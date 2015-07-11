@@ -23,11 +23,12 @@
     <Content Include="content\bootstrap-theme.min.css" />
     <Content Include="content\bootstrap.css" />
     <Content Include="content\bootstrap.min.css" />
-    <Content Include="content\images\edit-map.png" />
     <Content Include="content\images\favicon.png" />
     <Content Include="content\images\geocoder.png" />
+    <Content Include="content\images\map-editing-reverse.svg" />
     <Content Include="content\images\marker-icon-green.png" />
     <Content Include="content\images\marker-icon-middle.png" />
+    <Content Include="content\images\map-editing.svg" />
     <Content Include="content\leaflet-locate.css" />
     <Content Include="content\leaflet-geocoder.css" />
     <Content Include="content\font-awesome.css" />
