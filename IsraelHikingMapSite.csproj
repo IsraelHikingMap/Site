@@ -1,0 +1,191 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.Default.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <ProjectGuid>{DE18CA28-FFF7-4014-93C5-65EA40A813DA}</ProjectGuid>
+    <ProjectTypeGuids>{349c5851-65df-11da-9384-00065b846f21};{fae04ec0-301f-11d3-bf4b-00c04f79efbc}</ProjectTypeGuids>
+    <OutputType>Library</OutputType>
+    <OutputPath>bin</OutputPath>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <DebugType>full</DebugType>
+    <DebugSymbols>true</DebugSymbols>
+    <TypeScriptToolsVersion>1.4</TypeScriptToolsVersion>
+    <UseIISExpress>true</UseIISExpress>
+    <IISExpressSSLPort />
+    <IISExpressAnonymousAuthentication />
+    <IISExpressWindowsAuthentication />
+    <IISExpressUseClassicPipelineMode />
+  </PropertyGroup>
+  <ItemGroup>
+    <Content Include="app.css" />
+    <Content Include="content\bootstrap-theme.css" />
+    <Content Include="content\bootstrap-theme.min.css" />
+    <Content Include="content\bootstrap.css" />
+    <Content Include="content\bootstrap.min.css" />
+    <Content Include="content\images\favicon.png" />
+    <Content Include="content\images\geocoder.png" />
+    <Content Include="content\images\marker-icon-green.png" />
+    <Content Include="content\images\marker-icon-middle.png" />
+    <Content Include="content\leaflet-locate.css" />
+    <Content Include="content\leaflet-geocoder.css" />
+    <Content Include="content\font-awesome.css" />
+    <Content Include="content\font-awesome.min.css" />
+    <Content Include="content\images\layers-2x.png" />
+    <Content Include="content\images\layers.png" />
+    <Content Include="content\images\marker-icon-2x.png" />
+    <Content Include="content\images\marker-icon.png" />
+    <Content Include="content\images\marker-shadow.png" />
+    <Content Include="content\leaflet.css" />
+    <Content Include="fonts\fontawesome-webfont.svg" />
+    <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="index.html" />
+    <Content Include="packages.config" />
+    <Content Include="fonts\fontawesome-webfont.eot" />
+    <Content Include="fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\FontAwesome.otf" />
+    <Content Include="fonts\glyphicons-halflings-regular.eot" />
+    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff" />
+    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
+    <Content Include="content\bootstrap-theme.css.map" />
+    <Content Include="content\bootstrap.css.map" />
+    <Content Include="fonts\fontawesome-webfont.woff2" />
+    <Content Include="scripts\angular-mocks.js" />
+    <Content Include="scripts\angular-strap.js" />
+    <Content Include="scripts\angular-strap.min.js" />
+    <Content Include="scripts\angular-strap.tpl.js" />
+    <Content Include="scripts\angular-strap.tpl.min.js" />
+    <Content Include="scripts\angular.js" />
+    <Content Include="scripts\angular.min.js" />
+    <Content Include="scripts\bootstrap.js" />
+    <Content Include="scripts\bootstrap.min.js" />
+    <Content Include="scripts\angular.min.js.map" />
+    <Content Include="scripts\angular-strap.min.js.map" />
+    <None Include="Localhost.pubxml" />
+    <None Include="scripts\jquery-2.1.4.intellisense.js" />
+    <Content Include="scripts\google-analytics.js" />
+    <Content Include="scripts\leaflet-locate.js" />
+    <Content Include="scripts\leaflet-geocoder.js" />
+    <Content Include="scripts\FileAPI.flash.swf" />
+    <Content Include="scripts\FileAPI.js" />
+    <Content Include="scripts\FileAPI.min.js" />
+    <Content Include="scripts\jquery-2.1.4.js" />
+    <Content Include="scripts\jquery-2.1.4.min.js" />
+    <Content Include="scripts\leaflet-0.7.3.js" />
+    <Content Include="scripts\leaflet-0.7.3.min.js" />
+    <Content Include="scripts\leaflet-google.js" />
+    <Content Include="scripts\leaflet-locate.min.js" />
+    <Content Include="scripts\lodash.js" />
+    <Content Include="scripts\lodash.min.js" />
+    <Content Include="scripts\ng-file-upload-all.js" />
+    <Content Include="scripts\ng-file-upload-all.min.js" />
+    <Content Include="scripts\ng-file-upload-shim.js" />
+    <Content Include="scripts\ng-file-upload-shim.min.js" />
+    <Content Include="scripts\ng-file-upload.js" />
+    <Content Include="scripts\ng-file-upload.min.js" />
+    <Content Include="scripts\npm.js" />
+    <Content Include="scripts\togeojson.js" />
+    <Content Include="scripts\togpx.js" />
+    <Content Include="scripts\tokml.js" />
+    <Content Include="views\drawing.html" />
+    <Content Include="views\editOSM.html" />
+    <Content Include="views\templates\fileTooltip.tpl.html" />
+    <Content Include="views\infoHelp.html" />
+    <Content Include="views\file.html" />
+    <Content Include="views\templates\helpTooltip.tpl.html" />
+    <Content Include="views\templates\markerPopup.tpl.html" />
+    <Content Include="web.config" />
+    <Content Include="scripts\jquery-2.1.4.min.map" />
+    <Content Include="views\templates\infoTooltip.tpl.html" />
+    <Content Include="scripts\leaflet-locate.min.js.map" />
+    <None Include="web.Debug.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+    <None Include="web.Release.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="app.ts" />
+    <TypeScriptCompile Include="common\EventHelper.ts" />
+    <TypeScriptCompile Include="services\ObjectWithMap.ts" />
+    <TypeScriptCompile Include="common\IsraelHikingData.ts" />
+    <TypeScriptCompile Include="controllers\BaseMapController.ts" />
+    <TypeScriptCompile Include="controllers\DrawingController.ts" />
+    <TypeScriptCompile Include="controllers\MainMapController.ts" />
+    <TypeScriptCompile Include="controllers\MarkerPopupController.ts" />
+    <TypeScriptCompile Include="services\ControlCreatorService.ts" />
+    <TypeScriptCompile Include="scripts\typings\angular-file-upload\angular-file-upload.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\angularjs\angular-cookies.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\angularjs\angular-mocks.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\angularjs\angular-resource.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\angularjs\angular-route.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\angularjs\angular-sanitize.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\angularjs\angular.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\geojson\geojson.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\leaflet\leaflet.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />
+    <TypeScriptCompile Include="services\drawing\DrawingMarkerService.ts" />
+    <TypeScriptCompile Include="services\drawing\DrawingRouteService.ts" />
+    <TypeScriptCompile Include="controllers\EditOSMController.ts" />
+    <TypeScriptCompile Include="controllers\FileController.ts" />
+    <TypeScriptCompile Include="services\HashService.ts" />
+    <TypeScriptCompile Include="controllers\InfoHelpController.ts" />
+    <TypeScriptCompile Include="services\MapService.ts" />
+    <TypeScriptCompile Include="services\parsers\BaseParser.ts" />
+    <TypeScriptCompile Include="services\parsers\ParserFactory.ts" />
+    <TypeScriptCompile Include="services\parsers\GeoJsonParser.ts" />
+    <TypeScriptCompile Include="services\parsers\GpxParser.ts" />
+    <TypeScriptCompile Include="services\parsers\IParser.ts" />
+    <TypeScriptCompile Include="services\parsers\KmlParser.ts" />
+    <TypeScriptCompile Include="services\parsers\XmlParser.ts" />
+    <TypeScriptCompile Include="services\routers\BaseRouter.ts" />
+    <TypeScriptCompile Include="services\routers\NoneRouter.ts" />
+    <TypeScriptCompile Include="services\routers\RouterFactory.ts" />
+    <TypeScriptCompile Include="services\routers\BikeRouter.ts" />
+    <TypeScriptCompile Include="services\routers\FourByFourRouter.ts" />
+    <TypeScriptCompile Include="services\routers\HikeRouter.ts" />
+    <TypeScriptCompile Include="services\routers\IRouter.ts" />
+    <TypeScriptCompile Include="services\SnappingService.ts" />
+    <TypeScriptCompile Include="common\Constants.ts" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="directives\" />
+  </ItemGroup>
+  <PropertyGroup>
+    <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets')" />
+  <ProjectExtensions>
+    <VisualStudio>
+      <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
+        <WebProjectProperties>
+          <UseIIS>True</UseIIS>
+          <AutoAssignPort>True</AutoAssignPort>
+          <DevelopmentServerPort>0</DevelopmentServerPort>
+          <DevelopmentServerVPath>/</DevelopmentServerVPath>
+          <IISUrl>http://localhost:2964/</IISUrl>
+          <NTLMAuthentication>False</NTLMAuthentication>
+          <UseCustomServer>False</UseCustomServer>
+          <CustomServerUrl>
+          </CustomServerUrl>
+          <SaveServerSettingsInUserFile>False</SaveServerSettingsInUserFile>
+        </WebProjectProperties>
+      </FlavorProperties>
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
+    <TypeScriptSourceMap>true</TypeScriptSourceMap>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Release'">
+    <TypeScriptRemoveComments>true</TypeScriptRemoveComments>
+    <TypeScriptSourceMap>false</TypeScriptSourceMap>
+  </PropertyGroup>
+  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\TypeScript\Microsoft.TypeScript.targets')" />
+</Project>

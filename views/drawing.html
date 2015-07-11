@@ -1,0 +1,7 @@
+﻿<div class="leaflet-bar">
+    <a class="cursor-pointer" ng-click="clear($event)" title="Clear"><i class="fa fa-remove fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleRoute($event)" ng-class="{'leaflet-active' : isRouteEnabled()}" title="Toggle drawing mode"><i class="fa fa-pencil fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleRouting($event)" ng-class="{'leaflet-active' : isRoutingEnabled()}" title="Toogle routing mode"><i class="fa fa-level-up fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleMarkers($event)" ng-class="{'leaflet-active' : isMarkersEnabled()}" title="Togggle markers drawing mode"><i class="fa fa-map-marker fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="undo($event)" ng-class="{'leaflet-disabled' : isUndoDisbaled()}" title="Undo"><i class="fa fa-undo fa-lg"></i></a>
+</div>

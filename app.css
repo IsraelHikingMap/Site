@@ -1,0 +1,60 @@
+﻿html{
+  height: 100%;
+}
+
+body {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+}
+
+#map {
+	position: absolute; 
+	top:0; 
+	bottom:0; 
+	right:0; 
+	left:0; 
+	overflow:hidden;
+}
+
+.cursor-pointer {
+	cursor: pointer;
+}
+
+.cursor-crosshair {
+	cursor: crosshair;
+}
+
+/* Extra Small Devices, Phones */ 
+@media only screen and (min-width : 480px) {
+	.tooltip-info {
+	  max-width: 250px;
+	}
+}
+
+/* Small Devices, Tablets */
+@media only screen and (min-width : 768px) {
+	.tooltip-info {
+	  max-width: 600px;
+	}
+}
+
+/* Medium Devices, Desktops */
+@media only screen and (min-width : 992px) {
+	.tooltip-info {
+	  max-width: 600px;
+	}
+}
+
+/* Large Devices, Wide Screens */
+@media only screen and (min-width : 1200px) {
+	.tooltip-info {
+	  width: 600px;
+	}
+}
+
+.popover-routing {
+  width: 100px;
+}

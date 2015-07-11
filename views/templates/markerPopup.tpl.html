@@ -1,0 +1,8 @@
+﻿<div>
+    <div class="form-group">
+        <div class="input-group">
+            <input class="form-control" type="text" ng-model="title" style="min-width:100px" ng-readonly="!isInEditMode" />
+            <a class="btn btn-default cursor-pointer input-group-addon" ng-click="toggleEditMode()"><i ng-class="{'fa fa-pencil' : !isInEditMode, 'fa fa-check' : isInEditMode}"></i></a>
+        </div>
+    </div>
+</div>
