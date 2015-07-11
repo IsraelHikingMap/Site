@@ -8,7 +8,6 @@
     // HM TODO: support twl? - will be solved hopefull with iis backend.
     // HM TODO: remove hiking trails layer on map change? - not sure it is currently possible another leaflet bug.
     // HM TODO: when hovering on routePoint/marker - allow the user to move the editing related on.
-    // HM TODO: bug: firefox, there is also an issue with "sharing".
     // HM TODO: height graph?
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap"]);

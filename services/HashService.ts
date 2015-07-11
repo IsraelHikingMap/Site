@@ -33,7 +33,9 @@
             });
             this.map.on("moveend",(e: L.LeafletEvent) => {
                 this.updateHashEventHandler();
-                this.$rootScope.$apply();
+                if (!$rootScope.$$phase) {
+                    this.$rootScope.$apply();
+                }
             });
         }
 
@@ -172,8 +174,8 @@
                 this.drawingMarkerService.setData(data.markers);
                 this.drawingRouteService.changeRoutingType(data.routeData.routingType);
                 this.updateHash(lat, lng, zoom);
-                this.map.panTo([lat, lng]);
                 this.map.setZoom(zoom);
+                this.map.panTo([lat, lng]);
             } else {
                 // backwards compatibility... :-(
                 zoom = parseInt(this.getURLParameter('zoom'));

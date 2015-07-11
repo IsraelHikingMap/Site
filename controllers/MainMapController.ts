@@ -45,11 +45,11 @@ module IsraelHiking.Controllers {
             
             var googleLayer = new L.Google();
             //this.defaultLayer = L.tileLayer("Tiles/{z}/{x}/{y}.png", tileLayerOptions);
-            //var israelMTBLayer = L.tileLayer("MTBTiles/{z}/{x}/{y}.png", tileLayerOptions);
+            //var israelMTBLayer = L.tileLayer("mtbTiles/{z}/{x}/{y}.png", tileLayerOptions);
             //var overlayLayer = L.tileLayer("OverlayTiles/{z}/{x}/{y}.png", tileLayerOptions);
 
             this.defaultLayer = L.tileLayer("http://www.osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png", tileLayerOptions);
-            var israelMTBLayer = L.tileLayer("http://www.osm.org.il/IsraelHiking/MTBTiles/{z}/{x}/{y}.png", tileLayerOptions);
+            var israelMTBLayer = L.tileLayer("http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png", tileLayerOptions);
             var overlayLayer = L.tileLayer("http://www.osm.org.il/IsraelHiking/OverlayTiles/{z}/{x}/{y}.png", tileLayerOptions);
 
             this.layerSwitcher = new L.Control.Layers({
