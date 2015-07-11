@@ -12,7 +12,6 @@
 
     export class DrawingRouteService extends ObjectWithMap {
         private static MINIMAL_DISTANCE_BETWEEN_MARKERS = 100; // meter.
-        private static MINIMAL_TIME_BETWEEN_DRANGEND_AND_CLICK = 100; // milliseconds.
 
         private $q: angular.IQService;
         private routerFactory: Services.Routers.RouterFactory;
@@ -24,7 +23,6 @@
         private routeSegments: IRouteSegment[];
         private middleMarkers: IMiddleMarker[];
         private middleIcon: L.Icon;
-        private dragendEventTime: number; // this is used in order to overcome a bug in leaflet where click is fired right after drangend.
 
         public eventHelper: Common.EventHelper<IDataChangedEventArgs>;
 
@@ -42,7 +40,6 @@
             this.enabled = false;
             this.hoverEnabled = true;
             this.middleMarkers = [];
-            this.dragendEventTime = Date.now();
             this.eventHelper = new Common.EventHelper<IDataChangedEventArgs>();
             this.hoverPolyline.addTo(this.map);
 
@@ -148,23 +145,19 @@
 
         private setMarkerEvents = (marker: L.Marker) => {
             marker.on("click",(e: L.LeafletMouseEvent) => {
-                if (Date.now() - this.dragendEventTime < DrawingRouteService.MINIMAL_TIME_BETWEEN_DRANGEND_AND_CLICK) {
-                    return;
-                }
                 var middleMarker = this.getMiddleMarker(marker);
                 if (middleMarker != null) {
                     this.convertMiddleMarkerToPoint(middleMarker);
-                } else {
-                    this.removePoint(marker);
-                    this.hoverEnabled = true;
+                    marker.setIcon(new L.Icon.Default());
+                    this.eventHelper.raiseEvent({ applyToScope: true });
                 }
-                this.eventHelper.raiseEvent({ applyToScope: true });
             });
             marker.on("dragstart",(e: L.LeafletMouseEvent) => {
                 var middleMarker = this.getMiddleMarker(marker);
                 if (middleMarker != null) {
                     this.convertMiddleMarkerToPoint(middleMarker);
                 }
+                this.hoverEnabled = false;
                 this.dragPointStart(marker);
                 this.eventHelper.raiseEvent({ applyToScope: true });
             });
@@ -174,22 +167,29 @@
             marker.on("dragend",(e: L.LeafletMouseEvent) => {
                 this.dragPointEnd(marker.getLatLng());
                 this.eventHelper.raiseEvent({ applyToScope: true });
-                this.dragendEventTime = Date.now();
-
+                marker.setIcon(new L.Icon.Default());
+                marker.setOpacity(1.0)
+                this.hoverEnabled = true;
             });
             marker.on("mouseover",(e: L.LeafletMouseEvent) => {
                 this.hoverEnabled = false;
                 var middleMarker = this.getMiddleMarker(marker);
                 if (middleMarker != null) {
-                    marker.setOpacity(1.0);
+                    marker.setOpacity(0.5);
                 }
             });
             marker.on("mouseout",(e: L.LeafletMouseEvent) => {
-                this.hoverEnabled = true;
+                this.hoverEnabled = this.selectedPointSegmentIndex == -1;
                 var middleMarker = _.find(this.middleMarkers,(middleMarkerToFind) => middleMarkerToFind.marker.getLatLng().equals(marker.getLatLng()));
                 if (middleMarker != null) {
                     marker.setOpacity(0);
                 }
+            });
+            marker.on("dblclick",(e: L.LeafletMouseEvent) => {
+                this.removePoint(marker);
+                this.hoverEnabled = true;
+                e.originalEvent.stopPropagation();
+                return false;
             });
         }
 
@@ -217,7 +217,6 @@
             segment.polyline.setLatLngs(segmentLatlngs);
             this.routeSegments.splice(indexOfSegment, 0, newRouteSegment);
             _.remove(this.middleMarkers,(middleMarkerToFind: IMiddleMarker) => middleMarkerToFind.marker.getLatLng().equals(marker.getLatLng()));
-            marker.setIcon(new L.Icon.Default());
         }
 
         private dragPointStart = (point: L.Marker) => {
@@ -364,6 +363,7 @@
             marker.off("dragend");
             marker.off("mouseover");
             marker.off("mouseout");
+            marker.off("dblclick");
             this.map.removeLayer(marker);
         }
     }

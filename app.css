@@ -27,6 +27,28 @@ body {
 	cursor: crosshair;
 }
 
+.tooltip-inner {
+    background-color: #ffffff;
+    color: #000;
+}
+
+.tooltip.top .tooltip-arrow {
+    border-top-color: #ffffff;
+}
+
+.tooltip.right .tooltip-arrow {
+    border-right-color: #ffffff;
+}
+
+.tooltip.bottom .tooltip-arrow {
+    border-bottom-color: #ffffff;
+}
+
+.tooltip.left .tooltip-arrow {
+    border-left-color: #ffffff;
+}
+
+
 /* Extra Small Devices, Phones */ 
 @media only screen and (min-width : 480px) {
 	.tooltip-info {

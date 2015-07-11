@@ -1,13 +1,13 @@
 ﻿module IsraelHiking {
-    // HM TODO: fix issue with middle marker and drag.
     // HM TODO: middle markers when opening file.
-    // HM TODO: edit OSM button - better image - I have an image you sent me in the past, with a map and a pencil, I leave you to decide which we should use where.
     // HM TODO: add waiting animation when routing works (Not sure I'll bother doing it in the end)
-    // HM TODO: url to route (address/?url=) 
+    // HM TODO: url to route (address/?url=)
+    // HM TODO: support multiple files and routes.
     // HM TODO: support twl? - seems like there is no easy way - waiting on you for this.
     // HM TODO: remove hiking trails layer on map change? - not sure it is currently possible another leaflet bug.
     // HM TODO: when hovering on routePoint/marker - allow the user to move the editing related on.
     // HM TODO: bug: firefox, there is also an issue with "sharing".
+    // HM TODO: height graph?
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap"]);
 

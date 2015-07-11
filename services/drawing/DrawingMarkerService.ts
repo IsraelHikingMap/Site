@@ -74,7 +74,7 @@
 
         private createMarker(latlng: L.LatLng, title = ""): MarkerWithTitle {
             var marker = <MarkerWithTitle>L.marker(latlng, <L.MarkerOptions> { draggable: true, clickable: true, riseOnHover: true });
-            marker.on("click",(e: L.LeafletMouseEvent) => {
+            marker.on("dblclick",(e: L.LeafletMouseEvent) => {
                 this.removeMarker(marker);
                 this.eventHelper.raiseEvent({ applyToScope: true });
             });
@@ -84,8 +84,8 @@
             marker.on("dragStart",(e: L.LeafletMouseEvent) => {
                 marker.closePopup();
             });
-            marker.on("mouseover",(e: L.LeafletMouseEvent) => {
-                marker.openPopup();
+            marker.on("click",(e: L.LeafletMouseEvent) => {
+                marker.togglePopup();
             });
             marker.title = title;
             var newScope = <Controllers.IMarkerPopupScope>this.$rootScope.$new();
@@ -118,6 +118,7 @@
             marker.off("dragstart");
             marker.off("dragend");
             marker.off("mouseover");
+            marker.off("dblclick");
             this.map.removeLayer(marker);
             this.markers.splice(markerIndex, 1);
         }
