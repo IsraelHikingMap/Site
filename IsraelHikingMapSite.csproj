@@ -61,23 +61,22 @@
     <Content Include="scripts\angular-strap.tpl.min.js" />
     <Content Include="scripts\angular.js" />
     <Content Include="scripts\angular.min.js" />
-    <Content Include="scripts\bootstrap.js" />
-    <Content Include="scripts\bootstrap.min.js" />
     <Content Include="scripts\angular.min.js.map" />
     <Content Include="scripts\angular-strap.min.js.map" />
     <None Include="Localhost.pubxml" />
-    <None Include="scripts\jquery-2.1.4.intellisense.js" />
-    <Content Include="scripts\google-analytics.js" />
-    <Content Include="scripts\leaflet-locate.js" />
-    <Content Include="scripts\leaflet-geocoder.js" />
+    <Content Include="scripts\bootstrap.js" />
+    <Content Include="scripts\bootstrap.min.js" />
     <Content Include="scripts\FileAPI.flash.swf" />
     <Content Include="scripts\FileAPI.js" />
     <Content Include="scripts\FileAPI.min.js" />
+    <Content Include="scripts\google-analytics.js" />
     <Content Include="scripts\jquery-2.1.4.js" />
     <Content Include="scripts\jquery-2.1.4.min.js" />
     <Content Include="scripts\leaflet-0.7.3.js" />
     <Content Include="scripts\leaflet-0.7.3.min.js" />
+    <Content Include="scripts\leaflet-geocoder.js" />
     <Content Include="scripts\leaflet-google.js" />
+    <Content Include="scripts\leaflet-locate.js" />
     <Content Include="scripts\leaflet-locate.min.js" />
     <Content Include="scripts\lodash.js" />
     <Content Include="scripts\lodash.min.js" />
@@ -102,6 +101,8 @@
     <Content Include="scripts\jquery-2.1.4.min.map" />
     <Content Include="views\templates\infoTooltip.tpl.html" />
     <Content Include="scripts\leaflet-locate.min.js.map" />
+    <None Include="scripts\jquery-2.1.4.intellisense.js" />
+    <Content Include="scripts\tokml.js.map" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
