@@ -15,6 +15,7 @@
         static drawingMarkerService = "drawingMarkerService";
         static hashService = "hashService";
         static mapService = "mapService";
+        static layersService = "layersService";
         
         // Controllers
         static mainMapController = "mainMapController";

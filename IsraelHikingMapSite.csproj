@@ -90,6 +90,7 @@
     <Content Include="scripts\togeojson.js" />
     <Content Include="scripts\togpx.js" />
     <Content Include="scripts\tokml.js" />
+    <Content Include="views\layers.html" />
     <Content Include="views\drawing.html" />
     <Content Include="views\editOSM.html" />
     <Content Include="views\templates\fileTooltip.tpl.html" />
@@ -113,6 +114,8 @@
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="common\EventHelper.ts" />
+    <TypeScriptCompile Include="controllers\LayersController.ts" />
+    <TypeScriptCompile Include="services\LayersService.ts" />
     <TypeScriptCompile Include="services\ObjectWithMap.ts" />
     <TypeScriptCompile Include="common\IsraelHikingData.ts" />
     <TypeScriptCompile Include="controllers\BaseMapController.ts" />

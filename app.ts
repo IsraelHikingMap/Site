@@ -1,4 +1,5 @@
 ﻿module IsraelHiking {
+    // HM TODO: finish new layer switcher - bug in z index of overlay and base layers, add editing, allow user to insert overlay and tiles.
     // HM TODO: reduce marker size.
     // HM TODO: better middle marker support.
     // HM TODO: middle markers when opening file.
@@ -30,7 +31,8 @@
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, drawingRouteService: Services.DrawingRouteService, drawingMarkerService: Services.DrawingMarkerService) =>
             new Services.HashService($location, $rootScope, mapService, drawingRouteService, drawingMarkerService)]);
     app.service(Common.Constants.controlCreatorService, [Common.Constants.rootScope, Common.Constants.compile, ($rootScope: angular.IScope, $compile: angular.ICompileService) => new Services.ControlCreatorService($rootScope, $compile)]);
-
+    app.service(Common.Constants.layersService, [Common.Constants.mapService, (mapService: Services.MapService) => new Services.LayersService(mapService)]);
+    
     app.controller(Common.Constants.mainMapController, [Common.Constants.mapService, Common.Constants.controlCreatorService, Common.Constants.hashService,
         (mapService: Services.MapService, controlCreatorService: Services.ControlCreatorService, hashService: Services.HashService) =>
             new Controllers.MainMapcontoller(mapService, controlCreatorService, hashService)]);
@@ -55,5 +57,9 @@
     app.directive("infoHelpControl",() => <angular.IDirective> {
         controller: Controllers.InfoHelpController,
         templateUrl: "views/infoHelp.html",
+    });
+    app.directive("layersControl",() => <angular.IDirective> {
+        controller: Controllers.LayersController,
+        templateUrl: "views/layers.html",
     });    
 }

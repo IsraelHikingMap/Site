@@ -8,10 +8,10 @@
             this.$compile = $compile;
         }
 
-        public create = (map: L.Map, directiveHtmlName: string) => {
+        public create = (map: L.Map, directiveHtmlName: string, position = "topleft") => {
             var control = L.Control.extend(<L.IControl>{
                 options: <L.ControlOptions> {
-                    position: "topleft"
+                    position: position
                 },
                 onAdd: (map: L.Map): HTMLElement => {
                     var containerClassName = directiveHtmlName + "-container";

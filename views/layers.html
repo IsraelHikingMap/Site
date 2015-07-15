@@ -1,0 +1,17 @@
+﻿<div ng-init="hover = false" class="leaflet-control-layers" ng-mouseover="hover = true" ng-mouseleave="hover = false">
+    <a title="Layers" class="leaflet-control-layers-toggle cursor-pointer" ng-show="hover == false" ng-click="hover = !hover"></a>
+    <div class="leaflet-control-layers-expanded leaflet-control-layers" ng-show="hover == true">
+        <div ng-repeat="layer in layers">
+            <label class="control-label"><input type="radio" name="layerRadio" ng-model="selectedLayer" ng-value="layer" ng-click="setLayer(layer, $event)" /> {{layer}}</label>
+        </div>
+        <button ng-click="addLayer($event)"><i class="fa fa-plus"></i> Add Layer</button>
+        <div class="leaflet-control-layers-separator"></div>
+        <div ng-repeat="overlay in overlays">
+            <label class="control-label"><button ng-click="toggleVisibility(overlay, $event)"><i ng-class="{'fa fa-eye': overlay.visible, 'fa fa-eye-slash': !overlay.visible}"></i></button> {{overlay.name}}</label>
+        </div>
+        <div ng-repeat="route in routes">
+            <label class="control-label"><button ng-click="toggleVisibility(route, $event)"><i ng-class="{'fa fa-eye': route.visible, 'fa fa-eye-slash': !route.visible}"></i></button><button class="cursor-pointer" ng-click="selectRoute(route, $event)"><i class="fa fa-pencil"></i></button> {{route.name}}</label>
+        </div>
+        <button ng-click="addRoute($event)"><i class="fa fa-plus"></i> Add Route</button>
+    </div>
+</div>
