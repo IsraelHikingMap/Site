@@ -263,6 +263,9 @@
                 // middle point is being removed...
                 this.runRouting(pointSegmentIndex - 1, pointSegmentIndex).then(() => this.eventHelper.raiseEvent({ applyToScope: true }));
             }
+            else {
+                this.eventHelper.raiseEvent({ applyToScope: true });
+            }
         }
 
         private runRouting = (startIndex: number, endIndex: number): angular.IPromise<any> => {
@@ -273,6 +276,12 @@
             var promise = router.getRoute(startSegment.routePoint.getLatLng(), endSegment.routePoint.getLatLng());
 
             promise.then((data) => {
+                if (data == undefined || data.length == 0) {
+                    console.log(data);
+                    console.log("startIndex: " + startIndex + " endIndex: " + endIndex);
+                    console.log(startSegment);
+                    console.log(endSegment);
+                }
                 this.routeSegments[endIndex].polyline.setLatLngs(data[data.length - 1].latlngs);
                 this.addMiddleMarkersToSegment(this.routeSegments[endIndex]);
             });

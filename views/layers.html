@@ -1,17 +1,32 @@
 ﻿<div ng-init="hover = false" class="leaflet-control-layers" ng-mouseover="hover = true" ng-mouseleave="hover = false">
     <a title="Layers" class="leaflet-control-layers-toggle cursor-pointer" ng-show="hover == false" ng-click="hover = !hover"></a>
     <div class="leaflet-control-layers-expanded leaflet-control-layers" ng-show="hover == true">
-        <div ng-repeat="layer in layers">
-            <label class="control-label"><input type="radio" name="layerRadio" ng-model="selectedLayer" ng-value="layer" ng-click="setLayer(layer, $event)" /> {{layer}}</label>
+        <div ng-repeat="baseLayer in baseLayers">
+            <label class="control-label">
+                <button class="btn btn-xs btn-default" ng-click="selectBaseLayer(baseLayer, $event)" ng-class="{'active': baseLayer.selected }"><i class="fa fa-eye"></i></button>
+                <button class="btn btn-xs btn-danger" ng-click="removeBaseLayer(baseLayer, $event)" ng-show="andvanced"><i class="fa fa-trash"></i></button>
+                {{baseLayer.key}}
+            </label>
         </div>
-        <button ng-click="addLayer($event)"><i class="fa fa-plus"></i> Add Layer</button>
+        <button class="btn btn-xs btn-success" ng-click="addBaseLayer($event)" ng-show="andvanced"><i class="fa fa-plus"></i> Add Base Layer</button>
         <div class="leaflet-control-layers-separator"></div>
         <div ng-repeat="overlay in overlays">
-            <label class="control-label"><button ng-click="toggleVisibility(overlay, $event)"><i ng-class="{'fa fa-eye': overlay.visible, 'fa fa-eye-slash': !overlay.visible}"></i></button> {{overlay.name}}</label>
+            <label class="control-label">
+                <button class="btn btn-xs btn-default" ng-click="toggleVisibility(overlay, $event)"><i ng-class="{'fa fa-eye': overlay.visible, 'fa fa-eye-slash': !overlay.visible}"></i></button>
+                <button class="btn btn-xs btn-danger" ng-click="removeOverlay(overlay, $event)" ng-show="andvanced"><i class="fa fa-trash"></i></button>
+                {{overlay.key}}
+            </label>
         </div>
+        <button class="btn btn-xs btn-success" ng-click="addOverlay($event)" ng-show="andvanced"><i class="fa fa-plus"></i> Add Overlay</button>
+        <div class="leaflet-control-layers-separator"></div>
         <div ng-repeat="route in routes">
-            <label class="control-label"><button ng-click="toggleVisibility(route, $event)"><i ng-class="{'fa fa-eye': route.visible, 'fa fa-eye-slash': !route.visible}"></i></button><button class="cursor-pointer" ng-click="selectRoute(route, $event)"><i class="fa fa-pencil"></i></button> {{route.name}}</label>
+            <label class="control-label" ng-show="andvanced">
+                <button class="btn btn-xs btn-default" ng-click="selectRoute(route, $event)" ng-class="{'active' : route.active }"><i class="fa fa-pencil"></i></button>
+                <button class="btn btn-xs btn-danger" ng-click="removeRoute(route, $event)"><i class="fa fa-trash"></i></button>
+                {{route.key}}
+            </label>
         </div>
-        <button ng-click="addRoute($event)"><i class="fa fa-plus"></i> Add Route</button>
+        <button class="btn btn-xs btn-success" ng-click="addRoute('new route', $event)" ng-show="andvanced"><i class="fa fa-plus"></i> Add Route</button>
+        <button ng-init="andvanced = false" class="btn btn-xs btn-warning" ng-click="andvanced = !andvanced" title="Show advanced settings" ng-class="{'active': andvanced }"><i class="fa fa-gear"></i></button>
     </div>
 </div>

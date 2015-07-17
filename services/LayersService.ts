@@ -3,101 +3,192 @@
 }
 
 module IsraelHiking.Services {
-    export interface IKeyLayer {
+    export interface ILayer {
         key: string;
-        layer: L.ILayer;
+        layer: L.TileLayer;
     }
 
-    export class LayersService {
-        private layers: IKeyLayer[];
-        private overlays: IKeyLayer[];
-        private routes: IKeyLayer[];
-        private selectedLayerKey: string;
-        private map: L.Map;
+    export interface IBaseLayer extends ILayer {
+        selected: boolean
+    }
 
-        constructor(mapService: MapService) {
+    export interface IOvelay extends ILayer {
+        visible: boolean;
+    }
 
-            this.map = mapService.map;
+    export interface IRoute {
+        key: string;
+        active: boolean;
+        routeData: Common.RouteData;
+        polyline: L.Polyline;
+    }
 
-            var lastModified = "08/07/2015";//(typeof getLastModifiedDate == "function") ? getLastModifiedDate() : document.lastModified;
-            var attribution = "Map data &copy; <a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> contributors, <a href='http://creativecommons.org/licenses/by-sa/2.0/' target='_blank\">CC-BY-SA</a>, built with <a href='http://getbootstrap.com/' target='_blank'>Bootstrap</a>. Last update: " + lastModified;
+    export class LayersService extends ObjectWithMap {
+        private static ISRAEL_HIKING_MAP = "Israel Hiking map";
+        private static ISRAEL_MTB_MAP = "Israel MTB map";
+        private static GOOGLE_MAP = "Google map";
+        private static HIKING_TRAILS = "Hiking trails";
+        private static ATTRIBUTION = "Map data &copy; <a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> contributors, <a href='http://creativecommons.org/licenses/by-sa/2.0/' target='_blank\">CC-BY-SA</a>, built with <a href='http://getbootstrap.com/' target='_blank'>Bootstrap</a>. Last update: ";
 
-            var tileLayerOptions = <L.TileLayerOptions> {
+        private tileLayerOptions: L.TileLayerOptions;
+        private drawingRouteService: DrawingRouteService;
+        private overlayZIndex;
+
+        public baseLayers: IBaseLayer[];
+        public overlays: IOvelay[];
+        public routes: IRoute[];
+
+        public selectedBaseLayer: IBaseLayer;
+        public selectedRoute: IRoute;
+
+        constructor(mapService: MapService, drawingRouteService: DrawingRouteService) {
+            super(mapService);
+            this.drawingRouteService = drawingRouteService;
+            this.selectedBaseLayer = null;
+            this.selectedRoute = null;
+            this.baseLayers = [];
+            this.overlays = [];
+            this.routes = [];
+            this.overlayZIndex = 10;
+            var lastModified = "17/07/2015";//(typeof getLastModifiedDate == "function") ? getLastModifiedDate() : document.lastModified;
+            this.tileLayerOptions = <L.TileLayerOptions> {
                 minZoom: 7,
                 maxZoom: 16,
-                attribution: attribution
-            }
+                attribution: LayersService.ATTRIBUTION + lastModified
+            };
 
-            var googleLayer = <any>new L.Google();
-            //this.selectedLayer = L.tileLayer("Tiles/{z}/{x}/{y}.png", tileLayerOptions);
-            //var israelMTBLayer = L.tileLayer("mtbTiles/{z}/{x}/{y}.png", tileLayerOptions);
-            //var overlayLayer = L.tileLayer("OverlayTiles/{z}/{x}/{y}.png", tileLayerOptions);
+            this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_MAP, layer: <any>new L.Google(), selected: false });
+            this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png");
+            //this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "mtbTiles/{z}/{x}/{y}.png");
+            this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "http://www.osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png");
+            //this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "Tiles/{z}/{x}/{y}.png");
+            
+            this.addOverlay(LayersService.HIKING_TRAILS, "http://www.osm.org.il/IsraelHiking/OverlayTiles/{z}/{x}/{y}.png");
 
-            var israelHikingMap = L.tileLayer("http://www.osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png", tileLayerOptions);
-            var israelMTBLayer = L.tileLayer("http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png", tileLayerOptions);
-            var overlayLayer = L.tileLayer("http://www.osm.org.il/IsraelHiking/OverlayTiles/{z}/{x}/{y}.png", tileLayerOptions);
-
-            this.layers = [];
-            this.layers.push(<IKeyLayer>{ key: "Israel Hiking map", layer: israelHikingMap });
-            this.layers.push(<IKeyLayer>{ key: "Israel MTB map", layer: israelMTBLayer });
-            this.layers.push(<IKeyLayer>{ key: "Google", layer: googleLayer });
-
-            this.overlays = [];
-            this.overlays.push(<IKeyLayer>{ key: "Hiking trails", layer: overlayLayer });
-
-            this.routes = [];
-            this.routes.push(<IKeyLayer>{ key: "Some route from file", layer: null });
-            this.selectedLayerKey = null;
-            this.setSelectedLayer("Israel Hiking map");
-            this.toggleOverlay("Hiking trails", true);
+            //this.addRoute("untitled");
         }
 
-        public getLayersNames = (): string[]=> {
-            var names = [];
-            for (var layerIndex = 0; layerIndex < this.layers.length; layerIndex++) {
-                names.push(this.layers[layerIndex].key);
+        public addBaseLayer = (key: string, address: string) => {
+            if (_.find(this.baseLayers,(layerToFind) => layerToFind.key == key)) {
+                return; // layer exists
             }
-            return names;
+            var layer = <IBaseLayer>{ key: key, layer: L.tileLayer(address, this.tileLayerOptions), selected: false };
+            this.baseLayers.push(layer);
+            this.selectBaseLayer(layer)
         }
 
-        public getSelectedLayer = (): IKeyLayer => {
-            return _.find(this.layers,(layer) => layer.key == this.selectedLayerKey);
-        };
-
-        public setSelectedLayer = (key: string) => {
-            if (this.selectedLayerKey) {
-                this.map.removeLayer(this.getSelectedLayer().layer);
+        public addOverlay = (key: string, address: string) => {
+            if (_.find(this.overlays,(overlayToFind) => overlayToFind.key == key)) {
+                return; // overlay exists
             }
-            var newSelectedLayer = _.find(this.layers,(layer) => layer.key == key);
-            this.map.addLayer(newSelectedLayer.layer);
-            this.selectedLayerKey = newSelectedLayer.key;
+            var overlay = <IOvelay>{ key: key, layer: L.tileLayer(address, this.tileLayerOptions), visible: false };
+            overlay.layer.setZIndex(this.overlayZIndex++);
+            this.overlays.push(overlay);
+            this.toggleOverlay(overlay)
         }
 
-        public getOverlaysNames = (): string[]=> {
-            var names = [];
-            for (var overlayIndex = 0; overlayIndex < this.overlays.length; overlayIndex++) {
-                names.push(this.overlays[overlayIndex].key);
+        public addRoute = (key: string, routeData?: Common.RouteData) => {
+            if (_.find(this.routes,(routeToFind) => routeToFind.key == key)) {
+                return; // route exists
             }
-            return names;
+            var route = <IRoute> {
+                key: key,
+                active: false,
+                polyline: null,
+                routeData: routeData || <Common.RouteData> {
+                    routingType: Common.routingType.none,
+                    segments: [],
+                },
+            };
+            this.routes.push(route);
+            this.selectRoute(route);
         }
 
-        public getRouteNames = (): string[]=> {
-            var names = [];
-            for (var routeIndex = 0; routeIndex < this.routes.length; routeIndex++) {
-                names.push(this.routes[routeIndex].key);
+        public removeBaseLayer = (baseLayer: Services.IBaseLayer) => {
+            if (this.selectedBaseLayer.key != baseLayer.key) {
+                _.remove(this.baseLayers,(layer) => baseLayer.key == layer.key);
+                return;
             }
-            return names;
+            var index = this.baseLayers.indexOf(this.selectedBaseLayer);
+            index = (index + 1) % this.baseLayers.length;
+            this.selectBaseLayer(this.baseLayers[index]);
+            _.remove(this.baseLayers,(layer) => baseLayer.key == layer.key);
+            if (this.baseLayers.length == 0) {
+                this.map.removeLayer(baseLayer.layer);
+                this.selectedBaseLayer = null;
+            }
         }
 
-        public toggleOverlay = (key: string, show: boolean) => {
-            var overlay = _.find(this.overlays,(overlayToFind) => overlayToFind.key == key);
-            if (show) {
+        public removeOverlay = (overlay: IOvelay) => {
+            if (overlay.visible) {
+                this.map.removeLayer(overlay.layer);
+            }
+            _.remove(this.overlays,(overlayToRemove) => overlayToRemove.key == overlay.key);
+        }
+
+        public removeRoute = (route: IRoute) => {
+            if (route.active) {
+                this.drawingRouteService.clear();
+            } else if (route.polyline != null) {
+                this.map.removeLayer(route.polyline);
+            }
+            _.remove(this.routes,(routeToRemove) => routeToRemove.key == route.key);
+
+        }
+
+        public selectBaseLayer = (baseLayer: Services.IBaseLayer) => {
+            if (baseLayer.selected) {
+                return;
+            }
+            if (this.selectedBaseLayer) {
+                this.map.removeLayer(this.selectedBaseLayer.layer);
+                this.selectedBaseLayer.selected = false;
+            }
+            var newSelectedLayer = _.find(this.baseLayers,(layer) => layer.key == baseLayer.key);
+            this.map.addLayer(newSelectedLayer.layer, true);
+            newSelectedLayer.selected = true;
+            this.selectedBaseLayer = newSelectedLayer;
+        }
+
+        public toggleOverlay = (overlay: IOvelay) => {
+            var overlayFromArray = _.find(this.overlays,(overlayToFind) => overlayToFind.key == overlay.key);
+            overlayFromArray.visible = !overlayFromArray.visible;
+            if (overlayFromArray.visible) {
                 this.map.addLayer(overlay.layer);
             } else {
                 this.map.removeLayer(overlay.layer);
             }
         }
 
+        public selectRoute = (route: IRoute) => {
+            if (route.active) {
+                return;
+            }
+            if (this.selectedRoute) {
+                this.selectedRoute.active = false;
+                this.selectedRoute.routeData = this.drawingRouteService.getData();
+                this.selectedRoute.polyline = this.createPolyline(this.selectedRoute.routeData);
+                this.map.addLayer(this.selectedRoute.polyline);
+            }
 
+            this.drawingRouteService.clear();
+            this.drawingRouteService.setData(route.routeData);
+            this.selectedRoute = route;
+            this.selectedRoute.active = true;
+            if (this.selectedRoute.polyline) {
+                this.map.removeLayer(this.selectedRoute.polyline);
+            }
+        }
+
+        private createPolyline(data: Common.RouteData): L.Polyline {
+            var latlngs = <L.LatLng[]>[];
+            for (var segmentIndex = 0; segmentIndex < data.segments.length; segmentIndex++) {
+                var segment = data.segments[segmentIndex];
+                for (var latlngIndex = 0; latlngIndex < segment.latlngs.length; latlngIndex++) {
+                    latlngs.push(segment.latlngs[latlngIndex]);
+                }
+            }
+            return L.polyline(latlngs, <L.PolylineOptions> { opacity: 0.5, color: "red", weight: 4 });
+        }
     }
 } 

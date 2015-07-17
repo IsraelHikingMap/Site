@@ -169,13 +169,12 @@
                 zoom = parseInt(splittedpath[splittedpath.length - 3]);
                 lat = parseFloat(splittedpath[splittedpath.length - 2]);
                 lng = parseFloat(splittedpath[splittedpath.length - 1]);
+                this.map.panTo(new L.LatLng(lat, lng));
+                this.map.setZoom(zoom);
                 var data = this.urlStringToDataContainer(search);
                 this.drawingRouteService.setData(data.routeData);
                 this.drawingMarkerService.setData(data.markers);
                 this.drawingRouteService.changeRoutingType(data.routeData.routingType);
-                this.updateHash(lat, lng, zoom);
-                this.map.setZoom(zoom);
-                this.map.panTo([lat, lng]);
             } else {
                 // backwards compatibility... :-(
                 zoom = parseInt(this.getURLParameter('zoom'));

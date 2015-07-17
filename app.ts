@@ -1,11 +1,14 @@
 ﻿module IsraelHiking {
+    // HM TODO: support multiple files and routes - also in layer switcher.
     // HM TODO: finish new layer switcher - bug in z index of overlay and base layers, add editing, allow user to insert overlay and tiles.
+    // HM TODO: file management for multiple routes.
     // HM TODO: reduce marker size.
     // HM TODO: better middle marker support.
-    // HM TODO: middle markers when opening file.
+    // HM TODO: undo service?
+    // HM TODO: check undo and hash.
+    // HM TODO: update help.
     // HM TODO: add waiting animation when routing works (Not sure I'll bother doing it in the end)
     // HM TODO: url to route (address/?url=)
-    // HM TODO: support multiple files and routes - also in layer switcher.
     // HM TODO: support twl? - will be solved hopefull with iis backend.
     // HM TODO: remove hiking trails layer on map change? - not sure it is currently possible another leaflet bug.
     // HM TODO: when hovering on routePoint/marker - allow the user to move the editing related on.
@@ -31,7 +34,9 @@
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, drawingRouteService: Services.DrawingRouteService, drawingMarkerService: Services.DrawingMarkerService) =>
             new Services.HashService($location, $rootScope, mapService, drawingRouteService, drawingMarkerService)]);
     app.service(Common.Constants.controlCreatorService, [Common.Constants.rootScope, Common.Constants.compile, ($rootScope: angular.IScope, $compile: angular.ICompileService) => new Services.ControlCreatorService($rootScope, $compile)]);
-    app.service(Common.Constants.layersService, [Common.Constants.mapService, (mapService: Services.MapService) => new Services.LayersService(mapService)]);
+    app.service(Common.Constants.layersService, [Common.Constants.mapService, Common.Constants.drawingRouteService,
+        (mapService: Services.MapService, drawingRouteService: Services.DrawingRouteService) =>
+            new Services.LayersService(mapService, drawingRouteService)]);
     
     app.controller(Common.Constants.mainMapController, [Common.Constants.mapService, Common.Constants.controlCreatorService, Common.Constants.hashService,
         (mapService: Services.MapService, controlCreatorService: Services.ControlCreatorService, hashService: Services.HashService) =>

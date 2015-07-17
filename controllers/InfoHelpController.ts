@@ -40,8 +40,8 @@
             }
 
             $scope.goToLegend = () => {
-                this.map.setZoom(14);
                 this.map.panTo(new L.LatLng(32.8185, 35.5707));
+                this.map.setZoom(14);
                 this.infoTooltip.hide();
             }
         }

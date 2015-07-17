@@ -16,15 +16,21 @@
             var route = "http://h2096617.stratoserver.net:443/brouter?nogos=&alternativeidx=0&format=geojson";
             var params = "&profile=" + this.getProfile() + "&lonlats=" + latlngStart.lng + "," + latlngStart.lat + "|" + latlngEnd.lng + "," + latlngEnd.lat;
             var deferred = this.$q.defer();
+            var noneRouter = new NoneRouter(this.$q);
             this.$http.get(route + params).success((geojson: GeoJSON.FeatureCollection, status) => {
                 var data = this.geojsonParser.toDataContainer(geojson);
-                deferred.resolve(data.routeData.segments);
+                if (data.routeData.segments.length < 2) {
+                    noneRouter.getRoute(latlngStart, latlngEnd).then((noneRouterData) => {
+                        deferred.resolve(noneRouterData);
+                    });
+                } else {
+                    deferred.resolve(data.routeData.segments);
+                }
             }).error(() => {
-                var noneRouter = new NoneRouter(this.$q);
                 noneRouter.getRoute(latlngStart, latlngEnd).then((data) => {
                     deferred.resolve(data);
                 });
-                
+
             });
             return deferred.promise;
         }
