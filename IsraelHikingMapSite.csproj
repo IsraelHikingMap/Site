@@ -29,6 +29,8 @@
     <Content Include="content\images\marker-icon-green.png" />
     <Content Include="content\images\marker-icon-middle.png" />
     <Content Include="content\images\map-editing.svg" />
+    <Content Include="content\images\marker-icon-small-green.png" />
+    <Content Include="content\images\marker-icon-small.png" />
     <Content Include="content\leaflet-locate.css" />
     <Content Include="content\leaflet-geocoder.css" />
     <Content Include="content\font-awesome.css" />

@@ -169,8 +169,11 @@
                 zoom = parseInt(splittedpath[splittedpath.length - 3]);
                 lat = parseFloat(splittedpath[splittedpath.length - 2]);
                 lng = parseFloat(splittedpath[splittedpath.length - 1]);
-                this.map.panTo(new L.LatLng(lat, lng));
                 this.map.setZoom(zoom);
+                setTimeout(() => {
+                    this.map.panTo(new L.LatLng(lat, lng));
+                    // HM TODO: work around for zoom issue - remove when leaflet has a fixed?
+                }, 1000);
                 var data = this.urlStringToDataContainer(search);
                 this.drawingRouteService.setData(data.routeData);
                 this.drawingMarkerService.setData(data.markers);

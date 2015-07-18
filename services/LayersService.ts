@@ -65,7 +65,7 @@ module IsraelHiking.Services {
             
             this.addOverlay(LayersService.HIKING_TRAILS, "http://www.osm.org.il/IsraelHiking/OverlayTiles/{z}/{x}/{y}.png");
             this.toggleOverlay(this.overlays[0]);
-            this.addRoute("new route");
+            //this.addRoute("new route");
         }
 
         public addBaseLayer = (key: string, address: string) => {

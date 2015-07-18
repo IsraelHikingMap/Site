@@ -23,7 +23,7 @@
                 element = <any>element.parent();
             }
             return this.$tooltip(element, {
-                template: template,
+                templateUrl: template,
                 trigger: "click",
                 placement: "right",
                 title: title,

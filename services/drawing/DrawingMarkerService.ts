@@ -57,7 +57,7 @@
             for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
                 data.push(<Common.MarkerData>{
                     latlng: this.markers[markerIndex].getLatLng(),
-                    title: this.markers[markerIndex].title,
+                    title: this.markers[markerIndex].title || "",
                 });
             }
             return data;
@@ -74,6 +74,16 @@
 
         private createMarker(latlng: L.LatLng, title = ""): MarkerWithTitle {
             var marker = <MarkerWithTitle>L.marker(latlng, <L.MarkerOptions> { draggable: true, clickable: true, riseOnHover: true });
+            marker.title = title;
+            var newScope = <Controllers.IMarkerPopupScope>this.$rootScope.$new();
+            newScope.title = title;
+            newScope.setTitle = (title: string) => {
+                marker.title = title;
+                this.eventHelper.raiseEvent({ applyToScope: false });
+            }
+            var popupHtml = this.$compile("<marker-popup ng-title='title'></marker-popup>")(newScope)[0];
+            marker.bindPopup(popupHtml);
+
             marker.on("dblclick",(e: L.LeafletMouseEvent) => {
                 this.removeMarker(marker);
                 this.eventHelper.raiseEvent({ applyToScope: true });
@@ -85,17 +95,8 @@
                 marker.closePopup();
             });
             marker.on("click",(e: L.LeafletMouseEvent) => {
-                marker.togglePopup();
+                marker.openPopup();
             });
-            marker.title = title;
-            var newScope = <Controllers.IMarkerPopupScope>this.$rootScope.$new();
-            newScope.title = title;
-            newScope.setTitle = (title: string) => {
-                marker.title = title;
-                this.eventHelper.raiseEvent({ applyToScope: false });
-            }
-            marker.bindPopup(this.$compile("<marker-popup ng-title='title'></marker-popup>")(newScope)[0]);
-            
             marker.setIcon(this.icon);
             marker.addTo(this.map);
             return marker;

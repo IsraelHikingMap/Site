@@ -40,8 +40,11 @@
             }
 
             $scope.goToLegend = () => {
-                this.map.panTo(new L.LatLng(32.8185, 35.5707));
                 this.map.setZoom(14);
+                setTimeout(() => {
+                    this.map.panTo(new L.LatLng(32.8185, 35.5707));
+                    // HM TODO: work around for zoom issue - remove when leaflet has a fixed?
+                }, 1000);
                 this.infoTooltip.hide();
             }
         }

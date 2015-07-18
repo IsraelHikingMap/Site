@@ -23,6 +23,7 @@
         private routeSegments: IRouteSegment[];
         private middleMarkers: IMiddleMarker[];
         private middleIcon: L.Icon;
+        private routePointIcon: L.Icon;
 
         public eventHelper: Common.EventHelper<IDataChangedEventArgs>;
 
@@ -62,6 +63,14 @@
                 iconSize: new L.Point(17, 17),
                 iconAnchor: new L.Point(9, 9),
                 shadowSize: new L.Point(0, 0),
+            });
+
+            this.routePointIcon = new L.Icon.Default(<L.IconOptions> {
+                iconSize: new L.Point(13, 21),
+                iconAnchor: new L.Point(6, 21),
+                iconUrl: L.Icon.Default.imagePath + "/marker-icon-small.png",
+                shadowUrl: L.Icon.Default.imagePath + "/marker-shadow-small.png",
+                shadowSize: new L.Point(21, 21),
             });
         }
 
@@ -138,6 +147,7 @@
 
         private createMarker = (latlng: L.LatLng): L.Marker => {
             var marker = L.marker(latlng, <L.MarkerOptions> { draggable: true, clickable: true, riseOnHover: true });
+            marker.setIcon(this.routePointIcon);
             marker.addTo(this.map);
             this.setMarkerEvents(marker);
             return marker;
@@ -148,7 +158,7 @@
                 var middleMarker = this.getMiddleMarker(marker);
                 if (middleMarker != null) {
                     this.convertMiddleMarkerToPoint(middleMarker);
-                    marker.setIcon(new L.Icon.Default());
+                    marker.setIcon(this.routePointIcon);
                     this.eventHelper.raiseEvent({ applyToScope: true });
                 }
             });
@@ -167,7 +177,7 @@
             marker.on("dragend",(e: L.LeafletMouseEvent) => {
                 this.dragPointEnd(marker.getLatLng());
                 this.eventHelper.raiseEvent({ applyToScope: true });
-                marker.setIcon(new L.Icon.Default());
+                marker.setIcon(this.routePointIcon);
                 marker.setOpacity(1.0)
                 this.hoverEnabled = true;
             });

@@ -1,7 +1,7 @@
 ﻿module IsraelHiking {
     // HM TODO: support multiple files and routes in layer switcher.
     // HM TODO: file management for multiple routes.
-    // HM TODO: reduce marker size.
+    // HM TODO: save overlays and baselayers to localstorage.
     // HM TODO: better middle marker support.
     // HM TODO: undo service? - check undo and hash.
     // HM TODO: update help, better contrast.
