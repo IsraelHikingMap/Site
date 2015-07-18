@@ -16,6 +16,7 @@
         static hashService = "hashService";
         static mapService = "mapService";
         static layersService = "layersService";
+        static localStorageService = "localStorageService";
         
         // Controllers
         static mainMapController = "mainMapController";

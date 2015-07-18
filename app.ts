@@ -1,7 +1,6 @@
 ﻿module IsraelHiking {
     // HM TODO: support multiple files and routes in layer switcher.
     // HM TODO: file management for multiple routes.
-    // HM TODO: save overlays and baselayers to localstorage.
     // HM TODO: better middle marker support.
     // HM TODO: undo service? - check undo and hash.
     // HM TODO: update help, better contrast.
@@ -12,7 +11,7 @@
     // HM TODO: when hovering on routePoint/marker - allow the user to move the editing related on.
     // HM TODO: height graph?
 
-    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap"]);
+    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule"]);
 
     L.Icon.Default.imagePath = "content/images/";
 
@@ -32,9 +31,9 @@
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, drawingRouteService: Services.DrawingRouteService, drawingMarkerService: Services.DrawingMarkerService) =>
             new Services.HashService($location, $rootScope, mapService, drawingRouteService, drawingMarkerService)]);
     app.service(Common.Constants.controlCreatorService, [Common.Constants.rootScope, Common.Constants.compile, ($rootScope: angular.IScope, $compile: angular.ICompileService) => new Services.ControlCreatorService($rootScope, $compile)]);
-    app.service(Common.Constants.layersService, [Common.Constants.mapService, Common.Constants.drawingRouteService,
-        (mapService: Services.MapService, drawingRouteService: Services.DrawingRouteService) =>
-            new Services.LayersService(mapService, drawingRouteService)]);
+    app.service(Common.Constants.layersService, [Common.Constants.localStorageService, Common.Constants.mapService, Common.Constants.drawingRouteService,
+        (localStorageService: angular.local.storage.ILocalStorageService, mapService: Services.MapService, drawingRouteService: Services.DrawingRouteService) =>
+            new Services.LayersService(localStorageService, mapService, drawingRouteService)]);
     
     app.controller(Common.Constants.mainMapController, [Common.Constants.mapService, Common.Constants.controlCreatorService, Common.Constants.hashService,
         (mapService: Services.MapService, controlCreatorService: Services.ControlCreatorService, hashService: Services.HashService) =>

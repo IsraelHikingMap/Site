@@ -56,6 +56,8 @@
     <Content Include="content\bootstrap-theme.css.map" />
     <Content Include="content\bootstrap.css.map" />
     <Content Include="fonts\fontawesome-webfont.woff2" />
+    <Content Include="scripts\angular-local-storage.js" />
+    <Content Include="scripts\angular-local-storage.min.js" />
     <Content Include="scripts\angular-mocks.js" />
     <None Include="Localhost.pubxml" />
     <Content Include="scripts\angular-strap.js" />
@@ -119,6 +121,7 @@
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="common\EventHelper.ts" />
     <TypeScriptCompile Include="controllers\LayersController.ts" />
+    <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-cookies.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-mocks.d.ts" />
