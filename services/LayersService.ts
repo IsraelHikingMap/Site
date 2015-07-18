@@ -26,7 +26,7 @@ module IsraelHiking.Services {
     export class LayersService extends ObjectWithMap {
         private static ISRAEL_HIKING_MAP = "Israel Hiking map";
         private static ISRAEL_MTB_MAP = "Israel MTB map";
-        private static GOOGLE_MAP = "Google map";
+        private static GOOGLE_EARTH = "Google Earth";
         private static HIKING_TRAILS = "Hiking trails";
         private static ATTRIBUTION = "Map data &copy; <a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> contributors, <a href='http://creativecommons.org/licenses/by-sa/2.0/' target='_blank\">CC-BY-SA</a>, built with <a href='http://getbootstrap.com/' target='_blank'>Bootstrap</a>. Last update: ";
 
@@ -56,16 +56,16 @@ module IsraelHiking.Services {
                 maxZoom: 16,
                 attribution: LayersService.ATTRIBUTION + lastModified
             };
-
-            this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_MAP, layer: <any>new L.Google(), selected: false });
-            this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png");
-            //this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "mtbTiles/{z}/{x}/{y}.png");
             this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "http://www.osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png");
             //this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "Tiles/{z}/{x}/{y}.png");
+            this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png");
+            //this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "mtbTiles/{z}/{x}/{y}.png");
+            this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_EARTH, layer: <any>new L.Google(), selected: false });
+            this.selectBaseLayer(this.baseLayers[0]);
             
             this.addOverlay(LayersService.HIKING_TRAILS, "http://www.osm.org.il/IsraelHiking/OverlayTiles/{z}/{x}/{y}.png");
-
-            //this.addRoute("untitled");
+            this.toggleOverlay(this.overlays[0]);
+            this.addRoute("new route");
         }
 
         public addBaseLayer = (key: string, address: string) => {

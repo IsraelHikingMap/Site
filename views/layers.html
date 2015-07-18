@@ -3,7 +3,7 @@
     <div class="leaflet-control-layers-expanded leaflet-control-layers" ng-show="hover == true">
         <div ng-repeat="baseLayer in baseLayers">
             <label class="control-label">
-                <button class="btn btn-xs btn-default" ng-click="selectBaseLayer(baseLayer, $event)" ng-class="{'active': baseLayer.selected }"><i class="fa fa-eye"></i></button>
+                <button class="btn btn-xs btn-default" ng-click="selectBaseLayer(baseLayer, $event)" ng-class="{'active': baseLayer.selected }"><i ng-class="{'fa fa-eye': baseLayer.selected, 'fa fa-eye-slash': !baseLayer.selected}"></i></button>
                 <button class="btn btn-xs btn-danger" ng-click="removeBaseLayer(baseLayer, $event)" ng-show="andvanced"><i class="fa fa-trash"></i></button>
                 {{baseLayer.key}}
             </label>
@@ -26,7 +26,9 @@
                 {{route.key}}
             </label>
         </div>
-        <button class="btn btn-xs btn-success" ng-click="addRoute('new route', $event)" ng-show="andvanced"><i class="fa fa-plus"></i> Add Route</button>
+        <button class="btn btn-xs btn-success" ng-click="addRoute($event)" ng-show="andvanced" title="Add route"><i class="fa fa-plus"></i></button>
+        <button class="btn btn-xs btn-default" ng-click="openFromFile($event)" ng-show="andvanced" title="Save all routes to file"><i class="fa fa-folder-open"></i></button>
+        <button class="btn btn-xs btn-default" ng-click="saveToFile($event)" ng-show="andvanced" title="Open routes"><i class="fa fa-save"></i></button>
         <button ng-init="andvanced = false" class="btn btn-xs btn-warning" ng-click="andvanced = !andvanced" title="Show advanced settings" ng-class="{'active': andvanced }"><i class="fa fa-gear"></i></button>
     </div>
 </div>

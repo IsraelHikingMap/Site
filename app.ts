@@ -1,12 +1,10 @@
 ﻿module IsraelHiking {
-    // HM TODO: support multiple files and routes - also in layer switcher.
-    // HM TODO: finish new layer switcher - bug in z index of overlay and base layers, add editing, allow user to insert overlay and tiles.
+    // HM TODO: support multiple files and routes in layer switcher.
     // HM TODO: file management for multiple routes.
     // HM TODO: reduce marker size.
     // HM TODO: better middle marker support.
-    // HM TODO: undo service?
-    // HM TODO: check undo and hash.
-    // HM TODO: update help.
+    // HM TODO: undo service? - check undo and hash.
+    // HM TODO: update help, better contrast.
     // HM TODO: add waiting animation when routing works (Not sure I'll bother doing it in the end)
     // HM TODO: url to route (address/?url=)
     // HM TODO: support twl? - will be solved hopefull with iis backend.

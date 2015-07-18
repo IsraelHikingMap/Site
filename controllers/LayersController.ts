@@ -15,13 +15,16 @@
 
         addBaseLayer(e: Event): void;
         addOverlay(e: Event): void;
-        addRoute(key: string, e: Event): void;
+        addRoute(e: Event): void;
         removeBaseLayer(baseLayer: Services.IBaseLayer, e: Event): void;
         removeOverlay(overlay: Services.IOvelay, e: Event): void;
         removeRoute(route: Services.IRoute, e: Event): void;
         selectBaseLayer(baseLayer: Services.IBaseLayer, e: Event): void;
         toggleVisibility(overlay: Services.IOvelay, e: Event): void;
         selectRoute(route: Services.IRoute, e: Event): void;
+
+        openFromFile(e: Event): void;
+        saveToFile(e: Event): void;
     }
 
     export class LayersController extends BaseMapController {
@@ -47,7 +50,7 @@
                 this.suppressEvents(e);
             }
 
-            $scope.addRoute = (key: string, e: Event) => {
+            $scope.addRoute = (e: Event) => {
                 addRouteModal.show();
                 this.suppressEvents(e);
             }
@@ -80,12 +83,23 @@
                 layersService.selectRoute(route);
                 this.suppressEvents(e);
             }
+
+            $scope.openFromFile = (e: Event) => {
+                // HM TODO: finish
+                this.suppressEvents(e);
+            }
+
+            $scope.saveToFile = (e: Event) => {
+                // HM TODO: finish
+                this.suppressEvents(e);
+            }
         }
 
         private createBaseLayerModal = ($scope: ILayersScope, $modal, layersService: Services.LayersService): any => {
             var addBaseLayerScope = <IAddLayerModalScope>$scope.$new();
             addBaseLayerScope.addLayer = (name: string, address: string, e: Event) => {
-                layersService.addBaseLayer(name, address);
+                var decodedAddress = decodeURI(address).replace("{zoom}", "{z}");
+                layersService.addBaseLayer(name, decodedAddress);
                 this.suppressEvents(e);
             }
             return this.createAddLayerModal($modal, "Add Base Layer", addBaseLayerScope);
@@ -94,7 +108,8 @@
         private createOverlayModal = ($scope: ILayersScope, $modal, layersService: Services.LayersService): any => {
             var addOvelayScope = <IAddLayerModalScope>$scope.$new();
             addOvelayScope.addLayer = (name: string, address: string, e: Event) => {
-                layersService.addOverlay(name, address);
+                var decodedAddress = decodeURI(address).replace("{zoom}", "{z}");
+                layersService.addOverlay(name, decodedAddress);
                 this.suppressEvents(e);
             }
             return this.createAddLayerModal($modal, "Add Overlay", addOvelayScope);
@@ -108,7 +123,7 @@
             }
             return $modal({
                 title: "Add Route",
-                template: "views/templates/addRouteModal.tpl.html",
+                templateUrl: "views/templates/addRouteModal.tpl.html",
                 show: false,
                 scope: addRouteScope,
             });
@@ -117,7 +132,7 @@
         private createAddLayerModal($modal, title, scope): any {
             return $modal({
                 title: title,
-                template: "views/templates/addLayerModal.tpl.html",
+                templateUrl: "views/templates/addLayerModal.tpl.html",
                 show: false,
                 scope: scope,
             });
