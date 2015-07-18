@@ -11,20 +11,17 @@
     export interface ILayersScope extends angular.IScope {
         baseLayers: Services.IBaseLayer[];
         overlays: Services.IOvelay[];
-        routes: Services.IRoute[];
+        routes: Services.DrawingRouteService[];
 
         addBaseLayer(e: Event): void;
         addOverlay(e: Event): void;
         addRoute(e: Event): void;
         removeBaseLayer(baseLayer: Services.IBaseLayer, e: Event): void;
         removeOverlay(overlay: Services.IOvelay, e: Event): void;
-        removeRoute(route: Services.IRoute, e: Event): void;
+        removeRoute(routeName: string, e: Event): void;
         selectBaseLayer(baseLayer: Services.IBaseLayer, e: Event): void;
         toggleVisibility(overlay: Services.IOvelay, e: Event): void;
-        selectRoute(route: Services.IRoute, e: Event): void;
-
-        openFromFile(e: Event): void;
-        saveToFile(e: Event): void;
+        selectRoute(routeName: string, e: Event): void;
     }
 
     export class LayersController extends BaseMapController {
@@ -64,8 +61,8 @@
                 layersService.removeOverlay(overlay);
                 this.suppressEvents(e);
             }
-            $scope.removeRoute = (route: Services.IRoute, e: Event) => {
-                layersService.removeRoute(route);
+            $scope.removeRoute = (routeName: string, e: Event) => {
+                layersService.removeRoute(routeName);
                 this.suppressEvents(e);
             }
 
@@ -79,18 +76,8 @@
                 this.suppressEvents(e);
             }
 
-            $scope.selectRoute = (route: Services.IRoute, e: Event) => {
-                layersService.selectRoute(route);
-                this.suppressEvents(e);
-            }
-
-            $scope.openFromFile = (e: Event) => {
-                // HM TODO: finish
-                this.suppressEvents(e);
-            }
-
-            $scope.saveToFile = (e: Event) => {
-                // HM TODO: finish
+            $scope.selectRoute = (routeName: string, e: Event) => {
+                layersService.selectRoute(routeName);
                 this.suppressEvents(e);
             }
         }

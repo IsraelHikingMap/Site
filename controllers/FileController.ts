@@ -10,21 +10,20 @@
         private static MAX_SEGMENTS_NUMBER = 20;
         private static MININAM_SEGMENT_LENGTH = 500; // meter
 
-
-        drawingRouteService: Services.DrawingRouteService;
-        drawingMarkerService: Services.DrawingMarkerService;
-        parserFactory: Services.Parsers.ParserFactory;
-        fileChooserTooltip;
+        private layersService: Services.LayersService;
+        private drawingMarkerService: Services.DrawingMarkerService;
+        private parserFactory: Services.Parsers.ParserFactory;
+        private fileChooserTooltip: any;
 
         constructor($scope: IFileScope,
             mapService: Services.MapService,
             $tooltip,
-            drawingRouteService: Services.DrawingRouteService,
+            layersService: Services.LayersService,
             drawingMarkerService: Services.DrawingMarkerService,
             parserFactory: Services.Parsers.ParserFactory) {
             super(mapService, $tooltip);
 
-            this.drawingRouteService = drawingRouteService;
+            this.layersService = layersService;
             this.drawingMarkerService = drawingMarkerService;
             this.parserFactory = parserFactory;
             this.setDragAndDrop($scope);
@@ -44,10 +43,10 @@
                 reader.onload = (e: any) => {
                     var data = parser.parse(e.target.result);
                     this.map.fitBounds(data.bounds);
-                    this.manipulateRouteData(data.routeData);
+                    this.manipulateRoutesData(data.routesData);
                     this.drawingMarkerService.setData(data.markers);
                     $scope.$apply();
-                }
+                };
                 reader.readAsText(file);
             }
 
@@ -62,7 +61,7 @@
             $scope.save = (e: Event, fileName: string) => {
                 var data = <Common.DataContainer> {
                     markers: this.drawingMarkerService.getData(),
-                    routeData: this.drawingRouteService.getData(),
+                    routesData: this.layersService.getData(),
                 };
                 var ext = fileName.split('.').pop();
                 var parser = this.parserFactory.Create(ext);
@@ -112,38 +111,42 @@
             }
         }
 
-        private manipulateRouteData(routeData: Common.RouteData) {
-            var manipulatedRouteData = <Common.RouteData> {
-                segments: [],
-                routingType: this.drawingRouteService.getRoutingType(),
-            };
-            
-            for (var segmentIndex = 0; segmentIndex < routeData.segments.length; segmentIndex++) {
-                var segment = routeData.segments[segmentIndex].latlngs;
-                var routeLength = 0;
-                for (var latlngIndex = 1; latlngIndex < segment.length; latlngIndex++) {
-                    routeLength += segment[latlngIndex - 1].distanceTo(segment[latlngIndex]);
-                }
-                var segmentLength = routeLength / FileController.MAX_SEGMENTS_NUMBER;
-                if (segmentLength < FileController.MININAM_SEGMENT_LENGTH) {
-                    segmentLength = FileController.MININAM_SEGMENT_LENGTH;
-                }
-                var currentSegmentLength = 0;
-                var segmentData = <Common.RouteSegmentData> { latlngs: [segment[0]] };
-                for (var latlngIndex = 1; latlngIndex < segment.length; latlngIndex++) {
-                    currentSegmentLength += segment[latlngIndex - 1].distanceTo(segment[latlngIndex]);
-                    if (currentSegmentLength < segmentLength) {
-                        segmentData.latlngs.push(segment[latlngIndex]);
-                        continue;
-                    }
-                    segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];
-                    manipulatedRouteData.segments.push(segmentData);
-                    segmentData = <Common.RouteSegmentData> { latlngs: [segment[latlngIndex -1], segment[latlngIndex]] };
-                    currentSegmentLength = 0;
-                }
-            }
+        private manipulateRoutesData(routesData: Common.RouteData[]) {
 
-            this.drawingRouteService.setData(manipulatedRouteData);
+            for (var routeIndex = 0; routeIndex < routesData.length; routeIndex++) {
+                var routeData = routesData[routeIndex];
+                var selectedRoute = this.layersService.getSelectedRoute();
+                var manipulatedRouteData = <Common.RouteData> {
+                    segments: [],
+                    routingType: (selectedRoute == null) ? Common.routingType.none : selectedRoute.getRoutingType(),
+                };
+                for (var segmentIndex = 0; segmentIndex < routeData.segments.length; segmentIndex++) {
+                    var segment = routeData.segments[segmentIndex].latlngs;
+                    var routeLength = 0;
+                    for (var latlngIndex = 1; latlngIndex < segment.length; latlngIndex++) {
+                        routeLength += segment[latlngIndex - 1].distanceTo(segment[latlngIndex]);
+                    }
+                    var segmentLength = routeLength / FileController.MAX_SEGMENTS_NUMBER;
+                    if (segmentLength < FileController.MININAM_SEGMENT_LENGTH) {
+                        segmentLength = FileController.MININAM_SEGMENT_LENGTH;
+                    }
+                    var currentSegmentLength = 0;
+                    var segmentData = <Common.RouteSegmentData> { latlngs: [segment[0]] };
+                    for (var latlngIndex = 1; latlngIndex < segment.length; latlngIndex++) {
+                        currentSegmentLength += segment[latlngIndex - 1].distanceTo(segment[latlngIndex]);
+                        if (currentSegmentLength < segmentLength) {
+                            segmentData.latlngs.push(segment[latlngIndex]);
+                            continue;
+                        }
+                        segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];
+                        manipulatedRouteData.segments.push(segmentData);
+                        segmentData = <Common.RouteSegmentData> { latlngs: [segment[latlngIndex - 1], segment[latlngIndex]] };
+                        currentSegmentLength = 0;
+                    }
+                }
+
+                this.layersService.addRoute(routeData.name, manipulatedRouteData);
+            }
         }
     }
 } 

@@ -17,12 +17,13 @@
     }
 
     export interface RouteData {
+        name: string;
         segments: RouteSegmentData[];
         routingType: string;
     }
 
     export interface DataContainer {
-        routeData: RouteData;
+        routesData: RouteData[];
         markers: MarkerData[];
         bounds: L.LatLngBounds;
     }

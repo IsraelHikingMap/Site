@@ -1,34 +1,42 @@
 ﻿module IsraelHiking.Services {
     interface IUrlSerachObject {
-        routePoints: string;
         markers: string;
-        routingType: string;
     }
 
     export class HashService extends ObjectWithMap {
-        $location: angular.ILocationService;
-        $rootScope: angular.IScope;
-        drawingRouteService: DrawingRouteService;
-        drawingMarkerService: DrawingMarkerService;
-
         private static ARRAY_DELIMITER = ":";
         private static DATA_DELIMITER = ",";
+
+        private $location: angular.ILocationService;
+        private $rootScope: angular.IScope;
+        private layersService: LayersService;
+        private drawingMarkerService: DrawingMarkerService;
+        private ignoreChanges: boolean;
 
         constructor($location: angular.ILocationService,
             $rootScope: angular.IScope,
             mapSerivce: MapService,
-            drawingRouteService: DrawingRouteService,
+            layersService: LayersService,
             drawingMarkerService: DrawingMarkerService) {
             super(mapSerivce);
             this.$location = $location;
             this.$rootScope = $rootScope;
-            this.drawingRouteService = drawingRouteService;
+            this.layersService = layersService;
             this.drawingMarkerService = drawingMarkerService;
+            this.ignoreChanges = false;
+
             this.addDataFromUrl();
-            this.drawingRouteService.eventHelper.addListener((data) => {
+
+            this.layersService.eventHelper.addListener((data) => {
+                if (this.ignoreChanges) {
+                    return;
+                }
                 this.updateHashEventHandler();
             });
             this.drawingMarkerService.eventHelper.addListener((data) => {
+                if (this.ignoreChanges) {
+                    return;
+                }
                 this.updateHashEventHandler();
             });
             this.map.on("moveend",(e: L.LeafletEvent) => {
@@ -50,6 +58,20 @@
             var searchObject = this.dataContainerToUrlString();
             this.$location.path(path);
             this.$location.search(searchObject);
+        }
+
+        private routeToString = (routeData: Common.RouteData): string => {
+            var latlngsString = this.latlngsToStringArray(this.pointSegmentsToLatlng(routeData.segments)).join(HashService.ARRAY_DELIMITER);
+            return routeData.routingType + HashService.ARRAY_DELIMITER + latlngsString;
+        }
+
+        private stringToRoute = (data: string): Common.RouteData => {
+            var splitted = data.split(HashService.ARRAY_DELIMITER);
+            return <Common.RouteData> {
+                name: "",
+                routingType: splitted.shift(),
+                segments: this.latlngToPointSegments(this.stringArrayToLatlngs(splitted)),
+            };
         }
 
         private latlngsToStringArray(latlngs: L.LatLng[]): string[] {
@@ -123,37 +145,39 @@
         }
 
         private dataContainerToUrlString = (): IUrlSerachObject => {
-
-            var routeData = this.drawingRouteService.getData();
-            var routingType = this.drawingRouteService.getRoutingType();
+            var routesData = this.layersService.getData();
             var markers = this.drawingMarkerService.getData();
-            return <IUrlSerachObject> {
-                routePoints: this.latlngsToStringArray(this.pointSegmentsToLatlng(routeData.segments)).join(HashService.ARRAY_DELIMITER),
+
+            var urlObject = <IUrlSerachObject> {
                 markers: this.markersToStringArray(markers).join(HashService.ARRAY_DELIMITER),
-                routingType: routingType,
             };
+            for (var routeIndex = 0; routeIndex < routesData.length; routeIndex++) {
+                var routeData = routesData[routeIndex];
+                (<any>urlObject)[routeData.name] = this.routeToString(routeData);
+            }
+            return urlObject;
         }
 
         private urlStringToDataContainer(searchObject: IUrlSerachObject): Common.DataContainer {
             var data = <Common.DataContainer> {
                 markers: [],
-                routeData: {
-                    segments: [],
-                    routingType: Common.routingType.none
-                },
+                routesData: [],
             };
             if (!searchObject) {
                 return data;
             }
-            if (searchObject.routingType != undefined) {
-                data.routeData.routingType = searchObject.routingType
-            }
-            if (searchObject.routePoints != undefined) {
-                data.routeData.segments = this.latlngToPointSegments(this.stringArrayToLatlngs(searchObject.routePoints.split(HashService.ARRAY_DELIMITER) || []));
-            }
             if (searchObject.markers != undefined) {
                 data.markers = this.stringArrayToMarkers(searchObject.markers.split(HashService.ARRAY_DELIMITER) || [])
             }
+            for (var parameter in searchObject) {
+                if (parameter == "markers") {
+                    continue;
+                }
+                var routeData = this.stringToRoute(searchObject[parameter]);
+                routeData.name = parameter;
+                data.routesData.push(routeData);
+            }
+
             return data;
         }
 
@@ -166,18 +190,19 @@
             var lng = null;
             var hashOnly = true;
             if (splittedpath.length == 4) {
+                this.ignoreChanges = true;
                 zoom = parseInt(splittedpath[splittedpath.length - 3]);
                 lat = parseFloat(splittedpath[splittedpath.length - 2]);
                 lng = parseFloat(splittedpath[splittedpath.length - 1]);
                 this.map.setZoom(zoom);
-                setTimeout(() => {
+                //setTimeout(() => {
                     this.map.panTo(new L.LatLng(lat, lng));
                     // HM TODO: work around for zoom issue - remove when leaflet has a fixed?
-                }, 1000);
+                //}, 1000);
                 var data = this.urlStringToDataContainer(search);
-                this.drawingRouteService.setData(data.routeData);
+                this.layersService.setData(data.routesData, true);
                 this.drawingMarkerService.setData(data.markers);
-                this.drawingRouteService.changeRoutingType(data.routeData.routingType);
+                this.ignoreChanges = false;
             } else {
                 // backwards compatibility... :-(
                 zoom = parseInt(this.getURLParameter('zoom'));

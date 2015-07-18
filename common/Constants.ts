@@ -8,6 +8,7 @@
         static http = "$http";
         static q = "$q";
         static compile = "$compile";
+        static injector = "$injector";
         static parserFactory = "parserFactory";
         static routerFactory = "routerFactory";
         static controlCreatorService = "controlCreatorService";

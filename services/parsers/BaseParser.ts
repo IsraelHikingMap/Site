@@ -13,11 +13,8 @@
         public toDataContainer(geoJson: GeoJSON.FeatureCollection): Common.DataContainer {
 
             var data = <Common.DataContainer>{
-                markers: [],
-                routeData: {
-                    segments: [],
-                    routingType: Common.routingType.none
-                }
+                markers: <Common.MarkerData[]>[],
+                routesData: <Common.RouteData[]>[],
             };
             var leaftletGeoJson = L.geoJson(geoJson, {
                 onEachFeature: (feature: GeoJSON.Feature, layer) => {
@@ -32,16 +29,16 @@
                             latlngs.push(this.createLatlng(pointCoordinates));
                         }
                         if (lineString.coordinates.length >= 2) {
-                            data.routeData.segments.push(<Common.RouteSegmentData>
-                                {
-                                    routePoint: latlngs[0],
-                                    latlngs: [latlngs[0]],
-                                });
-                            data.routeData.segments.push(<Common.RouteSegmentData>
-                                {
-                                    routePoint: latlngs[latlngs.length - 1],
-                                    latlngs: latlngs,
-                                });
+                            var routeData = <Common.RouteData> { segments: [], routingType: Common.routingType.none, name: feature.properties.name || "" };
+                            routeData.segments.push(<Common.RouteSegmentData> {
+                                routePoint: latlngs[0],
+                                latlngs: [latlngs[0]],
+                            });
+                            routeData.segments.push(<Common.RouteSegmentData> {
+                                routePoint: latlngs[latlngs.length - 1],
+                                latlngs: latlngs,
+                            });
+                            data.routesData.push(routeData);
                         }
                     }
                     if (feature.geometry.type == BaseParser.POINT) {
@@ -90,26 +87,30 @@
                     }
                 });
             }
-            var lineStringCoordinates = <GeoJSON.Position[]>[];
-            var pointsSegments = <Common.RouteSegmentData[]>data.routeData.segments;
-            for (var pointSegmentIndex = 0; pointSegmentIndex < pointsSegments.length; pointSegmentIndex++) {
-                for (var latlngIndex = 0; latlngIndex < pointsSegments[pointSegmentIndex].latlngs.length; latlngIndex++) {
-                    var latlng = pointsSegments[pointSegmentIndex].latlngs[latlngIndex];
-                    lineStringCoordinates.push(<GeoJSON.Position>[latlng.lng, latlng.lat]);
-                }
-            }
-            if (lineStringCoordinates.length > 0) {
-                var lineStringFeature = <GeoJSON.Feature> {
-                    type: BaseParser.FEATURE,
-                    properties: {
-                        name: "Israel Hiking Map route",
-                    },
-                    geometry: <GeoJSON.LineString> {
-                        type: BaseParser.LINE_STRING,
-                        coordinates: lineStringCoordinates,
+
+            for (var routeIndex = 0; routeIndex < data.routesData.length; routeIndex++) {
+                var routeData = data.routesData[routeIndex];
+                var lineStringCoordinates = <GeoJSON.Position[]>[];
+                var pointsSegments = routeData.segments;
+                for (var pointSegmentIndex = 0; pointSegmentIndex < pointsSegments.length; pointSegmentIndex++) {
+                    for (var latlngIndex = 0; latlngIndex < pointsSegments[pointSegmentIndex].latlngs.length; latlngIndex++) {
+                        var latlng = pointsSegments[pointSegmentIndex].latlngs[latlngIndex];
+                        lineStringCoordinates.push(<GeoJSON.Position>[latlng.lng, latlng.lat]);
                     }
-                };
-                geoJson.features.push(lineStringFeature);
+                }
+                if (lineStringCoordinates.length > 0) {
+                    var lineStringFeature = <GeoJSON.Feature> {
+                        type: BaseParser.FEATURE,
+                        properties: {
+                            name: routeData.name,
+                        },
+                        geometry: <GeoJSON.LineString> {
+                            type: BaseParser.LINE_STRING,
+                            coordinates: lineStringCoordinates,
+                        }
+                    };
+                    geoJson.features.push(lineStringFeature);
+                }
             }
             return geoJson;
         }

@@ -19,12 +19,12 @@
             var noneRouter = new NoneRouter(this.$q);
             this.$http.get(route + params).success((geojson: GeoJSON.FeatureCollection, status) => {
                 var data = this.geojsonParser.toDataContainer(geojson);
-                if (data.routeData.segments.length < 2) {
+                if (data.routesData.length == 0 || data.routesData[0].segments.length < 2) {
                     noneRouter.getRoute(latlngStart, latlngEnd).then((noneRouterData) => {
                         deferred.resolve(noneRouterData);
                     });
                 } else {
-                    deferred.resolve(data.routeData.segments);
+                    deferred.resolve(data.routesData[0].segments);
                 }
             }).error(() => {
                 noneRouter.getRoute(latlngStart, latlngEnd).then((data) => {

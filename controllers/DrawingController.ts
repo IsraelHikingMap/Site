@@ -4,7 +4,6 @@
         toggleRouting(e: Event): void;
         toggleMarkers(e: Event): void;
         undo(e: Event): void;
-        clear(e: Event): void;
         isRouteEnabled(): boolean;
         isRoutingEnabled(): boolean;
         isMarkersEnabled(): boolean;
@@ -12,38 +11,43 @@
     }
 
     export class DrawingController extends BaseMapController {
-        private dataStack: Function[];
-        private drawingRouteService: Services.DrawingRouteService;
+        private layersService: Services.LayersService;
         private drawingMarkerService: Services.DrawingMarkerService;
         private ignoreDataChanged: boolean;
+        private selectedRoute: Services.DrawingRouteService;
 
         constructor($scope: IDrawingScope,
             mapService: Services.MapService,
-            drawingRouteService: Services.DrawingRouteService,
+            layersService: Services.LayersService,
             drawingMarkerService: Services.DrawingMarkerService) {
             super(mapService);
-            this.drawingRouteService = drawingRouteService;
+            this.layersService = layersService;
             this.drawingMarkerService = drawingMarkerService;
-            this.dataStack = [];
-            this.addCurrentData();
             this.ignoreDataChanged = false;
+            this.selectedRoute = this.layersService.getSelectedRoute();
+            if (this.selectedRoute == null) {
+                this.layersService.setData([]);
+                this.selectedRoute = this.layersService.getSelectedRoute();
+            }
 
-            this.drawingRouteService.eventHelper.addListener((args: Services.IDataChangedEventArgs) => {
-                this.addCurrentData();
-                this.updateScope($scope, args.applyToScope);
+            this.layersService.eventHelper.addListener((args: Services.IDataChangedEventArgs) => {
+                this.selectedRoute = this.layersService.getSelectedRoute();
             });
             this.drawingMarkerService.eventHelper.addListener((args: Services.IDataChangedEventArgs) => {
-                this.addCurrentData();
                 this.updateScope($scope, args.applyToScope);
             });
 
             $scope.toggleRoute = (e: Event) => {
-                if (this.drawingRouteService.isEnabled()) {
-                    this.drawingRouteService.enable(false);
+                if (this.selectedRoute == null) {
+                    return;
+                }
+
+                if (this.selectedRoute.isEnabled()) {
+                    this.selectedRoute.enable(false);
                     this.setDragMapCursor();
                 }
                 else {
-                    this.drawingRouteService.enable(true);
+                    this.selectedRoute.enable(true);
                     this.drawingMarkerService.enable(false);
                     this.setDrawingCursor();
                 }
@@ -52,10 +56,10 @@
             };
 
             $scope.toggleRouting = (e: Event) => {
-                if (this.drawingRouteService.isRoutingEnabled()) {
-                    this.drawingRouteService.changeRoutingType(Common.routingType.none);
+                if (this.selectedRoute.isRoutingEnabled()) {
+                    this.selectedRoute.changeRoutingType(Common.routingType.none);
                 } else {
-                    this.drawingRouteService.changeRoutingType(Common.routingType.hike);
+                    this.selectedRoute.changeRoutingType(Common.routingType.hike);
                 }
                 this.suppressEvents(e);
             };
@@ -67,37 +71,23 @@
                 }
                 else {
                     this.drawingMarkerService.enable(true);
-                    this.drawingRouteService.enable(false);
+                    this.selectedRoute.enable(false);
                     this.setDrawingCursor();
                 }
                 this.suppressEvents(e);
             };
 
             $scope.undo = (e: Event) => {
-                if ($scope.isUndoDisbaled()) {
-                    return;
-                }
-                this.dataStack.pop();
-                var undoDelegate = this.dataStack[this.dataStack.length - 1];
-                undoDelegate();
-                this.suppressEvents(e);
-            };
-
-            $scope.clear = (e: Event) => {
-                this.ignoreDataChanged = true;
-                this.drawingRouteService.clear();
-                this.drawingMarkerService.clear();
-                this.ignoreDataChanged = false;
-                this.addCurrentData();
+                // HM TODO: add undo logic
                 this.suppressEvents(e);
             };
 
             $scope.isRouteEnabled = (): boolean => {
-                return this.drawingRouteService.isEnabled();
+                return this.selectedRoute.isEnabled();
             };
 
             $scope.isRoutingEnabled = (): boolean => {
-                return this.drawingRouteService.isRoutingEnabled();
+                return this.selectedRoute.isRoutingEnabled();
             };
 
             $scope.isMarkersEnabled = (): boolean => {
@@ -105,30 +95,18 @@
             };
 
             $scope.isUndoDisbaled = (): boolean => {
-                return this.dataStack.length <= 1;
+                // HM TODO: add undo logic
+                return false;
             };
 
             document.onkeydown = (e: KeyboardEvent) => {
                 if (e.keyCode != 27) {
                     return;
                 }
-                this.drawingRouteService.enable(false);
+                this.selectedRoute.enable(false);
                 this.setDragMapCursor();
                 this.updateScope($scope, true);
             };
-        }
-
-        private addCurrentData = () => {
-            if (this.ignoreDataChanged) {
-                return;
-            }
-            var routeData = this.drawingRouteService.getData();
-            var markersData = this.drawingMarkerService.getData();
-
-            this.dataStack.push(() => {
-                this.drawingRouteService.setData(routeData);
-                this.drawingMarkerService.setData(markersData);
-            });
         }
 
         private setDrawingCursor() {

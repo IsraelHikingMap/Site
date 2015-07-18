@@ -20,15 +20,13 @@
         <button class="btn btn-xs btn-success" ng-click="addOverlay($event)" ng-show="andvanced"><i class="fa fa-plus"></i> Add Overlay</button>
         <div class="leaflet-control-layers-separator"></div>
         <div ng-repeat="route in routes">
-            <label class="control-label" ng-show="andvanced">
-                <button class="btn btn-xs btn-default" ng-click="selectRoute(route, $event)" ng-class="{'active' : route.active }"><i class="fa fa-pencil"></i></button>
-                <button class="btn btn-xs btn-danger" ng-click="removeRoute(route, $event)"><i class="fa fa-trash"></i></button>
-                {{route.key}}
+            <label class="control-label">
+                <button class="btn btn-xs btn-default" ng-click="selectRoute(route.name, $event)" ng-class="{'active' : route.active }"><i class="fa fa-pencil"></i></button>
+                <button class="btn btn-xs btn-danger" ng-click="removeRoute(route.name, $event)" ng-show="andvanced"><i class="fa fa-trash"></i></button>
+                {{route.name}}
             </label>
         </div>
-        <button class="btn btn-xs btn-success" ng-click="addRoute($event)" ng-show="andvanced" title="Add route"><i class="fa fa-plus"></i></button>
-        <button class="btn btn-xs btn-default" ng-click="openFromFile($event)" ng-show="andvanced" title="Save all routes to file"><i class="fa fa-folder-open"></i></button>
-        <button class="btn btn-xs btn-default" ng-click="saveToFile($event)" ng-show="andvanced" title="Open routes"><i class="fa fa-save"></i></button>
+        <button class="btn btn-xs btn-success" ng-click="addRoute($event)" ng-show="andvanced" title="Add route"><i class="fa fa-plus"> Add Route</i></button>
         <button ng-init="andvanced = false" class="btn btn-xs btn-warning" ng-click="andvanced = !andvanced" title="Show advanced settings" ng-class="{'active': andvanced }"><i class="fa fa-gear"></i></button>
     </div>
 </div>

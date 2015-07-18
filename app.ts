@@ -1,6 +1,8 @@
 ﻿module IsraelHiking {
-    // HM TODO: support multiple files and routes in layer switcher.
-    // HM TODO: file management for multiple routes.
+    // HM TODO: undo logic.
+    // HM TODO: fix hash when deleting a point.
+    // HM TODO: markers layer need reorder.
+    // HM TODO: update route from file with the same name?
     // HM TODO: better middle marker support.
     // HM TODO: undo service? - check undo and hash.
     // HM TODO: update help, better contrast.
@@ -21,19 +23,14 @@
     app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterFactory($http, $q, parserFactory)]);
-    app.service(Common.Constants.drawingRouteService, [Common.Constants.q, Common.Constants.mapService, Common.Constants.routerFactory,
-        ($q: angular.IQService, mapService: Services.MapService, routerFactory: Services.Routers.RouterFactory) =>
-            new Services.DrawingRouteService($q, mapService, routerFactory)]);
     app.service(Common.Constants.drawingMarkerService, [Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService,
         ($compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService) =>
             new Services.DrawingMarkerService($compile, $rootScope, mapService)]);
-    app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.drawingRouteService, Common.Constants.drawingMarkerService,
-        ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, drawingRouteService: Services.DrawingRouteService, drawingMarkerService: Services.DrawingMarkerService) =>
-            new Services.HashService($location, $rootScope, mapService, drawingRouteService, drawingMarkerService)]);
+    app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.layersService, Common.Constants.drawingMarkerService,
+        ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, layersService: Services.LayersService, drawingMarkerService: Services.DrawingMarkerService) =>
+            new Services.HashService($location, $rootScope, mapService, layersService, drawingMarkerService)]);
     app.service(Common.Constants.controlCreatorService, [Common.Constants.rootScope, Common.Constants.compile, ($rootScope: angular.IScope, $compile: angular.ICompileService) => new Services.ControlCreatorService($rootScope, $compile)]);
-    app.service(Common.Constants.layersService, [Common.Constants.localStorageService, Common.Constants.mapService, Common.Constants.drawingRouteService,
-        (localStorageService: angular.local.storage.ILocalStorageService, mapService: Services.MapService, drawingRouteService: Services.DrawingRouteService) =>
-            new Services.LayersService(localStorageService, mapService, drawingRouteService)]);
+    app.service(Common.Constants.layersService, [Common.Constants.injector, ($injector: angular.auto.IInjectorService) => new Services.LayersService($injector)]);
     
     app.controller(Common.Constants.mainMapController, [Common.Constants.mapService, Common.Constants.controlCreatorService, Common.Constants.hashService,
         (mapService: Services.MapService, controlCreatorService: Services.ControlCreatorService, hashService: Services.HashService) =>
