@@ -23,7 +23,7 @@
     }
 
     export interface DataContainer {
-        routesData: RouteData[];
+        routes: RouteData[];
         markers: MarkerData[];
         bounds: L.LatLngBounds;
     }

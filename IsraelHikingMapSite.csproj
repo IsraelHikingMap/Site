@@ -132,6 +132,8 @@
     <TypeScriptCompile Include="scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="scripts\typings\leaflet\leaflet.d.ts" />
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />
+    <TypeScriptCompile Include="services\drawing\BaseDrawing.ts" />
+    <TypeScriptCompile Include="services\drawing\DrawingFactory.ts" />
     <TypeScriptCompile Include="services\LayersService.ts" />
     <TypeScriptCompile Include="services\ObjectWithMap.ts" />
     <TypeScriptCompile Include="common\IsraelHikingData.ts" />
@@ -142,8 +144,8 @@
     <TypeScriptCompile Include="services\ControlCreatorService.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-file-upload\angular-file-upload.d.ts" />
     <TypeScriptCompile Include="scripts\typings\geojson\geojson.d.ts" />
-    <TypeScriptCompile Include="services\drawing\DrawingMarkerService.ts" />
-    <TypeScriptCompile Include="services\drawing\DrawingRouteService.ts" />
+    <TypeScriptCompile Include="services\drawing\DrawingMarker.ts" />
+    <TypeScriptCompile Include="services\drawing\DrawingRoute.ts" />
     <TypeScriptCompile Include="controllers\EditOSMController.ts" />
     <TypeScriptCompile Include="controllers\FileController.ts" />
     <TypeScriptCompile Include="services\HashService.ts" />

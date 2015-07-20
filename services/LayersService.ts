@@ -30,39 +30,40 @@ module IsraelHiking.Services {
         private static BASE_LAYERS_KEY = "BaseLayers";
         private static OVERLAYS_KEY = "Overlays";
 
-        private $injector: angular.auto.IInjectorService;
         private localStorageService: angular.local.storage.ILocalStorageService;
+        private hashService: HashService;
+        private drawingFactory: Drawing.DrawingFactory;
         private tileLayerOptions: L.TileLayerOptions;
         private overlayZIndex;
-        private dataChangedEventHandler: (date: IDataChangedEventArgs) => void;
 
         public baseLayers: IBaseLayer[];
         public overlays: IOvelay[];
-        public routes: DrawingRouteService[];
-        public eventHelper: Common.EventHelper<IDataChangedEventArgs>
+        public markers: Drawing.DrawingMarker;
+        public routes: Drawing.DrawingRoute[];
+        public eventHelper: Common.EventHelper<Common.IDataChangedEventArgs>
         public selectedBaseLayer: IBaseLayer;
-        public selectedRoute: DrawingRouteService;
+        public selectedDrawing: Drawing.IDrawing;
 
-        constructor($injector: angular.auto.IInjectorService) {
-            super($injector.get(Common.Constants.mapService));
-            this.$injector = $injector;
-            this.localStorageService = this.$injector.get(Common.Constants.localStorageService);
+        constructor(mapService: MapService,
+            localStorageService: angular.local.storage.ILocalStorageService,
+            drawingFactory: Drawing.DrawingFactory,
+            hashService: HashService) {
+            super(mapService);
+            this.localStorageService = localStorageService
+            this.hashService = hashService;
+            this.drawingFactory = drawingFactory;
             this.selectedBaseLayer = null;
-            this.selectedRoute = null;
             this.baseLayers = [];
             this.overlays = [];
             this.routes = [];
             this.overlayZIndex = 10;
-            this.eventHelper = new Common.EventHelper<IDataChangedEventArgs>();
+            this.eventHelper = new Common.EventHelper<Common.IDataChangedEventArgs>();
             var lastModified = "17/07/2015";//(typeof getLastModifiedDate == "function") ? getLastModifiedDate() : document.lastModified;
             this.tileLayerOptions = <L.TileLayerOptions> {
                 minZoom: 7,
                 maxZoom: 16,
                 attribution: LayersService.ATTRIBUTION + lastModified
             };
-            this.dataChangedEventHandler = (args: IDataChangedEventArgs) => {
-                this.eventHelper.raiseEvent(args);
-            }
             // default layers:
             this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "http://www.osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png");
             //this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "Tiles/{z}/{x}/{y}.png");
@@ -72,6 +73,7 @@ module IsraelHiking.Services {
             this.addOverlay(LayersService.HIKING_TRAILS, "http://www.osm.org.il/IsraelHiking/OverlayTiles/{z}/{x}/{y}.png");
 
             this.addLayersFromLocalStorage();
+            this.addDrawingsFromHash();
 
             this.selectBaseLayer(this.baseLayers[0]);
             this.toggleOverlay(this.overlays[0]);
@@ -102,29 +104,23 @@ module IsraelHiking.Services {
             this.localStorageService.set(LayersService.OVERLAYS_KEY, overlays);
         }
 
-        public addRoute = (name: string, routeData?: Common.RouteData, reRoute?: boolean) => {
+        public addRoute = (name: string, routeData: Common.RouteData = null) => {
             if (name == "") {
                 name = this.createRouteName();
             }
-            if (_.find(this.routes,(routeToFind) => routeToFind.name == name)) {
-                return; // route exists
+            var route = _.find(this.routes,(drawingToFind) => drawingToFind.name == name);
+            if (route != null && routeData != null) {
+                route.setData(routeData);
+                return;
             }
-            var drawingRouteService = new Services.DrawingRouteService(
-                <angular.IQService>this.$injector.get(Common.Constants.q),
-                <MapService>this.$injector.get(Common.Constants.mapService),
-                <Routers.RouterFactory>this.$injector.get(Common.Constants.routerFactory),
-                name);
-            drawingRouteService.setData(routeData || <Common.RouteData> {
+            routeData = routeData || <Common.RouteData> {
                 routingType: Common.routingType.none,
                 segments: [],
                 name: name,
-            });
-            if (reRoute) {
-                drawingRouteService.changeRoutingType(drawingRouteService.getRoutingType());
-            }
-            this.routes.push(drawingRouteService);
-            this.selectRoute(drawingRouteService.name);
-            this.eventHelper.raiseEvent(<IDataChangedEventArgs>{});
+            };
+            var drawingRoute = this.drawingFactory.createDrawingRoute(routeData, false);
+            this.routes.push(drawingRoute);
+            this.selectDrawing(drawingRoute.name);
         }
 
         public removeBaseLayer = (baseLayer: Services.IBaseLayer) => {
@@ -156,13 +152,13 @@ module IsraelHiking.Services {
         }
 
         public removeRoute = (routeName: string) => {
-            var drawingRouteService = _.find(this.routes,(routeToFind) => routeToFind.name == routeName);
-            if (drawingRouteService == null) {
+            var route = _.find(this.routes,(routeToFind) => routeToFind.name == routeName);
+            if (route == null) {
                 return;
             }
-            drawingRouteService.destroy();
-            this.routes.splice(this.routes.indexOf(drawingRouteService), 1);
-            this.eventHelper.raiseEvent(<IDataChangedEventArgs>{});
+            route.destroy();
+            this.routes.splice(this.routes.indexOf(route), 1);
+            this.hashService.removeRoute(routeName);
         }
 
         public selectBaseLayer = (baseLayer: Services.IBaseLayer) => {
@@ -189,23 +185,24 @@ module IsraelHiking.Services {
             }
         }
 
-        public selectRoute = (routeName: string) => {
-            var drawingRouteService = _.find(this.routes,(routeToFind) => routeToFind.name == routeName);
-            if (drawingRouteService == null) {
+        public selectDrawing = (name: string) => {
+            var drawing = <Drawing.IDrawing>_.find(this.routes,(routeToFind) => routeToFind.name == name);
+            if (name == this.markers.name) {
+                drawing = this.markers;
+            }
+            if (drawing == null) {
                 return;
             }
-            if (drawingRouteService.active) {
+            if (drawing.active) {
                 return;
             }
 
-            if (this.selectedRoute) {
-                this.selectedRoute.deactivate();
-                this.selectedRoute.eventHelper.removeListener(this.dataChangedEventHandler);
+            if (this.selectedDrawing) {
+                this.selectedDrawing.deactivate();
             }
-            this.selectedRoute = drawingRouteService;
-            this.selectedRoute.activate();
-            this.selectedRoute.eventHelper.addListener(this.dataChangedEventHandler);
-            this.eventHelper.raiseEvent(<IDataChangedEventArgs>{});
+            this.selectedDrawing = drawing;
+            this.selectedDrawing.activate();
+            this.eventHelper.raiseEvent(<Common.IDataChangedEventArgs>{});
         }
 
         private createRouteName = () => {
@@ -243,30 +240,30 @@ module IsraelHiking.Services {
             }
         }
 
-        public getData = (): Common.RouteData[]=> {
-            var routesData = <Common.RouteData[]>[];
-            for (var routeIndex = 0; routeIndex < this.routes.length; routeIndex++) {
-                var route = this.routes[routeIndex];
-                var data = route.getData();
-                data.name.replace(" ", "_");
-                routesData.push(data);
+        private addDrawingsFromHash = () => {
+            var dataContainer = this.hashService.getDataContainer();
+            if (dataContainer.routes.length == 0) {
+                dataContainer.routes.push(<Common.RouteData> {
+                    name: this.createRouteName(),
+                    routingType: Common.routingType.none,
+                    segments: []
+                });
             }
-            return routesData;
+            for (var routeIndex = 0; routeIndex < dataContainer.routes.length; routeIndex++) {
+                this.routes.push(this.drawingFactory.createDrawingRoute(dataContainer.routes[routeIndex], true));
+            }
+            this.markers = this.drawingFactory.createDrawingMarker(dataContainer.markers);
+            this.markers.deactivate();
+            this.selectDrawing((this.routes.length > 0) ? this.routes[0].name : this.markers.name);
         }
 
-        public setData = (data: Common.RouteData[], reRoute: boolean) => {
-            if (data.length == 0) {
-                this.addRoute(this.createRouteName());
-                return;
-            }
-            for (var routeIndex = 0; routeIndex < data.length; routeIndex++) {
-                var route = data[routeIndex];
-                this.addRoute(route.name.replace("_", " "), route, reRoute);
-            }
+        public getSelectedDrawing = (): Drawing.IDrawing => {
+            return this.selectedDrawing;
         }
 
-        public getSelectedRoute = (): DrawingRouteService => {
-            return this.selectedRoute;
+        public addMarkers = (markers: Common.MarkerData[]) => {
+            this.markers.addMarkers(markers);
         }
+
     }
-} 
+}

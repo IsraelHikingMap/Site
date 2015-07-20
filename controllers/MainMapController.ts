@@ -10,7 +10,14 @@
 
             this.controlCreatorService = controlCreatorService;
             this.map = mapService.map;
+            this.map.setZoom(hashService.zoom);
+            this.map.panTo(hashService.latlng);
+
             this.createControls();
+
+            this.map.on("moveend",(e: L.LeafletEvent) => {
+                hashService.updateLocation(this.map.getCenter(), this.map.getZoom());
+            });
         }
 
         private createControls = () => {

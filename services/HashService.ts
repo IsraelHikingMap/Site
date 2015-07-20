@@ -3,61 +3,79 @@
         markers: string;
     }
 
-    export class HashService extends ObjectWithMap {
+    export class HashService {
         private static ARRAY_DELIMITER = ":";
         private static DATA_DELIMITER = ",";
+        private static PERSICION = 4;
 
         private $location: angular.ILocationService;
         private $rootScope: angular.IScope;
-        private layersService: LayersService;
-        private drawingMarkerService: DrawingMarkerService;
-        private ignoreChanges: boolean;
+        private dataContainer: Common.DataContainer;
+        public latlng: L.LatLng;
+        public zoom: number;
 
         constructor($location: angular.ILocationService,
-            $rootScope: angular.IScope,
-            mapSerivce: MapService,
-            layersService: LayersService,
-            drawingMarkerService: DrawingMarkerService) {
-            super(mapSerivce);
+            $rootScope: angular.IScope) {
             this.$location = $location;
             this.$rootScope = $rootScope;
-            this.layersService = layersService;
-            this.drawingMarkerService = drawingMarkerService;
-            this.ignoreChanges = false;
-
+            this.latlng = new L.LatLng(31.773, 35.12);
+            this.zoom = 13;
+            this.dataContainer = <Common.DataContainer> { markers: [], routes: [] };
             this.addDataFromUrl();
-
-            this.layersService.eventHelper.addListener((data) => {
-                if (this.ignoreChanges) {
-                    return;
-                }
-                this.updateHashEventHandler();
-            });
-            this.drawingMarkerService.eventHelper.addListener((data) => {
-                if (this.ignoreChanges) {
-                    return;
-                }
-                this.updateHashEventHandler();
-            });
-            this.map.on("moveend",(e: L.LeafletEvent) => {
-                this.updateHashEventHandler();
-                if (!$rootScope.$$phase) {
-                    this.$rootScope.$apply();
-                }
-            });
         }
 
-        private updateHashEventHandler = () => {
-            var center = this.map.getCenter();
-            var zoom = this.map.getZoom();
-            this.updateHash(center.lat, center.lng, zoom);
+        public getDataContainer = (): Common.DataContainer => {
+            return angular.copy(this.dataContainer);
         }
 
-        private updateHash = (lat: number, lng: number, zoom: number) => {
-            var path = zoom + "/" + lat.toFixed(4) + "/" + lng.toFixed(4);
+        private updateUrl = () => {
+            var path = this.zoom +
+                "/" + this.latlng.lat.toFixed(HashService.PERSICION) +
+                "/" + this.latlng.lng.toFixed(HashService.PERSICION);
             var searchObject = this.dataContainerToUrlString();
             this.$location.path(path);
             this.$location.search(searchObject);
+            if (!this.$rootScope.$$phase) {
+                this.$rootScope.$apply();
+            }
+        }
+
+        public updateLocation = (latlng: L.LatLng, zoom: number) => {
+            this.latlng.lat = latlng.lat;
+            this.latlng.lng = latlng.lng;
+            this.zoom = zoom;
+            this.updateUrl();
+        }
+
+        public updateMarkers = (markers: Common.MarkerData[]) => {
+            this.dataContainer.markers = markers;
+            this.updateUrl();
+        }
+
+        public addRoute = (routeName: string) => {
+            var routeInHash = _.find(this.dataContainer.routes,(routeToFind) => routeToFind.name == routeName);
+            if (routeInHash != null) {
+                return;
+            }
+            this.dataContainer.routes.push(<Common.RouteData> {
+                name: routeName,
+                routingType: Common.routingType.none,
+                segments: [],
+            });
+        }
+
+        public updateRoute = (route: Common.RouteData) => {
+            var routeInHash = _.find(this.dataContainer.routes,(routeToFind) => routeToFind.name == route.name);
+            if (routeInHash == null) {
+                return;
+            }
+            angular.copy(route, routeInHash);
+            this.updateUrl();
+        }
+
+        public removeRoute = (routeName: string) => {
+            _.remove(this.dataContainer.routes,(routeToRemove) => routeToRemove.name == routeName);
+            this.updateUrl();
         }
 
         private routeToString = (routeData: Common.RouteData): string => {
@@ -78,7 +96,7 @@
             var array = <string[]>[];
             for (var latlngIndex = 0; latlngIndex < latlngs.length; latlngIndex++) {
                 var latlng = latlngs[latlngIndex];
-                array.push(latlng.lat.toFixed(4) + HashService.DATA_DELIMITER + latlng.lng.toFixed(4));
+                array.push(latlng.lat.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + latlng.lng.toFixed(HashService.PERSICION));
             }
             return array;
         }
@@ -100,7 +118,7 @@
             for (var latlngIndex = 0; latlngIndex < markers.length; latlngIndex++) {
                 var marker = markers[latlngIndex];
                 var title = marker.title.replace(HashService.ARRAY_DELIMITER, " ").replace(HashService.DATA_DELIMITER, " ");
-                array.push(marker.latlng.lat + HashService.DATA_DELIMITER + marker.latlng.lng + HashService.DATA_DELIMITER + title);
+                array.push(marker.latlng.lat.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + marker.latlng.lng.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + title);
             }
             return array;
         }
@@ -145,15 +163,12 @@
         }
 
         private dataContainerToUrlString = (): IUrlSerachObject => {
-            var routesData = this.layersService.getData();
-            var markers = this.drawingMarkerService.getData();
-
             var urlObject = <IUrlSerachObject> {
-                markers: this.markersToStringArray(markers).join(HashService.ARRAY_DELIMITER),
+                markers: this.markersToStringArray(this.dataContainer.markers).join(HashService.ARRAY_DELIMITER),
             };
-            for (var routeIndex = 0; routeIndex < routesData.length; routeIndex++) {
-                var routeData = routesData[routeIndex];
-                (<any>urlObject)[routeData.name] = this.routeToString(routeData);
+            for (var routeIndex = 0; routeIndex < this.dataContainer.routes.length; routeIndex++) {
+                var routeData = this.dataContainer.routes[routeIndex];
+                (<any>urlObject)[routeData.name.replace(" ", "_")] = this.routeToString(routeData);
             }
             return urlObject;
         }
@@ -161,7 +176,7 @@
         private urlStringToDataContainer(searchObject: IUrlSerachObject): Common.DataContainer {
             var data = <Common.DataContainer> {
                 markers: [],
-                routesData: [],
+                routes: [],
             };
             if (!searchObject) {
                 return data;
@@ -174,8 +189,8 @@
                     continue;
                 }
                 var routeData = this.stringToRoute(searchObject[parameter]);
-                routeData.name = parameter;
-                data.routesData.push(routeData);
+                routeData.name = parameter.replace("_", " ");
+                data.routes.push(routeData);
             }
 
             return data;
@@ -189,29 +204,20 @@
             var lat = null;
             var lng = null;
             var hashOnly = true;
-            if (splittedpath.length == 4) {
-                this.ignoreChanges = true;
-                zoom = parseInt(splittedpath[splittedpath.length - 3]);
-                lat = parseFloat(splittedpath[splittedpath.length - 2]);
-                lng = parseFloat(splittedpath[splittedpath.length - 1]);
-                this.map.setZoom(zoom);
-                //setTimeout(() => {
-                    this.map.panTo(new L.LatLng(lat, lng));
-                    // HM TODO: work around for zoom issue - remove when leaflet has a fixed?
-                //}, 1000);
-                var data = this.urlStringToDataContainer(search);
-                this.layersService.setData(data.routesData, true);
-                this.drawingMarkerService.setData(data.markers);
-                this.ignoreChanges = false;
-            } else {
+            if (splittedpath.length != 4) {
                 // backwards compatibility... :-(
                 zoom = parseInt(this.getURLParameter('zoom'));
                 lat = parseFloat(this.getURLParameter('lat'));
                 lng = parseFloat(this.getURLParameter('lng'));
                 if (zoom > 0 && lat > 0 && lng > 0) {
-                    var href = window.location.pathname + "#/" + zoom + "/" + lat.toFixed(4) + "/" + lng.toFixed(4);
+                    var href = window.location.pathname + "#/" + zoom + "/" + lat.toFixed(HashService.PERSICION) + "/" + lng.toFixed(HashService.PERSICION);
                     window.location.href = href;
                 }
+            } else {
+                this.zoom = parseInt(splittedpath[splittedpath.length - 3]);
+                this.latlng.lat = parseFloat(splittedpath[splittedpath.length - 2]);
+                this.latlng.lng = parseFloat(splittedpath[splittedpath.length - 1]);
+                this.dataContainer = this.urlStringToDataContainer(search);
             }
         }
         private getURLParameter(name) {

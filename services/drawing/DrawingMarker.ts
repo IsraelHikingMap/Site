@@ -1,48 +1,38 @@
-﻿module IsraelHiking.Services {
+﻿module IsraelHiking.Services.Drawing {
     export interface MarkerWithTitle extends L.Marker {
         title: string;
     }
 
-    export interface IDataChangedEventArgs {
-        applyToScope: boolean;
-    }
-
-    export class DrawingMarkerService extends ObjectWithMap {
+    export class DrawingMarker extends BaseDrawing<Common.MarkerData[]> {
         private $compile: angular.ICompileService;
         private $rootScope: angular.IRootScopeService;
         private markers: MarkerWithTitle[];
         private icon: L.Icon;
         private enabled: boolean;
-        public eventHelper: Common.EventHelper<IDataChangedEventArgs>;
 
         constructor($compile: angular.ICompileService,
             $rootScope: angular.IRootScopeService,
-            mapService: MapService) {
-            super(mapService);
+            mapService: MapService,
+            hashService: HashService) {
+            super(mapService, hashService);
+            this.name = "markers";
             this.$compile = $compile;
             this.$rootScope = $rootScope;
             this.enabled = false;
             this.markers = [];
-            this.eventHelper = new Common.EventHelper<IDataChangedEventArgs>();
             this.icon = new L.Icon.Default(<L.IconOptions> { iconUrl: L.Icon.Default.imagePath + "/marker-icon-green.png" });
+            this.addDataToStack(this.getData());
+
             this.map.on("click",(e: L.LeafletMouseEvent) => {
-                if (this.isEnabled()) {
+                if (this.active) {
                     this.addMarker(e.latlng);
-                    this.eventHelper.raiseEvent({ applyToScope: true });
                 }
             });
         }
 
-        public enable = (enable: boolean) => {
-            this.enabled = enable;
-        }
-
-        public isEnabled = (): boolean => {
-            return this.enabled;
-        }
-
         private addMarker = (latlng: L.LatLng) => {
             this.markers.push(this.createMarker(latlng));
+            this.updateDataLayer();
         }
 
         private removeMarker = (marker: MarkerWithTitle) => {
@@ -52,7 +42,7 @@
             }
         }
 
-        public getData = (): Common.MarkerData[] => {
+        public getData = (): Common.MarkerData[]=> {
             var data = [];
             for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
                 data.push(<Common.MarkerData>{
@@ -65,6 +55,10 @@
 
         public setData = (data: Common.MarkerData[]) => {
             this.internalClear();
+            this.addMarkers(data);
+        }
+
+        public addMarkers = (data: Common.MarkerData[]) => {
             for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
                 var markerData = data[markerIndex];
                 var marker = this.createMarker(markerData.latlng, markerData.title);
@@ -79,17 +73,17 @@
             newScope.title = title;
             newScope.setTitle = (title: string) => {
                 marker.title = title;
-                this.eventHelper.raiseEvent({ applyToScope: false });
+                this.updateDataLayer();
             }
             var popupHtml = this.$compile("<marker-popup ng-title='title'></marker-popup>")(newScope)[0];
             marker.bindPopup(popupHtml);
 
             marker.on("dblclick",(e: L.LeafletMouseEvent) => {
                 this.removeMarker(marker);
-                this.eventHelper.raiseEvent({ applyToScope: true });
+                this.updateDataLayer();
             });
             marker.on("dragend",(e: L.LeafletMouseEvent) => {
-                this.eventHelper.raiseEvent({ applyToScope: true });
+                this.updateDataLayer();
             });
             marker.on("dragStart",(e: L.LeafletMouseEvent) => {
                 marker.closePopup();
@@ -102,13 +96,8 @@
             return marker;
         }
 
-        public clear = () => {
-            this.internalClear();
-            this.eventHelper.raiseEvent({ applyToScope: false });
-        }
-
         private internalClear = () => {
-            for (var markerIndex = this.markers.length -1; markerIndex >= 0; markerIndex--) {
+            for (var markerIndex = this.markers.length - 1; markerIndex >= 0; markerIndex--) {
                 this.removeMarkerFromMap(markerIndex);
             }
         }
@@ -122,6 +111,42 @@
             marker.off("dblclick");
             this.map.removeLayer(marker);
             this.markers.splice(markerIndex, 1);
+        }
+
+        public activate = () => {
+            this.active = true;
+            var data = this.getData();
+            this.internalClear();
+            this.setData(data);
+        }
+
+        public deactivate = () => {
+            this.active = false;
+            var data = this.getData();
+            this.internalClear();
+            for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
+                var markerData = data[markerIndex];
+                var marker = <MarkerWithTitle>L.marker(markerData.latlng, <L.MarkerOptions> { draggable: false, clickable: true, riseOnHover: true });
+                marker.title = markerData.title;
+                marker.bindPopup(marker.title);
+                marker.on("click",(e: L.LeafletMouseEvent) => {
+                    marker.openPopup();
+                });
+                marker.setIcon(this.icon);
+                marker.addTo(this.map);
+                this.markers.push(marker);
+            }
+        }
+
+        private updateDataLayer = () => {
+            var data = this.getData();
+            this.hashService.updateMarkers(data);
+            this.addDataToStack(data);
+        }
+
+        protected postUndoHook = () => {
+            var data = this.getData();
+            this.hashService.updateMarkers(data);
         }
     }
 }

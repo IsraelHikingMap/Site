@@ -11,7 +11,8 @@
     export interface ILayersScope extends angular.IScope {
         baseLayers: Services.IBaseLayer[];
         overlays: Services.IOvelay[];
-        routes: Services.DrawingRouteService[];
+        routes: Services.Drawing.IDrawing[];
+        markers: Services.Drawing.IDrawing;
 
         addBaseLayer(e: Event): void;
         addOverlay(e: Event): void;
@@ -21,7 +22,7 @@
         removeRoute(routeName: string, e: Event): void;
         selectBaseLayer(baseLayer: Services.IBaseLayer, e: Event): void;
         toggleVisibility(overlay: Services.IOvelay, e: Event): void;
-        selectRoute(routeName: string, e: Event): void;
+        selectDrawing(name: string, e: Event): void;
     }
 
     export class LayersController extends BaseMapController {
@@ -33,6 +34,7 @@
             $scope.baseLayers = layersService.baseLayers;
             $scope.overlays = layersService.overlays;
             $scope.routes = layersService.routes;
+            $scope.markers = layersService.markers;
             var addBaseLayerModal = this.createBaseLayerModal($scope, $modal, layersService);
             var addOverlayModal = this.createOverlayModal($scope, $modal, layersService);
             var addRouteModal = this.createRouteModal($scope, $modal, layersService);
@@ -76,8 +78,8 @@
                 this.suppressEvents(e);
             }
 
-            $scope.selectRoute = (routeName: string, e: Event) => {
-                layersService.selectRoute(routeName);
+            $scope.selectDrawing = (name: string, e: Event) => {
+                layersService.selectDrawing(name);
                 this.suppressEvents(e);
             }
         }

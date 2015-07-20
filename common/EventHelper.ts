@@ -1,4 +1,7 @@
 ﻿module IsraelHiking.Common {
+    export interface IDataChangedEventArgs {
+        //applyToScope: boolean;
+    }
 
     export class EventHelper<TData> {
         private listeners: ((data: TData) => void)[];

@@ -11,9 +11,8 @@
         static injector = "$injector";
         static parserFactory = "parserFactory";
         static routerFactory = "routerFactory";
+        static drawingFactory = "drawingFactory";
         static controlCreatorService = "controlCreatorService";
-        static drawingRouteService = "drawingRouteService";
-        static drawingMarkerService = "drawingMarkerService";
         static hashService = "hashService";
         static mapService = "mapService";
         static layersService = "layersService";

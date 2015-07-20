@@ -14,7 +14,7 @@
 
             var data = <Common.DataContainer>{
                 markers: <Common.MarkerData[]>[],
-                routesData: <Common.RouteData[]>[],
+                routes: <Common.RouteData[]>[],
             };
             var leaftletGeoJson = L.geoJson(geoJson, {
                 onEachFeature: (feature: GeoJSON.Feature, layer) => {
@@ -38,7 +38,7 @@
                                 routePoint: latlngs[latlngs.length - 1],
                                 latlngs: latlngs,
                             });
-                            data.routesData.push(routeData);
+                            data.routes.push(routeData);
                         }
                     }
                     if (feature.geometry.type == BaseParser.POINT) {
@@ -88,8 +88,8 @@
                 });
             }
 
-            for (var routeIndex = 0; routeIndex < data.routesData.length; routeIndex++) {
-                var routeData = data.routesData[routeIndex];
+            for (var routeIndex = 0; routeIndex < data.routes.length; routeIndex++) {
+                var routeData = data.routes[routeIndex];
                 var lineStringCoordinates = <GeoJSON.Position[]>[];
                 var pointsSegments = routeData.segments;
                 for (var pointSegmentIndex = 0; pointSegmentIndex < pointsSegments.length; pointSegmentIndex++) {

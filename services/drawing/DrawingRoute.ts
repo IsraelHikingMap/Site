@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services {
+﻿module IsraelHiking.Services.Drawing {
     interface IRouteSegment {
         routePoint: L.Marker;
         routePointLatlng: L.LatLng;
@@ -10,7 +10,7 @@
         parentRouteSegment: IRouteSegment;
     }
 
-    export class DrawingRouteService extends ObjectWithMap {
+    export class DrawingRoute extends BaseDrawing<Common.RouteData> {
         private static MINIMAL_DISTANCE_BETWEEN_MARKERS = 100; // meter.
 
         private $q: angular.IQService;
@@ -25,15 +25,12 @@
         private middleIcon: L.Icon;
         private routePointIcon: L.Icon;
 
-        public active: boolean;
-        public name: string;
-
-        public eventHelper: Common.EventHelper<IDataChangedEventArgs>;
-
         constructor($q: angular.IQService,
             mapService: MapService,
-            routerFactory: Services.Routers.RouterFactory, name: string) {
-            super(mapService);
+            routerFactory: Services.Routers.RouterFactory,
+            hashService: HashService,
+            name: string) {
+            super(mapService, hashService);
             this.$q = $q;
             this.routerFactory = routerFactory;
             this.name = name;
@@ -45,7 +42,8 @@
             this.active = false;
             this.hoverEnabled = true;
             this.middleMarkers = [];
-            this.eventHelper = new Common.EventHelper<IDataChangedEventArgs>();
+            this.hashService.addRoute(this.name);
+            this.addDataToStack(this.getData());
 
             this.map.on("mousemove",(e: L.LeafletMouseEvent) => {
                 if (this.isEnabled()) {
@@ -56,7 +54,7 @@
             this.map.on("click",(e: L.LeafletMouseEvent) => {
                 if (this.isEnabled()) {
                     this.addPoint(e.latlng).then(() => {
-                        this.eventHelper.raiseEvent({ applyToScope: true });
+                        this.updateDataLayer();
                     });
                 }
             });
@@ -100,7 +98,7 @@
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
                 promises.push(this.addPoint(data.segments[pointIndex].routePoint));
             }
-            return this.$q.all(promises).then(() => this.eventHelper.raiseEvent({ applyToScope: true }));
+            return this.$q.all(promises).then(() => this.updateDataLayer());
         }
 
         public isRoutingEnabled = (): boolean => {
@@ -175,7 +173,7 @@
                 if (middleMarker != null) {
                     this.convertMiddleMarkerToPoint(middleMarker);
                     marker.setIcon(this.routePointIcon);
-                    this.eventHelper.raiseEvent({ applyToScope: true });
+                    this.updateDataLayer();
                 }
             });
             marker.on("dragstart",(e: L.LeafletMouseEvent) => {
@@ -185,14 +183,13 @@
                 }
                 this.hoverEnabled = false;
                 this.dragPointStart(marker);
-                this.eventHelper.raiseEvent({ applyToScope: true });
             });
             marker.on("drag",(e: L.LeafletMouseEvent) => {
                 this.dragPoint(marker.getLatLng());
             });
             marker.on("dragend",(e: L.LeafletMouseEvent) => {
                 this.dragPointEnd(marker.getLatLng());
-                this.eventHelper.raiseEvent({ applyToScope: true });
+                this.updateDataLayer();
                 marker.setIcon(this.routePointIcon);
                 marker.setOpacity(1.0)
                 this.hoverEnabled = true;
@@ -285,14 +282,14 @@
                 // first point is being removed
                 this.routeSegments[0].polyline.setLatLngs([this.routeSegments[0].routePointLatlng]);
                 this.removeMiddleMarkerBySegment(this.routeSegments[0]);
-                this.eventHelper.raiseEvent({ applyToScope: true });
+                this.updateDataLayer();
             }
             else if (pointSegmentIndex != 0 && pointSegmentIndex < this.routeSegments.length) {
                 // middle point is being removed...
-                this.runRouting(pointSegmentIndex - 1, pointSegmentIndex).then(() => this.eventHelper.raiseEvent({ applyToScope: true }));
+                this.runRouting(pointSegmentIndex - 1, pointSegmentIndex).then(() => this.updateDataLayer());
             }
             else {
-                this.eventHelper.raiseEvent({ applyToScope: true });
+                this.updateDataLayer();
             }
         }
 
@@ -321,7 +318,7 @@
                     // no need to add a middle marker where the route point is.
                     continue;
                 }
-                if (this.findDistanceToClosestMarker(latlng) <= DrawingRouteService.MINIMAL_DISTANCE_BETWEEN_MARKERS) {
+                if (this.findDistanceToClosestMarker(latlng) <= DrawingRoute.MINIMAL_DISTANCE_BETWEEN_MARKERS) {
                     continue;
                 }
                 this.middleMarkers.push(<IMiddleMarker> {
@@ -360,14 +357,11 @@
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
                 var segment = data.segments[pointIndex];
                 var latlngs = segment.latlngs.length > 0 ? segment.latlngs : [segment.routePoint];
+                // HM TODO: this moves the routes points when undo.
                 this.routeSegments.push(this.createRouteSegment(latlngs));
             }
             this.routingType = data.routingType;
             this.name = data.name || this.name;
-        }
-
-        public clear = () => {
-            this.internalclear();
         }
 
         private internalclear = () => {
@@ -439,6 +433,17 @@
                 var segment = this.routeSegments[segmementIndex];
                 this.map.removeLayer(segment.polyline);
             }
+        }
+
+        private updateDataLayer = () => {
+            var data = this.getData();
+            this.hashService.updateRoute(data);
+            this.addDataToStack(data);
+        }
+
+        protected postUndoHook = () => {
+            var data = this.getData();
+            this.hashService.updateRoute(data);
         }
     }
 }
