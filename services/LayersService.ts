@@ -62,10 +62,16 @@ module IsraelHiking.Services {
             this.tileLayerOptions = <L.TileLayerOptions> {
                 minZoom: 7,
                 maxZoom: 16,
-                attribution: LayersService.ATTRIBUTION + lastModified
+                attribution: LayersService.ATTRIBUTION + lastModified,
+            };
+            var tileLayerOptionsWithSubdomain = <L.TileLayerOptions> {
+                minZoom: 7,
+                maxZoom: 16,
+                attribution: LayersService.ATTRIBUTION + lastModified,
+                subdomains: ["tiles.trailze.com", "www.osm.org.il"]
             };
             // default layers:
-            this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "http://www.osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png");
+            this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "http://{s}/IsraelHiking/Tiles/{z}/{x}/{y}.png", tileLayerOptionsWithSubdomain);
             //this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "Tiles/{z}/{x}/{y}.png");
             this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png");
             //this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "mtbTiles/{z}/{x}/{y}.png");
@@ -79,11 +85,11 @@ module IsraelHiking.Services {
             this.toggleOverlay(this.overlays[0]);
         }
 
-        public addBaseLayer = (key: string, address: string) => {
+        public addBaseLayer = (key: string, address: string, options?: L.TileLayerOptions) => {
             if (_.find(this.baseLayers,(layerToFind) => layerToFind.key == key)) {
                 return; // layer exists
             }
-            var layer = <IBaseLayer>{ key: key, layer: L.tileLayer(address, this.tileLayerOptions), selected: false };
+            var layer = <IBaseLayer>{ key: key, layer: L.tileLayer(address, options || this.tileLayerOptions), selected: false };
             this.baseLayers.push(layer);
             this.selectBaseLayer(layer);
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY) || [];
