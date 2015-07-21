@@ -140,10 +140,10 @@
                         segmentData = <Common.RouteSegmentData> { latlngs: [segment[latlngIndex - 1], segment[latlngIndex]] };
                         currentSegmentLength = 0;
                     }
+                    segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];
                     manipulatedRouteData.segments.push(segmentData);
                 }
                 this.layersService.addRoute(manipulatedRouteData.name, manipulatedRouteData);
-                // HM TODO: update hash.
             }
         }
     }

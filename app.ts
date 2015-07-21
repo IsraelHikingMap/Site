@@ -1,17 +1,11 @@
 ﻿module IsraelHiking {
-    // HM TODO: open file point in the end missing.
-    // HM TODO: routing icons and no routing for markers.
-    // HM TODO: update route from file with the same name?
     // HM TODO: better middle marker support.
-    // HM TODO: update help, better contrast.
     // HM TODO: confirm on delete.
-    // HM TODO: hide file download tool tip after click;
-    // HM TODO: add waiting animation when routing works (Not sure I'll bother doing it in the end)
+    // HM TODO: height graph?
     // HM TODO: url to route (address/?url=)
     // HM TODO: support twl? - will be solved hopefull with iis backend.
-    // HM TODO: remove hiking trails layer on map change? - not sure it is currently possible another leaflet bug.
-    // HM TODO: when hovering on routePoint/marker - allow the user to move the editing related on.
-    // HM TODO: height graph?
+    // HM TODO: add waiting animation when routing works (Not sure I'll bother doing it in the end)
+    
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule"]);
 

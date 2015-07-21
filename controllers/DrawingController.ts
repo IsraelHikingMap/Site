@@ -6,6 +6,7 @@
         isDrawingEnabled(): boolean;
         getRoutingType(): string;
         isUndoDisbaled(): boolean;
+        showRouting(): boolean;
     }
 
     export class DrawingController extends BaseMapController {
@@ -56,6 +57,10 @@
             $scope.isUndoDisbaled = (): boolean => {
                 return this.selectedDrawing.isUndoDisbaled();
             };
+
+            $scope.showRouting = (): boolean => {
+                return this.selectedDrawing.name != Common.Constants.MARKERS;
+            }
 
             document.onkeydown = (e: KeyboardEvent) => {
                 if (e.keyCode != 27) {

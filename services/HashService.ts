@@ -1,8 +1,4 @@
 ﻿module IsraelHiking.Services {
-    interface IUrlSerachObject {
-        markers: string;
-    }
-
     export class HashService {
         private static ARRAY_DELIMITER = ":";
         private static DATA_DELIMITER = ",";
@@ -162,18 +158,17 @@
             return array;
         }
 
-        private dataContainerToUrlString = (): IUrlSerachObject => {
-            var urlObject = <IUrlSerachObject> {
-                markers: this.markersToStringArray(this.dataContainer.markers).join(HashService.ARRAY_DELIMITER),
-            };
+        private dataContainerToUrlString = (): any => {
+            var urlObject = {};
+            urlObject[Common.Constants.MARKERS] = this.markersToStringArray(this.dataContainer.markers).join(HashService.ARRAY_DELIMITER);
             for (var routeIndex = 0; routeIndex < this.dataContainer.routes.length; routeIndex++) {
                 var routeData = this.dataContainer.routes[routeIndex];
-                (<any>urlObject)[routeData.name.replace(" ", "_")] = this.routeToString(routeData);
+                urlObject[routeData.name.replace(" ", "_")] = this.routeToString(routeData);
             }
             return urlObject;
         }
 
-        private urlStringToDataContainer(searchObject: IUrlSerachObject): Common.DataContainer {
+        private urlStringToDataContainer(searchObject: any): Common.DataContainer {
             var data = <Common.DataContainer> {
                 markers: [],
                 routes: [],
@@ -181,11 +176,9 @@
             if (!searchObject) {
                 return data;
             }
-            if (searchObject.markers != undefined) {
-                data.markers = this.stringArrayToMarkers(searchObject.markers.split(HashService.ARRAY_DELIMITER) || [])
-            }
             for (var parameter in searchObject) {
-                if (parameter == "markers") {
+                if (parameter == Common.Constants.MARKERS) {
+                    data.markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.ARRAY_DELIMITER) || [])
                     continue;
                 }
                 var routeData = this.stringToRoute(searchObject[parameter]);

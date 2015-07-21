@@ -26,6 +26,7 @@
         static infoHelpController = "infoHelpController";
         static markerPopupController = "markerPopupController";
 
+        static MARKERS = "markers";
     }
 
 } 

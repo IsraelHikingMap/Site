@@ -15,7 +15,7 @@
             mapService: MapService,
             hashService: HashService) {
             super(mapService, hashService);
-            this.name = "markers";
+            this.name = Common.Constants.MARKERS;
             this.$compile = $compile;
             this.$rootScope = $rootScope;
             this.enabled = false;

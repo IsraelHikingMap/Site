@@ -105,11 +105,11 @@
             return this.routingType != Common.routingType.none;
         }
 
-        private createRouteSegment = (latlngs: L.LatLng[]): IRouteSegment => {
+        private createRouteSegment = (routePoint:L.LatLng, latlngs: L.LatLng[]): IRouteSegment => {
             var routeSegment = <IRouteSegment>{
                 polyline: L.polyline(latlngs, <L.PolylineOptions>{ opacity: 0.5, color: "blue", weight: 4 }),
-                routePoint: (this.active == false) ? null : this.createMarker(latlngs[latlngs.length - 1]),
-                routePointLatlng: latlngs[latlngs.length - 1],
+                routePoint: (this.active == false) ? null : this.createMarker(routePoint),
+                routePointLatlng: routePoint,
             };
             routeSegment.polyline.addTo(this.map);
             return routeSegment;
@@ -127,7 +127,7 @@
 
 
         private addPoint = (latlng: L.LatLng): angular.IPromise<void> => {
-            this.routeSegments.push(this.createRouteSegment([latlng]));
+            this.routeSegments.push(this.createRouteSegment(latlng, [latlng]));
             if (this.routeSegments.length > 1) {
                 var endPointSegmentIndex = this.routeSegments.length - 1;
                 return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
@@ -354,14 +354,14 @@
 
         public setData = (data: Common.RouteData) => {
             this.internalclear();
+            data.name = this.name;
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
                 var segment = data.segments[pointIndex];
                 var latlngs = segment.latlngs.length > 0 ? segment.latlngs : [segment.routePoint];
-                // HM TODO: this moves the routes points when undo.
-                this.routeSegments.push(this.createRouteSegment(latlngs));
+                this.routeSegments.push(this.createRouteSegment(segment.routePoint, latlngs));
             }
             this.routingType = data.routingType;
-            this.name = data.name || this.name;
+            this.hashService.updateRoute(this.getData());
         }
 
         private internalclear = () => {
