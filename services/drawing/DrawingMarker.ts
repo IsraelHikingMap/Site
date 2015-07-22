@@ -115,6 +115,7 @@
 
         public activate = () => {
             this.active = true;
+			this.enabled = true;
             var data = this.getData();
             this.internalClear();
             this.setData(data);
@@ -122,6 +123,7 @@
 
         public deactivate = () => {
             this.active = false;
+			this.enabled = false;
             var data = this.getData();
             this.internalClear();
             for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {

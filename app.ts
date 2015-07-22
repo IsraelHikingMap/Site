@@ -1,11 +1,12 @@
 ﻿module IsraelHiking {
+    // HM TODO: route length.
     // HM TODO: better middle marker support.
+    // HM TODO: snapping.
     // HM TODO: confirm on delete.
     // HM TODO: height graph?
     // HM TODO: url to route (address/?url=)
     // HM TODO: support twl? - will be solved hopefull with iis backend.
     // HM TODO: add waiting animation when routing works (Not sure I'll bother doing it in the end)
-    
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule"]);
 
@@ -21,9 +22,9 @@
         [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerFactory, Common.Constants.hashService,
             ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routeFactory: Services.Routers.RouterFactory, hashService: Services.HashService) =>
                 new Services.Drawing.DrawingFactory($q, $compile, $rootScope, mapService, routeFactory, hashService)]);
-    app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope,
-        ($location: angular.ILocationService, $rootScope: angular.IRootScopeService) =>
-            new Services.HashService($location, $rootScope)]);
+    app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.localStorageService,
+        ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
+            new Services.HashService($location, $rootScope, localStorageService)]);
     app.service(Common.Constants.controlCreatorService, [Common.Constants.rootScope, Common.Constants.compile, ($rootScope: angular.IScope, $compile: angular.ICompileService) => new Services.ControlCreatorService($rootScope, $compile)]);
     app.service(Common.Constants.layersService, [Common.Constants.mapService, Common.Constants.localStorageService, Common.Constants.drawingFactory, Common.Constants.hashService,
         (mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, drawingFactory: Services.Drawing.DrawingFactory, hashService: Services.HashService) => 

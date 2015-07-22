@@ -1,7 +1,7 @@
 ﻿module IsraelHiking.Controllers {
     export interface IDrawingScope extends angular.IScope {
         toggleDrawing(e: Event): void;
-        setRouting(routingType: string, e: Event): void;
+        toggleRouting(routingType: string, e: Event): void;
         undo(e: Event): void;
         isDrawingEnabled(): boolean;
         getRoutingType(): string;
@@ -36,8 +36,12 @@
                 this.suppressEvents(e);
             };
 
-            $scope.setRouting = (routingType: string, e: Event) => {
-                this.selectedDrawing.changeRoutingType(routingType);
+            $scope.toggleRouting = (routingType: string, e: Event) => {
+                if (this.selectedDrawing.getRoutingType() == routingType) {
+                    this.selectedDrawing.changeRoutingType(Common.routingType.none);
+                } else {
+                    this.selectedDrawing.changeRoutingType(routingType);
+                }
                 this.suppressEvents(e);
             };
 
@@ -63,11 +67,16 @@
             }
 
             document.onkeydown = (e: KeyboardEvent) => {
-                if (e.keyCode != 27) {
+                if (e.keyCode == 90 && e.ctrlKey) { // ctrl+Z
+                    this.selectedDrawing.undo();
+                }
+                else if (e.keyCode == 27) { // escape
+                    this.selectedDrawing.enable(false);
+                    this.setDragMapCursor();
+                }
+                else {
                     return;
                 }
-                this.selectedDrawing.enable(false);
-                this.setDragMapCursor();
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 }

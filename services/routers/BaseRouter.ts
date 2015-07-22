@@ -18,8 +18,14 @@
             var deferred = this.$q.defer();
             var noneRouter = new NoneRouter(this.$q);
             this.$http.get(route + params).success((geojson: GeoJSON.FeatureCollection, status) => {
-                var data = this.geojsonParser.toDataContainer(geojson);
-                if (data.routes.length == 0 || data.routes[0].segments.length < 2) {
+                var failed = false;
+                try {
+                    var data = this.geojsonParser.toDataContainer(geojson);
+                } catch (err) {
+                    failed = true;
+                }
+                if (failed || data.routes.length == 0 || data.routes[0].segments.length < 2 ) {
+                    console.error("Failed routing from " + latlngStart + " to " + latlngEnd);
                     noneRouter.getRoute(latlngStart, latlngEnd).then((noneRouterData) => {
                         deferred.resolve(noneRouterData);
                     });
