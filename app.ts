@@ -3,6 +3,7 @@
     // HM TODO: better middle marker support.
     // HM TODO: snapping.
     // HM TODO: confirm on delete.
+    // HM TODO: zoom level of added maps.
     // HM TODO: height graph?
     // HM TODO: url to route (address/?url=)
     // HM TODO: support twl? - will be solved hopefull with iis backend.
