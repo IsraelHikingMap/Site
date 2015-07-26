@@ -108,11 +108,15 @@
 			if (this._geocodeMarker) {
 				this._map.removeLayer(this._geocodeMarker);
 			}
-
 			this._geocodeMarker = new L.Marker(result.center)
 				.bindPopup(result.html || result.name)
 				.addTo(this._map)
 				.openPopup();
+			var _this = this;
+			this._geocodeMarker.once("dblclick", function () {
+			    _this._map.removeLayer(_this._geocodeMarker);
+			    _this._geocodeMarker = null;
+		    });
 
 			return this;
 		},
