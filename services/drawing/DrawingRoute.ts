@@ -404,7 +404,6 @@
 
         public activate = () => {
             this.active = true;
-            this.enabled = true;
             for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
                 var segment = this.routeSegments[segmementIndex];
                 segment.routePoint = this.createMarker(segment.routePointLatlng);

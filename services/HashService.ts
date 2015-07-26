@@ -1,21 +1,26 @@
 ﻿module IsraelHiking.Services {
     export class HashService {
+        private static ZOOM_KEY = "Zoom";
+        private static LATLNG_KEY = "LatLng";
         private static ARRAY_DELIMITER = ":";
         private static DATA_DELIMITER = ",";
         private static PERSICION = 4;
 
         private $location: angular.ILocationService;
         private $rootScope: angular.IScope;
+        private localStorageService: angular.local.storage.ILocalStorageService;
         private dataContainer: Common.DataContainer;
         public latlng: L.LatLng;
         public zoom: number;
 
         constructor($location: angular.ILocationService,
-            $rootScope: angular.IScope) {
+            $rootScope: angular.IScope,
+            localStorageService: angular.local.storage.ILocalStorageService) {
             this.$location = $location;
             this.$rootScope = $rootScope;
-            this.latlng = new L.LatLng(31.773, 35.12);
-            this.zoom = 13;
+            this.localStorageService = localStorageService;
+            this.latlng = this.localStorageService.get<L.LatLng>(HashService.LATLNG_KEY) || new L.LatLng(31.773, 35.12);
+            this.zoom = this.localStorageService.get<number>(HashService.ZOOM_KEY) || 13;
             this.dataContainer = <Common.DataContainer> { markers: [], routes: [] };
             this.addDataFromUrl();
         }
@@ -40,6 +45,8 @@
             this.latlng.lat = latlng.lat;
             this.latlng.lng = latlng.lng;
             this.zoom = zoom;
+            this.localStorageService.set(HashService.LATLNG_KEY, this.latlng);
+            this.localStorageService.set(HashService.ZOOM_KEY, this.zoom);
             this.updateUrl();
         }
 
