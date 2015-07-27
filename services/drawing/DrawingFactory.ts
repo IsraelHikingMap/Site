@@ -21,11 +21,11 @@
             this.hashService = hashService;
         }
 
-        public createDrawingRoute = (routeData: Common.RouteData, reRoute: boolean): DrawingRoute => {
+        public createDrawingRoute = (routeData: Common.RouteData, reroute: boolean): DrawingRoute => {
             var drawingRoute = new DrawingRoute(this.$q, this.mapService, this.routeFactory, this.hashService, routeData.name);
             drawingRoute.setData(routeData);
-            if (reRoute) {
-                drawingRoute.changeRoutingType(drawingRoute.getRoutingType());
+            if (reroute) {
+                drawingRoute.reroute();
             }
             return drawingRoute;
         }

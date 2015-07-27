@@ -3,6 +3,7 @@
         routePoint: L.Marker;
         routePointLatlng: L.LatLng;
         polyline: L.Polyline;
+        routingType: string;
     }
 
     interface IMiddleMarker {
@@ -16,7 +17,7 @@
         private $q: angular.IQService;
         private routerFactory: Services.Routers.RouterFactory;
         private selectedPointSegmentIndex: number;
-        private routingType: string;
+        private currentRoutingType: string;
         private hoverPolyline: L.Polyline;
         private enabled: boolean;
         private hoverEnabled: boolean;
@@ -37,7 +38,7 @@
             this.hoverPolyline = L.polyline([], <L.PolylineOptions>{ opacity: 0.5, color: 'blue', weight: 4, dashArray: "10, 10" });
             this.routeSegments = [];
             this.selectedPointSegmentIndex = -1;
-            this.routingType = Common.routingType.none;
+            this.currentRoutingType = Common.routingType.hike;
             this.enabled = false;
             this.active = false;
             this.hoverEnabled = true;
@@ -53,7 +54,7 @@
 
             this.map.on("click",(e: L.LeafletMouseEvent) => {
                 if (this.isEnabled()) {
-                    this.addPoint(e.latlng).then(() => {
+                    this.addPoint(e.latlng, this.currentRoutingType).then(() => {
                         this.updateDataLayer();
                     });
                 }
@@ -87,47 +88,49 @@
         }
 
         public getRoutingType = (): string => {
-            return this.routingType;
+            return this.currentRoutingType;
         }
 
-        public changeRoutingType = (routeType: string): angular.IPromise<void> => {
-            this.routingType = routeType;
+        public setRoutingType = (routingType: string) => {
+            this.currentRoutingType = routingType;
+        }
+
+        public reroute = (): angular.IPromise<void> => {
             var data = this.getData();
             this.internalclear();
             var promises = [];
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
-                promises.push(this.addPoint(data.segments[pointIndex].routePoint));
+                var segmentData = data.segments[pointIndex];
+                promises.push(this.addPoint(segmentData.routePoint, segmentData.routingType));
             }
             return this.$q.all(promises).then(() => this.updateDataLayer());
         }
 
-        public isRoutingEnabled = (): boolean => {
-            return this.routingType != Common.routingType.none;
-        }
-
-        private createRouteSegment = (routePoint:L.LatLng, latlngs: L.LatLng[]): IRouteSegment => {
+        private createRouteSegment = (routePoint:L.LatLng, latlngs: L.LatLng[], routingType: string): IRouteSegment => {
             var routeSegment = <IRouteSegment>{
                 polyline: L.polyline(latlngs, <L.PolylineOptions>{ opacity: 0.5, color: "blue", weight: 4 }),
                 routePoint: (this.active == false) ? null : this.createMarker(routePoint),
                 routePointLatlng: routePoint,
+                routingType: routingType,
             };
             routeSegment.polyline.addTo(this.map);
             return routeSegment;
         }
 
-        private createRouteSegmentWithMarker = (latlngs: L.LatLng[], marker: L.Marker): IRouteSegment => {
+        private createRouteSegmentWithMarker = (latlngs: L.LatLng[], marker: L.Marker, routingType: string): IRouteSegment => {
             var routeSegment = <IRouteSegment>{
                 polyline: L.polyline(latlngs, <L.PolylineOptions>{ opacity: 0.5, color: "blue", weight: 4 }),
                 routePoint: marker,
                 routePointLatlng: marker.getLatLng(),
+                routingType: routingType,
             };
             routeSegment.polyline.addTo(this.map);
             return routeSegment;
         }
 
 
-        private addPoint = (latlng: L.LatLng): angular.IPromise<void> => {
-            this.routeSegments.push(this.createRouteSegment(latlng, [latlng]));
+        private addPoint = (latlng: L.LatLng, routingType: string): angular.IPromise<void> => {
+            this.routeSegments.push(this.createRouteSegment(latlng, [latlng], routingType));
             if (this.routeSegments.length > 1) {
                 var endPointSegmentIndex = this.routeSegments.length - 1;
                 return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
@@ -235,7 +238,7 @@
             var indexInSegment = segmentLatlngs.indexOf(latlngInSegment);
             var indexOfSegment = this.routeSegments.indexOf(segment);
 
-            var newRouteSegment = this.createRouteSegmentWithMarker(segmentLatlngs.splice(0, indexInSegment + 1), marker);
+            var newRouteSegment = this.createRouteSegmentWithMarker(segmentLatlngs.splice(0, indexInSegment + 1), marker, this.currentRoutingType);
             segmentLatlngs.splice(0, 0, newRouteSegment.routePointLatlng);
             segment.polyline.setLatLngs(segmentLatlngs);
             this.routeSegments.splice(indexOfSegment, 0, newRouteSegment);
@@ -264,6 +267,7 @@
                 return;
             }
             this.routeSegments[this.selectedPointSegmentIndex].routePointLatlng = latlng;
+            this.routeSegments[this.selectedPointSegmentIndex].routingType = this.currentRoutingType;
             if (this.selectedPointSegmentIndex > 0) {
                 this.runRouting(this.selectedPointSegmentIndex - 1, this.selectedPointSegmentIndex);
             }
@@ -297,7 +301,7 @@
             var startSegment = this.routeSegments[startIndex];
             var endSegment = this.routeSegments[endIndex];
             this.removeMiddleMarkerBySegment(endSegment);
-            var router = this.routerFactory.create(this.routingType);
+            var router = this.routerFactory.create(endSegment.routingType);
             var promise = router.getRoute(startSegment.routePointLatlng, endSegment.routePointLatlng);
 
             promise.then((data) => {
@@ -343,11 +347,11 @@
                 pointsSegments.push(<Common.RouteSegmentData> {
                     routePoint: pointSegment.routePointLatlng,
                     latlngs: angular.copy(pointSegment.polyline.getLatLngs()),
+                    routingType: pointSegment.routingType,
                 });
             }
             return <Common.RouteData>{
                 name: this.name,
-                routingType: this.routingType,
                 segments: pointsSegments
             };
         }
@@ -358,9 +362,8 @@
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
                 var segment = data.segments[pointIndex];
                 var latlngs = segment.latlngs.length > 0 ? segment.latlngs : [segment.routePoint];
-                this.routeSegments.push(this.createRouteSegment(segment.routePoint, latlngs));
+                this.routeSegments.push(this.createRouteSegment(segment.routePoint, latlngs, segment.routingType));
             }
-            this.routingType = data.routingType;
             this.hashService.updateRoute(this.getData());
         }
 

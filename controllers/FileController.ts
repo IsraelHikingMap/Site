@@ -128,7 +128,7 @@
                         segmentLength = FileController.MINIMAL_SEGMENT_LENGTH;
                     }
                     var currentSegmentLength = 0;
-                    var segmentData = <Common.RouteSegmentData> { latlngs: [segment[0]] };
+                    var segmentData = <Common.RouteSegmentData> { latlngs: [segment[0]], routingType: Common.routingType.hike };
                     for (var latlngIndex = 1; latlngIndex < segment.length; latlngIndex++) {
                         currentSegmentLength += segment[latlngIndex - 1].distanceTo(segment[latlngIndex]);
                         if (currentSegmentLength < segmentLength) {
@@ -137,7 +137,7 @@
                         }
                         segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];
                         manipulatedRouteData.segments.push(segmentData);
-                        segmentData = <Common.RouteSegmentData> { latlngs: [segment[latlngIndex - 1], segment[latlngIndex]] };
+                        segmentData = <Common.RouteSegmentData> { latlngs: [segment[latlngIndex - 1], segment[latlngIndex]], routingType: Common.routingType.hike };
                         currentSegmentLength = 0;
                     }
                     segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];

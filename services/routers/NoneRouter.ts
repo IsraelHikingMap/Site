@@ -12,6 +12,7 @@
             emptyReturn.push(<Common.RouteSegmentData> {
                 routePoint: latlngEnd,
                 latlngs: [latlngStart, latlngMiddle, latlngEnd],
+                routingType: Common.routingType.none,
             });
             deferred.resolve(emptyReturn);
             return deferred.promise;

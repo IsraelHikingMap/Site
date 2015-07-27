@@ -62,7 +62,6 @@
             }
             this.dataContainer.routes.push(<Common.RouteData> {
                 name: routeName,
-                routingType: Common.routingType.none,
                 segments: [],
             });
         }
@@ -82,16 +81,13 @@
         }
 
         private routeToString = (routeData: Common.RouteData): string => {
-            var latlngsString = this.latlngsToStringArray(this.pointSegmentsToLatlng(routeData.segments)).join(HashService.ARRAY_DELIMITER);
-            return routeData.routingType + HashService.ARRAY_DELIMITER + latlngsString;
+            return this.routeSegmentsToString(routeData.segments);
         }
 
-        private stringToRoute = (data: string): Common.RouteData => {
-            var splitted = data.split(HashService.ARRAY_DELIMITER);
+        private stringToRoute = (data: string, name: string): Common.RouteData => {
             return <Common.RouteData> {
-                name: "",
-                routingType: splitted.shift(),
-                segments: this.latlngToPointSegments(this.stringArrayToLatlngs(splitted)),
+                name: name,
+                segments: this.stringToRouteSegments(data),
             };
         }
 
@@ -144,11 +140,28 @@
             return array;
         }
 
-        private pointSegmentsToLatlng(pointSegments: Common.RouteSegmentData[]): L.LatLng[] {
-            var array = <L.LatLng[]>[];
-            for (var latlngIndex = 0; latlngIndex < pointSegments.length; latlngIndex++) {
-                var pointSegment = pointSegments[latlngIndex];
-                array.push(pointSegment.routePoint);
+        private routeSegmentsToString(routeSegments: Common.RouteSegmentData[]): string {
+            var array = [];
+            for (var latlngIndex = 0; latlngIndex < routeSegments.length; latlngIndex++) {
+                var pointSegment = routeSegments[latlngIndex];
+                array.push(pointSegment.routingType + HashService.DATA_DELIMITER +
+                    pointSegment.routePoint.lat.toFixed(HashService.PERSICION) +
+                    HashService.DATA_DELIMITER +
+                    pointSegment.routePoint.lng.toFixed(HashService.PERSICION));
+            }
+            return array.join(HashService.ARRAY_DELIMITER);
+        }
+
+        private stringToRouteSegments = (data: string): Common.RouteSegmentData[] => {
+            var splitted = data.split(HashService.ARRAY_DELIMITER);
+            var array = <Common.RouteSegmentData[]>[];
+            for (var pointIndex = 0; pointIndex < splitted.length; pointIndex++) {
+                var pointStrings = splitted[pointIndex].split(HashService.DATA_DELIMITER);
+                array.push(<Common.RouteSegmentData> {
+                    latlngs: [],
+                    routePoint: new L.LatLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])),
+                    routingType: pointStrings[0]
+                });
             }
             return array;
         }
@@ -188,9 +201,7 @@
                     data.markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.ARRAY_DELIMITER) || [])
                     continue;
                 }
-                var routeData = this.stringToRoute(searchObject[parameter]);
-                routeData.name = parameter.replace("_", " ");
-                data.routes.push(routeData);
+                data.routes.push(this.stringToRoute(searchObject[parameter], parameter.replace("_", " ")));
             }
 
             return data;

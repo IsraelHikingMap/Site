@@ -8,7 +8,7 @@
         isEnabled: () => boolean;
         enable(enable: boolean): void;
         getRoutingType: () => string;
-        changeRoutingType: (routingType: string) => void;
+        setRoutingType: (routingType: string) => void;
         isUndoDisbaled: () => boolean;
     }
 
@@ -44,10 +44,13 @@
         // should be override in derived
         public enable = (enable: boolean): void => { }
 
+        // should be override in derived
         public getRoutingType = (): string => {
             return Common.routingType.none;
         }
-        public changeRoutingType = (routingType: string) => { }
+
+        // should be override in derived
+        public setRoutingType = (routingType: string) => { };
 
         public undo = () => {
             if (this.isUndoDisbaled()) {

@@ -128,7 +128,6 @@ module IsraelHiking.Services {
                 return;
             }
             routeData = routeData || <Common.RouteData> {
-                routingType: Common.routingType.none,
                 segments: [],
                 name: name,
             };
@@ -183,7 +182,7 @@ module IsraelHiking.Services {
                 this.map.removeLayer(this.selectedBaseLayer.layer);
                 this.selectedBaseLayer.selected = false;
             }
-            var newSelectedLayer = _.find(this.baseLayers,(layer) => layer.key == baseLayer.key);
+            var newSelectedLayer = _.find(this.baseLayers, (layer) => layer.key == baseLayer.key);
             this.map.addLayer(newSelectedLayer.layer, true);
             newSelectedLayer.selected = true;
             this.selectedBaseLayer = newSelectedLayer;
@@ -259,7 +258,6 @@ module IsraelHiking.Services {
             if (dataContainer.routes.length == 0) {
                 dataContainer.routes.push(<Common.RouteData> {
                     name: this.createRouteName(),
-                    routingType: Common.routingType.none,
                     segments: []
                 });
             }

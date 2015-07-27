@@ -29,14 +29,16 @@
                             latlngs.push(this.createLatlng(pointCoordinates));
                         }
                         if (lineString.coordinates.length >= 2) {
-                            var routeData = <Common.RouteData> { segments: [], routingType: Common.routingType.none, name: feature.properties.name || "" };
+                            var routeData = <Common.RouteData> { segments: [], name: feature.properties.name || "" };
                             routeData.segments.push(<Common.RouteSegmentData> {
                                 routePoint: latlngs[0],
                                 latlngs: [latlngs[0]],
+                                routingType: Common.routingType.hike,
                             });
                             routeData.segments.push(<Common.RouteSegmentData> {
                                 routePoint: latlngs[latlngs.length - 1],
                                 latlngs: latlngs,
+                                routingType: Common.routingType.hike,
                             });
                             data.routes.push(routeData);
                         }
