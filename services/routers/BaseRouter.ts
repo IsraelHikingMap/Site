@@ -17,7 +17,7 @@
             var params = "&profile=" + this.getProfile() + "&lonlats=" + latlngStart.lng + "," + latlngStart.lat + "|" + latlngEnd.lng + "," + latlngEnd.lat;
             var deferred = this.$q.defer();
             var noneRouter = new NoneRouter(this.$q);
-            this.$http.get(route + params, <angular.IRequestShortcutConfig> { timeout: 1000 }).success((geojson: GeoJSON.FeatureCollection, status) => {
+            this.$http.get(route + params, <angular.IRequestShortcutConfig> { timeout: 4500 }).success((geojson: GeoJSON.FeatureCollection, status) => {
                 var failed = false;
                 try {
                     var data = this.geojsonParser.toDataContainer(geojson);

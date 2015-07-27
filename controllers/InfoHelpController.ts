@@ -3,6 +3,8 @@
         openInfo(e: Event): void;
         openHelp(e: Event): void;
         goToLegend(): void;
+        getState(): string;
+        
     }
 
 
@@ -15,7 +17,6 @@
             $tooltip) {
             super(mapService, $tooltip);
             this.$tooltip = $tooltip;
-
             $scope.openInfo = (e: Event) => {
                 if (this.infoTooltip == null) {
                     this.infoTooltip = this.createToolTip(e.target, "views/templates/infoTooltip.tpl.html", "Info", $scope);
@@ -46,6 +47,16 @@
                     // HM TODO: work around for zoom issue - remove when leaflet has a fixed?
                 }, 1000);
                 this.infoTooltip.hide();
+            }
+
+            $scope.getState = (): string => {
+                if (this.helpTooltip && this.helpTooltip.$isShown) {
+                    return "help";
+                }
+                if (this.infoTooltip && this.infoTooltip.$isShown) {
+                    return "info";
+                }
+                return "none";
             }
         }
     }

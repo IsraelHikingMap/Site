@@ -19,8 +19,8 @@
                     return new HikeRouter(this.$http, this.$q, this.geojsonParser);
                 case Common.routingType.bike:
                     return new BikeRouter(this.$http, this.$q, this.geojsonParser);
-                case Common.routingType.fourByFour:
-                    return new FourByFourRouter(this.$http, this.$q, this.geojsonParser);
+                case Common.routingType.fourWheelDrive:
+                    return new FourWheelDriveRouter(this.$http, this.$q, this.geojsonParser);
                 default:
                     return new NoneRouter(this.$q);
             }

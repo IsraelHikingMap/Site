@@ -157,11 +157,13 @@
             var array = <Common.RouteSegmentData[]>[];
             for (var pointIndex = 0; pointIndex < splitted.length; pointIndex++) {
                 var pointStrings = splitted[pointIndex].split(HashService.DATA_DELIMITER);
-                array.push(<Common.RouteSegmentData> {
-                    latlngs: [],
-                    routePoint: new L.LatLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])),
-                    routingType: pointStrings[0]
-                });
+                if (pointStrings.length == 3) {
+                    array.push(<Common.RouteSegmentData> {
+                        latlngs: [],
+                        routePoint: new L.LatLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])),
+                        routingType: pointStrings[0]
+                    });
+                }
             }
             return array;
         }

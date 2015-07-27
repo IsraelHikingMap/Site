@@ -2,7 +2,7 @@
     export class routingType {
         public static hike = "h"; 
         public static bike = "b";
-        public static fourByFour = "f";
+        public static fourWheelDrive = "f";
         public static none = "n";
     }
 

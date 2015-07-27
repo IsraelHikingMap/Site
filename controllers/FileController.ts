@@ -112,6 +112,7 @@
             for (var routeIndex = 0; routeIndex < routesData.length; routeIndex++) {
                 var routeData = routesData[routeIndex];
                 var selectedRoute = this.layersService.getSelectedDrawing();
+                var routingType = this.layersService.getSelectedDrawing().getRoutingType();
                 var manipulatedRouteData = <Common.RouteData> {
                     segments: [],
                     routingType: this.layersService.getSelectedDrawing().getRoutingType(),
@@ -128,7 +129,7 @@
                         segmentLength = FileController.MINIMAL_SEGMENT_LENGTH;
                     }
                     var currentSegmentLength = 0;
-                    var segmentData = <Common.RouteSegmentData> { latlngs: [segment[0]], routingType: Common.routingType.hike };
+                    var segmentData = <Common.RouteSegmentData> { latlngs: [segment[0]], routingType: routingType };
                     for (var latlngIndex = 1; latlngIndex < segment.length; latlngIndex++) {
                         currentSegmentLength += segment[latlngIndex - 1].distanceTo(segment[latlngIndex]);
                         if (currentSegmentLength < segmentLength) {
@@ -137,7 +138,7 @@
                         }
                         segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];
                         manipulatedRouteData.segments.push(segmentData);
-                        segmentData = <Common.RouteSegmentData> { latlngs: [segment[latlngIndex - 1], segment[latlngIndex]], routingType: Common.routingType.hike };
+                        segmentData = <Common.RouteSegmentData> { latlngs: [segment[latlngIndex - 1], segment[latlngIndex]], routingType: routingType };
                         currentSegmentLength = 0;
                     }
                     segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];
