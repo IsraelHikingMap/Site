@@ -121,6 +121,11 @@
             this.setData(data);
         }
 
+        public clear = () => {
+            this.internalClear();
+            this.updateDataLayer();
+        }
+
         public deactivate = () => {
             this.active = false;
 			this.enabled = false;

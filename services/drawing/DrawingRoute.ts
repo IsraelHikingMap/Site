@@ -87,6 +87,11 @@
             return this.enabled && this.active;
         }
 
+        public clear = () => {
+            this.internalClear();
+            this.updateDataLayer();
+        }
+
         public getRoutingType = (): string => {
             return this.currentRoutingType;
         }
@@ -97,7 +102,7 @@
 
         public reroute = (): angular.IPromise<void> => {
             var data = this.getData();
-            this.internalclear();
+            this.internalClear();
             var promises = [];
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
                 var segmentData = data.segments[pointIndex];
@@ -357,7 +362,7 @@
         }
 
         public setData = (data: Common.RouteData) => {
-            this.internalclear();
+            this.internalClear();
             data.name = this.name;
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
                 var segment = data.segments[pointIndex];
@@ -367,7 +372,7 @@
             this.hashService.updateRoute(this.getData());
         }
 
-        private internalclear = () => {
+        private internalClear = () => {
             for (var segmentIndex = this.routeSegments.length - 1; segmentIndex >= 0; segmentIndex--) {
                 this.removeSegmentByIndex(segmentIndex);
             }

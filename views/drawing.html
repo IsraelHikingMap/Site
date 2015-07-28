@@ -1,4 +1,5 @@
 ﻿<div class="leaflet-bar">
+    <a class="cursor-pointer" ng-click="clear($event)" title="Clear"><i class="fa fa-remove fa-lg"></i></a>
     <a class="cursor-pointer" ng-click="toggleDrawing($event)" ng-class="{'leaflet-active' : isDrawingEnabled()}" title="Toggle drawing mode"><i class="fa fa-pencil fa-lg"></i></a>
     <a class="cursor-pointer" ng-show="showRouting()" ng-click="toggleRouting('h', $event)" ng-class="{'leaflet-active' : getRoutingType() == 'h'}" title="Hike routing"><i class="fa fa-level-up fa-lg"></i></a>
     <!--

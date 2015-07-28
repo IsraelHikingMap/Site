@@ -5,8 +5,9 @@
         activate: () => void;
         deactivate: () => void;
         undo: () => void;
-        isEnabled: () => boolean;
         enable(enable: boolean): void;
+        isEnabled: () => boolean;
+        clear() => void;
         getRoutingType: () => string;
         setRoutingType: (routingType: string) => void;
         isUndoDisbaled: () => boolean;
@@ -43,6 +44,8 @@
         }
         // should be override in derived
         public enable = (enable: boolean): void => { }
+        // should be override in derived
+        public clear = () => { }
 
         // should be override in derived
         public getRoutingType = (): string => {

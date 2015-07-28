@@ -1,5 +1,6 @@
 ﻿module IsraelHiking.Controllers {
     export interface IDrawingScope extends angular.IScope {
+        clear(e: Event): void;
         toggleDrawing(e: Event): void;
         toggleRouting(routingType: string, e: Event): void;
         undo(e: Event): void;
@@ -23,6 +24,11 @@
             this.layersService.eventHelper.addListener((args: Common.IDataChangedEventArgs) => {
                 this.selectedDrawing = this.layersService.getSelectedDrawing();
             });
+
+            $scope.clear = (e: Event) => {
+                this.selectedDrawing.clear();
+                this.suppressEvents(e);
+            }
 
             $scope.toggleDrawing = (e: Event) => {
                 if (this.selectedDrawing.isEnabled()) {
