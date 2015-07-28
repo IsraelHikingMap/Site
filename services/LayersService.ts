@@ -24,6 +24,8 @@ module IsraelHiking.Services {
     }
 
     export class LayersService extends ObjectWithMap {
+        public static MAX_ZOOM = 20;
+
         private static ISRAEL_HIKING_MAP = "Israel Hiking map";
         private static ISRAEL_MTB_MAP = "Israel MTB map";
         private static GOOGLE_EARTH = "Google Earth";
@@ -63,12 +65,14 @@ module IsraelHiking.Services {
             var lastModified = "17/07/2015";//(typeof getLastModifiedDate == "function") ? getLastModifiedDate() : document.lastModified;
             this.tileLayerOptions = <L.TileLayerOptions> {
                 minZoom: 7,
-                maxZoom: 16,
+                maxZoom: LayersService.MAX_ZOOM,
+                maxNativeZoom: 16,
                 attribution: LayersService.ATTRIBUTION + lastModified,
             };
             var tileLayerOptionsWithSubdomain = <L.TileLayerOptions> {
                 minZoom: 7,
-                maxZoom: 16,
+                maxZoom: LayersService.MAX_ZOOM,
+                maxNativeZoom: 16,
                 attribution: LayersService.ATTRIBUTION + lastModified,
                 subdomains: ["tiles.trailze.com", "www.osm.org.il"]
             };
@@ -98,7 +102,7 @@ module IsraelHiking.Services {
             this.baseLayers.push(layer);
             this.selectBaseLayer(layer);
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY) || [];
-            baseLayers.push(<ILayerData>{ key: key, address: address, minZoom: options.minZoom, maxZoom: options.maxZoom });
+            baseLayers.push(<ILayerData>{ key: key, address: address, minZoom: options.minZoom, maxZoom: options.maxNativeZoom });
             this.localStorageService.set(LayersService.BASE_LAYERS_KEY, baseLayers);
         }
 
@@ -114,7 +118,7 @@ module IsraelHiking.Services {
             this.overlays.push(overlay);
             this.toggleOverlay(overlay);
             var overlays = this.localStorageService.get<ILayerData[]>(LayersService.OVERLAYS_KEY) || [];
-            overlays.push(<ILayerData>{ key: key, address: address, minZoom: options.minZoom, maxZoom: options.maxZoom });
+            overlays.push(<ILayerData>{ key: key, address: address, minZoom: options.minZoom, maxZoom: options.maxNativeZoom });
             this.localStorageService.set(LayersService.OVERLAYS_KEY, overlays);
         }
 

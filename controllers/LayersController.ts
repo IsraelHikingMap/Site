@@ -102,9 +102,9 @@
 
         private createBaseLayerModal = ($scope: ILayersScope, $modal, layersService: Services.LayersService): any => {
             var addBaseLayerScope = <IAddLayerModalScope>$scope.$new();
-            addBaseLayerScope.addLayer = (name: string, address: string, minZoom: number, maxZoom: number, e: Event) => {
+            addBaseLayerScope.addLayer = (name: string, address: string, minZoom: number, maxNativeZoom: number, e: Event) => {
                 var decodedAddress = decodeURI(address).replace("{zoom}", "{z}");
-                layersService.addBaseLayer(name, decodedAddress, <L.TileLayerOptions> { minZoom: minZoom, maxZoom: maxZoom });
+                layersService.addBaseLayer(name, decodedAddress, <L.TileLayerOptions> { minZoom: minZoom, maxNativeZoom: maxNativeZoom, maxZoom: Services.LayersService.MAX_ZOOM });
                 this.suppressEvents(e);
             }
             return this.createAddLayerModal($modal, "Add Base Layer", addBaseLayerScope);
@@ -112,9 +112,9 @@
 
         private createOverlayModal = ($scope: ILayersScope, $modal, layersService: Services.LayersService): any => {
             var addOvelayScope = <IAddLayerModalScope>$scope.$new();
-            addOvelayScope.addLayer = (name: string, address: string, minZoom: number, maxZoom: number, e: Event) => {
+            addOvelayScope.addLayer = (name: string, address: string, minZoom: number, maxNativeZoom: number, e: Event) => {
                 var decodedAddress = decodeURI(address).replace("{zoom}", "{z}");
-                layersService.addOverlay(name, decodedAddress, <L.TileLayerOptions> { minZoom: minZoom, maxZoom: maxZoom });
+                layersService.addOverlay(name, decodedAddress, <L.TileLayerOptions> { minZoom: minZoom, maxNativeZoom: maxNativeZoom, maxZoom: Services.LayersService.MAX_ZOOM });
                 this.suppressEvents(e);
             }
             return this.createAddLayerModal($modal, "Add Overlay", addOvelayScope);
