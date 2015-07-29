@@ -38,9 +38,8 @@
             this.hoverPolyline = L.polyline([], <L.PolylineOptions>{ opacity: 0.5, color: 'blue', weight: 4, dashArray: "10, 10" });
             this.routeSegments = [];
             this.selectedPointSegmentIndex = -1;
-            this.currentRoutingType = Common.routingType.hike;
+            this.currentRoutingType = Common.RoutingType.hike;
             this.enabled = false;
-            this.active = false;
             this.hoverEnabled = true;
             this.middleMarkers = [];
             this.hashService.addRoute(this.name);
@@ -84,7 +83,7 @@
         }
 
         public isEnabled = (): boolean => {
-            return this.enabled && this.active;
+            return this.enabled && this.state == DrawingState.active;
         }
 
         public clear = () => {
@@ -114,7 +113,7 @@
         private createRouteSegment = (routePoint:L.LatLng, latlngs: L.LatLng[], routingType: string): IRouteSegment => {
             var routeSegment = <IRouteSegment>{
                 polyline: L.polyline(latlngs, <L.PolylineOptions>{ opacity: 0.5, color: "blue", weight: 4 }),
-                routePoint: (this.active == false) ? null : this.createMarker(routePoint),
+                routePoint: (this.state == DrawingState.active) ? this.createMarker(routePoint) : null,
                 routePointLatlng: routePoint,
                 routingType: routingType,
             };
@@ -311,7 +310,7 @@
 
             promise.then((data) => {
                 this.routeSegments[endIndex].polyline.setLatLngs(data[data.length - 1].latlngs);
-                if (this.active) {
+                if (this.state == DrawingState.active) {
                     this.addMiddleMarkersToSegment(this.routeSegments[endIndex]);
                 }
             });
@@ -411,17 +410,21 @@
         }
 
         public activate = () => {
-            this.active = true;
+            var needToAddPolylines = this.state == DrawingState.hidden;
+            this.state = DrawingState.active;
             for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
                 var segment = this.routeSegments[segmementIndex];
                 segment.routePoint = this.createMarker(segment.routePointLatlng);
                 this.addMiddleMarkersToSegment(segment);
+                if (needToAddPolylines) {
+                    this.map.addLayer(segment.polyline);
+                }
             }
             this.map.addLayer(this.hoverPolyline);
         }
 
         public deactivate = () => {
-            this.active = false;
+            this.state = DrawingState.inactive;
             this.enabled = false;
             for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
                 var segment = this.routeSegments[segmentIndex];
@@ -433,7 +436,7 @@
         }
 
         public destroy = () => {
-            if (this.active) {
+            if (this.state == DrawingState.active) {
                 this.deactivate();
             }
             for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
@@ -451,6 +454,23 @@
         protected postUndoHook = () => {
             var data = this.getData();
             this.hashService.updateRoute(data);
+        }
+
+        public hide = () => {
+            this.state = DrawingState.hidden;
+            for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
+                var segment = this.routeSegments[segmementIndex];
+                this.map.removeLayer(segment.polyline);
+                this.map.removeLayer(segment.routePoint);
+            }
+        }
+        public show = () => {
+            this.state = DrawingState.active;
+            for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
+                var segment = this.routeSegments[segmementIndex];
+                this.map.addLayer(segment.polyline);
+                this.map.addLayer(segment.routePoint);
+            }
         }
     }
 }

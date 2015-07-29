@@ -44,7 +44,7 @@
 
             $scope.toggleRouting = (routingType: string, e: Event) => {
                 if (this.selectedDrawing.getRoutingType() == routingType) {
-                    this.selectedDrawing.setRoutingType(Common.routingType.none);
+                    this.selectedDrawing.setRoutingType(Common.RoutingType.none);
                 } else {
                     this.selectedDrawing.setRoutingType(routingType);
                 }

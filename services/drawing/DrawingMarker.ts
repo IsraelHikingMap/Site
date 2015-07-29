@@ -24,7 +24,7 @@
             this.addDataToStack(this.getData());
 
             this.map.on("click",(e: L.LeafletMouseEvent) => {
-                if (this.active) {
+                if (this.state == DrawingState.active) {
                     this.addMarker(e.latlng);
                 }
             });
@@ -96,6 +96,18 @@
             return marker;
         }
 
+        private createInactiveMarker = (latlng: L.LatLng, title: string): MarkerWithTitle => {
+            var marker = <MarkerWithTitle>L.marker(latlng, <L.MarkerOptions> { draggable: false, clickable: true, riseOnHover: true });
+            marker.title = title;
+            marker.bindPopup(marker.title);
+            marker.on("click", (e: L.LeafletMouseEvent) => {
+                marker.openPopup();
+            });
+            marker.setIcon(this.icon);
+            marker.addTo(this.map);
+            return marker;
+        }
+
         private internalClear = () => {
             for (var markerIndex = this.markers.length - 1; markerIndex >= 0; markerIndex--) {
                 this.removeMarkerFromMap(markerIndex);
@@ -113,35 +125,44 @@
             this.markers.splice(markerIndex, 1);
         }
 
+        public clear = () => {
+            this.internalClear();
+            this.updateDataLayer();
+        }
+
         public activate = () => {
-            this.active = true;
+            this.state = DrawingState.active;
 			this.enabled = true;
             var data = this.getData();
             this.internalClear();
             this.setData(data);
         }
 
-        public clear = () => {
-            this.internalClear();
-            this.updateDataLayer();
-        }
-
         public deactivate = () => {
-            this.active = false;
+            this.state = DrawingState.inactive;
 			this.enabled = false;
             var data = this.getData();
             this.internalClear();
             for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
                 var markerData = data[markerIndex];
-                var marker = <MarkerWithTitle>L.marker(markerData.latlng, <L.MarkerOptions> { draggable: false, clickable: true, riseOnHover: true });
-                marker.title = markerData.title;
-                marker.bindPopup(marker.title);
-                marker.on("click",(e: L.LeafletMouseEvent) => {
-                    marker.openPopup();
-                });
-                marker.setIcon(this.icon);
-                marker.addTo(this.map);
+                var marker = this.createInactiveMarker(markerData.latlng, markerData.title);
                 this.markers.push(marker);
+            }
+        }
+
+        public hide = () => {
+            this.state = DrawingState.hidden;
+            for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
+                var marker = this.markers[markerIndex];
+                this.map.removeLayer(marker);
+            }
+        }
+
+        public show = () => {
+            this.state = DrawingState.active;
+            for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
+                var marker = this.markers[markerIndex];
+                this.map.addLayer(marker);
             }
         }
 

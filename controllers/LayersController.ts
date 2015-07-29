@@ -85,7 +85,7 @@
             }
 
             $scope.selectDrawing = (name: string, e: Event) => {
-                layersService.selectDrawing(name);
+                layersService.changeDrawingState(name);
                 this.suppressEvents(e);
             }
 

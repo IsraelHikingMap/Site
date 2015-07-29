@@ -1,5 +1,5 @@
 ﻿module IsraelHiking.Common {
-    export class routingType {
+    export class RoutingType {
         public static hike = "h"; 
         public static bike = "b";
         public static fourWheelDrive = "f";

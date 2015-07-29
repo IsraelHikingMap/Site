@@ -97,13 +97,13 @@ module IsraelHiking.Services {
         }
 
         public addBaseLayer = (key: string, address: string, options: L.TileLayerOptions) => {
-            if (_.find(this.baseLayers,(layerToFind) => layerToFind.key == key)) {
+            if (_.find(this.baseLayers, (layerToFind) => layerToFind.key == key)) {
                 return; // layer exists
             }
             if (options && !options.attribution) {
                 options.attribution = this.tileLayerOptions.attribution;
             }
-            
+
             var layer = <IBaseLayer>{ key: key, layer: L.tileLayer(address, options), selected: false };
             this.baseLayers.push(layer);
             this.selectBaseLayer(layer);
@@ -113,7 +113,7 @@ module IsraelHiking.Services {
         }
 
         public addOverlay = (key: string, address: string, options: L.TileLayerOptions, show = true) => {
-            if (_.find(this.overlays,(overlayToFind) => overlayToFind.key == key)) {
+            if (_.find(this.overlays, (overlayToFind) => overlayToFind.key == key)) {
                 return; // overlay exists
             }
             if (options && !options.attribution) {
@@ -134,7 +134,7 @@ module IsraelHiking.Services {
             if (name == "") {
                 name = this.createRouteName();
             }
-            var route = _.find(this.routes,(drawingToFind) => drawingToFind.name == name);
+            var route = _.find(this.routes, (drawingToFind) => drawingToFind.name == name);
             if (route != null && routeData != null) {
                 route.setData(routeData);
                 return;
@@ -145,21 +145,21 @@ module IsraelHiking.Services {
             };
             var drawingRoute = this.drawingFactory.createDrawingRoute(routeData, false);
             this.routes.push(drawingRoute);
-            this.selectDrawing(drawingRoute.name);
+            this.changeDrawingState(drawingRoute.name);
         }
 
         public removeBaseLayer = (baseLayer: Services.IBaseLayer) => {
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY);
-            _.remove(baseLayers,(layerData) => layerData.key == baseLayer.key);
+            _.remove(baseLayers, (layerData) => layerData.key == baseLayer.key);
             this.localStorageService.set(LayersService.BASE_LAYERS_KEY, baseLayers);
             if (this.selectedBaseLayer.key != baseLayer.key) {
-                _.remove(this.baseLayers,(layer) => baseLayer.key == layer.key);
+                _.remove(this.baseLayers, (layer) => baseLayer.key == layer.key);
                 return;
             }
             var index = this.baseLayers.indexOf(this.selectedBaseLayer);
             index = (index + 1) % this.baseLayers.length;
             this.selectBaseLayer(this.baseLayers[index]);
-            _.remove(this.baseLayers,(layer) => baseLayer.key == layer.key);
+            _.remove(this.baseLayers, (layer) => baseLayer.key == layer.key);
             if (this.baseLayers.length == 0) {
                 this.map.removeLayer(baseLayer.layer);
                 this.selectedBaseLayer = null;
@@ -168,16 +168,16 @@ module IsraelHiking.Services {
 
         public removeOverlay = (overlay: IOvelay) => {
             var overlays = this.localStorageService.get<ILayerData[]>(LayersService.OVERLAYS_KEY);
-            _.remove(overlays,(layerData) => layerData.key == overlay.key);
+            _.remove(overlays, (layerData) => layerData.key == overlay.key);
             this.localStorageService.set(LayersService.OVERLAYS_KEY, overlays);
             if (overlay.visible) {
                 this.map.removeLayer(overlay.layer);
             }
-            _.remove(this.overlays,(overlayToRemove) => overlayToRemove.key == overlay.key);
+            _.remove(this.overlays, (overlayToRemove) => overlayToRemove.key == overlay.key);
         }
 
         public removeRoute = (routeName: string) => {
-            var route = _.find(this.routes,(routeToFind) => routeToFind.name == routeName);
+            var route = _.find(this.routes, (routeToFind) => routeToFind.name == routeName);
             if (route == null) {
                 return;
             }
@@ -201,7 +201,7 @@ module IsraelHiking.Services {
         }
 
         public toggleOverlay = (overlay: IOvelay) => {
-            var overlayFromArray = _.find(this.overlays,(overlayToFind) => overlayToFind.key == overlay.key);
+            var overlayFromArray = _.find(this.overlays, (overlayToFind) => overlayToFind.key == overlay.key);
             overlayFromArray.visible = !overlayFromArray.visible;
             if (overlayFromArray.visible) {
                 this.map.addLayer(overlay.layer);
@@ -210,19 +210,26 @@ module IsraelHiking.Services {
             }
         }
 
-        public selectDrawing = (name: string) => {
-            var drawing = <Drawing.IDrawing>_.find(this.routes,(routeToFind) => routeToFind.name == name);
+        public changeDrawingState = (name: string) => {
+            var drawing = <Drawing.IDrawing>_.find(this.routes, (routeToFind) => routeToFind.name == name);
             if (name == this.markers.name) {
                 drawing = this.markers;
             }
             if (drawing == null) {
                 return;
             }
-            if (drawing.active) {
-                return;
+            if (drawing == this.selectedDrawing) {
+                if (drawing.state == Services.Drawing.DrawingState.active) {
+                    this.selectedDrawing.hide();
+                    return;
+                }
+                if (drawing.state == Services.Drawing.DrawingState.hidden) {
+                    this.selectedDrawing.show();
+                    return;
+                }
             }
 
-            if (this.selectedDrawing) {
+            if (this.selectedDrawing && this.selectedDrawing.state != Services.Drawing.DrawingState.hidden) {
                 this.selectedDrawing.deactivate();
             }
             this.selectedDrawing = drawing;
@@ -233,7 +240,7 @@ module IsraelHiking.Services {
         private createRouteName = () => {
             var index = 0;
             var routeName = "Route " + index;
-            while (_.any(this.routes,(route) => route.name == routeName)) {
+            while (_.any(this.routes, (route) => route.name == routeName)) {
                 index++;
                 routeName = "Route " + index;
             }
@@ -280,7 +287,7 @@ module IsraelHiking.Services {
             }
             this.markers = this.drawingFactory.createDrawingMarker(dataContainer.markers);
             this.markers.deactivate();
-            this.selectDrawing((this.routes.length > 0) ? this.routes[0].name : this.markers.name);
+            this.changeDrawingState((this.routes.length > 0) ? this.routes[0].name : this.markers.name);
         }
 
         public getSelectedDrawing = (): Drawing.IDrawing => {

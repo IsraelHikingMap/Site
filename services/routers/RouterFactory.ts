@@ -13,13 +13,13 @@
             this.geojsonParser = parserFactory.Create("geojson");
         }
 
-        public create(routingType: Common.routingType): IRouter {
+        public create(routingType: Common.RoutingType): IRouter {
             switch (routingType) {
-                case Common.routingType.hike:
+                case Common.RoutingType.hike:
                     return new HikeRouter(this.$http, this.$q, this.geojsonParser);
-                case Common.routingType.bike:
+                case Common.RoutingType.bike:
                     return new BikeRouter(this.$http, this.$q, this.geojsonParser);
-                case Common.routingType.fourWheelDrive:
+                case Common.RoutingType.fourWheelDrive:
                     return new FourWheelDriveRouter(this.$http, this.$q, this.geojsonParser);
                 default:
                     return new NoneRouter(this.$q);

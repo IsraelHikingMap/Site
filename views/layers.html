@@ -21,16 +21,16 @@
         <div class="leaflet-control-layers-separator"></div>
         <div ng-repeat="route in routes">
             <label class="control-label">
-                <button class="btn btn-xs btn-default" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.active }"><i class="fa fa-pencil"></i></button>
+                <button class="btn btn-xs btn-default" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.state == 'active' }" title="Select or hide route"><i ng-class="{'fa-pencil': route.state != 'hidden', 'fa-eye-slash': route.state == 'hidden' }" class="fa"></i></button>
                 <button class="btn btn-xs btn-danger" ng-click="removeRoute(route.name, $event)" ng-show="advanced"><i class="fa fa-trash"></i></button>
                 {{route.name}}
             </label>
         </div>
         <label class="control-label">
-            <button class="btn btn-xs btn-default" ng-click="selectDrawing(markers.name, $event)" ng-class="{'active' : markers.active }"><i class="fa fa-map-marker"></i></button>
+            <button class="btn btn-xs btn-default" ng-click="selectDrawing(markers.name, $event)" ng-class="{'active' : markers.state == 'active' }" title="Select or hide markers"><i ng-class="{'fa-map-marker': markers.state != 'hidden', 'fa-eye-slash': markers.state == 'hidden' }" class="fa"></i></button>
             {{markers.name}}
         </label>
-        <button class="btn btn-xs btn-success" ng-click="addRoute($event)" ng-show="advanced" title="Add route"><i class="fa fa-plus"></i> Add Route</button>
-        <button class="btn btn-xs btn-warning" ng-click="toggleAdvanced($event)" title="Show advanced settings" ng-class="{'active': advanced }"><i class="fa fa-gear"></i></button>
+        <button class="btn btn-xs btn-success" ng-click="addRoute($event)" ng-show="advanced" title="New route"><i class="fa fa-plus"></i> New Route</button>
+        <button class="btn btn-xs btn-warning" ng-click="toggleAdvanced($event)" title="Toggle advanced settings" ng-class="{'active': advanced }"><i class="fa fa-gear"></i></button>
     </div>
 </div>

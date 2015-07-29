@@ -33,12 +33,12 @@
                             routeData.segments.push(<Common.RouteSegmentData> {
                                 routePoint: latlngs[0],
                                 latlngs: [latlngs[0]],
-                                routingType: Common.routingType.hike,
+                                routingType: Common.RoutingType.hike,
                             });
                             routeData.segments.push(<Common.RouteSegmentData> {
                                 routePoint: latlngs[latlngs.length - 1],
                                 latlngs: latlngs,
-                                routingType: Common.routingType.hike,
+                                routingType: Common.RoutingType.hike,
                             });
                             data.routes.push(routeData);
                         }
