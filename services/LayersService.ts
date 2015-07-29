@@ -30,7 +30,8 @@ module IsraelHiking.Services {
         private static ISRAEL_MTB_MAP = "Israel MTB map";
         private static GOOGLE_EARTH = "Google Earth";
         private static HIKING_TRAILS = "Hiking trails";
-        private static ATTRIBUTION = "Map data &copy; <a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> contributors, <a href='http://creativecommons.org/licenses/by-sa/2.0/' target='_blank\">CC-BY-SA</a>, built with <a href='http://getbootstrap.com/' target='_blank'>Bootstrap</a>. Last update: ";
+        private static ATTRIBUTION = "Map data &copy; <a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> contributors, <a href='http://creativecommons.org/licenses/by-sa/2.0/' target='_blank\">CC-BY-SA</a>, built with <a href='http://getbootstrap.com/' target='_blank'>Bootstrap</a>. ";
+        private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION + "Map style courtesy of <a http='http://mtbmap.no'>MTBmap.no.</a> ";
         private static BASE_LAYERS_KEY = "BaseLayers";
         private static OVERLAYS_KEY = "Overlays";
 
@@ -62,24 +63,27 @@ module IsraelHiking.Services {
             this.routes = [];
             this.overlayZIndex = 10;
             this.eventHelper = new Common.EventHelper<Common.IDataChangedEventArgs>();
-            var lastModified = "17/07/2015";//(typeof getLastModifiedDate == "function") ? getLastModifiedDate() : document.lastModified;
+            var lastModified = "Last update: " + (new Date(document.lastModified)).toDateString();
             this.tileLayerOptions = <L.TileLayerOptions> {
                 minZoom: 7,
                 maxZoom: LayersService.MAX_ZOOM,
                 maxNativeZoom: 16,
                 attribution: LayersService.ATTRIBUTION + lastModified,
             };
-            var tileLayerOptionsWithSubdomain = <L.TileLayerOptions> {
+            // default layers:
+            this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "http://{s}/IsraelHiking/Tiles/{z}/{x}/{y}.png", <L.TileLayerOptions> {
                 minZoom: 7,
                 maxZoom: LayersService.MAX_ZOOM,
                 maxNativeZoom: 16,
                 attribution: LayersService.ATTRIBUTION + lastModified,
                 subdomains: ["tiles.trailze.com", "www.osm.org.il"]
-            };
-            // default layers:
-            this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "http://{s}/IsraelHiking/Tiles/{z}/{x}/{y}.png", tileLayerOptionsWithSubdomain);
-            this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png", this.tileLayerOptions);
-            //this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "mtbTiles/{z}/{x}/{y}.png");
+            });
+            this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png", <L.TileLayerOptions> {
+                minZoom: 7,
+                maxZoom: LayersService.MAX_ZOOM,
+                maxNativeZoom: 16,
+                attribution: LayersService.MTB_ATTRIBUTION + lastModified,
+            });
             this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_EARTH, layer: <any>new L.Google(), selected: false });
             this.addOverlay(LayersService.HIKING_TRAILS,
                 "http://www.osm.org.il/IsraelHiking/OverlayTiles/{z}/{x}/{y}.png",
