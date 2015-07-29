@@ -7,7 +7,7 @@
         undo: () => void;
         enable(enable: boolean): void;
         isEnabled: () => boolean;
-        clear() => void;
+        clear: () => void;
         getRoutingType: () => string;
         setRoutingType: (routingType: string) => void;
         isUndoDisbaled: () => boolean;
