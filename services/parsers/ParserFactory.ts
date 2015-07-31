@@ -1,13 +1,19 @@
 ﻿module IsraelHiking.Services.Parsers {
 
+    export class ParserType {
+        public static gpx = "gpx";
+        public static kml = "kml";
+        public static geojson = "geojson";
+    }
+
     export class ParserFactory {
         public Create(type: string): IParser {
             switch (type.toLocaleLowerCase()) {
-                case "gpx":
+                case ParserType.gpx:
                     return new GpxParser();
-                case "kml":
+                case ParserType.kml:
                     return new KmlParser();
-                case "geojson":
+                case ParserType.geojson:
                     return new GeoJsonParser();
                 default:
                     return null;

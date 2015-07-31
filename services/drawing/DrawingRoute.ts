@@ -16,9 +16,11 @@
 
         private $q: angular.IQService;
         private routerFactory: Services.Routers.RouterFactory;
+        private snappingService: SnappingService;
         private selectedPointSegmentIndex: number;
         private currentRoutingType: string;
         private hoverPolyline: L.Polyline;
+        private hoverMarker: L.Marker;
         private enabled: boolean;
         private hoverEnabled: boolean;
         private routeSegments: IRouteSegment[];
@@ -30,10 +32,12 @@
             mapService: MapService,
             routerFactory: Services.Routers.RouterFactory,
             hashService: HashService,
+            snappingService: SnappingService,
             name: string) {
             super(mapService, hashService);
             this.$q = $q;
             this.routerFactory = routerFactory;
+            this.snappingService = snappingService;
             this.name = name;
             this.hoverPolyline = L.polyline([], <L.PolylineOptions>{ opacity: 0.5, color: 'blue', weight: 4, dashArray: "10, 10" });
             this.routeSegments = [];
@@ -73,12 +77,21 @@
                 shadowUrl: L.Icon.Default.imagePath + "/marker-shadow-small.png",
                 shadowSize: new L.Point(21, 21),
             });
+
+            this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> {
+                clickable: false,
+                icon: this.routePointIcon,
+            });
         }
 
         public enable = (enable: boolean) => {
             this.enabled = enable;
             if (this.enabled == false) {
                 this.hoverPolyline.setLatLngs([]);
+                this.map.removeLayer(this.hoverMarker);
+            }
+            else {
+                this.map.addLayer(this.hoverMarker);
             }
         }
 
@@ -339,8 +352,10 @@
         private hover = (latlng: L.LatLng) => {
             this.hoverPolyline.setLatLngs([]);
             if (this.routeSegments.length > 0 && this.hoverEnabled && this.isEnabled()) {
+                var snapToLatlng = this.snappingService.snapTo(latlng);
+                this.hoverMarker.setLatLng(snapToLatlng);
                 var hoverStartPoint = this.routeSegments[this.routeSegments.length - 1].routePointLatlng;
-                this.hoverPolyline.setLatLngs([hoverStartPoint, latlng]);
+                this.hoverPolyline.setLatLngs([hoverStartPoint, snapToLatlng]);
             }
         }
 

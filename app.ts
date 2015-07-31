@@ -1,13 +1,8 @@
 ﻿module IsraelHiking {
-    // HM TODO: route length.
-    // HM TODO: better middle marker support.
-    // HM TODO: snapping.
-    // HM TODO: confirm on delete.
-    // HM TODO: bug: max zoom when chaning base map
-    // HM TODO: height graph?
-    // HM TODO: url to route (address/?url=)
+    // HM TODO: add snappings when clicking, remove cross hair, add snapping when dragging.
+    // HM TODO: improve snapping with overpass
     // HM TODO: support twl? - will be solved hopefull with iis backend.
-    // HM TODO: add waiting animation when routing works (Not sure I'll bother doing it in the end)
+    // HM TODO: fix hover plyline to work like hover marker.
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule"]);
 
@@ -19,10 +14,14 @@
     app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterFactory($http, $q, parserFactory)]);
+    app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService,
+        ($http: angular.IHttpService, mapService: Services.MapService) =>
+            new Services.SnappingService($http, mapService)]);
     app.service(Common.Constants.drawingFactory,
-        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerFactory, Common.Constants.hashService,
-            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routeFactory: Services.Routers.RouterFactory, hashService: Services.HashService) =>
-                new Services.Drawing.DrawingFactory($q, $compile, $rootScope, mapService, routeFactory, hashService)]);
+        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerFactory, Common.Constants.hashService, Common.Constants.snappingService,
+            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routeFactory: Services.Routers.RouterFactory, hashService: Services.HashService, snappingService: Services.SnappingService) =>
+                new Services.Drawing.DrawingFactory($q, $compile, $rootScope, mapService, routeFactory, hashService, snappingService)]);
+    
     app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.localStorageService,
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);

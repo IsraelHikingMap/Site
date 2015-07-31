@@ -17,6 +17,7 @@
         static mapService = "mapService";
         static layersService = "layersService";
         static localStorageService = "localStorageService";
+        static snappingService = "snappingService";
         
         // Controllers
         static mainMapController = "mainMapController";
