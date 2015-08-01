@@ -1,6 +1,5 @@
 ﻿module IsraelHiking {
-    // HM TODO: add snappings when clicking, remove cross hair, add snapping when dragging.
-    // HM TODO: improve snapping with overpass
+    // HM TODO: add snappings when clicking, add snapping when dragging - would probably require middle marker...
     // HM TODO: support twl? - will be solved hopefull with iis backend.
     // HM TODO: fix hover plyline to work like hover marker.
 

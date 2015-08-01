@@ -33,11 +33,9 @@
             $scope.toggleDrawing = (e: Event) => {
                 if (this.selectedDrawing.isEnabled()) {
                     this.selectedDrawing.enable(false);
-                    this.setDragMapCursor();
                 }
                 else {
                     this.selectedDrawing.enable(true);
-                    this.setDrawingCursor();
                 }
                 this.suppressEvents(e);
             };
@@ -78,7 +76,6 @@
                 }
                 else if (e.keyCode == 27) { // escape
                     this.selectedDrawing.enable(false);
-                    this.setDragMapCursor();
                 }
                 else {
                     return;
@@ -87,14 +84,6 @@
                     $scope.$apply();
                 }
             };
-        }
-
-        private setDrawingCursor() {
-            $(".leaflet-container").addClass("cursor-crosshair");
-        }
-
-        private setDragMapCursor() {
-            $(".leaflet-container").removeClass("cursor-crosshair");
         }
     }
 }
