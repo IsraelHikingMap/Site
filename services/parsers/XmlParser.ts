@@ -3,10 +3,10 @@
     declare var toGeoJSON: Function[];
     
     export class XmlParser extends BaseParser implements IParser {
-        public parse(content: string): Common.DataContainer {
-            var document = (new DOMParser()).parseFromString(<string>content, "text/xml");
-            var geojson = toGeoJSON[this.getFormat()](document);
-            return super.toDataContainer(geojson);
+
+        protected parseToGeoJson(content: string): GeoJSON.FeatureCollection {
+            var document = (new DOMParser()).parseFromString(content, "text/xml");
+            return toGeoJSON[this.getFormat()](document);
         }
 
         public toString(data: Common.DataContainer): string {

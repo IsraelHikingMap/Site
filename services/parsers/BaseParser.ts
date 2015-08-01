@@ -5,8 +5,12 @@
         private static LINE_STRING = "LineString";
         private static POINT = "Point";
 
+        public parse(content: string): Common.DataContainer {
+            var geojson = this.parseToGeoJson(content);
+            return this.toDataContainer(geojson);
+        }
         // should be implemented in derived class
-        public parse(content: string): Common.DataContainer { return null; }
+        protected parseToGeoJson(content: string): GeoJSON.FeatureCollection { return null; }
         // should be implemented in derived class
         public toString(data: Common.DataContainer): string { return ""; }
 
@@ -16,7 +20,7 @@
                 markers: <Common.MarkerData[]>[],
                 routes: <Common.RouteData[]>[],
             };
-            var leaftletGeoJson = L.geoJson(geoJson, {
+            var leaftletGeoJson = L.geoJson(geoJson, <L.GeoJSONOptions>{
                 onEachFeature: (feature: GeoJSON.Feature, layer) => {
                     if (feature.type != BaseParser.FEATURE) {
                         return;

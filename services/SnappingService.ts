@@ -1,56 +1,56 @@
 ﻿module IsraelHiking.Services {
 
     export class SnappingService extends ObjectWithMap {
-        snappings: L.LayerGroup<L.GeoJSON>;
+        snappings: L.LayerGroup<L.Polyline>;
+        $http: angular.IHttpService;
+        osmParser: Parsers.IParser;
 
         constructor($http: angular.IHttpService,
-            mapService: MapService) {
+            mapService: MapService,
+            parserFactory: Parsers.ParserFactory) {
             super(mapService);
 
+            this.$http = $http;
+            this.osmParser = parserFactory.Create(Parsers.ParserType.osm);
             this.snappings = L.layerGroup([]);
             this.map.addLayer(this.snappings);
+            this.generateSnappings();
             this.map.on("moveend", () => {
-                if (this.map.getZoom() <= 12) {
-                    this.snappings.clearLayers();
-                    return;
-                }
+                this.generateSnappings();
+            });
+        }
 
-                var proxy = "http://www2.turistforeningen.no/routing.php?url=";
-                var route = "http://www.openstreetmap.org/api/0.6/map";
-                var params = "&bbox=" + this.map.getBounds().toBBoxString() + "&1=2";
-                $http.get(proxy + route + params).success((osm: string) => {
-                    this.snappings.clearLayers();
-                    this.map.removeLayer(this.snappings);
-                    var xml = (new DOMParser()).parseFromString(osm, "text/xml");
-                    var layer = new (<any>L).OSM.DataLayer(xml, {
-                        areaTags: [],
-                        wayTags: ["highway"],
-                        ignoreNode: true,
-                        ignoreChangeSet: true,
-                        styles: {
-                            way: {
-                                opacity: 1,
-                                color: "red"
-                            }
+        private generateSnappings = () => {
+            if (this.map.getZoom() <= 12) {
+                this.snappings.clearLayers();
+                return;
+            }
+            
+            this.snappings.clearLayers();
+            var bounds = this.map.getBounds();
+            var boundsString = [bounds.getSouthWest().lat, bounds.getSouthWest().lng, bounds.getNorthEast().lat, bounds.getNorthEast().lng].join(",");
+            var address = "http://overpass-api.de/api/interpreter?data=%28way[%22highway%22]%28" + boundsString + "%29;%3E;%29;out;";
+            this.$http.get(address).success((osm: string) => {
+                var data = this.osmParser.parse(osm);
+                for (var routeIndex = 0; routeIndex < data.routes.length; routeIndex++) {
+                    var route = data.routes[routeIndex];
+                    for (var segmentIndex = 0; segmentIndex < route.segments.length; segmentIndex++) {
+                        var segment = route.segments[segmentIndex];
+                        if (segment.latlngs.length < 2) {
+                            continue;
                         }
-                    })
-                    this.snappings = layer;
-                    this.map.addLayer(this.snappings);
-                });
+                        this.snappings.addLayer(L.polyline(segment.latlngs, <L.PolylineOptions> { opacity: 0 }));
+                    }
+                }
             });
         }
 
         public snapTo = (latlng: L.LatLng): L.LatLng => {
-
             var sensitivity = 10;
             var minDist = Infinity;
             var minPoint = latlng;
 
-            this.snappings.eachLayer((layer) => {
-                if (layer instanceof L.Polyline == false) {
-                    return;
-                }
-                var polyline = <L.Polyline><any>layer;
+            this.snappings.eachLayer((polyline) => {
                 var latlngs = polyline.getLatLngs();
                 if (latlngs.length <= 0) {
                     return;

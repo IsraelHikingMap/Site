@@ -85,7 +85,6 @@
     <Content Include="scripts\leaflet-google.js" />
     <Content Include="scripts\leaflet-locate.js" />
     <Content Include="scripts\leaflet-locate.min.js" />
-    <Content Include="scripts\leaflet-osm.js" />
     <Content Include="scripts\lodash.js" />
     <Content Include="scripts\lodash.min.js" />
     <Content Include="scripts\ng-file-upload-all.js" />
@@ -158,6 +157,7 @@
     <TypeScriptCompile Include="controllers\InfoHelpController.ts" />
     <TypeScriptCompile Include="services\MapService.ts" />
     <TypeScriptCompile Include="services\parsers\BaseParser.ts" />
+    <TypeScriptCompile Include="services\parsers\OsmParser.ts" />
     <TypeScriptCompile Include="services\parsers\ParserFactory.ts" />
     <TypeScriptCompile Include="services\parsers\GeoJsonParser.ts" />
     <TypeScriptCompile Include="services\parsers\GpxParser.ts" />
