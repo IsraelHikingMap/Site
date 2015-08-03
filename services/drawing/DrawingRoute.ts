@@ -122,11 +122,12 @@
             });
 
             this.middleMarker.on("dragstart", (e: L.LeafletMouseEvent) => {
+                this.setHoverState(HoverState.dragging);
                 var snappingResponse = this.snapToRoute(this.middleMarker.getLatLng());
                 this.selectedRouteSegmentIndex = _.findIndex(this.routeSegments, (segment) => segment.polyline == snappingResponse.polyline);
                 var newSegment = this.createRouteSegment(snappingResponse.latlng, [this.routeSegments[this.selectedRouteSegmentIndex - 1].routePoint.getLatLng(), snappingResponse.latlng], this.currentRoutingType);
                 this.routeSegments.splice(this.selectedRouteSegmentIndex, 0, newSegment);
-                this.hoverState = HoverState.dragging;
+                
             });
 
             this.middleMarker.on("drag", (e: L.LeafletMouseEvent) => {
@@ -312,6 +313,7 @@
                     this.map.removeLayer(this.middleMarker);
                     break;
                 case HoverState.onPolyline:
+                case HoverState.dragging:
                     this.map.removeLayer(this.hoverPolyline);
                     this.map.removeLayer(this.hoverMarker);
                     this.map.addLayer(this.middleMarker);
