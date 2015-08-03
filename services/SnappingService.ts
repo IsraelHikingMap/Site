@@ -1,5 +1,16 @@
 ﻿module IsraelHiking.Services {
 
+    export interface ISnappingOptions {
+        layers: L.LayerGroup<L.Polyline>,
+        sensitivity: number;
+    }
+
+    export interface ISnappingResponse {
+        latlng: L.LatLng;
+        polyline: L.Polyline;
+        beforeIndex: number;
+    }
+
     export class SnappingService extends ObjectWithMap {
         snappings: L.LayerGroup<L.Polyline>;
         $http: angular.IHttpService;
@@ -45,14 +56,22 @@
             });
         }
 
-        public snapTo = (latlng: L.LatLng): L.LatLng => {
-            var sensitivity = 10;
+        public snapTo = (latlng: L.LatLng, options?: ISnappingOptions): ISnappingResponse => {
+            if (!options) {
+                options = <ISnappingOptions> {
+                    layers: this.snappings,
+                    sensitivity: 10,
+                };
+            }
             var minDist = Infinity;
-            var minPoint = latlng;
+            var response = <ISnappingResponse> {
+                latlng: latlng,
+                polyline: null,
+            };
 
-            this.snappings.eachLayer((polyline) => {
+            options.layers.eachLayer((polyline) => {
                 var latlngs = polyline.getLatLngs();
-                if (latlngs.length <= 0) {
+                if (latlngs.length <= 1) {
                     return;
                 }
 
@@ -60,25 +79,28 @@
                 var prevPoint = this.map.latLngToLayerPoint(latlngs[0]);
                 var startDistance = snapPoint.distanceTo(prevPoint);
 
-                if (startDistance <= sensitivity && startDistance < minDist) {
+                if (startDistance <= options.sensitivity && startDistance < minDist) {
                     minDist = startDistance;
-                    minPoint = latlngs[0];
+                    response.latlng = latlngs[0];
+                    response.polyline = polyline;
+                    response.beforeIndex = 0;
                 }
 
                 for (var latlngIndex = 1; latlngIndex < latlngs.length; latlngIndex++) {
                     var currentPoint = this.map.latLngToLayerPoint(latlngs[latlngIndex]);
 
                     var currentDistance = L.LineUtil.pointToSegmentDistance(snapPoint, prevPoint, currentPoint);
-                    if (currentDistance < minDist && currentDistance <= sensitivity) {
+                    if (currentDistance < minDist && currentDistance <= options.sensitivity) {
                         minDist = currentDistance;
-                        minPoint = this.map.layerPointToLatLng(L.LineUtil.closestPointOnSegment(snapPoint, prevPoint, currentPoint));
-
+                        response.latlng = this.map.layerPointToLatLng(L.LineUtil.closestPointOnSegment(snapPoint, prevPoint, currentPoint));
+                        response.polyline = polyline;
+                        response.beforeIndex = latlngIndex - 1;
                     }
                     prevPoint = currentPoint;
                 }
             });
 
-            return minPoint;
+            return response;
         }
     }
 } 
