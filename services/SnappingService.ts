@@ -1,7 +1,7 @@
 ﻿module IsraelHiking.Services {
 
     export interface ISnappingOptions {
-        layers: L.LayerGroup<L.Polyline>,
+        layers: L.LayerGroup<L.Polyline>;
         sensitivity: number;
     }
 
