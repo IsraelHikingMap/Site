@@ -2,21 +2,27 @@
     export interface IInfoHelpScope extends angular.IScope {
         openInfo(e: Event): void;
         openHelp(e: Event): void;
-        goToLegend(): void;
+        openLegend(): void;
         getState(): string;
-        
     }
-
 
     export class InfoHelpController extends BaseMapControllerWithToolTip {
         infoTooltip;
         helpTooltip;
+        legendModal;
 
         constructor($scope: IInfoHelpScope,
             mapService: Services.MapService,
-            $tooltip) {
+            $tooltip,
+            $modal) {
             super(mapService, $tooltip);
             this.$tooltip = $tooltip;
+            this.legendModal = $modal({
+                title: "Legend",
+                templateUrl: "views/templates/legendModal.tpl.html",
+                show: false,
+                scope: $scope,
+            });
             $scope.openInfo = (e: Event) => {
                 if (this.infoTooltip == null) {
                     this.infoTooltip = this.createToolTip(e.target, "views/templates/infoTooltip.tpl.html", "Info", $scope);
@@ -40,13 +46,9 @@
                 L.DomEvent.preventDefault(e);
             }
 
-            $scope.goToLegend = () => {
-                this.map.setZoom(14);
-                setTimeout(() => {
-                    this.map.panTo(new L.LatLng(32.8185, 35.5707));
-                    // HM TODO: work around for zoom issue - remove when leaflet has a fixed?
-                }, 1000);
-                this.infoTooltip.hide();
+            $scope.openLegend = () => {
+                this.legendModal.show();
+                this.helpTooltip.hide();
             }
 
             $scope.getState = (): string => {

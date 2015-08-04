@@ -29,6 +29,7 @@
     <Content Include="content\images\four-by-four.svg" />
     <Content Include="content\images\geocoder.png" />
     <Content Include="content\images\hike.svg" />
+    <Content Include="content\images\legend.png" />
     <Content Include="content\images\map-editing-reverse.svg" />
     <Content Include="content\images\marker-icon-green.png" />
     <Content Include="content\images\marker-icon-middle.png" />
@@ -100,6 +101,7 @@
     <Content Include="views\layers.html" />
     <Content Include="views\drawing.html" />
     <Content Include="views\editOSM.html" />
+    <Content Include="views\templates\legendModal.tpl.html" />
     <Content Include="views\templates\addRouteModal.tpl.html" />
     <Content Include="views\templates\addLayerModal.tpl.html" />
     <Content Include="views\templates\fileTooltip.tpl.html" />
