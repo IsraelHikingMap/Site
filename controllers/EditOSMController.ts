@@ -13,8 +13,7 @@
             $scope.editOsm = (e: Event) => {
                 var center = this.map.getCenter();
                 var zoom = this.map.getZoom();
-                window.open("http://www.openstreetmap.org/edit?editor=id#" +
-                    "background=custom:http://osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png&map=" + zoom + "/" + center.lat + "/" + center.lng);
+                window.open("http://www.openstreetmap.org/edit#background=custom:http://osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png&map=" + zoom + "/" + center.lat + "/" + center.lng);
                 this.suppressEvents(e);
             };
         } 
