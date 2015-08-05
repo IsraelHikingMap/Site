@@ -1,7 +1,5 @@
 ﻿module IsraelHiking {
-    // HM TODO: add snappings when clicking, add snapping when dragging - would probably require middle marker...
     // HM TODO: support twl? - will be solved hopefull with iis backend.
-    // HM TODO: fix hover plyline to work like hover marker.
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule"]);
 

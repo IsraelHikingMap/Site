@@ -2,6 +2,8 @@
     export class Google { new() }
 }
 
+declare var getLastModifiedDate: Function;
+
 module IsraelHiking.Services {
     export interface ILayer {
         key: string;
@@ -63,7 +65,8 @@ module IsraelHiking.Services {
             this.routes = [];
             this.overlayZIndex = 10;
             this.eventHelper = new Common.EventHelper<Common.IDataChangedEventArgs>();
-            var lastModified = "Last update: " + (new Date(document.lastModified)).toDateString();
+            
+            var lastModified = "Last update: " + (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
             this.tileLayerOptions = <L.TileLayerOptions> {
                 minZoom: 7,
                 maxZoom: LayersService.MAX_ZOOM,
