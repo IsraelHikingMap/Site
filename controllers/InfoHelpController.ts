@@ -16,7 +16,6 @@
             $tooltip,
             $modal) {
             super(mapService, $tooltip);
-            this.$tooltip = $tooltip;
             this.legendModal = $modal({
                 title: "Legend",
                 templateUrl: "views/templates/legendModal.tpl.html",
@@ -36,7 +35,7 @@
 
             $scope.openHelp = (e: Event) => {
                 if (this.helpTooltip == null) {
-                    this.helpTooltip = this.createToolTip(e.target, "views/templates/helpTooltip.tpl.html", "help", $scope);
+                    this.helpTooltip = this.createToolTip(e.target, "views/templates/helpTooltip.tpl.html", "Help", $scope);
                     this.helpTooltip.$promise.then(this.helpTooltip.show);
                 }
                 if (this.infoTooltip) {

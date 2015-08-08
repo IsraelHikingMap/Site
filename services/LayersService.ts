@@ -25,6 +25,11 @@ module IsraelHiking.Services {
         visible: boolean;
     }
 
+    export interface IRouteViewOptions {
+        pathOptions: L.PathOptions;
+        isVisible: boolean;
+    }
+
     export class LayersService extends ObjectWithMap {
         public static MAX_ZOOM = 20;
 
@@ -66,7 +71,8 @@ module IsraelHiking.Services {
             this.overlayZIndex = 10;
             this.eventHelper = new Common.EventHelper<Common.IDataChangedEventArgs>();
             
-            var lastModified = "Last update: " + (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
+            var lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
+            lastModified = "Last update: " + lastModified;
             this.tileLayerOptions = <L.TileLayerOptions> {
                 minZoom: 7,
                 maxZoom: LayersService.MAX_ZOOM,
@@ -133,7 +139,7 @@ module IsraelHiking.Services {
             this.localStorageService.set(LayersService.OVERLAYS_KEY, overlays);
         }
 
-        public addRoute = (name: string, routeData: Common.RouteData = null) => {
+        public addRoute = (name: string, routeData: Common.RouteData, pathOptions: L.PathOptions) => {
             if (name == "") {
                 name = this.createRouteName();
             }
@@ -146,9 +152,27 @@ module IsraelHiking.Services {
                 segments: [],
                 name: name,
             };
-            var drawingRoute = this.drawingFactory.createDrawingRoute(routeData, false);
+            var drawingRoute = this.drawingFactory.createDrawingRoute(routeData, false, pathOptions);
             this.routes.push(drawingRoute);
             this.changeDrawingState(drawingRoute.name);
+        }
+
+        public addOrUpdateRouteOptions = (oldName: string, newName: string, pathOptions: L.PathOptions, isVisible: boolean) => {
+            var route = _.find(this.routes, (drawingToFind) => drawingToFind.name == oldName);
+            if (route == null) {
+                this.addRoute(oldName, null, pathOptions);
+                route = _.find(this.routes, (drawingToFind) => drawingToFind.name == oldName);
+            }
+            if (oldName != newName && _.find(this.routes, (drawingToFind) => drawingToFind.name == newName) != null) {
+                // HM TODO: newName alreadyExitsts, toast?
+                return;
+            }
+            route.update(newName, pathOptions);
+            if (isVisible) {
+                route.show();
+            } else {
+                route.hide();
+            }
         }
 
         public removeBaseLayer = (baseLayer: Services.IBaseLayer) => {
@@ -240,8 +264,8 @@ module IsraelHiking.Services {
             this.eventHelper.raiseEvent(<Common.IDataChangedEventArgs>{});
         }
 
-        private createRouteName = () => {
-            var index = 0;
+        public createRouteName = () => {
+            var index = 1;
             var routeName = "Route " + index;
             while (_.any(this.routes, (route) => route.name == routeName)) {
                 index++;
@@ -286,7 +310,7 @@ module IsraelHiking.Services {
                 });
             }
             for (var routeIndex = 0; routeIndex < dataContainer.routes.length; routeIndex++) {
-                this.routes.push(this.drawingFactory.createDrawingRoute(dataContainer.routes[routeIndex], true));
+                this.routes.push(this.drawingFactory.createDrawingRoute(dataContainer.routes[routeIndex], true, null));
             }
             this.markers = this.drawingFactory.createDrawingMarker(dataContainer.markers);
             this.markers.deactivate();
@@ -301,5 +325,18 @@ module IsraelHiking.Services {
             this.markers.addMarkers(markers);
         }
 
+        public getRouteViewOptions = (routeName: string): IRouteViewOptions => {
+            var route = _.find(this.routes, (drawingToFind) => drawingToFind.name == routeName);
+            if (route == null) {
+                return <IRouteViewOptions>{
+                    pathOptions: this.drawingFactory.createPathOptions(),
+                    isVisible: true,
+                };
+            }
+            return <IRouteViewOptions>{
+                pathOptions: route.getPathOptions(),
+                isVisible: route.state != Drawing.DrawingState.hidden,
+            };
+        }
     }
 }

@@ -22,7 +22,7 @@
         <div ng-repeat="route in routes">
             <label class="control-label">
                 <button class="btn btn-xs btn-default" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.state == 'active' }" title="Select or hide route"><i ng-class="{'fa-pencil': route.state != 'hidden', 'fa-eye-slash': route.state == 'hidden' }" class="fa"></i></button>
-                <button class="btn btn-xs btn-danger" ng-click="removeRoute(route.name, $event)" ng-show="advanced"><i class="fa fa-trash"></i></button>
+                <button class="btn btn-xs btn-warning" ng-click="editRoute(route.name, $event)" ng-show="advanced"><i class="fa fa-wrench"></i></button>
                 {{route.name}}
             </label>
         </div>

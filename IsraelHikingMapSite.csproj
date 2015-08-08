@@ -74,6 +74,8 @@
     <Content Include="scripts\angular.min.js" />
     <Content Include="scripts\bootstrap.js" />
     <Content Include="scripts\bootstrap.min.js" />
+    <Content Include="scripts\d3\d3.js" />
+    <Content Include="scripts\d3\d3.min.js" />
     <Content Include="scripts\FileAPI.flash.swf" />
     <Content Include="scripts\FileAPI.js" />
     <Content Include="scripts\FileAPI.min.js" />
@@ -86,6 +88,8 @@
     <Content Include="scripts\leaflet-google.js" />
     <Content Include="scripts\leaflet-locate.js" />
     <Content Include="scripts\leaflet-locate.min.js" />
+    <Content Include="scripts\line-chart.js" />
+    <Content Include="scripts\line-chart.min.js" />
     <Content Include="scripts\lodash.js" />
     <Content Include="scripts\lodash.min.js" />
     <Content Include="scripts\ng-file-upload-all.js" />
@@ -101,8 +105,9 @@
     <Content Include="views\layers.html" />
     <Content Include="views\drawing.html" />
     <Content Include="views\editOSM.html" />
+    <Content Include="views\templates\routeStatisticsTooltip.tpl.html" />
     <Content Include="views\templates\legendModal.tpl.html" />
-    <Content Include="views\templates\addRouteModal.tpl.html" />
+    <Content Include="views\templates\routePropertiesModal.tpl.html" />
     <Content Include="views\templates\addLayerModal.tpl.html" />
     <Content Include="views\templates\fileTooltip.tpl.html" />
     <Content Include="views\infoHelp.html" />
@@ -115,6 +120,7 @@
     <Content Include="scripts\leaflet-locate.min.js.map" />
     <Content Include="scripts\angular.min.js.map" />
     <Content Include="scripts\angular-strap.min.js.map" />
+    <Content Include="scripts\d3\LICENSE" />
     <None Include="scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="scripts\tokml.js.map" />
     <None Include="web.Debug.config">
@@ -128,6 +134,8 @@
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="common\EventHelper.ts" />
     <TypeScriptCompile Include="controllers\LayersController.ts" />
+    <TypeScriptCompile Include="controllers\RoutePropertiesContoller.ts" />
+    <TypeScriptCompile Include="controllers\RouteStatisticsController.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-cookies.d.ts" />
@@ -136,6 +144,8 @@
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-route.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-sanitize.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\d3\d3.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\d3\plugins\d3.superformula.d.ts" />
     <TypeScriptCompile Include="scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="scripts\typings\leaflet\leaflet.d.ts" />
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />

@@ -30,18 +30,21 @@
         private middleIcon: L.Icon;
         private routePointIcon: L.Icon;
         private hoverState: string;
+        private pathOptions: L.PathOptions;
 
         constructor($q: angular.IQService,
             mapService: MapService,
             routerFactory: Services.Routers.RouterFactory,
             hashService: HashService,
             snappingService: SnappingService,
-            name: string) {
+            name: string,
+            pathOptions: L.PathOptions) {
             super(mapService, hashService);
             this.$q = $q;
             this.routerFactory = routerFactory;
             this.snappingService = snappingService;
             this.name = name;
+            this.pathOptions = pathOptions;
             this.routeSegments = [];
             this.selectedRouteSegmentIndex = -1;
             this.currentRoutingType = Common.RoutingType.hike;
@@ -57,7 +60,8 @@
                 shadowSize: new L.Point(21, 21),
             });
 
-            this.hoverPolyline = L.polyline([], <L.PolylineOptions>{ opacity: 0.5, color: 'blue', weight: 4, dashArray: "10, 10" });
+            this.hoverPolyline = L.polyline([]);
+            this.setHoverPolylineStyle();
             this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.routePointIcon });
             this.createMiddleMarker();
             this.setHoverState(HoverState.none);
@@ -127,7 +131,7 @@
                 this.selectedRouteSegmentIndex = _.findIndex(this.routeSegments, (segment) => segment.polyline == snappingResponse.polyline);
                 var newSegment = this.createRouteSegment(snappingResponse.latlng, [this.routeSegments[this.selectedRouteSegmentIndex - 1].routePoint.getLatLng(), snappingResponse.latlng], this.currentRoutingType);
                 this.routeSegments.splice(this.selectedRouteSegmentIndex, 0, newSegment);
-                
+
             });
 
             this.middleMarker.on("drag", (e: L.LeafletMouseEvent) => {
@@ -154,7 +158,7 @@
 
         private createRouteSegment = (routePoint: L.LatLng, latlngs: L.LatLng[], routingType: string): IRouteSegment => {
             var routeSegment = <IRouteSegment>{
-                polyline: L.polyline(latlngs, <L.PolylineOptions>{ opacity: 0.5, color: "blue", weight: 4 }),
+                polyline: L.polyline(latlngs, this.pathOptions),
                 routePoint: (this.state == DrawingState.active && this.hoverState != HoverState.dragging) ?
                     this.createMarker(routePoint) :
                     null,
@@ -327,7 +331,7 @@
         }
 
         private onMouseMove = (e: L.LeafletMouseEvent) => {
-            if (this.state != DrawingState.active || 
+            if (this.state != DrawingState.active ||
                 this.hoverState == HoverState.onMarker ||
                 this.hoverState == HoverState.dragging) {
                 return;
@@ -484,6 +488,33 @@
                 sensitivity: 30,
                 layers: L.layerGroup(polylines)
             });
+        }
+
+        private setHoverPolylineStyle = () => {
+            this.hoverPolyline.setStyle(<L.PolylineOptions>{ opacity: 0.5, color: this.pathOptions.color, weight: this.pathOptions.weight, dashArray: "10, 10" });
+        }
+
+        public getPathOptions = (): L.PathOptions => {
+            return this.pathOptions;
+        }
+
+        public update = (name: string, pathOptions: L.PathOptions) => {
+            if (this.name != name) {
+                this.hashService.removeRoute(this.name);
+                this.name = name;
+                this.hashService.addRoute(this.name);
+                this.hashService.updateRoute(this.getData());
+            }
+            this.pathOptions.color = pathOptions.color;
+            this.pathOptions.weight = pathOptions.weight;
+            for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
+                var polyline = this.routeSegments[segmentIndex].polyline;
+                if (polyline == null) {
+                    continue;
+                }
+                polyline.setStyle(this.pathOptions);
+            }
+            this.setHoverPolylineStyle();
         }
     }
 }

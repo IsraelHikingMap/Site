@@ -1,7 +1,9 @@
 ﻿module IsraelHiking {
+    // HM TODO: finish route propertires UI, add BL.
+    // HM TODO: ctrl+o - open, ctrl+s - save.
     // HM TODO: support twl? - will be solved hopefull with iis backend.
 
-    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule"]);
+    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "n3-line-chart"]);
 
     L.Icon.Default.imagePath = "content/images/";
 

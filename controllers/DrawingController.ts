@@ -8,18 +8,25 @@
         getRoutingType(): string;
         isUndoDisbaled(): boolean;
         showRouting(): boolean;
+        openStatistics(e: Event): void;
+        isStatisticsOpen(): boolean;
     }
 
-    export class DrawingController extends BaseMapController {
+    
+
+    export class DrawingController extends BaseMapControllerWithToolTip {
         private layersService: Services.LayersService;
         private selectedDrawing: Services.Drawing.IDrawing;
+        private routeStatisticsTooltip;
 
         constructor($scope: IDrawingScope,
+            $tooltip,
             mapService: Services.MapService,
             layersService: Services.LayersService) {
-            super(mapService);
+            super(mapService, $tooltip);
             this.layersService = layersService;
             this.selectedDrawing = this.layersService.getSelectedDrawing();
+            this.routeStatisticsTooltip = null;
 
             this.layersService.eventHelper.addListener((args: Common.IDataChangedEventArgs) => {
                 this.selectedDrawing = this.layersService.getSelectedDrawing();
@@ -68,6 +75,21 @@
 
             $scope.showRouting = (): boolean => {
                 return this.selectedDrawing.name != Common.Constants.MARKERS;
+            }
+
+            $scope.openStatistics = (e: Event) => {
+                if (this.routeStatisticsTooltip == null) {
+                    var newScope = <IRouteStatisticsScope>$scope.$new();
+                    var controller = new RouteStatisticsController(newScope, this.layersService); // updates the new scope
+                    
+                    this.routeStatisticsTooltip = this.createToolTip(e.target, "views/templates/routeStatisticsTooltip.tpl.html", "Route Statistics", newScope);
+                    this.routeStatisticsTooltip.$promise.then(this.routeStatisticsTooltip.show);
+                }
+                this.suppressEvents(e);
+            }
+
+            $scope.isStatisticsOpen = () => {
+                return this.routeStatisticsTooltip != null && this.routeStatisticsTooltip.$isShown;
             }
 
             document.onkeydown = (e: KeyboardEvent) => {

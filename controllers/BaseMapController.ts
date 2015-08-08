@@ -9,7 +9,7 @@
     }
 
     export class BaseMapControllerWithToolTip extends BaseMapController {
-        $tooltip;
+        private $tooltip;
 
         constructor(mapService: Services.MapService, $tooltip) {
             super(mapService);

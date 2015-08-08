@@ -4,10 +4,6 @@
         addLayer(name: string, address: string, minZoom: number, maxZoom: number, e: Event): void;
     }
 
-    export interface IAddRouteModalScope extends angular.IScope {
-        addRoute(name, e: Event): void;
-    }
-
     export interface ILayersScope extends angular.IScope {
         baseLayers: Services.IBaseLayer[];
         overlays: Services.IOvelay[];
@@ -21,7 +17,7 @@
         addRoute(e: Event): void;
         removeBaseLayer(baseLayer: Services.IBaseLayer, e: Event): void;
         removeOverlay(overlay: Services.IOvelay, e: Event): void;
-        removeRoute(routeName: string, e: Event): void;
+        editRoute(routeName: string, e: Event): void;
         selectBaseLayer(baseLayer: Services.IBaseLayer, e: Event): void;
         toggleVisibility(overlay: Services.IOvelay, e: Event): void;
         selectDrawing(name: string, e: Event): void;
@@ -43,7 +39,6 @@
             $scope.hovering = false;
             var addBaseLayerModal = this.createBaseLayerModal($scope, $modal, layersService);
             var addOverlayModal = this.createOverlayModal($scope, $modal, layersService);
-            var addRouteModal = this.createRouteModal($scope, $modal, layersService);
 
             $scope.addBaseLayer = (e: Event) => {
                 addBaseLayerModal.show();
@@ -56,7 +51,8 @@
             }
 
             $scope.addRoute = (e: Event) => {
-                addRouteModal.show();
+                var modal = this.createRouteModal($scope, $modal, layersService);
+                modal.$promise.then(modal.show);
                 this.suppressEvents(e);
             }
 
@@ -69,8 +65,9 @@
                 layersService.removeOverlay(overlay);
                 this.suppressEvents(e);
             }
-            $scope.removeRoute = (routeName: string, e: Event) => {
-                layersService.removeRoute(routeName);
+            $scope.editRoute = (routeName: string, e: Event) => {
+                var modal = this.createRouteModal($scope, $modal, layersService, routeName);
+                modal.$promise.then(modal.show);
                 this.suppressEvents(e);
             }
 
@@ -120,17 +117,15 @@
             return this.createAddLayerModal($modal, "Add Overlay", addOvelayScope);
         }
 
-        private createRouteModal = ($scope: ILayersScope, $modal, layersService: Services.LayersService): any => {
-            var addRouteScope = <IAddRouteModalScope>$scope.$new();
-            addRouteScope.addRoute = (name: string, e: Event) => {
-                layersService.addRoute(name);
-                this.suppressEvents(e);
-            }
+        private createRouteModal = ($scope: ILayersScope, $modal, layersService: Services.LayersService, name?: string): any => {
+            var routePropertiesScope = <IRoutePropertiesScope>$scope.$new();
+            var routePropertiesController = new RoutePropertiesController(routePropertiesScope, layersService, name);
+
             return $modal({
-                title: "Add Route",
-                templateUrl: "views/templates/addRouteModal.tpl.html",
+                title: "Route Properties",
+                templateUrl: "views/templates/routePropertiesModal.tpl.html",
                 show: false,
-                scope: addRouteScope,
+                scope: routePropertiesScope,
             });
         }
 

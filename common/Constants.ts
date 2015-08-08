@@ -1,33 +1,39 @@
 ﻿module IsraelHiking.Common {
     export class Constants {
         // Services
-        static rootScope = "$rootScope";
-        static scope = "$scope";
-        static tooltip = "$tooltip";
-        static location = "$location";
-        static http = "$http";
-        static q = "$q";
-        static compile = "$compile";
-        static injector = "$injector";
-        static parserFactory = "parserFactory";
-        static routerFactory = "routerFactory";
-        static drawingFactory = "drawingFactory";
-        static controlCreatorService = "controlCreatorService";
-        static hashService = "hashService";
-        static mapService = "mapService";
-        static layersService = "layersService";
-        static localStorageService = "localStorageService";
-        static snappingService = "snappingService";
+        public static rootScope = "$rootScope";
+        public static scope = "$scope";
+        public static tooltip = "$tooltip";
+        public static location = "$location";
+        public static http = "$http";
+        public static q = "$q";
+        public static compile = "$compile";
+        public static injector = "$injector";
+        public static parserFactory = "parserFactory";
+        public static routerFactory = "routerFactory";
+        public static drawingFactory = "drawingFactory";
+        public static controlCreatorService = "controlCreatorService";
+        public static hashService = "hashService";
+        public static mapService = "mapService";
+        public static layersService = "layersService";
+        public static localStorageService = "localStorageService";
+        public static snappingService = "snappingService";
         
         // Controllers
-        static mainMapController = "mainMapController";
-        static fileController = "fileController";
-        static drawingController = "drawingController";
-        static editOSMController = "editOSMController";
-        static infoHelpController = "infoHelpController";
-        static markerPopupController = "markerPopupController";
+        public static mainMapController = "mainMapController";
+        public static fileController = "fileController";
+        public static drawingController = "drawingController";
+        public static editOSMController = "editOSMController";
+        public static infoHelpController = "infoHelpController";
+        public static markerPopupController = "markerPopupController";
 
-        static MARKERS = "markers";
+        public static MARKERS = "markers";
+
+        public static COLORS = ["blue", "red", "green", "pink",
+            "purple", "brown", "yellow", "orange",
+            "turquoise", "black", "grey", "white"];
+
+
     }
 
 } 

@@ -144,7 +144,7 @@
                     segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];
                     manipulatedRouteData.segments.push(segmentData);
                 }
-                this.layersService.addRoute(manipulatedRouteData.name, manipulatedRouteData);
+                this.layersService.addRoute(manipulatedRouteData.name, manipulatedRouteData, null);
             }
         }
     }
