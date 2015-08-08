@@ -32,7 +32,7 @@
         }
 
         private generateSnappings = () => {
-            if (this.map.getZoom() <= 12) {
+            if (this.map.getZoom() <= 13) {
                 this.snappings.clearLayers();
                 return;
             }
@@ -47,10 +47,10 @@
                     var route = data.routes[routeIndex];
                     for (var segmentIndex = 0; segmentIndex < route.segments.length; segmentIndex++) {
                         var segment = route.segments[segmentIndex];
-                        if (segment.latlngs.length < 2) {
+                        if (segment.latlngzs.length < 2) {
                             continue;
                         }
-                        this.snappings.addLayer(L.polyline(segment.latlngs, <L.PolylineOptions> { opacity: 0 }));
+                        this.snappings.addLayer(L.polyline(segment.latlngzs, <L.PolylineOptions> { opacity: 0 }));
                     }
                 }
             });

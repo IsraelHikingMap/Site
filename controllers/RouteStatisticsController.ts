@@ -1,33 +1,63 @@
 ﻿module IsraelHiking.Controllers {
     export interface IRouteStatisticsScope extends angular.IScope {
-        length: number;
+        length: string;
         chartData: { x: string; y: number }[];
         chartOptions: any;
     }
 
     export class RouteStatisticsController {
+        drawingRoute: Services.Drawing.DrawingRoute;
+
         constructor($scope: IRouteStatisticsScope, layersService: Services.LayersService) {
-            $scope.length = 4;
-            $scope.chartData = [{ x: "1", y: 1 }, { x: "2", y: 2 }, { x: "3", y: 1.5 }, { x: "4", y: 1.3 }];
+            $scope.chartData = [];
+            $scope.chartOptions = {};
+            this.routeChanged($scope, layersService);
+
+            layersService.eventHelper.addListener((args: Common.IDataChangedEventArgs) => {
+                this.routeChanged($scope, layersService);
+            });
+        }
+
+        private routeChanged = ($scope: IRouteStatisticsScope, layersService: Services.LayersService) => {
+            var selectedDrawing = layersService.getSelectedDrawing();
+            if (selectedDrawing.name == Common.Constants.MARKERS) {
+                return;
+            }
+            this.drawingRoute = <Services.Drawing.DrawingRoute>selectedDrawing;
+            this.updateChart($scope);
+
+            this.drawingRoute.setRouteDataChangedCallback(() => {
+                this.updateChart($scope);
+            });
+        }
+
+        private updateChart = ($scope: IRouteStatisticsScope) => {
+            var statistics = this.drawingRoute.getRouteStatistics();
+
+            $scope.length = statistics.length.toFixed(2);
+            $scope.chartData = statistics.points;
             $scope.chartOptions = {
                 axes: {
-                    x: { key: 'x', ticksFormat: '.2f', type: 'linear', ticks: 4 },
-                    y: { type: 'linear', ticks: 5 },
+                    x: { type: "linear", ticks: 4, ticksFormat: ".2f", key: "x" },
+                    y: { type: "linear", ticks: 5 },
                 },
                 margin: {
-                    left: 25,
+                    left: 30,
                     right: 5,
                     top: 5,
                     bottom: 25
                 },
-                series: [{ y: 'y', color: 'steelblue', thickness: '2px', type: 'area', striped: true, label: 'Route' }, ],
-                lineMode: 'linear',
+                series: [{ y: "y", color: this.drawingRoute.getPathOptions().color, thickness: "2px", type: "area", striped: true, label: this.drawingRoute.name }],
+                lineMode: "linear",
                 tension: 0.7,
-                tooltip: { mode: 'scrubber', formatter: function (x, y, series) { return "(" + x + "," + y + ")"; } },
+                tooltip: { mode: "scrubber", formatter: function (x, y, series) { return "(" + x + "," + y + ")"; } },
                 drawLegend: false,
                 drawDots: true,
                 hideOverflow: false,
                 columnsHGap: 5
+            }
+            if (!$scope.$$phase) {
+                $scope.$apply();
             }
         }
     }

@@ -274,17 +274,6 @@ module IsraelHiking.Services {
             return routeName;
         }
 
-        private createPolyline(data: Common.RouteData): L.Polyline {
-            var latlngs = <L.LatLng[]>[];
-            for (var segmentIndex = 0; segmentIndex < data.segments.length; segmentIndex++) {
-                var segment = data.segments[segmentIndex];
-                for (var latlngIndex = 0; latlngIndex < segment.latlngs.length; latlngIndex++) {
-                    latlngs.push(segment.latlngs[latlngIndex]);
-                }
-            }
-            return L.polyline(latlngs, <L.PolylineOptions> { opacity: 0.5, color: "red", weight: 4 });
-        }
-
         private addLayersFromLocalStorage = () => {
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY) || [];
             for (var baseLayerIndex = 0; baseLayerIndex < baseLayers.length; baseLayerIndex++) {

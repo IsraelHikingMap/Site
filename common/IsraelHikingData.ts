@@ -13,7 +13,7 @@
 
     export interface RouteSegmentData {
         routePoint: L.LatLng;
-        latlngs: L.LatLng[];
+        latlngzs: LatLngZ[];
         routingType: string;
     }
 
@@ -26,5 +26,9 @@
         routes: RouteData[];
         markers: MarkerData[];
         bounds: L.LatLngBounds;
+    }
+
+    export interface LatLngZ extends L.LatLng {
+        z: number;
     }
 }

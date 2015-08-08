@@ -3,7 +3,13 @@
         routePoint: L.Marker;
         routePointLatlng: L.LatLng;
         polyline: L.Polyline;
+        latlngzs: Common.LatLngZ[];
         routingType: string;
+    }
+
+    export interface IRouteStatistics {
+        points: { x: string; y: number }[];
+        length: number;
     }
 
     class HoverState {
@@ -31,6 +37,7 @@
         private routePointIcon: L.Icon;
         private hoverState: string;
         private pathOptions: L.PathOptions;
+        private datachangedCallback: Function;
 
         constructor($q: angular.IQService,
             mapService: MapService,
@@ -122,14 +129,16 @@
 
             this.middleMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: true, draggable: true, icon: this.middleIcon, opacity: 0.0 });
             this.middleMarker.on("click", (e: L.LeafletMouseEvent) => {
-                this.convertMiddleMarkerToPoint();
+                this.onMiddleMarkerClick();
             });
 
             this.middleMarker.on("dragstart", (e: L.LeafletMouseEvent) => {
                 this.setHoverState(HoverState.dragging);
                 var snappingResponse = this.snapToRoute(this.middleMarker.getLatLng());
                 this.selectedRouteSegmentIndex = _.findIndex(this.routeSegments, (segment) => segment.polyline == snappingResponse.polyline);
-                var newSegment = this.createRouteSegment(snappingResponse.latlng, [this.routeSegments[this.selectedRouteSegmentIndex - 1].routePoint.getLatLng(), snappingResponse.latlng], this.currentRoutingType);
+                var latlngzs = [this.getLatLngZFromLatLng(this.routeSegments[this.selectedRouteSegmentIndex - 1].routePoint.getLatLng()),
+                    this.getLatLngZFromLatLng(snappingResponse.latlng)];
+                var newSegment = this.createRouteSegment(snappingResponse.latlng, latlngzs, this.currentRoutingType);
                 this.routeSegments.splice(this.selectedRouteSegmentIndex, 0, newSegment);
 
             });
@@ -148,21 +157,23 @@
                 var snappingResponse = this.snappingService.snapTo(this.middleMarker.getLatLng());
                 this.routeSegments[this.selectedRouteSegmentIndex].routePoint = this.createMarker(snappingResponse.latlng);
                 this.routeSegments[this.selectedRouteSegmentIndex].routePointLatlng = snappingResponse.latlng;
-                this.runRouting(this.selectedRouteSegmentIndex - 1, this.selectedRouteSegmentIndex);
-                this.runRouting(this.selectedRouteSegmentIndex, this.selectedRouteSegmentIndex + 1);
+                var tasks = [];
+                tasks.push(this.runRouting(this.selectedRouteSegmentIndex - 1, this.selectedRouteSegmentIndex));
+                tasks.push(this.runRouting(this.selectedRouteSegmentIndex, this.selectedRouteSegmentIndex + 1));
                 this.selectedRouteSegmentIndex = -1;
                 this.setHoverState(HoverState.none);
-                this.updateDataLayer();
+                this.$q.all(tasks).then(() => this.updateDataLayer());
             });
         }
 
-        private createRouteSegment = (routePoint: L.LatLng, latlngs: L.LatLng[], routingType: string): IRouteSegment => {
+        private createRouteSegment = (routePoint: L.LatLng, latlngzs: Common.LatLngZ[], routingType: string): IRouteSegment => {
             var routeSegment = <IRouteSegment>{
-                polyline: L.polyline(latlngs, this.pathOptions),
                 routePoint: (this.state == DrawingState.active && this.hoverState != HoverState.dragging) ?
                     this.createMarker(routePoint) :
                     null,
                 routePointLatlng: routePoint,
+                polyline: L.polyline(latlngzs, this.pathOptions),
+                latlngzs: latlngzs,
                 routingType: routingType,
             };
             routeSegment.polyline.addTo(this.map);
@@ -170,7 +181,7 @@
         }
 
         private addPoint = (latlng: L.LatLng, routingType: string): angular.IPromise<void> => {
-            this.routeSegments.push(this.createRouteSegment(latlng, [latlng], routingType));
+            this.routeSegments.push(this.createRouteSegment(latlng, [this.getLatLngZFromLatLng(latlng)], routingType));
             if (this.routeSegments.length > 1) {
                 var endPointSegmentIndex = this.routeSegments.length - 1;
                 return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
@@ -200,7 +211,6 @@
             });
             marker.on("dragend", (e: L.LeafletMouseEvent) => {
                 this.dragPointEnd(marker);
-                this.updateDataLayer();
                 this.setHoverState(HoverState.none);
             });
             marker.on("mouseover", (e: L.LeafletMouseEvent) => {
@@ -217,7 +227,7 @@
             });
         }
 
-        private convertMiddleMarkerToPoint = () => {
+        private onMiddleMarkerClick = () => {
             var snappingResponse = this.snapToRoute(this.middleMarker.getLatLng());
             if (snappingResponse.polyline == null) {
                 return;
@@ -226,13 +236,14 @@
             if (segment == null) {
                 return;
             }
-            var segmentLatlngs = segment.polyline.getLatLngs();
+            var segmentLatlngzs = segment.latlngzs;
             var indexOfSegment = this.routeSegments.indexOf(segment);
-            var newSegmentLatlngs = segmentLatlngs.splice(0, snappingResponse.beforeIndex + 1);
-            newSegmentLatlngs.push(snappingResponse.latlng);
+            var newSegmentLatlngs = segmentLatlngzs.splice(0, snappingResponse.beforeIndex + 1);
+            // HM TODO: verify that it works...
+            //newSegmentLatlngs.push(snappingResponse.latlng);
             var newRouteSegment = this.createRouteSegment(snappingResponse.latlng, newSegmentLatlngs, this.currentRoutingType);
-            segmentLatlngs.splice(0, 0, newRouteSegment.routePointLatlng);
-            segment.polyline.setLatLngs(segmentLatlngs);
+            //segmentLatlngzs.splice(0, 0, newRouteSegment.routePointLatlng);
+            segment.polyline.setLatLngs(segmentLatlngzs);
             this.routeSegments.splice(indexOfSegment, 0, newRouteSegment);
         }
 
@@ -263,13 +274,15 @@
             marker.setLatLng(snappingResponse.latlng);
             this.routeSegments[this.selectedRouteSegmentIndex].routePointLatlng = snappingResponse.latlng;
             this.routeSegments[this.selectedRouteSegmentIndex].routingType = this.currentRoutingType;
+            var tasks = [];
             if (this.selectedRouteSegmentIndex > 0) {
-                this.runRouting(this.selectedRouteSegmentIndex - 1, this.selectedRouteSegmentIndex);
+                tasks.push(this.runRouting(this.selectedRouteSegmentIndex - 1, this.selectedRouteSegmentIndex));
             }
             if (this.selectedRouteSegmentIndex < this.routeSegments.length - 1) {
-                this.runRouting(this.selectedRouteSegmentIndex, this.selectedRouteSegmentIndex + 1);
+                tasks.push(this.runRouting(this.selectedRouteSegmentIndex, this.selectedRouteSegmentIndex + 1));
             }
             this.selectedRouteSegmentIndex = -1;
+            this.$q.all(tasks).then(() => this.updateDataLayer());
         }
 
         private removePoint = (point: L.Marker) => {
@@ -279,6 +292,7 @@
 
             if (this.routeSegments.length > 0 && pointSegmentIndex == 0) {
                 // first point is being removed
+                this.routeSegments[0].latlngzs = [];
                 this.routeSegments[0].polyline.setLatLngs([this.routeSegments[0].routePointLatlng]);
                 this.updateDataLayer();
             }
@@ -298,7 +312,8 @@
             var promise = router.getRoute(startSegment.routePointLatlng, endSegment.routePointLatlng);
 
             promise.then((data) => {
-                this.routeSegments[endIndex].polyline.setLatLngs(data[data.length - 1].latlngs);
+                this.routeSegments[endIndex].latlngzs = data[data.length - 1].latlngzs;
+                this.routeSegments[endIndex].polyline.setLatLngs(this.routeSegments[endIndex].latlngzs);
             });
 
             return promise;
@@ -363,7 +378,7 @@
                 var pointSegment = this.routeSegments[wayPointIndex];
                 pointsSegments.push(<Common.RouteSegmentData> {
                     routePoint: pointSegment.routePointLatlng,
-                    latlngs: angular.copy(pointSegment.polyline.getLatLngs()),
+                    latlngzs: angular.copy(pointSegment.latlngzs),
                     routingType: pointSegment.routingType,
                 });
             }
@@ -378,8 +393,8 @@
             data.name = this.name;
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
                 var segment = data.segments[pointIndex];
-                var latlngs = segment.latlngs.length > 0 ? segment.latlngs : [segment.routePoint];
-                this.routeSegments.push(this.createRouteSegment(segment.routePoint, latlngs, segment.routingType));
+                var latlngzs = segment.latlngzs.length > 0 ? segment.latlngzs : [this.getLatLngZFromLatLng(segment.routePoint)];
+                this.routeSegments.push(this.createRouteSegment(segment.routePoint, latlngzs, segment.routingType));
             }
             this.hashService.updateRoute(this.getData());
         }
@@ -455,6 +470,7 @@
             var data = this.getData();
             this.hashService.updateRoute(data);
             this.addDataToStack(data);
+            this.raiseRouteDataChanged();
         }
 
         protected postUndoHook = () => {
@@ -515,6 +531,45 @@
                 polyline.setStyle(this.pathOptions);
             }
             this.setHoverPolylineStyle();
+        }
+
+        private getLatLngZFromLatLng = (latlng: L.LatLng): Common.LatLngZ => {
+            var latlngz = <Common.LatLngZ>latlng;
+            latlngz.z = 0;
+            return latlngz;
+        }
+
+        public getRouteStatistics = (): IRouteStatistics => {
+            var routeStatistics = <IRouteStatistics> {
+                points: [],
+                length: 0,
+            };
+            if (this.routeSegments.length <= 0) {
+                return routeStatistics;
+            }
+            var start = this.routeSegments[0].routePointLatlng;
+            var previousPoint = start;
+            for (var segmentIndex = 1; segmentIndex < this.routeSegments.length; segmentIndex++) {
+                var segment = this.routeSegments[segmentIndex];
+                for (var latlngzIndex = 0; latlngzIndex < segment.latlngzs.length; latlngzIndex++) {
+                    var latlngz = segment.latlngzs[latlngzIndex];
+                    routeStatistics.length += previousPoint.distanceTo(latlngz);
+                    routeStatistics.points.push({ x: (routeStatistics.length / 1000).toFixed(2), y: latlngz.z });
+                    previousPoint = latlngz;
+                }
+            }
+            routeStatistics.length = routeStatistics.length / 1000.0;
+            return routeStatistics;
+        }
+
+        public setRouteDataChangedCallback = (callback: Function) => {
+            this.datachangedCallback = callback;
+        }
+
+        private raiseRouteDataChanged = () => {
+            if (this.datachangedCallback != null) {
+                this.datachangedCallback();
+            }
         }
     }
 }

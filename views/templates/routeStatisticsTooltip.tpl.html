@@ -1,18 +1,26 @@
 ﻿<div class="tooltip in" ng-show="title">
     <div class="tooltip-arrow"></div>
-    <div class="tooltip-inner tooltip-info">
+    <div class="tooltip-inner tooltip-statistics">
         <h3> Route Statistics </h3>
-        <div class="text-left">
-            <div class="panel panel-default">
+        <div>
+            <linechart data="chartData" options="chartOptions" height="200"></linechart>
+            <!--
+                <div class="panel panel-default">
                 <div class="panel-body">
-                    <linechart data="chartData" options="chartOptions" height="200"></linechart>
+
                 </div>
             </div>
+                -->
             <div class="form-horizontal">
                 <div class="form-group">
                     <label class="control-label col-md-4">Length (Km):</label>
                     <div class="col-md-8">
-                        <label class="control-label">{{length}} <button type="button" class="btn btn-default btn-xs"><i class="fa fa-map-marker"></i></button> Km markers</label>
+                        <label class="control-label">
+                            {{length}}
+                            <!-- Not implemented yet...
+                                <button type="button" class="btn btn-default btn-xs"><i class="fa fa-map-marker"></i></button> Km markers
+                                -->
+                        </label>
                     </div>
                 </div>
             </div>

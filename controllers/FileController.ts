@@ -119,7 +119,7 @@
                     name: routeData.name,
                 };
                 for (var segmentIndex = 0; segmentIndex < routeData.segments.length; segmentIndex++) {
-                    var segment = routeData.segments[segmentIndex].latlngs;
+                    var segment = routeData.segments[segmentIndex].latlngzs;
                     var routeLength = 0;
                     for (var latlngIndex = 1; latlngIndex < segment.length; latlngIndex++) {
                         routeLength += segment[latlngIndex - 1].distanceTo(segment[latlngIndex]);
@@ -129,19 +129,19 @@
                         segmentLength = FileController.MINIMAL_SEGMENT_LENGTH;
                     }
                     var currentSegmentLength = 0;
-                    var segmentData = <Common.RouteSegmentData> { latlngs: [segment[0]], routingType: routingType };
+                    var segmentData = <Common.RouteSegmentData> { latlngzs: [segment[0]], routingType: routingType };
                     for (var latlngIndex = 1; latlngIndex < segment.length; latlngIndex++) {
                         currentSegmentLength += segment[latlngIndex - 1].distanceTo(segment[latlngIndex]);
                         if (currentSegmentLength < segmentLength) {
-                            segmentData.latlngs.push(segment[latlngIndex]);
+                            segmentData.latlngzs.push(segment[latlngIndex]);
                             continue;
                         }
-                        segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];
+                        segmentData.routePoint = segmentData.latlngzs[segmentData.latlngzs.length - 1];
                         manipulatedRouteData.segments.push(segmentData);
-                        segmentData = <Common.RouteSegmentData> { latlngs: [segment[latlngIndex - 1], segment[latlngIndex]], routingType: routingType };
+                        segmentData = <Common.RouteSegmentData> { latlngzs: [segment[latlngIndex - 1], segment[latlngIndex]], routingType: routingType };
                         currentSegmentLength = 0;
                     }
-                    segmentData.routePoint = segmentData.latlngs[segmentData.latlngs.length - 1];
+                    segmentData.routePoint = segmentData.latlngzs[segmentData.latlngzs.length - 1];
                     manipulatedRouteData.segments.push(segmentData);
                 }
                 this.layersService.addRoute(manipulatedRouteData.name, manipulatedRouteData, null);

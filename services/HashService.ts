@@ -159,7 +159,7 @@
                 var pointStrings = splitted[pointIndex].split(HashService.DATA_DELIMITER);
                 if (pointStrings.length == 3) {
                     array.push(<Common.RouteSegmentData> {
-                        latlngs: [],
+                        latlngzs: [],
                         routePoint: new L.LatLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])),
                         routingType: pointStrings[0]
                     });
@@ -174,7 +174,7 @@
                 var latlng = latlngs[latlngIndex];
                 array.push(<Common.RouteSegmentData> {
                     routePoint: latlng,
-                    latlngs: [],
+                    latlngzs: [],
                 });
             }
             return array;

@@ -27,21 +27,21 @@
                     }
                     if (feature.geometry.type == BaseParser.LINE_STRING) {
                         var lineString = <GeoJSON.LineString>feature.geometry;
-                        var latlngs = [];
+                        var latlngzs = <Common.LatLngZ[]>[];
                         for (var coordinate = 0; coordinate < lineString.coordinates.length; coordinate++) {
                             var pointCoordinates = lineString.coordinates[coordinate];
-                            latlngs.push(this.createLatlng(pointCoordinates));
+                            latlngzs.push(this.createLatlng(pointCoordinates));
                         }
                         if (lineString.coordinates.length >= 2) {
                             var routeData = <Common.RouteData> { segments: [], name: feature.properties.name || "" };
                             routeData.segments.push(<Common.RouteSegmentData> {
-                                routePoint: latlngs[0],
-                                latlngs: [latlngs[0]],
+                                routePoint: latlngzs[0],
+                                latlngzs: [latlngzs[0]],
                                 routingType: Common.RoutingType.hike,
                             });
                             routeData.segments.push(<Common.RouteSegmentData> {
-                                routePoint: latlngs[latlngs.length - 1],
-                                latlngs: latlngs,
+                                routePoint: latlngzs[latlngzs.length - 1],
+                                latlngzs: latlngzs,
                                 routingType: Common.RoutingType.hike,
                             });
                             data.routes.push(routeData);
@@ -65,8 +65,10 @@
             };
         }
 
-        private createLatlng(coordinates: GeoJSON.Position): L.LatLng {
-            return new L.LatLng(coordinates[1], coordinates[0]);
+        private createLatlng(coordinates: GeoJSON.Position): Common.LatLngZ {
+            var latlngz = <Common.LatLngZ>new L.LatLng(coordinates[1], coordinates[0]);
+            latlngz.z = coordinates[2] || 0; 
+            return latlngz;
         }
 
         public toGeoJson(data: Common.DataContainer): GeoJSON.FeatureCollection {
@@ -99,9 +101,9 @@
                 var lineStringCoordinates = <GeoJSON.Position[]>[];
                 var pointsSegments = routeData.segments;
                 for (var pointSegmentIndex = 0; pointSegmentIndex < pointsSegments.length; pointSegmentIndex++) {
-                    for (var latlngIndex = 0; latlngIndex < pointsSegments[pointSegmentIndex].latlngs.length; latlngIndex++) {
-                        var latlng = pointsSegments[pointSegmentIndex].latlngs[latlngIndex];
-                        lineStringCoordinates.push(<GeoJSON.Position>[latlng.lng, latlng.lat]);
+                    for (var latlngIndex = 0; latlngIndex < pointsSegments[pointSegmentIndex].latlngzs.length; latlngIndex++) {
+                        var latlngz = pointsSegments[pointSegmentIndex].latlngzs[latlngIndex];
+                        lineStringCoordinates.push(<GeoJSON.Position>[latlngz.lng, latlngz.lat, latlngz.z]);
                     }
                 }
                 if (lineStringCoordinates.length > 0) {

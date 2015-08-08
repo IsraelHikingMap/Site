@@ -31,6 +31,18 @@ body {
     opacity: 0.5;
 }
 
+.axis text {
+  fill: white;
+}
+
+.axis path {
+  stroke: white!important;
+}
+
+.tooltip-statistics {
+    min-width: 300px;
+}
+
 /* Extra Small Devices, Phones */ 
 @media only screen and (min-width : 480px) {
 	.tooltip-info {

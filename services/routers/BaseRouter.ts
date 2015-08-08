@@ -24,7 +24,8 @@
                 } catch (err) {
                     failed = true;
                 }
-                if (failed || data.routes.length == 0 || data.routes[0].segments.length < 2 ) {
+                if (failed || data.routes.length == 0 || data.routes[0].segments.length < 2) {
+                    // HM TODO: toast?
                     console.error("Failed routing from " + latlngStart + " to " + latlngEnd);
                     noneRouter.getRoute(latlngStart, latlngEnd).then((noneRouterData) => {
                         deferred.resolve(noneRouterData);
