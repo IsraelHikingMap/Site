@@ -29,11 +29,19 @@
 
         public static MARKERS = "markers";
 
-        public static COLORS = ["blue", "red", "green", "pink",
-            "purple", "brown", "yellow", "orange",
-            "turquoise", "black", "grey", "white"];
-
-
+        public static COLORS = [
+            "#0000FF",
+            "#FF0000",
+            "#FF6600",
+            "#FF00DD",
+            "#008000",
+            "#B700FF",
+            "#00B0A4",
+            "#9C7F00",
+            "#9C3E00",
+            "#7F9900",
+            "#7F8282",
+            "#101010"];
     }
 
 } 
