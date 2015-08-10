@@ -1,5 +1,4 @@
 ﻿module IsraelHiking {
-    // HM TODO: finish route propertires UI, add BL.
     // HM TODO: ctrl+o - open, ctrl+s - save.
     // HM TODO: support twl? - will be solved hopefull with iis backend.
 

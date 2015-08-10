@@ -20,7 +20,7 @@
             this.$rootScope = $rootScope;
             this.enabled = false;
             this.markers = [];
-            this.icon = new L.Icon.Default(<L.IconOptions> { iconUrl: L.Icon.Default.imagePath + "/marker-icon-green.png" });
+            this.icon = this.createMarkerIconWithColor("green");
             this.addDataToStack(this.getData());
 
             this.map.on("click",(e: L.LeafletMouseEvent) => {

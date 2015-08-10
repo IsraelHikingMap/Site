@@ -22,6 +22,10 @@
 
     export class DrawingRoute extends BaseDrawing<Common.RouteData> {
         private static MINIMAL_DISTANCE_BETWEEN_MARKERS = 100; // meter.
+        private static KM_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
+        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;text-shadow: 1px 1px 1px #000;'></i>" +
+        "<strong class='fa-stack-1x'>{{number}}</strong>" +
+        "</span>";
 
         private $q: angular.IQService;
         private routerFactory: Services.Routers.RouterFactory;
@@ -38,6 +42,8 @@
         private hoverState: string;
         private pathOptions: L.PathOptions;
         private datachangedCallback: Function;
+        private showKmMarkers: boolean;
+        private kmMarkersGroup: L.LayerGroup<L.Marker>;
 
         constructor($q: angular.IQService,
             mapService: MapService,
@@ -58,18 +64,14 @@
             this.enabled = false;
             this.hashService.addRoute(this.name);
             this.addDataToStack(this.getData());
-
-            this.routePointIcon = new L.Icon.Default(<L.IconOptions> {
-                iconSize: new L.Point(13, 21),
-                iconAnchor: new L.Point(6, 21),
-                iconUrl: L.Icon.Default.imagePath + "/marker-icon-small.png",
-                shadowUrl: L.Icon.Default.imagePath + "/marker-shadow-small.png",
-                shadowSize: new L.Point(21, 21),
-            });
+            this.showKmMarkers = false;
+            this.kmMarkersGroup = L.layerGroup([]);
+            this.map.addLayer(this.kmMarkersGroup);
+            this.routePointIcon = this.createMarkerIconWithColor(this.pathOptions.color);
 
             this.hoverPolyline = L.polyline([]);
-            this.setHoverPolylineStyle();
             this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.routePointIcon });
+            this.setHoverLayersStyle();
             this.createMiddleMarker();
             this.setHoverState(HoverState.none);
             this.map.on("mousemove", this.onMouseMove, this);
@@ -452,6 +454,7 @@
                 segment.routePoint = null;
             }
             this.setHoverState(HoverState.none);
+            this.toggleKmMarkers(false);
         }
 
         public destroy = () => {
@@ -463,6 +466,7 @@
                 this.destroyPolyline(segment.polyline);
             }
             this.destoryMarker(this.middleMarker);
+            this.map.removeLayer(this.kmMarkersGroup);
             this.map.off("mousemove", this.onMouseMove, this);
         }
 
@@ -471,6 +475,7 @@
             this.hashService.updateRoute(data);
             this.addDataToStack(data);
             this.raiseRouteDataChanged();
+            this.toggleKmMarkers(false);
         }
 
         protected postUndoHook = () => {
@@ -485,6 +490,7 @@
                 this.map.removeLayer(segment.polyline);
                 this.map.removeLayer(segment.routePoint);
             }
+            this.toggleKmMarkers(false);
         }
         public show = () => {
             this.state = DrawingState.active;
@@ -506,8 +512,9 @@
             });
         }
 
-        private setHoverPolylineStyle = () => {
+        private setHoverLayersStyle = () => {
             this.hoverPolyline.setStyle(<L.PolylineOptions>{ opacity: 0.5, color: this.pathOptions.color, weight: this.pathOptions.weight, dashArray: "10, 10" });
+            this.hoverMarker.setIcon(this.routePointIcon);
         }
 
         public getPathOptions = (): L.PathOptions => {
@@ -522,15 +529,19 @@
                 this.hashService.updateRoute(this.getData());
             }
             this.pathOptions.color = pathOptions.color;
+            this.routePointIcon = this.createMarkerIconWithColor(pathOptions.color);
             this.pathOptions.weight = pathOptions.weight;
             for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
-                var polyline = this.routeSegments[segmentIndex].polyline;
-                if (polyline == null) {
-                    continue;
+                var segment = this.routeSegments[segmentIndex];
+                if (segment.polyline != null) {
+                    segment.polyline.setStyle(this.pathOptions);
                 }
-                polyline.setStyle(this.pathOptions);
+                if (segment.routePoint != null) {
+                    segment.routePoint.setIcon(this.routePointIcon)
+                }
+                
             }
-            this.setHoverPolylineStyle();
+            this.setHoverLayersStyle();
         }
 
         private getLatLngZFromLatLng = (latlng: L.LatLng): Common.LatLngZ => {
@@ -560,6 +571,50 @@
             }
             routeStatistics.length = routeStatistics.length / 1000.0;
             return routeStatistics;
+        }
+
+        public isShowingKmMarkers = (): boolean => {
+            return this.showKmMarkers;
+        }
+
+        public toggleKmMarkers = (showKmMarkers: boolean) => {
+            this.showKmMarkers = showKmMarkers;
+            this.kmMarkersGroup.clearLayers();
+            if (this.showKmMarkers == false || this.routeSegments.length <= 0) {
+                return;
+            }
+            var length = 0;
+            var markerNumber = 0;
+            var start = this.routeSegments[0].routePointLatlng;
+            this.kmMarkersGroup.addLayer(this.createKmMarker(start, markerNumber));
+            var previousPoint = start;
+            for (var segmentIndex = 1; segmentIndex < this.routeSegments.length; segmentIndex++) {
+                var segment = this.routeSegments[segmentIndex];
+                for (var latlngzIndex = 0; latlngzIndex < segment.latlngzs.length; latlngzIndex++) {
+                    var latlngz = segment.latlngzs[latlngzIndex];
+                    length += previousPoint.distanceTo(latlngz);
+                    previousPoint = latlngz;
+                    if (length < (markerNumber + 1) * 1000) {
+                        continue;
+                    }
+                    markerNumber++;
+                    this.kmMarkersGroup.addLayer(this.createKmMarker(latlngz, markerNumber));
+                }
+            }
+        }
+
+        private createKmMarker = (latlng: L.LatLng, markerNumber: number): L.Marker => {
+            return L.marker(latlng, <L.MarkerOptions> {
+                clickable: false,
+                draggable: false,
+                icon: L.divIcon(<L.DivIconOptions> {
+                    html: DrawingRoute.KM_MARKER_HTML.replace("{{number}}", markerNumber.toString()),
+                    iconSize: L.point(32, 32),
+                    iconAnchor: L.point(16, 32),
+                    className: "km-marker",
+                    popupAnchor: L.point(0, -30),
+                })
+            });
         }
 
         public setRouteDataChangedCallback = (callback: Function) => {

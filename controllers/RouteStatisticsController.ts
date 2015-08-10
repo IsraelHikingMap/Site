@@ -1,8 +1,11 @@
 ﻿module IsraelHiking.Controllers {
     export interface IRouteStatisticsScope extends angular.IScope {
         length: string;
+        isKmMarkersOn: boolean;
         chartData: { x: string; y: number }[];
         chartOptions: any;
+        isShowingKmMarkers(): boolean;
+        toggleKmMarker(): void;
     }
 
     export class RouteStatisticsController {
@@ -16,6 +19,19 @@
             layersService.eventHelper.addListener((args: Common.IDataChangedEventArgs) => {
                 this.routeChanged($scope, layersService);
             });
+
+            $scope.toggleKmMarker = () => {
+                if (this.drawingRoute != null) {
+                    this.drawingRoute.toggleKmMarkers(!this.drawingRoute.isShowingKmMarkers());
+                }
+            }
+
+            $scope.isShowingKmMarkers = (): boolean => {
+                if (this.drawingRoute == null) {
+                    return false;
+                }
+                return this.drawingRoute.isShowingKmMarkers();
+            }
         }
 
         private routeChanged = ($scope: IRouteStatisticsScope, layersService: Services.LayersService) => {

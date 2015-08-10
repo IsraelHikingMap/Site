@@ -23,6 +23,7 @@
 
 
     export class BaseDrawing<TData> extends ObjectWithMap implements IDrawing {
+        private static COLOR_MARKER_HTML = "<i class='fa fa-map-marker fa-3x' style='color:{{color}};opacity:0.5;text-shadow: 3px 3px 3px #000;'></i>";
 
         private dataStack: TData[];
         protected hashService: HashService;
@@ -87,5 +88,15 @@
 
         // should be override in derived
         protected postUndoHook = () => { }
+
+        protected createMarkerIconWithColor = (color: string) => {
+            return L.divIcon(<L.DivIconOptions> {
+                html: BaseDrawing.COLOR_MARKER_HTML.replace("{{color}}", color),
+                iconSize: L.point(20, 36),
+                iconAnchor: L.point(10, 36),
+                className: "color-marker",
+                popupAnchor: L.point(0, -30),
+            });
+        }
     }
 } 
