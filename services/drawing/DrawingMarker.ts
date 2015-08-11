@@ -20,7 +20,7 @@
             this.$rootScope = $rootScope;
             this.enabled = false;
             this.markers = [];
-            this.icon = this.createMarkerIconWithColor("green");
+            this.icon = this.createMarkerIconWithColor();
             this.addDataToStack(this.getData());
 
             this.map.on("click",(e: L.LeafletMouseEvent) => {
@@ -175,6 +175,10 @@
         protected postUndoHook = () => {
             var data = this.getData();
             this.hashService.updateMarkers(data);
+        }
+
+        public getColor = () => {
+            return "green";
         }
     }
 }

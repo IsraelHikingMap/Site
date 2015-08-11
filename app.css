@@ -43,6 +43,10 @@ body {
     min-width: 300px;
 }
 
+.icon-background {
+    top: -2px;
+}
+
 /* Extra Small Devices, Phones */ 
 @media only screen and (min-width : 480px) {
 	.tooltip-info {

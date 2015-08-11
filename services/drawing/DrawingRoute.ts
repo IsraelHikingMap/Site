@@ -23,7 +23,8 @@
     export class DrawingRoute extends BaseDrawing<Common.RouteData> {
         private static MINIMAL_DISTANCE_BETWEEN_MARKERS = 100; // meter.
         private static KM_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
-        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;text-shadow: 1px 1px 1px #000;'></i>" +
+        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +
+        "<i class='fa fa-circle fa-stack-1x icon-background' style='color:white;'></i>" +
         "<strong class='fa-stack-1x'>{{number}}</strong>" +
         "</span>";
 
@@ -67,7 +68,7 @@
             this.showKmMarkers = false;
             this.kmMarkersGroup = L.layerGroup([]);
             this.map.addLayer(this.kmMarkersGroup);
-            this.routePointIcon = this.createMarkerIconWithColor(this.pathOptions.color);
+            this.routePointIcon = this.createMarkerIconWithColor();
 
             this.hoverPolyline = L.polyline([]);
             this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.routePointIcon });
@@ -529,7 +530,7 @@
                 this.hashService.updateRoute(this.getData());
             }
             this.pathOptions.color = pathOptions.color;
-            this.routePointIcon = this.createMarkerIconWithColor(pathOptions.color);
+            this.routePointIcon = this.createMarkerIconWithColor();
             this.pathOptions.weight = pathOptions.weight;
             for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
                 var segment = this.routeSegments[segmentIndex];
@@ -625,6 +626,10 @@
             if (this.datachangedCallback != null) {
                 this.datachangedCallback();
             }
+        }
+
+        public getColor = () => {
+            return this.pathOptions.color;
         }
     }
 }

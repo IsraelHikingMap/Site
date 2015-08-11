@@ -49,12 +49,12 @@
 
         private updateChart = ($scope: IRouteStatisticsScope) => {
             var statistics = this.drawingRoute.getRouteStatistics();
-
+            var ticks = _.range(1, Math.floor(statistics.length) + 1, Math.ceil(statistics.length / 10));
             $scope.length = statistics.length.toFixed(2);
             $scope.chartData = statistics.points;
             $scope.chartOptions = {
                 axes: {
-                    x: { type: "linear", ticks: 4, ticksFormat: ".2f", key: "x" },
+                    x: { type: "linear", ticks: ticks, ticksFormat: "d", key: "x" },
                     y: { type: "linear", ticks: 5 },
                 },
                 margin: {
@@ -63,7 +63,7 @@
                     top: 5,
                     bottom: 25
                 },
-                series: [{ y: "y", color: this.drawingRoute.getPathOptions().color, thickness: "2px", type: "area", striped: true, label: this.drawingRoute.name }],
+                series: [{ y: "y", color: this.drawingRoute.getColor(), thickness: "2px", type: "area", striped: true, label: this.drawingRoute.name }],
                 lineMode: "linear",
                 tension: 0.7,
                 tooltip: { mode: "scrubber", formatter: function (x, y, series) { return "(" + x + "," + y + ")"; } },

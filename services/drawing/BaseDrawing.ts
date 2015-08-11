@@ -10,6 +10,7 @@
         name: string;
         activate: () => void;
         deactivate: () => void;
+        getColor: () => string;
         hide: () => void;
         show: () => void;
         undo: () => void;
@@ -44,6 +45,8 @@
         public activate = (): void => { }
         // should be override in derived
         public deactivate = (): void => { }
+        // should be override in derived
+        public getColor = (): string => { return "" }
         // should be override in derived
         public hide = (): void => { }
         // should be override in derived
@@ -89,9 +92,9 @@
         // should be override in derived
         protected postUndoHook = () => { }
 
-        protected createMarkerIconWithColor = (color: string) => {
+        protected createMarkerIconWithColor = () => {
             return L.divIcon(<L.DivIconOptions> {
-                html: BaseDrawing.COLOR_MARKER_HTML.replace("{{color}}", color),
+                html: BaseDrawing.COLOR_MARKER_HTML.replace("{{color}}", this.getColor()),
                 iconSize: L.point(20, 36),
                 iconAnchor: L.point(10, 36),
                 className: "color-marker",

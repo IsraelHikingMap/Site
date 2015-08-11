@@ -20,13 +20,13 @@
         <button class="btn btn-xs btn-success" ng-click="addOverlay($event)" ng-show="advanced"><i class="fa fa-plus"></i> Add Overlay</button>
         <div class="leaflet-control-layers-separator"></div>
         <div ng-repeat="route in routes">
-            <label class="control-label">
+            <label class="control-label" style="color:{{route.getColor()}}">
                 <button class="btn btn-xs btn-default" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.state == 'active' }" title="Select or hide route"><i ng-class="{'fa-pencil': route.state != 'hidden', 'fa-eye-slash': route.state == 'hidden' }" class="fa"></i></button>
                 <button class="btn btn-xs btn-warning" ng-click="editRoute(route.name, $event)" ng-show="advanced"><i class="fa fa-wrench"></i></button>
                 {{route.name}}
             </label>
         </div>
-        <label class="control-label">
+        <label class="control-label" style="color:{{markers.getColor()}}">
             <button class="btn btn-xs btn-default" ng-click="selectDrawing(markers.name, $event)" ng-class="{'active' : markers.state == 'active' }" title="Select or hide markers"><i ng-class="{'fa-map-marker': markers.state != 'hidden', 'fa-eye-slash': markers.state == 'hidden' }" class="fa"></i></button>
             {{markers.name}}
         </label>
