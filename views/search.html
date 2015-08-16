@@ -1,0 +1,25 @@
+﻿<div class="leaflet-bar" ng-hide="isShowingSearch">
+    <a class="cursor-pointer" ng-click="toggleSearchBar($event)" title="Search"><i class="fa fa-search fa-lg"></i></a>
+</div>
+<div ng-show="isShowingSearch" class="search-results-panel">
+    <table class="table-hover">
+        <thead>
+            <tr>
+                <th>
+                    <div class="input-group">
+                        <input type="text" ng-model="searchTerm" ng-change="getAddresses(searchTerm)" class="form-control" placeholder="Search..." dir="{{isHebrew ? 'rtl' : 'ltr'}}"/>
+                        <a class="btn btn-default input-group-addon" ng-click="toggleSearchBar($event)"><i class="fa fa-search fa-lg"></i></a>
+                    </div>
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr ng-repeat="address in addresses" ng-click="selectAddress(address)" dir="{{isHebrew ? 'rtl' : 'ltr'}}">
+                <td>
+                    <p class="search-results-item">{{address.display}}</p>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+

@@ -28,13 +28,9 @@
             this.controlCreatorService.create(this.map, "drawing-control");
             this.controlCreatorService.create(this.map, "edit-osm-control");
             this.controlCreatorService.create(this.map, "info-help-control");
+            this.controlCreatorService.create(this.map, "search-control", "topright");
 
             L.control.scale(<L.ScaleOptions> { imperial: false }).addTo(this.map);
-            (<any>L).Control.geocoder({
-                geocoder: (<any>L).Control.Geocoder.Nominatim({
-                    geocodingQueryParams: { countrycodes: 'no' }
-                })
-            }).addTo(this.map);
 
             this.controlCreatorService.create(this.map, "layers-control", "topright");
         }

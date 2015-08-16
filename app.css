@@ -1,5 +1,5 @@
-﻿html{
-  height: 100%;
+﻿html {
+    height: 100%;
 }
 
 body {
@@ -11,20 +11,20 @@ body {
 }
 
 #map {
-	position: absolute; 
-	top:0; 
-	bottom:0; 
-	right:0; 
-	left:0; 
-	overflow:hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    overflow: hidden;
 }
 
 .cursor-pointer {
-	cursor: pointer;
+    cursor: pointer;
 }
 
 .cursor-crosshair {
-	cursor: crosshair;
+    cursor: crosshair;
 }
 
 .modal-backdrop {
@@ -32,11 +32,11 @@ body {
 }
 
 .axis text {
-  fill: white;
+    fill: white;
 }
 
 .axis path {
-  stroke: white!important;
+    stroke: white !important;
 }
 
 .tooltip-statistics {
@@ -47,32 +47,43 @@ body {
     top: -2px;
 }
 
-/* Extra Small Devices, Phones */ 
+.search-results-panel {
+    background-color: #FFF;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    max-width: 250px;
+}
+
+.search-results-item {
+    margin: 10px;
+}
+
+/* Extra Small Devices, Phones */
 @media only screen and (min-width : 480px) {
-	.tooltip-info {
-	  max-width: 250px;
-	}
+    .tooltip-info {
+        max-width: 250px;
+    }
 }
 
 /* Small Devices, Tablets */
 @media only screen and (min-width : 768px) {
-	.tooltip-info {
-	  max-width: 600px;
-	}
+    .tooltip-info {
+        max-width: 600px;
+    }
 }
 
 /* Medium Devices, Desktops */
 @media only screen and (min-width : 992px) {
-	.tooltip-info {
-	  max-width: 600px;
-	}
+    .tooltip-info {
+        max-width: 600px;
+    }
 }
 
 /* Large Devices, Wide Screens */
 @media only screen and (min-width : 1200px) {
-	.tooltip-info {
-	  width: 600px;
-	}
+    .tooltip-info {
+        width: 600px;
+    }
 }
 
 .help-button {
@@ -81,5 +92,5 @@ body {
 }
 
 .tooltip-inner a {
-    color: #79bdf7
+    color: #79bdf7;
 }
