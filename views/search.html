@@ -7,7 +7,7 @@
             <tr>
                 <th>
                     <div class="input-group">
-                        <input type="text" ng-model="searchTerm" ng-change="getAddresses(searchTerm)" class="form-control" placeholder="Search..." dir="{{isHebrew ? 'rtl' : 'ltr'}}"/>
+                        <input type="text" ng-model="searchTerm" ng-change="getAddresses(searchTerm)" class="form-control" placeholder="Search..." dir="{{isHebrew ? 'rtl' : 'ltr'}}" sync-focus-with="isShowingSearch" />
                         <a class="btn btn-default input-group-addon" ng-click="toggleSearchBar($event)"><i class="fa fa-search fa-lg"></i></a>
                     </div>
                 </th>

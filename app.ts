@@ -34,6 +34,7 @@
             new Controllers.MainMapcontoller(mapService, controlCreatorService, hashService)]);
     
     // Directives:
+    app.directive("syncFocusWith", () => new Directives.SyncFocusWithDirective());
     app.directive("markerPopup", () => <angular.IDirective> {
         controller: Controllers.MarkerPopupController,
         templateUrl: "views/templates/markerPopup.tpl.html",
@@ -62,4 +63,5 @@
         controller: Controllers.SearchController,
         templateUrl: "views/search.html",
     });
+    
 }

@@ -91,6 +91,22 @@
             if ($scope.isShowingSearch) {
                 $scope.getAddresses($scope.searchTerm);
             }
+
+            $(window).bind("keydown", (e: JQueryEventObject) => {
+
+                if (e.ctrlKey == false) {
+                    return;
+                }
+                switch (String.fromCharCode(e.which).toLowerCase()) {
+                    case "f":
+                        $scope.toggleSearchBar(e);
+                        break;
+                }
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
+                return false;
+            });
         }
 
         private handleSearchResponse = ($scope: ISearchScope, response: any, searchTerm: string): ISearchResults[]=> {

@@ -137,6 +137,7 @@
     <TypeScriptCompile Include="controllers\RoutePropertiesContoller.ts" />
     <TypeScriptCompile Include="controllers\RouteStatisticsController.ts" />
     <TypeScriptCompile Include="controllers\SearchController.ts" />
+    <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-cookies.d.ts" />
@@ -187,9 +188,7 @@
     <TypeScriptCompile Include="services\SnappingService.ts" />
     <TypeScriptCompile Include="common\Constants.ts" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="directives\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>
