@@ -27,6 +27,7 @@
             this.parserFactory = parserFactory;
             this.hashService = hashService;
             this.setDragAndDrop($scope);
+            this.fileChooserTooltip = null;
 
             $scope.open = ($files, e: Event) => {
 
@@ -77,6 +78,26 @@
                     ((<any>window).URL || (<any>window).webkitURL).revokeObjectURL(blobURL);
                 }, 100);
             }
+
+            $(window).bind("keydown", (e: JQueryEventObject) => {
+
+                if (e.ctrlKey == false) {
+                    return;
+                }
+                switch (String.fromCharCode(e.which).toLowerCase()) {
+                    //case "o":
+                        //angular.element("#openFile").trigger("click");
+                        // HM TODO: add support to open file from shorutcut.
+                        //break;
+                    case "s":
+                        angular.element("#saveFile").trigger("click");
+                        break;
+                }
+                if (!$scope.$$phase) {
+                    $scope.$apply();
+                }
+                return false;
+            });
         }
 
         private setDragAndDrop = ($scope: IFileScope) => {
