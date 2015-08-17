@@ -109,7 +109,7 @@
                             coords.forEach(function (coordinates) {
                                 var seg = { trkpt: [] };
                                 coordinates.forEach(function (c) {
-                                    seg.trkpt.push({ "@lat": c[1], "@lon": c[0] });
+                                    seg.trkpt.push({ "@lat": c[1], "@lon": c[0], "ele": c[2] });
                                 });
                                 o.trkseg.push(seg);
                             });
@@ -130,7 +130,7 @@
                                 poly.forEach(function (ring) {
                                     var seg = { trkpt: [] };
                                     ring.forEach(function (c) {
-                                        seg.trkpt.push({ "@lat": c[1], "@lon": c[0] });
+                                        seg.trkpt.push({ "@lat": c[1], "@lon": c[0], "ele": c[2] });
                                     });
                                     o.trkseg.push(seg);
                                 });
