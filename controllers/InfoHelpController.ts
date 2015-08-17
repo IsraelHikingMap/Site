@@ -4,6 +4,7 @@
         openHelp(e: Event): void;
         openLegend(): void;
         getState(): string;
+        getLegendImage(): string;
     }
 
     export class InfoHelpController extends BaseMapControllerWithToolTip {
@@ -12,9 +13,10 @@
         legendModal;
 
         constructor($scope: IInfoHelpScope,
-            mapService: Services.MapService,
             $tooltip,
-            $modal) {
+            $modal,
+            mapService: Services.MapService,
+            layersService: Services.LayersService) {
             super(mapService, $tooltip);
             this.legendModal = $modal({
                 title: "Legend",
@@ -58,6 +60,12 @@
                     return "info";
                 }
                 return "none";
+            }
+
+            $scope.getLegendImage = () => {
+                return layersService.selectedBaseLayer.key == Services.LayersService.ISRAEL_MTB_MAP ?
+                    "content/images/legend_mtb.png" :
+                    "content/images/legend.png";
             }
         }
     }

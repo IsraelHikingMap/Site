@@ -32,6 +32,7 @@
     <Content Include="content\images\geocoder.png" />
     <Content Include="content\images\hike.svg" />
     <Content Include="content\images\legend.png" />
+    <Content Include="content\images\legend_mtb.png" />
     <Content Include="content\images\map-editing-reverse.svg" />
     <Content Include="content\images\marker-icon-green.png" />
     <Content Include="content\images\marker-icon-middle.png" />

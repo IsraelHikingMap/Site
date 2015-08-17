@@ -32,9 +32,9 @@ module IsraelHiking.Services {
 
     export class LayersService extends ObjectWithMap {
         public static MAX_ZOOM = 20;
+        public static ISRAEL_MTB_MAP = "Israel MTB map";
 
         private static ISRAEL_HIKING_MAP = "Israel Hiking map";
-        private static ISRAEL_MTB_MAP = "Israel MTB map";
         private static GOOGLE_EARTH = "Google Earth";
         private static HIKING_TRAILS = "Hiking trails";
         private static ATTRIBUTION = "Map data &copy; <a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> contributors, <a href='http://creativecommons.org/licenses/by-sa/2.0/' target='_blank\">CC-BY-SA</a>, built with <a href='http://getbootstrap.com/' target='_blank'>Bootstrap</a>. ";
