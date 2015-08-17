@@ -106,6 +106,7 @@
     <Content Include="views\drawing.html" />
     <Content Include="views\editOSM.html" />
     <Content Include="views\search.html" />
+    <Content Include="views\share.html" />
     <Content Include="views\templates\routeStatisticsTooltip.tpl.html" />
     <Content Include="views\templates\legendModal.tpl.html" />
     <Content Include="views\templates\routePropertiesModal.tpl.html" />
@@ -115,6 +116,7 @@
     <Content Include="views\file.html" />
     <Content Include="views\templates\helpTooltip.tpl.html" />
     <Content Include="views\templates\markerPopup.tpl.html" />
+    <Content Include="views\templates\shareTooltip.tpl.html" />
     <Content Include="web.config" />
     <Content Include="scripts\jquery-2.1.4.min.map" />
     <Content Include="views\templates\infoTooltip.tpl.html" />
@@ -138,6 +140,7 @@
     <TypeScriptCompile Include="controllers\RoutePropertiesContoller.ts" />
     <TypeScriptCompile Include="controllers\RouteStatisticsController.ts" />
     <TypeScriptCompile Include="controllers\SearchController.ts" />
+    <TypeScriptCompile Include="controllers\ShareController.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />

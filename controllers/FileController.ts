@@ -92,6 +92,8 @@
                     case "s":
                         angular.element("#saveFile").trigger("click");
                         break;
+                    default:
+                        return;
                 }
                 if (!$scope.$$phase) {
                     $scope.$apply();

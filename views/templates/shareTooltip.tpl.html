@@ -1,0 +1,32 @@
+﻿<div class="tooltip in" ng-show="title">
+    <div class="tooltip-arrow"></div>
+    <div class="tooltip-inner tooltip-info">
+        <h3 class="text-left">Share</h3>
+        <div class="form-horizontal">
+            <div class="form-group">
+                <label class="control-label col-md-2">Link</label>
+                <div class="col-md-10">
+                    <p class="text-left"><a href="{{shareAddress}}" target="_blank">{{shareAddress}}</a></p>
+                </div>
+            </div>
+            <hr />
+            <h3 class="text-left">Embed</h3>
+            <div class="form-group">
+                <label class="control-label col-md-2">Width</label>
+                <div class="col-md-4">
+                    <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)"/>
+                </div>
+                <label class="control-label col-md-2">Height</label>
+                <div class="col-md-4">
+                    <input type="number" ng-model="height" class="form-control" ng-change="updateEmbedText(width, height)"/>
+                </div>
+            </div>
+            <p class="text-left col-md-offset-2 col-md-10">Copy and paste the code below in order to show this map on your webpage.</p>
+            <div class="form-group">
+                <div class="col-md-offset-2 col-md-10">
+                    <textarea rows="5" class="form-control" ng-model="embedText"></textarea>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

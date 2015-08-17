@@ -101,6 +101,8 @@
                     case "f":
                         $scope.toggleSearchBar(e);
                         break;
+                    default:
+                        return;
                 }
                 if (!$scope.$$phase) {
                     $scope.$apply();

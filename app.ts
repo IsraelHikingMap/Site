@@ -63,5 +63,8 @@
         controller: Controllers.SearchController,
         templateUrl: "views/search.html",
     });
-    
+    app.directive("shareControl", () => <angular.IDirective> {
+        controller: Controllers.ShareController,
+        templateUrl: "views/share.html",
+    });
 }

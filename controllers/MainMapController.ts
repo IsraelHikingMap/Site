@@ -29,6 +29,7 @@
             this.controlCreatorService.create(this.map, "edit-osm-control");
             this.controlCreatorService.create(this.map, "info-help-control");
             this.controlCreatorService.create(this.map, "search-control", "topright");
+            this.controlCreatorService.create(this.map, "share-control", "topright");
 
             L.control.scale(<L.ScaleOptions> { imperial: false }).addTo(this.map);
 
