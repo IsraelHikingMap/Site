@@ -1,6 +1,8 @@
 ﻿module IsraelHiking.Controllers {
     export interface IRouteStatisticsScope extends angular.IScope {
         length: string;
+        gain: string;
+        delta: string;
         isKmMarkersOn: boolean;
         chartData: { x: string; y: number }[];
         chartOptions: any;
@@ -50,7 +52,9 @@
         private updateChart = ($scope: IRouteStatisticsScope) => {
             var statistics = this.drawingRoute.getRouteStatistics();
             var ticks = _.range(1, Math.floor(statistics.length) + 1, Math.ceil(statistics.length / 10));
-            $scope.length = statistics.length.toFixed(2);
+            $scope.length = this.toDisplayableUnit(statistics.length);
+            $scope.gain = this.toDisplayableUnit(statistics.gain);
+            $scope.delta = this.toDisplayableUnit(statistics.delta);
             $scope.chartData = statistics.points;
             $scope.chartOptions = {
                 axes: {
@@ -75,6 +79,10 @@
             if (!$scope.$$phase) {
                 $scope.$apply();
             }
+        }
+
+        private toDisplayableUnit = (distance: number): string => {
+            return distance > 1000 ? (distance / 1000.0).toFixed(2) + "Km" : distance.toFixed(0) + "m";
         }
     }
 

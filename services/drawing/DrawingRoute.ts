@@ -9,7 +9,9 @@
 
     export interface IRouteStatistics {
         points: { x: string; y: number }[];
-        length: number;
+        length: number; // meters
+        gain: number; // meters - adding only when going up hill.
+        delta: number; // meters - max z - min z.
     }
 
     class HoverState {
@@ -555,22 +557,35 @@
             var routeStatistics = <IRouteStatistics> {
                 points: [],
                 length: 0,
+                gain: 0,
+                delta: 0,
             };
             if (this.routeSegments.length <= 0) {
                 return routeStatistics;
             }
-            var start = this.routeSegments[0].routePointLatlng;
+            var start = this.routeSegments[0].latlngzs[0];
             var previousPoint = start;
+            var maxZ = 0;
+            var minZ = 0
             for (var segmentIndex = 1; segmentIndex < this.routeSegments.length; segmentIndex++) {
                 var segment = this.routeSegments[segmentIndex];
                 for (var latlngzIndex = 0; latlngzIndex < segment.latlngzs.length; latlngzIndex++) {
                     var latlngz = segment.latlngzs[latlngzIndex];
                     routeStatistics.length += previousPoint.distanceTo(latlngz);
                     routeStatistics.points.push({ x: (routeStatistics.length / 1000).toFixed(2), y: latlngz.z });
+                    routeStatistics.gain += ((latlngz.z - previousPoint.z) > 0 && latlngz.z != 0 && previousPoint.z != 0) ?
+                        (latlngz.z - previousPoint.z) :
+                        0;
+                    if (latlngz.z > maxZ || maxZ == 0) {
+                        maxZ = latlngz.z;
+                    }
+                    if (latlngz.z < minZ || minZ == 0) {
+                        minZ = latlngz.z;
+                    }
                     previousPoint = latlngz;
                 }
             }
-            routeStatistics.length = routeStatistics.length / 1000.0;
+            routeStatistics.delta = maxZ - minZ;
             return routeStatistics;
         }
 

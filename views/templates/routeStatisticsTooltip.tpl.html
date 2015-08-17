@@ -6,11 +6,15 @@
             <linechart data="chartData" options="chartOptions" height="200"></linechart>
             <div class="form-horizontal">
                 <div class="form-group">
-                    <label class="control-label col-md-4">Length (Km):</label>
-                    <label class="control-label col-md-2">{{length}}</label>
+                    <label class="control-label col-md-3">Length</label>
+                    <label class="control-label col-md-3">{{length}}</label>
                     <label class="control-label col-md-6">
                         <a class="btn btn-default btn-xs" ng-click="toggleKmMarker()" ng-class="{'active': isShowingKmMarkers()}"><i class="fa fa-map-marker"></i></a> Km markers
                     </label>
+                    <label class="control-label col-md-3">Gain</label>
+                    <label class="control-label col-md-3">{{gain}}</label>
+                    <label class="control-label col-md-3">Max Diff</label>
+                    <label class="control-label col-md-3">{{delta}}</label>
                 </div>
             </div>
         </div>
