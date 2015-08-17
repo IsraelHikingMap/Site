@@ -22,7 +22,7 @@
 
         private createControls = () => {
 
-            (<any>L).control.locate({ icon: "fa fa-crosshairs" }).addTo(this.map);
+            (<any>L).control.locate({ icon: "fa fa-crosshairs", keepCurrentZoomLevel: true }).addTo(this.map);
 
             this.controlCreatorService.create(this.map, "file-control");
             this.controlCreatorService.create(this.map, "drawing-control");
