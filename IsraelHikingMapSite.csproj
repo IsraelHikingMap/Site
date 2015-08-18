@@ -141,6 +141,7 @@
     <TypeScriptCompile Include="controllers\RouteStatisticsController.ts" />
     <TypeScriptCompile Include="controllers\SearchController.ts" />
     <TypeScriptCompile Include="controllers\ShareController.ts" />
+    <TypeScriptCompile Include="directives\DisableMapDraggingDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />

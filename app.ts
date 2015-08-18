@@ -35,6 +35,7 @@
     
     // Directives:
     app.directive("syncFocusWith", () => new Directives.SyncFocusWithDirective());
+    app.directive("disableMapDragging", [Common.Constants.mapService, (mapService: Services.MapService) => new Directives.DisableMapDraggingDirective(mapService)]);
     app.directive("markerPopup", () => <angular.IDirective> {
         controller: Controllers.MarkerPopupController,
         templateUrl: "views/templates/markerPopup.tpl.html",

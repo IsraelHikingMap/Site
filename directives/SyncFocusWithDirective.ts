@@ -13,7 +13,7 @@
                         } else if (currentValue === false && previousValue) {
                             setTimeout(() => $element[0].blur(), 0);
                         }
-                    })
+                    });
                 }
             }
         }

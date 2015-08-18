@@ -1,4 +1,4 @@
-﻿<div class="leaflet-control-layers" ng-mouseover="hovering = true" ng-mouseleave="hovering = false">
+﻿<div class="leaflet-control-layers" ng-mouseover="hovering = true" ng-mouseleave="hovering = false" disable-map-dragging >
     <a title="Layers" class="leaflet-control-layers-toggle cursor-pointer" ng-show="hovering == false" ng-click="toggleHovering($event)"></a>
     <div class="leaflet-control-layers-expanded leaflet-control-layers" ng-show="hovering == true" ng-click="toggleHovering($event)">
         <div ng-repeat="baseLayer in baseLayers">
