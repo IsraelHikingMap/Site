@@ -2,7 +2,7 @@
     export interface IRouteStatisticsScope extends angular.IScope {
         length: string;
         gain: string;
-        delta: string;
+        loss: string;
         isKmMarkersOn: boolean;
         chartData: { x: string; y: number }[];
         chartOptions: any;
@@ -51,14 +51,15 @@
 
         private updateChart = ($scope: IRouteStatisticsScope) => {
             var statistics = this.drawingRoute.getRouteStatistics();
-            var ticks = _.range(1, Math.floor(statistics.length) + 1, Math.ceil(statistics.length / 10));
+            var ticks = _.range(1, Math.floor(statistics.length / 1000.0) + 1, Math.ceil(statistics.length / 10000));
+            var max = Math.ceil(statistics.length / 1000.0);
             $scope.length = this.toDisplayableUnit(statistics.length);
             $scope.gain = this.toDisplayableUnit(statistics.gain);
-            $scope.delta = this.toDisplayableUnit(statistics.delta);
+            $scope.loss = this.toDisplayableUnit(statistics.loss);
             $scope.chartData = statistics.points;
             $scope.chartOptions = {
                 axes: {
-                    x: { type: "linear", ticks: ticks, ticksFormat: "d", key: "x" },
+                    x: { type: "linear", ticks: ticks, ticksFormat: "d", key: "x", max: max },
                     y: { type: "linear", ticks: 5 },
                 },
                 margin: {

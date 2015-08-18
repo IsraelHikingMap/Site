@@ -9,9 +9,9 @@
 
     export interface IRouteStatistics {
         points: { x: string; y: number }[];
-        length: number; // meters
-        gain: number; // meters - adding only when going up hill.
-        delta: number; // meters - max z - min z.
+        length: number; // [meters]
+        gain: number; // [meters] - adding only when going up hill.
+        loss: number; // [meters] - adding only when going downhill - should be negative number.
     }
 
     class HoverState {
@@ -558,15 +558,13 @@
                 points: [],
                 length: 0,
                 gain: 0,
-                delta: 0,
+                loss: 0,
             };
             if (this.routeSegments.length <= 0) {
                 return routeStatistics;
             }
             var start = this.routeSegments[0].latlngzs[0];
             var previousPoint = start;
-            var maxZ = 0;
-            var minZ = 0
             for (var segmentIndex = 1; segmentIndex < this.routeSegments.length; segmentIndex++) {
                 var segment = this.routeSegments[segmentIndex];
                 for (var latlngzIndex = 0; latlngzIndex < segment.latlngzs.length; latlngzIndex++) {
@@ -576,16 +574,12 @@
                     routeStatistics.gain += ((latlngz.z - previousPoint.z) > 0 && latlngz.z != 0 && previousPoint.z != 0) ?
                         (latlngz.z - previousPoint.z) :
                         0;
-                    if (latlngz.z > maxZ || maxZ == 0) {
-                        maxZ = latlngz.z;
-                    }
-                    if (latlngz.z < minZ || minZ == 0) {
-                        minZ = latlngz.z;
-                    }
+                    routeStatistics.loss += ((latlngz.z - previousPoint.z) < 0 && latlngz.z != 0 && previousPoint.z != 0) ?
+                        (latlngz.z - previousPoint.z) :
+                        0;
                     previousPoint = latlngz;
                 }
             }
-            routeStatistics.delta = maxZ - minZ;
             return routeStatistics;
         }
 
