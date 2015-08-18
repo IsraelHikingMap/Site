@@ -70,6 +70,7 @@
             }
 
             $scope.selectAddress = (address: ISearchResults) => {
+                $scope.isShowingSearch = false;
                 mapService.map.panTo(address.latlng);
                 if (this.marker == null) {
                     this.marker = L.marker(address.latlng);
