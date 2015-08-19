@@ -51,7 +51,9 @@
             }
 
             $scope.addRoute = (e: Event) => {
-                var modal = this.createRouteModal($scope, $modal, layersService);
+                var routePropertiesScope = <IRouteAddScope>$scope.$new();
+                var routeAddController = new RouteAddController(routePropertiesScope, layersService);
+                var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);
             }
@@ -66,7 +68,9 @@
                 this.suppressEvents(e);
             }
             $scope.editRoute = (routeName: string, e: Event) => {
-                var modal = this.createRouteModal($scope, $modal, layersService, routeName);
+                var routePropertiesScope = <IRouteUpdateScope>$scope.$new();
+                var routeUpdateController = new RouteUpdateController(routePropertiesScope, layersService, routeName);
+                var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);
             }
@@ -86,7 +90,7 @@
                 this.suppressEvents(e);
             }
 
-            $scope.toggleAdvanced = (e: Event) => { 
+            $scope.toggleAdvanced = (e: Event) => {
                 $scope.advanced = !$scope.advanced;
                 this.suppressEvents(e);
             }
@@ -117,10 +121,7 @@
             return this.createAddLayerModal($modal, "Add Overlay", addOvelayScope);
         }
 
-        private createRouteModal = ($scope: ILayersScope, $modal, layersService: Services.LayersService, name?: string): any => {
-            var routePropertiesScope = <IRoutePropertiesScope>$scope.$new();
-            var routePropertiesController = new RoutePropertiesController(routePropertiesScope, layersService, name);
-
+        private createRoutePropertiesModal = (routePropertiesScope: IRouteBaseScope, $modal): any => {
             return $modal({
                 title: "Route Properties",
                 templateUrl: "views/templates/routePropertiesModal.tpl.html",

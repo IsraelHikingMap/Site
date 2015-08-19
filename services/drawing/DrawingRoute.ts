@@ -519,18 +519,21 @@
             this.hoverPolyline.setStyle(<L.PolylineOptions>{ opacity: 0.5, color: this.pathOptions.color, weight: this.pathOptions.weight, dashArray: "10, 10" });
             this.hoverMarker.setIcon(this.routePointIcon);
         }
-
-        public getPathOptions = (): L.PathOptions => {
-            return this.pathOptions;
-        }
-
-        public update = (name: string, pathOptions: L.PathOptions) => {
+        
+        public setName = (name: string) => {
             if (this.name != name) {
                 this.hashService.removeRoute(this.name);
                 this.name = name;
                 this.hashService.addRoute(this.name);
                 this.hashService.updateRoute(this.getData());
             }
+        }
+
+        public getPathOptions = (): L.PathOptions => {
+            return this.pathOptions;
+        }
+
+        public setPathOptions = (pathOptions: L.PathOptions) => {
             this.pathOptions.color = pathOptions.color;
             this.routePointIcon = this.createMarkerIconWithColor();
             this.pathOptions.weight = pathOptions.weight;
@@ -542,7 +545,6 @@
                 if (segment.routePoint != null) {
                     segment.routePoint.setIcon(this.routePointIcon)
                 }
-                
             }
             this.setHoverLayersStyle();
         }
@@ -639,6 +641,19 @@
 
         public getColor = () => {
             return this.pathOptions.color;
+        }
+
+        public reverse = () => {
+            for (var segmentIndex = 1; segmentIndex < this.routeSegments.length; segmentIndex++) {
+                var currentSegment = this.routeSegments[segmentIndex];
+                var previousSegment = this.routeSegments[segmentIndex - 1];
+                previousSegment.latlngzs = currentSegment.latlngzs.reverse();
+                previousSegment.routingType = currentSegment.routingType;
+                if (previousSegment.polyline != null && currentSegment.polyline != null) {
+                    previousSegment.polyline.setLatLngs(currentSegment.polyline.getLatLngs().reverse());
+                }
+            }
+            this.routeSegments.reverse();
         }
     }
 }

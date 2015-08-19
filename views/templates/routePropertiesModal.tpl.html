@@ -5,7 +5,7 @@
                 <button type="button" class="close" aria-label="Close" ng-click="$hide()"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" ng-bind="title"></h4>
             </div>
-            <form ng-submit="saveRoute(name, weight, isVisible, $event); $hide()">
+            <form ng-submit="saveRoute(name, weight, $event); $hide()">
                 <div class="modal-body">
                     <div class="form-horizontal">
                         <div class="form-group">
@@ -30,9 +30,12 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="submit" class="btn btn-success" title="Save"><i class="fa fa-save"></i></button>
-                    <button type="button" ng-click="toggleVisibility($event)" class="btn btn-default" title="Toggle visibility"><i class="fa fa-lg" ng-class="{'fa-eye': isVisible, 'fa-eye-slash': !isVisible}"></i></button>
-                    <button type="button" ng-click="deleteRoute($event); $hide()" class="btn btn-danger" title="Delete route"><i class="fa fa-lg fa-trash"></i></button>
+                    <button type="button" ng-hide="isNew" ng-click="saveRouteToFile('gpx', $event);" class="btn btn-default pull-left" title="Save route to .gpx file"><i class="fa fa-lg fa-save"></i> GPX</button>
+                    <button type="button" ng-hide="isNew" ng-click="saveRouteToFile('kml', $event);" class="btn btn-default pull-left" title="Save route to .gpx file"><i class="fa fa-lg fa-save"></i> KML</button>
+                    <button type="button" ng-hide="isNew" ng-click="deleteRoute($event); $hide()" class="btn btn-danger" title="Delete route"><i class="fa fa-lg fa-trash"></i></button>
+                    <button type="button" ng-hide="isNew" ng-click="reverseRoute($event);" class="btn btn-default" title="Reverse route"><i class="fa fa-lg fa-arrows-h"></i></button>
+                    <button type="button" ng-hide="isNew" ng-click="toggleVisibility($event)" class="btn btn-default" title="Toggle visibility"><i class="fa fa-lg" ng-class="{'fa-eye': isVisible, 'fa-eye-slash': !isVisible}"></i></button>
+                    <button type="submit" class="btn btn-success" title="Save"><i class="fa fa-check"></i></button>
                 </div>
             </form>
         </div>

@@ -136,8 +136,10 @@
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="common\EventHelper.ts" />
+    <TypeScriptCompile Include="controllers\RouteAddController.ts" />
     <TypeScriptCompile Include="controllers\LayersController.ts" />
-    <TypeScriptCompile Include="controllers\RoutePropertiesContoller.ts" />
+    <TypeScriptCompile Include="controllers\RouteBaseController.ts" />
+    <TypeScriptCompile Include="controllers\RouteUpdateContoller.ts" />
     <TypeScriptCompile Include="controllers\RouteStatisticsController.ts" />
     <TypeScriptCompile Include="controllers\SearchController.ts" />
     <TypeScriptCompile Include="controllers\ShareController.ts" />

@@ -143,7 +143,7 @@ module IsraelHiking.Services {
             if (name == "") {
                 name = this.createRouteName();
             }
-            var route = _.find(this.routes, (drawingToFind) => drawingToFind.name == name);
+            var route = this.getRouteByName(name);
             if (route != null && routeData != null) {
                 route.setData(routeData);
                 return;
@@ -157,22 +157,9 @@ module IsraelHiking.Services {
             this.changeDrawingState(drawingRoute.name);
         }
 
-        public addOrUpdateRouteOptions = (oldName: string, newName: string, pathOptions: L.PathOptions, isVisible: boolean) => {
-            var route = _.find(this.routes, (drawingToFind) => drawingToFind.name == oldName);
-            if (route == null) {
-                this.addRoute(oldName, null, pathOptions);
-                route = _.find(this.routes, (drawingToFind) => drawingToFind.name == oldName);
-            }
-            if (oldName != newName && _.find(this.routes, (drawingToFind) => drawingToFind.name == newName) != null) {
-                // HM TODO: newName alreadyExitsts, toast?
-                return;
-            }
-            route.update(newName, pathOptions);
-            if (isVisible) {
-                route.show();
-            } else {
-                route.hide();
-            }
+        public isNameAvailable = (name: string) => {
+            var route = this.getRouteByName(name);
+            return route == null;
         }
 
         public removeBaseLayer = (baseLayer: Services.IBaseLayer) => {
@@ -204,7 +191,7 @@ module IsraelHiking.Services {
         }
 
         public removeRoute = (routeName: string) => {
-            var route = _.find(this.routes, (routeToFind) => routeToFind.name == routeName);
+            var route = this.getRouteByName(routeName);
             if (route == null) {
                 return;
             }
@@ -238,7 +225,7 @@ module IsraelHiking.Services {
         }
 
         public changeDrawingState = (name: string) => {
-            var drawing = <Drawing.IDrawing>_.find(this.routes, (routeToFind) => routeToFind.name == name);
+            var drawing = <Drawing.IDrawing>this.getRouteByName(name);
             if (name == this.markers.name) {
                 drawing = this.markers;
             }
@@ -314,18 +301,12 @@ module IsraelHiking.Services {
             this.markers.addMarkers(markers);
         }
 
-        public getRouteViewOptions = (routeName: string): IRouteViewOptions => {
-            var route = _.find(this.routes, (drawingToFind) => drawingToFind.name == routeName);
-            if (route == null) {
-                return <IRouteViewOptions>{
-                    pathOptions: this.drawingFactory.createPathOptions(),
-                    isVisible: true,
-                };
-            }
-            return <IRouteViewOptions>{
-                pathOptions: route.getPathOptions(),
-                isVisible: route.state != Drawing.DrawingState.hidden,
-            };
+        public getRouteByName = (routeName: string): Drawing.DrawingRoute => {
+            return _.find(this.routes, (drawingToFind) => drawingToFind.name == routeName);
+        }
+
+        public createPathOptions = () => {
+            return this.drawingFactory.createPathOptions();
         }
     }
 }
