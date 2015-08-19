@@ -54,6 +54,10 @@ body {
     max-width: 250px;
 }
 
+.chome-wordwrap-fix {
+    word-wrap: break-word;
+}
+
 .search-results-item {
     margin: 10px;
 }
