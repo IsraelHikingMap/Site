@@ -24,16 +24,16 @@
                         <div class="form-group">
                             <label class="control-label col-md-3">Color: <button type="button" class="btn btn-default" style="background:{{color}}"></button></label>
                             <div class="col-md-9">
-                                <button type="button" class="btn btn-default col-xs-3" style="background:{{currentColor}};" ng-repeat="currentColor in colors" ng-click="setColor(currentColor);"></button>
+                                <button type="button" class="btn btn-default col-xs-3" style="background:{{currentColor}};" ng-repeat="currentColor in colors" ng-click="setColor(currentColor, $event)"></button>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" ng-hide="isNew" ng-click="saveRouteToFile('gpx', $event);" class="btn btn-default pull-left" title="Save route to .gpx file"><i class="fa fa-lg fa-save"></i> GPX</button>
-                    <button type="button" ng-hide="isNew" ng-click="saveRouteToFile('kml', $event);" class="btn btn-default pull-left" title="Save route to .gpx file"><i class="fa fa-lg fa-save"></i> KML</button>
+                    <button type="button" ng-hide="isNew" ng-click="saveRouteToFile('gpx', $event)" class="btn btn-default pull-left" title="Save route to .gpx file"><i class="fa fa-lg fa-save"></i> GPX</button>
+                    <button type="button" ng-hide="isNew" ng-click="saveRouteToFile('kml', $event)" class="btn btn-default pull-left" title="Save route to .gpx file"><i class="fa fa-lg fa-save"></i> KML</button>
                     <button type="button" ng-hide="isNew" ng-click="deleteRoute($event); $hide()" class="btn btn-danger" title="Delete route"><i class="fa fa-lg fa-trash"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="reverseRoute($event);" class="btn btn-default" title="Reverse route"><i class="fa fa-lg fa-arrows-h"></i></button>
+                    <button type="button" ng-hide="isNew" ng-click="reverseRoute($event)" class="btn btn-default" title="Reverse route"><i class="fa fa-lg fa-arrows-h"></i></button>
                     <button type="button" ng-hide="isNew" ng-click="toggleVisibility($event)" class="btn btn-default" title="Toggle visibility"><i class="fa fa-lg" ng-class="{'fa-eye': isVisible, 'fa-eye-slash': !isVisible}"></i></button>
                     <button type="submit" class="btn btn-success" title="Save"><i class="fa fa-check"></i></button>
                 </div>

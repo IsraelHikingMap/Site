@@ -61,10 +61,10 @@
 
             $scope.save = (e: Event, fileName: string) => {
                 var data = this.hashService.getDataContainer();
-                var ext = fileName.split('.').pop();
-                var parser = this.parserFactory.Create(ext);
-                var dtatString = parser.toString(data);
-                var blob = new Blob([dtatString], { type: "application/json" })
+                var extension = fileName.split('.').pop();
+                var parser = this.parserFactory.Create(extension);
+                var dataString = parser.toString(data);
+                var blob = new Blob([dataString], { type: "application/json" })
                 var blobURL = ((<any>window).URL || (<any>window).webkitURL).createObjectURL(blob);
                 var anchor = <any>document.createElement("a");
                 anchor.style = "display: none";

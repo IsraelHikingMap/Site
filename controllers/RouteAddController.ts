@@ -5,8 +5,9 @@
 
     export class RouteAddController extends RouteBaseController {
         constructor($scope: IRouteAddScope,
+            mapService: Services.MapService,
             layersService: Services.LayersService) {
-            super($scope, layersService);
+            super($scope, mapService, layersService);
             var options = layersService.createPathOptions();
             $scope.name = layersService.createRouteName();
             $scope.isNew = true;
@@ -22,6 +23,7 @@
                     color: $scope.color,
                     weight: $scope.weight,
                 });
+                this.suppressEvents(e);
             }
 
         }

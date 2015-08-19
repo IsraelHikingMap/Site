@@ -29,7 +29,8 @@
         constructor($scope: ILayersScope,
             $modal,
             mapService: Services.MapService,
-            layersService: Services.LayersService) {
+            layersService: Services.LayersService,
+            parserFactory: Services.Parsers.ParserFactory) {
             super(mapService);
             $scope.baseLayers = layersService.baseLayers;
             $scope.overlays = layersService.overlays;
@@ -52,7 +53,7 @@
 
             $scope.addRoute = (e: Event) => {
                 var routePropertiesScope = <IRouteAddScope>$scope.$new();
-                var routeAddController = new RouteAddController(routePropertiesScope, layersService);
+                var routeAddController = new RouteAddController(routePropertiesScope, mapService, layersService);
                 var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);
@@ -69,7 +70,7 @@
             }
             $scope.editRoute = (routeName: string, e: Event) => {
                 var routePropertiesScope = <IRouteUpdateScope>$scope.$new();
-                var routeUpdateController = new RouteUpdateController(routePropertiesScope, layersService, routeName);
+                var routeUpdateController = new RouteUpdateController(routePropertiesScope, mapService, layersService, parserFactory, routeName);
                 var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);
