@@ -59,7 +59,7 @@
             $scope.chartData = statistics.points;
             $scope.chartOptions = {
                 axes: {
-                    x: { type: "linear", ticks: ticks, ticksFormat: "d", key: "x", max: max },
+                    x: { type: "linear", ticks: ticks, ticksFormat: "d", key: "x", max: max, innerTicks: true},
                     y: { type: "linear", ticks: 5 },
                 },
                 margin: {

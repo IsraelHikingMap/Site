@@ -42,6 +42,7 @@ module IsraelHiking.Services {
         private static BASE_LAYERS_KEY = "BaseLayers";
         private static OVERLAYS_KEY = "Overlays";
 
+        private $http: angular.IHttpService;
         private localStorageService: angular.local.storage.ILocalStorageService;
         private hashService: HashService;
         private drawingFactory: Drawing.DrawingFactory;
@@ -56,11 +57,13 @@ module IsraelHiking.Services {
         public selectedBaseLayer: IBaseLayer;
         public selectedDrawing: Drawing.IDrawing;
 
-        constructor(mapService: MapService,
+        constructor($http: angular.IHttpService,
+            mapService: MapService,
             localStorageService: angular.local.storage.ILocalStorageService,
             drawingFactory: Drawing.DrawingFactory,
             hashService: HashService) {
             super(mapService);
+            this.$http = $http;
             this.localStorageService = localStorageService
             this.hashService = hashService;
             this.drawingFactory = drawingFactory;
@@ -278,6 +281,13 @@ module IsraelHiking.Services {
         }
 
         private addDrawingsFromHash = () => {
+            if (this.hashService.externalUrl != "") {
+                this.$http.get(this.hashService.externalUrl).success((data) => {
+                    var extention = this.hashService.externalUrl.split(".").pop;
+                    // HM TODO: add data parsing, in case of error - default.
+                });
+            }
+
             var dataContainer = this.hashService.getDataContainer();
             if (dataContainer.routes.length == 0) {
                 dataContainer.routes.push(<Common.RouteData> {

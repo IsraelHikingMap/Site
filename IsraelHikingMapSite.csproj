@@ -41,7 +41,6 @@
     <Content Include="content\images\marker-icon-small.png" />
     <Content Include="content\images\marker-shadow-small.png" />
     <Content Include="content\leaflet-locate.css" />
-    <Content Include="content\leaflet-geocoder.css" />
     <Content Include="content\images\layers-2x.png" />
     <Content Include="content\images\layers.png" />
     <Content Include="content\images\marker-icon-2x.png" />
@@ -85,7 +84,6 @@
     <Content Include="scripts\jquery-2.1.4.min.js" />
     <Content Include="scripts\leaflet-0.7.3.js" />
     <Content Include="scripts\leaflet-0.7.3.min.js" />
-    <Content Include="scripts\leaflet-geocoder.js" />
     <Content Include="scripts\leaflet-google.js" />
     <Content Include="scripts\leaflet-locate.js" />
     <Content Include="scripts\leaflet-locate.min.js" />

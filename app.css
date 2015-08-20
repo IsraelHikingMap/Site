@@ -39,6 +39,10 @@ body {
     stroke: white !important;
 }
 
+.axis line {
+    stroke: white !important;
+}
+
 .tooltip-statistics {
     min-width: 300px;
 }

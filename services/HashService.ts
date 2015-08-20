@@ -16,6 +16,7 @@
         public latlng: L.LatLng;
         public zoom: number;
         public searchTerm: string;
+        public externalUrl: string;
 
         constructor($location: angular.ILocationService,
             $rootScope: angular.IScope,
@@ -219,6 +220,7 @@
             var splittedpath = path.split("/");
             var search = this.$location.search();
             this.searchTerm = search.q || "";
+            this.externalUrl = search.url || "";
 
             if (splittedpath.length != 4) {
                 // backwards compatibility... :-(
