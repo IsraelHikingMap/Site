@@ -3,7 +3,9 @@
         private static FEATURE_COLLECTION = "FeatureCollection";
         private static FEATURE = "Feature";
         private static LINE_STRING = "LineString";
+        private static MULTI_LINE_STRING = "MultiLineString";
         private static POINT = "Point";
+        private static MULTI_POINT = "MultiPoint";
 
         public parse(content: string): Common.DataContainer {
             var geojson = this.parseToGeoJson(content);
@@ -27,26 +29,21 @@
                     }
                     if (feature.geometry.type == BaseParser.LINE_STRING) {
                         var lineString = <GeoJSON.LineString>feature.geometry;
-                        var latlngzs = <Common.LatLngZ[]>[];
-                        for (var coordinate = 0; coordinate < lineString.coordinates.length; coordinate++) {
-                            var pointCoordinates = lineString.coordinates[coordinate];
-                            latlngzs.push(this.createLatlng(pointCoordinates));
-                        }
-                        if (lineString.coordinates.length >= 2) {
-                            var routeData = <Common.RouteData> { segments: [], name: feature.properties.name || "" };
-                            routeData.segments.push(<Common.RouteSegmentData> {
-                                routePoint: latlngzs[0],
-                                latlngzs: [latlngzs[0]],
-                                routingType: Common.RoutingType.hike,
-                            });
-                            routeData.segments.push(<Common.RouteSegmentData> {
-                                routePoint: latlngzs[latlngzs.length - 1],
-                                latlngzs: latlngzs,
-                                routingType: Common.RoutingType.hike,
-                            });
-                            data.routes.push(routeData);
+                        this.positionsToData(lineString.coordinates, data, feature.properties.name);
+                    }
+
+                    if (feature.geometry.type == BaseParser.MULTI_LINE_STRING) {
+                        var multiLineString = <GeoJSON.MultiLineString>feature.geometry;
+                        this.multiLineStringToData(multiLineString, data, feature.properties.name);
+                    }
+                    if (feature.geometry.type == BaseParser.MULTI_POINT) {
+                        var points = <GeoJSON.MultiPoint>feature.geometry;
+                        for (var pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
+                            var marker = this.createMarker(points.coordinates[pointIndex], feature.properties.name)
+                            data.markers.push(marker);
                         }
                     }
+
                     if (feature.geometry.type == BaseParser.POINT) {
                         var point = <GeoJSON.Point>feature.geometry;
                         var marker = this.createMarker(point.coordinates, feature.properties.name)
@@ -69,6 +66,38 @@
             var latlngz = <Common.LatLngZ>new L.LatLng(coordinates[1], coordinates[0]);
             latlngz.z = coordinates[2] || 0; 
             return latlngz;
+        }
+
+        private positionsToData(positions: GeoJSON.Position[], data: Common.DataContainer, name: string) {
+            var latlngzs = new Array<Common.LatLngZ>(positions.length);
+            for (var coordinate = 0; coordinate < positions.length; coordinate++) {
+                var pointCoordinates = positions[coordinate];
+                latlngzs[coordinate] = this.createLatlng(pointCoordinates);
+            }
+            if (positions.length >= 2) {
+                var routeData = <Common.RouteData> { segments: [], name: name || "" };
+                routeData.segments.push(<Common.RouteSegmentData> {
+                    routePoint: latlngzs[0],
+                    latlngzs: [latlngzs[0]],
+                    routingType: Common.RoutingType.hike,
+                });
+                routeData.segments.push(<Common.RouteSegmentData> {
+                    routePoint: latlngzs[latlngzs.length - 1],
+                    latlngzs: latlngzs,
+                    routingType: Common.RoutingType.hike,
+                });
+                data.routes.push(routeData);
+            }
+        }
+
+        private multiLineStringToData(multiLineString: GeoJSON.MultiLineString, data: Common.DataContainer, name: string) {
+            var isUsePartInName = multiLineString.coordinates.length > 1;
+            var partIndex = 1;
+            for (var lineIndex = 0; lineIndex < multiLineString.coordinates.length; lineIndex++) {
+                var lineCoordinates = multiLineString.coordinates[lineIndex];
+                var meaningfullName = isUsePartInName ? name + " part " + partIndex++ : name;
+                this.positionsToData(lineCoordinates, data, meaningfullName);
+            }
         }
 
         public toGeoJson(data: Common.DataContainer): GeoJSON.FeatureCollection {
