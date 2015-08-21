@@ -30,7 +30,7 @@
             $modal,
             mapService: Services.MapService,
             layersService: Services.LayersService,
-            parserFactory: Services.Parsers.ParserFactory) {
+            fileService: Services.FileService) {
             super(mapService);
             $scope.baseLayers = layersService.baseLayers;
             $scope.overlays = layersService.overlays;
@@ -70,7 +70,7 @@
             }
             $scope.editRoute = (routeName: string, e: Event) => {
                 var routePropertiesScope = <IRouteUpdateScope>$scope.$new();
-                var routeUpdateController = new RouteUpdateController(routePropertiesScope, mapService, layersService, parserFactory, routeName);
+                var routeUpdateController = new RouteUpdateController(routePropertiesScope, mapService, layersService, fileService, routeName);
                 var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);

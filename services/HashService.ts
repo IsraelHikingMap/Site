@@ -221,6 +221,9 @@
             var search = this.$location.search();
             this.searchTerm = search.q || "";
             this.externalUrl = search.url || "";
+            if (this.externalUrl != "") {
+                // HM TODO: do something with external url
+            }
 
             if (splittedpath.length != 4) {
                 // backwards compatibility... :-(

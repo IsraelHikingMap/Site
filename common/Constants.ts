@@ -18,6 +18,7 @@
         public static layersService = "layersService";
         public static localStorageService = "localStorageService";
         public static snappingService = "snappingService";
+        public static fileService = "fileService";
         
         // Controllers
         public static mainMapController = "mainMapController";

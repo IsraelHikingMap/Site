@@ -281,12 +281,6 @@ module IsraelHiking.Services {
         }
 
         private addDrawingsFromHash = () => {
-            if (this.hashService.externalUrl != "") {
-                this.$http.get(this.hashService.externalUrl).success((data) => {
-                    var extention = this.hashService.externalUrl.split(".").pop;
-                    // HM TODO: add data parsing, in case of error - default.
-                });
-            }
 
             var dataContainer = this.hashService.getDataContainer();
             if (dataContainer.routes.length == 0) {

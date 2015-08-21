@@ -1,5 +1,5 @@
 ﻿module IsraelHiking {
-    // HM TODO: move stuff to file service.
+    // HM TODO: hash service should handle exteranlUrl?
     // HM TODO: support twl? - will be solved hopefull with iis backend.
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "n3-line-chart"]);
@@ -12,6 +12,7 @@
     app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterFactory($http, $q, parserFactory)]);
+    app.service(Common.Constants.fileService, [Common.Constants.parserFactory, (parserFactory: Services.Parsers.ParserFactory) => new Services.FileService(parserFactory)]);
     app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory,
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.SnappingService($http, mapService, parserFactory)]);
@@ -66,5 +67,9 @@
     app.directive("shareControl", () => <angular.IDirective> {
         controller: Controllers.ShareController,
         templateUrl: "views/share.html",
+    });
+
+    app.config(($httpProvider: angular.IHttpProvider) => {
+        delete $httpProvider.defaults.headers.common['X-Requested-With'];
     });
 }

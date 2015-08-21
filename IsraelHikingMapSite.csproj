@@ -158,6 +158,7 @@
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />
     <TypeScriptCompile Include="services\drawing\BaseDrawing.ts" />
     <TypeScriptCompile Include="services\drawing\DrawingFactory.ts" />
+    <TypeScriptCompile Include="services\FileService.ts" />
     <TypeScriptCompile Include="services\LayersService.ts" />
     <TypeScriptCompile Include="services\ObjectWithMap.ts" />
     <TypeScriptCompile Include="common\IsraelHikingData.ts" />

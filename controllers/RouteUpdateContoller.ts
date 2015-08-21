@@ -12,7 +12,7 @@
         constructor($scope: IRouteUpdateScope,
             mapService: Services.MapService,
             layersService: Services.LayersService,
-            parserFactory: Services.Parsers.ParserFactory,
+            fileService: Services.FileService,
             name: string) {
             super($scope, mapService, layersService);
             var route = layersService.getRouteByName(name);
@@ -50,21 +50,7 @@
                     markers: [],
                     routes: [route.getData()]
                 };
-                var parser = parserFactory.Create(extention);
-                var dataString = parser.toString(data);
-                var blob = new Blob([dataString], { type: "application/json" })
-                var blobURL = ((<any>window).URL || (<any>window).webkitURL).createObjectURL(blob);
-                var anchor = <any>document.createElement("a");
-                anchor.style = "display: none";
-                anchor.download = route.name + "." + extention;
-                anchor.href = blobURL;
-                document.body.appendChild(anchor);
-                anchor.click();
-
-                setTimeout(function () {
-                    document.body.removeChild(anchor);
-                    ((<any>window).URL || (<any>window).webkitURL).revokeObjectURL(blobURL);
-                }, 100);
+                fileService.saveToFile(route.name + "." + extention, data);
                 this.suppressEvents(e);
             }
 
