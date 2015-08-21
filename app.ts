@@ -1,5 +1,4 @@
 ﻿module IsraelHiking {
-    // HM TODO: hash service should handle exteranlUrl?
     // HM TODO: support twl? - will be solved hopefull with iis backend.
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "n3-line-chart"]);

@@ -12,8 +12,6 @@
         isStatisticsOpen(): boolean;
     }
 
-    
-
     export class DrawingController extends BaseMapControllerWithToolTip {
         private layersService: Services.LayersService;
         private selectedDrawing: Services.Drawing.IDrawing;
@@ -62,18 +60,30 @@
             };
 
             $scope.isDrawingEnabled = (): boolean => {
+                if (this.selectedDrawing == null) {
+                    return false;
+                }
                 return this.selectedDrawing.isEnabled();
             };
 
             $scope.getRoutingType = (): string => {
+                if (this.selectedDrawing == null) {
+                    return Common.RoutingType.hike;
+                }
                 return this.selectedDrawing.getRoutingType();
             };
 
             $scope.isUndoDisbaled = (): boolean => {
+                if (this.selectedDrawing == null) {
+                    return false;
+                }
                 return this.selectedDrawing.isUndoDisbaled();
             };
 
             $scope.showRouting = (): boolean => {
+                if (this.selectedDrawing == null) {
+                    return false;
+                }
                 return this.selectedDrawing.name != Common.Constants.MARKERS;
             }
 

@@ -10,6 +10,7 @@
         private fileChooserTooltip: any;
 
         constructor($scope: IFileScope,
+            $http: angular.IHttpService,
             mapService: Services.MapService,
             $tooltip,
             layersService: Services.LayersService,
@@ -20,6 +21,13 @@
             this.setDragAndDrop($scope);
             this.fileChooserTooltip = null;
 
+            if (hashService.externalUrl != "") {
+                $http.get(hashService.externalUrl).success((content: string) => {
+                    var dataContainer = fileService.readFromFile(hashService.externalUrl, content, Common.RoutingType.hike);
+                    this.addFileDataToMap(dataContainer, layersService);
+                });
+            }
+
             $scope.open = ($files, e: Event) => {
 
                 if ($files.length <= 0) {
@@ -29,13 +37,7 @@
                 var reader = new FileReader();
                 reader.onload = (e: any) => {
                     var data = fileService.readFromFile(file.name, e.target.result, layersService.getSelectedDrawing().getRoutingType());
-                    if (data.bounds != null) {
-                        this.map.fitBounds(data.bounds);
-                    }
-                    for (var routeIndex = 0; routeIndex < data.routes.length; routeIndex++) {
-                        layersService.addRoute(data.routes[routeIndex].name, data.routes[routeIndex], null);
-                    }
-                    layersService.addMarkers(data.markers);
+                    this.addFileDataToMap(data, layersService);
                     $scope.$apply();
                 };
                 reader.readAsText(file);
@@ -105,6 +107,16 @@
             for (var name in callbacks) {
                 dropbox.addEventListener(name, callbacks[name], false);
             }
+        }
+
+        private addFileDataToMap = (data: Common.DataContainer, layersService: Services.LayersService) => {
+            if (data.bounds != null) {
+                this.map.fitBounds(data.bounds);
+            }
+            for (var routeIndex = 0; routeIndex < data.routes.length; routeIndex++) {
+                layersService.addRoute(data.routes[routeIndex].name, data.routes[routeIndex], null);
+            }
+            layersService.addMarkers(data.markers);
         }
     }
 } 

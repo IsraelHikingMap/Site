@@ -73,7 +73,7 @@ module IsraelHiking.Services {
             this.routes = [];
             this.overlayZIndex = 10;
             this.eventHelper = new Common.EventHelper<Common.IDataChangedEventArgs>();
-            
+
             var lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
             lastModified = "Last update: " + lastModified;
             this.tileLayerOptions = <L.TileLayerOptions> {
@@ -281,7 +281,6 @@ module IsraelHiking.Services {
         }
 
         private addDrawingsFromHash = () => {
-
             var dataContainer = this.hashService.getDataContainer();
             if (dataContainer.routes.length == 0) {
                 dataContainer.routes.push(<Common.RouteData> {
