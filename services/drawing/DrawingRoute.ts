@@ -547,6 +547,7 @@
                 }
             }
             this.setHoverLayersStyle();
+            this.updateDataLayer();
         }
 
         private getLatLngZFromLatLng = (latlng: L.LatLng): Common.LatLngZ => {
@@ -654,6 +655,7 @@
                 }
             }
             this.routeSegments.reverse();
+            this.updateDataLayer();
         }
     }
 }
