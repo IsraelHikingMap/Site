@@ -191,7 +191,7 @@
             urlObject[Common.Constants.MARKERS] = this.markersToStringArray(this.dataContainer.markers).join(HashService.ARRAY_DELIMITER);
             for (var routeIndex = 0; routeIndex < this.dataContainer.routes.length; routeIndex++) {
                 var routeData = this.dataContainer.routes[routeIndex];
-                urlObject[routeData.name.replace(" ", "_")] = this.routeToString(routeData);
+                urlObject[routeData.name.split(" ").join("_")] = this.routeToString(routeData);
             }
             return urlObject;
         }
@@ -209,7 +209,7 @@
                     data.markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || [])
                     continue;
                 }
-                data.routes.push(this.stringToRoute(searchObject[parameter], parameter.replace("_", " ")));
+                data.routes.push(this.stringToRoute(searchObject[parameter], parameter.split("_").join(" ")));
             }
 
             return data;
