@@ -64,8 +64,7 @@
                 }
                 switch (String.fromCharCode(e.which).toLowerCase()) {
                     //case "o":
-                        //angular.element("#openFile").trigger("click");
-                        // HM TODO: add support to open file from shorutcut.
+                        // Opening a file dialog is a violation of security it can not be done.
                         //break;
                     case "s":
                         angular.element("#saveFile").trigger("click");
