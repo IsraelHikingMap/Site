@@ -66,6 +66,20 @@ body {
     margin: 10px;
 }
 
+.help-button {
+    width: 28px;
+    height: 28px;
+}
+
+.tooltip-inner a {
+    color: #79bdf7;
+}
+
+.scrollable-area {
+    max-height: 200px;
+    overflow: scroll;
+}
+
 /* Extra Small Devices, Phones */
 @media only screen and (min-width : 480px) {
     .tooltip-info {
@@ -94,11 +108,4 @@ body {
     }
 }
 
-.help-button {
-    width: 28px;
-    height: 28px;
-}
 
-.tooltip-inner a {
-    color: #79bdf7;
-}

@@ -44,7 +44,9 @@
         }
 
         public createPathOptions = (): L.PathOptions => {
-            return <L.PathOptions> { color: Common.Constants.COLORS[this.NextColorIndex++], weight: 4, opacity: 0.5 };
+            var nextColorIndex = this.NextColorIndex;
+            this.NextColorIndex = (this.NextColorIndex + 1) % Common.Constants.COLORS.length;
+            return <L.PathOptions> { color: Common.Constants.COLORS[nextColorIndex], weight: 4, opacity: 0.5 };
         }
     }
 } 

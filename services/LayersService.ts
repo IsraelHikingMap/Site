@@ -153,8 +153,8 @@ module IsraelHiking.Services {
             }
             routeData = routeData || <Common.RouteData> {
                 segments: [],
-                name: name,
             };
+            routeData.name = name; // in case name is empty we'll override it.
             var drawingRoute = this.drawingFactory.createDrawingRoute(routeData, false, pathOptions);
             this.routes.push(drawingRoute);
             this.changeDrawingState(drawingRoute.name);
