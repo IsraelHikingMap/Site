@@ -1,4 +1,5 @@
 ﻿module IsraelHiking {
+    // HM TODO: remove scroll from routes when no needed.
     // HM TODO: support twl? - will be solved hopefull with iis backend.
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "n3-line-chart"]);
@@ -8,6 +9,7 @@
     // Services:
     app.service(Common.Constants.mapService, [() => new Services.MapService()]);
     app.service(Common.Constants.parserFactory, [() => new Services.Parsers.ParserFactory()]);
+    app.service(Common.Constants.heightService, [Common.Constants.http, ($http: angular.IHttpService) => new Services.HeightService($http)]);
     app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterFactory($http, $q, parserFactory)]);
@@ -16,10 +18,9 @@
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.SnappingService($http, mapService, parserFactory)]);
     app.service(Common.Constants.drawingFactory,
-        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerFactory, Common.Constants.hashService, Common.Constants.snappingService,
-            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routeFactory: Services.Routers.RouterFactory, hashService: Services.HashService, snappingService: Services.SnappingService) =>
-                new Services.Drawing.DrawingFactory($q, $compile, $rootScope, mapService, routeFactory, hashService, snappingService)]);
-
+        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerFactory, Common.Constants.hashService, Common.Constants.snappingService, Common.Constants.heightService,
+            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routeFactory: Services.Routers.RouterFactory, hashService: Services.HashService, snappingService: Services.SnappingService, heightService: Services.HeightService) =>
+                new Services.Drawing.DrawingFactory($q, $compile, $rootScope, mapService, routeFactory, hashService, snappingService, heightService)]);
     app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.localStorageService,
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
@@ -66,9 +67,5 @@
     app.directive("shareControl", () => <angular.IDirective> {
         controller: Controllers.ShareController,
         templateUrl: "views/share.html",
-    });
-
-    app.config(($httpProvider: angular.IHttpProvider) => {
-        delete $httpProvider.defaults.headers.common['X-Requested-With'];
     });
 }

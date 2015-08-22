@@ -52,7 +52,7 @@
         private updateChart = ($scope: IRouteStatisticsScope) => {
             var statistics = this.drawingRoute.getRouteStatistics();
             var ticks = _.range(1, Math.floor(statistics.length / 1000.0) + 1, Math.ceil(statistics.length / 10000));
-            var max = Math.ceil(statistics.length / 1000.0);
+            var max = statistics.length / 1000.0;
             $scope.length = this.toDisplayableUnit(statistics.length);
             $scope.gain = this.toDisplayableUnit(statistics.gain);
             $scope.loss = this.toDisplayableUnit(statistics.loss);
@@ -63,7 +63,7 @@
                     y: { type: "linear", ticks: 5 },
                 },
                 margin: {
-                    left: 30,
+                    left: 50,
                     right: 5,
                     top: 5,
                     bottom: 25

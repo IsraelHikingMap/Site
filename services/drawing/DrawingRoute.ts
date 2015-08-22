@@ -33,6 +33,7 @@
         private $q: angular.IQService;
         private routerFactory: Services.Routers.RouterFactory;
         private snappingService: SnappingService;
+        private heightService: HeightService;
         private selectedRouteSegmentIndex: number;
         private currentRoutingType: string;
         private hoverPolyline: L.Polyline;
@@ -53,12 +54,14 @@
             routerFactory: Services.Routers.RouterFactory,
             hashService: HashService,
             snappingService: SnappingService,
+            heightService: HeightService,
             name: string,
             pathOptions: L.PathOptions) {
             super(mapService, hashService);
             this.$q = $q;
             this.routerFactory = routerFactory;
             this.snappingService = snappingService;
+            this.heightService = heightService;
             this.name = name;
             this.pathOptions = pathOptions;
             this.routeSegments = [];
@@ -315,13 +318,14 @@
             var endSegment = this.routeSegments[endIndex];
             var router = this.routerFactory.create(endSegment.routingType);
             var promise = router.getRoute(startSegment.routePointLatlng, endSegment.routePointLatlng);
-
+            var deferred = this.$q.defer();
             promise.then((data) => {
                 this.routeSegments[endIndex].latlngzs = data[data.length - 1].latlngzs;
                 this.routeSegments[endIndex].polyline.setLatLngs(this.routeSegments[endIndex].latlngzs);
+                deferred.resolve(this.heightService.updateHeights(this.routeSegments[endIndex].latlngzs));
             });
 
-            return promise;
+            return deferred.promise;
         }
 
         private setHoverState = (state: string) => {

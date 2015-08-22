@@ -19,6 +19,7 @@
         public static localStorageService = "localStorageService";
         public static snappingService = "snappingService";
         public static fileService = "fileService";
+        public static heightService = "heightService";
         
         // Controllers
         public static mainMapController = "mainMapController";
