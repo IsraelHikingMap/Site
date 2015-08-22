@@ -74,6 +74,7 @@
             newScope.setTitle = (title: string) => {
                 marker.title = title;
                 this.updateDataLayer();
+                marker.closePopup();
             }
             var popupHtml = this.$compile("<marker-popup ng-title='title'></marker-popup>")(newScope)[0];
             marker.bindPopup(popupHtml);
