@@ -77,7 +77,7 @@ body {
 
 .scrollable-area {
     max-height: 200px;
-    overflow: scroll;
+    overflow-y: auto;
 }
 
 /* Extra Small Devices, Phones */

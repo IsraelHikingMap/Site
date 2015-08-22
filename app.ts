@@ -1,6 +1,7 @@
 ﻿module IsraelHiking {
-    // HM TODO: remove scroll from routes when no needed.
-    // HM TODO: support twl? - will be solved hopefull with iis backend.
+    // HM TODO: url using server side + twl support.
+    // HM TODO: routing using server side.
+    // HM TODO: height using server side.
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "n3-line-chart"]);
 
