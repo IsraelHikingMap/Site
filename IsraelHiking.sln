@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHikingMapSite", "IsraelHikingMapSite.csproj", "{DE18CA28-FFF7-4014-93C5-65EA40A813DA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.Web", "IsrealHiking.Web\IsraelHiking.Web.csproj", "{DE18CA28-FFF7-4014-93C5-65EA40A813DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

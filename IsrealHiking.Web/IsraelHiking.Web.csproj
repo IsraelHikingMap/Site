@@ -142,6 +142,7 @@
     <TypeScriptCompile Include="controllers\SearchController.ts" />
     <TypeScriptCompile Include="controllers\ShareController.ts" />
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
+    <TypeScriptCompile Include="directives\DraggableDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
@@ -198,6 +199,9 @@
   <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
+  </PropertyGroup>
+  <PropertyGroup>
+    <AssemblyName>IsraelHiking.Web</AssemblyName>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets')" />
