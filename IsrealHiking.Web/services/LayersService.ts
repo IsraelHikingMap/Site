@@ -17,7 +17,7 @@ module IsraelHiking.Services {
         maxZoom: number;
     }
 
-    export interface IBaseLayer extends ILayer {
+    export interface IBaseLayer extends ILayer, ILayerData {
         selected: boolean
     }
 
@@ -33,6 +33,7 @@ module IsraelHiking.Services {
     export class LayersService extends ObjectWithMap {
         public static MAX_ZOOM = 20;
         public static ISRAEL_MTB_MAP = "Israel MTB map";
+        public static DEFUALT_TILES_ADDRESS = "http://www.osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png";
 
         private static ISRAEL_HIKING_MAP = "Israel Hiking map";
         private static GOOGLE_EARTH = "Google Earth";
@@ -96,7 +97,7 @@ module IsraelHiking.Services {
                 maxNativeZoom: 16,
                 attribution: LayersService.MTB_ATTRIBUTION + lastModified,
             });
-            this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_EARTH, layer: <any>new L.Google(), selected: false });
+            this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_EARTH, layer: <any>new L.Google(), selected: false, address: "" });
             this.addOverlay(LayersService.HIKING_TRAILS,
                 "http://www.osm.org.il/IsraelHiking/OverlayTiles/{z}/{x}/{y}.png",
                 this.tileLayerOptions,
@@ -116,7 +117,7 @@ module IsraelHiking.Services {
                 options.attribution = this.tileLayerOptions.attribution;
             }
 
-            var layer = <IBaseLayer>{ key: key, layer: L.tileLayer(address, options), selected: false };
+            var layer = <IBaseLayer>{ key: key, layer: L.tileLayer(address, options), selected: false, address: address };
             this.baseLayers.push(layer);
             this.selectBaseLayer(layer);
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY) || [];

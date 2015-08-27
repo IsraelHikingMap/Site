@@ -7,13 +7,21 @@
     export class EditOSMController extends BaseMapController {
 
         constructor($scope: IEditOSMScope,
-            mapService: Services.MapService) {
+            $window: angular.IWindowService,
+            mapService: Services.MapService,
+            layersService: Services.LayersService) {
             super(mapService);
 
             $scope.editOsm = (e: Event) => {
                 var center = this.map.getCenter();
                 var zoom = this.map.getZoom();
-                window.open("http://www.openstreetmap.org/edit#background=custom:http://osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png&map=" + zoom + "/" + center.lat + "/" + center.lng);
+                var baseLayerAddress = layersService.selectedBaseLayer.address;
+                var background = "background=bing";
+                if (baseLayerAddress != "") {
+                    var address = baseLayerAddress.indexOf("{s}") == -1 ? baseLayerAddress : Services.LayersService.DEFUALT_TILES_ADDRESS;
+                    background = "background=custom:" + address;
+                }
+                $window.open("http://www.openstreetmap.org/edit#" + background + "&map=" + zoom + "/" + center.lat + "/" + center.lng);
                 this.suppressEvents(e);
             };
         } 
