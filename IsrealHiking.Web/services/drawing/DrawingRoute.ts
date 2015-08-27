@@ -224,10 +224,14 @@
                 this.setHoverState(HoverState.none);
             });
             marker.on("mouseover", (e: L.LeafletMouseEvent) => {
-                this.setHoverState(HoverState.onMarker);
+                if (this.hoverState != HoverState.dragging) {
+                    this.setHoverState(HoverState.onMarker);
+                }
             });
             marker.on("mouseout", (e: L.LeafletMouseEvent) => {
-                this.setHoverState(HoverState.none);
+                if (this.hoverState != HoverState.dragging) {
+                    this.setHoverState(HoverState.none);
+                }
             });
             marker.on("dblclick", (e: L.LeafletMouseEvent) => {
                 this.removePoint(marker);
