@@ -9,7 +9,7 @@
         }
 
         public create = (map: L.Map, directiveHtmlName: string, position = "topleft") => {
-            var control = L.Control.extend(<L.IControl>{
+            var control = L.Control.extend(<L.ClassExtendOptions>{
                 options: <L.ControlOptions> {
                     position: position
                 },

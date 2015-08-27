@@ -1,0 +1,14 @@
+﻿{
+  "Framework": "jasmine",
+  "Compile": {
+    "Mode": "External",
+    "Extensions": [ ".ts" ],
+    "ExtensionsWithNoOutput": [ ".d.ts" ]
+  },
+  "References": [],
+  "Tests": [
+    { "Include": "*/*tests.ts" }
+  ],
+  "EnableCodeCoverage": true,
+  "CodeCoverageIncludes": ["..\\isrealhiking.web\\services\\heightservice.*"]
+}

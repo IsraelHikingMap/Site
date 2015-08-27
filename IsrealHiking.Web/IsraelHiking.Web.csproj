@@ -144,6 +144,7 @@
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
     <TypeScriptCompile Include="directives\DraggableDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
+    <TypeScriptCompile Include="scripts\typings\angular-file-upload\angular-file-upload.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-cookies.d.ts" />
@@ -157,6 +158,7 @@
     <TypeScriptCompile Include="scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="scripts\typings\leaflet\leaflet.d.ts" />
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\ng-file-upload\ng-file-upload.d.ts" />
     <TypeScriptCompile Include="services\drawing\BaseDrawing.ts" />
     <TypeScriptCompile Include="services\drawing\DrawingFactory.ts" />
     <TypeScriptCompile Include="services\FileService.ts" />
@@ -169,7 +171,6 @@
     <TypeScriptCompile Include="controllers\MainMapController.ts" />
     <TypeScriptCompile Include="controllers\MarkerPopupController.ts" />
     <TypeScriptCompile Include="services\ControlCreatorService.ts" />
-    <TypeScriptCompile Include="scripts\typings\angular-file-upload\angular-file-upload.d.ts" />
     <TypeScriptCompile Include="scripts\typings\geojson\geojson.d.ts" />
     <TypeScriptCompile Include="services\drawing\DrawingMarker.ts" />
     <TypeScriptCompile Include="services\drawing\DrawingRoute.ts" />
