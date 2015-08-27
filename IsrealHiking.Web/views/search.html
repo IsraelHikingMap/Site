@@ -7,14 +7,14 @@
             <tr>
                 <th>
                     <div class="input-group">
-                        <input type="text" ng-model="searchTerm" ng-change="getAddresses(searchTerm)" class="form-control" placeholder="Search..." dir="{{isHebrew ? 'rtl' : 'ltr'}}" sync-focus-with="isShowingSearch" />
+                        <input type="text" ng-model="searchTerm" ng-change="getAddresses(searchTerm)" class="form-control" placeholder="Search..." dir="{{isHebrew ? 'rtl' : 'ltr'}}" sync-focus-with="isShowingSearch" ng-click="ignoreClick($event)" />
                         <a class="btn btn-default input-group-addon" ng-click="toggleSearchBar($event)"><i class="fa fa-search fa-lg"></i></a>
                     </div>
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="address in addresses" ng-click="selectAddress(address)" dir="{{isHebrew ? 'rtl' : 'ltr'}}">
+            <tr ng-repeat="address in addresses" ng-click="selectAddress(address, $event)" dir="{{isHebrew ? 'rtl' : 'ltr'}}">
                 <td>
                     <p class="search-results-item">{{address.display}}</p>
                 </td>

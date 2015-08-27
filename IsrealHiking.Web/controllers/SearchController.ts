@@ -6,7 +6,8 @@
         searchTerm: string;
         toggleSearchBar(e: Event);
         getAddresses(searchTerm: string);
-        selectAddress(address: ISearchResults): void;
+        selectAddress(address: ISearchResults, e: Event): void;
+        ignoreClick(e: Event): void;
     }
 
     interface ISearchResults {
@@ -69,7 +70,7 @@
                 });
             }
 
-            $scope.selectAddress = (address: ISearchResults) => {
+            $scope.selectAddress = (address: ISearchResults, e: Event) => {
                 $scope.isShowingSearch = false;
                 mapService.map.panTo(address.latlng);
                 if (this.marker == null) {
@@ -87,10 +88,15 @@
                 setTimeout(() => {
                     this.marker.openPopup();
                 }, 300);
+                this.suppressEvents(e);
             }
 
             if ($scope.isShowingSearch) {
                 $scope.getAddresses($scope.searchTerm);
+            }
+
+            $scope.ignoreClick = (e: Event) => {
+                this.suppressEvents(e);
             }
 
             $(window).bind("keydown", (e: JQueryEventObject) => {
