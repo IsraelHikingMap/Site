@@ -188,13 +188,15 @@
             return routeSegment;
         }
 
-        private addPoint = (latlng: L.LatLng, routingType: string): angular.IPromise<void> => {
+        private addPoint = (latlng: L.LatLng, routingType: string): angular.IPromise<{}> => {
             this.routeSegments.push(this.createRouteSegment(latlng, [this.getLatLngZFromLatLng(latlng)], routingType));
             if (this.routeSegments.length > 1) {
                 var endPointSegmentIndex = this.routeSegments.length - 1;
                 return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
+            } else if (this.routeSegments.length == 1) {
+                return this.heightService.updateHeights(this.routeSegments[0].latlngzs);
             }
-            var deferred = this.$q.defer<void>();
+            var deferred = this.$q.defer<{}>();
             deferred.resolve();
 
             return deferred.promise;
@@ -572,7 +574,7 @@
             }
             var start = this.routeSegments[0].latlngzs[0];
             var previousPoint = start;
-            for (var segmentIndex = 1; segmentIndex < this.routeSegments.length; segmentIndex++) {
+            for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
                 var segment = this.routeSegments[segmentIndex];
                 for (var latlngzIndex = 0; latlngzIndex < segment.latlngzs.length; latlngzIndex++) {
                     var latlngz = segment.latlngzs[latlngzIndex];
