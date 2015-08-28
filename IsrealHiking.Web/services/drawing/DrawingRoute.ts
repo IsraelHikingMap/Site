@@ -29,6 +29,17 @@
         "<i class='fa fa-circle fa-stack-1x icon-background' style='color:white;'></i>" +
         "<strong class='fa-stack-1x'>{{number}}</strong>" +
         "</span>";
+        private static START_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
+        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +
+        "<i class='fa fa-circle fa-stack-2x icon-background' style='color:white;'></i>" +
+        "<i class='fa fa-play-circle fa-stack-1x icon-background' style='color:green;'></i>" +
+        "</span>";
+
+        private static END_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
+        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +
+        "<i class='fa fa-circle fa-stack-2x icon-background' style='color:white;'></i>" +
+        "<i class='fa fa-stop fa-stack-1x icon-background' style='color:red;'></i>" +
+        "</span>";
 
         private $q: angular.IQService;
         private routerFactory: Services.Routers.RouterFactory;
@@ -43,6 +54,8 @@
         private middleMarker: L.Marker;
         private middleIcon: L.Icon;
         private routePointIcon: L.Icon;
+        private routePointIconStart: L.Icon;
+        private routePointIconEnd: L.Icon;
         private hoverState: string;
         private pathOptions: L.PathOptions;
         private datachangedCallback: Function;
@@ -74,6 +87,8 @@
             this.kmMarkersGroup = L.layerGroup([]);
             this.map.addLayer(this.kmMarkersGroup);
             this.routePointIcon = this.createMarkerIconWithColor();
+            this.routePointIconStart = this.createIconFromHtml(DrawingRoute.START_MARKER_HTML);
+            this.routePointIconEnd = this.createIconFromHtml(DrawingRoute.END_MARKER_HTML);
 
             this.hoverPolyline = L.polyline([]);
             this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.routePointIcon });
@@ -190,6 +205,7 @@
 
         private addPoint = (latlng: L.LatLng, routingType: string): angular.IPromise<{}> => {
             this.routeSegments.push(this.createRouteSegment(latlng, [this.getLatLngZFromLatLng(latlng)], routingType));
+            this.updateStartAndEndMarkersIcons();
             if (this.routeSegments.length > 1) {
                 var endPointSegmentIndex = this.routeSegments.length - 1;
                 return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
@@ -303,10 +319,11 @@
             var pointSegmentToRemove = _.find(this.routeSegments, (pointSegmentTofind) => pointSegmentTofind.routePointLatlng.equals(point.getLatLng()));
             var pointSegmentIndex = this.routeSegments.indexOf(pointSegmentToRemove);
             this.removeSegmentByIndex(pointSegmentIndex);
+            this.updateStartAndEndMarkersIcons();
 
             if (this.routeSegments.length > 0 && pointSegmentIndex == 0) {
                 // first point is being removed
-                this.routeSegments[0].latlngzs = [];
+                this.routeSegments[0].latlngzs = [this.routeSegments[0].latlngzs[this.routeSegments[0].latlngzs.length - 1]];
                 this.routeSegments[0].polyline.setLatLngs([this.routeSegments[0].routePointLatlng]);
                 this.updateDataLayer();
             }
@@ -456,6 +473,7 @@
                 }
             }
             this.setHoverState(HoverState.none);
+            this.updateStartAndEndMarkersIcons();
         }
 
         public deactivate = () => {
@@ -640,6 +658,16 @@
             });
         }
 
+        private createIconFromHtml = (html: string) => {
+            return L.divIcon(<L.DivIconOptions> {
+                html: html,
+                iconSize: L.point(32, 32),
+                iconAnchor: L.point(16, 32),
+                className: "special-marker",
+                popupAnchor: L.point(0, -30),
+            })
+        }
+
         public setRouteDataChangedCallback = (callback: Function) => {
             this.datachangedCallback = callback;
         }
@@ -666,6 +694,17 @@
             }
             this.routeSegments.reverse();
             this.updateDataLayer();
+        }
+
+        private updateStartAndEndMarkersIcons = () => {
+            if (this.routeSegments.length <= 0 || this.state != DrawingState.active) {
+                return;
+            }
+            this.routeSegments[this.routeSegments.length - 1].routePoint.setIcon(this.routePointIconEnd);
+            this.routeSegments[0].routePoint.setIcon(this.routePointIconStart);
+            for (var routeSegmentIndex = 1; routeSegmentIndex < this.routeSegments.length - 1; routeSegmentIndex++) {
+                this.routeSegments[routeSegmentIndex].routePoint.setIcon(this.routePointIcon);
+            }
         }
     }
 }
