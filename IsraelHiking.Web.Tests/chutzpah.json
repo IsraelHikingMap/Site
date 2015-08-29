@@ -7,8 +7,7 @@
   },
   "References": [],
   "Tests": [
-    { "Include": "*/*tests.ts" }
+    { "Include": "*\\*tests.ts" }
   ],
-  "EnableCodeCoverage": true,
-  "CodeCoverageIncludes": ["..\\isrealhiking.web\\services\\heightservice.*"]
+  "CodeCoverageIncludes": ["*\\isrealhiking.web\\services\\heightservice.*"]
 }

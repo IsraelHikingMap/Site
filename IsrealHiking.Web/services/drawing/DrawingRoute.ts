@@ -269,10 +269,7 @@
             var segmentLatlngzs = segment.latlngzs;
             var indexOfSegment = this.routeSegments.indexOf(segment);
             var newSegmentLatlngs = segmentLatlngzs.splice(0, snappingResponse.beforeIndex + 1);
-            // HM TODO: verify that it works...
-            //newSegmentLatlngs.push(snappingResponse.latlng);
             var newRouteSegment = this.createRouteSegment(snappingResponse.latlng, newSegmentLatlngs, this.currentRoutingType);
-            //segmentLatlngzs.splice(0, 0, newRouteSegment.routePointLatlng);
             segment.polyline.setLatLngs(segmentLatlngzs);
             this.routeSegments.splice(indexOfSegment, 0, newRouteSegment);
         }
@@ -339,12 +336,16 @@
         private runRouting = (startIndex: number, endIndex: number): angular.IPromise<any> => {
             var startSegment = this.routeSegments[startIndex];
             var endSegment = this.routeSegments[endIndex];
+            endSegment.polyline.setLatLngs([startSegment.routePointLatlng, endSegment.routePointLatlng]);
+            // HM TODO: recreate polyline?
+            endSegment.polyline.setStyle(<L.PathOptions>{ dashArray: "10 10", className: "loading-segment-indicator", color: this.pathOptions.color, weight: this.pathOptions.weight, opacity: this.pathOptions.opacity });
             var router = this.routerFactory.create(endSegment.routingType);
             var promise = router.getRoute(startSegment.routePointLatlng, endSegment.routePointLatlng);
             var deferred = this.$q.defer();
             promise.then((data) => {
                 this.routeSegments[endIndex].latlngzs = data[data.length - 1].latlngzs;
                 this.routeSegments[endIndex].polyline.setLatLngs(this.routeSegments[endIndex].latlngzs);
+                this.routeSegments[endIndex].polyline.setStyle(this.pathOptions);
                 deferred.resolve(this.heightService.updateHeights(this.routeSegments[endIndex].latlngzs));
             });
 

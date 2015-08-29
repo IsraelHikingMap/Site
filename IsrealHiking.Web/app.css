@@ -80,6 +80,30 @@ body {
     overflow-y: auto;
 }
 
+.loading-segment-indicator {
+    -webkit-animation:dash .4s linear infinite;
+    animation:dash .4s linear infinite
+
+}
+@-webkit-keyframes dash {
+    from {
+        stroke-dashoffset: 20;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+@keyframes dash {
+    from {
+        stroke-dashoffset: 20;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
 /* Extra Small Devices, Phones */
 @media only screen and (min-width : 480px) {
     .tooltip-info {
