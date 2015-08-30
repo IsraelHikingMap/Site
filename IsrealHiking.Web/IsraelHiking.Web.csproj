@@ -80,6 +80,7 @@
     <Content Include="scripts\FileAPI.js" />
     <Content Include="scripts\FileAPI.min.js" />
     <Content Include="scripts\google-analytics.js" />
+    <Content Include="scripts\interact-1.2.4.min.js" />
     <Content Include="scripts\jquery-2.1.4.js" />
     <Content Include="scripts\jquery-2.1.4.min.js" />
     <Content Include="scripts\leaflet-0.7.3.js" />
