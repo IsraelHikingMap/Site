@@ -336,20 +336,30 @@
         private runRouting = (startIndex: number, endIndex: number): angular.IPromise<any> => {
             var startSegment = this.routeSegments[startIndex];
             var endSegment = this.routeSegments[endIndex];
-            endSegment.polyline.setLatLngs([startSegment.routePointLatlng, endSegment.routePointLatlng]);
-            // HM TODO: recreate polyline?
-            endSegment.polyline.setStyle(<L.PathOptions>{ dashArray: "10 10", className: "loading-segment-indicator", color: this.pathOptions.color, weight: this.pathOptions.weight, opacity: this.pathOptions.opacity });
+            var polyline = this.createLoadingSegmentIndicatorPolyline([startSegment.routePointLatlng, endSegment.routePointLatlng]);
             var router = this.routerFactory.create(endSegment.routingType);
             var promise = router.getRoute(startSegment.routePointLatlng, endSegment.routePointLatlng);
             var deferred = this.$q.defer();
             promise.then((data) => {
+                this.map.removeLayer(polyline);
                 this.routeSegments[endIndex].latlngzs = data[data.length - 1].latlngzs;
                 this.routeSegments[endIndex].polyline.setLatLngs(this.routeSegments[endIndex].latlngzs);
-                this.routeSegments[endIndex].polyline.setStyle(this.pathOptions);
                 deferred.resolve(this.heightService.updateHeights(this.routeSegments[endIndex].latlngzs));
             });
 
             return deferred.promise;
+        }
+
+        private createLoadingSegmentIndicatorPolyline = (latlngs: L.LatLng[]): L.Polyline => {
+            var polyline = L.polyline(latlngs, <L.PathOptions> {
+                dashArray: "10 10",
+                className: "loading-segment-indicator",
+                color: this.pathOptions.color,
+                weight: this.pathOptions.weight,
+                opacity: this.pathOptions.opacity,
+            });
+            this.map.addLayer(polyline);
+            return polyline;
         }
 
         private setHoverState = (state: string) => {
