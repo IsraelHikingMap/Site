@@ -1,10 +1,9 @@
 ﻿module IsraelHiking {
-    // HM TODO: resize and drag for all popups.
     // HM TODO: url using server side + twl support.
     // HM TODO: routing using server side.
     // HM TODO: height using server side.
 
-    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "n3-line-chart"]);
+    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "googlechart"]);
 
     L.Icon.Default.imagePath = "content/images/";
 
@@ -37,7 +36,7 @@
     
     // Directives:
     app.directive("syncFocusWith", () => new Directives.SyncFocusWithDirective());
-    app.directive("draggable", () => new Directives.DraggableDirective());
+    app.directive("draggableMovable", [Common.Constants.window, ($window: angular.IWindowService) => new Directives.DraggableMovableDirective($window)]);
     app.directive("disableMapMovement", [Common.Constants.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
     app.directive("markerPopup", () => <angular.IDirective> {
         controller: Controllers.MarkerPopupController,

@@ -9,6 +9,7 @@
         public static q = "$q";
         public static compile = "$compile";
         public static injector = "$injector";
+        public static window = "$window";
         public static parserFactory = "parserFactory";
         public static routerFactory = "routerFactory";
         public static drawingFactory = "drawingFactory";

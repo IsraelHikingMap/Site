@@ -4,18 +4,63 @@
         gain: string;
         loss: string;
         isKmMarkersOn: boolean;
-        chartData: { x: string; y: number }[];
-        chartOptions: any;
         isShowingKmMarkers(): boolean;
         toggleKmMarker(): void;
+        chart: any;
     }
 
     export class RouteStatisticsController {
         drawingRoute: Services.Drawing.DrawingRoute;
 
         constructor($scope: IRouteStatisticsScope, layersService: Services.LayersService) {
-            $scope.chartData = [];
-            $scope.chartOptions = {};
+
+            $scope.chart = <any> {};
+            $scope.chart.type = "AreaChart";
+            $scope.chart.data = <google.visualization.DataObject>{
+                cols: <google.visualization.DataObjectColumn[]>[
+                    <google.visualization.DataObjectColumn>{
+                        id: "distance",
+                        label: "Distance",
+                        type: "number"
+                    },
+                    <google.visualization.DataObjectColumn>{
+                        id: "height",
+                        label: "Height",
+                        type: "number"
+                    },
+                ],
+                rows: <google.visualization.DataObjectRow[]>[]
+            };
+
+            $scope.chart.options = <google.visualization.AreaChartOptions> {
+                isStacked: true,
+                fill: 20,
+                displayExactValues: true,
+                legend: "none",
+                chartArea: <google.visualization.ChartArea>{
+                    left: 50,
+                    top: 10,
+                    width: "100%",
+                    height: "75%"
+                },
+                backgroundColor: { fill: "transparent" },
+                vAxis: <google.visualization.ChartAxis>{
+                    title: "Height (m)",
+                    viewWindowMode: "explicit",
+                    gridlines: <google.visualization.ChartGridlines>{
+                        color: "transparent"
+                    }
+                },
+                hAxis: <google.visualization.ChartAxis>{
+                    title: "Distance (Km)",
+                    gridlines: <google.visualization.ChartGridlines>{
+                        color: "transparent"
+                    }
+                },
+            };
+
+            $scope.chart.formatters = {};
+
             this.routeChanged($scope, layersService);
 
             layersService.eventHelper.addListener((args: Common.IDataChangedEventArgs) => {
@@ -51,35 +96,23 @@
 
         private updateChart = ($scope: IRouteStatisticsScope) => {
             var statistics = this.drawingRoute.getRouteStatistics();
-            var ticks = _.range(1, Math.floor(statistics.length / 1000.0) + 1, Math.ceil(statistics.length / 10000));
-            var max = statistics.length / 1000.0;
+            $scope.chart.data.rows.splice(0, $scope.chart.data.rows.length);
+            for (var index = 0; index < statistics.points.length; index++) {
+                var point = statistics.points[index];
+                $scope.chart.data.rows.push(<google.visualization.DataObjectRow>
+                    {
+                    c: [<google.visualization.DataObjectCell>{ v: point.x },
+                        <google.visualization.DataObjectCell>{ v: point.y }, ]
+                    });
+            }
+            $scope.chart.options.colors = [this.drawingRoute.getColor()];
+            $scope.chart.options.vAxis.viewWindow = <google.visualization.ChartViewWindow>{
+                min: _.min(statistics.points, (point) => point.y).y,
+                max: _.max(statistics.points, (point) => point.y).y,
+            }
             $scope.length = this.toDisplayableUnit(statistics.length);
             $scope.gain = this.toDisplayableUnit(statistics.gain);
             $scope.loss = this.toDisplayableUnit(statistics.loss);
-            $scope.chartData = statistics.points;
-            $scope.chartOptions = {
-                axes: {
-                    x: { type: "linear", ticks: ticks, ticksFormat: "d", key: "x", max: max, innerTicks: true},
-                    y: { type: "linear", ticks: 5 },
-                },
-                margin: {
-                    left: 50,
-                    right: 5,
-                    top: 5,
-                    bottom: 25
-                },
-                series: [{ y: "y", color: this.drawingRoute.getColor(), thickness: "2px", type: "area", striped: true, label: this.drawingRoute.name }],
-                lineMode: "linear",
-                tension: 0.7,
-                tooltip: { mode: "scrubber", formatter: function (x, y, series) { return "(" + x + "," + y + ")"; } },
-                drawLegend: false,
-                drawDots: true,
-                hideOverflow: false,
-                columnsHGap: 5
-            }
-            if (!$scope.$$phase) {
-                $scope.$apply();
-            }
         }
 
         private toDisplayableUnit = (distance: number): string => {

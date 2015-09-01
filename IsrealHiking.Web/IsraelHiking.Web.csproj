@@ -50,7 +50,9 @@
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="index.html" />
-    <Content Include="packages.config" />
+    <Content Include="packages.config">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="scripts\angular-local-storage.js" />
     <Content Include="scripts\angular-local-storage.min.js" />
     <Content Include="fonts\glyphicons-halflings-regular.woff2" />
@@ -74,12 +76,11 @@
     <Content Include="scripts\angular.min.js" />
     <Content Include="scripts\bootstrap.js" />
     <Content Include="scripts\bootstrap.min.js" />
-    <Content Include="scripts\d3\d3.js" />
-    <Content Include="scripts\d3\d3.min.js" />
     <Content Include="scripts\FileAPI.flash.swf" />
     <Content Include="scripts\FileAPI.js" />
     <Content Include="scripts\FileAPI.min.js" />
     <Content Include="scripts\google-analytics.js" />
+    <Content Include="scripts\interact-1.2.4.js" />
     <Content Include="scripts\interact-1.2.4.min.js" />
     <Content Include="scripts\jquery-2.1.4.js" />
     <Content Include="scripts\jquery-2.1.4.min.js" />
@@ -88,8 +89,6 @@
     <Content Include="scripts\leaflet-google.js" />
     <Content Include="scripts\leaflet-locate.js" />
     <Content Include="scripts\leaflet-locate.min.js" />
-    <Content Include="scripts\line-chart.js" />
-    <Content Include="scripts\line-chart.min.js" />
     <Content Include="scripts\lodash.js" />
     <Content Include="scripts\lodash.min.js" />
     <Content Include="scripts\ng-file-upload-all.js" />
@@ -101,6 +100,7 @@
     <Content Include="scripts\togeojson.js" />
     <Content Include="scripts\togpx.js" />
     <Content Include="scripts\tokml.js" />
+    <Content Include="scripts\ng-google-chart.js" />
     <Content Include="views\layers.html" />
     <Content Include="views\drawing.html" />
     <Content Include="views\editOSM.html" />
@@ -121,7 +121,6 @@
     <Content Include="views\templates\infoTooltip.tpl.html" />
     <Content Include="scripts\leaflet-locate.min.js.map" />
     <Content Include="scripts\angular-strap.min.js.map" />
-    <Content Include="scripts\d3\LICENSE" />
     <Content Include="scripts\angular.min.js.map" />
     <None Include="scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="scripts\tokml.js.map" />
@@ -143,7 +142,7 @@
     <TypeScriptCompile Include="controllers\SearchController.ts" />
     <TypeScriptCompile Include="controllers\ShareController.ts" />
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
-    <TypeScriptCompile Include="directives\DraggableDirective.ts" />
+    <TypeScriptCompile Include="directives\DraggableMovableDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-file-upload\angular-file-upload.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
@@ -154,8 +153,7 @@
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-route.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-sanitize.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular.d.ts" />
-    <TypeScriptCompile Include="scripts\typings\d3\d3.d.ts" />
-    <TypeScriptCompile Include="scripts\typings\d3\plugins\d3.superformula.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\google.visualization\google.visualization.d.ts" />
     <TypeScriptCompile Include="scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="scripts\typings\leaflet\leaflet.d.ts" />
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />

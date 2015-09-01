@@ -104,6 +104,11 @@ body {
     }
 }
 
+.tooltip-statistics {
+    max-width: none;
+    width: 200px;
+}
+
 /* Extra Small Devices, Phones */
 @media only screen and (min-width : 480px) {
     .tooltip-info {
@@ -128,7 +133,7 @@ body {
 /* Large Devices, Wide Screens */
 @media only screen and (min-width : 1200px) {
     .tooltip-info {
-        width: 600px;
+        max-width: 600px;
     }
 }
 
