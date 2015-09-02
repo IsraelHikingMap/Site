@@ -7,8 +7,14 @@
         routingType: string;
     }
 
+    export interface IRouteStatisticsPoint {
+        x: string;
+        y: number;
+        latlng: L.LatLng;
+    }
+
     export interface IRouteStatistics {
-        points: { x: string; y: number }[];
+        points: IRouteStatisticsPoint[];
         length: number; // [meters]
         gain: number; // [meters] - adding only when going up hill.
         loss: number; // [meters] - adding only when going downhill - should be negative number.
@@ -597,7 +603,7 @@
 
         public getRouteStatistics = (): IRouteStatistics => {
             var routeStatistics = <IRouteStatistics> {
-                points: [],
+                points: <IRouteStatisticsPoint[]>[],
                 length: 0,
                 gain: 0,
                 loss: 0,
@@ -612,7 +618,11 @@
                 for (var latlngzIndex = 0; latlngzIndex < segment.latlngzs.length; latlngzIndex++) {
                     var latlngz = segment.latlngzs[latlngzIndex];
                     routeStatistics.length += previousPoint.distanceTo(latlngz);
-                    routeStatistics.points.push({ x: (routeStatistics.length / 1000).toFixed(2), y: latlngz.z });
+                    routeStatistics.points.push(<IRouteStatisticsPoint>{ 
+                        x: (routeStatistics.length / 1000).toFixed(2),
+                        y: latlngz.z,
+                        latlng: latlngz,
+                    });
                     routeStatistics.gain += ((latlngz.z - previousPoint.z) > 0 && latlngz.z != 0 && previousPoint.z != 0) ?
                         (latlngz.z - previousPoint.z) :
                         0;

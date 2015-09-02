@@ -6,14 +6,16 @@
         isKmMarkersOn: boolean;
         isShowingKmMarkers(): boolean;
         toggleKmMarker(): void;
+        chartReady(chartWrapper: google.visualization.ChartWrapper): void;
         chart: any;
     }
 
     export class RouteStatisticsController {
         drawingRoute: Services.Drawing.DrawingRoute;
 
-        constructor($scope: IRouteStatisticsScope, layersService: Services.LayersService) {
-
+        constructor($scope: IRouteStatisticsScope,
+            layersService: Services.LayersService,
+            mapService: Services.MapService) {
             $scope.chart = <any> {};
             $scope.chart.type = "AreaChart";
             $scope.chart.data = <google.visualization.DataObject>{
@@ -26,6 +28,16 @@
                     <google.visualization.DataObjectColumn>{
                         id: "height",
                         label: "Height",
+                        type: "number"
+                    },
+                    <google.visualization.DataObjectColumn>{
+                        id: "lat",
+                        label: "Hidden",
+                        type: "number"
+                    },
+                    <google.visualization.DataObjectColumn>{
+                        id: "lng",
+                        label: "Hidden",
                         type: "number"
                     },
                 ],
@@ -58,8 +70,23 @@
                     }
                 },
             };
-
+            $scope.chart.view = {
+                columns: [0,1]
+            }
             $scope.chart.formatters = {};
+
+            var hoverChartMarker = L.marker(mapService.map.getCenter(), <L.MarkerOptions> { opacity: 0.0 });
+            mapService.map.addLayer(hoverChartMarker);
+            $scope.chartReady = (chartWrapper: google.visualization.ChartWrapper) => {
+                google.visualization.events.addListener(chartWrapper.getChart(), "onmouseover", (e: { row: number; column: number }) => {
+                    var row = <google.visualization.DataObjectRow>$scope.chart.data.rows[e.row];
+                    hoverChartMarker.setLatLng([row.c[2].v, row.c[3].v]);
+                    hoverChartMarker.setOpacity(1.0);
+                });
+                google.visualization.events.addListener(chartWrapper.getChart(), "onmouseout", (e: { row: number; column: number }) => {
+                    hoverChartMarker.setOpacity(0.0);
+                });
+            };
 
             this.routeChanged($scope, layersService);
 
@@ -102,7 +129,9 @@
                 $scope.chart.data.rows.push(<google.visualization.DataObjectRow>
                     {
                     c: [<google.visualization.DataObjectCell>{ v: point.x },
-                        <google.visualization.DataObjectCell>{ v: point.y }, ]
+                        <google.visualization.DataObjectCell>{ v: point.y },
+                        <google.visualization.DataObjectCell>{ v: point.latlng.lat },
+                        <google.visualization.DataObjectCell>{ v: point.latlng.lng },]
                     });
             }
             $scope.chart.options.colors = [this.drawingRoute.getColor()];

@@ -90,7 +90,7 @@
             $scope.openStatistics = (e: Event) => {
                 if (this.routeStatisticsTooltip == null) {
                     var newScope = <IRouteStatisticsScope>$scope.$new();
-                    var controller = new RouteStatisticsController(newScope, this.layersService); // updates the new scope
+                    var controller = new RouteStatisticsController(newScope, this.layersService, mapService); // updates the new scope
                     
                     this.routeStatisticsTooltip = this.createToolTip(e.target, "views/templates/routeStatisticsTooltip.tpl.html", "Route Statistics", newScope);
                     this.routeStatisticsTooltip.$promise.then(this.routeStatisticsTooltip.show);

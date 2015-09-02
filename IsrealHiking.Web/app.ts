@@ -70,4 +70,8 @@
         controller: Controllers.ShareController,
         templateUrl: "views/share.html",
     });
+
+    app.run(["googleChartApiPromise", (googleChartApiPromise) => {
+        // loading google visualization on start-up.
+    }]);
 }

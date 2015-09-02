@@ -3,7 +3,7 @@
         <button type="button" class="btn btn-default btn-xs pull-right" aria-label="Close" ng-click="$hide()"><i aria-hidden="true" class="fa fa-close"></i></button>
         <h3> Route Statistics </h3>
         <div>
-            <div google-chart chart="chart" style="height:200px;" />
+            <div google-chart chart="chart" on-ready="chartReady(chartWrapper)" style="height:200px;" />
                 <div class="form-horizontal">
                     <div class="form-group">
                         <label class="control-label col-md-3">Length</label>
