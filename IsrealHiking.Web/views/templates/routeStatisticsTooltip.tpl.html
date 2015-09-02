@@ -1,6 +1,6 @@
 ﻿<div class="tooltip in tooltip-inner tooltip-statistics" ng-show="title" draggable-movable >
-    <div >
-        <button type="button" class="btn btn-default btn-xs pull-right" aria-label="Close" ng-click="$hide()"><i aria-hidden="true" class="fa fa-close"></i></button>
+    <span class="cursor-pointer pull-right" aria-label="Close" ng-click="$hide()"><i aria-hidden="true" class="fa fa-close fa-inverse"></i></span>
+    <div>
         <h3> Route Statistics </h3>
         <div>
             <div google-chart chart="chart" on-ready="chartReady(chartWrapper)" style="height:200px;" />

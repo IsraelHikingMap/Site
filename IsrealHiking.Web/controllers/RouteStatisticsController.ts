@@ -11,11 +11,14 @@
     }
 
     export class RouteStatisticsController {
-        drawingRoute: Services.Drawing.DrawingRoute;
+
+        private drawingRoute: Services.Drawing.DrawingRoute;
+        private hoverChartMarker: L.Marker;
 
         constructor($scope: IRouteStatisticsScope,
             layersService: Services.LayersService,
             mapService: Services.MapService) {
+
             $scope.chart = <any> {};
             $scope.chart.type = "AreaChart";
             $scope.chart.data = <google.visualization.DataObject>{
@@ -75,16 +78,16 @@
             }
             $scope.chart.formatters = {};
 
-            var hoverChartMarker = L.marker(mapService.map.getCenter(), <L.MarkerOptions> { opacity: 0.0 });
-            mapService.map.addLayer(hoverChartMarker);
+            this.hoverChartMarker = L.marker(mapService.map.getCenter(), <L.MarkerOptions> { opacity: 0.0 });
+            mapService.map.addLayer(this.hoverChartMarker);
             $scope.chartReady = (chartWrapper: google.visualization.ChartWrapper) => {
                 google.visualization.events.addListener(chartWrapper.getChart(), "onmouseover", (e: { row: number; column: number }) => {
                     var row = <google.visualization.DataObjectRow>$scope.chart.data.rows[e.row];
-                    hoverChartMarker.setLatLng([row.c[2].v, row.c[3].v]);
-                    hoverChartMarker.setOpacity(1.0);
+                    this.hoverChartMarker.setLatLng([row.c[2].v, row.c[3].v]);
+                    this.hoverChartMarker.setOpacity(1.0);
                 });
                 google.visualization.events.addListener(chartWrapper.getChart(), "onmouseout", (e: { row: number; column: number }) => {
-                    hoverChartMarker.setOpacity(0.0);
+                    this.hoverChartMarker.setOpacity(0.0);
                 });
             };
 
@@ -142,6 +145,9 @@
             $scope.length = this.toDisplayableUnit(statistics.length);
             $scope.gain = this.toDisplayableUnit(statistics.gain);
             $scope.loss = this.toDisplayableUnit(statistics.loss);
+
+            var icon = Services.IconsService.createHoverIcon(this.drawingRoute.getColor());
+            this.hoverChartMarker.setIcon(icon);
         }
 
         private toDisplayableUnit = (distance: number): string => {

@@ -20,7 +20,7 @@
             this.$rootScope = $rootScope;
             this.enabled = false;
             this.markers = [];
-            this.icon = this.createMarkerIconWithColor();
+            this.icon = IconsService.createMarkerIconWithColor(this.getColor());
             this.addDataToStack(this.getData());
 
             this.map.on("click",(e: L.LeafletMouseEvent) => {

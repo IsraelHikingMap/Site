@@ -30,22 +30,6 @@
 
     export class DrawingRoute extends BaseDrawing<Common.RouteData> {
         private static MINIMAL_DISTANCE_BETWEEN_MARKERS = 100; // meter.
-        private static KM_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
-        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +
-        "<i class='fa fa-circle fa-stack-1x icon-background' style='color:white;'></i>" +
-        "<strong class='fa-stack-1x'>{{number}}</strong>" +
-        "</span>";
-        private static START_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
-        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +
-        "<i class='fa fa-circle fa-stack-2x icon-background' style='color:white;'></i>" +
-        "<i class='fa fa-play-circle fa-stack-1x icon-background' style='color:green;'></i>" +
-        "</span>";
-
-        private static END_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
-        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +
-        "<i class='fa fa-circle fa-stack-2x icon-background' style='color:white;'></i>" +
-        "<i class='fa fa-stop fa-stack-1x icon-background' style='color:red;'></i>" +
-        "</span>";
 
         private $q: angular.IQService;
         private routerFactory: Services.Routers.RouterFactory;
@@ -58,7 +42,6 @@
         private enabled: boolean;
         private routeSegments: IRouteSegment[];
         private middleMarker: L.Marker;
-        private middleIcon: L.Icon;
         private routePointIcon: L.Icon;
         private routePointIconStart: L.Icon;
         private routePointIconEnd: L.Icon;
@@ -92,9 +75,9 @@
             this.showKmMarkers = false;
             this.kmMarkersGroup = L.layerGroup([]);
             this.map.addLayer(this.kmMarkersGroup);
-            this.routePointIcon = this.createMarkerIconWithColor();
-            this.routePointIconStart = this.createIconFromHtml(DrawingRoute.START_MARKER_HTML);
-            this.routePointIconEnd = this.createIconFromHtml(DrawingRoute.END_MARKER_HTML);
+            this.routePointIcon = IconsService.createMarkerIconWithColor(this.getColor());
+            this.routePointIconStart = IconsService.createStartIcon();
+            this.routePointIconEnd = IconsService.createEndIcon();
 
             this.hoverPolyline = L.polyline([]);
             this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.routePointIcon });
@@ -149,14 +132,7 @@
         }
 
         private createMiddleMarker = () => {
-            this.middleIcon = new L.Icon.Default(<L.IconOptions> {
-                iconUrl: L.Icon.Default.imagePath + "/marker-icon-middle.png",
-                iconSize: new L.Point(17, 17),
-                iconAnchor: new L.Point(9, 9),
-                shadowSize: new L.Point(0, 0),
-            });
-
-            this.middleMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: true, draggable: true, icon: this.middleIcon, opacity: 0.0 });
+            this.middleMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: true, draggable: true, icon: IconsService.createHoverIcon(this.getColor()), opacity: 0.0 });
             this.middleMarker.on("click", (e: L.LeafletMouseEvent) => {
                 this.onMiddleMarkerClick();
             });
@@ -580,7 +556,8 @@
 
         public setPathOptions = (pathOptions: L.PathOptions) => {
             this.pathOptions.color = pathOptions.color;
-            this.routePointIcon = this.createMarkerIconWithColor();
+            this.routePointIcon = IconsService.createMarkerIconWithColor(this.getColor());
+            this.middleMarker.setIcon(IconsService.createHoverIcon(this.getColor()));
             this.pathOptions.weight = pathOptions.weight;
             for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
                 var segment = this.routeSegments[segmentIndex];
@@ -669,24 +646,8 @@
             return L.marker(latlng, <L.MarkerOptions> {
                 clickable: false,
                 draggable: false,
-                icon: L.divIcon(<L.DivIconOptions> {
-                    html: DrawingRoute.KM_MARKER_HTML.replace("{{number}}", markerNumber.toString()),
-                    iconSize: L.point(32, 32),
-                    iconAnchor: L.point(16, 32),
-                    className: "km-marker",
-                    popupAnchor: L.point(0, -30),
-                })
+                icon: IconsService.createKmMarkerIcon(markerNumber),
             });
-        }
-
-        private createIconFromHtml = (html: string) => {
-            return L.divIcon(<L.DivIconOptions> {
-                html: html,
-                iconSize: L.point(32, 32),
-                iconAnchor: L.point(16, 32),
-                className: "special-marker",
-                popupAnchor: L.point(0, -30),
-            })
         }
 
         public setRouteDataChangedCallback = (callback: Function) => {

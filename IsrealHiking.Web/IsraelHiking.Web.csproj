@@ -162,6 +162,7 @@
     <TypeScriptCompile Include="services\drawing\DrawingFactory.ts" />
     <TypeScriptCompile Include="services\FileService.ts" />
     <TypeScriptCompile Include="services\HeightService.ts" />
+    <TypeScriptCompile Include="services\IconsService.ts" />
     <TypeScriptCompile Include="services\LayersService.ts" />
     <TypeScriptCompile Include="services\ObjectWithMap.ts" />
     <TypeScriptCompile Include="common\IsraelHikingData.ts" />
