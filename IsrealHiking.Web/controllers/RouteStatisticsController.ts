@@ -6,7 +6,8 @@
         isKmMarkersOn: boolean;
         isShowingKmMarkers(): boolean;
         toggleKmMarker(): void;
-        chartReady(chartWrapper: google.visualization.ChartWrapper): void;
+        onMouseOver(rowIndex: number, colIndex: number);
+        onMouseOut();
         chart: any;
     }
 
@@ -80,15 +81,14 @@
 
             this.hoverChartMarker = L.marker(mapService.map.getCenter(), <L.MarkerOptions> { opacity: 0.0 });
             mapService.map.addLayer(this.hoverChartMarker);
-            $scope.chartReady = (chartWrapper: google.visualization.ChartWrapper) => {
-                google.visualization.events.addListener(chartWrapper.getChart(), "onmouseover", (e: { row: number; column: number }) => {
-                    var row = <google.visualization.DataObjectRow>$scope.chart.data.rows[e.row];
-                    this.hoverChartMarker.setLatLng([row.c[2].v, row.c[3].v]);
-                    this.hoverChartMarker.setOpacity(1.0);
-                });
-                google.visualization.events.addListener(chartWrapper.getChart(), "onmouseout", (e: { row: number; column: number }) => {
-                    this.hoverChartMarker.setOpacity(0.0);
-                });
+            $scope.onMouseOver = (rowIndex: number, colIndex: number) => {
+                var row = <google.visualization.DataObjectRow>$scope.chart.data.rows[rowIndex];
+                this.hoverChartMarker.setLatLng([row.c[2].v, row.c[3].v]);
+                this.hoverChartMarker.setOpacity(1.0);
+            };
+
+            $scope.onMouseOut = () => {
+                this.hoverChartMarker.setOpacity(0.0);
             };
 
             this.routeChanged($scope, layersService);

@@ -1,6 +1,7 @@
 ﻿<div class="tooltip in" ng-show="title">
     <div class="tooltip-arrow"></div>
     <div class="tooltip-inner">
+        <span class="cursor-pointer pull-right" aria-label="Close" ng-click="$hide()"><i aria-hidden="true" class="fa fa-close fa-inverse"></i></span>
         <ul class="text-left">
             <li><a class="cursor-pointer" ng-click="save($event, 'IsraelHikingMap.gpx'); $hide()">IsraelHikingMap.gpx</a></li>
             <li><a class="cursor-pointer" ng-click="save($event, 'IsraelHikingMap.kml'); $hide()">IsraelHikingMap.kml</a></li>

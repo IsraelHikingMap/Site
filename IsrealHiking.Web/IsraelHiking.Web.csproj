@@ -97,6 +97,7 @@
     <Content Include="scripts\ng-file-upload-shim.min.js" />
     <Content Include="scripts\ng-file-upload.js" />
     <Content Include="scripts\ng-file-upload.min.js" />
+    <Content Include="scripts\ng-google-chart.min.js" />
     <Content Include="scripts\togeojson.js" />
     <Content Include="scripts\togpx.js" />
     <Content Include="scripts\tokml.js" />

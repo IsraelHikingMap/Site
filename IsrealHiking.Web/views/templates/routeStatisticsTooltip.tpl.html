@@ -3,7 +3,7 @@
     <div>
         <h3> Route Statistics </h3>
         <div>
-            <div google-chart chart="chart" on-ready="chartReady(chartWrapper)" style="height:200px;" />
+            <div google-chart chart="chart" style="height:200px;" agc-on-mouseover="onMouseOver(row, col)" agc-on-mouseout="onMouseOut()"/>
                 <div class="form-horizontal">
                     <div class="form-group">
                         <label class="control-label col-md-3">Length</label>
