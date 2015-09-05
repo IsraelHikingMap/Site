@@ -14,7 +14,7 @@
     app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterFactory($http, $q, parserFactory)]);
-    app.service(Common.Constants.fileService, [Common.Constants.parserFactory, (parserFactory: Services.Parsers.ParserFactory) => new Services.FileService(parserFactory)]);
+    app.service(Common.Constants.fileService, [Common.Constants.parserFactory, Common.Constants.heightService, (parserFactory: Services.Parsers.ParserFactory, heightService: Services.HeightService) => new Services.FileService(parserFactory, heightService)]);
     app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory,
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.SnappingService($http, mapService, parserFactory)]);

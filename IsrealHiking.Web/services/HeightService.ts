@@ -15,10 +15,10 @@
                 var latlngz = latlngzs[index];
                 if (latlngz.z == 0) {
                     filteredArray.push(latlngz);
-                    pointsString += latlngz.lat + "," + latlngz.lng + ",";
+                    pointsString += latlngz.lat.toFixed(4) + "," + latlngz.lng.toFixed(4) + ",";
                 }
             }
-            pointsString += filteredArray.length + "," + filteredArray.length;
+            pointsString = pointsString.substr(0, pointsString.length - 1);
             return this.$http.jsonp(HeightService.VIRTUAL_EARTH_BASE_ADDRESS, {
                 params: {
                     key: "ArUJIOvdEI-4sFS5-3PqMlDJP-00FMLrOeLIGkLRpfWIjfpOcESgnE-Zmk-ZimU2",
@@ -40,6 +40,8 @@
                 for (var index = 0; index < filteredArray.length; index++) {
                     filteredArray[index].z = elevations[index];
                 }
+            }).error(() => {
+                console.log("Height requests failed: " + pointsString)
             });
         }
     }
