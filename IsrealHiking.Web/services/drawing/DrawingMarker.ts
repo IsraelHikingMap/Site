@@ -64,6 +64,7 @@
                 var marker = this.createMarker(markerData.latlng, markerData.title);
                 this.markers.push(marker);
             }
+            this.updateDataLayer();
         }
 
         private createMarker(latlng: L.LatLng, title = ""): MarkerWithTitle {
