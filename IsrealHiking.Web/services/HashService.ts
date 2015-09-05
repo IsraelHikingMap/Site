@@ -7,6 +7,7 @@
         private static MARKER_SPECIAL_CHARACTERS_REGEXP = /[:;,]+/;
         private static DATA_DELIMITER = ",";
         private static PERSICION = 4;
+        private static BASE_LAYER = "baselayer";
 
         private $location: angular.ILocationService;
         private $rootScope: angular.IScope;
@@ -17,6 +18,7 @@
         public zoom: number;
         public searchTerm: string;
         public externalUrl: string;
+        public baseLayer: string;
 
         constructor($location: angular.ILocationService,
             $rootScope: angular.IScope,
@@ -83,6 +85,11 @@
 
         public removeRoute = (routeName: string) => {
             _.remove(this.dataContainer.routes, (routeToRemove) => routeToRemove.name == routeName);
+            this.updateUrl();
+        }
+
+        public updateBaseLayer = (baseLayer: string) => {
+            this.baseLayer = baseLayer;
             this.updateUrl();
         }
 
@@ -188,6 +195,7 @@
 
         private dataContainerToUrlString = (): any => {
             var urlObject = {};
+            urlObject[HashService.BASE_LAYER] = this.baseLayerToHash(this.baseLayer);
             urlObject[Common.Constants.MARKERS] = this.markersToStringArray(this.dataContainer.markers).join(HashService.ARRAY_DELIMITER);
             for (var routeIndex = 0; routeIndex < this.dataContainer.routes.length; routeIndex++) {
                 var routeData = this.dataContainer.routes[routeIndex];
@@ -209,6 +217,9 @@
                     data.markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || [])
                     continue;
                 }
+                if (parameter == HashService.BASE_LAYER) {
+                    continue;
+                }
                 data.routes.push(this.stringToRoute(searchObject[parameter], parameter.split("_").join(" ")));
             }
 
@@ -221,6 +232,7 @@
             var search = this.$location.search();
             this.searchTerm = search.q || "";
             this.externalUrl = search.url || "";
+            this.baseLayer = this.hashToBaseLayer(search[HashService.BASE_LAYER] || "");
 
             if (splittedpath.length != 4) {
                 // backwards compatibility... :-(
@@ -240,6 +252,20 @@
         }
         private getURLParameter(name) {
             return decodeURIComponent((new RegExp("[?|&]" + name + "=" + "([^&;]+?)(&|#|;|$)").exec(location.search) || [, ""])[1].replace(/\+/g, "%20")) || null;
+        }
+
+        private baseLayerToHash(baseLayer: string): string {
+            if (baseLayer.indexOf("www") != -1 || baseLayer.indexOf("http") != -1) {
+                return baseLayer;
+            }
+            return baseLayer.split(" ").join("_");
+        }
+
+        private hashToBaseLayer(str: string): string {
+            if (str.indexOf("www") != -1 || str.indexOf("http") != -1) {
+                return str;
+            }
+            return str.split("_").join(" ");
         }
     }
 } 

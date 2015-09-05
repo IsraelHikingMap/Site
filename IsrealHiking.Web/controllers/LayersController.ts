@@ -106,7 +106,8 @@
             var addBaseLayerScope = <IAddLayerModalScope>$scope.$new();
             addBaseLayerScope.addLayer = (name: string, address: string, minZoom: number, maxNativeZoom: number, e: Event) => {
                 var decodedAddress = decodeURI(address).replace("{zoom}", "{z}");
-                layersService.addBaseLayer(name, decodedAddress, <L.TileLayerOptions> { minZoom: minZoom, maxNativeZoom: maxNativeZoom, maxZoom: Services.LayersService.MAX_ZOOM });
+                var layer = layersService.addBaseLayer(name, decodedAddress, <L.TileLayerOptions> { minZoom: minZoom, maxNativeZoom: maxNativeZoom, maxZoom: Services.LayersService.MAX_ZOOM });
+                layersService.selectBaseLayer(layer);
                 this.suppressEvents(e);
             }
             return this.createAddLayerModal($modal, "Add Base Layer", addBaseLayerScope);

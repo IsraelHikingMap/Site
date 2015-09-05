@@ -105,24 +105,24 @@ module IsraelHiking.Services {
 
             this.addLayersFromLocalStorage();
             this.addDrawingsFromHash();
-
-            this.selectBaseLayer(this.baseLayers[0]);
+            this.addBaseLayerFromHash();
         }
 
-        public addBaseLayer = (key: string, address: string, options: L.TileLayerOptions) => {
-            if (_.find(this.baseLayers, (layerToFind) => layerToFind.key == key)) {
-                return; // layer exists
+        public addBaseLayer = (key: string, address: string, options: L.TileLayerOptions): IBaseLayer => {
+            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key == key);
+            if (layer != null) {
+                return layer; // layer exists
             }
             if (options && !options.attribution) {
                 options.attribution = this.tileLayerOptions.attribution;
             }
 
-            var layer = <IBaseLayer>{ key: key, layer: L.tileLayer(address, options), selected: false, address: address };
+            layer = <IBaseLayer>{ key: key, layer: L.tileLayer(address, options), selected: false, address: address };
             this.baseLayers.push(layer);
-            this.selectBaseLayer(layer);
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY) || [];
             baseLayers.push(<ILayerData>{ key: key, address: address, minZoom: options.minZoom, maxZoom: options.maxNativeZoom });
             this.localStorageService.set(LayersService.BASE_LAYERS_KEY, baseLayers);
+            return layer;
         }
 
         public addOverlay = (key: string, address: string, options: L.TileLayerOptions, show = true) => {
@@ -216,6 +216,7 @@ module IsraelHiking.Services {
             this.map.addLayer(newSelectedLayer.layer, true);
             newSelectedLayer.selected = true;
             this.selectedBaseLayer = newSelectedLayer;
+            this.updateBaseLayerHash();
         }
 
         public toggleOverlay = (overlay: IOvelay) => {
@@ -311,6 +312,45 @@ module IsraelHiking.Services {
 
         public createPathOptions = () => {
             return this.drawingFactory.createPathOptions();
+        }
+
+        private addBaseLayerFromHash = () => {
+            if (this.hashService.baseLayer == "") {
+                this.selectBaseLayer(this.baseLayers[0]);
+                return;
+            }
+            var baseLayer = _.find(this.baseLayers, (baseLayerToFind) => baseLayerToFind.address == this.hashService.baseLayer || baseLayerToFind.key == this.hashService.baseLayer);
+            if (baseLayer != null) {
+                this.selectBaseLayer(baseLayer);
+                return;
+            }
+            var name = "Custom Layer ";
+            var index = 0;
+            var layer = null;
+            var customName = name + index.toString();
+            do {
+                index++;
+                customName = name + index.toString();
+                layer = _.find(this.baseLayers, (baseLayerToFind) => baseLayerToFind.key == customName);
+            } while (layer != null);
+            layer = this.addBaseLayer(customName, this.hashService.baseLayer, this.tileLayerOptions);
+            this.selectBaseLayer(layer);
+        }
+
+        private updateBaseLayerHash = () => {
+            var baseLayer = "";
+            if (this.selectedBaseLayer == null) {
+                baseLayer = "";
+            }
+            else if (this.selectedBaseLayer.key == LayersService.ISRAEL_HIKING_MAP ||
+                this.selectedBaseLayer.key == LayersService.ISRAEL_MTB_MAP ||
+                this.selectedBaseLayer.key == LayersService.GOOGLE_EARTH) {
+                baseLayer = this.selectedBaseLayer.key;
+            }
+            else {
+                baseLayer = this.selectedBaseLayer.address;
+            }
+            this.hashService.updateBaseLayer(baseLayer);
         }
     }
 }
