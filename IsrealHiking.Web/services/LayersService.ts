@@ -110,7 +110,7 @@ module IsraelHiking.Services {
         }
 
         public addBaseLayer = (key: string, address: string, options: L.TileLayerOptions): IBaseLayer => {
-            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key == key);
+            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() == key.toLocaleLowerCase());
             if (layer != null) {
                 return layer; // layer exists
             }
@@ -127,7 +127,7 @@ module IsraelHiking.Services {
         }
 
         public addOverlay = (key: string, address: string, options: L.TileLayerOptions, show = true) => {
-            if (_.find(this.overlays, (overlayToFind) => overlayToFind.key == key)) {
+            if (_.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() == key.toLocaleLowerCase())) {
                 return; // overlay exists
             }
             if (options && !options.attribution) {
