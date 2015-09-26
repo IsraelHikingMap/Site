@@ -675,6 +675,7 @@
                 }
             }
             this.routeSegments.reverse();
+            this.updateStartAndEndMarkersIcons();
             this.updateDataLayer();
         }
 
