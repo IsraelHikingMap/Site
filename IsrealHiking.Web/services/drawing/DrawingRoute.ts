@@ -660,14 +660,19 @@
         }
 
         public reverse = () => {
-            for (var segmentIndex = 1; segmentIndex < this.routeSegments.length; segmentIndex++) {
+            for (var segmentIndex = 0; segmentIndex < this.routeSegments.length - 1; segmentIndex++) {
                 var currentSegment = this.routeSegments[segmentIndex];
-                var previousSegment = this.routeSegments[segmentIndex - 1];
-                previousSegment.latlngzs = currentSegment.latlngzs.reverse();
-                previousSegment.routingType = currentSegment.routingType;
-                if (previousSegment.polyline != null && currentSegment.polyline != null) {
-                    previousSegment.polyline.setLatLngs(currentSegment.polyline.getLatLngs().reverse());
+                var nextSegment = this.routeSegments[segmentIndex + 1];
+                currentSegment.latlngzs = nextSegment.latlngzs.reverse();
+                currentSegment.routingType = nextSegment.routingType;
+                if (currentSegment.polyline != null && nextSegment.polyline != null) {
+                    currentSegment.polyline.setLatLngs(nextSegment.polyline.getLatLngs().reverse());
                 }
+            }
+            var lastSegment = this.routeSegments[this.routeSegments.length - 1];
+            lastSegment.latlngzs = [lastSegment.latlngzs[lastSegment.latlngzs.length - 1]];
+            if (lastSegment.polyline != null) {
+                lastSegment.polyline.setLatLngs(lastSegment.latlngzs);
             }
             this.routeSegments.reverse();
             this.updateStartAndEndMarkersIcons();
