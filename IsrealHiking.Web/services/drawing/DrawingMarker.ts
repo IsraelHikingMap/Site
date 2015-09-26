@@ -8,6 +8,7 @@
         private $rootScope: angular.IRootScopeService;
         private markers: MarkerWithTitle[];
         private icon: L.Icon;
+        private hoverMarker: L.Marker;
 
         constructor($compile: angular.ICompileService,
             $rootScope: angular.IRootScopeService,
@@ -20,7 +21,10 @@
             this.enabled = false;
             this.markers = [];
             this.icon = IconsService.createMarkerIconWithColor(this.getColor());
+            this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.icon });
             this.addDataToStack(this.getData());
+
+            this.map.on("mousemove", this.onMouseMove, this);
 
             this.map.on("click",(e: L.LeafletMouseEvent) => {
                 if (this.isEnabled()) {
@@ -133,7 +137,7 @@
 
         public activate = () => {
             this.state = DrawingState.active;
-			this.enabled = true;
+			this.enable(true);
             var data = this.getData();
             this.internalClear();
             this.setData(data);
@@ -141,7 +145,7 @@
 
         public deactivate = () => {
             this.state = DrawingState.inactive;
-			this.enabled = false;
+			this.enable(false);
             var data = this.getData();
             this.internalClear();
             for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
@@ -153,6 +157,7 @@
 
         public hide = () => {
             this.state = DrawingState.hidden;
+            this.enable(false);
             for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
                 var marker = this.markers[markerIndex];
                 this.map.removeLayer(marker);
@@ -161,6 +166,7 @@
 
         public show = () => {
             this.state = DrawingState.active;
+            this.updateHoverMarker();
             for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
                 var marker = this.markers[markerIndex];
                 this.map.addLayer(marker);
@@ -184,6 +190,24 @@
 
         public enable = (enable: boolean): void => {
             this.enabled = enable;
+            this.updateHoverMarker();
         }
+
+        private updateHoverMarker = () => {
+            if (this.isEnabled()) {
+                this.map.addLayer(this.hoverMarker);
+            } else {
+                this.map.removeLayer(this.hoverMarker);
+            }
+        }
+
+        private onMouseMove = (e: L.LeafletMouseEvent) => {
+            if (this.isEnabled() == false) {
+                return;
+            }
+            this.hoverMarker.setLatLng(e.latlng);
+        }
+
+
     }
 }
