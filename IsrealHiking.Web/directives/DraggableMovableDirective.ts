@@ -11,7 +11,7 @@ module IsraelHiking.Directives {
                     }
                     var x = 0;
                     var y = 0;
-                    interact(handle).draggable({
+                    var inertia = interact(handle).draggable({
                         onmove: (event) => {
                             var target = event.target;
                             // keep the dragged position in the data-x/data-y attributes
@@ -54,6 +54,10 @@ module IsraelHiking.Directives {
                             var Evt: any = Event; // typescipt compilation issue...
                             $window.dispatchEvent(new Evt("resize"));
                         }
+                    });
+
+                    $scope.$on("$destroy", () => {
+                        inertia.unset();
                     });
                 }
             }
