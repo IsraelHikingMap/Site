@@ -39,7 +39,6 @@
         private currentRoutingType: string;
         private hoverPolyline: L.Polyline;
         private hoverMarker: L.Marker;
-        private enabled: boolean;
         private routeSegments: IRouteSegment[];
         private middleMarker: L.Marker;
         private routePointIcon: L.Icon;
@@ -101,10 +100,6 @@
             if (this.enabled == false) {
                 this.setHoverState(HoverState.none);
             }
-        }
-
-        public isEnabled = (): boolean => {
-            return this.enabled && this.state == DrawingState.active;
         }
 
         public clear = () => {

@@ -8,7 +8,6 @@
         private $rootScope: angular.IRootScopeService;
         private markers: MarkerWithTitle[];
         private icon: L.Icon;
-        private enabled: boolean;
 
         constructor($compile: angular.ICompileService,
             $rootScope: angular.IRootScopeService,
@@ -24,7 +23,7 @@
             this.addDataToStack(this.getData());
 
             this.map.on("click",(e: L.LeafletMouseEvent) => {
-                if (this.state == DrawingState.active) {
+                if (this.isEnabled()) {
                     this.addMarker(e.latlng);
                 }
             });
@@ -181,6 +180,10 @@
 
         public getColor = () => {
             return "green";
+        }
+
+        public enable = (enable: boolean): void => {
+            this.enabled = enable;
         }
     }
 }

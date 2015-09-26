@@ -27,6 +27,7 @@
 
         private dataStack: TData[];
         protected hashService: HashService;
+        protected enabled: boolean;
 
         public state: string;
         public name: string;
@@ -56,7 +57,7 @@
         public setData = (data: TData): void => { }
 
         public isEnabled = (): boolean => {
-            return this.state == DrawingState.active;
+            return this.enabled && this.state == DrawingState.active;
         }
         // should be override in derived
         public enable = (enable: boolean): void => { }
