@@ -24,3 +24,16 @@ The architecture is based heavily on AngularJS:
 In order to be able to see this site you'll need some tools:
 * Download and install [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or later.
 * Using nuget install/update the following: TypeScript, Web Essentials, Chutzpah (both runner and context menu).
+
+# Setup The server
+In order to be able to make the server work a few prerequisits are needed:
+1. Windows machine with IIS enabled and a site - assuming the site physical folder is at C:\site
+2. Install [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html)
+3. Download and extract [Graphhopper](https://graphhopper.com/public/releases/graphhopper-web-0.5.0-bin.zip) to C:\site\graphhopper
+4. Install [GpsBabel for windows](http://www.gpsbabel.org/download.html#downloading) at C:\site\gpsbabel
+5. Download the elevation files from our [map repository](https://github.com/IsraelHikingMap/Map/tree/master/Cache/Rasters/ASTER)
+5.1 Take each hgt file and zip it inside a zip with the same name.
+5.2 Take all the zip files and put them at C:\site\graphhopper\elevation-cache
+6. download Israel pbf file from [Geofabrik](http://download.geofabrik.de/asia/israel-and-palestine.html) and place it at C:\site\graphhopper\israel-and-palestine-latest.osm.pbf
+
+7. java -jar graphhopper-web-0.5.0-with-dep.jar jetty.resourcebase=webapp config=config-example.properties osmreader.osm=israel-and-palestine-latest.osm.pbf 
