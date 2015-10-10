@@ -13,8 +13,10 @@
         }
 
         public getRoute(latlngStart: L.LatLng, latlngEnd: L.LatLng): angular.IPromise<Common.RouteSegmentData[]> {
-            var route = "http://h2096617.stratoserver.net:443/brouter?nogos=&alternativeidx=0&format=geojson";
-            var params = "&profile=" + this.getProfile() + "&lonlats=" + latlngStart.lng + "," + latlngStart.lat + "|" + latlngEnd.lng + "," + latlngEnd.lat;
+            //var route = "http://h2096617.stratoserver.net:443/brouter?nogos=&alternativeidx=0&format=geojson";
+            //var params = "&profile=" + this.getProfile() + "&lonlats=" + latlngStart.lng + "," + latlngStart.lat + "|" + latlngEnd.lng + "," + latlngEnd.lat;
+            var route = "http://31.154.13.99/api/routing";
+            var params = "?from=" + latlngStart.lat + "," + latlngStart.lng + "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + this.getProfile();
             var deferred = this.$q.defer();
             var noneRouter = new NoneRouter(this.$q);
             this.$http.get(route + params, <angular.IRequestShortcutConfig> { timeout: 4500 }).success((geojson: GeoJSON.FeatureCollection, status) => {
@@ -33,7 +35,8 @@
                 } else {
                     deferred.resolve(data.routes[0].segments);
                 }
-            }).error(() => {
+            }).error((err) => {
+                console.error("Failed routing from " + latlngStart + " to " + latlngEnd + " " + err);
                 noneRouter.getRoute(latlngStart, latlngEnd).then((data) => {
                     deferred.resolve(data);
                 });

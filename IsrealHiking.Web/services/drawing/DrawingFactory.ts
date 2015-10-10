@@ -7,7 +7,7 @@
         private routeFactory: Routers.RouterFactory;
         private hashService: HashService;
         private snappingService: SnappingService;
-        private heightService: HeightService;
+        private elevationProvider: Elevation.IElevationProvider;
         private NextColorIndex = 0;
 
         constructor($q: angular.IQService,
@@ -17,7 +17,7 @@
             routeFactory: Routers.RouterFactory,
             hashService: HashService,
             snappingService: SnappingService,
-            heightService: HeightService) {
+            elevationProvider: Elevation.IElevationProvider) {
             this.$q = $q;
             this.$compile = $compile;
             this.$rootScope = $rootScope;
@@ -25,14 +25,14 @@
             this.routeFactory = routeFactory;
             this.hashService = hashService;
             this.snappingService = snappingService;
-            this.heightService = heightService;
+            this.elevationProvider = elevationProvider;
         }
 
         public createDrawingRoute = (routeData: Common.RouteData, reroute: boolean, pathOptions: L.PathOptions): DrawingRoute => {
             if (pathOptions == null) {
                 pathOptions = this.createPathOptions();
             }
-            var drawingRoute = new DrawingRoute(this.$q, this.mapService, this.routeFactory, this.hashService, this.snappingService, this. heightService, routeData.name, pathOptions);
+            var drawingRoute = new DrawingRoute(this.$q, this.mapService, this.routeFactory, this.hashService, this.snappingService, this. elevationProvider, routeData.name, pathOptions);
             drawingRoute.setData(routeData);
             if (reroute) {
                 drawingRoute.reroute();

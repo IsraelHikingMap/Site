@@ -2,7 +2,8 @@
     export class BikeRouter extends BaseRouter {
 
         protected getProfile(): string {
-            return "trekking";
+            //return "trekking";
+            return "b";
         }
     }
 } 

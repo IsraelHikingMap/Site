@@ -38,7 +38,7 @@
     <TypeScriptCompile Include="scripts\typings\leaflet\leaflet.d.ts" />
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />
     <TypeScriptCompile Include="scripts\typings\ng-file-upload\ng-file-upload.d.ts" />
-    <TypeScriptCompile Include="services\HeightServiceTests.ts" />
+    <TypeScriptCompile Include="services\MicrosoftElevationProviderTests.ts" />
     <TypeScriptCompile Include="scripts\typings\jasmine\jasmine.d.ts" />
   </ItemGroup>
   <ItemGroup>

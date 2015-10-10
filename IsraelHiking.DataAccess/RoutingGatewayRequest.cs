@@ -8,6 +8,7 @@ namespace IsraelHiking.DataAccess
 {
     public enum ProfileType
     {
+        None,
         Foot,
         Bike,
         Car,

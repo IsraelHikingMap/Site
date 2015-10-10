@@ -34,7 +34,7 @@
         private $q: angular.IQService;
         private routerFactory: Services.Routers.RouterFactory;
         private snappingService: SnappingService;
-        private heightService: HeightService;
+        private elevationProvider: Elevation.IElevationProvider;
         private selectedRouteSegmentIndex: number;
         private currentRoutingType: string;
         private hoverPolyline: L.Polyline;
@@ -55,14 +55,14 @@
             routerFactory: Services.Routers.RouterFactory,
             hashService: HashService,
             snappingService: SnappingService,
-            heightService: HeightService,
+            elevationProvider: Services.Elevation.IElevationProvider,
             name: string,
             pathOptions: L.PathOptions) {
             super(mapService, hashService);
             this.$q = $q;
             this.routerFactory = routerFactory;
             this.snappingService = snappingService;
-            this.heightService = heightService;
+            this.elevationProvider = elevationProvider;
             this.name = name;
             this.pathOptions = pathOptions;
             this.routeSegments = [];
@@ -187,7 +187,7 @@
                 var endPointSegmentIndex = this.routeSegments.length - 1;
                 return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
             } else if (this.routeSegments.length == 1) {
-                return this.heightService.updateHeights(this.routeSegments[0].latlngzs);
+                return this.elevationProvider.updateHeights(this.routeSegments[0].latlngzs);
             }
             var deferred = this.$q.defer<{}>();
             deferred.resolve();
@@ -321,7 +321,7 @@
                 this.map.removeLayer(polyline);
                 this.routeSegments[endIndex].latlngzs = data[data.length - 1].latlngzs;
                 this.routeSegments[endIndex].polyline.setLatLngs(this.routeSegments[endIndex].latlngzs);
-                deferred.resolve(this.heightService.updateHeights(this.routeSegments[endIndex].latlngzs));
+                deferred.resolve(this.elevationProvider.updateHeights(this.routeSegments[endIndex].latlngzs));
             });
 
             return deferred.promise;

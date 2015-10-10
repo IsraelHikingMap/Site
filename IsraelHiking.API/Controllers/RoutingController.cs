@@ -1,34 +1,56 @@
 ﻿using GeoJSON.Net.Feature;
+using GeoJSON.Net.Geometry;
 using IsraelHiking.DataAccess;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Description;
 
 namespace IsraelHiking.API.Controllers
 {
     public class RoutingController : ApiController
     {
         private readonly RoutingGateway _routingGateway;
+        private readonly ElevationDataStorage _elevationDataStorage;
+        private readonly Logger _logger;
 
         public RoutingController()
         {
             _routingGateway = new RoutingGateway();
+            _elevationDataStorage = ElevationDataStorage.Instance;
+            _logger = new Logger();
         }
 
+        [ResponseType(typeof(FeatureCollection))]
+        [HttpGet]
         //GET /api/routing?from=31.8239,35.0375&to=31.8213,35.0965&type=f
-        public async Task<FeatureCollection> GetRouting(string from, string to, string type)
+        public async Task<IHttpActionResult> GetRouting(string from, string to, string type)
         {
-            if (type == "n")
+            LineString lineString;
+            var profile = ConvertProfile(type);
+            if (profile == ProfileType.None)
             {
-                //HM TODO: none routing - should only get evelation and return two points geojson?
-                return null;
+                var pointFrom = GetGeographicPosition(from);
+                var pointTo = GetGeographicPosition(to);
+                if (ModelState.IsValid == false)
+                {
+                    return BadRequest(ModelState);
+                }
+                lineString = new LineString(new[] { pointFrom, pointTo });
             }
-
-            return await _routingGateway.GetRouting(new RoutingGatewayRequest
+            else
             {
-                From = from,
-                To = to,
-                Profile = ConvertProfile(type)
-            });
+                lineString = await _routingGateway.GetRouting(new RoutingGatewayRequest
+                {
+                    From = from,
+                    To = to,
+                    Profile = profile,
+                });
+            }
+            var feature = new Feature(lineString, new FeatureProperties { Name = "Routing from " + from + " to " + to + " profile type: " + profile.ToString(), Creator = "IsraelHiking" });
+            return Ok(new FeatureCollection(new List<Feature>() { feature }));
         }
 
         private static ProfileType ConvertProfile(string type)
@@ -45,9 +67,25 @@ namespace IsraelHiking.API.Controllers
                 case "f":
                     profile = ProfileType.Car;
                     break;
+                case "n":
+                    profile = ProfileType.None;
+                    break;
             }
-
             return profile;
+        }
+
+        private GeographicPosition GetGeographicPosition(string position)
+        {
+            var splitted = position.Split(',');
+            if (splitted.Length != 2)
+            {
+                ModelState.AddModelError("Position", "Invalid position");
+                return null;
+            }
+            var lat = double.Parse(splitted.First());
+            var lng = double.Parse(splitted.Last());
+            var elevation = _elevationDataStorage.GetElevation(lat, lng);
+            return new GeographicPosition(lat, lng, elevation);
         }
     }
 }

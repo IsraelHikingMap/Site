@@ -9,5 +9,5 @@
   "Tests": [
     { "Include": "*\\*tests.ts" }
   ],
-  "CodeCoverageIncludes": ["*\\isrealhiking.web\\services\\heightservice.*"]
+  "CodeCoverageIncludes": ["*\\isrealhiking.web\\services\\elevation\\*.*"]
 }

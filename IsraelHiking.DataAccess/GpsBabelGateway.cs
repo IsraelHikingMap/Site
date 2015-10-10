@@ -20,7 +20,7 @@ namespace IsraelHiking.DataAccess
         {
             var extension = Path.GetExtension(filePath);
             var outputFileName = Path.GetFileNameWithoutExtension(filePath) + "." + outputFromat;
-            var workingDirectory = ConfigurationManager.AppSettings["serverRoot"].ToString() + ConfigurationManager.AppSettings["gpsbabel"].ToString();
+            var workingDirectory = ConfigurationManager.AppSettings["gpsbabel"].ToString();
             var process = Process.Start(new ProcessStartInfo
             {
                 FileName = @"gpsbabel.exe",

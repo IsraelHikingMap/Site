@@ -20,7 +20,8 @@
         public static localStorageService = "localStorageService";
         public static snappingService = "snappingService";
         public static fileService = "fileService";
-        public static heightService = "heightService";
+        public static microsoftElevationProvider = "microsoftElevationProvider";
+        public static elevationProvider = "elevationProvider";
         
         // Controllers
         public static mainMapController = "mainMapController";

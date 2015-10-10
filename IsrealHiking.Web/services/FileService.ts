@@ -5,12 +5,12 @@
         private static MINIMAL_SEGMENT_LENGTH = 500; // meter
 
         private parserFactory: Parsers.ParserFactory;
-        private heightService: HeightService;
+        private elevationProvider: Services.Elevation.IElevationProvider;
 
         constructor(parserFactory: Parsers.ParserFactory,
-            heightService: HeightService) {
+            elevationProvider: Services.Elevation.IElevationProvider) {
             this.parserFactory = parserFactory;
-            this.heightService = heightService;
+            this.elevationProvider = elevationProvider;
         }
 
         public saveToFile = (fileName: string, data: Common.DataContainer) => {
@@ -88,7 +88,7 @@
                 returnArray.push(manipulatedRouteData);
             }
             
-            this.heightService.updateHeights(latlngzsToUpdate);
+            this.elevationProvider.updateHeights(latlngzsToUpdate);
             return returnArray;
         }
     }

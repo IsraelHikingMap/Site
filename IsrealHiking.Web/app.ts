@@ -1,7 +1,5 @@
 ﻿module IsraelHiking {
     // HM TODO: url using server side + twl support.
-    // HM TODO: routing using server side.
-    // HM TODO: height using server side.
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "googlechart"]);
 
@@ -10,18 +8,19 @@
     // Services:
     app.service(Common.Constants.mapService, [() => new Services.MapService()]);
     app.service(Common.Constants.parserFactory, [() => new Services.Parsers.ParserFactory()]);
-    app.service(Common.Constants.heightService, [Common.Constants.http, ($http: angular.IHttpService) => new Services.HeightService($http)]);
+    app.service(Common.Constants.microsoftElevationProvider, [Common.Constants.http, ($http: angular.IHttpService) => new Services.Elevation.MicrosoftElevationProvider($http)]);
+    app.service(Common.Constants.elevationProvider, [Common.Constants.http, ($http: angular.IHttpService) => new Services.Elevation.ElevationProvider($http)]);
     app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterFactory($http, $q, parserFactory)]);
-    app.service(Common.Constants.fileService, [Common.Constants.parserFactory, Common.Constants.heightService, (parserFactory: Services.Parsers.ParserFactory, heightService: Services.HeightService) => new Services.FileService(parserFactory, heightService)]);
+    app.service(Common.Constants.fileService, [Common.Constants.parserFactory, Common.Constants.elevationProvider, (parserFactory: Services.Parsers.ParserFactory, elevationProvider: Services.Elevation.IElevationProvider) => new Services.FileService(parserFactory, elevationProvider)]);
     app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory,
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.SnappingService($http, mapService, parserFactory)]);
     app.service(Common.Constants.drawingFactory,
-        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerFactory, Common.Constants.hashService, Common.Constants.snappingService, Common.Constants.heightService,
-            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routeFactory: Services.Routers.RouterFactory, hashService: Services.HashService, snappingService: Services.SnappingService, heightService: Services.HeightService) =>
-                new Services.Drawing.DrawingFactory($q, $compile, $rootScope, mapService, routeFactory, hashService, snappingService, heightService)]);
+        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerFactory, Common.Constants.hashService, Common.Constants.snappingService, Common.Constants.elevationProvider,
+            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routeFactory: Services.Routers.RouterFactory, hashService: Services.HashService, snappingService: Services.SnappingService, elevationProvider: Services.Elevation.IElevationProvider) =>
+                new Services.Drawing.DrawingFactory($q, $compile, $rootScope, mapService, routeFactory, hashService, snappingService, elevationProvider)]);
     app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.localStorageService,
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
