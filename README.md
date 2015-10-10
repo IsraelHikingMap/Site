@@ -27,12 +27,11 @@ In order to be able to see this site you'll need some tools:
 
 # Setup The server
 In order to be able to make the server work a few prerequisits are needed:
-1. Windows machine with IIS enabled and a site.
-2. Install [Java Runtime Environment](http://www.oracle.com/technetwork/java/javase/downloads/jre8-downloads-2133155.html).
-3. Download and extract [Graphhopper](https://graphhopper.com/public/releases/graphhopper-web-0.5.0-bin.zip).
-4. Copy the elevation files from our IsraelHiking.DataAccess\elevation-cache to _graphhopper folder_\elevation-cahce.
-5. Install [GpsBabel for windows](http://www.gpsbabel.org/download.html#downloading).
-6. Download Israel pbf file from [Geofabrik](http://download.geofabrik.de/asia/israel-and-palestine.html) and place it at _graphhopper folder_\israel-and-palestine-latest.osm.pbf.
-7. Copy config-example.properties to graphhopper folder.
-8. java -jar graphhopper-web-0.5.0-with-dep.jar jetty.resourcebase=webapp config=config-example.properties osmreader.osm=israel-and-palestine-latest.osm.pbf.
-
+* Windows machine with IIS enabled and a site.
+* Install Java Runtime Environment. 
+* Download and extract [Graphhopper](https://graphhopper.com/public/releases/graphhopper-web-0.5.0-bin.zip).
+* Copy the elevation files from our IsraelHiking.DataAccess\elevation-cache to _graphhopper folder_\elevation-cahce.
+* Install [GpsBabel for windows](http://www.gpsbabel.org/download.html#downloading).
+* Download Israel pbf file from [Geofabrik](http://download.geofabrik.de/asia/israel-and-palestine.html) and place it * _graphhopper folder_\israel-and-palestine-latest.osm.pbf.
+* Copy config-example.properties to graphhopper folder. 
+* java -jar graphhopper-web-0.5.0-with-dep.jar jetty.resourcebase=webapp config=config-example.properties osmreader.osm=israel-and-palestine-latest.osm.pbf.
