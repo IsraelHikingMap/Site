@@ -49,6 +49,18 @@ namespace IsraelHiking.DataAccess
             _logger = new Logger();
         }
 
+        public static ElevationDataStorage Instance
+        {
+            get
+            {
+                if (_instance == null)
+                {
+                    _instance = new ElevationDataStorage();
+                }
+                return _instance;
+            }
+        }
+
         public Task Initialize()
         {
             return Task.Run(() =>
@@ -75,30 +87,6 @@ namespace IsraelHiking.DataAccess
             });
         }
 
-        private byte[] GetByteArrayFromZip(string hgtZipFile)
-        {
-            using (ZipFile zip = ZipFile.Read(hgtZipFile))
-            {
-                var entry = zip.Entries.First(e => e.FileName.Contains("hgt"));
-                using (var ms = new MemoryStream())
-                {
-                    entry.Extract(ms);
-                    return ms.ToArray();
-                }
-            }
-        }
-        public static ElevationDataStorage Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ElevationDataStorage();
-                }
-                return _instance;
-            }
-        }
-
         public double GetElevation(double lat, double lng)
         {
             var key = new LatLngKey { Lat = (int)lat, Lng = (int)lng };
@@ -112,6 +100,19 @@ namespace IsraelHiking.DataAccess
             var lngIndex = (int)((lng - key.Lng) / samplesSize);
 
             return array[latIndex, lngIndex];
+        }
+
+        private byte[] GetByteArrayFromZip(string hgtZipFile)
+        {
+            using (ZipFile zip = ZipFile.Read(hgtZipFile))
+            {
+                var entry = zip.Entries.First(e => e.FileName.Contains("hgt"));
+                using (var ms = new MemoryStream())
+                {
+                    entry.Extract(ms);
+                    return ms.ToArray();
+                }
+            }
         }
     }
 }

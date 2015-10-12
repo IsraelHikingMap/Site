@@ -46,8 +46,8 @@ namespace IsraelHiking.DataAccess
                 _logger.Debug("Got routing: " + content);
                 var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
 
-                //return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new GeographicPosition(c[1], c[0], c.Count > 2 ? c[2] : (double?)null)));
-                return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new GeographicPosition(c[1], c[0], _elevationDataStorage.GetElevation(c[1], c[0]))));
+                return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new GeographicPosition(c[1], c[0], c.Count > 2 ? c[2] : (double?)null)));
+                //return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new GeographicPosition(c[1], c[0], if ()));
             }
         }
     }
