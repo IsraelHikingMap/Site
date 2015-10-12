@@ -279,7 +279,11 @@
             this.routeSegments[this.selectedRouteSegmentIndex].routePointLatlng = snappingResponse.latlng;
             this.routeSegments[this.selectedRouteSegmentIndex].routingType = this.currentRoutingType;
             var tasks = [];
-            if (this.selectedRouteSegmentIndex > 0) {
+            if (this.selectedRouteSegmentIndex == 0) {
+                this.routeSegments[0].latlngzs = [this.getLatLngZFromLatLng(snappingResponse.latlng)];
+                tasks.push(this.elevationProvider.updateHeights(this.routeSegments[0].latlngzs));
+            }
+            else if (this.selectedRouteSegmentIndex > 0) {
                 tasks.push(this.runRouting(this.selectedRouteSegmentIndex - 1, this.selectedRouteSegmentIndex));
             }
             if (this.selectedRouteSegmentIndex < this.routeSegments.length - 1) {
