@@ -21,7 +21,7 @@
             }
 
             pointsString = pointsString.substr(0, pointsString.length - 1);
-            return this.$http.get("http://31.154.13.99/api/elevation?" + pointsString)
+            return this.$http.get("api/elevation?" + pointsString)
                 .success((data: number[]) => {
                     for (var index = 0; index < filteredArray.length; index++) {
                         filteredArray[index].z = data[index];

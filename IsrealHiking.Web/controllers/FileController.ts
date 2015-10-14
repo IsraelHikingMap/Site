@@ -22,8 +22,8 @@
             this.fileChooserTooltip = null;
 
             if (hashService.externalUrl != "") {
-                $http.get(hashService.externalUrl).success((content: string) => {
-                    var dataContainer = fileService.readFromFile(hashService.externalUrl, content, Common.RoutingType.hike);
+                $http.get("api/ConvertFiles?url=" + hashService.externalUrl).success((content: string) => {
+                    var dataContainer = fileService.readFromFile("External.gpx", content, Common.RoutingType.hike);
                     this.addFileDataToMap(dataContainer, layersService);
                 });
             }
