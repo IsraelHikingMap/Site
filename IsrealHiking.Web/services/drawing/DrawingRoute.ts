@@ -50,6 +50,8 @@
         private showKmMarkers: boolean;
         private kmMarkersGroup: L.LayerGroup<L.Marker>;
 
+        public isRoutingPerPoint: boolean;
+
         constructor($q: angular.IQService,
             mapService: MapService,
             routerFactory: Services.Routers.RouterFactory,
@@ -73,6 +75,7 @@
             this.addDataToStack(this.getData());
             this.showKmMarkers = false;
             this.kmMarkersGroup = L.layerGroup([]);
+            this.isRoutingPerPoint = false;
             this.map.addLayer(this.kmMarkersGroup);
             this.routePointIcon = IconsService.createMarkerIconWithColor(this.getColor());
             this.routePointIconStart = IconsService.createStartIcon();
@@ -113,6 +116,13 @@
 
         public setRoutingType = (routingType: string) => {
             this.currentRoutingType = routingType;
+            if (this.isRoutingPerPoint == true) {
+                return;
+            }
+            for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
+                this.routeSegments[segmentIndex].routingType = routingType;
+            }
+            this.reroute();
         }
 
         public reroute = (): angular.IPromise<void> => {
@@ -415,10 +425,21 @@
         public setData = (data: Common.RouteData) => {
             this.internalClear();
             data.name = this.name;
+            var isRoutingPerPoint = false;
+            var firstRoutingType = null;
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
                 var segment = data.segments[pointIndex];
+                if (firstRoutingType == null) {
+                    firstRoutingType = segment.routingType;
+                } else if (isRoutingPerPoint == false) {
+                    isRoutingPerPoint = firstRoutingType != segment.routingType;
+                }
                 var latlngzs = segment.latlngzs.length > 0 ? segment.latlngzs : [this.getLatLngZFromLatLng(segment.routePoint)];
                 this.routeSegments.push(this.createRouteSegment(segment.routePoint, latlngzs, segment.routingType));
+            }
+            this.isRoutingPerPoint = isRoutingPerPoint;
+            if (this.isRoutingPerPoint == false && firstRoutingType != null) {
+                this.currentRoutingType = firstRoutingType;
             }
             this.hashService.updateRoute(this.getData());
         }
@@ -511,16 +532,21 @@
             for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
                 var segment = this.routeSegments[segmementIndex];
                 this.map.removeLayer(segment.polyline);
-                this.map.removeLayer(segment.routePoint);
+                if (segment.routePoint != null) {
+                    this.map.removeLayer(segment.routePoint);
+                }
             }
             this.toggleKmMarkers(false);
         }
         public show = () => {
+            // HM TODO: fix toggle visibility for active/inactive
             this.state = DrawingState.active;
             for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
                 var segment = this.routeSegments[segmementIndex];
                 this.map.addLayer(segment.polyline);
-                this.map.addLayer(segment.routePoint);
+                if (segment.routePoint != null) {
+                    this.map.addLayer(segment.routePoint);
+                }
             }
         }
 
