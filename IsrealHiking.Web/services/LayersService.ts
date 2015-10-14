@@ -90,7 +90,7 @@ module IsraelHiking.Services {
                 maxZoom: LayersService.MAX_ZOOM,
                 maxNativeZoom: 16,
                 attribution: LayersService.ATTRIBUTION + lastModified,
-                subdomains: ["tiles.trailze.com", "www.osm.org.il"]
+                subdomains: ["www.osm.org.il"]
             });
             this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png", <L.TileLayerOptions> {
                 minZoom: 7,
