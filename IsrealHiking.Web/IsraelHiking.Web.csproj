@@ -20,6 +20,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Content Include="app.css" />
+    <Content Include="content\angular-toastr.css" />
+    <Content Include="content\angular-toastr.min.css" />
     <Content Include="content\bootstrap-theme.css" />
     <Content Include="content\bootstrap-theme.min.css" />
     <Content Include="content\bootstrap.css" />
@@ -73,6 +75,10 @@
     <Content Include="scripts\angular-strap.min.js" />
     <Content Include="scripts\angular-strap.tpl.js" />
     <Content Include="scripts\angular-strap.tpl.min.js" />
+    <Content Include="scripts\angular-toastr.js" />
+    <Content Include="scripts\angular-toastr.min.js" />
+    <Content Include="scripts\angular-toastr.tpls.js" />
+    <Content Include="scripts\angular-toastr.tpls.min.js" />
     <Content Include="scripts\angular.js" />
     <Content Include="scripts\angular.min.js" />
     <Content Include="scripts\bootstrap.js" />
@@ -106,11 +112,13 @@
     <Content Include="services\elevation\ElevationProvider.js" />
     <Content Include="services\elevation\IElevationProvider.js" />
     <Content Include="services\elevation\MicrosoftElevationProvider.js" />
+    <Content Include="views\convertFormat.html" />
     <Content Include="views\layers.html" />
     <Content Include="views\drawing.html" />
     <Content Include="views\editOSM.html" />
     <Content Include="views\search.html" />
     <Content Include="views\share.html" />
+    <Content Include="views\templates\convertFormatModal.tpl.html" />
     <Content Include="views\templates\routeStatisticsTooltip.tpl.html" />
     <Content Include="views\templates\legendModal.tpl.html" />
     <Content Include="views\templates\routePropertiesModal.tpl.html" />
@@ -139,6 +147,7 @@
   <ItemGroup>
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="common\EventHelper.ts" />
+    <TypeScriptCompile Include="controllers\ConvertFormatController.ts" />
     <TypeScriptCompile Include="controllers\RouteAddController.ts" />
     <TypeScriptCompile Include="controllers\LayersController.ts" />
     <TypeScriptCompile Include="controllers\RouteBaseController.ts" />

@@ -29,6 +29,7 @@
             this.controlCreatorService.create(this.map, "info-help-control");
             this.controlCreatorService.create(this.map, "search-control", "topright");
             this.controlCreatorService.create(this.map, "file-control", "topright");
+            this.controlCreatorService.create(this.map, "convert-fromat-control", "topright");
             this.controlCreatorService.create(this.map, "share-control", "topright");
             this.controlCreatorService.create(this.map, "layers-control", "topright");
 

@@ -17,7 +17,12 @@
             var extension = fileName.split('.').pop();
             var parser = this.parserFactory.Create(extension);
             var dataString = parser.toString(data);
-            var blob = new Blob([dataString], { type: "application/json" })
+            var blob = new Blob([dataString], { type: "application/json" });
+            this.saveDataToFile(fileName, blob);
+        }
+
+        public saveDataToFile = (fileName: string, blob: Blob) => {
+            
             var blobURL = ((<any>window).URL || (<any>window).webkitURL).createObjectURL(blob);
             var anchor = <any>document.createElement("a");
             anchor.style = "display: none";

@@ -21,10 +21,12 @@ namespace IsraelHiking.DataAccess
         public string ConvertFileFromat(string filePath, string outputFromat)
         {
             var extension = Path.GetExtension(filePath);
-            var outputFileName = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + "." + outputFromat);
+            var inputTempfileName = Path.GetTempFileName(); // file names are created to overcome utf-8 issues in file name.
+            var outputTempfileName = Path.GetTempFileName();
+            File.Copy(filePath, inputTempfileName, true);
             var workingDirectory = ConfigurationManager.AppSettings["gpsbabel"].ToString();
             var executable = "gpsbabel.exe";
-            var agruments = "-i " + ConvertExtenstionToFormat(extension) + " -f " + filePath + " -o " + ConvertExtenstionToFormat(outputFromat) + " -F " + outputFileName;
+            var agruments = "-i " + ConvertExtenstionToFormat(extension) + " -f \"" + inputTempfileName + "\" -o " + ConvertExtenstionToFormat(outputFromat) + " -F \"" + outputTempfileName + "\"";
             _logger.Debug("Running: " + Path.Combine(workingDirectory, executable) + " " + agruments);
             var process = Process.Start(new ProcessStartInfo
             {
@@ -33,6 +35,9 @@ namespace IsraelHiking.DataAccess
                 WorkingDirectory = workingDirectory,
             });
             process.WaitForExit(10000);
+            File.Delete(inputTempfileName);
+            var outputFileName = Path.Combine(Path.GetDirectoryName(filePath), Path.GetFileNameWithoutExtension(filePath) + "." + outputFromat);
+            File.Move(outputTempfileName, outputFileName);
             return outputFileName;
         }
 
@@ -43,7 +48,7 @@ namespace IsraelHiking.DataAccess
             {
                 return "naviguide";
             }
-            return extension;
+            return extension.ToLower();
         }
     }
 }

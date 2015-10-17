@@ -1,6 +1,4 @@
 ﻿module IsraelHiking {
-    // HM TODO: url using server side + twl support.
-
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "googlechart"]);
 
     L.Icon.Default.imagePath = "content/images/";
@@ -68,6 +66,11 @@
     app.directive("shareControl", () => <angular.IDirective> {
         controller: Controllers.ShareController,
         templateUrl: "views/share.html",
+    });
+
+    app.directive("convertFromatControl", () => <angular.IDirective> {
+        controller: Controllers.ConvertFormatController,
+        templateUrl: "views/convertFormat.html",
     });
 
     app.run(["googleChartApiPromise", (googleChartApiPromise) => {
