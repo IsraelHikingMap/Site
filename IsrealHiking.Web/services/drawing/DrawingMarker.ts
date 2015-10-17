@@ -23,6 +23,8 @@
             this.icon = IconsService.createMarkerIconWithColor(this.getColor());
             this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.icon });
             this.addDataToStack(this.getData());
+            this.state = DrawingState.inactive;
+            this.createInactiveMarkers();
 
             this.map.on("mousemove", this.onMouseMove, this);
 
@@ -135,17 +137,40 @@
             this.updateDataLayer();
         }
 
-        public activate = () => {
-            this.state = DrawingState.active;
-			this.enable(true);
-            var data = this.getData();
-            this.internalClear();
-            this.setData(data);
+        public changeStateTo = (targetState: string) => {
+            if (targetState == this.state) {
+                return;
+            }
+            switch (this.state) {
+                case DrawingState.hidden:
+                    if (targetState == DrawingState.active) {
+                        this.createActiveMarkers();
+                    } else {
+                        this.createInactiveMarkers();
+                    }
+                    break;
+                case DrawingState.inactive:
+                    if (targetState == DrawingState.active) {
+                        this.createActiveMarkers();
+                    }
+                    if (targetState == DrawingState.hidden) {
+                        this.hideMarkers();
+                    }
+                    break;
+                case DrawingState.active:
+                    if (targetState == DrawingState.hidden) {
+                        this.hideMarkers();
+                    } else {
+                        this.createInactiveMarkers();
+                    }
+                    break;
+            }
+
+            this.state = targetState;
+            this.updateHoverMarker();
         }
 
-        public deactivate = () => {
-            this.state = DrawingState.inactive;
-			this.enable(false);
+        private createInactiveMarkers = () => {
             var data = this.getData();
             this.internalClear();
             for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
@@ -155,21 +180,20 @@
             }
         }
 
-        public hide = () => {
-            this.state = DrawingState.hidden;
-            this.enable(false);
-            for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
-                var marker = this.markers[markerIndex];
-                this.map.removeLayer(marker);
+        private createActiveMarkers = () => {
+            var data = this.getData();
+            this.internalClear();
+            for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
+                var markerData = data[markerIndex];
+                var marker = this.createMarker(markerData.latlng, markerData.title);
+                this.markers.push(marker);
             }
         }
 
-        public show = () => {
-            this.state = DrawingState.active;
-            this.updateHoverMarker();
+        private hideMarkers = () => {
             for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
                 var marker = this.markers[markerIndex];
-                this.map.addLayer(marker);
+                this.map.removeLayer(marker);
             }
         }
 

@@ -233,20 +233,20 @@ module IsraelHiking.Services {
             }
             if (drawing == this.selectedDrawing) {
                 if (drawing.state == Services.Drawing.DrawingState.active) {
-                    this.selectedDrawing.hide();
+                    this.selectedDrawing.changeStateTo(Drawing.DrawingState.hidden);
                     return;
                 }
                 if (drawing.state == Services.Drawing.DrawingState.hidden) {
-                    this.selectedDrawing.show();
+                    this.selectedDrawing.changeStateTo(Drawing.DrawingState.active);
                     return;
                 }
             }
 
-            if (this.selectedDrawing && this.selectedDrawing.state != Services.Drawing.DrawingState.hidden) {
-                this.selectedDrawing.deactivate();
+            if (this.selectedDrawing && this.selectedDrawing.state == Services.Drawing.DrawingState.active) {
+                this.selectedDrawing.changeStateTo(Drawing.DrawingState.inactive);
             }
             this.selectedDrawing = drawing;
-            this.selectedDrawing.activate();
+            this.selectedDrawing.changeStateTo(Drawing.DrawingState.active);
             this.eventHelper.raiseEvent(<Common.IDataChangedEventArgs>{});
         }
 
@@ -288,7 +288,6 @@ module IsraelHiking.Services {
                 this.routes.push(this.drawingFactory.createDrawingRoute(dataContainer.routes[routeIndex], true, null));
             }
             this.markers = this.drawingFactory.createDrawingMarker(dataContainer.markers);
-            this.markers.deactivate();
             this.changeDrawingState((this.routes.length > 0) ? this.routes[0].name : this.markers.name);
         }
 

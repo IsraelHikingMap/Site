@@ -16,6 +16,7 @@
             mapService: Services.MapService,
             layersService: Services.LayersService,
             fileService: Services.FileService,
+            toastr: Toastr,
             name: string) {
             super($scope, mapService, layersService);
             var route = layersService.getRouteByName(name);
@@ -33,15 +34,15 @@
                 this.suppressEvents(e);
             }
             $scope.saveRoute = (name: string, weight: number, e: Event) => {
-                if (layersService.isNameAvailable(name) == true) {
+                if (name != route.name && layersService.isNameAvailable(name) == true) {
                     route.setName(name);
-                } else {
+                } else if (name != route.name && layersService.isNameAvailable(name) == false) {
                     toastr.error("The route name is already in use, please select another name.", "Route Name");
                 }
-                if ($scope.isVisible) {
-                    route.show();
-                } else {
-                    route.hide();
+                if ($scope.isVisible && route.state == Services.Drawing.DrawingState.hidden) {
+                    route.changeStateTo(Services.Drawing.DrawingState.inactive);
+                } else if ($scope.isVisible == false) {
+                    route.changeStateTo(Services.Drawing.DrawingState.hidden);
                 }
                 if ($scope.isReversed) {
                     route.reverse();

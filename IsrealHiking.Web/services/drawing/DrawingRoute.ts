@@ -80,12 +80,15 @@
             this.routePointIcon = IconsService.createMarkerIconWithColor(this.getColor());
             this.routePointIconStart = IconsService.createStartIcon();
             this.routePointIconEnd = IconsService.createEndIcon();
+            this.state = DrawingState.inactive;
 
             this.hoverPolyline = L.polyline([]);
             this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.routePointIcon });
             this.setHoverLayersStyle();
             this.createMiddleMarker();
             this.setHoverState(HoverState.none);
+            this.addPolylines(); // inactive state has the polylines.
+
             this.map.on("mousemove", this.onMouseMove, this);
 
             this.map.on("click", (e: L.LeafletMouseEvent) => {
@@ -475,40 +478,70 @@
             this.map.removeLayer(polyline);
         }
 
-        public activate = () => {
-            var needToAddPolylines = this.state == DrawingState.hidden;
-            this.state = DrawingState.active;
-            for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
-                var segment = this.routeSegments[segmementIndex];
-                segment.routePoint = this.createMarker(segment.routePointLatlng);
-                if (needToAddPolylines) {
-                    this.map.addLayer(segment.polyline);
-                }
+        public changeStateTo = (targetState: string) => {
+            if (targetState == this.state) {
+                return;
             }
+            switch (this.state) {
+                case DrawingState.hidden:
+                    this.addPolylines();
+                    if (targetState == DrawingState.active) {
+                        this.addMarkers();
+                    }
+                    break;
+                case DrawingState.inactive:
+                    if (targetState == DrawingState.active) {
+                        this.addMarkers();
+                    }
+                    if (targetState == DrawingState.hidden) {
+                        this.destroyMarkers();
+                    }
+                    break;
+                case DrawingState.active:
+                    this.destroyMarkers();
+                    if (targetState == DrawingState.hidden) {
+                        this.destroyPolylines();
+                    }
+                    break;
+            }
+
+            this.state = targetState;
             this.setHoverState(HoverState.none);
+            this.toggleKmMarkers(false);
             this.updateStartAndEndMarkersIcons();
         }
 
-        public deactivate = () => {
-            this.state = DrawingState.inactive;
-            this.enabled = false;
+        private addPolylines = () => {
+            for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
+                var segment = this.routeSegments[segmementIndex];
+                this.map.addLayer(segment.polyline);
+            }
+        }
+
+        private destroyPolylines = () => {
+            for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
+                var segment = this.routeSegments[segmementIndex];
+                this.map.removeLayer(segment.polyline);
+            }
+        }
+
+        private addMarkers = () => {
+            for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
+                var segment = this.routeSegments[segmementIndex];
+                segment.routePoint = this.createMarker(segment.routePointLatlng);
+            }
+        }
+
+        private destroyMarkers = () => {
             for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
                 var segment = this.routeSegments[segmentIndex];
                 this.destoryMarker(segment.routePoint);
                 segment.routePoint = null;
             }
-            this.setHoverState(HoverState.none);
-            this.toggleKmMarkers(false);
         }
 
         public destroy = () => {
-            if (this.state == DrawingState.active) {
-                this.deactivate();
-            }
-            for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
-                var segment = this.routeSegments[segmementIndex];
-                this.destroyPolyline(segment.polyline);
-            }
+            this.changeStateTo(DrawingState.hidden);
             this.destoryMarker(this.middleMarker);
             this.map.removeLayer(this.kmMarkersGroup);
             this.map.off("mousemove", this.onMouseMove, this);
@@ -527,29 +560,6 @@
             this.hashService.updateRoute(data);
         }
 
-        public hide = () => {
-            this.state = DrawingState.hidden;
-            for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
-                var segment = this.routeSegments[segmementIndex];
-                this.map.removeLayer(segment.polyline);
-                if (segment.routePoint != null) {
-                    this.map.removeLayer(segment.routePoint);
-                }
-            }
-            this.toggleKmMarkers(false);
-        }
-
-        public show = () => {
-            // HM TODO: fix toggle visibility for active/inactive
-            this.state = DrawingState.active;
-            for (var segmementIndex = 0; segmementIndex < this.routeSegments.length; segmementIndex++) {
-                var segment = this.routeSegments[segmementIndex];
-                this.map.addLayer(segment.polyline);
-                if (segment.routePoint != null) {
-                    this.map.addLayer(segment.routePoint);
-                }
-            }
-        }
 
         private snapToRoute = (latlng: L.LatLng): ISnappingResponse => {
             var polylines = [];

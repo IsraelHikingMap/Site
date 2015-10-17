@@ -69,9 +69,10 @@
                 layersService.removeOverlay(overlay);
                 this.suppressEvents(e);
             }
+
             $scope.editRoute = (routeName: string, e: Event) => {
                 var routePropertiesScope = <IRouteUpdateScope>$scope.$new();
-                var routeUpdateController = new RouteUpdateController(routePropertiesScope, mapService, layersService, fileService, routeName);
+                var routeUpdateController = new RouteUpdateController(routePropertiesScope, mapService, layersService, fileService, toastr, routeName);
                 var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);

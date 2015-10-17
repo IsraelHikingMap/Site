@@ -8,11 +8,8 @@
     export interface IDrawing {
         state: string;
         name: string;
-        activate: () => void;
-        deactivate: () => void;
         getColor: () => string;
-        hide: () => void;
-        show: () => void;
+        changeStateTo: (state: string) => void;
         undo: () => void;
         enable(enable: boolean): void;
         isEnabled: () => boolean;
@@ -42,15 +39,9 @@
         }
 
         // should be override in derived
-        public activate = (): void => { }
-        // should be override in derived
-        public deactivate = (): void => { }
-        // should be override in derived
         public getColor = (): string => { return "" }
         // should be override in derived
-        public hide = (): void => { }
-        // should be override in derived
-        public show = (): void => { }
+        public changeStateTo = (targetState: string) => { }
         // should be override in derived
         public getData = (): TData => { return null; }
         // should be override in derived
