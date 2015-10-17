@@ -18,7 +18,7 @@
                 var baseLayerAddress = layersService.selectedBaseLayer.address;
                 var background = "background=bing";
                 if (baseLayerAddress != "") {
-                    var address = baseLayerAddress.indexOf("{s}") == -1 ? baseLayerAddress : Services.LayersService.DEFUALT_TILES_ADDRESS;
+                    var address = baseLayerAddress.indexOf("{s}") == -1 ? baseLayerAddress : Services.LayersService.DEFAULT_TILES_ADDRESS;
                     background = "background=custom:" + address;
                 }
                 $window.open("http://www.openstreetmap.org/edit#" + background + "&map=" + zoom + "/" + center.lat + "/" + center.lng);

@@ -33,7 +33,7 @@ module IsraelHiking.Services {
     export class LayersService extends ObjectWithMap {
         public static MAX_ZOOM = 20;
         public static ISRAEL_MTB_MAP = "Israel MTB Map";
-        public static DEFUALT_TILES_ADDRESS = "http://www.osm.org.il/IsraelHiking/Tiles/{z}/{x}/{y}.png";
+        public static DEFAULT_TILES_ADDRESS = "http://IsraelHiking.osm.org.il/Tiles/{z}/{x}/{y}.png";
 
         private static ISRAEL_HIKING_MAP = "Israel Hiking Map";
         private static GOOGLE_EARTH = "Google Earth";
@@ -43,6 +43,8 @@ module IsraelHiking.Services {
         private static BASE_LAYERS_KEY = "BaseLayers";
         private static OVERLAYS_KEY = "Overlays";
         private static CUSTOM_LAYER = "Custom Layer";
+        private static MTB_TILES_ADDRESS = "http://IsraelHiking.osm.org.il/mtbTiles/{z}/{x}/{y}.png";
+        private static OVERLAY_TILES_ADDRESS = "http://IsraelHiking.osm.org.il/OverlayTiles/{z}/{x}/{y}.png";
 
         private $http: angular.IHttpService;
         private localStorageService: angular.local.storage.ILocalStorageService;
@@ -85,24 +87,15 @@ module IsraelHiking.Services {
                 attribution: LayersService.ATTRIBUTION + lastModified,
             };
             // default layers:
-            this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, "http://{s}/IsraelHiking/Tiles/{z}/{x}/{y}.png", <L.TileLayerOptions> {
-                minZoom: 7,
-                maxZoom: LayersService.MAX_ZOOM,
-                maxNativeZoom: 16,
-                attribution: LayersService.ATTRIBUTION + lastModified,
-                subdomains: ["www.osm.org.il"]
-            });
-            this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, "http://www.osm.org.il/IsraelHiking/mtbTiles/{z}/{x}/{y}.png", <L.TileLayerOptions> {
+            this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, LayersService.DEFAULT_TILES_ADDRESS, this.tileLayerOptions);
+            this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, LayersService.MTB_TILES_ADDRESS, <L.TileLayerOptions> {
                 minZoom: 7,
                 maxZoom: LayersService.MAX_ZOOM,
                 maxNativeZoom: 16,
                 attribution: LayersService.MTB_ATTRIBUTION + lastModified,
             });
             this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_EARTH, layer: <any>new L.Google(), selected: false, address: "" });
-            this.addOverlay(LayersService.HIKING_TRAILS,
-                "http://www.osm.org.il/IsraelHiking/OverlayTiles/{z}/{x}/{y}.png",
-                this.tileLayerOptions,
-                false);
+            this.addOverlay(LayersService.HIKING_TRAILS, LayersService.OVERLAY_TILES_ADDRESS, this.tileLayerOptions, false);
 
             this.addLayersFromLocalStorage();
             this.addDrawingsFromHash();
