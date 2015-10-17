@@ -6,7 +6,8 @@
     export class RouteAddController extends RouteBaseController {
         constructor($scope: IRouteAddScope,
             mapService: Services.MapService,
-            layersService: Services.LayersService) {
+            layersService: Services.LayersService,
+            toastr: Toastr) {
             super($scope, mapService, layersService);
             var options = layersService.createPathOptions();
             $scope.name = layersService.createRouteName();
@@ -16,7 +17,8 @@
 
             $scope.saveRoute = (name: string, weight: number, e: Event) => {
                 if (layersService.isNameAvailable(name) == false) {
-                    // HM TODO: toast? return false?
+                    toastr.error("The route name is already in use, please select another name.", "Route Name");
+                    this.suppressEvents(e);
                     return;
                 }
                 layersService.addRoute(name, null, <L.PathOptions> {

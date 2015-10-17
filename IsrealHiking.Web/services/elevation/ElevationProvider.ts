@@ -1,9 +1,12 @@
 ﻿module IsraelHiking.Services.Elevation {
     export class ElevationProvider implements IElevationProvider {
         private $http: angular.IHttpService;
+        private toastr: Toastr;
 
-        constructor($http: angular.IHttpService) {
+        constructor($http: angular.IHttpService,
+            toastr: Toastr) {
             this.$http = $http;
+            this.toastr = toastr;
         }
 
         public updateHeights(latlngzs: Common.LatLngZ[]): angular.IHttpPromise<{}> {
@@ -27,7 +30,7 @@
                         filteredArray[index].z = data[index];
                     }
                 }).error(() => {
-                    console.log("Elevation request failed: " + pointsString)
+                    this.toastr.error("Elevation request failed: " + pointsString);
                 });
         }
     }

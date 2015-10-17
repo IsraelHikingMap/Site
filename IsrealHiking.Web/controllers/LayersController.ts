@@ -30,7 +30,8 @@
             $modal,
             mapService: Services.MapService,
             layersService: Services.LayersService,
-            fileService: Services.FileService) {
+            fileService: Services.FileService,
+            toastr: Toastr) {
             super(mapService);
             $scope.baseLayers = layersService.baseLayers;
             $scope.overlays = layersService.overlays;
@@ -53,7 +54,7 @@
 
             $scope.addRoute = (e: Event) => {
                 var routePropertiesScope = <IRouteAddScope>$scope.$new();
-                var routeAddController = new RouteAddController(routePropertiesScope, mapService, layersService);
+                var routeAddController = new RouteAddController(routePropertiesScope, mapService, layersService, toastr);
                 var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);

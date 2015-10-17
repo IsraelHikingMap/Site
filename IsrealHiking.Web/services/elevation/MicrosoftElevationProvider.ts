@@ -3,9 +3,12 @@
         private static VIRTUAL_EARTH_BASE_ADDRESS = "http://dev.virtualearth.net/REST/v1/Elevation/List?jsonp=JSON_CALLBACK";
 
         private $http: angular.IHttpService;
+        private toastr: Toastr;
 
-        constructor($http: angular.IHttpService) {
+        constructor($http: angular.IHttpService,
+            toastr: Toastr) {
             this.$http = $http;
+            this.toastr = toastr;
         }
 
         public updateHeights(latlngzs: Common.LatLngZ[]): angular.IHttpPromise<{}> {
@@ -44,7 +47,7 @@
                     filteredArray[index].z = elevations[index];
                 }
             }).error(() => {
-                console.log("Height requests failed: " + pointsString)
+                this.toastr.error("Height requests failed from virtual earth failed: " + pointsString);
             });
         }
     }

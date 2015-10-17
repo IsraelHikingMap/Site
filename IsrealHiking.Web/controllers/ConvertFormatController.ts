@@ -16,7 +16,8 @@
             $modal,
             Upload: angular.angularFileUpload.IUploadService,
             mapService: Services.MapService,
-            fileService: Services.FileService) {
+            fileService: Services.FileService,
+            toastr: Toastr) {
             super(mapService);
 
             this.convertModal = $modal({
@@ -48,7 +49,7 @@
                     file: this.fileToUpload,
                     url: "api/convertFiles?outputFormat=" + $scope.selectedFormat,
                 }).success((data: any) => {
-                    var extension = this.fileToUpload.name.split('.').pop(); 
+                    var extension = this.fileToUpload.name.split('.').pop();
                     var outputFileName = (<string>this.fileToUpload.name).replace("." + extension, "." + $scope.selectedFormat);
                     var byteCharacters = atob(data);
                     var byteNumbers = new Array(byteCharacters.length);
@@ -56,8 +57,10 @@
                         byteNumbers[i] = byteCharacters.charCodeAt(i);
                     }
                     var byteArray = new Uint8Array(byteNumbers);
-                    var blob = new Blob([byteArray], {type: "application/octet-stream" });
+                    var blob = new Blob([byteArray], { type: "application/octet-stream" });
                     fileService.saveDataToFile(outputFileName, blob);
+                }).error(() => {
+                    toastr.error("Failed to convert file.");
                 });
             }
         }

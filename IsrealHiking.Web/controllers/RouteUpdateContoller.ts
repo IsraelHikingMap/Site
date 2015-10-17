@@ -36,7 +36,7 @@
                 if (layersService.isNameAvailable(name) == true) {
                     route.setName(name);
                 } else {
-                    // HM TODO: toast? return false?
+                    toastr.error("The route name is already in use, please select another name.", "Route Name");
                 }
                 if ($scope.isVisible) {
                     route.show();

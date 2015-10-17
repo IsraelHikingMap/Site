@@ -25,6 +25,8 @@
                 $http.get("api/ConvertFiles?url=" + hashService.externalUrl).success((content: string) => {
                     var dataContainer = fileService.readFromFile("External.gpx", content, Common.RoutingType.hike);
                     this.addFileDataToMap(dataContainer, layersService);
+                }).error(() => {
+                    toastr.error("Failed to load external url file.");
                 });
             }
 

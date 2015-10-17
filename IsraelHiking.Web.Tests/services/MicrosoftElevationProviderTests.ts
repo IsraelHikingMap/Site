@@ -2,23 +2,27 @@
 /// <reference path="../../isrealhiking.web/services/elevation/ielevationprovider.ts" />
 /// <reference path="../../isrealhiking.web/common/israelhikingdata.ts" />
 /// <reference path="../scripts/typings/leaflet/leaflet.d.ts" />
+/// <reference path="../scripts/typings/toastr/toastr.d.ts" />
+/// <reference path="../scripts/typings/angularjs/angular.d.ts" />
 /// <chutzpah_reference path="../../isrealhiking.web/scripts/angular.js" />
 /// <chutzpah_reference path="../../isrealhiking.web/scripts/angular-mocks.js" />
 /// <chutzpah_reference path="../../isrealhiking.web/scripts/leaflet-0.7.3.js" />
-/// <chutzpah_reference path="../../isrealhiking.web/services/heightservice.js" />
+/// <chutzpah_reference path="../../isrealhiking.web/services/elevation/microsoftelevationprovider.js" />
 
 module IsraelHiking {
     describe("Microsoft Elevation Provider", () => {
-        var ADDRESS = "http://dev.virtualearth.net/REST/v1/Elevation/List?jsonp=JSON_CALLBACK&key=ArUJIOvdEI-4sFS5-3PqMlDJP-00FMLrOeLIGkLRpfWIjfpOcESgnE-Zmk-ZimU2&points=undefined,undefined,1,1";
+        var ADDRESS = "http://dev.virtualearth.net/REST/v1/Elevation/List?jsonp=JSON_CALLBACK&key=ArUJIOvdEI-4sFS5-3PqMlDJP-00FMLrOeLIGkLRpfWIjfpOcESgnE-Zmk-ZimU2&points=undefined,undefined";
         var elevationProvider: IsraelHiking.Services.Elevation.MicrosoftElevationProvider;
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
+        var toastr: Toastr;
 
-        beforeEach(angular.mock.inject((_$http_, _$httpBackend_: angular.IHttpBackendService) => {
+        beforeEach(angular.mock.inject((_$http_, _$httpBackend_: angular.IHttpBackendService, _toastr_) => {
             // The injector unwraps the underscores (_) from around the parameter names when matching
             $http = _$http_;
             $httpBackend = _$httpBackend_;
-            elevationProvider = new Services.Elevation.MicrosoftElevationProvider($http);
+            toastr = _toastr_;
+            elevationProvider = new Services.Elevation.MicrosoftElevationProvider($http, toastr);
         }));
 
         it("Should update height data", () => {

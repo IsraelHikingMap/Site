@@ -15,10 +15,12 @@
         snappings: L.LayerGroup<L.Polyline>;
         $http: angular.IHttpService;
         osmParser: Parsers.IParser;
+        toastr: Toastr;
 
         constructor($http: angular.IHttpService,
             mapService: MapService,
-            parserFactory: Parsers.ParserFactory) {
+            parserFactory: Parsers.ParserFactory,
+            toastr: Toastr) {
             super(mapService);
 
             this.$http = $http;
@@ -26,6 +28,7 @@
             this.snappings = L.layerGroup([]);
             this.map.addLayer(this.snappings);
             this.generateSnappings();
+            this.toastr = toastr;
             this.map.on("moveend", () => {
                 this.generateSnappings();
             });
@@ -53,6 +56,8 @@
                         this.snappings.addLayer(L.polyline(segment.latlngzs, <L.PolylineOptions> { opacity: 0 }));
                     }
                 }
+            }).error(() => {
+                this.toastr.error("Unable to get overpass data for snapping...");
             });
         }
 

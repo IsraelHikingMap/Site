@@ -538,6 +538,7 @@
             }
             this.toggleKmMarkers(false);
         }
+
         public show = () => {
             // HM TODO: fix toggle visibility for active/inactive
             this.state = DrawingState.active;

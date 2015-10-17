@@ -1,20 +1,24 @@
 ﻿module IsraelHiking {
-    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "googlechart"]);
+    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "googlechart", "ngAnimate", "toastr"]);
 
     L.Icon.Default.imagePath = "content/images/";
 
     // Services:
     app.service(Common.Constants.mapService, [() => new Services.MapService()]);
     app.service(Common.Constants.parserFactory, [() => new Services.Parsers.ParserFactory()]);
-    app.service(Common.Constants.microsoftElevationProvider, [Common.Constants.http, ($http: angular.IHttpService) => new Services.Elevation.MicrosoftElevationProvider($http)]);
-    app.service(Common.Constants.elevationProvider, [Common.Constants.http, ($http: angular.IHttpService) => new Services.Elevation.ElevationProvider($http)]);
-    app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.parserFactory,
-        ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
-            new Services.Routers.RouterFactory($http, $q, parserFactory)]);
+    app.service(Common.Constants.microsoftElevationProvider, [Common.Constants.http, Common.Constants.toastr,
+        ($http: angular.IHttpService, toastr: Toastr) =>
+            new Services.Elevation.MicrosoftElevationProvider($http, toastr)]);
+    app.service(Common.Constants.elevationProvider, [Common.Constants.http, Common.Constants.toastr,
+        ($http: angular.IHttpService, toastr: Toastr) =>
+            new Services.Elevation.ElevationProvider($http, toastr)]);
+    app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.toastr, Common.Constants.parserFactory,
+        ($http: angular.IHttpService, $q: angular.IQService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
+            new Services.Routers.RouterFactory($http, $q, toastr, parserFactory)]);
     app.service(Common.Constants.fileService, [Common.Constants.parserFactory, Common.Constants.elevationProvider, (parserFactory: Services.Parsers.ParserFactory, elevationProvider: Services.Elevation.IElevationProvider) => new Services.FileService(parserFactory, elevationProvider)]);
-    app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory,
-        ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory) =>
-            new Services.SnappingService($http, mapService, parserFactory)]);
+    app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory, Common.Constants.toastr,
+        ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
+            new Services.SnappingService($http, mapService, parserFactory, toastr)]);
     app.service(Common.Constants.drawingFactory,
         [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerFactory, Common.Constants.hashService, Common.Constants.snappingService, Common.Constants.elevationProvider,
             ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routeFactory: Services.Routers.RouterFactory, hashService: Services.HashService, snappingService: Services.SnappingService, elevationProvider: Services.Elevation.IElevationProvider) =>

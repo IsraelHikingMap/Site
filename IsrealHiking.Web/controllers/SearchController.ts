@@ -28,7 +28,8 @@
             $http: angular.IHttpService,
             $q: angular.IQService,
             mapService: Services.MapService,
-            hashService: Services.HashService) {
+            hashService: Services.HashService,
+            toastr: Toastr) {
             super(mapService);
             this.resultsQueue = [];
             this.marker = null;
@@ -65,8 +66,10 @@
                         namedetails: "1",
                         "accept-language": $scope.isHebrew ? "he-il" : "en-us",
                     }
-                }).then((response: any): ISearchResults[]=> {
+                }).success((response: any[]): ISearchResults[]=> {
                     return this.handleSearchResponse($scope, response, searchTerm);
+                }).error(() => {
+                    toastr.warning("Unable to get search results from nominatim server.");
                 });
             }
 
@@ -118,15 +121,15 @@
             });
         }
 
-        private handleSearchResponse = ($scope: ISearchScope, response: any, searchTerm: string): ISearchResults[]=> {
+        private handleSearchResponse = ($scope: ISearchScope, response: any[], searchTerm: string): ISearchResults[]=> {
             var queueItem = _.find(this.resultsQueue, (itemToFind) => itemToFind.searchTerm == searchTerm);
             if (queueItem == null || this.resultsQueue[this.resultsQueue.length - 1].searchTerm != searchTerm) {
                 this.resultsQueue.splice(0, this.resultsQueue.length - 1);
                 return;
             }
             $scope.addresses = [];
-            for (var resultIndex = 0; resultIndex < response.data.length; resultIndex++) {
-                var data = response.data[resultIndex];
+            for (var resultIndex = 0; resultIndex < response.length; resultIndex++) {
+                var data = response[resultIndex];
                 var address = data.address;
                 var parts = [];
                 var formattedAddress = "";
