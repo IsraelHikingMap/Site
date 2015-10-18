@@ -33,6 +33,7 @@ namespace IsraelHiking.DataAccess
                 FileName = executable,
                 Arguments = agruments,
                 WorkingDirectory = workingDirectory,
+                WindowStyle = ProcessWindowStyle.Hidden,
             });
             process.WaitForExit(10000);
             File.Delete(inputTempfileName);

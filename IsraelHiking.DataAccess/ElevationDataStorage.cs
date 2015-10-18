@@ -1,13 +1,9 @@
-﻿using GeoJSON.Net.Geometry;
-using Ionic.Zip;
+﻿using Ionic.Zip;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
@@ -41,12 +37,13 @@ namespace IsraelHiking.DataAccess
     public class ElevationDataStorage
     {
         private static ElevationDataStorage _instance;
-        private Dictionary<LatLngKey, short[,]> _elevationData;
-        private Logger _logger;
+        private readonly Dictionary<LatLngKey, short[,]> _elevationData;
+        private readonly Logger _logger;
 
         private ElevationDataStorage()
         {
             _logger = new Logger();
+            _elevationData = new Dictionary<LatLngKey, short[,]>();
         }
 
         public static ElevationDataStorage Instance
@@ -66,9 +63,13 @@ namespace IsraelHiking.DataAccess
             return Task.Run(() =>
             {
                 var hgtFolder = ConfigurationManager.AppSettings["hgtFolder"].ToString();
+                if (Directory.Exists(hgtFolder) == false)
+                {
+                    _logger.Error("!!! The folder: " + hgtFolder + " does not exists, please change the hgtFolder key in the configuration file !!!");
+                    return;
+                }
                 var hgtZipFiles = Directory.GetFiles(hgtFolder, "*.hgt.zip");
                 _logger.Debug("Found " + hgtZipFiles.Length + " files in: " + hgtFolder);
-                _elevationData = new Dictionary<LatLngKey, short[,]>();
                 foreach (var hgtZipFile in hgtZipFiles)
                 {
                     _logger.Debug("Reading file " + hgtZipFile);
