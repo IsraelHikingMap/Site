@@ -47,7 +47,7 @@
             $scope.convertFile = () => {
                 Upload.upload(<angular.angularFileUpload.IFileUploadConfig> {
                     file: this.fileToUpload,
-                    url: "api/convertFiles?outputFormat=" + $scope.selectedFormat,
+                    url: Common.Urls.convertFiles + "?outputFormat=" + $scope.selectedFormat,
                 }).success((data: any) => {
                     var extension = this.fileToUpload.name.split('.').pop();
                     var outputFileName = (<string>this.fileToUpload.name).replace("." + extension, "." + $scope.selectedFormat);

@@ -10,6 +10,18 @@
                     <p class="text-left"><a href="{{shareAddress}}" target="_blank" class="chome-wordwrap-fix">{{shareAddress}}</a></p>
                 </div>
             </div>
+            <div class="form-group">
+                <label class="control-label col-md-2" title="Use this token to update a short url with current state">Update Token</label>
+                <div class="col-md-6">
+                    <input class="form-control" ng-model="updateToken" />
+                </div>
+                <div class="col-md-2" ng-hide="updateToken">
+                    <button class="btn btn-success" ng-click="createShortUrl()">Generate Short URL</button>
+                </div>
+                <div class="col-md-2" ng-show="updateToken">
+                    <button class="btn btn-success" ng-click="updateShortUrl(updateToken)">Update</button>
+                </div>
+            </div>
             <hr />
             <h3 class="text-left">Embed</h3>
             <div class="form-group">

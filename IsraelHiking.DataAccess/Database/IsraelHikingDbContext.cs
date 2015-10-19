@@ -12,7 +12,6 @@ namespace IsraelHiking.DataAccess.Database
             : base("IsraelHikingDbContext")
         {
             Configuration.ProxyCreationEnabled = true;
-            Configuration.LazyLoadingEnabled = true;
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)

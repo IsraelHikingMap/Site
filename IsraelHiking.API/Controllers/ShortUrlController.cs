@@ -1,10 +1,8 @@
 ﻿using IsraelHiking.DataAccess.Database;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace IsraelHiking.API.Controllers
@@ -18,51 +16,53 @@ namespace IsraelHiking.API.Controllers
             _dbContext = new IsraelHikingDbContext();
         }
 
-        // GET api/shorturl?url=short
-        public IHttpActionResult GetFullUrl(string url)
+        // GET s/abc
+        [Route("s/{id}")]
+        public IHttpActionResult GetShortUrl(string id)
         {
-            var shortUrl = _dbContext.ShortUrls.FirstOrDefault(s => s.Url == url);
+            var shortUrl = _dbContext.ShortUrls.FirstOrDefault(s => s.Id == id);
             if (shortUrl == null)
             {
                 return BadRequest();
             }
             shortUrl.LastViewed = DateTime.Now;
+            shortUrl.ViewsCount++;
             _dbContext.SaveChanges();
-            return Ok(shortUrl.FullUrl);
+            var response = Request.CreateResponse(HttpStatusCode.Moved);
+            response.Headers.Location = new Uri(shortUrl.FullUrl);
+            return ResponseMessage(response);
         }
 
-        // POST api/shorturl?url=some-long-url
-        public IHttpActionResult PostShortUrl(string url)
+        // POST api/shorturl
+        public IHttpActionResult PostShortUrl(ShortUrl shortUrl)
         {
-            var shortUrl = new ShortUrl
+            shortUrl.CreationDate = DateTime.Now;
+            shortUrl.LastViewed = DateTime.Now;
+            shortUrl.ModifyKey = GetRandomString(10);
+            shortUrl.ViewsCount = 0;
+            var id = GetRandomString(10);
+            while (_dbContext.ShortUrls.FirstOrDefault(s => s.Id == id) != null)
             {
-                CreationDate = DateTime.Now,
-                LastViewed = DateTime.Now,
-                FullUrl = url,
-                ModifyKey = GetRandomString(10),
-            };
-            var shortUrlString = GetRandomString(8);
-            while (_dbContext.ShortUrls.FirstOrDefault(s => s.Url == shortUrlString) != null)
-            {
-                shortUrlString = GetRandomString(8);
+                id = GetRandomString(10);
             }
-            shortUrl.Url = shortUrlString;
+            shortUrl.Id = id;
             _dbContext.ShortUrls.Add(shortUrl);
             _dbContext.SaveChanges();
             return Ok(shortUrl);
         }
 
-        // PUT api/shorturl?url=some-long-url&modifyKey=mykey
-        public IHttpActionResult PutShortUrl(string url, string modifyKey)
+        // PUT api/shorturl/abc
+        public IHttpActionResult PutShortUrl(string id, ShortUrl shortUrl)
         {
-            var shortUrl = _dbContext.ShortUrls.FirstOrDefault(s => s.ModifyKey == modifyKey);
-            if (shortUrl == null)
+            var shortUrlFromDatabase = _dbContext.ShortUrls.FirstOrDefault(s => s.ModifyKey == id);
+            if (shortUrlFromDatabase == null)
             {
                 return NotFound();
             }
-            shortUrl.FullUrl = url;
+            shortUrlFromDatabase.FullUrl = shortUrl.FullUrl;
+            shortUrl.LastViewed = DateTime.Now;
             _dbContext.SaveChanges();
-            return Ok();
+            return Ok(shortUrlFromDatabase);
         }
 
         private static string GetRandomString(int length)

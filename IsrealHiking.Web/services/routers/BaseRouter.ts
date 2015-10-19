@@ -16,9 +16,7 @@
         }
 
         public getRoute(latlngStart: L.LatLng, latlngEnd: L.LatLng): angular.IPromise<Common.RouteSegmentData[]> {
-            //var route = "http://h2096617.stratoserver.net:443/brouter?nogos=&alternativeidx=0&format=geojson";
-            //var params = "&profile=" + this.getProfile() + "&lonlats=" + latlngStart.lng + "," + latlngStart.lat + "|" + latlngEnd.lng + "," + latlngEnd.lat;
-            var address = "api/routing?from=" + latlngStart.lat + "," + latlngStart.lng + "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + this.getProfile();
+            var address = Common.Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng + "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + this.getProfile();
             var deferred = this.$q.defer();
             var noneRouter = new NoneRouter(this.$q);
             this.$http.get(address, <angular.IRequestShortcutConfig> { timeout: 4500 })
