@@ -142,6 +142,7 @@
     <Content Include="scripts\angular-strap.min.js.map" />
     <Content Include="scripts\angular.min.js.map" />
     <Content Include="scripts\angular-animate.min.js.map" />
+    <None Include="OSM2012.pubxml" />
     <None Include="scripts\jquery-2.1.4.intellisense.js" />
     <Content Include="scripts\tokml.js.map" />
     <None Include="web.Debug.config">
