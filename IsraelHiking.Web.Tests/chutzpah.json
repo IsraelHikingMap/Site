@@ -5,7 +5,11 @@
     "Extensions": [ ".ts" ],
     "ExtensionsWithNoOutput": [ ".d.ts" ]
   },
-  "References": [],
+  "References": [
+    {
+      "Includes": ["*\\isrealhiking.web\\scripts\\*.js"]
+    }
+  ],
   "Tests": [
     { "Include": "*\\*tests.ts" }
   ],

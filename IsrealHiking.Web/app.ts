@@ -1,4 +1,6 @@
 ﻿module IsraelHiking {
+    // HM TODO: short url - web.config + UI.
+
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "googlechart", "ngAnimate", "toastr"]);
 
     L.Icon.Default.imagePath = "content/images/";

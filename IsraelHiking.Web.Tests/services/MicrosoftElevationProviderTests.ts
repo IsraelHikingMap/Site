@@ -4,10 +4,7 @@
 /// <reference path="../scripts/typings/leaflet/leaflet.d.ts" />
 /// <reference path="../scripts/typings/toastr/toastr.d.ts" />
 /// <reference path="../scripts/typings/angularjs/angular.d.ts" />
-/// <chutzpah_reference path="../../isrealhiking.web/scripts/angular.js" />
-/// <chutzpah_reference path="../../isrealhiking.web/scripts/angular-mocks.js" />
-/// <chutzpah_reference path="../../isrealhiking.web/scripts/leaflet-0.7.3.js" />
-/// <chutzpah_reference path="../../isrealhiking.web/services/elevation/microsoftelevationprovider.js" />
+
 
 module IsraelHiking {
     describe("Microsoft Elevation Provider", () => {
@@ -17,7 +14,7 @@ module IsraelHiking {
         var $httpBackend: angular.IHttpBackendService;
         var toastr: Toastr;
 
-        beforeEach(angular.mock.inject((_$http_, _$httpBackend_: angular.IHttpBackendService, _toastr_) => {
+        beforeEach(angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _toastr_: Toastr) => {
             // The injector unwraps the underscores (_) from around the parameter names when matching
             $http = _$http_;
             $httpBackend = _$httpBackend_;
