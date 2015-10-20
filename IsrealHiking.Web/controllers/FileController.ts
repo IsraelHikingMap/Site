@@ -47,7 +47,7 @@
 
             $scope.openFileChooser = (e: Event) => {
                 if (this.fileChooserTooltip == null) {
-                    this.fileChooserTooltip = this.createToolTip(e.target, "views/templates/fileTooltip.tpl.html", "Save", $scope);
+                    this.fileChooserTooltip = this.createToolTip(e.target, "views/templates/fileTooltip.tpl.html", "Save", $scope, "left");
                     this.fileChooserTooltip.$promise.then(this.fileChooserTooltip.show);
                 }
                 this.suppressEvents(e);
