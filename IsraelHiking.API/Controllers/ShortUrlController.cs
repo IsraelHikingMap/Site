@@ -68,7 +68,7 @@ namespace IsraelHiking.API.Controllers
         private static string GetRandomString(int length)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var random = new Random();
+            var random = new Random(DateTime.Now.Millisecond);
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 

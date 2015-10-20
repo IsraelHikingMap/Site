@@ -51,6 +51,8 @@
     <Content Include="content\images\marker-icon.png" />
     <Content Include="content\images\marker-shadow.png" />
     <Content Include="content\leaflet.css" />
+    <Content Include="content\loading-bar.css" />
+    <Content Include="content\loading-bar.min.css" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="index.html" />
@@ -100,6 +102,8 @@
     <Content Include="scripts\leaflet-google.js" />
     <Content Include="scripts\leaflet-locate.js" />
     <Content Include="scripts\leaflet-locate.min.js" />
+    <Content Include="scripts\loading-bar.js" />
+    <Content Include="scripts\loading-bar.min.js" />
     <Content Include="scripts\lodash.js" />
     <Content Include="scripts\lodash.min.js" />
     <Content Include="scripts\ng-file-upload-all.js" />

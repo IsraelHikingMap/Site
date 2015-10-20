@@ -91,7 +91,7 @@
         }
 
         private getShortUrl = (id: string) => {
-            return "s/" + id;
+            return Common.Urls.getShotUrl + id;
         }
     }
 }
