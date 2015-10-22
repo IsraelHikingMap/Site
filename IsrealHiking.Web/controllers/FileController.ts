@@ -15,7 +15,8 @@
             $tooltip,
             layersService: Services.LayersService,
             hashService: Services.HashService,
-            fileService: Services.FileService) {
+            fileService: Services.FileService,
+            toastr: Toastr) {
             super(mapService, $tooltip);
 
             this.setDragAndDrop($scope);

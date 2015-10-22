@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Controllers
                 File.WriteAllBytes(tempFileName, content);
                 var convertedGpx = _gpsBabelGateway.ConvertFileFromat(tempFileName, "gpx");
                 var gpxString = File.ReadAllText(convertedGpx);
-                Directory.Delete(tempPath);
+                Directory.Delete(tempPath, true);
                 return gpxString;
             }
         }
@@ -57,7 +57,7 @@ namespace IsraelHiking.API.Controllers
 
             if (streamProvider.FileData.Count() != 1)
             {
-                Directory.Delete(tempPath);
+                Directory.Delete(tempPath, true);
                 return BadRequest();
             }
             var inputFileName = Path.Combine(tempPath, streamProvider.FileData.First().Headers.ContentDisposition.FileName.Trim('\"'));
@@ -70,7 +70,7 @@ namespace IsraelHiking.API.Controllers
 
         private string GetTemporaryPath()
         {
-            var path = Path.GetTempPath() + "IsraelHiking_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss_fff");
+            var path = Path.Combine(Path.GetTempPath(), "IsraelHiking_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss_fff"));
             Directory.CreateDirectory(path);
             return path;
         }
