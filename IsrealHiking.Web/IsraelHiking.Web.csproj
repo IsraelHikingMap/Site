@@ -152,6 +152,9 @@
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
+    <None Include="web.OSM2012.config">
+      <DependentUpon>web.config</DependentUpon>
+    </None>
     <None Include="web.Release.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -329,6 +332,13 @@
   </PropertyGroup>
   <PropertyGroup>
     <RootNamespace>IsraelHiking.Web</RootNamespace>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'OSM2012'">
+    <DebugSymbols>true</DebugSymbols>
+    <OutputPath>bin\</OutputPath>
+    <DebugType>full</DebugType>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets" Condition="Exists('$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\WebApplications\Microsoft.WebApplication.targets')" />
