@@ -494,7 +494,7 @@
                         this.addMarkers();
                     }
                     if (targetState == DrawingState.hidden) {
-                        this.destroyMarkers();
+                        this.destroyPolylines();
                     }
                     break;
                 case DrawingState.active:

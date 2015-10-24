@@ -116,7 +116,12 @@
                 this.map.fitBounds(data.bounds);
             }
             for (var routeIndex = 0; routeIndex < data.routes.length; routeIndex++) {
-                layersService.addRoute(data.routes[routeIndex].name, data.routes[routeIndex], null);
+                var route = data.routes[routeIndex];
+                if (layersService.isNameAvailable(route.name)) {
+                    layersService.addRoute(route.name, route, null);
+                } else {
+                    layersService.addRoute("", route, null); // will cause an automatic name to be created.
+                }
             }
             layersService.addMarkers(data.markers);
         }
