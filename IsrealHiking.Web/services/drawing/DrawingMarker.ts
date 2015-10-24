@@ -77,6 +77,7 @@
             marker.title = title;
             var newScope = <Controllers.IMarkerPopupScope>this.$rootScope.$new();
             newScope.title = title;
+            newScope.marker = marker;
             newScope.setTitle = (title: string) => {
                 marker.title = title;
                 this.updateDataLayer();
@@ -128,6 +129,7 @@
             marker.off("dragend");
             marker.off("mouseover");
             marker.off("dblclick");
+            marker.off("popupopen");
             this.map.removeLayer(marker);
             this.markers.splice(markerIndex, 1);
         }
