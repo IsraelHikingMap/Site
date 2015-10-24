@@ -1,13 +1,12 @@
 ﻿using GeoJSON.Net.Feature;
+using GeoJSON.Net.Geometry;
 using IsraelHiking.DataAccess;
-using Newtonsoft.Json;
+using SharpKml.Engine;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
@@ -18,27 +17,31 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly Logger _logger;
         private readonly GpsBabelGateway _gpsBabelGateway;
+        private readonly ElevationDataStorage _elevationDataStorage;
 
         public ConvertFilesController()
         {
             _gpsBabelGateway = new GpsBabelGateway();
             _logger = new Logger();
+            _elevationDataStorage = ElevationDataStorage.Instance;
         }
 
         // GET api/ConvertFiles?url=http://jeeptrip.co.il/routes/pd6bccre.twl
-        public async Task<string> GetRemoteFile(string url)
+        public async Task<FeatureCollection> GetRemoteFile(string url)
         {
             using (HttpClient client = new HttpClient())
             {
+                _logger.Debug("Getting file from: " + url);
                 var response = await client.GetAsync(url);
                 var content = await response.Content.ReadAsByteArrayAsync();
                 var tempPath = GetTemporaryPath();
                 var tempFileName = Path.Combine(tempPath, "IsraelHikingUrl" + Path.GetExtension(url));
                 File.WriteAllBytes(tempFileName, content);
-                var convertedGpx = _gpsBabelGateway.ConvertFileFromat(tempFileName, "gpx");
-                var gpxString = File.ReadAllText(convertedGpx);
+                var convertedKml = _gpsBabelGateway.ConvertFileFromat(tempFileName, "kml");
+                var featureCollection = ConvertFileToGeoJson(convertedKml);
                 Directory.Delete(tempPath, true);
-                return gpxString;
+                _logger.Debug("File was retrieved successfully");
+                return featureCollection;
             }
         }
 
@@ -74,5 +77,48 @@ namespace IsraelHiking.API.Controllers
             Directory.CreateDirectory(path);
             return path;
         }
+
+        private FeatureCollection ConvertFileToGeoJson(string fileName)
+        {
+            var collection = new FeatureCollection();
+            using (var stream = File.OpenRead(fileName))
+            {
+                var kml = KmlFile.Load(stream);
+                foreach (var point in kml.Root.Flatten().OfType<SharpKml.Dom.Point>())
+                {
+                    var feature = new Feature(new Point(CreateGeoPosition(point.Coordinate)), CreateProperties(point.Parent));
+                    collection.Features.Add(feature);
+                }
+                foreach (var lineString in kml.Root.Flatten().OfType<SharpKml.Dom.LineString>())
+                {
+                    var feature = new Feature(new LineString(lineString.Coordinates.Select(v => CreateGeoPosition(v))), CreateProperties(lineString.Parent));
+                    collection.Features.Add(feature);
+                }
+                // HM TODO: Track?
+            }
+            return collection;
+        }
+
+
+        private GeographicPosition CreateGeoPosition(SharpKml.Base.Vector vector)
+        {
+            if (vector.Altitude.HasValue && vector.Altitude != 0)
+            {
+                return new GeographicPosition(vector.Latitude, vector.Longitude, vector.Altitude);
+            }
+            return new GeographicPosition(vector.Latitude, vector.Longitude, _elevationDataStorage.GetElevation(vector.Latitude, vector.Longitude));
+        }
+
+        private Dictionary<string, object> CreateProperties(SharpKml.Dom.Element element)
+        {
+            var dictionary = new Dictionary<string, object>();
+            var placemerk = element as SharpKml.Dom.Placemark;
+            if (placemerk != null)
+            {
+                dictionary.Add("name", placemerk.Name);
+            }
+            return dictionary;
+        }
+        
     }
 }

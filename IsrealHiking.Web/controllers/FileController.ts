@@ -23,8 +23,8 @@
             this.fileChooserTooltip = null;
 
             if (hashService.externalUrl != "") {
-                $http.get(Common.Urls.convertFiles + "?url=" + hashService.externalUrl).success((content: string) => {
-                    var dataContainer = fileService.readFromFile("External.gpx", content, Common.RoutingType.hike);
+                $http.get(Common.Urls.convertFiles + "?url=" + hashService.externalUrl).success((content: GeoJSON.FeatureCollection) => {
+                    var dataContainer = fileService.readFromFile("External.geojson", JSON.stringify(content), Common.RoutingType.hike);
                     this.addFileDataToMap(dataContainer, layersService);
                 }).error(() => {
                     toastr.error("Failed to load external url file.");
