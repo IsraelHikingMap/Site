@@ -5,13 +5,13 @@
                 <button type="button" class="close" aria-label="Close" ng-click="$hide()"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" ng-bind="title"></h4>
             </div>
-            <form ng-submit="addLayer(name, address, minZoom, maxZoom, $event); $hide()" ng-init="minZoom = 7; maxZoom = 16;">
+            <form ng-submit="saveLayer(key, address, minZoom, maxZoom, $event); $hide()" ng-init="minZoom = 7; maxZoom = 16;">
                 <div class="modal-body">
                     <div class="form-horizontal">
                         <div class="form-group">
                             <label class="control-label col-md-3">Name</label>
                             <div class="col-md-9">
-                                <input type="text" ng-model="name" class="form-control" placeholder="A name to be displayed in the layer control" required="" />
+                                <input type="text" ng-model="key" class="form-control" placeholder="A name to be displayed in the layers control" required="" />
                             </div>
                         </div>
                         <div class="form-group">
@@ -33,8 +33,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <input type="submit" class="btn btn-success" value="Add" />
-                    <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>
+                    <button type="button" ng-hide="isNew" ng-click="removeLayer($event); $hide()" class="btn btn-danger" title="Delete layer"><i class="fa fa-lg fa-trash"></i></button>
+                    <button type="submit" class="btn btn-success" title="Save"><i class="fa fa-check"></i></button>
                 </div>
             </form>
         </div>

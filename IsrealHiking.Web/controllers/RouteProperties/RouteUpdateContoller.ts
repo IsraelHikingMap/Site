@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿module IsraelHiking.Controllers.RouteProperties {
     export interface IRouteUpdateScope extends IRouteBaseScope {
         isVisible: boolean;
         isRoutingPerPoint: boolean;

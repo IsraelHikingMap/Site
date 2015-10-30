@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿module IsraelHiking.Controllers.RouteProperties {
     export interface IRouteAddScope extends IRouteBaseScope {
 
     }

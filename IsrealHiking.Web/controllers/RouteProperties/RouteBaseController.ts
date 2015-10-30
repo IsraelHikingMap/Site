@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿module IsraelHiking.Controllers.RouteProperties {
     export interface IRouteBaseScope extends angular.IScope {
         name: string;
         weight: number;

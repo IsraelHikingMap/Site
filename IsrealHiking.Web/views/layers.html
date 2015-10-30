@@ -4,7 +4,7 @@
         <div ng-repeat="baseLayer in baseLayers">
             <label class="control-label">
                 <button class="btn btn-xs btn-default" ng-click="selectBaseLayer(baseLayer, $event)" ng-class="{'active': baseLayer.selected }"><i ng-class="{'fa fa-eye': baseLayer.selected, 'fa fa-eye-slash': !baseLayer.selected}"></i></button>
-                <button class="btn btn-xs btn-danger" ng-click="removeBaseLayer(baseLayer, $event)" ng-show="advanced"><i class="fa fa-trash"></i></button>
+                <button class="btn btn-xs btn-warning" ng-click="editBaseLayer(baseLayer, $event)" ng-show="advanced && baseLayer.isEditable"><i class="fa fa-wrench"></i></button>
                 {{baseLayer.key}}
             </label>
         </div>
@@ -13,7 +13,7 @@
         <div ng-repeat="overlay in overlays">
             <label class="control-label">
                 <button class="btn btn-xs btn-default" ng-click="toggleVisibility(overlay, $event)"><i ng-class="{'fa fa-eye': overlay.visible, 'fa fa-eye-slash': !overlay.visible}"></i></button>
-                <button class="btn btn-xs btn-danger" ng-click="removeOverlay(overlay, $event)" ng-show="advanced"><i class="fa fa-trash"></i></button>
+                <button class="btn btn-xs btn-warning" ng-click="editOverlay(overlay, $event)" ng-show="advanced && overlay.isEditable"><i class="fa fa-wrench"></i></button>
                 {{overlay.key}}
             </label>
         </div>

@@ -5,11 +5,6 @@
 declare var getLastModifiedDate: Function;
 
 module IsraelHiking.Services {
-    export interface ILayer {
-        key: string;
-        layer: L.TileLayer;
-    }
-
     export interface ILayerData {
         key: string;
         address: string;
@@ -17,11 +12,16 @@ module IsraelHiking.Services {
         maxZoom: number;
     }
 
-    export interface IBaseLayer extends ILayer, ILayerData {
-        selected: boolean
+    export interface ILayer extends ILayerData {
+        layer: L.TileLayer;
+        isEditable: boolean;
     }
 
-    export interface IOvelay extends ILayer {
+    export interface IBaseLayer extends ILayer {
+        selected: boolean;
+    }
+
+    export interface IOverlay extends ILayer {
         visible: boolean;
     }
 
@@ -31,10 +31,12 @@ module IsraelHiking.Services {
     }
 
     export class LayersService extends ObjectWithMap {
-        public static MAX_ZOOM = 20;
         public static ISRAEL_MTB_MAP = "Israel MTB Map";
         public static DEFAULT_TILES_ADDRESS = "http://IsraelHiking.osm.org.il/Tiles/{z}/{x}/{y}.png";
 
+        private static MAX_ZOOM = 20;
+        private static MIN_ZOOM = 7;
+        private static MAX_NATIVE_ZOOM = 16;
         private static ISRAEL_HIKING_MAP = "Israel Hiking Map";
         private static GOOGLE_EARTH = "Google Earth";
         private static HIKING_TRAILS = "Hiking Trails";
@@ -50,11 +52,11 @@ module IsraelHiking.Services {
         private localStorageService: angular.local.storage.ILocalStorageService;
         private hashService: HashService;
         private drawingFactory: Drawing.DrawingFactory;
-        private tileLayerOptions: L.TileLayerOptions;
+        private defaultAttribution: string;
         private overlayZIndex;
 
         public baseLayers: IBaseLayer[];
-        public overlays: IOvelay[];
+        public overlays: IOverlay[];
         public markers: Drawing.DrawingMarker;
         public routes: Drawing.DrawingRoute[];
         public eventHelper: Common.EventHelper<Common.IDataChangedEventArgs>
@@ -79,62 +81,84 @@ module IsraelHiking.Services {
             this.eventHelper = new Common.EventHelper<Common.IDataChangedEventArgs>();
 
             var lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
-            lastModified = "Last update: " + lastModified;
-            this.tileLayerOptions = <L.TileLayerOptions> {
-                minZoom: 7,
-                maxZoom: LayersService.MAX_ZOOM,
-                maxNativeZoom: 16,
-                attribution: LayersService.ATTRIBUTION + lastModified,
-            };
+            this.defaultAttribution = LayersService.ATTRIBUTION + "Last update: " + lastModified;
             // default layers:
-            this.addBaseLayer(LayersService.ISRAEL_HIKING_MAP, LayersService.DEFAULT_TILES_ADDRESS, this.tileLayerOptions);
-            this.addBaseLayer(LayersService.ISRAEL_MTB_MAP, LayersService.MTB_TILES_ADDRESS, <L.TileLayerOptions> {
-                minZoom: 7,
-                maxZoom: LayersService.MAX_ZOOM,
-                maxNativeZoom: 16,
-                attribution: LayersService.MTB_ATTRIBUTION + lastModified,
-            });
-            this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_EARTH, layer: <any>new L.Google(), selected: false, address: "" });
-            this.addOverlay(LayersService.HIKING_TRAILS, LayersService.OVERLAY_TILES_ADDRESS, this.tileLayerOptions, false);
+            this.addBaseLayer(<ILayer> {
+                key: LayersService.ISRAEL_HIKING_MAP,
+                address: LayersService.DEFAULT_TILES_ADDRESS,
+                isEditable: false,
+            }, this.defaultAttribution);
 
+            this.addBaseLayer(<ILayer> {
+                key: LayersService.ISRAEL_MTB_MAP,
+                address: LayersService.MTB_TILES_ADDRESS,
+                isEditable: false,
+            }, LayersService.MTB_ATTRIBUTION + lastModified);
+
+            this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_EARTH, layer: <any>new L.Google(), selected: false, address: "", isEditable: false });
+            var overlay = this.addOverlay(<ILayerData> {
+                key: LayersService.HIKING_TRAILS,
+                address: LayersService.OVERLAY_TILES_ADDRESS,
+                minZoom: LayersService.MIN_ZOOM,
+                maxZoom: LayersService.MAX_NATIVE_ZOOM,
+                isEditable: false
+            });
+            this.toggleOverlay(overlay);
             this.addLayersFromLocalStorage();
             this.addDrawingsFromHash();
             this.addBaseLayerFromHash();
         }
 
-        public addBaseLayer = (key: string, address: string, options: L.TileLayerOptions): IBaseLayer => {
-            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() == key.toLocaleLowerCase());
+        public addBaseLayer = (layerData: ILayerData, attribution?: string): IBaseLayer => {
+            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() == layerData.key.toLocaleLowerCase());
             if (layer != null) {
                 return layer; // layer exists
             }
-            if (options && !options.attribution) {
-                options.attribution = this.tileLayerOptions.attribution;
-            }
 
-            layer = <IBaseLayer>{ key: key, layer: L.tileLayer(address, options), selected: false, address: address };
+            layer = <IBaseLayer>angular.copy(layerData);
+            layer.layer = L.tileLayer(layerData.address, this.createOptionsFromLayerData(layerData, attribution));
             this.baseLayers.push(layer);
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY) || [];
-            baseLayers.push(<ILayerData>{ key: key, address: address, minZoom: options.minZoom, maxZoom: options.maxNativeZoom });
+            baseLayers.push(layerData);
             this.localStorageService.set(LayersService.BASE_LAYERS_KEY, this.unique(baseLayers));
             return layer;
         }
 
-        public addOverlay = (key: string, address: string, options: L.TileLayerOptions, show = true) => {
-            if (_.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() == key.toLocaleLowerCase())) {
-                return; // overlay exists
+        public addOverlay = (layerData: ILayerData): IOverlay => {
+            var overlay = _.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() == layerData.key.toLocaleLowerCase());
+            if (overlay != null) {
+                return overlay; // overlay exists
             }
-            if (options && !options.attribution) {
-                options.attribution = this.tileLayerOptions.attribution;
-            }
-            var overlay = <IOvelay>{ key: key, layer: L.tileLayer(address, options), visible: false };
+            overlay = <IOverlay>angular.copy(layerData);
+            overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData));
+            overlay.visible = false;
             overlay.layer.setZIndex(this.overlayZIndex++);
             this.overlays.push(overlay);
-            if (show) {
-                this.toggleOverlay(overlay);
+            var overlaysFromStorage = this.localStorageService.get<ILayerData[]>(LayersService.OVERLAYS_KEY) || [];
+            overlaysFromStorage.push(layerData);
+            this.localStorageService.set(LayersService.OVERLAYS_KEY, this.unique(overlaysFromStorage));
+            return overlay;
+        }
+
+        public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: ILayerData): string => {
+            if (oldLayer.key != newLayer.key &&
+                _.find(this.baseLayers, bl => bl.key.toLocaleLowerCase() == newLayer.key.toLocaleLowerCase()) != null) {
+                return "The name: '" + newLayer.key + "' is already in use.";
             }
-            var overlays = this.localStorageService.get<ILayerData[]>(LayersService.OVERLAYS_KEY) || [];
-            overlays.push(<ILayerData>{ key: key, address: address, minZoom: options.minZoom, maxZoom: options.maxNativeZoom });
-            this.localStorageService.set(LayersService.OVERLAYS_KEY, this.unique(overlays));
+            this.removeBaseLayer(oldLayer);
+            var layer = this.addBaseLayer(newLayer);
+            this.selectBaseLayer(layer);
+            return "";
+        }
+
+        public updateOverlay = (oldLayer: IOverlay, newLayer: ILayerData) => {
+            if (oldLayer.key != newLayer.key &&
+                _.find(this.overlays, o => o.key.toLocaleLowerCase() == newLayer.key.toLocaleLowerCase()) != null) {
+                return "The name: '" + newLayer.key + "' is already in use.";
+            }
+            this.removeOverlay(oldLayer);
+            var layer = this.addOverlay(newLayer);
+            return "";
         }
 
         public addRoute = (name: string, routeData: Common.RouteData, pathOptions: L.PathOptions) => {
@@ -178,7 +202,7 @@ module IsraelHiking.Services {
             }
         }
 
-        public removeOverlay = (overlay: IOvelay) => {
+        public removeOverlay = (overlay: IOverlay) => {
             var overlays = this.localStorageService.get<ILayerData[]>(LayersService.OVERLAYS_KEY);
             _.remove(overlays, (layerData) => layerData.key == overlay.key);
             this.localStorageService.set(LayersService.OVERLAYS_KEY, this.unique(overlays));
@@ -213,7 +237,7 @@ module IsraelHiking.Services {
             this.updateBaseLayerHash();
         }
 
-        public toggleOverlay = (overlay: IOvelay) => {
+        public toggleOverlay = (overlay: IOverlay) => {
             var overlayFromArray = _.find(this.overlays, (overlayToFind) => overlayToFind.key == overlay.key);
             overlayFromArray.visible = !overlayFromArray.visible;
             if (overlayFromArray.visible) {
@@ -263,16 +287,17 @@ module IsraelHiking.Services {
         private addLayersFromLocalStorage = () => {
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY) || [];
             for (var baseLayerIndex = 0; baseLayerIndex < baseLayers.length; baseLayerIndex++) {
-                var baseLayerData = baseLayers[baseLayerIndex];
-                this.addBaseLayer(baseLayerData.key, baseLayerData.address, <L.TileLayerOptions> { minZoom: baseLayerData.minZoom, maxZoom: baseLayerData.maxZoom });
+                var baseLayer = <ILayer>baseLayers[baseLayerIndex];
+                baseLayer.isEditable = true;
+                this.addBaseLayer(baseLayer);
             }
 
             var overlays = this.localStorageService.get<ILayerData[]>(LayersService.OVERLAYS_KEY) || [];
             for (var overlayIndex = 0; overlayIndex < overlays.length; overlayIndex++) {
-                var overlayData = overlays[overlayIndex];
-                this.addOverlay(overlayData.key, overlayData.address,
-                    <L.TileLayerOptions> { minZoom: overlayData.minZoom, maxZoom: overlayData.maxZoom },
-                    false);
+                var overlayData = <ILayer>overlays[overlayIndex];
+                overlayData.isEditable = true;
+                var overlay = this.addOverlay(overlayData);
+                this.toggleOverlay(overlay);
             }
         }
 
@@ -328,7 +353,11 @@ module IsraelHiking.Services {
                 customName = name + index.toString();
                 layer = _.find(this.baseLayers, (baseLayerToFind) => baseLayerToFind.key == customName);
             } while (layer != null);
-            layer = this.addBaseLayer(customName, this.hashService.baseLayer, this.tileLayerOptions);
+            layer = this.addBaseLayer(<ILayer> {
+                key: customName,
+                address: this.hashService.baseLayer,
+                isEditable: true,
+            });
             this.selectBaseLayer(layer);
         }
 
@@ -357,7 +386,15 @@ module IsraelHiking.Services {
                 layersMap[layer.key.toLowerCase()] = true;
                 return true;
             });
+        }
 
+        private createOptionsFromLayerData = (layerData: ILayerData, attribution?: string): L.TileLayerOptions => {
+            return <L.TileLayerOptions>{
+                minZoom: layerData.minZoom || LayersService.MIN_ZOOM,
+                maxNativeZoom: layerData.maxZoom || LayersService.MAX_NATIVE_ZOOM,
+                maxZoom: LayersService.MAX_ZOOM,
+                attribution: attribution || this.defaultAttribution
+            };
         }
     }
 }
