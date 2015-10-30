@@ -9,6 +9,10 @@
             $scope.title = "Update Overlay";
             $scope.isNew = false;
             $scope.layer = layer;
+            $scope.key = layer.key;
+            $scope.maxZoom = layer.maxZoom;
+            $scope.minZoom = layer.minZoom;
+            $scope.address = layer.address;
 
             $scope.removeLayer = (e: Event) => {
                 var message = layersService.removeOverlay($scope.layer);

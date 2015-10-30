@@ -157,7 +157,8 @@ module IsraelHiking.Services {
                 return "The name: '" + newLayer.key + "' is already in use.";
             }
             this.removeOverlay(oldLayer);
-            var layer = this.addOverlay(newLayer);
+            var overlay = this.addOverlay(newLayer);
+            this.toggleOverlay(overlay);
             return "";
         }
 
