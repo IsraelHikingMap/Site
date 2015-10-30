@@ -115,7 +115,7 @@ module IsraelHiking.Services {
             this.baseLayers.push(layer);
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY) || [];
             baseLayers.push(<ILayerData>{ key: key, address: address, minZoom: options.minZoom, maxZoom: options.maxNativeZoom });
-            this.localStorageService.set(LayersService.BASE_LAYERS_KEY, baseLayers);
+            this.localStorageService.set(LayersService.BASE_LAYERS_KEY, this.unique(baseLayers));
             return layer;
         }
 
@@ -134,7 +134,7 @@ module IsraelHiking.Services {
             }
             var overlays = this.localStorageService.get<ILayerData[]>(LayersService.OVERLAYS_KEY) || [];
             overlays.push(<ILayerData>{ key: key, address: address, minZoom: options.minZoom, maxZoom: options.maxNativeZoom });
-            this.localStorageService.set(LayersService.OVERLAYS_KEY, overlays);
+            this.localStorageService.set(LayersService.OVERLAYS_KEY, this.unique(overlays));
         }
 
         public addRoute = (name: string, routeData: Common.RouteData, pathOptions: L.PathOptions) => {
@@ -163,7 +163,7 @@ module IsraelHiking.Services {
         public removeBaseLayer = (baseLayer: Services.IBaseLayer) => {
             var baseLayers = this.localStorageService.get<ILayerData[]>(LayersService.BASE_LAYERS_KEY);
             _.remove(baseLayers, (layerData) => layerData.key == baseLayer.key);
-            this.localStorageService.set(LayersService.BASE_LAYERS_KEY, baseLayers);
+            this.localStorageService.set(LayersService.BASE_LAYERS_KEY, this.unique(baseLayers));
             if (this.selectedBaseLayer.key != baseLayer.key) {
                 _.remove(this.baseLayers, (layer) => baseLayer.key == layer.key);
                 return;
@@ -181,7 +181,7 @@ module IsraelHiking.Services {
         public removeOverlay = (overlay: IOvelay) => {
             var overlays = this.localStorageService.get<ILayerData[]>(LayersService.OVERLAYS_KEY);
             _.remove(overlays, (layerData) => layerData.key == overlay.key);
-            this.localStorageService.set(LayersService.OVERLAYS_KEY, overlays);
+            this.localStorageService.set(LayersService.OVERLAYS_KEY, this.unique(overlays));
             if (overlay.visible) {
                 this.map.removeLayer(overlay.layer);
             }
@@ -346,6 +346,18 @@ module IsraelHiking.Services {
                 baseLayer = this.selectedBaseLayer.address;
             }
             this.hashService.updateBaseLayer(baseLayer);
+        }
+
+        private unique(layers: ILayerData[]): ILayerData[] {
+            var layersMap = {};
+            return layers.reverse().filter((layer) => {
+                if (layersMap[layer.key.toLowerCase()]) {
+                    return false;
+                }
+                layersMap[layer.key.toLowerCase()] = true;
+                return true;
+            });
+
         }
     }
 }
