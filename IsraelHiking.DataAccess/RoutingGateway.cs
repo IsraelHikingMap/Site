@@ -1,25 +1,21 @@
-﻿using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
+﻿using GeoJSON.Net.Geometry;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccess.JsonResponse;
+using IsraelHiking.DataAccessInterfaces;
 using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
 {
-    public class RoutingGateway
+    public class RoutingGateway : IRoutingGateway
     {
-        private readonly Logger _logger;
-        private readonly ElevationDataStorage _elevationDataStorage;
+        private readonly ILogger _logger;
 
         public RoutingGateway()
         {
             _logger = new Logger();
-            _elevationDataStorage = ElevationDataStorage.Instance;
         }
 
         public async Task<LineString> GetRouting(RoutingGatewayRequest request)
@@ -47,7 +43,6 @@ namespace IsraelHiking.DataAccess
                 var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
 
                 return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new GeographicPosition(c[1], c[0], c.Count > 2 ? c[2] : (double?)null)));
-                //return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new GeographicPosition(c[1], c[0], if ()));
             }
         }
     }

@@ -1,6 +1,6 @@
 ﻿using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
-using IsraelHiking.DataAccess;
+using IsraelHiking.DataAccessInterfaces;
 using SharpKml.Engine;
 using System;
 using System.Collections.Generic;
@@ -15,34 +15,30 @@ namespace IsraelHiking.API.Controllers
 {
     public class ConvertFilesController : ApiController
     {
-        private readonly Logger _logger;
-        private readonly GpsBabelGateway _gpsBabelGateway;
-        private readonly ElevationDataStorage _elevationDataStorage;
+        private readonly ILogger _logger;
+        private readonly IGpsBabelGateway _gpsBabelGateway;
+        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IRemoveFileFetcherGateway _remoteFileFetcher;
 
-        public ConvertFilesController()
+        public ConvertFilesController(ILogger logger, 
+            IGpsBabelGateway gpsBabelGateway, 
+            IElevationDataStorage elevationDataStorage,
+            IRemoveFileFetcherGateway remoteFileFetcher)
         {
-            _gpsBabelGateway = new GpsBabelGateway();
-            _logger = new Logger();
-            _elevationDataStorage = ElevationDataStorage.Instance;
+            _gpsBabelGateway = gpsBabelGateway;
+            _logger = logger;
+            _elevationDataStorage = elevationDataStorage;
+            _remoteFileFetcher = remoteFileFetcher;
         }
 
         // GET api/ConvertFiles?url=http://jeeptrip.co.il/routes/pd6bccre.twl
         public async Task<FeatureCollection> GetRemoteFile(string url)
         {
-            using (HttpClient client = new HttpClient())
-            {
-                _logger.Debug("Getting file from: " + url);
-                var response = await client.GetAsync(url);
-                var content = await response.Content.ReadAsByteArrayAsync();
-                var tempPath = GetTemporaryPath();
-                var tempFileName = Path.Combine(tempPath, "IsraelHikingUrl" + Path.GetExtension(url));
-                File.WriteAllBytes(tempFileName, content);
-                var convertedKml = _gpsBabelGateway.ConvertFileFromat(tempFileName, "kml");
-                var featureCollection = ConvertFileToGeoJson(convertedKml);
-                Directory.Delete(tempPath, true);
-                _logger.Debug("File was retrieved successfully");
-                return featureCollection;
-            }
+            var content = await _remoteFileFetcher.GetFileContent(url);
+            var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(url));
+            var convertedKml = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, "kml");
+            var featureCollection = ConvertContentToGeoJson(convertedKml);
+            return featureCollection;
         }
 
         /// <summary>
@@ -54,34 +50,33 @@ namespace IsraelHiking.API.Controllers
         // POST api/convertFiles?outputFormat=twl
         public async Task<IHttpActionResult> PostConvertFile(string outputFormat)
         {
-            var tempPath = GetTemporaryPath();
-            var streamProvider = new MultipartFileStreamProvider(tempPath);
+            var streamProvider = new MultipartMemoryStreamProvider();
             var multipartFileStreamProvider = await Request.Content.ReadAsMultipartAsync(streamProvider);
 
-            if (streamProvider.FileData.Count() != 1)
+            if (multipartFileStreamProvider.Contents.Count == 0)
             {
-                Directory.Delete(tempPath, true);
                 return BadRequest();
             }
-            var inputFileName = Path.Combine(tempPath, streamProvider.FileData.First().Headers.ContentDisposition.FileName.Trim('\"'));
-            File.Move(streamProvider.FileData.First().LocalFileName, inputFileName);
-            var outputFile = _gpsBabelGateway.ConvertFileFromat(inputFileName, outputFormat);
-            var bytes = File.ReadAllBytes(outputFile);
-            Directory.Delete(tempPath, true);
-            return Ok(bytes);
+            var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('\"')));
+            var content = await streamProvider.Contents.First().ReadAsByteArrayAsync();
+            var outputContent = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, outputFormat);
+            return Ok(outputContent);
         }
 
-        private string GetTemporaryPath()
+        private string ConvertExtenstionToFormat(string extension)
         {
-            var path = Path.Combine(Path.GetTempPath(), "IsraelHiking_" + DateTime.Now.ToString("yyyy-MM-dd_HH-mm-ss_fff"));
-            Directory.CreateDirectory(path);
-            return path;
+            extension = extension.Replace(".", "");
+            if (extension == "twl")
+            {
+                return "naviguide";
+            }
+            return extension.ToLower();
         }
 
-        private FeatureCollection ConvertFileToGeoJson(string fileName)
+        private FeatureCollection ConvertContentToGeoJson(byte[] content)
         {
             var collection = new FeatureCollection();
-            using (var stream = File.OpenRead(fileName))
+            using (var stream = new MemoryStream(content))
             {
                 var kml = KmlFile.Load(stream);
                 foreach (var point in kml.Root.Flatten().OfType<SharpKml.Dom.Point>())
@@ -98,7 +93,6 @@ namespace IsraelHiking.API.Controllers
             }
             return collection;
         }
-
 
         private GeographicPosition CreateGeoPosition(SharpKml.Base.Vector vector)
         {

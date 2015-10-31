@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<gpx xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" creator="OruxMaps v.6.0.10" version="1.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd">
+<metadata>
+<name><![CDATA[2015-09-25 12:16]]></name>
+<desc><![CDATA[]]></desc>
+<link href="http://www.oruxmaps.com">
+<text>OruxMaps</text>
+</link>
+<time>2015-09-25T09:16:08Z</time><bounds maxlat="32.8933814" maxlon="35.6218303" minlat="32.8900237" minlon="35.6184744"/>
+</metadata>
+<wpt lat="32.8933828" lon="35.6184752">
+<ele>-207.81</ele>
+<time>2015-09-25T09:16:52Z</time>
+<name><![CDATA[מבנה עתיק, שער, חניה.]]></name>
+<desc><![CDATA[]]></desc>
+<sym>Waypoint</sym>
+<type>נ"צ</type>
+<extensions>
+<om:oruxmapsextensions xmlns:om="http://www.oruxmaps.com/oruxmapsextensions/1/0">
+<om:ext type="ICON" subtype="0">1</om:ext>
+</om:oruxmapsextensions>
+</extensions>
+</wpt>
+<wpt lat="32.8904408" lon="35.6219097">
+<ele>-210.04</ele>
+<time>2015-09-25T09:27:24Z</time>
+<name><![CDATA[סימון אדום]]></name>
+<desc><![CDATA[]]></desc>
+<sym>Waypoint</sym>
+<type>נ"צ</type>
+<extensions>
+<om:oruxmapsextensions xmlns:om="http://www.oruxmaps.com/oruxmapsextensions/1/0">
+<om:ext type="ICON" subtype="0">1</om:ext>
+</om:oruxmapsextensions>
+</extensions>
+</wpt>
+<trk>
+<name><![CDATA[2015-09-25 12:16]]></name>
+<desc><![CDATA[<h1>OruxMaps</h1><br /><hr align="center" width="480" style="height: 2px; width: 517px"/><h2>שם: 2015-09-25 12:16</h2><br /><p>שעת התחלה: 09/25/2015 12:16</p><p>שעת סיום: 09/25/2015 12:25</p><p>מרחק: 0.5km (00:09)</p><p>זמן תנועה: 00:06</p><p>מהירות ממוצעת: 3.4km/h</p><p>ממוצע מהירות בתנועה: 4.6km/h</p><p>מהירות מירבית: 6.9km/h</p><p>גובה מזערי: -212m</p><p>גובה מירבי: -206m</p><p>מהירות בעלייה: 86.2m/h</p><p>מהירות בירידה: ‎-218.4m/h</p><p>צבירת גובה: 6m</p><p>הפסד גובה: -7m</p><p>זמן בעלייה: 00:04</p><p>זמן בירידה: 00:02</p><hr align="center" width="480" style="height: 2px; width: 517px"/>]]></desc>
+<type>לא מוגדר</type>
+<extensions>
+<om:oruxmapsextensions xmlns:om="http://www.oruxmaps.com/oruxmapsextensions/1/0">
+<om:ext type="TYPE" subtype="0">0</om:ext>
+</om:oruxmapsextensions>
+</extensions>
+<trkseg>
+<trkpt lat="32.8933814" lon="35.6184744">
+<ele>-208.80</ele>
+<time>2015-09-25T09:16:10Z</time>
+</trkpt>
+<trkpt lat="32.8932694" lon="35.6186468">
+<ele>-208.16</ele>
+<time>2015-09-25T09:18:30Z</time>
+</trkpt>
+<trkpt lat="32.8931220" lon="35.6187840">
+<ele>-206.52</ele>
+<time>2015-09-25T09:18:54Z</time>
+</trkpt>
+<trkpt lat="32.8929890" lon="35.6189470">
+<ele>-206.04</ele>
+<time>2015-09-25T09:19:05Z</time>
+</trkpt>
+<trkpt lat="32.8928374" lon="35.6190717">
+<ele>-207.36</ele>
+<time>2015-09-25T09:19:17Z</time>
+</trkpt>
+<trkpt lat="32.8926572" lon="35.6191099">
+<ele>-206.83</ele>
+<time>2015-09-25T09:19:32Z</time>
+</trkpt>
+<trkpt lat="32.8924717" lon="35.6191144">
+<ele>-210.00</ele>
+<time>2015-09-25T09:19:46Z</time>
+</trkpt>
+<trkpt lat="32.8923044" lon="35.6192138">
+<ele>-208.82</ele>
+<time>2015-09-25T09:20:00Z</time>
+</trkpt>
+<trkpt lat="32.8921520" lon="35.6193290">
+<ele>-208.46</ele>
+<time>2015-09-25T09:20:14Z</time>
+</trkpt>
+<trkpt lat="32.8920034" lon="35.6194661">
+<ele>-208.75</ele>
+<time>2015-09-25T09:20:28Z</time>
+</trkpt>
+<trkpt lat="32.8918711" lon="35.6196203">
+<ele>-210.99</ele>
+<time>2015-09-25T09:20:42Z</time>
+</trkpt>
+<trkpt lat="32.8917514" lon="35.6197975">
+<ele>-211.93</ele>
+<time>2015-09-25T09:20:56Z</time>
+</trkpt>
+<trkpt lat="32.8915860" lon="35.6199041">
+<ele>-210.63</ele>
+<time>2015-09-25T09:21:11Z</time>
+</trkpt>
+<trkpt lat="32.8914118" lon="35.6200003">
+<ele>-210.58</ele>
+<time>2015-09-25T09:21:27Z</time>
+</trkpt>
+<trkpt lat="32.8912590" lon="35.6201234">
+<ele>-210.66</ele>
+<time>2015-09-25T09:21:41Z</time>
+</trkpt>
+<trkpt lat="32.8911184" lon="35.6202630">
+<ele>-210.14</ele>
+<time>2015-09-25T09:21:56Z</time>
+</trkpt>
+<trkpt lat="32.8909717" lon="35.6203877">
+<ele>-210.28</ele>
+<time>2015-09-25T09:22:11Z</time>
+</trkpt>
+<trkpt lat="32.8908400" lon="35.6205395">
+<ele>-211.02</ele>
+<time>2015-09-25T09:22:25Z</time>
+</trkpt>
+<trkpt lat="32.8907033" lon="35.6206820">
+<ele>-212.06</ele>
+<time>2015-09-25T09:22:40Z</time>
+</trkpt>
+<trkpt lat="32.8905818" lon="35.6208568">
+<ele>-210.79</ele>
+<time>2015-09-25T09:22:55Z</time>
+</trkpt>
+<trkpt lat="32.8904482" lon="35.6210113">
+<ele>-209.70</ele>
+<time>2015-09-25T09:23:10Z</time>
+</trkpt>
+<trkpt lat="32.8902876" lon="35.6211097">
+<ele>-209.83</ele>
+<time>2015-09-25T09:23:24Z</time>
+</trkpt>
+<trkpt lat="32.8901587" lon="35.6212753">
+<ele>-208.25</ele>
+<time>2015-09-25T09:23:40Z</time>
+</trkpt>
+<trkpt lat="32.8900237" lon="35.6214222">
+<ele>-210.06</ele>
+<time>2015-09-25T09:24:12Z</time>
+</trkpt>
+<trkpt lat="32.8901538" lon="35.6215747">
+<ele>-210.36</ele>
+<time>2015-09-25T09:24:47Z</time>
+</trkpt>
+<trkpt lat="32.8903129" lon="35.6216818">
+<ele>-210.01</ele>
+<time>2015-09-25T09:25:12Z</time>
+</trkpt>
+<trkpt lat="32.8904443" lon="35.6218303">
+<ele>-209.34</ele>
+<time>2015-09-25T09:25:32Z</time>
+</trkpt>
+</trkseg>
+</trk>
+</gpx>

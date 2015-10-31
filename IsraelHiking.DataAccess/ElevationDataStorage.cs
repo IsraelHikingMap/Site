@@ -1,4 +1,6 @@
 ﻿using Ionic.Zip;
+using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -8,54 +10,15 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess
 {
-    internal class LatLngKey : IEquatable<LatLngKey>
+    public class ElevationDataStorage : IElevationDataStorage
     {
-        public double Lat { get; set; }
-        public double Lng { get; set; }
-
-        public bool Equals(LatLngKey other)
-        {
-            return other.Lat == Lat && other.Lng == Lng;
-        }
-
-        public override int GetHashCode()
-        {
-            return Lat.GetHashCode() ^ Lng.GetHashCode();
-        }
-
-        public override bool Equals(object obj)
-        {
-            var other = obj as LatLngKey;
-            if (other == null)
-            {
-                return false;
-            }
-            return Equals(other);
-        }
-    }
-
-    public class ElevationDataStorage
-    {
-        private static ElevationDataStorage _instance;
         private readonly Dictionary<LatLngKey, short[,]> _elevationData;
-        private readonly Logger _logger;
+        private readonly ILogger _logger;
 
-        private ElevationDataStorage()
+        public ElevationDataStorage(ILogger logger)
         {
-            _logger = new Logger();
+            _logger = logger;
             _elevationData = new Dictionary<LatLngKey, short[,]>();
-        }
-
-        public static ElevationDataStorage Instance
-        {
-            get
-            {
-                if (_instance == null)
-                {
-                    _instance = new ElevationDataStorage();
-                }
-                return _instance;
-            }
         }
 
         public Task Initialize()

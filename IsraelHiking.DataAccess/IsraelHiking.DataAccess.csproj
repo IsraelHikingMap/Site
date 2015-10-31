@@ -65,8 +65,8 @@
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="SQLite.CodeFirst, Version=0.9.8.0, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\SQLite.CodeFirst.0.9.8.0\lib\net45\SQLite.CodeFirst.dll</HintPath>
+    <Reference Include="SQLite.CodeFirst, Version=1.0.0.0, Culture=neutral, PublicKeyToken=eb96ba0a78d831a7, processorArchitecture=MSIL">
+      <HintPath>..\packages\SQLite.CodeFirst.1.0.0.0\lib\net45\SQLite.CodeFirst.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -102,15 +102,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Database\IsraelHikingDbContext.cs" />
-    <Compile Include="Database\ShortUrl.cs" />
+    <Compile Include="Database\IsraelHikingRepository.cs" />
     <Compile Include="ElevationDataStorage.cs" />
-    <Compile Include="FeatureProperties.cs" />
     <Compile Include="GpsBabelGateway.cs" />
     <Compile Include="JsonResponse\JsonGraphHopperResponse.cs" />
     <Compile Include="Logger.cs" />
+    <Compile Include="RemoveFileFetcherGateway.cs" />
     <Compile Include="RoutingGateway.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="RoutingGatewayRequest.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config">
@@ -156,6 +155,16 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\IsraelHiking.Common\IsraelHiking.Common.csproj">
+      <Project>{37179794-eada-4067-88d6-c495d1950c19}</Project>
+      <Name>IsraelHiking.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj">
+      <Project>{7d11a010-ca5a-48ee-aa2a-bf063cca4ecf}</Project>
+      <Name>IsraelHiking.DataAccessInterfaces</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\System.Data.SQLite.Core.1.0.98.1\build\net45\System.Data.SQLite.Core.targets" Condition="Exists('..\packages\System.Data.SQLite.Core.1.0.98.1\build\net45\System.Data.SQLite.Core.targets')" />

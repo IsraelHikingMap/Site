@@ -10,7 +10,7 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <DebugType>full</DebugType>
     <DebugSymbols>true</DebugSymbols>
-    <TypeScriptToolsVersion>1.4</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>1.6</TypeScriptToolsVersion>
     <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
@@ -243,6 +243,7 @@
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-route.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-sanitize.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\geojson\geojson.d.ts" />
     <TypeScriptCompile Include="scripts\typings\google.visualization\google.visualization.d.ts" />
     <TypeScriptCompile Include="scripts\typings\jquery\jquery.d.ts" />
     <TypeScriptCompile Include="scripts\typings\leaflet\leaflet.d.ts" />
@@ -264,7 +265,6 @@
     <TypeScriptCompile Include="controllers\MainMapController.ts" />
     <TypeScriptCompile Include="controllers\MarkerPopupController.ts" />
     <TypeScriptCompile Include="services\ControlCreatorService.ts" />
-    <TypeScriptCompile Include="scripts\typings\geojson\geojson.d.ts" />
     <TypeScriptCompile Include="services\drawing\DrawingMarker.ts" />
     <TypeScriptCompile Include="services\drawing\DrawingRoute.ts" />
     <TypeScriptCompile Include="controllers\EditOSMController.ts" />
@@ -292,8 +292,16 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IsraelHiking.API\IsraelHiking.API.csproj">
-      <Project>{441b33b8-3253-43a1-ba3e-0529c93e1b03}</Project>
+      <Project>{9a4bb0a7-d567-4b56-9ec0-abb37a570147}</Project>
       <Name>IsraelHiking.API</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IsraelHiking.Common\IsraelHiking.Common.csproj">
+      <Project>{37179794-eada-4067-88d6-c495d1950c19}</Project>
+      <Name>IsraelHiking.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj">
+      <Project>{7d11a010-ca5a-48ee-aa2a-bf063cca4ecf}</Project>
+      <Name>IsraelHiking.DataAccessInterfaces</Name>
     </ProjectReference>
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj">
       <Project>{432a397c-869c-4045-acd7-09051745d62c}</Project>
@@ -311,6 +319,10 @@
     </Reference>
     <Reference Include="GeoJSON.Net, Version=0.1.38.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\GeoJSON.Net.0.1.38\lib\GeoJSON.Net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="IsraelTransverseMercator, Version=1.1.0.1, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\IsraelTransverseMercator.1.1.1.1\lib\IsraelTransverseMercator.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="log4net, Version=1.2.13.0, Culture=neutral, PublicKeyToken=669e0ddf0bb1aa2a, processorArchitecture=MSIL">
@@ -335,6 +347,22 @@
     </Reference>
     <Reference Include="Microsoft.Owin.Hosting, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.Hosting.3.0.1\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.ServiceLocation, Version=1.3.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\CommonServiceLocator.1.3\lib\portable-net4+sl5+netcore45+wpa81+wp8\Microsoft.Practices.ServiceLocation.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.Configuration, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.Configuration.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Practices.Unity.RegistrationByConvention, Version=4.0.0.0, Culture=neutral, PublicKeyToken=6d32ff45e0ccc69f, processorArchitecture=MSIL">
+      <HintPath>..\packages\Unity.4.0.1\lib\net45\Microsoft.Practices.Unity.RegistrationByConvention.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
@@ -365,8 +393,8 @@
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
-    <Reference Include="System.Web.Cors, Version=5.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
-      <HintPath>..\packages\Microsoft.AspNet.Cors.5.0.0\lib\net45\System.Web.Cors.dll</HintPath>
+    <Reference Include="System.Web.Cors, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.AspNet.Cors.5.2.3\lib\net45\System.Web.Cors.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Web.Http, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -380,9 +408,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Startup.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Service References\" />
+    <Compile Include="UnityResolver.cs" />
+    <Compile Include="WebApiConfig.cs" />
   </ItemGroup>
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>

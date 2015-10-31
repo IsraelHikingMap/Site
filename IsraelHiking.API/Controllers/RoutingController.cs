@@ -1,7 +1,7 @@
 ﻿using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
-using IsraelHiking.DataAccess;
-using System;
+using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,15 +12,17 @@ namespace IsraelHiking.API.Controllers
 {
     public class RoutingController : ApiController
     {
-        private readonly RoutingGateway _routingGateway;
-        private readonly ElevationDataStorage _elevationDataStorage;
-        private readonly Logger _logger;
+        private readonly IRoutingGateway _routingGateway;
+        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly ILogger _logger;
 
-        public RoutingController()
+        public RoutingController(IRoutingGateway routingGateway,
+            IElevationDataStorage elevationDataStorage,
+            ILogger logger)
         {
-            _routingGateway = new RoutingGateway();
-            _elevationDataStorage = ElevationDataStorage.Instance;
-            _logger = new Logger();
+            _routingGateway = routingGateway;
+            _elevationDataStorage = elevationDataStorage;
+            _logger = logger;
         }
 
         [ResponseType(typeof(FeatureCollection))]

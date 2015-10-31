@@ -1,4 +1,5 @@
-﻿using IsraelHiking.DataAccess.Database;
+﻿using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
 using System;
 using System.Linq;
 using System.Net;
@@ -9,25 +10,25 @@ namespace IsraelHiking.API.Controllers
 {
     public class ShortUrlController : ApiController
     {
-        private IsraelHikingDbContext _dbContext;
+        private IIsraelHikingRepository _repository;
 
-        public ShortUrlController()
+        public ShortUrlController(IIsraelHikingRepository repository)
         {
-            _dbContext = new IsraelHikingDbContext();
+            _repository = repository;
         }
 
         // GET s/abc
         [Route("s/{id}")]
         public IHttpActionResult GetShortUrl(string id)
         {
-            var shortUrl = _dbContext.ShortUrls.FirstOrDefault(s => s.Id == id);
+            var shortUrl = _repository.GetShortUrlById(id);
             if (shortUrl == null)
             {
                 return BadRequest();
             }
             shortUrl.LastViewed = DateTime.Now;
             shortUrl.ViewsCount++;
-            _dbContext.SaveChanges();
+            _repository.Update(shortUrl);
             var response = Request.CreateResponse(HttpStatusCode.Moved);
             response.Headers.Location = new Uri(shortUrl.FullUrl);
             return ResponseMessage(response);
@@ -41,27 +42,26 @@ namespace IsraelHiking.API.Controllers
             shortUrl.ModifyKey = GetRandomString(10);
             shortUrl.ViewsCount = 0;
             var id = GetRandomString(10);
-            while (_dbContext.ShortUrls.FirstOrDefault(s => s.Id == id) != null)
+            while (_repository.GetShortUrlById(id) != null)
             {
                 id = GetRandomString(10);
             }
             shortUrl.Id = id;
-            _dbContext.ShortUrls.Add(shortUrl);
-            _dbContext.SaveChanges();
+            _repository.AddShortUrl(shortUrl);
             return Ok(shortUrl);
         }
 
         // PUT api/shorturl/abc
         public IHttpActionResult PutShortUrl(string id, ShortUrl shortUrl)
         {
-            var shortUrlFromDatabase = _dbContext.ShortUrls.FirstOrDefault(s => s.ModifyKey == id);
+            var shortUrlFromDatabase = _repository.GetShortUrlById(id);
             if (shortUrlFromDatabase == null)
             {
                 return NotFound();
             }
             shortUrlFromDatabase.FullUrl = shortUrl.FullUrl;
             shortUrl.LastViewed = DateTime.Now;
-            _dbContext.SaveChanges();
+            _repository.Update(shortUrl);
             return Ok(shortUrlFromDatabase);
         }
 
@@ -76,8 +76,8 @@ namespace IsraelHiking.API.Controllers
         {
             if (disposing)
             {
-                _dbContext.Dispose();
-                _dbContext = null;
+                _repository.Dispose();
+                _repository = null;
             }
 
             base.Dispose(disposing);

@@ -1,4 +1,5 @@
-﻿using SQLite.CodeFirst;
+﻿using IsraelHiking.Common;
+using SQLite.CodeFirst;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
 

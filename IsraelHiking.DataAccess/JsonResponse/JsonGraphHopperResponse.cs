@@ -7,13 +7,7 @@ namespace IsraelHiking.DataAccess.JsonResponse
 {
     public class JsonGraphHopperResponse
     {
-        //public JsonHints hints { get; set; }
         public List<JsonPath> paths { get; set; }
-    }
-
-    public class JsonHints
-    {
-        //{\"visited_nodes.average\":\"62.0\",\"visited_nodes.sum\":\"62\"},
     }
 
     public class JsonPath

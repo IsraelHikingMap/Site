@@ -1,11 +1,12 @@
-﻿using log4net;
+﻿using IsraelHiking.DataAccessInterfaces;
+using log4net;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.ExceptionHandling;
 
 namespace IsraelHiking.DataAccess
 {
-    public class Logger : ExceptionLogger
+    public class Logger : ExceptionLogger, ILogger
     {
         private readonly ILog log = LogManager.GetLogger(typeof(Logger));
 

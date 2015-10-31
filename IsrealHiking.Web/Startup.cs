@@ -2,10 +2,12 @@
 using Owin;
 using System.Net.Http.Headers;
 using System.Web.Http;
-using IsraelHiking.API;
 using IsraelHiking.DataAccess;
 using System.Web.Http.ExceptionHandling;
-using Microsoft.Owin.Cors;
+using Microsoft.Practices.Unity;
+using IsraelHiking.DataAccessInterfaces;
+using IsraelHiking.DataAccess.Database;
+using IsraelTransverseMercator;
 
 [assembly: OwinStartup(typeof(IsraelHiking.Web.Startup))]
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
@@ -16,9 +18,8 @@ namespace IsraelHiking.Web
     {
         public void Configuration(IAppBuilder app)
         {
-            var logger = new Logger();
+            ILogger logger = new Logger();
             logger.Debug("Starting Israel Hiking Server.");
-            //app.UseCors(CorsOptions.AllowAll);
             var config = new HttpConfiguration();
             WebApiConfig.Register(config);
 
@@ -26,13 +27,27 @@ namespace IsraelHiking.Web
             config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             config.Formatters.JsonFormatter.SerializerSettings.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.None;
             config.Services.Add(typeof(IExceptionLogger), logger);
+            config.DependencyResolver = new UnityResolver(RegisterUnityTypes(logger));
 
             app.UseWebApi(config);
-            
+            logger.Debug("Israel Hiking Server is up and running.");
+        }
+
+        private UnityContainer RegisterUnityTypes(ILogger logger)
+        {
+            var container = new UnityContainer();
+            container.RegisterType<IRemoveFileFetcherGateway, RemoveFileFetcherGateway>();
+            container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
+            container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
+            container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();
+            container.RegisterType<IRoutingGateway, RoutingGateway>();
+            container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
+            container.RegisterType<ILogger, Logger>();
 
             logger.Debug("Initializing Elevation data.");
-            ElevationDataStorage.Instance.Initialize().ContinueWith((task) => logger.Debug("Finished loading elevation data from files."));
-            logger.Debug("Israel Hiking Server is up and running.");
+            container.Resolve<IElevationDataStorage>().Initialize().ContinueWith((task) => logger.Debug("Finished loading elevation data from files."));
+
+            return container;
         }
     }
 }
