@@ -6,16 +6,15 @@
     "ExtensionsWithNoOutput": [ ".d.ts" ]
   },
   "References": [
-    { "Path": "../../isrealhiking.web/scripts/angular.js" },
+    { "Path": "../../isrealhiking.web/scripts/angular.min.js" },
     { "Path": "../../isrealhiking.web/scripts/angular-mocks.js" },
     { "Path": "../../isrealhiking.web/scripts/leaflet-0.7.3.js" },
     { "Path": "../../isrealhiking.web/scripts/angular-toastr.js" },
-    { "Includes": [ "*\\..\\..\\..\\**\\isrealhiking.web\\services\\elevation\\IElevationProvider.ts" ] },
-    { "Includes": [ "*\\..\\..\\..\\**\\IsrealHiking.Web\\services\\elevation\\MicrosoftElevationProvider.ts" ] },
-    { "Includes": [ "*\\..\\..\\..\\**\\isrealhiking.web\\common\\israelhikingdata.ts" ] }
+    { "Path": "../../isrealhiking.web/services/elevation/MicrosoftElevationProvider.js" },
+    { "Path": "../../isrealhiking.web/common/israelhikingdata.js" }
   ],
   "Tests": [
     { "Include": "*\\**\\*Tests.ts" }
-  ]
-  //"CodeCoverageIncludes": ["*\\isrealhiking.web\\services\\elevation\\*.*"]
+  ],
+  "CodeCoverageIncludes": ["*\\isrealhiking.web\\services\\elevation\\*.*"]
 }
