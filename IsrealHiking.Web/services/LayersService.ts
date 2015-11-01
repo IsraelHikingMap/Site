@@ -41,7 +41,7 @@ module IsraelHiking.Services {
         private static GOOGLE_EARTH = "Google Earth";
         private static HIKING_TRAILS = "Hiking Trails";
         private static ATTRIBUTION = "Map data &copy; <a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> contributors, <a href='http://creativecommons.org/licenses/by-sa/2.0/' target='_blank\">CC-BY-SA</a>, built with <a href='http://getbootstrap.com/' target='_blank'>Bootstrap</a>. ";
-        private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION + "Map style courtesy of <a http='http://mtbmap.no'>MTBmap.no.</a> ";
+        private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION + "Map style courtesy of <a href='http://mtbmap.no'>MTBmap.no.</a> ";
         private static BASE_LAYERS_KEY = "BaseLayers";
         private static OVERLAYS_KEY = "Overlays";
         private static CUSTOM_LAYER = "Custom Layer";
