@@ -53,7 +53,6 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="chutzpah.json" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>

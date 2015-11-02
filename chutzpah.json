@@ -1,0 +1,18 @@
+﻿{
+  "Framework": "jasmine",
+  "Compile": {
+    "Mode": "External",
+    "Extensions": [ ".ts" ],
+    "ExtensionsWithNoOutput": [ ".d.ts" ],
+    "UseSourceMaps": true
+  },
+  "References": [
+    { "Path": "isrealhiking.web\\scripts\\angular.min.js" },
+    { "Path": "isrealhiking.web\\scripts\\angular-mocks.js" },
+    { "Path": "isrealhiking.web\\scripts\\leaflet-0.7.3.js" },
+    { "Path": "isrealhiking.web\\scripts\\angular-toastr.js" },
+    { "Path": "isrealhiking.web\\services\\elevation\\", "Includes": ["*.ts"]}
+  ],
+  "Tests": [{ "Include": "*\\**\\*Tests.ts" }],
+  "CodeCoverageIncludes": ["*\\isrealhiking.web\\services\\elevation\\*.*"]
+}

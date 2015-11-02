@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{BE348F1C-7103-4EE7-AD68-5122D12AE586}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
+		chutzpah.json = chutzpah.json
 		config-example.properties = config-example.properties
 		README.md = README.md
 	EndProjectSection
