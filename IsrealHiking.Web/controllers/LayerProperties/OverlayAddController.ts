@@ -9,7 +9,7 @@
             $scope.isNew = true;
         }
 
-        protected internalSave = ($scope: ILayerBaseScope, layerData: Services.ILayerData) => {
+        protected internalSave = ($scope: ILayerBaseScope, layerData: Common.LayerData) => {
             var overlay = this.layersService.addOverlay(layerData);
             this.layersService.toggleOverlay(overlay);
             return "";

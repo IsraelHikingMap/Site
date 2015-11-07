@@ -6,6 +6,20 @@
         public static none = "n";
     }
 
+    export interface SiteUrl {
+        Id: string;
+        Title: string;
+        JsonData: string;
+        ModifyKey: string;
+    }
+
+    export interface LayerData {
+        key: string;
+        address: string;
+        minZoom: number;
+        maxZoom: number;
+    }
+
     export interface MarkerData {
         latlng: L.LatLng;
         title: string;
@@ -25,6 +39,8 @@
     export interface DataContainer {
         routes: RouteData[];
         markers: MarkerData[];
+        baseLayer: LayerData;
+        overlays: LayerData[];
         bounds: L.LatLngBounds;
     }
 

@@ -24,10 +24,12 @@
             toastr: Toastr) {
             super(mapService);
             this.layersService = layersService;
+            $scope.minZoom = Services.LayersService.MIN_ZOOM;
+            $scope.maxZoom = Services.LayersService.MAX_NATIVE_ZOOM;
 
             $scope.saveLayer = (key: string, address: string, minZoom: number, maxZoom: number, e: Event) => {
                 var decodedAddress = decodeURI(address).replace("{zoom}", "{z}");
-                var layerData = <Services.ILayerData> {
+                var layerData = <Common.LayerData> {
                     key: key,
                     address: decodedAddress,
                     isEditable: true,
@@ -42,7 +44,7 @@
             }
         }
         // should be implemented in derrived classes
-        protected internalSave = ($scope: ILayerBaseScope, layerData: Services.ILayerData): string => { return "Implementation Error." }
+        protected internalSave = ($scope: ILayerBaseScope, layerData: Common.LayerData): string => { return "Implementation Error." }
 
     }
 }

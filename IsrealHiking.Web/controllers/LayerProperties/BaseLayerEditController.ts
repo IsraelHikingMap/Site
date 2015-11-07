@@ -20,7 +20,7 @@
             }
         }
 
-        protected internalSave = ($scope: ILayerBaseEditScope<Services.IBaseLayer>, layerData: Services.ILayerData) => {
+        protected internalSave = ($scope: ILayerBaseEditScope<Services.IBaseLayer>, layerData: Common.LayerData) => {
             return this.layersService.updateBaseLayer($scope.layer, layerData);
         }
 

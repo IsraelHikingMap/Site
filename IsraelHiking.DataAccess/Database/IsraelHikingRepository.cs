@@ -15,19 +15,19 @@ namespace IsraelHiking.DataAccess.Database
             _dbContext = new IsraelHikingDbContext();
         }
 
-        public ShortUrl GetShortUrlById(string id)
+        public SiteUrl GetUrlById(string id)
         {
-            return _dbContext.ShortUrls.FirstOrDefault(s => s.Id == id);
+            return _dbContext.SiteUrls.FirstOrDefault(s => s.Id == id);
         }
 
-        public ShortUrl GetShortUrlByModifyKey(string modifyKey)
+        public SiteUrl GetUrlByModifyKey(string modifyKey)
         {
-            return _dbContext.ShortUrls.FirstOrDefault(s => s.ModifyKey == modifyKey);
+            return _dbContext.SiteUrls.FirstOrDefault(s => s.ModifyKey == modifyKey);
         }
 
-        public void AddShortUrl(ShortUrl shortUrl)
+        public void AddUrl(SiteUrl siteUrl)
         {
-            _dbContext.ShortUrls.Add(shortUrl);
+            _dbContext.SiteUrls.Add(siteUrl);
             _dbContext.SaveChanges();
         }
 

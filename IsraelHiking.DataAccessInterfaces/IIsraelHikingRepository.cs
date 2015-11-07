@@ -5,9 +5,9 @@ namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IIsraelHikingRepository : IDisposable
     {
-        void AddShortUrl(ShortUrl shortUrl);
-        ShortUrl GetShortUrlById(string id);
-        ShortUrl GetShortUrlByModifyKey(string modifyKey);
+        void AddUrl(SiteUrl siteUrl);
+        SiteUrl GetUrlById(string id);
+        SiteUrl GetUrlByModifyKey(string modifyKey);
         void Update(object obj);
     }
 }

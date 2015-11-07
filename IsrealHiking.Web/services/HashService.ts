@@ -18,8 +18,8 @@
         public zoom: number;
         public searchTerm: string;
         public externalUrl: string;
-        public shortUrl: string;
-        public baseLayer: string;
+        public siteUrl: string;
+        //public baseLayer: string;
 
         constructor($location: angular.ILocationService,
             $rootScope: angular.IScope,
@@ -51,8 +51,8 @@
         }
 
         public clear = () => {
-            if (this.shortUrl) {
-                this.$location.search({ s: this.shortUrl });
+            if (this.siteUrl) {
+                this.$location.search({ s: this.siteUrl });
             } else {
                 this.$location.search({});
             }
@@ -229,7 +229,7 @@
                     continue;
                 }
                 if (parameter == HashService.BASE_LAYER) {
-                    continue;
+                    data.baseLayer = this.stringToBaseLayer(searchObject[parameter] || "");
                 }
                 if (parameter == "s") {
                     continue;
@@ -246,8 +246,7 @@
             var search = this.$location.search();
             this.searchTerm = search.q || "";
             this.externalUrl = search.url || "";
-            this.shortUrl = search.s || "";
-            this.baseLayer = this.hashToBaseLayer(search[HashService.BASE_LAYER] || "");
+            this.siteUrl = search.s || "";
 
             if (splittedpath.length != 4) {
                 // backwards compatibility... :-(
@@ -269,18 +268,24 @@
             return decodeURIComponent((new RegExp("[?|&]" + name + "=" + "([^&;]+?)(&|#|;|$)").exec(location.search) || [, ""])[1].replace(/\+/g, "%20")) || null;
         }
 
-        private baseLayerToHash(baseLayer: string): string {
-            if (baseLayer.indexOf("www") != -1 || baseLayer.indexOf("http") != -1) {
-                return baseLayer;
-            }
-            return baseLayer.split(" ").join("_");
-        }
+        //private baseLayerToHash(baseLayer: string): string {
+        //    if (baseLayer.indexOf("www") != -1 || baseLayer.indexOf("http") != -1) {
+        //        return baseLayer;
+        //    }
+        //    return baseLayer.split(" ").join("_");
+        //}
 
-        private hashToBaseLayer(str: string): string {
-            if (str.indexOf("www") != -1 || str.indexOf("http") != -1) {
-                return str;
+        private stringToBaseLayer(addressOrKey: string): Common.LayerData {
+            if (addressOrKey.indexOf("www") != -1 || addressOrKey.indexOf("http") != -1) {
+                return <Common.LayerData>{
+                    key: "",
+                    address: addressOrKey,
+                };
             }
-            return str.split("_").join(" ");
+            return <Common.LayerData>{
+                key: addressOrKey.split("_").join(" "),
+                address: "",
+            };
         }
     }
 } 

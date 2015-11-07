@@ -68,7 +68,7 @@
     <Compile Include="Controllers\ElevationController.cs" />
     <Compile Include="Controllers\ItmGridController.cs" />
     <Compile Include="Controllers\RoutingController.cs" />
-    <Compile Include="Controllers\ShortUrlController.cs" />
+    <Compile Include="Controllers\UrlsController.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

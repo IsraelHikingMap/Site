@@ -36,7 +36,6 @@
             $scope.advanced = false;
             $scope.hovering = false;
 
-
             $scope.addBaseLayer = (e: Event) => {
                 var newScope = <LayerProperties.ILayerBaseScope>$scope.$new();
                 var controller = new LayerProperties.BaseLayerAddController(newScope, mapService, layersService, toastr);

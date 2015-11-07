@@ -14,9 +14,9 @@ namespace IsraelHiking.DataAccess.Tests
         public void NoDatabaseFile_CreateDatabase_DatabaseShouldBeCreated()
         {
             var context = new IsraelHikingDbContext();
-            var shortUrl = new ShortUrl();
-            shortUrl.CreationDate = DateTime.Now;
-            var list = context.ShortUrls.ToList();
+            var siteUrl = new SiteUrl();
+            siteUrl.CreationDate = DateTime.Now;
+            var list = context.SiteUrls.ToList();
             Assert.AreEqual(0, list.Count);
         }
     }

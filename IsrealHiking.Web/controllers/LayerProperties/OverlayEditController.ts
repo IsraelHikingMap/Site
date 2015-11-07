@@ -20,7 +20,7 @@
             }
         }
 
-        protected internalSave = ($scope: ILayerBaseEditScope<Services.IOverlay>, layerData: Services.ILayerData) => {
+        protected internalSave = ($scope: ILayerBaseEditScope<Services.IOverlay>, layerData: Common.LayerData) => {
             return this.layersService.updateOverlay($scope.layer, layerData);
         }
     }

@@ -7,7 +7,7 @@ namespace IsraelHiking.DataAccess.Database
 {
     public class IsraelHikingDbContext : DbContext
     {
-        public DbSet<ShortUrl> ShortUrls { get; set; }
+        public DbSet<SiteUrl> SiteUrls { get; set; }
 
         public IsraelHikingDbContext()
             : base("IsraelHikingDbContext")
