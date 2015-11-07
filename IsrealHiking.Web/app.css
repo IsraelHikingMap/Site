@@ -76,8 +76,8 @@ body {
 }
 
 .scrollable-area {
-    max-height: 200px;
-    overflow-y: auto;
+    max-height: 400px;
+    overflow-y: scroll;
 }
 
 .loading-segment-indicator {

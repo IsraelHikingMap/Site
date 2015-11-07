@@ -1,8 +1,8 @@
-﻿<div class="leaflet-control-layers" ng-mouseover="hovering = true" ng-mouseleave="hovering = false" disable-map-movement >
+﻿<div class="leaflet-control-layers" ng-mouseover="hovering = true" ng-mouseleave="hovering = false" disable-map-movement>
     <a title="Layers" class="leaflet-control-layers-toggle cursor-pointer" ng-show="hovering == false" ng-click="toggleHovering($event)"></a>
-    <div class="leaflet-control-layers-expanded leaflet-control-layers" ng-show="hovering == true" ng-click="toggleHovering($event)">
-        <div ng-repeat="baseLayer in baseLayers">
-            <label class="control-label">
+    <div class="leaflet-control-layers-expanded leaflet-control-layers scrollable-area" ng-show="hovering == true" ng-click="toggleHovering($event)">
+        <div>
+            <label class="control-label" ng-repeat="baseLayer in baseLayers">
                 <button class="btn btn-xs btn-default" ng-click="selectBaseLayer(baseLayer, $event)" ng-class="{'active': baseLayer.selected }"><i ng-class="{'fa fa-eye': baseLayer.selected, 'fa fa-eye-slash': !baseLayer.selected}"></i></button>
                 <button class="btn btn-xs btn-warning" ng-click="editBaseLayer(baseLayer, $event)" ng-show="advanced && baseLayer.isEditable"><i class="fa fa-wrench"></i></button>
                 {{baseLayer.key}}
@@ -10,8 +10,8 @@
         </div>
         <button class="btn btn-xs btn-success" ng-click="addBaseLayer($event)" ng-show="advanced"><i class="fa fa-plus"></i> Add Base Layer</button>
         <div class="leaflet-control-layers-separator"></div>
-        <div ng-repeat="overlay in overlays">
-            <label class="control-label">
+        <div>
+            <label class="control-label" ng-repeat="overlay in overlays">
                 <button class="btn btn-xs btn-default" ng-click="toggleVisibility(overlay, $event)"><i ng-class="{'fa fa-eye': overlay.visible, 'fa fa-eye-slash': !overlay.visible}"></i></button>
                 <button class="btn btn-xs btn-warning" ng-click="editOverlay(overlay, $event)" ng-show="advanced && overlay.isEditable"><i class="fa fa-wrench"></i></button>
                 {{overlay.key}}
@@ -19,7 +19,7 @@
         </div>
         <button class="btn btn-xs btn-success" ng-click="addOverlay($event)" ng-show="advanced"><i class="fa fa-plus"></i> Add Overlay</button>
         <div class="leaflet-control-layers-separator"></div>
-        <div class="scrollable-area">
+        <div>
             <label class="control-label" style="color:{{route.getColor()}}" ng-repeat="route in routes">
                 <button class="btn btn-xs btn-default" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.state == 'active' }" title="Select or hide route"><i ng-class="{'fa-pencil': route.state != 'hidden', 'fa-eye-slash': route.state == 'hidden' }" class="fa"></i></button>
                 <button class="btn btn-xs btn-warning" ng-click="editRoute(route.name, $event)"><i class="fa fa-wrench"></i></button>
