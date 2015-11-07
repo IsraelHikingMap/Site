@@ -1,7 +1,7 @@
 ﻿using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
 using IsraelHiking.DataAccessInterfaces;
-using SharpKml.Engine;
+using IsraelHiking.Gpx;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -10,6 +10,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using System.Xml.Serialization;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -36,8 +37,8 @@ namespace IsraelHiking.API.Controllers
         {
             var content = await _remoteFileFetcher.GetFileContent(url);
             var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(url));
-            var convertedKml = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, "kml");
-            var featureCollection = ConvertContentToGeoJson(convertedKml);
+            var convertedGpx = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, ConvertExtenstionToFormat(".gpx"));
+            var featureCollection = ConvertGpxContentToGeoJson(convertedGpx);
             return featureCollection;
         }
 
@@ -59,6 +60,12 @@ namespace IsraelHiking.API.Controllers
             }
             var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('\"')));
             var content = await streamProvider.Contents.First().ReadAsByteArrayAsync();
+            if (outputFormat.Equals("geojson", StringComparison.InvariantCultureIgnoreCase))
+            {
+                var convertedGpx = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, ConvertExtenstionToFormat(".gpx"));
+                var featureCollection = ConvertGpxContentToGeoJson(convertedGpx);
+                return Ok(featureCollection);
+            }
             var outputContent = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, outputFormat);
             return Ok(outputContent);
         }
@@ -70,49 +77,71 @@ namespace IsraelHiking.API.Controllers
             {
                 return "naviguide";
             }
+            if (extension == "gpx")
+            {
+                return "gpx,gpxver=1.1";
+            }
             return extension.ToLower();
         }
 
-        private FeatureCollection ConvertContentToGeoJson(byte[] content)
+
+
+        private FeatureCollection ConvertGpxContentToGeoJson(byte[] content)
         {
             var collection = new FeatureCollection();
             using (var stream = new MemoryStream(content))
             {
-                var kml = KmlFile.Load(stream);
-                foreach (var point in kml.Root.Flatten().OfType<SharpKml.Dom.Point>())
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof(gpxType));
+                var gpx = xmlSerializer.Deserialize(stream) as gpxType;
+                foreach (var point in gpx.wpt ?? new wptType[0])
                 {
-                    var feature = new Feature(new Point(CreateGeoPosition(point.Coordinate)), CreateProperties(point.Parent));
+                    var feature = new Feature(new Point(CreateGeoPosition(point)), CreateNameProperties(point.name));
                     collection.Features.Add(feature);
                 }
-                foreach (var lineString in kml.Root.Flatten().OfType<SharpKml.Dom.LineString>())
+                foreach (var track in gpx.trk ?? new trkType[0])
                 {
-                    var feature = new Feature(new LineString(lineString.Coordinates.Select(v => CreateGeoPosition(v))), CreateProperties(lineString.Parent));
+                    if (track.trkseg.Length == 1)
+                    {
+                        var lineStringFeature = new Feature(new LineString(track.trkseg[0].trkpt.Select(point => CreateGeoPosition(point))), CreateNameProperties(track.name));
+                        collection.Features.Add(lineStringFeature);
+                        continue;
+                    }
+                    var lineStringList = new List<LineString>();
+                    foreach (var segment in track.trkseg)
+                    {
+                        lineStringList.Add(new LineString(segment.trkpt.Select(point => CreateGeoPosition(point))));
+                    }
+                    var feature = new Feature(new MultiLineString(lineStringList), CreateNameProperties(track.name));
                     collection.Features.Add(feature);
                 }
-                // HM TODO: Track?
+
+                foreach (var route in gpx.rte ?? new rteType[0])
+                {
+                    var lineStringFeature = new Feature(new LineString(route.rtept.Select(point => CreateGeoPosition(point))), CreateNameProperties(route.name));
+                    collection.Features.Add(lineStringFeature);
+                }
             }
             return collection;
         }
 
-        private GeographicPosition CreateGeoPosition(SharpKml.Base.Vector vector)
+        private GeographicPosition CreateGeoPosition(wptType wayPoint)
         {
-            if (vector.Altitude.HasValue && vector.Altitude != 0)
+            double lat = (double)wayPoint.lat;
+            double lon = (double)wayPoint.lon;
+            double ele = (double)wayPoint.ele;
+            if (ele != 0)
             {
-                return new GeographicPosition(vector.Latitude, vector.Longitude, vector.Altitude);
+                return new GeographicPosition(lat, lon, ele);
             }
-            return new GeographicPosition(vector.Latitude, vector.Longitude, _elevationDataStorage.GetElevation(vector.Latitude, vector.Longitude));
+            return new GeographicPosition(lat, lon, _elevationDataStorage.GetElevation(lat, lon));
         }
 
-        private Dictionary<string, object> CreateProperties(SharpKml.Dom.Element element)
+        private Dictionary<string, object> CreateNameProperties(string name)
         {
             var dictionary = new Dictionary<string, object>();
-            var placemerk = element as SharpKml.Dom.Placemark;
-            if (placemerk != null)
-            {
-                dictionary.Add("name", placemerk.Name);
-            }
+            dictionary.Add("name", name);
             return dictionary;
         }
-        
+
     }
 }

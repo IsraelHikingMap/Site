@@ -299,7 +299,7 @@ module IsraelHiking.Services {
             if (this.hashService.siteUrl) {
                 this.$http.get(Common.Urls.urls + this.hashService.siteUrl).success((siteUrl: Common.SiteUrl) => {
                     var data = JSON.parse(siteUrl.JsonData);
-                    this.setData(data);
+                    this.setData(data, false);
                     this.addBaseLayerFromHash(data.baseLayer);
                     this.addOverlaysFromHash(data.overlays);
                     this.hashService.clear();
@@ -307,7 +307,7 @@ module IsraelHiking.Services {
                 return;
             } else {
                 var data = this.hashService.getDataContainer();
-                this.setData(data);
+                this.setData(data, true);
                 this.addBaseLayerFromHash(data.baseLayer);
                 this.hashService.clear();
             }
@@ -429,7 +429,7 @@ module IsraelHiking.Services {
             return container;
         }
 
-        private setData = (dataContainer: Common.DataContainer) => {
+        private setData = (dataContainer: Common.DataContainer, reroute: boolean) => {
             if (dataContainer.routes.length == 0) {
                 dataContainer.routes.push(<Common.RouteData>{
                     name: this.createRouteName(),
@@ -437,7 +437,7 @@ module IsraelHiking.Services {
                 });
             }
             for (var routeIndex = 0; routeIndex < dataContainer.routes.length; routeIndex++) {
-                this.routes.push(this.drawingFactory.createDrawingRoute(dataContainer.routes[routeIndex], true));
+                this.routes.push(this.drawingFactory.createDrawingRoute(dataContainer.routes[routeIndex], reroute));
             }
             this.addMarkers(dataContainer.markers);
             this.changeDrawingState((this.routes.length > 0) ? this.routes[0].name : this.markers.name);

@@ -25,12 +25,12 @@ namespace IsraelHiking.DataAccess
                 var outputTempfileName = Path.GetTempFileName();
                 File.WriteAllBytes(inputTempfileName, content);
                 var workingDirectory = ConfigurationManager.AppSettings[GPS_DIRECTORY_KEY].ToString();
-                var agruments = "-i " + inputFormat + " -f \"" + inputTempfileName + "\" -o " + outputFromat + " -F \"" + outputTempfileName + "\"";
-                _logger.Debug("Running: " + Path.Combine(workingDirectory, GPS_BABEL_EXE) + " " + agruments);
+                var arguments = "-i " + inputFormat + " -f \"" + inputTempfileName + "\" -o " + outputFromat + " -F \"" + outputTempfileName + "\"";
+                _logger.Debug("Running: " + Path.Combine(workingDirectory, GPS_BABEL_EXE) + " " + arguments);
                 var process = Process.Start(new ProcessStartInfo
                 {
                     FileName = GPS_BABEL_EXE,
-                    Arguments = agruments,
+                    Arguments = arguments,
                     WorkingDirectory = workingDirectory,
                     WindowStyle = ProcessWindowStyle.Hidden,
                 });

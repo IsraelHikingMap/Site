@@ -13,6 +13,7 @@
             $http: angular.IHttpService,
             mapService: Services.MapService,
             $tooltip,
+            Upload: angular.angularFileUpload.IUploadService,
             layersService: Services.LayersService,
             hashService: Services.HashService,
             fileService: Services.FileService,
@@ -24,7 +25,7 @@
 
             if (hashService.externalUrl != "") {
                 $http.get(Common.Urls.convertFiles + "?url=" + hashService.externalUrl).success((content: GeoJSON.FeatureCollection) => {
-                    var dataContainer = fileService.readFromFile("External.geojson", JSON.stringify(content), Common.RoutingType.hike);
+                    var dataContainer = fileService.readFromFile(content);
                     this.addFileDataToMap(dataContainer, layersService);
                 }).error(() => {
                     toastr.error("Failed to load external url file.");
@@ -32,18 +33,18 @@
             }
 
             $scope.open = ($files, e: Event) => {
-
                 if ($files.length <= 0) {
                     return;
                 }
-                var file = $files.shift();
-                var reader = new FileReader();
-                reader.onload = (e: any) => {
-                    var data = fileService.readFromFile(file.name, e.target.result, layersService.getSelectedDrawing().getRoutingType());
-                    this.addFileDataToMap(data, layersService);
-                    $scope.$apply();
-                };
-                reader.readAsText(file);
+                Upload.upload(<angular.angularFileUpload.IFileUploadConfig>{
+                    file: $files.shift(),
+                    url: Common.Urls.convertFiles + "?outputFormat=geojson",
+                }).success((content: GeoJSON.FeatureCollection) => {
+                    var dataContainer = fileService.readFromFile(content);
+                    this.addFileDataToMap(dataContainer, layersService);
+                }).error(() => {
+                    toastr.error("Failed to load file.");
+                });
             }
 
             $scope.openFileChooser = (e: Event) => {

@@ -13,7 +13,7 @@
             this.$http = $http;
             this.$q = $q;
             this.toastr = toastr;
-            this.geojsonParser = parserFactory.Create("geojson");
+            this.geojsonParser = parserFactory.Create(Parsers.ParserType.geojson);
         }
 
         public create(routingType: Common.RoutingType): IRouter {

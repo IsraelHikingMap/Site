@@ -37,17 +37,16 @@
             }, 100);
         }
 
-        public readFromFile = (fileName: string, content: string, routingType: string): Common.DataContainer => {
-            var extension = fileName.split('.').pop();
-            var parser = this.parserFactory.Create(extension);
+        public readFromFile = (content: GeoJSON.FeatureCollection): Common.DataContainer => {
+            var parser = this.parserFactory.Create(Parsers.ParserType.geojson);
             if (parser == null) {
                 return <Common.DataContainer> {
                     markers: [],
                     routes: [],
                 };
             }
-            var data = parser.parse(content);
-            data.routes = this.manipulateRoutesData(data.routes, routingType);
+            var data = parser.parse(JSON.stringify(content));
+            data.routes = this.manipulateRoutesData(data.routes, Common.RoutingType.none);
             return data;
         }
 
