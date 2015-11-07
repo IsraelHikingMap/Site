@@ -50,7 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FeatureProperties.cs" />
-    <Compile Include="LatLngKey.cs" />
+    <Compile Include="LatLng.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RoutingGatewayRequest.cs" />
     <Compile Include="ShortUrl.cs" />

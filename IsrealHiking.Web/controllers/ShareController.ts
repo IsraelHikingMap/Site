@@ -2,7 +2,7 @@
 
     interface IShortUrl {
         Id: string;
-        FullUrl: string;
+        JsonData: string;
         ModifyKey: string;
     }
 
@@ -17,7 +17,6 @@
         updateEmbedText(width: number, height: number): void;
         createShortUrl(): void;
         updateShortUrl(updateToken: string): void;
-
     }
 
     export class ShareController extends BaseMapControllerWithToolTip {
@@ -27,7 +26,7 @@
             $tooltip,
             $http: angular.IHttpService,
             mapService: Services.MapService,
-            hashService: Services.HashService,
+            layersService: Services.LayersService,
             toastr: Toastr) {
             super(mapService, $tooltip);
             this.shareToolTip = null;
@@ -56,7 +55,7 @@
 
             $scope.createShortUrl = () => {
                 var shortUrl = <IShortUrl>{
-                    FullUrl: this.getShareAddress(),
+                    JsonData: JSON.stringify(layersService.getData()),
                 };
                 $http.post(Common.Urls.shortUrl, shortUrl).success((shortUrl: IShortUrl) => {
                     $scope.updateToken = shortUrl.ModifyKey;
@@ -69,7 +68,7 @@
 
             $scope.updateShortUrl = (updateToken: string) => {
                 var shortUrl = <IShortUrl>{
-                    FullUrl: this.getShareAddress(),
+                    JsonData: JSON.stringify(layersService.getData()),
                     ModifyKey: updateToken,
                 };
                 $http.put(Common.Urls.shortUrl + updateToken, shortUrl).success((shortUrl: IShortUrl) => {
@@ -91,7 +90,7 @@
         }
 
         private getShortUrl = (id: string) => {
-            return Common.Urls.getShotUrl + id;
+            return Common.Urls.apiBase + "#/?s=" + id;
         }
     }
 }

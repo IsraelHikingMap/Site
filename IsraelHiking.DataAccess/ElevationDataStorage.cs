@@ -12,13 +12,13 @@ namespace IsraelHiking.DataAccess
 {
     public class ElevationDataStorage : IElevationDataStorage
     {
-        private readonly Dictionary<LatLngKey, short[,]> _elevationData;
+        private readonly Dictionary<LatLng, short[,]> _elevationData;
         private readonly ILogger _logger;
 
         public ElevationDataStorage(ILogger logger)
         {
             _logger = logger;
-            _elevationData = new Dictionary<LatLngKey, short[,]>();
+            _elevationData = new Dictionary<LatLng, short[,]>();
         }
 
         public Task Initialize()
@@ -40,7 +40,7 @@ namespace IsraelHiking.DataAccess
                     int samples = (short)(Math.Sqrt(byteArray.Length / 2) + 0.5);
                     var bottomLeftLat = int.Parse(Path.GetFileName(hgtZipFile).Substring(1, 2));
                     var bottomLeftLng = int.Parse(Path.GetFileName(hgtZipFile).Substring(4, 3));
-                    var key = new LatLngKey { Lat = bottomLeftLat, Lng = bottomLeftLng };
+                    var key = new LatLng { Lat = bottomLeftLat, Lng = bottomLeftLng };
                     _elevationData[key] = new short[samples, samples];
                     for (int byteIndex = 0; byteIndex < byteArray.Length; byteIndex += 2)
                     {
@@ -53,7 +53,7 @@ namespace IsraelHiking.DataAccess
 
         public double GetElevation(double lat, double lng)
         {
-            var key = new LatLngKey { Lat = (int)lat, Lng = (int)lng };
+            var key = new LatLng { Lat = (int)lat, Lng = (int)lng };
             if (_elevationData.ContainsKey(key) == false)
             {
                 return 0;

@@ -28,7 +28,7 @@
             this.elevationProvider = elevationProvider;
         }
 
-        public createDrawingRoute = (routeData: Common.RouteData, reroute: boolean, pathOptions: L.PathOptions): DrawingRoute => {
+        public createDrawingRoute = (routeData: Common.RouteData, reroute: boolean, pathOptions?: L.PathOptions): DrawingRoute => {
             if (pathOptions == null) {
                 pathOptions = this.createPathOptions();
             }

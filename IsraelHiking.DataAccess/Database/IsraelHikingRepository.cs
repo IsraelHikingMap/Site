@@ -20,6 +20,11 @@ namespace IsraelHiking.DataAccess.Database
             return _dbContext.ShortUrls.FirstOrDefault(s => s.Id == id);
         }
 
+        public ShortUrl GetShortUrlByModifyKey(string modifyKey)
+        {
+            return _dbContext.ShortUrls.FirstOrDefault(s => s.ModifyKey == modifyKey);
+        }
+
         public void AddShortUrl(ShortUrl shortUrl)
         {
             _dbContext.ShortUrls.Add(shortUrl);

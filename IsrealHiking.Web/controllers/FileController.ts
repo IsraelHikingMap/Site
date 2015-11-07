@@ -55,7 +55,7 @@
             }
 
             $scope.save = (e: Event, fileName: string) => {
-                var data = hashService.getDataContainer();
+                var data = layersService.getData();
                 fileService.saveToFile(fileName, data);
                 this.suppressEvents(e);
             }
@@ -118,9 +118,9 @@
             for (var routeIndex = 0; routeIndex < data.routes.length; routeIndex++) {
                 var route = data.routes[routeIndex];
                 if (layersService.isNameAvailable(route.name)) {
-                    layersService.addRoute(route.name, route, null);
+                    layersService.addRoute(route.name, route);
                 } else {
-                    layersService.addRoute("", route, null); // will cause an automatic name to be created.
+                    layersService.addRoute("", route); // will cause an automatic name to be created.
                 }
             }
             layersService.addMarkers(data.markers);

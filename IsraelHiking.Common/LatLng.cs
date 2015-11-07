@@ -6,12 +6,12 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.Common
 {
-    public class LatLngKey : IEquatable<LatLngKey>
+    public class LatLng : IEquatable<LatLng>
     {
         public double Lat { get; set; }
         public double Lng { get; set; }
 
-        public bool Equals(LatLngKey other)
+        public bool Equals(LatLng other)
         {
             return other.Lat == Lat && other.Lng == Lng;
         }
@@ -23,7 +23,7 @@ namespace IsraelHiking.Common
 
         public override bool Equals(object obj)
         {
-            var other = obj as LatLngKey;
+            var other = obj as LatLng;
             if (other == null)
             {
                 return false;

@@ -18,6 +18,7 @@
         public zoom: number;
         public searchTerm: string;
         public externalUrl: string;
+        public shortUrl: string;
         public baseLayer: string;
 
         constructor($location: angular.ILocationService,
@@ -41,12 +42,21 @@
             var path = this.zoom +
                 "/" + this.latlng.lat.toFixed(HashService.PERSICION) +
                 "/" + this.latlng.lng.toFixed(HashService.PERSICION);
-            var searchObject = this.dataContainerToUrlString();
+            //var searchObject = this.dataContainerToUrlString();
             this.$location.path(path);
-            this.$location.search(searchObject);
+            //this.$location.search(searchObject);
             if (!this.$rootScope.$$phase) {
                 this.$rootScope.$apply();
             }
+        }
+
+        public clear = () => {
+            if (this.shortUrl) {
+                this.$location.search({ s: this.shortUrl });
+            } else {
+                this.$location.search({});
+            }
+            
         }
 
         public updateLocation = (latlng: L.LatLng, zoom: number) => {
@@ -58,44 +68,44 @@
             this.updateUrl();
         }
 
-        public updateMarkers = (markers: Common.MarkerData[]) => {
-            this.dataContainer.markers = markers;
-            this.updateUrl();
-        }
+        //public updateMarkers = (markers: Common.MarkerData[]) => {
+        //    this.dataContainer.markers = markers;
+        //    this.updateUrl();
+        //}
 
-        public addRoute = (routeName: string) => {
-            var routeInHash = _.find(this.dataContainer.routes, (routeToFind) => routeToFind.name == routeName);
-            if (routeInHash != null) {
-                return;
-            }
-            this.dataContainer.routes.push(<Common.RouteData> {
-                name: routeName,
-                segments: [],
-            });
-        }
+        //public addRoute = (routeName: string) => {
+        //    var routeInHash = _.find(this.dataContainer.routes, (routeToFind) => routeToFind.name == routeName);
+        //    if (routeInHash != null) {
+        //        return;
+        //    }
+        //    this.dataContainer.routes.push(<Common.RouteData> {
+        //        name: routeName,
+        //        segments: [],
+        //    });
+        //}
 
-        public updateRoute = (route: Common.RouteData) => {
-            var routeInHash = _.find(this.dataContainer.routes, (routeToFind) => routeToFind.name == route.name);
-            if (routeInHash == null) {
-                return;
-            }
-            angular.copy(route, routeInHash);
-            this.updateUrl();
-        }
+        //public updateRoute = (route: Common.RouteData) => {
+        //    var routeInHash = _.find(this.dataContainer.routes, (routeToFind) => routeToFind.name == route.name);
+        //    if (routeInHash == null) {
+        //        return;
+        //    }
+        //    angular.copy(route, routeInHash);
+        //    this.updateUrl();
+        //}
 
-        public removeRoute = (routeName: string) => {
-            _.remove(this.dataContainer.routes, (routeToRemove) => routeToRemove.name == routeName);
-            this.updateUrl();
-        }
+        //public removeRoute = (routeName: string) => {
+        //    _.remove(this.dataContainer.routes, (routeToRemove) => routeToRemove.name == routeName);
+        //    this.updateUrl();
+        //}
 
-        public updateBaseLayer = (baseLayer: string) => {
-            this.baseLayer = baseLayer;
-            this.updateUrl();
-        }
+        //public updateBaseLayer = (baseLayer: string) => {
+        //    this.baseLayer = baseLayer;
+        //    this.updateUrl();
+        //}
 
-        private routeToString = (routeData: Common.RouteData): string => {
-            return this.routeSegmentsToString(routeData.segments);
-        }
+        //private routeToString = (routeData: Common.RouteData): string => {
+        //    return this.routeSegmentsToString(routeData.segments);
+        //}
 
         private stringToRoute = (data: string, name: string): Common.RouteData => {
             return <Common.RouteData> {
@@ -104,14 +114,14 @@
             };
         }
 
-        private latlngsToStringArray(latlngs: L.LatLng[]): string[] {
-            var array = <string[]>[];
-            for (var latlngIndex = 0; latlngIndex < latlngs.length; latlngIndex++) {
-                var latlng = latlngs[latlngIndex];
-                array.push(latlng.lat.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + latlng.lng.toFixed(HashService.PERSICION));
-            }
-            return array;
-        }
+        //private latlngsToStringArray(latlngs: L.LatLng[]): string[] {
+        //    var array = <string[]>[];
+        //    for (var latlngIndex = 0; latlngIndex < latlngs.length; latlngIndex++) {
+        //        var latlng = latlngs[latlngIndex];
+        //        array.push(latlng.lat.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + latlng.lng.toFixed(HashService.PERSICION));
+        //    }
+        //    return array;
+        //}
 
         private stringArrayToLatlngs(stringArray: string[]): L.LatLng[] {
             var array = <L.LatLng[]>[];
@@ -125,15 +135,16 @@
             return array;
         }
 
-        private markersToStringArray(markers: Common.MarkerData[]): string[] {
-            var array = <string[]>[];
-            for (var latlngIndex = 0; latlngIndex < markers.length; latlngIndex++) {
-                var marker = markers[latlngIndex];
-                var title = marker.title.replace(HashService.MARKER_SPECIAL_CHARACTERS_REGEXP, " ");
-                array.push(marker.latlng.lat.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + marker.latlng.lng.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + title);
-            }
-            return array;
-        }
+        //private markersToStringArray(markers: Common.MarkerData[]): string[] {
+        //    var array = <string[]>[];
+        //    for (var latlngIndex = 0; latlngIndex < markers.length; latlngIndex++) {
+        //        var marker = markers[latlngIndex];
+        //        var title = marker.title.replace(HashService.MARKER_SPECIAL_CHARACTERS_REGEXP, " ");
+        //        array.push(marker.latlng.lat.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + marker.latlng.lng.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + title);
+        //    }
+        //    return array;
+        //}
+
         private stringArrayToMarkers(stringArray: string[]): Common.MarkerData[] {
             var array = <Common.MarkerData[]>[];
             for (var srtingIndex = 0; srtingIndex < stringArray.length; srtingIndex++) {
@@ -153,17 +164,17 @@
             return array;
         }
 
-        private routeSegmentsToString(routeSegments: Common.RouteSegmentData[]): string {
-            var array = [];
-            for (var latlngIndex = 0; latlngIndex < routeSegments.length; latlngIndex++) {
-                var pointSegment = routeSegments[latlngIndex];
-                array.push(pointSegment.routingType + HashService.DATA_DELIMITER +
-                    pointSegment.routePoint.lat.toFixed(HashService.PERSICION) +
-                    HashService.DATA_DELIMITER +
-                    pointSegment.routePoint.lng.toFixed(HashService.PERSICION));
-            }
-            return array.join(HashService.ARRAY_DELIMITER);
-        }
+        //private routeSegmentsToString(routeSegments: Common.RouteSegmentData[]): string {
+        //    var array = [];
+        //    for (var latlngIndex = 0; latlngIndex < routeSegments.length; latlngIndex++) {
+        //        var pointSegment = routeSegments[latlngIndex];
+        //        array.push(pointSegment.routingType + HashService.DATA_DELIMITER +
+        //            pointSegment.routePoint.lat.toFixed(HashService.PERSICION) +
+        //            HashService.DATA_DELIMITER +
+        //            pointSegment.routePoint.lng.toFixed(HashService.PERSICION));
+        //    }
+        //    return array.join(HashService.ARRAY_DELIMITER);
+        //}
 
         private stringToRouteSegments = (data: string): Common.RouteSegmentData[]=> {
             var splitted = data.split(HashService.SPILT_REGEXP);
@@ -193,16 +204,16 @@
             return array;
         }
 
-        private dataContainerToUrlString = (): any => {
-            var urlObject = {};
-            urlObject[HashService.BASE_LAYER] = this.baseLayerToHash(this.baseLayer);
-            urlObject[Common.Constants.MARKERS] = this.markersToStringArray(this.dataContainer.markers).join(HashService.ARRAY_DELIMITER);
-            for (var routeIndex = 0; routeIndex < this.dataContainer.routes.length; routeIndex++) {
-                var routeData = this.dataContainer.routes[routeIndex];
-                urlObject[routeData.name.split(" ").join("_")] = this.routeToString(routeData);
-            }
-            return urlObject;
-        }
+        //private dataContainerToUrlString = (): any => {
+        //    var urlObject = {};
+        //    urlObject[HashService.BASE_LAYER] = this.baseLayerToHash(this.baseLayer);
+        //    urlObject[Common.Constants.MARKERS] = this.markersToStringArray(this.dataContainer.markers).join(HashService.ARRAY_DELIMITER);
+        //    for (var routeIndex = 0; routeIndex < this.dataContainer.routes.length; routeIndex++) {
+        //        var routeData = this.dataContainer.routes[routeIndex];
+        //        urlObject[routeData.name.split(" ").join("_")] = this.routeToString(routeData);
+        //    }
+        //    return urlObject;
+        //}
 
         private urlStringToDataContainer(searchObject: any): Common.DataContainer {
             var data = <Common.DataContainer> {
@@ -220,6 +231,9 @@
                 if (parameter == HashService.BASE_LAYER) {
                     continue;
                 }
+                if (parameter == "s") {
+                    continue;
+                }
                 data.routes.push(this.stringToRoute(searchObject[parameter], parameter.split("_").join(" ")));
             }
 
@@ -232,6 +246,7 @@
             var search = this.$location.search();
             this.searchTerm = search.q || "";
             this.externalUrl = search.url || "";
+            this.shortUrl = search.s || "";
             this.baseLayer = this.hashToBaseLayer(search[HashService.BASE_LAYER] || "");
 
             if (splittedpath.length != 4) {

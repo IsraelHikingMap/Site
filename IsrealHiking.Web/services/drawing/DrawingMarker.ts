@@ -201,14 +201,14 @@
 
         private updateDataLayer = () => {
             var data = this.getData();
-            this.hashService.updateMarkers(data);
+            //this.hashService.updateMarkers(data);
             this.addDataToStack(data);
         }
 
-        protected postUndoHook = () => {
-            var data = this.getData();
-            this.hashService.updateMarkers(data);
-        }
+        //protected postUndoHook = () => {
+        //    var data = this.getData();
+        //    this.hashService.updateMarkers(data);
+        //}
 
         public getColor = () => {
             return "green";

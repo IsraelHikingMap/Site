@@ -7,6 +7,7 @@ namespace IsraelHiking.DataAccessInterfaces
     {
         void AddShortUrl(ShortUrl shortUrl);
         ShortUrl GetShortUrlById(string id);
+        ShortUrl GetShortUrlByModifyKey(string modifyKey);
         void Update(object obj);
     }
 }

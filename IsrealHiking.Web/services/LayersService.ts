@@ -162,7 +162,7 @@ module IsraelHiking.Services {
             return "";
         }
 
-        public addRoute = (name: string, routeData: Common.RouteData, pathOptions: L.PathOptions) => {
+        public addRoute = (name: string, routeData: Common.RouteData, pathOptions?: L.PathOptions) => {
             if (name == "") {
                 name = this.createRouteName();
             }
@@ -220,7 +220,7 @@ module IsraelHiking.Services {
             }
             route.destroy();
             this.routes.splice(this.routes.indexOf(route), 1);
-            this.hashService.removeRoute(routeName);
+            //this.hashService.removeRoute(routeName);
         }
 
         public selectBaseLayer = (baseLayer: Services.IBaseLayer) => {
@@ -303,18 +303,16 @@ module IsraelHiking.Services {
         }
 
         private addDrawingsFromHash = () => {
-            var dataContainer = this.hashService.getDataContainer();
-            if (dataContainer.routes.length == 0) {
-                dataContainer.routes.push(<Common.RouteData> {
-                    name: this.createRouteName(),
-                    segments: []
+            if (this.hashService.shortUrl) {
+                this.$http.get(Common.Urls.shortUrl + this.hashService.shortUrl).success((data: Common.DataContainer) => {
+                    this.setData(data);
+                    this.hashService.clear();
                 });
+                return;
+            } else {
+                this.setData(this.hashService.getDataContainer());
+                this.hashService.clear();
             }
-            for (var routeIndex = 0; routeIndex < dataContainer.routes.length; routeIndex++) {
-                this.routes.push(this.drawingFactory.createDrawingRoute(dataContainer.routes[routeIndex], true, null));
-            }
-            this.markers = this.drawingFactory.createDrawingMarker(dataContainer.markers);
-            this.changeDrawingState((this.routes.length > 0) ? this.routes[0].name : this.markers.name);
         }
 
         public getSelectedDrawing = (): Drawing.IDrawing => {
@@ -375,7 +373,7 @@ module IsraelHiking.Services {
             else {
                 baseLayer = this.selectedBaseLayer.address;
             }
-            this.hashService.updateBaseLayer(baseLayer);
+            //this.hashService.updateBaseLayer(baseLayer);
         }
 
         private unique(layers: ILayerData[]): ILayerData[] {
@@ -396,6 +394,34 @@ module IsraelHiking.Services {
                 maxZoom: LayersService.MAX_ZOOM,
                 attribution: attribution || this.defaultAttribution
             };
+        }
+
+        public getData = () => {
+            var container = <Common.DataContainer>{
+                markers: [],
+                routes: [],
+            };
+
+            container.markers = this.markers.getData();
+            for (var routeIndex = 0; routeIndex < this.routes.length; routeIndex++) {
+                container.routes.push(this.routes[routeIndex].getData());
+            }
+
+            return container;
+        }
+
+        private setData = (dataContainer: Common.DataContainer) => {
+            if (dataContainer.routes.length == 0) {
+                dataContainer.routes.push(<Common.RouteData>{
+                    name: this.createRouteName(),
+                    segments: []
+                });
+            }
+            for (var routeIndex = 0; routeIndex < dataContainer.routes.length; routeIndex++) {
+                this.routes.push(this.drawingFactory.createDrawingRoute(dataContainer.routes[routeIndex], true));
+            }
+            this.markers = this.drawingFactory.createDrawingMarker(dataContainer.markers);
+            this.changeDrawingState((this.routes.length > 0) ? this.routes[0].name : this.markers.name);
         }
     }
 }
