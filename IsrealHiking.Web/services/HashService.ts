@@ -32,6 +32,7 @@
             this.dataContainer = <Common.DataContainer> { markers: [], routes: [] };
             this.searchTerm = "";
             this.addDataFromUrl();
+            this.updateUrl();
         }
 
         public getDataContainer = (): Common.DataContainer => {
@@ -254,7 +255,7 @@
                 var lat = parseFloat(this.getURLParameter("lat"));
                 var lng = parseFloat(this.getURLParameter("lng"));
                 if (zoom > 0 && lat > 0 && lng > 0) {
-                    var href = window.location.pathname + "#/" + zoom + "/" + lat.toFixed(HashService.PERSICION) + "/" + lng.toFixed(HashService.PERSICION);
+                    var href = window.location.pathname + HashService.getLocationAddress(zoom, lat, lng);
                     window.location.href = href;
                 }
             } else {
@@ -287,5 +288,9 @@
                 address: "",
             };
         }
+
+        public static getLocationAddress(zoom: number, lat: number, lng: number) {
+            return "#/" + zoom + "/" + lat.toFixed(HashService.PERSICION) + "/" + lng.toFixed(HashService.PERSICION);
+        } 
     }
 } 
