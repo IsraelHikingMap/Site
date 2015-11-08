@@ -7,29 +7,35 @@
         height: number;
         embedText: string;
         updateToken: string;
-        isShareOpen(): boolean;
         openShare(e: Event);
         updateEmbedText(width: number, height: number): void;
         generateUrl(): void;
         updateUrl(updateToken: string): void;
+        clearShareAddress(): void;
     }
 
-    export class ShareController extends BaseMapControllerWithToolTip {
-        private shareToolTip;
+    export class ShareController extends BaseMapController {
+        private shareModal;
 
         constructor($scope: IShareScope,
-            $tooltip,
+            $modal,
             $http: angular.IHttpService,
             mapService: Services.MapService,
             layersService: Services.LayersService,
             toastr: Toastr) {
-            super(mapService, $tooltip);
-            this.shareToolTip = null;
+            super(mapService);
+            
             $scope.title = "";
             $scope.width = 640;
             $scope.height = 390;
             $scope.shareAddress = "";
             
+            this.shareModal = $modal({
+                title: "Share your work",
+                templateUrl: "views/templates/shareModal.tpl.html",
+                show: false,
+                scope: $scope,
+            });
 
             $scope.updateEmbedText = (width: number, height: number) => {
                 $scope.width = width;
@@ -38,16 +44,9 @@
             }
 
             $scope.openShare = (e: Event) => {
-                if (this.shareToolTip == null) {
-                    this.shareToolTip = this.createToolTip(e.target, "views/templates/shareTooltip.tpl.html", "Share", $scope, "left");
-                    this.shareToolTip.$promise.then(this.shareToolTip.show);
-                }
                 $scope.embedText = this.getEmbedText($scope);
+                this.shareModal.$promise.then(this.shareModal.show);
                 this.suppressEvents(e);
-            }
-
-            $scope.isShareOpen = () => {
-                return this.shareToolTip != null && this.shareToolTip.$isShown;
             }
 
             $scope.generateUrl = () => {
@@ -77,6 +76,10 @@
                 }).error(() => {
                     toastr.error("Unable to update data, please try again later...");
                 });
+            }
+
+            $scope.clearShareAddress = () => {
+                $scope.shareAddress = "";
             }
         }
 

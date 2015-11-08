@@ -191,7 +191,7 @@
     <Content Include="views\file.html" />
     <Content Include="views\templates\helpTooltip.tpl.html" />
     <Content Include="views\templates\markerPopup.tpl.html" />
-    <Content Include="views\templates\shareTooltip.tpl.html" />
+    <Content Include="views\templates\shareModal.tpl.html" />
     <Content Include="web.config">
       <SubType>Designer</SubType>
     </Content>

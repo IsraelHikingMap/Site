@@ -1,0 +1,48 @@
+﻿<div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header" ng-show="title">
+                <button type="button" class="close" aria-label="Close" ng-click="$hide()"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" ng-bind="title"></h4>
+            </div>
+            <form class="form-horizontal">
+                <div class="modal-body">
+                    <div class="form-group" ng-hide="shareAddress">
+                        <label class="control-label col-md-8" title="Generate a URL to share with your friends!">Generate a URL to share with your friends!</label>
+                        <div class="col-md-4">
+                            <button class="btn btn-success" ng-click="generateUrl()">GO!</button>
+                        </div>
+                    </div>
+                    <div ng-show="shareAddress">
+                        <div class="form-group">
+                            <a href="{{shareAddress}}" target="_blank" class="col-md-offset-2 chome-wordwrap-fix">{{shareAddress}}</a>
+                        </div>
+                        <hr />
+                        <h3>Embed</h3>
+                        <div class="form-group">
+                            <label class="control-label col-md-2">Width</label>
+                            <div class="col-md-4">
+                                <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)" />
+                            </div>
+                            <label class="control-label col-md-2">Height</label>
+                            <div class="col-md-4">
+                                <input type="number" ng-model="height" class="form-control" ng-change="updateEmbedText(width, height)" />
+                            </div>
+                        </div>
+                        <p class="col-md-offset-2 col-md-10">Copy and paste the code below in order to show this map on your webpage.</p>
+                        <div class="form-group">
+                            <label class="control-label col-md-2">HTML</label>
+                            <div class="col-md-offset-2 col-md-10">
+                                <textarea rows="5" class="form-control" ng-model="embedText"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-warning" ng-show="shareAddress" ng-click="clearShareAddress()">Clear</button>
+                    <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
