@@ -19,7 +19,6 @@
         public searchTerm: string;
         public externalUrl: string;
         public siteUrl: string;
-        //public baseLayer: string;
 
         constructor($location: angular.ILocationService,
             $rootScope: angular.IScope,
@@ -40,12 +39,8 @@
         }
 
         private updateUrl = () => {
-            var path = this.zoom +
-                "/" + this.latlng.lat.toFixed(HashService.PERSICION) +
-                "/" + this.latlng.lng.toFixed(HashService.PERSICION);
-            //var searchObject = this.dataContainerToUrlString();
+            var path = HashService.getLocationAddress(this.zoom, this.latlng.lat, this.latlng.lng);
             this.$location.path(path);
-            //this.$location.search(searchObject);
             if (!this.$rootScope.$$phase) {
                 this.$rootScope.$apply();
             }
@@ -69,60 +64,12 @@
             this.updateUrl();
         }
 
-        //public updateMarkers = (markers: Common.MarkerData[]) => {
-        //    this.dataContainer.markers = markers;
-        //    this.updateUrl();
-        //}
-
-        //public addRoute = (routeName: string) => {
-        //    var routeInHash = _.find(this.dataContainer.routes, (routeToFind) => routeToFind.name == routeName);
-        //    if (routeInHash != null) {
-        //        return;
-        //    }
-        //    this.dataContainer.routes.push(<Common.RouteData> {
-        //        name: routeName,
-        //        segments: [],
-        //    });
-        //}
-
-        //public updateRoute = (route: Common.RouteData) => {
-        //    var routeInHash = _.find(this.dataContainer.routes, (routeToFind) => routeToFind.name == route.name);
-        //    if (routeInHash == null) {
-        //        return;
-        //    }
-        //    angular.copy(route, routeInHash);
-        //    this.updateUrl();
-        //}
-
-        //public removeRoute = (routeName: string) => {
-        //    _.remove(this.dataContainer.routes, (routeToRemove) => routeToRemove.name == routeName);
-        //    this.updateUrl();
-        //}
-
-        //public updateBaseLayer = (baseLayer: string) => {
-        //    this.baseLayer = baseLayer;
-        //    this.updateUrl();
-        //}
-
-        //private routeToString = (routeData: Common.RouteData): string => {
-        //    return this.routeSegmentsToString(routeData.segments);
-        //}
-
         private stringToRoute = (data: string, name: string): Common.RouteData => {
             return <Common.RouteData> {
                 name: name,
                 segments: this.stringToRouteSegments(data),
             };
         }
-
-        //private latlngsToStringArray(latlngs: L.LatLng[]): string[] {
-        //    var array = <string[]>[];
-        //    for (var latlngIndex = 0; latlngIndex < latlngs.length; latlngIndex++) {
-        //        var latlng = latlngs[latlngIndex];
-        //        array.push(latlng.lat.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + latlng.lng.toFixed(HashService.PERSICION));
-        //    }
-        //    return array;
-        //}
 
         private stringArrayToLatlngs(stringArray: string[]): L.LatLng[] {
             var array = <L.LatLng[]>[];
@@ -135,16 +82,6 @@
             }
             return array;
         }
-
-        //private markersToStringArray(markers: Common.MarkerData[]): string[] {
-        //    var array = <string[]>[];
-        //    for (var latlngIndex = 0; latlngIndex < markers.length; latlngIndex++) {
-        //        var marker = markers[latlngIndex];
-        //        var title = marker.title.replace(HashService.MARKER_SPECIAL_CHARACTERS_REGEXP, " ");
-        //        array.push(marker.latlng.lat.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + marker.latlng.lng.toFixed(HashService.PERSICION) + HashService.DATA_DELIMITER + title);
-        //    }
-        //    return array;
-        //}
 
         private stringArrayToMarkers(stringArray: string[]): Common.MarkerData[] {
             var array = <Common.MarkerData[]>[];
@@ -164,18 +101,6 @@
             }
             return array;
         }
-
-        //private routeSegmentsToString(routeSegments: Common.RouteSegmentData[]): string {
-        //    var array = [];
-        //    for (var latlngIndex = 0; latlngIndex < routeSegments.length; latlngIndex++) {
-        //        var pointSegment = routeSegments[latlngIndex];
-        //        array.push(pointSegment.routingType + HashService.DATA_DELIMITER +
-        //            pointSegment.routePoint.lat.toFixed(HashService.PERSICION) +
-        //            HashService.DATA_DELIMITER +
-        //            pointSegment.routePoint.lng.toFixed(HashService.PERSICION));
-        //    }
-        //    return array.join(HashService.ARRAY_DELIMITER);
-        //}
 
         private stringToRouteSegments = (data: string): Common.RouteSegmentData[]=> {
             var splitted = data.split(HashService.SPILT_REGEXP);
@@ -205,16 +130,18 @@
             return array;
         }
 
-        //private dataContainerToUrlString = (): any => {
-        //    var urlObject = {};
-        //    urlObject[HashService.BASE_LAYER] = this.baseLayerToHash(this.baseLayer);
-        //    urlObject[Common.Constants.MARKERS] = this.markersToStringArray(this.dataContainer.markers).join(HashService.ARRAY_DELIMITER);
-        //    for (var routeIndex = 0; routeIndex < this.dataContainer.routes.length; routeIndex++) {
-        //        var routeData = this.dataContainer.routes[routeIndex];
-        //        urlObject[routeData.name.split(" ").join("_")] = this.routeToString(routeData);
-        //    }
-        //    return urlObject;
-        //}
+        private stringToBaseLayer(addressOrKey: string): Common.LayerData {
+            if (addressOrKey.indexOf("www") != -1 || addressOrKey.indexOf("http") != -1) {
+                return <Common.LayerData>{
+                    key: "",
+                    address: addressOrKey,
+                };
+            }
+            return <Common.LayerData>{
+                key: addressOrKey.split("_").join(" "),
+                address: "",
+            };
+        }
 
         private urlStringToDataContainer(searchObject: any): Common.DataContainer {
             var data = <Common.DataContainer> {
@@ -237,7 +164,6 @@
                 }
                 data.routes.push(this.stringToRoute(searchObject[parameter], parameter.split("_").join(" ")));
             }
-
             return data;
         }
 
@@ -248,49 +174,16 @@
             this.searchTerm = search.q || "";
             this.externalUrl = search.url || "";
             this.siteUrl = search.s || "";
-
-            if (splittedpath.length != 4) {
-                // backwards compatibility... :-(
-                var zoom = parseInt(this.getURLParameter("zoom"));
-                var lat = parseFloat(this.getURLParameter("lat"));
-                var lng = parseFloat(this.getURLParameter("lng"));
-                if (zoom > 0 && lat > 0 && lng > 0) {
-                    var href = window.location.pathname + HashService.getLocationAddress(zoom, lat, lng);
-                    window.location.href = href;
-                }
-            } else {
+            if (splittedpath.length == 4) {
                 this.zoom = parseInt(splittedpath[splittedpath.length - 3]);
                 this.latlng.lat = parseFloat(splittedpath[splittedpath.length - 2]);
                 this.latlng.lng = parseFloat(splittedpath[splittedpath.length - 1]);
-                this.dataContainer = this.urlStringToDataContainer(search);
             }
-        }
-        private getURLParameter(name) {
-            return decodeURIComponent((new RegExp("[?|&]" + name + "=" + "([^&;]+?)(&|#|;|$)").exec(location.search) || [, ""])[1].replace(/\+/g, "%20")) || null;
-        }
-
-        //private baseLayerToHash(baseLayer: string): string {
-        //    if (baseLayer.indexOf("www") != -1 || baseLayer.indexOf("http") != -1) {
-        //        return baseLayer;
-        //    }
-        //    return baseLayer.split(" ").join("_");
-        //}
-
-        private stringToBaseLayer(addressOrKey: string): Common.LayerData {
-            if (addressOrKey.indexOf("www") != -1 || addressOrKey.indexOf("http") != -1) {
-                return <Common.LayerData>{
-                    key: "",
-                    address: addressOrKey,
-                };
-            }
-            return <Common.LayerData>{
-                key: addressOrKey.split("_").join(" "),
-                address: "",
-            };
+            this.dataContainer = this.urlStringToDataContainer(search);
         }
 
         public static getLocationAddress(zoom: number, lat: number, lng: number) {
-            return "#/" + zoom + "/" + lat.toFixed(HashService.PERSICION) + "/" + lng.toFixed(HashService.PERSICION);
+            return zoom + "/" + lat.toFixed(HashService.PERSICION) + "/" + lng.toFixed(HashService.PERSICION);
         } 
     }
 } 

@@ -9,17 +9,10 @@
     <link rel="stylesheet" href="content/bootstrap.min.css" />
 </head>
 <body>
-    <h4>Redirecting to new and improved site!</h4>
+    <h4 style="margin:50px">Redirecting to new and improved site!</h4>
+    <script src="redirect.js"></script>
     <script>
-        setTimeout(function () {
-            var href = location.href.replace("IsraelMTBmap.html", "index.html");
-            if (href.indexOf("#") == -1) {
-                href += "#/";
-            }
-            href += (href.indexOf("?") != -1) ? "&" : "?";
-            href += "baselayer=Israel_MTB_Map";
-            window.location.href = href;
-        }, 1000);
+        redirect(true);
     </script>
 </body>
 </html>

@@ -386,7 +386,6 @@ module IsraelHiking.Services {
             else {
                 baseLayer = this.selectedBaseLayer.address;
             }
-            //this.hashService.updateBaseLayer(baseLayer);
         }
 
         private unique(layers: Common.LayerData[]): Common.LayerData[] {
