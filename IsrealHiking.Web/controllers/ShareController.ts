@@ -5,13 +5,15 @@
         shareAddress: string;
         width: number;
         height: number;
+        size: string;
         embedText: string;
         updateToken: string;
+        isLoading: boolean;
         openShare(e: Event);
         updateEmbedText(width: number, height: number): void;
         generateUrl(): void;
-        updateUrl(updateToken: string): void;
         clearShareAddress(): void;
+        setSize(size: string): void;
     }
 
     export class ShareController extends BaseMapController {
@@ -26,12 +28,14 @@
             super(mapService);
             
             $scope.title = "";
-            $scope.width = 640;
-            $scope.height = 390;
+            $scope.width = 400;
+            $scope.height = 300;
+            $scope.size = "Small";
+            $scope.isLoading = false;
             $scope.shareAddress = "";
             
             this.shareModal = $modal({
-                title: "Share your work",
+                title: "Share Your Work",
                 templateUrl: "views/templates/shareModal.tpl.html",
                 show: false,
                 scope: $scope,
@@ -50,6 +54,7 @@
             }
 
             $scope.generateUrl = () => {
+                $scope.isLoading = true;
                 var siteUrl = <Common.SiteUrl>{
                     Title: $scope.title,
                     JsonData: JSON.stringify(layersService.getData()),
@@ -60,26 +65,31 @@
                     $scope.embedText = this.getEmbedText($scope);
                 }).error(() => {
                     toastr.error("Unable to generate URL, please try again later...");
-                });
-            }
-
-            $scope.updateUrl = (updateToken: string) => {
-                var siteUrl = <Common.SiteUrl>{
-                    Title: $scope.title,
-                    JsonData: JSON.stringify(layersService.getData()),
-                    ModifyKey: updateToken,
-                };
-                $http.put(Common.Urls.urls + updateToken, siteUrl).success((siteUrlResponse: Common.SiteUrl) => {
-                    $scope.shareAddress = this.getShareAddress(siteUrlResponse.Id);
-                    $scope.embedText = this.getEmbedText($scope);
-                    toastr.success("Data has been updated");
-                }).error(() => {
-                    toastr.error("Unable to update data, please try again later...");
+                }).finally(() => {
+                    $scope.isLoading = false;
                 });
             }
 
             $scope.clearShareAddress = () => {
                 $scope.shareAddress = "";
+            }
+
+            $scope.setSize = (size: string) => {
+                switch (size) {
+                    case "Small":
+                        $scope.width = 400;
+                        $scope.height = 300;
+                        break;
+                    case "Medium": 
+                        $scope.width = 600;
+                        $scope.height = 450;
+                        break;
+                    case "Large":
+                        $scope.width = 800;
+                        $scope.height = 600;
+                        break;
+                }
+                $scope.embedText = this.getEmbedText($scope);
             }
         }
 

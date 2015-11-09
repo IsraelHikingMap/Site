@@ -10,7 +10,7 @@
                     <div class="form-group" ng-hide="shareAddress">
                         <label class="control-label col-md-8" title="Generate a URL to share with your friends!">Generate a URL to share with your friends!</label>
                         <div class="col-md-4">
-                            <button class="btn btn-success" ng-click="generateUrl()">GO!</button>
+                            <button class="btn btn-success" ng-click="generateUrl()" ng-disabled="isLoading">GO!</button>
                         </div>
                     </div>
                     <div ng-show="shareAddress">
@@ -18,8 +18,18 @@
                             <a href="{{shareAddress}}" target="_blank" class="col-md-offset-2 chome-wordwrap-fix">{{shareAddress}}</a>
                         </div>
                         <hr />
-                        <h3>Embed</h3>
                         <div class="form-group">
+                            <label class="control-label col-md-2">Embed Size </label>
+                            <div class="col-md-4">
+                                <select ng-model="size" class="form-control" ng-change="setSize(size)">
+                                    <option>Small</option>
+                                    <option>Medium</option>
+                                    <option>Large</option>
+                                    <option>Custom</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" ng-show="size == 'Custom'">
                             <label class="control-label col-md-2">Width</label>
                             <div class="col-md-4">
                                 <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)" />
@@ -32,8 +42,8 @@
                         <p class="col-md-offset-2 col-md-10">Copy and paste the code below in order to show this map on your webpage.</p>
                         <div class="form-group">
                             <label class="control-label col-md-2">HTML</label>
-                            <div class="col-md-offset-2 col-md-10">
-                                <textarea rows="5" class="form-control" ng-model="embedText"></textarea>
+                            <div class="col-md-10">
+                                <textarea rows="3" class="form-control" ng-model="embedText" />
                             </div>
                         </div>
                     </div>
