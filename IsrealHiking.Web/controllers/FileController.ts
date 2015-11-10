@@ -24,12 +24,13 @@
             this.fileChooserTooltip = null;
 
             if (hashService.externalUrl != "") {
-                $http.get(Common.Urls.convertFiles + "?url=" + hashService.externalUrl).success((content: GeoJSON.FeatureCollection) => {
-                    var dataContainer = fileService.readFromFile(content);
-                    this.addFileDataToMap(dataContainer, layersService);
-                }).error(() => {
-                    toastr.error("Failed to load external url file.");
-                });
+                $http.get(Common.Urls.convertFiles + "?url=" + hashService.externalUrl)
+                    .success((content: GeoJSON.FeatureCollection) => {
+                        var dataContainer = fileService.readFromFile(content);
+                        layersService.setData(dataContainer, false);
+                    }).error(() => {
+                        toastr.error("Failed to load external url file.");
+                    });
             }
 
             $scope.open = ($files, e: Event) => {
@@ -41,7 +42,7 @@
                     url: Common.Urls.convertFiles + "?outputFormat=geojson",
                 }).success((content: GeoJSON.FeatureCollection) => {
                     var dataContainer = fileService.readFromFile(content);
-                    this.addFileDataToMap(dataContainer, layersService);
+                    layersService.setData(dataContainer, false);
                 }).error(() => {
                     toastr.error("Failed to load file.");
                 });
@@ -68,8 +69,8 @@
                 }
                 switch (String.fromCharCode(e.which).toLowerCase()) {
                     //case "o":
-                        // Opening a file dialog is a violation of security it can not be done.
-                        //break;
+                    // Opening a file dialog is a violation of security it can not be done.
+                    //break;
                     case "s":
                         angular.element("#saveFile").trigger("click");
                         break;
@@ -110,21 +111,6 @@
             for (var name in callbacks) {
                 dropbox.addEventListener(name, callbacks[name], false);
             }
-        }
-
-        private addFileDataToMap = (data: Common.DataContainer, layersService: Services.LayersService) => {
-            if (data.bounds != null) {
-                this.map.fitBounds(data.bounds);
-            }
-            for (var routeIndex = 0; routeIndex < data.routes.length; routeIndex++) {
-                var route = data.routes[routeIndex];
-                if (layersService.isNameAvailable(route.name)) {
-                    layersService.addRoute(route.name, route);
-                } else {
-                    layersService.addRoute("", route); // will cause an automatic name to be created.
-                }
-            }
-            layersService.addMarkers(data.markers);
         }
     }
 } 

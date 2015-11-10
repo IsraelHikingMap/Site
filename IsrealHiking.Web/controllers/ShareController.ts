@@ -101,7 +101,7 @@
         private getShareAddress = (id: string) => {
             var center = this.map.getCenter();
             var zoom = this.map.getZoom();
-            return Common.Urls.apiBase + "#/" + Services.HashService.getLocationAddress(zoom, center.lat, center.lng) + "?s=" + id;
+            return Common.Urls.apiBase + "#/?s=" + id;
         }
     }
 }

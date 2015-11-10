@@ -41,7 +41,8 @@
         markers: MarkerData[];
         baseLayer: LayerData;
         overlays: LayerData[];
-        bounds: L.LatLngBounds;
+        northEast: L.LatLng;
+        southWest: L.LatLng;
     }
 
     export interface LatLngZ extends L.LatLng {

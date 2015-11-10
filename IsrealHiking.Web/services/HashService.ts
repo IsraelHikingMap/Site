@@ -39,7 +39,9 @@
         }
 
         private updateUrl = () => {
-            var path = HashService.getLocationAddress(this.zoom, this.latlng.lat, this.latlng.lng);
+            var path = this.zoom +
+                "/" + this.latlng.lat.toFixed(HashService.PERSICION) +
+                "/" + this.latlng.lng.toFixed(HashService.PERSICION);
             this.$location.path(path);
             if (!this.$rootScope.$$phase) {
                 this.$rootScope.$apply();
@@ -181,9 +183,5 @@
             }
             this.dataContainer = this.urlStringToDataContainer(search);
         }
-
-        public static getLocationAddress(zoom: number, lat: number, lng: number) {
-            return zoom + "/" + lat.toFixed(HashService.PERSICION) + "/" + lng.toFixed(HashService.PERSICION);
-        } 
     }
 } 

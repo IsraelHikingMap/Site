@@ -20,7 +20,7 @@
     }
 
 
-    export class BaseDrawing<TData> extends ObjectWithMap implements IDrawing {
+    export abstract class BaseDrawing<TData> extends ObjectWithMap implements IDrawing {
 
         private dataStack: TData[];
         protected hashService: HashService;

@@ -51,7 +51,8 @@
                     }
                 }
             });
-            data.bounds = leaftletGeoJson.getBounds();
+            data.northEast = leaftletGeoJson.getBounds().getNorthEast();
+            data.southWest = leaftletGeoJson.getBounds().getSouthWest();
             return data;
         }
 

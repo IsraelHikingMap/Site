@@ -71,7 +71,6 @@
             this.selectedRouteSegmentIndex = -1;
             this.currentRoutingType = Common.RoutingType.hike;
             this.enabled = false;
-            //this.hashService.addRoute(this.name);
             this.addDataToStack(this.getData());
             this.showKmMarkers = false;
             this.kmMarkersGroup = L.layerGroup([]);
@@ -444,7 +443,6 @@
             if (this.isRoutingPerPoint == false && firstRoutingType != null) {
                 this.currentRoutingType = firstRoutingType;
             }
-            //this.hashService.updateRoute(this.getData());
         }
 
         private internalClear = () => {
@@ -549,17 +547,10 @@
 
         private updateDataLayer = () => {
             var data = this.getData();
-            //this.hashService.updateRoute(data);
             this.addDataToStack(data);
             this.raiseRouteDataChanged();
             this.toggleKmMarkers(false);
         }
-
-        //protected postUndoHook = () => {
-        //    var data = this.getData();
-        //    this.hashService.updateRoute(data);
-        //}
-
 
         private snapToRoute = (latlng: L.LatLng): ISnappingResponse => {
             var polylines = [];
@@ -579,10 +570,7 @@
         
         public setName = (name: string) => {
             if (this.name != name) {
-                //this.hashService.removeRoute(this.name);
                 this.name = name;
-                //this.hashService.addRoute(this.name);
-                //this.hashService.updateRoute(this.getData());
             }
         }
 

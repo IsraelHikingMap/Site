@@ -414,11 +414,17 @@ module IsraelHiking.Services {
                 routes: [],
                 baseLayer: null,
                 overlays: [],
+                northEast: this.map.getBounds().getNorthEast(),
+                southWest: this.map.getBounds().getSouthWest(),
             };
 
-            container.markers = this.markers.getData();
-            for (var routeIndex = 0; routeIndex < this.routes.length; routeIndex++) {
-                container.routes.push(this.routes[routeIndex].getData());
+            if (this.markers.state != Drawing.DrawingState.hidden) {
+                container.markers = this.markers.getData();
+            }
+            for (var route of this.routes) {
+                if (route.state != Drawing.DrawingState.hidden) {
+                    container.routes.push(route.getData());
+                }
             }
             container.baseLayer = this.extractDataFromLayer(this.selectedBaseLayer);
             var visibaleOverlays = this.overlays.filter(overlay => overlay.visible);
@@ -428,17 +434,24 @@ module IsraelHiking.Services {
             return container;
         }
 
-        private setData = (dataContainer: Common.DataContainer, reroute: boolean) => {
+        public setData = (dataContainer: Common.DataContainer, reroute: boolean) => {
             if (dataContainer.routes.length == 0) {
                 dataContainer.routes.push(<Common.RouteData>{
                     name: this.createRouteName(),
                     segments: []
                 });
             }
-            for (var routeIndex = 0; routeIndex < dataContainer.routes.length; routeIndex++) {
-                this.routes.push(this.drawingFactory.createDrawingRoute(dataContainer.routes[routeIndex], reroute));
+            for (var route of dataContainer.routes) {
+                if (this.isNameAvailable(route.name) == false) {
+                    route.name = this.createRouteName();
+                } 
+                this.routes.push(this.drawingFactory.createDrawingRoute(route, reroute));
             }
             this.addMarkers(dataContainer.markers);
+            if (dataContainer.northEast != null && dataContainer.southWest != null) {
+                this.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));
+            }
+
             this.changeDrawingState((this.routes.length > 0) ? this.routes[0].name : this.markers.name);
         }
 
