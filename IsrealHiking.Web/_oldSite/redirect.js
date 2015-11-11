@@ -13,8 +13,8 @@ function redirect(isMTBMap) {
     } else {
         search = window.location.hash.split("?");
         var splittedpath = search[0].split("/");
-        if (splittedpath.length == 4) {
-            zoom = parseInt(splittedpath[splittedpath.length - 3]);
+        if (splittedpath.length == 3) {
+            zoom = parseInt(splittedpath[splittedpath.length - 3].replace("#", ""));
             lat = parseFloat(splittedpath[splittedpath.length - 2]);
             lng = parseFloat(splittedpath[splittedpath.length - 1].split("?")[0]);
             href = baseAddress + zoom + "/" + lat.toFixed(4) + "/" + lng.toFixed(4);
