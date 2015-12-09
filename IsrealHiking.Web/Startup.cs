@@ -36,7 +36,7 @@ namespace IsraelHiking.Web
         private UnityContainer RegisterUnityTypes(ILogger logger)
         {
             var container = new UnityContainer();
-            container.RegisterType<IRemoveFileFetcherGateway, RemoveFileFetcherGateway>();
+            container.RegisterType<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
             container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();

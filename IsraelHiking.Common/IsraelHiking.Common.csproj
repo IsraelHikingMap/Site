@@ -52,6 +52,7 @@
     <Compile Include="FeatureProperties.cs" />
     <Compile Include="LatLng.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="RemoteFileFetcherGatewayResponse.cs" />
     <Compile Include="RoutingGatewayRequest.cs" />
     <Compile Include="SiteUrl.cs" />
   </ItemGroup>

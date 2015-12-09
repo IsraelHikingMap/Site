@@ -52,7 +52,7 @@
     <Compile Include="IGpsBabelGateway.cs" />
     <Compile Include="IIsraelHikingRepository.cs" />
     <Compile Include="ILogger.cs" />
-    <Compile Include="IRemoveFileFetcherGateway.cs" />
+    <Compile Include="IRemoteFileFetcherGateway.cs" />
     <Compile Include="IRoutingGateway.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

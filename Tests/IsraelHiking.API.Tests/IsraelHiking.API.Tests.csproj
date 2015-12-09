@@ -87,6 +87,10 @@
       <Project>{9a4bb0a7-d567-4b56-9ec0-abb37a570147}</Project>
       <Name>IsraelHiking.API</Name>
     </ProjectReference>
+    <ProjectReference Include="..\..\IsraelHiking.Common\IsraelHiking.Common.csproj">
+      <Project>{37179794-eada-4067-88d6-c495d1950c19}</Project>
+      <Name>IsraelHiking.Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj">
       <Project>{7d11a010-ca5a-48ee-aa2a-bf063cca4ecf}</Project>
       <Name>IsraelHiking.DataAccessInterfaces</Name>

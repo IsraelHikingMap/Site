@@ -19,12 +19,12 @@ namespace IsraelHiking.API.Controllers
         private readonly ILogger _logger;
         private readonly IGpsBabelGateway _gpsBabelGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
-        private readonly IRemoveFileFetcherGateway _remoteFileFetcher;
+        private readonly IRemoteFileFetcherGateway _remoteFileFetcher;
 
         public ConvertFilesController(ILogger logger, 
             IGpsBabelGateway gpsBabelGateway, 
             IElevationDataStorage elevationDataStorage,
-            IRemoveFileFetcherGateway remoteFileFetcher)
+            IRemoteFileFetcherGateway remoteFileFetcher)
         {
             _gpsBabelGateway = gpsBabelGateway;
             _logger = logger;
@@ -35,9 +35,9 @@ namespace IsraelHiking.API.Controllers
         // GET api/ConvertFiles?url=http://jeeptrip.co.il/routes/pd6bccre.twl
         public async Task<FeatureCollection> GetRemoteFile(string url)
         {
-            var content = await _remoteFileFetcher.GetFileContent(url);
-            var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(url));
-            var convertedGpx = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, ConvertExtenstionToFormat(".gpx"));
+            var response = await _remoteFileFetcher.GetFileContent(url);
+            var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(response.FileName));
+            var convertedGpx = await _gpsBabelGateway.ConvertFileFromat(response.Content, inputFormat, ConvertExtenstionToFormat(".gpx"));
             var featureCollection = ConvertGpxContentToGeoJson(convertedGpx);
             return featureCollection;
         }
@@ -58,7 +58,8 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest();
             }
-            var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('\"')));
+            var fileName = streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('"');
+            var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(fileName));
             var content = await streamProvider.Contents.First().ReadAsByteArrayAsync();
             if (outputFormat.Equals("geojson", StringComparison.InvariantCultureIgnoreCase))
             {
@@ -66,13 +67,13 @@ namespace IsraelHiking.API.Controllers
                 var featureCollection = ConvertGpxContentToGeoJson(convertedGpx);
                 return Ok(featureCollection);
             }
-            var outputContent = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, outputFormat);
+            var outputContent = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, ConvertExtenstionToFormat(outputFormat));
             return Ok(outputContent);
         }
 
         private string ConvertExtenstionToFormat(string extension)
         {
-            extension = extension.Replace(".", "");
+            extension = extension.ToLower().Replace(".", "");
             if (extension == "twl")
             {
                 return "naviguide";
@@ -81,10 +82,8 @@ namespace IsraelHiking.API.Controllers
             {
                 return "gpx,gpxver=1.1";
             }
-            return extension.ToLower();
+            return extension;
         }
-
-
 
         private FeatureCollection ConvertGpxContentToGeoJson(byte[] content)
         {

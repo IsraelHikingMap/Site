@@ -107,7 +107,7 @@
     <Compile Include="GpsBabelGateway.cs" />
     <Compile Include="JsonResponse\JsonGraphHopperResponse.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="RemoveFileFetcherGateway.cs" />
+    <Compile Include="RemoteFileFetcherGateway.cs" />
     <Compile Include="RoutingGateway.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
