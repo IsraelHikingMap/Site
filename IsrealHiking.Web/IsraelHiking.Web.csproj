@@ -84,6 +84,7 @@
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="index.html" />
+    <Content Include="IsraelMTBmap.html" />
     <Content Include="_oldSite\index.html" />
     <Content Include="_oldSite\IsraelMTBmap.html" />
     <Content Include="packages.config">

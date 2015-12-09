@@ -298,19 +298,35 @@ module IsraelHiking.Services {
         private addDataFromHash = () => {
             if (this.hashService.siteUrl) {
                 this.$http.get(Common.Urls.urls + this.hashService.siteUrl).success((siteUrl: Common.SiteUrl) => {
-                    var data = JSON.parse(siteUrl.JsonData);
-                    this.setData(data, false);
-                    this.addBaseLayerFromHash(data.baseLayer);
-                    this.addOverlaysFromHash(data.overlays);
-                    this.hashService.clear();
+                    this.handleSiteUrlData(siteUrl.JsonData);
                 });
                 return;
-            } else {
-                var data = this.hashService.getDataContainer();
-                this.setData(data, true);
-                this.addBaseLayerFromHash(data.baseLayer);
-                this.hashService.clear();
+            } 
+            var data = this.hashService.getDataContainer();
+            this.setData(data, true);
+            this.addBaseLayerFromHash(data.baseLayer);
+            this.hashService.clear();
+        }
+
+        private handleSiteUrlData = (stringData: any) => {
+            var data = <Common.DataContainer>JSON.parse(stringData);
+            if (data.routes) {
+                for (let route of data.routes) {
+                    for (let segment of route.segments) {
+                        var latlngzs = <Common.LatLngZ[]>[];
+                        for (let latlngz of segment.latlngzs) {
+                            var fullLatLngZ = <Common.LatLngZ>L.latLng(latlngz.lat, latlngz.lng);
+                            fullLatLngZ.z = latlngz.z;
+                            latlngzs.push(fullLatLngZ);
+                        }
+                        segment.latlngzs = latlngzs;
+                    }
+                }
             }
+            this.setData(data, false);
+            this.addBaseLayerFromHash(data.baseLayer);
+            this.addOverlaysFromHash(data.overlays);
+            this.hashService.clear();
         }
 
         public getSelectedDrawing = (): Drawing.IDrawing => {
