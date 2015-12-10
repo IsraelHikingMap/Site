@@ -151,7 +151,7 @@
                     }
                 });
                 gpx_str = JXON.stringify(gpx);
-                return gpx_str;
+                return '<?xml version="1.0" encoding="UTF-8"?>' + gpx_str;
             };
 
             module.exports = togpx;
@@ -274,24 +274,30 @@
                     for (var sName in oParentObj) {
                         vValue = oParentObj[sName];
                         if (isFinite(sName) || vValue instanceof Function) { continue; } /* verbosity level is 0 */
+                        // when it is _
                         if (sName === sValueProp) {
                             if (vValue !== null && vValue !== true) { oParentEl.appendChild(oXMLDoc.createTextNode(vValue.constructor === Date ? vValue.toGMTString() : String(vValue))); }
                         } else if (sName === sAttributesProp) { /* verbosity level is 3 */
                             for (var sAttrib in vValue) { oParentEl.setAttribute(sAttrib, vValue[sAttrib]); }
+                        } else if (sName === sAttrPref + 'xmlns') {
+                            // do nothing: special handling of xml namespaces is done via createElementNS()
                         } else if (sName.charAt(0) === sAttrPref) {
                             oParentEl.setAttribute(sName.slice(1), vValue);
                         } else if (vValue.constructor === Array) {
                             for (var nItem = 0; nItem < vValue.length; nItem++) {
-                                oChild = oXMLDoc.createElement(sName);
+                                oChild = oXMLDoc.createElementNS(vValue[nItem][sAttrPref + 'xmlns'] || oParentEl.namespaceURI, sName);
                                 loadObjTree(oXMLDoc, oChild, vValue[nItem]);
                                 oParentEl.appendChild(oChild);
                             }
                         } else {
-                            oChild = oXMLDoc.createElement(sName);
+                            oChild = oXMLDoc.createElementNS((vValue || {})[sAttrPref + 'xmlns'] || oParentEl.namespaceURI, sName);
                             if (vValue instanceof Object) {
                                 loadObjTree(oXMLDoc, oChild, vValue);
                             } else if (vValue !== null && vValue !== true) {
                                 oChild.appendChild(oXMLDoc.createTextNode(vValue.toString()));
+                            } else if (!sEmptyTrue && vValue === true) {
+                                oChild.appendChild(oXMLDoc.createTextNode(vValue.toString()));
+
                             }
                             oParentEl.appendChild(oChild);
                         }
