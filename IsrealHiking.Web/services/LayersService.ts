@@ -320,7 +320,13 @@ module IsraelHiking.Services {
                             latlngzs.push(fullLatLngZ);
                         }
                         segment.latlngzs = latlngzs;
+                        segment.routePoint = L.latLng(segment.routePoint.lat, segment.routePoint.lng);
                     }
+                }
+            }
+            if (data.markers) {
+                for (let marker of data.markers) {
+                    marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng)
                 }
             }
             this.setData(data, false);
