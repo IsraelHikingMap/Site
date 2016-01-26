@@ -8,18 +8,19 @@
         title: string;
         setTitle(title: string): void;
         itmCoordinates: INorthEast;
-        marker: IsraelHiking.Services.Drawing.MarkerWithTitle
+        marker: IsraelHiking.Services.Drawing.MarkerWithTitle;
+        latLng: L.LatLng;
     }
 
     export class MarkerPopupController {
         constructor($scope: IMarkerPopupScope,
             $http: angular.IHttpService) {
             $scope.marker.on("popupopen", () => {
-                var latLng = $scope.marker.getLatLng();
+                $scope.latLng = $scope.marker.getLatLng();
                 $http.get(Common.Urls.itmGrid, <angular.IRequestShortcutConfig> {
                     params: {
-                        lat: latLng.lat,
-                        lon: latLng.lng
+                        lat: $scope.latLng.lat,
+                        lon: $scope.latLng.lng
                     }
                 }).success((northEast: INorthEast) => {
                     $scope.itmCoordinates = northEast;
