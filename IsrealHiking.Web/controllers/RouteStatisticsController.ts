@@ -139,8 +139,8 @@
             }
             $scope.chart.options.colors = [this.drawingRoute.getColor()];
             $scope.chart.options.vAxis.viewWindow = <google.visualization.ChartViewWindow>{
-                min: _.min(statistics.points, (point) => point.y).y,
-                max: _.max(statistics.points, (point) => point.y).y,
+                min: _.minBy(statistics.points, (pointToMin) => pointToMin.y).y,
+                max: _.maxBy(statistics.points, (pointToMax) => pointToMax.y).y,
             }
             $scope.length = this.toDisplayableUnit(statistics.length);
             $scope.gain = this.toDisplayableUnit(statistics.gain);

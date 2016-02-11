@@ -1,5 +1,5 @@
 /**
- * @license AngularJS v1.4.7
+ * @license AngularJS v1.4.9
  * (c) 2010-2015 Google, Inc. http://angularjs.org
  * License: MIT
  */
@@ -758,6 +758,15 @@ angular.mock.TzDate = function(offset, timestamp) {
 angular.mock.TzDate.prototype = Date.prototype;
 /* jshint +W101 */
 
+
+/**
+ * @ngdoc service
+ * @name $animate
+ *
+ * @description
+ * Mock implementation of the {@link ng.$animate `$animate`} service. Exposes two additional methods
+ * for testing animations.
+ */
 angular.mock.animate = angular.module('ngAnimateMock', ['ng'])
 
   .config(['$provide', function($provide) {
@@ -790,9 +799,50 @@ angular.mock.animate = angular.module('ngAnimateMock', ['ng'])
       return queueFn;
     });
 
-    $provide.decorator('$animate', ['$delegate', '$timeout', '$browser', '$$rAF',
+    $provide.decorator('$$animateJs', ['$delegate', function($delegate) {
+      var runners = [];
+
+      var animateJsConstructor = function() {
+        var animator = $delegate.apply($delegate, arguments);
+        // If no javascript animation is found, animator is undefined
+        if (animator) {
+          runners.push(animator);
+        }
+        return animator;
+      };
+
+      animateJsConstructor.$closeAndFlush = function() {
+        runners.forEach(function(runner) {
+          runner.end();
+        });
+        runners = [];
+      };
+
+      return animateJsConstructor;
+    }]);
+
+    $provide.decorator('$animateCss', ['$delegate', function($delegate) {
+      var runners = [];
+
+      var animateCssConstructor = function(element, options) {
+        var animator = $delegate(element, options);
+        runners.push(animator);
+        return animator;
+      };
+
+      animateCssConstructor.$closeAndFlush = function() {
+        runners.forEach(function(runner) {
+          runner.end();
+        });
+        runners = [];
+      };
+
+      return animateCssConstructor;
+    }]);
+
+    $provide.decorator('$animate', ['$delegate', '$timeout', '$browser', '$$rAF', '$animateCss', '$$animateJs',
                                     '$$forceReflow', '$$animateAsyncRun', '$rootScope',
-                            function($delegate,   $timeout,   $browser,   $$rAF,
+                            function($delegate,   $timeout,   $browser,   $$rAF,   $animateCss,   $$animateJs,
                                      $$forceReflow,   $$animateAsyncRun,  $rootScope) {
       var animate = {
         queue: [],
@@ -804,7 +854,35 @@ angular.mock.animate = angular.module('ngAnimateMock', ['ng'])
           return $$forceReflow.totalReflows;
         },
         enabled: $delegate.enabled,
-        flush: function() {
+        /**
+         * @ngdoc method
+         * @name $animate#closeAndFlush
+         * @description
+         *
+         * This method will close all pending animations (both {@link ngAnimate#javascript-based-animations Javascript}
+         * and {@link ngAnimate.$animateCss CSS}) and it will also flush any remaining animation frames and/or callbacks.
+         */
+        closeAndFlush: function() {
+          // we allow the flush command to swallow the errors
+          // because depending on whether CSS or JS animations are
+          // used, there may not be a RAF flush. The primary flush
+          // at the end of this function must throw an exception
+          // because it will track if there were pending animations
+          this.flush(true);
+          $animateCss.$closeAndFlush();
+          $$animateJs.$closeAndFlush();
+          this.flush();
+        },
+        /**
+         * @ngdoc method
+         * @name $animate#flush
+         * @description
+         *
+         * This method is used to flush the pending callbacks and animation frames to either start
+         * an animation or conclude an animation. Note that this will not actually close an
+         * actively running animation (see {@link ngMock.$animate#closeAndFlush `closeAndFlush()`} for that).
+         */
+        flush: function(hideErrors) {
           $rootScope.$digest();
 
           var doNextRun, somethingFlushed = false;
@@ -821,7 +899,7 @@ angular.mock.animate = angular.module('ngAnimateMock', ['ng'])
             }
           } while (doNextRun);
 
-          if (!somethingFlushed) {
+          if (!somethingFlushed && !hideErrors) {
             throw new Error('No pending animations ready to be closed or flushed');
           }
 
@@ -1837,7 +1915,7 @@ angular.mock.$RootElementProvider = function() {
  *
  * // Controller definition ...
  *
- * myMod.controller('MyDirectiveController', ['log', function($log) {
+ * myMod.controller('MyDirectiveController', ['$log', function($log) {
  *   $log.info(this.name);
  * })];
  *
@@ -2278,8 +2356,9 @@ if (window.jasmine || window.mocha) {
    * @param {...(string|Function|Object)} fns any number of modules which are represented as string
    *        aliases or as anonymous module initialization functions. The modules are used to
    *        configure the injector. The 'ng' and 'ngMock' modules are automatically loaded. If an
-   *        object literal is passed they will be registered as values in the module, the key being
-   *        the module name and the value being what is returned.
+   *        object literal is passed each key-value pair will be registered on the module via
+   *        {@link auto.$provide $provide}.value, the key being the string name (or token) to associate
+   *        with the value on the injector.
    */
   window.module = angular.mock.module = function() {
     var moduleFns = Array.prototype.slice.call(arguments, 0);

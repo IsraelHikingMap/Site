@@ -271,7 +271,7 @@ module IsraelHiking.Services {
         public createRouteName = () => {
             var index = 1;
             var routeName = "Route " + index;
-            while (_.any(this.routes, (route) => route.name == routeName)) {
+            while (_.some(this.routes, (route) => route.name == routeName)) {
                 index++;
                 routeName = "Route " + index;
             }

@@ -37,8 +37,8 @@
                 if ($files.length <= 0) {
                     return;
                 }
-                Upload.upload(<angular.angularFileUpload.IFileUploadConfig>{
-                    file: $files.shift(),
+                Upload.upload(<angular.angularFileUpload.IFileUploadConfigFile>{
+                    data: { file: $files.shift() },
                     url: Common.Urls.convertFiles + "?outputFormat=geojson",
                 }).success((content: GeoJSON.FeatureCollection) => {
                     var dataContainer = fileService.readFromFile(content);
