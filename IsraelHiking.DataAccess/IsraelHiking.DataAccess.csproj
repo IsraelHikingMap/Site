@@ -106,7 +106,7 @@
     <Compile Include="Database\IsraelHikingRepository.cs" />
     <Compile Include="ElevationDataStorage.cs" />
     <Compile Include="GpsBabelGateway.cs" />
-    <Compile Include="GraphHopper\GraphHopperInitializer.cs" />
+    <Compile Include="GraphHopper\GraphHopperHelper.cs" />
     <Compile Include="JsonResponse\JsonGraphHopperResponse.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="ProcessHelper.cs" />
@@ -163,9 +163,6 @@
     <None Include="GraphHopper\israel-and-palestine-latest.osm.pbf">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="GraphHopper\refresh.cmd">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
@@ -181,9 +178,7 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="GraphHopper\graphhopper-tools-0.6.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
+    <Content Include="GraphHopper\graphhopper-tools-0.6.0.jar" />
     <Content Include="GraphHopper\graphhopper-web-0.6.0-with-dep.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

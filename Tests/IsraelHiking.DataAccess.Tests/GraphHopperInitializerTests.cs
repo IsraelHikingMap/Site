@@ -1,4 +1,6 @@
-﻿using IsraelHiking.DataAccess.GraphHopper;
+﻿using System.IO;
+using System.Reflection;
+using IsraelHiking.DataAccess.GraphHopper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IsraelHiking.DataAccess.Tests
@@ -11,8 +13,8 @@ namespace IsraelHiking.DataAccess.Tests
         public void Initialize_ShouldAddService()
         {
             var logger = new TraceLogger();
-            GraphHopperInitializer init = new GraphHopperInitializer(logger, new ProcessHelper(logger));
-            init.InstallServiceIfNeeded();
+            GraphHopperHelper init = new GraphHopperHelper(logger, new ProcessHelper(logger));
+            init.Initialize(Path.GetDirectoryName(Assembly.GetAssembly(typeof(GraphHopperInitializerTests)).Location));
         }
     }
 }

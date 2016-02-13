@@ -7,22 +7,22 @@ namespace IsraelHiking.Web
 {
     public class UnityResolver : IDependencyResolver
     {
-        protected IUnityContainer container;
+        private readonly IUnityContainer _container;
 
         public UnityResolver(IUnityContainer container)
         {
             if (container == null)
             {
-                throw new ArgumentNullException("container");
+                throw new ArgumentNullException(nameof(container));
             }
-            this.container = container;
+            _container = container;
         }
 
         public object GetService(Type serviceType)
         {
             try
             {
-                return container.Resolve(serviceType);
+                return _container.Resolve(serviceType);
             }
             catch (ResolutionFailedException)
             {
@@ -34,7 +34,7 @@ namespace IsraelHiking.Web
         {
             try
             {
-                return container.ResolveAll(serviceType);
+                return _container.ResolveAll(serviceType);
             }
             catch (ResolutionFailedException)
             {
@@ -44,13 +44,13 @@ namespace IsraelHiking.Web
 
         public IDependencyScope BeginScope()
         {
-            var child = container.CreateChildContainer();
+            var child = _container.CreateChildContainer();
             return new UnityResolver(child);
         }
 
         public void Dispose()
         {
-            container.Dispose();
+            _container.Dispose();
         }
     }
 }

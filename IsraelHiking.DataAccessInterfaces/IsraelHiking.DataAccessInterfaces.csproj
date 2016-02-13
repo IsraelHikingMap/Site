@@ -50,6 +50,7 @@
   <ItemGroup>
     <Compile Include="IElevationDataStorage.cs" />
     <Compile Include="IGpsBabelGateway.cs" />
+    <Compile Include="IGraphHopperHelper.cs" />
     <Compile Include="IIsraelHikingRepository.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="IProcessHelper.cs" />

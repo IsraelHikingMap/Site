@@ -1,4 +1,5 @@
-﻿using Microsoft.Owin;
+﻿using System;
+using Microsoft.Owin;
 using Owin;
 using System.Net.Http.Headers;
 using System.Web.Http;
@@ -7,6 +8,7 @@ using System.Web.Http.ExceptionHandling;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccess.Database;
+using IsraelHiking.DataAccess.GraphHopper;
 using IsraelTransverseMercator;
 
 [assembly: OwinStartup(typeof(IsraelHiking.Web.Startup))]
@@ -19,7 +21,7 @@ namespace IsraelHiking.Web
         public void Configuration(IAppBuilder app)
         {
             ILogger logger = new Logger();
-            logger.Debug("Starting Israel Hiking Server.");
+            logger.Info("Starting Israel Hiking Server.");
             var config = new HttpConfiguration();
             WebApiConfig.Register(config);
 
@@ -30,7 +32,7 @@ namespace IsraelHiking.Web
             config.DependencyResolver = new UnityResolver(RegisterUnityTypes(logger));
 
             app.UseWebApi(config);
-            logger.Debug("Israel Hiking Server is up and running.");
+            logger.Info("Israel Hiking Server is up and running.");
         }
 
         private UnityContainer RegisterUnityTypes(ILogger logger)
@@ -41,13 +43,16 @@ namespace IsraelHiking.Web
             container.RegisterType<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
             container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
+            container.RegisterType<IGraphHopperHelper, GraphHopperHelper>(new ContainerControlledLifetimeManager());
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();
             container.RegisterType<IRoutingGateway, RoutingGateway>();
             container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
             
-            logger.Debug("Initializing Elevation data.");
-            container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Debug("Finished loading elevation data from files."));
+            // HM TODO: add hangfire for scheduling.
 
+            logger.Info("Initializing Elevation data and Graph Hopper Service");
+            container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Info("Finished loading elevation data from files."));
+            container.Resolve<IGraphHopperHelper>().Initialize(AppDomain.CurrentDomain.BaseDirectory).ContinueWith(task => logger.Info("Finished initializing Graph Hopper service."));
             return container;
         }
     }
