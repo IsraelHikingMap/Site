@@ -13,9 +13,9 @@ namespace IsraelHiking.DataAccess
     {
         private readonly ILogger _logger;
 
-        public RoutingGateway()
+        public RoutingGateway(ILogger logger)
         {
-            _logger = new Logger();
+            _logger = logger;
         }
 
         public async Task<LineString> GetRouting(RoutingGatewayRequest request)

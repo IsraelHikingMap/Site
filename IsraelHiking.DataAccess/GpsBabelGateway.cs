@@ -9,32 +9,28 @@ namespace IsraelHiking.DataAccess
     public class GpsBabelGateway : IGpsBabelGateway
     {
         private readonly ILogger _logger;
+        private readonly IProcessHelper _processHelper;
         private const string GPS_BABEL_EXE = "gpsbabel.exe";
         private const string GPS_DIRECTORY_KEY = "gpsbabel";
 
-        public GpsBabelGateway()
+        public GpsBabelGateway(ILogger logger, IProcessHelper processHelper)
         {
-            _logger = new Logger();
+            _logger = logger;
+            _processHelper = processHelper;
         }
 
         public Task<byte[]> ConvertFileFromat(byte[] content, string inputFormat, string outputFromat)
         {
             return Task.Run(() =>
             {
-                var inputTempfileName = Path.GetTempFileName(); // file names are created to overcome utf-8 issues in file name.
+                var inputTempfileName = Path.GetTempFileName();
+                // file names are created to overcome utf-8 issues in file name.
                 var outputTempfileName = Path.GetTempFileName();
                 File.WriteAllBytes(inputTempfileName, content);
-                var workingDirectory = ConfigurationManager.AppSettings[GPS_DIRECTORY_KEY].ToString();
-                var arguments = "-i " + inputFormat + " -f \"" + inputTempfileName + "\" -o " + outputFromat + " -F \"" + outputTempfileName + "\"";
-                _logger.Debug("Running: " + Path.Combine(workingDirectory, GPS_BABEL_EXE) + " " + arguments);
-                var process = Process.Start(new ProcessStartInfo
-                {
-                    FileName = GPS_BABEL_EXE,
-                    Arguments = arguments,
-                    WorkingDirectory = workingDirectory,
-                    WindowStyle = ProcessWindowStyle.Hidden,
-                });
-                process.WaitForExit(10000);
+                var workingDirectory = ConfigurationManager.AppSettings[GPS_DIRECTORY_KEY];
+                var arguments = "-i " + inputFormat + " -f \"" + inputTempfileName + "\" -o " + outputFromat + " -F \"" +
+                                outputTempfileName + "\"";
+                _processHelper.Start(GPS_BABEL_EXE, arguments, workingDirectory);
                 File.Delete(inputTempfileName);
                 var outputContent = File.ReadAllBytes(outputTempfileName);
                 File.Delete(outputTempfileName);

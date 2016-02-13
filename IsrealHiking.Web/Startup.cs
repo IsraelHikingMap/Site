@@ -36,16 +36,17 @@ namespace IsraelHiking.Web
         private UnityContainer RegisterUnityTypes(ILogger logger)
         {
             var container = new UnityContainer();
+            container.RegisterType<ILogger, Logger>();
+            container.RegisterType<IProcessHelper, ProcessHelper>();
             container.RegisterType<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
             container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();
             container.RegisterType<IRoutingGateway, RoutingGateway>();
             container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
-            container.RegisterType<ILogger, Logger>();
-
+            
             logger.Debug("Initializing Elevation data.");
-            container.Resolve<IElevationDataStorage>().Initialize().ContinueWith((task) => logger.Debug("Finished loading elevation data from files."));
+            container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Debug("Finished loading elevation data from files."));
 
             return container;
         }

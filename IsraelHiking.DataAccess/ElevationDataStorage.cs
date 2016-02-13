@@ -12,6 +12,7 @@ namespace IsraelHiking.DataAccess
 {
     public class ElevationDataStorage : IElevationDataStorage
     {
+        private const string HGT_FOLDER_KEY = "hgtFolder";
         private readonly Dictionary<LatLng, short[,]> _elevationData;
         private readonly ILogger _logger;
 
@@ -25,7 +26,7 @@ namespace IsraelHiking.DataAccess
         {
             return Task.Run(() =>
             {
-                var hgtFolder = ConfigurationManager.AppSettings["hgtFolder"].ToString();
+                var hgtFolder = ConfigurationManager.AppSettings[HGT_FOLDER_KEY];
                 if (Directory.Exists(hgtFolder) == false)
                 {
                     _logger.Error("!!! The folder: " + hgtFolder + " does not exists, please change the hgtFolder key in the configuration file !!!");
