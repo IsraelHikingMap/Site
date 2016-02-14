@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Configuration;
 using Microsoft.Owin;
 using Owin;
 using System.Net.Http.Headers;
@@ -10,6 +11,8 @@ using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccess.Database;
 using IsraelHiking.DataAccess.GraphHopper;
 using IsraelTransverseMercator;
+using Microsoft.Owin.FileSystems;
+using Microsoft.Owin.StaticFiles;
 
 [assembly: OwinStartup(typeof(IsraelHiking.Web.Startup))]
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
@@ -18,6 +21,8 @@ namespace IsraelHiking.Web
 {
     public class Startup
     {
+        private const string DIRECTORY_LISTING_KEY = "directoryListing";
+
         public void Configuration(IAppBuilder app)
         {
             ILogger logger = new Logger();
@@ -32,7 +37,26 @@ namespace IsraelHiking.Web
             config.DependencyResolver = new UnityResolver(RegisterUnityTypes(logger));
 
             app.UseWebApi(config);
+            SetupFileServer(app, logger);
             logger.Info("Israel Hiking Server is up and running.");
+        }
+
+        private void SetupFileServer(IAppBuilder app, ILogger logger)
+        {
+            var physicalPath = ConfigurationManager.AppSettings[DIRECTORY_LISTING_KEY];
+            logger.Info("Seting-up file server for folder " + physicalPath);
+            var physicalFileSystem = new PhysicalFileSystem(physicalPath);
+            var options = new FileServerOptions
+            {
+                EnableDefaultFiles = true,
+                EnableDirectoryBrowsing = true,
+                FileSystem = physicalFileSystem,
+                RequestPath = new PathString("/files")
+            };
+            options.StaticFileOptions.FileSystem = physicalFileSystem;
+            options.StaticFileOptions.ServeUnknownFileTypes = true;
+
+            app.UseFileServer(options);
         }
 
         private UnityContainer RegisterUnityTypes(ILogger logger)
