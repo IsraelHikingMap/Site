@@ -48,8 +48,6 @@ namespace IsraelHiking.Web
             container.RegisterType<IRoutingGateway, RoutingGateway>();
             container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
             
-            // HM TODO: add hangfire for scheduling.
-
             logger.Info("Initializing Elevation data and Graph Hopper Service");
             container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Info("Finished loading elevation data from files."));
             container.Resolve<IGraphHopperHelper>().Initialize(AppDomain.CurrentDomain.BaseDirectory).ContinueWith(task => logger.Info("Finished initializing Graph Hopper service."));

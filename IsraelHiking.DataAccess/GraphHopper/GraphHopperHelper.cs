@@ -133,14 +133,20 @@ namespace IsraelHiking.DataAccess.GraphHopper
 
         private async Task GetLatestOsmData()
         {
-            using (var httpClient = new HttpClient())
+            using (var httpClient = new HttpClient { Timeout = new TimeSpan(0, 0, 30, 0) })
             {
                 var address = "http://download.geofabrik.de/asia/" + PBF_FILE_NAME;
                 _logger.Info("Fetching " + address);
-                var content = await httpClient.GetAsync(address);
+                var content = await httpClient.GetAsync(address).ConfigureAwait(false);
                 var fileFullPath = Path.Combine(WorkingDirectory, PBF_FILE_NAME);
-                _logger.Info("Saving to " + fileFullPath);
-                File.WriteAllBytes(fileFullPath, await content.Content.ReadAsByteArrayAsync());
+                if (File.Exists(fileFullPath))
+                {
+                    _logger.Info("Deleting " + fileFullPath);
+                    File.Delete(fileFullPath);
+                }
+                _logger.Info("Saving new content to " + fileFullPath);
+                var fileContent = await content.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                File.WriteAllBytes(fileFullPath, fileContent);
             }
         }
     }

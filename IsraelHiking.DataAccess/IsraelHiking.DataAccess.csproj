@@ -178,7 +178,9 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="GraphHopper\graphhopper-tools-0.6.0.jar" />
+    <Content Include="GraphHopper\graphhopper-tools-0.6.0.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="GraphHopper\graphhopper-web-0.6.0-with-dep.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
