@@ -346,6 +346,10 @@
       <Project>{432a397c-869c-4045-acd7-09051745d62c}</Project>
       <Name>IsraelHiking.DataAccess</Name>
     </ProjectReference>
+    <ProjectReference Include="..\IsraelHiking.Updater\IsraelHiking.Updater.csproj">
+      <Project>{5a90cc1c-f51d-4663-b2a9-4c260873b570}</Project>
+      <Name>IsraelHiking.Updater</Name>
+    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <Reference Include="EntityFramework, Version=6.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">

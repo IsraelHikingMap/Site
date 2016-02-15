@@ -25,7 +25,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
         {
             _logger = logger;
             _processHelper = processHelper;
-            var assemblyPath = Path.GetDirectoryName(Assembly.GetAssembly(typeof (GraphHopperHelper)).Location) ?? string.Empty;
+            var assemblyPath = Path.GetDirectoryName(Assembly.GetAssembly(typeof(GraphHopperHelper)).Location) ?? string.Empty;
             WorkingDirectory = Path.Combine(assemblyPath, "GraphHopper");
             if (string.IsNullOrEmpty(WorkingDirectory))
             {
@@ -37,7 +37,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
         {
             return Task.Run(() =>
             {
-                WorkingDirectory = Path.Combine(serverPath, "bin", "GraphHopper");
+                WorkingDirectory = Path.Combine(serverPath, "GraphHopper");
                 var serviceController = GetService();
                 if (serviceController != null && serviceController.Status == ServiceControllerStatus.Running)
                 {
@@ -92,24 +92,13 @@ namespace IsraelHiking.DataAccess.GraphHopper
         public async Task UpdateData()
         {
             await GetLatestOsmData();
-            var oldDirectory = Path.Combine(WorkingDirectory, "israel-and-palestine-latest.osm-gh-old");
             var currentDirectory = Path.Combine(WorkingDirectory, "israel-and-palestine-latest.osm-gh");
+            var oldDirectory = Path.Combine(WorkingDirectory, "israel-and-palestine-latest.osm-gh-old");
             var newDirectory = Path.Combine(WorkingDirectory, GH_NEW_CACHE_FOLDER);
-            foreach (var directory in new[] {oldDirectory, newDirectory}.Where(Directory.Exists))
-            {
-                _logger.Info("Deleting " + directory);
-                try
-                {
-                    Directory.Delete(directory, true);
-                }
-                catch (Exception ex)
-                {
-                    _logger.Error($"Unable to delete {directory} {ex}");
-                }
-            }
+            DeleteDirectories();
 
             _logger.Info("Creating graph hopper cache based on latest pbf file");
-            _processHelper.Start("java", $"-cp \"*\" com.graphhopper.tools.Import config=config-example.properties osmreader.osm={PBF_FILE_NAME} graph.location={GH_NEW_CACHE_FOLDER}", WorkingDirectory, 30 * 60 * 1000);
+            _processHelper.Start("cmd", $"/c java -cp \"*\" com.graphhopper.tools.Import config=config-example.properties osmreader.osm={PBF_FILE_NAME} graph.location={GH_NEW_CACHE_FOLDER} > UpdateCache.log", WorkingDirectory, 30 * 60 * 1000);
 
             _processHelper.Start(NSSM_EXE, $"stop {GRAPH_HOPPER_ROUTING_SERVICE_NAME}", WorkingDirectory);
             try
@@ -124,6 +113,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
                     _logger.Info($"moving {newDirectory} to {currentDirectory}");
                     Directory.Move(newDirectory, currentDirectory);
                 }
+                DeleteDirectories();
             }
             finally
             {
@@ -144,9 +134,28 @@ namespace IsraelHiking.DataAccess.GraphHopper
                     _logger.Info("Deleting " + fileFullPath);
                     File.Delete(fileFullPath);
                 }
-                _logger.Info("Saving new content to " + fileFullPath);
                 var fileContent = await content.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                _logger.Info("Saving new content to " + fileFullPath);
                 File.WriteAllBytes(fileFullPath, fileContent);
+                _logger.Debug("done");
+            }
+        }
+
+        private void DeleteDirectories()
+        {
+            var oldDirectory = Path.Combine(WorkingDirectory, "israel-and-palestine-latest.osm-gh-old");
+            var newDirectory = Path.Combine(WorkingDirectory, GH_NEW_CACHE_FOLDER);
+            foreach (var directory in new[] { oldDirectory, newDirectory }.Where(Directory.Exists))
+            {
+                _logger.Info("Deleting " + directory);
+                try
+                {
+                    Directory.Delete(directory, true);
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error($"Unable to delete {directory} {ex}");
+                }
             }
         }
     }

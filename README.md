@@ -7,8 +7,10 @@ The technology stack of this site is base on the following frameworks:
 * [AngularJS](https://angularjs.org/)
 * [Leaflet](http://leafletjs.com/)
 * [Jasmine](http://jasmine.github.io/) + [Chutzpah](https://chutzpah.codeplex.com/) + [PhantomJS](http://phantomjs.org/) - for unit testing.
+* [Asp.Net Web Api](http://www.asp.net/web-api)
+* [Sqlite](https://www.sqlite.org/)
 
-# Architecture and folder stucture
+# Architecture and folder stucture of UI
 The architecture is based heavily on AngularJS:
 * common - used to store data types that are common to the entire app.
 * content - used for css files and images.
@@ -20,6 +22,13 @@ The architecture is based heavily on AngularJS:
  * routers - handles the routing - currently there are 4 routers - hike, bike, fourbyfour and none.
 * views - represents the UI - all HTML should be placed there
  
+# Architecture of Server
+The architecture is based on layer
+* Contollers - the top most layer to catch all the requests
+* DataAccessInterfaces - a slim layer to decouple business logic from data access
+* DataAccess - database, file system and network request are processed in this layer
+* Updater will be discussed below.  
+
 # Setting up this project
 In order to be able to see this site you'll need some tools:
 * Download and install [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or later.
@@ -29,9 +38,6 @@ In order to be able to see this site you'll need some tools:
 In order to be able to make the server work a few prerequisits are needed:
 * Windows machine with IIS enabled and a site.
 * Install Java Runtime Environment. 
-* Download and extract [Graphhopper](https://graphhopper.com/public/releases/graphhopper-web-0.5.0-bin.zip).
-* Copy the elevation files from our IsraelHiking.DataAccess\elevation-cache to _graphhopper folder_\elevation-cahce.
 * Install [GpsBabel for windows](http://www.gpsbabel.org/download.html#downloading).
-* Download Israel pbf file from [Geofabrik](http://download.geofabrik.de/asia/israel-and-palestine.html) and place it in _graphhopper folder_\israel-and-palestine-latest.osm.pbf.
-* Copy config-example.properties to graphhopper folder. 
-* java -jar graphhopper-web-0.5.0-with-dep.jar jetty.resourcebase=webapp config=config-example.properties osmreader.osm=israel-and-palestine-latest.osm.pbf.
+* As administrator run IsraelHiking.Updater.exe - this will create a service to run Graph Hopper so it will always be up.
+* Add a task to windows scheduler to run the updater as administrator once a day or so to update the routing file.

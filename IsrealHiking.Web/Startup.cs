@@ -67,14 +67,12 @@ namespace IsraelHiking.Web
             container.RegisterType<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
             container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
-            container.RegisterType<IGraphHopperHelper, GraphHopperHelper>(new ContainerControlledLifetimeManager());
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();
             container.RegisterType<IRoutingGateway, RoutingGateway>();
             container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
             
             logger.Info("Initializing Elevation data and Graph Hopper Service");
             container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Info("Finished loading elevation data from files."));
-            container.Resolve<IGraphHopperHelper>().Initialize(AppDomain.CurrentDomain.BaseDirectory).ContinueWith(task => logger.Info("Finished initializing Graph Hopper service."));
             return container;
         }
     }

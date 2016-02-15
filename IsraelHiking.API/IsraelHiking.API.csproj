@@ -64,7 +64,6 @@
     <Compile Include="Controllers\ElevationController.cs" />
     <Compile Include="Controllers\ItmGridController.cs" />
     <Compile Include="Controllers\RoutingController.cs" />
-    <Compile Include="Controllers\UpdateDataController.cs" />
     <Compile Include="Controllers\UrlsController.cs" />
     <Compile Include="Gpx\GpxTypes.cs">
       <DependentUpon>GpxTypes.xsd</DependentUpon>
