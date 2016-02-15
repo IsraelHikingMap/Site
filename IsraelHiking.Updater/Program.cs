@@ -23,8 +23,6 @@ namespace IsraelHiking.Updater
             {
                 logger.Error("Failed updating data with exception: " + ex);
             }
-            
-            Console.ReadLine();
         }
     }
 }
