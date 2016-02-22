@@ -22,7 +22,7 @@
 
         public saveToFile = (fileName: string, data: Common.DataContainer): angular.IPromise<{}> => {
             var extension = fileName.split('.').pop();
-            var geoJsonParser = this.parserFactory.Create(Parsers.ParserType.geojson);
+            var geoJsonParser = this.parserFactory.create(Parsers.ParserType.geojson);
             var geoJsonString = geoJsonParser.toString(data);
             var geoJsonBlob = new Blob([geoJsonString], { type: "application/json" });
             if (extension == Parsers.ParserType.geojson) {
@@ -49,7 +49,7 @@
         }
 
         public readFromFile = (content: GeoJSON.FeatureCollection): Common.DataContainer => {
-            var geoJsonParser = this.parserFactory.Create(Parsers.ParserType.geojson);
+            var geoJsonParser = this.parserFactory.create(Parsers.ParserType.geojson);
             var data = geoJsonParser.parse(JSON.stringify(content));
             data.routes = this.manipulateRoutesData(data.routes, Common.RoutingType.none);
             return data;

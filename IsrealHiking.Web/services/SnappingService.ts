@@ -24,7 +24,7 @@
             super(mapService);
 
             this.$http = $http;
-            this.osmParser = parserFactory.Create(Parsers.ParserType.osm);
+            this.osmParser = parserFactory.create(Parsers.ParserType.osm);
             this.snappings = L.layerGroup([]);
             this.map.addLayer(this.snappings);
             this.generateSnappings();
