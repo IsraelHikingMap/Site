@@ -4,48 +4,53 @@
         private static MAX_SEGMENTS_NUMBER = 20;
         private static MINIMAL_SEGMENT_LENGTH = 500; // meter
 
+        private $q: angular.IQService;
         private parserFactory: Parsers.ParserFactory;
         private elevationProvider: Services.Elevation.IElevationProvider;
+        private Upload: angular.angularFileUpload.IUploadService;
 
-        constructor(parserFactory: Parsers.ParserFactory,
-            elevationProvider: Services.Elevation.IElevationProvider) {
+
+        constructor($q: angular.IQService,
+            parserFactory: Parsers.ParserFactory,
+            elevationProvider: Services.Elevation.IElevationProvider,
+            Upload: angular.angularFileUpload.IUploadService) {
+            this.$q = $q;
             this.parserFactory = parserFactory;
             this.elevationProvider = elevationProvider;
+            this.Upload = Upload;
         }
 
-        public saveToFile = (fileName: string, data: Common.DataContainer) => {
+        public saveToFile = (fileName: string, data: Common.DataContainer): angular.IPromise<{}> => {
             var extension = fileName.split('.').pop();
-            var parser = this.parserFactory.Create(extension);
-            var dataString = parser.toString(data);
-            var blob = new Blob([dataString], { type: "application/json" });
-            this.saveDataToFile(fileName, blob);
+            var geoJsonParser = this.parserFactory.Create(Parsers.ParserType.geojson);
+            var geoJsonString = geoJsonParser.toString(data);
+            var geoJsonBlob = new Blob([geoJsonString], { type: "application/json" });
+            if (extension == Parsers.ParserType.geojson) {
+                saveAs(geoJsonBlob, fileName);
+                return this.$q.resolve("");
+            }
+            return this.uploadForConversionAndSave(geoJsonBlob, extension, fileName);            
         }
 
-        public saveDataToFile = (fileName: string, blob: Blob) => {
-            
-            var blobURL = ((<any>window).URL || (<any>window).webkitURL).createObjectURL(blob);
-            var anchor = <any>document.createElement("a");
-            anchor.style = "display: none";
-            anchor.download = fileName;
-            anchor.href = blobURL;
-            document.body.appendChild(anchor);
-            anchor.click();
-
-            setTimeout(function () {
-                document.body.removeChild(anchor);
-                ((<any>window).URL || (<any>window).webkitURL).revokeObjectURL(blobURL);
-            }, 100);
+        public uploadForConversionAndSave = (blob: Blob, format: string, fileName: string) : angular.IHttpPromise<{}> => {
+            return this.Upload.upload(<angular.angularFileUpload.IFileUploadConfigFile>{
+                data: { file: blob },
+                url: Common.Urls.convertFiles + "?outputFormat=" + format,
+            }).success((data: any) => {
+                var byteCharacters = atob(data);
+                var byteNumbers = new Array(byteCharacters.length);
+                for (var i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+                }
+                var byteArray = new Uint8Array(byteNumbers);
+                var blob = new Blob([byteArray], { type: "application/octet-stream" });
+                saveAs(blob, fileName);
+            });
         }
 
         public readFromFile = (content: GeoJSON.FeatureCollection): Common.DataContainer => {
-            var parser = this.parserFactory.Create(Parsers.ParserType.geojson);
-            if (parser == null) {
-                return <Common.DataContainer> {
-                    markers: [],
-                    routes: [],
-                };
-            }
-            var data = parser.parse(JSON.stringify(content));
+            var geoJsonParser = this.parserFactory.Create(Parsers.ParserType.geojson);
+            var data = geoJsonParser.parse(JSON.stringify(content));
             data.routes = this.manipulateRoutesData(data.routes, Common.RoutingType.none);
             return data;
         }

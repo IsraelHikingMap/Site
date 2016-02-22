@@ -58,7 +58,10 @@
 
             $scope.save = (e: Event, fileName: string) => {
                 var data = layersService.getData();
-                fileService.saveToFile(fileName, data);
+                fileService.saveToFile(fileName, data)
+                    .then(() => { }, (err) => {
+                        toastr.error("Uable to save file...");
+                    });
                 this.suppressEvents(e);
             }
 

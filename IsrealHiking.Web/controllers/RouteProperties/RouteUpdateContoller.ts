@@ -60,7 +60,10 @@
                     markers: [],
                     routes: [route.getData()]
                 };
-                fileService.saveToFile(route.name + "." + extention, data);
+                fileService.saveToFile(route.name + "." + extention, data)
+                    .then(() => {}, (err) => {
+                        toastr.error("Unable to save route to file...");
+                    });
                 this.suppressEvents(e);
             }
 

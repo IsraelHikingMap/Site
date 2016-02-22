@@ -6,6 +6,7 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using IsraelHiking.DataAccess;
 using System.Web.Http.ExceptionHandling;
+using IsraelHiking.API.Gpx;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccess.Database;
@@ -64,6 +65,7 @@ namespace IsraelHiking.Web
             var container = new UnityContainer();
             container.RegisterType<ILogger, Logger>();
             container.RegisterType<IProcessHelper, ProcessHelper>();
+            container.RegisterType<IGpxGeoJsonConverter, GpxGeoJsonConverter>();
             container.RegisterType<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
             container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());

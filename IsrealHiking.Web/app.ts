@@ -1,4 +1,6 @@
-﻿module IsraelHiking {
+﻿// HM TODO: kill parsers and use serverside code.
+
+module IsraelHiking {
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "googlechart", "ngAnimate", "toastr", "angular-loading-bar"]);
 
     L.Icon.Default.imagePath = "content/images/";
@@ -15,7 +17,9 @@
     app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.toastr, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterFactory($http, $q, toastr, parserFactory)]);
-    app.service(Common.Constants.fileService, [Common.Constants.parserFactory, Common.Constants.elevationProvider, (parserFactory: Services.Parsers.ParserFactory, elevationProvider: Services.Elevation.IElevationProvider) => new Services.FileService(parserFactory, elevationProvider)]);
+    app.service(Common.Constants.fileService, [Common.Constants.q, Common.Constants.parserFactory, Common.Constants.elevationProvider, Common.Constants.upload,
+        ($q: angular.IQService, parserFactory: Services.Parsers.ParserFactory, elevationProvider: Services.Elevation.IElevationProvider, Upload: angular.angularFileUpload.IUploadService) =>
+            new Services.FileService($q, parserFactory, elevationProvider, Upload)]);
     app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory, Common.Constants.toastr,
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
             new Services.SnappingService($http, mapService, parserFactory, toastr)]);

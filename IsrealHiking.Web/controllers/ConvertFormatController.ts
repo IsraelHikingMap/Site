@@ -2,6 +2,7 @@
     export interface IConvertFormatScope extends angular.IScope {
         formats: string[];
         selectedFormat: string;
+        selectedFileName: string;
         setSelectedFormat(selectedFormat: string): void;
         openConvert(e: Event): void;
         selectFile($files, e: Event): void;
@@ -10,13 +11,12 @@
 
     export class ConvertFormatController extends BaseMapController {
         private convertModal;
-        private fileToUpload;
+        private fileToUpload: File;
 
         constructor($scope: IConvertFormatScope,
             $modal,
-            Upload: angular.angularFileUpload.IUploadService,
-            mapService: Services.MapService,
             fileService: Services.FileService,
+            mapService: Services.MapService,
             toastr: Toastr) {
             super(mapService);
 
@@ -40,28 +40,15 @@
             $scope.selectFile = ($files, e: Event) => {
                 if ($files.length <= 0) {
                     return;
-                }
+                }                
                 this.fileToUpload = $files.shift();
+                $scope.selectedFileName = this.fileToUpload.name;
             }
 
             $scope.convertFile = () => {
-                Upload.upload(<angular.angularFileUpload.IFileUploadConfigFile> {
-                    data: { file: this.fileToUpload },
-                    url: Common.Urls.convertFiles + "?outputFormat=" + $scope.selectedFormat,
-                }).success((data: any) => {
-                    var extension = this.fileToUpload.name.split('.').pop();
-                    var outputFileName = (<string>this.fileToUpload.name).replace("." + extension, "." + $scope.selectedFormat);
-                    var byteCharacters = atob(data);
-                    var byteNumbers = new Array(byteCharacters.length);
-                    for (var i = 0; i < byteCharacters.length; i++) {
-                        byteNumbers[i] = byteCharacters.charCodeAt(i);
-                    }
-                    var byteArray = new Uint8Array(byteNumbers);
-                    var blob = new Blob([byteArray], { type: "application/octet-stream" });
-                    fileService.saveDataToFile(outputFileName, blob);
-                }).error(() => {
-                    toastr.error("Failed to convert file.");
-                });
+                var extension = this.fileToUpload.name.split('.').pop();
+                var outputFileName = (this.fileToUpload.name).replace("." + extension, "." + $scope.selectedFormat);
+                fileService.uploadForConversionAndSave(this.fileToUpload, $scope.selectedFormat, outputFileName);
             }
         }
     }

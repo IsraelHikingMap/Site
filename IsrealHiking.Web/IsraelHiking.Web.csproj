@@ -129,6 +129,8 @@
     <Content Include="scripts\FileAPI.js" />
     <Content Include="scripts\FileAPI.min.js" />
     <None Include="scripts\jquery-2.2.0.intellisense.js" />
+    <Content Include="scripts\FileSaver.js" />
+    <Content Include="scripts\FileSaver.min.js" />
     <Content Include="scripts\jquery-2.2.0.js" />
     <Content Include="scripts\jquery-2.2.0.min.js" />
     <Content Include="scripts\lodash.core.js" />
@@ -180,8 +182,6 @@
     <Content Include="scripts\loading-bar.min.js" />
     <Content Include="scripts\ng-google-chart.min.js" />
     <Content Include="scripts\togeojson.js" />
-    <Content Include="scripts\togpx.js" />
-    <Content Include="scripts\tokml.js" />
     <Content Include="scripts\ng-google-chart.js" />
     <Content Include="services\ControlCreatorService.js" />
     <Content Include="services\drawing\BaseDrawing.js" />
@@ -199,9 +199,7 @@
     <Content Include="services\ObjectWithMap.js" />
     <Content Include="services\parsers\BaseParser.js" />
     <Content Include="services\parsers\GeoJsonParser.js" />
-    <Content Include="services\parsers\GpxParser.js" />
     <Content Include="services\parsers\IParser.js" />
-    <Content Include="services\parsers\KmlParser.js" />
     <Content Include="services\parsers\OsmParser.js" />
     <Content Include="services\parsers\ParserFactory.js" />
     <Content Include="services\parsers\XmlParser.js" />
@@ -239,7 +237,6 @@
     <None Include="OSM2012.pubxml" />
     <Content Include="scripts\angular.min.js.map" />
     <Content Include="scripts\angular-animate.min.js.map" />
-    <Content Include="scripts\tokml.js.map" />
     <Content Include="scripts\jquery-2.2.0.min.map" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
@@ -282,6 +279,7 @@
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-sanitize.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular.d.ts" />
     <TypeScriptCompile Include="scripts\typings\es6-promise\es6-promise.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\FileSaver\FileSaver.d.ts" />
     <TypeScriptCompile Include="scripts\typings\geojson\geojson.d.ts" />
     <TypeScriptCompile Include="scripts\typings\google.visualization\google.visualization.d.ts" />
     <TypeScriptCompile Include="scripts\typings\jquery\jquery.d.ts" />
@@ -315,9 +313,7 @@
     <TypeScriptCompile Include="services\parsers\OsmParser.ts" />
     <TypeScriptCompile Include="services\parsers\ParserFactory.ts" />
     <TypeScriptCompile Include="services\parsers\GeoJsonParser.ts" />
-    <TypeScriptCompile Include="services\parsers\GpxParser.ts" />
     <TypeScriptCompile Include="services\parsers\IParser.ts" />
-    <TypeScriptCompile Include="services\parsers\KmlParser.ts" />
     <TypeScriptCompile Include="services\parsers\XmlParser.ts" />
     <TypeScriptCompile Include="services\routers\BaseRouter.ts" />
     <TypeScriptCompile Include="services\routers\NoneRouter.ts" />

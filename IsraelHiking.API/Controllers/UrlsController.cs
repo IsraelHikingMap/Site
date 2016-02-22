@@ -30,9 +30,6 @@ namespace IsraelHiking.API.Controllers
             siteUrl.ViewsCount++;
             _repository.Update(siteUrl);
             return Ok(siteUrl);
-            //var response = Request.CreateResponse(HttpStatusCode.OK);
-            //response.Content = new StringContent(siteUrl.JsonData, Encoding.UTF8, "application/json");
-            //return ResponseMessage(response);
         }
 
         // POST api/urls

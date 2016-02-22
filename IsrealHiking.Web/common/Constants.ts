@@ -23,6 +23,7 @@
         public static microsoftElevationProvider = "microsoftElevationProvider";
         public static elevationProvider = "elevationProvider";
         public static toastr = "toastr";
+        public static upload = "Upload";
         
         // Controllers
         public static mainMapController = "mainMapController";

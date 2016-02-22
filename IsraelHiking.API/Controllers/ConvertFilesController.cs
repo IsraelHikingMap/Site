@@ -11,25 +11,32 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using System.Xml.Serialization;
+using IsraelHiking.API.Gpx;
+using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Controllers
 {
     public class ConvertFilesController : ApiController
     {
+        private double TOLERANCE = 0.001;
+
         private readonly ILogger _logger;
         private readonly IGpsBabelGateway _gpsBabelGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IRemoteFileFetcherGateway _remoteFileFetcher;
+        private readonly IGpxGeoJsonConverter _gpxGeoJsonConverter;
 
         public ConvertFilesController(ILogger logger, 
             IGpsBabelGateway gpsBabelGateway, 
             IElevationDataStorage elevationDataStorage,
-            IRemoteFileFetcherGateway remoteFileFetcher)
+            IRemoteFileFetcherGateway remoteFileFetcher, 
+            IGpxGeoJsonConverter gpxGeoJsonConverter)
         {
             _gpsBabelGateway = gpsBabelGateway;
             _logger = logger;
             _elevationDataStorage = elevationDataStorage;
             _remoteFileFetcher = remoteFileFetcher;
+            _gpxGeoJsonConverter = gpxGeoJsonConverter;
         }
 
         // GET api/ConvertFiles?url=http://jeeptrip.co.il/routes/pd6bccre.twl
@@ -61,6 +68,15 @@ namespace IsraelHiking.API.Controllers
             var fileName = streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('"');
             var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(fileName));
             var content = await streamProvider.Contents.First().ReadAsByteArrayAsync();
+            if (inputFormat == outputFormat)
+            {
+                return Ok(content);
+            }
+            if (inputFormat.Equals("geojson", StringComparison.InvariantCultureIgnoreCase))
+            {
+                content = ConverGeoJsonContentToGpx(content);
+                inputFormat = ConvertExtenstionToFormat(".gpx");
+            }
             if (outputFormat.Equals("geojson", StringComparison.InvariantCultureIgnoreCase))
             {
                 var convertedGpx = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, ConvertExtenstionToFormat(".gpx"));
@@ -74,6 +90,10 @@ namespace IsraelHiking.API.Controllers
         private string ConvertExtenstionToFormat(string extension)
         {
             extension = extension.ToLower().Replace(".", "");
+            if (string.IsNullOrWhiteSpace(extension))
+            {
+                return "geojson";
+            }
             if (extension == "twl")
             {
                 return "naviguide";
@@ -87,60 +107,88 @@ namespace IsraelHiking.API.Controllers
 
         private FeatureCollection ConvertGpxContentToGeoJson(byte[] content)
         {
-            var collection = new FeatureCollection();
             using (var stream = new MemoryStream(content))
             {
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(gpxType));
+                XmlSerializer xmlSerializer = new XmlSerializer(typeof (gpxType));
                 var gpx = xmlSerializer.Deserialize(stream) as gpxType;
-                foreach (var point in gpx.wpt ?? new wptType[0])
-                {
-                    var feature = new Feature(new Point(CreateGeoPosition(point)), CreateNameProperties(point.name));
-                    collection.Features.Add(feature);
-                }
-                foreach (var track in gpx.trk ?? new trkType[0])
-                {
-                    if (track.trkseg.Length == 1)
-                    {
-                        var lineStringFeature = new Feature(new LineString(track.trkseg[0].trkpt.Select(point => CreateGeoPosition(point))), CreateNameProperties(track.name));
-                        collection.Features.Add(lineStringFeature);
-                        continue;
-                    }
-                    var lineStringList = new List<LineString>();
-                    foreach (var segment in track.trkseg)
-                    {
-                        lineStringList.Add(new LineString(segment.trkpt.Select(point => CreateGeoPosition(point))));
-                    }
-                    var feature = new Feature(new MultiLineString(lineStringList), CreateNameProperties(track.name));
-                    collection.Features.Add(feature);
-                }
-
-                foreach (var route in gpx.rte ?? new rteType[0])
-                {
-                    var lineStringFeature = new Feature(new LineString(route.rtept.Select(point => CreateGeoPosition(point))), CreateNameProperties(route.name));
-                    collection.Features.Add(lineStringFeature);
-                }
+                var collection = _gpxGeoJsonConverter.ConvertToGeoJson(gpx);
+                UpdateZeroOrNullElevation(collection);
+                return collection;
             }
-            return collection;
         }
 
-        private GeographicPosition CreateGeoPosition(wptType wayPoint)
+        private byte[] ConverGeoJsonContentToGpx(byte[] content)
         {
-            double lat = (double)wayPoint.lat;
-            double lon = (double)wayPoint.lon;
-            double ele = (double)wayPoint.ele;
-            if (ele != 0)
+            using (var outputStream = new MemoryStream())
+            using (var stream = new MemoryStream(content))
             {
-                return new GeographicPosition(lat, lon, ele);
+                var serializer = new JsonSerializer();
+
+                using (var sr = new StreamReader(stream))
+                using (var jsonTextReader = new JsonTextReader(sr))
+                {
+                    var collection = serializer.Deserialize<FeatureCollection>(jsonTextReader);
+                    var gpx = _gpxGeoJsonConverter.ConverToGpx(collection);
+                    XmlSerializer xmlSerializer = new XmlSerializer(typeof(gpxType));
+                    xmlSerializer.Serialize(outputStream, gpx);
+                    return outputStream.ToArray();
+                }
             }
-            return new GeographicPosition(lat, lon, _elevationDataStorage.GetElevation(lat, lon));
         }
 
-        private Dictionary<string, object> CreateNameProperties(string name)
+        private void UpdateZeroOrNullElevation(FeatureCollection featureCollection)
         {
-            var dictionary = new Dictionary<string, object>();
-            dictionary.Add("name", name);
-            return dictionary;
+            foreach (var feature in featureCollection.Features)
+            {
+                var point = feature.Geometry as Point;
+                if (point != null)
+                {
+                    point.Coordinates = UpdateGeoPositions(new[] { point.Coordinates as GeographicPosition }).FirstOrDefault();
+                }
+                
+                var lineString = feature.Geometry as LineString;
+                if (lineString != null)
+                {
+                    lineString.Coordinates = UpdateGeoPositions(lineString.Coordinates.OfType<GeographicPosition>().ToArray()).Cast<IPosition>().ToList();
+                }
+
+                var multiLineString = feature.Geometry as MultiLineString;
+                if (multiLineString != null)
+                {
+                    foreach (var currentLineString in multiLineString.Coordinates)
+                    {
+                        currentLineString.Coordinates = UpdateGeoPositions(currentLineString.Coordinates.OfType<GeographicPosition>().ToArray()).Cast<IPosition>().ToList();
+                    }
+                }
+
+
+            }
         }
 
+        private GeographicPosition[] UpdateGeoPositions(GeographicPosition[] positions)
+        {
+            if (positions == null)
+            {
+                return null;
+            }
+            var updatedPositions = new List<GeographicPosition>();
+            foreach (var geographicPosition in positions)
+            {
+                if (geographicPosition == null)
+                {
+                    updatedPositions.Add(null);
+                }
+                else if (geographicPosition.Altitude == null || Math.Abs(geographicPosition.Altitude.Value) < TOLERANCE)
+                {
+                    updatedPositions.Add(new GeographicPosition(geographicPosition.Latitude, geographicPosition.Longitude, _elevationDataStorage.GetElevation(geographicPosition.Latitude, geographicPosition.Longitude)));
+                }
+                else
+                {
+                    updatedPositions.Add(geographicPosition);
+                }
+            }
+
+            return updatedPositions.ToArray();
+        }
     }
 }

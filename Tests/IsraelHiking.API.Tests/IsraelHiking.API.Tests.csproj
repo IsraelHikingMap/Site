@@ -80,6 +80,7 @@
     <Compile Include="Controllers\ConvertFilesControllerTests.cs" />
     <Compile Include="Controllers\ElevationControllerTests.cs" />
     <Compile Include="Controllers\ItmGridControllerTests.cs" />
+    <Compile Include="Gpx\GpxConverterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
