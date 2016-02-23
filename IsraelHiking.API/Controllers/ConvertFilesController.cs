@@ -67,6 +67,7 @@ namespace IsraelHiking.API.Controllers
             }
             var fileName = streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('"');
             var inputFormat = ConvertExtenstionToFormat(Path.GetExtension(fileName));
+            outputFormat = ConvertExtenstionToFormat(outputFormat);
             var content = await streamProvider.Contents.First().ReadAsByteArrayAsync();
             if (inputFormat == outputFormat)
             {
@@ -83,7 +84,7 @@ namespace IsraelHiking.API.Controllers
                 var featureCollection = ConvertGpxContentToGeoJson(convertedGpx);
                 return Ok(featureCollection);
             }
-            var outputContent = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, ConvertExtenstionToFormat(outputFormat));
+            var outputContent = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, outputFormat);
             return Ok(outputContent);
         }
 

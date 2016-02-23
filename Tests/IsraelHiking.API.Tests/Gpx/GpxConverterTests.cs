@@ -16,7 +16,7 @@ namespace IsraelHiking.API.Tests.Gpx
         {
             gpxType gpx = new gpxType
             {
-                wpt = new[] {new wptType {lat = 1, lon = 2, ele = 3, name = "point"}}
+                wpt = new[] {new wptType {lat = 1, lon = 2, ele = 3, eleSpecified = false, name = "point"}}
             };
 
             var featureCollection = _gpxGeoJsonConverter.ConvertToGeoJson(gpx);
@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Tests.Gpx
             var coordinates = point.Coordinates as GeographicPosition;
             Assert.IsNotNull(coordinates);
             Assert.AreEqual(gpx.wpt[0].name, featureCollection.Features.First().Properties["name"]);
-            Assert.AreEqual(gpx.wpt[0].ele, (decimal)coordinates.Altitude);
+            Assert.AreEqual(null, (decimal?)coordinates.Altitude);
             Assert.AreEqual(gpx.wpt[0].lat, (decimal)coordinates.Latitude);
             Assert.AreEqual(gpx.wpt[0].lon, (decimal)coordinates.Longitude);
         }
@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Tests.Gpx
         {
             gpxType gpx = new gpxType
             {
-                wpt = new[] { new wptType { lat = 1, lon = 2, ele = 3, name = "point" } }
+                wpt = new[] { new wptType { lat = 1, lon = 2, ele = 3, eleSpecified = true, name = "point" } }
             };
 
             var featureCollection = _gpxGeoJsonConverter.ConvertToGeoJson(gpx);
@@ -57,8 +57,8 @@ namespace IsraelHiking.API.Tests.Gpx
             {
                 rte = new [] { new rteType { name = "route", rtept = new[]
                 {
-                    new wptType { lat = 1, lon = 2, ele = 3 },
-                    new wptType { lat = 4, lon = 5, ele = 6 }
+                    new wptType { lat = 1, lon = 2, ele = 3, eleSpecified = true },
+                    new wptType { lat = 4, lon = 5 }
                 } } },
             };
 
@@ -91,16 +91,16 @@ namespace IsraelHiking.API.Tests.Gpx
                             {
                                 trkpt = new[]
                                 {
-                                    new wptType {lat = 1, lon = 2, ele = 3},
-                                    new wptType {lat = 4, lon = 5, ele = 6}
+                                    new wptType {lat = 1, lon = 2, ele = 3, eleSpecified = true},
+                                    new wptType {lat = 4, lon = 5, ele = 6, eleSpecified = true}
                                 }
                             },
                             new trksegType
                             {
                                 trkpt = new[]
                                 {
-                                    new wptType {lat = 11, lon = 12, ele = 13},
-                                    new wptType {lat = 14, lon = 15, ele = 16}
+                                    new wptType {lat = 11, lon = 12, ele = 13, eleSpecified = true},
+                                    new wptType {lat = 14, lon = 15}
                                 }
                             }
                         }

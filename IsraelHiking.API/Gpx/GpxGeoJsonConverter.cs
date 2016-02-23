@@ -51,14 +51,13 @@ namespace IsraelHiking.API.Gpx
                 rte = collection.Features.Where(f => f.Geometry is LineString).Select(CreateRoute).ToArray(),
                 trk = collection.Features.Where(f => f.Geometry is MultiLineString).Select(CreateTrack).ToArray(),
             };
-
         }
 
         private GeographicPosition CreateGeoPosition(wptType wayPoint)
         {
             double lat = (double)wayPoint.lat;
             double lon = (double)wayPoint.lon;
-            double ele = (double)wayPoint.ele;
+            double? ele = wayPoint.eleSpecified ? (double?) wayPoint.ele : null;
             return new GeographicPosition(lat, lon, ele);
         }
 
@@ -80,6 +79,7 @@ namespace IsraelHiking.API.Gpx
                 lat = (decimal)position.Latitude,
                 lon = (decimal)position.Longitude,
                 ele = (decimal)(position.Altitude ?? 0),
+                eleSpecified = position.Altitude.HasValue,
                 name = name,
             };
         }
