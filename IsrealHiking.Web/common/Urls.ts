@@ -7,6 +7,8 @@
         public static elevation = Urls.apiBase + "api/elevation";
         public static routing = Urls.apiBase + "api/routing";
         public static itmGrid = Urls.apiBase + "api/itmGrid";
+        public static saveFile = Urls.apiBase + "api/saveFile";
+        public static openFile = Urls.apiBase + "api/openFile";
 
     }
 }

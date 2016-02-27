@@ -222,7 +222,6 @@
     <Content Include="views\templates\legendModal.tpl.html" />
     <Content Include="views\templates\routePropertiesModal.tpl.html" />
     <Content Include="views\templates\layerPropertiesModal.tpl.html" />
-    <Content Include="views\templates\fileTooltip.tpl.html" />
     <Content Include="views\infoHelp.html" />
     <Content Include="views\file.html" />
     <Content Include="views\templates\helpTooltip.tpl.html" />

@@ -298,7 +298,11 @@ module IsraelHiking.Services {
         private addDataFromHash = () => {
             if (this.hashService.siteUrl) {
                 this.$http.get(Common.Urls.urls + this.hashService.siteUrl).success((siteUrl: Common.SiteUrl) => {
-                    this.handleSiteUrlData(siteUrl.JsonData);
+                    var data = <Common.DataContainer>JSON.parse(siteUrl.JsonData);
+                    this.setJsonData(data);
+                    this.addBaseLayerFromHash(data.baseLayer);
+                    this.addOverlaysFromHash(data.overlays);
+                    this.hashService.clear();
                 });
                 return;
             } 
@@ -308,12 +312,11 @@ module IsraelHiking.Services {
             this.hashService.clear();
         }
 
-        private handleSiteUrlData = (stringData: any) => {
-            var data = <Common.DataContainer>JSON.parse(stringData);
+        public setJsonData = (data: Common.DataContainer) => {
             if (data.routes) {
                 for (let route of data.routes) {
                     for (let segment of route.segments) {
-                        var latlngzs = <Common.LatLngZ[]>[];
+                        let latlngzs = <Common.LatLngZ[]>[];
                         for (let latlngz of segment.latlngzs) {
                             var fullLatLngZ = <Common.LatLngZ>L.latLng(latlngz.lat, latlngz.lng);
                             fullLatLngZ.z = latlngz.z;
@@ -330,9 +333,6 @@ module IsraelHiking.Services {
                 }
             }
             this.setData(data, false);
-            this.addBaseLayerFromHash(data.baseLayer);
-            this.addOverlaysFromHash(data.overlays);
-            this.hashService.clear();
         }
 
         public getSelectedDrawing = (): Drawing.IDrawing => {
@@ -457,24 +457,30 @@ module IsraelHiking.Services {
         }
 
         public setData = (dataContainer: Common.DataContainer, reroute: boolean) => {
-            if (dataContainer.routes.length == 0) {
-                dataContainer.routes.push(<Common.RouteData>{
+            if (dataContainer.routes.length === 0) {
+                dataContainer.routes.push({
                     name: this.createRouteName(),
                     segments: []
-                });
+                } as Common.RouteData);
             }
-            for (var route of dataContainer.routes) {
-                if (this.isNameAvailable(route.name) == false) {
+            var nameToActivate = this.selectedDrawing ? this.selectedDrawing.name : this.markers.name;
+            if (dataContainer.markers.length > 0) {
+                nameToActivate = this.markers.name;
+                this.addMarkers(dataContainer.markers);
+            }
+            for (let route of dataContainer.routes) {
+                if (this.isNameAvailable(route.name) === false) {
                     route.name = this.createRouteName();
-                } 
+                }
+                nameToActivate = route.name;
                 this.routes.push(this.drawingFactory.createDrawingRoute(route, reroute));
             }
-            this.addMarkers(dataContainer.markers);
+            
             if (dataContainer.northEast != null && dataContainer.southWest != null) {
                 this.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));
             }
 
-            this.changeDrawingState((this.routes.length > 0) ? this.routes[0].name : this.markers.name);
+            this.changeDrawingState(nameToActivate);
         }
 
         private extractDataFromLayer = (layer: ILayer): Common.LayerData => {

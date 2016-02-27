@@ -1,5 +1,5 @@
 ﻿<div class="leaflet-bar">
-    <a id="openFile" class="cursor-pointer" ngf-select ngf-multiple="false" ngf-change="open($files, $event)"><i class="fa fa-folder-open fa-lg" accept=".gpx,.kml,.geojson" title="Open a file"></i></a>
-    <a id="saveFile" class="cursor-pointer" ng-click="openFileChooser($event)" title="Save current work"><i class="fa fa-save fa-lg"></i></a>
+    <a id="openFile" class="cursor-pointer" ngf-select ngf-multiple="false" ng-model="file" ngf-change="open($files)" title="Open a file"><i class="fa fa-folder-open fa-lg"></i></a>
+    <a id="saveFile" class="cursor-pointer" ng-click="save($event)" title="Save current work"><i class="fa fa-save fa-lg"></i></a>
 </div>
 

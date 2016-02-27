@@ -65,11 +65,16 @@
     <Compile Include="Controllers\ItmGridController.cs" />
     <Compile Include="Controllers\RoutingController.cs" />
     <Compile Include="Controllers\UrlsController.cs" />
+    <Compile Include="Gpx\GpxDataContainerConverter.cs" />
     <Compile Include="Gpx\GpxGeoJsonConverter.cs" />
     <Compile Include="Gpx\GpxTypes.cs">
       <DependentUpon>GpxTypes.xsd</DependentUpon>
     </Compile>
+    <Compile Include="Gpx\IGpxDataContainerConverter.cs" />
+    <Compile Include="Gpx\IGpxGeoJsonConverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Services\FileConversionService.cs" />
+    <Compile Include="Services\IFileConversionService.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IsraelHiking.Common\IsraelHiking.Common.csproj">

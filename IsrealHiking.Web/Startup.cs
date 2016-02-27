@@ -7,6 +7,7 @@ using System.Web.Http;
 using IsraelHiking.DataAccess;
 using System.Web.Http.ExceptionHandling;
 using IsraelHiking.API.Gpx;
+using IsraelHiking.API.Services;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccess.Database;
@@ -66,13 +67,15 @@ namespace IsraelHiking.Web
             container.RegisterType<ILogger, Logger>();
             container.RegisterType<IProcessHelper, ProcessHelper>();
             container.RegisterType<IGpxGeoJsonConverter, GpxGeoJsonConverter>();
+            container.RegisterType<IGpxDataContainerConverter, GpxDataContainerConverter>();
             container.RegisterType<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
             container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();
             container.RegisterType<IRoutingGateway, RoutingGateway>();
             container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
-            
+            container.RegisterType<IFileConversionService, FileConversionService>();
+
             logger.Info("Initializing Elevation data and Graph Hopper Service");
             container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Info("Finished loading elevation data from files."));
             return container;

@@ -1,6 +1,4 @@
-﻿// HM TODO: kill parsers and use serverside code.
-
-module IsraelHiking {
+﻿module IsraelHiking {
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "googlechart", "ngAnimate", "toastr", "angular-loading-bar"]);
 
     L.Icon.Default.imagePath = "content/images/";
@@ -17,9 +15,9 @@ module IsraelHiking {
     app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.toastr, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterFactory($http, $q, toastr, parserFactory)]);
-    app.service(Common.Constants.fileService, [Common.Constants.q, Common.Constants.parserFactory, Common.Constants.elevationProvider, Common.Constants.upload,
-        ($q: angular.IQService, parserFactory: Services.Parsers.ParserFactory, elevationProvider: Services.Elevation.IElevationProvider, Upload: angular.angularFileUpload.IUploadService) =>
-            new Services.FileService($q, parserFactory, elevationProvider, Upload)]);
+    app.service(Common.Constants.fileService, [Common.Constants.http, Common.Constants.parserFactory, Common.Constants.elevationProvider, Common.Constants.upload,
+        ($http: angular.IHttpService, parserFactory: Services.Parsers.ParserFactory, elevationProvider: Services.Elevation.IElevationProvider, Upload: angular.angularFileUpload.IUploadService) =>
+            new Services.FileService($http, parserFactory, elevationProvider, Upload)]);
     app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory, Common.Constants.toastr,
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
             new Services.SnappingService($http, mapService, parserFactory, toastr)]);
@@ -49,36 +47,36 @@ module IsraelHiking {
     });
     app.directive("drawingControl", () => <angular.IDirective> {
         controller: Controllers.DrawingController,
-        templateUrl: "views/drawing.html",
+        templateUrl: "views/drawing.html"
     });
     app.directive("editOsmControl", () => <angular.IDirective> {
         controller: Controllers.EditOSMController,
-        templateUrl: "views/editOSM.html",
+        templateUrl: "views/editOSM.html"
     });
     app.directive("fileControl", () => <angular.IDirective> {
         controller: Controllers.FileController,
-        templateUrl: "views/file.html",
+        templateUrl: "views/file.html"
     });
     app.directive("infoHelpControl", () => <angular.IDirective> {
         controller: Controllers.InfoHelpController,
-        templateUrl: "views/infoHelp.html",
+        templateUrl: "views/infoHelp.html"
     });
     app.directive("layersControl", () => <angular.IDirective> {
         controller: Controllers.LayersController,
-        templateUrl: "views/layers.html",
+        templateUrl: "views/layers.html"
     });
     app.directive("searchControl", () => <angular.IDirective> {
         controller: Controllers.SearchController,
-        templateUrl: "views/search.html",
+        templateUrl: "views/search.html"
     });
     app.directive("shareControl", () => <angular.IDirective> {
         controller: Controllers.ShareController,
-        templateUrl: "views/share.html",
+        templateUrl: "views/share.html"
     });
 
     app.directive("convertFromatControl", () => <angular.IDirective> {
         controller: Controllers.ConvertFormatController,
-        templateUrl: "views/convertFormat.html",
+        templateUrl: "views/convertFormat.html"
     });
 
     app.run(["googleChartApiPromise", (googleChartApiPromise) => {

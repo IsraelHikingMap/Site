@@ -1,19 +1,20 @@
-﻿using GeoJSON.Net.Geometry;
-using IsraelHiking.API.Controllers;
-using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
-using System.IO;
+﻿using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http.Results;
-using GeoJSON.Net.Feature;
+using GeoJSON.Net.Geometry;
+using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Gpx;
+using IsraelHiking.API.Services;
+using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
+using IsraelTransverseMercator;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
-namespace IsraelHiking.API.Tests
+namespace IsraelHiking.API.Tests.Controllers
 {
     [TestClass]
     public class ConvertFilesControllerTests
@@ -51,7 +52,7 @@ namespace IsraelHiking.API.Tests
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _removeFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
-            _controller = new ConvertFilesController(logger, _gpsBabelGateway, _elevationDataStorage, _removeFileFetcherGateway, new GpxGeoJsonConverter());
+            _controller = new ConvertFilesController(logger, _elevationDataStorage, _removeFileFetcherGateway, new FileConversionService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new CoordinatesConverter()));
         }
 
         [TestMethod]
@@ -62,18 +63,17 @@ namespace IsraelHiking.API.Tests
             _removeFileFetcherGateway.GetFileContent(url).Returns(Task.FromResult(new RemoteFileFetcherGatewayResponse { Content = bytes, FileName = "file.KML" }));
             _gpsBabelGateway.ConvertFileFromat(bytes, "kml", "gpx,gpxver=1.1").Returns(Task.FromResult(bytes));
 
-            var featureCollection = _controller.GetRemoteFile(url).Result;
+            var dataContainer = _controller.GetRemoteFile(url).Result;
 
-            Assert.AreEqual(2, featureCollection.Features.Count);
-            Assert.IsTrue(featureCollection.Features[0].Geometry is Point);
-            Assert.IsTrue(featureCollection.Features[1].Geometry is LineString);
+            Assert.AreEqual(1, dataContainer.routes.Count);
+            Assert.AreEqual(1, dataContainer.markers.Count);
         }
 
         [TestMethod]
         public void PostConvertFile_ConvertToKml_ShouldReturnByteArray()
         {
             var multipartContent = new MultipartContent();
-            var streamContent = new StreamContent(new MemoryStream(new byte[1] { 1 }));
+            var streamContent = new StreamContent(new MemoryStream(new byte[] { 1 }));
             streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
             {
                 Name = "\"files\"",
@@ -82,10 +82,11 @@ namespace IsraelHiking.API.Tests
             streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/kml");
             multipartContent.Add(streamContent);
             _controller.Request = new HttpRequestMessage {Content = multipartContent};
-            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), "naviguide", "kml").Returns(Task.FromResult(new byte[2] { 1, 1 }));
+            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), "naviguide", "kml").Returns(Task.FromResult(new byte[] { 1, 1 }));
 
             var response = _controller.PostConvertFile("kml").Result as OkNegotiatedContentResult<byte[]>;
 
+            Assert.IsNotNull(response);
             Assert.AreEqual(2, response.Content.Length);
         }
 
@@ -94,7 +95,7 @@ namespace IsraelHiking.API.Tests
         {
             var multipartContent = new MultipartContent();
             _controller.Request = new HttpRequestMessage {Content = multipartContent};
-            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), "naviguide", "kml").Returns(Task.FromResult(new byte[2] { 1, 1 }));
+            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), "naviguide", "kml").Returns(Task.FromResult(new byte[] { 1, 1 }));
 
             var response = _controller.PostConvertFile("kml").Result as BadRequestResult;
 
@@ -117,7 +118,7 @@ namespace IsraelHiking.API.Tests
             _controller.Request = new HttpRequestMessage { Content = multipartContent };
             _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(bytes));
 
-            var response = _controller.PostConvertFile("geojson").Result as OkNegotiatedContentResult<FeatureCollection>;
+            var response = _controller.PostConvertFile("geojson").Result as OkNegotiatedContentResult<byte[]>;
 
             Assert.IsNotNull(response);
         }

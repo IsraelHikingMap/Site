@@ -1,66 +1,47 @@
 ﻿module IsraelHiking.Controllers {
 
     export interface IFileScope extends angular.IScope {
-        open($files, e: Event): void;
-        openFileChooser(e: Event): void;
-        save(e: Event, fileName: string): void;
+        file: File;
+        open($files): void;
+        save(e: Event): void;
     }
 
-    export class FileController extends BaseMapControllerWithToolTip {
-        private fileChooserTooltip: any;
+    export class FileController extends BaseMapController {
 
         constructor($scope: IFileScope,
-            $http: angular.IHttpService,
             mapService: Services.MapService,
-            $tooltip,
-            Upload: angular.angularFileUpload.IUploadService,
             layersService: Services.LayersService,
             hashService: Services.HashService,
             fileService: Services.FileService,
             toastr: Toastr) {
-            super(mapService, $tooltip);
+            super(mapService);
 
             this.setDragAndDrop($scope);
-            this.fileChooserTooltip = null;
 
-            if (hashService.externalUrl != "") {
-                $http.get(Common.Urls.convertFiles + "?url=" + hashService.externalUrl)
-                    .success((content: GeoJSON.FeatureCollection) => {
-                        var dataContainer = fileService.readFromFile(content);
-                        layersService.setData(dataContainer, false);
+            if (hashService.externalUrl !== "") {
+                fileService.openFromUrl(hashService.externalUrl)
+                    .success((dataContainer: Common.DataContainer) => {
+                        layersService.setJsonData(dataContainer);
                     }).error(() => {
                         toastr.error("Failed to load external url file.");
                     });
             }
 
-            $scope.open = ($files, e: Event) => {
-                if ($files.length <= 0) {
-                    return;
+            $scope.open = () => {
+                if ($scope.file) {
+                    fileService.openFromFile($scope.file).success((dataContainer: Common.DataContainer) => {
+                        layersService.setJsonData(dataContainer);
+                    }).error(() => {
+                        toastr.error("Failed to load file.");
+                    });
                 }
-                Upload.upload(<angular.angularFileUpload.IFileUploadConfigFile>{
-                    data: { file: $files.shift() },
-                    url: Common.Urls.convertFiles + "?outputFormat=geojson",
-                }).success((content: GeoJSON.FeatureCollection) => {
-                    var dataContainer = fileService.readFromFile(content);
-                    layersService.setData(dataContainer, false);
-                }).error(() => {
-                    toastr.error("Failed to load file.");
-                });
             }
 
-            $scope.openFileChooser = (e: Event) => {
-                if (this.fileChooserTooltip == null) {
-                    this.fileChooserTooltip = this.createToolTip(e.target, "views/templates/fileTooltip.tpl.html", "Save", $scope, "left");
-                    this.fileChooserTooltip.$promise.then(this.fileChooserTooltip.show);
-                }
-                this.suppressEvents(e);
-            }
-
-            $scope.save = (e: Event, fileName: string) => {
+            $scope.save = (e: Event) => {
                 var data = layersService.getData();
-                fileService.saveToFile(fileName, data)
-                    .then(() => { }, (err) => {
-                        toastr.error("Uable to save file...");
+                fileService.saveToFile("IsraelHikingMap.gpx", data)
+                    .then(() => { }, () => {
+                        toastr.error("Unable to save file...");
                     });
                 this.suppressEvents(e);
             }
@@ -106,12 +87,12 @@
                     e.preventDefault();
                     var files = Array.prototype.slice.apply(e.dataTransfer.files);
                     setTimeout(() => {
-                        $scope.open(files, null);
+                        $scope.open(files);
                     }, 25);
                     this.map.scrollWheelZoom.enable();
                 }
             };
-            for (var name in callbacks) {
+            for (let name in callbacks) {
                 dropbox.addEventListener(name, callbacks[name], false);
             }
         }

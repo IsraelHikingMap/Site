@@ -6,7 +6,7 @@
         toggleVisibility(e: Event): void;
         deleteRoute(e: Event): void;
         reverseRoute(e: Event): void;
-        saveRouteToFile(extention: string, e: Event);
+        saveRouteToFile(e: Event);
         toggleRoutingPerPoint(e: Event): void;
     }
 
@@ -55,13 +55,13 @@
                 layersService.removeRoute(route.name);
                 this.suppressEvents(e);
             }
-            $scope.saveRouteToFile = (extention: string, e: Event): void=> {
+            $scope.saveRouteToFile = (e: Event): void=> {
                 var data = <Common.DataContainer> {
                     markers: [],
                     routes: [route.getData()]
                 };
-                fileService.saveToFile(route.name + "." + extention, data)
-                    .then(() => {}, (err) => {
+                fileService.saveToFile(route.name + ".gpx", data)
+                    .then(() => {}, () => {
                         toastr.error("Unable to save route to file...");
                     });
                 this.suppressEvents(e);

@@ -2,21 +2,16 @@
 using System.Linq;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
+using IsraelHiking.Common;
 using IsraelHiking.Gpx;
 
 namespace IsraelHiking.API.Gpx
 {
-    public interface IGpxGeoJsonConverter
-    {
-        FeatureCollection ConvertToGeoJson(gpxType gpx);
-        gpxType ConverToGpx(FeatureCollection collection);
-    }
-
     public class GpxGeoJsonConverter : IGpxGeoJsonConverter
     {
         private const string NAME = "name";
 
-        public FeatureCollection ConvertToGeoJson(gpxType gpx)
+        public FeatureCollection ToGeoJson(gpxType gpx)
         {
             var collection = new FeatureCollection();
             var points = gpx.wpt ?? new wptType[0];
@@ -36,17 +31,18 @@ namespace IsraelHiking.API.Gpx
                     continue;
                 }
                 var lineStringList = track.trkseg.Select(segment => new LineString(segment.trkpt.Select(CreateGeoPosition))).ToList();
-                var feature = new Feature(new MultiLineString(lineStringList), CreateNameProperties(track.name));
+                var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.name));
                 collection.Features.Add(feature);
             }
 
             return collection;        
         }
 
-        public gpxType ConverToGpx(FeatureCollection collection)
+        public gpxType ToGpx(FeatureCollection collection)
         {
             return new gpxType
             {
+                creator = DataContainer.ISRAEL_HIKING_MAP,
                 wpt = collection.Features.Where(f => f.Geometry is Point).Select(CreateWayPoint).ToArray(),
                 rte = collection.Features.Where(f => f.Geometry is LineString).Select(CreateRoute).ToArray(),
                 trk = collection.Features.Where(f => f.Geometry is MultiLineString).Select(CreateTrack).ToArray(),
@@ -115,6 +111,11 @@ namespace IsraelHiking.API.Gpx
         private Dictionary<string, object> CreateNameProperties(string name)
         {
             return new Dictionary<string, object> {{NAME, name}};
+        }
+
+        private Dictionary<string, object> CreateMultiLineProperties(string name)
+        {
+            return new Dictionary<string, object> { { NAME, name }, { "Creator",  DataContainer.ISRAEL_HIKING_MAP} };
         }
 
         private string GetFeatureName(Feature feature)

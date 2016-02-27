@@ -46,9 +46,9 @@
             }
 
             $scope.convertFile = () => {
-                var extension = this.fileToUpload.name.split('.').pop();
-                var outputFileName = (this.fileToUpload.name).replace("." + extension, "." + $scope.selectedFormat);
-                fileService.uploadForConversionAndSave(this.fileToUpload, $scope.selectedFormat, outputFileName);
+                var extension = this.fileToUpload.name.split(".").pop();
+                var outputFileName = this.fileToUpload.name.replace("." + extension, "." + $scope.selectedFormat);
+                fileService.uploadForConversionAndSave(this.fileToUpload, outputFileName);
             }
         }
     }

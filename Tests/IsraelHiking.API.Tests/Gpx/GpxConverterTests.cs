@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Tests.Gpx
                 wpt = new[] {new wptType {lat = 1, lon = 2, ele = 3, eleSpecified = false, name = "point"}}
             };
 
-            var featureCollection = _gpxGeoJsonConverter.ConvertToGeoJson(gpx);
+            var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
 
             Assert.AreEqual(1, featureCollection.Features.Count);
             var point = featureCollection.Features.Select(f => f.Geometry).OfType<Point>().FirstOrDefault();
@@ -40,8 +40,8 @@ namespace IsraelHiking.API.Tests.Gpx
                 wpt = new[] { new wptType { lat = 1, lon = 2, ele = 3, eleSpecified = true, name = "point" } }
             };
 
-            var featureCollection = _gpxGeoJsonConverter.ConvertToGeoJson(gpx);
-            var newGpx = _gpxGeoJsonConverter.ConverToGpx(featureCollection);
+            var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
+            var newGpx = _gpxGeoJsonConverter.ToGpx(featureCollection);
 
             Assert.AreEqual(gpx.wpt.Length, newGpx.wpt.Length);
             Assert.AreEqual(gpx.wpt[0].name, newGpx.wpt[0].name);
@@ -62,8 +62,8 @@ namespace IsraelHiking.API.Tests.Gpx
                 } } },
             };
 
-            var featureCollection = _gpxGeoJsonConverter.ConvertToGeoJson(gpx);
-            var newGpx = _gpxGeoJsonConverter.ConverToGpx(featureCollection);
+            var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
+            var newGpx = _gpxGeoJsonConverter.ToGpx(featureCollection);
 
             Assert.AreEqual(gpx.rte.Length, newGpx.rte.Length);
             Assert.AreEqual(gpx.rte[0].name, newGpx.rte[0].name);
@@ -109,8 +109,8 @@ namespace IsraelHiking.API.Tests.Gpx
             };
             
 
-            var featureCollection = _gpxGeoJsonConverter.ConvertToGeoJson(gpx);
-            var newGpx = _gpxGeoJsonConverter.ConverToGpx(featureCollection);
+            var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
+            var newGpx = _gpxGeoJsonConverter.ToGpx(featureCollection);
 
             Assert.AreEqual(gpx.trk.Length, newGpx.trk.Length);
             Assert.AreEqual(gpx.trk[0].name, newGpx.trk[0].name);

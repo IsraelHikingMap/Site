@@ -41,7 +41,7 @@ namespace IsraelHiking.DataAccess
                     int samples = (short)(Math.Sqrt(byteArray.Length / 2) + 0.5);
                     var bottomLeftLat = int.Parse(Path.GetFileName(hgtZipFile).Substring(1, 2));
                     var bottomLeftLng = int.Parse(Path.GetFileName(hgtZipFile).Substring(4, 3));
-                    var key = new LatLng { Lat = bottomLeftLat, Lng = bottomLeftLng };
+                    var key = new LatLng { lat = bottomLeftLat, lng = bottomLeftLng };
                     _elevationData[key] = new short[samples, samples];
                     for (int byteIndex = 0; byteIndex < byteArray.Length; byteIndex += 2)
                     {
@@ -54,15 +54,15 @@ namespace IsraelHiking.DataAccess
 
         public double GetElevation(double lat, double lng)
         {
-            var key = new LatLng { Lat = (int)lat, Lng = (int)lng };
+            var key = new LatLng { lat = (int)lat, lng = (int)lng };
             if (_elevationData.ContainsKey(key) == false)
             {
                 return 0;
             }
             var array = _elevationData[key];
             var samplesSize = 1.0 / array.GetLength(0);
-            var latIndex = (array.GetLength(0) - 1) - (int)((lat - key.Lat) / samplesSize);
-            var lngIndex = (int)((lng - key.Lng) / samplesSize);
+            var latIndex = (array.GetLength(0) - 1) - (int)((lat - key.lat) / samplesSize);
+            var lngIndex = (int)((lng - key.lng) / samplesSize);
 
             return array[latIndex, lngIndex];
         }
