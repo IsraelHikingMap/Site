@@ -4,7 +4,7 @@
         <div>
             <label class="control-label" ng-repeat="baseLayer in baseLayers">
                 <button class="btn btn-xs btn-default" ng-click="selectBaseLayer(baseLayer, $event)" ng-class="{'active': baseLayer.selected }"><i ng-class="{'fa fa-eye': baseLayer.selected, 'fa fa-eye-slash': !baseLayer.selected}"></i></button>
-                <button class="btn btn-xs btn-warning" ng-click="editBaseLayer(baseLayer, $event)" ng-show="advanced && baseLayer.isEditable"><i class="fa fa-wrench"></i></button>
+                <button class="btn btn-xs btn-warning" ng-click="editBaseLayer(baseLayer, $event)" ng-show="advanced && baseLayer.isEditable" title="Base layer properties"><i class="fa fa-wrench"></i></button>
                 {{baseLayer.key}}
             </label>
         </div>
@@ -13,7 +13,7 @@
         <div>
             <label class="control-label" ng-repeat="overlay in overlays">
                 <button class="btn btn-xs btn-default" ng-click="toggleVisibility(overlay, $event)"><i ng-class="{'fa fa-eye': overlay.visible, 'fa fa-eye-slash': !overlay.visible}"></i></button>
-                <button class="btn btn-xs btn-warning" ng-click="editOverlay(overlay, $event)" ng-show="advanced && overlay.isEditable"><i class="fa fa-wrench"></i></button>
+                <button class="btn btn-xs btn-warning" ng-click="editOverlay(overlay, $event)" ng-show="advanced && overlay.isEditable" title="Overlay properties"><i class="fa fa-wrench"></i></button>
                 {{overlay.key}}
             </label>
         </div>
@@ -22,7 +22,7 @@
         <div>
             <label class="control-label" style="color:{{route.getColor()}}" ng-repeat="route in routes">
                 <button class="btn btn-xs btn-default" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.state == 'active' }" title="Select or hide route"><i ng-class="{'fa-pencil': route.state != 'hidden', 'fa-eye-slash': route.state == 'hidden' }" class="fa"></i></button>
-                <button class="btn btn-xs btn-warning" ng-click="editRoute(route.name, $event)"><i class="fa fa-wrench"></i></button>
+                <button class="btn btn-xs btn-warning" ng-click="editRoute(route.name, $event)" title="Route properties"><i class="fa fa-wrench"></i></button>
                 {{route.name}}
             </label>
         </div>

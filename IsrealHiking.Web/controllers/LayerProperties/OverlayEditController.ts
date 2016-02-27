@@ -6,7 +6,7 @@
             layer: Services.IOverlay,
             toastr: Toastr) {
             super($scope, mapService, layersService, toastr);
-            $scope.title = "Update Overlay";
+            $scope.title = "Overlay Properties";
             $scope.isNew = false;
             $scope.layer = layer;
             $scope.key = layer.key;
@@ -15,7 +15,7 @@
             $scope.address = layer.address;
 
             $scope.removeLayer = (e: Event) => {
-                var message = layersService.removeOverlay($scope.layer);
+                layersService.removeOverlay($scope.layer);
                 this.suppressEvents(e);
             }
         }

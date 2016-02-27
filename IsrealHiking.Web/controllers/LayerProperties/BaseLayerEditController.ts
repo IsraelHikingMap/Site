@@ -6,7 +6,7 @@
             layer: Services.IBaseLayer,
             toastr: Toastr) {
             super($scope, mapService, layersService, toastr);
-            $scope.title = "Update Base Layer";
+            $scope.title = "Base Layer Properties";
             $scope.isNew = false;
             $scope.layer = layer;
             $scope.key = layer.key;
@@ -15,7 +15,7 @@
             $scope.address = layer.address;
 
             $scope.removeLayer = (e: Event) => {
-                layersService.removeBaseLayer(<Services.IBaseLayer>$scope.layer);
+                layersService.removeBaseLayer($scope.layer);
                 this.suppressEvents(e);
             }
         }
