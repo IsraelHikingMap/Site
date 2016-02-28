@@ -31,6 +31,106 @@ body {
     opacity: 0.5;
 }
 
+.bg-marker {
+    background: green;
+}
+
+.bg-blue {
+    background: #0000FF;
+}
+
+.bg-red {
+    background: #FF0000;
+}
+
+.bg-orange {
+    background: #FF6600;
+}
+
+.bg-pink {
+    background: #FF00DD;
+}
+
+.bg-green {
+    background: #008000;
+}
+
+.bg-purple {
+    background: #B700FF;
+}
+
+.bg-turquize {
+    background: #00B0A4;
+}
+
+.bg-gold {
+    background: #9C7F00;
+}
+
+.bg-brown {
+    background: #9C3E00;
+}
+
+.bg-grass {
+    background: #7F9900;
+}
+.bg-gray {
+    background: #7F8282;
+}
+.bg-dark {
+    background: #101010;
+}
+
+.fg-marker {
+    color: green;
+}
+
+.fg-blue {
+    color: #0000FF;
+}
+
+.fg-red {
+    color: #FF0000;
+}
+
+.fg-orange {
+    color: #FF6600;
+}
+
+.fg-pink {
+    color: #FF00DD;
+}
+
+.fg-green {
+    color: #008000;
+}
+
+.fg-purple {
+    color: #B700FF;
+}
+
+.fg-turquize {
+    color: #00B0A4;
+}
+
+.fg-gold {
+    color: #9C7F00;
+}
+
+.fg-brown {
+    color: #9C3E00;
+}
+
+.fg-grass {
+    color: #7F9900;
+}
+.fg-gray {
+    color: #7F8282;
+}
+.fg-dark {
+    color: #101010;
+}
+
 .axis text {
     fill: white;
 }

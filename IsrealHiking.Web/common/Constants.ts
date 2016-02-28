@@ -35,19 +35,21 @@
 
         public static MARKERS = "markers";
 
+        // make sure to update app.css if you update this list.
         public static COLORS = [
-            "#0000FF",
-            "#FF0000",
-            "#FF6600",
-            "#FF00DD",
-            "#008000",
-            "#B700FF",
-            "#00B0A4",
-            "#9C7F00",
-            "#9C3E00",
-            "#7F9900",
-            "#7F8282",
-            "#101010"];
+        { key: "blue", value: "#0000FF" },
+        { key: "red", value: "#FF0000" },
+        { key: "orange", value: "#FF6600" },
+        { key: "pink", value: "#FF00DD" },
+        { key: "green", value: "#008000" },
+        { key: "purple", value: "#B700FF" },
+        { key: "turquize", value: "#00B0A4" },
+        { key: "gold", value: "#9C7F00" },
+        { key: "brown", value: "#9C3E00" },
+        { key: "grass", value: "#7F9900" },
+        { key: "gray", value: "#7F8282" },
+        { key: "dark", value: "#101010" }
+        ];
     }
 
 } 

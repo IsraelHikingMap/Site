@@ -60,15 +60,19 @@
 
         public setData = (data: Common.MarkerData[]) => {
             this.internalClear();
-            this.addMarkers(data);
+            this.addMarkersInternal(data);
         }
 
-        public addMarkers = (data: Common.MarkerData[]) => {
+        private addMarkersInternal = (data: Common.MarkerData[]) => {
             for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
                 var markerData = data[markerIndex];
                 var marker = this.createMarker(markerData.latlng, markerData.title);
                 this.markers.push(marker);
             }
+        }
+
+        public addMarkers = (data: Common.MarkerData[]) => {
+            this.addMarkersInternal(data);
             this.updateDataLayer();
         }
 
@@ -206,6 +210,10 @@
 
         public getColor = () => {
             return "green";
+        }
+
+        public getColorKeyValue = () => {
+            return { key: "marker", value: this.getColor() };
         }
 
         public enable = (enable: boolean): void => {

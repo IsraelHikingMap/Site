@@ -8,7 +8,7 @@
         private hashService: HashService;
         private snappingService: SnappingService;
         private elevationProvider: Elevation.IElevationProvider;
-        private NextColorIndex = 0;
+        private nextColorIndex = 0;
 
         constructor($q: angular.IQService,
             $compile: angular.ICompileService,
@@ -54,15 +54,15 @@
         }
 
         public createPathOptions = (): L.PathOptions => {
-            var nextColorIndex = this.NextColorIndex;
-            this.NextColorIndex = (this.NextColorIndex + 1) % Common.Constants.COLORS.length;
-            return <L.PathOptions> {
-                color: Common.Constants.COLORS[nextColorIndex],
+            let newPathOptions = {
+                color: Common.Constants.COLORS[this.nextColorIndex].value,
                 weight: 4,
                 opacity: 0.5,
                 dashArray: null,
-                className: "",
-            };
+                className: ""
+            } as L.PathOptions;
+            this.nextColorIndex = (this.nextColorIndex + 1) % Common.Constants.COLORS.length;
+            return newPathOptions;
         }
     }
 } 

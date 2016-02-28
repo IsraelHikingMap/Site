@@ -18,36 +18,35 @@
             fileService: Services.FileService,
             toastr: Toastr,
             name: string) {
-            super($scope, mapService, layersService);
+            super($scope, mapService);
             var route = layersService.getRouteByName(name);
             var options = route.getPathOptions();
-            var shouldReverse = false;
             $scope.name = name;
             $scope.isNew = false;
             $scope.weight = options.weight;
-            $scope.color = options.color;
-            $scope.isVisible = route.state != Services.Drawing.DrawingState.hidden;
+            $scope.color = _.find(Common.Constants.COLORS, c => c.value === options.color);
+            $scope.isVisible = route.state !== Services.Drawing.DrawingState.hidden;
             $scope.isRoutingPerPoint = route.isRoutingPerPoint;
             $scope.isReversed = false;
             $scope.toggleVisibility = (e: Event) => {
                 $scope.isVisible = !$scope.isVisible;
                 this.suppressEvents(e);
             }
-            $scope.saveRoute = (name: string, weight: number, e: Event) => {
-                if (name != route.name && layersService.isNameAvailable(name) == true) {
-                    route.setName(name);
-                } else if (name != route.name && layersService.isNameAvailable(name) == false) {
+            $scope.saveRoute = (newName: string, weight: number, e: Event) => {
+                if (newName !== route.name && layersService.isNameAvailable(newName)) {
+                    route.setName(newName);
+                } else if (newName !== route.name && layersService.isNameAvailable(newName) === false) {
                     toastr.error("The route name is already in use, please select another name.", "Route Name");
                 }
-                if ($scope.isVisible && route.state == Services.Drawing.DrawingState.hidden) {
+                if ($scope.isVisible && route.state === Services.Drawing.DrawingState.hidden) {
                     route.changeStateTo(Services.Drawing.DrawingState.inactive);
-                } else if ($scope.isVisible == false) {
+                } else if ($scope.isVisible === false) {
                     route.changeStateTo(Services.Drawing.DrawingState.hidden);
                 }
                 if ($scope.isReversed) {
                     route.reverse();
                 }
-                route.setPathOptions({ color: $scope.color, weight: weight });
+                route.setPathOptions({ color: $scope.color.value, weight: weight } as L.PathOptions);
                 route.isRoutingPerPoint = $scope.isRoutingPerPoint;
                 this.suppressEvents(e);
             }
@@ -56,10 +55,10 @@
                 this.suppressEvents(e);
             }
             $scope.saveRouteToFile = (e: Event): void=> {
-                var data = <Common.DataContainer> {
+                var data = {
                     markers: [],
                     routes: [route.getData()]
-                };
+                } as Common.DataContainer;
                 fileService.saveToFile(route.name + ".gpx", data)
                     .then(() => {}, () => {
                         toastr.error("Unable to save route to file...");

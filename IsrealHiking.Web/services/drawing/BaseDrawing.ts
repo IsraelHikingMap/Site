@@ -39,21 +39,24 @@
         }
 
         // should be override in derived
-        public getColor = (): string => { return "" }
+        public getColor = (): string => { throw new Error("Should be implemented in derrived class") }
         // should be override in derived
-        public changeStateTo = (targetState: string) => { }
+        public getColorKeyValue = (): { key: string, value: string } => { throw new Error("Should be implemented in derrived class") }
         // should be override in derived
-        public getData = (): TData => { return null; }
+        public changeStateTo = (targetState: string) => { throw new Error("Should be implemented in derrived class") }
         // should be override in derived
-        public setData = (data: TData): void => { }
+        public getData = (): TData => { throw new Error("Should be implemented in derrived class") }
+        // should be override in derived
+        public setData = (data: TData): void => { throw new Error("Should be implemented in derrived class") }
 
         public isEnabled = (): boolean => {
-            return this.enabled && this.state == DrawingState.active;
+            return this.enabled && this.state === DrawingState.active;
         }
+
         // should be override in derived
-        public enable = (enable: boolean): void => { }
+        public enable = (enable: boolean): void => { throw new Error("Should be implemented in derrived class") }
         // should be override in derived
-        public clear = () => { }
+        public clear = () => { throw new Error("Should be implemented in derrived class") }
 
         // should be override in derived
         public getRoutingType = (): string => {
@@ -69,7 +72,6 @@
             }
             this.dataStack.pop();
             this.setData(this.dataStack[this.dataStack.length - 1]);
-            this.postUndoHook();
         }
 
         public isUndoDisbaled = (): boolean => {
@@ -79,8 +81,5 @@
         protected addDataToStack = (data: TData) => {
             this.dataStack.push(data);
         }
-
-        // should be override in derived
-        protected postUndoHook = () => { }
     }
 } 

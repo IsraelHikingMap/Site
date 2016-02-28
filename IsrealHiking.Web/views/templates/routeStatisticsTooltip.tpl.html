@@ -1,22 +1,22 @@
-﻿<div class="tooltip in tooltip-inner tooltip-statistics" ng-show="title" draggable-movable >
+﻿<div class="tooltip in tooltip-inner tooltip-statistics" ng-show="title" draggable-movable>
     <span class="cursor-pointer pull-right" aria-label="Close" ng-click="$hide()"><i aria-hidden="true" class="fa fa-close fa-inverse"></i></span>
     <div>
         <h3> Route Statistics </h3>
         <div>
-            <div google-chart chart="chart" style="height:200px;" agc-on-mouseover="onMouseOver(row, col)" agc-on-mouseout="onMouseOut()"/>
-                <div class="form-horizontal">
-                    <div class="form-group">
-                        <label class="control-label col-md-3">Length</label>
-                        <label class="control-label col-md-3">{{length}}</label>
-                        <label class="control-label col-md-6">
-                            <a class="btn btn-default btn-xs" ng-click="toggleKmMarker()" ng-class="{'active': isShowingKmMarkers()}"><i class="fa fa-map-marker"></i></a> Km markers
-                        </label>
-                        <label class="control-label col-md-3">Gain</label>
-                        <label class="control-label col-md-3">{{gain}}</label>
-                        <label class="control-label col-md-3">Loss</label>
-                        <label class="control-label col-md-3">{{loss}}</label>
-                    </div>
+            <div google-chart chart="chart" style="height: 200px;" agc-on-mouseover="onMouseOver(row, col)" agc-on-mouseout="onMouseOut()"></div>
+            <div class="form-horizontal">
+                <div class="form-group">
+                    <label class="control-label col-md-3">Length</label>
+                    <label class="control-label col-md-3">{{length}}</label>
+                    <label class="control-label col-md-6">
+                        <a class="btn btn-default btn-xs" ng-click="toggleKmMarker()" ng-class="{'active': isShowingKmMarkers()}"><i class="fa fa-map-marker"></i></a> Km markers
+                    </label>
+                    <label class="control-label col-md-3">Gain</label>
+                    <label class="control-label col-md-3">{{gain}}</label>
+                    <label class="control-label col-md-3">Loss</label>
+                    <label class="control-label col-md-3">{{loss}}</label>
                 </div>
             </div>
+        </div>
     </div>
 </div>

@@ -25,9 +25,9 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="control-label col-md-6">Color: <button type="button" class="btn btn-default" style="background:{{color}}"></button></label>
+                                    <label class="control-label col-md-6">Color: <button type="button" class="btn btn-default" ng-class="'bg-' + color.key" ></button></label>
                                     <div class="col-md-6">
-                                        <button type="button" class="btn btn-default col-xs-3" style="background:{{currentColor}};" ng-repeat="currentColor in colors" ng-click="setColor(currentColor, $event)"></button>
+                                        <button type="button" class="btn btn-default col-xs-3" ng-class="'bg-' + currentColor.key" ng-repeat="currentColor in colors" ng-click="setColor(currentColor, $event)"></button>
                                     </div>
                                 </div>
                             </div>

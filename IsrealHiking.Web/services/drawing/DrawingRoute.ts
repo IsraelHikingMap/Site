@@ -688,6 +688,10 @@
             return this.pathOptions.color;
         }
 
+        public getColorKeyValue = (): { key: string, value: string } => {
+            return _.find(Common.Constants.COLORS, c => c.value === this.getColor());
+        }
+
         public reverse = () => {
             for (var segmentIndex = 0; segmentIndex < this.routeSegments.length - 1; segmentIndex++) {
                 var currentSegment = this.routeSegments[segmentIndex];
