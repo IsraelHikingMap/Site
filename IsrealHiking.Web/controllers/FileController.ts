@@ -1,7 +1,6 @@
 ﻿module IsraelHiking.Controllers {
 
     export interface IFileScope extends angular.IScope {
-        file: File;
         open($files): void;
         save(e: Event): void;
     }
@@ -9,6 +8,8 @@
     export class FileController extends BaseMapController {
 
         constructor($scope: IFileScope,
+            $timeout: angular.ITimeoutService,
+            $window: angular.IWindowService,
             mapService: Services.MapService,
             layersService: Services.LayersService,
             hashService: Services.HashService,
@@ -16,7 +17,7 @@
             toastr: Toastr) {
             super(mapService);
 
-            this.setDragAndDrop($scope);
+            this.setDragAndDrop($scope, $timeout);
 
             if (hashService.externalUrl !== "") {
                 fileService.openFromUrl(hashService.externalUrl)
@@ -27,14 +28,14 @@
                     });
             }
 
-            $scope.open = () => {
-                if ($scope.file) {
-                    fileService.openFromFile($scope.file).success((dataContainer: Common.DataContainer) => {
-                        layersService.setJsonData(dataContainer);
-                    }).error(() => {
-                        toastr.error("Failed to load file.");
-                    });
-                }
+            $scope.open = (file: File) => {
+                if (!file)
+                    return;
+                fileService.openFromFile(file).success((dataContainer: Common.DataContainer) => {
+                    layersService.setJsonData(dataContainer);
+                }).error(() => {
+                    toastr.error("Failed to load file.");
+                });
             }
 
             $scope.save = (e: Event) => {
@@ -46,20 +47,21 @@
                 this.suppressEvents(e);
             }
 
-            $(window).bind("keydown", (e: JQueryEventObject) => {
+            angular.element($window).bind("keydown", (e: JQueryEventObject) => {
 
-                if (e.ctrlKey == false) {
-                    return;
+                if (e.ctrlKey === false) {
+                    return false;
                 }
                 switch (String.fromCharCode(e.which).toLowerCase()) {
-                    //case "o":
-                    // Opening a file dialog is a violation of security it can not be done.
-                    //break;
+                    case "o":
+                        // this doesn't work on firefox due to security reasons. it does work in chrome and IE though. 
+                        $("#openFile").click();
+                    break;
                     case "s":
-                        angular.element("#saveFile").trigger("click");
+                        $scope.save(e);
                         break;
                     default:
-                        return;
+                        return false;
                 }
                 if (!$scope.$$phase) {
                     $scope.$apply();
@@ -68,33 +70,26 @@
             });
         }
 
-        private setDragAndDrop = ($scope: IFileScope) => {
+        private setDragAndDrop = ($scope: IFileScope, $timeout: angular.ITimeoutService) => {
             var dropbox = this.map.getContainer();
 
-            var callbacks = {
-                dragenter: () => {
-                    this.map.scrollWheelZoom.disable();
-                },
-                dragleave: () => {
-                    this.map.scrollWheelZoom.enable();
-                },
-                dragover: (e: DragEvent) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                },
-                drop: (e: DragEvent) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    var files = Array.prototype.slice.apply(e.dataTransfer.files);
-                    setTimeout(() => {
-                        $scope.open(files);
+            dropbox.addEventListener("dragenter", () => { this.map.scrollWheelZoom.disable(); }, false);
+            dropbox.addEventListener("dragleave", () => { this.map.scrollWheelZoom.enable(); }, false);
+            dropbox.addEventListener("dragover", (e: DragEvent) => {
+                e.stopPropagation();
+                e.preventDefault();
+            }, false);
+            dropbox.addEventListener("drop", (e: DragEvent) => {
+                e.stopPropagation();
+                e.preventDefault();
+                var files = Array.prototype.slice.apply(e.dataTransfer.files);
+                if (files && files.length > 0) {
+                    $timeout(() => {
+                        $scope.open(files.shift());
                     }, 25);
-                    this.map.scrollWheelZoom.enable();
                 }
-            };
-            for (let name in callbacks) {
-                dropbox.addEventListener(name, callbacks[name], false);
-            }
+                this.map.scrollWheelZoom.enable();
+            }, false);
         }
     }
 } 
