@@ -1,6 +1,8 @@
 # Intro
 This repository holds all the files that the site needs in order to run.
 
+[![Build status](https://ci.appveyor.com/api/projects/status/38up550uh57s8khw/branch/master?svg=true)](https://ci.appveyor.com/project/HarelM/site/branch/master)
+
 # Technology stack
 The technology stack of this site is base on the following frameworks:
 * [Typescript](http://www.typescriptlang.org/)
