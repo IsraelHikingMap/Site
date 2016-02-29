@@ -66,7 +66,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var dataContainer = _controller.GetRemoteFile(url).Result;
 
             Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(2, dataContainer.markers.Count);
         }
 
         [TestMethod]
