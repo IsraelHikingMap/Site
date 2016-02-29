@@ -50,7 +50,7 @@
             angular.element($window).bind("keydown", (e: JQueryEventObject) => {
 
                 if (e.ctrlKey === false) {
-                    return false;
+                    return true;
                 }
                 switch (String.fromCharCode(e.which).toLowerCase()) {
                     case "o":
@@ -61,12 +61,12 @@
                         $scope.save(e);
                         break;
                     default:
-                        return false;
+                        return true;
                 }
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 }
-                return false;
+                return true;
             });
         }
 
