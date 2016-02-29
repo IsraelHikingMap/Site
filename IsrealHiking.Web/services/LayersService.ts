@@ -290,8 +290,7 @@ module IsraelHiking.Services {
             for (var overlayIndex = 0; overlayIndex < overlays.length; overlayIndex++) {
                 var overlayData = <ILayer>overlays[overlayIndex];
                 overlayData.isEditable = true;
-                var overlay = this.addOverlay(overlayData);
-                this.toggleOverlay(overlay);
+                this.addOverlay(overlayData);
             }
         }
 
