@@ -10,6 +10,7 @@ namespace IsraelHiking.DataAccess.Tests
     public class GpsBabelGatewayTests
     {
         [TestMethod]
+        [Ignore]
         public void ConvertFileFromat_FromGpxToKmlWithUTF8_ShouldSucceed()
         {
             var logger = new TraceLogger();
