@@ -97,7 +97,6 @@ module IsraelHiking.Services {
                 maxZoom: LayersService.MAX_NATIVE_ZOOM,
                 isEditable: false
             });
-            this.toggleOverlay(overlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
         }
