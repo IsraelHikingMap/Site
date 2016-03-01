@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Text;
+using System.Threading.Tasks;
 using System.Web.Http;
 
 namespace IsraelHiking.API.Controllers
@@ -19,47 +20,47 @@ namespace IsraelHiking.API.Controllers
         }
 
         // GET api/Urls/abc
-        public IHttpActionResult GetSiteUrl(string id)
+        public async Task<IHttpActionResult> GetSiteUrl(string id)
         {
-            var siteUrl = _repository.GetUrlById(id);
+            var siteUrl = await _repository.GetUrlById(id);
             if (siteUrl == null)
             {
                 return BadRequest();
             }
             siteUrl.LastViewed = DateTime.Now;
             siteUrl.ViewsCount++;
-            _repository.Update(siteUrl);
+            await _repository.Update(siteUrl);
             return Ok(siteUrl);
         }
 
         // POST api/urls
-        public IHttpActionResult PostSiteUrl(SiteUrl siteUrl)
+        public async Task<IHttpActionResult> PostSiteUrl(SiteUrl siteUrl)
         {
             siteUrl.CreationDate = DateTime.Now;
             siteUrl.LastViewed = DateTime.Now;
             siteUrl.ModifyKey = GetRandomString(10);
             siteUrl.ViewsCount = 0;
             var id = GetRandomString(10);
-            while (_repository.GetUrlById(id) != null)
+            while (await _repository.GetUrlById(id) != null)
             {
                 id = GetRandomString(10);
             }
             siteUrl.Id = id;
-            _repository.AddUrl(siteUrl);
+            await _repository.AddUrl(siteUrl);
             return Ok(siteUrl);
         }
 
         // PUT api/urls/abc
-        public IHttpActionResult PutSiteUrl(string id, SiteUrl siteUrl)
+        public async Task<IHttpActionResult> PutSiteUrl(string id, SiteUrl siteUrl)
         {
-            var siteUrlFromDatabase = _repository.GetUrlByModifyKey(id);
+            var siteUrlFromDatabase = await _repository.GetUrlByModifyKey(id);
             if (siteUrlFromDatabase == null)
             {
                 return NotFound();
             }
             siteUrlFromDatabase.JsonData = siteUrl.JsonData;
             siteUrlFromDatabase.LastViewed = DateTime.Now;
-            _repository.Update(siteUrlFromDatabase);
+            await _repository.Update(siteUrlFromDatabase);
             return Ok(siteUrlFromDatabase);
         }
 

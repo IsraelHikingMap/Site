@@ -6,5 +6,10 @@ namespace IsraelHiking.Common
     {
         public string name { get; set; }
         public List<RouteSegmentData> segments { get; set; }
+
+        public RouteData()
+        {
+            segments = new List<RouteSegmentData>();
+        }
     }
 }

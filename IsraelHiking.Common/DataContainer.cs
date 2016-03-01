@@ -10,5 +10,11 @@ namespace IsraelHiking.Common
         public List<MarkerData> markers { get; set; }
         public LatLng northEast { get; set; }
         public LatLng southWest { get; set; }
+
+        public DataContainer()
+        {
+            routes = new List<RouteData>();
+            markers = new List<MarkerData>();
+        }
     }
 }

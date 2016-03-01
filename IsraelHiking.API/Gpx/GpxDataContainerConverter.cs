@@ -9,11 +9,13 @@ namespace IsraelHiking.API.Gpx
     {
         public gpxType ToGpx(DataContainer container)
         {
+            var markers = container.markers ?? new List<MarkerData>();
+            var routes = container.routes ?? new List<RouteData>();
             return new gpxType
             {
                 creator = DataContainer.ISRAEL_HIKING_MAP,
-                wpt = container.markers.Select(ToWptType).ToArray(),
-                trk = container.routes.Select(r => new trkType
+                wpt = markers.Select(ToWptType).ToArray(),
+                trk = routes.Select(r => new trkType
                 {
                     name = r.name,
                     trkseg = r.segments.Select(s => new trksegType

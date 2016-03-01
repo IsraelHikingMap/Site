@@ -1,13 +1,14 @@
 ﻿using IsraelHiking.Common;
 using System;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IIsraelHikingRepository : IDisposable
     {
-        void AddUrl(SiteUrl siteUrl);
-        SiteUrl GetUrlById(string id);
-        SiteUrl GetUrlByModifyKey(string modifyKey);
-        void Update(object obj);
+        Task AddUrl(SiteUrl siteUrl);
+        Task<SiteUrl> GetUrlById(string id);
+        Task<SiteUrl> GetUrlByModifyKey(string modifyKey);
+        Task Update(object obj);
     }
 }

@@ -3,6 +3,7 @@ using IsraelHiking.DataAccessInterfaces;
 using System.Data.Entity;
 using System.Linq;
 using System;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess.Database
 {
@@ -15,26 +16,26 @@ namespace IsraelHiking.DataAccess.Database
             _dbContext = new IsraelHikingDbContext();
         }
 
-        public SiteUrl GetUrlById(string id)
+        public Task<SiteUrl> GetUrlById(string id)
         {
-            return _dbContext.SiteUrls.FirstOrDefault(s => s.Id == id);
+            return _dbContext.SiteUrls.FirstOrDefaultAsync(s => s.Id == id);
         }
 
-        public SiteUrl GetUrlByModifyKey(string modifyKey)
+        public Task<SiteUrl> GetUrlByModifyKey(string modifyKey)
         {
-            return _dbContext.SiteUrls.FirstOrDefault(s => s.ModifyKey == modifyKey);
+            return _dbContext.SiteUrls.FirstOrDefaultAsync(s => s.ModifyKey == modifyKey);
         }
 
-        public void AddUrl(SiteUrl siteUrl)
+        public async Task AddUrl(SiteUrl siteUrl)
         {
             _dbContext.SiteUrls.Add(siteUrl);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
-        public void Update(object obj)
+        public async Task Update(object obj)
         {
             _dbContext.Entry(obj).State = EntityState.Modified;
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 
         public void Dispose()

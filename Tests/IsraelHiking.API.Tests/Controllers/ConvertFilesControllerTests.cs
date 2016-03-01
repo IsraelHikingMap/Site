@@ -13,6 +13,8 @@ using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -24,16 +26,15 @@ namespace IsraelHiking.API.Tests.Controllers
         private IGpsBabelGateway _gpsBabelGateway;
         private IElevationDataStorage _elevationDataStorage;
         private IRemoteFileFetcherGateway _removeFileFetcherGateway;
+        private IFileConversionService _fileConversionService;
 
         private const string GPX_DATA = @"<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
-            <gpx xmlns='http://www.topografix.com/GPX/1/1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd' version='1.1' creator='togpx'>
+            <gpx xmlns='http://www.topografix.com/GPX/1/1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd' version='1.1' creator='IsraelHikingMap'>
             <wpt lat='31.85073184447357' lon='34.964332580566406'>
-                <name></name>
-                <desc>name=</desc>
+                <name>title</name>
             </wpt>
             <trk>
                 <name>Route 1</name>
-                <desc>name=Route 1</desc>
                 <trkseg>
                     <trkpt lat='31.841402444946397' lon='34.96433406040586'><ele>167</ele></trkpt>
                     <trkpt lat='31.8414' lon='34.964336'><ele>167.5</ele></trkpt>
@@ -52,7 +53,8 @@ namespace IsraelHiking.API.Tests.Controllers
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _removeFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
-            _controller = new ConvertFilesController(logger, _elevationDataStorage, _removeFileFetcherGateway, new FileConversionService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new CoordinatesConverter()));
+            _fileConversionService = new FileConversionService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new CoordinatesConverter());
+            _controller = new ConvertFilesController(logger, _elevationDataStorage, _removeFileFetcherGateway, _fileConversionService);
         }
 
         [TestMethod]
@@ -68,6 +70,54 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.AreEqual(1, dataContainer.routes.Count);
             Assert.AreEqual(1, dataContainer.markers.Count);
         }
+
+        [TestMethod]
+        public void PostSaveFile_ConvertToGpx_ShouldReturnByteArray()
+        {
+            var dataContainer = new DataContainer
+            {
+                markers = new List<MarkerData> {new MarkerData {latlng = new LatLng {lat = 10, lng = 10}, title = "title"}}
+            };
+
+            var bytes = _controller.PostSaveFile(dataContainer);
+
+            CollectionAssert.AreEqual(_fileConversionService.ConvertDataContainerToGpxBytes(dataContainer), bytes);
+        }
+
+        [TestMethod]
+        public void PostOpenFile_NoFile_ShouldReturnBadRequest()
+        {
+            var multipartContent = new MultipartContent();
+            _controller.Request = new HttpRequestMessage { Content = multipartContent };
+
+            var results = _controller.PostOpenFile().Result as BadRequestResult;
+
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void PostOpenFile_GpxFile_ShouldReturnDataContainer()
+        {
+            var multipartContent = new MultipartContent();
+            var streamContent = new StreamContent(new MemoryStream(Encoding.ASCII.GetBytes(GPX_DATA)));
+            streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "\"files\"",
+                FileName = "\"SomeFile.gpx\""
+            };
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/gpx");
+            multipartContent.Add(streamContent);
+            _controller.Request = new HttpRequestMessage { Content = multipartContent };
+
+            var results = _controller.PostOpenFile().Result as OkNegotiatedContentResult<DataContainer>;
+            var dataContainer = results.Content;
+
+            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(1, dataContainer.routes.Count);
+            Assert.AreEqual(1, dataContainer.routes.First().segments.Count);
+            Assert.AreEqual(5, dataContainer.routes.First().segments.First().latlngzs.Count);
+        }
+
 
         [TestMethod]
         public void PostConvertFile_ConvertToKml_ShouldReturnByteArray()

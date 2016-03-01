@@ -32,14 +32,14 @@ namespace IsraelHiking.API.Controllers
         {
             LineString lineString;
             var profile = ConvertProfile(type);
-            if (profile == ProfileType.None)
+            var pointFrom = GetGeographicPosition(from);
+            var pointTo = GetGeographicPosition(to);
+            if (ModelState.IsValid == false)
             {
-                var pointFrom = GetGeographicPosition(from);
-                var pointTo = GetGeographicPosition(to);
-                if (ModelState.IsValid == false)
-                {
-                    return BadRequest(ModelState);
-                }
+                return BadRequest(ModelState);
+            }
+            if (profile == ProfileType.None)
+            {   
                 lineString = new LineString(new[] { pointFrom, pointTo });
             }
             else
@@ -51,8 +51,8 @@ namespace IsraelHiking.API.Controllers
                     Profile = profile,
                 });
             }
-            var feature = new Feature(lineString, new FeatureProperties { Name = "Routing from " + from + " to " + to + " profile type: " + profile.ToString(), Creator = "IsraelHiking" });
-            return Ok(new FeatureCollection(new List<Feature>() { feature }));
+            var feature = new Feature(lineString, new FeatureProperties { Name = "Routing from " + from + " to " + to + " profile type: " + profile, Creator = "IsraelHikingMap" });
+            return Ok(new FeatureCollection(new List<Feature> { feature }));
         }
 
         private static ProfileType ConvertProfile(string type)
@@ -81,7 +81,7 @@ namespace IsraelHiking.API.Controllers
             var splitted = position.Split(',');
             if (splitted.Length != 2)
             {
-                ModelState.AddModelError("Position", "Invalid position");
+                ModelState.AddModelError("Position", $"Invalid position: {position} format should be number,number");
                 return null;
             }
             var lat = double.Parse(splitted.First());
