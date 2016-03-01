@@ -47,7 +47,6 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostSiteUrl_RandomHitsItemInDatabase_ShouldAddSiteUrl()
         {
-            var id = "someId";
             var queue = new Queue<SiteUrl>();
             queue.Enqueue(new SiteUrl());
             queue.Enqueue(null);
