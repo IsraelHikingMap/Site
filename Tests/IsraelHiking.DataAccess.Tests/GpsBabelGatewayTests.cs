@@ -24,8 +24,8 @@ namespace IsraelHiking.DataAccess.Tests
 
             var startIndex = actualKml.IndexOf("\r\n    <snippet>");
             var endIndex = actualKml.IndexOf("</snippet>");
-            actualKml = actualKml.Remove(startIndex, endIndex - startIndex + "</snippet>".Length).Substring(0, 400);
-            Assert.AreEqual(expectedKml.Substring(0, 400), actualKml);
+            actualKml = actualKml.Remove(startIndex, endIndex - startIndex + "</snippet>".Length).Substring(0, 400).Replace("\r", "").Replace("\n", "");
+            Assert.AreEqual(expectedKml.Substring(0, 400).Replace("\r", "").Replace("\n", ""), actualKml);
         }
     }
 }
