@@ -1,5 +1,4 @@
-﻿using System;
-using System.Configuration;
+﻿using System.Configuration;
 using Microsoft.Owin;
 using Owin;
 using System.Net.Http.Headers;
@@ -11,7 +10,7 @@ using IsraelHiking.API.Services;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccess.Database;
-using IsraelHiking.DataAccess.GraphHopper;
+using IsraelHiking.DataAccess.GPSBabel;
 using IsraelTransverseMercator;
 using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.StaticFiles;

@@ -76,7 +76,20 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var dataContainer = new DataContainer
             {
-                markers = new List<MarkerData> {new MarkerData {latlng = new LatLng {lat = 10, lng = 10}, title = "title"}}
+                markers = new List<MarkerData> {new MarkerData
+                {
+                    latlng = new LatLng {lat = 10, lng = 10}, title = "title"
+                }},
+                routes = new List<RouteData>
+                {
+                    new RouteData
+                    {
+                        segments = new List<RouteSegmentData>
+                        {
+                            new RouteSegmentData { latlngzs =  new List<LatLngZ> {  new LatLngZ()} }
+                        }
+                    }
+                }
             };
 
             var bytes = _controller.PostSaveFile(dataContainer);

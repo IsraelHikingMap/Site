@@ -15,6 +15,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
         private const string GH_NEW_CACHE_FOLDER = "israel-and-palestine-latest.osm-gh-new";
         private const string GRAPH_HOPPER_ROUTING_SERVICE_NAME = "\"Graph Hopper Routing\"";
         private const string NSSM_EXE = "nssm.exe";
+        private const string GRAPHHOPPER = "GraphHopper";
 
         private readonly ILogger _logger;
         private readonly IProcessHelper _processHelper;
@@ -26,7 +27,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
             _logger = logger;
             _processHelper = processHelper;
             var assemblyPath = Path.GetDirectoryName(Assembly.GetAssembly(typeof(GraphHopperHelper)).Location) ?? string.Empty;
-            WorkingDirectory = Path.Combine(assemblyPath, "GraphHopper");
+            WorkingDirectory = Path.Combine(assemblyPath, GRAPHHOPPER);
             if (string.IsNullOrEmpty(WorkingDirectory))
             {
                 _logger.Error("Unable to set working directory from assembly path!");
@@ -37,7 +38,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
         {
             return Task.Run(() =>
             {
-                WorkingDirectory = Path.Combine(serverPath, "GraphHopper");
+                WorkingDirectory = Path.Combine(serverPath, GRAPHHOPPER);
                 var serviceController = GetService();
                 if (serviceController != null && serviceController.Status == ServiceControllerStatus.Running)
                 {

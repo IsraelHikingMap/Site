@@ -104,8 +104,8 @@
   <ItemGroup>
     <Compile Include="Database\IsraelHikingDbContext.cs" />
     <Compile Include="Database\IsraelHikingRepository.cs" />
-    <Compile Include="ElevationDataStorage.cs" />
-    <Compile Include="GpsBabelGateway.cs" />
+    <Compile Include="elevation-cache\ElevationDataStorage.cs" />
+    <Compile Include="GPSBabel\GpsBabelGateway.cs" />
     <Compile Include="GraphHopper\GraphHopperHelper.cs" />
     <Compile Include="JsonResponse\JsonGraphHopperResponse.cs" />
     <Compile Include="Logger.cs" />
@@ -175,6 +175,30 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
+    <Content Include="GPSBabel\gpsbabel.exe">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GPSBabel\icudt51.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GPSBabel\icuin51.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GPSBabel\icuuc51.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GPSBabel\libgcc_s_dw2-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GPSBabel\libstdc++-6.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GPSBabel\libwinpthread-1.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="GPSBabel\Qt5Core.dll">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Include="GraphHopper\graphhopper-tools-0.6.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>

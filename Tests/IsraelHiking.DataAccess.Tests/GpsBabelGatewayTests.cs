@@ -1,8 +1,8 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Configuration;
 using System.IO;
-using IsraelHiking.DataAccessInterfaces;
-using NSubstitute;
+using System.Reflection;
+using IsraelHiking.DataAccess.GPSBabel;
 
 namespace IsraelHiking.DataAccess.Tests
 {
@@ -10,12 +10,11 @@ namespace IsraelHiking.DataAccess.Tests
     public class GpsBabelGatewayTests
     {
         [TestMethod]
-        [Ignore]
         public void ConvertFileFromat_FromGpxToKmlWithUTF8_ShouldSucceed()
         {
             var logger = new TraceLogger();
             var gateway = new GpsBabelGateway(logger, new ProcessHelper(logger));
-            ConfigurationManager.AppSettings["gpsbabel"] = @"C:\Program Files (x86)\GpsBabel\";
+            ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY] = Path.GetDirectoryName(Assembly.GetAssembly(typeof(GpsBabelGatewayTests)).Location) ?? string.Empty;
             var content = File.ReadAllBytes(@"TestData\test.gpx");
             var outputContent = gateway.ConvertFileFromat(content, "gpx", "kml").Result;
             var kmlContent = File.ReadAllBytes(@"TestData\test.kml");
