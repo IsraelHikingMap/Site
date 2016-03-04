@@ -2,8 +2,10 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Configuration;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Xml.Linq;
 using IsraelHiking.DataAccess.GPSBabel;
 
 namespace IsraelHiking.DataAccess.Tests
@@ -19,13 +21,11 @@ namespace IsraelHiking.DataAccess.Tests
             ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY] = Path.GetDirectoryName(Assembly.GetAssembly(typeof(GpsBabelGatewayTests)).Location) ?? string.Empty;
             var content = File.ReadAllBytes(@"TestData\test.gpx");
             var outputContent = gateway.ConvertFileFromat(content, "gpx", "kml").Result;
-            var actualKml = Encoding.UTF8.GetString(outputContent);
-            var expectedKml = File.ReadAllText(@"TestData\test.kml");
+            MemoryStream stream = new MemoryStream(outputContent);
+            var actualKmlDoc = XDocument.Load(stream);
 
-            var startIndex = actualKml.IndexOf("\r\n    <snippet>");
-            var endIndex = actualKml.IndexOf("</snippet>");
-            actualKml = actualKml.Remove(startIndex, endIndex - startIndex + "</snippet>".Length).Substring(0, 400).Replace("\r", "").Replace("\n", "");
-            Assert.AreEqual(expectedKml.Substring(0, 400).Replace("\r", "").Replace("\n", ""), actualKml);
+            var expectedKmlDoc = XDocument.Load(new FileStream(@"TestData\test.kml", FileMode.Open, FileAccess.Read));
+            Assert.AreEqual(expectedKmlDoc.Descendants().Count(x => x.Name.LocalName == "LookAt"), actualKmlDoc.Descendants().Count(x => x.Name.LocalName == "LookAt"));
         }
     }
 }
