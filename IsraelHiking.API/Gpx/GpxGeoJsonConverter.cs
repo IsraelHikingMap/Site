@@ -2,8 +2,8 @@
 using System.Linq;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
+using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.Common;
-using IsraelHiking.Gpx;
 
 namespace IsraelHiking.API.Gpx
 {

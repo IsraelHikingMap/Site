@@ -2,12 +2,13 @@
 using SQLite.CodeFirst;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.DataAccess.Database
 {
-    public class IsraelHikingDbContext : DbContext
+    public class IsraelHikingDbContext : DbContext, IIsraelHikingDbContext
     {
-        public DbSet<SiteUrl> SiteUrls { get; set; }
+        public IDbSet<SiteUrl> SiteUrls { get; set; }
 
         public IsraelHikingDbContext()
             : base("IsraelHikingDbContext")
@@ -19,6 +20,11 @@ namespace IsraelHiking.DataAccess.Database
         {
             modelBuilder.Conventions.Remove<PluralizingTableNameConvention>();
             System.Data.Entity.Database.SetInitializer(new SqliteCreateDatabaseIfNotExists<IsraelHikingDbContext>(modelBuilder));
+        }
+
+        public void MarkAsModified(object obj)
+        {
+            Entry(obj).State = EntityState.Modified;
         }
     }
 }

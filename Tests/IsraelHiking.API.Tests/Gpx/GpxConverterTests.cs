@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using GeoJSON.Net.Geometry;
 using IsraelHiking.API.Gpx;
-using IsraelHiking.Gpx;
+using IsraelHiking.API.Gpx.GpxTypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IsraelHiking.API.Tests.Gpx

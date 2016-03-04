@@ -9,11 +9,11 @@ namespace IsraelHiking.DataAccess.Database
 {
     public class IsraelHikingRepository : IIsraelHikingRepository
     {
-        private IsraelHikingDbContext _dbContext;
+        private IIsraelHikingDbContext _dbContext;
 
-        public IsraelHikingRepository()
+        public IsraelHikingRepository(IIsraelHikingDbContext context)
         {
-            _dbContext = new IsraelHikingDbContext();
+            _dbContext = context;
         }
 
         public Task<SiteUrl> GetUrlById(string id)
@@ -34,7 +34,7 @@ namespace IsraelHiking.DataAccess.Database
 
         public async Task Update(object obj)
         {
-            _dbContext.Entry(obj).State = EntityState.Modified;
+            _dbContext.MarkAsModified(obj);
             await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 

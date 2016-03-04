@@ -1,5 +1,5 @@
 using GeoJSON.Net.Feature;
-using IsraelHiking.Gpx;
+using IsraelHiking.API.Gpx.GpxTypes;
 
 namespace IsraelHiking.API.Gpx
 {

@@ -26,14 +26,14 @@ namespace IsraelHiking.DataAccess
         {
             return Task.Run(() =>
             {
-                var hgtFolder = Path.Combine(ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY], ELEVATION_CACHE);
-                if (Directory.Exists(hgtFolder) == false)
+                var elevationCacheFolder = Path.Combine(ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY], ELEVATION_CACHE);
+                if (Directory.Exists(elevationCacheFolder) == false)
                 {
-                    _logger.Error("!!! The folder: " + hgtFolder + " does not exists, please change the hgtFolder key in the configuration file !!!");
+                    _logger.Error($"!!! The folder: {elevationCacheFolder} does not exists, please change the binFolder key in the configuration file !!!");
                     return;
                 }
-                var hgtZipFiles = Directory.GetFiles(hgtFolder, "*.hgt.zip");
-                _logger.Debug("Found " + hgtZipFiles.Length + " files in: " + hgtFolder);
+                var hgtZipFiles = Directory.GetFiles(elevationCacheFolder, "*.hgt.zip");
+                _logger.Debug("Found " + hgtZipFiles.Length + " files in: " + elevationCacheFolder);
                 foreach (var hgtZipFile in hgtZipFiles)
                 {
                     _logger.Debug("Reading file " + hgtZipFile);

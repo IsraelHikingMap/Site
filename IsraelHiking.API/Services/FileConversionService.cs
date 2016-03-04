@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using System.Xml.Serialization;
 using GeoJSON.Net.Feature;
 using IsraelHiking.API.Gpx;
+using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelHiking.Gpx;
 using IsraelTransverseMercator;
 using Newtonsoft.Json;
 
@@ -97,10 +97,6 @@ namespace IsraelHiking.API.Services
         private string ConvertExtenstionToFormat(string extension)
         {
             extension = extension.ToLower().Replace(".", "");
-            if (string.IsNullOrWhiteSpace(extension))
-            {
-                return GEOJSON;
-            }
             switch (extension)
             {
                 case "twl":

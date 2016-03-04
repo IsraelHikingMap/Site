@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.Common;
-using IsraelHiking.Gpx;
 
 namespace IsraelHiking.API.Gpx
 {

@@ -3,10 +3,10 @@ using System.Reflection;
 using IsraelHiking.DataAccess.GraphHopper;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace IsraelHiking.DataAccess.Tests
+namespace IsraelHiking.DataAccess.Tests.GraphHopper
 {
     [TestClass]
-    public class GraphHopperInitializerTests
+    public class GraphHopperHelperTests
     {
         [TestMethod]
         [Ignore]
@@ -14,7 +14,7 @@ namespace IsraelHiking.DataAccess.Tests
         {
             var logger = new TraceLogger();
             GraphHopperHelper init = new GraphHopperHelper(logger, new ProcessHelper(logger));
-            init.Initialize(Path.GetDirectoryName(Assembly.GetAssembly(typeof(GraphHopperInitializerTests)).Location));
+            init.Initialize(Path.GetDirectoryName(Assembly.GetAssembly(typeof(GraphHopperHelperTests)).Location));
         }
     }
 }

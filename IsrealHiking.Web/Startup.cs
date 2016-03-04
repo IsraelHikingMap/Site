@@ -68,6 +68,7 @@ namespace IsraelHiking.Web
             container.RegisterType<IGpxGeoJsonConverter, GpxGeoJsonConverter>();
             container.RegisterType<IGpxDataContainerConverter, GpxDataContainerConverter>();
             container.RegisterType<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
+            container.RegisterType<IIsraelHikingDbContext, IsraelHikingDbContext>();
             container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();

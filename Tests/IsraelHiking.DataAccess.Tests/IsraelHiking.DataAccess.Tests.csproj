@@ -97,12 +97,14 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="DatabaseTests.cs" />
-    <Compile Include="GpsBabelGatewayTests.cs" />
+    <Compile Include="Database\IsraeHikingDbContextTests.cs" />
+    <Compile Include="Database\IsraelHikingRepositoryTests.cs" />
+    <Compile Include="GpsBabel\GpsBabelGatewayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoteFileFetcherGatewayTests.cs" />
-    <Compile Include="GraphHopperInitializerTests.cs" />
+    <Compile Include="GraphHopper\GraphHopperHelperTests.cs" />
     <Compile Include="TraceLogger.cs" />
+    <Compile Include="ElevationDataStorageTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\IsraelHiking.Common\IsraelHiking.Common.csproj">

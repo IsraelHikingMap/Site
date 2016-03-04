@@ -1,5 +1,5 @@
-﻿using IsraelHiking.Common;
-using IsraelHiking.Gpx;
+﻿using IsraelHiking.API.Gpx.GpxTypes;
+using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Gpx
 {
