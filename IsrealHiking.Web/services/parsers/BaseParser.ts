@@ -1,5 +1,5 @@
 ﻿module IsraelHiking.Services.Parsers {
-    export class BaseParser implements IParser {
+    export abstract class BaseParser implements IParser {
         private static FEATURE_COLLECTION = "FeatureCollection";
         private static FEATURE = "Feature";
         private static LINE_STRING = "LineString";
