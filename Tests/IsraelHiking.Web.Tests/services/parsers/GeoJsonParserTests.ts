@@ -13,44 +13,73 @@ module IsraelHiking.Tests {
         });
 
         it("Should parse geoJson string", () => {
-            var collection = <GeoJSON.FeatureCollection> {
-                features: [
-                    <GeoJSON.Feature>{
-                        type: "Feature",
-                        properties: {
-                            name: "point"
-                        },
-                        geometry: <GeoJSON.Point> {
-                            type: "Point",
-                            coordinates: [102.0, 0.5]
-                        }    
+            var collection = {
+                features: [{
+                    type: "Feature",
+                    properties: {
+                        name: "point"
                     },
-                    <GeoJSON.Feature>{
-                        type: "Feature",
-                        properties: {
-                            name: "LineString"
-                        },
-                        geometry: <GeoJSON.LineString>{
-                            type: "LineString",
-                            coordinates: [[102.0, 0.0], [103.0, 1.0], [104.0, 0.0], [105.0, 1.0]]
-                        }
-                    }
-                ]
-            };
+                    geometry: {
+                        type: "Point",
+                        coordinates: [1, 1]
+                    } as GeoJSON.Point
+                } as GeoJSON.Feature, {
+                    type: "Feature",
+                    properties: {
+                        name: "LineString"
+                    },
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[2, 2], [3, 3], [4, 4], [5, 5]]
+                    } as GeoJSON.LineString
+                } as GeoJSON.Feature, {
+                    type: "Feature",
+                    properties: {
+                        name: "multiPoint"
+                    },
+                    geometry: {
+                        type: "MultiPoint",
+                        coordinates: [[6, 6]]
+                    } as GeoJSON.MultiPoint
+                } as GeoJSON.Feature, {
+                    type: "Feature",
+                    properties: {
+                        name: "multiLineString"
+                    },
+                    geometry: {
+                        type: "MultiLineString",
+                        coordinates: [[[7, 7], [8, 8]]]
+                    } as GeoJSON.MultiLineString
+                } as GeoJSON.Feature]
+            } as GeoJSON.FeatureCollection;
 
             var data = geoJsonParser.parse(JSON.stringify(collection));
-            expect(data.markers.length).toBe(1);
+            expect(data.markers.length).toBe(2);
+            expect(data.routes.length).toBe(2);
         });
 
         it("Should convert data container to geojson", () => {
-            var data = <Common.DataContainer>{
+            var data = {
                 markers: [
                     { title: "marker", latlng: L.latLng(1, 1) } as Common.MarkerData
                 ],
-                routes: []
-            };
+                routes: [
+                    {
+                        name: "route",
+                        segments: [
+                            {
+                                latlngzs: [L.latLng(1, 1)],
+                                routePoint: L.latLng(1, 1),
+                                routingType: "h"
+                            } as Common.RouteSegmentData
+                        ]
+                    } as Common.RouteData
+                ]
+            } as Common.DataContainer;
             var geoJson = JSON.parse(geoJsonParser.toString(data)) as GeoJSON.FeatureCollection;
-            expect(geoJson.features.length).toBe(1);
+            expect(geoJson.features.length).toBe(2);
+            expect(geoJson.features[0].geometry.type).toBe("Point");
+            expect(geoJson.features[1].geometry.type).toBe("MultiLineString");
         });
     });
 }

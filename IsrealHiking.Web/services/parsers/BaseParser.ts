@@ -25,9 +25,6 @@
 
             var leaftletGeoJson = L.geoJson(geoJson, {
                 onEachFeature: (feature: GeoJSON.Feature, layer) => {
-                    if (feature.type !== BaseParser.FEATURE) {
-                        return;
-                    }
                     if (feature.geometry.type === BaseParser.LINE_STRING) {
                         var lineString = feature.geometry as GeoJSON.LineString;
                         this.positionsToData(lineString.coordinates, data, feature.properties.name);

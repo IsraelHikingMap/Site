@@ -57,6 +57,8 @@
     <TypeScriptCompile Include="services\elevation\ElevationProviderTests.ts" />
     <TypeScriptCompile Include="services\elevation\MicrosoftElevationProviderTests.ts" />
     <TypeScriptCompile Include="services\parsers\GeoJsonParserTests.ts" />
+    <TypeScriptCompile Include="services\parsers\OsmParserTests.ts" />
+    <TypeScriptCompile Include="services\parsers\ParserFactoryTests.ts" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

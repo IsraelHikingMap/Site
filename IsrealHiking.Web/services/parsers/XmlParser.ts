@@ -2,7 +2,7 @@
 
     declare var toGeoJSON: Function[];
     
-    export class XmlParser extends BaseParser implements IParser {
+    export abstract class XmlParser extends BaseParser implements IParser {
 
         protected parseToGeoJson(content: string): GeoJSON.FeatureCollection {
             var document = (new DOMParser()).parseFromString(content, "text/xml");
@@ -15,9 +15,9 @@
         }
 
         // should be implemented in derived class 
-        protected getFormat(): string { return ""; }
+        protected getFormat(): string { throw new Error("Should be implemented in derived class"); }
 
         // should be implemented in derived class 
-        protected convertToXml(geoJson: GeoJSON.FeatureCollection): string { return ""; }
+        protected convertToXml(geoJson: GeoJSON.FeatureCollection): string { throw new Error("Should be implemented in derived class"); }
     }
 }   

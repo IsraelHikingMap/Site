@@ -11,6 +11,10 @@
     { "Path": "isrealhiking.web\\scripts\\angular-mocks.js" },
     { "Path": "isrealhiking.web\\scripts\\leaflet-0.7.3.js" },
     { "Path": "isrealhiking.web\\scripts\\angular-toastr.js" },
+    { "Path": "isrealhiking.web\\scripts\\lodash.js" },
+    { "Path": "isrealhiking.web\\scripts\\togeojson.js" },
+    { "Path": "isrealhiking.web\\services\\parsers\\BaseParser.ts"},
+    { "Path": "isrealhiking.web\\services\\parsers\\XmlParser.ts"},
     { "Path": "isrealhiking.web\\services\\elevation\\", "Includes": ["*.ts"]},
     { "Path": "isrealhiking.web\\services\\parsers\\", "Includes": ["*.ts"]},
     { "Path": "isrealhiking.web\\common\\", "Includes": ["*.ts"]}
