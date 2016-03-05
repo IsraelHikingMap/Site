@@ -4,7 +4,7 @@
         private $compile: angular.ICompileService;
         private $rootScope: angular.IRootScopeService;
         private mapService: MapService;
-        private routeFactory: Routers.RouterFactory;
+        private routerService: Routers.RouterService;
         private hashService: HashService;
         private snappingService: SnappingService;
         private elevationProvider: Elevation.IElevationProvider;
@@ -14,7 +14,7 @@
             $compile: angular.ICompileService,
             $rootScope: angular.IRootScopeService,
             mapService: MapService,
-            routeFactory: Routers.RouterFactory,
+            routerService: Routers.RouterService,
             hashService: HashService,
             snappingService: SnappingService,
             elevationProvider: Elevation.IElevationProvider) {
@@ -22,7 +22,7 @@
             this.$compile = $compile;
             this.$rootScope = $rootScope;
             this.mapService = mapService;
-            this.routeFactory = routeFactory;
+            this.routerService = routerService;
             this.hashService = hashService;
             this.snappingService = snappingService;
             this.elevationProvider = elevationProvider;
@@ -34,7 +34,7 @@
             }
             var drawingRoute = new DrawingRoute(this.$q,
                 this.mapService,
-                this.routeFactory,
+                this.routerService,
                 this.hashService,
                 this.snappingService,
                 this.elevationProvider,

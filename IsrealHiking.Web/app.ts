@@ -12,9 +12,9 @@
     app.service(Common.Constants.elevationProvider, [Common.Constants.http, Common.Constants.toastr,
         ($http: angular.IHttpService, toastr: Toastr) =>
             new Services.Elevation.ElevationProvider($http, toastr)]);
-    app.service(Common.Constants.routerFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.toastr, Common.Constants.parserFactory,
+    app.service(Common.Constants.routerService, [Common.Constants.http, Common.Constants.q, Common.Constants.toastr, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
-            new Services.Routers.RouterFactory($http, $q, toastr, parserFactory)]);
+            new Services.Routers.RouterService($http, $q, toastr, parserFactory)]);
     app.service(Common.Constants.fileService, [Common.Constants.http, Common.Constants.parserFactory, Common.Constants.elevationProvider, Common.Constants.upload,
         ($http: angular.IHttpService, parserFactory: Services.Parsers.ParserFactory, elevationProvider: Services.Elevation.IElevationProvider, Upload: angular.angularFileUpload.IUploadService) =>
             new Services.FileService($http, parserFactory, elevationProvider, Upload)]);
@@ -22,9 +22,9 @@
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
             new Services.SnappingService($http, mapService, parserFactory, toastr)]);
     app.service(Common.Constants.drawingFactory,
-        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerFactory, Common.Constants.hashService, Common.Constants.snappingService, Common.Constants.elevationProvider,
-            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routeFactory: Services.Routers.RouterFactory, hashService: Services.HashService, snappingService: Services.SnappingService, elevationProvider: Services.Elevation.IElevationProvider) =>
-                new Services.Drawing.DrawingFactory($q, $compile, $rootScope, mapService, routeFactory, hashService, snappingService, elevationProvider)]);
+        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.mapService, Common.Constants.routerService, Common.Constants.hashService, Common.Constants.snappingService, Common.Constants.elevationProvider,
+            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, routerService: Services.Routers.RouterService, hashService: Services.HashService, snappingService: Services.SnappingService, elevationProvider: Services.Elevation.IElevationProvider) =>
+                new Services.Drawing.DrawingFactory($q, $compile, $rootScope, mapService, routerService, hashService, snappingService, elevationProvider)]);
     app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.localStorageService,
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
@@ -43,7 +43,7 @@
     app.directive("disableMapMovement", [Common.Constants.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
     app.directive("markerPopup", () => <angular.IDirective> {
         controller: Controllers.MarkerPopupController,
-        templateUrl: "views/templates/markerPopup.tpl.html",
+        templateUrl: "views/templates/markerPopup.tpl.html"
     });
     app.directive("drawingControl", () => <angular.IDirective> {
         controller: Controllers.DrawingController,

@@ -59,10 +59,12 @@
     <TypeScriptCompile Include="services\parsers\GeoJsonParserTests.ts" />
     <TypeScriptCompile Include="services\parsers\OsmParserTests.ts" />
     <TypeScriptCompile Include="services\parsers\ParserFactoryTests.ts" />
+    <TypeScriptCompile Include="services\routers\RouterServiceTests.ts" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

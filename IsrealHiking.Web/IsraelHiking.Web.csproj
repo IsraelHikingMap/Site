@@ -203,13 +203,8 @@
     <Content Include="services\parsers\OsmParser.js" />
     <Content Include="services\parsers\ParserFactory.js" />
     <Content Include="services\parsers\XmlParser.js" />
-    <Content Include="services\routers\BaseRouter.js" />
-    <Content Include="services\routers\BikeRouter.js" />
-    <Content Include="services\routers\FourWheelDriveRouter.js" />
-    <Content Include="services\routers\HikeRouter.js" />
-    <Content Include="services\routers\IRouter.js" />
+    <Content Include="services\routers\RouterService.js" />
     <Content Include="services\routers\NoneRouter.js" />
-    <Content Include="services\routers\RouterFactory.js" />
     <Content Include="services\SnappingService.js" />
     <Content Include="views\convertFormat.html" />
     <Content Include="views\layers.html" />
@@ -314,13 +309,8 @@
     <TypeScriptCompile Include="services\parsers\GeoJsonParser.ts" />
     <TypeScriptCompile Include="services\parsers\IParser.ts" />
     <TypeScriptCompile Include="services\parsers\XmlParser.ts" />
-    <TypeScriptCompile Include="services\routers\BaseRouter.ts" />
+    <TypeScriptCompile Include="services\routers\RouterService.ts" />
     <TypeScriptCompile Include="services\routers\NoneRouter.ts" />
-    <TypeScriptCompile Include="services\routers\RouterFactory.ts" />
-    <TypeScriptCompile Include="services\routers\BikeRouter.ts" />
-    <TypeScriptCompile Include="services\routers\FourWheelDriveRouter.ts" />
-    <TypeScriptCompile Include="services\routers\HikeRouter.ts" />
-    <TypeScriptCompile Include="services\routers\IRouter.ts" />
     <TypeScriptCompile Include="services\SnappingService.ts" />
     <TypeScriptCompile Include="common\Constants.ts" />
   </ItemGroup>

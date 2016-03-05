@@ -32,7 +32,7 @@
         private static MINIMAL_DISTANCE_BETWEEN_MARKERS = 100; // meter.
 
         private $q: angular.IQService;
-        private routerFactory: Services.Routers.RouterFactory;
+        private routerService: Services.Routers.RouterService;
         private snappingService: SnappingService;
         private elevationProvider: Elevation.IElevationProvider;
         private selectedRouteSegmentIndex: number;
@@ -54,7 +54,7 @@
 
         constructor($q: angular.IQService,
             mapService: MapService,
-            routerFactory: Services.Routers.RouterFactory,
+            routerService: Services.Routers.RouterService,
             hashService: HashService,
             snappingService: SnappingService,
             elevationProvider: Services.Elevation.IElevationProvider,
@@ -62,7 +62,7 @@
             pathOptions: L.PathOptions) {
             super(mapService, hashService);
             this.$q = $q;
-            this.routerFactory = routerFactory;
+            this.routerService = routerService;
             this.snappingService = snappingService;
             this.elevationProvider = elevationProvider;
             this.name = name;
@@ -330,8 +330,7 @@
             var startSegment = this.routeSegments[startIndex];
             var endSegment = this.routeSegments[endIndex];
             var polyline = this.createLoadingSegmentIndicatorPolyline([startSegment.routePointLatlng, endSegment.routePointLatlng]);
-            var router = this.routerFactory.create(endSegment.routingType);
-            var promise = router.getRoute(startSegment.routePointLatlng, endSegment.routePointLatlng);
+            var promise = this.routerService.getRoute(startSegment.routePointLatlng, endSegment.routePointLatlng, endSegment.routingType);
             var deferred = this.$q.defer();
             promise.then((data) => {
                 this.map.removeLayer(polyline);
