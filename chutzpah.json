@@ -7,10 +7,11 @@
     "UseSourceMaps": true
   },
   "References": [
-    { "Path": "isrealhiking.web\\scripts\\angular.min.js" },
+    { "Path": "isrealhiking.web\\scripts\\angular.js" },
     { "Path": "isrealhiking.web\\scripts\\angular-mocks.js" },
     { "Path": "isrealhiking.web\\scripts\\leaflet-0.7.3.js" },
     { "Path": "isrealhiking.web\\scripts\\angular-toastr.js" },
+    { "Path": "isrealhiking.web\\scripts\\angular-local-storage.js" },
     { "Path": "isrealhiking.web\\scripts\\lodash.js" },
     { "Path": "isrealhiking.web\\scripts\\togeojson.js" },
     { "Path": "isrealhiking.web\\common\\", "Includes": ["*.ts"]},
@@ -18,12 +19,14 @@
     { "Path": "isrealhiking.web\\services\\parsers\\XmlParser.ts"},
     { "Path": "isrealhiking.web\\services\\elevation\\", "Includes": ["*.ts"]},
     { "Path": "isrealhiking.web\\services\\parsers\\", "Includes": ["*.ts"]},
-    { "Path": "isrealhiking.web\\services\\routers\\", "Includes": ["*.ts"]}
+    { "Path": "isrealhiking.web\\services\\routers\\", "Includes": ["*.ts"]},
+    { "Path": "isrealhiking.web\\services\\hashService.ts"}
   ],
   "Tests": [{ "Include": "*\\**\\*Tests.ts" }],
   "CodeCoverageIncludes": [
     "*\\isrealhiking.web\\services\\elevation\\*.*",
     "*\\isrealhiking.web\\services\\parsers\\*.*",
-    "*\\isrealhiking.web\\services\\routers\\*.*"
+    "*\\isrealhiking.web\\services\\routers\\*.*",
+    "*\\isrealhiking.web\\services\\*.*"
   ]
 }

@@ -9,18 +9,16 @@ module IsraelHiking.Tests {
         var $q: angular.IQService;        
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
-        var $timeout;
         var toastr: Toastr;
         var routeService: Services.Routers.RouterService;
 
         beforeEach(() => {
             angular.mock.module("toastr");
-            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$q_: angular.IQService, _$timeout_: angular.ITimeoutService, _toastr_: Toastr) => { // 
+            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$q_: angular.IQService, _toastr_: Toastr) => { // 
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
                 $q = _$q_;
-                $timeout = _$timeout_;
                 toastr = _toastr_;
                 toastr.error = (): any => { };
                 routeService = new Services.Routers.RouterService($http, $q, toastr, new Services.Parsers.ParserFactory());
