@@ -35,25 +35,22 @@
         }
 
         private generateSnappings = () => {
+            this.snappings.clearLayers();
             if (this.map.getZoom() <= 13) {
-                this.snappings.clearLayers();
                 return;
             }
             
-            this.snappings.clearLayers();
             var bounds = this.map.getBounds();
             var boundsString = [bounds.getSouthWest().lat, bounds.getSouthWest().lng, bounds.getNorthEast().lat, bounds.getNorthEast().lng].join(",");
-            var address = "http://overpass-api.de/api/interpreter?data=%28way[%22highway%22]%28" + boundsString + "%29;%3E;%29;out;";
+            var address = `http://overpass-api.de/api/interpreter?data=%28way[%22highway%22]%28${boundsString}%29;%3E;%29;out;`;
             this.$http.get(address).success((osm: string) => {
                 var data = this.osmParser.parse(osm);
-                for (var routeIndex = 0; routeIndex < data.routes.length; routeIndex++) {
-                    var route = data.routes[routeIndex];
-                    for (var segmentIndex = 0; segmentIndex < route.segments.length; segmentIndex++) {
-                        var segment = route.segments[segmentIndex];
+                for (let route of data.routes) {
+                    for (let segment of route.segments) {
                         if (segment.latlngzs.length < 2) {
                             continue;
                         }
-                        this.snappings.addLayer(L.polyline(segment.latlngzs, <L.PolylineOptions> { opacity: 0 }));
+                        this.snappings.addLayer(L.polyline(segment.latlngzs, { opacity: 0 } as L.PolylineOptions));
                     }
                 }
             }).error(() => {
@@ -65,14 +62,14 @@
             if (!options) {
                 options = <ISnappingOptions> {
                     layers: this.snappings,
-                    sensitivity: 10,
+                    sensitivity: 10
                 };
             }
-            var minDist = Infinity;
-            var response = <ISnappingResponse> {
+            var minDistance = Infinity;
+            var response = {
                 latlng: latlng,
-                polyline: null,
-            };
+                polyline: null
+            } as ISnappingResponse;
 
             options.layers.eachLayer((polyline) => {
                 var latlngs = polyline.getLatLngs();
@@ -84,19 +81,19 @@
                 var prevPoint = this.map.latLngToLayerPoint(latlngs[0]);
                 var startDistance = snapPoint.distanceTo(prevPoint);
 
-                if (startDistance <= options.sensitivity && startDistance < minDist) {
-                    minDist = startDistance;
+                if (startDistance <= options.sensitivity && startDistance < minDistance) {
+                    minDistance = startDistance;
                     response.latlng = latlngs[0];
                     response.polyline = polyline;
                     response.beforeIndex = 0;
                 }
 
-                for (var latlngIndex = 1; latlngIndex < latlngs.length; latlngIndex++) {
+                for (let latlngIndex = 1; latlngIndex < latlngs.length; latlngIndex++) {
                     var currentPoint = this.map.latLngToLayerPoint(latlngs[latlngIndex]);
 
                     var currentDistance = L.LineUtil.pointToSegmentDistance(snapPoint, prevPoint, currentPoint);
-                    if (currentDistance < minDist && currentDistance <= options.sensitivity) {
-                        minDist = currentDistance;
+                    if (currentDistance < minDistance && currentDistance <= options.sensitivity) {
+                        minDistance = currentDistance;
                         response.latlng = this.map.layerPointToLatLng(L.LineUtil.closestPointOnSegment(snapPoint, prevPoint, currentPoint));
                         response.polyline = polyline;
                         response.beforeIndex = latlngIndex - 1;
