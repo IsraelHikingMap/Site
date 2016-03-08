@@ -193,7 +193,7 @@
         }
 
         private addPoint = (latlng: L.LatLng, routingType: string): angular.IPromise<{}> => {
-            this.routeSegments.push(this.createRouteSegment(latlng, [this.getLatLngZFromLatLng(latlng)], routingType));
+            this.routeSegments.push(this.createRouteSegment(latlng, [this.getLatLngZFromLatLng(latlng), this.getLatLngZFromLatLng(latlng)], routingType));
             this.updateStartAndEndMarkersIcons();
             if (this.routeSegments.length > 1) {
                 var endPointSegmentIndex = this.routeSegments.length - 1;
@@ -292,7 +292,7 @@
             this.routeSegments[this.selectedRouteSegmentIndex].routingType = this.currentRoutingType;
             var tasks = [];
             if (this.selectedRouteSegmentIndex == 0) {
-                this.routeSegments[0].latlngzs = [this.getLatLngZFromLatLng(snappingResponse.latlng)];
+                this.routeSegments[0].latlngzs = [this.getLatLngZFromLatLng(snappingResponse.latlng), this.getLatLngZFromLatLng(snappingResponse.latlng)];
                 tasks.push(this.elevationProvider.updateHeights(this.routeSegments[0].latlngzs));
             }
             else if (this.selectedRouteSegmentIndex > 0) {
@@ -314,7 +314,7 @@
             if (this.routeSegments.length > 0 && pointSegmentIndex == 0) {
                 // first point is being removed
                 this.routeSegments[0].latlngzs = [this.routeSegments[0].latlngzs[this.routeSegments[0].latlngzs.length - 1]];
-                this.routeSegments[0].polyline.setLatLngs([this.routeSegments[0].routePointLatlng]);
+                this.routeSegments[0].polyline.setLatLngs([this.routeSegments[0].routePointLatlng, this.routeSegments[0].routePointLatlng]);
                 this.updateDataLayer();
             }
             else if (pointSegmentIndex != 0 && pointSegmentIndex < this.routeSegments.length) {
