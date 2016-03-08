@@ -7,7 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace IsraelHiking.API.Tests.Gpx
 {
     [TestClass]
-    public class GpxConverterTests
+    public class GpxGeoJsonConverterTests
     {
         private readonly IGpxGeoJsonConverter _gpxGeoJsonConverter = new GpxGeoJsonConverter();
 

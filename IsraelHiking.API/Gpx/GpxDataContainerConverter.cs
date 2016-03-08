@@ -15,6 +15,7 @@ namespace IsraelHiking.API.Gpx
             {
                 creator = DataContainer.ISRAEL_HIKING_MAP,
                 wpt = markers.Select(ToWptType).ToArray(),
+                rte = new rteType[0],
                 trk = routes.Select(r => new trkType
                 {
                     name = r.name,
@@ -47,10 +48,10 @@ namespace IsraelHiking.API.Gpx
             }).ToList();
 
             var trks = gpx.trk ?? new trkType[0];
-            var tracks = trks.Select(t => new RouteData
+            var tracks = trks.Where(t => t.trkseg != null && t.trkseg.Any()).Select(t => new RouteData
             {
                 name = t.name,
-                segments = t.trkseg.Select(seg => new RouteSegmentData
+                segments = t.trkseg.Where(seg => seg.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
                 {
                     latlngzs = seg.trkpt.Select(ToLatLngZ).ToList(),
                     routePoint =  ToLatLngZ(seg.trkpt.Last()),
@@ -63,6 +64,10 @@ namespace IsraelHiking.API.Gpx
 
             var allPoints = container.routes.SelectMany(r => r.segments.SelectMany(s => s.latlngzs)).OfType<LatLng>().ToList();
             allPoints.AddRange(container.markers.Select(m => m.latlng));
+            if (allPoints.Any() == false)
+            {
+                return container;
+            }
             container.northEast = new LatLngZ
             {
                 lat = allPoints.Max(l => l.lat),
@@ -74,7 +79,6 @@ namespace IsraelHiking.API.Gpx
                 lat = allPoints.Min(l => l.lat),
                 lng = allPoints.Min(l => l.lng)
             };
-
             return container;
         }
 

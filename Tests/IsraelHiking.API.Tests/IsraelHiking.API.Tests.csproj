@@ -82,7 +82,8 @@
     <Compile Include="Controllers\ItmGridControllerTests.cs" />
     <Compile Include="Controllers\RoutingControllerTests.cs" />
     <Compile Include="Controllers\UrlsControllerTests.cs" />
-    <Compile Include="Gpx\GpxConverterTests.cs" />
+    <Compile Include="Gpx\GpxGeoJsonConverterTests.cs" />
+    <Compile Include="Gpx\GpxDataContainerConverterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
