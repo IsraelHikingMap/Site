@@ -185,12 +185,20 @@ namespace IsraelHiking.API.Services
             var returnArray = new List<RouteData>();
             foreach (var routeData in routesData)
             {
+                var allRoutePoints = routeData.segments.SelectMany(s => s.latlngzs).ToList();
+                if (allRoutePoints.Any() == false)
+                {
+                    continue;
+                }
                 var manipulatedRouteData = new RouteData
                 {
-                    segments = new List<RouteSegmentData>(),
+                    segments = new List<RouteSegmentData> { new RouteSegmentData
+                    {
+                        routePoint = allRoutePoints.First(),
+                        latlngzs = new List<LatLngZ> { allRoutePoints.First(), allRoutePoints.First() }
+                    } },
                     name = routeData.name
                 };
-                var allRoutePoints = routeData.segments.SelectMany(s => s.latlngzs).ToList();
                 var routeLength = allRoutePoints.Skip(1).Select((p, i) => GetDistance(p, allRoutePoints[i])).Sum();
                 var segmentLength = routeLength / MAX_SEGMENTS_NUMBER;
                 if (segmentLength < MINIMAL_SEGMENT_LENGTH)
