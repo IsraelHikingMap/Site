@@ -1,9 +1,15 @@
 ﻿module IsraelHiking.Controllers {
+    export interface IFormatViewModel {
+        label: string,
+        outputFormat: string,
+        extension:  string,
+    }
+
     export interface IConvertFormatScope extends angular.IScope {
-        formats: string[];
-        selectedFormat: string;
+        formats: IFormatViewModel[];
+        selectedFormat: IFormatViewModel;
         selectedFileName: string;
-        setSelectedFormat(selectedFormat: string): void;
+        setSelectedFormat(selectedFormat: IFormatViewModel): void;
         openConvert(e: Event): void;
         selectFile($files, e: Event): void;
         convertFile(selectedFormat: string): void;
@@ -24,16 +30,41 @@
                 title: "Convert File Format",
                 templateUrl: "views/templates/convertFormatModal.tpl.html",
                 show: false,
-                scope: $scope,
+                scope: $scope
             });
 
-            $scope.formats = ["gpx", "kml", "twl", "csv"];
+            $scope.formats = [
+                {
+                    label: "GPX version 1.1 (.gpx)",
+                    extension: "gpx",
+                    outputFormat: "gpx"
+                } as IFormatViewModel, {
+                    label: "Keyhole Markup Language (.kml)",
+                    extension: "kml",
+                    outputFormat: "kml"
+                } as IFormatViewModel, {
+                    label: "Naviguide binary route file (.twl)",
+                    extension: "twl",
+                    outputFormat: "twl"
+                } as IFormatViewModel, {
+                    label: "Comma-Separated Values (.csv)",
+                    extension: "csv",
+                    outputFormat: "csv"
+                } as IFormatViewModel, {
+                    label: "Single Track GPX (.gpx)",
+                    extension: "gpx",
+                    outputFormat: "gpx_single_track"
+                } as IFormatViewModel
+            ];
+
+            $scope.selectedFormat = $scope.formats[0];
+
             $scope.openConvert = (e: Event) => {
                 this.convertModal.$promise.then(this.convertModal.show);
                 this.suppressEvents(e);
             }
 
-            $scope.setSelectedFormat = (selectedFormat: string) => {
+            $scope.setSelectedFormat = (selectedFormat: IFormatViewModel) => {
                 $scope.selectedFormat = selectedFormat;
             }
 
@@ -47,8 +78,8 @@
 
             $scope.convertFile = () => {
                 var extension = this.fileToUpload.name.split(".").pop();
-                var outputFileName = this.fileToUpload.name.replace("." + extension, "." + $scope.selectedFormat);
-                fileService.uploadForConversionAndSave(this.fileToUpload, outputFileName);
+                var outputFileName = this.fileToUpload.name.replace(`.${extension}`, `.${$scope.selectedFormat.extension}`);
+                fileService.uploadForConversionAndSave(this.fileToUpload, outputFileName, $scope.selectedFormat.outputFormat);
             }
         }
     }

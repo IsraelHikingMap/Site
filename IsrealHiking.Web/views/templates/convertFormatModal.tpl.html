@@ -17,7 +17,7 @@
                         <div class="form-group">
                             <label class="control-label col-md-3">Output format</label>
                             <div class="col-md-9">
-                                <select class="form-control" ng-options="format for format in formats" ng-model="selectedFormat" ng-change="setSelectedFormat(selectedFormat)" required/>
+                                <select class="form-control" ng-options="format as format.label for format in formats" ng-model="selectedFormat" ng-change="setSelectedFormat(selectedFormat)" required></select>
                             </div>
                         </div>
                     </div>

@@ -35,10 +35,10 @@
             return this.$http.get(Common.Urls.convertFiles + "?url=" + url);
         }
 
-        public uploadForConversionAndSave = (blob: Blob, fileName: string): angular.IHttpPromise<{}> => {
+        public uploadForConversionAndSave = (blob: Blob, fileName: string, format: string): angular.IHttpPromise<{}> => {
             return this.Upload.upload(<angular.angularFileUpload.IFileUploadConfigFile>{
                 data: { file: blob },
-                url: Common.Urls.convertFiles + "?outputFormat=" + fileName.split(".").pop()
+                url: Common.Urls.convertFiles + "?outputFormat=" + format
             }).success((data) => {
                 this.saveBytesResponseToFile(data, fileName);
             });

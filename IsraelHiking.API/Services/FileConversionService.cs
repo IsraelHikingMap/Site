@@ -20,6 +20,7 @@ namespace IsraelHiking.API.Services
         private const int MINIMAL_SEGMENT_LENGTH = 500; // meter
         private const string GEOJSON = "geojson";
         private const string GPX_BABEL_FORMAT = "gpx,gpxver=1.1";
+        private const string GPX_SINGLE_TRACK = "gpx_single_track";
         private readonly IGpsBabelGateway _gpsBabelGateway;
         private readonly IGpxGeoJsonConverter _gpxGeoJsonConverter;
         private readonly IGpxDataContainerConverter _gpxDataContainerConverter;
@@ -49,12 +50,49 @@ namespace IsraelHiking.API.Services
                 content = ConvertGeoJsonContentToGpx(content);
                 inputFormat = GPX_BABEL_FORMAT;
             }
-            if (outputFormat != GEOJSON)
+            if (outputFormat != GEOJSON && outputFormat != GPX_SINGLE_TRACK)
             {
                 return await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, outputFormat);
             }
             var convertedGpx = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, GPX_BABEL_FORMAT);
-            var featureCollection = ConvertGpxContentToGeoJson(convertedGpx);
+            using (var stream = new MemoryStream(convertedGpx))
+            {
+                var xmlSerializer = new XmlSerializer(typeof(gpxType));
+                var gpx = xmlSerializer.Deserialize(stream) as gpxType;
+            
+                if (outputFormat == GEOJSON)
+                {
+                    return ConvertToGeoJsonBytes(gpx);
+                }
+                if (outputFormat == GPX_SINGLE_TRACK)
+                {
+                    return ConvertToSingleTrackGpx(gpx);
+                }
+                throw new Exception("This is not a valid output format");
+            }
+        }
+
+        private byte[] ConvertToSingleTrackGpx(gpxType gpx)
+        {
+            var singleTrackGpx = new gpxType
+            {
+                wpt = gpx.wpt,
+                rte = new rteType[0],
+                trk = gpx.trk.Select(t => new trkType
+                {
+                    name = t.name,
+                    desc = t.desc,
+                    cmt = t.cmt,
+                    trkseg = new[] { new trksegType { trkpt = t.trkseg.SelectMany(s => s.trkpt).ToArray() } }
+                }).ToArray()
+            };
+
+            return GpxToBytes(singleTrackGpx);
+        }
+
+        private byte[] ConvertToGeoJsonBytes(gpxType gpx)
+        {
+            var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
             using (var memoryStream = new MemoryStream())
             {
                 var writer = new StreamWriter(memoryStream);
@@ -68,9 +106,14 @@ namespace IsraelHiking.API.Services
 
         public byte[] ConvertDataContainerToGpxBytes(DataContainer dataContainer)
         {
+            var gpx = _gpxDataContainerConverter.ToGpx(dataContainer);
+            return GpxToBytes(gpx);
+        }
+
+        private byte[] GpxToBytes(gpxType gpx)
+        {
             using (var outputStream = new MemoryStream())
             {
-                var gpx = _gpxDataContainerConverter.ToGpx(dataContainer);
                 XmlSerializer xmlSerializer = new XmlSerializer(typeof(gpxType));
                 xmlSerializer.Serialize(outputStream, gpx);
                 return outputStream.ToArray();
