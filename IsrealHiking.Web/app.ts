@@ -80,6 +80,6 @@
     });
 
     app.run(["googleChartApiPromise", (googleChartApiPromise) => {
-        // loading google visualization on start-up.
+        $("link[type*=icon]").detach().appendTo("head");
     }]);
 }
