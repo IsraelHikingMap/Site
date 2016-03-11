@@ -21,7 +21,7 @@
         }
 
         private createControls = () => {
-            (<any>L).control.locate({ icon: "fa fa-crosshairs", keepCurrentZoomLevel: true, follow: true }).addTo(this.map);
+            (L as any).control.locate({ icon: "fa fa-crosshairs", keepCurrentZoomLevel: true, follow: true }).addTo(this.map);
 
             this.controlCreatorService.create(this.map, "drawing-control");
             this.controlCreatorService.create(this.map, "edit-osm-control");
@@ -32,7 +32,7 @@
             this.controlCreatorService.create(this.map, "share-control", "topright");
             this.controlCreatorService.create(this.map, "layers-control", "topright");
 
-            L.control.scale(<L.ScaleOptions> { imperial: false }).addTo(this.map);
+            L.control.scale({ imperial: false } as L.ScaleOptions).addTo(this.map);
         }
     }
 } 

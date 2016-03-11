@@ -3,6 +3,7 @@
     export interface IFileScope extends angular.IScope {
         open($files): void;
         save(e: Event): void;
+        print(e: Event): void;
     }
 
     export class FileController extends BaseMapController {
@@ -10,6 +11,7 @@
         constructor($scope: IFileScope,
             $timeout: angular.ITimeoutService,
             $window: angular.IWindowService,
+            $document: angular.IDocumentService,
             mapService: Services.MapService,
             layersService: Services.LayersService,
             hashService: Services.HashService,
@@ -47,6 +49,16 @@
                 this.suppressEvents(e);
             }
 
+            $scope.print = (e: Event) => {
+                angular.element($document[0].querySelectorAll(".leaflet-bar")).each((i, a) => {
+                    console.log(a);
+                    angular.element(a).addClass("no-print");
+                });
+                
+                $window.print();
+                this.suppressEvents(e);
+            } 
+
             angular.element($window).bind("keydown", (e: JQueryEventObject) => {
 
                 if (e.ctrlKey === false) {
@@ -60,6 +72,8 @@
                     case "s":
                         $scope.save(e);
                         break;
+                    case "p":
+                        $scope.print(e);
                     default:
                         return true;
                 }

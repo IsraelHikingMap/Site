@@ -80,6 +80,6 @@
     });
 
     app.run(["googleChartApiPromise", (googleChartApiPromise) => {
-        $("link[type*=icon]").detach().appendTo("head");
+        angular.element("link[type*=icon]").detach().appendTo("head");
     }]);
 }

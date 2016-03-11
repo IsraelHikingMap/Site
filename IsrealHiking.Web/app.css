@@ -145,6 +145,8 @@ body {
 
 .tooltip-statistics {
     min-width: 300px;
+    max-width: none;
+    width: 200px;
 }
 
 .icon-background {
@@ -204,11 +206,6 @@ body {
     }
 }
 
-.tooltip-statistics {
-    max-width: none;
-    width: 200px;
-}
-
 /* Extra Small Devices, Phones */
 @media only screen and (min-width : 480px) {
     .tooltip-info {
@@ -234,6 +231,14 @@ body {
 @media only screen and (min-width : 1200px) {
     .tooltip-info {
         max-width: 600px;
+    }
+}
+
+@media print
+{    
+    .no-print
+    {
+        display: none !important;
     }
 }
 
