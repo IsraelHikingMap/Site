@@ -34,7 +34,7 @@ namespace IsraelHiking.API.Gpx
             container.markers = points.Select(point => new MarkerData { title  = point.name, latlng = ToLatLngZ(point) }).ToList();
 
             var routes = gpx.rte ?? new rteType[0];
-            container.routes = routes.Select(route => new RouteData
+            container.routes = routes.Where(r => r.rtept != null && r.rtept.Any()).Select(route => new RouteData
             {
                 name = route.name,
                 segments = new List<RouteSegmentData>
@@ -42,7 +42,7 @@ namespace IsraelHiking.API.Gpx
                     new RouteSegmentData
                     {
                         latlngzs = route.rtept.Select(ToLatLngZ).ToList(),
-                        routePoint =  ToLatLngZ(route.rtept.Last())
+                        routePoint = ToLatLngZ(route.rtept.Last())
                     }
                 }
             }).ToList();

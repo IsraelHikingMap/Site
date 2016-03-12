@@ -1,23 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Serialization;
-using GeoJSON.Net.Feature;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
-using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Services
 {
     public class FileConversionService : IFileConversionService
     {
         private const int MAX_SEGMENTS_NUMBER = 20;
-        private const int MINIMAL_SEGMENT_LENGTH = 500; // meter
+        private const int MINIMAL_SEGMENT_LENGTH = 500; // meters
         private const string GEOJSON = "geojson";
         private const string GPX_BABEL_FORMAT = "gpx,gpxver=1.1";
         private const string GPX_SINGLE_TRACK = "gpx_single_track";
@@ -47,33 +43,32 @@ namespace IsraelHiking.API.Services
             }
             if (inputFormat == GEOJSON)
             {
-                content = ConvertGeoJsonContentToGpx(content);
+                content = _gpxGeoJsonConverter.ToGpx(content.ToFeatureCollection()).ToBytes();
                 inputFormat = GPX_BABEL_FORMAT;
+            }
+            if (inputFormat == outputFormat)
+            {
+                return content;
             }
             if (outputFormat != GEOJSON && outputFormat != GPX_SINGLE_TRACK)
             {
                 return await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, outputFormat);
             }
             var convertedGpx = await _gpsBabelGateway.ConvertFileFromat(content, inputFormat, GPX_BABEL_FORMAT);
-            using (var stream = new MemoryStream(convertedGpx))
+            switch (outputFormat)
             {
-                var xmlSerializer = new XmlSerializer(typeof(gpxType));
-                var gpx = xmlSerializer.Deserialize(stream) as gpxType;
-            
-                if (outputFormat == GEOJSON)
-                {
-                    return ConvertToGeoJsonBytes(gpx);
-                }
-                if (outputFormat == GPX_SINGLE_TRACK)
-                {
-                    return ConvertToSingleTrackGpx(gpx);
-                }
-                throw new Exception("This is not a valid output format");
+                case GEOJSON:
+                    return _gpxGeoJsonConverter.ToGeoJson(convertedGpx.ToGpx()).ToBytes();
+                case GPX_SINGLE_TRACK:
+                    return ConvertToSingleTrackGpx(convertedGpx);
+                default:
+                    throw new Exception("This is not a valid output format");
             }
         }
 
-        private byte[] ConvertToSingleTrackGpx(gpxType gpx)
+        private byte[] ConvertToSingleTrackGpx(byte[] content)
         {
+            var gpx = content.ToGpx();
             var singleTrackGpx = new gpxType
             {
                 wpt = gpx.wpt,
@@ -83,58 +78,23 @@ namespace IsraelHiking.API.Services
                     name = t.name,
                     desc = t.desc,
                     cmt = t.cmt,
-                    trkseg = new[] { new trksegType { trkpt = t.trkseg.SelectMany(s => s.trkpt).ToArray() } }
+                    trkseg = new[] {new trksegType {trkpt = t.trkseg.SelectMany(s => s.trkpt).ToArray()}}
                 }).ToArray()
             };
-
-            return GpxToBytes(singleTrackGpx);
-        }
-
-        private byte[] ConvertToGeoJsonBytes(gpxType gpx)
-        {
-            var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
-            using (var memoryStream = new MemoryStream())
-            {
-                var writer = new StreamWriter(memoryStream);
-                var jsonWriter = new JsonTextWriter(writer);
-                var serializer = new JsonSerializer();
-                serializer.Serialize(jsonWriter, featureCollection);
-                jsonWriter.Flush();
-                return memoryStream.ToArray();
-            }
-        }
-
-        public byte[] ConvertDataContainerToGpxBytes(DataContainer dataContainer)
-        {
-            var gpx = _gpxDataContainerConverter.ToGpx(dataContainer);
-            return GpxToBytes(gpx);
-        }
-
-        private byte[] GpxToBytes(gpxType gpx)
-        {
-            using (var outputStream = new MemoryStream())
-            {
-                XmlSerializer xmlSerializer = new XmlSerializer(typeof(gpxType));
-                xmlSerializer.Serialize(outputStream, gpx);
-                return outputStream.ToArray();
-            }
+            return singleTrackGpx.ToBytes();
         }
 
         public async Task<DataContainer> ConvertAnyFormatToDataContainer(byte[] content, string extension)
         {
             var gpxBytes = await Convert(content, extension, ".gpx");
-            using (var stream = new MemoryStream(gpxBytes))
+            var gpx = gpxBytes.ToGpx();
+            var container = _gpxDataContainerConverter.ToDataContainer(gpx);
+            if (gpx.creator != DataContainer.ISRAEL_HIKING_MAP)
             {
-                var xmlSerializer = new XmlSerializer(typeof(gpxType));
-                var gpx = xmlSerializer.Deserialize(stream) as gpxType;
-                var container = _gpxDataContainerConverter.ToDataContainer(gpx);
-                if (gpx.creator != DataContainer.ISRAEL_HIKING_MAP)
-                {
-                    // HM TODO: routing type is incomplete - make this better
-                    container.routes = ManipulateRoutesData(container.routes, "h");
-                }
-                return container;
+                // HM TODO: routing type is incomplete - make this better?
+                container.routes = ManipulateRoutesData(container.routes, "h");
             }
+            return container;
         }
 
         private string ConvertExtenstionToFormat(string extension)
@@ -146,37 +106,8 @@ namespace IsraelHiking.API.Services
                     return "naviguide";
                 case "gpx":
                     return GPX_BABEL_FORMAT;
-            }
-            return extension;
-        }
-
-        private FeatureCollection ConvertGpxContentToGeoJson(byte[] content)
-        {
-            using (var stream = new MemoryStream(content))
-            {
-                var xmlSerializer = new XmlSerializer(typeof(gpxType));
-                var gpx = xmlSerializer.Deserialize(stream) as gpxType;
-                var collection = _gpxGeoJsonConverter.ToGeoJson(gpx);
-                return collection;
-            }
-        }
-
-        private byte[] ConvertGeoJsonContentToGpx(byte[] content)
-        {
-            using (var outputStream = new MemoryStream())
-            using (var stream = new MemoryStream(content))
-            {
-                var serializer = new JsonSerializer();
-
-                using (var sr = new StreamReader(stream))
-                using (var jsonTextReader = new JsonTextReader(sr))
-                {
-                    var collection = serializer.Deserialize<FeatureCollection>(jsonTextReader);
-                    var gpx = _gpxGeoJsonConverter.ToGpx(collection);
-                    var xmlSerializer = new XmlSerializer(typeof(gpxType));
-                    xmlSerializer.Serialize(outputStream, gpx);
-                    return outputStream.ToArray();
-                }
+                default:
+                    return extension;
             }
         }
 
@@ -186,10 +117,6 @@ namespace IsraelHiking.API.Services
             foreach (var routeData in routesData)
             {
                 var allRoutePoints = routeData.segments.SelectMany(s => s.latlngzs).ToList();
-                if (allRoutePoints.Any() == false)
-                {
-                    continue;
-                }
                 var manipulatedRouteData = new RouteData
                 {
                     segments = new List<RouteSegmentData> { new RouteSegmentData
@@ -214,7 +141,7 @@ namespace IsraelHiking.API.Services
                     routingType = routingType
                 };
 
-                for (int latlngIndex = 1; latlngIndex < allRoutePoints.Count; latlngIndex++)
+                for (var latlngIndex = 1; latlngIndex < allRoutePoints.Count; latlngIndex++)
                 {      
                     currentSegmentLength += GetDistance(allRoutePoints[latlngIndex - 1], allRoutePoints[latlngIndex]);
                     if (currentSegmentLength < segmentLength)

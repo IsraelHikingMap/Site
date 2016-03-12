@@ -27,6 +27,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IElevationDataStorage _elevationDataStorage;
         private IRemoteFileFetcherGateway _removeFileFetcherGateway;
         private IFileConversionService _fileConversionService;
+        private IGpxDataContainerConverter _gpxDataContainerConverter;
 
         private const string GPX_DATA = @"<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
             <gpx xmlns='http://www.topografix.com/GPX/1/1' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd' version='1.1' creator='IsraelHikingMap'>
@@ -53,8 +54,9 @@ namespace IsraelHiking.API.Tests.Controllers
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _removeFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
-            _fileConversionService = new FileConversionService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new CoordinatesConverter());
-            _controller = new ConvertFilesController(logger, _elevationDataStorage, _removeFileFetcherGateway, _fileConversionService);
+            _gpxDataContainerConverter = new GpxDataContainerConverter();
+            _fileConversionService = new FileConversionService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new CoordinatesConverter());
+            _controller = new ConvertFilesController(logger, _elevationDataStorage, _removeFileFetcherGateway, _fileConversionService, _gpxDataContainerConverter);
         }
 
         [TestMethod]
@@ -94,7 +96,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             var bytes = _controller.PostSaveFile(dataContainer);
 
-            CollectionAssert.AreEqual(_fileConversionService.ConvertDataContainerToGpxBytes(dataContainer), bytes);
+            CollectionAssert.AreEqual(_gpxDataContainerConverter.ToGpx(dataContainer).ToBytes(), bytes);
         }
 
         [TestMethod]

@@ -67,7 +67,7 @@
                 switch (String.fromCharCode(e.which).toLowerCase()) {
                     case "o":
                         // this doesn't work on firefox due to security reasons. it does work in chrome and IE though. 
-                        $("#openFile").click();
+                        angular.element("#openFile").click();
                     break;
                     case "s":
                         $scope.save(e);

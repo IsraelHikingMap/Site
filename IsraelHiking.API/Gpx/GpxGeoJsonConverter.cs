@@ -34,7 +34,6 @@ namespace IsraelHiking.API.Gpx
                 var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.name));
                 collection.Features.Add(feature);
             }
-
             return collection;        
         }
 
@@ -59,12 +58,8 @@ namespace IsraelHiking.API.Gpx
 
         private wptType CreateWayPoint(Feature pointFeature)
         {
-            var point = pointFeature.Geometry as Point;
-            var position = point?.Coordinates as GeographicPosition;
-            if (position == null)
-            {
-                return null;
-            }
+            var point = (Point) pointFeature.Geometry;
+            var position = (GeographicPosition) point.Coordinates;
             return CreateWayPoint(position, GetFeatureName(pointFeature));
         }
 
@@ -120,11 +115,7 @@ namespace IsraelHiking.API.Gpx
 
         private string GetFeatureName(Feature feature)
         {
-            if (feature.Properties.ContainsKey(NAME))
-            {
-                return feature.Properties[NAME]?.ToString();
-            }
-            return string.Empty;
+            return feature.Properties.ContainsKey(NAME) ? feature.Properties[NAME].ToString() : string.Empty;
         }
     }
 }

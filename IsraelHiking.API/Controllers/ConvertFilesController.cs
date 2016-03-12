@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 
@@ -16,16 +17,19 @@ namespace IsraelHiking.API.Controllers
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IRemoteFileFetcherGateway _remoteFileFetcher;
         private readonly IFileConversionService _fileConversionService;
+        private readonly IGpxDataContainerConverter _gpxDataContainerConverter;
 
         public ConvertFilesController(ILogger logger, 
             IElevationDataStorage elevationDataStorage,
             IRemoteFileFetcherGateway remoteFileFetcher, 
-            IFileConversionService fileConversionService)
+            IFileConversionService fileConversionService, 
+            IGpxDataContainerConverter gpxDataContainerConverter)
         {
             _logger = logger;
             _elevationDataStorage = elevationDataStorage;
             _remoteFileFetcher = remoteFileFetcher;
             _fileConversionService = fileConversionService;
+            _gpxDataContainerConverter = gpxDataContainerConverter;
         }
         /// <summary>
         /// Gets a file from an external Url and converts it to data container
@@ -53,7 +57,7 @@ namespace IsraelHiking.API.Controllers
         [Route("api/saveFile")]
         public byte[] PostSaveFile(DataContainer dataContainer)
         {
-            return _fileConversionService.ConvertDataContainerToGpxBytes(dataContainer);
+            return _gpxDataContainerConverter.ToGpx(dataContainer).ToBytes();
         }
 
         /// <summary>

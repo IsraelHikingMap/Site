@@ -67,6 +67,7 @@
     <Compile Include="Controllers\UrlsController.cs" />
     <Compile Include="Gpx\GpxDataContainerConverter.cs" />
     <Compile Include="Gpx\GpxGeoJsonConverter.cs" />
+    <Compile Include="Gpx\SerializarionExtensions.cs" />
     <Compile Include="Gpx\GpxTypes.cs">
       <DependentUpon>GpxTypes.xsd</DependentUpon>
     </Compile>
