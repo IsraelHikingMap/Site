@@ -115,6 +115,8 @@
     <Content Include="IsraelMTBmap.html" />
     <Content Include="scripts\angular-animate.js" />
     <Content Include="scripts\angular-animate.min.js" />
+    <Content Include="scripts\angular-file-saver.bundle.js" />
+    <Content Include="scripts\angular-file-saver.bundle.min.js" />
     <Content Include="scripts\angular-mocks.js" />
     <Content Include="scripts\angular-toastr.js" />
     <Content Include="scripts\angular-toastr.min.js" />
@@ -128,8 +130,6 @@
     <Content Include="scripts\FileAPI.js" />
     <Content Include="scripts\FileAPI.min.js" />
     <None Include="scripts\jquery-2.2.0.intellisense.js" />
-    <Content Include="scripts\FileSaver.js" />
-    <Content Include="scripts\FileSaver.min.js" />
     <Content Include="scripts\jquery-2.2.0.js" />
     <Content Include="scripts\jquery-2.2.0.min.js" />
     <Content Include="scripts\lodash.core.js" />
@@ -259,7 +259,6 @@
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
     <TypeScriptCompile Include="directives\DraggableMovableDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
-    <TypeScriptCompile Include="scripts\typings\angular-file-upload\angular-file-upload.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-component-router.d.ts" />
@@ -270,7 +269,6 @@
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-sanitize.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular.d.ts" />
     <TypeScriptCompile Include="scripts\typings\es6-promise\es6-promise.d.ts" />
-    <TypeScriptCompile Include="scripts\typings\FileSaver\FileSaver.d.ts" />
     <TypeScriptCompile Include="scripts\typings\geojson\geojson.d.ts" />
     <TypeScriptCompile Include="scripts\typings\google.visualization\google.visualization.d.ts" />
     <TypeScriptCompile Include="scripts\typings\jquery\jquery.d.ts" />

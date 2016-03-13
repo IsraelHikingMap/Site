@@ -24,6 +24,7 @@
         public static elevationProvider = "elevationProvider";
         public static toastr = "toastr";
         public static upload = "Upload";
+        public static fileSaver = "FileSaver";
         
         // Controllers
         public static mainMapController = "mainMapController";

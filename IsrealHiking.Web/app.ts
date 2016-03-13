@@ -1,5 +1,7 @@
 ﻿module IsraelHiking {
-    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule", "googlechart", "ngAnimate", "toastr", "angular-loading-bar"]);
+    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap",
+        "LocalStorageModule", "googlechart", "ngAnimate",
+        "toastr", "angular-loading-bar", "ngFileSaver"]);
 
     L.Icon.Default.imagePath = "content/images/";
 
@@ -15,9 +17,9 @@
     app.service(Common.Constants.routerService, [Common.Constants.http, Common.Constants.q, Common.Constants.toastr, Common.Constants.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterService($http, $q, toastr, parserFactory)]);
-    app.service(Common.Constants.fileService, [Common.Constants.http, Common.Constants.parserFactory, Common.Constants.elevationProvider, Common.Constants.upload,
-        ($http: angular.IHttpService, parserFactory: Services.Parsers.ParserFactory, elevationProvider: Services.Elevation.IElevationProvider, Upload: angular.angularFileUpload.IUploadService) =>
-            new Services.FileService($http, parserFactory, elevationProvider, Upload)]);
+    app.service(Common.Constants.fileService, [Common.Constants.http, Common.Constants.upload, Common.Constants.fileSaver,
+        ($http: angular.IHttpService, Upload: angular.angularFileUpload.IUploadService, FileSaver: Services.IFileSaver) =>
+            new Services.FileService($http, Upload, FileSaver)]);
     app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory, Common.Constants.toastr,
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
             new Services.SnappingService($http, mapService, parserFactory, toastr)]);
