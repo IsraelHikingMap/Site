@@ -59,7 +59,7 @@
                     markers: [],
                     routes: [route.getData()]
                 } as Common.DataContainer;
-                fileService.saveToFile(route.name + ".gpx", data)
+                fileService.saveToFile(route.name + ".gpx", "gpx", data)
                     .then(() => {}, () => {
                         toastr.error("Unable to save route to file...");
                     });

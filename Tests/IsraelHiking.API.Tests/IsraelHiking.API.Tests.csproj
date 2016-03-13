@@ -77,7 +77,7 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="Controllers\ConvertFilesControllerTests.cs" />
+    <Compile Include="Controllers\FilesControllerTests.cs" />
     <Compile Include="Controllers\ElevationControllerTests.cs" />
     <Compile Include="Controllers\ItmGridControllerTests.cs" />
     <Compile Include="Controllers\RoutingControllerTests.cs" />
@@ -85,7 +85,7 @@
     <Compile Include="Gpx\GpxGeoJsonConverterTests.cs" />
     <Compile Include="Gpx\GpxDataContainerConverterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Services\FileConversionServiceTests.cs" />
+    <Compile Include="Gpx\DataContainerConverterTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\IsraelHiking.API\IsraelHiking.API.csproj">
@@ -105,6 +105,7 @@
     <None Include="app.config" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

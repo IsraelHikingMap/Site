@@ -17,8 +17,8 @@
             this.Upload = Upload;
         }
 
-        public saveToFile = (fileName: string, dataContainer: Common.DataContainer): angular.IPromise<{}> => {
-            return this.$http.post(Common.Urls.saveFile, dataContainer)
+        public saveToFile = (fileName: string, format:string, dataContainer: Common.DataContainer): angular.IPromise<{}> => {
+            return this.$http.post(Common.Urls.files + "?format=" + format, dataContainer)
                 .success((responseData) => {
                     this.saveBytesResponseToFile(responseData, fileName);
                 });
@@ -32,13 +32,13 @@
         }
 
         public openFromUrl = (url: string): angular.IHttpPromise<Common.DataContainer> => {
-            return this.$http.get(Common.Urls.convertFiles + "?url=" + url);
+            return this.$http.get(Common.Urls.files + "?url=" + url);
         }
 
         public uploadForConversionAndSave = (blob: Blob, fileName: string, format: string): angular.IHttpPromise<{}> => {
             return this.Upload.upload(<angular.angularFileUpload.IFileUploadConfigFile>{
                 data: { file: blob },
-                url: Common.Urls.convertFiles + "?outputFormat=" + format
+                url: Common.Urls.files + "?outputFormat=" + format
             }).success((data) => {
                 this.saveBytesResponseToFile(data, fileName);
             });

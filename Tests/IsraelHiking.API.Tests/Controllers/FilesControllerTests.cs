@@ -4,10 +4,8 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web.Http.Results;
-using GeoJSON.Net.Geometry;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Gpx;
-using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
@@ -19,14 +17,14 @@ using System.Linq;
 namespace IsraelHiking.API.Tests.Controllers
 {
     [TestClass]
-    public class ConvertFilesControllerTests
+    public class FilesControllerTests
     {
-        private ConvertFilesController _controller;
+        private FilesController _controller;
 
         private IGpsBabelGateway _gpsBabelGateway;
         private IElevationDataStorage _elevationDataStorage;
         private IRemoteFileFetcherGateway _removeFileFetcherGateway;
-        private IFileConversionService _fileConversionService;
+        private IDataContainerConverter _dataContainerConverter;
         private IGpxDataContainerConverter _gpxDataContainerConverter;
 
         private const string GPX_DATA = @"<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
@@ -50,13 +48,12 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestInitialize]
         public void TestInitialize()
         {
-            ILogger logger = Substitute.For<ILogger>();
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _removeFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
             _gpxDataContainerConverter = new GpxDataContainerConverter();
-            _fileConversionService = new FileConversionService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new CoordinatesConverter());
-            _controller = new ConvertFilesController(logger, _elevationDataStorage, _removeFileFetcherGateway, _fileConversionService, _gpxDataContainerConverter);
+            _dataContainerConverter = new DataContainerConverter(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new CoordinatesConverter());
+            _controller = new FilesController(_elevationDataStorage, _removeFileFetcherGateway, _dataContainerConverter);
         }
 
         [TestMethod]
@@ -65,7 +62,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = "someurl";
             byte[] bytes = Encoding.ASCII.GetBytes(GPX_DATA);
             _removeFileFetcherGateway.GetFileContent(url).Returns(Task.FromResult(new RemoteFileFetcherGatewayResponse { Content = bytes, FileName = "file.KML" }));
-            _gpsBabelGateway.ConvertFileFromat(bytes, "kml", "gpx,gpxver=1.1").Returns(Task.FromResult(bytes));
+            _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Is<string>(x=> x.Contains("kml")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(Task.FromResult(bytes));
 
             var dataContainer = _controller.GetRemoteFile(url).Result;
 
@@ -94,7 +91,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 }
             };
 
-            var bytes = _controller.PostSaveFile(dataContainer);
+            var bytes = _controller.PostSaveFile("gpx", dataContainer).Result;
 
             CollectionAssert.AreEqual(_gpxDataContainerConverter.ToGpx(dataContainer).ToBytes(), bytes);
         }
@@ -131,61 +128,6 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.AreEqual(1, dataContainer.routes.Count);
             Assert.AreEqual(1, dataContainer.routes.First().segments.Count);
             Assert.AreEqual(5, dataContainer.routes.First().segments.First().latlngzs.Count);
-        }
-
-
-        [TestMethod]
-        public void PostConvertFile_ConvertToKml_ShouldReturnByteArray()
-        {
-            var multipartContent = new MultipartContent();
-            var streamContent = new StreamContent(new MemoryStream(new byte[] { 1 }));
-            streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
-            {
-                Name = "\"files\"",
-                FileName = "\"SomeFile.twl\""
-            };
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/kml");
-            multipartContent.Add(streamContent);
-            _controller.Request = new HttpRequestMessage {Content = multipartContent};
-            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), "naviguide", "kml").Returns(Task.FromResult(new byte[] { 1, 1 }));
-
-            var response = _controller.PostConvertFile("kml").Result as OkNegotiatedContentResult<byte[]>;
-
-            Assert.IsNotNull(response);
-            Assert.AreEqual(2, response.Content.Length);
-        }
-
-        [TestMethod]
-        public void PostConvertFile_NoFiles_ShouldReturnBadRequest()
-        {
-            var multipartContent = new MultipartContent();
-            _controller.Request = new HttpRequestMessage {Content = multipartContent};
-            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), "naviguide", "kml").Returns(Task.FromResult(new byte[] { 1, 1 }));
-
-            var response = _controller.PostConvertFile("kml").Result as BadRequestResult;
-
-            Assert.IsNotNull(response);
-        }
-
-        [TestMethod]
-        public void PostConvertFile_FromGpxToGeoJson_ShouldReturnGeoJson()
-        {
-            var bytes = Encoding.ASCII.GetBytes(GPX_DATA);
-            var multipartContent = new MultipartContent();
-            var streamContent = new StreamContent(new MemoryStream(bytes));
-            streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
-            {
-                Name = "\"files\"",
-                FileName = "\"SomeFile.gpx\""
-            };
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/gpx");
-            multipartContent.Add(streamContent);
-            _controller.Request = new HttpRequestMessage { Content = multipartContent };
-            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(bytes));
-
-            var response = _controller.PostConvertFile("geojson").Result as OkNegotiatedContentResult<byte[]>;
-
-            Assert.IsNotNull(response);
         }
     }
 }

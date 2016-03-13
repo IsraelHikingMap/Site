@@ -88,7 +88,6 @@
     <Content Include="content\loading-bar.css" />
     <Content Include="content\loading-bar.min.css" />
     <Content Include="controllers\BaseMapController.js" />
-    <Content Include="controllers\ConvertFormatController.js" />
     <Content Include="controllers\DrawingController.js" />
     <Content Include="controllers\EditOSMController.js" />
     <Content Include="controllers\FileController.js" />
@@ -206,13 +205,12 @@
     <Content Include="services\routers\RouterService.js" />
     <Content Include="services\routers\NoneRouter.js" />
     <Content Include="services\SnappingService.js" />
-    <Content Include="views\convertFormat.html" />
+    <Content Include="views\saveAs.html" />
     <Content Include="views\layers.html" />
     <Content Include="views\drawing.html" />
     <Content Include="views\editOSM.html" />
     <Content Include="views\search.html" />
     <Content Include="views\share.html" />
-    <Content Include="views\templates\convertFormatModal.tpl.html" />
     <Content Include="views\templates\routeStatisticsTooltip.tpl.html" />
     <Content Include="views\templates\legendModal.tpl.html" />
     <Content Include="views\templates\routePropertiesModal.tpl.html" />
@@ -246,7 +244,6 @@
     <TypeScriptCompile Include="app.ts" />
     <TypeScriptCompile Include="common\EventHelper.ts" />
     <TypeScriptCompile Include="common\Urls.ts" />
-    <TypeScriptCompile Include="controllers\ConvertFormatController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\BaseLayerAddController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\LayerBaseController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\BaseLayerEditController.ts" />

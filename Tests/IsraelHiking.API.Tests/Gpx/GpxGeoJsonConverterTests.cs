@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using GeoJSON.Net.Feature;
+﻿using System.Linq;
 using GeoJSON.Net.Geometry;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
@@ -21,7 +19,7 @@ namespace IsraelHiking.API.Tests.Gpx
                 wpt = new[] {new wptType {lat = 1, lon = 2, ele = 3, eleSpecified = false, name = "point"}}
             };
 
-            var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
+            var featureCollection = _gpxGeoJsonConverter.   ToGeoJson(gpx);
 
             Assert.AreEqual(1, featureCollection.Features.Count);
             var point = featureCollection.Features.Select(f => f.Geometry).OfType<Point>().FirstOrDefault();
@@ -125,6 +123,39 @@ namespace IsraelHiking.API.Tests.Gpx
                     Assert.AreEqual(gpx.trk[0].trkseg[i].trkpt[j].lon, newGpx.trk[0].trkseg[i].trkpt[j].lon);
                 }
             }
+        }
+
+        [TestMethod]
+        public void CovertTwoWays_OnlyOneTrackWithOneSegment_ShouldBeTheSame()
+        {
+            gpxType gpx = new gpxType
+            {
+                trk = new[]
+                {
+                    new trkType
+                    {
+                        name = "tarck",
+                        trkseg = new[]
+                        {
+                            new trksegType
+                            {
+                                trkpt = new[]
+                                {
+                                    new wptType {lat = 1, lon = 2, ele = 3, eleSpecified = true},
+                                    new wptType {lat = 4, lon = 5, ele = 6, eleSpecified = true}
+                                }
+                            },
+                        }
+                    }
+                }
+            };
+
+            var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
+            
+            Assert.AreEqual(1, featureCollection.Features.Count);
+            var lineString = featureCollection.Features.First().Geometry as LineString;
+            Assert.IsNotNull(lineString);
+            Assert.AreEqual(2, lineString.Coordinates.Count);
         }
     }
 }

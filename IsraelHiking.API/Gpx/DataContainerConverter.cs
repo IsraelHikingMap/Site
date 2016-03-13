@@ -2,27 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.API.Gpx
 {
-    public class FileConversionService : IFileConversionService
+    public class DataContainerConverter : IDataContainerConverter
     {
         private const int MAX_SEGMENTS_NUMBER = 20;
         private const int MINIMAL_SEGMENT_LENGTH = 500; // meters
         private const string GEOJSON = "geojson";
+        private const string GPX = "gpx";
         private const string GPX_BABEL_FORMAT = "gpx,gpxver=1.1";
+        private const string KML_BABEL_FORMAT = "kml,points=0";
         private const string GPX_SINGLE_TRACK = "gpx_single_track";
         private readonly IGpsBabelGateway _gpsBabelGateway;
         private readonly IGpxGeoJsonConverter _gpxGeoJsonConverter;
         private readonly IGpxDataContainerConverter _gpxDataContainerConverter;
         private readonly ICoordinatesConverter _coordinatesConverter;
 
-        public FileConversionService(IGpsBabelGateway gpsBabelGateway,
+        public DataContainerConverter(IGpsBabelGateway gpsBabelGateway,
             IGpxGeoJsonConverter gpxGeoJsonConverter,
             IGpxDataContainerConverter gpxDataContainerConverter,
             ICoordinatesConverter coordinatesConverter)
@@ -33,7 +34,25 @@ namespace IsraelHiking.API.Services
             _coordinatesConverter = coordinatesConverter;
         }
 
-        public async Task<byte[]> Convert(byte[] content, string inputFileExtension, string outputFileExtension)
+        public Task<byte[]> ToAnyFormat(DataContainer dataContainer, string format)
+        {
+            var gpx = _gpxDataContainerConverter.ToGpx(dataContainer);
+            return Convert(gpx.ToBytes(), GPX, format);
+        }
+
+        public async Task<DataContainer> ToDataContainer(byte[] content, string format)
+        {
+            var gpx = (await Convert(content, format, GPX)).ToGpx();
+            var container = _gpxDataContainerConverter.ToDataContainer(gpx);
+            if (gpx.creator != DataContainer.ISRAEL_HIKING_MAP)
+            {
+                // HM TODO: routing type is incomplete - make this better?
+                container.routes = ManipulateRoutesData(container.routes, "h");
+            }
+            return container;
+        }
+
+        private async Task<byte[]> Convert(byte[] content, string inputFileExtension, string outputFileExtension)
         {
             var inputFormat = ConvertExtenstionToFormat(inputFileExtension);
             var outputFormat = ConvertExtenstionToFormat(outputFileExtension);
@@ -84,19 +103,6 @@ namespace IsraelHiking.API.Services
             return singleTrackGpx.ToBytes();
         }
 
-        public async Task<DataContainer> ConvertAnyFormatToDataContainer(byte[] content, string extension)
-        {
-            var gpxBytes = await Convert(content, extension, ".gpx");
-            var gpx = gpxBytes.ToGpx();
-            var container = _gpxDataContainerConverter.ToDataContainer(gpx);
-            if (gpx.creator != DataContainer.ISRAEL_HIKING_MAP)
-            {
-                // HM TODO: routing type is incomplete - make this better?
-                container.routes = ManipulateRoutesData(container.routes, "h");
-            }
-            return container;
-        }
-
         private string ConvertExtenstionToFormat(string extension)
         {
             extension = extension.ToLower().Replace(".", "");
@@ -104,8 +110,10 @@ namespace IsraelHiking.API.Services
             {
                 case "twl":
                     return "naviguide";
-                case "gpx":
+                case GPX:
                     return GPX_BABEL_FORMAT;
+                case "kml":
+                    return KML_BABEL_FORMAT;
                 default:
                     return extension;
             }

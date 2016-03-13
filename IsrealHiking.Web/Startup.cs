@@ -6,7 +6,6 @@ using System.Web.Http;
 using IsraelHiking.DataAccess;
 using System.Web.Http.ExceptionHandling;
 using IsraelHiking.API.Gpx;
-using IsraelHiking.API.Services;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccess.Database;
@@ -74,7 +73,7 @@ namespace IsraelHiking.Web
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();
             container.RegisterType<IRoutingGateway, RoutingGateway>();
             container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
-            container.RegisterType<IFileConversionService, FileConversionService>();
+            container.RegisterType<IDataContainerConverter, DataContainerConverter>();
 
             logger.Info("Initializing Elevation data and Graph Hopper Service");
             container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Info("Finished loading elevation data from files."));

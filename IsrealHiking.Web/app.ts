@@ -75,8 +75,8 @@
     });
 
     app.directive("convertFromatControl", () => <angular.IDirective> {
-        controller: Controllers.ConvertFormatController,
-        templateUrl: "views/convertFormat.html"
+        controller: Controllers.FileController,
+        templateUrl: "views/saveAs.html"
     });
 
     app.run(["googleChartApiPromise", (googleChartApiPromise) => {
