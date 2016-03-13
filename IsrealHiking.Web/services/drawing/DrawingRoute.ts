@@ -582,16 +582,16 @@
             this.routePointIcon = IconsService.createMarkerIconWithColor(this.getColor());
             this.middleMarker.setIcon(IconsService.createHoverIcon(this.getColor()));
             this.pathOptions.weight = pathOptions.weight;
-            for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
-                var segment = this.routeSegments[segmentIndex];
+            for (let segment of this.routeSegments) {
                 if (segment.polyline != null) {
                     segment.polyline.setStyle(this.pathOptions);
                 }
                 if (segment.routePoint != null) {
-                    segment.routePoint.setIcon(this.routePointIcon)
+                    segment.routePoint.setIcon(this.routePointIcon);
                 }
             }
             this.setHoverLayersStyle();
+            this.updateStartAndEndMarkersIcons();
             this.updateDataLayer();
         }
 
