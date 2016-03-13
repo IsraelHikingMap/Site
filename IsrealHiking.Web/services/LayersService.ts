@@ -1,5 +1,5 @@
 ﻿declare module L {
-    export class Google { new() }
+    export class Google { new(); }
 }
 
 declare var getLastModifiedDate: Function;
@@ -52,18 +52,19 @@ module IsraelHiking.Services {
         public overlays: IOverlay[];
         public markers: Drawing.DrawingMarker;
         public routes: Drawing.DrawingRoute[];
-        public eventHelper: Common.EventHelper<Common.IDataChangedEventArgs>
+        public eventHelper: Common.EventHelper<Common.IDataChangedEventArgs>;
         public selectedBaseLayer: IBaseLayer;
         public selectedDrawing: Drawing.IDrawing;
 
         constructor($http: angular.IHttpService,
+            $window: angular.IWindowService,
             mapService: MapService,
             localStorageService: angular.local.storage.ILocalStorageService,
             drawingFactory: Drawing.DrawingFactory,
             hashService: HashService) {
             super(mapService);
             this.$http = $http;
-            this.localStorageService = localStorageService
+            this.localStorageService = localStorageService;
             this.hashService = hashService;
             this.drawingFactory = drawingFactory;
             this.selectedBaseLayer = null;
@@ -77,26 +78,27 @@ module IsraelHiking.Services {
             var lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
             this.defaultAttribution = LayersService.ATTRIBUTION + "Last update: " + lastModified;
             // default layers:
-            this.addBaseLayer(<ILayer> {
+            this.addBaseLayer({
                 key: LayersService.ISRAEL_HIKING_MAP,
                 address: LayersService.DEFAULT_TILES_ADDRESS,
-                isEditable: false,
-            }, this.defaultAttribution);
+                isEditable: false
+            } as ILayer, this.defaultAttribution);
 
-            this.addBaseLayer(<ILayer> {
+            this.addBaseLayer({
                 key: LayersService.ISRAEL_MTB_MAP,
                 address: LayersService.MTB_TILES_ADDRESS,
-                isEditable: false,
-            }, LayersService.MTB_ATTRIBUTION + lastModified);
-
-            this.baseLayers.push(<IBaseLayer> { key: LayersService.GOOGLE_EARTH, layer: <any>new L.Google(), selected: false, address: "", isEditable: false });
-            var overlay = this.addOverlay(<Common.LayerData> {
+                isEditable: false
+            } as ILayer, LayersService.MTB_ATTRIBUTION + lastModified);
+            if ($window.location.protocol !== "https:") {
+                this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: new L.Google() as any, selected: false, address: "", isEditable: false } as IBaseLayer);
+            }
+            this.addOverlay({
                 key: LayersService.HIKING_TRAILS,
                 address: LayersService.OVERLAY_TILES_ADDRESS,
                 minZoom: LayersService.MIN_ZOOM,
                 maxZoom: LayersService.MAX_NATIVE_ZOOM,
                 isEditable: false
-            });
+            } as Common.LayerData);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
         }
