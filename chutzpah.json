@@ -24,9 +24,10 @@
     { "Path": "isrealhiking.web\\services\\elevation\\", "Includes": ["*.ts"]},
     { "Path": "isrealhiking.web\\services\\parsers\\", "Includes": ["*.ts"]},
     { "Path": "isrealhiking.web\\services\\routers\\", "Includes": ["*.ts"]},
-    { "Path": "isrealhiking.web\\services\\snappingService.ts"},
-    { "Path": "isrealhiking.web\\services\\hashService.ts"},
-    { "Path": "isrealhiking.web\\services\\fileService.ts"}
+    { "Path": "isrealhiking.web\\services\\SnappingService.ts"},
+    { "Path": "isrealhiking.web\\services\\HashService.ts"},
+    { "Path": "isrealhiking.web\\services\\FileService.ts"},
+    { "Path": "isrealhiking.web\\services\\ControlCreatorService.ts"}
   ],
   "Tests": [{ "Include": "*\\**\\*Tests.ts" }],
   "CodeCoverageIncludes": [

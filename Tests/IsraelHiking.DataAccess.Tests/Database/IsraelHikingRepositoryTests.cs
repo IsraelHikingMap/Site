@@ -181,7 +181,7 @@ namespace IsraelHiking.DataAccess.Tests.Database
         }
 
         [TestMethod]
-        public void Update()
+        public void Update_ShouldUpdateDatabase()
         {
             var newSiteUrl = new SiteUrl();
 

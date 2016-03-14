@@ -6,8 +6,8 @@ module IsraelHiking.Tests {
     describe("File Service", () => {
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
-        var Upload: angular.angularFileUpload.IUploadService;
-        var FileSaver: Services.IFileSaver;
+        var upload: angular.angularFileUpload.IUploadService;
+        var fileSaver: Services.IFileSaver;
         var fileService: Services.FileService;
 
         beforeEach(() => {
@@ -17,28 +17,28 @@ module IsraelHiking.Tests {
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
-                Upload = _Upload_;
-                FileSaver = _FileSaver_;
-                fileService = new Services.FileService($http, Upload, FileSaver);
+                upload = _Upload_;
+                fileSaver = _FileSaver_;
+                fileService = new Services.FileService($http, upload, fileSaver);
             });
         });
 
         it("Should save to file", () => {
-            spyOn(FileSaver, "saveAs");
+            spyOn(fileSaver, "saveAs");
             $httpBackend.whenPOST(Common.Urls.files + "?format=format").respond(btoa("bytes"));
 
             fileService.saveToFile("file.name", "format", {} as Common.DataContainer);
 
             $httpBackend.flush();
-            expect(FileSaver.saveAs).toHaveBeenCalled();
+            expect(fileSaver.saveAs).toHaveBeenCalled();
         });
         
         it("Should open from file", () => {
-            spyOn(Upload, "upload");
+            spyOn(upload, "upload");
 
             fileService.openFromFile(new Blob([""]) as File);
 
-            expect(Upload.upload).toHaveBeenCalled();
+            expect(upload.upload).toHaveBeenCalled();
         });
 
         it("Should open from url", () => {

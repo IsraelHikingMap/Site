@@ -20,7 +20,7 @@
             var element = angular.element(target);
             if (element.is("i")) {
                 // user clicked on the icon, we want to open the tooltip from the button.
-                element = <any>element.parent();
+                element = element.parent() as any;
             }
             return this.$tooltip(element, {
                 templateUrl: template,
@@ -28,7 +28,7 @@
                 placement: placement,
                 title: title,
                 container: "body",
-                scope: $scope,
+                scope: $scope
             });
         }
     }

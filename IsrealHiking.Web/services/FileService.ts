@@ -6,16 +6,16 @@
 
     export class FileService {
 
-        private Upload: angular.angularFileUpload.IUploadService;
-        private FileSaver: IFileSaver;
+        private upload: angular.angularFileUpload.IUploadService;
+        private fileSaver: IFileSaver;
         private $http: angular.IHttpService;
 
         constructor($http: angular.IHttpService,
-            Upload: angular.angularFileUpload.IUploadService,
-            FileSaver: IFileSaver) {
+            upload: angular.angularFileUpload.IUploadService,
+            fileSaver: IFileSaver) {
             this.$http = $http;
-            this.Upload = Upload;
-            this.FileSaver = FileSaver;
+            this.upload = upload;
+            this.fileSaver = fileSaver;
         }
 
         public saveToFile = (fileName: string, format:string, dataContainer: Common.DataContainer): angular.IPromise<{}> => {
@@ -26,7 +26,7 @@
         }
 
         public openFromFile = (file: File): angular.IHttpPromise<Common.DataContainer> => {
-            return this.Upload.upload({
+            return this.upload.upload({
                 data: { file: file },
                 url: Common.Urls.openFile
             } as angular.angularFileUpload.IFileUploadConfigFile);
@@ -44,7 +44,7 @@
             }
             var byteArray = new Uint8Array(byteNumbers);
             var blobToSave = new Blob([byteArray], { type: "application/octet-stream" });
-            this.FileSaver.saveAs(blobToSave, fileName);
+            this.fileSaver.saveAs(blobToSave, fileName);
         }
     }
 

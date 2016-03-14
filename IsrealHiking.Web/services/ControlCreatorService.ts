@@ -1,34 +1,40 @@
 ﻿module IsraelHiking.Services {
-    export class ControlCreatorService {
+
+    /**
+     * This service allows the creation of leaflet controls on the map
+     */
+    export class ControlCreatorService extends ObjectWithMap {
         $rootScope: angular.IRootScopeService;
         $compile: angular.ICompileService;
 
-        constructor($rootScope: angular.IRootScopeService, $compile: angular.ICompileService) {
+        constructor($rootScope: angular.IRootScopeService,
+            $compile: angular.ICompileService,
+            mapService: MapService) {
+            super(mapService);
             this.$rootScope = $rootScope;
             this.$compile = $compile;
         }
 
-        public create = (map: L.Map, directiveHtmlName: string, position = "topleft") => {
-            var control = L.Control.extend(<L.ClassExtendOptions>{
-                options: <L.ControlOptions> {
+        /**
+         * Creates a control on the leaflet map
+         * 
+         * @param directiveHtmlName - the dricetive html string
+         * @param position - the position to place the control: topleft/topright/bottomleft/bottomright
+         */
+        public create(directiveHtmlName: string, position = "topleft") {
+            var control = L.Control.extend({
+                options: {
                     position: position
-                },
-                onAdd: (map: L.Map): HTMLElement => {
-                    var containerClassName = directiveHtmlName + "-container";
-                    var container = L.DomUtil.create("div", containerClassName);
-                    container.appendChild(this.$compile("<" + directiveHtmlName + "></" + directiveHtmlName + ">")(this.$rootScope.$new())[0]);
-                    return container;
+                } as L.ControlOptions,
+                onAdd: (): HTMLElement => {
+                    var controlDiv = angular.element("<div>")
+                        .addClass(directiveHtmlName + "-container")
+                        .append(this.$compile(`<${directiveHtmlName}></${directiveHtmlName}>`)(this.$rootScope.$new()));
+                    return controlDiv[0];
                 },
                 onRemove: () => { }
-            });
-            (new control()).addTo(map);
+            } as L.ClassExtendOptions);
+            new control().addTo(this.map);
         }
-
-        //private createScope = (service: Controllers.IMapController): angular.IScope => {
-        //    var newScope = this.$rootScope.$new();
-        //    service.setScope(newScope);
-        //    angular.extend(newScope, service);
-        //    return newScope;
-        //}
     }
 } 

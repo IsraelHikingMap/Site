@@ -18,8 +18,8 @@
         ($http: angular.IHttpService, $q: angular.IQService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterService($http, $q, toastr, parserFactory)]);
     app.service(Common.Constants.fileService, [Common.Constants.http, Common.Constants.upload, Common.Constants.fileSaver,
-        ($http: angular.IHttpService, Upload: angular.angularFileUpload.IUploadService, FileSaver: Services.IFileSaver) =>
-            new Services.FileService($http, Upload, FileSaver)]);
+        ($http: angular.IHttpService, upload: angular.angularFileUpload.IUploadService, fileSaver: Services.IFileSaver) =>
+            new Services.FileService($http, upload, fileSaver)]);
     app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory, Common.Constants.toastr,
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
             new Services.SnappingService($http, mapService, parserFactory, toastr)]);
@@ -30,7 +30,9 @@
     app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.localStorageService,
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
-    app.service(Common.Constants.controlCreatorService, [Common.Constants.rootScope, Common.Constants.compile, ($rootScope: angular.IScope, $compile: angular.ICompileService) => new Services.ControlCreatorService($rootScope, $compile)]);
+    app.service(Common.Constants.controlCreatorService, [Common.Constants.rootScope, Common.Constants.compile, Common.Constants.mapService,
+        ($rootScope: angular.IScope, $compile: angular.ICompileService, mapService: Services.MapService) =>
+            new Services.ControlCreatorService($rootScope, $compile, mapService)]);
     app.service(Common.Constants.layersService, [Common.Constants.http, Common.Constants.window, Common.Constants.mapService, Common.Constants.localStorageService, Common.Constants.drawingFactory, Common.Constants.hashService,
         ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, drawingFactory: Services.Drawing.DrawingFactory, hashService: Services.HashService) =>
             new Services.LayersService($http, $window, mapService, localStorageService, drawingFactory, hashService)]);
@@ -81,7 +83,7 @@
         templateUrl: "views/saveAs.html"
     });
 
-    app.run(["googleChartApiPromise", (googleChartApiPromise) => {
+    app.run(["googleChartApiPromise", () => {
         angular.element("link[type*=icon]").detach().appendTo("head");
     }]);
 }
