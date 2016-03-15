@@ -26,8 +26,7 @@
     { "Path": "isrealhiking.web\\services\\routers\\", "Includes": ["*.ts"]},
     { "Path": "isrealhiking.web\\services\\SnappingService.ts"},
     { "Path": "isrealhiking.web\\services\\HashService.ts"},
-    { "Path": "isrealhiking.web\\services\\FileService.ts"},
-    { "Path": "isrealhiking.web\\services\\ControlCreatorService.ts"}
+    { "Path": "isrealhiking.web\\services\\FileService.ts"}
   ],
   "Tests": [{ "Include": "*\\**\\*Tests.ts" }],
   "CodeCoverageIncludes": [

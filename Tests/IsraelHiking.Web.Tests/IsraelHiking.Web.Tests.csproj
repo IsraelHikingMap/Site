@@ -58,7 +58,6 @@
     <TypeScriptCompile Include="Scripts\typings\jasmine\jasmine.d.ts" />
     <TypeScriptCompile Include="services\elevation\ElevationProviderTests.ts" />
     <TypeScriptCompile Include="services\elevation\MicrosoftElevationProviderTests.ts" />
-    <TypeScriptCompile Include="services\ControlCreatorServiceTests.ts" />
     <TypeScriptCompile Include="services\FileServiceTests.ts" />
     <TypeScriptCompile Include="services\SnappingServiceTests.ts" />
     <TypeScriptCompile Include="services\parsers\GeoJsonParserTests.ts" />

@@ -30,58 +30,54 @@
     app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.localStorageService,
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
-    app.service(Common.Constants.controlCreatorService, [Common.Constants.rootScope, Common.Constants.compile, Common.Constants.mapService,
-        ($rootScope: angular.IScope, $compile: angular.ICompileService, mapService: Services.MapService) =>
-            new Services.ControlCreatorService($rootScope, $compile, mapService)]);
     app.service(Common.Constants.layersService, [Common.Constants.http, Common.Constants.window, Common.Constants.mapService, Common.Constants.localStorageService, Common.Constants.drawingFactory, Common.Constants.hashService,
         ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, drawingFactory: Services.Drawing.DrawingFactory, hashService: Services.HashService) =>
             new Services.LayersService($http, $window, mapService, localStorageService, drawingFactory, hashService)]);
 
-    app.controller(Common.Constants.mainMapController, [Common.Constants.mapService, Common.Constants.controlCreatorService, Common.Constants.hashService,
-        (mapService: Services.MapService, controlCreatorService: Services.ControlCreatorService, hashService: Services.HashService) =>
-            new Controllers.MainMapcontoller(mapService, controlCreatorService, hashService)]);
+    app.controller(Common.Constants.mainMapController, [Common.Constants.rootScope, Common.Constants.compile, Common.Constants.mapService, Common.Constants.hashService,
+        ($rootScope: angular.IRootScopeService, $compile: angular.ICompileService, mapService: Services.MapService, hashService: Services.HashService) =>
+            new Controllers.MainMapcontoller($rootScope, $compile, mapService, hashService)]);
     
     // Directives:
     app.directive("syncFocusWith", () => new Directives.SyncFocusWithDirective());
     app.directive("draggableMovable", [Common.Constants.window, ($window: angular.IWindowService) => new Directives.DraggableMovableDirective($window)]);
     app.directive("disableMapMovement", [Common.Constants.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
-    app.directive("markerPopup", () => <angular.IDirective> {
+    app.directive("markerPopup", () => ({
         controller: Controllers.MarkerPopupController,
         templateUrl: "views/templates/markerPopup.tpl.html"
-    });
-    app.directive("drawingControl", () => <angular.IDirective> {
+    } as angular.IDirective));
+    app.directive("drawingControl", () => ({
         controller: Controllers.DrawingController,
         templateUrl: "views/drawing.html"
-    });
-    app.directive("editOsmControl", () => <angular.IDirective> {
-        controller: Controllers.EditOSMController,
-        templateUrl: "views/editOSM.html"
-    });
-    app.directive("fileControl", () => <angular.IDirective> {
+    } as angular.IDirective));
+    app.directive("editOsmControl", () => ({
+            controller: Controllers.EditOSMController,
+            templateUrl: "views/editOSM.html"
+        } as angular.IDirective));
+    app.directive("fileControl", () => ({
         controller: Controllers.FileController,
         templateUrl: "views/file.html"
-    });
-    app.directive("infoHelpControl", () => <angular.IDirective> {
+    } as angular.IDirective));
+    app.directive("infoHelpControl", () => ({
         controller: Controllers.InfoHelpController,
         templateUrl: "views/infoHelp.html"
-    });
-    app.directive("layersControl", () => <angular.IDirective> {
+    } as angular.IDirective));
+    app.directive("layersControl", () => ({
         controller: Controllers.LayersController,
         templateUrl: "views/layers.html"
-    });
-    app.directive("searchControl", () => <angular.IDirective> {
+    } as angular.IDirective));
+    app.directive("searchControl", () => ({
         controller: Controllers.SearchController,
         templateUrl: "views/search.html"
-    });
-    app.directive("shareControl", () => <angular.IDirective> {
+    } as angular.IDirective));
+    app.directive("shareControl", () => ({
         controller: Controllers.ShareController,
         templateUrl: "views/share.html"
-    });
-
-    app.directive("convertFromatControl", () => <angular.IDirective> {
+    } as angular.IDirective));
+    app.directive("convertFromatControl", () => ({
         controller: Controllers.FileController,
         templateUrl: "views/saveAs.html"
-    });
+    } as angular.IDirective));
 
     app.run(["googleChartApiPromise", () => {
         angular.element("link[type*=icon]").detach().appendTo("head");

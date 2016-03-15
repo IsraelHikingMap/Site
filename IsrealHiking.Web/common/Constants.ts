@@ -13,7 +13,6 @@
         public static parserFactory = "parserFactory";
         public static routerService = "routerService";
         public static drawingFactory = "drawingFactory";
-        public static controlCreatorService = "controlCreatorService";
         public static hashService = "hashService";
         public static mapService = "mapService";
         public static layersService = "layersService";

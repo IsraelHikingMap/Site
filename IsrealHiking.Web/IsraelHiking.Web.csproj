@@ -182,7 +182,6 @@
     <Content Include="scripts\ng-google-chart.min.js" />
     <Content Include="scripts\togeojson.js" />
     <Content Include="scripts\ng-google-chart.js" />
-    <Content Include="services\ControlCreatorService.js" />
     <Content Include="services\drawing\BaseDrawing.js" />
     <Content Include="services\drawing\DrawingFactory.js" />
     <Content Include="services\drawing\DrawingMarker.js" />
@@ -290,7 +289,6 @@
     <TypeScriptCompile Include="controllers\DrawingController.ts" />
     <TypeScriptCompile Include="controllers\MainMapController.ts" />
     <TypeScriptCompile Include="controllers\MarkerPopupController.ts" />
-    <TypeScriptCompile Include="services\ControlCreatorService.ts" />
     <TypeScriptCompile Include="services\drawing\DrawingMarker.ts" />
     <TypeScriptCompile Include="services\drawing\DrawingRoute.ts" />
     <TypeScriptCompile Include="controllers\EditOSMController.ts" />
