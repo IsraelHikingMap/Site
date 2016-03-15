@@ -25,7 +25,7 @@ module IsraelHiking.Services {
 
     export class LayersService extends ObjectWithMap {
         public static ISRAEL_MTB_MAP = "Israel MTB Map";
-        public static DEFAULT_TILES_ADDRESS = "http://IsraelHiking.osm.org.il/Tiles/{z}/{x}/{y}.png";
+        public static DEFAULT_TILES_ADDRESS = "//IsraelHiking.osm.org.il/Tiles/{z}/{x}/{y}.png";
         public static MIN_ZOOM = 7;
         public static MAX_NATIVE_ZOOM = 16;
 
@@ -38,8 +38,8 @@ module IsraelHiking.Services {
         private static BASE_LAYERS_KEY = "BaseLayers";
         private static OVERLAYS_KEY = "Overlays";
         private static CUSTOM_LAYER = "Custom Layer";
-        private static MTB_TILES_ADDRESS = "http://IsraelHiking.osm.org.il/mtbTiles/{z}/{x}/{y}.png";
-        private static OVERLAY_TILES_ADDRESS = "http://IsraelHiking.osm.org.il/OverlayTiles/{z}/{x}/{y}.png";
+        private static MTB_TILES_ADDRESS = "//IsraelHiking.osm.org.il/mtbTiles/{z}/{x}/{y}.png";
+        private static OVERLAY_TILES_ADDRESS = "//IsraelHiking.osm.org.il/OverlayTiles/{z}/{x}/{y}.png";
 
         private $http: angular.IHttpService;
         private localStorageService: angular.local.storage.ILocalStorageService;
@@ -89,9 +89,7 @@ module IsraelHiking.Services {
                 address: LayersService.MTB_TILES_ADDRESS,
                 isEditable: false
             } as ILayer, LayersService.MTB_ATTRIBUTION + lastModified);
-            if ($window.location.protocol !== "https:") {
-                this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: new L.Google() as any, selected: false, address: "", isEditable: false } as IBaseLayer);
-            }
+            this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: new L.Google() as any, selected: false, address: "", isEditable: false } as IBaseLayer);
             this.addOverlay({
                 key: LayersService.HIKING_TRAILS,
                 address: LayersService.OVERLAY_TILES_ADDRESS,
