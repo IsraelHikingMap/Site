@@ -25,7 +25,7 @@ module IsraelHiking.Services {
 
     export class LayersService extends ObjectWithMap {
         public static ISRAEL_MTB_MAP = "Israel MTB Map";
-        public static DEFAULT_TILES_ADDRESS = "//IsraelHiking.osm.org.il/Tiles/{z}/{x}/{y}.png";
+        public static DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
         public static MIN_ZOOM = 7;
         public static MAX_NATIVE_ZOOM = 16;
 
@@ -38,8 +38,8 @@ module IsraelHiking.Services {
         private static BASE_LAYERS_KEY = "BaseLayers";
         private static OVERLAYS_KEY = "Overlays";
         private static CUSTOM_LAYER = "Custom Layer";
-        private static MTB_TILES_ADDRESS = "//IsraelHiking.osm.org.il/mtbTiles/{z}/{x}/{y}.png";
-        private static OVERLAY_TILES_ADDRESS = "//IsraelHiking.osm.org.il/OverlayTiles/{z}/{x}/{y}.png";
+        private static MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
+        private static OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";
 
         private $http: angular.IHttpService;
         private localStorageService: angular.local.storage.ILocalStorageService;
