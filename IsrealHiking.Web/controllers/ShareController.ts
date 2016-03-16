@@ -95,7 +95,7 @@
 
         private getEmbedText = ($scope: IShareScope) => {
             var shareAddress = $scope.shareAddress || window.location.href;
-            return "<iframe src='" + shareAddress + "' width='" + $scope.width + "' height='" + $scope.height + "' frameborder='0' scrolling='no' />";
+            return "<iframe src='" + shareAddress + "' width='" + $scope.width + "' height='" + $scope.height + "' frameborder='0' scrolling='no'></iframe>";
         }
 
         private getShareAddress = (id: string) => {
