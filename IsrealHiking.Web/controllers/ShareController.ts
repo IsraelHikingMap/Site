@@ -99,9 +99,7 @@
         }
 
         private getShareAddress = (id: string) => {
-            var center = this.map.getCenter();
-            var zoom = this.map.getZoom();
-            return Common.Urls.apiBase + "#/?s=" + id;
+            return "//" + window.location.host + "/#/?s=" + id;
         }
     }
 }
