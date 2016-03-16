@@ -9,6 +9,7 @@
         embedText: string;
         updateToken: string;
         isLoading: boolean;
+        siteUrlId: string;
         openShare(e: Event);
         updateEmbedText(width: number, height: number): void;
         generateUrl(): void;
@@ -18,27 +19,31 @@
 
     export class ShareController extends BaseMapController {
         private shareModal;
+        private $window: angular.IWindowService;
 
         constructor($scope: IShareScope,
             $modal,
             $http: angular.IHttpService,
+            $window:  angular.IWindowService,
             mapService: Services.MapService,
             layersService: Services.LayersService,
             toastr: Toastr) {
             super(mapService);
-            
+
+            this.$window = $window;
             $scope.title = "";
             $scope.width = 400;
             $scope.height = 300;
             $scope.size = "Small";
             $scope.isLoading = false;
             $scope.shareAddress = "";
-            
+            $scope.siteUrlId = "";
+
             this.shareModal = $modal({
                 title: "Share Your Work",
                 templateUrl: "views/templates/shareModal.tpl.html",
                 show: false,
-                scope: $scope,
+                scope: $scope
             });
 
             $scope.updateEmbedText = (width: number, height: number) => {
@@ -55,13 +60,14 @@
 
             $scope.generateUrl = () => {
                 $scope.isLoading = true;
-                var siteUrl = <Common.SiteUrl>{
+                var siteUrl = {
                     Title: $scope.title,
-                    JsonData: JSON.stringify(layersService.getData()),
-                };
+                    JsonData: JSON.stringify(layersService.getData())
+                } as Common.SiteUrl;
                 $http.post(Common.Urls.urls, siteUrl).success((siteUrlResponse: Common.SiteUrl) => {
+                    $scope.siteUrlId = siteUrlResponse.Id;
                     $scope.updateToken = siteUrlResponse.ModifyKey;
-                    $scope.shareAddress = this.getShareAddress(siteUrlResponse.Id);
+                    $scope.shareAddress = `http:${this.getShareAddressWithoutProtocol($scope)}`;
                     $scope.embedText = this.getEmbedText($scope);
                 }).error(() => {
                     toastr.error("Unable to generate URL, please try again later...");
@@ -72,6 +78,7 @@
 
             $scope.clearShareAddress = () => {
                 $scope.shareAddress = "";
+                $scope.siteUrlId = "";
             }
 
             $scope.setSize = (size: string) => {
@@ -94,12 +101,15 @@
         }
 
         private getEmbedText = ($scope: IShareScope) => {
-            var shareAddress = $scope.shareAddress || window.location.href;
-            return "<iframe src='" + shareAddress + "' width='" + $scope.width + "' height='" + $scope.height + "' frameborder='0' scrolling='no'></iframe>";
+            var shareAddress = this.getShareAddressWithoutProtocol($scope);
+            return `<iframe src='${shareAddress}' width='${$scope.width}' height='${$scope.height}' frameborder='0' scrolling='no'></iframe>`;
         }
 
-        private getShareAddress = (id: string) => {
-            return "//" + window.location.host + "/#/?s=" + id;
+        private getShareAddressWithoutProtocol = ($scope: IShareScope) => {
+            if ($scope.siteUrlId) {
+                return `//${this.$window.location.host}/#/?s=${$scope.siteUrlId}`;
+            }
+            return this.$window.location.href;
         }
     }
 }
