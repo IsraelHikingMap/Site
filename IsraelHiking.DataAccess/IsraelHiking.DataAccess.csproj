@@ -62,7 +62,7 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=8.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
-      <HintPath>..\packages\Newtonsoft.Json.8.0.2\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <HintPath>..\packages\Newtonsoft.Json.8.0.3\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="SQLite.CodeFirst, Version=1.1.11.0, Culture=neutral, PublicKeyToken=eb96ba0a78d831a7, processorArchitecture=MSIL">
@@ -105,6 +105,7 @@
     <Compile Include="Database\IsraelHikingDbContext.cs" />
     <Compile Include="Database\IsraelHikingRepository.cs" />
     <Compile Include="elevation-cache\ElevationDataStorage.cs" />
+    <Compile Include="FileSystemHelper.cs" />
     <Compile Include="GPSBabel\GpsBabelGateway.cs" />
     <Compile Include="GraphHopper\GraphHopperHelper.cs" />
     <Compile Include="JsonResponse\JsonGraphHopperResponse.cs" />

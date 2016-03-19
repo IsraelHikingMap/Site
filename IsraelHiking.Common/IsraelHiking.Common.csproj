@@ -51,6 +51,8 @@
   <ItemGroup>
     <Compile Include="DataContainer.cs" />
     <Compile Include="FeatureProperties.cs" />
+    <Compile Include="FileExplorer\FileExplorerViewModel.cs" />
+    <Compile Include="FileExplorer\FileSystemEntry.cs" />
     <Compile Include="LatLng.cs" />
     <Compile Include="LatLngZ.cs" />
     <Compile Include="MarkerData.cs" />

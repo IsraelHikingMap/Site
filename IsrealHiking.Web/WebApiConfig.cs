@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Web.Http;
+using IsraelHiking.API.Controllers;
 
 namespace IsraelHiking.Web
 {
@@ -19,6 +20,14 @@ namespace IsraelHiking.Web
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
+
+            foreach (var folder in FileExplorerController.ListingDictionary.Keys)
+            {
+                config.Routes.MapHttpRoute(
+                name: folder,
+                routeTemplate: folder + "/{*path}",
+                defaults: new { controller = "FileExplorer" });
+            }
         }
     }
 }

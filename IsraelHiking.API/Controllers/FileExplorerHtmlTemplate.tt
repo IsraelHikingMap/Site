@@ -1,0 +1,65 @@
+﻿<#@ template language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+
+<html>
+<head>
+	<link rel='stylesheet' href='/content/bootstrap.min.css' />
+	<link rel='stylesheet' href='/content/font-awesome.min.css' />
+</head>
+<body>
+	<div class='container'>
+		<h3>Index of 
+		<#foreach(var header in FileExplorerViewModel.CurrentEntryPath)
+		{#>
+			<a href='<#=header.Link#>'><#=header.Name#></a>
+		<#}#>
+		</h3>
+		<table class='table table-hover'>
+			<thead>
+			<tr>
+				<th></th>
+				<th>Name</th>
+				<th>Size</th>
+				<th>Last Modified</th>
+			</tr>
+			</thead>
+			<tbody>
+			<#foreach (var item in FileExplorerViewModel.Entries)
+			{#>
+				<tr>
+					<#if (item.Name.EndsWith("/")) 
+					{#>
+						<td><i class='fa fa-lg fa-folder-open'></i></td>
+					<#} else if (item.Name.EndsWith("xml")) {#>
+						<td><i class='fa fa-lg fa-file-code-o'></i></td>
+					<#} else if (item.Name.EndsWith("zip")) {#>
+						<td><i class='fa fa-lg fa-file-zip-o'></i></td>
+					<#} else if (item.Name.EndsWith("png")) {#>
+						<td><i class='fa fa-lg fa-file-image-o'></i></td>
+					<#} else {#>
+						<td><i class='fa fa-lg fa-file-text-o'></i></td>
+					<#}#>
+					<td><a href="<#=item.Link#>"><#=item.Name#></a></td>
+					<#if (item.Name.EndsWith("/"))
+					{#>
+						<td></td>
+					<#} else if (item.Size > 1024 * 1024 * 1024) {#>
+						<td><#=item.Size / (1024 * 1024 * 1024)#> Gb</td>
+					<#} else if (item.Size > 1024 * 1024) {#>
+						<td><#=item.Size / (1024 * 1024)#> Mb</td>
+					<#} else if (item.Size > 1024) {#>
+						<td><#=item.Size / 1024#> Kb</td>
+					<#} else {#>
+						<td><#=item.Size#> b</td>
+					<#}#>
+					<td><#=item.LastModified#></td>
+				</tr>
+			<#}#>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>
