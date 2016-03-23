@@ -22,8 +22,11 @@
     }
 
     export class LayersController extends BaseMapController {
+        private static SHOW_ADVANCED_KEY = "showAdvancedLayerControl";
+
         constructor($scope: ILayersScope,
             $modal,
+            localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
             layersService: Services.LayersService,
             fileService: Services.FileService,
@@ -33,7 +36,7 @@
             $scope.overlays = layersService.overlays;
             $scope.routes = layersService.routes;
             $scope.markers = layersService.markers;
-            $scope.advanced = false;
+            $scope.advanced = localStorageService.get(LayersController.SHOW_ADVANCED_KEY) == "true";
             $scope.hovering = false;
 
             $scope.addBaseLayer = (e: Event) => {
@@ -93,6 +96,7 @@
 
             $scope.toggleAdvanced = (e: Event) => {
                 $scope.advanced = !$scope.advanced;
+                localStorageService.set(LayersController.SHOW_ADVANCED_KEY, $scope.advanced);
                 this.suppressEvents(e);
             }
 
