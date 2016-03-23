@@ -26,7 +26,7 @@
             $scope.weight = options.weight;
             $scope.color = _.find(Common.Constants.COLORS, c => c.value === options.color);
             $scope.isVisible = route.state !== Services.Drawing.DrawingState.hidden;
-            $scope.isRoutingPerPoint = route.isRoutingPerPoint;
+            $scope.isRoutingPerPoint = route.getIsRoutingPerPoint();
             $scope.isReversed = false;
             $scope.toggleVisibility = (e: Event) => {
                 $scope.isVisible = !$scope.isVisible;
@@ -47,7 +47,7 @@
                     route.reverse();
                 }
                 route.setPathOptions({ color: $scope.color.value, weight: weight } as L.PathOptions);
-                route.isRoutingPerPoint = $scope.isRoutingPerPoint;
+                route.setIsRoutingPerPoint($scope.isRoutingPerPoint);
                 this.suppressEvents(e);
             }
             $scope.deleteRoute = (e: Event) => {

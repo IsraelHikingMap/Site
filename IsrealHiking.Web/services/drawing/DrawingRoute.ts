@@ -30,8 +30,10 @@
 
     export class DrawingRoute extends BaseDrawing<Common.RouteData> {
         private static MINIMAL_DISTANCE_BETWEEN_MARKERS = 100; // meter.
+        private static IS_ROUTING_PER_POINT_KEY = "isRoutingPerPoint";
 
         private $q: angular.IQService;
+        private localStorageService: angular.local.storage.ILocalStorageService;
         private routerService: Services.Routers.RouterService;
         private snappingService: SnappingService;
         private elevationProvider: Elevation.IElevationProvider;
@@ -49,10 +51,10 @@
         private datachangedCallback: Function;
         private showKmMarkers: boolean;
         private kmMarkersGroup: L.LayerGroup<L.Marker>;
-
-        public isRoutingPerPoint: boolean;
+        private isRoutingPerPoint: boolean;
 
         constructor($q: angular.IQService,
+            localStorageService: angular.local.storage.ILocalStorageService,
             mapService: MapService,
             routerService: Services.Routers.RouterService,
             hashService: HashService,
@@ -62,6 +64,7 @@
             pathOptions: L.PathOptions) {
             super(mapService, hashService);
             this.$q = $q;
+            this.localStorageService = localStorageService;
             this.routerService = routerService;
             this.snappingService = snappingService;
             this.elevationProvider = elevationProvider;
@@ -74,7 +77,7 @@
             this.addDataToStack(this.getData());
             this.showKmMarkers = false;
             this.kmMarkersGroup = L.layerGroup([]);
-            this.isRoutingPerPoint = false;
+            this.isRoutingPerPoint = localStorageService.get(DrawingRoute.IS_ROUTING_PER_POINT_KEY) == "true";
             this.map.addLayer(this.kmMarkersGroup);
             this.routePointIcon = IconsService.createMarkerIconWithColor(this.getColor());
             this.routePointIconStart = IconsService.createStartIcon();
@@ -82,7 +85,7 @@
             this.state = DrawingState.inactive;
 
             this.hoverPolyline = L.polyline([]);
-            this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.routePointIcon });
+            this.hoverMarker = L.marker(this.map.getCenter(), { clickable: false, icon: this.routePointIcon } as L.MarkerOptions);
             this.setHoverLayersStyle();
             this.createMiddleMarker();
             this.setHoverState(HoverState.none);
@@ -118,7 +121,7 @@
 
         public setRoutingType = (routingType: string) => {
             this.currentRoutingType = routingType;
-            if (this.isRoutingPerPoint == true) {
+            if (this.isRoutingPerPoint) {
                 return;
             }
             for (var segmentIndex = 0; segmentIndex < this.routeSegments.length; segmentIndex++) {
@@ -426,20 +429,20 @@
         public setData = (data: Common.RouteData) => {
             this.internalClear();
             data.name = this.name;
-            var isRoutingPerPoint = false;
+            var isRoutingPerPoint = this.isRoutingPerPoint;
             var firstRoutingType = null;
             for (var pointIndex = 0; pointIndex < data.segments.length; pointIndex++) {
                 var segment = data.segments[pointIndex];
                 if (firstRoutingType == null) {
                     firstRoutingType = segment.routingType;
-                } else if (isRoutingPerPoint == false) {
-                    isRoutingPerPoint = firstRoutingType != segment.routingType;
+                } else if (isRoutingPerPoint === false) {
+                    isRoutingPerPoint = firstRoutingType !== segment.routingType;
                 }
                 var latlngzs = segment.latlngzs.length > 0 ? segment.latlngzs : [this.getLatLngZFromLatLng(segment.routePoint)];
                 this.routeSegments.push(this.createRouteSegment(segment.routePoint, latlngzs, segment.routingType));
             }
             this.isRoutingPerPoint = isRoutingPerPoint;
-            if (this.isRoutingPerPoint == false && firstRoutingType != null) {
+            if (this.isRoutingPerPoint === false && firstRoutingType != null) {
                 this.currentRoutingType = firstRoutingType;
             }
         }
@@ -720,6 +723,15 @@
             for (var routeSegmentIndex = 1; routeSegmentIndex < this.routeSegments.length - 1; routeSegmentIndex++) {
                 this.routeSegments[routeSegmentIndex].routePoint.setIcon(this.routePointIcon);
             }
+        }
+
+        public getIsRoutingPerPoint = (): boolean => {
+            return this.isRoutingPerPoint;
+        }
+
+        public setIsRoutingPerPoint = (isRoutingPerPoint: boolean) => {
+            this.isRoutingPerPoint = isRoutingPerPoint;
+            this.localStorageService.set(DrawingRoute.IS_ROUTING_PER_POINT_KEY, this.isRoutingPerPoint);
         }
     }
 }

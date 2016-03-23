@@ -3,6 +3,7 @@
         private $q: angular.IQService;
         private $compile: angular.ICompileService;
         private $rootScope: angular.IRootScopeService;
+        private localStorageService: angular.local.storage.ILocalStorageService;
         private mapService: MapService;
         private routerService: Routers.RouterService;
         private hashService: HashService;
@@ -13,6 +14,7 @@
         constructor($q: angular.IQService,
             $compile: angular.ICompileService,
             $rootScope: angular.IRootScopeService,
+            localStorageService: angular.local.storage.ILocalStorageService,
             mapService: MapService,
             routerService: Routers.RouterService,
             hashService: HashService,
@@ -21,6 +23,7 @@
             this.$q = $q;
             this.$compile = $compile;
             this.$rootScope = $rootScope;
+            this.localStorageService = localStorageService;
             this.mapService = mapService;
             this.routerService = routerService;
             this.hashService = hashService;
@@ -33,6 +36,7 @@
                 pathOptions = this.createPathOptions();
             }
             var drawingRoute = new DrawingRoute(this.$q,
+                this.localStorageService, 
                 this.mapService,
                 this.routerService,
                 this.hashService,
