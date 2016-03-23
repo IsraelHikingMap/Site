@@ -3,7 +3,6 @@
     export class OverpassSearchResultsProvider extends BaseSearchResultsProvider {
 
         private static LIMIT = 5;
-        private static OVERPASS_ADDRESS = "http://overpass-api.de/api/interpreter";
 
         constructor($http: angular.IHttpService,
             $q: angular.IQService) {
@@ -18,7 +17,7 @@
                 BaseSearchResultsProvider.bounds.getSouthWest().lat, BaseSearchResultsProvider.bounds.getSouthWest().lng,
                 BaseSearchResultsProvider.bounds.getNorthEast().lat, BaseSearchResultsProvider.bounds.getNorthEast().lng
             ].join(",");
-            this.$http.get(OverpassSearchResultsProvider.OVERPASS_ADDRESS, {
+            this.$http.get(Common.Urls.overpass, {
                 params: {
                     data: `(rel["${nameKey}"~"${searchTerm}"](${boundsString});>;);out;`
                 }

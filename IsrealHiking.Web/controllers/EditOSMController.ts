@@ -17,8 +17,11 @@
                 var zoom = this.map.getZoom();
                 var baseLayerAddress = layersService.selectedBaseLayer.address;
                 var background = "background=bing";
-                if (baseLayerAddress != "") {
-                    var address = baseLayerAddress.indexOf("{s}") == -1 ? baseLayerAddress : Services.LayersService.DEFAULT_TILES_ADDRESS;
+                if (baseLayerAddress !== "") {
+                    if (baseLayerAddress.indexOf("/") === 0) {
+                        baseLayerAddress = Common.Urls.apiBase + baseLayerAddress;
+                    }
+                    var address = baseLayerAddress.indexOf("{s}") === -1 ? baseLayerAddress : Common.Urls.apiBase + Services.LayersService.DEFAULT_TILES_ADDRESS;
                     background = "background=custom:" + address;
                 }
                 $window.open("http://www.openstreetmap.org/edit#" + background + "&map=" + zoom + "/" + center.lat + "/" + center.lng);

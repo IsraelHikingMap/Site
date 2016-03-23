@@ -42,8 +42,11 @@
             
             var bounds = this.map.getBounds();
             var boundsString = [bounds.getSouthWest().lat, bounds.getSouthWest().lng, bounds.getNorthEast().lat, bounds.getNorthEast().lng].join(",");
-            var address = `http://overpass-api.de/api/interpreter?data=(way["highway"](${boundsString});>;);out;`;
-            this.$http.get(address).success((osm: string) => {
+            this.$http.get(Common.Urls.overpass, {
+                params: {
+                    data: `(way["highway"](${boundsString});>;);out;`
+                }
+            }).success((osm: string) => {
                 var data = this.osmParser.parse(osm);
                 for (let route of data.routes) {
                     for (let segment of route.segments) {
