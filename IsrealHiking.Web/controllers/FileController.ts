@@ -105,7 +105,6 @@
 
             $scope.print = (e: Event) => {
                 angular.element($document[0].querySelectorAll(".leaflet-bar")).each((i, a) => {
-                    console.log(a);
                     angular.element(a).addClass("no-print");
                 });
                 

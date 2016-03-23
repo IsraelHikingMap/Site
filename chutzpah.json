@@ -13,7 +13,7 @@
     { "Path": "isrealhiking.web\\scripts\\angular-toastr.js" },
     { "Path": "isrealhiking.web\\scripts\\angular-local-storage.js" },
     { "Path": "isrealhiking.web\\scripts\\lodash.js" },
-    { "Path": "isrealhiking.web\\scripts\\togeojson.js" },
+    { "Path": "isrealhiking.web\\scripts\\osm_geojson.js" },
     { "Path": "isrealhiking.web\\scripts\\ng-file-upload-all.js" },
     { "Path": "isrealhiking.web\\scripts\\angular-file-saver.bundle.min.js" },
     { "Path": "isrealhiking.web\\common\\", "Includes": ["*.ts"]},

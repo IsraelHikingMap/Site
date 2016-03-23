@@ -48,7 +48,7 @@ module IsraelHiking.Tests {
                     },
                     geometry: {
                         type: "MultiLineString",
-                        coordinates: [[[7, 7], [8, 8]]]
+                        coordinates: [[[7, 7], [8, 8]], []]
                     } as GeoJSON.MultiLineString
                 } as GeoJSON.Feature]
             } as GeoJSON.FeatureCollection;

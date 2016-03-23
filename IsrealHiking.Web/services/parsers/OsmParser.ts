@@ -1,11 +1,26 @@
-﻿module IsraelHiking.Services.Parsers {
+﻿declare module osm_geojson {
+    var osm2geojson: Function;
+    var geojson2osm: Function;
+}
 
-    export class OsmParser extends XmlParser implements IParser {
-        protected getFormat(): string {
-            return "osm";
+module IsraelHiking.Services.Parsers {
+  
+    export class OsmParser extends BaseParser implements IParser {
+         protected parseToGeoJson(content: string): GeoJSON.FeatureCollection {
+             return osm_geojson.osm2geojson(content);
+         }
+
+        public toString(data: Common.DataContainer): string {
+            var geoJson = super.toGeoJson(data);
+            return this.convertToXml(geoJson);
         }
-        public convertToXml(geoJson: GeoJSON.FeatureCollection): string {
-            throw new Error("not impelemented...");
+
+        // should be implemented in derived class 
+        protected getFormat(): string { throw new Error("Should be implemented in derived class"); }
+
+        // should be implemented in derived class 
+        protected convertToXml(geoJson: GeoJSON.FeatureCollection): string {
+            return osm_geojson.geojson2osm(geoJson);
         }
     }
 }  

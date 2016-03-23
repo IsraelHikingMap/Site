@@ -24,7 +24,7 @@
             } as Common.DataContainer;
 
             var leaftletGeoJson = L.geoJson(geoJson, {
-                onEachFeature: (feature: GeoJSON.Feature, layer) => {
+                onEachFeature: (feature: GeoJSON.Feature) => {
                     if (feature.geometry.type === BaseParser.LINE_STRING) {
                         var lineString = feature.geometry as GeoJSON.LineString;
                         this.positionsToData(lineString.coordinates, data, feature.properties.name);
@@ -42,7 +42,7 @@
                         }
                     }
 
-                    if (feature.geometry.type == BaseParser.POINT) {
+                    if (feature.geometry.type === BaseParser.POINT) {
                         let point = feature.geometry as GeoJSON.Point;
                         let marker = this.createMarker(point.coordinates, feature.properties.name);
                         data.markers.push(marker);
@@ -55,14 +55,14 @@
         }
 
         private createMarker(coordinates: GeoJSON.Position, message?: string): Common.MarkerData {
-            return <Common.MarkerData> {
+            return {
                 latlng: this.createLatlng(coordinates),
-                title: message,
-            };
+                title: message
+            } as Common.MarkerData;
         }
 
         private createLatlng(coordinates: GeoJSON.Position): Common.LatLngZ {
-            var latlngz = <Common.LatLngZ>new L.LatLng(coordinates[1], coordinates[0]);
+            var latlngz = new L.LatLng(coordinates[1], coordinates[0]) as Common.LatLngZ;
             latlngz.z = coordinates[2] || 0; 
             return latlngz;
         }
@@ -77,7 +77,7 @@
                 var routeData = { segments: [], name: name || "" } as Common.RouteData;
                 routeData.segments.push({
                     routePoint: latlngzs[0],
-                    latlngzs: [latlngzs[0]],
+                    latlngzs: [latlngzs[0], latlngzs[0]],
                     routingType: Common.RoutingType.hike
                 } as Common.RouteSegmentData);
                 routeData.segments.push({
@@ -90,13 +90,35 @@
         }
 
         private multiLineStringToData(multiLineString: GeoJSON.MultiLineString, data: Common.DataContainer, name: string) {
-            var isUsePartInName = multiLineString.coordinates.length > 1;
-            var partIndex = 1;
-            for (let lineIndex = 0; lineIndex < multiLineString.coordinates.length; lineIndex++) {
-                var lineCoordinates = multiLineString.coordinates[lineIndex];
-                var meaningfullName = isUsePartInName ? name + " part " + partIndex++ : name;
-                this.positionsToData(lineCoordinates, data, meaningfullName);
+            var routeData = {
+                name: name,
+                segments: []
+            } as Common.RouteData;
+            for (let lineCoordinates of multiLineString.coordinates) {
+                if (lineCoordinates.length <= 0) {
+                    continue;
+                }
+                if (routeData.segments.length === 0) {
+                    let latLng = this.createLatlng(lineCoordinates[0]);
+                    routeData.segments.push({
+                        latlngzs: [latLng, latLng],
+                        routePoint: latLng,
+                        routingType: Common.RoutingType.hike
+                    } as Common.RouteSegmentData);
+                }
+                let latlngzs = [];
+                for (let pointCoordinates of lineCoordinates) {
+                    latlngzs.push(this.createLatlng(pointCoordinates));
+                }
+                if (latlngzs.length >= 2) {
+                    routeData.segments.push({
+                        latlngzs: latlngzs,
+                        routePoint: latlngzs[0],
+                        routingType: Common.RoutingType.hike
+                    } as Common.RouteSegmentData);
+                }
             }
+            data.routes.push(routeData);
         }
 
         public toGeoJson(data: Common.DataContainer): GeoJSON.FeatureCollection {

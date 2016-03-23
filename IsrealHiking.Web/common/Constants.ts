@@ -11,6 +11,7 @@
         public static injector = "$injector";
         public static window = "$window";
         public static parserFactory = "parserFactory";
+        public static searchResultsProviderFactory = "searchResultsProviderFactory";
         public static routerService = "routerService";
         public static drawingFactory = "drawingFactory";
         public static hashService = "hashService";

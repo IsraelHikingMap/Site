@@ -1,19 +1,14 @@
 ﻿module IsraelHiking.Controllers {
+
     export interface ISearchScope extends angular.IScope {
         isShowingSearch: boolean;
         isHebrew: boolean;
-        addresses: ISearchResults[];
+        searchResults: Services.Search.ISearchResults[];
         searchTerm: string;
         toggleSearchBar(e: Event);
-        getAddresses(searchTerm: string);
-        selectAddress(address: ISearchResults, e: Event): void;
+        search(searchTerm: string);
+        selectResult(address: Services.Search.ISearchResults, e: Event): void;
         ignoreClick(e: Event): void;
-    }
-
-    interface ISearchResults {
-        display: string;
-        latlng: L.LatLng;
-        searchTerm: string;
     }
 
     interface ISearchResultsQueueItem {
@@ -22,80 +17,83 @@
 
     export class SearchController extends BaseMapController {
         private resultsQueue: ISearchResultsQueueItem[];
-        private marker: L.Marker;
+        private layerGroup:  L.LayerGroup<L.ILayer>;
 
         constructor($scope: ISearchScope,
-            $http: angular.IHttpService,
-            $q: angular.IQService,
+            $timeout: angular.ITimeoutService,
             mapService: Services.MapService,
             hashService: Services.HashService,
+            searchResultsProviderFactory: Services.Search.SearchResultsProviderFactory,
             toastr: Toastr) {
             super(mapService);
             this.resultsQueue = [];
-            this.marker = null;
+            this.layerGroup = L.layerGroup();
+            this.map.addLayer(this.layerGroup);
             $scope.searchTerm = hashService.searchTerm;
             $scope.isShowingSearch = $scope.searchTerm.length > 0;
             $scope.isHebrew = this.hasHebrewCharacters($scope.searchTerm);
-            $scope.addresses = [];
+            $scope.searchResults = [];
 
             $scope.toggleSearchBar = (e: Event) => {
                 $scope.isShowingSearch = !$scope.isShowingSearch;
                 this.suppressEvents(e);
             }
 
-            $scope.getAddresses = (searchTerm: string) => {
+            $scope.search = (searchTerm: string) => {
                 $scope.isHebrew = this.hasHebrewCharacters(searchTerm);
 
                 if (searchTerm.length <= 2) {
+                    $scope.searchResults = [];
                     return;
                 }
-                this.resultsQueue.push(<ISearchResultsQueueItem>{
+                this.resultsQueue.push({
                     searchTerm: searchTerm,
                     addresses: []
-                });
+                } as ISearchResultsQueueItem);
 
-                return $http.get("http://nominatim.openstreetmap.org/search/", {
-                    params: {
-                        q: searchTerm,
-                        limit: 5,
-                        format: "json",
-                        addressdetails: 1,
-                        countrycode: "il",
-                        viewbox: "35.940941,33.43338,34.2677,29.4965",
-                        bounded: "1",
-                        namedetails: "1",
-                        "accept-language": $scope.isHebrew ? "he-il" : "en-us",
+                var nominatim = searchResultsProviderFactory.create(Services.Search.SearchProviderType.nominatim);
+                var overpass = searchResultsProviderFactory.create(Services.Search.SearchProviderType.overpass);
+
+                nominatim.getResults(searchTerm, $scope.isHebrew).then((results: Services.Search.ISearchResults[]) => {
+                    var queueItem = _.find(this.resultsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
+                    if (queueItem == null || this.resultsQueue.indexOf(queueItem) !== this.resultsQueue.length - 1) {
+                        this.resultsQueue.splice(0, this.resultsQueue.length - 1);
+                        return;
                     }
-                }).success((response: any[]): ISearchResults[]=> {
-                    return this.handleSearchResponse($scope, response, searchTerm);
-                }).error(() => {
-                    toastr.warning("Unable to get search results from nominatim server.");
+                    $scope.searchResults = results;
+                    overpass.getResults(searchTerm, $scope.isHebrew).then((additionalResults: Services.Search.ISearchResults[]) => {
+                        for (let additionalResult of additionalResults) {
+                            $scope.searchResults.push(additionalResult);
+                        }
+                    });
+                }, () => {
+                    toastr.warning("Unable to get search results.");
                 });
             }
 
-            $scope.selectAddress = (address: ISearchResults, e: Event) => {
+            $scope.selectResult = (searchResults: Services.Search.ISearchResults, e: Event) => {
                 $scope.isShowingSearch = false;
-                mapService.map.panTo(address.latlng);
-                if (this.marker == null) {
-                    this.marker = L.marker(address.latlng);
-                    this.marker.once("dblclick", () => {
-                        mapService.map.removeLayer(this.marker);
-                        this.marker = null;
-                    });
-                    mapService.map.addLayer(this.marker);
-                } else {
-                    this.marker.setLatLng(address.latlng);
+                this.layerGroup.clearLayers();
+                this.map.panTo(searchResults.latlng);
+                var marker = L.marker(searchResults.latlng);
+                marker.bindPopup(searchResults.name || searchResults.address);
+                marker.once("dblclick", () => {
+                    this.layerGroup.clearLayers();
+                });
+                this.layerGroup.addLayer(marker);
+                for (let line of searchResults.latlngsArray) {
+                    let polyLine = L.polyline(line, { opacity: 1, color: "Blue", weight: 3 } as L.PolylineOptions);
+                    this.layerGroup.addLayer(polyLine);
                 }
-                this.marker.bindPopup(address.display);
-
-                setTimeout(() => {
-                    this.marker.openPopup();
+                
+                $timeout(() => {
+                    marker.openPopup();
                 }, 300);
                 this.suppressEvents(e);
             }
 
             if ($scope.isShowingSearch) {
-                $scope.getAddresses($scope.searchTerm);
+                $scope.search($scope.searchTerm);
             }
 
             $scope.ignoreClick = (e: Event) => {
@@ -104,56 +102,21 @@
 
             $(window).bind("keydown", (e: JQueryEventObject) => {
 
-                if (e.ctrlKey == false) {
-                    return;
+                if (e.ctrlKey === false) {
+                    return true;
                 }
                 switch (String.fromCharCode(e.which).toLowerCase()) {
                     case "f":
                         $scope.toggleSearchBar(e);
                         break;
                     default:
-                        return;
+                        return true;
                 }
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 }
                 return false;
             });
-        }
-
-        private handleSearchResponse = ($scope: ISearchScope, response: any[], searchTerm: string): ISearchResults[]=> {
-            var queueItem = _.find(this.resultsQueue, (itemToFind) => itemToFind.searchTerm == searchTerm);
-            if (queueItem == null || this.resultsQueue[this.resultsQueue.length - 1].searchTerm != searchTerm) {
-                this.resultsQueue.splice(0, this.resultsQueue.length - 1);
-                return;
-            }
-            $scope.addresses = [];
-            for (var resultIndex = 0; resultIndex < response.length; resultIndex++) {
-                var data = response[resultIndex];
-                var address = data.address;
-                var parts = [];
-                var formattedAddress = "";
-                if (address.road || address.building) {
-                    formattedAddress += (address.building || "") + " " + (address.road || "") + " " + (address.house_number || "");
-                }
-
-                if (address.city || address.town || address.village) {
-                    formattedAddress += (address.city || "") + (address.town || "") + (address.village || "");
-                }
-                if (data.namedetails) {
-                    if ($scope.isHebrew) {
-                        formattedAddress = data.namedetails.name + ", " + formattedAddress;
-                    } else {
-                        formattedAddress = data.namedetails["name:en"] + ", " + formattedAddress;
-                    }
-                }
-                $scope.addresses.push(<ISearchResults> {
-                    display: formattedAddress.replace("  ", " ").trim(),
-                    latlng: L.latLng(data.lat, data.lon),
-                    searchTerm: searchTerm,
-                });
-            }
-            this.resultsQueue.splice(0, this.resultsQueue.length - 1);
         }
 
         private hasHebrewCharacters(searchTerm: string): boolean {

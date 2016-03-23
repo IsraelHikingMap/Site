@@ -78,6 +78,7 @@
     <Content Include="content\images\marker-shadow-small.png" />
     <Content Include="content\images\os-israel-logo.png" />
     <Content Include="content\images\os-israel-logo_transparent.png" />
+    <Content Include="content\images\OSM-relation.png" />
     <Content Include="content\leaflet-locate.css" />
     <Content Include="content\images\layers-2x.png" />
     <Content Include="content\images\layers.png" />
@@ -142,6 +143,11 @@
     <Content Include="scripts\ng-file-upload-shim.min.js" />
     <Content Include="scripts\ng-file-upload.js" />
     <Content Include="scripts\ng-file-upload.min.js" />
+    <Content Include="scripts\osm_geojson.js" />
+    <Content Include="services\search\BaseSearchResultsProvider.js" />
+    <Content Include="services\search\NominatimSearchResultsProvider.js" />
+    <Content Include="services\search\OverpassSearchResultsProvider.js" />
+    <Content Include="services\search\SearchResultsProviderFactory.js" />
     <Content Include="_oldSite\index.html" />
     <Content Include="_oldSite\IsraelMTBmap.html" />
     <Content Include="packages.config">
@@ -200,7 +206,6 @@
     <Content Include="services\parsers\IParser.js" />
     <Content Include="services\parsers\OsmParser.js" />
     <Content Include="services\parsers\ParserFactory.js" />
-    <Content Include="services\parsers\XmlParser.js" />
     <Content Include="services\routers\RouterService.js" />
     <Content Include="services\routers\NoneRouter.js" />
     <Content Include="services\SnappingService.js" />
@@ -283,6 +288,8 @@
     <TypeScriptCompile Include="services\FileService.ts" />
     <TypeScriptCompile Include="services\IconsService.ts" />
     <TypeScriptCompile Include="services\LayersService.ts" />
+    <TypeScriptCompile Include="services\search\BaseSearchResultsProvider.ts" />
+    <TypeScriptCompile Include="services\search\NominatimSearchResultsProvider.ts" />
     <TypeScriptCompile Include="services\ObjectWithMap.ts" />
     <TypeScriptCompile Include="common\IsraelHikingData.ts" />
     <TypeScriptCompile Include="controllers\BaseMapController.ts" />
@@ -301,9 +308,10 @@
     <TypeScriptCompile Include="services\parsers\ParserFactory.ts" />
     <TypeScriptCompile Include="services\parsers\GeoJsonParser.ts" />
     <TypeScriptCompile Include="services\parsers\IParser.ts" />
-    <TypeScriptCompile Include="services\parsers\XmlParser.ts" />
     <TypeScriptCompile Include="services\routers\RouterService.ts" />
     <TypeScriptCompile Include="services\routers\NoneRouter.ts" />
+    <TypeScriptCompile Include="services\search\OverpassSearchResultsProvider.ts" />
+    <TypeScriptCompile Include="services\search\SearchResultsProviderFactory.ts" />
     <TypeScriptCompile Include="services\SnappingService.ts" />
     <TypeScriptCompile Include="common\Constants.ts" />
   </ItemGroup>

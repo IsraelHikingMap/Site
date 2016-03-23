@@ -18,29 +18,29 @@ module IsraelHiking.Tests {
         var mapDiv: JQuery;
 
         var osmWay = "<?xml version='1.0' encoding='UTF-8'?>\
-<osm version='0.6' generator='JOSM'>\
-  <node id='1' lat='34.0666735' lon='-118.734254'>\
-    <tag k='name' v='Santa Monica Mountains National Recreation Area' />\
-    <tag k='leisure' v='park' />\
-    <tag k='ele' v='243' />\
-  </node>\
-  <node id='2' lat='34.0723400' lon='-118.7343501' />\
-  <node id='3' lat='34.0670965' lon='-118.7322253' />\
-  <node id='4' lat='34.0724577' lon='-118.7364799' />\
-  <node id='5' lat='34.0671122' lon='-118.7364725' />\
-  <node id='6' lat='34.0722227' lon='-118.7322321' />\
-  <way id='7'>\
-    <nd ref='1' />\
-    <nd ref='2' />\
-    <nd ref='3' />\
-    <nd ref='4' />\
-    <nd ref='5' />\
-    <nd ref='6' />\
-    <tag k='park:type' v='state_park' />\
-    <tag k='name' v='Malibu Creek State Park' />\
-    <tag k='leisure' v='park' />\
-  </way>\
-</osm>";
+                        <osm version='0.6' generator='JOSM'>\
+                          <node id='1' lat='34.0666735' lon='-118.734254'>\
+                            <tag k='name' v='Santa Monica Mountains National Recreation Area' />\
+                            <tag k='leisure' v='park' />\
+                            <tag k='ele' v='243' />\
+                          </node>\
+                          <node id='2' lat='34.0723400' lon='-118.7343501' />\
+                          <node id='3' lat='34.0670965' lon='-118.7322253' />\
+                          <node id='4' lat='34.0724577' lon='-118.7364799' />\
+                          <node id='5' lat='34.0671122' lon='-118.7364725' />\
+                          <node id='6' lat='34.0722227' lon='-118.7322321' />\
+                          <way id='7'>\
+                            <nd ref='1' />\
+                            <nd ref='2' />\
+                            <nd ref='3' />\
+                            <nd ref='4' />\
+                            <nd ref='5' />\
+                            <nd ref='6' />\
+                            <tag k='park:type' v='state_park' />\
+                            <tag k='name' v='Malibu Creek State Park' />\
+                            <tag k='leisure' v='park' />\
+                          </way>\
+                        </osm>";
 
         beforeEach(() => {
             angular.mock.module("toastr");

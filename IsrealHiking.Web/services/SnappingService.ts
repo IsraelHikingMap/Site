@@ -42,12 +42,13 @@
             
             var bounds = this.map.getBounds();
             var boundsString = [bounds.getSouthWest().lat, bounds.getSouthWest().lng, bounds.getNorthEast().lat, bounds.getNorthEast().lng].join(",");
-            var address = `http://overpass-api.de/api/interpreter?data=%28way[%22highway%22]%28${boundsString}%29;%3E;%29;out;`;
+            var address = `http://overpass-api.de/api/interpreter?data=(way["highway"](${boundsString});>;);out;`;
             this.$http.get(address).success((osm: string) => {
                 var data = this.osmParser.parse(osm);
                 for (let route of data.routes) {
                     for (let segment of route.segments) {
-                        if (segment.latlngzs.length < 2) {
+                        if (segment.latlngzs.length < 2 ||
+                            (segment.latlngzs.length === 2 && segment.latlngzs[0].equals(segment.latlngzs[1]))) {
                             continue;
                         }
                         this.snappings.addLayer(L.polyline(segment.latlngzs, { opacity: 0 } as L.PolylineOptions));

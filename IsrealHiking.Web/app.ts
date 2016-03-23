@@ -8,6 +8,9 @@
     // Services:
     app.service(Common.Constants.mapService, [() => new Services.MapService()]);
     app.service(Common.Constants.parserFactory, [() => new Services.Parsers.ParserFactory()]);
+    app.service(Common.Constants.searchResultsProviderFactory, [Common.Constants.http, Common.Constants.q,
+        ($http: angular.IHttpService, $q: angular.IQService) =>
+            new Services.Search.SearchResultsProviderFactory($http, $q)]);
     app.service(Common.Constants.microsoftElevationProvider, [Common.Constants.http, Common.Constants.toastr,
         ($http: angular.IHttpService, toastr: Toastr) =>
             new Services.Elevation.MicrosoftElevationProvider($http, toastr)]);
