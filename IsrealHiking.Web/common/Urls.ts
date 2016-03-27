@@ -8,6 +8,7 @@
         public static itmGrid = Urls.apiBase + "api/itmGrid";
         public static files = Urls.apiBase + "api/files";
         public static openFile = Urls.apiBase + "api/files/open";
+        public static search = Urls.apiBase + "api/search/";
         public static overpass = window.location.protocol + "//overpass-api.de/api/interpreter";
 
     }

@@ -4,11 +4,15 @@ using System.Net.Http.Headers;
 using System.Web.Http;
 using IsraelHiking.DataAccess;
 using System.Web.Http.ExceptionHandling;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
+using IsraelHiking.API.Services;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelHiking.DataAccess.Database;
+using IsraelHiking.DataAccess.ElasticSearch;
 using IsraelHiking.DataAccess.GPSBabel;
+using IsraelHiking.DataAccess.GraphHopper;
 using IsraelTransverseMercator;
 
 [assembly: OwinStartup(typeof(IsraelHiking.Web.Startup))]
@@ -49,11 +53,14 @@ namespace IsraelHiking.Web
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();
             container.RegisterType<IRoutingGateway, RoutingGateway>();
+            container.RegisterType<IElasticSearchGateway, ElasticSearchGateway>(new ContainerControlledLifetimeManager());
             container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
-            container.RegisterType<IDataContainerConverter, DataContainerConverter>();
+            container.RegisterType<IDataContainerConverterService, DataContainerConverterService>();
 
+            container.Resolve<IElasticSearchGateway>().Initialize();
             logger.Info("Initializing Elevation data and Graph Hopper Service");
             container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Info("Finished loading elevation data from files."));
+            
             return container;
         }
     }

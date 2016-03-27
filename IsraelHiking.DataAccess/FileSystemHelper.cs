@@ -11,6 +11,11 @@ namespace IsraelHiking.DataAccess
             return Directory.Exists(path) || File.Exists(path);
         }
 
+        public long GetFileSize(string path)
+        {
+            return File.Exists(path) ? new FileInfo(path).Length : 0;
+        }
+
         public string[] GetDirectories(string path)
         {
             return Directory.GetDirectories(path);
@@ -50,6 +55,16 @@ namespace IsraelHiking.DataAccess
         public long GetSize(string fileName)
         {
             return new FileInfo(fileName).Length;
+        }
+
+        public void WriteAllBytes(string filePath, byte[] content)
+        {
+            File.WriteAllBytes(filePath, content);
+        }
+
+        public Stream FileOpenRead(string filePath)
+        {
+            return File.OpenRead(filePath);
         }
     }
 }

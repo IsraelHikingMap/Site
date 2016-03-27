@@ -2,10 +2,8 @@
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IGraphHopperHelper
+    public interface IGraphHopperHelper : INssmHelper
     {
-        string WorkingDirectory { get; }
-        Task Initialize(string serverPath);
-        Task UpdateData();
+        Task UpdateData(string osmFilePath);
     }
 }

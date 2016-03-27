@@ -10,7 +10,7 @@
         }
 
         public getResults = (searchTerm: string, isHebrew: boolean): angular.IPromise<ISearchResults[]> => {
-            var deferered = this.$q.defer();
+            var deferred = this.$q.defer();
             var nameKey = isHebrew ? "name" : "name:en";
             var parser = new Parsers.OsmParser();
             var boundsString = [
@@ -48,12 +48,12 @@
                         results.push(searchResult);
                     }
                 }
-                deferered.resolve(results);
+                deferred.resolve(results);
             }).error((err) => {
-                deferered.reject(err);
+                deferred.reject(err);
             });
 
-            return deferered.promise;
+            return deferred.promise;
         }
     }
 }

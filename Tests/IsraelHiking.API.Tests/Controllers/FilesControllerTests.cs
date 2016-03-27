@@ -13,6 +13,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.Collections.Generic;
 using System.Linq;
+using IsraelHiking.API.Converters;
+using IsraelHiking.API.Services;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -24,7 +26,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IGpsBabelGateway _gpsBabelGateway;
         private IElevationDataStorage _elevationDataStorage;
         private IRemoteFileFetcherGateway _removeFileFetcherGateway;
-        private IDataContainerConverter _dataContainerConverter;
+        private IDataContainerConverterService _dataContainerConverterService;
         private IGpxDataContainerConverter _gpxDataContainerConverter;
 
         private const string GPX_DATA = @"<?xml version='1.0' encoding='UTF-8' standalone='no' ?>
@@ -52,8 +54,8 @@ namespace IsraelHiking.API.Tests.Controllers
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _removeFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
             _gpxDataContainerConverter = new GpxDataContainerConverter();
-            _dataContainerConverter = new DataContainerConverter(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new CoordinatesConverter());
-            _controller = new FilesController(_elevationDataStorage, _removeFileFetcherGateway, _dataContainerConverter);
+            _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new CoordinatesConverter());
+            _controller = new FilesController(_elevationDataStorage, _removeFileFetcherGateway, _dataContainerConverterService);
         }
 
         [TestMethod]

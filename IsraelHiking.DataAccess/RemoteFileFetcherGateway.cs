@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common;
+﻿using System.Net;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -12,6 +13,14 @@ namespace IsraelHiking.DataAccess
         public RemoteFileFetcherGateway(ILogger logger)
         {
             _logger = logger;
+        }
+
+        public async Task<long> GetFileSize(string url)
+        {
+            var httpWebRequest = (HttpWebRequest)WebRequest.Create(url);
+            httpWebRequest.Method = "HEAD";
+            var resp = (HttpWebResponse)await httpWebRequest.GetResponseAsync();
+            return resp.ContentLength;
         }
 
         public async Task<RemoteFileFetcherGatewayResponse> GetFileContent(string url)

@@ -5,7 +5,9 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
+using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Controllers
@@ -14,15 +16,15 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IRemoteFileFetcherGateway _remoteFileFetcher;
-        private readonly IDataContainerConverter _dataContainerConverter;
+        private readonly IDataContainerConverterService _dataContainerConverterService;
 
         public FilesController(IElevationDataStorage elevationDataStorage,
             IRemoteFileFetcherGateway remoteFileFetcher, 
-            IDataContainerConverter dataContainerConverter)
+            IDataContainerConverterService dataContainerConverterService)
         {
             _elevationDataStorage = elevationDataStorage;
             _remoteFileFetcher = remoteFileFetcher;
-            _dataContainerConverter = dataContainerConverter;
+            _dataContainerConverterService = dataContainerConverterService;
         }
         /// <summary>
         /// Gets a file from an external Url and converts it to data container
@@ -33,7 +35,7 @@ namespace IsraelHiking.API.Controllers
         public async Task<DataContainer> GetRemoteFile(string url)
         {
             var response = await _remoteFileFetcher.GetFileContent(url);
-            var dataContainer = await _dataContainerConverter.ToDataContainer(response.Content, Path.GetExtension(response.FileName));
+            var dataContainer = await _dataContainerConverterService.ToDataContainer(response.Content, Path.GetExtension(response.FileName));
             foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
             {
                 latLngZ.z = _elevationDataStorage.GetElevation(latLngZ.lat, latLngZ.lng);
@@ -51,7 +53,7 @@ namespace IsraelHiking.API.Controllers
         // POST api/files?format=gpx
         public Task<byte[]> PostSaveFile(string format, [FromBody]DataContainer dataContainer)
         {
-            return _dataContainerConverter.ToAnyFormat(dataContainer, format);
+            return _dataContainerConverterService.ToAnyFormat(dataContainer, format);
         }
 
         /// <summary>
@@ -72,7 +74,7 @@ namespace IsraelHiking.API.Controllers
             }
             var fileName = streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('"');
             var content = await streamProvider.Contents.First().ReadAsByteArrayAsync();
-            var dataContainer = await _dataContainerConverter.ToDataContainer(content, Path.GetExtension(fileName));
+            var dataContainer = await _dataContainerConverterService.ToDataContainer(content, Path.GetExtension(fileName));
             return Ok(dataContainer);
         }
     }
