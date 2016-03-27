@@ -145,6 +145,7 @@
     <Content Include="scripts\ng-file-upload.min.js" />
     <Content Include="scripts\osm_geojson.js" />
     <Content Include="services\search\BaseSearchResultsProvider.js" />
+    <Content Include="services\search\LocalSearchResultsProvider.js" />
     <Content Include="services\search\NominatimSearchResultsProvider.js" />
     <Content Include="services\search\OverpassSearchResultsProvider.js" />
     <Content Include="services\search\SearchResultsProviderFactory.js" />
