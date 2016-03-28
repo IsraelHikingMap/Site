@@ -26,7 +26,7 @@ namespace IsraelHiking.Updater
             try
             {
                 osmDataService.Initialize(directory).Wait();
-                osmDataService.UpdateData(OsmDataService.Operations.UpdateElasticSearch).Wait();
+                osmDataService.UpdateData(operations).Wait();
             }
             catch (Exception ex)
             {

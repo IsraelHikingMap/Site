@@ -53,4 +53,14 @@
         ];
     }
 
+    export class GeoJsonFeatureType {
+        public static featureCollection = "FeatureCollection";
+        public static feature = "Feature";
+        public static lineString = "LineString";
+        public static multiLineString = "MultiLineString";
+        public static polygone = "Polygon";
+        public static multiPolygon = "MultiPolygon";
+        public static point = "Point";
+        public static multiPoint = "MultiPoint";
+    }
 } 

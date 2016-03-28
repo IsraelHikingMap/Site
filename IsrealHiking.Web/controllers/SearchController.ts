@@ -55,8 +55,9 @@
                 //var overpass = searchResultsProviderFactory.create(Services.Search.SearchProviderType.overpass);
                 var local = searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
 
-                //local.getResults(searchTerm, $scope.isHebrew);
-                local.getResults(searchTerm, $scope.isHebrew).then((results: Services.Search.ISearchResults[]) => {
+                local.getResults(searchTerm, $scope.isHebrew)
+                //nominatim.getResults(searchTerm, $scope.isHebrew)
+                    .then((results: Services.Search.ISearchResults[]) => {
                     var queueItem = _.find(this.resultsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
                     if (queueItem == null || this.resultsQueue.indexOf(queueItem) !== this.resultsQueue.length - 1) {
                         this.resultsQueue.splice(0, this.resultsQueue.length - 1);

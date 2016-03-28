@@ -4,9 +4,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoJSON.Net.Feature;
+using GeoJSON.Net.Geometry;
 using IsraelHiking.API.Converters;
 using IsraelHiking.DataAccess.ElasticSearch;
 using IsraelHiking.DataAccessInterfaces;
+using OsmSharp.Osm;
 using OsmSharp.Osm.PBF.Streams;
 using OsmSharp.Osm.Streams.Complete;
 
@@ -131,6 +133,9 @@ namespace IsraelHiking.API.Services
                     {
                         continue;
                     }
+                    var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(geoJson);
+                    geoJson.Properties["sort_order"] = propertiesExtraData?.SortOrder ?? 0;
+                    geoJson.Properties["icon"] = propertiesExtraData?.Icon ?? string.Empty;
                     list.Add(geoJson);
                     if (list.Count != PAGE_SIZE)
                     {
@@ -144,6 +149,12 @@ namespace IsraelHiking.API.Services
                 _elasticSearchGateway.UpdateData(list).Wait();
                 _logger.Info($"Finished updating Elastic Search, Indexed {PAGE_SIZE * page + list.Count} records");
             }
+        }
+
+        private bool IsKeyValueExsits(Dictionary<string, object> dictionary, string key, string value)
+        {
+            return dictionary.ContainsKey(key) && 
+                dictionary[key].ToString().Equals(value, StringComparison.InvariantCultureIgnoreCase);
         }
     }
 }

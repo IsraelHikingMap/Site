@@ -98,6 +98,7 @@
     </Compile>
     <Compile Include="Converters\IGpxDataContainerConverter.cs" />
     <Compile Include="Converters\IGpxGeoJsonConverter.cs" />
+    <Compile Include="Services\GeoJsonFeatureHelper.cs" />
     <Compile Include="Services\OsmDataService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataContainerConverterService.cs" />

@@ -8,41 +8,52 @@
 
         public getResults = (searchTerm: string, isHebrew: boolean): angular.IPromise<ISearchResults[]> => {
             var deferred = this.$q.defer();
-            var parser = new Parsers.GeoJsonParser();
             var params = isHebrew ? {} : { language: "en" };
             this.$http.get(Common.Urls.search + searchTerm, {
                 params: params
             }).success((response: GeoJSON.FeatureCollection) => {
-                var data = parser.parse(JSON.stringify(response));
-                var results = [] as ISearchResults[];
-                for (let marker of data.markers) {
-                    results.push({
-                        searchTerm: searchTerm,
-                        name: marker.title,
-                        latlng: marker.latlng,
-                        latlngsArray: []
-                    } as ISearchResults);
-                }
-                for (let route of data.routes) {
-                    if (!route.name || route.segments.length === 2) {
-                        // getting only relations with name
-                        continue;
-                    }
-                    let searchResult = {
-                        name: route.name,
-                        searchTerm: searchTerm,
-                        icon: "/content/images/OSM-relation.png",
-                        latlngsArray: []
+                let results = [] as ISearchResults[];
+                for (let feature of response.features) {
+                    let singleResult = {
+                        name: isHebrew ? feature.properties.name : feature.properties["name:en"],
+                        latlngsArray: [],
+                        icon: feature.properties.icon
                     } as ISearchResults;
-                    for (let segment of route.segments) {
-                        if (segment.latlngzs.length > 0) {
-                            searchResult.latlngsArray.push(segment.latlngzs);
-                        }
+
+                    switch (feature.geometry.type) {
+                        case Common.GeoJsonFeatureType.point:
+                            let point = feature.geometry as GeoJSON.Point;
+                            singleResult.latlng = Services.Parsers.BaseParser.createLatlng(point.coordinates) as L.LatLng;
+                            break;
+                        case Common.GeoJsonFeatureType.lineString:
+                            let lineString = feature.geometry as GeoJSON.LineString;
+                            singleResult.latlng = Services.Parsers.BaseParser.createLatlng(lineString.coordinates[0]) as L.LatLng;
+                            singleResult.latlngsArray.push(Services.Parsers.BaseParser.createLatlngArray(lineString.coordinates));
+                            break;
+                        case Common.GeoJsonFeatureType.multiLineString:
+                            let multiLineString = feature.geometry as GeoJSON.MultiLineString;
+                            singleResult.latlng = Services.Parsers.BaseParser.createLatlng(multiLineString.coordinates[0][0]) as L.LatLng;
+                            for (let currentCoordinatesArray of multiLineString.coordinates) {
+                                singleResult.latlngsArray.push(Services.Parsers.BaseParser.createLatlngArray(currentCoordinatesArray));
+                            }
+                            break;
+                        case Common.GeoJsonFeatureType.polygone:
+                            let polygone = feature.geometry as GeoJSON.Polygon;
+                            singleResult.latlng = Services.Parsers.BaseParser.createLatlng(polygone.coordinates[0][0]) as L.LatLng;
+                            for (let currentCoordinatesArray of polygone.coordinates) {
+                                singleResult.latlngsArray.push(Services.Parsers.BaseParser.createLatlngArray(currentCoordinatesArray));
+                            }
+                            break;
+                        case Common.GeoJsonFeatureType.multiPolygon:
+                            let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
+                            singleResult.latlng = Services.Parsers.BaseParser.createLatlng(multiPolygone.coordinates[0][0][0]) as L.LatLng;
+                            for (let currentPolygoneCoordinates of multiPolygone.coordinates) {
+                                for (let currentCoordinatesArray of currentPolygoneCoordinates) {
+                                    singleResult.latlngsArray.push(Services.Parsers.BaseParser.createLatlngArray(currentCoordinatesArray));
+                                }
+                            }
                     }
-                    if (searchResult.latlngsArray.length > 0) {
-                        searchResult.latlng = searchResult.latlngsArray[0][0];
-                        results.push(searchResult);
-                    }
+                    results.push(singleResult);
                 }
                 deferred.resolve(results);
             }).error((err) => {
