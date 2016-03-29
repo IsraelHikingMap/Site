@@ -60,6 +60,7 @@ namespace IsraelHiking.API.Services
             new PropertiesData("man_made", "cistern", 1),
             new PropertiesData("leisure", "picnic", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_picnic.n.16.png"),
             new PropertiesData("leisure", "picnic_table", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_picnic.n.16.png"),
+            new PropertiesData("leisure", "nature_reserve", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
             new PropertiesData("tourism", "picnic_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_picnic.n.16.png"),
             new PropertiesData("tourism", "camp_site", 1, "http://www.sjjb.co.uk/mapicons/png/accommodation_camping.n.16.png"),
             new PropertiesData("tourism", "viewpoint", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_view_point.p.16.png"),
@@ -68,6 +69,7 @@ namespace IsraelHiking.API.Services
             new PropertiesData("historic", "archaeological_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_archaeological2.p.16.png"),
             new PropertiesData("historic", "memorial", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_memorial.p.16.png"),
             new PropertiesData("historic", "monument", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_monument.p.16.png"),
+            
         };
 
         public static PropertiesData FindPropertiesData(Feature feature)
