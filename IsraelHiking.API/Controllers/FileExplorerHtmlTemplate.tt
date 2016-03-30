@@ -9,7 +9,7 @@
 	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible" />
-    <title>Israel Hiking Map - <#=FileExplorerViewModel.CurrentEntryPath.Last().Name#></title>
+    <title>Israel Hiking Map - <#=FileExplorerViewModel.CurrentEntryPath.Any() ? FileExplorerViewModel.CurrentEntryPath.Last().Name : "Invalid Folder"#></title>
     <!-- Favicons courtesy of http://realfavicongenerator.net/ -->
     <link rel="apple-touch-icon" sizes="57x57" href="/content/images/favicons/apple-touch-icon-57x57.png">
     <link rel="apple-touch-icon" sizes="60x60" href="/content/images/favicons/apple-touch-icon-60x60.png">

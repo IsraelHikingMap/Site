@@ -33,7 +33,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             var stringContent = response.Content as StringContent;
             Assert.IsNotNull(stringContent);
-            Assert.IsFalse(stringContent.ReadAsStringAsync().Result.Contains("fa"));
+            Assert.IsFalse(stringContent.ReadAsStringAsync().Result.Contains("class='fa"));
         }
 
         [TestMethod]
@@ -50,7 +50,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             var stringContent = response.Content as StringContent;
             Assert.IsNotNull(stringContent);
-            Assert.IsFalse(stringContent.ReadAsStringAsync().Result.Contains("fa"));
+            Assert.IsFalse(stringContent.ReadAsStringAsync().Result.Contains("class='fa"));
         }
 
         [TestMethod]
@@ -81,7 +81,9 @@ namespace IsraelHiking.API.Tests.Controllers
 
             var stringContent = response.Content as StringContent;
             Assert.IsNotNull(stringContent);
-            Assert.IsFalse(stringContent.ReadAsStringAsync().Result.Contains("fa-folder"));
+            var html = stringContent.ReadAsStringAsync().Result;
+            Assert.IsFalse(html.Contains("class='fa-folder"));
+            Assert.IsTrue(html.Contains("Invalid Folder"));
         }
 
         [TestMethod]

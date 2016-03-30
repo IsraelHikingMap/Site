@@ -33,7 +33,7 @@ namespace IsraelHiking.API.Controllers
                     "ge, chrome=1\" http-equiv=\"X-UA-Compatible\" />\r\n    <title>Israel Hiking Map - ");
             
             #line 12 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(FileExplorerViewModel.CurrentEntryPath.Last().Name));
+            this.Write(this.ToStringHelper.ToStringWithCulture(FileExplorerViewModel.CurrentEntryPath.Any() ? FileExplorerViewModel.CurrentEntryPath.Last().Name : "Invalid Folder"));
             
             #line default
             #line hidden
