@@ -59,7 +59,7 @@ namespace IsraelHiking.API.Controllers
                 return ConvertListingToReponse(new FileExplorerViewModel());
             }
             var fileExplorerViewModel = new FileExplorerViewModel();
-            var directories = _fileSystemHelper.GetDirectories(fullPath);
+            var directories = _fileSystemHelper.GetNonHiddenDirectories(fullPath);
             fileExplorerViewModel.Entries.AddRange(
                 directories.Select(directory => new FileSystemEntry
                 {
@@ -68,7 +68,7 @@ namespace IsraelHiking.API.Controllers
                     Size = 0,
                     Link = currenUri + _fileSystemHelper.GetShortName(directory) + "/"
                 }).ToList());
-            var files = _fileSystemHelper.GetFiles(fullPath);
+            var files = _fileSystemHelper.GetNonHiddenFiles(fullPath);
             fileExplorerViewModel.Entries.AddRange(files.Select(file => new FileSystemEntry
             {
                 Name = _fileSystemHelper.GetShortName(file),

@@ -7,8 +7,8 @@ namespace IsraelHiking.DataAccessInterfaces
     {
         bool Exists(string path);
         long GetFileSize(string path);
-        string[] GetDirectories(string path);
-        string[] GetFiles(string path);
+        string[] GetNonHiddenDirectories(string path);
+        string[] GetNonHiddenFiles(string path);
         DateTime GetLastModifiedDate(string path);
         string GetShortName(string path);
         long GetSize(string fileName);

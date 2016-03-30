@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.DataAccess
@@ -16,14 +17,18 @@ namespace IsraelHiking.DataAccess
             return File.Exists(path) ? new FileInfo(path).Length : 0;
         }
 
-        public string[] GetDirectories(string path)
+        public string[] GetNonHiddenDirectories(string path)
         {
-            return Directory.GetDirectories(path);
+            return Directory.GetDirectories(path)
+                .Where(d => !new DirectoryInfo(d).Attributes.HasFlag(FileAttributes.Hidden))
+                .ToArray();
         }
 
-        public string[] GetFiles(string path)
+        public string[] GetNonHiddenFiles(string path)
         {
-            return Directory.GetFiles(path);
+            return Directory.GetFiles(path)
+                .Where(f => !new FileInfo(f).Attributes.HasFlag(FileAttributes.Hidden) && !f.EndsWith("web.config"))
+                .ToArray();
         }
 
         public string GetShortName(string path)

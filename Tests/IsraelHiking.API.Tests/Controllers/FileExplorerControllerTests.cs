@@ -43,7 +43,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var dir1 = "dir1";
             _controller.Request = new HttpRequestMessage { RequestUri = new Uri("http://www.www.com/Example") };
             _fileSystemHelper.Exists(Arg.Is<string>(x => x.Contains(EXAMPLE_DIRECTORY))).Returns(true);
-            _fileSystemHelper.GetDirectories(Path.Combine(EXAMPLE_DIRECTORY, path)).Returns(new[] { dir1 });
+            _fileSystemHelper.GetNonHiddenDirectories(Path.Combine(EXAMPLE_DIRECTORY, path)).Returns(new[] { dir1 });
             _fileSystemHelper.GetShortName(dir1).Returns(dir1);
 
             var response = _controller.GetListingPage(null);
@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var dir1 = "dir1";
             _controller.Request = new HttpRequestMessage { RequestUri = new Uri("http://www.www.com/Example") };
             _fileSystemHelper.Exists(Arg.Is<string>(x => x.Contains(EXAMPLE_DIRECTORY))).Returns(true);
-            _fileSystemHelper.GetDirectories(Path.Combine(EXAMPLE_DIRECTORY, path)).Returns(new[] { dir1 });
+            _fileSystemHelper.GetNonHiddenDirectories(Path.Combine(EXAMPLE_DIRECTORY, path)).Returns(new[] { dir1 });
             _fileSystemHelper.GetShortName(dir1).Returns(dir1);
 
             var response = _controller.GetListingPage(path);
@@ -91,7 +91,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var filesList = new[] {"zipfile.zip", "image.png", "xml.xml", "text.txt"};
             _controller.Request = new HttpRequestMessage { RequestUri = new Uri("http://www.www.com/Example/path/path") };
             _fileSystemHelper.Exists(Arg.Is<string>(x => x.Contains(EXAMPLE_DIRECTORY))).Returns(true);
-            _fileSystemHelper.GetFiles(Path.Combine(EXAMPLE_DIRECTORY, path)).Returns(filesList);
+            _fileSystemHelper.GetNonHiddenFiles(Path.Combine(EXAMPLE_DIRECTORY, path)).Returns(filesList);
             _fileSystemHelper.GetShortName(Arg.Any<string>()).Returns(x => x[0]);
             for (int index = 0; index < filesList.Length; index++)
             {
