@@ -102,18 +102,11 @@ namespace IsraelHiking.API.Converters
                 var multiPolygon = new MultiPolygon();
                 var outerWays = relation.Members.Where(m => m.Role == "outer").Select(m => m.Member).OfType<CompleteWay>();
                 var outerCoordinatesGroups = GetCoordinatesGroupsFromWays(outerWays);
-                // remove these ways from the feature collection?
-                if (outerCoordinatesGroups.OfType<Polygon>().Count() != 1)
-                {
-                    // there should be only one group of coordinates in an outer multipolygon relation.
-                    return null;
-                }
-                multiPolygon.Coordinates.Add(outerCoordinatesGroups.OfType<Polygon>().First());
+                multiPolygon.Coordinates.AddRange(outerCoordinatesGroups.OfType<Polygon>());
                 var innerWays = relation.Members.Where(m => m.Role != "outer").Select(m => m.Member).OfType<CompleteWay>();
                 var innerCoordinatesGroups = GetCoordinatesGroupsFromWays(innerWays);
                 if (innerCoordinatesGroups.OfType<Polygon>().Any())
                 {
-                    // ignoring non linear rings in relation (partial holes)
                     multiPolygon.Coordinates.AddRange(innerCoordinatesGroups.OfType<Polygon>());
                 }
                 return new Feature(multiPolygon, ConvertTags(relation.Tags, relation.Id));

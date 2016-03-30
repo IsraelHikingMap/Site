@@ -1,4 +1,5 @@
-﻿using System.Net;
+﻿using System;
+using System.Net;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using System.Net.Http;
@@ -28,6 +29,7 @@ namespace IsraelHiking.DataAccess
             using (HttpClient client = new HttpClient())
             {
                 _logger.Debug("Getting file from: " + url);
+                client.Timeout = TimeSpan.FromMinutes(10);
                 var response = await client.GetAsync(url);
                 var fileName = (response.Content.Headers.ContentDisposition != null)
                     ? response.Content.Headers.ContentDisposition.FileName.Trim('"')

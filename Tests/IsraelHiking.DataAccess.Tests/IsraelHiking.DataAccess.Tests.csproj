@@ -107,6 +107,7 @@
   <ItemGroup>
     <Compile Include="Database\IsraeHikingDbContextTests.cs" />
     <Compile Include="Database\IsraelHikingRepositoryTests.cs" />
+    <Compile Include="ElasticSearch\ElasticSearchGatewayTests.cs" />
     <Compile Include="ElevationDataStorageTests.cs" />
     <Compile Include="GpsBabel\GpsBabelGatewayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -140,6 +141,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
+  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>

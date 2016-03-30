@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using IsraelHiking.API.Services;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccess.ElasticSearch;
@@ -16,22 +17,7 @@ namespace IsraelHiking.Updater
             {
                 return;
             }
-            var logger = new ConsoleLogger();
-            var helperProcess = new ProcessHelper(logger);
-            var graphHopperHelper = new GraphHopperHelper(logger, helperProcess);
-            var elasticSearchGateway = new ElasticSearchGateway(logger);
-            var elasticSearchHelper = new ElasticSearchHelper(logger, helperProcess);
-            var osmDataService = new OsmDataService(graphHopperHelper, new RemoteFileFetcherGateway(logger), new FileSystemHelper(), elasticSearchGateway, elasticSearchHelper, logger);
-            var directory = Directory.GetCurrentDirectory();
-            try
-            {
-                osmDataService.Initialize(directory).Wait();
-                osmDataService.UpdateData(operations).Wait();
-            }
-            catch (Exception ex)
-            {
-                logger.Error("Failed updating OSM data with exception: " + ex);
-            }
+            Run(operations).Wait();
         }
 
         private static OsmDataService.Operations GetOperationsFromAgruments(string[] args)
@@ -55,6 +41,26 @@ namespace IsraelHiking.Updater
                 operations &= ~OsmDataService.Operations.UpdateGraphHopper;
             }
             return operations;
+        }
+
+        private static async Task Run(OsmDataService.Operations operations)
+        {
+            var logger = new ConsoleLogger();
+            var helperProcess = new ProcessHelper(logger);
+            var graphHopperHelper = new GraphHopperHelper(logger, helperProcess);
+            var elasticSearchGateway = new ElasticSearchGateway(logger);
+            var elasticSearchHelper = new ElasticSearchHelper(logger, helperProcess);
+            var osmDataService = new OsmDataService(graphHopperHelper, new RemoteFileFetcherGateway(logger), new FileSystemHelper(), elasticSearchGateway, elasticSearchHelper, logger);
+            var directory = Directory.GetCurrentDirectory();
+            try
+            {
+                await osmDataService.Initialize(directory);
+                await osmDataService.UpdateData(operations);
+            }
+            catch (Exception ex)
+            {
+                logger.Error("Failed updating OSM data with exception: " + ex);
+            }
         }
     }
 }
