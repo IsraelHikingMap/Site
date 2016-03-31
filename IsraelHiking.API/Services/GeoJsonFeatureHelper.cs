@@ -38,6 +38,7 @@ namespace IsraelHiking.API.Services
 
         private static readonly List<PropertiesData> Ways = new List<PropertiesData>
         {
+            new PropertiesData("place", "any", 1, "http://www.sjjb.co.uk/mapicons/png/accommodation_alpinehut.p.16.png", true),
             new PropertiesData("waterway", "stream", 1),
             new PropertiesData("waterway", "river", 1),
             new PropertiesData("waterway", "wadi", 1),
@@ -69,7 +70,8 @@ namespace IsraelHiking.API.Services
             new PropertiesData("historic", "archaeological_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_archaeological2.p.16.png"),
             new PropertiesData("historic", "memorial", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_memorial.p.16.png"),
             new PropertiesData("historic", "monument", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_monument.p.16.png"),
-            
+            // just for icons:
+            new PropertiesData("highway", "bus_stop", 0, "http://www.sjjb.co.uk/mapicons/png/transport_bus_stop2.p.16.png"),
         };
 
         public static PropertiesData FindPropertiesData(Feature feature)

@@ -53,6 +53,11 @@
                                 }
                             }
                     }
+                    if (feature.properties.lat && feature.properties.lng) {
+                        singleResult.latlng = L.latLng(feature.properties.lat, feature.properties.lng);
+                    }
+                    let geo = L.geoJson(feature);
+                    singleResult.bounds = geo.getBounds();
                     results.push(singleResult);
                 }
                 deferred.resolve(results);

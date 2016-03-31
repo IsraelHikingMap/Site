@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
 using IsraelHiking.API.Converters;
 using IsraelHiking.DataAccess.ElasticSearch;
 using IsraelHiking.DataAccessInterfaces;
@@ -28,6 +27,8 @@ namespace IsraelHiking.API.Services
 
         private const string PBF_FILE_NAME = "israel-and-palestine-latest.osm.pbf";
         private const int PAGE_SIZE = 10000;
+        private const string PLACE = "place";
+        private const string NAME = "name";
 
         private readonly ILogger _logger;
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
@@ -124,37 +125,112 @@ namespace IsraelHiking.API.Services
                 await _elasticSearchGateway.DeleteAll();
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var converter = new OsmGeoJsonConverter();
-                var list = new List<Feature>(PAGE_SIZE);
-                int page = 0;
-                foreach (var completeOsmGeo in completeSource)
+                var smallCahceList = new List<Feature>(PAGE_SIZE);
+                int total = 0;
+                var namesDictionary = completeSource
+                    .Where(o => string.IsNullOrWhiteSpace(GetName(o)) == false)
+                    .GroupBy(GetName)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+                foreach (var name in namesDictionary.Keys)
                 {
-                    var geoJson = converter.ToGeoJson(completeOsmGeo);
-                    if (geoJson?.Properties == null || !geoJson.Properties.Keys.Any(k => k.Contains("name")))
+                    var list = MergeElements(namesDictionary[name]).Select(e => converter.ToGeoJson(e)).Where(f => f != null).ToList();
+                    list.ForEach(feature =>
+                    {
+                        var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(feature);
+                        feature.Properties["sort_order"] = propertiesExtraData?.SortOrder ?? 0;
+                        feature.Properties["icon"] = propertiesExtraData?.Icon ?? string.Empty;
+                    });
+                    smallCahceList.AddRange(list);
+                    if (smallCahceList.Count < PAGE_SIZE)
                     {
                         continue;
                     }
-                    var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(geoJson);
-                    geoJson.Properties["sort_order"] = propertiesExtraData?.SortOrder ?? 0;
-                    geoJson.Properties["icon"] = propertiesExtraData?.Icon ?? string.Empty;
-                    list.Add(geoJson);
-                    if (list.Count != PAGE_SIZE)
-                    {
-                        continue;
-                    }
-                    page++;
-                    _logger.Info($"Indexing {PAGE_SIZE * page} records");
-                    _elasticSearchGateway.UpdateData(list).Wait();
-                    list.Clear();
+                    total += smallCahceList.Count;
+                    _logger.Info($"Indexing {total} records");
+                    _elasticSearchGateway.UpdateData(smallCahceList).Wait();
+                    smallCahceList.Clear();
                 }
-                _elasticSearchGateway.UpdateData(list).Wait();
-                _logger.Info($"Finished updating Elastic Search, Indexed {PAGE_SIZE * page + list.Count} records");
+                _elasticSearchGateway.UpdateData(smallCahceList).Wait();
+                _logger.Info($"Finished updating Elastic Search, Indexed {total + smallCahceList.Count} records");
             }
         }
 
-        private bool IsKeyValueExsits(Dictionary<string, object> dictionary, string key, string value)
+        private string GetName(ICompleteOsmGeo osm)
         {
-            return dictionary.ContainsKey(key) && 
-                dictionary[key].ToString().Equals(value, StringComparison.InvariantCultureIgnoreCase);
+            if (osm.Tags.ContainsKey(NAME))
+            {
+                return osm.Tags[NAME];
+            }
+            foreach (var tag in osm.Tags)
+            {
+                if (tag.Key.Contains(NAME))
+                {
+                    return tag.Value;
+                }
+            }
+            return string.Empty;
+        }
+
+        private List<ICompleteOsmGeo> MergeElements(List<ICompleteOsmGeo> elements)
+        {
+            if (elements.Count == 1)
+            {
+                return elements;
+            }
+            var nodes = elements.OfType<Node>().ToList();
+            var ways = elements.OfType<CompleteWay>().ToList();
+            var relations = elements.OfType<CompleteRelation>().ToList();
+            if (nodes.Count == elements.Count || ways.Count == elements.Count || relations.Count == elements.Count)
+            {
+                return elements;
+            }
+            foreach (var way in ways.Where(w => w.Tags.ContainsKey(PLACE)))
+            {
+                MergePlaceNode(nodes, way);
+            }
+            foreach (var relation in relations)
+            {
+                foreach (var way in OsmGeoJsonConverter.GetAllWays(relation))
+                {
+                    var wayToRemove = ways.FirstOrDefault(w => w.Id == way.Id);
+                    if (wayToRemove != null)
+                    {
+                        MergeTags(way, relation);
+                        ways.Remove(wayToRemove);
+                    }
+                }
+                if (relation.Tags.ContainsKey(PLACE))
+                {
+                    MergePlaceNode(nodes, relation);
+                }
+            }
+
+            var mergedElements = new List<ICompleteOsmGeo>();
+            mergedElements.AddRange(nodes);
+            mergedElements.AddRange(ways);
+            mergedElements.AddRange(relations);
+            return mergedElements;
+        }
+
+        private void MergePlaceNode(List<Node> nodes, ICompleteOsmGeo element)
+        {
+            var node = nodes.FirstOrDefault(n => n.Tags.ContainsKey(PLACE));
+            if (node == null)
+            {
+                return;
+            }
+            element.Tags.Add("lat", node.Latitude.ToString());
+            element.Tags.Add("lng", node.Longitude.ToString());
+            MergeTags(node, element);
+            nodes.Remove(node);
+        }
+
+        private void MergeTags(ICompleteOsmGeo fromItem, ICompleteOsmGeo toItem)
+        {
+            foreach (var tag in fromItem.Tags)
+            {
+                toItem.Tags.AddOrReplace(tag);
+            }
         }
     }
 }

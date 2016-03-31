@@ -327,7 +327,7 @@ module IsraelHiking.Services {
             }
             if (data.markers) {
                 for (let marker of data.markers) {
-                    marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng)
+                    marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng);
                 }
             }
             this.setData(data, false);

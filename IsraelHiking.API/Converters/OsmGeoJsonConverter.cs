@@ -3,10 +3,6 @@ using System.Linq;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
 using OsmSharp.Collections.Tags;
-//using OsmSharp.Geo.Attributes;
-//using OsmSharp.Geo.Features;
-//using OsmSharp.Geo.Geometries;
-//using OsmSharp.Math.Geo;
 using OsmSharp.Osm;
 
 namespace IsraelHiking.API.Converters
@@ -112,14 +108,35 @@ namespace IsraelHiking.API.Converters
                 return new Feature(multiPolygon, ConvertTags(relation.Tags, relation.Id));
             }
 
-            var ways = relation.Members.Select(m => m.Member).OfType<CompleteWay>();
-            var coordinatesGroups = GetCoordinatesGroupsFromWays(ways);
+            var nodes = relation.Members.Select(m => m.Member).OfType<Node>().ToList();
+            if (nodes.Any())
+            {
+                var multiPoint = new MultiPoint(nodes.Select(n => new Point(ConvertNode(n))).ToList());
+                return new Feature(multiPoint, ConvertTags(relation.Tags, relation.Id));
+            }
+
+            var coordinatesGroups = GetCoordinatesGroupsFromWays(GetAllWays(relation));
             if (!coordinatesGroups.Any())
             {
                 return null;
             }
             var multiLineString = new MultiLineString(coordinatesGroups.OfType<LineString>().ToList());
             return new Feature(multiLineString, ConvertTags(relation.Tags, relation.Id));
+        }
+
+        public static List<CompleteWay> GetAllWays(CompleteRelation relation)
+        {
+            if (relation.Members.All(m => m.Member.Type != CompleteOsmType.Relation))
+            {
+                return relation.Members.Select(m => m.Member).OfType<CompleteWay>().ToList();
+            }
+            var list = relation.Members.Select(m => m.Member).OfType<CompleteWay>().ToList();
+            var subRelations = relation.Members.Select(m => m.Member).OfType<CompleteRelation>();
+            foreach (var subRelation in subRelations)
+            {
+                list.AddRange(GetAllWays(subRelation));
+            }
+            return list;
         }
     }
 }
