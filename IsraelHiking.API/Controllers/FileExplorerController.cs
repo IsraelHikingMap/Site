@@ -76,7 +76,8 @@ namespace IsraelHiking.API.Controllers
                 Link = currenUri + _fileSystemHelper.GetShortName(file),
                 Size = _fileSystemHelper.GetSize(file)
             }).ToList());
-            fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry {Name = "/", Link = baseUri});
+            string baseHeaderName = baseUri.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Last() + "/";
+            fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry {Name = baseHeaderName, Link = baseUri});
             foreach (var header in path.Split(new [] {'/'},  StringSplitOptions.RemoveEmptyEntries))
             {
                 fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry
