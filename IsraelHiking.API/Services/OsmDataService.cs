@@ -131,6 +131,7 @@ namespace IsraelHiking.API.Services
                     .Where(o => string.IsNullOrWhiteSpace(GetName(o)) == false)
                     .GroupBy(GetName)
                     .ToDictionary(g => g.Key, g => g.ToList());
+                _logger.Info("Finished grouping data by name.");
                 foreach (var name in namesDictionary.Keys)
                 {
                     var list = MergeElements(namesDictionary[name]).Select(e => converter.ToGeoJson(e)).Where(f => f != null).ToList();

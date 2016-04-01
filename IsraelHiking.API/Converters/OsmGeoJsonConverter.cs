@@ -121,6 +121,7 @@ namespace IsraelHiking.API.Converters
                 return null;
             }
             var multiLineString = new MultiLineString(coordinatesGroups.OfType<LineString>().ToList());
+            multiLineString.Coordinates.AddRange(coordinatesGroups.OfType<Polygon>().SelectMany(p => p.Coordinates));
             return new Feature(multiLineString, ConvertTags(relation.Tags, relation.Id));
         }
 

@@ -13,7 +13,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         {
             ElasticSearchGateway gateway = new ElasticSearchGateway(new TraceLogger());
             gateway.Initialize();
-            var results = gateway.Search("שמורת טבע מצוק הצינים").Result;
+            var results = gateway.Search("בית שאן").Result;
             Assert.AreEqual(10, results.Count);
         }
     }
