@@ -85,4 +85,8 @@
     app.run(["googleChartApiPromise", () => {
         angular.element("link[type*=icon]").detach().appendTo("head");
     }]);
+
+    app.config($compileProvider => {
+        $compileProvider.aHrefSanitizationWhitelist(/[.*facebook][^\s*(whatsapp):]/);
+    });
 }

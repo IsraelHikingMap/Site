@@ -3,6 +3,8 @@
     export interface IShareScope extends angular.IScope {
         title: string;
         shareAddress: string;
+        whatappShareAddress: string;
+        facebookShareAddress: string;
         width: number;
         height: number;
         size: string;
@@ -36,8 +38,6 @@
             $scope.height = 300;
             $scope.size = "Small";
             $scope.isLoading = false;
-            $scope.shareAddress = "";
-            $scope.siteUrlId = "";
 
             this.shareModal = $modal({
                 title: "Share Your Work",
@@ -45,6 +45,15 @@
                 show: false,
                 scope: $scope
             });
+
+            $scope.clearShareAddress = () => {
+                $scope.shareAddress = "";
+                $scope.whatappShareAddress = "";
+                $scope.facebookShareAddress = "";
+                $scope.siteUrlId = "";
+            }
+
+            $scope.clearShareAddress();
 
             $scope.updateEmbedText = (width: number, height: number) => {
                 $scope.width = width;
@@ -68,6 +77,9 @@
                     $scope.siteUrlId = siteUrlResponse.Id;
                     $scope.updateToken = siteUrlResponse.ModifyKey;
                     $scope.shareAddress = `http:${this.getShareAddressWithoutProtocol($scope)}`;
+                    let escaped = (<any>$window).encodeURIComponent($scope.shareAddress);
+                    $scope.whatappShareAddress = `whatsapp://send?text=${escaped}`;
+                    $scope.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
                     $scope.embedText = this.getEmbedText($scope);
                 }).error(() => {
                     toastr.error("Unable to generate URL, please try again later...");
@@ -76,10 +88,7 @@
                 });
             }
 
-            $scope.clearShareAddress = () => {
-                $scope.shareAddress = "";
-                $scope.siteUrlId = "";
-            }
+            
 
             $scope.setSize = (size: string) => {
                 switch (size) {

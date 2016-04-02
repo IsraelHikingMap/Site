@@ -15,7 +15,16 @@
                     </div>
                     <div ng-show="shareAddress">
                         <div class="form-group">
-                            <a href="{{shareAddress}}" target="_blank" class="col-md-offset-2 chome-wordwrap-fix">{{shareAddress}}</a>
+                            <a href="{{shareAddress}}" target="_blank" class="col-xs-offset-1 chome-wordwrap-fix">{{shareAddress}}</a>
+                        </div>
+                        <div class="col-xs-offset-1">
+                            <div class="visible-sm visible-xs">
+                                <a ng-href="{{whatappShareAddress}}" class="btn btn-default"><i class="fa fa-whatsapp"></i></a>
+                                <a ng-href="{{facebookShareAddress}}" class="btn btn-default" target="_blank"><i class="fa fa-facebook"></i></a>
+                            </div>
+                            <div class="hidden-sm hidden-xs">
+                                <a ng-href="{{facebookShareAddress}}" class="btn btn-default" target="_blank"><i class="fa fa-facebook"></i></a>
+                            </div>
                         </div>
                         <hr />
                         <div class="form-group">
