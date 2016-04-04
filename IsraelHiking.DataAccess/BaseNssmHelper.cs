@@ -54,7 +54,7 @@ namespace IsraelHiking.DataAccess
 
         public void Stop()
         {
-            ProcessHelper.Start(NSSM_EXE, $"stop {Name}", WorkingDirectory);
+            ProcessHelper.Start(_nssm, $"stop {Name}", WorkingDirectory);
         }
 
         private void InstallService()
