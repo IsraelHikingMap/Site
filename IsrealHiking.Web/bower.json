@@ -1,0 +1,31 @@
+{
+  "name": "ASP.NET",
+  "private": true,
+  "dependencies": {
+    "angular": "*",
+    "angular-animate": "*",
+    "angular-mocks": "*",
+    "angular-file-saver": "*",
+    "angular-local-storage": "*",
+    "angular-strap": "*",
+    "angular-toastr": "*",
+    "angular-google-chart": "*",
+    "angular-loading-bar": "*",
+    "bootstrap": "*",
+    "jquery": "*",
+    "lodash": "*",
+    "ng-file-upload": "*",
+    "font-awesome": "*",
+    "interact": "*",
+    "leaflet": "*",
+    "leaflet.locatecontrol": "*"
+  },
+  "overrides": {
+    "bootstrap": {
+      "main": [ "dist/js/bootstrap.js", "dist/css/*.min.*", "dist/fonts/*.*" ]
+    },
+    "font-awesome": {
+      "main": [ "css/*.min.*", "fonts/*.*" ]
+    }
+  }
+}

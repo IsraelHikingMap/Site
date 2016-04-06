@@ -1,0 +1,15 @@
+{
+  "version": "1.0.0",
+  "name": "israel_hiking",
+  "private": true,
+  "devDependencies": {
+    "gulp": "*",
+    "gulp-concat": "*",
+    "gulp-cssmin": "*",
+    "gulp-uglify": "*",
+    "gulp-filter": "*",
+    "gulp-less": "*",
+    "main-bower-files": "*",
+    "rimraf": "*"
+  }
+}
