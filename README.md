@@ -41,7 +41,7 @@ The architecture is based on layers
 * Updater will be discussed below.  
 
 # Setting up this project
-In order to be able to see this site you'll need some tools:
+In order to be able to build this site you'll need some tools:
 * Download and install [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or later.
 * Using nuget install/update the following: TypeScript, Web Essentials, Chutzpah (both runner and context menu).
 
@@ -56,7 +56,11 @@ In order to be able to make the server work a few prerequisits are needed:
 This utility is used to download and update the OSM data for the search and routing.
 This utility also setups the services needed for the machine.
 The following flags can be used when running from commnad line:
+
 ```-d```: don't download latest OSM pbf file from geofabrik
+
 ```-g```: don't update graphhopper data
+
 ```-e```: don't update elastic search data
+
 ```-h```: for the help menu
