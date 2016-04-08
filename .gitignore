@@ -189,3 +189,11 @@ FakesAssemblies/
 GeneratedArtifacts/
 _Pvt_Extensions/
 ModelManifest.xml
+/IsrealHiking.Web/bower_components
+/.vs/config
+*.sqlite
+!/IsrealHiking.Web/*.ts
+!/IsrealHiking.Web/scripts/*.js
+/IsrealHiking.Web/**/*.js
+/IsrealHiking.Web/**/*.map
+/Tests/IsraelHiking.Web.Tests/**/*.js
