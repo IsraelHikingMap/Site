@@ -93,7 +93,7 @@ namespace IsraelHiking.API.Converters
 
         private Feature ConvertRelation(CompleteRelation relation)
         {
-            if (relation.Tags.ContainsKey("type") && relation.Tags["type"] == "multipolygon")
+            if (IsMultipolygon(relation))
             {
                 var multiPolygon = new MultiPolygon();
                 var outerWays = relation.Members.Where(m => m.Role == "outer").Select(m => m.Member).OfType<CompleteWay>();
@@ -138,6 +138,19 @@ namespace IsraelHiking.API.Converters
                 list.AddRange(GetAllWays(subRelation));
             }
             return list;
+        }
+
+        private bool IsMultipolygon(CompleteOsmBase relation)
+        {
+            if (relation.Tags.ContainsKey("boundary"))
+            {
+                return true;
+            }
+            if (relation.Tags.ContainsKey("type") == false)
+            {
+                return false;
+            }
+            return relation.Tags["type"] == "multipolygon" || relation.Tags["type"] == "boundary";
         }
     }
 }

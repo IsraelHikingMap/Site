@@ -77,7 +77,7 @@
             $scope.selectResult = (searchResults: Services.Search.ISearchResults, e: Event) => {
                 $scope.isShowingSearch = false;
                 this.layerGroup.clearLayers();
-                this.map.fitBounds(searchResults.bounds);
+                this.map.fitBounds(searchResults.bounds, <L.Map.FitBoundsOptions> { maxZoom: Services.LayersService.MAX_NATIVE_ZOOM});
                 var marker = L.marker(searchResults.latlng);
                 marker.bindPopup(searchResults.name || searchResults.address);
                 marker.once("dblclick", () => {
