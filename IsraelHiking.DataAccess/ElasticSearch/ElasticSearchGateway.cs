@@ -52,13 +52,22 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 return new List<Feature>();
             }
             var field = string.IsNullOrWhiteSpace(languageCode) ? "properties.name" : "properties.name:" + languageCode;
-            var response = await _elasticClient.SearchAsync<Feature>(s => 
-                s.Size(NUMBER_OF_RESULTS)
-                .TrackScores()
-                .Sort(f => f.Descending("properties.sort_order").Descending("_score"))
-                .Query(q => q.MultiMatch(mm => mm.Query(searchTerm)
-                    .Fields(f => f.Fields(field))
-                    .Type(TextQueryType.BestFields))));
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Size(NUMBER_OF_RESULTS)
+                    .TrackScores()
+                    .Sort(f => f.Descending("_score"))
+                    .Query(
+                        q => q.FunctionScore(
+                            fs => fs.Query(
+                                iq => iq.MultiMatch(
+                                    mm => mm.Query(searchTerm)
+                                        .Fields(f => f.Fields(field + "^2", "properties.name*", "properties._name"))
+                                        .Type(TextQueryType.BestFields)
+                                        .Fuzziness(Fuzziness.Auto))
+                            ).Functions(fn => fn.FieldValueFactor(f => f.Field("properties.search_factor")))
+                        )
+                    )
+                );
             return response.Documents.ToList();
         }
 

@@ -15,7 +15,7 @@
                 let results = [] as ISearchResults[];
                 for (let feature of response.features) {
                     let singleResult = {
-                        name: isHebrew ? feature.properties.name : feature.properties["name:en"],
+                        name: this.getName(feature, isHebrew),
                         latlngsArray: [],
                         icon: feature.properties.icon
                     } as ISearchResults;
@@ -66,6 +66,17 @@
             });
 
             return deferred.promise;
+        }
+
+        private getName(feature: GeoJSON.Feature, isHebrew: boolean): string {
+            let name = isHebrew
+                ? feature.properties.name || feature.properties["name:he"]
+                : feature.properties["name:en"] || feature.properties.name;
+            if (name) {
+                return name;
+            }
+            let resultsArray = _.pick(feature.properties, (value, key) => key.contains("name"));
+            return resultsArray[0];
         }
     }
 }

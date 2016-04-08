@@ -138,7 +138,7 @@ namespace IsraelHiking.API.Services
                     list.ForEach(feature =>
                     {
                         var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(feature);
-                        feature.Properties["sort_order"] = propertiesExtraData?.SortOrder ?? 0;
+                        feature.Properties["search_factor"] = propertiesExtraData?.SearchFactor ?? PropertiesData.DefaultSearchFactor;
                         feature.Properties["icon"] = propertiesExtraData?.Icon ?? string.Empty;
                     });
                     smallCahceList.AddRange(list);

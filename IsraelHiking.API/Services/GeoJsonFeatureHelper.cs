@@ -8,17 +8,19 @@ namespace IsraelHiking.API.Services
 {
     public class PropertiesData
     {
+        public const double DefaultSearchFactor = 0.5;
+
         public string Key { get; }
         public string Value { get; }
         public bool IsAnyValue { get; }
-        public int SortOrder { get; }
+        public double SearchFactor { get; }
         public string Icon { get; }
 
-        public PropertiesData(string key, string value, int sortOrder, string icon = "", bool isAnyValue = false)
+        public PropertiesData(string key, string value, double searchFactor, string icon = "", bool isAnyValue = false)
         {
             Key = key;
             Value = value;
-            SortOrder = sortOrder;
+            SearchFactor = searchFactor;
             IsAnyValue = isAnyValue;
             Icon = icon;
         }
@@ -71,7 +73,7 @@ namespace IsraelHiking.API.Services
             new PropertiesData("historic", "memorial", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_memorial.p.16.png"),
             new PropertiesData("historic", "monument", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_monument.p.16.png"),
             // just for icons:
-            new PropertiesData("highway", "bus_stop", 0, "http://www.sjjb.co.uk/mapicons/png/transport_bus_stop2.p.16.png"),
+            new PropertiesData("highway", "bus_stop", PropertiesData.DefaultSearchFactor, "http://www.sjjb.co.uk/mapicons/png/transport_bus_stop2.p.16.png"),
         };
 
         public static PropertiesData FindPropertiesData(Feature feature)
