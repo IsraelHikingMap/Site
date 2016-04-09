@@ -194,6 +194,11 @@ body {
     animation: dash .4s linear infinite;
 }
 
+.table-hover > tbody > tr.active-row:hover > td,
+.active-row> td {
+    background-color: #bddef9;
+}
+
 @-webkit-keyframes dash {
     from {
         stroke-dashoffset: 20;

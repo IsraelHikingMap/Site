@@ -5,10 +5,12 @@
         isHebrew: boolean;
         searchResults: Services.Search.ISearchResults[];
         searchTerm: string;
+        activeSearchResult: Services.Search.ISearchResults;
         toggleSearchBar(e: Event);
         search(searchTerm: string);
         selectResult(address: Services.Search.ISearchResults, e: Event): void;
         ignoreClick(e: Event): void;
+        keyDown(e: KeyboardEvent): void;
     }
 
     interface ISearchResultsQueueItem {
@@ -16,10 +18,15 @@
     }
 
     export class SearchController extends BaseMapController {
+        private static ENTER_KEY = 13;
+        private static UP_KEY = 38;
+        private static DOWN_KEY = 40;
+
         private resultsQueue: ISearchResultsQueueItem[];
-        private layerGroup:  L.LayerGroup<L.ILayer>;
+        private layerGroup: L.LayerGroup<L.ILayer>;
 
         constructor($scope: ISearchScope,
+            $window: angular.IWindowService,
             $timeout: angular.ITimeoutService,
             mapService: Services.MapService,
             hashService: Services.HashService,
@@ -33,6 +40,7 @@
             $scope.isShowingSearch = $scope.searchTerm.length > 0;
             $scope.isHebrew = this.hasHebrewCharacters($scope.searchTerm);
             $scope.searchResults = [];
+            $scope.activeSearchResult = null;
 
             $scope.toggleSearchBar = (e: Event) => {
                 $scope.isShowingSearch = !$scope.isShowingSearch;
@@ -51,33 +59,27 @@
                     addresses: []
                 } as ISearchResultsQueueItem);
 
-                //var nominatim = searchResultsProviderFactory.create(Services.Search.SearchProviderType.nominatim);
-                //var overpass = searchResultsProviderFactory.create(Services.Search.SearchProviderType.overpass);
                 var local = searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
 
                 local.getResults(searchTerm, $scope.isHebrew)
-                //nominatim.getResults(searchTerm, $scope.isHebrew)
                     .then((results: Services.Search.ISearchResults[]) => {
-                    var queueItem = _.find(this.resultsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
-                    if (queueItem == null || this.resultsQueue.indexOf(queueItem) !== this.resultsQueue.length - 1) {
-                        this.resultsQueue.splice(0, this.resultsQueue.length - 1);
-                        return;
-                    }
-                    $scope.searchResults = results;
-                    //overpass.getResults(searchTerm, $scope.isHebrew).then((additionalResults: Services.Search.ISearchResults[]) => {
-                    //    for (let additionalResult of additionalResults) {
-                    //        $scope.searchResults.push(additionalResult);
-                    //    }
-                    //});
-                }, () => {
-                    toastr.warning("Unable to get search results.");
-                });
+                        let queueItem = _.find(this.resultsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
+                        if (queueItem == null || this.resultsQueue.indexOf(queueItem) !== this.resultsQueue.length - 1) {
+                            this.resultsQueue.splice(0, this.resultsQueue.length - 1);
+                            return;
+                        }
+                        $scope.searchResults = results;
+                        this.resultsQueue.splice(0);
+                    }, () => {
+                        toastr.warning("Unable to get search results.");
+                    });
             }
 
             $scope.selectResult = (searchResults: Services.Search.ISearchResults, e: Event) => {
                 $scope.isShowingSearch = false;
+                $scope.activeSearchResult = searchResults;
                 this.layerGroup.clearLayers();
-                this.map.fitBounds(searchResults.bounds, <L.Map.FitBoundsOptions> { maxZoom: Services.LayersService.MAX_NATIVE_ZOOM});
+                this.map.fitBounds(searchResults.bounds, <L.Map.FitBoundsOptions>{ maxZoom: Services.LayersService.MAX_NATIVE_ZOOM });
                 var marker = L.marker(searchResults.latlng);
                 marker.bindPopup(searchResults.name || searchResults.address);
                 marker.once("dblclick", () => {
@@ -88,7 +90,7 @@
                     let polyLine = L.polyline(line, { opacity: 1, color: "Blue", weight: 3 } as L.PolylineOptions);
                     this.layerGroup.addLayer(polyLine);
                 }
-                
+
                 $timeout(() => {
                     marker.openPopup();
                 }, 300);
@@ -103,8 +105,33 @@
                 this.suppressEvents(e);
             }
 
-            $(window).bind("keydown", (e: JQueryEventObject) => {
+            $scope.keyDown = (e: KeyboardEvent): void => {
+                if ($scope.isShowingSearch === false) {
+                    return;
+                }
+                let index = $scope.searchResults.indexOf($scope.activeSearchResult);
+                switch (e.keyCode) {
+                case SearchController.UP_KEY:
+                    index = (index - 1) % $scope.searchResults.length;
+                    if (index < 0) {
+                        index = $scope.searchResults.length - 1;
+                    }
+                    $scope.activeSearchResult = $scope.searchResults[index];
+                    break;
+                case SearchController.DOWN_KEY:
+                    index = (index + 1) % $scope.searchResults.length;
+                    $scope.activeSearchResult = $scope.searchResults[index];
+                    break;
+                case SearchController.ENTER_KEY:
+                    $scope.selectResult($scope.activeSearchResult, e);
+                    break;
+                }
+            }
 
+            /**
+             * Globally used keydown to catch ctrl+f in order to open this search controller
+             */
+            angular.element($window).bind("keydown", (e: JQueryEventObject) => {
                 if (e.ctrlKey === false) {
                     return true;
                 }

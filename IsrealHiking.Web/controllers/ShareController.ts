@@ -88,8 +88,6 @@
                 });
             }
 
-            
-
             $scope.setSize = (size: string) => {
                 switch (size) {
                     case "Small":
