@@ -111,20 +111,20 @@
                 }
                 let index = $scope.searchResults.indexOf($scope.activeSearchResult);
                 switch (e.keyCode) {
-                case SearchController.UP_KEY:
-                    index = (index - 1) % $scope.searchResults.length;
-                    if (index < 0) {
-                        index = $scope.searchResults.length - 1;
-                    }
-                    $scope.activeSearchResult = $scope.searchResults[index];
-                    break;
-                case SearchController.DOWN_KEY:
-                    index = (index + 1) % $scope.searchResults.length;
-                    $scope.activeSearchResult = $scope.searchResults[index];
-                    break;
-                case SearchController.ENTER_KEY:
-                    $scope.selectResult($scope.activeSearchResult, e);
-                    break;
+                    case SearchController.UP_KEY:
+                        index = (index - 1) % $scope.searchResults.length;
+                        if (index < 0) {
+                            index = $scope.searchResults.length - 1;
+                        }
+                        $scope.activeSearchResult = $scope.searchResults[index];
+                        break;
+                    case SearchController.DOWN_KEY:
+                        index = (index + 1) % $scope.searchResults.length;
+                        $scope.activeSearchResult = $scope.searchResults[index];
+                        break;
+                    case SearchController.ENTER_KEY:
+                        $scope.selectResult($scope.activeSearchResult, e);
+                        break;
                 }
             }
 

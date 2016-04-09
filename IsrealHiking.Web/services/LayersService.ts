@@ -6,7 +6,7 @@ declare var getLastModifiedDate: Function;
 
 module IsraelHiking.Services {
     export interface ILayer extends Common.LayerData {
-        layer: L.TileLayer;
+        layer: L.ILayer;
         isEditable: boolean;
     }
 
@@ -97,17 +97,18 @@ module IsraelHiking.Services {
                 maxZoom: LayersService.MAX_NATIVE_ZOOM,
                 isEditable: false
             } as Common.LayerData);
+            this.overlays.push({ isEditable: false, address: "", key: "Wiki", layer: new Drawing.WikiMarkersLayer($http, mapService) as L.ILayer } as IOverlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
         }
 
         public addBaseLayer = (layerData: Common.LayerData, attribution?: string): IBaseLayer => {
-            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() == layerData.key.toLocaleLowerCase());
+            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() === layerData.key.toLocaleLowerCase());
             if (layer != null) {
                 return layer; // layer exists
             }
 
-            layer = <IBaseLayer>angular.copy(layerData);
+            layer = angular.copy(layerData) as IBaseLayer;
             layer.layer = L.tileLayer(layerData.address, this.createOptionsFromLayerData(layerData, attribution));
             this.baseLayers.push(layer);
             var baseLayers = this.localStorageService.get<Common.LayerData[]>(LayersService.BASE_LAYERS_KEY) || [];
@@ -117,14 +118,14 @@ module IsraelHiking.Services {
         }
 
         public addOverlay = (layerData: Common.LayerData): IOverlay => {
-            var overlay = _.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() == layerData.key.toLocaleLowerCase());
+            var overlay = _.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() === layerData.key.toLocaleLowerCase());
             if (overlay != null) {
                 return overlay; // overlay exists
             }
-            overlay = <IOverlay>angular.copy(layerData);
+            overlay = angular.copy(layerData) as IOverlay;
             overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData));
             overlay.visible = false;
-            overlay.layer.setZIndex(this.overlayZIndex++);
+            (overlay.layer as L.TileLayer).setZIndex(this.overlayZIndex++);
             this.overlays.push(overlay);
             var overlaysFromStorage = this.localStorageService.get<Common.LayerData[]>(LayersService.OVERLAYS_KEY) || [];
             overlaysFromStorage.push(layerData);
@@ -133,8 +134,8 @@ module IsraelHiking.Services {
         }
 
         public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: Common.LayerData): string => {
-            if (oldLayer.key != newLayer.key &&
-                _.find(this.baseLayers, bl => bl.key.toLocaleLowerCase() == newLayer.key.toLocaleLowerCase()) != null) {
+            if (oldLayer.key !== newLayer.key &&
+                _.find(this.baseLayers, bl => bl.key.toLocaleLowerCase() === newLayer.key.toLocaleLowerCase()) != null) {
                 return "The name: '" + newLayer.key + "' is already in use.";
             }
             this.removeBaseLayer(oldLayer);
@@ -144,8 +145,8 @@ module IsraelHiking.Services {
         }
 
         public updateOverlay = (oldLayer: IOverlay, newLayer: Common.LayerData) => {
-            if (oldLayer.key != newLayer.key &&
-                _.find(this.overlays, o => o.key.toLocaleLowerCase() == newLayer.key.toLocaleLowerCase()) != null) {
+            if (oldLayer.key !== newLayer.key &&
+                _.find(this.overlays, o => o.key.toLocaleLowerCase() === newLayer.key.toLocaleLowerCase()) != null) {
                 return "The name: '" + newLayer.key + "' is already in use.";
             }
             this.removeOverlay(oldLayer);
@@ -155,7 +156,7 @@ module IsraelHiking.Services {
         }
 
         public addRoute = (name: string, routeData: Common.RouteData, pathOptions?: L.PathOptions) => {
-            if (name == "") {
+            if (name === "") {
                 name = this.createRouteName();
             }
             var route = this.getRouteByName(name);
@@ -164,7 +165,7 @@ module IsraelHiking.Services {
                 return;
             }
             routeData = routeData || <Common.RouteData> {
-                segments: [],
+                segments: []
             };
             routeData.name = name; // in case name is empty we'll override it.
             var drawingRoute = this.drawingFactory.createDrawingRoute(routeData, false, pathOptions);
@@ -177,19 +178,19 @@ module IsraelHiking.Services {
             return route == null;
         }
 
-        public removeBaseLayer = (baseLayer: Services.IBaseLayer) => {
+        public removeBaseLayer = (baseLayer: IBaseLayer) => {
             var baseLayers = this.localStorageService.get<Common.LayerData[]>(LayersService.BASE_LAYERS_KEY);
-            _.remove(baseLayers, (layerData) => layerData.key == baseLayer.key);
+            _.remove(baseLayers, (layerData) => layerData.key === baseLayer.key);
             this.localStorageService.set(LayersService.BASE_LAYERS_KEY, this.unique(baseLayers));
-            if (this.selectedBaseLayer.key != baseLayer.key) {
-                _.remove(this.baseLayers, (layer) => baseLayer.key == layer.key);
+            if (this.selectedBaseLayer.key !== baseLayer.key) {
+                _.remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
                 return;
             }
             var index = this.baseLayers.indexOf(this.selectedBaseLayer);
             index = (index + 1) % this.baseLayers.length;
             this.selectBaseLayer(this.baseLayers[index]);
-            _.remove(this.baseLayers, (layer) => baseLayer.key == layer.key);
-            if (this.baseLayers.length == 0) {
+            _.remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
+            if (this.baseLayers.length === 0) {
                 this.map.removeLayer(baseLayer.layer);
                 this.selectedBaseLayer = null;
             }
@@ -197,12 +198,12 @@ module IsraelHiking.Services {
 
         public removeOverlay = (overlay: IOverlay) => {
             var overlays = this.localStorageService.get<Common.LayerData[]>(LayersService.OVERLAYS_KEY);
-            _.remove(overlays, (layerData) => layerData.key == overlay.key);
+            _.remove(overlays, (layerData) => layerData.key === overlay.key);
             this.localStorageService.set(LayersService.OVERLAYS_KEY, this.unique(overlays));
             if (overlay.visible) {
                 this.map.removeLayer(overlay.layer);
             }
-            _.remove(this.overlays, (overlayToRemove) => overlayToRemove.key == overlay.key);
+            _.remove(this.overlays, (overlayToRemove) => overlayToRemove.key === overlay.key);
         }
 
         public removeRoute = (routeName: string) => {
@@ -212,10 +213,9 @@ module IsraelHiking.Services {
             }
             route.destroy();
             this.routes.splice(this.routes.indexOf(route), 1);
-            //this.hashService.removeRoute(routeName);
         }
 
-        public selectBaseLayer = (baseLayer: Services.IBaseLayer) => {
+        public selectBaseLayer = (baseLayer: IBaseLayer) => {
             if (baseLayer.selected) {
                 return;
             }
@@ -223,15 +223,14 @@ module IsraelHiking.Services {
                 this.map.removeLayer(this.selectedBaseLayer.layer);
                 this.selectedBaseLayer.selected = false;
             }
-            var newSelectedLayer = _.find(this.baseLayers, (layer) => layer.key == baseLayer.key);
+            var newSelectedLayer = _.find(this.baseLayers, (layer) => layer.key === baseLayer.key);
             this.map.addLayer(newSelectedLayer.layer, true);
             newSelectedLayer.selected = true;
             this.selectedBaseLayer = newSelectedLayer;
-            this.updateBaseLayerHash();
         }
 
         public toggleOverlay = (overlay: IOverlay) => {
-            var overlayFromArray = _.find(this.overlays, (overlayToFind) => overlayToFind.key == overlay.key);
+            var overlayFromArray = _.find(this.overlays, (overlayToFind) => overlayToFind.key === overlay.key);
             overlayFromArray.visible = !overlayFromArray.visible;
             if (overlayFromArray.visible) {
                 this.map.addLayer(overlay.layer);
@@ -241,36 +240,36 @@ module IsraelHiking.Services {
         }
 
         public changeDrawingState = (name: string) => {
-            var drawing = <Drawing.IDrawing>this.getRouteByName(name);
-            if (name == this.markers.name) {
+            var drawing = this.getRouteByName(name) as Drawing.IDrawing;
+            if (name === this.markers.name) {
                 drawing = this.markers;
             }
             if (drawing == null) {
                 return;
             }
-            if (drawing == this.selectedDrawing) {
-                if (drawing.state == Services.Drawing.DrawingState.active) {
+            if (drawing === this.selectedDrawing) {
+                if (drawing.state === Services.Drawing.DrawingState.active) {
                     this.selectedDrawing.changeStateTo(Drawing.DrawingState.hidden);
                     return;
                 }
-                if (drawing.state == Services.Drawing.DrawingState.hidden) {
+                if (drawing.state === Services.Drawing.DrawingState.hidden) {
                     this.selectedDrawing.changeStateTo(Drawing.DrawingState.active);
                     return;
                 }
             }
 
-            if (this.selectedDrawing && this.selectedDrawing.state == Services.Drawing.DrawingState.active) {
+            if (this.selectedDrawing && this.selectedDrawing.state === Services.Drawing.DrawingState.active) {
                 this.selectedDrawing.changeStateTo(Drawing.DrawingState.inactive);
             }
             this.selectedDrawing = drawing;
             this.selectedDrawing.changeStateTo(Drawing.DrawingState.active);
-            this.eventHelper.raiseEvent(<Common.IDataChangedEventArgs>{});
+            this.eventHelper.raiseEvent({} as Common.IDataChangedEventArgs);
         }
 
         public createRouteName = () => {
             var index = 1;
             var routeName = "Route " + index;
-            while (_.some(this.routes, (route) => route.name == routeName)) {
+            while (_.some(this.routes, (route) => route.name === routeName)) {
                 index++;
                 routeName = "Route " + index;
             }
@@ -342,7 +341,7 @@ module IsraelHiking.Services {
         }
 
         public getRouteByName = (routeName: string): Drawing.DrawingRoute => {
-            return _.find(this.routes, (drawingToFind) => drawingToFind.name == routeName);
+            return _.find(this.routes, (drawingToFind) => drawingToFind.name === routeName);
         }
 
         public createPathOptions = () => {
@@ -350,61 +349,46 @@ module IsraelHiking.Services {
         }
 
         private addBaseLayerFromHash = (layerData: Common.LayerData) => {
-            if (layerData == null || (layerData.address == "" && layerData.key =="")) {
+            if (layerData == null || (layerData.address === "" && layerData.key === "")) {
                 this.selectBaseLayer(this.baseLayers[0]);
                 return;
             }
             var baseLayer = _.find(this.baseLayers, (baseLayerToFind) =>
-                baseLayerToFind.address.toLocaleLowerCase() == layerData.address.toLocaleLowerCase() ||
-                baseLayerToFind.key.toLocaleLowerCase() == layerData.key.toLocaleLowerCase());
+                baseLayerToFind.address.toLocaleLowerCase() === layerData.address.toLocaleLowerCase() ||
+                baseLayerToFind.key.toLocaleLowerCase() === layerData.key.toLocaleLowerCase());
             if (baseLayer != null) {
                 this.selectBaseLayer(baseLayer);
                 return;
             }
             var key = layerData.key;
-            if (key == "") {
+            if (key === "") {
                 key = LayersService.CUSTOM_LAYER + " ";
-                var index = 0;
-                var layer = null;
-                var customName = key + index.toString();
+                let index = 0;
+                let layer: IBaseLayer;
+                let customName : string;
                 do {
                     index++;
                     customName = key + index.toString();
-                    layer = _.find(this.baseLayers, (baseLayerToFind) => baseLayerToFind.key == customName);
+                    layer = _.find(this.baseLayers, (baseLayerToFind) => baseLayerToFind.key === customName);
                 } while (layer != null);
             }
             
-            layer = this.addBaseLayer(<ILayer> {
+            var newLayer = this.addBaseLayer({
                 key: key,
                 address: layerData.address,
                 minZoom: layerData.minZoom,
                 maxZoom: layerData.maxZoom,
-                isEditable: true,
-            });
-            this.selectBaseLayer(layer);
+                isEditable: true
+            } as ILayer);
+            this.selectBaseLayer(newLayer);
         }
 
         private addOverlaysFromHash = (overlays: Common.LayerData[]) => {
             for (var overlayIndex = 0; overlayIndex < overlays.length; overlayIndex++) {
                 var overlay = this.addOverlay(overlays[overlayIndex]);
-                if (overlay.visible == false) {
+                if (overlay.visible === false) {
                     this.toggleOverlay(overlay);
                 }
-            }
-        }
-
-        private updateBaseLayerHash = () => {
-            var baseLayer = "";
-            if (this.selectedBaseLayer == null) {
-                baseLayer = "";
-            }
-            else if (this.selectedBaseLayer.key == LayersService.ISRAEL_HIKING_MAP ||
-                this.selectedBaseLayer.key == LayersService.ISRAEL_MTB_MAP ||
-                this.selectedBaseLayer.key == LayersService.GOOGLE_EARTH) {
-                baseLayer = this.selectedBaseLayer.key;
-            }
-            else {
-                baseLayer = this.selectedBaseLayer.address;
             }
         }
 
@@ -435,14 +419,14 @@ module IsraelHiking.Services {
                 baseLayer: null,
                 overlays: [],
                 northEast: this.map.getBounds().getNorthEast(),
-                southWest: this.map.getBounds().getSouthWest(),
+                southWest: this.map.getBounds().getSouthWest()
             };
 
-            if (this.markers.state != Drawing.DrawingState.hidden) {
+            if (this.markers.state !== Drawing.DrawingState.hidden) {
                 container.markers = this.markers.getData();
             }
             for (var route of this.routes) {
-                if (route.state != Drawing.DrawingState.hidden) {
+                if (route.state !== Drawing.DrawingState.hidden) {
                     container.routes.push(route.getData());
                 }
             }
@@ -486,7 +470,7 @@ module IsraelHiking.Services {
                 key: layer.key,
                 address: layer.address,
                 minZoom: layer.minZoom,
-                maxZoom: layer.maxZoom,
+                maxZoom: layer.maxZoom
             };
         }
     }
