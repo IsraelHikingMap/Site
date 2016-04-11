@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
+using System.Xml.Linq;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
@@ -18,6 +22,7 @@ namespace IsraelHiking.API.Services
         private const string GEOJSON = "geojson";
         private const string GPX = "gpx";
         private const string GPX_BABEL_FORMAT = "gpx,gpxver=1.1";
+        private const string GPX_BABEL_FORMAT_VERSION_1 = "gpx,gpxver=1.0";
         private const string KML_BABEL_FORMAT = "kml,points=0";
         private const string GPX_SINGLE_TRACK = "gpx_single_track";
         private readonly IGpsBabelGateway _gpsBabelGateway;
@@ -56,8 +61,8 @@ namespace IsraelHiking.API.Services
 
         private async Task<byte[]> Convert(byte[] content, string inputFileExtension, string outputFileExtension)
         {
-            var inputFormat = ConvertExtenstionToFormat(inputFileExtension);
-            var outputFormat = ConvertExtenstionToFormat(outputFileExtension);
+            var inputFormat = GetGpsBabelFormat(inputFileExtension, content);
+            var outputFormat = GetGpsBabelFormat(outputFileExtension);
             if (inputFormat == outputFormat)
             {
                 return content;
@@ -105,7 +110,7 @@ namespace IsraelHiking.API.Services
             return singleTrackGpx.ToBytes();
         }
 
-        private string ConvertExtenstionToFormat(string extension)
+        private string GetGpsBabelFormat(string extension, byte[] content = null)
         {
             extension = extension.ToLower().Replace(".", "");
             switch (extension)
@@ -113,7 +118,7 @@ namespace IsraelHiking.API.Services
                 case "twl":
                     return "naviguide";
                 case GPX:
-                    return GPX_BABEL_FORMAT;
+                    return IsGetGpxVersion1(content) ? GPX_BABEL_FORMAT_VERSION_1 : GPX_BABEL_FORMAT;
                 case "kml":
                     return KML_BABEL_FORMAT;
                 default:
@@ -183,5 +188,18 @@ namespace IsraelHiking.API.Services
             var northEast2 = _coordinatesConverter.Wgs84ToItm(new LatLon { Latitude = point2.lat, Longitude = point2.lng });
             return Math.Sqrt(Math.Pow(northEast1.North - northEast2.North, 2) + Math.Pow(northEast1.East - northEast2.East, 2));
         }
+
+        private bool IsGetGpxVersion1(byte[] content)
+        {
+            if (content == null)
+            {
+                return false;
+            }
+            using (var mempryStream = new MemoryStream(content))
+            {
+                var document = XDocument.Load(mempryStream);
+                return document.Elements().Where(x => x.Name.LocalName == "gpx").Attributes().Any(a => a.Name.LocalName == "version" && a.Value == "1.0");
+            }
+        }   
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using GeoJSON.Net.Feature;
 using IsraelHiking.API.Converters;
@@ -167,6 +168,19 @@ namespace IsraelHiking.API.Tests.Gpx
             var gpxToConvert = new gpxType { rte = new [] {  new rteType {  rtept = new wptType[0]} }};
 
             var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), "gpx").Result;
+
+            Assert.AreEqual(0, dataContainer.routes.Count);
+        }
+
+        [TestMethod]
+        public void ConvertGpxVersion1ToDataContainer_NonSiteFileNoPointsInTrack_ShouldManipulateRouteData()
+        {
+            string gpxVersion1 = "<?xml version='1.0' encoding='UTF-8'?><gpx version='1.0' creator='GPSBabel - http://www.gpsbabel.org' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://www.topografix.com/GPX/1/0' xsi:schemaLocation='http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd'><rte><rtept lat='33.1187173918366' lon='35.6488631636844'><ele>0.000000</ele><name>A001</name><cmt>60963[1] דרך עפר היוצאת מעיקול בכביש 959 - נקודת ההתחלה</cmt><desc>60963[1] דרך עפר היוצאת מעיקול בכביש 959 - נקודת ההתחלה</desc></rtept></rte></gpx>";
+            byte[] bytes = Encoding.UTF8.GetBytes(gpxVersion1);
+            var gpx = new gpxType { rte = new[] { new rteType { rtept = new wptType[0] } } };
+            _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(gpx.ToBytes()));
+
+            var dataContainer = _converterService.ToDataContainer(bytes, "gpx").Result;
 
             Assert.AreEqual(0, dataContainer.routes.Count);
         }
