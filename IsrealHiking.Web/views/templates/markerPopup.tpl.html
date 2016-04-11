@@ -2,11 +2,14 @@
     <form ng-submit="setTitle(title)">
         <div class="form-group">
             <div class="input-group">
-                <input class="form-control" type="text" ng-model="title" style="min-width:100px" />
+                <input class="form-control" type="text" ng-model="title" style="min-width: 100px" ng-change="updateWikiCoordinates(title)"/>
                 <a class="btn btn-default cursor-pointer input-group-addon" ng-click="setTitle(title)"><i class="fa fa-check"></i></a>
             </div>
         </div>
     </form>
-    <p>Lat {{latLng.lat | number }}°, Lon {{latLng.lng | number}}°</p>
-    <p>E {{itmCoordinates.East}} m, N {{itmCoordinates.North}} m</p>
+    <p>
+        Lat {{latLng.lat | number }}°, Lon {{latLng.lng | number}}°<br/>
+        E {{itmCoordinates.East}} m, N {{itmCoordinates.North}} m
+    </p>
+    <p class="chome-wordwrap-fix">Coordinates for <a href="https://he.wikipedia.org/">Wikipedia</a>: {{wikiCoordinatesString}}</p>
 </div>

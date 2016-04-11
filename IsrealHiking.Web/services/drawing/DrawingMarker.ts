@@ -1,12 +1,12 @@
 ﻿module IsraelHiking.Services.Drawing {
-    export interface MarkerWithTitle extends L.Marker {
+    export interface IMarkerWithTitle extends L.Marker {
         title: string;
     }
 
     export class DrawingMarker extends BaseDrawing<Common.MarkerData[]> {
         private $compile: angular.ICompileService;
         private $rootScope: angular.IRootScopeService;
-        private markers: MarkerWithTitle[];
+        private markers: IMarkerWithTitle[];
         private icon: L.Icon;
         private hoverMarker: L.Marker;
 
@@ -21,14 +21,14 @@
             this.enabled = false;
             this.markers = [];
             this.icon = IconsService.createMarkerIconWithColor(this.getColor());
-            this.hoverMarker = L.marker(this.map.getCenter(), <L.MarkerOptions> { clickable: false, icon: this.icon });
+            this.hoverMarker = L.marker(this.map.getCenter(), { clickable: false, icon: this.icon } as L.MarkerOptions);
             this.addDataToStack(this.getData());
             this.state = DrawingState.inactive;
             this.createInactiveMarkers();
 
             this.map.on("mousemove", this.onMouseMove, this);
 
-            this.map.on("click",(e: L.LeafletMouseEvent) => {
+            this.map.on("click", (e: L.LeafletMouseEvent) => {
                 if (this.isEnabled()) {
                     this.addMarker(e.latlng);
                 }
@@ -40,20 +40,20 @@
             this.updateDataLayer();
         }
 
-        private removeMarker = (marker: MarkerWithTitle) => {
+        private removeMarker = (marker: IMarkerWithTitle) => {
             var markerIndex = this.markers.indexOf(marker);
-            if (markerIndex != -1) {
+            if (markerIndex !== -1) {
                 this.removeMarkerFromMap(markerIndex);
             }
         }
 
-        public getData = (): Common.MarkerData[]=> {
+        public getData = (): Common.MarkerData[] => {
             var data = [];
-            for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
-                data.push(<Common.MarkerData>{
+            for (let markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
+                data.push({
                     latlng: this.markers[markerIndex].getLatLng(),
-                    title: this.markers[markerIndex].title || "",
-                });
+                    title: this.markers[markerIndex].title || ""
+                } as Common.MarkerData);
             }
             return data;
         }
@@ -64,8 +64,7 @@
         }
 
         private addMarkersInternal = (data: Common.MarkerData[]) => {
-            for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
-                var markerData = data[markerIndex];
+            for (let markerData of data) {
                 var marker = this.createMarker(markerData.latlng, markerData.title);
                 this.markers.push(marker);
             }
@@ -76,31 +75,31 @@
             this.updateDataLayer();
         }
 
-        private createMarker(latlng: L.LatLng, title = ""): MarkerWithTitle {
-            var marker = <MarkerWithTitle>L.marker(latlng, <L.MarkerOptions> { draggable: true, clickable: true, riseOnHover: true });
+        private createMarker(latlng: L.LatLng, title = ""): IMarkerWithTitle {
+            var marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true } as L.MarkerOptions) as IMarkerWithTitle;
             marker.title = title;
-            var newScope = <Controllers.IMarkerPopupScope>this.$rootScope.$new();
+            var newScope = this.$rootScope.$new() as Controllers.IMarkerPopupScope;
             newScope.title = title;
             newScope.marker = marker;
-            newScope.setTitle = (title: string) => {
-                marker.title = title;
+            newScope.setTitle = (newTitle: string) => {
+                marker.title = newTitle;
                 this.updateDataLayer();
                 marker.closePopup();
             }
             var popupHtml = this.$compile("<marker-popup ng-title='title'></marker-popup>")(newScope)[0];
             marker.bindPopup(popupHtml);
 
-            marker.on("dblclick",(e: L.LeafletMouseEvent) => {
+            marker.on("dblclick", () => {
                 this.removeMarker(marker);
                 this.updateDataLayer();
             });
-            marker.on("dragend",(e: L.LeafletMouseEvent) => {
+            marker.on("dragend", () => {
                 this.updateDataLayer();
             });
-            marker.on("dragStart",(e: L.LeafletMouseEvent) => {
+            marker.on("dragStart", () => {
                 marker.closePopup();
             });
-            marker.on("click",(e: L.LeafletMouseEvent) => {
+            marker.on("click", () => {
                 marker.openPopup();
             });
             marker.setIcon(this.icon);
@@ -108,11 +107,11 @@
             return marker;
         }
 
-        private createInactiveMarker = (latlng: L.LatLng, title: string): MarkerWithTitle => {
-            var marker = <MarkerWithTitle>L.marker(latlng, <L.MarkerOptions> { draggable: false, clickable: true, riseOnHover: true });
+        private createInactiveMarker = (latlng: L.LatLng, title: string): IMarkerWithTitle => {
+            var marker = L.marker(latlng, { draggable: false, clickable: true, riseOnHover: true } as L.MarkerOptions) as IMarkerWithTitle;
             marker.title = title;
             marker.bindPopup(marker.title);
-            marker.on("click", (e: L.LeafletMouseEvent) => {
+            marker.on("click", () => {
                 marker.openPopup();
             });
             marker.setIcon(this.icon);
@@ -121,7 +120,7 @@
         }
 
         private internalClear = () => {
-            for (var markerIndex = this.markers.length - 1; markerIndex >= 0; markerIndex--) {
+            for (let markerIndex = this.markers.length - 1; markerIndex >= 0; markerIndex--) {
                 this.removeMarkerFromMap(markerIndex);
             }
         }
@@ -144,27 +143,27 @@
         }
 
         public changeStateTo = (targetState: string) => {
-            if (targetState == this.state) {
+            if (targetState === this.state) {
                 return;
             }
             switch (this.state) {
                 case DrawingState.hidden:
-                    if (targetState == DrawingState.active) {
+                    if (targetState === DrawingState.active) {
                         this.createActiveMarkers();
                     } else {
                         this.createInactiveMarkers();
                     }
                     break;
                 case DrawingState.inactive:
-                    if (targetState == DrawingState.active) {
+                    if (targetState === DrawingState.active) {
                         this.createActiveMarkers();
                     }
-                    if (targetState == DrawingState.hidden) {
+                    if (targetState === DrawingState.hidden) {
                         this.hideMarkers();
                     }
                     break;
                 case DrawingState.active:
-                    if (targetState == DrawingState.hidden) {
+                    if (targetState === DrawingState.hidden) {
                         this.hideMarkers();
                     } else {
                         this.createInactiveMarkers();
@@ -179,8 +178,7 @@
         private createInactiveMarkers = () => {
             var data = this.getData();
             this.internalClear();
-            for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
-                var markerData = data[markerIndex];
+            for (let markerData of data) {
                 var marker = this.createInactiveMarker(markerData.latlng, markerData.title);
                 this.markers.push(marker);
             }
@@ -189,15 +187,14 @@
         private createActiveMarkers = () => {
             var data = this.getData();
             this.internalClear();
-            for (var markerIndex = 0; markerIndex < data.length; markerIndex++) {
-                var markerData = data[markerIndex];
+            for (let markerData of data) {
                 var marker = this.createMarker(markerData.latlng, markerData.title);
                 this.markers.push(marker);
             }
         }
 
         private hideMarkers = () => {
-            for (var markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
+            for (let markerIndex = 0; markerIndex < this.markers.length; markerIndex++) {
                 var marker = this.markers[markerIndex];
                 this.map.removeLayer(marker);
             }
@@ -230,7 +227,7 @@
         }
 
         private onMouseMove = (e: L.LeafletMouseEvent) => {
-            if (this.isEnabled() == false) {
+            if (this.isEnabled() === false) {
                 return;
             }
             this.hoverMarker.setLatLng(e.latlng);

@@ -36,35 +36,35 @@
             $scope.overlays = layersService.overlays;
             $scope.routes = layersService.routes;
             $scope.markers = layersService.markers;
-            $scope.advanced = localStorageService.get(LayersController.SHOW_ADVANCED_KEY) == "true";
+            $scope.advanced = localStorageService.get(LayersController.SHOW_ADVANCED_KEY) ? true : false;
             $scope.hovering = false;
 
             $scope.addBaseLayer = (e: Event) => {
-                var newScope = <LayerProperties.ILayerBaseScope>$scope.$new();
+                var newScope = $scope.$new() as LayerProperties.ILayerBaseScope;
                 var controller = new LayerProperties.BaseLayerAddController(newScope, mapService, layersService, toastr);
                 this.showLayerModal(newScope, $modal, e);
             }
 
             $scope.editBaseLayer = (layer: Services.IBaseLayer, e: Event) => {
-                var newScope = <LayerProperties.ILayerBaseEditScope<Services.IBaseLayer>>$scope.$new();
+                var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.IBaseLayer>;
                 var controller = new LayerProperties.BaseLayerEditController(newScope, mapService, layersService, layer, toastr);
                 this.showLayerModal(newScope, $modal, e);
             }
 
             $scope.addOverlay = (e: Event) => {
-                var newScope = <LayerProperties.ILayerBaseScope>$scope.$new();
+                var newScope = $scope.$new() as LayerProperties.ILayerBaseScope;
                 var controller = new LayerProperties.OverlayAddController(newScope, mapService, layersService, toastr);
                 this.showLayerModal(newScope, $modal, e);
             }
 
             $scope.editOverlay = (layer: Services.IOverlay, e: Event) => {
-                var newScope = <LayerProperties.ILayerBaseEditScope<Services.IOverlay>>$scope.$new();
+                var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.IOverlay>;
                 var controller = new LayerProperties.OverlayEditController(newScope, mapService, layersService, layer, toastr);
                 this.showLayerModal(newScope, $modal, e);
             }
 
             $scope.addRoute = (e: Event) => {
-                var routePropertiesScope = <RouteProperties.IRouteAddScope> $scope.$new();
+                var routePropertiesScope = $scope.$new() as RouteProperties.IRouteAddScope;
                 var routeAddController = new RouteProperties.RouteAddController(routePropertiesScope, mapService, layersService, toastr);
                 var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
@@ -111,7 +111,7 @@
                 title: "Route Properties",
                 templateUrl: "views/templates/routePropertiesModal.tpl.html",
                 show: false,
-                scope: routePropertiesScope,
+                scope: routePropertiesScope
             });
         }
 
@@ -120,7 +120,7 @@
                 title: $scope.title,
                 templateUrl: "views/templates/layerPropertiesModal.tpl.html",
                 show: false,
-                scope: $scope,
+                scope: $scope
             });
             modal.$promise.then(modal.show);
             this.suppressEvents(e);
