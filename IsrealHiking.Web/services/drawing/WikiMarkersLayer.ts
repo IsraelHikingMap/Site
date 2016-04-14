@@ -62,5 +62,9 @@
                 }
             });
         }
+
+        public getAttribution(): string {
+            return "<a href='//creativecommons.org/licenses/by-sa/3.0/'>© Wikipadia CCA-SA</a>";
+        }
     }
 }
