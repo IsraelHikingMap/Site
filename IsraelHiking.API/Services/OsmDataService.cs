@@ -172,7 +172,7 @@ namespace IsraelHiking.API.Services
             return string.Empty;
         }
 
-        private List<ICompleteOsmGeo> MergeElements(List<ICompleteOsmGeo> elements)
+        private IEnumerable<ICompleteOsmGeo> MergeElements(IReadOnlyCollection<ICompleteOsmGeo> elements)
         {
             if (elements.Count == 1)
             {
@@ -181,7 +181,7 @@ namespace IsraelHiking.API.Services
             var nodes = elements.OfType<Node>().ToList();
             var ways = elements.OfType<CompleteWay>().ToList();
             var relations = elements.OfType<CompleteRelation>().ToList();
-            if (nodes.Count == elements.Count || ways.Count == elements.Count || relations.Count == elements.Count)
+            if (nodes.Count == elements.Count || relations.Count == elements.Count)
             {
                 return elements;
             }
@@ -189,23 +189,8 @@ namespace IsraelHiking.API.Services
             {
                 MergePlaceNode(nodes, way);
             }
-            foreach (var relation in relations)
-            {
-                foreach (var way in OsmGeoJsonConverter.GetAllWays(relation))
-                {
-                    var wayToRemove = ways.FirstOrDefault(w => w.Id == way.Id);
-                    if (wayToRemove != null)
-                    {
-                        MergeTags(way, relation);
-                        ways.Remove(wayToRemove);
-                    }
-                }
-                if (relation.Tags.ContainsKey(PLACE))
-                {
-                    MergePlaceNode(nodes, relation);
-                }
-            }
-
+            MergeWaysInRelations(relations, ways, nodes);
+            ways = MergeWays(ways);
             var mergedElements = new List<ICompleteOsmGeo>();
             mergedElements.AddRange(nodes);
             mergedElements.AddRange(ways);
@@ -213,7 +198,28 @@ namespace IsraelHiking.API.Services
             return mergedElements;
         }
 
-        private void MergePlaceNode(List<Node> nodes, ICompleteOsmGeo element)
+        private void MergeWaysInRelations(IEnumerable<CompleteRelation> relations, ICollection<CompleteWay> ways, ICollection<Node> nodes)
+        {
+            foreach (var relation in relations)
+            {
+                foreach (var way in OsmGeoJsonConverter.GetAllWays(relation))
+                {
+                    var wayToRemove = ways.FirstOrDefault(w => w.Id == way.Id);
+                    if (wayToRemove == null)
+                    {
+                        continue;
+                    }
+                    MergeTags(way, relation);
+                    ways.Remove(wayToRemove);
+                }
+                if (relation.Tags.ContainsKey(PLACE))
+                {
+                    MergePlaceNode(nodes, relation);
+                }
+            }
+        }
+
+        private void MergePlaceNode(ICollection<Node> nodes, ICompleteOsmGeo element)
         {
             var node = nodes.FirstOrDefault(n => n.Tags.ContainsKey(PLACE));
             if (node == null)
@@ -232,6 +238,70 @@ namespace IsraelHiking.API.Services
             {
                 toItem.Tags.AddOrReplace(tag);
             }
+        }
+
+        /// <summary>
+        /// This method create a new list of ways based on the given list. 
+        /// The merge is done by looking into the ways' nodes and combine ways which start or end with the same node. 
+        /// </summary>
+        /// <param name="ways">The ways to merge</param>
+        /// <returns>The merged ways</returns>
+        private List<CompleteWay> MergeWays(List<CompleteWay> ways)
+        {
+            if (ways.Any() == false)
+            {
+                return new List<CompleteWay>();
+            }
+            var mergedWays = new List<CompleteWay> { ways.First() };
+            var waysToMerge = new List<CompleteWay>(ways.Skip(1));
+            while (waysToMerge.Any())
+            {
+                var foundAWayToMergeTo = false;
+                for (var index = waysToMerge.Count - 1; index >= 0 ; index--)
+                {
+                    var wayToMerge = waysToMerge[index];
+                    var wayToMergeTo =
+                        mergedWays.FirstOrDefault(
+                            mw =>
+                                mw.Nodes.Last() == wayToMerge.Nodes.First() ||
+                                mw.Nodes.First() == wayToMerge.Nodes.Last());
+                    if (wayToMergeTo == null)
+                    {
+                        continue;
+                    }
+                    MergeTags(wayToMerge, wayToMergeTo);
+                    var nodes = wayToMerge.Nodes;
+                    bool addToStart = false;
+                    if (nodes.Last() == wayToMergeTo.Nodes.First())
+                    {
+                        addToStart = true;
+                        nodes.Remove(nodes.Last());
+                    }
+                    else if (nodes.First() == wayToMergeTo.Nodes.Last())
+                    {
+                        nodes.Remove(nodes.First());
+                    }
+                    if (addToStart)
+                    {
+                        wayToMergeTo.Nodes.InsertRange(0, nodes);
+                    }
+                    else
+                    {
+                        wayToMergeTo.Nodes.AddRange(nodes);
+                    }
+                    waysToMerge.Remove(wayToMerge);
+                    foundAWayToMergeTo = true;
+                }
+
+                if (foundAWayToMergeTo)
+                {
+                    continue;
+                }
+
+                mergedWays.Add(waysToMerge.First());
+                waysToMerge.RemoveAt(0);
+            }
+            return mergedWays;
         }
     }
 }
