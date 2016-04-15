@@ -11,7 +11,7 @@
             var params = isHebrew ? {} : { language: "en" };
             this.$http.get(Common.Urls.search + searchTerm, {
                 params: params
-            }).success((response: GeoJSON.FeatureCollection) => {
+            }).success((response: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>) => {
                 let results = [] as ISearchResults[];
                 for (let feature of response.features) {
                     let singleResult = {
@@ -68,7 +68,7 @@
             return deferred.promise;
         }
 
-        private getName(feature: GeoJSON.Feature, isHebrew: boolean): string {
+        private getName(feature: GeoJSON.Feature<GeoJSON.GeometryObject>, isHebrew: boolean): string {
             let name = isHebrew
                 ? feature.properties.name || feature.properties["name:he"]
                 : feature.properties["name:en"] || feature.properties.name;

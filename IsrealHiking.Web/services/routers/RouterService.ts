@@ -20,7 +20,7 @@
             var deferred = this.$q.defer();
             var noneRouter = new NoneRouter(this.$q);
             this.$http.get(address, <angular.IRequestShortcutConfig> { timeout: 4500 })
-                .success((geojson: GeoJSON.FeatureCollection) => {
+                .success((geojson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>) => {
                     var failed = false;
                     let data = null;
                     try {

@@ -37,8 +37,8 @@ module IsraelHiking.Tests {
                         type: "LineString",
                         coordinates: [[1,1] as GeoJSON.Position, [1.5,1.5], [2,2]]
                     } as GeoJSON.LineString
-                } as GeoJSON.Feature
-            ] } as GeoJSON.FeatureCollection);
+                } as GeoJSON.Feature<GeoJSON.LineString>
+            ] } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
             routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "h").then((data) => {
                 expect(data.length).toBe(2);
                 expect(data[1].latlngzs.length).toBe(3);

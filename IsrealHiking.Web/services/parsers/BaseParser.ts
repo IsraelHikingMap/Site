@@ -6,18 +6,18 @@
             return this.toDataContainer(geojson);
         }
         // should be implemented in derived class
-        protected parseToGeoJson(content: string): GeoJSON.FeatureCollection { return null; }
+        protected parseToGeoJson(content: string): GeoJSON.FeatureCollection<GeoJSON.GeometryObject> { return null; }
         // should be implemented in derived class
         public toString(data: Common.DataContainer): string { return ""; }
 
-        public toDataContainer(geoJson: GeoJSON.FeatureCollection): Common.DataContainer {
+        public toDataContainer(geoJson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>): Common.DataContainer {
 
             var data = {
                 markers: [] as Common.MarkerData[],
                 routes: [] as Common.RouteData[]
             } as Common.DataContainer;
             let leaftletGeoJson = L.geoJson(geoJson, {
-                onEachFeature: (feature: GeoJSON.Feature) => {
+                onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
                     let routeData = null;
                     switch (feature.geometry.type) {
                         case Common.GeoJsonFeatureType.point:
@@ -130,7 +130,7 @@
             return routeData;
         }
 
-        public toGeoJson(data: Common.DataContainer): GeoJSON.FeatureCollection {
+        public toGeoJson(data: Common.DataContainer): GeoJSON.FeatureCollection<GeoJSON.GeometryObject> {
             var geoJson = {
                 type: Common.GeoJsonFeatureType.featureCollection,
                 crs: {
@@ -139,8 +139,8 @@
                         name: "EPSG:3857"
                     }
                 },
-                features: [] as GeoJSON.Feature[]
-            } as GeoJSON.FeatureCollection;
+                features: [] as GeoJSON.Feature<GeoJSON.GeometryObject>[]
+            } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
             for (let marker of data.markers) {
                 geoJson.features.push({
@@ -152,7 +152,7 @@
                         type: Common.GeoJsonFeatureType.point,
                         coordinates: [marker.latlng.lng, marker.latlng.lat]
                     } as GeoJSON.Point
-                } as GeoJSON.Feature);
+                } as GeoJSON.Feature<GeoJSON.GeometryObject>);
             }
 
             for (let routeData of data.routes) {
@@ -176,7 +176,7 @@
                             type: Common.GeoJsonFeatureType.multiLineString,
                             coordinates: multiLineStringCoordinates
                         } as GeoJSON.MultiLineString
-                    } as GeoJSON.Feature;
+                    } as GeoJSON.Feature<GeoJSON.GeometryObject>;
                     geoJson.features.push(multiLineStringFeature);
                 }
             }
