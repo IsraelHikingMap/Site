@@ -78,12 +78,14 @@ namespace IsraelHiking.API.Controllers
             }).ToList());
             string baseHeaderName = baseUri.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Last() + "/";
             fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry {Name = baseHeaderName, Link = baseUri});
+            var currentLink = baseUri;
             foreach (var header in path.Split(new [] {'/'},  StringSplitOptions.RemoveEmptyEntries))
             {
+                currentLink += header + "/";
                 fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry
                 {
                     Name = header + "/",
-                    Link = baseUri + header + "/"
+                    Link = currentLink
                 });
             }
             return ConvertListingToReponse(fileExplorerViewModel);
