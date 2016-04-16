@@ -7,9 +7,7 @@
         routingType: string;
     }
 
-    export interface IRouteStatisticsPoint {
-        x: string;
-        y: number;
+    export interface IRouteStatisticsPoint extends L.Point {
         latlng: L.LatLng;
     }
 
@@ -606,25 +604,28 @@
             if (this.routeSegments.length <= 0) {
                 return routeStatistics;
             }
-            var start = this.routeSegments[0].latlngzs[0];
-            var previousPoint = start;
+            let previousPoint = this.routeSegments[0].latlngzs[0];;
             for (let segment of this.routeSegments) {
                 for (let latlngz of segment.latlngzs) {
                     routeStatistics.length += previousPoint.distanceTo(latlngz);
-                    routeStatistics.points.push({
-                        x: (routeStatistics.length / 1000).toFixed(2),
-                        y: latlngz.z,
-                        latlng: latlngz
-                    } as IRouteStatisticsPoint);
-                    routeStatistics.gain += ((latlngz.z - previousPoint.z) > 0 && latlngz.z !== 0 && previousPoint.z !== 0) ?
-                        (latlngz.z - previousPoint.z) :
-                        0;
-                    routeStatistics.loss += ((latlngz.z - previousPoint.z) < 0 && latlngz.z !== 0 && previousPoint.z !== 0) ?
-                        (latlngz.z - previousPoint.z) :
-                        0;
+                    let point = L.point((routeStatistics.length / 1000), latlngz.z) as IRouteStatisticsPoint;
+                    point.latlng = latlngz;
+                    routeStatistics.points.push(point);
                     previousPoint = latlngz;
                 }
             }
+            let simplified = L.LineUtil.simplify(routeStatistics.points, 1);
+            let previousSimplifiedPoint = simplified[0];
+            for (let point of simplified) {
+                routeStatistics.gain += ((point.y - previousSimplifiedPoint.y) > 0 && point.y !== 0 && previousSimplifiedPoint.y !== 0) ?
+                    (point.y - previousSimplifiedPoint.y) :
+                    0;
+                routeStatistics.loss += ((point.y - previousSimplifiedPoint.y) < 0 && point.y !== 0 && previousSimplifiedPoint.y !== 0) ?
+                    (point.y - previousSimplifiedPoint.y) :
+                    0;
+                previousSimplifiedPoint = point;
+            }
+            
             return routeStatistics;
         }
 

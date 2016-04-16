@@ -189,6 +189,12 @@ body {
     overflow-y: scroll;
 }
 
+.chart-tooltip {
+    color:black; 
+    text-align:left;
+    margin: 5px;
+}
+
 .loading-segment-indicator {
     -webkit-animation: dash .4s linear infinite;
     animation: dash .4s linear infinite;
