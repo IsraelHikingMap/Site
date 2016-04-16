@@ -8,6 +8,7 @@
     // Services:
     app.service(Common.Constants.mapService, [() => new Services.MapService()]);
     app.service(Common.Constants.parserFactory, [() => new Services.Parsers.ParserFactory()]);
+    app.service(Common.Constants.sidebarService, [Common.Constants.compile, ($compile: angular.ICompileService) => new Services.SidebarService($compile)]);
     app.service(Common.Constants.searchResultsProviderFactory, [Common.Constants.http, Common.Constants.q,
         ($http: angular.IHttpService, $q: angular.IQService) =>
             new Services.Search.SearchResultsProviderFactory($http, $q)]);
@@ -37,9 +38,9 @@
         ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, drawingFactory: Services.Drawing.DrawingFactory, hashService: Services.HashService) =>
             new Services.LayersService($http, $window, mapService, localStorageService, drawingFactory, hashService)]);
 
-    app.controller(Common.Constants.mainMapController, [Common.Constants.rootScope, Common.Constants.compile, Common.Constants.mapService, Common.Constants.hashService,
-        ($rootScope: angular.IRootScopeService, $compile: angular.ICompileService, mapService: Services.MapService, hashService: Services.HashService) =>
-            new Controllers.MainMapcontoller($rootScope, $compile, mapService, hashService)]);
+    app.controller(Common.Constants.mainMapController, [Common.Constants.scope, Common.Constants.compile, Common.Constants.mapService, Common.Constants.hashService, Common.Constants.sidebarService,
+        ($scope: Controllers.IMainMapScope, $compile: angular.ICompileService, mapService: Services.MapService, hashService: Services.HashService, sidebarService: Services.SidebarService )=>
+            new Controllers.MainMapcontoller($scope, $compile, mapService, hashService, sidebarService)]);
     
     // Directives:
     app.directive("syncFocusWith", () => new Directives.SyncFocusWithDirective());
@@ -47,7 +48,7 @@
     app.directive("disableMapMovement", [Common.Constants.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
     app.directive("markerPopup", () => ({
         controller: Controllers.MarkerPopupController,
-        templateUrl: "views/templates/markerPopup.tpl.html"
+        templateUrl: "views/markerPopup.html"
     } as angular.IDirective));
     app.directive("drawingControl", () => ({
         controller: Controllers.DrawingController,
@@ -77,10 +78,23 @@
         controller: Controllers.ShareController,
         templateUrl: "views/share.html"
     } as angular.IDirective));
-    app.directive("convertFromatControl", () => ({
+    app.directive("saveAsControl", () => ({
         controller: Controllers.FileController,
         templateUrl: "views/saveAs.html"
     } as angular.IDirective));
+    app.directive("info", () => ({
+        controller: Controllers.InfoHelpController,
+        templateUrl: "views/sidebars/infoSidebar.html"
+    } as angular.IDirective));
+    app.directive("help", () => ({
+        controller: Controllers.InfoHelpController,
+        templateUrl: "views/sidebars/helpSidebar.html"
+    } as angular.IDirective));
+    app.directive("layersSidebar", () => ({
+        controller: Controllers.LayersController,
+        templateUrl: "views/sidebars/layersSidebar.html"
+    } as angular.IDirective));
+
 
     app.run(["googleChartApiPromise", () => {
         angular.element("link[type*=icon]").detach().appendTo("head");

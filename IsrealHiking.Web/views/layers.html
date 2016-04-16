@@ -1,36 +1,5 @@
-﻿<div class="leaflet-control-layers" ng-mouseover="hovering = true" ng-mouseleave="hovering = false" disable-map-movement>
-    <a title="Layers" class="leaflet-control-layers-toggle cursor-pointer" ng-show="hovering == false" ng-click="toggleHovering($event)"></a>
-    <div class="leaflet-control-layers-expanded leaflet-control-layers scrollable-area" ng-show="hovering == true" ng-click="toggleHovering($event)">
-        <div>
-            <label class="control-label" ng-repeat="baseLayer in baseLayers">
-                <button class="btn btn-xs btn-default" ng-click="selectBaseLayer(baseLayer, $event)" ng-class="{'active': baseLayer.selected }"><i ng-class="{'fa fa-eye': baseLayer.selected, 'fa fa-eye-slash': !baseLayer.selected}"></i></button>
-                <button class="btn btn-xs btn-warning" ng-click="editBaseLayer(baseLayer, $event)" ng-show="advanced && baseLayer.isEditable" title="Base layer properties"><i class="fa fa-wrench"></i></button>
-                {{baseLayer.key}}
-            </label>
-        </div>
-        <button class="btn btn-xs btn-success" ng-click="addBaseLayer($event)" ng-show="advanced"><i class="fa fa-plus"></i> Add Base Layer</button>
-        <div class="leaflet-control-layers-separator"></div>
-        <div>
-            <label class="control-label" ng-repeat="overlay in overlays">
-                <button class="btn btn-xs btn-default" ng-click="toggleVisibility(overlay, $event)"><i ng-class="{'fa fa-eye': overlay.visible, 'fa fa-eye-slash': !overlay.visible}"></i></button>
-                <button class="btn btn-xs btn-warning" ng-click="editOverlay(overlay, $event)" ng-show="advanced && overlay.isEditable" title="Overlay properties"><i class="fa fa-wrench"></i></button>
-                {{overlay.key}}
-            </label>
-        </div>
-        <button class="btn btn-xs btn-success" ng-click="addOverlay($event)" ng-show="advanced"><i class="fa fa-plus"></i> Add Overlay</button>
-        <div class="leaflet-control-layers-separator"></div>
-        <div>
-            <label class="control-label" ng-class="'fg-' + route.getColorKeyValue().key" ng-repeat="route in routes">
-                <button class="btn btn-xs btn-default" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.state == 'active' }" title="Select or hide route"><i ng-class="{'fa-pencil': route.state != 'hidden', 'fa-eye-slash': route.state == 'hidden' }" class="fa"></i></button>
-                <button class="btn btn-xs btn-warning" ng-click="editRoute(route.name, $event)" title="Route properties"><i class="fa fa-wrench"></i></button>
-                {{route.name}}
-            </label>
-        </div>
-        <label class="control-label" ng-class="'fg-' + markers.getColorKeyValue().key">
-            <button class="btn btn-xs btn-default" ng-click="selectDrawing(markers.name, $event)" ng-class="{'active' : markers.state == 'active' }" title="Select or hide markers"><i ng-class="{'fa-map-marker': markers.state != 'hidden', 'fa-eye-slash': markers.state == 'hidden' }" class="fa"></i></button>
-            {{markers.name}}
-        </label>
-        <button class="btn btn-xs btn-success" ng-click="addRoute($event)" ng-show="advanced" title="New route"><i class="fa fa-plus"></i> New Route</button>
-        <button class="btn btn-xs btn-warning" ng-click="toggleAdvanced($event)" title="Toggle advanced settings" ng-class="{'active': advanced }"><i class="fa fa-gear"></i></button>
-    </div>
+﻿<div class="leaflet-bar" disable-map-movement>
+    <a title="Layers" class="cursor-pointer" ng-click="toggleShow($event)">
+        <img src="/content/images/layers.png"/>
+    </a>
 </div>

@@ -1,38 +1,51 @@
 ﻿module IsraelHiking.Controllers {
+    export interface IMainMapScope extends angular.IScope {
+        getIsSidebarVisible(): boolean;
+        closeSidebar(): void;
+    }
+
 
     export class MainMapcontoller extends BaseMapController {
-        $rootScope: angular.IRootScopeService;
         $compile: angular.ICompileService;
 
-        constructor($rootScope: angular.IRootScopeService,
+        constructor($scope: IMainMapScope,
             $compile: angular.ICompileService,
             mapService: Services.MapService,
-            hashService: Services.HashService) {
+            hashService: Services.HashService,
+            sidebarService: Services.SidebarService) {
             super(mapService);
 
             this.map = mapService.map;
             this.map.setZoom(hashService.zoom);
             this.map.panTo(hashService.latlng);
             this.$compile = $compile;
-            this.$rootScope = $rootScope;
-            this.createControls();
+            this.createControls($scope);
 
-            this.map.on("moveend",(e: L.LeafletEvent) => {
+            $scope.getIsSidebarVisible = () => {
+                return sidebarService.isVisible;
+            }
+
+            $scope.closeSidebar = () => {
+                sidebarService.hide();
+            }
+
+            this.map.on("moveend",() => {
                 hashService.updateLocation(this.map.getCenter(), this.map.getZoom());
             });
         }
 
-        private createControls = () => {
+        private createControls = ($scope: angular.IRootScopeService) => {
             (L as any).control.locate({ icon: "fa fa-crosshairs", keepCurrentZoomLevel: true, follow: true }).addTo(this.map);
 
-            this.createContorl("drawing-control");
-            this.createContorl("edit-osm-control");
-            this.createContorl("info-help-control");
-            this.createContorl("search-control", "topright");
-            this.createContorl("file-control", "topright");
-            this.createContorl("convert-fromat-control", "topright");
-            this.createContorl("share-control", "topright");
-            this.createContorl("layers-control", "topright");
+            this.createContorl($scope, "layers-control");
+            this.createContorl($scope, "file-control");
+            this.createContorl($scope, "save-as-control");
+            this.createContorl($scope, "edit-osm-control");
+            this.createContorl($scope, "info-help-control");
+            this.createContorl($scope, "search-control", "topright");
+            this.createContorl($scope, "drawing-control", "topright");
+            this.createContorl($scope, "share-control", "topright");
+            
 
             L.control.scale({ imperial: false } as L.ScaleOptions).addTo(this.map);
         }
@@ -43,7 +56,7 @@
          * @param directiveHtmlName - the dricetive html string
          * @param position - the position to place the control: topleft/topright/bottomleft/bottomright
          */
-        private createContorl(directiveHtmlName: string, position = "topleft") {
+        private createContorl($scope: angular.IRootScopeService, directiveHtmlName: string, position = "topleft") {
             var control = L.Control.extend({
                 options: {
                     position: position
@@ -51,7 +64,7 @@
                 onAdd: (): HTMLElement => {
                     var controlDiv = angular.element("<div>")
                         .addClass(directiveHtmlName + "-container")
-                        .append(this.$compile(`<${directiveHtmlName}></${directiveHtmlName}>`)(this.$rootScope.$new()));
+                        .append(this.$compile(`<${directiveHtmlName}></${directiveHtmlName}>`)($scope.$new()));
                     return controlDiv[0];
                 },
                 onRemove: () => { }

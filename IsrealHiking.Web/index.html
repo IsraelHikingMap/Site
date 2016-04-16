@@ -4,7 +4,7 @@
 <head prefix="og: http://ogp.me/ns#">
     <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
-    <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible"/>
+    <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible" />
     <meta property="og:site_name" content="IsraelHiking.OSM.org.il" />
     <meta property="og:type" content="activity" />
     <meta property="og:title" content="Israel Hiking Map" />
@@ -40,15 +40,24 @@
     <link rel="stylesheet" href="content/bootstrap-theme.min.css" />
     <link rel="stylesheet" href="content/font-awesome.min.css" />
     <link rel="stylesheet" href="content/L.Control.Locate.css" />
-    <link rel="stylesheet" href="content/angular-toastr.css"/>
-    <link rel="stylesheet" href="content/loading-bar.css"/>
+    <link rel="stylesheet" href="content/angular-toastr.css" />
+    <link rel="stylesheet" href="content/loading-bar.css" />
+    <link rel="stylesheet" href="content/simple-sidebar.css" />
     <link rel="stylesheet" href="app.css" type="text/css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="scripts/jquery.js"></script>
     <script src="scripts/angular.js"></script>
 </head>
-<body ng-controller="mainMapController">
-    <div id="map"></div>
+<body ng-controller="mainMapController" >
+    <div id="wrapper" ng-class="{'toggled': getIsSidebarVisible()}" class="full-page">
+        <div id="sidebar-wrapper">
+            <span class="cursor-pointer pull-right" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
+            <div id="sidebarContent"></div>
+        </div>
+        <div id="page-content-wrapper" class="full-page">
+            <div id="map"></div>
+        </div>
+    </div>
 
     <!-- third party libraries-->
     <script src="scripts/angular-animate.js"></script>
@@ -99,6 +108,7 @@
     <script src="services/HashService.js"></script>
     <script src="services/IconsService.js"></script>
     <script src="services/MapService.js"></script>
+    <script src="services/SidebarService.js"></script>
     <script src="services/SnappingService.js"></script>
     <script src="services/LayersService.js"></script>
     <!-- Load controllers -->

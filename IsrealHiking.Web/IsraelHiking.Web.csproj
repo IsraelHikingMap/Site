@@ -77,6 +77,7 @@
     <Content Include="content\L.Control.Locate.css" />
     <Content Include="content\leaflet.css" />
     <Content Include="content\loading-bar.css" />
+    <Content Include="content\simple-sidebar.css" />
     <Content Include="controllers\BaseMapController.js" />
     <Content Include="controllers\DrawingController.js" />
     <Content Include="controllers\EditOSMController.js" />
@@ -136,6 +137,8 @@
     <Content Include="services\search\NominatimSearchResultsProvider.js" />
     <Content Include="services\search\OverpassSearchResultsProvider.js" />
     <Content Include="services\search\SearchResultsProviderFactory.js" />
+    <Content Include="services\SidebarService.js" />
+    <Content Include="views\sidebars\layersSidebar.html" />
     <Content Include="_oldSite\index.html" />
     <Content Include="_oldSite\IsraelMTBmap.html" />
     <Content Include="packages.config">
@@ -180,19 +183,19 @@
     <Content Include="views\editOSM.html" />
     <Content Include="views\search.html" />
     <Content Include="views\share.html" />
-    <Content Include="views\templates\routeStatisticsTooltip.tpl.html" />
-    <Content Include="views\templates\legendModal.tpl.html" />
-    <Content Include="views\templates\routePropertiesModal.tpl.html" />
-    <Content Include="views\templates\layerPropertiesModal.tpl.html" />
+    <Content Include="views\tooltips\routeStatisticsTooltip.html" />
+    <Content Include="views\modals\legendModal.html" />
+    <Content Include="views\modals\routePropertiesModal.html" />
+    <Content Include="views\modals\layerPropertiesModal.html" />
     <Content Include="views\infoHelp.html" />
     <Content Include="views\file.html" />
-    <Content Include="views\templates\helpTooltip.tpl.html" />
-    <Content Include="views\templates\markerPopup.tpl.html" />
-    <Content Include="views\templates\shareModal.tpl.html" />
+    <Content Include="views\sidebars\helpSidebar.html" />
+    <Content Include="views\markerPopup.html" />
+    <Content Include="views\modals\shareModal.html" />
     <Content Include="web.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="views\templates\infoTooltip.tpl.html" />
+    <Content Include="views\sidebars\infoSidebar.html" />
     <None Include="OSM2012.pubxml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
@@ -274,6 +277,7 @@
     <TypeScriptCompile Include="services\routers\NoneRouter.ts" />
     <TypeScriptCompile Include="services\search\OverpassSearchResultsProvider.ts" />
     <TypeScriptCompile Include="services\search\SearchResultsProviderFactory.ts" />
+    <TypeScriptCompile Include="services\SidebarService.ts" />
     <TypeScriptCompile Include="services\SnappingService.ts" />
     <TypeScriptCompile Include="common\Constants.ts" />
   </ItemGroup>

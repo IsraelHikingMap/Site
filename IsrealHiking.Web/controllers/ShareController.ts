@@ -41,7 +41,7 @@
 
             this.shareModal = $modal({
                 title: "Share Your Work",
-                templateUrl: "views/templates/shareModal.tpl.html",
+                templateUrl: "views/modals/shareModal.html",
                 show: false,
                 scope: $scope
             });

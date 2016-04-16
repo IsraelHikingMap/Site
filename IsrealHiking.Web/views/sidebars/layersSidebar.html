@@ -1,0 +1,95 @@
+﻿<div class="row">
+    <div class="col-xs-offset-9 col-xs-3">
+        <button class="btn btn-xs btn-warning" ng-click="toggleAdvanced($event)" title="Toggle advanced settings" ng-class="{'active': advanced }"><i class="fa fa-gear"></i></button>
+    </div>
+</div>
+<div ng-repeat="baseLayer in baseLayers" class="row">
+    <div class="col-xs-2">
+        <a class="cursor-pointer" ng-click="selectBaseLayer(baseLayer, $event)">
+            <i class="fa fa-lg" ng-class="{'fa-eye': baseLayer.selected, 'fa-eye-slash': !baseLayer.selected}"></i>
+        </a>
+    </div>
+    <div ng-class="{'col-xs-7': advanced && baseLayer.isEditable, 'col-xs-10': !(advanced && baseLayer.isEditable)}">
+        <a class="cursor-pointer" ng-click="selectBaseLayer(baseLayer, $event)">
+            {{baseLayer.key}}
+        </a>
+    </div>
+    <div class="col-xs-3" ng-show="advanced && baseLayer.isEditable">
+        <a class="cursor-pointer" ng-click="editBaseLayer(baseLayer, $event)" title="Base layer properties"><i class="fa fa-lg fa-wrench fa-warning"></i></a>
+    </div>
+</div>
+<div class="row" ng-show="advanced">
+    <div class="col-xs-offset-2 col-xs-7">
+        <a class="cursor-pointer" ng-click="addBaseLayer($event)">Add Base Layer</a>
+    </div>
+    <div class="col-xs-3">
+        <a class="cursor-pointer" ng-click="addBaseLayer($event)">
+            <i class="fa fa-plus"></i>
+        </a>
+    </div>
+</div>
+<hr ng-hide="advanced" />
+
+<div ng-repeat="overlay in overlays" class="row">
+    <div class="col-xs-2">
+        <a class="cursor-pointer" ng-click="toggleVisibility(overlay, $event)">
+            <i class="fa fa-lg" ng-class="{'fa-eye': overlay.visible, 'fa-eye-slash': !overlay.visible}"></i>
+        </a>
+    </div>
+    <div ng-class="{'col-xs-7': advanced && overlay.isEditable, 'col-xs-10': !(advanced && overlay.isEditable)}">
+        <a class="cursor-pointer" ng-click="toggleVisibility(overlay, $event)">
+            {{overlay.key}}
+        </a>
+    </div>
+    <div class="col-xs-3" ng-show="advanced && overlay.isEditable">
+        <a class="cursor-pointer" ng-click="editOverlay(overlay, $event)" title="Base layer properties"><i class="fa fa-lg fa-wrench fa-warning"></i></a>
+    </div>
+</div>
+
+<div class="row" ng-show="advanced">
+    <div class="col-xs-offset-2 col-xs-7">
+        <a class="cursor-pointer" ng-click="addOverlay($event)">Add Overlay</a>
+    </div>
+    <div class="col-xs-3">
+        <a class="cursor-pointer" ng-click="addOverlay($event)">
+            <i class="fa fa-plus"></i>
+        </a>
+    </div>
+</div>
+<hr ng-hide="advanced" />
+
+<div class="row" ng-repeat="route in routes">
+    <div class="col-xs-2">
+        <a class="cursor-pointer" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.state == 'active' }">
+            <span ng-class="'fg-' + route.getColorKeyValue().key">
+                <i class="fa fa-lg" ng-class="{'fa-pencil': route.state != 'hidden', 'fa-eye-slash': route.state == 'hidden' }"></i>
+            </span>
+        </a>
+    </div>
+    <div class="col-xs-7">
+        <a class="cursor-pointer" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.state == 'active' }"><span ng-class="'fg-' + route.getColorKeyValue().key">{{route.name}}</span></a>
+    </div>
+    <div class="col-xs-3">
+        <a class="cursor-pointer" ng-click="editRoute(route.name, $event)" title="Route properties"><i class="fa fa-lg fa-wrench"></i></a>
+    </div>
+</div>
+<div class="row">
+    <div class="col-xs-2">
+        <a class="cursor-pointer" ng-click="selectDrawing(markers.name, $event)" title="Select or hide markers">
+            <span ng-class="'fg-' + markers.getColorKeyValue().key">
+                <i class="fa fa-lg" ng-class="{'fa-map-marker': markers.state != 'hidden', 'fa-eye-slash': markers.state == 'hidden' }"></i>
+            </span>
+        </a>
+    </div>
+    <div class="col-xs-10">
+        <a class="cursor-pointer" ng-click="selectDrawing(markers.name, $event)" ng-class="{'active' : markers.state == 'active' }" title="Select or hide markers"><span ng-class="'fg-' + markers.getColorKeyValue().key">{{markers.name}}</span></a>
+    </div>
+</div>
+<div class="row active">
+    <div class="col-xs-offset-2 col-xs-7">
+        <a class="cursor-pointer" ng-click="addRoute($event)" ng-show="advanced" title="New route">Add Route</a>
+    </div>
+    <div class="col-xs-3">
+        <a class="cursor-pointer" ng-click="addRoute($event)" ng-show="advanced" title="Add route"><i class="fa fa-plus"></i></a>
+    </div>
+</div>

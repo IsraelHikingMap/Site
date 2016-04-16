@@ -10,6 +10,10 @@ body {
     left: 0;
 }
 
+.full-page {
+    height: 100%;
+}
+
 #map {
     position: absolute;
     top: 0;
@@ -17,6 +21,65 @@ body {
     right: 0;
     left: 0;
     overflow: hidden;
+}
+
+/*---Sidebar---*/
+#sidebarContent {
+    line-height: 24px;
+    padding: 10px;
+    overflow-x: hidden;
+}
+
+#sidebarContent .row a {
+    text-decoration: none;
+    color: #999999;
+}
+
+#sidebarContent .row .active {
+    text-decoration: none;
+    color: #999999;
+    font-weight: bold;
+}
+
+#sidebarContent .row:hover {
+    text-decoration: none;
+    color: #fff;
+    background: rgba(255,255,255,0.2);
+}
+
+@media(min-width:768px) {
+    #wrapper {
+        padding-left: 0;
+    }
+
+    #wrapper.toggled {
+        padding-left: 400px;
+    }
+
+    #sidebar-wrapper {
+        width: 0;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        width: 400px;
+    }
+
+    #page-content-wrapper {
+        padding: 20px;
+        position: relative;
+    }
+
+    #wrapper.toggled #page-content-wrapper {
+        position: relative;
+        margin-right: -400px;
+    }
+}
+/*---Sidebar end*/
+
+.fa-layers {
+  transform:rotate(50deg) skewX(24deg) skewY(12deg);  
+  -webkit-transform:rotate(50deg) skewX(24deg) skewY(12deg);  
+  -ms-transform:rotate(50deg) skewX(24deg) skewY(12deg);  
 }
 
 .cursor-pointer {
@@ -184,10 +247,6 @@ body {
     color: #79bdf7;
 }
 
-.scrollable-area {
-    max-height: 400px;
-    overflow-y: scroll;
-}
 
 .chart-tooltip {
     color:black; 

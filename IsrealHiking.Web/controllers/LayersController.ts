@@ -6,7 +6,6 @@
         routes: Services.Drawing.IDrawing[];
         markers: Services.Drawing.IDrawing;
         advanced: boolean;
-        hovering: boolean;
 
         addBaseLayer(e: Event): void;
         editBaseLayer(layer: Services.ILayer, e: Event): void;
@@ -18,7 +17,7 @@
         toggleVisibility(overlay: Services.IOverlay, e: Event): void;
         selectDrawing(name: string, e: Event): void;
         toggleAdvanced(e: Event): void;
-        toggleHovering(e: Event): void;
+        toggleShow(e: Event): void;
     }
 
     export class LayersController extends BaseMapController {
@@ -30,6 +29,7 @@
             mapService: Services.MapService,
             layersService: Services.LayersService,
             fileService: Services.FileService,
+            sidebarService: Services.SidebarService,
             toastr: Toastr) {
             super(mapService);
             $scope.baseLayers = layersService.baseLayers;
@@ -37,8 +37,6 @@
             $scope.routes = layersService.routes;
             $scope.markers = layersService.markers;
             $scope.advanced = localStorageService.get(LayersController.SHOW_ADVANCED_KEY) ? true : false;
-            $scope.hovering = false;
-
             $scope.addBaseLayer = (e: Event) => {
                 var newScope = $scope.$new() as LayerProperties.ILayerBaseScope;
                 var controller = new LayerProperties.BaseLayerAddController(newScope, mapService, layersService, toastr);
@@ -100,8 +98,8 @@
                 this.suppressEvents(e);
             }
 
-            $scope.toggleHovering = (e: Event) => {
-                $scope.hovering = !$scope.hovering;
+            $scope.toggleShow = (e: Event) => {
+                sidebarService.toggle("layers-sidebar", $scope);
                 this.suppressEvents(e);
             }
         }
@@ -109,7 +107,7 @@
         private createRoutePropertiesModal = (routePropertiesScope: RouteProperties.IRouteBaseScope, $modal): any => {
             return $modal({
                 title: "Route Properties",
-                templateUrl: "views/templates/routePropertiesModal.tpl.html",
+                templateUrl: "views/modals/routePropertiesModal.html",
                 show: false,
                 scope: routePropertiesScope
             });
@@ -118,7 +116,7 @@
         private showLayerModal = ($scope: LayerProperties.ILayerBaseScope, $modal, e: Event) => {
             var modal = $modal({
                 title: $scope.title,
-                templateUrl: "views/templates/layerPropertiesModal.tpl.html",
+                templateUrl: "views/modals/layerPropertiesModal.html",
                 show: false,
                 scope: $scope
             });

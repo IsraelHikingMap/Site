@@ -16,7 +16,7 @@
             this.$tooltip = $tooltip;
         }
 
-        protected createToolTip(target: any, template: string, title: string, $scope: angular.IScope, placement = "right") {
+        protected createToolTip(target: any, template: string, title: string, $scope: angular.IScope, placement = "left") {
             var element = angular.element(target);
             if (element.is("i")) {
                 // user clicked on the icon, we want to open the tooltip from the button.

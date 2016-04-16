@@ -25,6 +25,7 @@
         public static toastr = "toastr";
         public static upload = "Upload";
         public static fileSaver = "FileSaver";
+        public static sidebarService = "sidebarService";
         
         // Controllers
         public static mainMapController = "mainMapController";

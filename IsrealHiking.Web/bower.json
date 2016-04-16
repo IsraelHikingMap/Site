@@ -12,6 +12,7 @@
     "angular-google-chart": "*",
     "angular-loading-bar": "*",
     "bootstrap": "*",
+    "startbootstrap-simple-sidebar": "*",
     "jquery": "*",
     "lodash": "*",
     "ng-file-upload": "*",
@@ -26,6 +27,9 @@
     },
     "font-awesome": {
       "main": [ "css/*.min.*", "fonts/*.*" ]
+    },
+    "startbootstrap-simple-sidebar": {
+      "main": [ "css/simple-sidebar.css" ]
     }
   }
 }

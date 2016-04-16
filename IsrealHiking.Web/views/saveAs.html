@@ -3,7 +3,7 @@
 </div>
 <div ng-show="isShowingSaveAs" class="save-as-panel ihm-panel" disable-map-movement>
     <div class="input-group">
-        <select class="form-control" ng-options="format as format.label for format in formats" ng-model="selectedFormat" ng-click="ignoreClick($event)"></select>
         <a class="btn btn-default input-group-addon" ng-click="saveAs(selectedFormat, $event)"><i class="fa fa-files-o fa-lg"></i></a>
+        <select class="form-control" ng-options="format as format.label for format in formats" ng-model="selectedFormat" ng-click="ignoreClick($event)"></select>
     </div>
 </div>
