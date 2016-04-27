@@ -33,14 +33,15 @@ namespace IsraelHiking.API.Controllers
         // POST api/urls
         public async Task<IHttpActionResult> PostSiteUrl(SiteUrl siteUrl)
         {
+            var random = new Random(Guid.NewGuid().GetHashCode());
             siteUrl.CreationDate = DateTime.Now;
             siteUrl.LastViewed = DateTime.Now;
-            siteUrl.ModifyKey = GetRandomString(10);
+            siteUrl.ModifyKey = GetRandomString(10, random);
             siteUrl.ViewsCount = 0;
-            var id = GetRandomString(10);
+            var id = GetRandomString(10, random);
             while (await _repository.GetUrlById(id) != null)
             {
-                id = GetRandomString(10);
+                id = GetRandomString(10, random);
             }
             siteUrl.Id = id;
             await _repository.AddUrl(siteUrl);
@@ -61,10 +62,9 @@ namespace IsraelHiking.API.Controllers
             return Ok(siteUrlFromDatabase);
         }
 
-        private static string GetRandomString(int length)
+        private static string GetRandomString(int length, Random random)
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            var random = new Random(DateTime.Now.Millisecond);
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
