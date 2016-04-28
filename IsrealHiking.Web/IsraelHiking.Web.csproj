@@ -64,6 +64,7 @@
     <Content Include="content\images\hike.svg" />
     <Content Include="content\images\layers-2x.png" />
     <Content Include="content\images\layers.png" />
+    <Content Include="content\images\layers.svg" />
     <Content Include="content\images\legend.png" />
     <Content Include="content\images\legend_mtb.png" />
     <Content Include="content\images\map-editing.svg" />

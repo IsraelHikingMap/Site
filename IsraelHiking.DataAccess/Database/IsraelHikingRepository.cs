@@ -1,8 +1,6 @@
 ﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using System.Data.Entity;
-using System.Linq;
-using System;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess.Database
