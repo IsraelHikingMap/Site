@@ -71,5 +71,10 @@ namespace IsraelHiking.DataAccess
         {
             return File.OpenRead(filePath);
         }
+
+        public string GetCurrentDirectory()
+        {
+            return Directory.GetCurrentDirectory();
+        }
     }
 }

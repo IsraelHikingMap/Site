@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using GeoJSON.Net.Feature;
 
-namespace IsraelHiking.DataAccess.ElasticSearch
+namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IElasticSearchGateway
     {

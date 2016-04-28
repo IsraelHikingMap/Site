@@ -14,5 +14,6 @@ namespace IsraelHiking.DataAccessInterfaces
         long GetSize(string fileName);
         void WriteAllBytes(string filePath, byte[] content);
         Stream FileOpenRead(string filePath);
+        string GetCurrentDirectory();
     }
 }

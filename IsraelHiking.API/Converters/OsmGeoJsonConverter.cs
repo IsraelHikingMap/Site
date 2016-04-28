@@ -59,23 +59,23 @@ namespace IsraelHiking.API.Converters
             {
                 var currentNodes = new List<Node>(waysToGroup.First().Nodes);
                 waysToGroup.RemoveAt(0);
-                var group =
-                    nodesGroups.FirstOrDefault(g => currentNodes.Last() == g.First() || currentNodes.First() == g.Last());
+                var group = nodesGroups.FirstOrDefault(g => currentNodes.Last() == g.First() 
+                || currentNodes.First() == g.Last()
+                || currentNodes.First() == g.First() 
+                || currentNodes.Last() == g.Last());
                 if (group == null)
                 {
                     group = currentNodes;
                     nodesGroups.Add(group);
                     continue;
                 }
-                if (currentNodes.Last() == group.First() && currentNodes.First() == group.Last())
+                if (currentNodes.First() == group.First() || currentNodes.Last() == group.Last())
                 {
-                    currentNodes.RemoveAll(n => n == currentNodes.Last() || n == currentNodes.First());
-                    group.AddRange(currentNodes);
-                    continue;
+                    currentNodes.Reverse(); // direction of this way is incompatible with other ways.
                 }
                 if (currentNodes.First() == group.Last())
                 {
-                    currentNodes.RemoveAt(0);
+                    currentNodes.Remove(currentNodes.First());
                     group.AddRange(currentNodes);
                     continue;
                 }

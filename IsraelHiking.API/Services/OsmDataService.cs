@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using GeoJSON.Net.Feature;
 using IsraelHiking.API.Converters;
-using IsraelHiking.DataAccess.ElasticSearch;
 using IsraelHiking.DataAccessInterfaces;
 using OsmSharp.Osm;
 using OsmSharp.Osm.PBF.Streams;
@@ -13,18 +12,8 @@ using OsmSharp.Osm.Streams.Complete;
 
 namespace IsraelHiking.API.Services
 {
-    public class OsmDataService
+    public class OsmDataService : IOsmDataService
     {
-        [Flags]
-        public enum Operations
-        {
-            None = 0,
-            GetOsmFile = 1,
-            UpdateElasticSearch = 2,
-            UpdateGraphHopper = 4,
-            All = GetOsmFile | UpdateElasticSearch | UpdateGraphHopper
-        }
-
         private const string PBF_FILE_NAME = "israel-and-palestine-latest.osm.pbf";
         private const int PAGE_SIZE = 10000;
         private const string PLACE = "place";
@@ -43,8 +32,7 @@ namespace IsraelHiking.API.Services
             IFileSystemHelper fileSystemHelper,
             IElasticSearchGateway elasticSearchGateway,
             INssmHelper elasticSearchHelper,
-            ILogger logger
-            )
+            ILogger logger)
         {
             _graphHopperHelper = graphHopperHelper;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
@@ -68,18 +56,18 @@ namespace IsraelHiking.API.Services
             _logger.Info("Finished initializing OSM data service with server path: " + serverPath);
         }
 
-        public async Task UpdateData(Operations operations)
+        public async Task UpdateData(OsmDataServiceOperations operations)
         {
             try
             {
-                if (operations == Operations.None)
+                if (operations == OsmDataServiceOperations.None)
                 {
                     _logger.Warn("No operations are requested, doing nothing...");
                     return;
                 }
                 _logger.Info("Updating OSM data");
                 var osmFilePath = Path.Combine(_serverPath, PBF_FILE_NAME);
-                if ((operations & Operations.GetOsmFile) != 0)
+                if ((operations & OsmDataServiceOperations.GetOsmFile) != 0)
                 {
                     await FetchOsmFile(osmFilePath);
                 }
@@ -88,11 +76,11 @@ namespace IsraelHiking.API.Services
                     _logger.Error(osmFilePath + " File is missing. Fatal error - exiting.");
                     return;
                 }
-                if ((operations & Operations.UpdateElasticSearch) != 0)
+                if ((operations & OsmDataServiceOperations.UpdateElasticSearch) != 0)
                 {
                     await UpdateElasticSearchFromFile(osmFilePath);
                 }
-                if ((operations & Operations.UpdateGraphHopper) != 0)
+                if ((operations & OsmDataServiceOperations.UpdateGraphHopper) != 0)
                 {
                     await _graphHopperHelper.UpdateData(osmFilePath);
                 }
@@ -264,31 +252,31 @@ namespace IsraelHiking.API.Services
                         mergedWays.FirstOrDefault(
                             mw =>
                                 mw.Nodes.Last() == wayToMerge.Nodes.First() ||
-                                mw.Nodes.First() == wayToMerge.Nodes.Last());
+                                mw.Nodes.First() == wayToMerge.Nodes.Last() ||
+                                mw.Nodes.First() == wayToMerge.Nodes.First() ||
+                                mw.Nodes.Last() == wayToMerge.Nodes.Last());
                     if (wayToMergeTo == null)
                     {
                         continue;
                     }
-                    MergeTags(wayToMerge, wayToMergeTo);
+                    if (wayToMerge.Nodes.First() == wayToMergeTo.Nodes.First() ||
+                        wayToMerge.Nodes.Last() == wayToMergeTo.Nodes.Last())
+                    {
+                        wayToMerge.Nodes.Reverse();
+                    }
                     var nodes = wayToMerge.Nodes;
-                    bool addToStart = false;
                     if (nodes.Last() == wayToMergeTo.Nodes.First())
                     {
-                        addToStart = true;
                         nodes.Remove(nodes.Last());
+                        wayToMergeTo.Nodes.InsertRange(0, nodes);
                     }
                     else if (nodes.First() == wayToMergeTo.Nodes.Last())
                     {
                         nodes.Remove(nodes.First());
-                    }
-                    if (addToStart)
-                    {
-                        wayToMergeTo.Nodes.InsertRange(0, nodes);
-                    }
-                    else
-                    {
                         wayToMergeTo.Nodes.AddRange(nodes);
                     }
+
+                    MergeTags(wayToMerge, wayToMergeTo);
                     waysToMerge.Remove(wayToMerge);
                     foundAWayToMergeTo = true;
                 }

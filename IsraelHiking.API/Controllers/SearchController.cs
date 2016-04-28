@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Web.Http;
 using GeoJSON.Net.Feature;
-using IsraelHiking.DataAccess.ElasticSearch;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Controllers
 {
