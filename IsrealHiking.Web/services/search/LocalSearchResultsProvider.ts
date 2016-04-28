@@ -19,8 +19,8 @@
                         latlngsArray: [],
                         icon: feature.properties.icon
                     } as ISearchResults;
-
-                    switch (feature.geometry.type) {
+                    try {
+                        switch (feature.geometry.type) {
                         case Common.GeoJsonFeatureType.point:
                             let point = feature.geometry as GeoJSON.Point;
                             singleResult.latlng = Services.Parsers.BaseParser.createLatlng(point.coordinates) as L.LatLng;
@@ -52,13 +52,18 @@
                                     singleResult.latlngsArray.push(Services.Parsers.BaseParser.createLatlngArray(currentCoordinatesArray));
                                 }
                             }
+                        }
+                        if (feature.properties.lat && feature.properties.lng) {
+                            singleResult.latlng = L.latLng(feature.properties.lat, feature.properties.lng);
+                        }
+                        let geo = L.geoJson(feature);
+                        singleResult.bounds = geo.getBounds();
+                        results.push(singleResult);
                     }
-                    if (feature.properties.lat && feature.properties.lng) {
-                        singleResult.latlng = L.latLng(feature.properties.lat, feature.properties.lng);
+                    catch (error) {
+                        console.log(error);
+                        console.log(feature);
                     }
-                    let geo = L.geoJson(feature);
-                    singleResult.bounds = geo.getBounds();
-                    results.push(singleResult);
                 }
                 deferred.resolve(results);
             }).error((err) => {
