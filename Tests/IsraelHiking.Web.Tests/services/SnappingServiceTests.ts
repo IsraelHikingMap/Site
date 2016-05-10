@@ -1,6 +1,7 @@
 ﻿/// <reference path="../../../isrealhiking.web/common/constants.ts" />
 /// <reference path="../../../isrealhiking.web/services/mapservice.ts" />
 /// <reference path="../../../IsrealHiking.Web/scripts/typings/angularjs/angular-mocks.d.ts" />
+/// <reference path="../../../isrealhiking.web/scripts/typings/lodash/lodash.d.ts" />
 /// <reference path="../../../isrealhiking.web/services/snappingservice.ts" />
 /// <reference path="../../../IsrealHiking.Web/services/parsers/BaseParser.ts" />
 /// <reference path="../../../isrealhiking.web/services/objectwithmap.ts" />
@@ -55,6 +56,7 @@ module IsraelHiking.Tests {
                 mapService = new Services.MapService();
                 parserFactory = new Services.Parsers.ParserFactory();
                 snappingService = new Services.SnappingService($http, mapService, parserFactory, _toastr_);
+                snappingService.enable(true);
             });
         });
 
@@ -63,11 +65,20 @@ module IsraelHiking.Tests {
             mapDiv = null;
         });
 
+        it("Should clear snappings layer when disabled", () => {
+            snappingService.enable(false);
+            mapService.map.setZoom(14); // this fires moveend
+
+            expect(snappingService.snappings.getLayers().length).toBe(0);
+        });
+
         it("Should clear snappings layer when zoom is less than 14", () => {
             mapService.map.setZoom(12); // this fires moveend
 
             expect(snappingService.snappings.getLayers().length).toBe(0);
         });
+
+
 
         it("Should add one snappings layer when zoom is 14", () => {
             $httpBackend.whenGET(() => true).respond(osmWay);

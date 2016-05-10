@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services {
+﻿namespace IsraelHiking.Services {
 
     export interface ISnappingOptions {
         layers: L.LayerGroup<L.Polyline>;
@@ -11,11 +11,17 @@
         beforeIndex: number;
     }
 
+    interface ISnappingRequestQueueItem {
+        boundsString: string;
+    }
+
     export class SnappingService extends ObjectWithMap {
-        snappings: L.LayerGroup<L.Polyline>;
-        $http: angular.IHttpService;
-        osmParser: Parsers.IParser;
-        toastr: Toastr;
+        public snappings: L.LayerGroup<L.Polyline>;
+        private $http: angular.IHttpService;
+        private osmParser: Parsers.IParser;
+        private toastr: Toastr;
+        private enabled: boolean;
+        private requestsQueue: ISnappingRequestQueueItem[];
 
         constructor($http: angular.IHttpService,
             mapService: MapService,
@@ -27,28 +33,41 @@
             this.osmParser = parserFactory.create(Parsers.ParserType.osm);
             this.snappings = L.layerGroup([]);
             this.map.addLayer(this.snappings);
-            this.generateSnappings();
             this.toastr = toastr;
+            this.enabled = false;
+            this.requestsQueue = [];
             this.map.on("moveend", () => {
                 this.generateSnappings();
             });
         }
 
         private generateSnappings = () => {
-            this.snappings.clearLayers();
-            if (this.map.getZoom() <= 13) {
+            
+            if (this.map.getZoom() <= 13 || this.enabled === false) {
+                this.snappings.clearLayers();
                 return;
             }
             
             var bounds = this.map.getBounds();
             var boundsString = [bounds.getSouthWest().lat, bounds.getSouthWest().lng, bounds.getNorthEast().lat, bounds.getNorthEast().lng].join(",");
+            this.requestsQueue.push({
+                boundsString: boundsString
+            } as ISnappingRequestQueueItem);
+
             this.$http.get(Common.Urls.overpass, {
                 params: {
                     data: `(way["highway"](${boundsString});>;);out;`
                 }
             }).success((osm: string) => {
                 var data = this.osmParser.parse(osm);
-                for (let route of data.routes) {
+                let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.boundsString === boundsString);
+                if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
+                    this.requestsQueue.splice(0, this.requestsQueue.length - 1);
+                    return;
+                }
+                this.snappings.clearLayers();
+                let topN = _.take(data.routes, 500); // performance issue - taking random first 500
+                for (let route of topN) {
                     for (let segment of route.segments) {
                         if (segment.latlngzs.length < 2 ||
                             (segment.latlngzs.length === 2 && segment.latlngzs[0].equals(segment.latlngzs[1]))) {
@@ -57,8 +76,10 @@
                         this.snappings.addLayer(L.polyline(segment.latlngzs, { opacity: 0 } as L.PolylineOptions));
                     }
                 }
+                this.requestsQueue.splice(0);
             }).error(() => {
                 this.toastr.error("Unable to get overpass data for snapping...");
+                this.snappings.clearLayers();
             });
         }
 
@@ -108,5 +129,16 @@
 
             return response;
         }
+
+        public enable = (enable: boolean) => {
+            this.enabled = enable;
+            if (this.enabled) {
+                this.generateSnappings();
+            }
+        }
+
+        public isEnabled = (): boolean => {
+            return this.enabled;
+        } 
     }
 } 

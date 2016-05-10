@@ -13,7 +13,7 @@
         keyDown(e: KeyboardEvent): void;
     }
 
-    interface ISearchResultsQueueItem {
+    interface ISearchRequestQueueItem {
         searchTerm: string;
     }
 
@@ -22,7 +22,7 @@
         private static UP_KEY = 38;
         private static DOWN_KEY = 40;
 
-        private resultsQueue: ISearchResultsQueueItem[];
+        private requestsQueue: ISearchRequestQueueItem[];
         private layerGroup: L.LayerGroup<L.ILayer>;
 
         constructor($scope: ISearchScope,
@@ -33,7 +33,7 @@
             searchResultsProviderFactory: Services.Search.SearchResultsProviderFactory,
             toastr: Toastr) {
             super(mapService);
-            this.resultsQueue = [];
+            this.requestsQueue = [];
             this.layerGroup = L.layerGroup();
             this.map.addLayer(this.layerGroup);
             $scope.searchTerm = hashService.searchTerm;
@@ -54,22 +54,21 @@
                     $scope.searchResults = [];
                     return;
                 }
-                this.resultsQueue.push({
-                    searchTerm: searchTerm,
-                    addresses: []
-                } as ISearchResultsQueueItem);
+                this.requestsQueue.push({
+                    searchTerm: searchTerm
+                } as ISearchRequestQueueItem);
 
                 var local = searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
 
                 local.getResults(searchTerm, $scope.isHebrew)
                     .then((results: Services.Search.ISearchResults[]) => {
-                        let queueItem = _.find(this.resultsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
-                        if (queueItem == null || this.resultsQueue.indexOf(queueItem) !== this.resultsQueue.length - 1) {
-                            this.resultsQueue.splice(0, this.resultsQueue.length - 1);
+                        let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
+                        if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
+                            this.requestsQueue.splice(0, this.requestsQueue.length - 1);
                             return;
                         }
                         $scope.searchResults = results;
-                        this.resultsQueue.splice(0);
+                        this.requestsQueue.splice(0);
                     }, () => {
                         toastr.warning("Unable to get search results.");
                     });

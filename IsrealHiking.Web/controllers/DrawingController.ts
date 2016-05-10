@@ -20,14 +20,16 @@
         constructor($scope: IDrawingScope,
             $tooltip,
             mapService: Services.MapService,
-            layersService: Services.LayersService) {
+            layersService: Services.LayersService,
+            snappingService:  Services.SnappingService) {
             super(mapService, $tooltip);
             this.layersService = layersService;
             this.selectedDrawing = this.layersService.getSelectedDrawing();
             this.routeStatisticsTooltip = null;
 
-            this.layersService.eventHelper.addListener((args: Common.IDataChangedEventArgs) => {
+            this.layersService.eventHelper.addListener(() => {
                 this.selectedDrawing = this.layersService.getSelectedDrawing();
+                snappingService.enable(this.selectedDrawing.isEnabled());
             });
 
             $scope.clear = (e: Event) => {
@@ -46,7 +48,7 @@
             };
 
             $scope.toggleRouting = (routingType: string, e: Event) => {
-                if (this.selectedDrawing.getRoutingType() == routingType) {
+                if (this.selectedDrawing.getRoutingType() === routingType) {
                     this.selectedDrawing.setRoutingType(Common.RoutingType.none);
                 } else {
                     this.selectedDrawing.setRoutingType(routingType);
@@ -84,7 +86,7 @@
                 if (this.selectedDrawing == null) {
                     return false;
                 }
-                return this.selectedDrawing.name != Common.Constants.MARKERS;
+                return this.selectedDrawing.name !== Common.Constants.MARKERS;
             }
 
             $scope.openStatistics = (e: Event) => {
@@ -103,10 +105,10 @@
             }
 
             document.onkeydown = (e: KeyboardEvent) => {
-                if (e.keyCode == 90 && e.ctrlKey) { // ctrl+Z
+                if (e.keyCode === 90 && e.ctrlKey) { // ctrl+Z
                     this.selectedDrawing.undo();
                 }
-                else if (e.keyCode == 27) { // escape
+                else if (e.keyCode === 27) { // escape
                     this.selectedDrawing.enable(false);
                 }
                 else {
