@@ -47,7 +47,6 @@ namespace IsraelHiking.Web
             logger.Info("Initializing Elevation data and Elastic Search Service");
             container.Resolve<IElasticSearchGateway>().Initialize();
             container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Info("Finished loading elevation data from files."));
-
         }
     }
 }

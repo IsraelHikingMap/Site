@@ -12,10 +12,10 @@ using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
-namespace IsraelHiking.API.Tests.Gpx
+namespace IsraelHiking.API.Tests.Services
 {
     [TestClass]
-    public class DataContainerConverterTests
+    public class DataContainerConverterServiceTests
     {
         private IDataContainerConverterService _converterService;
         private IGpsBabelGateway _gpsBabelGateway;
@@ -26,7 +26,7 @@ namespace IsraelHiking.API.Tests.Gpx
         {
             _randomBytes = new byte[] { 0, 1, 1, 0 };
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
-            _converterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new CoordinatesConverter());
+            _converterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new DouglasPeuckerReductionService(new CoordinatesConverter()));
         }
 
         [TestMethod]
@@ -132,7 +132,7 @@ namespace IsraelHiking.API.Tests.Gpx
             var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), "gpx").Result;
 
             Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(5, dataContainer.routes.First().segments.Count);
+            Assert.AreEqual(4, dataContainer.routes.First().segments.Count);
         }
 
         [TestMethod]

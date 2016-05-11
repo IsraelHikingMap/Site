@@ -2,23 +2,18 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using System.Xml;
 using System.Xml.Linq;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelTransverseMercator;
 
 namespace IsraelHiking.API.Services
 {
     public class DataContainerConverterService : IDataContainerConverterService
     {
-        private const int MAX_SEGMENTS_NUMBER = 20;
-        private const int MINIMAL_SEGMENT_LENGTH = 500; // meters
         private const string GEOJSON = "geojson";
         private const string GPX = "gpx";
         private const string GPX_BABEL_FORMAT = "gpx,gpxver=1.1";
@@ -28,17 +23,17 @@ namespace IsraelHiking.API.Services
         private readonly IGpsBabelGateway _gpsBabelGateway;
         private readonly IGpxGeoJsonConverter _gpxGeoJsonConverter;
         private readonly IGpxDataContainerConverter _gpxDataContainerConverter;
-        private readonly ICoordinatesConverter _coordinatesConverter;
+        private readonly IDouglasPeuckerReductionService _douglasPeuckerReductionService;
 
         public DataContainerConverterService(IGpsBabelGateway gpsBabelGateway,
             IGpxGeoJsonConverter gpxGeoJsonConverter,
             IGpxDataContainerConverter gpxDataContainerConverter,
-            ICoordinatesConverter coordinatesConverter)
+            IDouglasPeuckerReductionService douglasPeuckerReductionService)
         {
             _gpsBabelGateway = gpsBabelGateway;
             _gpxGeoJsonConverter = gpxGeoJsonConverter;
             _gpxDataContainerConverter = gpxDataContainerConverter;
-            _coordinatesConverter = coordinatesConverter;
+            _douglasPeuckerReductionService = douglasPeuckerReductionService;
         }
 
         public Task<byte[]> ToAnyFormat(DataContainer dataContainer, string format)
@@ -128,65 +123,7 @@ namespace IsraelHiking.API.Services
 
         private List<RouteData> ManipulateRoutesData(IEnumerable<RouteData> routesData, string routingType)
         {
-            var returnArray = new List<RouteData>();
-            foreach (var routeData in routesData)
-            {
-                var allRoutePoints = routeData.segments.SelectMany(s => s.latlngzs).ToList();
-                var manipulatedRouteData = new RouteData
-                {
-                    segments = new List<RouteSegmentData> { new RouteSegmentData
-                    {
-                        routePoint = allRoutePoints.First(),
-                        latlngzs = new List<LatLngZ> { allRoutePoints.First(), allRoutePoints.First() }
-                    } },
-                    name = routeData.name
-                };
-                var routeLength = allRoutePoints.Skip(1).Select((p, i) => GetDistance(p, allRoutePoints[i])).Sum();
-                var segmentLength = routeLength / MAX_SEGMENTS_NUMBER;
-                if (segmentLength < MINIMAL_SEGMENT_LENGTH)
-                {
-                    segmentLength = MINIMAL_SEGMENT_LENGTH;
-                }
-
-                var currentSegmentLength = 0.0;
-                var segmentData = new RouteSegmentData
-                {
-                    latlngzs = new List<LatLngZ> { allRoutePoints[0] },
-                    routePoint = allRoutePoints[0],
-                    routingType = routingType
-                };
-
-                for (var latlngIndex = 1; latlngIndex < allRoutePoints.Count; latlngIndex++)
-                {      
-                    currentSegmentLength += GetDistance(allRoutePoints[latlngIndex - 1], allRoutePoints[latlngIndex]);
-                    if (currentSegmentLength < segmentLength)
-                    {
-                        segmentData.latlngzs.Add(allRoutePoints[latlngIndex]);
-                        segmentData.routePoint = allRoutePoints[latlngIndex];
-                        continue;
-                    }
-                    
-                    manipulatedRouteData.segments.Add(segmentData);
-                    currentSegmentLength = 0;
-                    segmentData = new RouteSegmentData
-                    {
-                        latlngzs = new List<LatLngZ> { allRoutePoints[latlngIndex - 1], allRoutePoints[latlngIndex] },
-                        routePoint = allRoutePoints[latlngIndex],
-                        routingType = routingType
-                    };
-                }
-                manipulatedRouteData.segments.Add(segmentData);
-                returnArray.Add(manipulatedRouteData);
-            }
-
-            return returnArray;
-        }
-
-        private double GetDistance(LatLng point1, LatLng point2)
-        {
-            var northEast1 = _coordinatesConverter.Wgs84ToItm(new LatLon { Latitude = point1.lat, Longitude = point1.lng });
-            var northEast2 = _coordinatesConverter.Wgs84ToItm(new LatLon { Latitude = point2.lat, Longitude = point2.lng });
-            return Math.Sqrt(Math.Pow(northEast1.North - northEast2.North, 2) + Math.Pow(northEast1.East - northEast2.East, 2));
+            return routesData.Select(r => _douglasPeuckerReductionService.SimplifyRouteData(r, routingType)).ToList();
         }
 
         private bool IsGetGpxVersion1(byte[] content)

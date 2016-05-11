@@ -114,7 +114,9 @@
     </Compile>
     <Compile Include="Converters\IGpxDataContainerConverter.cs" />
     <Compile Include="Converters\IGpxGeoJsonConverter.cs" />
+    <Compile Include="Services\DouglasPeuckerReductionService.cs" />
     <Compile Include="Services\GeoJsonFeatureHelper.cs" />
+    <Compile Include="Services\IDouglasPeuckerReductionService.cs" />
     <Compile Include="Services\IOsmDataService.cs" />
     <Compile Include="Services\OsmDataService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
