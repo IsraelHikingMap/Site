@@ -76,12 +76,6 @@ body {
 }
 /*---Sidebar end*/
 
-.fa-layers {
-  transform:rotate(50deg) skewX(24deg) skewY(12deg);  
-  -webkit-transform:rotate(50deg) skewX(24deg) skewY(12deg);  
-  -ms-transform:rotate(50deg) skewX(24deg) skewY(12deg);  
-}
-
 .cursor-pointer {
     cursor: pointer;
 }

@@ -5,10 +5,16 @@
 <#@ import namespace="System.Collections.Generic" #>
 
 <html>
-<head>
-	<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<head prefix="og: http://ogp.me/ns#">
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
     <meta content="utf-8" http-equiv="encoding">
     <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible" />
+    <meta property="og:site_name" content="IsraelHiking.OSM.org.il" />
+    <meta property="og:type" content="activity" />
+    <meta property="og:title" content="Israel Hiking Map" />
+    <meta property="og:image" content="http://israelhiking.osm.org.il/content/images/favicons/android-chrome-192x192.png" />
+    <meta property="og:image:url" content="http://israelhiking.osm.org.il/content/images/favicons/android-chrome-192x192.png" />
+    <meta property="og:image:secure_url" content="https://israelhiking.osm.org.il/content/images/favicons/android-chrome-192x192.png" />
     <title>Israel Hiking Map - <#=FileExplorerViewModel.CurrentEntryPath.Any() ? FileExplorerViewModel.CurrentEntryPath.Last().Name : "Invalid Folder"#></title>
     <!-- Favicons courtesy of http://realfavicongenerator.net/ -->
     <link rel="apple-touch-icon" sizes="57x57" href="/content/images/favicons/apple-touch-icon-57x57.png">
@@ -32,8 +38,8 @@
     <meta name="msapplication-config" content="/content/images/favicons/browserconfig.xml">
     <meta name="theme-color" content="#0a42bb">
 	<!-- Stylesheets -->
-	<link rel='stylesheet' href='/content/bootstrap.min.css' />
-	<link rel='stylesheet' href='/content/font-awesome.min.css' />
+	<link rel="stylesheet" href="/content/bootstrap.min.css" />
+	<link rel="stylesheet" href="/content/font-awesome.min.css" />
 </head>
 <body>
 	<div class='container'>
