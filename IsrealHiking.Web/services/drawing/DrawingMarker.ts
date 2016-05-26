@@ -77,12 +77,17 @@
 
         private createMarker(latlng: L.LatLng, title = ""): IMarkerWithTitle {
             var marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true } as L.MarkerOptions) as IMarkerWithTitle;
+            marker.bindLabel(title, this.getBindLableOptions());
+            marker.showLabel();
             marker.title = title;
             var newScope = this.$rootScope.$new() as Controllers.IMarkerPopupScope;
             newScope.title = title;
             newScope.marker = marker;
             newScope.setTitle = (newTitle: string) => {
                 marker.title = newTitle;
+                marker.unbindLabel();
+                marker.bindLabel(newTitle, this.getBindLableOptions());
+                marker.showLabel();
                 this.updateDataLayer();
                 marker.closePopup();
             }
@@ -109,6 +114,7 @@
 
         private createInactiveMarker = (latlng: L.LatLng, title: string): IMarkerWithTitle => {
             var marker = L.marker(latlng, { draggable: false, clickable: true, riseOnHover: true } as L.MarkerOptions) as IMarkerWithTitle;
+            marker.bindLabel(title, this.getBindLableOptions());
             marker.title = title;
             marker.bindPopup(marker.title);
             marker.on("click", () => {
@@ -133,6 +139,7 @@
             marker.off("mouseover");
             marker.off("dblclick");
             marker.off("popupopen");
+            marker.unbindLabel();
             this.map.removeLayer(marker);
             this.markers.splice(markerIndex, 1);
         }
@@ -233,6 +240,8 @@
             this.hoverMarker.setLatLng(e.latlng);
         }
 
-
+        private getBindLableOptions = (): L.LabelOptions => {
+            return { noHide: true, className: "marker-label" } as L.LabelOptions;
+        }
     }
 }

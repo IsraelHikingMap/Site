@@ -193,7 +193,7 @@ ModelManifest.xml
 /.vs/config
 *.sqlite
 !/IsrealHiking.Web/*.ts
-!/IsrealHiking.Web/scripts/*.js
 /IsrealHiking.Web/**/*.js
 /IsrealHiking.Web/**/*.map
+!/IsrealHiking.Web/scripts/*.js
 /Tests/IsraelHiking.Web.Tests/**/*.js

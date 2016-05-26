@@ -19,6 +19,7 @@
     "font-awesome": "*",
     "interact": "*",
     "leaflet": "*",
+    "Leaflet.label": "*",
     "leaflet.locatecontrol": "*"
   },
   "overrides": {

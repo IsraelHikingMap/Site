@@ -131,25 +131,25 @@
         }
 
         public toGeoJson(data: Common.DataContainer): GeoJSON.FeatureCollection<GeoJSON.GeometryObject> {
-            var geoJson = {
-                type: Common.GeoJsonFeatureType.featureCollection,
+            let geoJson = {
+                type: "FeatureCollection",
                 crs: {
                     type: "name",
                     properties: {
                         name: "EPSG:3857"
-                    }
-                },
+                    } 
+                } as GeoJSON.NamedCoordinateReferenceSystem,
                 features: [] as GeoJSON.Feature<GeoJSON.GeometryObject>[]
             } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
             for (let marker of data.markers) {
                 geoJson.features.push({
-                    type: Common.GeoJsonFeatureType.feature,
+                    type: "Feature",
                     properties: {
                         name: marker.title
                     },
                     geometry: {
-                        type: Common.GeoJsonFeatureType.point,
+                        type: "Point",
                         coordinates: [marker.latlng.lng, marker.latlng.lat]
                     } as GeoJSON.Point
                 } as GeoJSON.Feature<GeoJSON.GeometryObject>);
@@ -167,7 +167,7 @@
                 }
                 if (multiLineStringCoordinates.length > 0) {
                     let multiLineStringFeature = {
-                        type: Common.GeoJsonFeatureType.feature,
+                        type: "Feature",
                         properties: {
                             name: routeData.name,
                             creator: "IsraelHikingMap"

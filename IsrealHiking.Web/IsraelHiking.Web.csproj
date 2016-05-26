@@ -126,6 +126,7 @@
     <Content Include="scripts\L.Control.Locate.js" />
     <Content Include="scripts\leaflet-google.js" />
     <Content Include="scripts\leaflet-src.js" />
+    <Content Include="scripts\leaflet.label.js" />
     <Content Include="scripts\loading-bar.js" />
     <Content Include="scripts\lodash.js" />
     <Content Include="scripts\ng-file-upload.js" />
@@ -240,6 +241,7 @@
     <TypeScriptCompile Include="scripts\typings\geojson\geojson.d.ts" />
     <TypeScriptCompile Include="scripts\typings\google.visualization\google.visualization.d.ts" />
     <TypeScriptCompile Include="scripts\typings\jquery\jquery.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\leaflet-label\leaflet-label.d.ts" />
     <TypeScriptCompile Include="scripts\typings\leaflet\leaflet.d.ts" />
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />
     <TypeScriptCompile Include="scripts\typings\ng-file-upload\ng-file-upload.d.ts" />
