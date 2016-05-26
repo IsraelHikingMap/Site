@@ -14,6 +14,7 @@ module IsraelHiking.Tests {
 
         it("Should parse geoJson string", () => {
             var collection = {
+                type: "FeatureCollection",
                 features: [{
                     type: "Feature",
                     properties: {
