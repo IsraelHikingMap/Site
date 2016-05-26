@@ -77,17 +77,18 @@
 
         private createMarker(latlng: L.LatLng, title = ""): IMarkerWithTitle {
             var marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true } as L.MarkerOptions) as IMarkerWithTitle;
-            marker.bindLabel(title, this.getBindLableOptions());
-            marker.showLabel();
             marker.title = title;
             var newScope = this.$rootScope.$new() as Controllers.IMarkerPopupScope;
             newScope.title = title;
             newScope.marker = marker;
             newScope.setTitle = (newTitle: string) => {
                 marker.title = newTitle;
-                marker.unbindLabel();
-                marker.bindLabel(newTitle, this.getBindLableOptions());
-                marker.showLabel();
+                marker.updateLabelContent(newTitle);
+                if (!newTitle) {
+                    marker.hideLabel();    
+                } else {
+                    marker.showLabel();
+                }
                 this.updateDataLayer();
                 marker.closePopup();
             }
@@ -109,12 +110,15 @@
             });
             marker.setIcon(this.icon);
             marker.addTo(this.map);
+            marker.bindLabel(title, this.getBindLableOptions());
+            if (!title) { // must be after adding to map...
+                marker.hideLabel();
+            }
             return marker;
         }
 
         private createInactiveMarker = (latlng: L.LatLng, title: string): IMarkerWithTitle => {
             var marker = L.marker(latlng, { draggable: false, clickable: true, riseOnHover: true } as L.MarkerOptions) as IMarkerWithTitle;
-            marker.bindLabel(title, this.getBindLableOptions());
             marker.title = title;
             marker.bindPopup(marker.title);
             marker.on("click", () => {
@@ -122,6 +126,10 @@
             });
             marker.setIcon(this.icon);
             marker.addTo(this.map);
+            marker.bindLabel(title, this.getBindLableOptions());
+            if (!title) { // must be after adding to map
+                marker.hideLabel();
+            }
             return marker;
         }
 
