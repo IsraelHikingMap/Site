@@ -29,7 +29,12 @@ body {
     color: green;
     background: white;
     padding: 3px;
-    border-radius: 6px; 
+    border-radius: 6px;
+    direction: rtl;
+}
+
+.marker-popup {
+    min-width: 200px;
 }
 
 /*---Sidebar---*/

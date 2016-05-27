@@ -249,7 +249,7 @@
         }
 
         private getBindLableOptions = (): L.LabelOptions => {
-            return { noHide: true, className: "marker-label" } as L.LabelOptions;
+            return { noHide: true, className: "marker-label", opacity: 1 } as L.LabelOptions;
         }
     }
 }
