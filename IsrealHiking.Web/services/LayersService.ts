@@ -77,8 +77,6 @@ module IsraelHiking.Services {
             this.eventHelper = new Common.EventHelper<Common.IDataChangedEventArgs>();
             this.markers = this.drawingFactory.createDrawingMarker([]);
 
-            this.localStorageService.set(LayersService.OVERLAYS_KEY, null)
-
             let lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
             this.defaultAttribution = LayersService.ATTRIBUTION + "Last update: " + lastModified;
             // default layers:
@@ -94,13 +92,13 @@ module IsraelHiking.Services {
                 isEditable: false
             } as ILayer, LayersService.MTB_ATTRIBUTION + lastModified);
             this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: new L.Google() as any, selected: false, address: "", isEditable: false } as IBaseLayer);
-            this.addOverlay({
+            let hikingTrailsOverlay = this.addOverlay({
                 key: LayersService.HIKING_TRAILS,
                 address: LayersService.OVERLAY_TILES_ADDRESS,
                 minZoom: LayersService.MIN_ZOOM,
-                maxZoom: LayersService.MAX_NATIVE_ZOOM,
-                isEditable: false
-            } as Common.LayerData);
+                maxZoom: LayersService.MAX_NATIVE_ZOOM
+            } as ILayer);
+            hikingTrailsOverlay.isEditable = false;
             this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wiki", layer: new Drawing.WikiMarkersLayer($http, mapService) as L.ILayer } as IOverlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
@@ -129,6 +127,7 @@ module IsraelHiking.Services {
             overlay = angular.copy(layerData) as IOverlay;
             overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData));
             overlay.visible = false;
+            overlay.isEditable = true;
             (overlay.layer as L.TileLayer).setZIndex(this.overlayZIndex++);
             this.overlays.push(overlay);
             var overlaysFromStorage = this.localStorageService.get<Common.LayerData[]>(LayersService.OVERLAYS_KEY) || [];
@@ -432,12 +431,12 @@ module IsraelHiking.Services {
         }
 
         private createOptionsFromLayerData = (layerData: Common.LayerData, attribution?: string): L.TileLayerOptions => {
-            return <L.TileLayerOptions>{
+            return {
                 minZoom: layerData.minZoom || LayersService.MIN_ZOOM,
                 maxNativeZoom: layerData.maxZoom || LayersService.MAX_NATIVE_ZOOM,
                 maxZoom: LayersService.MAX_ZOOM,
                 attribution: attribution || this.defaultAttribution
-            };
+        } as L.TileLayerOptions;
         }
 
         public getData = () => {
