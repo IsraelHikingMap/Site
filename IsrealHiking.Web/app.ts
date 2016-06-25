@@ -1,4 +1,4 @@
-﻿module IsraelHiking {
+﻿namespace IsraelHiking {
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap",
         "LocalStorageModule", "googlechart", "ngAnimate",
         "toastr", "angular-loading-bar", "ngFileSaver"]);

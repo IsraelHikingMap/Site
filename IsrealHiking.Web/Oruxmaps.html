@@ -1,0 +1,57 @@
+﻿<!DOCTYPE html>
+<html ng-app="Oruxmaps">
+<head prefix="og: http://ogp.me/ns#">
+    <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+    <meta content="utf-8" http-equiv="encoding">
+    <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible" />
+    <meta property="og:site_name" content="IsraelHiking.OSM.org.il" />
+    <meta property="og:type" content="activity" />
+    <meta property="og:title" content="Israel Hiking Map" />
+    <meta property="og:image" content="http://israelhiking.osm.org.il/content/images/favicons/android-chrome-192x192.png" />
+    <meta property="og:image:url" content="http://israelhiking.osm.org.il/content/images/favicons/android-chrome-192x192.png" />
+    <meta property="og:image:secure_url" content="https://israelhiking.osm.org.il/content/images/favicons/android-chrome-192x192.png" />
+    <title>Israel Hiking Map - Oruxmaps downlaod</title>
+    <link rel="stylesheet" href="app.css" type="text/css" />
+    <meta content="utf-8" http-equiv="encoding">
+    <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible" />
+    <link rel="shortcut icon" href="/content/images/favicons/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="content/bootstrap.min.css" />
+    <script src="scripts/jquery.js"></script>
+    <script src="scripts/angular.js"></script>
+</head>
+<body ng-controller="OruxmapsController">
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <h1>
+                    <img src="https://avatars0.githubusercontent.com/u/13288969?v=3&s=200" alt="" /> Israel Hiking Map
+                </h1>
+                <h3>
+                    Install or update Israel Hiking Map for offline use with <a href="https://play.google.com/store/apps/details?id=com.orux.oruxmaps" target="_blank">OruxMaps</a>
+                </h3>
+                <p>Click on one of the links below from an Android device with OruxMaps 6.5.4 or later. The download may take several minutes, and afterwards you can enjoy the map with no need for a network connection.</p>
+                <ul>
+                    <li ng-repeat="link in links">
+                        <a ng-click="redirect(link.url)" class="cursor-pointer">{{link.description}}</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-md-6" dir="rtl">
+                <h1>
+                    <img src="https://avatars0.githubusercontent.com/u/13288969?v=3&s=200" alt="" /> מפת הטיולים החופשית
+                </h1>
+                <h3>
+                    התקנה או עדכון של מפת הטיולים החופשית לשימוש לא מקוון ב- <a href="https://play.google.com/store/apps/details?id=com.orux.oruxmaps" target="_blank">OruxMaps</a>
+                </h3>
+                <p>לחצו על אחד הקישורים הנ"ל ממכשיר אנדרואיד שבו מותקנת OruxMaps מגרסה 6.5.4 או יותר. ההורדה עשויה להמשך דקות רבות, אך בסיומה תוכלו להשתמש במפה ללא צורך בגישה לרשת.</p>
+                <ul>
+                    <li ng-repeat="link in links">
+                        <a ng-click="redirect(link.url)" class="cursor-pointer">{{link.descriptionHebrew}}</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="Oruxmaps.js"></script>
+</body>
+</html>
