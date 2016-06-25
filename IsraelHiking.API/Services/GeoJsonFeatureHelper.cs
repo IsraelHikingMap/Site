@@ -46,7 +46,8 @@ namespace IsraelHiking.API.Services
             new PropertiesData("waterway", "wadi", 1),
             new PropertiesData("boundary", "national_park", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
             new PropertiesData("boundary", "protected_area", 1),
-            new PropertiesData("leisure", "nature_reserve", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png")
+            new PropertiesData("leisure", "nature_reserve", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
+            new PropertiesData("historic", "archaeological_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_archaeological2.p.16.png")
         };
 
         private static readonly List<PropertiesData> Nodes = new List<PropertiesData>
