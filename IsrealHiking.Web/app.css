@@ -10,19 +10,6 @@ body {
     left: 0;
 }
 
-.full-page {
-    height: 100%;
-}
-
-#map {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    overflow: hidden;
-}
-
 .marker-label {
     position: absolute;
     font-size: 15px;
@@ -37,59 +24,6 @@ body {
     min-width: 200px;
 }
 
-/*---Sidebar---*/
-#sidebarContent {
-    line-height: 24px;
-    padding: 10px;
-    overflow-x: hidden;
-}
-
-#sidebarContent .row a {
-    text-decoration: none;
-    color: #999999;
-}
-
-#sidebarContent .row .active {
-    text-decoration: none;
-    color: #999999;
-    font-weight: bold;
-}
-
-#sidebarContent .row:hover {
-    text-decoration: none;
-    color: #fff;
-    background: rgba(255,255,255,0.2);
-}
-
-@media(min-width:768px) {
-    #wrapper {
-        padding-left: 0;
-    }
-
-    #wrapper.toggled {
-        padding-left: 400px;
-    }
-
-    #sidebar-wrapper {
-        width: 0;
-    }
-
-    #wrapper.toggled #sidebar-wrapper {
-        width: 400px;
-    }
-
-    #page-content-wrapper {
-        padding: 20px;
-        position: relative;
-    }
-
-    #wrapper.toggled #page-content-wrapper {
-        position: relative;
-        margin-right: -400px;
-    }
-}
-/*---Sidebar end*/
-
 .cursor-pointer {
     cursor: pointer;
 }
@@ -102,128 +36,6 @@ body {
     opacity: 0.5;
 }
 
-.bg-marker {
-    background: green;
-}
-
-.bg-blue {
-    background: #0000FF;
-}
-
-.bg-red {
-    background: #FF0000;
-}
-
-.bg-orange {
-    background: #FF6600;
-}
-
-.bg-pink {
-    background: #FF00DD;
-}
-
-.bg-green {
-    background: #008000;
-}
-
-.bg-purple {
-    background: #B700FF;
-}
-
-.bg-turquize {
-    background: #00B0A4;
-}
-
-.bg-gold {
-    background: #9C7F00;
-}
-
-.bg-brown {
-    background: #9C3E00;
-}
-
-.bg-grass {
-    background: #7F9900;
-}
-
-.bg-gray {
-    background: #7F8282;
-}
-
-.bg-dark {
-    background: #101010;
-}
-
-.fg-marker {
-    color: green;
-}
-
-.fg-blue {
-    color: #0000FF;
-}
-
-.fg-red {
-    color: #FF0000;
-}
-
-.fg-orange {
-    color: #FF6600;
-}
-
-.fg-pink {
-    color: #FF00DD;
-}
-
-.fg-green {
-    color: #008000;
-}
-
-.fg-purple {
-    color: #B700FF;
-}
-
-.fg-turquize {
-    color: #00B0A4;
-}
-
-.fg-gold {
-    color: #9C7F00;
-}
-
-.fg-brown {
-    color: #9C3E00;
-}
-
-.fg-grass {
-    color: #7F9900;
-}
-
-.fg-gray {
-    color: #7F8282;
-}
-
-.fg-dark {
-    color: #101010;
-}
-
-.axis text {
-    fill: white;
-}
-
-.axis path {
-    stroke: white !important;
-}
-
-.axis line {
-    stroke: white !important;
-}
-
-.tooltip-statistics {
-    min-width: 300px;
-    max-width: none;
-    width: 200px;
-}
-
 .icon-background {
     top: -2px;
 }
@@ -234,16 +46,8 @@ body {
     border-radius: 4px;
 }
 
-.search-results-panel {
-    max-width: 250px;
-}
-
 .chome-wordwrap-fix {
     word-wrap: break-word;
-}
-
-.search-results-item {
-    margin: 10px;
 }
 
 .help-button {
@@ -251,25 +55,9 @@ body {
     height: 28px;
 }
 
-.tooltip-inner a {
-    color: #79bdf7;
-}
-
-
-.chart-tooltip {
-    color:black; 
-    text-align:left;
-    margin: 5px;
-}
-
 .loading-segment-indicator {
     -webkit-animation: dash .4s linear infinite;
     animation: dash .4s linear infinite;
-}
-
-.table-hover > tbody > tr.active-row:hover > td,
-.active-row> td {
-    background-color: #bddef9;
 }
 
 @-webkit-keyframes dash {
@@ -292,12 +80,14 @@ body {
     }
 }
 
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+
 /* Extra Small Devices, Phones */
 @media only screen and (min-width : 480px) {
-    .tooltip-info {
-        max-width: 250px;
-    }
-
     .save-as-panel {
         max-width: 250px;
     }
@@ -305,9 +95,6 @@ body {
 
 /* Small Devices, Tablets */
 @media only screen and (min-width : 768px) {
-    .tooltip-info {
-        max-width: 600px;
-    }
     .save-as-panel {
         max-width: 300px;
     }
@@ -315,20 +102,10 @@ body {
 
 /* Medium Devices, Desktops */
 @media only screen and (min-width : 992px) {
-    .tooltip-info {
-        max-width: 600px;
-    }
 }
 
 /* Large Devices, Wide Screens */
 @media only screen and (min-width : 1200px) {
-    .tooltip-info {
-        max-width: 600px;
-    }
 }
 
-@media print {
-    .no-print {
-        display: none !important;
-    }
-}
+

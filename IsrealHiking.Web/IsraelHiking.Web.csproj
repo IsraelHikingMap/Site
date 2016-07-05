@@ -81,8 +81,13 @@
     <Content Include="content\simple-sidebar.css" />
     <Content Include="controllers\BaseMapController.js" />
     <Content Include="controllers\DrawingController.js" />
+    <Content Include="controllers\editOSM.html" />
     <Content Include="controllers\EditOSMController.js" />
     <Content Include="controllers\FileController.js" />
+    <Content Include="controllers\RouteProperties\routeProperties.css" />
+    <Content Include="controllers\routeStatistics.css" />
+    <Content Include="controllers\search.css" />
+    <Content Include="index.css" />
     <Content Include="controllers\InfoHelpController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerAddController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerEditController.js" />
@@ -142,7 +147,7 @@
     <Content Include="services\search\OverpassSearchResultsProvider.js" />
     <Content Include="services\search\SearchResultsProviderFactory.js" />
     <Content Include="services\SidebarService.js" />
-    <Content Include="views\sidebars\layersSidebar.html" />
+    <Content Include="controllers\layersSidebar.html" />
     <Content Include="_oldSite\index.html" />
     <Content Include="_oldSite\IsraelMTBmap.html" />
     <Content Include="packages.config">
@@ -181,25 +186,23 @@
     <Content Include="services\routers\RouterService.js" />
     <Content Include="services\routers\NoneRouter.js" />
     <Content Include="services\SnappingService.js" />
-    <Content Include="views\saveAs.html" />
-    <Content Include="views\layers.html" />
-    <Content Include="views\drawing.html" />
-    <Content Include="views\editOSM.html" />
-    <Content Include="views\search.html" />
-    <Content Include="views\share.html" />
-    <Content Include="views\tooltips\routeStatisticsTooltip.html" />
-    <Content Include="views\modals\legendModal.html" />
-    <Content Include="views\modals\routePropertiesModal.html" />
-    <Content Include="views\modals\layerPropertiesModal.html" />
-    <Content Include="views\infoHelp.html" />
-    <Content Include="views\file.html" />
-    <Content Include="views\sidebars\helpSidebar.html" />
-    <Content Include="views\markerPopup.html" />
-    <Content Include="views\modals\shareModal.html" />
+    <Content Include="controllers\fileSaveAs.html" />
+    <Content Include="controllers\layers.html" />
+    <Content Include="controllers\drawing.html" />
+    <Content Include="controllers\search.html" />
+    <Content Include="controllers\share.html" />
+    <Content Include="controllers\routeStatisticsTooltip.html" />
+    <Content Include="controllers\RouteProperties\routePropertiesModal.html" />
+    <Content Include="controllers\LayerProperties\layerPropertiesModal.html" />
+    <Content Include="controllers\infoHelp.html" />
+    <Content Include="controllers\file.html" />
+    <Content Include="controllers\helpSidebar.html" />
+    <Content Include="controllers\markerPopup.html" />
+    <Content Include="controllers\shareModal.html" />
     <Content Include="web.config">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="views\sidebars\infoSidebar.html" />
+    <Content Include="controllers\infoSidebar.html" />
     <None Include="OSM2012.pubxml" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>

@@ -48,51 +48,51 @@
     app.directive("disableMapMovement", [Common.Constants.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
     app.directive("markerPopup", () => ({
         controller: Controllers.MarkerPopupController,
-        templateUrl: "views/markerPopup.html"
+        templateUrl: "controllers/markerPopup.html"
     } as angular.IDirective));
     app.directive("drawingControl", () => ({
         controller: Controllers.DrawingController,
-        templateUrl: "views/drawing.html"
+        templateUrl: "controllers/drawing.html"
     } as angular.IDirective));
     app.directive("editOsmControl", () => ({
             controller: Controllers.EditOSMController,
-            templateUrl: "views/editOSM.html"
+            templateUrl: "controllers/editOSM.html"
         } as angular.IDirective));
     app.directive("fileControl", () => ({
         controller: Controllers.FileController,
-        templateUrl: "views/file.html"
+        templateUrl: "controllers/file.html"
     } as angular.IDirective));
     app.directive("infoHelpControl", () => ({
         controller: Controllers.InfoHelpController,
-        templateUrl: "views/infoHelp.html"
+        templateUrl: "controllers/infoHelp.html"
     } as angular.IDirective));
     app.directive("layersControl", () => ({
         controller: Controllers.LayersController,
-        templateUrl: "views/layers.html"
+        templateUrl: "controllers/layers.html"
     } as angular.IDirective));
     app.directive("searchControl", () => ({
         controller: Controllers.SearchController,
-        templateUrl: "views/search.html"
+        templateUrl: "controllers/search.html"
     } as angular.IDirective));
     app.directive("shareControl", () => ({
         controller: Controllers.ShareController,
-        templateUrl: "views/share.html"
+        templateUrl: "controllers/share.html"
     } as angular.IDirective));
     app.directive("saveAsControl", () => ({
         controller: Controllers.FileController,
-        templateUrl: "views/saveAs.html"
+        templateUrl: "controllers/fileSaveAs.html"
     } as angular.IDirective));
     app.directive("info", () => ({
         controller: Controllers.InfoHelpController,
-        templateUrl: "views/sidebars/infoSidebar.html"
+        templateUrl: "controllers/infoSidebar.html"
     } as angular.IDirective));
     app.directive("help", () => ({
         controller: Controllers.InfoHelpController,
-        templateUrl: "views/sidebars/helpSidebar.html"
+        templateUrl: "controllers/helpSidebar.html"
     } as angular.IDirective));
     app.directive("layersSidebar", () => ({
         controller: Controllers.LayersController,
-        templateUrl: "views/sidebars/layersSidebar.html"
+        templateUrl: "controllers/layersSidebar.html"
     } as angular.IDirective));
 
 

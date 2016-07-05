@@ -1,0 +1,27 @@
+﻿.tooltip-statistics {
+    min-width: 300px;
+    max-width: none;
+    width: 200px;
+}
+
+.axis text {
+    fill: white;
+}
+
+.axis path {
+    stroke: white !important;
+}
+
+.axis line {
+    stroke: white !important;
+}
+
+.chart-tooltip {
+    color:black; 
+    text-align:left;
+    margin: 5px;
+}
+
+.tooltip-inner a {
+    color: #79bdf7;
+}

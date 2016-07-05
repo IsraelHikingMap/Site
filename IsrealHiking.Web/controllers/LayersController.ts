@@ -107,7 +107,7 @@
         private createRoutePropertiesModal = (routePropertiesScope: RouteProperties.IRouteBaseScope, $modal): any => {
             return $modal({
                 title: "Route Properties",
-                templateUrl: "views/modals/routePropertiesModal.html",
+                templateUrl: "controllers/RouteProperties/routePropertiesModal.html",
                 show: false,
                 scope: routePropertiesScope
             });
@@ -116,7 +116,7 @@
         private showLayerModal = ($scope: LayerProperties.ILayerBaseScope, $modal, e: Event) => {
             var modal = $modal({
                 title: $scope.title,
-                templateUrl: "views/modals/layerPropertiesModal.html",
+                templateUrl: "controllers/LayerProperties/layerPropertiesModal.html",
                 show: false,
                 scope: $scope
             });

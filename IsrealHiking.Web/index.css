@@ -1,0 +1,65 @@
+﻿#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+.full-page {
+    height: 100%;
+}
+
+/*---Sidebar---*/
+#sidebarContent {
+    line-height: 24px;
+    padding: 10px;
+    overflow-x: hidden;
+}
+
+#sidebarContent .row a {
+    text-decoration: none;
+    color: #999999;
+}
+
+#sidebarContent .row .active {
+    text-decoration: none;
+    color: #999999;
+    font-weight: bold;
+}
+
+#sidebarContent .row:hover {
+    text-decoration: none;
+    color: #fff;
+    background: rgba(255,255,255,0.2);
+}
+
+@media(min-width:768px) {
+    #wrapper {
+        padding-left: 0;
+    }
+
+    #wrapper.toggled {
+        padding-left: 400px;
+    }
+
+    #sidebar-wrapper {
+        width: 0;
+    }
+
+    #wrapper.toggled #sidebar-wrapper {
+        width: 400px;
+    }
+
+    #page-content-wrapper {
+        padding: 20px;
+        position: relative;
+    }
+
+    #wrapper.toggled #page-content-wrapper {
+        position: relative;
+        margin-right: -400px;
+    }
+}
+/*---Sidebar end*/

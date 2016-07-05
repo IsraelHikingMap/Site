@@ -1,0 +1,12 @@
+﻿.search-results-panel {
+    max-width: 250px;
+}
+
+.search-results-item {
+    margin: 10px;
+}
+
+.table-hover > tbody > tr.active-row:hover > td,
+.active-row> td {
+    background-color: #bddef9;
+}
