@@ -55,8 +55,22 @@
 <body ng-controller="mainMapController" >
     <div id="wrapper" ng-class="{'toggled': getIsSidebarVisible()}" class="full-page">
         <div id="sidebar-wrapper">
-            <span class="cursor-pointer pull-right" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
-            <div id="sidebarContent"></div>
+            <div class="container-fluid">
+                <div class="sidebar-close">
+                    <span class="cursor-pointer" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
+                </div>
+                <div ng-switch on="sidebarService.viewName">
+                    <div ng-switch-when="layers">
+                        <layers-sidebar></layers-sidebar>
+                    </div>
+                    <div ng-switch-when="info">
+                        <info></info>
+                    </div>
+                    <div ng-switch-when="help">
+                        <help></help>
+                    </div>
+                </div>
+            </div>
         </div>
         <div id="page-content-wrapper" class="full-page">
             <div id="map"></div>

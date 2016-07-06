@@ -14,17 +14,17 @@
             layersService: Services.LayersService) {
             super(mapService);
             $scope.toggleInfo = (e: Event) => {
-                sidebarService.toggle("info", $scope);
+                sidebarService.toggle("info");
                 this.suppressEvents(e);
             };
 
             $scope.toggleHelp = (e: Event) => {
-                sidebarService.toggle("help", $scope);
+                sidebarService.toggle("help");
                 this.suppressEvents(e);
             }
 
             $scope.getState = (): string => {
-                return sidebarService.currentDirective;
+                return sidebarService.viewName;
             }
 
             $scope.getLegendImage = () => {

@@ -1,7 +1,9 @@
 ﻿module IsraelHiking.Controllers {
     export interface IMainMapScope extends angular.IScope {
+        sidebarService: Services.SidebarService;
         getIsSidebarVisible(): boolean;
         closeSidebar(): void;
+
     }
 
 
@@ -20,6 +22,8 @@
             this.map.panTo(hashService.latlng);
             this.$compile = $compile;
             this.createControls($scope);
+
+            $scope.sidebarService = sidebarService;
 
             $scope.getIsSidebarVisible = () => {
                 return sidebarService.isVisible;
@@ -45,7 +49,6 @@
             this.createContorl($scope, "search-control", "topright");
             this.createContorl($scope, "drawing-control", "topright");
             this.createContorl($scope, "share-control", "topright");
-            
 
             L.control.scale({ imperial: false } as L.ScaleOptions).addTo(this.map);
         }

@@ -1,30 +1,25 @@
 ﻿module IsraelHiking.Services {
 
     export class SidebarService {
-        private $compile: angular.ICompileService;
-        public currentDirective: string;
+        public viewName: string;
         public isVisible: boolean;
 
-        constructor($compile: angular.ICompileService) {
-            this.$compile = $compile;
+        constructor() {
             this.hide();
         }
 
-        public toggle = (directiveHtmlName: string, scope: angular.IScope) => {
-            if (this.currentDirective === directiveHtmlName) {
+        public toggle = (viewName: string) => {
+            if (this.viewName === viewName) {
                 this.hide();
                 return;
             }
             this.isVisible = true;
-            this.currentDirective = directiveHtmlName;
-            var html = this.$compile(`<${directiveHtmlName}></${directiveHtmlName}>`)(scope)[0];
-            // HM TODO?: remove the need to know the id of the html element.
-            angular.element("#sidebarContent").empty().append(html);
+            this.viewName = viewName;
         }
 
         public hide = () => {
             this.isVisible = false;
-            this.currentDirective = "";
+            this.viewName = "";
         }
     }
 }

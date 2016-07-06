@@ -11,25 +11,30 @@
     height: 100%;
 }
 
-/*---Sidebar---*/
-#sidebarContent {
+.sidebar-close {
+    position: absolute;
+    right: 5px;
+    top: 0;
+    z-index: 100;
+}
+
+#sidebar-wrapper {
     line-height: 24px;
-    padding: 10px;
     overflow-x: hidden;
+    color: #999999
 }
 
-#sidebarContent .row a {
-    text-decoration: none;
-    color: #999999;
+#sidebar-wrapper .divider {
+    border-color: #999999;
+    margin-top: 5px;
+    margin-bottom: 5px;
 }
 
-#sidebarContent .row .active {
-    text-decoration: none;
-    color: #999999;
+#sidebar-wrapper .row.active {
     font-weight: bold;
 }
 
-#sidebarContent .row:hover {
+#sidebar-wrapper .row:hover {
     text-decoration: none;
     color: #fff;
     background: rgba(255,255,255,0.2);
@@ -62,4 +67,3 @@
         margin-right: -400px;
     }
 }
-/*---Sidebar end*/

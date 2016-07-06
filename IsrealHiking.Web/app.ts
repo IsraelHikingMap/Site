@@ -8,7 +8,7 @@
     // Services:
     app.service(Common.Constants.mapService, [() => new Services.MapService()]);
     app.service(Common.Constants.parserFactory, [() => new Services.Parsers.ParserFactory()]);
-    app.service(Common.Constants.sidebarService, [Common.Constants.compile, ($compile: angular.ICompileService) => new Services.SidebarService($compile)]);
+    app.service(Common.Constants.sidebarService, [() => new Services.SidebarService()]);
     app.service(Common.Constants.searchResultsProviderFactory, [Common.Constants.http, Common.Constants.q,
         ($http: angular.IHttpService, $q: angular.IQService) =>
             new Services.Search.SearchResultsProviderFactory($http, $q)]);

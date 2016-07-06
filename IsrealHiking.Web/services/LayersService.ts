@@ -313,7 +313,6 @@ module IsraelHiking.Services {
                 this.setData(data, true);
                 this.addBaseLayerFromHash(data.baseLayer);
                 this.hashService.clear();
-                console.log(this.localStorageService.get(LayersService.ACTIVE_OVERLAYS_KEY));
                 for (let overlayKey of (this.localStorageService.get(LayersService.ACTIVE_OVERLAYS_KEY) || []) as string[]) {
                     let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
                     if (overlay && overlay.visible === false) {

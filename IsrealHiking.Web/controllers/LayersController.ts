@@ -99,7 +99,7 @@
             }
 
             $scope.toggleShow = (e: Event) => {
-                sidebarService.toggle("layers-sidebar", $scope);
+                sidebarService.toggle("layers");
                 this.suppressEvents(e);
             }
         }
