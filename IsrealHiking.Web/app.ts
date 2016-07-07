@@ -82,11 +82,15 @@
         controller: Controllers.FileController,
         templateUrl: "controllers/fileSaveAs.html"
     } as angular.IDirective));
-    app.directive("info", () => ({
+    app.directive("zoomControl", () => ({
+        controller: Controllers.ZoomController,
+        templateUrl: "controllers/zoom.html"
+    } as angular.IDirective));
+    app.directive("infoSidebar", () => ({
         controller: Controllers.InfoHelpController,
         templateUrl: "controllers/infoSidebar.html"
     } as angular.IDirective));
-    app.directive("help", () => ({
+    app.directive("helpSidebar", () => ({
         controller: Controllers.InfoHelpController,
         templateUrl: "controllers/helpSidebar.html"
     } as angular.IDirective));
@@ -94,7 +98,6 @@
         controller: Controllers.LayersController,
         templateUrl: "controllers/layersSidebar.html"
     } as angular.IDirective));
-
 
     app.run(["googleChartApiPromise", () => {
         angular.element("link[type*=icon]").detach().appendTo("head");

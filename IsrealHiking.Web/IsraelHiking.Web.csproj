@@ -87,6 +87,8 @@
     <Content Include="controllers\RouteProperties\routeProperties.css" />
     <Content Include="controllers\routeStatistics.css" />
     <Content Include="controllers\search.css" />
+    <Content Include="controllers\zoom.html" />
+    <Content Include="controllers\ZoomController.js" />
     <Content Include="index.css" />
     <Content Include="controllers\InfoHelpController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerAddController.js" />
@@ -230,6 +232,7 @@
     <TypeScriptCompile Include="controllers\RouteStatisticsController.ts" />
     <TypeScriptCompile Include="controllers\SearchController.ts" />
     <TypeScriptCompile Include="controllers\ShareController.ts" />
+    <TypeScriptCompile Include="controllers\ZoomController.ts" />
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
     <TypeScriptCompile Include="directives\DraggableMovableDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />

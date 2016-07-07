@@ -64,10 +64,10 @@
                         <layers-sidebar></layers-sidebar>
                     </div>
                     <div ng-switch-when="info">
-                        <info></info>
+                        <info-sidebar></info-sidebar>
                     </div>
                     <div ng-switch-when="help">
-                        <help></help>
+                        <help-sidebar></help-sidebar>
                     </div>
                 </div>
             </div>
@@ -150,6 +150,7 @@
     <script src="controllers/LayerProperties/BaseLayerEditController.js"></script>
     <script src="controllers/LayerProperties/OverlayAddController.js"></script>
     <script src="controllers/LayerProperties/OverlayEditController.js"></script>
+    <script src="controllers/ZoomController.js"></script>
     <!-- Load directives -->
     <script src="directives/SyncFocusWithDirective.js"></script>
     <script src="directives/DraggableMovableDirective.js"></script>

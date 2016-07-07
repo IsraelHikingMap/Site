@@ -3,9 +3,7 @@
         sidebarService: Services.SidebarService;
         getIsSidebarVisible(): boolean;
         closeSidebar(): void;
-
     }
-
 
     export class MainMapcontoller extends BaseMapController {
         $compile: angular.ICompileService;
@@ -39,7 +37,9 @@
         }
 
         private createControls = ($scope: angular.IRootScopeService) => {
-            (L as any).control.locate({ icon: "fa fa-crosshairs", keepCurrentZoomLevel: true, follow: true }).addTo(this.map);
+            this.createContorl($scope, "zoom-control");
+
+            (L as any).control.locate({ compile: this.$compile, scope: $scope.$new(), icon: "fa fa-location-arrow", keepCurrentZoomLevel: true, follow: true }).addTo(this.map);
 
             this.createContorl($scope, "layers-control");
             this.createContorl($scope, "file-control");
