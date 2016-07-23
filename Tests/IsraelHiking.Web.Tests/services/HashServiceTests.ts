@@ -43,9 +43,9 @@ module IsraelHiking.Tests {
             hashService = new Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
-            expect(dataContainer.markers.length).toBe(2);
-            expect(dataContainer.markers[0].title).toBe("title");
-            expect(dataContainer.markers[1].latlng.lat).toBe(2);
+            expect(dataContainer.routes[0].markers.length).toBe(2);
+            expect(dataContainer.routes[0].markers[0].title).toBe("title");
+            expect(dataContainer.routes[0].markers[1].latlng.lat).toBe(2);
         });
 
         it("Should be tolerant to points with single coordinate in search", () => {
@@ -54,11 +54,11 @@ module IsraelHiking.Tests {
             hashService = new Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
-            expect(dataContainer.markers.length).toBe(1);
-            expect(dataContainer.markers[0].latlng.lat).toBe(2);
+            expect(dataContainer.routes[0].markers.length).toBe(1);
+            expect(dataContainer.routes[0].markers[0].latlng.lat).toBe(2);
         });
 
-        it("Should initialize a route from search", () => {
+        it("Should initialize a routes from search", () => {
             $location.search({ route_1: "h,1,2;b,3,4", route2: "h,5,6:f,7,8" });
 
             hashService = new Services.HashService($location, $rootScope, localStorageService);
@@ -66,11 +66,25 @@ module IsraelHiking.Tests {
             let dataContainer = hashService.getDataContainer();
             expect(dataContainer.routes.length).toBe(2);
             expect(dataContainer.routes[0].name).toBe("route 1");
-            expect(dataContainer.routes[0].segments[0].routePoint.lat).toBe(1);
-            expect(dataContainer.routes[0].segments[1].routePoint.lng).toBe(4);
+            expect(dataContainer.routes[0].segments[0].routePoint.latlng.lat).toBe(1);
+            expect(dataContainer.routes[0].segments[1].routePoint.latlng.lng).toBe(4);
             expect(dataContainer.routes[1].name).toBe("route2");
-            expect(dataContainer.routes[1].segments[0].routePoint.lng).toBe(6);
-            expect(dataContainer.routes[1].segments[1].routePoint.lat).toBe(7);
+            expect(dataContainer.routes[1].segments[0].routePoint.latlng.lng).toBe(6);
+            expect(dataContainer.routes[1].segments[1].routePoint.latlng.lat).toBe(7);
+        });
+
+        it("Should initialize markers and routes from search", () => {
+            $location.search({ markers: "1,1,title;2,2", route_1: "h,1,2;b,3,4" });
+
+            hashService = new Services.HashService($location, $rootScope, localStorageService);
+
+            let dataContainer = hashService.getDataContainer();
+            expect(dataContainer.routes[0].name).toBe("route 1");
+            expect(dataContainer.routes[0].segments[0].routePoint.latlng.lng).toBe(2);
+            expect(dataContainer.routes[0].segments[1].routePoint.latlng.lat).toBe(3);
+            expect(dataContainer.routes[0].markers.length).toBe(2);
+            expect(dataContainer.routes[0].markers[0].title).toBe("title");
+            expect(dataContainer.routes[0].markers[1].latlng.lat).toBe(2);
         });
 
         it("Should initialize a baselayer address from search", () => {
@@ -100,7 +114,6 @@ module IsraelHiking.Tests {
 
             let dataContainer = hashService.getDataContainer();
             expect(dataContainer.baseLayer).toBeUndefined();
-            expect(dataContainer.markers.length).toBe(0);
             expect(dataContainer.routes.length).toBe(0);
         });
 

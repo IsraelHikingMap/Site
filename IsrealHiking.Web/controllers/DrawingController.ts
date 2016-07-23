@@ -1,123 +1,130 @@
 ﻿module IsraelHiking.Controllers {
     export interface IDrawingScope extends angular.IScope {
         clear(e: Event): void;
-        toggleDrawing(e: Event): void;
+        setEditMode(editMode: string, e: Event): void;
+        getEditMode(): string;
         toggleRouting(routingType: string, e: Event): void;
-        undo(e: Event): void;
-        isDrawingEnabled(): boolean;
         getRoutingType(): string;
+        
+        undo(e: Event): void;
         isUndoDisbaled(): boolean;
-        showRouting(): boolean;
         openStatistics(e: Event): void;
         isStatisticsOpen(): boolean;
     }
 
     export class DrawingController extends BaseMapControllerWithToolTip {
+        private localStorageService: angular.local.storage.ILocalStorageService;
         private layersService: Services.LayersService;
-        private selectedDrawing: Services.Drawing.IDrawing;
         private routeStatisticsTooltip;
+        private static ESCAPE_KEYCODE = 27;
 
         constructor($scope: IDrawingScope,
             $tooltip,
+            $window: angular.IWindowService,
+            localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
-            layersService: Services.LayersService,
-            snappingService:  Services.SnappingService) {
+            layersService: Services.LayersService) {
             super(mapService, $tooltip);
+            this.localStorageService = localStorageService;
             this.layersService = layersService;
-            this.selectedDrawing = this.layersService.getSelectedDrawing();
             this.routeStatisticsTooltip = null;
 
-            this.layersService.eventHelper.addListener(() => {
-                this.selectedDrawing = this.layersService.getSelectedDrawing();
-                snappingService.enable(this.selectedDrawing.isEnabled());
-            });
-
             $scope.clear = (e: Event) => {
-                this.selectedDrawing.clear();
                 this.suppressEvents(e);
+                if (this.layersService.getSelectedRoute() == null) {
+                    return;
+                }
+                this.layersService.getSelectedRoute().clear();
             }
 
-            $scope.toggleDrawing = (e: Event) => {
-                if (this.selectedDrawing.isEnabled()) {
-                    this.selectedDrawing.enable(false);
-                }
-                else {
-                    this.selectedDrawing.enable(true);
-                }
+            $scope.setEditMode = (editMode: string, e: Event) => {
                 this.suppressEvents(e);
+                let selectedRoute = this.layersService.getSelectedRoute();
+                if (selectedRoute == null) {
+                    return;
+                }
+                if (selectedRoute.getEditMode() === editMode)
+                {
+                    selectedRoute.readOnly();
+                }
+                else if (editMode === Services.Layers.RouteLayers.EditMode.ROUTE) {
+                    selectedRoute.editRoute();
+                }
+                else if (editMode === Services.Layers.RouteLayers.EditMode.POI) {
+                    selectedRoute.editPoi();
+                }
             };
 
             $scope.toggleRouting = (routingType: string, e: Event) => {
-                if (this.selectedDrawing.getRoutingType() === routingType) {
-                    this.selectedDrawing.setRoutingType(Common.RoutingType.none);
-                } else {
-                    this.selectedDrawing.setRoutingType(routingType);
-                }
                 this.suppressEvents(e);
+                if (this.layersService.getSelectedRoute() == null) {
+                    return;
+                }
+                this.localStorageService.set(Services.Layers.RouteLayers.RouteLayerFactory.ROUTING_TYPE, routingType);
+                this.layersService.getSelectedRoute().setRoutingType(routingType);
             };
 
             $scope.undo = (e: Event) => {
-                this.selectedDrawing.undo();
                 this.suppressEvents(e);
+                if (this.layersService.getSelectedRoute() == null) {
+                    return;
+                }
+                this.layersService.getSelectedRoute().undo();
+                
             };
 
-            $scope.isDrawingEnabled = (): boolean => {
-                if (this.selectedDrawing == null) {
-                    return false;
+            $scope.getEditMode = (): string => {
+                if (this.layersService.getSelectedRoute() == null) {
+                    return Services.Layers.RouteLayers.EditMode.NONE;
                 }
-                return this.selectedDrawing.isEnabled();
+                return this.layersService.getSelectedRoute().getEditMode();
             };
 
             $scope.getRoutingType = (): string => {
-                if (this.selectedDrawing == null) {
-                    return Common.RoutingType.hike;
+                if (this.layersService.getSelectedRoute() == null) {
+                    return Common.RoutingType.none;
                 }
-                return this.selectedDrawing.getRoutingType();
+                return this.layersService.getSelectedRoute().getRouteProperties().currentRoutingType;
             };
 
             $scope.isUndoDisbaled = (): boolean => {
-                if (this.selectedDrawing == null) {
-                    return false;
+                if (this.layersService.getSelectedRoute() == null) {
+                    return true;
                 }
-                return this.selectedDrawing.isUndoDisbaled();
+                return this.layersService.getSelectedRoute().isUndoDisbaled();
             };
 
-            $scope.showRouting = (): boolean => {
-                if (this.selectedDrawing == null) {
-                    return false;
-                }
-                return this.selectedDrawing.name !== Common.Constants.MARKERS;
-            }
-
             $scope.openStatistics = (e: Event) => {
-                if (this.routeStatisticsTooltip == null) {
-                    var newScope = <IRouteStatisticsScope>$scope.$new();
-                    var controller = new RouteStatisticsController(newScope, this.layersService, mapService); // updates the new scope
-                    
-                    this.routeStatisticsTooltip = this.createToolTip(e.target, "controllers/routeStatisticsTooltip.html", "Route Statistics", newScope);
-                    this.routeStatisticsTooltip.$promise.then(this.routeStatisticsTooltip.show);
-                }
                 this.suppressEvents(e);
+                if (this.routeStatisticsTooltip != null || this.layersService.getSelectedRoute() == null) {
+                    return;
+                }
+                var newScope = $scope.$new() as IRouteStatisticsScope;
+                var controller = new RouteStatisticsController(newScope, this.layersService, mapService); // updates the new scope
+                    
+                this.routeStatisticsTooltip = this.createToolTip(e.target, "controllers/routeStatisticsTooltip.html", "Route Statistics", newScope);
+                this.routeStatisticsTooltip.$promise.then(this.routeStatisticsTooltip.show);
             }
 
             $scope.isStatisticsOpen = () => {
                 return this.routeStatisticsTooltip != null && this.routeStatisticsTooltip.$isShown;
             }
 
-            document.onkeydown = (e: KeyboardEvent) => {
-                if (e.keyCode === 90 && e.ctrlKey) { // ctrl+Z
-                    this.selectedDrawing.undo();
+            angular.element($window).bind("keydown", (e: JQueryEventObject) => {
+                if (this.layersService.getSelectedRoute() == null) {
+                    return;
                 }
-                else if (e.keyCode === 27) { // escape
-                    this.selectedDrawing.enable(false);
-                }
-                else {
+                if (e.ctrlKey && String.fromCharCode(e.which).toLowerCase() === "z") {
+                    this.layersService.getSelectedRoute().undo();
+                } else if (e.keyCode === DrawingController.ESCAPE_KEYCODE) {
+                    this.layersService.getSelectedRoute().readOnly();
+                } else {
                     return;
                 }
                 if (!$scope.$$phase) {
                     $scope.$apply();
                 }
-            };
+            });
         }
     }
 }

@@ -26,7 +26,7 @@
     }
 
     export interface RouteSegmentData {
-        routePoint: L.LatLng;
+        routePoint: MarkerData;
         latlngzs: LatLngZ[];
         routingType: string;
     }
@@ -34,11 +34,10 @@
     export interface RouteData {
         name: string;
         segments: RouteSegmentData[];
+        markers: MarkerData[];
     }
-
     export interface DataContainer {
         routes: RouteData[];
-        markers: MarkerData[];
         baseLayer: LayerData;
         overlays: LayerData[];
         northEast: L.LatLng;

@@ -28,7 +28,7 @@
             this.localStorageService = localStorageService;
             this.latlng = this.localStorageService.get<L.LatLng>(HashService.LATLNG_KEY) || new L.LatLng(31.773, 35.12);
             this.zoom = this.localStorageService.get<number>(HashService.ZOOM_KEY) || 13;
-            this.dataContainer = <Common.DataContainer> { markers: [], routes: [] };
+            this.dataContainer = { routes: [] } as Common.DataContainer;
             this.searchTerm = "";
             this.addDataFromUrl();
             this.updateUrl();
@@ -69,7 +69,8 @@
         private stringToRoute = (data: string, name: string): Common.RouteData => {
             return {
                 name: name,
-                segments: this.stringToRouteSegments(data)
+                segments: this.stringToRouteSegments(data),
+                markers: []
             } as Common.RouteData;
         }
 
@@ -100,7 +101,7 @@
                 if (pointStrings.length === 3) {
                     array.push({
                         latlngzs: [],
-                        routePoint: new L.LatLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])),
+                        routePoint: { latlng: new L.LatLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])) },
                         routingType: pointStrings[0]
                     } as Common.RouteSegmentData);
                 }
@@ -122,14 +123,14 @@
         }
 
         private urlStringToDataContainer(searchObject: any): Common.DataContainer {
-            var data = {
-                markers: [],
+            let data = {
                 routes: []
             } as Common.DataContainer;
+            let markers = [];
             for (let parameter in searchObject) {
                 if (searchObject.hasOwnProperty(parameter)) {
                     if (parameter === Common.Constants.MARKERS) {
-                        data.markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || []);
+                        markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || []);
                         continue;
                     }
                     if (parameter === HashService.BASE_LAYER) {
@@ -141,6 +142,12 @@
                     data.routes.push(this.stringToRoute(searchObject[parameter], parameter.split("_").join(" ")));
                 }
             }
+            if (data.routes.length === 0 && markers.length > 0) {
+                data.routes.push({ name: Common.Constants.MARKERS, markers: markers, segments: []});
+            } else if (data.routes.length > 0 && markers.length > 0){
+                data.routes[0].markers = markers;    
+            }
+
             return data;
         }
 

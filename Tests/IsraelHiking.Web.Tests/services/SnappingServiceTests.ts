@@ -70,6 +70,7 @@ module IsraelHiking.Tests {
             mapService.map.setZoom(14); // this fires moveend
 
             expect(snappingService.snappings.getLayers().length).toBe(0);
+            expect(snappingService.isEnabled()).toBe(false);
         });
 
         it("Should clear snappings layer when zoom is less than 14", () => {

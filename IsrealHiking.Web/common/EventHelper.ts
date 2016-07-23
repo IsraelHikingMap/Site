@@ -1,7 +1,4 @@
 ﻿module IsraelHiking.Common {
-    export interface IDataChangedEventArgs {
-        //applyToScope: boolean;
-    }
 
     export class EventHelper<TData> {
         private listeners: ((data: TData) => void)[];
@@ -15,7 +12,7 @@
         }
         removeListener(delegate: (data: TData) => void) {
             var index = this.listeners.indexOf(delegate);
-            if (index != -1) {
+            if (index !== -1) {
                 this.listeners.splice(index, 1);
             }
         }

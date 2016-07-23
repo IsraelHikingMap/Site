@@ -48,7 +48,6 @@ namespace IsraelHiking.API.Services
             var container = _gpxDataContainerConverter.ToDataContainer(gpx);
             if (gpx.creator != DataContainer.ISRAEL_HIKING_MAP)
             {
-                // HM TODO: routing type is incomplete - make this better?
                 container.routes = ManipulateRoutesData(container.routes, "h");
             }
             return container;

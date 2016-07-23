@@ -9,9 +9,9 @@
     app.service(Common.Constants.mapService, [() => new Services.MapService()]);
     app.service(Common.Constants.parserFactory, [() => new Services.Parsers.ParserFactory()]);
     app.service(Common.Constants.sidebarService, [() => new Services.SidebarService()]);
-    app.service(Common.Constants.searchResultsProviderFactory, [Common.Constants.http, Common.Constants.q,
-        ($http: angular.IHttpService, $q: angular.IQService) =>
-            new Services.Search.SearchResultsProviderFactory($http, $q)]);
+    app.service(Common.Constants.searchResultsProviderFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.parserFactory,
+        ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
+            new Services.Search.SearchResultsProviderFactory($http, $q, parserFactory)]);
     app.service(Common.Constants.microsoftElevationProvider, [Common.Constants.http, Common.Constants.toastr,
         ($http: angular.IHttpService, toastr: Toastr) =>
             new Services.Elevation.MicrosoftElevationProvider($http, toastr)]);
@@ -27,16 +27,16 @@
     app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory, Common.Constants.toastr,
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
             new Services.SnappingService($http, mapService, parserFactory, toastr)]);
-    app.service(Common.Constants.drawingFactory,
-        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.localStorageService, Common.Constants.mapService, Common.Constants.routerService, Common.Constants.hashService, Common.Constants.snappingService, Common.Constants.elevationProvider,
-            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, localStorageService:angular.local.storage.ILocalStorageService, mapService: Services.MapService, routerService: Services.Routers.RouterService, hashService: Services.HashService, snappingService: Services.SnappingService, elevationProvider: Services.Elevation.IElevationProvider) =>
-                new Services.Drawing.DrawingFactory($q, $compile, $rootScope, localStorageService, mapService, routerService, hashService, snappingService, elevationProvider)]);
+    app.service(Common.Constants.routeLayerFactory,
+        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.timeout, Common.Constants.localStorageService, Common.Constants.mapService, Common.Constants.routerService, Common.Constants.snappingService, Common.Constants.elevationProvider,
+            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, $timeout: angular.ITimeoutService, localStorageService: angular.local.storage.ILocalStorageService, mapService: Services.MapService, routerService: Services.Routers.RouterService, snappingService: Services.SnappingService, elevationProvider: Services.Elevation.IElevationProvider) =>
+                new Services.Layers.RouteLayers.RouteLayerFactory($q, $compile, $rootScope, $timeout, localStorageService, mapService, routerService, snappingService, elevationProvider)]);
     app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.localStorageService,
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
-    app.service(Common.Constants.layersService, [Common.Constants.http, Common.Constants.window, Common.Constants.mapService, Common.Constants.localStorageService, Common.Constants.drawingFactory, Common.Constants.hashService,
-        ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, drawingFactory: Services.Drawing.DrawingFactory, hashService: Services.HashService) =>
-            new Services.LayersService($http, $window, mapService, localStorageService, drawingFactory, hashService)]);
+    app.service(Common.Constants.layersService, [Common.Constants.http, Common.Constants.window, Common.Constants.mapService, Common.Constants.localStorageService, Common.Constants.routeLayerFactory, Common.Constants.hashService,
+        ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService) =>
+            new Services.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService)]);
 
     app.controller(Common.Constants.mainMapController, [Common.Constants.scope, Common.Constants.compile, Common.Constants.mapService, Common.Constants.hashService, Common.Constants.sidebarService,
         ($scope: Controllers.IMainMapScope, $compile: angular.ICompileService, mapService: Services.MapService, hashService: Services.HashService, sidebarService: Services.SidebarService )=>

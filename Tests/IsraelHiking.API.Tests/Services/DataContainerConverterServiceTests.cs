@@ -99,7 +99,6 @@ namespace IsraelHiking.API.Tests.Services
         {
             var results = _converterService.ToDataContainer(new gpxType().ToBytes(), "gpx").Result;
 
-            Assert.AreEqual(0, results.markers.Count);
             Assert.AreEqual(0, results.routes.Count);
         }
 

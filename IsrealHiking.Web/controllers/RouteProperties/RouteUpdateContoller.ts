@@ -1,7 +1,5 @@
 ﻿module IsraelHiking.Controllers.RouteProperties {
     export interface IRouteUpdateScope extends IRouteBaseScope {
-        isVisible: boolean;
-        isRoutingPerPoint: boolean;
         isReversed: boolean;
         toggleVisibility(e: Event): void;
         deleteRoute(e: Event): void;
@@ -19,60 +17,36 @@
             toastr: Toastr,
             name: string) {
             super($scope, mapService);
-            var route = layersService.getRouteByName(name);
-            var options = route.getPathOptions();
-            $scope.name = name;
+            let routeLayer = layersService.getRouteByName(name);
+            $scope.routeProperties = angular.copy(routeLayer.getRouteProperties());
             $scope.isNew = false;
-            $scope.weight = options.weight;
-            $scope.color = _.find(Common.Constants.COLORS, c => c.value === options.color);
-            $scope.isVisible = route.state !== Services.Drawing.DrawingState.hidden;
-            $scope.isRoutingPerPoint = route.getIsRoutingPerPoint();
             $scope.isReversed = false;
-            $scope.toggleVisibility = (e: Event) => {
-                $scope.isVisible = !$scope.isVisible;
-                this.suppressEvents(e);
-            }
-            $scope.saveRoute = (newName: string, weight: number, e: Event) => {
-                if (newName !== route.name && layersService.isNameAvailable(newName)) {
-                    route.setName(newName);
-                } else if (newName !== route.name && layersService.isNameAvailable(newName) === false) {
+
+            $scope.saveRoute = (e: Event) => {
+                if ($scope.routeProperties.name !== routeLayer.getRouteProperties().name && layersService.isNameAvailable($scope.routeProperties.name) === false) {
                     toastr.error("The route name is already in use, please select another name.", "Route Name");
-                }
-                if ($scope.isVisible && route.state === Services.Drawing.DrawingState.hidden) {
-                    route.changeStateTo(Services.Drawing.DrawingState.inactive);
-                } else if ($scope.isVisible === false) {
-                    route.changeStateTo(Services.Drawing.DrawingState.hidden);
+                } 
+                if ($scope.routeProperties.isVisible !== routeLayer.getRouteProperties().isVisible) {
+                    layersService.changeRouteState(routeLayer);
                 }
                 if ($scope.isReversed) {
-                    route.reverse();
+                    routeLayer.reverse();
                 }
-                route.setPathOptions({ color: $scope.color.value, weight: weight } as L.PathOptions);
-                route.setIsRoutingPerPoint($scope.isRoutingPerPoint);
+                routeLayer.setRouteProperties($scope.routeProperties);
                 this.suppressEvents(e);
             }
             $scope.deleteRoute = (e: Event) => {
-                layersService.removeRoute(route.name);
+                layersService.removeRoute(routeLayer.getRouteProperties().name);
                 this.suppressEvents(e);
             }
-            $scope.saveRouteToFile = (e: Event): void=> {
+            $scope.saveRouteToFile = (e: Event): void => {
                 var data = {
-                    markers: [],
-                    routes: [route.getData()]
+                    routes: [routeLayer.getData()]
                 } as Common.DataContainer;
-                fileService.saveToFile(route.name + ".gpx", "gpx", data)
+                fileService.saveToFile($scope.routeProperties.name + ".gpx", "gpx", data)
                     .then(() => {}, () => {
                         toastr.error("Unable to save route to file...");
                     });
-                this.suppressEvents(e);
-            }
-
-            $scope.reverseRoute = (e: Event) => {
-                $scope.isReversed = !$scope.isReversed;
-                this.suppressEvents(e);
-            }
-
-            $scope.toggleRoutingPerPoint = (e: Event) => {
-                $scope.isRoutingPerPoint = !$scope.isRoutingPerPoint;
                 this.suppressEvents(e);
             }
         }

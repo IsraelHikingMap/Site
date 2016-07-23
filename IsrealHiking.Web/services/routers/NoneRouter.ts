@@ -13,7 +13,7 @@
             var latlngzEnd = latlngEnd as Common.LatLngZ;
             latlngzEnd.z = 0;
             emptyReturn.push({
-                routePoint: latlngEnd,
+                routePoint: { latlng: latlngEnd, title: "" } as Common.MarkerData,
                 latlngzs: [latlngzStart, latlngzEnd],
                 routingType: Common.RoutingType.none,
             } as Common.RouteSegmentData);

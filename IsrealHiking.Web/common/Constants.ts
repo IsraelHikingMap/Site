@@ -10,10 +10,11 @@
         public static compile = "$compile";
         public static injector = "$injector";
         public static window = "$window";
+        public static timeout = "$timeout";
         public static parserFactory = "parserFactory";
         public static searchResultsProviderFactory = "searchResultsProviderFactory";
         public static routerService = "routerService";
-        public static drawingFactory = "drawingFactory";
+        public static routeLayerFactory = "routeLayerFactory";
         public static hashService = "hashService";
         public static mapService = "mapService";
         public static layersService = "layersService";

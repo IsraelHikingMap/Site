@@ -42,10 +42,10 @@ module IsraelHiking.Tests {
         });
 
         it("Should open from url", () => {
-            $httpBackend.whenGET(Common.Urls.files + "?url=url").respond({ markers: [{} as Common.MarkerData] } as Common.DataContainer);
+            $httpBackend.whenGET(Common.Urls.files + "?url=url").respond({ routes: [{ markers: [{} as Common.MarkerData] }] } as Common.DataContainer);
 
             fileService.openFromUrl("url")
-                .success((data) => expect(data.markers.length).toBe(1));
+                .success((data) => expect(data.routes[0].markers.length).toBe(1));
 
             $httpBackend.flush();
         });

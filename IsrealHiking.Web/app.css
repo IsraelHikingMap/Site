@@ -13,7 +13,6 @@ body {
 .marker-label {
     position: absolute;
     font-size: 15px;
-    color: green;
     background: white;
     padding: 3px;
     border-radius: 6px;

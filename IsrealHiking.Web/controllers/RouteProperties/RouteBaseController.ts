@@ -1,12 +1,10 @@
 ﻿module IsraelHiking.Controllers.RouteProperties {
     export interface IRouteBaseScope extends angular.IScope {
-        name: string;
-        weight: number;
-        color: { key: string, value: string };
-        colors: {key: string, value: string}[];
+        routeProperties: Services.Layers.RouteLayers.IRouteProperties;
+        colors: { key: string, value: string }[];
         isNew: boolean;
-        setColor(color: { key: string, value: string }, e: Event);
-        saveRoute(name: string, weight: number, e: Event);
+        getColorName(colorValue: string): string;
+        saveRoute(e: Event);
     }
 
     export class RouteBaseController extends BaseMapController {
@@ -15,9 +13,8 @@
             super(mapService);
             $scope.colors = Common.Constants.COLORS;
 
-            $scope.setColor = (color: { key: string, value: string }, e: Event) => {
-                $scope.color = color;
-                this.suppressEvents(e);
+            $scope.getColorName = (colorValue: string): string => {
+                return _.find(Common.Constants.COLORS, c => c.value === colorValue).key;
             }
         }
     }

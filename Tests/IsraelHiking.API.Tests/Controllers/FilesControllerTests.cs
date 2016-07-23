@@ -64,12 +64,13 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = "someurl";
             byte[] bytes = Encoding.ASCII.GetBytes(GPX_DATA);
             _removeFileFetcherGateway.GetFileContent(url).Returns(Task.FromResult(new RemoteFileFetcherGatewayResponse { Content = bytes, FileName = "file.KML" }));
-            _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Is<string>(x=> x.Contains("kml")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(Task.FromResult(bytes));
+            _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Is<string>(x => x.Contains("kml")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(Task.FromResult(bytes));
 
             var dataContainer = _controller.GetRemoteFile(url).Result;
 
             Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
+            //Assert.AreEqual(1, dataContainer.markers.Count);
         }
 
         [TestMethod]
@@ -77,17 +78,21 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var dataContainer = new DataContainer
             {
-                markers = new List<MarkerData> {new MarkerData
-                {
-                    latlng = new LatLng {lat = 10, lng = 10}, title = "title"
-                }},
                 routes = new List<RouteData>
                 {
                     new RouteData
                     {
                         segments = new List<RouteSegmentData>
                         {
-                            new RouteSegmentData { latlngzs =  new List<LatLngZ> {  new LatLngZ()} }
+                            new RouteSegmentData {latlngzs = new List<LatLngZ> {new LatLngZ()}}
+                        },
+                        markers = new List<MarkerData>
+                        {
+                            new MarkerData
+                            {
+                                latlng = new LatLng {lat = 10, lng = 10},
+                                title = "title"
+                            }
                         }
                     }
                 }
@@ -126,10 +131,11 @@ namespace IsraelHiking.API.Tests.Controllers
             var results = _controller.PostOpenFile().Result as OkNegotiatedContentResult<DataContainer>;
             var dataContainer = results.Content;
 
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            //Assert.AreEqual(1, dataContainer.markers.Count);
             Assert.AreEqual(1, dataContainer.routes.Count);
             Assert.AreEqual(1, dataContainer.routes.First().segments.Count);
             Assert.AreEqual(5, dataContainer.routes.First().segments.First().latlngzs.Count);
+            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
         }
     }
 }

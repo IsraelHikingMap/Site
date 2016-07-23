@@ -19,7 +19,7 @@
             var address = Common.Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng + "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + profile;
             var deferred = this.$q.defer();
             var noneRouter = new NoneRouter(this.$q);
-            this.$http.get(address, <angular.IRequestShortcutConfig> { timeout: 4500 })
+            this.$http.get(address, { timeout: 4500 } as angular.IRequestShortcutConfig)
                 .success((geojson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>) => {
                     var failed = false;
                     let data = null;

@@ -30,14 +30,10 @@
     margin-bottom: 5px;
 }
 
-#sidebar-wrapper .row.active {
-    font-weight: bold;
-}
-
 #sidebar-wrapper .row:hover {
     text-decoration: none;
     color: #fff;
-    background: rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.3);
 }
 
 @media(min-width:768px) {

@@ -52,7 +52,7 @@
     <script src="scripts/jquery.js"></script>
     <script src="scripts/angular.js"></script>
 </head>
-<body ng-controller="mainMapController" >
+<body ng-controller="mainMapController">
     <div id="wrapper" ng-class="{'toggled': getIsSidebarVisible()}" class="full-page">
         <div id="sidebar-wrapper">
             <div class="container-fluid">
@@ -61,13 +61,13 @@
                 </div>
                 <div ng-switch on="sidebarService.viewName">
                     <div ng-switch-when="layers">
-                        <layers-sidebar></layers-sidebar>
+                        <div layers-sidebar></div>
                     </div>
                     <div ng-switch-when="info">
-                        <info-sidebar></info-sidebar>
+                        <div info-sidebar ></div>
                     </div>
                     <div ng-switch-when="help">
-                        <help-sidebar></help-sidebar>
+                        <div help-sidebar></div>
                     </div>
                 </div>
             </div>
@@ -109,7 +109,17 @@
     <script src="services/drawing/DrawingFactory.js"></script>
     <script src="services/drawing/DrawingMarker.js"></script>
     <script src="services/drawing/DrawingRoute.js"></script>
-    <script src="services/drawing/WikiMarkersLayer.js"></script>
+    <script src="services/layers/routelayers/HoverHandler.js"></script>
+    <script src="services/layers/routelayers/RouteLayer.js"></script>
+    <script src="services/layers/routelayers/RouteLayerFactory.js"></script>
+    <script src="services/layers/routelayers/RouteStateBase.js"></script>
+    <script src="services/layers/routelayers/RouteStateEditBase.js"></script>
+    <script src="services/layers/routelayers/RouteStateEditPoi.js"></script>
+    <script src="services/layers/routelayers/RouteStateEditRoute.js"></script>
+    <script src="services/layers/routelayers/RouteStateHidden.js"></script>
+    <script src="services/layers/routelayers/RouteStateReadOnly.js"></script>
+    <script src="services/layers/routelayers/UndoHandler.js"></script>
+    <script src="services/layers/WikiMarkersLayer.js"></script>
     <script src="services/parsers/ParserFactory.js"></script>
     <script src="services/parsers/BaseParser.js"></script>
     <script src="services/parsers/GeoJsonParser.js"></script>

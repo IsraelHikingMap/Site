@@ -32,14 +32,18 @@ module IsraelHiking.Tests {
 
             var data = osmParser.parse(osmString);
 
-            expect(data.markers.length).toBe(1);
+
             expect(data.routes.length).toBe(1);
+            expect(data.routes[0].markers.length).toBe(1);
         });
 
         it("Should parse osm convert it geojson and back", () => {
             var data = {
-                markers: [{ title: "title", latlng: L.latLng(1,2)} as Common.MarkerData],
-                routes: []
+                routes: [
+                    {
+                        markers: [{ title: "title", latlng: L.latLng(1, 2) } as Common.MarkerData],
+                        segments: []
+                    }]
             } as Common.DataContainer;
             var osm = osmParser.toString(data);
 

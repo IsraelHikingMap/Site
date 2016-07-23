@@ -51,28 +51,18 @@
 <hr class="divider" />
 
 <div ng-repeat="route in routes">
-    <div class="row cursor-pointer" ng-click="selectDrawing(route.name, $event)" ng-class="{'active' : route.state == 'active' }">
+    <div class="row cursor-pointer" ng-click="selectRoute(route, $event)">
         <div class="col-xs-2">
-            <span ng-class="'fg-' + route.getColorKeyValue().key">
-                <i class="fa fa-lg" ng-class="{'fa-pencil': route.state != 'hidden', 'fa-eye-slash': route.state == 'hidden' }"></i>
+            <span ng-class="'fg-' + getRouteColorName(route)">
+                <i class="fa fa-lg" ng-class="{'fa-pencil': isRouteSelected(route), 'fa-eye': isRouteVisisble(route) && !isRouteSelected(route), 'fa-eye-slash': !isRouteVisisble(route) }"></i>
             </span>
         </div>
         <div class="col-xs-7">
-            <span ng-class="'fg-' + route.getColorKeyValue().key">{{route.name}}</span>
+            <span ng-class="'fg-' + getRouteColorName(route)">{{getRouteName(route)}}</span>
         </div>
         <div class="col-xs-3">
-            <span class="pull-right" ng-click="editRoute(route.name, $event)" bs-tooltip="'Route properties'"><i class="fa fa-lg fa-wrench"></i></span>
+            <span class="pull-right" ng-click="editRoute(getRouteName(route), $event)" bs-tooltip="'Route properties'"><i class="fa fa-lg fa-wrench"></i></span>
         </div>
-    </div>
-</div>
-<div class="row cursor-pointer" ng-click="selectDrawing(markers.name, $event)" ng-class="{'active' : markers.state == 'active' }">
-    <div class="col-xs-2">
-        <span ng-class="'fg-' + markers.getColorKeyValue().key">
-            <i class="fa fa-lg" ng-class="{'fa-map-marker': markers.state != 'hidden', 'fa-eye-slash': markers.state == 'hidden' }"></i>
-        </span>
-    </div>
-    <div class="col-xs-10">
-        <span ng-class="'fg-' + markers.getColorKeyValue().key">{{markers.name}}</span>
     </div>
 </div>
 <div class="row add cursor-pointer" ng-click="addRoute($event)" ng-show="advanced">

@@ -3,8 +3,7 @@
     export interface ILayersScope extends angular.IScope {
         baseLayers: Services.IBaseLayer[];
         overlays: Services.IOverlay[];
-        routes: Services.Drawing.IDrawing[];
-        markers: Services.Drawing.IDrawing;
+        routes: Services.Layers.RouteLayers.RouteLayer[];
         advanced: boolean;
 
         addBaseLayer(e: Event): void;
@@ -15,9 +14,13 @@
         editRoute(routeName: string, e: Event): void;
         selectBaseLayer(baseLayer: Services.IBaseLayer, e: Event): void;
         toggleVisibility(overlay: Services.IOverlay, e: Event): void;
-        selectDrawing(name: string, e: Event): void;
+        selectRoute(routeLayer: Services.Layers.RouteLayers.RouteLayer, e: Event): void;
         toggleAdvanced(e: Event): void;
         toggleShow(e: Event): void;
+        getRouteColorName(route: Services.Layers.RouteLayers.RouteLayer):void;
+        getRouteName(route: Services.Layers.RouteLayers.RouteLayer): void;
+        isRouteVisisble(route: Services.Layers.RouteLayers.RouteLayer): boolean;
+        isRouteSelected(route: Services.Layers.RouteLayers.RouteLayer): boolean;
     }
 
     export class LayersController extends BaseMapController {
@@ -30,12 +33,12 @@
             layersService: Services.LayersService,
             fileService: Services.FileService,
             sidebarService: Services.SidebarService,
+            routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory,
             toastr: Toastr) {
             super(mapService);
             $scope.baseLayers = layersService.baseLayers;
             $scope.overlays = layersService.overlays;
             $scope.routes = layersService.routes;
-            $scope.markers = layersService.markers;
             $scope.advanced = localStorageService.get(LayersController.SHOW_ADVANCED_KEY) ? true : false;
             $scope.addBaseLayer = (e: Event) => {
                 var newScope = $scope.$new() as LayerProperties.ILayerBaseScope;
@@ -63,7 +66,7 @@
 
             $scope.addRoute = (e: Event) => {
                 var routePropertiesScope = $scope.$new() as RouteProperties.IRouteAddScope;
-                var routeAddController = new RouteProperties.RouteAddController(routePropertiesScope, mapService, layersService, toastr);
+                var routeAddController = new RouteProperties.RouteAddController(routePropertiesScope, mapService, layersService, routeLayerFactory, toastr);
                 var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);
@@ -87,8 +90,8 @@
                 this.suppressEvents(e);
             }
 
-            $scope.selectDrawing = (name: string, e: Event) => {
-                layersService.changeDrawingState(name);
+            $scope.selectRoute = (routeLayer: Services.Layers.RouteLayers.RouteLayer, e: Event) => {
+                layersService.changeRouteState(routeLayer);
                 this.suppressEvents(e);
             }
 
@@ -101,6 +104,22 @@
             $scope.toggleShow = (e: Event) => {
                 sidebarService.toggle("layers");
                 this.suppressEvents(e);
+            }
+
+            $scope.getRouteColorName = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
+                return _.find(Common.Constants.COLORS, colorToFind => colorToFind.value === routeLayer.getRouteProperties().pathOptions.color).key;
+            }
+
+            $scope.getRouteName = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
+                return routeLayer.getRouteProperties().name;
+            }
+
+            $scope.isRouteVisisble = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
+                return routeLayer.getRouteProperties().isVisible;
+            }
+
+            $scope.isRouteSelected = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
+                return layersService.getSelectedRoute() === routeLayer;
             }
         }
 

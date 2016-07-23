@@ -5,13 +5,13 @@
                 <button type="button" class="close" aria-label="Close" ng-click="$hide()"><span aria-hidden="true">&times;</span></button>
                 <h4 class="modal-title" ng-bind="title"></h4>
             </div>
-            <form ng-submit="saveRoute(name, weight, $event); $hide()">
+            <form ng-submit="saveRoute($event); $hide()">
                 <div class="modal-body">
                     <div class="form-horizontal">
                         <div class="form-group">
                             <label class="control-label col-md-3">Name</label>
                             <div class="col-md-9">
-                                <input type="text" ng-model="name" class="form-control" placeholder="A name to be displayed in the layer control" required="" />
+                                <input type="text" ng-model="routeProperties.name" class="form-control" placeholder="A name to be displayed in the layer control" required="" />
                             </div>
                         </div>
                         <div class="row">
@@ -19,15 +19,15 @@
                                 <div class="form-group">
                                     <label class="control-label col-md-6">Width (px):</label>
                                     <div class="col-md-6">
-                                        <input type="number" class="form-control" min="1" max="10" ng-model="weight" placeholder="Width" />
+                                        <input type="number" class="form-control" min="1" max="10" ng-model="routeProperties.pathOptions.weight" placeholder="Width" />
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="control-label col-md-6">Color: <button type="button" class="btn btn-default" ng-class="'bg-' + color.key" ></button></label>
+                                    <label class="control-label col-md-6">Color: <button type="button" class="btn btn-default" ng-class="'bg-' + getColorName(routeProperties.pathOptions.color)" ></button></label>
                                     <div class="col-md-6">
-                                        <button type="button" class="btn btn-default col-xs-3" ng-class="'bg-' + currentColor.key" ng-repeat="currentColor in colors" ng-click="setColor(currentColor, $event)"></button>
+                                        <button type="button" class="btn btn-default col-xs-3" ng-class="'bg-' + currentColor.key" ng-repeat="currentColor in colors" ng-click="routeProperties.pathOptions.color = currentColor.value"></button>
                                     </div>
                                 </div>
                             </div>
@@ -37,9 +37,9 @@
                 <div class="modal-footer">
                     <button type="button" ng-hide="isNew" ng-click="saveRouteToFile($event)" class="btn btn-default" title="Save route to file"><i class="fa fa-lg fa-save"></i></button>
                     <button type="button" ng-hide="isNew" ng-click="deleteRoute($event); $hide()" class="btn btn-danger" title="Delete route"><i class="fa fa-lg fa-trash"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="reverseRoute($event)" class="btn btn-default" title="Reverse route" ng-class="{'active': isReversed }"><i class="fa fa-lg fa-arrows-h"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="toggleVisibility($event)" class="btn btn-default" title="Toggle visibility"><i class="fa fa-lg" ng-class="{'fa-eye': isVisible, 'fa-eye-slash': !isVisible}"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="toggleRoutingPerPoint($event)" class="btn btn-default" title="Toggle routing type per point" ng-class="{'active': isRoutingPerPoint }"><i class="fa fa-bolt"></i></button>
+                    <button type="button" ng-hide="isNew" ng-click="isReversed = !isReversed" class="btn btn-default" title="Reverse route" ng-class="{'active': isReversed }"><i class="fa fa-lg fa-arrows-h"></i></button>
+                    <button type="button" ng-hide="isNew" ng-click="routeProperties.isVisible = !routeProperties.isVisible" class="btn btn-default" title="Toggle visibility"><i class="fa fa-lg" ng-class="{'fa-eye': routeProperties.isVisible, 'fa-eye-slash': !routeProperties.isVisible}"></i></button>
+                    <button type="button" ng-hide="isNew" ng-click="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" class="btn btn-default" title="Toggle routing type per point" ng-class="{'active': routeProperties.isRoutingPerPoint }"><i class="fa fa-bolt"></i></button>
                     <button type="submit" class="btn btn-success" title="Save"><i class="fa fa-check"></i></button>
                 </div>
             </form>
