@@ -166,6 +166,11 @@
                     this.hoverHandler.setState(HoverHandlerBase.NONE);
                 }
             });
+            marker.on("dblclick", () => {
+                let segment = _.find(this.context.route.segments, segmentToFind => marker === segmentToFind.routePointMarker);
+                this.removeRouteSegment(segment);
+                this.hoverHandler.setState(HoverHandlerBase.NONE); // prevent from click to add a point.
+            });
         }
 
         protected createRouteSegment = (latlng: L.LatLng, latlngzs: Common.LatLngZ[], routingType: string): IRouteSegment => {

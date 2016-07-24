@@ -1,4 +1,9 @@
 ﻿namespace IsraelHiking {
+
+    // HM TODO: check mobile
+    // HM TODO: change app.ts name.
+    // HM TODO: add missing js files.
+
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap",
         "LocalStorageModule", "googlechart", "ngAnimate",
         "toastr", "angular-loading-bar", "ngFileSaver"]);
