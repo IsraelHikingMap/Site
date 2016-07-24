@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Routers {
+﻿namespace IsraelHiking.Services.Routers {
     export class NoneRouter {
         $q: angular.IQService;
         constructor($q: angular.IQService) {
@@ -13,7 +13,7 @@
             var latlngzEnd = latlngEnd as Common.LatLngZ;
             latlngzEnd.z = 0;
             emptyReturn.push({
-                routePoint: { latlng: latlngEnd, title: "" } as Common.MarkerData,
+                routePoint: latlngEnd,
                 latlngzs: [latlngzStart, latlngzEnd],
                 routingType: Common.RoutingType.none,
             } as Common.RouteSegmentData);

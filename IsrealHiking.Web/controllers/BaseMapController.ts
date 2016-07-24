@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
 
     export class BaseMapController extends Services.ObjectWithMap {
        

@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Services
             {
                 segments = new List<RouteSegmentData> { new RouteSegmentData
                     {
-                        routePoint = new MarkerData() { latlng = allRoutePoints.First() },
+                        routePoint = allRoutePoints.First(),
                         latlngzs = new List<LatLngZ> { allRoutePoints.First(), allRoutePoints.First() }
                     } },
                 name = routeData.name
@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Services
                 manipulatedRouteData.segments.Add(new RouteSegmentData
                 {
                     latlngzs = latLngz,
-                    routePoint = new MarkerData { latlng = latLngz.Last() },
+                    routePoint = latLngz.Last(),
                     routingType = routingType
                 });
             }

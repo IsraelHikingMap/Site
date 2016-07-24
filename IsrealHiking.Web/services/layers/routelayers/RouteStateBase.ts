@@ -1,4 +1,4 @@
-module IsraelHiking.Services.Layers.RouteLayers {
+namespace IsraelHiking.Services.Layers.RouteLayers {
     export class EditMode {
         public static POI = "POI";
         public static ROUTE = "Route";
@@ -28,14 +28,9 @@ module IsraelHiking.Services.Layers.RouteLayers {
             this.context.setState(new RouteStateReadOnly(this.context));
         }
 
-        public setEditRouteState(): void {
+        public setEditState(): void {
             this.context.clearCurrentState();
-            this.context.setState(new RouteStateEditRoute(this.context));
-        }
-
-        public setEditPoiState(): void {
-            this.context.clearCurrentState();
-            this.context.setState(new RouteStateEditPoi(this.context));
+            this.context.setState(new RouteStateEdit(this.context));
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services {
+﻿namespace IsraelHiking.Services {
 
     export interface IFileSaver {
         saveAs(blob: Blob, fileName: string): void;

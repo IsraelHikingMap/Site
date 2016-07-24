@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Parsers {
+﻿namespace IsraelHiking.Services.Parsers {
     export class GeoJsonParser extends BaseParser implements IParser {
 
         protected parseToGeoJson(content: string): GeoJSON.FeatureCollection<GeoJSON.GeometryObject> {

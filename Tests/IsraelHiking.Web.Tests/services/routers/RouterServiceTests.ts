@@ -3,7 +3,7 @@
 /// <reference path="../../../../isrealhiking.web/services/routers/nonerouter.ts" />
 /// <reference path="../../../../isrealhiking.web/services/routers/routerservice.ts" />
 
-module IsraelHiking.Tests {
+namespace IsraelHiking.Tests {
     describe("Router Service", () => {
         const ADDRESS = Common.Urls.routing + "?from=1,1&to=2,2&type=h";
         var $q: angular.IQService;        

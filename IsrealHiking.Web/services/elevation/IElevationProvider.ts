@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Elevation {
+﻿namespace IsraelHiking.Services.Elevation {
     export interface IElevationProvider {
         updateHeights(latlngzs: Common.LatLngZ[]): angular.IHttpPromise<{}>
     }

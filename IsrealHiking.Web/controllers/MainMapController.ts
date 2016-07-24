@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
     export interface IMainMapScope extends angular.IScope {
         sidebarService: Services.SidebarService;
         getIsSidebarVisible(): boolean;

@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Parsers {
+﻿namespace IsraelHiking.Services.Parsers {
 
     export class ParserType {
         public static geojson = "geojson";

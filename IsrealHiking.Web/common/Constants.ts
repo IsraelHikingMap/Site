@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Common {
+﻿namespace IsraelHiking.Common {
     export class Constants {
         // Services
         public static rootScope = "$rootScope";

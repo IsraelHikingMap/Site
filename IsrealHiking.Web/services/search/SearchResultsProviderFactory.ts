@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Search {
+﻿namespace IsraelHiking.Services.Search {
     export class SearchProviderType {
         public static nominatim = "Nominatim";
         public static overpass = "Overpass";

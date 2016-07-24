@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Elevation {
+﻿namespace IsraelHiking.Services.Elevation {
     export class ElevationProvider implements IElevationProvider {
         private $http: angular.IHttpService;
         private toastr: Toastr;

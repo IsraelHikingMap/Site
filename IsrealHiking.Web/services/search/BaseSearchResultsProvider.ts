@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Search {
+﻿namespace IsraelHiking.Services.Search {
 
     export interface ISearchResultsProvider  {
         getResults: (searchTerm: string, isHebrew: boolean) => angular.IPromise<ISearchResults[]>;

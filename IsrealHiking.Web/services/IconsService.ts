@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services {
+﻿namespace IsraelHiking.Services {
     export class IconsService {
         private static KM_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
         "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +

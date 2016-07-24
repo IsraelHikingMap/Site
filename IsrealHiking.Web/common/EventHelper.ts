@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Common {
+﻿namespace IsraelHiking.Common {
 
     export class EventHelper<TData> {
         private listeners: ((data: TData) => void)[];

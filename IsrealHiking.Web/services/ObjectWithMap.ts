@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services {
+﻿namespace IsraelHiking.Services {
 
     export class ObjectWithMap {
         map: L.Map;

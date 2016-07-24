@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Directives {
+﻿namespace IsraelHiking.Directives {
     export class SyncFocusWithDirective {
         constructor() {
             return <angular.IDirective>{

@@ -43,16 +43,16 @@
         }
 
         public createRouteLayer = (route: IRoute): RouteLayer => {
-            var routeLayer = new RouteLayer(this.$q,
-                this.$rootScope,
-                this.$compile,
-                this.$timeout,
+            return new RouteLayer(this.$q,
                 this.mapService,
                 this.snappingService,
                 this.routerService,
                 this.elevationProvider,
                 route);
-            return routeLayer;
+        }
+
+        public createPoiLayer = (): PoiLayers.PoiLayer => {
+            return new PoiLayers.PoiLayer(this.$rootScope, this.$compile, this.$timeout, this.mapService);
         }
 
         public createRoute(name: string): IRoute {
@@ -78,7 +78,6 @@
 
         public createRouteFromData(routeData: Common.RouteData): IRoute {
             let route = this.createRoute(routeData.name);
-            route.markers = routeData.markers as IRouteMarker[];
             route.segments = routeData.segments as IRouteSegment[];
             return route;
         }

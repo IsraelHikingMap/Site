@@ -3,7 +3,7 @@
 /// <reference path="../../../../isrealhiking.web/services/parsers/baseparser.ts" />
 /// <reference path="../../../../isrealhiking.web/services/parsers/geojsonparser.ts" />
 
-module IsraelHiking.Tests {
+namespace IsraelHiking.Tests {
     describe("GeoJson Parser", () => {
 
         var geoJsonParser: Services.Parsers.GeoJsonParser;
@@ -28,8 +28,8 @@ module IsraelHiking.Tests {
             } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
             var data = geoJsonParser.parse(JSON.stringify(collection));
-            expect(data.routes[0].markers.length).toBe(1);
-            expect(data.routes.length).toBe(1);
+            expect(data.markers.length).toBe(1);
+            expect(data.routes.length).toBe(0);
         });
 
         it("Should parse geojson linestring", () => {
@@ -49,7 +49,7 @@ module IsraelHiking.Tests {
             } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
             var data = geoJsonParser.parse(JSON.stringify(collection));
-            expect(data.routes[0].markers.length).toBe(0);
+            expect(data.markers.length).toBe(0);
             expect(data.routes.length).toBe(1);
         });
 
@@ -70,8 +70,8 @@ module IsraelHiking.Tests {
             } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
             var data = geoJsonParser.parse(JSON.stringify(collection));
-            expect(data.routes[0].markers.length).toBe(0);
-            expect(data.routes.length).toBe(1);
+            expect(data.markers.length).toBe(0);
+            expect(data.routes.length).toBe(0);
         });
 
         it("Should parse complex geoJson string", () => {
@@ -138,22 +138,22 @@ module IsraelHiking.Tests {
             } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
             var data = geoJsonParser.parse(JSON.stringify(collection));
-            expect(data.routes[0].markers.length).toBe(2);
+            expect(data.markers.length).toBe(2);
             expect(data.routes.length).toBe(4);
         });
 
         it("Should convert data container to geojson", () => {
             var data = {
+                markers: [
+                    { title: "marker", latlng: L.latLng(1, 1) } as Common.MarkerData
+                ],
                 routes: [
                     {
                         name: "route",
-                        markers: [
-                            { title: "marker", latlng: L.latLng(1, 1) } as Common.MarkerData
-                        ],
                         segments: [
                             {
                                 latlngzs: [L.latLng(1, 1)],
-                                routePoint: { latlng: L.latLng(1, 1), title: "" },
+                                routePoint: L.latLng(1, 1),
                                 routingType: "h"
                             } as Common.RouteSegmentData
                         ]

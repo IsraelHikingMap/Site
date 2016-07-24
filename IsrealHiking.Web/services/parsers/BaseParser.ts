@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Parsers {
+﻿namespace IsraelHiking.Services.Parsers {
     export abstract class BaseParser implements IParser {
 
         public parse(content: string): Common.DataContainer {
@@ -12,9 +12,9 @@
         public toDataContainer(geoJson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>): Common.DataContainer {
 
             let data = {
-                routes: [] as Common.RouteData[]
+                routes: [] as Common.RouteData[],
+                markers: [] as Common.MarkerData[]
             } as Common.DataContainer;
-            let markers = [];
             let leaftletGeoJson = L.geoJson(geoJson, {
                 onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
                     let routeData = null;
@@ -22,13 +22,13 @@
                         case Common.GeoJsonFeatureType.point:
                             let point = feature.geometry as GeoJSON.Point;
                             let marker = this.createMarker(point.coordinates, feature.properties.name);
-                            markers.push(marker);
+                            data.markers.push(marker);
                             break;
                         case Common.GeoJsonFeatureType.multiPoint:
                             let points = feature.geometry as GeoJSON.MultiPoint;
                             for (let pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
                                 let marker = this.createMarker(points.coordinates[pointIndex], feature.properties.name);
-                                markers.push(marker);
+                                data.markers.push(marker);
                             }
                             break;
                         case Common.GeoJsonFeatureType.lineString:
@@ -59,11 +59,6 @@
             } as L.GeoJSONOptions);
             data.northEast = leaftletGeoJson.getBounds().getNorthEast();
             data.southWest = leaftletGeoJson.getBounds().getSouthWest();
-            if (data.routes.length === 0) {
-                data.routes.push({ markers: markers, name: "Markers", segments: [] } as Common.RouteData);
-            } else {
-                data.routes[0].markers = markers;
-            }
             return data;
         }
 
@@ -96,12 +91,12 @@
                 return routeData;
             }
             routeData.segments.push({
-                routePoint: { latlng: latlngzs[0], title: "" } as Common.MarkerData,
+                routePoint: latlngzs[0],
                 latlngzs: [latlngzs[0], latlngzs[0]],
                 routingType: Common.RoutingType.hike
             } as Common.RouteSegmentData);
             routeData.segments.push({
-                routePoint: { latlng: latlngzs[latlngzs.length - 1], title: "" } as Common.MarkerData, 
+                routePoint: latlngzs[latlngzs.length - 1],
                 latlngzs: latlngzs,
                 routingType: Common.RoutingType.hike
             } as Common.RouteSegmentData);
@@ -118,7 +113,7 @@
                     let latLng = BaseParser.createLatlng(lineCoordinates[0]);
                     routeData.segments.push({
                         latlngzs: [latLng, latLng],
-                        routePoint: { latlng: latLng, title: "" } as Common.MarkerData,
+                        routePoint: latLng,
                         routingType: Common.RoutingType.hike
                     } as Common.RouteSegmentData);
                 }
@@ -126,7 +121,7 @@
                 if (latlngzs.length >= 2) {
                     routeData.segments.push({
                         latlngzs: latlngzs,
-                        routePoint: { latlng: latlngzs[0], title: "" } as Common.MarkerData,
+                        routePoint: latlngzs[0],
                         routingType: Common.RoutingType.hike
                     } as Common.RouteSegmentData);
                 }
@@ -146,20 +141,20 @@
                 features: [] as GeoJSON.Feature<GeoJSON.GeometryObject>[]
             } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
-            for (let routeData of data.routes) {
-                for (let marker of routeData.markers) {
-                    geoJson.features.push({
-                        type: "Feature",
-                        properties: {
-                            name: marker.title
-                        },
-                        geometry: {
-                            type: "Point",
-                            coordinates: [marker.latlng.lng, marker.latlng.lat]
-                        } as GeoJSON.Point
-                    } as GeoJSON.Feature<GeoJSON.GeometryObject>);
-                }
+            for (let marker of data.markers) {
+                geoJson.features.push({
+                    type: "Feature",
+                    properties: {
+                        name: marker.title
+                    },
+                    geometry: {
+                        type: "Point",
+                        coordinates: [marker.latlng.lng, marker.latlng.lat]
+                    } as GeoJSON.Point
+                } as GeoJSON.Feature<GeoJSON.GeometryObject>);
+            }
 
+            for (let routeData of data.routes) {
                 let multiLineStringCoordinates = [] as GeoJSON.Position[][];
 
                 for (let segment of routeData.segments) {

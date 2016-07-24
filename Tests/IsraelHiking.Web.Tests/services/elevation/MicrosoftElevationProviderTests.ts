@@ -7,7 +7,7 @@
 /// <reference path="../../../../isrealhiking.web/services/elevation/microsoftelevationprovider.ts" />
 /// <reference path="../../../../isrealhiking.web/common/israelhikingdata.ts" />
 
-module IsraelHiking.Tests {
+namespace IsraelHiking.Tests {
     describe("Microsoft Elevation Provider", () => {
         var ADDRESS = "http://dev.virtualearth.net/REST/v1/Elevation/List?jsonp=JSON_CALLBACK&key=ArUJIOvdEI-4sFS5-3PqMlDJP-00FMLrOeLIGkLRpfWIjfpOcESgnE-Zmk-ZimU2&points=0.0000,0.0000";
         var elevationProvider: Services.Elevation.MicrosoftElevationProvider;

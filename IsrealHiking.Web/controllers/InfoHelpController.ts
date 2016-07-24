@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
     export interface IInfoHelpScope extends angular.IScope {
         toggleInfo(e: Event): void;
         toggleHelp(e: Event): void;
@@ -11,7 +11,7 @@
         constructor($scope: IInfoHelpScope,
             sidebarService: Services.SidebarService,
             mapService: Services.MapService,
-            layersService: Services.LayersService) {
+            layersService: Services.Layers.LayersService) {
             super(mapService);
             $scope.toggleInfo = (e: Event) => {
                 sidebarService.toggle("info");
@@ -28,7 +28,7 @@
             }
 
             $scope.getLegendImage = () => {
-                return layersService.selectedBaseLayer.key === Services.LayersService.ISRAEL_MTB_MAP ?
+                return layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_MTB_MAP ?
                     "/content/images/legend_mtb.png" :
                     "/content/images/legend.png";
             }

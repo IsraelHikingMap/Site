@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
 
     export interface IFormatViewModel {
         label: string,
@@ -25,7 +25,7 @@
             $window: angular.IWindowService,
             $document: angular.IDocumentService,
             mapService: Services.MapService,
-            layersService: Services.LayersService,
+            layersService: Services.Layers.LayersService,
             hashService: Services.HashService,
             fileService: Services.FileService,
             toastr: Toastr) {

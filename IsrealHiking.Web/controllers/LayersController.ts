@@ -1,19 +1,19 @@
-﻿module IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
 
     export interface ILayersScope extends angular.IScope {
-        baseLayers: Services.IBaseLayer[];
-        overlays: Services.IOverlay[];
+        baseLayers: Services.Layers.IBaseLayer[];
+        overlays: Services.Layers.IOverlay[];
         routes: Services.Layers.RouteLayers.RouteLayer[];
         advanced: boolean;
 
         addBaseLayer(e: Event): void;
-        editBaseLayer(layer: Services.ILayer, e: Event): void;
+        editBaseLayer(layer: Services.Layers.ILayer, e: Event): void;
         addOverlay(e: Event): void;
-        editOverlay(layer: Services.ILayer, e: Event): void;
+        editOverlay(layer: Services.Layers.ILayer, e: Event): void;
         addRoute(e: Event): void;
         editRoute(routeName: string, e: Event): void;
-        selectBaseLayer(baseLayer: Services.IBaseLayer, e: Event): void;
-        toggleVisibility(overlay: Services.IOverlay, e: Event): void;
+        selectBaseLayer(baseLayer: Services.Layers.IBaseLayer, e: Event): void;
+        toggleVisibility(overlay: Services.Layers.IOverlay, e: Event): void;
         selectRoute(routeLayer: Services.Layers.RouteLayers.RouteLayer, e: Event): void;
         toggleAdvanced(e: Event): void;
         toggleShow(e: Event): void;
@@ -30,7 +30,7 @@
             $modal,
             localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
-            layersService: Services.LayersService,
+            layersService: Services.Layers.LayersService,
             fileService: Services.FileService,
             sidebarService: Services.SidebarService,
             routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory,
@@ -46,8 +46,8 @@
                 this.showLayerModal(newScope, $modal, e);
             }
 
-            $scope.editBaseLayer = (layer: Services.IBaseLayer, e: Event) => {
-                var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.IBaseLayer>;
+            $scope.editBaseLayer = (layer: Services.Layers.IBaseLayer, e: Event) => {
+                var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.Layers.IBaseLayer>;
                 var controller = new LayerProperties.BaseLayerEditController(newScope, mapService, layersService, layer, toastr);
                 this.showLayerModal(newScope, $modal, e);
             }
@@ -58,8 +58,8 @@
                 this.showLayerModal(newScope, $modal, e);
             }
 
-            $scope.editOverlay = (layer: Services.IOverlay, e: Event) => {
-                var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.IOverlay>;
+            $scope.editOverlay = (layer: Services.Layers.IOverlay, e: Event) => {
+                var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.Layers.IOverlay>;
                 var controller = new LayerProperties.OverlayEditController(newScope, mapService, layersService, layer, toastr);
                 this.showLayerModal(newScope, $modal, e);
             }
@@ -80,12 +80,12 @@
                 this.suppressEvents(e);
             }
 
-            $scope.selectBaseLayer = (baseLayer: Services.IBaseLayer, e: Event) => {
+            $scope.selectBaseLayer = (baseLayer: Services.Layers.IBaseLayer, e: Event) => {
                 layersService.selectBaseLayer(baseLayer);
                 this.suppressEvents(e);
             }
 
-            $scope.toggleVisibility = (overlay: Services.IOverlay, e: Event) => {
+            $scope.toggleVisibility = (overlay: Services.Layers.IOverlay, e: Event) => {
                 layersService.toggleOverlay(overlay);
                 this.suppressEvents(e);
             }

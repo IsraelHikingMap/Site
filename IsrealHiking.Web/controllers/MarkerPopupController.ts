@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
     export interface INorthEast {
         North: number;
         East: number;
@@ -7,9 +7,8 @@
     export interface IMarkerPopupScope extends angular.IScope {
         title: string;
         itmCoordinates: INorthEast;
-        marker: Services.Layers.RouteLayers.IMarkerWithTitle;
-        routeLayer: Services.Layers.RouteLayers.RouteLayer;
-        inRoute: boolean;
+        marker: Services.Layers.PoiLayers.IMarkerWithTitle;
+        poiLayer: Services.Layers.PoiLayers.PoiLayer;
         latLng: L.LatLng;
         wikiCoordinatesString: string;
         setTitle(title: string): void;
@@ -42,13 +41,8 @@
             };
 
             $scope.setTitle = (newTitle: string) => {
-                if ($scope.inRoute) {
-                    let segment = _.find($scope.routeLayer.route.segments, segmentToFind => segmentToFind.routePointMarker === $scope.marker);
-                    segment.routePoint.title = newTitle;
-                } else {
-                    let routeMarker = _.find($scope.routeLayer.route.markers, markerToFind => markerToFind.marker === $scope.marker);
-                    routeMarker.title = newTitle;
-                }
+                let routeMarker = _.find($scope.poiLayer.markers, markerToFind => markerToFind.marker === $scope.marker);
+                routeMarker.title = newTitle;
                 $scope.marker.updateLabelContent(newTitle);
                 $scope.marker.title = newTitle;
                 if (!newTitle) {
@@ -56,7 +50,7 @@
                 } else {
                     $scope.marker.showLabel();
                 }
-                $scope.routeLayer.dataChanged();
+                $scope.poiLayer.dataChanged();
                 $scope.marker.closePopup();
             }
         }

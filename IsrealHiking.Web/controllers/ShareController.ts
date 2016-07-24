@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
 
     export interface IShareScope extends angular.IScope {
         title: string;
@@ -28,7 +28,7 @@
             $http: angular.IHttpService,
             $window:  angular.IWindowService,
             mapService: Services.MapService,
-            layersService: Services.LayersService,
+            layersService: Services.Layers.LayersService,
             toastr: Toastr) {
             super(mapService);
 

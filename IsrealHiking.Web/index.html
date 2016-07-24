@@ -64,7 +64,7 @@
                         <div layers-sidebar></div>
                     </div>
                     <div ng-switch-when="info">
-                        <div info-sidebar ></div>
+                        <div info-sidebar></div>
                     </div>
                     <div ng-switch-when="help">
                         <div help-sidebar></div>
@@ -105,21 +105,22 @@
     <script src="common/Urls.js"></script>
     <!-- Load services -->
     <script src="services/ObjectWithMap.js"></script>
-    <script src="services/drawing/BaseDrawing.js"></script>
-    <script src="services/drawing/DrawingFactory.js"></script>
-    <script src="services/drawing/DrawingMarker.js"></script>
-    <script src="services/drawing/DrawingRoute.js"></script>
-    <script src="services/layers/routelayers/HoverHandler.js"></script>
+    <script src="services/layers/routelayers/HoverHandlerBase.js"></script>
+    <script src="services/layers/routelayers/HoverHandlerRoute.js"></script>
+    <script src="services/layers/poilayers/HoverHandlerPoi.js"></script>
+    <script src="services/layers/poilayers/PoiLayer.js"></script>
+    <script src="services/layers/poilayers/PoiStateBase.js"></script>
+    <script src="services/layers/poilayers/PoiStateEdit.js"></script>
+    <script src="services/layers/poilayers/PoiStateReadOnly.js"></script>
     <script src="services/layers/routelayers/RouteLayer.js"></script>
     <script src="services/layers/routelayers/RouteLayerFactory.js"></script>
     <script src="services/layers/routelayers/RouteStateBase.js"></script>
-    <script src="services/layers/routelayers/RouteStateEditBase.js"></script>
-    <script src="services/layers/routelayers/RouteStateEditPoi.js"></script>
-    <script src="services/layers/routelayers/RouteStateEditRoute.js"></script>
+    <script src="services/layers/routelayers/RouteStateEdit.js"></script>
     <script src="services/layers/routelayers/RouteStateHidden.js"></script>
     <script src="services/layers/routelayers/RouteStateReadOnly.js"></script>
     <script src="services/layers/routelayers/UndoHandler.js"></script>
     <script src="services/layers/WikiMarkersLayer.js"></script>
+    <script src="services/layers/LayersService.js"></script>
     <script src="services/parsers/ParserFactory.js"></script>
     <script src="services/parsers/BaseParser.js"></script>
     <script src="services/parsers/GeoJsonParser.js"></script>
@@ -139,7 +140,6 @@
     <script src="services/MapService.js"></script>
     <script src="services/SidebarService.js"></script>
     <script src="services/SnappingService.js"></script>
-    <script src="services/LayersService.js"></script>
     <!-- Load controllers -->
     <script src="controllers/BaseMapController.js"></script>
     <script src="controllers/DrawingController.js"></script>

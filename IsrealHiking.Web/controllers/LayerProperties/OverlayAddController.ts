@@ -1,8 +1,8 @@
-﻿module IsraelHiking.Controllers.LayerProperties {
+﻿namespace IsraelHiking.Controllers.LayerProperties {
     export class OverlayAddController extends LayerBaseController {
         constructor($scope: ILayerBaseScope,
             mapService: Services.MapService,
-            layersService: Services.LayersService,
+            layersService: Services.Layers.LayersService,
             toastr: Toastr) {
             super($scope, mapService, layersService, toastr);
             $scope.title = "Add Overlay";

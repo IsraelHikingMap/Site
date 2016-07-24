@@ -36,7 +36,7 @@
             new Services.HashService($location, $rootScope, localStorageService)]);
     app.service(Common.Constants.layersService, [Common.Constants.http, Common.Constants.window, Common.Constants.mapService, Common.Constants.localStorageService, Common.Constants.routeLayerFactory, Common.Constants.hashService,
         ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService) =>
-            new Services.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService)]);
+            new Services.Layers.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService)]);
 
     app.controller(Common.Constants.mainMapController, [Common.Constants.scope, Common.Constants.compile, Common.Constants.mapService, Common.Constants.hashService, Common.Constants.sidebarService,
         ($scope: Controllers.IMainMapScope, $compile: angular.ICompileService, mapService: Services.MapService, hashService: Services.HashService, sidebarService: Services.SidebarService )=>

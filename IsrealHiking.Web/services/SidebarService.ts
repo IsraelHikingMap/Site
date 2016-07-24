@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services {
+﻿namespace IsraelHiking.Services {
 
     export class SidebarService {
         public viewName: string;

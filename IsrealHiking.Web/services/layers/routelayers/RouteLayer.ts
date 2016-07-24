@@ -1,16 +1,8 @@
-module IsraelHiking.Services.Layers.RouteLayers {
-
-    export interface IMarkerWithTitle extends L.Marker {
-        title: string;
-    }
+namespace IsraelHiking.Services.Layers.RouteLayers {
 
     export interface IRouteSegment extends Common.RouteSegmentData {
-        routePointMarker: IMarkerWithTitle;
+        routePointMarker: L.Marker;
         polyline: L.Polyline;
-    }
-
-    export interface IRouteMarker extends Common.MarkerData {
-        marker: IMarkerWithTitle;
     }
 
     export interface IRouteProperties {
@@ -23,7 +15,6 @@ module IsraelHiking.Services.Layers.RouteLayers {
 
     export interface IRoute {
         segments: IRouteSegment[];
-        markers: IRouteMarker[];
         properties: IRouteProperties;
     }
 
@@ -40,9 +31,6 @@ module IsraelHiking.Services.Layers.RouteLayers {
 
     export class RouteLayer extends ObjectWithMap implements L.ILayer {
         public $q: angular.IQService;
-        public $rootScope: angular.IRootScopeService;
-        public $compile: angular.ICompileService;
-        public $timeout: angular.ITimeoutService;
         public snappingService: SnappingService;
         public routerService: Routers.RouterService;
         public elevationProvider: Elevation.IElevationProvider;
@@ -50,13 +38,9 @@ module IsraelHiking.Services.Layers.RouteLayers {
         public eventHelper: Common.EventHelper<{}>;
 
         private currentState: RouteStateBase;
-        private undoHandler: UndoHandler;
-        
+        private undoHandler: UndoHandler<Common.RouteData>;
 
         constructor($q: angular.IQService,
-            $rootScope: angular.IRootScopeService,
-            $compile: angular.ICompileService,
-            $timeout: angular.ITimeoutService,
             mapService: MapService,
             snappingService: SnappingService,
             routerService: Routers.RouterService,
@@ -65,17 +49,14 @@ module IsraelHiking.Services.Layers.RouteLayers {
             super(mapService);
 
             this.$q = $q;
-            this.$rootScope = $rootScope;
-            this.$compile = $compile;
-            this.$timeout = $timeout;
             this.snappingService = snappingService;
             this.routerService = routerService;
             this.elevationProvider = elevationProvider;
             this.route = route;
-            this.undoHandler = new UndoHandler();
+            this.undoHandler = new UndoHandler<Common.RouteData>();
             this.undoHandler.addDataToUndoStack(this.getData());
             this.currentState = new RouteStateReadOnly(this);
-            this.eventHelper = this.eventHelper = new Common.EventHelper<{}>();
+            this.eventHelper = new Common.EventHelper<{}>();
         }
 
         public onAdd(map: L.Map): void {
@@ -101,11 +82,7 @@ module IsraelHiking.Services.Layers.RouteLayers {
         }
 
         public editRoute() {
-            this.currentState.setEditRouteState();
-        }
-
-        public editPoi() {
-            this.currentState.setEditPoiState();
+            this.currentState.setEditState();
         }
 
         public readOnly() {
@@ -137,22 +114,14 @@ module IsraelHiking.Services.Layers.RouteLayers {
             let segmentsData = [] as Common.RouteSegmentData[];
             for (let segment of this.route.segments) {
                 segmentsData.push({
-                    routePoint: { latlng: segment.routePoint.latlng, title: segment.routePoint.title },
+                    routePoint: segment.routePoint,
                     latlngzs: angular.copy(segment.latlngzs),
                     routingType: segment.routingType
                 } as Common.RouteSegmentData);
             }
-            let markersData = [] as Common.MarkerData[];
-            for (let marker of this.route.markers) {
-                markersData.push({
-                    latlng: marker.latlng,
-                    title: marker.title
-                } as Common.MarkerData);
-            }
             return {
                 name: this.route.properties.name,
-                segments: segmentsData,
-                markers: markersData
+                segments: segmentsData
             } as Common.RouteData;
         }
 
@@ -169,18 +138,11 @@ module IsraelHiking.Services.Layers.RouteLayers {
         private setDataInternal = (data: Common.RouteData) => {
             this.currentState.clear();
             this.route.segments = [];
-            this.route.markers = [];
             for (let segmentData of data.segments) {
                 let segment = angular.copy(segmentData) as IRouteSegment;
                 segment.polyline = null;
                 segment.routePointMarker = null;
                 this.route.segments.push(segment);
-            }
-
-            for (let markerData of data.markers) {
-                let marker = angular.copy(markerData) as IRouteMarker;
-                marker.marker = null;
-                this.route.markers.push(marker);
             }
         }
 
@@ -188,11 +150,6 @@ module IsraelHiking.Services.Layers.RouteLayers {
             var latlngz = latlng as Common.LatLngZ;
             latlngz.z = 0;
             return latlngz;
-        }
-
-        public getBindLabelOptions = (): L.LabelOptions => {
-            let colorKeyValue = _.find(Common.Constants.COLORS, colorToFind => colorToFind.value === this.route.properties.pathOptions.color);
-            return { noHide: true, className: `marker-label fg-${colorKeyValue.key}`, opacity: 1 } as L.LabelOptions;
         }
 
         public getStatistics = (): IRouteStatistics => {
@@ -239,7 +196,6 @@ module IsraelHiking.Services.Layers.RouteLayers {
         public clear = () => {
             this.currentState.clear();
             this.route.segments = [];
-            this.route.markers = [];
             this.dataChanged();
             this.currentState.initialize();
         }
@@ -247,6 +203,10 @@ module IsraelHiking.Services.Layers.RouteLayers {
         public undo = () => {
             this.undoHandler.pop();
             this.setData(this.undoHandler.top());
+        }
+
+        public isUndoDisbaled = (): boolean => {
+            return this.undoHandler.isUndoDisbaled() || this.currentState.getEditMode() === EditMode.NONE;
         }
 
         public reverse = () => {
@@ -287,10 +247,6 @@ module IsraelHiking.Services.Layers.RouteLayers {
                 return;
             }
             this.currentState.reRoute();
-        }
-
-        public isUndoDisbaled = (): boolean => {
-            return this.undoHandler.isUndoDisbaled() || this.currentState.getEditMode() === EditMode.NONE;
         }
     }
 }

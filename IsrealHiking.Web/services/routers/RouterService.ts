@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Routers {
+﻿namespace IsraelHiking.Services.Routers {
     export class RouterService {
         private $http: angular.IHttpService;
         private $q: angular.IQService;

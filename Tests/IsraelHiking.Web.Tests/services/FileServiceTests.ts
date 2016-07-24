@@ -2,7 +2,7 @@
 /// <reference path="../../../isrealhiking.web/common/constants.ts" />
 /// <reference path="../../../isrealhiking.web/services/fileservice.ts" />
 
-module IsraelHiking.Tests {
+namespace IsraelHiking.Tests {
     describe("File Service", () => {
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
@@ -42,10 +42,10 @@ module IsraelHiking.Tests {
         });
 
         it("Should open from url", () => {
-            $httpBackend.whenGET(Common.Urls.files + "?url=url").respond({ routes: [{ markers: [{} as Common.MarkerData] }] } as Common.DataContainer);
+            $httpBackend.whenGET(Common.Urls.files + "?url=url").respond({ routes:[], markers: [{} as Common.MarkerData] } as Common.DataContainer);
 
             fileService.openFromUrl("url")
-                .success((data) => expect(data.routes[0].markers.length).toBe(1));
+                .success((data) => expect(data.markers.length).toBe(1));
 
             $httpBackend.flush();
         });

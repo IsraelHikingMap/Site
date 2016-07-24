@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Elevation {
+﻿namespace IsraelHiking.Services.Elevation {
     export class MicrosoftElevationProvider implements IElevationProvider {
         private static VIRTUAL_EARTH_BASE_ADDRESS = "http://dev.virtualearth.net/REST/v1/Elevation/List?jsonp=JSON_CALLBACK";
 

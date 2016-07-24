@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Search {
+﻿namespace IsraelHiking.Services.Search {
     export class LocalSearchResultsProvider extends BaseSearchResultsProvider {
 
         constructor($http: angular.IHttpService,

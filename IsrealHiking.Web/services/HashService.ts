@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services {
+﻿namespace IsraelHiking.Services {
     export class HashService {
         private static ZOOM_KEY = "Zoom";
         private static LATLNG_KEY = "LatLng";
@@ -101,7 +101,7 @@
                 if (pointStrings.length === 3) {
                     array.push({
                         latlngzs: [],
-                        routePoint: { latlng: new L.LatLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])) },
+                        routePoint: L.latLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])),
                         routingType: pointStrings[0]
                     } as Common.RouteSegmentData);
                 }
@@ -126,11 +126,10 @@
             let data = {
                 routes: []
             } as Common.DataContainer;
-            let markers = [];
             for (let parameter in searchObject) {
                 if (searchObject.hasOwnProperty(parameter)) {
                     if (parameter === Common.Constants.MARKERS) {
-                        markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || []);
+                        data.markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || []);
                         continue;
                     }
                     if (parameter === HashService.BASE_LAYER) {
@@ -142,12 +141,6 @@
                     data.routes.push(this.stringToRoute(searchObject[parameter], parameter.split("_").join(" ")));
                 }
             }
-            if (data.routes.length === 0 && markers.length > 0) {
-                data.routes.push({ name: Common.Constants.MARKERS, markers: markers, segments: []});
-            } else if (data.routes.length > 0 && markers.length > 0){
-                data.routes[0].markers = markers;    
-            }
-
             return data;
         }
 

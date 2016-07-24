@@ -1,9 +1,9 @@
-﻿module IsraelHiking.Controllers.LayerProperties {
+﻿namespace IsraelHiking.Controllers.LayerProperties {
     export class OverlayEditController extends LayerBaseController {
-        constructor($scope: ILayerBaseEditScope<Services.IOverlay>,
+        constructor($scope: ILayerBaseEditScope<Services.Layers.IOverlay>,
             mapService: Services.MapService,
-            layersService: Services.LayersService,
-            layer: Services.IOverlay,
+            layersService: Services.Layers.LayersService,
+            layer: Services.Layers.IOverlay,
             toastr: Toastr) {
             super($scope, mapService, layersService, toastr);
             $scope.title = "Overlay Properties";
@@ -20,7 +20,7 @@
             }
         }
 
-        protected internalSave = ($scope: ILayerBaseEditScope<Services.IOverlay>, layerData: Common.LayerData) => {
+        protected internalSave = ($scope: ILayerBaseEditScope<Services.Layers.IOverlay>, layerData: Common.LayerData) => {
             return this.layersService.updateOverlay($scope.layer, layerData);
         }
     }

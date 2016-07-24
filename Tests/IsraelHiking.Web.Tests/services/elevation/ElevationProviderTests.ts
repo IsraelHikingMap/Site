@@ -1,7 +1,7 @@
 ﻿/// <reference path="../../../../isrealhiking.web/services/elevation/elevationprovider.ts" />
 /// <reference path="../../../../isrealhiking.web/common/urls.ts" />
 
-module IsraelHiking.Tests {
+namespace IsraelHiking.Tests {
     describe("Elevation Provider", () => {
         var ADDRESS = Common.Urls.elevation + "?point=0.0000,0.0000";
         var elevationProvider: Services.Elevation.ElevationProvider;

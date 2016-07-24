@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
 
     export interface ISearchScope extends angular.IScope {
         isShowingSearch: boolean;
@@ -78,7 +78,7 @@
                 $scope.isShowingSearch = false;
                 $scope.activeSearchResult = searchResults;
                 this.layerGroup.clearLayers();
-                this.map.fitBounds(searchResults.bounds, <L.Map.FitBoundsOptions>{ maxZoom: Services.LayersService.MAX_NATIVE_ZOOM });
+                this.map.fitBounds(searchResults.bounds, <L.Map.FitBoundsOptions>{ maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM });
                 var marker = L.marker(searchResults.latlng);
                 marker.bindPopup(searchResults.name || searchResults.address);
                 marker.once("dblclick", () => {

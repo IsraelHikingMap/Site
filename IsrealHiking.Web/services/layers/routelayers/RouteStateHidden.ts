@@ -1,4 +1,4 @@
-module IsraelHiking.Services.Layers.RouteLayers {
+namespace IsraelHiking.Services.Layers.RouteLayers {
     export class RouteStateHidden extends RouteStateBase {
         constructor(context: RouteLayer) {
             super(context);

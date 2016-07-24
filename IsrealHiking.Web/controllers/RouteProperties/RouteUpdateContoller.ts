@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers.RouteProperties {
+﻿namespace IsraelHiking.Controllers.RouteProperties {
     export interface IRouteUpdateScope extends IRouteBaseScope {
         isReversed: boolean;
         toggleVisibility(e: Event): void;
@@ -12,7 +12,7 @@
 
         constructor($scope: IRouteUpdateScope,
             mapService: Services.MapService,
-            layersService: Services.LayersService,
+            layersService: Services.Layers.LayersService,
             fileService: Services.FileService,
             toastr: Toastr,
             name: string) {

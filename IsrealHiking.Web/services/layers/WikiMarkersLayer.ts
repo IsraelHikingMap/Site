@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Drawing {
+﻿namespace IsraelHiking.Services.Drawing {
     interface IWikiPage {
         lat: number;
         lon: number;

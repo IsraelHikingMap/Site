@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../../isrealhiking.web/services/parsers/parserfactory.ts" />
 
-module IsraelHiking.Tests {
+namespace IsraelHiking.Tests {
     describe("Parser Factory", () => {
 
         var parserFactory: Services.Parsers.ParserFactory;

@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../../../isrealhiking.web/services/parsers/osmparser.ts" />
 
-module IsraelHiking.Tests {
+namespace IsraelHiking.Tests {
     describe("Osm Parser", () => {
 
         var osmParser: Services.Parsers.OsmParser;
@@ -32,16 +32,15 @@ module IsraelHiking.Tests {
 
             var data = osmParser.parse(osmString);
 
-
             expect(data.routes.length).toBe(1);
-            expect(data.routes[0].markers.length).toBe(1);
+            expect(data.markers.length).toBe(1);
         });
 
         it("Should parse osm convert it geojson and back", () => {
             var data = {
+                markers: [{ title: "title", latlng: L.latLng(1, 2) } as Common.MarkerData],
                 routes: [
                     {
-                        markers: [{ title: "title", latlng: L.latLng(1, 2) } as Common.MarkerData],
                         segments: []
                     }]
             } as Common.DataContainer;

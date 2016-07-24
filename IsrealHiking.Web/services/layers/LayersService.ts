@@ -4,7 +4,7 @@
 
 declare var getLastModifiedDate: Function;
 
-module IsraelHiking.Services {
+namespace IsraelHiking.Services.Layers {
     export interface ILayer extends Common.LayerData {
         layer: L.ILayer;
         isEditable: boolean;
@@ -53,6 +53,7 @@ module IsraelHiking.Services {
         public baseLayers: IBaseLayer[];
         public overlays: IOverlay[];
         public routes: Layers.RouteLayers.RouteLayer[];
+        public markers: Layers.PoiLayers.PoiLayer;
         public eventHelper: Common.EventHelper<{}>;
         public selectedBaseLayer: IBaseLayer;
         public selectedRoute: Layers.RouteLayers.RouteLayer;
@@ -75,7 +76,7 @@ module IsraelHiking.Services {
             this.routes = [];
             this.overlayZIndex = 10;
             this.eventHelper = new Common.EventHelper<{}>();
-
+            this.markers = this.routeLayerFactory.createPoiLayer();
             let lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
             this.defaultAttribution = LayersService.ATTRIBUTION + "Last update: " + lastModified;
             // default layers:
@@ -91,11 +92,11 @@ module IsraelHiking.Services {
                 isEditable: false
             } as ILayer, LayersService.MTB_ATTRIBUTION + lastModified);
             try {
-                this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: new L.Google() as any, selected: false, address: "", isEditable: false } as IBaseLayer);    
+                this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: new L.Google() as any, selected: false, address: "", isEditable: false } as IBaseLayer);
             } catch (e) {
                 console.error("Unable to create the google earch layer... ");
-            } 
-            
+            }
+
             let hikingTrailsOverlay = this.addOverlay({
                 key: LayersService.HIKING_TRAILS,
                 address: LayersService.OVERLAY_TILES_ADDRESS,
@@ -330,18 +331,24 @@ module IsraelHiking.Services {
                             latlngzs.push(fullLatLngZ);
                         }
                         segment.latlngzs = latlngzs;
-                        segment.routePoint.latlng = L.latLng(segment.routePoint.latlng.lat, segment.routePoint.latlng.lng);
+                        segment.routePoint = L.latLng(segment.routePoint.lat, segment.routePoint.lng);
                     }
-                    for (let marker of route.markers) {
-                        marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng);    
-                    }
+                }
+            }
+            if (data.markers) {
+                for (let marker of data.markers) {
+                    marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng);
                 }
             }
             this.setData(data, false);
         }
 
-        public getSelectedRoute = (): Layers.RouteLayers.RouteLayer => {
+        public getSelectedRoute = (): RouteLayers.RouteLayer => {
             return this.selectedRoute;
+        }
+
+        public getMarkers = (): PoiLayers.PoiLayer => {
+            return this.markers;
         }
 
         public getRouteByName = (routeName: string): Layers.RouteLayers.RouteLayer => {
@@ -414,12 +421,13 @@ module IsraelHiking.Services {
                 maxNativeZoom: layerData.maxZoom || LayersService.MAX_NATIVE_ZOOM,
                 maxZoom: LayersService.MAX_ZOOM,
                 attribution: attribution || this.defaultAttribution
-        } as L.TileLayerOptions;
+            } as L.TileLayerOptions;
         }
 
         public getData = () => {
             var container = {
                 routes: [],
+                markers: [],
                 baseLayer: null,
                 overlays: [],
                 northEast: this.map.getBounds().getNorthEast(),
@@ -431,6 +439,7 @@ module IsraelHiking.Services {
                     container.routes.push(route.getData());
                 }
             }
+            container.markers = this.markers.getData();
             container.baseLayer = this.extractDataFromLayer(this.selectedBaseLayer);
             var visibaleOverlays = this.overlays.filter(overlay => overlay.visible);
             for (let overlayIndex = 0; overlayIndex < visibaleOverlays.length; overlayIndex++) {
@@ -443,8 +452,7 @@ module IsraelHiking.Services {
             if (dataContainer.routes.length === 0) {
                 dataContainer.routes.push({
                     name: this.createRouteName(),
-                    segments: [],
-                    markers: []
+                    segments: []
                 } as Common.RouteData);
             }
             for (let routeData of dataContainer.routes) {
@@ -458,6 +466,7 @@ module IsraelHiking.Services {
                     this.selectRoute(routeLayer);
                 }
             }
+            this.markers.setData(dataContainer.markers || []);
 
             if (dataContainer.northEast != null && dataContainer.southWest != null) {
                 this.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));

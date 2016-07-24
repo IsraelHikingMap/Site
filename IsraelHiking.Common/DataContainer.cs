@@ -2,32 +2,28 @@
 
 namespace IsraelHiking.Common
 {
+    public class LayerData
+    {
+        public string key { get; set; }
+        public string address { get; set; }
+        public int? minZoom { get; set; }
+        public int? maxZoom { get; set; }
+    }
+
     public class DataContainer
     {
         public const string ISRAEL_HIKING_MAP = "IsraelHikingMap";
 
         public List<RouteData> routes { get; set; }
+        public List<MarkerData> markers { get; set; }
         public LatLng northEast { get; set; }
         public LatLng southWest { get; set; }
+        public LayerData baseLayer { get; set; }
+        public List<LayerData> overlays { get; set; }
 
         public DataContainer()
         {
             routes = new List<RouteData>();
-        }
-    }
-
-    public class DataContainerOld
-    {
-        public const string ISRAEL_HIKING_MAP = "IsraelHikingMap";
-
-        public List<RouteDataOld> routes { get; set; }
-        public List<MarkerData> markers { get; set; }
-        public LatLng northEast { get; set; }
-        public LatLng southWest { get; set; }
-
-        public DataContainerOld()
-        {
-            routes = new List<RouteDataOld>();
             markers = new List<MarkerData>();
         }
     }

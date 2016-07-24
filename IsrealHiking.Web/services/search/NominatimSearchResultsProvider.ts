@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Services.Search {
+﻿namespace IsraelHiking.Services.Search {
 
     export interface INominatimRequest {
         q: string;

@@ -35,6 +35,7 @@ namespace IsraelHiking.API.Tests.Gpx
         {
             var dataContainer = new DataContainer
             {
+                markers = new List<MarkerData> { new MarkerData { latlng = new LatLng { lat = 1, lng = 2 } } },
                 routes = new List<RouteData>
                 {
                     new RouteData
@@ -43,8 +44,7 @@ namespace IsraelHiking.API.Tests.Gpx
                         segments = new List<RouteSegmentData>
                         {
                             new RouteSegmentData {latlngzs = new List<LatLngZ> {new LatLngZ {lat = 3, lng = 4, z = 5}}}
-                        },
-                        markers = new List<MarkerData> { new MarkerData {  latlng = new LatLng { lat = 1, lng = 2} } }
+                        }
                     }
                 }
             };
@@ -93,7 +93,7 @@ namespace IsraelHiking.API.Tests.Gpx
             };
             var dataContainer = _converter.ToDataContainer(gpx);
             Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
+            Assert.AreEqual(1, dataContainer.markers.Count);
         }
 
         [TestMethod]
@@ -104,9 +104,8 @@ namespace IsraelHiking.API.Tests.Gpx
                 wpt = new[] { new wptType { lat = 4, lon = 5, ele = 6, eleSpecified = true } },
             };
             var dataContainer = _converter.ToDataContainer(gpx);
-            Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
-            Assert.AreEqual(0, dataContainer.routes.First().segments.Count);
+            Assert.AreEqual(0, dataContainer.routes.Count);
+            Assert.AreEqual(1, dataContainer.markers.Count);
         }
 
 
@@ -119,7 +118,7 @@ namespace IsraelHiking.API.Tests.Gpx
             };
             var dataContainer = _converter.ToDataContainer(gpx);
             Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(0, dataContainer.routes.First().markers.Count);
+            Assert.AreEqual(0, dataContainer.markers.Count);
             Assert.AreEqual(0, dataContainer.routes.First().segments.Count);
         }
 
@@ -132,15 +131,16 @@ namespace IsraelHiking.API.Tests.Gpx
             };
             var dataContainer = _converter.ToDataContainer(gpx);
             Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(0, dataContainer.routes.First().markers.Count);
+            Assert.AreEqual(0, dataContainer.markers.Count);
             Assert.AreEqual(1, dataContainer.routes.First().segments.Count);
         }
 
         [TestMethod]
-        public void ConvertTpGpxAndBack_WithData_ShouldReturnTheSameData()
+        public void ConvertToGpxAndBack_WithData_ShouldReturnTheSameData()
         {
             var dataContainer = new DataContainer
             {
+                markers = new List<MarkerData> { new MarkerData { latlng = new LatLng { lat = 1, lng = 2 } } },
                 routes = new List<RouteData>
                 {
                     new RouteData
@@ -154,10 +154,9 @@ namespace IsraelHiking.API.Tests.Gpx
                                     new LatLngZ {lat = 3, lng = 4, z = 5},
                                     new LatLngZ {lat = 6, lng = 7, z = 8}
                                 },
-                                routePoint = new MarkerData { latlng = new LatLng { lat = 6, lng = 7}, title = "route segment title" }
+                                routePoint = new LatLng { lat = 6, lng = 7}
                             }
-                        },
-                        markers = new List<MarkerData> {new MarkerData {latlng = new LatLng {lat = 1, lng = 2}}}
+                        }
                     },
                     new RouteData
                     {
@@ -169,8 +168,7 @@ namespace IsraelHiking.API.Tests.Gpx
                                 new LatLngZ {lat = 13, lng = 14, z = 15},
                                 new LatLngZ {lat = 16, lng = 17, z = 18}
                             }}
-                        },
-                        markers = new List<MarkerData> {new MarkerData {latlng = new LatLng {lat = 11, lng = 12}}}
+                        }
                     }
                 }
             };
@@ -181,12 +179,8 @@ namespace IsraelHiking.API.Tests.Gpx
             Assert.AreEqual(dataContainer.routes.Count, newDataContainer.routes.Count);
             Assert.AreEqual(dataContainer.routes.First().name, newDataContainer.routes.First().name);
             CollectionAssert.AreEqual(dataContainer.routes.First().segments.First().latlngzs, newDataContainer.routes.First().segments.First().latlngzs);
-            Assert.AreEqual(dataContainer.routes.First().markers.Count, newDataContainer.routes.First().markers.Count);
-            Assert.AreEqual(dataContainer.routes.First().markers.First().latlng, newDataContainer.routes.First().markers.First().latlng);
-
+            Assert.AreEqual(dataContainer.markers.First().latlng, newDataContainer.markers.First().latlng);
             Assert.AreEqual(dataContainer.routes.Last().name, newDataContainer.routes.Last().name);
-            Assert.AreEqual(dataContainer.routes.Last().markers.Count, newDataContainer.routes.Last().markers.Count);
-            Assert.AreEqual(dataContainer.routes.Last().markers.Last().latlng, newDataContainer.routes.Last().markers.Last().latlng);
         }
     }
 }

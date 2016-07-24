@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers.RouteProperties {
+﻿namespace IsraelHiking.Controllers.RouteProperties {
     export interface IRouteBaseScope extends angular.IScope {
         routeProperties: Services.Layers.RouteLayers.IRouteProperties;
         colors: { key: string, value: string }[];

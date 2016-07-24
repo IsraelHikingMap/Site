@@ -1,9 +1,9 @@
-﻿module IsraelHiking.Controllers.LayerProperties {
+﻿namespace IsraelHiking.Controllers.LayerProperties {
     export class BaseLayerEditController extends LayerBaseController {
-        constructor($scope: ILayerBaseEditScope<Services.IBaseLayer>,
+        constructor($scope: ILayerBaseEditScope<Services.Layers.IBaseLayer>,
             mapService: Services.MapService,
-            layersService: Services.LayersService,
-            layer: Services.IBaseLayer,
+            layersService: Services.Layers.LayersService,
+            layer: Services.Layers.IBaseLayer,
             toastr: Toastr) {
             super($scope, mapService, layersService, toastr);
             $scope.title = "Base Layer Properties";
@@ -20,7 +20,7 @@
             }
         }
 
-        protected internalSave = ($scope: ILayerBaseEditScope<Services.IBaseLayer>, layerData: Common.LayerData) => {
+        protected internalSave = ($scope: ILayerBaseEditScope<Services.Layers.IBaseLayer>, layerData: Common.LayerData) => {
             return this.layersService.updateBaseLayer($scope.layer, layerData);
         }
 

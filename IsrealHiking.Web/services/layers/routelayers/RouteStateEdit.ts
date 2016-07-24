@@ -1,14 +1,43 @@
 ﻿namespace IsraelHiking.Services.Layers.RouteLayers {
-    export abstract class RouteStateEditBase extends RouteStateBase {
+    export class RouteStateEdit extends RouteStateBase {
         protected hoverHandler: IHoverHandler;
         private selectedRouteSegmentIndex: number;
 
         constructor(context: RouteLayer) {
             super(context);
             this.selectedRouteSegmentIndex = -1;
+            this.hoverHandler = new HoverHandlerRoute(context, this.createMiddleMarker());
+            this.initialize();
         }
 
-        protected abstract addPoint(e: L.LeafletMouseEvent): void;
+        private addPoint(e: L.LeafletMouseEvent) {
+            if (this.hoverHandler.getState() !== HoverHandlerBase.ADD_POINT) {
+                return;
+            }
+            let snappingResponse = this.context.snappingService.snapTo(e.latlng);
+            this.addPointToRoute(snappingResponse.latlng, this.context.route.properties.currentRoutingType).then(() => {
+                this.context.dataChanged();
+            });
+        }
+
+        private addPointToRoute = (latlng: L.LatLng, routingType: string): angular.IPromise<{}> => {
+            this.context.route.segments.push(this.createRouteSegment(latlng, [this.context.getLatLngZFromLatLng(latlng), this.context.getLatLngZFromLatLng(latlng)], routingType));
+            this.updateStartAndEndMarkersIcons();
+            if (this.context.route.segments.length > 1) {
+                let endPointSegmentIndex = this.context.route.segments.length - 1;
+                return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
+            } else if (this.context.route.segments.length === 1) {
+                return this.context.elevationProvider.updateHeights(this.context.route.segments[0].latlngzs);
+            }
+            var deferred = this.context.$q.defer<{}>();
+            deferred.resolve();
+
+            return deferred.promise;
+        }
+
+        public getEditMode() {
+            return EditMode.ROUTE;
+        }
 
         public initialize() {
             this.context.map.on("click", this.addPoint, this);
@@ -16,11 +45,8 @@
             this.context.snappingService.enable(true);
             for (let segment of this.context.route.segments) {
                 segment.polyline = L.polyline(segment.latlngzs, this.context.route.properties.pathOptions);
-                segment.routePointMarker = this.createMarker(segment.routePoint, true);
+                segment.routePointMarker = this.createMarker(segment.routePoint);
                 this.context.map.addLayer(segment.polyline);
-            }
-            for (let marker of this.context.route.markers) {
-                marker.marker = this.createMarker(marker, false);
             }
             this.updateStartAndEndMarkersIcons();
         }
@@ -30,49 +56,19 @@
                 this.context.map.removeLayer(segment.polyline);
                 this.destoryMarker(segment.routePointMarker);
             }
-            for (let marker of this.context.route.markers) {
-                this.destoryMarker(marker.marker);
-            }
             this.context.snappingService.enable(false);
             this.context.map.off("mousemove", this.hoverHandler.onMouseMove, this.hoverHandler);
-            this.hoverHandler.setState(HoverHandlerBase.NONE);
             this.context.map.off("click", this.addPoint, this);
+            this.hoverHandler.setState(HoverHandlerBase.NONE);
         }
 
 
-        protected createMarker = (markerData: Common.MarkerData, inRoute: boolean): IMarkerWithTitle => {
+        private createMarker = (latlng: L.LatLng): L.Marker => {
             let pathOptions = this.context.route.properties.pathOptions;
-            let marker = L.marker(markerData.latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions) as IMarkerWithTitle;
-            marker.title = markerData.title;
-            this.addLabelAndEvents(marker, inRoute);
+            let marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
+            this.setRouteMarkerEvents(marker);
             marker.addTo(this.context.map);
-            if (!markerData.title) { // must be after adding to map...
-                marker.hideLabel();
-            }
             return marker;
-        }
-
-        private addLabelAndEvents(marker: IMarkerWithTitle, inRoute: boolean): void {
-            marker.bindLabel(marker.title, this.context.getBindLabelOptions());
-            var newScope = this.context.$rootScope.$new() as Controllers.IMarkerPopupScope;
-            newScope.marker = marker;
-            newScope.routeLayer = this.context;
-            newScope.inRoute = inRoute;
-            if (inRoute) {
-                this.setRouteMarkerEvents(marker);
-                newScope.remove = () => {
-                    let segment = _.find(this.context.route.segments, segmentToFind => segmentToFind.routePointMarker === marker);
-                    this.removeRouteSegment(segment);
-                }
-            } else {
-                this.setPoiMarkerEvents(marker);
-                newScope.remove = () => {
-                    let routeMarker = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
-                    this.removePoi(routeMarker);
-                }
-            }
-            let popupHtml = this.context.$compile("<marker-popup ng-title='title'></marker-popup>")(newScope)[0];
-            marker.bindPopup(popupHtml);
         }
 
         protected updateStartAndEndMarkersIcons = () => {
@@ -97,7 +93,7 @@
             }
             let snappingResponse = this.context.snappingService.snapTo(marker.getLatLng());
             marker.setLatLng(snappingResponse.latlng);
-            this.context.route.segments[this.selectedRouteSegmentIndex].routePoint.latlng = snappingResponse.latlng;
+            this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
             let segmentStartLatlng = this.selectedRouteSegmentIndex === 0 ? [snappingResponse.latlng] : [this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng(), snappingResponse.latlng];
             this.context.route.segments[this.selectedRouteSegmentIndex].polyline.setLatLngs(segmentStartLatlng);
             if (this.selectedRouteSegmentIndex < this.context.route.segments.length - 1) {
@@ -111,7 +107,7 @@
             }
             let snappingResponse = this.context.snappingService.snapTo(marker.getLatLng());
             marker.setLatLng(snappingResponse.latlng);
-            this.context.route.segments[this.selectedRouteSegmentIndex].routePoint.latlng = snappingResponse.latlng;
+            this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
             this.context.route.segments[this.selectedRouteSegmentIndex].routingType = this.context.route.properties.currentRoutingType;
             let tasks = [];
             if (this.selectedRouteSegmentIndex === 0) {
@@ -136,7 +132,7 @@
             if (this.context.route.segments.length > 0 && segmentIndex === 0) {
                 //first point is being removed
                 this.context.route.segments[0].latlngzs = [this.context.route.segments[0].latlngzs[this.context.route.segments[0].latlngzs.length - 1]];
-                this.context.route.segments[0].polyline.setLatLngs([this.context.route.segments[0].routePoint.latlng, this.context.route.segments[0].routePoint.latlng]);
+                this.context.route.segments[0].polyline.setLatLngs([this.context.route.segments[0].routePoint, this.context.route.segments[0].routePoint]);
                 this.context.dataChanged();
             }
             else if (segmentIndex !== 0 && segmentIndex < this.context.route.segments.length) {
@@ -146,33 +142,6 @@
             else {
                 this.context.dataChanged();
             }
-        }
-
-        private removePoi = (poi: IRouteMarker) => {
-            let poiToRemove = _.find(this.context.route.markers, markerToFind => markerToFind === poi);
-            this.context.route.markers.splice(this.context.route.markers.indexOf(poiToRemove), 1);
-            this.destoryMarker(poiToRemove.marker);
-        }
-
-        private setPoiMarkerEvents(marker: L.Marker) {
-            marker.on("dragStart", () => {
-                marker.closePopup();
-            });
-            marker.on("dragend", () => {
-                let markerInArray = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
-                markerInArray.latlng = marker.getLatLng();
-                this.context.dataChanged();
-            });
-            marker.on("mouseover", () => {
-                if (this.hoverHandler.getState() !== HoverHandlerBase.DRAGGING) {
-                    this.hoverHandler.setState(HoverHandlerBase.ON_MARKER);
-                }
-            });
-            marker.on("mouseout", () => {
-                if (this.hoverHandler.getState() !== HoverHandlerBase.DRAGGING) {
-                    this.hoverHandler.setState(HoverHandlerBase.NONE);
-                }
-            });
         }
 
         private setRouteMarkerEvents = (marker: L.Marker) => {
@@ -199,12 +168,12 @@
             });
         }
 
-        protected createRouteSegment = (routePoint: Common.MarkerData, latlngzs: Common.LatLngZ[], routingType: string): IRouteSegment => {
+        protected createRouteSegment = (latlng: L.LatLng, latlngzs: Common.LatLngZ[], routingType: string): IRouteSegment => {
             var routeSegment = {
                 routePointMarker: (this.hoverHandler.getState() !== HoverHandlerBase.DRAGGING)
-                    ? this.createMarker(routePoint, true)
+                    ? this.createMarker(latlng)
                     : null,
-                routePoint: routePoint,
+                routePoint: latlng,
                 polyline: L.polyline(latlngzs, this.context.route.properties.pathOptions),
                 latlngzs: latlngzs,
                 routingType: routingType
@@ -225,8 +194,8 @@
         protected runRouting = (startIndex: number, endIndex: number): angular.IPromise<any> => {
             var startSegment = this.context.route.segments[startIndex];
             var endSegment = this.context.route.segments[endIndex];
-            var polyline = this.createLoadingSegmentIndicatorPolyline([startSegment.routePoint.latlng, endSegment.routePoint.latlng]);
-            var promise = this.context.routerService.getRoute(startSegment.routePoint.latlng, endSegment.routePoint.latlng, endSegment.routingType);
+            var polyline = this.createLoadingSegmentIndicatorPolyline([startSegment.routePoint, endSegment.routePoint]);
+            var promise = this.context.routerService.getRoute(startSegment.routePoint, endSegment.routePoint, endSegment.routingType);
             var deferred = this.context.$q.defer();
             promise.then((data) => {
                 this.context.map.removeLayer(polyline);
@@ -250,7 +219,7 @@
             var segmentLatlngzs = segment.latlngzs;
             var indexOfSegment = this.context.route.segments.indexOf(segment);
             var newSegmentLatlngs = segmentLatlngzs.splice(0, snappingResponse.beforeIndex + 1);
-            var newRouteSegment = this.createRouteSegment({ latlng: snappingResponse.latlng } as Common.MarkerData, newSegmentLatlngs, this.context.route.properties.currentRoutingType);
+            var newRouteSegment = this.createRouteSegment(snappingResponse.latlng, newSegmentLatlngs, this.context.route.properties.currentRoutingType);
             segment.polyline.setLatLngs(segmentLatlngzs);
             this.context.route.segments.splice(indexOfSegment, 0, newRouteSegment);
         }
@@ -261,7 +230,7 @@
             this.selectedRouteSegmentIndex = _.findIndex(this.context.route.segments, (segment) => segment.polyline === snappingResponse.polyline);
             let latlngzs = [this.context.getLatLngZFromLatLng(this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng()),
                 this.context.getLatLngZFromLatLng(snappingResponse.latlng)];
-            let newSegment = this.createRouteSegment({ latlng: snappingResponse.latlng } as Common.MarkerData, latlngzs, this.context.route.properties.currentRoutingType);
+            let newSegment = this.createRouteSegment(snappingResponse.latlng, latlngzs, this.context.route.properties.currentRoutingType);
             this.context.route.segments.splice(this.selectedRouteSegmentIndex, 0, newSegment);
         }
 
@@ -277,8 +246,8 @@
 
         private middleMarkerDragEnd = (middleMarker: L.Marker) => {
             let snappingResponse = this.context.snappingService.snapTo(middleMarker.getLatLng());
-            this.context.route.segments[this.selectedRouteSegmentIndex].routePointMarker = this.createMarker({ latlng: snappingResponse.latlng } as Common.MarkerData, true);
-            this.context.route.segments[this.selectedRouteSegmentIndex].routePoint.latlng = snappingResponse.latlng;
+            this.context.route.segments[this.selectedRouteSegmentIndex].routePointMarker = this.createMarker(snappingResponse.latlng);
+            this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
             let tasks = [];
             tasks.push(this.runRouting(this.selectedRouteSegmentIndex - 1, this.selectedRouteSegmentIndex));
             tasks.push(this.runRouting(this.selectedRouteSegmentIndex, this.selectedRouteSegmentIndex + 1));

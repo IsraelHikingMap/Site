@@ -46,41 +46,27 @@ namespace IsraelHiking.API.Converters
             return new gpxType
             {
                 creator = DataContainer.ISRAEL_HIKING_MAP,
-                wpt = ConvertRouteDataToWayPoints(routes),
+                wpt = container.markers.Select(ToWptType).ToArray(),
                 rte = new rteType[0],
                 trk = routes.Select(r => new trkType
                 {
                     name = r.name,
-                    trkseg = r.segments.Select(ToTrksegType).ToArray(),
-                    extensions = new extensionsType { Any = new[] { XmlFactory.CreateRouteId(r.id) } }
+                    trkseg = r.segments.Select(ToTrksegType).ToArray()
                 }).ToArray()
             };
         }
 
         public DataContainer ToDataContainer(gpxType gpx)
         {
-            var container = new DataContainer();
-            var points = gpx.wpt ?? new wptType[0];
-            var pointsPerRoute = points.Where(p => p.extensions != null && p.extensions.Any.Any(e => e.LocalName == XmlFactory.ROUTE_ID)).GroupBy(p => p.extensions.Any.First(a => a.LocalName == XmlFactory.ROUTE_ID).InnerText).ToList();
-            var nonRoutePoints = points.Except(pointsPerRoute.SelectMany(g => g.ToList())).Select(ToMarkerData).ToList();
-
-            container.routes = ConvertRoutesToRoutesData(gpx.rte ?? new rteType[0]);
+            var container = new DataContainer
+            {
+                markers = (gpx.wpt ?? new wptType[0]).Select(ToMarkerData).ToList(),
+                routes = ConvertRoutesToRoutesData(gpx.rte ?? new rteType[0])
+            };
             container.routes.AddRange(ConvertTracksToRouteData(gpx.trk ?? new trkType[0]));
-
-            SetMarkers(container, nonRoutePoints, pointsPerRoute);
             UpdateBoundingBox(container);
 
             return container;
-        }
-
-        private wptType[] ConvertRouteDataToWayPoints(List<RouteData> routes)
-        {
-            var wayPoints = new List<wptType>();
-            foreach (var routeData in routes)
-            {
-                wayPoints.AddRange(routeData.markers.Select(m => ToWptType(m, routeData.id)));
-            }
-            return wayPoints.ToArray();
         }
 
         private List<RouteData> ConvertRoutesToRoutesData(rteType[] routes)
@@ -88,15 +74,14 @@ namespace IsraelHiking.API.Converters
             var routesData = routes.Where(r => r.rtept != null && r.rtept.Any()).Select(route => new RouteData
             {
                 name = route.name,
-                id = Guid.NewGuid().ToString(),
                 segments = new List<RouteSegmentData>
                 {
                     new RouteSegmentData
                     {
                         latlngzs = route.rtept.Select(ToLatLngZ).ToList(),
-                        routePoint = new MarkerData {latlng = ToLatLngZ(route.rtept.Last())}
+                        routePoint = ToLatLngZ(route.rtept.Last())
                     }
-                },
+                }
             }).ToList();
             return routesData;
         }
@@ -105,46 +90,21 @@ namespace IsraelHiking.API.Converters
         {
             var tracks = trks.Where(t => t.trkseg != null && t.trkseg.Any()).Select(t => new RouteData
             {
-                id = t.extensions?.Any.FirstOrDefault(a => a.LocalName == XmlFactory.ROUTE_ID)?.InnerText ?? Guid.NewGuid().ToString(),
                 name = t.name,
                 segments = t.trkseg.Where(seg => seg.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
                 {
                     latlngzs = seg.trkpt.Select(ToLatLngZ).ToList(),
-                    routePoint = new MarkerData {latlng = ToLatLngZ(seg.trkpt.Last()), title = seg.trkpt.Last().name},
+                    routePoint = ToLatLngZ(seg.trkpt.Last()),
                     routingType = seg.extensions?.Any.FirstOrDefault(a => a.LocalName == XmlFactory.ROUTING_TYPE)?.InnerText ?? "h",
                 }).ToList(),
             });
             return tracks;
         }
 
-        private void SetMarkers(DataContainer container, List<MarkerData> nonRoutePoints, List<IGrouping<string, wptType>> pointsPerRoute)
-        {
-            foreach (var routeData in container.routes)
-            {
-                routeData.markers = pointsPerRoute.Where(p => p.Key == routeData.id)
-                    .SelectMany(g => g.ToList().Select(ToMarkerData))
-                    .ToList();
-            }
-            if (container.routes.Count == 0 && nonRoutePoints.Count > 0)
-            {
-                container.routes.Add(new RouteData
-                {
-                    id = Guid.NewGuid().ToString(),
-                    name = "Markers",
-                    markers = nonRoutePoints
-                });
-            }
-            else if (nonRoutePoints.Count > 0)
-            {
-                container.routes.First().markers.AddRange(nonRoutePoints);
-            }
-            
-        }
-
         private void UpdateBoundingBox(DataContainer container)
         {
             var allPoints = container.routes.SelectMany(r => r.segments.SelectMany(s => s.latlngzs)).OfType<LatLng>().ToList();
-            allPoints.AddRange(container.routes.SelectMany(r => r.markers.Select(m => m.latlng)));
+            allPoints.AddRange(container.markers.Select(m => m.latlng));
             if (allPoints.Any() == false)
             {
                 return;
@@ -181,14 +141,13 @@ namespace IsraelHiking.API.Converters
             };
         }
 
-        private wptType ToWptType(MarkerData marker, string id)
+        private wptType ToWptType(MarkerData marker)
         {
             return new wptType
             {
                 lat = (decimal)marker.latlng.lat,
                 lon = (decimal)marker.latlng.lng,
                 name = marker.title,
-                extensions = string.IsNullOrWhiteSpace(id) ? null : new extensionsType { Any = new[] { XmlFactory.CreateRouteId(id) } }
             };
         }
 
@@ -205,16 +164,11 @@ namespace IsraelHiking.API.Converters
 
         private trksegType ToTrksegType(RouteSegmentData segmentData)
         {
-            var segType = new trksegType
+            return new trksegType
             {
                 trkpt = segmentData.latlngzs.Select(ToWptType).ToArray(),
                 extensions = new extensionsType { Any = new[] { XmlFactory.CreateRoutingType(segmentData.routingType) } }
             };
-            if (segmentData.routePoint != null)
-            {
-                segType.trkpt[segType.trkpt.Length - 1] = ToWptType(segmentData.routePoint, string.Empty);
-            }
-            return segType;
         }
     }
 }

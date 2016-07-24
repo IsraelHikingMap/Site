@@ -1,7 +1,7 @@
 ﻿namespace IsraelHiking.Services.Layers.RouteLayers {
-    export class UndoHandler {
+    export class UndoHandler<TData> {
 
-        private undoStack: Common.RouteData[];
+        private undoStack: TData[];
 
         constructor() {
             this.undoStack = [];
@@ -14,7 +14,7 @@
             this.undoStack.pop();
         }
 
-        public top = (): Common.RouteData => {
+        public top = (): TData => {
             return this.undoStack[this.undoStack.length - 1];
         }
 
@@ -22,7 +22,7 @@
             return this.undoStack.length <= 1;
         }
 
-        public addDataToUndoStack = (data: Common.RouteData) => {
+        public addDataToUndoStack = (data: TData) => {
             this.undoStack.push(data);
         }
     }

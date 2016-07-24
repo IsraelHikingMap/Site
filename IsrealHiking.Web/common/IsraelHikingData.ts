@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Common {
+﻿namespace IsraelHiking.Common {
     export class RoutingType {
         public static hike = "h"; 
         public static bike = "b";
@@ -26,7 +26,7 @@
     }
 
     export interface RouteSegmentData {
-        routePoint: MarkerData;
+        routePoint: L.LatLng;
         latlngzs: LatLngZ[];
         routingType: string;
     }
@@ -34,10 +34,11 @@
     export interface RouteData {
         name: string;
         segments: RouteSegmentData[];
-        markers: MarkerData[];
     }
+
     export interface DataContainer {
         routes: RouteData[];
+        markers: MarkerData[];
         baseLayer: LayerData;
         overlays: LayerData[];
         northEast: L.LatLng;

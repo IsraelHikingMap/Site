@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
     export interface IRouteStatisticsScope extends angular.IScope {
         length: string;
         gain: string;
@@ -19,7 +19,7 @@
         private routeDataChangedEventHandler: (data: {}) => void;
 
         constructor($scope: IRouteStatisticsScope,
-            layersService: Services.LayersService,
+            layersService: Services.Layers.LayersService,
             mapService: Services.MapService) {
             super(mapService);
 
@@ -55,7 +55,7 @@
             }
         }
 
-        private routeChanged = ($scope: IRouteStatisticsScope, layersService: Services.LayersService) => {
+        private routeChanged = ($scope: IRouteStatisticsScope, layersService: Services.Layers.LayersService) => {
             if (this.routeLayer) {
                 this.routeLayer.eventHelper.removeListener(this.routeDataChangedEventHandler);
             }
@@ -97,7 +97,7 @@
             }
             let markerNumber = 0;
             let length = 0;
-            let start = routeData.segments[0].routePoint.latlng;
+            let start = routeData.segments[0].routePoint;
             this.kmMarkersGroup.addLayer(this.createKmMarker(start, markerNumber));
             let previousPoint = start;
             for (let segment of routeData.segments) {

@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Common {
+﻿namespace IsraelHiking.Common {
     export class Urls { 
         // api
         public static apiBase = window.location.protocol + "//" + window.location.host + "/";

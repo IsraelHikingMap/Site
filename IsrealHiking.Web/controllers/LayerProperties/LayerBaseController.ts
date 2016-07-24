@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Controllers.LayerProperties {
+﻿namespace IsraelHiking.Controllers.LayerProperties {
     export interface ILayerBaseScope extends angular.IScope {
         title: string;
         key: string;
@@ -15,36 +15,36 @@
         removeLayer(e: Event): void;
     }
 
-    export class LayerBaseController extends BaseMapController {
-        protected layersService: Services.LayersService;
+    export abstract class LayerBaseController extends BaseMapController {
+        protected layersService: Services.Layers.LayersService;
 
         constructor($scope: ILayerBaseScope,
             mapService: Services.MapService,
-            layersService: Services.LayersService,
+            layersService: Services.Layers.LayersService,
             toastr: Toastr) {
             super(mapService);
             this.layersService = layersService;
-            $scope.minZoom = Services.LayersService.MIN_ZOOM;
-            $scope.maxZoom = Services.LayersService.MAX_NATIVE_ZOOM;
+            $scope.minZoom = Services.Layers.LayersService.MIN_ZOOM;
+            $scope.maxZoom = Services.Layers.LayersService.MAX_NATIVE_ZOOM;
 
             $scope.saveLayer = (key: string, address: string, minZoom: number, maxZoom: number, e: Event) => {
                 var decodedAddress = decodeURI(address).replace("{zoom}", "{z}");
-                var layerData = <Common.LayerData> {
+                var layerData = {
                     key: key,
                     address: decodedAddress,
                     isEditable: true,
                     minZoom: minZoom,
                     maxZoom: maxZoom,
-                };
+                } as Common.LayerData;
                 var message = this.internalSave($scope, layerData);
-                if (message != "") {
+                if (message !== "") {
                     toastr.error(message);
                 }
                 this.suppressEvents(e);
             }
         }
         // should be implemented in derrived classes
-        protected internalSave = ($scope: ILayerBaseScope, layerData: Common.LayerData): string => { return "Implementation Error." }
+        protected internalSave = ($scope: ILayerBaseScope, layerData: Common.LayerData): string => { throw Error("Implementation Error.") }
 
     }
 }

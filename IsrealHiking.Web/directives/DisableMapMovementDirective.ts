@@ -1,4 +1,4 @@
-﻿module IsraelHiking.Directives {
+﻿namespace IsraelHiking.Directives {
     export class DisableMapMovementDirective {
         constructor(mapService: Services.MapService) {
             return <angular.IDirective>{

@@ -8,7 +8,7 @@
 /// <reference path="../../../isrealhiking.web/services/parsers/parserfactory.ts" />
 /// <reference path="../../../IsrealHiking.Web/scripts/typings/toastr/toastr.d.ts" />
 
-module IsraelHiking.Tests {
+namespace IsraelHiking.Tests {
     describe("Snapping Service", () => {
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
