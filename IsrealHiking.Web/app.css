@@ -13,10 +13,14 @@ body {
 .marker-label {
     position: absolute;
     font-size: 15px;
+    color: green;
     background: white;
     padding: 3px;
     border-radius: 6px;
     direction: rtl;
+    white-space: nowrap;
+    border: 1px solid black;
+    opacity: 0.8 !important;
 }
 
 .marker-popup {
