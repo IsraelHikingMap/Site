@@ -20,7 +20,8 @@
     "interact": "*",
     "leaflet": "*",
     "Leaflet.label": "*",
-    "leaflet.locatecontrol": "*"
+    "leaflet.locatecontrol": "*",
+    "leaflet-polylinedecorator": "*"
   },
   "overrides": {
     "bootstrap": {

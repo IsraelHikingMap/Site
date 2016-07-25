@@ -137,6 +137,7 @@
     <Content Include="scripts\leaflet-google.js" />
     <Content Include="scripts\leaflet-src.js" />
     <Content Include="scripts\leaflet.label.js" />
+    <Content Include="scripts\leaflet.polylineDecorator.js" />
     <Content Include="scripts\loading-bar.js" />
     <Content Include="scripts\lodash.js" />
     <Content Include="scripts\ng-file-upload.js" />
