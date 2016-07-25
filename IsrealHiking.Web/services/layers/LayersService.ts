@@ -54,7 +54,7 @@ namespace IsraelHiking.Services.Layers {
         public overlays: IOverlay[];
         public routes: Layers.RouteLayers.RouteLayer[];
         public markers: Layers.PoiLayers.PoiLayer;
-        public eventHelper: Common.EventHelper<{}>;
+        public routeChangedEvent: Common.EventHelper<{}>;
         public selectedBaseLayer: IBaseLayer;
         public selectedRoute: Layers.RouteLayers.RouteLayer;
 
@@ -75,7 +75,7 @@ namespace IsraelHiking.Services.Layers {
             this.overlays = [];
             this.routes = [];
             this.overlayZIndex = 10;
-            this.eventHelper = new Common.EventHelper<{}>();
+            this.routeChangedEvent = new Common.EventHelper<{}>();
             this.markers = this.routeLayerFactory.createPoiLayer();
             let lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
             this.defaultAttribution = LayersService.ATTRIBUTION + "Last update: " + lastModified;
@@ -268,7 +268,7 @@ namespace IsraelHiking.Services.Layers {
                 this.selectedRoute.readOnly();
             }
             this.selectedRoute = routeLayer;
-            this.eventHelper.raiseEvent({});
+            this.routeChangedEvent.raiseEvent({});
         }
 
         public createRouteName = () => {

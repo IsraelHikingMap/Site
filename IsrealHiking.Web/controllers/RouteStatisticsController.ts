@@ -45,7 +45,7 @@
 
             this.routeChanged($scope, layersService);
 
-            layersService.eventHelper.addListener(() => {
+            layersService.routeChangedEvent.addListener(() => {
                 this.routeChanged($scope, layersService);
             });
 

@@ -31,6 +31,12 @@
 
             $scope.editMode = Services.Layers.RouteLayers.EditMode.NONE;
 
+            this.layersService.routeChangedEvent.addListener(() => {
+                if ($scope.editMode === Services.Layers.RouteLayers.EditMode.ROUTE) {
+                    $scope.editMode = (this.layersService.getSelectedRoute() != null) ? this.layersService.getSelectedRoute().getEditMode() : Services.Layers.RouteLayers.EditMode.NONE;
+                }
+            });
+
             $scope.clear = (e: Event) => {
                 this.suppressEvents(e);
                 if ($scope.editMode === Services.Layers.RouteLayers.EditMode.ROUTE && this.layersService.getSelectedRoute() != null) {
