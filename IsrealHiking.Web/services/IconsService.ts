@@ -22,7 +22,7 @@
         "<i class='fa fa-circle fa-stack-1x' style='color:white'></i>" +
         "</span>";
 
-        private static COLOR_MARKER_HTML = "<i class='fa fa-map-marker fa-3x' style='color:{{color}};opacity:0.5;text-shadow: 3px 3px 3px #000;'></i>";
+        private static COLOR_MARKER_HTML = "<i class='fa fa-map-marker fa-3x' style='color:{{color}};text-shadow: 3px 3px 3px #000;'></i>";
 
         public static createHoverIcon(color: string): L.DivIcon {
             return L.divIcon({
@@ -39,7 +39,7 @@
                 iconSize: L.point(20, 36),
                 iconAnchor: L.point(10, 36),
                 className: "color-marker",
-                popupAnchor: L.point(0, -30)
+                popupAnchor: L.point(0, -40)
             } as L.DivIconOptions);
         }
 

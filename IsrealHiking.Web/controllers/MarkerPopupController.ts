@@ -4,7 +4,11 @@
         East: number;
     }
 
-    export interface IMarkerPopupScope extends angular.IScope {
+    export interface IRemovableMarkerScope extends angular.IScope{
+        remove(): void;
+    }
+
+    export interface IMarkerPopupScope extends IRemovableMarkerScope {
         title: string;
         itmCoordinates: INorthEast;
         marker: Services.Layers.PoiLayers.IMarkerWithTitle;
@@ -13,7 +17,6 @@
         wikiCoordinatesString: string;
         setTitle(title: string): void;
         updateWikiCoordinates(title: string): void;
-        remove(): void;
     }
 
     export class MarkerPopupController {

@@ -10,35 +10,6 @@
             this.initialize();
         }
 
-        private addPoint(e: L.LeafletMouseEvent) {
-            if (this.hoverHandler.getState() !== HoverHandlerBase.ADD_POINT) {
-                return;
-            }
-            let snappingResponse = this.context.snappingService.snapTo(e.latlng);
-            this.addPointToRoute(snappingResponse.latlng, this.context.route.properties.currentRoutingType).then(() => {
-                this.context.dataChanged();
-            });
-        }
-
-        private addPointToRoute = (latlng: L.LatLng, routingType: string): angular.IPromise<{}> => {
-            this.context.route.segments.push(this.createRouteSegment(latlng, [this.context.getLatLngZFromLatLng(latlng), this.context.getLatLngZFromLatLng(latlng)], routingType));
-            this.updateStartAndEndMarkersIcons();
-            if (this.context.route.segments.length > 1) {
-                let endPointSegmentIndex = this.context.route.segments.length - 1;
-                return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
-            } else if (this.context.route.segments.length === 1) {
-                return this.context.elevationProvider.updateHeights(this.context.route.segments[0].latlngzs);
-            }
-            var deferred = this.context.$q.defer<{}>();
-            deferred.resolve();
-
-            return deferred.promise;
-        }
-
-        public getEditMode() {
-            return EditMode.ROUTE;
-        }
-
         public initialize() {
             this.context.map.on("click", this.addPoint, this);
             this.context.map.on("mousemove", this.hoverHandler.onMouseMove, this.hoverHandler);
@@ -62,12 +33,44 @@
             this.hoverHandler.setState(HoverHandlerBase.NONE);
         }
 
+        public getEditMode() {
+            return EditMode.ROUTE;
+        }
+
+        private addPoint(e: L.LeafletMouseEvent) {
+            let snappingResponse = this.context.snappingService.snapTo(e.latlng);
+            this.addPointToRoute(snappingResponse.latlng, this.context.route.properties.currentRoutingType).then(() => {
+                this.context.dataChanged();
+            });
+            this.hoverHandler.setState(HoverHandlerBase.NONE);
+        }
+
+        private addPointToRoute = (latlng: L.LatLng, routingType: string): angular.IPromise<{}> => {
+            this.context.route.segments.push(this.createRouteSegment(latlng, [this.context.getLatLngZFromLatLng(latlng), this.context.getLatLngZFromLatLng(latlng)], routingType));
+            this.updateStartAndEndMarkersIcons();
+            if (this.context.route.segments.length > 1) {
+                let endPointSegmentIndex = this.context.route.segments.length - 1;
+                return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
+            } else if (this.context.route.segments.length === 1) {
+                return this.context.elevationProvider.updateHeights(this.context.route.segments[0].latlngzs);
+            }
+            var deferred = this.context.$q.defer<{}>();
+            deferred.resolve();
+
+            return deferred.promise;
+        }
 
         private createMarker = (latlng: L.LatLng): L.Marker => {
             let pathOptions = this.context.route.properties.pathOptions;
             let marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
             this.setRouteMarkerEvents(marker);
             marker.addTo(this.context.map);
+            let newScope = this.context.$rootScope.$new() as Controllers.IRemovableMarkerScope;
+            newScope.remove = () => {
+                let segment = _.find(this.context.route.segments, segmentToFind => marker === segmentToFind.routePointMarker);
+                this.removeRouteSegment(segment); 
+            }
+            marker.bindPopup(this.context.$compile("<div route-point-popup></div>")(newScope)[0]);
             return marker;
         }
 
@@ -165,11 +168,6 @@
                 if (this.hoverHandler.getState() !== HoverHandlerBase.DRAGGING) {
                     this.hoverHandler.setState(HoverHandlerBase.NONE);
                 }
-            });
-            marker.on("dblclick", () => {
-                let segment = _.find(this.context.route.segments, segmentToFind => marker === segmentToFind.routePointMarker);
-                this.removeRouteSegment(segment);
-                this.hoverHandler.setState(HoverHandlerBase.NONE); // prevent from click to add a point.
             });
         }
 
@@ -299,7 +297,6 @@
             marker.off("dragend");
             marker.off("mouseover");
             marker.off("mouseout");
-            marker.off("dblclick");
             this.context.map.removeLayer(marker);
             this.hoverHandler.setState(HoverHandlerBase.NONE);
         }

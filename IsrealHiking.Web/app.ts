@@ -1,8 +1,7 @@
 ﻿namespace IsraelHiking {
 
-    // HM TODO: check mobile
     // HM TODO: change app.ts name.
-    // HM TODO: add missing js files.
+    // HM TODO: add missing js files/remove all js files.
 
     export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap",
         "LocalStorageModule", "googlechart", "ngAnimate",
@@ -54,6 +53,9 @@
     app.directive("markerPopup", () => ({
         controller: Controllers.MarkerPopupController,
         templateUrl: "controllers/markerPopup.html"
+    } as angular.IDirective));
+    app.directive("routePointPopup", () => ({
+        templateUrl: "controllers/routePointPopup.html"
     } as angular.IDirective));
     app.directive("drawingControl", () => ({
         controller: Controllers.DrawingController,

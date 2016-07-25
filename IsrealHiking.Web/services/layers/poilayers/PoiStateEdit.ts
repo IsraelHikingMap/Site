@@ -45,7 +45,7 @@
                 let routeMarker = _.find(this.context.markers, markerToFind => markerToFind.marker === marker);
                 this.removePoi(routeMarker);
             }
-            let popupHtml = this.context.$compile("<marker-popup ng-title='title'></marker-popup>")(newScope)[0];
+            let popupHtml = this.context.$compile("<div marker-popup></div>")(newScope)[0];
             marker.bindPopup(popupHtml);
         }
 

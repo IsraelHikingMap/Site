@@ -31,6 +31,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
 
     export class RouteLayer extends ObjectWithMap implements L.ILayer {
         public $q: angular.IQService;
+        public $rootScope: angular.IRootScopeService;
+        public $compile: angular.ICompileService;
         public snappingService: SnappingService;
         public routerService: Routers.RouterService;
         public elevationProvider: Elevation.IElevationProvider;
@@ -41,6 +43,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         private undoHandler: UndoHandler<Common.RouteData>;
 
         constructor($q: angular.IQService,
+            $rootScope: angular.IRootScopeService,
+            $compile: angular.ICompileService,
             mapService: MapService,
             snappingService: SnappingService,
             routerService: Routers.RouterService,
@@ -49,6 +53,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             super(mapService);
 
             this.$q = $q;
+            this.$rootScope = $rootScope;
+            this.$compile = $compile;
             this.snappingService = snappingService;
             this.routerService = routerService;
             this.elevationProvider = elevationProvider;

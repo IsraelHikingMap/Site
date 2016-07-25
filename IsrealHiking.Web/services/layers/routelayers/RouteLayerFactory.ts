@@ -44,6 +44,8 @@
 
         public createRouteLayer = (route: IRoute): RouteLayer => {
             return new RouteLayer(this.$q,
+                this.$rootScope,
+                this.$compile,
                 this.mapService,
                 this.snappingService,
                 this.routerService,
