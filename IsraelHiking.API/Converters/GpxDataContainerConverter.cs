@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
 using IsraelHiking.API.Gpx.GpxTypes;
@@ -7,34 +6,55 @@ using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Converters
 {
-    public static class XmlFactory
+    public static class RoutingTypeConverter
     {
-        public const string ROUTE_ID = "RouteId";
-        public const string ROUTING_TYPE = "RoutingType";
+        private const string ROUTING_TYPE = "RoutingType";
 
-        public static XmlElement CreateRouteId(string id)
+        public static string FromXml(extensionsType extensions)
+        {
+            return RoutingTypeToCharacter(
+                    extensions?.Any.FirstOrDefault(a => a.LocalName == ROUTING_TYPE)?.InnerText
+                    );
+        }
+
+        public static XmlElement ToXml(string type)
         {
             var doc = new XmlDocument();
-            var element = doc.CreateElement("RouteId");
-            element.InnerText = id;
+            var element = doc.CreateElement(ROUTING_TYPE);
+            element.InnerText = RoutingTypeFromCharacter(type);
             return element;
         }
 
-        public static XmlElement CreateRoutingType(string type)
+        private static string RoutingTypeFromCharacter(string routingTypeCharacter)
         {
-            var doc = new XmlDocument();
-            var element = doc.CreateElement("RoutingType");
-            element.InnerText = type;
-            return element;
+            switch (routingTypeCharacter)
+            {
+                case "h":
+                    return "Hike";
+                case "b":
+                    return "Bike";
+                case "f":
+                    return "4WD";
+                default:
+                    return "None";
+            }
         }
 
-        public static XmlElement CreateColor(string colorName, string colorHex)
+        private static string RoutingTypeToCharacter(string routingTypeCharacter)
         {
-            var doc = new XmlDocument();
-            var element = doc.CreateElement("Color");
-            element.SetAttribute("name", colorName);
-            element.SetAttribute("value", colorHex);
-            return element;
+            switch (routingTypeCharacter)
+            {
+                case "Hike":
+                    return "h";
+                case "Bike":
+                    return "b";
+                case "4WD":
+                    return "f";
+                case "None":
+                    return "n";
+                default:
+                    return "h";
+            }
         }
     }
 
@@ -95,7 +115,7 @@ namespace IsraelHiking.API.Converters
                 {
                     latlngzs = seg.trkpt.Select(ToLatLngZ).ToList(),
                     routePoint = ToLatLngZ(seg.trkpt.Last()),
-                    routingType = seg.extensions?.Any.FirstOrDefault(a => a.LocalName == XmlFactory.ROUTING_TYPE)?.InnerText ?? "h",
+                    routingType = RoutingTypeConverter.FromXml(seg.extensions)
                 }).ToList(),
             });
             return tracks;
@@ -167,7 +187,7 @@ namespace IsraelHiking.API.Converters
             return new trksegType
             {
                 trkpt = segmentData.latlngzs.Select(ToWptType).ToArray(),
-                extensions = new extensionsType { Any = new[] { XmlFactory.CreateRoutingType(segmentData.routingType) } }
+                extensions = new extensionsType { Any = new[] { RoutingTypeConverter.ToXml(segmentData.routingType) } }
             };
         }
     }
