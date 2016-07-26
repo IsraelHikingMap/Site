@@ -3,9 +3,10 @@
     // HM TODO: change app.ts name.
     // HM TODO: add missing js files/remove all js files.
 
-    export var app = angular.module("IsraelHiking", ["ngFileUpload", "mgcrea.ngStrap",
-        "LocalStorageModule", "googlechart", "ngAnimate",
-        "toastr", "angular-loading-bar", "ngFileSaver"]);
+    export var app = angular.module("IsraelHiking", [
+        "ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule",
+        "angular-loading-bar", "googlechart", "ngAnimate",
+        "toastr", "ngFileSaver", "rzModule"]);
 
     L.Icon.Default.imagePath = "content/images/";
 

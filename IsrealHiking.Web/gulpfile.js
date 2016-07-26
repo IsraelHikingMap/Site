@@ -25,7 +25,7 @@ var config = {
     bowerDir: "./bower_components"
 }
 
-gulp.task("build", function () {
+gulp.task("update-references", function () {
 
     var jsFilter = filter(["**/*.js"], { restore: true });
     var cssFilter = filter(["**/*.css"], { restore: true });

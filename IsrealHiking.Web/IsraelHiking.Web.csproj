@@ -78,6 +78,7 @@
     <Content Include="content\L.Control.Locate.css" />
     <Content Include="content\leaflet.css" />
     <Content Include="content\loading-bar.css" />
+    <Content Include="content\rzslider.css" />
     <Content Include="content\simple-sidebar.css" />
     <Content Include="controllers\BaseMapController.js" />
     <Content Include="controllers\DrawingController.js" />
@@ -143,6 +144,7 @@
     <Content Include="scripts\ng-file-upload.js" />
     <Content Include="scripts\ng-google-chart.js" />
     <Content Include="scripts\osm_geojson.js" />
+    <Content Include="scripts\rzslider.js" />
     <Content Include="scripts\webcomponents.js" />
     <Content Include="services\layers\WikiMarkersLayer.js" />
     <Content Include="services\search\BaseSearchResultsProvider.js" />

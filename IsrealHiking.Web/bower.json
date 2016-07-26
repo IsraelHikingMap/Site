@@ -11,6 +11,7 @@
     "angular-toastr": "*",
     "angular-google-chart": "*",
     "angular-loading-bar": "*",
+    "angularjs-slider": "*",
     "bootstrap": "*",
     "startbootstrap-simple-sidebar": "*",
     "jquery": "*",
