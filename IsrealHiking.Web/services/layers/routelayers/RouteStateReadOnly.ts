@@ -18,7 +18,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         private createPolyline(latlngzs: L.LatLng[]) {
             let pathOptions = this.context.route.properties.pathOptions;
             let polyline = L.polyline(latlngzs, pathOptions);
-            if (latlngzs.length > 2) {
+            if (latlngzs.length > 2 || !latlngzs[0].equals(latlngzs[1])) {
                 var arrow = L.polylineDecorator(polyline, {
                     patterns: [{
                         repeat: 100,

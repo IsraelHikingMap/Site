@@ -242,7 +242,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 return;
             }
             for (let segment of this.route.segments) {
-                segment.routingType = routingType;
+                segment.routingType = this.route.properties.currentRoutingType;
             }
             this.reRoute();
             this.dataChanged();
