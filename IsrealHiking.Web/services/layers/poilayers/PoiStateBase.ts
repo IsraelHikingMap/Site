@@ -25,5 +25,17 @@
             this.context.clearCurrentState();
             this.context.setState(new PoiStateEdit(this.context));
         }
+
+        protected createMarker = (markerData: Common.MarkerData, isEditable: boolean): IMarkerWithTitle => {
+            let pathOptions = this.context.pathOptions;
+            let marker = L.marker(markerData.latlng, { draggable: isEditable, clickable: isEditable, riseOnHover: true, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions) as IMarkerWithTitle;
+            marker.title = markerData.title || "";
+            marker.bindLabel(marker.title.replace(/\n/g, "<br/>"), this.context.getBindLabelOptions());
+            marker.addTo(this.context.map);
+            if (!marker.title) { // must be after adding to map...
+                marker.hideLabel();
+            }
+            return marker;
+        }
     }
 }

@@ -146,6 +146,11 @@
     <Content Include="scripts\osm_geojson.js" />
     <Content Include="scripts\rzslider.js" />
     <Content Include="scripts\webcomponents.js" />
+    <Content Include="services\layers\poilayers\HoverHandlerPoi.js" />
+    <Content Include="services\layers\poilayers\PoiLayer.js" />
+    <Content Include="services\layers\poilayers\PoiStateBase.js" />
+    <Content Include="services\layers\poilayers\PoiStateEdit.js" />
+    <Content Include="services\layers\poilayers\PoiStateReadOnly.js" />
     <Content Include="services\layers\WikiMarkersLayer.js" />
     <Content Include="services\search\BaseSearchResultsProvider.js" />
     <Content Include="services\search\LocalSearchResultsProvider.js" />

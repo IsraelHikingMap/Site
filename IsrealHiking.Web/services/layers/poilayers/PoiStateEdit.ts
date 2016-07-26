@@ -9,7 +9,7 @@
         }
 
         protected addPoint(e: L.LeafletMouseEvent) {
-            let marker = this.createMarker({ latlng: e.latlng } as Common.MarkerData);
+            let marker = this.createMarkerWithEvents({ latlng: e.latlng, title: "" } as Common.MarkerData);
             this.context.markers.push({
                 latlng: e.latlng,
                 marker: marker,
@@ -23,20 +23,8 @@
             return EditMode.POI;
         }
 
-        protected createMarker = (markerData: Common.MarkerData): IMarkerWithTitle => {
-            let pathOptions = this.context.pathOptions;
-            let marker = L.marker(markerData.latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions) as IMarkerWithTitle;
-            marker.title = markerData.title;
-            this.addLabelAndEvents(marker);
-            marker.addTo(this.context.map);
-            if (!markerData.title) { // must be after adding to map...
-                marker.hideLabel();
-            }
-            return marker;
-        }
-
-        private addLabelAndEvents(marker: IMarkerWithTitle): void {
-            marker.bindLabel(marker.title, this.context.getBindLabelOptions());
+        private createMarkerWithEvents(markerData: Common.MarkerData): IMarkerWithTitle {
+            let marker = this.createMarker(markerData, true);
             var newScope = this.context.$rootScope.$new() as Controllers.IMarkerPopupScope;
             newScope.marker = marker;
             newScope.poiLayer = this.context;
@@ -47,6 +35,7 @@
             }
             let popupHtml = this.context.$compile("<div marker-popup></div>")(newScope)[0];
             marker.bindPopup(popupHtml);
+            return marker;
         }
 
         private setPoiMarkerEvents(marker: L.Marker) {
@@ -82,7 +71,7 @@
             this.context.map.on("mousemove", this.hoverHandler.onMouseMove, this.hoverHandler);
 
             for (let marker of this.context.markers) {
-                marker.marker = this.createMarker(marker);
+                marker.marker = this.createMarkerWithEvents(marker);
             }
         }
 
