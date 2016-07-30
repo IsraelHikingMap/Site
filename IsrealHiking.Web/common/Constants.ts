@@ -47,9 +47,9 @@
         { key: "green", value: "#008000" },
         { key: "purple", value: "#B700FF" },
         { key: "turquize", value: "#00B0A4" },
-        { key: "gold", value: "#9C7F00" },
+        { key: "yellow", value: "#FFFF00" },
         { key: "brown", value: "#9C3E00" },
-        { key: "grass", value: "#7F9900" },
+        { key: "cyan", value: "#00FFFF" },
         { key: "gray", value: "#7F8282" },
         { key: "dark", value: "#101010" }
         ];

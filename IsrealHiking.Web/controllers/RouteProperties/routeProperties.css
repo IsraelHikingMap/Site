@@ -26,16 +26,16 @@
     background: #00B0A4;
 }
 
-.bg-gold {
-    background: #9C7F00;
+.bg-yellow {
+    background: #FFFF00;
 }
 
 .bg-brown {
     background: #9C3E00;
 }
 
-.bg-grass {
-    background: #7F9900;
+.bg-cyan {
+    background: #00FFFF;
 }
 
 .bg-gray {
@@ -78,16 +78,16 @@
     color: #00B0A4;
 }
 
-.fg-gold {
-    color: #9C7F00;
+.fg-yellow {
+    color: #FFFF00;
 }
 
 .fg-brown {
     color: #9C3E00;
 }
 
-.fg-grass {
-    color: #7F9900;
+.fg-cyan {
+    color: #00FFFF;
 }
 
 .fg-gray {
