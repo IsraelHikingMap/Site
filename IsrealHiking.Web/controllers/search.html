@@ -1,5 +1,5 @@
 ﻿<div class="leaflet-bar" ng-hide="isShowingSearch">
-    <a class="cursor-pointer" ng-click="toggleSearchBar($event)" bs-tooltip="'Search'" data-placement="left"><i class="fa fa-search fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleSearchBar($event)" bs-tooltip="'Search'" data-placement="left" data-container="body"><i class="fa fa-search fa-lg"></i></a>
 </div>
 <div ng-show="isShowingSearch" class="search-results-panel ihm-panel" disable-map-movement ng-keydown="keyDown($event)" tabindex="0">
     <table class="table-hover">

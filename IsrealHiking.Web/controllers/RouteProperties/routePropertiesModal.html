@@ -41,12 +41,28 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" ng-hide="isNew" ng-click="saveRouteToFile($event)" class="btn btn-default" title="Save route to file"><i class="fa fa-lg fa-save"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="deleteRoute($event); $hide()" class="btn btn-danger" title="Delete route"><i class="fa fa-lg fa-trash"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="isReversed = !isReversed" class="btn btn-default" title="Reverse route" ng-class="{'active': isReversed }"><i class="fa fa-lg fa-arrows-h"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="routeProperties.isVisible = !routeProperties.isVisible" class="btn btn-default" title="Toggle visibility"><i class="fa fa-lg" ng-class="{'fa-eye': routeProperties.isVisible, 'fa-eye-slash': !routeProperties.isVisible}"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" class="btn btn-default" title="Toggle routing type per point" ng-class="{'active': routeProperties.isRoutingPerPoint }"><i class="fa fa-bolt"></i></button>
-                    <button type="submit" class="btn btn-success" title="Save"><i class="fa fa-check"></i></button>
+                    <div class="row">
+                        <div class="col-md-2 pull-right">
+                            <button type="submit" class="btn btn-block btn-success" bs-tooltip="'Save'" data-placement="bottom" data-container="body"><i class="fa fa-check"></i></button>
+                        </div>
+                        <div ng-hide="isNew">
+                            <div class="col-md-2 pull-right">
+                                <button type="button" ng-click="deleteRoute($event); $hide()" class="btn btn-block btn-danger" bs-tooltip="'Delete route'" data-placement="bottom" data-container="body"><i class="fa fa-lg fa-trash"></i></button>
+                            </div>
+                            <div class="col-md-2 pull-right">
+                                <button type="button" ng-click="saveRouteToFile($event)" class="btn btn-block btn-default" bs-tooltip="'Save route to file'" data-placement="bottom" data-container="body"><i class="fa fa-lg fa-save"></i></button>
+                            </div>
+                            <div class="col-md-2 pull-right">
+                                <button type="button" ng-click="isReversed = !isReversed" class="btn btn-block btn-default" bs-tooltip="'Reverse route'" data-placement="bottom" data-container="body" ng-class="{'active': isReversed }"><i class="fa fa-lg fa-arrows-h"></i></button>
+                            </div>
+                            <div class="col-md-2 pull-right">
+                                <button type="button" ng-click="routeProperties.isVisible = !routeProperties.isVisible" class="btn btn-block btn-default" bs-tooltip="'Toggle visibility'" data-placement="bottom" data-container="body"><i class="fa fa-lg" ng-class="{'fa-eye': routeProperties.isVisible, 'fa-eye-slash': !routeProperties.isVisible}"></i></button>
+                            </div>
+                            <div class="col-md-2 pull-right">
+                                <button type="button" ng-click="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" class="btn btn-block btn-default" bs-tooltip="'Toggle routing type per point'" data-placement="bottom" data-container="body" ng-class="{'active': routeProperties.isRoutingPerPoint }"><i class="fa fa-bolt"></i></button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </form>
         </div>
