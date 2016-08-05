@@ -59,7 +59,7 @@
          * @param directiveHtmlName - the dricetive html string
          * @param position - the position to place the control: topleft/topright/bottomleft/bottomright
          */
-        private createContorl($scope: angular.IRootScopeService, directiveHtmlName: string, position = "topleft") {
+        private createContorl($scope: angular.IRootScopeService, directiveHtmlName: string, position: L.PositionString = "topleft") {
             var control = L.Control.extend({
                 options: {
                     position: position

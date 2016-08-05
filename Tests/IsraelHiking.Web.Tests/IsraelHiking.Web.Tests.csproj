@@ -67,12 +67,10 @@
     <TypeScriptCompile Include="services\routers\RouterServiceTests.ts" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config">
-      <SubType>Designer</SubType>
-    </None>
+    <Folder Include="services\layers\" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="services\layers\" />
+    <None Include="packages.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
