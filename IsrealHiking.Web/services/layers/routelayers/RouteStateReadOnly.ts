@@ -22,7 +22,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 var arrow = L.polylineDecorator(polyline, {
                     patterns: [{
                         repeat: 100,
-                        symbol: L.Symbol.arrowHead({ pixelSize: 10, polygon: false, pathOptions: pathOptions })
+                        symbol: L.Symbol.arrowHead({ pixelSize: 10, polygon: false, pathOptions: { color: "black", opacity: pathOptions.opacity, weight: 3 } as L.PathOptions  })
                     }]
                 });
                 this.arrows.addLayer(arrow);    
