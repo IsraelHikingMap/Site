@@ -17,7 +17,7 @@ namespace IsraelHiking.DataAccess.Tests
 
             elevationDataStorage.Initialize().Wait();
 
-            Assert.AreEqual(0, elevationDataStorage.GetElevation(32, 35));
+            Assert.AreEqual(0, elevationDataStorage.GetElevation(32, 35).Result);
         }
 
         [TestMethod]
