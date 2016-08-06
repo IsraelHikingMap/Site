@@ -60,15 +60,6 @@
 
             this.setDragAndDrop($scope, $timeout);
 
-            if (hashService.externalUrl !== "") {
-                fileService.openFromUrl(hashService.externalUrl)
-                    .success((dataContainer: Common.DataContainer) => {
-                        layersService.setJsonData(dataContainer);
-                    }).error(() => {
-                        toastr.error("Failed to load external url file.");
-                    });
-            }
-
             $scope.open = (file: File) => {
                 if (!file)
                     return;

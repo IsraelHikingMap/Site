@@ -32,8 +32,8 @@ namespace IsraelHiking.API.Controllers
         {
             LineString lineString;
             var profile = ConvertProfile(type);
-            var pointFrom = GetGeographicPosition(from);
-            var pointTo = GetGeographicPosition(to);
+            var pointFrom = await GetGeographicPosition(from);
+            var pointTo = await GetGeographicPosition(to);
             if (ModelState.IsValid == false)
             {
                 return BadRequest(ModelState);
@@ -76,7 +76,7 @@ namespace IsraelHiking.API.Controllers
             return profile;
         }
 
-        private GeographicPosition GetGeographicPosition(string position)
+        private async Task<GeographicPosition> GetGeographicPosition(string position)
         {
             var splitted = position.Split(',');
             if (splitted.Length != 2)
@@ -86,7 +86,7 @@ namespace IsraelHiking.API.Controllers
             }
             var lat = double.Parse(splitted.First());
             var lng = double.Parse(splitted.Last());
-            var elevation = _elevationDataStorage.GetElevation(lat, lng);
+            var elevation = await _elevationDataStorage.GetElevation(lat, lng);
             return new GeographicPosition(lat, lng, elevation);
         }
     }

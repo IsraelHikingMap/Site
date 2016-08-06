@@ -36,7 +36,7 @@ namespace IsraelHiking.API.Controllers
             var dataContainer = await _dataContainerConverterService.ToDataContainer(response.Content, Path.GetExtension(response.FileName));
             foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
             {
-                latLngZ.z = _elevationDataStorage.GetElevation(latLngZ.lat, latLngZ.lng);
+                latLngZ.z = await _elevationDataStorage.GetElevation(latLngZ.lat, latLngZ.lng);
             }
             return dataContainer;
         }

@@ -251,7 +251,7 @@ namespace IsraelHiking.Services.Layers {
             }
         }
 
-        public changeRouteState = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
+        public changeRouteState = (routeLayer: RouteLayers.RouteLayer) => {
             if (routeLayer === this.selectedRoute && routeLayer.getRouteProperties().isVisible) {
                 this.selectRoute(null);
                 this.map.removeLayer(routeLayer);
@@ -263,7 +263,7 @@ namespace IsraelHiking.Services.Layers {
             this.selectRoute(routeLayer);
         }
 
-        private selectRoute = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
+        private selectRoute = (routeLayer: RouteLayers.RouteLayer) => {
             if (this.selectedRoute) {
                 this.selectedRoute.readOnly();
             }
@@ -298,26 +298,38 @@ namespace IsraelHiking.Services.Layers {
         }
 
         private addDataFromHash = () => {
-            if (!this.hashService.siteUrl) {
+            if (this.hashService.siteUrl) {
+                this.$http.get(Common.Urls.urls + this.hashService.siteUrl).success((siteUrl: Common.SiteUrl) => {
+                    let data = JSON.parse(siteUrl.JsonData) as Common.DataContainer;
+                    this.setJsonData(data);
+                    this.addOverlaysFromHash(data.overlays);
+                    this.hashService.clear();
+                }).error(() => {
+                    toastr.error("Failed to load shared content.");
+                });
+                return;
+            }
+            if (this.hashService.externalUrl) {
+                this.$http.get(Common.Urls.files + "?url=" + this.hashService.externalUrl)
+                    .success((dataContainer: Common.DataContainer) => {
+                        this.setJsonData(dataContainer);
+                    })
+                    .error(() => {
+                        toastr.error("Failed to load external url file.");
+                    });
+            } else {
                 let data = this.hashService.getDataContainer();
                 this.setData(data, true);
                 this.addBaseLayerFromHash(data.baseLayer);
-                this.hashService.clear();
-                for (let overlayKey of (this.localStorageService.get(LayersService.ACTIVE_OVERLAYS_KEY) || []) as string[]) {
-                    let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
-                    if (overlay && overlay.visible === false) {
-                        this.toggleOverlay(overlay);
-                    }
-                }
-                return;
             }
-            this.$http.get(Common.Urls.urls + this.hashService.siteUrl).success((siteUrl: Common.SiteUrl) => {
-                let data = JSON.parse(siteUrl.JsonData) as Common.DataContainer;
-                this.setJsonData(data);
-                this.addBaseLayerFromHash(data.baseLayer);
-                this.addOverlaysFromHash(data.overlays);
-                this.hashService.clear();
-            });
+            this.hashService.clear();
+            for (let overlayKey of (this.localStorageService.get(LayersService.ACTIVE_OVERLAYS_KEY) || []) as string[]) {
+                let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
+                if (overlay && overlay.visible === false) {
+                    this.toggleOverlay(overlay);
+                }
+            }
+
         }
 
         public setJsonData = (data: Common.DataContainer) => {
@@ -341,6 +353,7 @@ namespace IsraelHiking.Services.Layers {
                 }
             }
             this.setData(data, false);
+            this.addBaseLayerFromHash(data.baseLayer);
         }
 
         public getSelectedRoute = (): RouteLayers.RouteLayer => {

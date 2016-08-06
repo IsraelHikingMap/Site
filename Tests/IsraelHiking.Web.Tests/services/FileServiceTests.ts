@@ -40,14 +40,5 @@ namespace IsraelHiking.Tests {
 
             expect(upload.upload).toHaveBeenCalled();
         });
-
-        it("Should open from url", () => {
-            $httpBackend.whenGET(Common.Urls.files + "?url=url").respond({ routes:[], markers: [{} as Common.MarkerData] } as Common.DataContainer);
-
-            fileService.openFromUrl("url")
-                .success((data) => expect(data.markers.length).toBe(1));
-
-            $httpBackend.flush();
-        });
     });
 }

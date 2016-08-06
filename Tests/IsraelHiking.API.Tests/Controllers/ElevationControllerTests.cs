@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Tests.Controllers
             elevationDataStorage.GetElevation(31.8213, 35.0965).Returns(2);
             _elevationController = new ElevationController(elevationDataStorage);
 
-            var response = _elevationController.GetElevation(new[] { "31.8239,35.0375", "31.8213,35.0965" }).ToArray();
+            var response = _elevationController.GetElevation(new[] { "31.8239,35.0375", "31.8213,35.0965" }).Result.ToArray();
 
             Assert.AreEqual(1, response[0]);
             Assert.AreEqual(2, response[1]);

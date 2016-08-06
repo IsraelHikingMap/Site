@@ -2,6 +2,7 @@
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -13,48 +14,60 @@ namespace IsraelHiking.DataAccess
     public class ElevationDataStorage : IElevationDataStorage
     {
         private const string ELEVATION_CACHE = "elevation-cache";
-        private readonly Dictionary<LatLng, short[,]> _elevationData;
+        private readonly ConcurrentDictionary<LatLng, short[,]> _elevationData;
         private readonly ILogger _logger;
+        private readonly ConcurrentDictionary<LatLng, Task> _initializationTaskPerLatLng;
 
         public ElevationDataStorage(ILogger logger)
         {
             _logger = logger;
-            _elevationData = new Dictionary<LatLng, short[,]>();
+            _elevationData = new ConcurrentDictionary<LatLng, short[,]>();
+            _initializationTaskPerLatLng = new ConcurrentDictionary<LatLng, Task>();
         }
 
         public Task Initialize()
         {
-            return Task.Run(() =>
+            var elevationCacheFolder = Path.Combine(ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY], ELEVATION_CACHE);
+            if (Directory.Exists(elevationCacheFolder) == false)
             {
-                var elevationCacheFolder = Path.Combine(ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY], ELEVATION_CACHE);
-                if (Directory.Exists(elevationCacheFolder) == false)
-                {
-                    _logger.Error($"!!! The folder: {elevationCacheFolder} does not exists, please change the binFolder key in the configuration file !!!");
-                    return;
-                }
-                var hgtZipFiles = Directory.GetFiles(elevationCacheFolder, "*.hgt.zip");
-                _logger.Debug("Found " + hgtZipFiles.Length + " files in: " + elevationCacheFolder);
-                foreach (var hgtZipFile in hgtZipFiles)
+                _logger.Error($"!!! The folder: {elevationCacheFolder} does not exists, please change the binFolder key in the configuration file !!!");
+                return Task.Run(() => { });
+            }
+            var hgtZipFiles = Directory.GetFiles(elevationCacheFolder, "*.hgt.zip");
+            _logger.Debug("Found " + hgtZipFiles.Length + " files in: " + elevationCacheFolder);
+            foreach (var hgtZipFile in hgtZipFiles)
+            {
+                var bottomLeftLat = int.Parse(Path.GetFileName(hgtZipFile).Substring(1, 2));
+                var bottomLeftLng = int.Parse(Path.GetFileName(hgtZipFile).Substring(4, 3));
+                var key = new LatLng { lat = bottomLeftLat, lng = bottomLeftLng };
+
+                _initializationTaskPerLatLng[key] = Task.Run(() =>
                 {
                     _logger.Debug("Reading file " + hgtZipFile);
                     var byteArray = GetByteArrayFromZip(hgtZipFile);
-                    int samples = (short)(Math.Sqrt(byteArray.Length / 2) + 0.5);
-                    var bottomLeftLat = int.Parse(Path.GetFileName(hgtZipFile).Substring(1, 2));
-                    var bottomLeftLng = int.Parse(Path.GetFileName(hgtZipFile).Substring(4, 3));
-                    var key = new LatLng { lat = bottomLeftLat, lng = bottomLeftLng };
-                    _elevationData[key] = new short[samples, samples];
+                    int samples = (short) (Math.Sqrt(byteArray.Length/2.0) + 0.5);
+                    var elevationArray = new short[samples, samples];
                     for (int byteIndex = 0; byteIndex < byteArray.Length; byteIndex += 2)
                     {
-                        short currentElevation = BitConverter.ToInt16(new[] { byteArray[byteIndex + 1], byteArray[byteIndex] }, 0);
-                        _elevationData[key][(byteIndex / 2) / samples, (byteIndex / 2) % samples] = currentElevation;
+                        short currentElevation = BitConverter.ToInt16(new[] {byteArray[byteIndex + 1], byteArray[byteIndex]}, 0);
+                        elevationArray[(byteIndex/2)/samples, (byteIndex/2)%samples] = currentElevation;
                     }
-                }
-            });
+                    _elevationData[key] = elevationArray;
+                    _logger.Debug("Finished reading file " + hgtZipFile);
+                });
+            }
+
+            return Task.WhenAll(_initializationTaskPerLatLng.Values);
         }
 
-        public double GetElevation(double lat, double lng)
+        public async Task<double> GetElevation(double lat, double lng)
         {
             var key = new LatLng { lat = (int)lat, lng = (int)lng };
+            if (_initializationTaskPerLatLng.ContainsKey(key) == false)
+            {
+                return 0;
+            }
+            await _initializationTaskPerLatLng[key];
             if (_elevationData.ContainsKey(key) == false)
             {
                 return 0;
