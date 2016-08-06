@@ -462,9 +462,7 @@ namespace IsraelHiking.Services.Layers {
                 let routeLayer = this.routeLayerFactory.createRouteLayerFromData(routeData, reroute);
                 this.routes.push(routeLayer);
                 this.map.addLayer(routeLayer);
-                if (!this.selectedRoute) {
-                    this.selectRoute(routeLayer);
-                }
+                this.selectRoute(routeLayer);
             }
             this.markers.setData(dataContainer.markers || []);
 
