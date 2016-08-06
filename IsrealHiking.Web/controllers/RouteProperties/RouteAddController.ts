@@ -5,6 +5,7 @@
 
     export class RouteAddController extends RouteBaseController {
         constructor($scope: IRouteAddScope,
+            localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService,
             routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory,
@@ -19,7 +20,7 @@
                     this.suppressEvents(e);
                     return;
                 }
-                
+                this.updateLocalStorage($scope, localStorageService);
                 layersService.addRoute({ properties: $scope.routeProperties, segments: []});
                 this.suppressEvents(e);
             }

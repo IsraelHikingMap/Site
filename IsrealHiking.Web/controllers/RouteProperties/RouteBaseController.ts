@@ -17,5 +17,10 @@
                 return _.find(Services.Layers.RouteLayers.RouteLayerFactory.COLORS, c => c.value === colorValue).key;
             }
         }
+
+        protected updateLocalStorage($scope: IRouteBaseScope, localStorageService: angular.local.storage.ILocalStorageService) {
+            localStorageService.set(Services.Layers.RouteLayers.RouteLayerFactory.IS_ROUTING_PER_POINT_KEY, $scope.routeProperties.isRoutingPerPoint);
+            localStorageService.set(Services.Layers.RouteLayers.RouteLayerFactory.ROUTE_OPACITY, $scope.routeProperties.pathOptions.opacity);
+        }
     }
 }

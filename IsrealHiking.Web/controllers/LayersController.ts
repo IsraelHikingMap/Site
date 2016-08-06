@@ -66,7 +66,7 @@
 
             $scope.addRoute = (e: Event) => {
                 var routePropertiesScope = $scope.$new() as RouteProperties.IRouteAddScope;
-                var routeAddController = new RouteProperties.RouteAddController(routePropertiesScope, mapService, layersService, routeLayerFactory, toastr);
+                var routeAddController = new RouteProperties.RouteAddController(routePropertiesScope, localStorageService, mapService, layersService, routeLayerFactory, toastr);
                 var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);
@@ -74,7 +74,7 @@
 
             $scope.editRoute = (routeName: string, e: Event) => {
                 var routePropertiesScope = <RouteProperties.IRouteUpdateScope>$scope.$new();
-                var routeUpdateController = new RouteProperties.RouteUpdateController(routePropertiesScope, mapService, layersService, fileService, toastr, routeName);
+                var routeUpdateController = new RouteProperties.RouteUpdateController(routePropertiesScope, localStorageService, mapService, layersService, fileService, toastr, routeName);
                 var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
                 modal.$promise.then(modal.show);
                 this.suppressEvents(e);

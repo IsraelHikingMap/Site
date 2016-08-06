@@ -299,23 +299,19 @@ namespace IsraelHiking.Services.Layers {
 
         private addDataFromHash = () => {
             if (this.hashService.siteUrl) {
-                this.$http.get(Common.Urls.urls + this.hashService.siteUrl).success((siteUrl: Common.SiteUrl) => {
-                    let data = JSON.parse(siteUrl.JsonData) as Common.DataContainer;
-                    this.setJsonData(data);
-                    this.addOverlaysFromHash(data.overlays);
-                    this.hashService.clear();
-                }).error(() => {
-                    toastr.error("Failed to load shared content.");
-                });
+                this.$http.get(Common.Urls.urls + this.hashService.siteUrl)
+                    .success((siteUrl: Common.SiteUrl) => {
+                        let data = JSON.parse(siteUrl.JsonData) as Common.DataContainer;
+                        this.setJsonData(data);
+                        this.addOverlaysFromHash(data.overlays);
+                        this.hashService.clear();
+                    });
                 return;
             }
             if (this.hashService.externalUrl) {
                 this.$http.get(Common.Urls.files + "?url=" + this.hashService.externalUrl)
                     .success((dataContainer: Common.DataContainer) => {
                         this.setJsonData(dataContainer);
-                    })
-                    .error(() => {
-                        toastr.error("Failed to load external url file.");
                     });
             } else {
                 let data = this.hashService.getDataContainer();

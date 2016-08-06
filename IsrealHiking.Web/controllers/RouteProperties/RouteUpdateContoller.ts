@@ -11,6 +11,7 @@
     export class RouteUpdateController extends RouteBaseController {
 
         constructor($scope: IRouteUpdateScope,
+            localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService,
             fileService: Services.FileService,
@@ -32,6 +33,7 @@
                 if ($scope.isReversed) {
                     routeLayer.reverse();
                 }
+                this.updateLocalStorage($scope, localStorageService);
                 routeLayer.setRouteProperties($scope.routeProperties);
                 this.suppressEvents(e);
             }
