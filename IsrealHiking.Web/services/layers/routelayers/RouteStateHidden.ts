@@ -12,8 +12,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             // no need to do anything
         }
 
-        public getEditMode() {
-            return EditMode.NONE;
+        public getEditMode(): EditMode {
+            return Services.Layers.EditModeString.none;
         }
     }
 }

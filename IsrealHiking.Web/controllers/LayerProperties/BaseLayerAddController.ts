@@ -10,9 +10,9 @@
         }
 
         protected internalSave = ($scope: ILayerBaseScope, layerData: Common.LayerData): string => {
-            var layer = this.layersService.addBaseLayer(layerData);
+            let layer = this.layersService.addBaseLayer(layerData);
             this.layersService.selectBaseLayer(layer);
             return "";
-        }
+        };
     }
 }

@@ -4,12 +4,14 @@
 /// <reference path="../../../../isrealhiking.web/scripts/typings/angularjs/angular-mocks.d.ts" />
 /// <reference path="../../../../isrealhiking.web/scripts/typings/toastr/toastr.d.ts" />
 /// <reference path="../../../../isrealhiking.web/services/elevation/ielevationprovider.ts" />
+/// <reference path="../../../../isrealhiking.web/common/israelhiking.d.ts" />
 /// <reference path="../../../../isrealhiking.web/services/elevation/microsoftelevationprovider.ts" />
-/// <reference path="../../../../isrealhiking.web/common/israelhikingdata.ts" />
+
 
 namespace IsraelHiking.Tests {
+    export const ADDRESS = "http://dev.virtualearth.net/REST/v1/Elevation/List?jsonp=JSON_CALLBACK&key=ArUJIOvdEI-4sFS5-3PqMlDJP-00FMLrOeLIGkLRpfWIjfpOcESgnE-Zmk-ZimU2&points=0.0000,0.0000";
+
     describe("Microsoft Elevation Provider", () => {
-        var ADDRESS = "http://dev.virtualearth.net/REST/v1/Elevation/List?jsonp=JSON_CALLBACK&key=ArUJIOvdEI-4sFS5-3PqMlDJP-00FMLrOeLIGkLRpfWIjfpOcESgnE-Zmk-ZimU2&points=0.0000,0.0000";
         var elevationProvider: Services.Elevation.MicrosoftElevationProvider;
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;

@@ -19,8 +19,8 @@
             this.context.dataChanged();
         }
 
-        public getEditMode() {
-            return EditMode.POI;
+        public getEditMode(): EditMode {
+            return EditModeString.poi;
         }
 
         private createMarkerWithEvents(markerData: Common.MarkerData): IMarkerWithTitle {

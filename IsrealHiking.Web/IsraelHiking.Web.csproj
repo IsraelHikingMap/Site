@@ -21,11 +21,10 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <ItemGroup>
-    <Content Include="app.css" />
-    <Content Include="app.js" />
-    <Content Include="common\Constants.js" />
+    <Content Include="common.css" />
+    <Content Include="bootstraper.js" />
+    <Content Include="common\Strings.js" />
     <Content Include="common\EventHelper.js" />
-    <Content Include="common\IsraelHikingData.js" />
     <Content Include="common\Urls.js" />
     <Content Include="content\angular-toastr.css" />
     <Content Include="content\bootstrap-theme.min.css" />
@@ -146,6 +145,7 @@
     <Content Include="scripts\osm_geojson.js" />
     <Content Include="scripts\rzslider.js" />
     <Content Include="scripts\webcomponents.js" />
+    <Content Include="services\layers\IDrawingLayer.js" />
     <Content Include="services\layers\poilayers\HoverHandlerPoi.js" />
     <Content Include="services\layers\poilayers\PoiLayer.js" />
     <Content Include="services\layers\poilayers\PoiStateBase.js" />
@@ -231,7 +231,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <TypeScriptCompile Include="app.ts" />
+    <TypeScriptCompile Include="bootstraper.ts" />
     <TypeScriptCompile Include="common\EventHelper.ts" />
     <TypeScriptCompile Include="common\Urls.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\BaseLayerAddController.ts" />
@@ -269,6 +269,7 @@
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />
     <TypeScriptCompile Include="scripts\typings\ng-file-upload\ng-file-upload.d.ts" />
     <TypeScriptCompile Include="scripts\typings\toastr\toastr.d.ts" />
+    <TypeScriptCompile Include="services\layers\IDrawingLayer.ts" />
     <TypeScriptCompile Include="services\layers\poilayers\PoiLayer.ts" />
     <TypeScriptCompile Include="services\layers\poilayers\PoiStateBase.ts" />
     <TypeScriptCompile Include="services\layers\poilayers\PoiStateEdit.ts" />
@@ -294,7 +295,7 @@
     <TypeScriptCompile Include="services\search\LocalSearchResultsProvider.ts" />
     <TypeScriptCompile Include="services\search\NominatimSearchResultsProvider.ts" />
     <TypeScriptCompile Include="services\ObjectWithMap.ts" />
-    <TypeScriptCompile Include="common\IsraelHikingData.ts" />
+    <TypeScriptCompile Include="common\IsraelHiking.d.ts" />
     <TypeScriptCompile Include="controllers\BaseMapController.ts" />
     <TypeScriptCompile Include="controllers\DrawingController.ts" />
     <TypeScriptCompile Include="controllers\MainMapController.ts" />
@@ -315,7 +316,7 @@
     <TypeScriptCompile Include="services\search\SearchResultsProviderFactory.ts" />
     <TypeScriptCompile Include="services\SidebarService.ts" />
     <TypeScriptCompile Include="services\SnappingService.ts" />
-    <TypeScriptCompile Include="common\Constants.ts" />
+    <TypeScriptCompile Include="common\Strings.ts" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IsraelHiking.API\IsraelHiking.API.csproj">
@@ -520,6 +521,17 @@
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <TypeScriptRemoveComments>false</TypeScriptRemoveComments>
     <TypeScriptSourceMap>true</TypeScriptSourceMap>
+    <TypeScriptTarget>ES5</TypeScriptTarget>
+    <TypeScriptJSXEmit>None</TypeScriptJSXEmit>
+    <TypeScriptCompileOnSaveEnabled>True</TypeScriptCompileOnSaveEnabled>
+    <TypeScriptNoImplicitAny>False</TypeScriptNoImplicitAny>
+    <TypeScriptModuleKind>CommonJS</TypeScriptModuleKind>
+    <TypeScriptOutFile />
+    <TypeScriptOutDir />
+    <TypeScriptGeneratesDeclarations>False</TypeScriptGeneratesDeclarations>
+    <TypeScriptNoEmitOnError>True</TypeScriptNoEmitOnError>
+    <TypeScriptMapRoot />
+    <TypeScriptSourceRoot />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Release'">
     <TypeScriptRemoveComments>true</TypeScriptRemoveComments>

@@ -5,7 +5,7 @@
             let geojson = this.parseToGeoJson(content);
             return this.toDataContainer(geojson);
         }
-        
+
         protected abstract parseToGeoJson(content: string): GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
         public abstract toString(data: Common.DataContainer): string;
 
@@ -19,32 +19,32 @@
                 onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
                     let routeData = null;
                     switch (feature.geometry.type) {
-                        case Common.GeoJsonFeatureType.point:
-                            let point = feature.geometry as GeoJSON.Point;
-                            let marker = this.createMarker(point.coordinates, feature.properties.name);
+                        case Strings.GeoJson.point:
+                            var point = feature.geometry as GeoJSON.Point;
+                            var marker = this.createMarker(point.coordinates, feature.properties.name);
                             data.markers.push(marker);
                             break;
-                        case Common.GeoJsonFeatureType.multiPoint:
-                            let points = feature.geometry as GeoJSON.MultiPoint;
+                        case Strings.GeoJson.multiPoint:
+                            var points = feature.geometry as GeoJSON.MultiPoint;
                             for (let pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
                                 let marker = this.createMarker(points.coordinates[pointIndex], feature.properties.name);
                                 data.markers.push(marker);
                             }
                             break;
-                        case Common.GeoJsonFeatureType.lineString:
-                            let lineString = feature.geometry as GeoJSON.LineString;
+                        case Strings.GeoJson.lineString:
+                            var lineString = feature.geometry as GeoJSON.LineString;
                             routeData = this.positionsToData(lineString.coordinates, feature.properties.name);
                             break;
-                        case Common.GeoJsonFeatureType.multiLineString:
-                            let multiLineString = feature.geometry as GeoJSON.MultiLineString;
+                        case Strings.GeoJson.multiLineString:
+                            var multiLineString = feature.geometry as GeoJSON.MultiLineString;
                             routeData = this.coordinatesArrayToData(multiLineString.coordinates, feature.properties.name);
                             break;
-                        case Common.GeoJsonFeatureType.polygone:
-                            let polygone = feature.geometry as GeoJSON.Polygon;
+                        case Strings.GeoJson.polygone:
+                            var polygone = feature.geometry as GeoJSON.Polygon;
                             routeData = this.coordinatesArrayToData(polygone.coordinates, feature.properties.name);
                             break;
-                        case Common.GeoJsonFeatureType.multiPolygon:
-                            let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
+                        case Strings.GeoJson.multiPolygon:
+                            var multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
                             routeData = ({ name: feature.properties.name || "", segments: [] } as Common.RouteData);
                             for (let polygoneCoordinates of multiPolygone.coordinates) {
                                 let route = this.coordinatesArrayToData(polygoneCoordinates, feature.properties.name);
@@ -84,7 +84,7 @@
         }
 
         private positionsToData(positions: GeoJSON.Position[], name: string): Common.RouteData {
-            
+
             var routeData = { segments: [], markers: [], name: name || "" } as Common.RouteData;
             var latlngzs = BaseParser.createLatlngArray(positions);
             if (latlngzs.length < 2) {
@@ -93,12 +93,12 @@
             routeData.segments.push({
                 routePoint: latlngzs[0],
                 latlngzs: [latlngzs[0], latlngzs[0]],
-                routingType: Common.RoutingType.hike
+                routingType: "h"
             } as Common.RouteSegmentData);
             routeData.segments.push({
                 routePoint: latlngzs[latlngzs.length - 1],
                 latlngzs: latlngzs,
-                routingType: Common.RoutingType.hike
+                routingType: "h"
             } as Common.RouteSegmentData);
             return routeData;
         }
@@ -114,7 +114,7 @@
                     routeData.segments.push({
                         latlngzs: [latLng, latLng],
                         routePoint: latLng,
-                        routingType: Common.RoutingType.hike
+                        routingType: "h"
                     } as Common.RouteSegmentData);
                 }
                 let latlngzs = BaseParser.createLatlngArray(lineCoordinates);
@@ -122,7 +122,7 @@
                     routeData.segments.push({
                         latlngzs: latlngzs,
                         routePoint: latlngzs[0],
-                        routingType: Common.RoutingType.hike
+                        routingType: "h"
                     } as Common.RouteSegmentData);
                 }
             }
@@ -136,7 +136,7 @@
                     type: "name",
                     properties: {
                         name: "EPSG:3857"
-                    } 
+                    }
                 } as GeoJSON.NamedCoordinateReferenceSystem,
                 features: [] as GeoJSON.Feature<GeoJSON.GeometryObject>[]
             } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
@@ -148,7 +148,7 @@
                         name: marker.title
                     },
                     geometry: {
-                        type: "Point",
+                        type: Strings.GeoJson.point,
                         coordinates: [marker.latlng.lng, marker.latlng.lat]
                     } as GeoJSON.Point
                 } as GeoJSON.Feature<GeoJSON.GeometryObject>);
@@ -172,7 +172,7 @@
                             creator: "IsraelHikingMap"
                         },
                         geometry: {
-                            type: Common.GeoJsonFeatureType.multiLineString,
+                            type: Strings.GeoJson.multiLineString,
                             coordinates: multiLineStringCoordinates
                         } as GeoJSON.MultiLineString
                     } as GeoJSON.Feature<GeoJSON.GeometryObject>;

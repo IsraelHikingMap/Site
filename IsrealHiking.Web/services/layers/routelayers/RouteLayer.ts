@@ -8,7 +8,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
     export interface IRouteProperties {
         name: string;
         pathOptions: L.PathOptions;
-        currentRoutingType: string;
+        currentRoutingType: Common.RoutingType;
         isRoutingPerPoint: boolean;
         isVisible: boolean;
     }
@@ -29,7 +29,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         loss: number; // [meters] - adding only when going downhill - should be negative number.
     }
 
-    export class RouteLayer extends ObjectWithMap implements L.ILayer {
+    export class RouteLayer extends ObjectWithMap implements IDrawingLayer {
         public $q: angular.IQService;
         public $rootScope: angular.IRootScopeService;
         public $compile: angular.ICompileService;
@@ -83,7 +83,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.currentState = state;
         }
 
-        public getEditMode(): string {
+        public getEditMode(): EditMode {
             return this.currentState.getEditMode();
         }
 
@@ -212,7 +212,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         }
 
         public isUndoDisbaled = (): boolean => {
-            return this.undoHandler.isUndoDisbaled() || this.currentState.getEditMode() === EditMode.NONE;
+            return this.undoHandler.isUndoDisbaled() || this.currentState.getEditMode() === Strings.DrawingEditMode.none;
         }
 
         public reverse = () => {
@@ -232,9 +232,9 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.dataChanged();
         }
 
-        public setRoutingType = (routingType: string) => {
+        public setRoutingType = (routingType: Common.RoutingType) => {
             if (this.route.properties.currentRoutingType === routingType) {
-                this.route.properties.currentRoutingType = Common.RoutingType.none;
+                this.route.properties.currentRoutingType = "n";
             } else {
                 this.route.properties.currentRoutingType = routingType;
             }

@@ -8,7 +8,7 @@
         marker: IMarkerWithTitle;
     }
 
-    export class PoiLayer extends ObjectWithMap implements L.ILayer {
+    export class PoiLayer extends ObjectWithMap implements IDrawingLayer {
         private currentState: PoiStateBase;
         private undoHandler: RouteLayers.UndoHandler<Common.MarkerData[]>;
 
@@ -47,7 +47,7 @@
             this.eventHelper = new Common.EventHelper<{}>();
         }
 
-        public getEditMode(): string {
+        public getEditMode(): EditMode {
             return this.currentState.getEditMode();
         }
 
@@ -112,7 +112,7 @@
         }
 
         public isUndoDisbaled = (): boolean => {
-            return this.undoHandler.isUndoDisbaled() || this.currentState.getEditMode() === EditMode.NONE;
+            return this.undoHandler.isUndoDisbaled() || this.currentState.getEditMode() === EditModeString.none;
         }
 
         public dataChanged = () => {

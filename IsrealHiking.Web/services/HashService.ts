@@ -8,6 +8,7 @@
         private static DATA_DELIMITER = ",";
         private static PERSICION = 4;
         private static BASE_LAYER = "baselayer";
+        private static MARKERS = "markers";
 
         private $location: angular.ILocationService;
         private $rootScope: angular.IScope;
@@ -128,7 +129,7 @@
             } as Common.DataContainer;
             for (let parameter in searchObject) {
                 if (searchObject.hasOwnProperty(parameter)) {
-                    if (parameter === Common.Constants.MARKERS) {
+                    if (parameter === HashService.MARKERS) {
                         data.markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || []);
                         continue;
                     }

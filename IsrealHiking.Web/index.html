@@ -48,7 +48,7 @@
     <link rel="stylesheet" href="controllers/RouteProperties/routeProperties.css" />
     <link rel="stylesheet" href="controllers/routeStatistics.css" />
     <link rel="stylesheet" href="controllers/search.css" />
-    <link rel="stylesheet" href="app.css" type="text/css" />
+    <link rel="stylesheet" href="common.css" type="text/css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="scripts/jquery.js"></script>
     <script src="scripts/angular.js"></script>
@@ -103,11 +103,11 @@
     <script src="Tiles/LastModified.js"></script>
     <!-- Load common -->
     <script src="common/EventHelper.js"></script>
-    <script src="common/IsraelHikingData.js"></script>
-    <script src="common/Constants.js"></script>
+    <script src="common/Strings.js"></script>
     <script src="common/Urls.js"></script>
     <!-- Load services -->
     <script src="services/ObjectWithMap.js"></script>
+    <script src="services/layers/IDrawingLayer.js"></script>
     <script src="services/layers/routelayers/HoverHandlerBase.js"></script>
     <script src="services/layers/routelayers/HoverHandlerRoute.js"></script>
     <script src="services/layers/poilayers/HoverHandlerPoi.js"></script>
@@ -169,6 +169,6 @@
     <script src="directives/DraggableMovableDirective.js"></script>
     <script src="directives/DisableMapMovementDirective.js"></script>
     <!-- Start application -->
-    <script src="app.js"></script>
+    <script src="bootstraper.js"></script>
 </body>
 </html>

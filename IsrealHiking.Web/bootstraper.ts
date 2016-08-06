@@ -1,8 +1,4 @@
 ﻿namespace IsraelHiking {
-
-    // HM TODO: change app.ts name.
-    // HM TODO: add missing js files/remove all js files.
-
     export var app = angular.module("IsraelHiking", [
         "ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule",
         "angular-loading-bar", "googlechart", "ngAnimate",
@@ -11,103 +7,106 @@
     L.Icon.Default.imagePath = "content/images/";
 
     // Services:
-    app.service(Common.Constants.mapService, [() => new Services.MapService()]);
-    app.service(Common.Constants.parserFactory, [() => new Services.Parsers.ParserFactory()]);
-    app.service(Common.Constants.sidebarService, [() => new Services.SidebarService()]);
-    app.service(Common.Constants.searchResultsProviderFactory, [Common.Constants.http, Common.Constants.q, Common.Constants.parserFactory,
+    app.service(Strings.Services.mapService, [() => new Services.MapService()]);
+    app.service(Strings.Services.parserFactory, [() => new Services.Parsers.ParserFactory()]);
+    app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
+    app.service(Strings.Services.searchResultsProviderFactory, [Strings.Angular.http, Strings.Angular.q, Strings.Services.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Search.SearchResultsProviderFactory($http, $q, parserFactory)]);
-    app.service(Common.Constants.microsoftElevationProvider, [Common.Constants.http, Common.Constants.toastr,
+    app.service(Strings.Services.microsoftElevationProvider, [Strings.Angular.http, Strings.Services.toastr,
         ($http: angular.IHttpService, toastr: Toastr) =>
             new Services.Elevation.MicrosoftElevationProvider($http, toastr)]);
-    app.service(Common.Constants.elevationProvider, [Common.Constants.http, Common.Constants.toastr,
+    app.service(Strings.Services.elevationProvider, [Strings.Angular.http, Strings.Services.toastr,
         ($http: angular.IHttpService, toastr: Toastr) =>
             new Services.Elevation.ElevationProvider($http, toastr)]);
-    app.service(Common.Constants.routerService, [Common.Constants.http, Common.Constants.q, Common.Constants.toastr, Common.Constants.parserFactory,
+    app.service(Strings.Services.routerService, [Strings.Angular.http, Strings.Angular.q, Strings.Services.toastr, Strings.Services.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Routers.RouterService($http, $q, toastr, parserFactory)]);
-    app.service(Common.Constants.fileService, [Common.Constants.http, Common.Constants.upload, Common.Constants.fileSaver,
+    app.service(Strings.Services.fileService, [Strings.Angular.http, Strings.Services.upload, Strings.Services.fileSaver,
         ($http: angular.IHttpService, upload: angular.angularFileUpload.IUploadService, fileSaver: Services.IFileSaver) =>
             new Services.FileService($http, upload, fileSaver)]);
-    app.service(Common.Constants.snappingService, [Common.Constants.http, Common.Constants.mapService, Common.Constants.parserFactory, Common.Constants.toastr,
+    app.service(Strings.Services.snappingService, [Strings.Angular.http, Strings.Services.mapService, Strings.Services.parserFactory, Strings.Services.toastr,
         ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
             new Services.SnappingService($http, mapService, parserFactory, toastr)]);
-    app.service(Common.Constants.routeLayerFactory,
-        [Common.Constants.q, Common.Constants.compile, Common.Constants.rootScope, Common.Constants.timeout, Common.Constants.localStorageService, Common.Constants.mapService, Common.Constants.routerService, Common.Constants.snappingService, Common.Constants.elevationProvider,
+    app.service(Strings.Services.routeLayerFactory,
+        [Strings.Angular.q, Strings.Angular.compile, Strings.Angular.rootScope, Strings.Angular.timeout, Strings.Services.localStorageService,
+            Strings.Services.mapService, Strings.Services.routerService, Strings.Services.snappingService, Strings.Services.elevationProvider,
             ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, $timeout: angular.ITimeoutService, localStorageService: angular.local.storage.ILocalStorageService, mapService: Services.MapService, routerService: Services.Routers.RouterService, snappingService: Services.SnappingService, elevationProvider: Services.Elevation.IElevationProvider) =>
                 new Services.Layers.RouteLayers.RouteLayerFactory($q, $compile, $rootScope, $timeout, localStorageService, mapService, routerService, snappingService, elevationProvider)]);
-    app.service(Common.Constants.hashService, [Common.Constants.location, Common.Constants.rootScope, Common.Constants.localStorageService,
+    app.service(Strings.Services.hashService, [Strings.Angular.location, Strings.Angular.rootScope, Strings.Services.localStorageService,
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
-    app.service(Common.Constants.layersService, [Common.Constants.http, Common.Constants.window, Common.Constants.mapService, Common.Constants.localStorageService, Common.Constants.routeLayerFactory, Common.Constants.hashService,
+    app.service(Strings.Services.layersService, [Strings.Angular.http, Strings.Angular.window, Strings.Services.mapService,
+        Strings.Services.localStorageService, Strings.Services.routeLayerFactory, Strings.Services.hashService,
         ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService) =>
             new Services.Layers.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService)]);
 
-    app.controller(Common.Constants.mainMapController, [Common.Constants.scope, Common.Constants.compile, Common.Constants.mapService, Common.Constants.hashService, Common.Constants.sidebarService,
+    app.controller(Strings.Controllers.mainMapController, [Strings.Angular.scope, Strings.Angular.compile, Strings.Services.mapService,
+        Strings.Services.hashService, Strings.Services.sidebarService,
         ($scope: Controllers.IMainMapScope, $compile: angular.ICompileService, mapService: Services.MapService, hashService: Services.HashService, sidebarService: Services.SidebarService )=>
             new Controllers.MainMapcontoller($scope, $compile, mapService, hashService, sidebarService)]);
     
     // Directives:
-    app.directive("syncFocusWith", () => new Directives.SyncFocusWithDirective());
-    app.directive("draggableMovable", [Common.Constants.window, ($window: angular.IWindowService) => new Directives.DraggableMovableDirective($window)]);
-    app.directive("disableMapMovement", [Common.Constants.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
-    app.directive("markerPopup", () => ({
+    app.directive(Strings.Directives.syncFocusWith, () => new Directives.SyncFocusWithDirective());
+    app.directive(Strings.Directives.draggableMovable, [Strings.Angular.window, ($window: angular.IWindowService) => new Directives.DraggableMovableDirective($window)]);
+    app.directive(Strings.Directives.disableMapMovement, [Strings.Services.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
+    app.directive(Strings.Directives.markerPopup, () => ({
         controller: Controllers.MarkerPopupController,
         templateUrl: "controllers/markerPopup.html"
     } as angular.IDirective));
-    app.directive("routePointPopup", () => ({
+    app.directive(Strings.Directives.routePointPopup, () => ({
         templateUrl: "controllers/routePointPopup.html"
     } as angular.IDirective));
-    app.directive("drawingControl", () => ({
+    app.directive(Strings.Directives.drawingControl, () => ({
         controller: Controllers.DrawingController,
         templateUrl: "controllers/drawing.html"
     } as angular.IDirective));
-    app.directive("editOsmControl", () => ({
+    app.directive(Strings.Directives.editOsmControl, () => ({
             controller: Controllers.EditOSMController,
             templateUrl: "controllers/editOSM.html"
         } as angular.IDirective));
-    app.directive("fileControl", () => ({
+    app.directive(Strings.Directives.fileControl, () => ({
         controller: Controllers.FileController,
         templateUrl: "controllers/file.html"
     } as angular.IDirective));
-    app.directive("infoHelpControl", () => ({
+    app.directive(Strings.Directives.infoHelpControl, () => ({
         controller: Controllers.InfoHelpController,
         templateUrl: "controllers/infoHelp.html"
     } as angular.IDirective));
-    app.directive("layersControl", () => ({
+    app.directive(Strings.Directives.layersControl, () => ({
         controller: Controllers.LayersController,
         templateUrl: "controllers/layers.html"
     } as angular.IDirective));
-    app.directive("searchControl", () => ({
+    app.directive(Strings.Directives.searchControl, () => ({
         controller: Controllers.SearchController,
         templateUrl: "controllers/search.html"
     } as angular.IDirective));
-    app.directive("shareControl", () => ({
+    app.directive(Strings.Directives.shareControl, () => ({
         controller: Controllers.ShareController,
         templateUrl: "controllers/share.html"
     } as angular.IDirective));
-    app.directive("saveAsControl", () => ({
+    app.directive(Strings.Directives.saveAsControl, () => ({
         controller: Controllers.FileController,
         templateUrl: "controllers/fileSaveAs.html"
     } as angular.IDirective));
-    app.directive("zoomControl", () => ({
+    app.directive(Strings.Directives.zoomControl, () => ({
         controller: Controllers.ZoomController,
         templateUrl: "controllers/zoom.html"
     } as angular.IDirective));
-    app.directive("infoSidebar", () => ({
+    app.directive(Strings.Directives.infoSidebar, () => ({
         controller: Controllers.InfoHelpController,
         templateUrl: "controllers/infoSidebar.html"
     } as angular.IDirective));
-    app.directive("helpSidebar", () => ({
+    app.directive(Strings.Directives.helpSidebar, () => ({
         controller: Controllers.InfoHelpController,
         templateUrl: "controllers/helpSidebar.html"
     } as angular.IDirective));
-    app.directive("layersSidebar", () => ({
+    app.directive(Strings.Directives.layersSidebar, () => ({
         controller: Controllers.LayersController,
         templateUrl: "controllers/layersSidebar.html"
     } as angular.IDirective));
 
-    app.run(["googleChartApiPromise", () => {
+    app.run([Strings.Services.googleChartApiPromise, () => {
         angular.element("link[type*=icon]").detach().appendTo("head");
     }]);
 

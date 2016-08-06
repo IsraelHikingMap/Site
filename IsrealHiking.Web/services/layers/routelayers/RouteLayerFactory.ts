@@ -3,6 +3,21 @@
         private static IS_ROUTING_PER_POINT_KEY = "isRoutingPerPoint";
         public static ROUTING_TYPE = "routingType";
 
+        public static COLORS = [
+            { key: "blue", value: "#0000FF" },
+            { key: "red", value: "#FF0000" },
+            { key: "orange", value: "#FF6600" },
+            { key: "pink", value: "#FF00DD" },
+            { key: "green", value: "#008000" },
+            { key: "purple", value: "#B700FF" },
+            { key: "turquize", value: "#00B0A4" },
+            { key: "yellow", value: "#FFFF00" },
+            { key: "brown", value: "#9C3E00" },
+            { key: "cyan", value: "#00FFFF" },
+            { key: "gray", value: "#7F8282" },
+            { key: "dark", value: "#101010" }
+        ];
+
         private $q: angular.IQService;
         private $compile: angular.ICompileService;
         private $rootScope: angular.IRootScopeService;
@@ -61,11 +76,11 @@
             let route = {
                 properties: {
                     name: name,
-                    currentRoutingType: this.localStorageService.get(RouteLayerFactory.ROUTING_TYPE) || Common.RoutingType.hike,
+                    currentRoutingType: this.localStorageService.get(RouteLayerFactory.ROUTING_TYPE) || "h",
                     isRoutingPerPoint: this.localStorageService.get(RouteLayerFactory.IS_ROUTING_PER_POINT_KEY) ? true : false,
                     isVisible: true,
                     pathOptions: {
-                        color: Common.Constants.COLORS[this.nextColorIndex].value,
+                        color: RouteLayerFactory.COLORS[this.nextColorIndex].value,
                         className: "",
                         opacity: 0.5,
                         weight: 4
@@ -74,7 +89,7 @@
                 markers: [],
                 segments: []
             } as RouteLayers.IRoute;
-            this.nextColorIndex = (this.nextColorIndex + 1) % Common.Constants.COLORS.length;
+            this.nextColorIndex = (this.nextColorIndex + 1) % RouteLayerFactory.COLORS.length;
             return route;
         }
 

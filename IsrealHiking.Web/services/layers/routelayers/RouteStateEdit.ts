@@ -33,8 +33,8 @@
             this.hoverHandler.setState(HoverHandlerBase.NONE);
         }
 
-        public getEditMode() {
-            return EditMode.ROUTE;
+        public getEditMode(): EditMode {
+            return EditModeString.route;
         }
 
         private addPoint(e: L.LeafletMouseEvent) {

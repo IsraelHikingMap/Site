@@ -1,10 +1,5 @@
-﻿namespace IsraelHiking.Common {
-    export class RoutingType {
-        public static hike = "h"; 
-        public static bike = "b";
-        public static fourWheelDrive = "f";
-        public static none = "n";
-    }
+﻿declare namespace IsraelHiking.Common {
+    type RoutingType = "h" | "b" | "f" | "n";
 
     export interface SiteUrl {
         Id: string;
@@ -28,7 +23,7 @@
     export interface RouteSegmentData {
         routePoint: L.LatLng;
         latlngzs: LatLngZ[];
-        routingType: string;
+        routingType: RoutingType;
     }
 
     export interface RouteData {

@@ -1,10 +1,4 @@
 namespace IsraelHiking.Services.Layers.RouteLayers {
-    export class EditMode {
-        public static POI = "POI";
-        public static ROUTE = "Route";
-        public static NONE = "None";
-    }
-
     export abstract class RouteStateBase {
         protected context: RouteLayer;
 
@@ -14,7 +8,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
 
         public abstract initialize(): void;
         public abstract clear(): void;
-        public abstract getEditMode(): string;
+        public abstract getEditMode(): EditMode;
 
         public reRoute = (): void => { } // does nothing if not overriden
 

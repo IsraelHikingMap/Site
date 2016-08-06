@@ -1,4 +1,5 @@
 ﻿/// <reference path="../../../../IsrealHiking.Web/scripts/typings/geojson/geojson.d.ts" />
+/// <reference path="../../../../isrealhiking.web/common/israelhiking.d.ts" />
 /// <reference path="../../../../isrealhiking.web/services/parsers/iparser.ts" />
 /// <reference path="../../../../isrealhiking.web/services/parsers/baseparser.ts" />
 /// <reference path="../../../../isrealhiking.web/services/parsers/geojsonparser.ts" />
@@ -152,7 +153,7 @@ namespace IsraelHiking.Tests {
                         name: "route",
                         segments: [
                             {
-                                latlngzs: [L.latLng(1, 1)],
+                                latlngzs: [L.latLng(1, 1) as Common.LatLngZ],
                                 routePoint: L.latLng(1, 1),
                                 routingType: "h"
                             } as Common.RouteSegmentData

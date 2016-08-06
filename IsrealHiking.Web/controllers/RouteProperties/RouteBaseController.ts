@@ -11,10 +11,10 @@
         constructor($scope: IRouteBaseScope,
             mapService: Services.MapService) {
             super(mapService);
-            $scope.colors = Common.Constants.COLORS;
+            $scope.colors = Services.Layers.RouteLayers.RouteLayerFactory.COLORS;
 
             $scope.getColorName = (colorValue: string): string => {
-                return _.find(Common.Constants.COLORS, c => c.value === colorValue).key;
+                return _.find(Services.Layers.RouteLayers.RouteLayerFactory.COLORS, c => c.value === colorValue).key;
             }
         }
     }

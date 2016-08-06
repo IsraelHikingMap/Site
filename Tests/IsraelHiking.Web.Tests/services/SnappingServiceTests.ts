@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../isrealhiking.web/common/constants.ts" />
-/// <reference path="../../../isrealhiking.web/services/mapservice.ts" />
+﻿/// <reference path="../../../isrealhiking.web/services/mapservice.ts" />
 /// <reference path="../../../IsrealHiking.Web/scripts/typings/angularjs/angular-mocks.d.ts" />
 /// <reference path="../../../isrealhiking.web/scripts/typings/lodash/lodash.d.ts" />
 /// <reference path="../../../isrealhiking.web/services/snappingservice.ts" />

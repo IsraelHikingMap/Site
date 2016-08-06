@@ -17,8 +17,8 @@
             }
         }
 
-        public getEditMode() {
-            return EditMode.NONE;
+        public getEditMode(): EditMode {
+            return EditModeString.none;
         }
     }
 }

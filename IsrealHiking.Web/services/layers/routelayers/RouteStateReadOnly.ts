@@ -48,8 +48,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.context.map.removeLayer(this.arrows);
         }
 
-        public getEditMode() {
-            return EditMode.NONE;
+        public getEditMode(): EditMode {
+            return EditModeString.none;
         }
     }
 }

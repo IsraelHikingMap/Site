@@ -1,5 +1,4 @@
 ﻿/// <reference path="../../../isrealhiking.web/scripts/typings/angular-local-storage/angular-local-storage.d.ts" />
-/// <reference path="../../../isrealhiking.web/common/constants.ts" />
 /// <reference path="../../../isrealhiking.web/services/hashservice.ts" />
 
 namespace IsraelHiking.Tests {

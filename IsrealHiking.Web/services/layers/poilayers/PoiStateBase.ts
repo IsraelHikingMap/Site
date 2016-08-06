@@ -1,9 +1,4 @@
 ﻿namespace IsraelHiking.Services.Layers.PoiLayers {
-    export class EditMode {
-        public static POI = "POI";
-        public static ROUTE = "Route";
-        public static NONE = "None";
-    }
 
     export abstract class PoiStateBase {
         protected context: PoiLayer;
@@ -14,7 +9,7 @@
 
         public abstract initialize(): void;
         public abstract clear(): void;
-        public abstract getEditMode(): string;
+        public abstract getEditMode(): EditMode;
 
         public setReadOnlyState(): void {
             this.context.clearCurrentState();
