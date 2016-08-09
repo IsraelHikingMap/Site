@@ -134,6 +134,7 @@
     <Content Include="scripts\interact.js" />
     <Content Include="scripts\jquery.js" />
     <Content Include="scripts\L.Control.Locate.js" />
+    <Content Include="scripts\leaflet-ant-path.js" />
     <Content Include="scripts\leaflet-google.js" />
     <Content Include="scripts\leaflet-src.js" />
     <Content Include="scripts\leaflet.label.js" />

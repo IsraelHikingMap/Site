@@ -17,16 +17,16 @@
         "<i class='fa fa-stop fa-stack-1x icon-background' style='color:red;'></i>" +
         "</span>";
 
-        private static HOVER_CHART_MARKER_HTML = "<span class='fa-stack' style='font-size: 8px;'>" +
+        private static ROUND_MARKER_HTML = "<span class='fa-stack' style='font-size: 8px;'>" +
         "<i class='fa fa-circle fa-stack-2x' style='color:{{color}};'></i>" +
         "<i class='fa fa-circle fa-stack-1x' style='color:white'></i>" +
         "</span>";
 
         private static COLOR_MARKER_HTML = "<i class='fa fa-map-marker fa-3x' style='color:{{color}};text-shadow: 3px 3px 3px #000;'></i>";
 
-        public static createHoverIcon(color: string): L.DivIcon {
+        public static createRoundIcon(color: string): L.DivIcon {
             return L.divIcon({
-                html: IconsService.HOVER_CHART_MARKER_HTML.replace("{{color}}", color),
+                html: IconsService.ROUND_MARKER_HTML.replace("{{color}}", color),
                 iconSize: L.point(16, 16),
                 iconAnchor: L.point(8, 8),
                 className: "hover-marker"

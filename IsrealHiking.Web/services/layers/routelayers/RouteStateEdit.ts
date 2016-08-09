@@ -260,7 +260,7 @@
         }
 
         protected createMiddleMarker = (): L.Marker => {
-            var middleMarker = L.marker(this.context.map.getCenter(), { clickable: true, draggable: true, icon: IconsService.createHoverIcon(this.context.route.properties.pathOptions.color), opacity: 0.0 } as L.MarkerOptions);
+            var middleMarker = L.marker(this.context.map.getCenter(), { clickable: true, draggable: true, icon: IconsService.createRoundIcon(this.context.route.properties.pathOptions.color), opacity: 0.0 } as L.MarkerOptions);
             middleMarker.on("click", () => {
                 this.middleMarkerClick(middleMarker);
             });

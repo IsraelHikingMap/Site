@@ -39,7 +39,7 @@
         }
 
         private setPoiMarkerEvents(marker: L.Marker) {
-            marker.on("dragStart", () => {
+            marker.on("dragstart", () => {
                 marker.closePopup();
                 this.hoverHandler.setState(RouteLayers.HoverHandlerBase.DRAGGING);
             });

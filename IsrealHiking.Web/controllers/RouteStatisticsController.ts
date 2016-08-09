@@ -144,7 +144,7 @@
             $scope.gain = this.toDisplayableUnit(statistics.gain);
             $scope.loss = this.toDisplayableUnit(statistics.loss);
 
-            var icon = Services.IconsService.createHoverIcon(routeColor);
+            var icon = Services.IconsService.createRoundIcon(routeColor);
             this.hoverChartMarker.setIcon(icon);
     }
 
