@@ -1,7 +1,8 @@
 ﻿namespace IsraelHiking.Common {
     export class Urls { 
         // api
-        public static apiBase = window.location.protocol + "//" + window.location.host + "/api/";
+        public static baseAddress = window.location.protocol + "//" + window.location.host;
+        public static apiBase = Urls.baseAddress + "/api/";
         public static urls = Urls.apiBase + "urls/";
         public static elevation = Urls.apiBase + "elevation";
         public static routing = Urls.apiBase + "routing";

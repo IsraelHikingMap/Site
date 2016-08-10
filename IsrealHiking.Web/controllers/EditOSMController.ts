@@ -3,7 +3,6 @@
         editOsm(e: Event): void;
     }
 
-
     export class EditOSMController extends BaseMapController {
 
         constructor($scope: IEditOSMScope,
@@ -13,18 +12,18 @@
             super(mapService);
 
             $scope.editOsm = (e: Event) => {
-                var center = this.map.getCenter();
-                var zoom = this.map.getZoom();
-                var baseLayerAddress = layersService.selectedBaseLayer.address;
-                var background = "background=bing";
+                let center = this.map.getCenter();
+                let zoom = this.map.getZoom();
+                let baseLayerAddress = layersService.selectedBaseLayer.address;
+                let background = "background=bing";
                 if (baseLayerAddress !== "") {
                     if (baseLayerAddress.indexOf("/") === 0) {
-                        baseLayerAddress = Common.Urls.apiBase + baseLayerAddress;
+                        baseLayerAddress = Common.Urls.baseAddress + baseLayerAddress;
                     }
-                    var address = baseLayerAddress.indexOf("{s}") === -1 ? baseLayerAddress : Common.Urls.apiBase + Services.Layers.LayersService.DEFAULT_TILES_ADDRESS;
-                    background = "background=custom:" + address;
+                    let address = baseLayerAddress.indexOf("{s}") === -1 ? baseLayerAddress : Common.Urls.baseAddress + Services.Layers.LayersService.DEFAULT_TILES_ADDRESS;
+                    background = `background=custom:${address}`;
                 }
-                $window.open("http://www.openstreetmap.org/edit#" + background + "&map=" + zoom + "/" + center.lat + "/" + center.lng);
+                $window.open(`http://www.openstreetmap.org/edit#${background}&map=${zoom}/${center.lat}/${center.lng}`);
                 this.suppressEvents(e);
             };
         } 
