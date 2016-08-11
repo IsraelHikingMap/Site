@@ -28,8 +28,8 @@
             return L.divIcon({
                 html: IconsService.ROUND_MARKER_HTML.replace("{{color}}", color),
                 iconSize: L.point(16, 16),
-                iconAnchor: L.point(8, 8),
-                className: "hover-marker"
+                iconAnchor: L.point(8, 10),
+                className: "round-marker"
             } as L.DivIconOptions);
         }
 

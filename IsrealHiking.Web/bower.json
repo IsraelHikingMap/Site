@@ -22,7 +22,6 @@
     "leaflet": "*",
     "Leaflet.label": "*",
     "leaflet.locatecontrol": "*",
-    "leaflet-polylinedecorator": "*",
     "leaflet-ant-path": "*" 
   },
   "overrides": {

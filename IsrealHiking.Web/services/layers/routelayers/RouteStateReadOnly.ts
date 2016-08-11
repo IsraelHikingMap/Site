@@ -1,5 +1,4 @@
 declare namespace L {
-    function polylineDecorator(p: Polyline, options?: any): Polyline;
     interface AntPathOptions extends PolylineOptions {
         delay?: string;
         pulseColor?: string;
@@ -8,9 +7,7 @@ declare namespace L {
     namespace polyline {
         function antPath(latlngs: LatLng[], options: AntPathOptions): L.Polyline;
     }
-    namespace Symbol {
-        function arrowHead(options: any): any;
-    }
+    // HM TODO: remove js reference
 }
 
 namespace IsraelHiking.Services.Layers.RouteLayers {
@@ -25,22 +22,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
 
         private createPolyline(latlngzs: L.LatLng[]) {
             let routePathOptions = this.context.route.properties.pathOptions;
-            if (this.context.route.properties.name.indexOf("AntPath") !== -1) {
-                let pathOptions = { delay: "2000", pulseColor: routePathOptions.color, dashArray: "30 10", opacity: routePathOptions.opacity, color: "transparent", weight: routePathOptions.weight } as L.AntPathOptions;
-                let polyline = L.polyline.antPath(latlngzs, pathOptions);
-                this.context.map.addLayer(polyline);
-                return polyline;
-            }
-            let polyline = L.polyline(latlngzs, routePathOptions);
-            if (latlngzs.length > 2 || !latlngzs[0].equals(latlngzs[1])) {
-                var arrow = L.polylineDecorator(polyline, {
-                    patterns: [{
-                        repeat: 100,
-                        symbol: L.Symbol.arrowHead({ pixelSize: 10, polygon: false, pathOptions: { color: "black", opacity: routePathOptions.opacity, weight: 3 } as L.PathOptions })
-                    }]
-                });
-                this.readOnlyLayers.addLayer(arrow);
-            }
+            let pathOptions = { delay: "2000", pulseColor: routePathOptions.color, dashArray: "30 10", opacity: routePathOptions.opacity, color: "transparent", weight: routePathOptions.weight } as L.AntPathOptions;
+            let polyline = L.polyline.antPath(latlngzs, pathOptions);
             this.context.map.addLayer(polyline);
             return polyline;
         }
