@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
+using IsraelHiking.Common;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -300,11 +302,62 @@ namespace IsraelHiking.API.Tests.Services
         public void TestSimplifyRouteData()
         {
             var converter = new GpxDataContainerConverter();
-            var containter = converter.ToDataContainer(Encoding.ASCII.GetBytes(gpxString).ToGpx());
+            var container = converter.ToDataContainer(Encoding.ASCII.GetBytes(gpxString).ToGpx());
 
-            var route = _service.SimplifyRouteData(containter.routes.First(), "h");
+            var route = _service.SimplifyRouteData(container.routes.First(), "h");
 
             Assert.IsTrue(route.segments.Count <= 40);
+        }
+
+        [TestMethod]
+        public void SimplifyRoundRoute()
+        {
+            var container = new DataContainer();
+            container.routes.Add(new RouteData
+            {
+                segments = new List<RouteSegmentData>
+                {
+                    new RouteSegmentData
+                    {
+                        latlngzs = new List<LatLngZ>
+                        {
+                            new LatLngZ {lat = 1, lng = 1},
+                            new LatLngZ {lat = 2, lng = 2},
+                            new LatLngZ {lat = 3, lng = 3},
+                            new LatLngZ {lat = 4, lng = 4},
+                            new LatLngZ {lat = 1, lng = 1},
+                        }
+                    }
+                }
+            });
+
+            var route = _service.SimplifyRouteData(container.routes.First(), "h");
+
+            Assert.IsTrue(route.segments.Count <= 5);
+        }
+
+        [TestMethod]
+        public void SimplifyRouteWithTwoPoints_ShouldNotBeSimplified()
+        {
+            var container = new DataContainer();
+            container.routes.Add(new RouteData
+            {
+                segments = new List<RouteSegmentData>
+                {
+                    new RouteSegmentData
+                    {
+                        latlngzs = new List<LatLngZ>
+                        {
+                            new LatLngZ {lat = 1, lng = 1},
+                            new LatLngZ {lat = 2, lng = 2}
+                        }
+                    }
+                }
+            });
+
+            var route = _service.SimplifyRouteData(container.routes.First(), "h");
+
+            Assert.AreEqual(3, route.segments.Count);
         }
     }
 }

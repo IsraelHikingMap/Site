@@ -9,6 +9,11 @@ namespace IsraelHiking.API.Converters
 {
     public class OsmGeoJsonConverter
     {
+        private const string OUTER = "outer";
+        private const string BOUNDARY = "boundary";
+        private const string TYPE = "type";
+        private const string MULTIPOLYGON = "multipolygon";
+
         public Feature ToGeoJson(ICompleteOsmGeo completeOsmGeo)
         {
             if (completeOsmGeo.Tags.Count == 0)
@@ -22,16 +27,14 @@ namespace IsraelHiking.API.Converters
                     return new Feature(new Point(ConvertNode(node)), ConvertTags(node.Tags, node.Id.Value));
                 case CompleteOsmType.Way:
                     var way = completeOsmGeo as CompleteWay;
-                    if (way.Nodes.Count <= 1)
+                    if (way == null || way.Nodes.Count <= 1)
                     {
                         // can't convert a way with 1 coordinates to geojson.
                         return null;
                     }
-                    var coordinates = way.Nodes.Select(ConvertNode);
                     var properties = ConvertTags(way.Tags, way.Id);
-                    return way.Nodes.First() == way.Nodes.Last() && way.Nodes.Count >= 4
-                        ? new Feature(new Polygon(new List<LineString> { new LineString(coordinates) }), properties)
-                        : new Feature(new LineString(coordinates), properties);
+                    var geometry = GetGeometryFromNodes(way.Nodes);
+                    return new Feature(geometry, properties);
                 case CompleteOsmType.Relation:
                     return ConvertRelation(completeOsmGeo as CompleteRelation);
                 default:
@@ -59,21 +62,21 @@ namespace IsraelHiking.API.Converters
             {
                 var currentNodes = new List<Node>(waysToGroup.First().Nodes);
                 waysToGroup.RemoveAt(0);
-                var group = nodesGroups.FirstOrDefault(g => currentNodes.Last() == g.First() 
-                || currentNodes.First() == g.Last()
-                || currentNodes.First() == g.First() 
-                || currentNodes.Last() == g.Last());
+                var group = nodesGroups.FirstOrDefault(g => currentNodes.Last().Id == g.First().Id 
+                || currentNodes.First().Id == g.Last().Id
+                || currentNodes.First().Id == g.First().Id 
+                || currentNodes.Last().Id == g.Last().Id);
                 if (group == null)
                 {
                     group = currentNodes;
                     nodesGroups.Add(group);
                     continue;
                 }
-                if (currentNodes.First() == group.First() || currentNodes.Last() == group.Last())
+                if (currentNodes.First().Id == group.First().Id || currentNodes.Last().Id == group.Last().Id)
                 {
                     currentNodes.Reverse(); // direction of this way is incompatible with other ways.
                 }
-                if (currentNodes.First() == group.Last())
+                if (currentNodes.First().Id == group.Last().Id)
                 {
                     currentNodes.Remove(currentNodes.First());
                     group.AddRange(currentNodes);
@@ -82,30 +85,14 @@ namespace IsraelHiking.API.Converters
                 currentNodes.Remove(currentNodes.Last());
                 group.InsertRange(0, currentNodes);
             }
-            return nodesGroups.Select(nodes =>
-            {
-                var coordinates = nodes.Select(ConvertNode);
-                return nodes.First() == nodes.Last() && nodes.Count >= 4
-                    ? new Polygon(new List<LineString> {new LineString(coordinates)}) as IGeometryObject
-                    : new LineString(coordinates) as IGeometryObject;
-            }).ToList();
+            return nodesGroups.Select(GetGeometryFromNodes).ToList();
         }
 
         private Feature ConvertRelation(CompleteRelation relation)
         {
             if (IsMultipolygon(relation))
             {
-                var multiPolygon = new MultiPolygon();
-                var outerWays = relation.Members.Where(m => m.Role == "outer").Select(m => m.Member).OfType<CompleteWay>();
-                var outerCoordinatesGroups = GetCoordinatesGroupsFromWays(outerWays);
-                multiPolygon.Coordinates.AddRange(outerCoordinatesGroups.OfType<Polygon>());
-                var innerWays = relation.Members.Where(m => m.Role != "outer").Select(m => m.Member).OfType<CompleteWay>();
-                var innerCoordinatesGroups = GetCoordinatesGroupsFromWays(innerWays);
-                if (innerCoordinatesGroups.OfType<Polygon>().Any())
-                {
-                    multiPolygon.Coordinates.AddRange(innerCoordinatesGroups.OfType<Polygon>());
-                }
-                return new Feature(multiPolygon, ConvertTags(relation.Tags, relation.Id));
+                return ConvertToMultipolygon(relation);
             }
 
             var nodes = relation.Members.Select(m => m.Member).OfType<Node>().ToList();
@@ -125,32 +112,69 @@ namespace IsraelHiking.API.Converters
             return new Feature(multiLineString, ConvertTags(relation.Tags, relation.Id));
         }
 
+        private Feature ConvertToMultipolygon(CompleteRelation relation)
+        {
+            var multiPolygon = new MultiPolygon();
+            var outerWays = GetAllWaysByRole(relation).Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
+            var outerCoordinatesGroups = GetCoordinatesGroupsFromWays(outerWays);
+            multiPolygon.Coordinates.AddRange(outerCoordinatesGroups.OfType<Polygon>());
+            var innerWays = GetAllWaysByRole(relation).Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
+            var innerCoordinatesGroups = GetCoordinatesGroupsFromWays(innerWays).OfType<Polygon>().ToList();
+            multiPolygon.Coordinates.AddRange(innerCoordinatesGroups);
+            return new Feature(multiPolygon, ConvertTags(relation.Tags, relation.Id));
+        }
+
         public static List<CompleteWay> GetAllWays(CompleteRelation relation)
         {
+            return GetAllWaysByRole(relation).SelectMany(kvp => kvp.Value).ToList();
+        }
+
+        private static Dictionary<string, List<CompleteWay>> GetAllWaysByRole(CompleteRelation relation)
+        {
+            var dicionary = relation.Members.GroupBy(m => m.Role ?? string.Empty)
+                .ToDictionary(g => g.Key, g => g.Select(k => k.Member).OfType<CompleteWay>().ToList());
             if (relation.Members.All(m => m.Member.Type != CompleteOsmType.Relation))
             {
-                return relation.Members.Select(m => m.Member).OfType<CompleteWay>().ToList();
+                return dicionary;
             }
-            var list = relation.Members.Select(m => m.Member).OfType<CompleteWay>().ToList();
             var subRelations = relation.Members.Select(m => m.Member).OfType<CompleteRelation>();
             foreach (var subRelation in subRelations)
             {
-                list.AddRange(GetAllWays(subRelation));
+                var subRelationDictionary = GetAllWaysByRole(subRelation);
+                foreach (var key in subRelationDictionary.Keys)
+                {
+                    if (dicionary.ContainsKey(key))
+                    {
+                        dicionary[key].AddRange(subRelationDictionary[key]);
+                    }
+                    else
+                    {
+                        dicionary[key] = subRelationDictionary[key];
+                    }
+                }
             }
-            return list;
+            return dicionary;
         }
 
         private bool IsMultipolygon(CompleteOsmBase relation)
         {
-            if (relation.Tags.ContainsKey("boundary"))
+            if (relation.Tags.ContainsKey(BOUNDARY))
             {
                 return true;
             }
-            if (relation.Tags.ContainsKey("type") == false)
+            if (relation.Tags.ContainsKey(TYPE) == false)
             {
                 return false;
             }
-            return relation.Tags["type"] == "multipolygon" || relation.Tags["type"] == "boundary";
+            return relation.Tags[TYPE] == MULTIPOLYGON || relation.Tags[TYPE] == BOUNDARY;
+        }
+
+        private IGeometryObject GetGeometryFromNodes(List<Node> nodes)
+        {
+            var coordinates = nodes.Select(ConvertNode);
+            return nodes.First().Id == nodes.Last().Id && nodes.Count >= 4
+                        ? new Polygon(new List<LineString> { new LineString(coordinates) }) as IGeometryObject
+                        : new LineString(coordinates);
         }
     }
 }

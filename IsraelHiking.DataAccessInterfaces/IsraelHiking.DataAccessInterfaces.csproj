@@ -82,6 +82,7 @@
     <Compile Include="IIsraelHikingRepository.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="INssmHelper.cs" />
+    <Compile Include="IOsmRepository.cs" />
     <Compile Include="IProcessHelper.cs" />
     <Compile Include="IRemoteFileFetcherGateway.cs" />
     <Compile Include="IRoutingGateway.cs" />

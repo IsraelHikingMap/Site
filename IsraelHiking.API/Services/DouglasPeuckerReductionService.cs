@@ -71,7 +71,7 @@ namespace IsraelHiking.API.Services
             var pointIndexsToKeep = new List<int> {firstPoint, lastPoint};
 
             //The first and the last point cannot be the same
-            while (points[firstPoint].Equals(points[lastPoint]))
+            while (points[firstPoint].North == points[lastPoint].North && points[firstPoint].East == points[lastPoint].East && lastPoint > firstPoint)
             {
                 lastPoint--;
             }

@@ -2,10 +2,12 @@
 using SQLite.CodeFirst;
 using System.Data.Entity;
 using System.Data.Entity.ModelConfiguration.Conventions;
+using System.Diagnostics.CodeAnalysis;
 using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.DataAccess.Database
 {
+    [ExcludeFromCodeCoverage]
     public class IsraelHikingDbContext : DbContext, IIsraelHikingDbContext
     {
         public IDbSet<SiteUrl> SiteUrls { get; set; }

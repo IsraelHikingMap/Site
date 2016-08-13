@@ -17,7 +17,8 @@ namespace IsraelHiking.API.Services
         private const string PBF_FILE_NAME = "israel-and-palestine-latest.osm.pbf";
         private const int PAGE_SIZE = 10000;
         private const string PLACE = "place";
-        private const string NAME = "name";
+        private const string ICON = "icon";
+        private const string SEARCH_FACTOR = "search_factor";
 
         private readonly ILogger _logger;
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
@@ -25,6 +26,7 @@ namespace IsraelHiking.API.Services
         private readonly INssmHelper _elasticSearchHelper;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IOsmRepository _osmRepository;
         private string _serverPath;
 
         public OsmDataService(IGraphHopperHelper graphHopperHelper,
@@ -32,7 +34,8 @@ namespace IsraelHiking.API.Services
             IFileSystemHelper fileSystemHelper,
             IElasticSearchGateway elasticSearchGateway,
             INssmHelper elasticSearchHelper,
-            ILogger logger)
+            ILogger logger, 
+            IOsmRepository osmRepository)
         {
             _graphHopperHelper = graphHopperHelper;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
@@ -40,6 +43,7 @@ namespace IsraelHiking.API.Services
             _elasticSearchGateway = elasticSearchGateway;
             _elasticSearchHelper = elasticSearchHelper;
             _logger = logger;
+            _osmRepository = osmRepository;
         }
 
         /// <summary>
@@ -107,57 +111,33 @@ namespace IsraelHiking.API.Services
         private async Task UpdateElasticSearchFromFile(string osmFilePath)
         {
             _logger.Info("Updating Elastic Search OSM data");
-            using (var stream = _fileSystemHelper.FileOpenRead(osmFilePath))
+            var namesDictionary = await _osmRepository.GetElementsWithName(osmFilePath);
+            var converter = new OsmGeoJsonConverter();
+            var smallCahceList = new List<Feature>(PAGE_SIZE);
+            int total = 0;
+            await _elasticSearchGateway.DeleteAll();
+            foreach (var name in namesDictionary.Keys)
             {
-                var source = new PBFOsmStreamSource(stream);
-                await _elasticSearchGateway.DeleteAll();
-                var completeSource = new OsmSimpleCompleteStreamSource(source);
-                var converter = new OsmGeoJsonConverter();
-                var smallCahceList = new List<Feature>(PAGE_SIZE);
-                int total = 0;
-                var namesDictionary = completeSource
-                    .Where(o => string.IsNullOrWhiteSpace(GetName(o)) == false)
-                    .GroupBy(GetName)
-                    .ToDictionary(g => g.Key, g => g.ToList());
-                _logger.Info("Finished grouping data by name.");
-                foreach (var name in namesDictionary.Keys)
+                var list = MergeElements(namesDictionary[name]).Select(e => converter.ToGeoJson(e)).Where(f => f != null).ToList();
+                list.ForEach(feature =>
                 {
-                    var list = MergeElements(namesDictionary[name]).Select(e => converter.ToGeoJson(e)).Where(f => f != null).ToList();
-                    list.ForEach(feature =>
-                    {
-                        var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(feature);
-                        feature.Properties["search_factor"] = propertiesExtraData?.SearchFactor ?? PropertiesData.DefaultSearchFactor;
-                        feature.Properties["icon"] = propertiesExtraData?.Icon ?? string.Empty;
-                    });
-                    smallCahceList.AddRange(list);
-                    if (smallCahceList.Count < PAGE_SIZE)
-                    {
-                        continue;
-                    }
-                    total += smallCahceList.Count;
-                    _logger.Info($"Indexing {total} records");
-                    _elasticSearchGateway.UpdateData(smallCahceList).Wait();
-                    smallCahceList.Clear();
+                    var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(feature);
+                    feature.Properties[SEARCH_FACTOR] = propertiesExtraData?.SearchFactor ?? PropertiesData.DefaultSearchFactor;
+                    feature.Properties[ICON] = propertiesExtraData?.Icon ?? string.Empty;
+                });
+                smallCahceList.AddRange(list);
+                if (smallCahceList.Count < PAGE_SIZE)
+                {
+                    continue;
                 }
+                total += smallCahceList.Count;
+                _logger.Info($"Indexing {total} records");
                 _elasticSearchGateway.UpdateData(smallCahceList).Wait();
-                _logger.Info($"Finished updating Elastic Search, Indexed {total + smallCahceList.Count} records");
+                smallCahceList.Clear();
             }
-        }
+            _elasticSearchGateway.UpdateData(smallCahceList).Wait();
+            _logger.Info($"Finished updating Elastic Search, Indexed {total + smallCahceList.Count} records");
 
-        private string GetName(ICompleteOsmGeo osm)
-        {
-            if (osm.Tags.ContainsKey(NAME))
-            {
-                return osm.Tags[NAME];
-            }
-            foreach (var tag in osm.Tags)
-            {
-                if (tag.Key.Contains(NAME))
-                {
-                    return tag.Value;
-                }
-            }
-            return string.Empty;
         }
 
         private IEnumerable<ICompleteOsmGeo> MergeElements(IReadOnlyCollection<ICompleteOsmGeo> elements)
@@ -245,7 +225,7 @@ namespace IsraelHiking.API.Services
             while (waysToMerge.Any())
             {
                 var foundAWayToMergeTo = false;
-                for (var index = waysToMerge.Count - 1; index >= 0 ; index--)
+                for (var index = waysToMerge.Count - 1; index >= 0; index--)
                 {
                     var wayToMerge = waysToMerge[index];
                     var wayToMergeTo =

@@ -12,9 +12,7 @@ namespace IsraelHiking.API.Converters
 
         public static string FromXml(extensionsType extensions)
         {
-            return RoutingTypeToCharacter(
-                    extensions?.Any.FirstOrDefault(a => a.LocalName == ROUTING_TYPE)?.InnerText
-                    );
+            return RoutingTypeToCharacter(extensions?.Any.FirstOrDefault(a => a.LocalName == ROUTING_TYPE)?.InnerText);
         }
 
         public static XmlElement ToXml(string type)
@@ -35,8 +33,10 @@ namespace IsraelHiking.API.Converters
                     return "Bike";
                 case "f":
                     return "4WD";
-                default:
+                case "n":
                     return "None";
+                default:
+                    return "Hike";
             }
         }
 

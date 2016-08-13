@@ -1,10 +1,12 @@
-﻿using IsraelHiking.API.Converters;
+﻿using System.Diagnostics.CodeAnalysis;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelTransverseMercator;
 using Microsoft.Practices.Unity;
 
 namespace IsraelHiking.API
 {
+    [ExcludeFromCodeCoverage]
     public static class UnityRegisterApi
     {
         public static void RegisterUnityTypes(IUnityContainer container)

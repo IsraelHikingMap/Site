@@ -23,6 +23,7 @@ namespace IsraelHiking.DataAccess
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
             container.RegisterType<IGraphHopperHelper, GraphHopperHelper>();
             container.RegisterType<INssmHelper, ElasticSearchHelper>();
+            container.RegisterType<IOsmRepository, OsmRepository>();
         }
     }
 }
