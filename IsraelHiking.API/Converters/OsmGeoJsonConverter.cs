@@ -57,7 +57,7 @@ namespace IsraelHiking.API.Converters
         private List<IGeometryObject> GetCoordinatesGroupsFromWays(IEnumerable<CompleteWay> ways)
         {
             var nodesGroups = new List<List<Node>>();
-            var waysToGroup = new List<CompleteWay>(ways);
+            var waysToGroup = new List<CompleteWay>(ways.Where(w => w.Nodes.Any()));
             while (waysToGroup.Any())
             {
                 var currentNodes = new List<Node>(waysToGroup.First().Nodes);

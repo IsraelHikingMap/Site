@@ -7,8 +7,6 @@ using GeoJSON.Net.Feature;
 using IsraelHiking.API.Converters;
 using IsraelHiking.DataAccessInterfaces;
 using OsmSharp.Osm;
-using OsmSharp.Osm.PBF.Streams;
-using OsmSharp.Osm.Streams.Complete;
 
 namespace IsraelHiking.API.Services
 {
@@ -34,16 +32,16 @@ namespace IsraelHiking.API.Services
             IFileSystemHelper fileSystemHelper,
             IElasticSearchGateway elasticSearchGateway,
             INssmHelper elasticSearchHelper,
-            ILogger logger, 
-            IOsmRepository osmRepository)
+            IOsmRepository osmRepository,
+            ILogger logger)
         {
             _graphHopperHelper = graphHopperHelper;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
             _fileSystemHelper = fileSystemHelper;
             _elasticSearchGateway = elasticSearchGateway;
             _elasticSearchHelper = elasticSearchHelper;
-            _logger = logger;
             _osmRepository = osmRepository;
+            _logger = logger;
         }
 
         /// <summary>
@@ -94,7 +92,6 @@ namespace IsraelHiking.API.Services
             {
                 _logger.Error(ex.ToString());
             }
-
         }
 
         private async Task FetchOsmFile(string osmFilePath)
@@ -231,26 +228,26 @@ namespace IsraelHiking.API.Services
                     var wayToMergeTo =
                         mergedWays.FirstOrDefault(
                             mw =>
-                                mw.Nodes.Last() == wayToMerge.Nodes.First() ||
-                                mw.Nodes.First() == wayToMerge.Nodes.Last() ||
-                                mw.Nodes.First() == wayToMerge.Nodes.First() ||
-                                mw.Nodes.Last() == wayToMerge.Nodes.Last());
+                                mw.Nodes.Last().Id == wayToMerge.Nodes.First().Id ||
+                                mw.Nodes.First().Id == wayToMerge.Nodes.Last().Id ||
+                                mw.Nodes.First().Id == wayToMerge.Nodes.First().Id ||
+                                mw.Nodes.Last().Id == wayToMerge.Nodes.Last().Id);
                     if (wayToMergeTo == null)
                     {
                         continue;
                     }
-                    if (wayToMerge.Nodes.First() == wayToMergeTo.Nodes.First() ||
-                        wayToMerge.Nodes.Last() == wayToMergeTo.Nodes.Last())
+                    if (wayToMerge.Nodes.First().Id == wayToMergeTo.Nodes.First().Id ||
+                        wayToMerge.Nodes.Last().Id == wayToMergeTo.Nodes.Last().Id)
                     {
                         wayToMerge.Nodes.Reverse();
                     }
                     var nodes = wayToMerge.Nodes;
-                    if (nodes.Last() == wayToMergeTo.Nodes.First())
+                    if (nodes.Last().Id == wayToMergeTo.Nodes.First().Id)
                     {
                         nodes.Remove(nodes.Last());
                         wayToMergeTo.Nodes.InsertRange(0, nodes);
                     }
-                    else if (nodes.First() == wayToMergeTo.Nodes.Last())
+                    else if (nodes.First().Id == wayToMergeTo.Nodes.Last().Id)
                     {
                         nodes.Remove(nodes.First());
                         wayToMergeTo.Nodes.AddRange(nodes);

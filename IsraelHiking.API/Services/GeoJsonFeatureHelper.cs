@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using GeoJSON.Net.Feature;
 using GeoJSON.Net.Geometry;
@@ -26,6 +27,7 @@ namespace IsraelHiking.API.Services
         }
     }
 
+    [ExcludeFromCodeCoverage]
     public static class GeoJsonFeatureHelper
     {
         private static readonly List<PropertiesData> Relations = new List<PropertiesData>
