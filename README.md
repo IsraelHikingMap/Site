@@ -3,6 +3,7 @@ This repository holds all the files that the site needs in order to run.
 
 [![Build status](https://ci.appveyor.com/api/projects/status/38up550uh57s8khw/branch/master?svg=true)](https://ci.appveyor.com/project/HarelM/site/branch/master)
 [![Test status](http://teststatusbadge.azurewebsites.net/api/status/HarelM/site)](https://ci.appveyor.com/project/HarelM/site)
+[![Coverage Status](https://coveralls.io/repos/github/IsraelHikingMap/Site/badge.svg?branch=master)](https://coveralls.io/github/IsraelHikingMap/Site?branch=master)
 
 # Technology stack
 The technology stack of this site is base on the following frameworks:
@@ -25,7 +26,7 @@ The architecture is based heavily on AngularJS:
 * directives - folder for all the directives.
 * scripts - third level javascipt libraries used in this project.
 * services - this layer hold the lower level data handling.
- * drawing - where the drawing markers and routes logic is
+ * layers - where the layer logic is - POI, route, wiki, layersService
  * elevation - elevation services to know what altitude a point has
  * parsers - parses files and converts them form string to data model objects and back
  * routers - handles the routing - currently there are 4 routers - hike, bike, fourbyfour and none.
@@ -36,6 +37,7 @@ The architecture is based heavily on AngularJS:
 The architecture is based on layers
 * Contollers - the top most layer to catch all the requests
 * Services - other logic used by controllers
+* Converters - converters logic between types of geo structures
 * DataAccessInterfaces - a slim layer to decouple business logic from data access
 * DataAccess - database, file system and network request are processed in this layer
 * Updater will be discussed below.  
