@@ -107,7 +107,6 @@
     <Content Include="controllers\SearchController.js" />
     <Content Include="controllers\ShareController.js" />
     <Content Include="directives\DisableMapMovementDirective.js" />
-    <Content Include="directives\DraggableMovableDirective.js" />
     <Content Include="directives\SyncFocusWithDirective.js" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
@@ -123,15 +122,12 @@
     <Content Include="scripts\angular-file-saver.bundle.js" />
     <Content Include="scripts\angular-local-storage.js" />
     <Content Include="scripts\angular-mocks.js" />
-    <Content Include="scripts\angular-strap.js" />
-    <Content Include="scripts\angular-strap.tpl.js" />
     <Content Include="scripts\angular-toastr.tpls.js" />
     <Content Include="scripts\angular.js" />
     <Content Include="scripts\Blob.js" />
     <Content Include="scripts\bootstrap.js" />
     <Content Include="scripts\FileSaver.js" />
     <Content Include="scripts\google-analytics.js" />
-    <Content Include="scripts\interact.js" />
     <Content Include="scripts\jquery.js" />
     <Content Include="scripts\L.Control.Locate.js" />
     <Content Include="scripts\leaflet-ant-path.js" />
@@ -144,6 +140,7 @@
     <Content Include="scripts\ng-google-chart.js" />
     <Content Include="scripts\osm_geojson.js" />
     <Content Include="scripts\rzslider.js" />
+    <Content Include="scripts\ui-bootstrap-tpls.js" />
     <Content Include="scripts\webcomponents.js" />
     <Content Include="services\layers\IDrawingLayer.js" />
     <Content Include="services\layers\poilayers\HoverHandlerPoi.js" />
@@ -248,10 +245,10 @@
     <TypeScriptCompile Include="controllers\ShareController.ts" />
     <TypeScriptCompile Include="controllers\ZoomController.ts" />
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
-    <TypeScriptCompile Include="directives\DraggableMovableDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="Oruxmaps.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\angular-ui-bootstrap\angular-ui-bootstrap.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-component-router.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-cookies.d.ts" />

@@ -1,8 +1,8 @@
 ﻿namespace IsraelHiking {
     export var app = angular.module("IsraelHiking", [
-        "ngFileUpload", "mgcrea.ngStrap", "LocalStorageModule",
+        "ngFileUpload", "LocalStorageModule",
         "angular-loading-bar", "googlechart", "ngAnimate",
-        "toastr", "ngFileSaver", "rzModule"]);
+        "toastr", "ngFileSaver", "rzModule", "ui.bootstrap"]);
 
     L.Icon.Default.imagePath = "content/images/";
 
@@ -48,7 +48,6 @@
     
     // Directives:
     app.directive(Strings.Directives.syncFocusWith, () => new Directives.SyncFocusWithDirective());
-    app.directive(Strings.Directives.draggableMovable, [Strings.Angular.window, ($window: angular.IWindowService) => new Directives.DraggableMovableDirective($window)]);
     app.directive(Strings.Directives.disableMapMovement, [Strings.Services.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
     app.directive(Strings.Directives.markerPopup, () => ({
         controller: Controllers.MarkerPopupController,

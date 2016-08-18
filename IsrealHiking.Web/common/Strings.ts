@@ -48,7 +48,6 @@
 
     export namespace Directives {
         export const syncFocusWith = "syncFocusWith";
-        export const draggableMovable = "draggableMovable";
         export const disableMapMovement = "disableMapMovement";
         export const markerPopup = "markerPopup";
         export const routePointPopup = "routePointPopup";

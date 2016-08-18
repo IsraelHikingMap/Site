@@ -7,22 +7,21 @@
     "angular-mocks": "*",
     "angular-file-saver": "*",
     "angular-local-storage": "*",
-    "angular-strap": "*",
     "angular-toastr": "*",
     "angular-google-chart": "*",
     "angular-loading-bar": "*",
     "angularjs-slider": "*",
+    "angular-bootstrap": "*",
     "bootstrap": "*",
     "startbootstrap-simple-sidebar": "*",
     "jquery": "*",
     "lodash": "*",
     "ng-file-upload": "*",
     "font-awesome": "*",
-    "interact": "*",
     "leaflet": "*",
     "Leaflet.label": "*",
     "leaflet.locatecontrol": "*",
-    "leaflet-ant-path": "*" 
+    "leaflet-ant-path": "*"
   },
   "overrides": {
     "bootstrap": {

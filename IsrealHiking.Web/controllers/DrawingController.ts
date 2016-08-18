@@ -1,5 +1,6 @@
 ﻿namespace IsraelHiking.Controllers {
     export interface IDrawingScope extends angular.IScope {
+        isStatisticsOpen: boolean;
         clear(e: Event): void;
         setEditMode(editMode: string, e: Event): void;
         editMode: Services.Layers.EditMode;
@@ -7,27 +8,23 @@
         getRoutingType(): Common.RoutingType;
         undo(e: Event): void;
         isUndoDisbaled(): boolean;
-        openStatistics(e: Event): void;
-        isStatisticsOpen(): boolean;
     }
 
-    export class DrawingController extends BaseMapControllerWithToolTip {
+    export class DrawingController extends BaseMapController {
         private localStorageService: angular.local.storage.ILocalStorageService;
         private layersService: Services.Layers.LayersService;
-        private routeStatisticsTooltip;
         private static ESCAPE_KEYCODE = 27;
 
         constructor($scope: IDrawingScope,
-            $tooltip,
             $window: angular.IWindowService,
             localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService) {
-            super(mapService, $tooltip);
+            super(mapService);
             this.localStorageService = localStorageService;
             this.layersService = layersService;
-            this.routeStatisticsTooltip = null;
 
+            $scope.isStatisticsOpen = false;
             $scope.editMode = Services.Layers.EditModeString.none;
 
             this.layersService.routeChangedEvent.addListener(() => {
@@ -104,21 +101,6 @@
                 return layer != null ? layer.isUndoDisbaled() : true;
             };
 
-            $scope.openStatistics = (e: Event) => {
-                this.suppressEvents(e);
-                if (this.routeStatisticsTooltip != null || this.layersService.getSelectedRoute() == null) {
-                    return;
-                }
-                var newScope = $scope.$new() as IRouteStatisticsScope;
-                var controller = new RouteStatisticsController(newScope, this.layersService, mapService); // updates the new scope
-
-                this.routeStatisticsTooltip = this.createToolTip(e.target, "controllers/routeStatisticsTooltip.html", "Route Statistics", newScope);
-                this.routeStatisticsTooltip.$promise.then(this.routeStatisticsTooltip.show);
-            }
-
-            $scope.isStatisticsOpen = () => {
-                return this.routeStatisticsTooltip != null && this.routeStatisticsTooltip.$isShown;
-            }
 
             angular.element($window).bind("keydown", (e: JQueryEventObject) => {
                 if (this.layersService.getSelectedRoute() == null) {

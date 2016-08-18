@@ -12,7 +12,7 @@
             <span>{{baseLayer.key}}</span>
         </div>
         <div class="col-xs-3" ng-show="advanced && baseLayer.isEditable">
-            <span class="pull-right" ng-click="editBaseLayer(baseLayer, $event)" bs-tooltip="'Base layer properties'"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
+            <span class="pull-right" ng-click="editBaseLayer(baseLayer, $event)" uib-tooltip="Base layer properties" tooltip-placement="left"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
         </div>
     </div>
 </div>
@@ -21,7 +21,7 @@
         <span>Add Base Layer</span>
     </div>
     <div class="col-xs-3">
-        <span class="pull-right" bs-tooltip="'Add Base Layer'"><i class="fa fa-plus"></i></span>
+        <span class="pull-right" uib-tooltip="Add Base Layer" tooltip-placement="left"><i class="fa fa-plus"></i></span>
     </div>
 </div>
 <hr class="divider" />
@@ -35,7 +35,7 @@
             <span>{{overlay.key}}</span>
         </div>
         <div class="col-xs-3" ng-show="advanced && overlay.isEditable">
-            <span class="pull-right" ng-click="editOverlay(overlay, $event)" bs-tooltip="'Overlay properties'"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
+            <span class="pull-right" ng-click="editOverlay(overlay, $event)" uib-tooltip="Overlay properties" tooltip-placement="left"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
         </div>
     </div>
 </div>
@@ -45,7 +45,7 @@
         <span>Add Overlay</span>
     </div>
     <div class="col-xs-3">
-        <span class="pull-right" bs-tooltip="'Add Overlay'"><i class="fa fa-plus"></i></span>
+        <span class="pull-right" uib-tooltip="Add Overlay" tooltip-placement="left"><i class="fa fa-plus"></i></span>
     </div>
 </div>
 <hr class="divider" />
@@ -61,15 +61,15 @@
             <span ng-class="'fg-' + getRouteColorName(route)">{{getRouteName(route)}}</span>
         </div>
         <div class="col-xs-3">
-            <span class="pull-right" ng-click="editRoute(getRouteName(route), $event)" bs-tooltip="'Route properties'"><i class="fa fa-lg fa-wrench"></i></span>
+            <span class="pull-right" ng-click="editRoute(getRouteName(route), $event)" uib-tooltip="Route properties" tooltip-placement="left"><i class="fa fa-lg fa-wrench"></i></span>
         </div>
     </div>
 </div>
 <div class="row add cursor-pointer" ng-click="addRoute($event)" ng-show="advanced">
     <div class="col-xs-offset-2 col-xs-7">
-        <span  >Add Route</span>
+        <span>Add Route</span>
     </div>
     <div class="col-xs-3">
-        <span class="pull-right" bs-tooltip="'Add Route'"><i class="fa fa-plus"></i></span>
+        <span class="pull-right" uib-tooltip="Add Route" tooltip-placement="left"><i class="fa fa-plus"></i></span>
     </div>
 </div>

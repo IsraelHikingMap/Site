@@ -1,7 +1,11 @@
 ﻿.tooltip-statistics {
+    background: black;
+    position: absolute;
+    width: 300px;
+    overflow: hidden;
+    border-radius: 10px;
     min-width: 300px;
-    max-width: none;
-    width: 200px;
+    min-height: 200px;
 }
 
 .axis text {
