@@ -27,7 +27,7 @@
         private static SHOW_ADVANCED_KEY = "showAdvancedLayerControl";
 
         constructor($scope: ILayersScope,
-            $modal,
+            $uibModal: angular.ui.bootstrap.IModalService,
             localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService,
@@ -43,40 +43,38 @@
             $scope.addBaseLayer = (e: Event) => {
                 var newScope = $scope.$new() as LayerProperties.ILayerBaseScope;
                 var controller = new LayerProperties.BaseLayerAddController(newScope, mapService, layersService, toastr);
-                this.showLayerModal(newScope, $modal, e);
+                this.openLayerModal(newScope, $uibModal, e);
             }
 
             $scope.editBaseLayer = (layer: Services.Layers.IBaseLayer, e: Event) => {
                 var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.Layers.IBaseLayer>;
                 var controller = new LayerProperties.BaseLayerEditController(newScope, mapService, layersService, layer, toastr);
-                this.showLayerModal(newScope, $modal, e);
+                this.openLayerModal(newScope, $uibModal, e);
             }
 
             $scope.addOverlay = (e: Event) => {
                 var newScope = $scope.$new() as LayerProperties.ILayerBaseScope;
                 var controller = new LayerProperties.OverlayAddController(newScope, mapService, layersService, toastr);
-                this.showLayerModal(newScope, $modal, e);
+                this.openLayerModal(newScope, $uibModal, e);
             }
 
             $scope.editOverlay = (layer: Services.Layers.IOverlay, e: Event) => {
                 var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.Layers.IOverlay>;
                 var controller = new LayerProperties.OverlayEditController(newScope, mapService, layersService, layer, toastr);
-                this.showLayerModal(newScope, $modal, e);
+                this.openLayerModal(newScope, $uibModal, e);
             }
 
             $scope.addRoute = (e: Event) => {
                 var routePropertiesScope = $scope.$new() as RouteProperties.IRouteAddScope;
                 var routeAddController = new RouteProperties.RouteAddController(routePropertiesScope, localStorageService, mapService, layersService, routeLayerFactory, toastr);
-                var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
-                modal.$promise.then(modal.show);
+                this.openRoutePropertiesModal(routePropertiesScope, $uibModal);
                 this.suppressEvents(e);
             }
 
             $scope.editRoute = (routeName: string, e: Event) => {
                 var routePropertiesScope = <RouteProperties.IRouteUpdateScope>$scope.$new();
                 var routeUpdateController = new RouteProperties.RouteUpdateController(routePropertiesScope, localStorageService, mapService, layersService, fileService, toastr, routeName);
-                var modal = this.createRoutePropertiesModal(routePropertiesScope, $modal);
-                modal.$promise.then(modal.show);
+                this.openRoutePropertiesModal(routePropertiesScope, $uibModal);
                 this.suppressEvents(e);
             }
 
@@ -123,23 +121,18 @@
             }
         }
 
-        private createRoutePropertiesModal = (routePropertiesScope: RouteProperties.IRouteBaseScope, $modal): any => {
-            return $modal({
-                title: "Route Properties",
+        private openRoutePropertiesModal = (routePropertiesScope: RouteProperties.IRouteBaseScope, $uibModal: angular.ui.bootstrap.IModalService): void => {
+            $uibModal.open({
                 templateUrl: "controllers/RouteProperties/routePropertiesModal.html",
-                show: false,
                 scope: routePropertiesScope
             });
         }
 
-        private showLayerModal = ($scope: LayerProperties.ILayerBaseScope, $modal, e: Event) => {
-            var modal = $modal({
-                title: $scope.title,
+        private openLayerModal = ($scope: LayerProperties.ILayerBaseScope, $uibModal: angular.ui.bootstrap.IModalService, e: Event) => {
+            $uibModal.open({
                 templateUrl: "controllers/LayerProperties/layerPropertiesModal.html",
-                show: false,
                 scope: $scope
             });
-            modal.$promise.then(modal.show);
             this.suppressEvents(e);
         }
     }

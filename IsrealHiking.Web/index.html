@@ -75,6 +75,9 @@
         </div>
         <div id="page-content-wrapper" class="full-page">
             <div id="map"></div>
+            <div draggable class="route-statistics-popup">
+                <div route-statistics-popup></div>
+            </div>
         </div>
     </div>
 
@@ -98,7 +101,6 @@
     <script src="scripts/leaflet-ant-path.js"></script>
     <script src="scripts/rzslider.js"></script>
     <script src="scripts/ui-bootstrap-tpls.js"></script>
-    <script src="scripts/fc-window-directive.js"></script>
     <script src="Tiles/LastModified.js"></script>
     <!-- Load common -->
     <script src="common/EventHelper.js"></script>
@@ -142,6 +144,7 @@
     <script src="services/MapService.js"></script>
     <script src="services/SidebarService.js"></script>
     <script src="services/SnappingService.js"></script>
+    <script src="services/RouteStatisticsService.js"></script>
     <!-- Load controllers -->
     <script src="controllers/BaseMapController.js"></script>
     <script src="controllers/DrawingController.js"></script>
@@ -164,6 +167,7 @@
     <script src="controllers/LayerProperties/OverlayEditController.js"></script>
     <script src="controllers/ZoomController.js"></script>
     <!-- Load directives -->
+    <script src="directives/DraggableDirective.js"></script>
     <script src="directives/SyncFocusWithDirective.js"></script>
     <script src="directives/DisableMapMovementDirective.js"></script>
     <!-- Start application -->

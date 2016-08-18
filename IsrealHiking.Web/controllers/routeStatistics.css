@@ -1,31 +1,52 @@
-﻿.tooltip-statistics {
-    background: black;
+﻿.route-statistics-popup {
+    background: #000000;
+    background: rgba(0,0,0,0.3);
     position: absolute;
-    width: 300px;
     overflow: hidden;
-    border-radius: 10px;
-    min-width: 300px;
-    min-height: 200px;
+    color: white;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
-.axis text {
-    fill: white;
+.route-statistics-header {
+    cursor: move;
+    text-align: center;
 }
 
-.axis path {
-    stroke: white !important;
-}
-
-.axis line {
-    stroke: white !important;
+.route-statistics-chart {
+   height: 200px
 }
 
 .chart-tooltip {
-    color:black; 
-    text-align:left;
+    color: black;
+    text-align: left;
     margin: 5px;
 }
 
 .tooltip-inner a {
     color: #79bdf7;
+}
+
+/* Extra Small Devices, Phones */
+@media only screen and (min-width : 480px) {
+    .route-statistics-popup {
+        left: 10%;
+        width: 80%;
+    }
+}
+
+/* Small Devices, Tablets */
+@media only screen and (min-width : 768px) {
+    .route-statistics-popup {
+        left: 6%;
+        width: 88%;
+    }
+}
+
+/* Medium Devices, Desktops */
+@media only screen and (min-width : 992px) {
+    .route-statistics-popup {
+        left: 4%;
+        width: 92%;
+    }
 }

@@ -245,6 +245,7 @@
     <TypeScriptCompile Include="controllers\ShareController.ts" />
     <TypeScriptCompile Include="controllers\ZoomController.ts" />
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
+    <TypeScriptCompile Include="directives\DraggableDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="Oruxmaps.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
@@ -288,6 +289,7 @@
     <TypeScriptCompile Include="services\FileService.ts" />
     <TypeScriptCompile Include="services\IconsService.ts" />
     <TypeScriptCompile Include="services\layers\LayersService.ts" />
+    <TypeScriptCompile Include="services\RouteStatisticsService.ts" />
     <TypeScriptCompile Include="services\search\BaseSearchResultsProvider.ts" />
     <TypeScriptCompile Include="services\search\LocalSearchResultsProvider.ts" />
     <TypeScriptCompile Include="services\search\NominatimSearchResultsProvider.ts" />

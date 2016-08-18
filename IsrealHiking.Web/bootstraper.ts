@@ -10,6 +10,7 @@
     app.service(Strings.Services.mapService, [() => new Services.MapService()]);
     app.service(Strings.Services.parserFactory, [() => new Services.Parsers.ParserFactory()]);
     app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
+    app.service(Strings.Services.routeStatisticsService, [() => new Services.RouteStatisticsService()]);
     app.service(Strings.Services.searchResultsProviderFactory, [Strings.Angular.http, Strings.Angular.q, Strings.Services.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Search.SearchResultsProviderFactory($http, $q, parserFactory)]);
@@ -103,6 +104,12 @@
     app.directive(Strings.Directives.layersSidebar, () => ({
         controller: Controllers.LayersController,
         templateUrl: "controllers/layersSidebar.html"
+    } as angular.IDirective));
+
+    app.directive(Strings.Directives.draggable, [Strings.Angular.document, ($document: angular.IDocumentService) => new Directives.DraggableDirective($document)]);
+    app.directive(Strings.Directives.routeStatisticsPopup, () => ({
+        controller: Controllers.RouteStatisticsController,
+        templateUrl: "controllers/routeStatisticsTooltip.html"
     } as angular.IDirective));
 
     app.run([Strings.Services.googleChartApiPromise, () => {

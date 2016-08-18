@@ -1,6 +1,6 @@
 ﻿namespace IsraelHiking.Controllers {
     export interface IDrawingScope extends angular.IScope {
-        isStatisticsOpen: boolean;
+        
         clear(e: Event): void;
         setEditMode(editMode: string, e: Event): void;
         editMode: Services.Layers.EditMode;
@@ -8,23 +8,27 @@
         getRoutingType(): Common.RoutingType;
         undo(e: Event): void;
         isUndoDisbaled(): boolean;
+        toggleStatistics(): void;
+        isStatisticsOpen(): boolean;
     }
 
     export class DrawingController extends BaseMapController {
         private localStorageService: angular.local.storage.ILocalStorageService;
         private layersService: Services.Layers.LayersService;
+        private routeStatisticsService: Services.RouteStatisticsService;
         private static ESCAPE_KEYCODE = 27;
 
         constructor($scope: IDrawingScope,
             $window: angular.IWindowService,
             localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
-            layersService: Services.Layers.LayersService) {
+            layersService: Services.Layers.LayersService,
+            routeStatisticsService: Services.RouteStatisticsService) {
             super(mapService);
             this.localStorageService = localStorageService;
             this.layersService = layersService;
+            this.routeStatisticsService = routeStatisticsService;
 
-            $scope.isStatisticsOpen = false;
             $scope.editMode = Services.Layers.EditModeString.none;
 
             this.layersService.routeChangedEvent.addListener(() => {
@@ -32,6 +36,14 @@
                     $scope.editMode = (this.layersService.getSelectedRoute() != null) ? this.layersService.getSelectedRoute().getEditMode() : Services.Layers.EditModeString.none;
                 }
             });
+
+            $scope.toggleStatistics = () => {
+                this.routeStatisticsService.toggle();
+            }
+
+            $scope.isStatisticsOpen = () => {
+                return this.routeStatisticsService.isVisible;
+            }
 
             $scope.clear = (e: Event) => {
                 this.suppressEvents(e);

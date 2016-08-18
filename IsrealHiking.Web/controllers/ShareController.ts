@@ -20,11 +20,10 @@
     }
 
     export class ShareController extends BaseMapController {
-        private shareModal;
         private $window: angular.IWindowService;
 
         constructor($scope: IShareScope,
-            $modal,
+            $uibModal: angular.ui.bootstrap.IModalService,
             $http: angular.IHttpService,
             $window:  angular.IWindowService,
             mapService: Services.MapService,
@@ -38,13 +37,6 @@
             $scope.height = 300;
             $scope.size = "Small";
             $scope.isLoading = false;
-
-            this.shareModal = $modal({
-                title: "Share Your Work",
-                templateUrl: "controllers/shareModal.html",
-                show: false,
-                scope: $scope
-            });
 
             $scope.clearShareAddress = () => {
                 $scope.shareAddress = "";
@@ -63,7 +55,10 @@
 
             $scope.openShare = (e: Event) => {
                 $scope.embedText = this.getEmbedText($scope);
-                this.shareModal.$promise.then(this.shareModal.show);
+                $uibModal.open({
+                    templateUrl: "controllers/shareModal.html",
+                    scope: $scope
+                });
                 this.suppressEvents(e);
             }
 

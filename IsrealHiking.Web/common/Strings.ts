@@ -19,6 +19,7 @@
         export const injector = "$injector";
         export const window = "$window";
         export const timeout = "$timeout";
+        export const document = "$document";
     }
 
     export namespace Services {
@@ -40,6 +41,7 @@
         export const elevationProvider = "elevationProvider";
         export const fileSaver = "FileSaver";
         export const sidebarService = "sidebarService";
+        export const routeStatisticsService = "routeStatisticsService";
     }
 
     export namespace Controllers {
@@ -63,6 +65,8 @@
         export const infoSidebar = "infoSidebar";
         export const helpSidebar = "helpSidebar";
         export const layersSidebar = "layersSidebar";
+        export const draggable = "draggable";
+        export const routeStatisticsPopup = "routeStatisticsPopup";
     }
 
     export namespace DrawingEditMode {

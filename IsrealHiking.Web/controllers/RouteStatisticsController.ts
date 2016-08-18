@@ -5,10 +5,12 @@
         loss: string;
         isKmMarkersOn: boolean;
         isShowingKmMarkers(): boolean;
-        toggleKmMarker(): void;
-        onMouseOver(rowIndex: number, colIndex: number);
-        onMouseOut();
         chart: any;
+        toggleKmMarker(): void;
+        onMouseOver(rowIndex: number, colIndex: number): void;
+        onMouseOut(): void;
+        hide(): void;
+        isVisible(): boolean;
     }
 
     export class RouteStatisticsController extends Services.ObjectWithMap {
@@ -19,8 +21,10 @@
         private routeDataChangedEventHandler: (data: {}) => void;
 
         constructor($scope: IRouteStatisticsScope,
+            $rootScope: angular.IRootScopeService,
             layersService: Services.Layers.LayersService,
-            mapService: Services.MapService) {
+            mapService: Services.MapService,
+            routeStatisticsService: Services.RouteStatisticsService) {
             super(mapService);
 
             this.routeLayer = null;
@@ -32,7 +36,6 @@
             this.routeDataChangedEventHandler = ({}) => this.onRouteDataChanged($scope);
 
             $scope.isKmMarkersOn = false;
-
             $scope.onMouseOver = (rowIndex: number) => {
                 var row = $scope.chart.data.rows[rowIndex] as google.visualization.DataObjectRow;
                 this.hoverChartMarker.setLatLng([row.c[2].v, row.c[3].v]);
@@ -52,6 +55,14 @@
             $scope.toggleKmMarker = () => {
                 $scope.isKmMarkersOn = !$scope.isKmMarkersOn;
                 this.updateKmMarkers($scope.isKmMarkersOn);
+            }
+
+            $scope.hide = () => {
+                routeStatisticsService.hide();
+            }
+
+            $scope.isVisible = (): boolean => {
+                return routeStatisticsService.isVisible;
             }
         }
 
@@ -206,14 +217,20 @@
                 } as google.visualization.ChartArea,
                 backgroundColor: { fill: "transparent" },
                 vAxis: {
+                    baselineColor: "white",
+                    textStyle: { color: "white" },
                     title: "Height (m)",
+                    titleTextStyle: {color: "white"},
                     viewWindowMode: "explicit",
                     gridlines: {
                         color: "transparent"
                     } as google.visualization.ChartGridlines
                 } as google.visualization.ChartAxis,
                 hAxis: {
+                    baselineColor: "white",
+                    textStyle: { color: "white" },
                     title: "Distance (Km)",
+                    titleTextStyle: { color: "white" },
                     format: "0.00",
                     gridlines: {
                         color: "transparent"

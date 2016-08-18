@@ -7,7 +7,6 @@ declare namespace L {
     namespace polyline {
         function antPath(latlngs: LatLng[], options: AntPathOptions): L.Polyline;
     }
-    // HM TODO: remove js reference
 }
 
 namespace IsraelHiking.Services.Layers.RouteLayers {

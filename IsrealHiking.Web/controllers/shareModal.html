@@ -1,67 +1,63 @@
-﻿<div class="modal" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header" ng-show="title">
-                <button type="button" class="close" aria-label="Close" ng-click="$hide()"><span aria-hidden="true">&times;</span></button>
-                <h4 class="modal-title" ng-bind="title"></h4>
-            </div>
-            <form class="form-horizontal">
-                <div class="modal-body">
-                    <div class="form-group" ng-hide="shareAddress">
-                        <label class="control-label col-md-8" title="Generate a URL to share with your friends!">Generate a URL to share with your friends!</label>
-                        <div class="col-md-4">
-                            <button class="btn btn-success" ng-click="generateUrl()" ng-disabled="isLoading">GO!</button>
-                        </div>
-                    </div>
-                    <div ng-show="shareAddress">
-                        <div class="form-group">
-                            <a href="{{shareAddress}}" target="_blank" class="col-xs-offset-1 chome-wordwrap-fix">{{shareAddress}}</a>
-                        </div>
-                        <div class="col-xs-offset-1">
-                            <div class="visible-sm visible-xs">
-                                <a ng-href="{{whatappShareAddress}}" class="btn btn-default"><i class="fa fa-whatsapp"></i></a>
-                                <a ng-href="{{facebookShareAddress}}" class="btn btn-default" target="_blank"><i class="fa fa-facebook"></i></a>
-                            </div>
-                            <div class="hidden-sm hidden-xs">
-                                <a ng-href="{{facebookShareAddress}}" class="btn btn-default" target="_blank"><i class="fa fa-facebook"></i></a>
-                            </div>
-                        </div>
-                        <hr />
-                        <div class="form-group">
-                            <label class="control-label col-md-2">Embed Size </label>
-                            <div class="col-md-4">
-                                <select ng-model="size" class="form-control" ng-change="setSize(size)">
-                                    <option>Small</option>
-                                    <option>Medium</option>
-                                    <option>Large</option>
-                                    <option>Custom</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="form-group" ng-show="size == 'Custom'">
-                            <label class="control-label col-md-2">Width</label>
-                            <div class="col-md-4">
-                                <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)" />
-                            </div>
-                            <label class="control-label col-md-2">Height</label>
-                            <div class="col-md-4">
-                                <input type="number" ng-model="height" class="form-control" ng-change="updateEmbedText(width, height)" />
-                            </div>
-                        </div>
-                        <p class="col-md-offset-2 col-md-10">Copy and paste the code below in order to show this map on your webpage.</p>
-                        <div class="form-group">
-                            <label class="control-label col-md-2">HTML</label>
-                            <div class="col-md-10">
-                                <textarea rows="3" class="form-control" ng-model="embedText" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-warning" ng-show="shareAddress" ng-click="clearShareAddress()">Clear</button>
-                    <button type="button" class="btn btn-default" ng-click="$hide()">Close</button>
-                </div>
-            </form>
-        </div>
+﻿<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="$close()"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Share Your Work</h4>
     </div>
+    <form class="form-horizontal">
+        <div class="modal-body">
+            <div class="form-group" ng-hide="shareAddress">
+                <label class="control-label col-md-8" title="Generate a URL to share with your friends!">Generate a URL to share with your friends!</label>
+                <div class="col-md-4">
+                    <button class="btn btn-success" ng-click="generateUrl()" ng-disabled="isLoading">GO!</button>
+                </div>
+            </div>
+            <div ng-show="shareAddress">
+                <div class="form-group">
+                    <a href="{{shareAddress}}" target="_blank" class="col-xs-offset-1 chome-wordwrap-fix">{{shareAddress}}</a>
+                </div>
+                <div class="col-xs-offset-1">
+                    <div class="visible-sm visible-xs">
+                        <a ng-href="{{whatappShareAddress}}" class="btn btn-default"><i class="fa fa-whatsapp"></i></a>
+                        <a ng-href="{{facebookShareAddress}}" class="btn btn-default" target="_blank"><i class="fa fa-facebook"></i></a>
+                    </div>
+                    <div class="hidden-sm hidden-xs">
+                        <a ng-href="{{facebookShareAddress}}" class="btn btn-default" target="_blank"><i class="fa fa-facebook"></i></a>
+                    </div>
+                </div>
+                <hr />
+                <div class="form-group">
+                    <label class="control-label col-md-2">Embed Size </label>
+                    <div class="col-md-4">
+                        <select ng-model="size" class="form-control" ng-change="setSize(size)">
+                            <option>Small</option>
+                            <option>Medium</option>
+                            <option>Large</option>
+                            <option>Custom</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group" ng-show="size == 'Custom'">
+                    <label class="control-label col-md-2">Width</label>
+                    <div class="col-md-4">
+                        <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)" />
+                    </div>
+                    <label class="control-label col-md-2">Height</label>
+                    <div class="col-md-4">
+                        <input type="number" ng-model="height" class="form-control" ng-change="updateEmbedText(width, height)" />
+                    </div>
+                </div>
+                <p class="col-md-offset-2 col-md-10">Copy and paste the code below in order to show this map on your webpage.</p>
+                <div class="form-group">
+                    <label class="control-label col-md-2">HTML</label>
+                    <div class="col-md-10">
+                        <textarea rows="3" class="form-control" ng-model="embedText" />
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button type="button" class="btn btn-warning" ng-show="shareAddress" ng-click="clearShareAddress()">Clear</button>
+            <button type="button" class="btn btn-default" ng-click="$close()">Close</button>
+        </div>
+    </form>
 </div>
