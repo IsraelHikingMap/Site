@@ -1,6 +1,6 @@
 ﻿<div class="row">
     <div class="col-xs-2">
-        <button class="btn btn-xs btn-warning" ng-click="toggleAdvanced($event)" title="Toggle advanced settings" ng-class="{'active': advanced }"><i class="fa fa-gear"></i></button>
+        <button class="btn btn-xs btn-warning" ng-click="toggleAdvanced($event)" uib-tooltip="Toggle advanced settings" tooltip-placement="right" ng-class="{'active': advanced }"><i class="fa fa-gear"></i></button>
     </div>
 </div>
 <div ng-repeat="baseLayer in baseLayers">

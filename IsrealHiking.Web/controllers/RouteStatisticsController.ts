@@ -6,13 +6,13 @@
         isKmMarkersOn: boolean;
         isShowingKmMarkers(): boolean;
         chart: any;
-        toggleKmMarker(): void;
+        toggleKmMarker($event: Event): void;
         onMouseOver(rowIndex: number, colIndex: number): void;
         onMouseOut(): void;
-        hide(): void;
+        hide($event: Event): void;
     }
 
-    export class RouteStatisticsController extends Services.ObjectWithMap {
+    export class RouteStatisticsController extends BaseMapController {
 
         private routeLayer: Services.Layers.RouteLayers.RouteLayer;
         private hoverChartMarker: L.Marker;
@@ -52,12 +52,14 @@
                 this.routeChanged($scope, layersService);
             });
 
-            $scope.toggleKmMarker = () => {
+            $scope.toggleKmMarker = ($event: Event) => {
+                this.suppressEvents($event);
                 $scope.isKmMarkersOn = !$scope.isKmMarkersOn;
                 this.updateKmMarkers($scope.isKmMarkersOn);
             }
 
-            $scope.hide = () => {
+            $scope.hide = ($event: Event) => {
+                this.suppressEvents($event);
                 routeStatisticsService.hide();
             }
 

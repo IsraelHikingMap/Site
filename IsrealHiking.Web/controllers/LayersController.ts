@@ -32,50 +32,67 @@
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService,
             fileService: Services.FileService,
-            sidebarService: Services.SidebarService,
-            routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory,
-            toastr: Toastr) {
+            sidebarService: Services.SidebarService) {
             super(mapService);
             $scope.baseLayers = layersService.baseLayers;
             $scope.overlays = layersService.overlays;
             $scope.routes = layersService.routes;
             $scope.advanced = localStorageService.get(LayersController.SHOW_ADVANCED_KEY) ? true : false;
             $scope.addBaseLayer = (e: Event) => {
-                var newScope = $scope.$new() as LayerProperties.ILayerBaseScope;
-                var controller = new LayerProperties.BaseLayerAddController(newScope, mapService, layersService, toastr);
-                this.openLayerModal(newScope, $uibModal, e);
+                this.suppressEvents(e);
+                $uibModal.open({
+                    templateUrl: "controllers/LayerProperties/layerPropertiesModal.html",
+                    controller: LayerProperties.BaseLayerAddController
+                });
             }
 
             $scope.editBaseLayer = (layer: Services.Layers.IBaseLayer, e: Event) => {
-                var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.Layers.IBaseLayer>;
-                var controller = new LayerProperties.BaseLayerEditController(newScope, mapService, layersService, layer, toastr);
-                this.openLayerModal(newScope, $uibModal, e);
+                this.suppressEvents(e);
+                let newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.Layers.IBaseLayer>;
+                newScope.layer = layer;
+                $uibModal.open({
+                    templateUrl: "controllers/LayerProperties/layerPropertiesModal.html",
+                    scope: newScope,
+                    controller: LayerProperties.BaseLayerEditController
+                });
             }
 
             $scope.addOverlay = (e: Event) => {
-                var newScope = $scope.$new() as LayerProperties.ILayerBaseScope;
-                var controller = new LayerProperties.OverlayAddController(newScope, mapService, layersService, toastr);
-                this.openLayerModal(newScope, $uibModal, e);
+                this.suppressEvents(e);
+                $uibModal.open({
+                    templateUrl: "controllers/LayerProperties/layerPropertiesModal.html",
+                    controller: LayerProperties.OverlayAddController
+                });
             }
 
             $scope.editOverlay = (layer: Services.Layers.IOverlay, e: Event) => {
-                var newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.Layers.IOverlay>;
-                var controller = new LayerProperties.OverlayEditController(newScope, mapService, layersService, layer, toastr);
-                this.openLayerModal(newScope, $uibModal, e);
+                this.suppressEvents(e);
+                let newScope = $scope.$new() as LayerProperties.ILayerBaseEditScope<Services.Layers.IOverlay>;
+                newScope.layer = layer;
+                $uibModal.open({
+                    templateUrl: "controllers/LayerProperties/layerPropertiesModal.html",
+                    scope: newScope,
+                    controller: LayerProperties.OverlayEditController
+                });
             }
 
             $scope.addRoute = (e: Event) => {
-                var routePropertiesScope = $scope.$new() as RouteProperties.IRouteAddScope;
-                var routeAddController = new RouteProperties.RouteAddController(routePropertiesScope, localStorageService, mapService, layersService, routeLayerFactory, toastr);
-                this.openRoutePropertiesModal(routePropertiesScope, $uibModal);
                 this.suppressEvents(e);
+                $uibModal.open({
+                    templateUrl: "controllers/RouteProperties/routePropertiesModal.html",
+                    controller: RouteProperties.RouteAddController
+                });
             }
 
             $scope.editRoute = (routeName: string, e: Event) => {
-                var routePropertiesScope = <RouteProperties.IRouteUpdateScope>$scope.$new();
-                var routeUpdateController = new RouteProperties.RouteUpdateController(routePropertiesScope, localStorageService, mapService, layersService, fileService, toastr, routeName);
-                this.openRoutePropertiesModal(routePropertiesScope, $uibModal);
+                var routePropertiesScope = $scope.$new() as RouteProperties.IRouteUpdateScope;
                 this.suppressEvents(e);
+                routePropertiesScope.name = routeName;
+                $uibModal.open({
+                    templateUrl: "controllers/RouteProperties/routePropertiesModal.html",
+                    controller: RouteProperties.RouteUpdateController,
+                    scope: routePropertiesScope
+                });
             }
 
             $scope.selectBaseLayer = (baseLayer: Services.Layers.IBaseLayer, e: Event) => {
@@ -119,21 +136,6 @@
             $scope.isRouteSelected = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
                 return layersService.getSelectedRoute() === routeLayer;
             }
-        }
-
-        private openRoutePropertiesModal = (routePropertiesScope: RouteProperties.IRouteBaseScope, $uibModal: angular.ui.bootstrap.IModalService): void => {
-            $uibModal.open({
-                templateUrl: "controllers/RouteProperties/routePropertiesModal.html",
-                scope: routePropertiesScope
-            });
-        }
-
-        private openLayerModal = ($scope: LayerProperties.ILayerBaseScope, $uibModal: angular.ui.bootstrap.IModalService, e: Event) => {
-            $uibModal.open({
-                templateUrl: "controllers/LayerProperties/layerPropertiesModal.html",
-                scope: $scope
-            });
-            this.suppressEvents(e);
         }
     }
 } 

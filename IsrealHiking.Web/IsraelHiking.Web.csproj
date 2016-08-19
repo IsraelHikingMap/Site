@@ -91,6 +91,7 @@
     <Content Include="controllers\search.css" />
     <Content Include="controllers\zoom.html" />
     <Content Include="controllers\ZoomController.js" />
+    <Content Include="directives\DraggableDirective.js" />
     <Content Include="index.css" />
     <Content Include="controllers\InfoHelpController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerAddController.js" />
@@ -160,6 +161,7 @@
     <Content Include="services\layers\routelayers\RouteStateReadOnly.js" />
     <Content Include="services\layers\routelayers\UndoHandler.js" />
     <Content Include="services\layers\WikiMarkersLayer.js" />
+    <Content Include="services\RouteStatisticsService.js" />
     <Content Include="services\search\BaseSearchResultsProvider.js" />
     <Content Include="services\search\LocalSearchResultsProvider.js" />
     <Content Include="services\search\NominatimSearchResultsProvider.js" />
@@ -206,7 +208,7 @@
     <Content Include="controllers\drawing.html" />
     <Content Include="controllers\search.html" />
     <Content Include="controllers\share.html" />
-    <Content Include="controllers\routeStatisticsTooltip.html" />
+    <Content Include="controllers\routeStatistics.html" />
     <Content Include="controllers\RouteProperties\routePropertiesModal.html" />
     <Content Include="controllers\LayerProperties\layerPropertiesModal.html" />
     <Content Include="controllers\infoHelp.html" />

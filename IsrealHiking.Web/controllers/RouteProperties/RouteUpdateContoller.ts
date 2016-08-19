@@ -1,5 +1,6 @@
 ﻿namespace IsraelHiking.Controllers.RouteProperties {
     export interface IRouteUpdateScope extends IRouteBaseScope {
+        name: string;
         isReversed: boolean;
         toggleVisibility(e: Event): void;
         deleteRoute(e: Event): void;
@@ -15,10 +16,9 @@
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService,
             fileService: Services.FileService,
-            toastr: Toastr,
-            name: string) {
+            toastr: Toastr) {
             super($scope, mapService);
-            let routeLayer = layersService.getRouteByName(name);
+            let routeLayer = layersService.getRouteByName($scope.name);
             $scope.routeProperties = angular.copy(routeLayer.getRouteProperties());
             $scope.isNew = false;
             $scope.isReversed = false;

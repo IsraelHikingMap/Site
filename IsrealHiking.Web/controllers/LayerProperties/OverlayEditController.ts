@@ -3,16 +3,14 @@
         constructor($scope: ILayerBaseEditScope<Services.Layers.IOverlay>,
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService,
-            layer: Services.Layers.IOverlay,
             toastr: Toastr) {
             super($scope, mapService, layersService, toastr);
             $scope.title = "Overlay Properties";
             $scope.isNew = false;
-            $scope.layer = layer;
-            $scope.key = layer.key;
-            $scope.maxZoom = layer.maxZoom;
-            $scope.minZoom = layer.minZoom;
-            $scope.address = layer.address;
+            $scope.key = $scope.layer.key;
+            $scope.maxZoom = $scope.layer.maxZoom;
+            $scope.minZoom = $scope.layer.minZoom;
+            $scope.address = $scope.layer.address;
 
             $scope.removeLayer = (e: Event) => {
                 layersService.removeOverlay($scope.layer);

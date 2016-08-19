@@ -1,36 +1,50 @@
-﻿namespace IsraelHiking.Directives {
+﻿declare class DocumentTouch {
+};
+
+namespace IsraelHiking.Directives {
+    export interface IDraggableScope {
+        selector: string;
+    }
+
     export class DraggableDirective implements angular.IDirective {
         constructor($document: angular.IDocumentService) {
             return {
-                link: (scope, element, attr) => {
+                link: ($scope: IDraggableScope, element: JQuery, attr) => {
                     var startX = 0, startY = 0, x = 0, y = 0;
-
-                    //element.css({
-                    //    position: 'absolute',
-                    //    cursor: 'pointer'
-                    //});
-
-                    element.on('mousedown', event => {
+                    element.on("touchstart mousedown", ".route-statistics-header", event => {
+                        // HM TODO: fix touch screen exit and km markers
                         // Prevent default dragging of selected content
                         event.preventDefault();
-                        startX = event.pageX - x;
-                        startY = event.pageY - y;
-                        $document.on('mousemove', mousemove);
-                        $document.on('mouseup', mouseup);
+                        let pageX = (event.type.toLowerCase() === "mousedown")
+                            ? event.pageX
+                            : (event.originalEvent as any).touches[0].pageX;
+                        let pageY = (event.type.toLowerCase() === "mousedown")
+                            ? event.pageY
+                            : (event.originalEvent as any).touches[0].pageY;
+                        startX = pageX - x;
+                        startY = pageY - y;
+                        $document.on("touchmove mousemove", mousemove);
+                        $document.on("touchend mouseup", mouseup);
                     });
 
                     function mousemove(event) {
-                        y = event.pageY - startY;
-                        x = event.pageX - startX;
+                        let pageX = (event.type.toLowerCase() === "mousemove")
+                            ? event.pageX
+                            : (event.originalEvent as any).touches[0].pageX;
+                        let pageY = (event.type.toLowerCase() === "mousemove")
+                            ? event.pageY
+                            : (event.originalEvent as any).touches[0].pageY;
+                        x = pageX - startX;
+                        y = pageY - startY;
                         element.css({
-                            top: y + 'px',
-                            left: x + 'px'
+                            top: y + "px",
+                            left: x + "px"
                         });
                     }
 
                     function mouseup() {
-                        $document.off('mousemove', mousemove);
-                        $document.off('mouseup', mouseup);
+                        $document.off("touchmove mousemove", mousemove);
+                        $document.off("touchend mouseup", mouseup);
                     }
                 }
             } as angular.IDirective;
