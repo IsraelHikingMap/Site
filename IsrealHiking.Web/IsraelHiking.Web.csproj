@@ -26,6 +26,7 @@
     <Content Include="common\Strings.js" />
     <Content Include="common\EventHelper.js" />
     <Content Include="common\Urls.js" />
+    <Content Include="content\angular-resizable.css" />
     <Content Include="content\angular-toastr.css" />
     <Content Include="content\bootstrap-theme.min.css" />
     <Content Include="content\bootstrap.min.css" />
@@ -122,6 +123,7 @@
     <Content Include="scripts\angular-file-saver.bundle.js" />
     <Content Include="scripts\angular-local-storage.js" />
     <Content Include="scripts\angular-mocks.js" />
+    <Content Include="scripts\angular-resizable.js" />
     <Content Include="scripts\angular-toastr.tpls.js" />
     <Content Include="scripts\angular.js" />
     <Content Include="scripts\Blob.js" />

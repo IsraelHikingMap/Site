@@ -6,15 +6,24 @@
     color: white;
     padding-left: 10px;
     padding-right: 10px;
+    height: 250px;
+    left: 15%;
+    width: 70%;
 }
 
 .route-statistics-header {
     cursor: move;
-    text-align: center;
+}
+
+.route-statistics-header-title {
+    font-size: large;
 }
 
 .route-statistics-chart {
-   height: 200px
+    position: absolute;
+    top: 50px;
+    bottom: 5px;
+    width: 100%;
 }
 
 .chart-tooltip {
@@ -27,6 +36,25 @@
     color: #79bdf7;
 }
 
+.rg-right span, .rg-left span, .rg-top span, .rg-bottom span {
+    border: 1px solid white;
+}
+
+.rg-right span, .rg-left span {
+    border-width: 0 3px;
+}
+
+.rg-top span, .rg-bottom span {
+    border-width: 3px 0;
+}
+
+.rg-right {
+    margin: 0;
+}
+
+.rg-bottom {
+    margin: 0;
+}
 /* Extra Small Devices, Phones */
 @media only screen and (min-width : 480px) {
     .route-statistics-popup {

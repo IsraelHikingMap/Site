@@ -1,6 +1,6 @@
 ﻿namespace IsraelHiking {
     export var app = angular.module("IsraelHiking", [
-        "ngFileUpload", "LocalStorageModule",
+        "ngFileUpload", "LocalStorageModule", "angularResizable",
         "angular-loading-bar", "googlechart", "ngAnimate",
         "toastr", "ngFileSaver", "rzModule", "ui.bootstrap"]);
 
@@ -43,9 +43,10 @@
             new Services.Layers.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService)]);
 
     app.controller(Strings.Controllers.mainMapController, [Strings.Angular.scope, Strings.Angular.compile, Strings.Services.mapService,
-        Strings.Services.hashService, Strings.Services.sidebarService,
-        ($scope: Controllers.IMainMapScope, $compile: angular.ICompileService, mapService: Services.MapService, hashService: Services.HashService, sidebarService: Services.SidebarService )=>
-            new Controllers.MainMapcontoller($scope, $compile, mapService, hashService, sidebarService)]);
+        Strings.Services.hashService, Strings.Services.sidebarService, Strings.Services.routeStatisticsService,
+        ($scope: Controllers.IMainMapScope, $compile: angular.ICompileService, mapService: Services.MapService,
+            hashService: Services.HashService, sidebarService: Services.SidebarService, routeStatisticsService: Services.RouteStatisticsService) =>
+            new Controllers.MainMapcontoller($scope, $compile, mapService, hashService, sidebarService, routeStatisticsService)]);
     
     // Directives:
     app.directive(Strings.Directives.syncFocusWith, () => new Directives.SyncFocusWithDirective());

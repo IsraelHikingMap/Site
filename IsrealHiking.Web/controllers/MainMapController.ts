@@ -3,6 +3,7 @@
         sidebarService: Services.SidebarService;
         getIsSidebarVisible(): boolean;
         closeSidebar(): void;
+        isRouteStatisticsVisible(): boolean;
     }
 
     export class MainMapcontoller extends BaseMapController {
@@ -12,7 +13,8 @@
             $compile: angular.ICompileService,
             mapService: Services.MapService,
             hashService: Services.HashService,
-            sidebarService: Services.SidebarService) {
+            sidebarService: Services.SidebarService,
+            routeStatisticsService: Services.RouteStatisticsService) {
             super(mapService);
 
             this.map = mapService.map;
@@ -29,6 +31,10 @@
 
             $scope.closeSidebar = () => {
                 sidebarService.hide();
+            }
+
+            $scope.isRouteStatisticsVisible = (): boolean => {
+                return routeStatisticsService.isVisible;
             }
 
             this.map.on("moveend",() => {

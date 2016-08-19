@@ -1,23 +1,32 @@
-﻿<div class="tooltip-statistics" disable-map-movement ng-show="isVisible()">
-    <!--draggable-movable class="tooltip in tooltip-inner tooltip-statistics" ng-show="title"-->
+﻿<div disable-map-movement>
     <div class="sidebar-close">
         <span class="cursor-pointer" aria-label="Close" ng-click="hide()"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
     </div>
     <div>
-        <h4 class="route-statistics-header">Route Statistics</h4>
-        <div>
-            <div google-chart chart="chart" class="route-statistics-chart" agc-on-mouseover="onMouseOver(row, col)" agc-on-mouseout="onMouseOut()"></div>
-            <div class="form-group">
-                <label class="control-label col-md-2 col-xs-3">Length</label>
-                <label class="control-label col-md-2 col-xs-3">{{length}}</label>
-                <label class="control-label col-md-2 col-xs-6">
+        <div class="route-statistics-header row">
+            <div class="col-md-12">
+                <h5>
+                    <span class="route-statistics-header-title">Route Statistics:</span>
+                    Length: {{length}},
+                    Gain: {{gain}},
+                    Loss: {{loss}}
                     <a class="btn btn-default btn-xs" ng-click="toggleKmMarker()" ng-class="{active: isKmMarkersOn}"><i class="fa fa-map-marker"></i></a> Km markers
-                </label>
-                <label class="control-label col-md-2 col-xs-3">Gain</label>
-                <label class="control-label col-md-1 col-xs-3">{{gain}}</label>
-                <label class="control-label col-md-2 col-xs-3">Loss</label>
-                <label class="control-label col-md-1 col-xs-3">{{loss}}</label>
+                </h5>
             </div>
         </div>
+        <div class="route-statistics-chart" google-chart chart="chart" agc-on-mouseover="onMouseOver(row, col)" agc-on-mouseout="onMouseOut()"></div>
+        <!--
+        <div class="route-statistics-footer">
+            <label class="control-label col-md-2 col-xs-3">Length</label>
+            <label class="control-label col-md-2 col-xs-3">{{length}}</label>
+            <label class="control-label col-md-2 col-xs-6">
+                <a class="btn btn-default btn-xs" ng-click="toggleKmMarker()" ng-class="{active: isKmMarkersOn}"><i class="fa fa-map-marker"></i></a> Km markers
+            </label>
+            <label class="control-label col-md-2 col-xs-3">Gain</label>
+            <label class="control-label col-md-1 col-xs-3">{{gain}}</label>
+            <label class="control-label col-md-2 col-xs-3">Loss</label>
+            <label class="control-label col-md-1 col-xs-3">{{loss}}</label>
+        </div>
+        -->
     </div>
 </div>

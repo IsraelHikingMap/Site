@@ -10,7 +10,6 @@
         onMouseOver(rowIndex: number, colIndex: number): void;
         onMouseOut(): void;
         hide(): void;
-        isVisible(): boolean;
     }
 
     export class RouteStatisticsController extends Services.ObjectWithMap {
@@ -21,7 +20,8 @@
         private routeDataChangedEventHandler: (data: {}) => void;
 
         constructor($scope: IRouteStatisticsScope,
-            $rootScope: angular.IRootScopeService,
+            $window: angular.IWindowService,
+            $timeout: angular.ITimeoutService,
             layersService: Services.Layers.LayersService,
             mapService: Services.MapService,
             routeStatisticsService: Services.RouteStatisticsService) {
@@ -61,9 +61,14 @@
                 routeStatisticsService.hide();
             }
 
-            $scope.isVisible = (): boolean => {
-                return routeStatisticsService.isVisible;
-            }
+            $scope.$on("angular-resizable.resizing", () => {
+                $window.dispatchEvent(new Event("resize"));
+            });
+
+            // fixes issue with chart display on firt load.
+            $scope.$watch(() => routeStatisticsService.isVisible, () => {
+                $window.dispatchEvent(new Event("resize"));
+            }, true);
         }
 
         private routeChanged = ($scope: IRouteStatisticsScope, layersService: Services.Layers.LayersService) => {
@@ -157,9 +162,10 @@
 
             var icon = Services.IconsService.createRoundIcon(routeColor);
             this.hoverChartMarker.setIcon(icon);
-    }
+        }
 
         private initializeChart = ($scope: IRouteStatisticsScope) => {
+            let color = "white";
             $scope.chart = {};
             $scope.chart.type = "LineChart";
             $scope.chart.data = {
@@ -217,20 +223,20 @@
                 } as google.visualization.ChartArea,
                 backgroundColor: { fill: "transparent" },
                 vAxis: {
-                    baselineColor: "white",
-                    textStyle: { color: "white" },
+                    baselineColor: color,
+                    textStyle: { color: color },
                     title: "Height (m)",
-                    titleTextStyle: {color: "white"},
+                    titleTextStyle: { color: color },
                     viewWindowMode: "explicit",
                     gridlines: {
                         color: "transparent"
                     } as google.visualization.ChartGridlines
                 } as google.visualization.ChartAxis,
                 hAxis: {
-                    baselineColor: "white",
-                    textStyle: { color: "white" },
+                    baselineColor: color,
+                    textStyle: { color: color },
                     title: "Distance (Km)",
-                    titleTextStyle: { color: "white" },
+                    titleTextStyle: { color: color },
                     format: "0.00",
                     gridlines: {
                         color: "transparent"
