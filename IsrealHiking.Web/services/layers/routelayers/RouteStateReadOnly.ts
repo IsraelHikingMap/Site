@@ -19,12 +19,11 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.initialize();
         }
 
-        private createPolyline(latlngzs: L.LatLng[]) {
+        private addPolyline(latlngzs: L.LatLng[]) {
             let routePathOptions = this.context.route.properties.pathOptions;
             let pathOptions = { delay: "2000", pulseColor: routePathOptions.color, dashArray: "30 10", opacity: routePathOptions.opacity, color: "transparent", weight: routePathOptions.weight } as L.AntPathOptions;
             let polyline = L.polyline.antPath(latlngzs, pathOptions);
-            this.context.map.addLayer(polyline);
-            return polyline;
+            this.readOnlyLayers.addLayer(polyline);
         }
 
         private createStartAndEndMarkers() {
@@ -55,16 +54,25 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 return;
             }
             this.createStartAndEndMarkers();
+            let groupedLatLngs = []; // gourp as many segment in order for the ant path to look smoother
             for (let segment of this.context.route.segments) {
-                segment.polyline = this.createPolyline(segment.latlngzs);
                 segment.routePointMarker = null;
+                segment.polyline = null;
+                if (groupedLatLngs.length === 0) {
+                    groupedLatLngs = segment.latlngzs;
+                    continue;
+                }
+                if (groupedLatLngs[groupedLatLngs.length - 1].equals(segment.latlngzs[0])) {
+                    groupedLatLngs = groupedLatLngs.concat(segment.latlngzs);
+                    continue;
+                }
+                this.addPolyline(groupedLatLngs);
+                groupedLatLngs = segment.latlngzs;
             }
+            let polyLine = this.addPolyline(groupedLatLngs);
         }
 
         public clear() {
-            for (let segment of this.context.route.segments) {
-                this.context.map.removeLayer(segment.polyline);
-            }
             this.readOnlyLayers.clearLayers();
             this.context.map.removeLayer(this.readOnlyLayers);
         }
