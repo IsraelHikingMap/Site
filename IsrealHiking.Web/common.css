@@ -31,6 +31,16 @@ body {
     white-space: nowrap;
 }
 
+.modal-footer .modal-footer-btns {
+    display: inline;
+    white-space: nowrap;
+}
+
+.modal-footer .btn {
+    margin-left: 0 !important;
+    width: 16%;
+}
+
 .cursor-pointer {
     cursor: pointer;
 }
