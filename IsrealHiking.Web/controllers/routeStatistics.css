@@ -36,25 +36,6 @@
     color: #79bdf7;
 }
 
-.rg-right span, .rg-left span, .rg-top span, .rg-bottom span {
-    border: 1px solid white;
-}
-
-.rg-right span, .rg-left span {
-    border-width: 0 3px;
-}
-
-.rg-top span, .rg-bottom span {
-    border-width: 3px 0;
-}
-
-.rg-right {
-    margin: 0;
-}
-
-.rg-bottom {
-    margin: 0;
-}
 /* Extra Small Devices, Phones */
 @media only screen and (min-width : 480px) {
     .route-statistics-popup {

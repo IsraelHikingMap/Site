@@ -26,7 +26,6 @@
     <Content Include="common\Strings.js" />
     <Content Include="common\EventHelper.js" />
     <Content Include="common\Urls.js" />
-    <Content Include="content\angular-resizable.css" />
     <Content Include="content\angular-toastr.css" />
     <Content Include="content\bootstrap-theme.min.css" />
     <Content Include="content\bootstrap.min.css" />
@@ -91,7 +90,8 @@
     <Content Include="controllers\search.css" />
     <Content Include="controllers\zoom.html" />
     <Content Include="controllers\ZoomController.js" />
-    <Content Include="directives\DraggableDirective.js" />
+    <Content Include="directives\DraggableResizable.css" />
+    <Content Include="directives\DraggableResizableDirective.js" />
     <Content Include="index.css" />
     <Content Include="controllers\InfoHelpController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerAddController.js" />
@@ -124,7 +124,6 @@
     <Content Include="scripts\angular-file-saver.bundle.js" />
     <Content Include="scripts\angular-local-storage.js" />
     <Content Include="scripts\angular-mocks.js" />
-    <Content Include="scripts\angular-resizable.js" />
     <Content Include="scripts\angular-toastr.tpls.js" />
     <Content Include="scripts\angular.js" />
     <Content Include="scripts\Blob.js" />
@@ -249,7 +248,7 @@
     <TypeScriptCompile Include="controllers\ShareController.ts" />
     <TypeScriptCompile Include="controllers\ZoomController.ts" />
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
-    <TypeScriptCompile Include="directives\DraggableDirective.ts" />
+    <TypeScriptCompile Include="directives\DraggableResizableDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="Oruxmaps.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />

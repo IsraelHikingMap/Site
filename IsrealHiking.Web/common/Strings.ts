@@ -65,7 +65,7 @@
         export const infoSidebar = "infoSidebar";
         export const helpSidebar = "helpSidebar";
         export const layersSidebar = "layersSidebar";
-        export const draggable = "draggable";
+        export const draggableResizable = "draggableResizable";
         export const routeStatisticsPopup = "routeStatisticsPopup";
     }
 

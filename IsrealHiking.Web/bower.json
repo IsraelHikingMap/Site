@@ -21,8 +21,7 @@
     "leaflet": "*",
     "Leaflet.label": "*",
     "leaflet.locatecontrol": "*",
-    "leaflet-ant-path": "*",
-    "angular-resizable": "*"
+    "leaflet-ant-path": "*"
   },
   "overrides": {
     "bootstrap": {

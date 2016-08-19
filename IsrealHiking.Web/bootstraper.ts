@@ -1,6 +1,6 @@
 ﻿namespace IsraelHiking {
     export var app = angular.module("IsraelHiking", [
-        "ngFileUpload", "LocalStorageModule", "angularResizable",
+        "ngFileUpload", "LocalStorageModule",
         "angular-loading-bar", "googlechart", "ngAnimate",
         "toastr", "ngFileSaver", "rzModule", "ui.bootstrap"]);
 
@@ -107,10 +107,11 @@
         templateUrl: "controllers/layersSidebar.html"
     } as angular.IDirective));
 
-    app.directive(Strings.Directives.draggable, [Strings.Angular.document, ($document: angular.IDocumentService) => new Directives.DraggableDirective($document)]);
+    app.directive(Strings.Directives.draggableResizable, [Strings.Angular.document, Strings.Angular.timeout,
+        ($document: angular.IDocumentService, $timeout: angular.ITimeoutService) => new Directives.DraggableResizableDirective($document, $timeout)]);
     app.directive(Strings.Directives.routeStatisticsPopup, () => ({
         controller: Controllers.RouteStatisticsController,
-        templateUrl: "controllers/routeStatisticsTooltip.html"
+        templateUrl: "controllers/routeStatistics.html"
     } as angular.IDirective));
 
     app.run([Strings.Services.googleChartApiPromise, () => {

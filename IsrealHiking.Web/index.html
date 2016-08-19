@@ -44,11 +44,11 @@
     <link rel="stylesheet" href="content/loading-bar.css" />
     <link rel="stylesheet" href="content/simple-sidebar.css" />
     <link rel="stylesheet" href="content/rzslider.css" />
-    <link rel="stylesheet" href="content/angular-resizable.css" />
     <link rel="stylesheet" href="index.css" />
     <link rel="stylesheet" href="controllers/RouteProperties/routeProperties.css" />
     <link rel="stylesheet" href="controllers/routeStatistics.css" />
-    <link rel="stylesheet" href="controllers/search.css" />
+    <link rel="stylesheet" href="controllers/search.css"/>
+    <link rel="stylesheet" href="directives/DraggableResizable.css" />
     <link rel="stylesheet" href="common.css" type="text/css" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="scripts/jquery.js"></script>
@@ -76,7 +76,7 @@
         </div>
         <div id="page-content-wrapper" class="full-page">
             <div id="map"></div>
-            <div class="route-statistics-popup" draggable resizable r-directions="['bottom', 'right']" ng-show="isRouteStatisticsVisible()">
+            <div class="route-statistics-popup" draggable-resizable directions="['bottom', 'right']" drag-selector="'.route-statistics-header'" ng-show="isRouteStatisticsVisible()">
                 <div route-statistics-popup></div>
             </div>
         </div>
@@ -102,7 +102,6 @@
     <script src="scripts/leaflet-ant-path.js"></script>
     <script src="scripts/rzslider.js"></script>
     <script src="scripts/ui-bootstrap-tpls.js"></script>
-    <script src="scripts/angular-resizable.js"></script>
     <script src="Tiles/LastModified.js"></script>
     <!-- Load common -->
     <script src="common/EventHelper.js"></script>
@@ -169,7 +168,7 @@
     <script src="controllers/LayerProperties/OverlayEditController.js"></script>
     <script src="controllers/ZoomController.js"></script>
     <!-- Load directives -->
-    <script src="directives/DraggableDirective.js"></script>
+    <script src="directives/DraggableResizableDirective.js"></script>
     <script src="directives/SyncFocusWithDirective.js"></script>
     <script src="directives/DisableMapMovementDirective.js"></script>
     <!-- Start application -->
