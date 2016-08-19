@@ -1,19 +1,17 @@
-﻿<div disable-map-movement>
-    <div class="sidebar-close">
-        <span class="cursor-pointer" aria-label="Close" ng-mousedown="hide($event)"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
-    </div>
-    <div>
-        <div class="route-statistics-header row">
-            <div class="col-md-12">
-                <h5>
-                    <span class="route-statistics-header-title">Route Statistics:</span>
-                    Length: {{length}},
-                    Gain: {{gain}},
-                    Loss: {{loss}}
-                    <a class="btn btn-default btn-xs" ng-click="toggleKmMarker($event)" ng-class="{active: isKmMarkersOn}"><i class="fa fa-map-marker"></i></a> Km markers
-                </h5>
-            </div>
+﻿<div class="sidebar-close">
+    <span class="cursor-pointer" aria-label="Close" ng-mousedown="hide($event)"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
+</div>
+<div>
+    <div class="route-statistics-header row">
+        <div class="col-md-12">
+            <h5>
+                <span class="route-statistics-header-title">Route Statistics:</span>
+                Length: {{length}},
+                Gain: {{gain}},
+                Loss: {{loss}}
+                <a class="btn btn-default btn-xs" ng-click="toggleKmMarker($event)" ng-class="{active: isKmMarkersOn}"><i class="fa fa-map-marker"></i></a> Km markers
+            </h5>
         </div>
-        <div class="route-statistics-chart" google-chart chart="chart" agc-on-mouseover="onMouseOver(row, col)" agc-on-mouseout="onMouseOut()"></div>
     </div>
+    <div class="route-statistics-chart" google-chart chart="chart" agc-on-mouseover="onMouseOver(row, col)" agc-on-mouseout="onMouseOut()"></div>
 </div>
