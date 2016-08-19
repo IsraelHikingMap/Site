@@ -17,6 +17,7 @@
         selectRoute(routeLayer: Services.Layers.RouteLayers.RouteLayer, e: Event): void;
         toggleAdvanced(e: Event): void;
         toggleShow(e: Event): void;
+        isVisisble(): boolean;
         getRouteColorName(route: Services.Layers.RouteLayers.RouteLayer):void;
         getRouteName(route: Services.Layers.RouteLayers.RouteLayer): void;
         isRouteVisisble(route: Services.Layers.RouteLayers.RouteLayer): boolean;
@@ -119,6 +120,10 @@
             $scope.toggleShow = (e: Event) => {
                 sidebarService.toggle("layers");
                 this.suppressEvents(e);
+            }
+
+            $scope.isVisisble = (): boolean => {
+                return sidebarService.viewName === "layers";
             }
 
             $scope.getRouteColorName = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {

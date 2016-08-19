@@ -36,6 +36,10 @@
     background: rgba(255,255,255,0.3);
 }
 
+#wrapper.toggled #page-content-wrapper {
+    position: relative;
+}
+
 @media(min-width:768px) {
     #wrapper {
         padding-left: 0;
@@ -59,7 +63,6 @@
     }
 
     #wrapper.toggled #page-content-wrapper {
-        position: relative;
         margin-right: -400px;
     }
 }

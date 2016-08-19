@@ -6580,6 +6580,10 @@ L.DomEvent = {
 
 	// this is a horrible workaround for a bug in Android where a single touch triggers two click events
 	_filterClick: function (e, handler) {
+	    if (e.originalEvent === undefined) {
+	        handler(e);
+	        return;
+	    }
 		var timeStamp = (e.timeStamp || e.originalEvent.timeStamp),
 			elapsed = L.DomEvent._lastClick && (timeStamp - L.DomEvent._lastClick);
 
