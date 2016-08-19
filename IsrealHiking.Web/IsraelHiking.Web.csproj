@@ -27,6 +27,7 @@
     <Content Include="common\EventHelper.js" />
     <Content Include="common\Urls.js" />
     <Content Include="content\angular-toastr.css" />
+    <Content Include="content\bootstrap-slider.css" />
     <Content Include="content\bootstrap-theme.min.css" />
     <Content Include="content\bootstrap.min.css" />
     <Content Include="content\font-awesome.min.css" />
@@ -77,7 +78,6 @@
     <Content Include="content\L.Control.Locate.css" />
     <Content Include="content\leaflet.css" />
     <Content Include="content\loading-bar.css" />
-    <Content Include="content\rzslider.css" />
     <Content Include="content\simple-sidebar.css" />
     <Content Include="controllers\BaseMapController.js" />
     <Content Include="controllers\DrawingController.js" />
@@ -127,6 +127,7 @@
     <Content Include="scripts\angular-toastr.tpls.js" />
     <Content Include="scripts\angular.js" />
     <Content Include="scripts\Blob.js" />
+    <Content Include="scripts\bootstrap-slider.js" />
     <Content Include="scripts\bootstrap.js" />
     <Content Include="scripts\FileSaver.js" />
     <Content Include="scripts\google-analytics.js" />
@@ -141,7 +142,7 @@
     <Content Include="scripts\ng-file-upload.js" />
     <Content Include="scripts\ng-google-chart.js" />
     <Content Include="scripts\osm_geojson.js" />
-    <Content Include="scripts\rzslider.js" />
+    <Content Include="scripts\slider.js" />
     <Content Include="scripts\ui-bootstrap-tpls.js" />
     <Content Include="scripts\webcomponents.js" />
     <Content Include="services\layers\IDrawingLayer.js" />

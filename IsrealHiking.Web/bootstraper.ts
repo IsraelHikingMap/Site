@@ -1,8 +1,8 @@
 ﻿namespace IsraelHiking {
     export var app = angular.module("IsraelHiking", [
-        "ngFileUpload", "LocalStorageModule",
+        "ngFileUpload", "LocalStorageModule", "ui.bootstrap-slider",
         "angular-loading-bar", "googlechart", "ngAnimate",
-        "toastr", "ngFileSaver", "rzModule", "ui.bootstrap"]);
+        "toastr", "ngFileSaver", "ui.bootstrap"]);
 
     L.Icon.Default.imagePath = "content/images/";
 
