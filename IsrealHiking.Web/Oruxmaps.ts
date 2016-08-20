@@ -23,6 +23,13 @@
                 $window.location.href = address;
             }
 
+            if ($window.location.hash) {
+                for (let link of $scope.links) {
+                    if ($window.location.hash.toLowerCase().indexOf(link.hash.toLowerCase()) !== -1) {
+                        $scope.redirect(link.url);
+                    }
+                }    
+            }
         }
     }
 }
