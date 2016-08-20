@@ -29,8 +29,8 @@
 
             $scope.getLegendImage = () => {
                 return layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_MTB_MAP ?
-                    "/content/images/legend_mtb.png" :
-                    "/content/images/legend.png";
+                    "/mtbtiles/legend.png" :
+                    "/tiles/legend.png";
             }
         }
     }
