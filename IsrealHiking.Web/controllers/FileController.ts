@@ -104,7 +104,7 @@
             } 
 
             $scope.ignoreClick = (e: Event) => {
-                this.suppressEvents(e);
+                e.stopPropagation();
             }
 
             angular.element($window).bind("keydown", (e: JQueryEventObject) => {

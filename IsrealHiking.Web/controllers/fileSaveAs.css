@@ -1,0 +1,19 @@
+﻿/* Extra Small Devices, Phones */
+.save-as-panel {
+    width: 250px;
+}
+
+    .save-as-panel .dropdown-toggle {
+        width: 200px;
+    }
+
+/* Small Devices, Tablets */
+@media only screen and (min-width : 768px) {
+    .save-as-panel {
+        width: 300px;
+    }
+
+        .save-as-panel .dropdown-toggle {
+            width: 250px;
+        }
+}

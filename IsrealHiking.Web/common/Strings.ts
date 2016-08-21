@@ -67,6 +67,7 @@
         export const layersSidebar = "layersSidebar";
         export const draggableResizable = "draggableResizable";
         export const routeStatisticsPopup = "routeStatisticsPopup";
+        export const dropdown = "dropdown";
     }
 
     export namespace DrawingEditMode {

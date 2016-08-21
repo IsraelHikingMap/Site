@@ -1,9 +1,9 @@
 ﻿<div class="leaflet-bar" ng-hide="isShowingSaveAs">
-    <a class="cursor-pointer" ng-click="toggleSaveAs($event)" uib-tooltip="Save as..." tooltip-placement="right"><i class="fa fa-files-o fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleSaveAs($event)" uib-tooltip="Save as..." tooltip-placement="right" tooltip-is-open="isOpen && !isShowingSaveAs"><i class="fa fa-files-o fa-lg"></i></a>
 </div>
-<div ng-show="isShowingSaveAs" class="save-as-panel ihm-panel" disable-map-movement>
+<div ng-show="isShowingSaveAs" class="save-as-panel ihm-panel">
     <div class="input-group">
         <a class="btn btn-default input-group-addon" ng-click="saveAs(selectedFormat, $event)"><i class="fa fa-files-o fa-lg"></i></a>
-        <select class="form-control" ng-options="format as format.label for format in formats" ng-model="selectedFormat" ng-click="ignoreClick($event)"></select>
+        <div dropdown ng-label="label" ng-list="formats" ng-model="selectedFormat"></div>
     </div>
 </div>

@@ -82,6 +82,7 @@
     <Content Include="controllers\editOSM.html" />
     <Content Include="controllers\EditOSMController.js" />
     <Content Include="controllers\FileController.js" />
+    <Content Include="controllers\fileSaveAs.css" />
     <Content Include="controllers\routePointPopup.html" />
     <Content Include="controllers\RouteProperties\routeProperties.css" />
     <Content Include="controllers\routeStatistics.css" />
@@ -90,6 +91,9 @@
     <Content Include="controllers\ZoomController.js" />
     <Content Include="directives\DraggableResizable.css" />
     <Content Include="directives\DraggableResizableDirective.js" />
+    <Content Include="directives\Dropdown.css" />
+    <Content Include="directives\Dropdown.html" />
+    <Content Include="directives\DropdownDirective.js" />
     <Content Include="index.css" />
     <Content Include="controllers\InfoHelpController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerAddController.js" />
@@ -248,6 +252,7 @@
     <TypeScriptCompile Include="controllers\ZoomController.ts" />
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
     <TypeScriptCompile Include="directives\DraggableResizableDirective.ts" />
+    <TypeScriptCompile Include="directives\DropdownDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="Oruxmaps.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />

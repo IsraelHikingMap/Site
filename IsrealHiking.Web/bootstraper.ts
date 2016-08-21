@@ -49,6 +49,7 @@
             new Controllers.MainMapcontoller($scope, $compile, mapService, hashService, sidebarService, routeStatisticsService)]);
     
     // Directives:
+    app.directive(Strings.Directives.dropdown, [() => new Directives.DropdownDirective()]);
     app.directive(Strings.Directives.syncFocusWith, () => new Directives.SyncFocusWithDirective());
     app.directive(Strings.Directives.disableMapMovement, [Strings.Services.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
     app.directive(Strings.Directives.markerPopup, () => ({

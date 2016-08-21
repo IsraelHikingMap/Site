@@ -103,20 +103,6 @@ body {
     }
 }
 
-/* Extra Small Devices, Phones */
-@media only screen and (min-width : 480px) {
-    .save-as-panel {
-        max-width: 250px;
-    }
-}
-
-/* Small Devices, Tablets */
-@media only screen and (min-width : 768px) {
-    .save-as-panel {
-        max-width: 300px;
-    }
-}
-
 /* Medium Devices, Desktops */
 @media only screen and (min-width : 992px) {
 }

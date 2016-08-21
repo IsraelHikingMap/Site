@@ -1,0 +1,18 @@
+﻿<div class="dropdown" uib-dropdown is-open="isOpen">
+    <div class="row">
+        <div class="col-xs-12">
+            <button class="btn btn-default btn-block dropdown-toggle" type="button" uib-dropdown-toggle ng-click="$event.stopPropagation()">
+                <i class="fa fa-chevron-down pull-right"></i>
+                {{getSelectedLabel() || placeholder}}
+            </button>
+        </div>
+    </div>
+    <ul class="dropdown-menu dropdown-scroll" uib-dropdown-menu ng-click="$event.stopPropagation()">
+        <li ng-show="placeholder"><a class="dropdown-header">{{placeholder}}</a></li>
+        <li ng-repeat="item in ngList()">
+            <a class="cursor-pointer" ng-click="select(item)">
+                {{getLabel(item)}}
+            </a>
+        </li>
+    </ul>
+</div>
