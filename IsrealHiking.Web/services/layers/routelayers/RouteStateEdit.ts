@@ -198,12 +198,16 @@
             var startSegment = this.context.route.segments[startIndex];
             var endSegment = this.context.route.segments[endIndex];
             var polyline = this.createLoadingSegmentIndicatorPolyline([startSegment.routePoint, endSegment.routePoint]);
-            var promise = this.context.routerService.getRoute(startSegment.routePoint, endSegment.routePoint, endSegment.routingType);
+            var startLatLng = startSegment.routePoint;
+            var startSegmentEndPoint = startSegment.latlngzs[startSegment.latlngzs.length - 1];
+            if (endSegment.routingType === "n") {
+                startLatLng = startSegmentEndPoint;
+            }
+            var promise = this.context.routerService.getRoute(startLatLng, endSegment.routePoint, endSegment.routingType);
             var deferred = this.context.$q.defer();
             promise.then((data) => {
                 this.context.map.removeLayer(polyline);
                 var latlngs = data[data.length - 1].latlngzs;
-                var startSegmentEndPoint = startSegment.latlngzs[startSegment.latlngzs.length - 1];
                 if (startSegment.routingType === "n" && !startSegmentEndPoint.equals(latlngs[0])) {
                     // need to connect the non-routed segment in case it isn't
                     latlngs = [startSegmentEndPoint].concat(latlngs);
