@@ -93,12 +93,12 @@ namespace IsraelHiking.API.Services
             {
                 wpt = gpx.wpt,
                 rte = new rteType[0],
-                trk = gpx.trk.Select(t => new trkType
+                trk = (gpx.trk ?? new trkType[0]).Select(t => new trkType
                 {
                     name = t.name,
                     desc = t.desc,
                     cmt = t.cmt,
-                    trkseg = new[] {new trksegType {trkpt = t.trkseg.SelectMany(s => s.trkpt).ToArray()}}
+                    trkseg = new[] {new trksegType {trkpt = (t.trkseg ?? new trksegType[0]).SelectMany(s => s.trkpt).ToArray()}}
                 }).ToArray()
             };
             return singleTrackGpx.ToBytes();
