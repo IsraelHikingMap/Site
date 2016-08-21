@@ -202,7 +202,13 @@
             var deferred = this.context.$q.defer();
             promise.then((data) => {
                 this.context.map.removeLayer(polyline);
-                this.context.route.segments[endIndex].latlngzs = data[data.length - 1].latlngzs;
+                var latlngs = data[data.length - 1].latlngzs;
+                var startSegmentEndPoint = startSegment.latlngzs[startSegment.latlngzs.length - 1];
+                if (startSegment.routingType === "n" && !startSegmentEndPoint.equals(latlngs[0])) {
+                    // need to connect the non-routed segment in case it isn't
+                    latlngs = [startSegmentEndPoint].concat(latlngs);
+                }
+                this.context.route.segments[endIndex].latlngzs = latlngs;
                 this.context.route.segments[endIndex].polyline.setLatLngs(this.context.route.segments[endIndex].latlngzs);
                 deferred.resolve(this.context.elevationProvider.updateHeights(this.context.route.segments[endIndex].latlngzs));
             });
