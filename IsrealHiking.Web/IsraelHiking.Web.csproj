@@ -116,9 +116,9 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="gulpfile.js" />
     <Content Include="index.html" />
-    <Content Include="Oruxmaps.html" />
+    <Content Include="OruxmapsDownload.html" />
     <Content Include="IsraelMTBmap.html" />
-    <Content Include="Oruxmaps.js" />
+    <Content Include="OruxmapsDownload.js" />
     <Content Include="package.json" />
     <Content Include=".bowerrc" />
     <Content Include="bower.json" />
@@ -254,7 +254,7 @@
     <TypeScriptCompile Include="directives\DraggableResizableDirective.ts" />
     <TypeScriptCompile Include="directives\DropdownDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
-    <TypeScriptCompile Include="Oruxmaps.ts" />
+    <TypeScriptCompile Include="OruxmapsDownload.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-ui-bootstrap\angular-ui-bootstrap.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
