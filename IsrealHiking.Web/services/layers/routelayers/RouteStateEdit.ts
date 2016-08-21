@@ -110,21 +110,24 @@
             }
             let snappingResponse = this.context.snappingService.snapTo(marker.getLatLng());
             marker.setLatLng(snappingResponse.latlng);
+            let snapLatLngZ = this.context.getLatLngZFromLatLng(snappingResponse.latlng);
             this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
             this.context.route.segments[this.selectedRouteSegmentIndex].routingType = this.context.route.properties.currentRoutingType;
-            let tasks = [];
+            this.context.route.segments[this.selectedRouteSegmentIndex].latlngzs[this.context.route.segments[this.selectedRouteSegmentIndex].latlngzs.length - 1] = snapLatLngZ;
+            let chain = this.context.$q.when();
+            var selectedRouteSegmentIndex = this.selectedRouteSegmentIndex; //closure
             if (this.selectedRouteSegmentIndex === 0) {
-                this.context.route.segments[0].latlngzs = [this.context.getLatLngZFromLatLng(snappingResponse.latlng), this.context.getLatLngZFromLatLng(snappingResponse.latlng)];
-                tasks.push(this.context.elevationProvider.updateHeights(this.context.route.segments[0].latlngzs));
+                this.context.route.segments[0].latlngzs = [snapLatLngZ, snapLatLngZ];
+                chain = chain.then(() => this.context.elevationProvider.updateHeights(this.context.route.segments[0].latlngzs)) as angular.IPromise<any>;
             }
             else if (this.selectedRouteSegmentIndex > 0) {
-                tasks.push(this.runRouting(this.selectedRouteSegmentIndex - 1, this.selectedRouteSegmentIndex));
+                chain = chain.then(() => this.runRouting(selectedRouteSegmentIndex - 1, selectedRouteSegmentIndex));
             }
             if (this.selectedRouteSegmentIndex < this.context.route.segments.length - 1) {
-                tasks.push(this.runRouting(this.selectedRouteSegmentIndex, this.selectedRouteSegmentIndex + 1));
+                chain = chain.then(() => this.context.$q.resolve(this.runRouting(selectedRouteSegmentIndex, selectedRouteSegmentIndex + 1)));
             }
             this.selectedRouteSegmentIndex = -1;
-            this.context.$q.all(tasks).then(() => this.context.dataChanged());
+            chain.then(() => this.context.dataChanged());
         }
 
         private removeRouteSegment = (segment: IRouteSegment) => {
@@ -261,12 +264,13 @@
             let snappingResponse = this.context.snappingService.snapTo(middleMarker.getLatLng());
             this.context.route.segments[this.selectedRouteSegmentIndex].routePointMarker = this.createMarker(snappingResponse.latlng);
             this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
-            let tasks = [];
-            tasks.push(this.runRouting(this.selectedRouteSegmentIndex - 1, this.selectedRouteSegmentIndex));
-            tasks.push(this.runRouting(this.selectedRouteSegmentIndex, this.selectedRouteSegmentIndex + 1));
+            this.context.route.segments[this.selectedRouteSegmentIndex].latlngzs[this.context.route.segments[this.selectedRouteSegmentIndex].latlngzs.length - 1] = this.context.getLatLngZFromLatLng(snappingResponse.latlng);
+            var selectedRouteSegmentIndex = this.selectedRouteSegmentIndex; // closure;
+            this.runRouting(selectedRouteSegmentIndex - 1, selectedRouteSegmentIndex)
+                .then(() => this.runRouting(selectedRouteSegmentIndex, selectedRouteSegmentIndex + 1))
+                .then(() => this.context.dataChanged());
             this.selectedRouteSegmentIndex = -1;
             this.hoverHandler.setState(HoverHandlerBase.NONE);
-            this.context.$q.all(tasks).then(() => this.context.dataChanged());
         }
 
         protected createMiddleMarker = (): L.Marker => {
@@ -312,11 +316,11 @@
         }
 
         public reRoute = (): void => {
-            let promises = [];
+            var chain = this.context.$q.when();
             for (let segmentIndex = 1; segmentIndex < this.context.route.segments.length; segmentIndex++) {
-                promises.push(this.runRouting(segmentIndex - 1, segmentIndex));
+                chain = chain.then(() => this.runRouting(segmentIndex - 1, segmentIndex));
             }
-            this.context.$q.all(promises).then(() => this.context.dataChanged());
+            chain.then(() => this.context.dataChanged());
         }
     }
 }
