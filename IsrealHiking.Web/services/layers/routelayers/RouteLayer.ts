@@ -233,11 +233,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         }
 
         public setRoutingType = (routingType: Common.RoutingType) => {
-            if (this.route.properties.currentRoutingType === routingType) {
-                this.route.properties.currentRoutingType = "n";
-            } else {
-                this.route.properties.currentRoutingType = routingType;
-            }
+            this.route.properties.currentRoutingType = routingType;
             if (this.route.properties.isRoutingPerPoint) {
                 return;
             }

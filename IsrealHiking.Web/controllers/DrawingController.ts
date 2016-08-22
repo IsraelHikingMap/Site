@@ -4,7 +4,7 @@
         clear(e: Event): void;
         setEditMode(editMode: string, e: Event): void;
         editMode: Services.Layers.EditMode;
-        toggleRouting(routingType: Common.RoutingType, e: Event): void;
+        setRouting(routingType: Common.RoutingType, e: Event): void;
         getRoutingType(): Common.RoutingType;
         undo(e: Event): void;
         isUndoDisbaled(): boolean;
@@ -84,7 +84,7 @@
                 }
             };
 
-            $scope.toggleRouting = (routingType: Common.RoutingType, e: Event) => {
+            $scope.setRouting = (routingType: Common.RoutingType, e: Event) => {
                 this.suppressEvents(e);
                 if (this.layersService.getSelectedRoute() == null) {
                     return;

@@ -71,6 +71,7 @@
     <Content Include="content\images\marker-icon.png" />
     <Content Include="content\images\marker-shadow-small.png" />
     <Content Include="content\images\marker-shadow.png" />
+    <Content Include="content\images\none.svg" />
     <Content Include="content\images\os-israel-logo.png" />
     <Content Include="content\images\os-israel-logo_transparent.png" />
     <Content Include="content\L.Control.Locate.css" />
