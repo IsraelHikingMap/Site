@@ -60,16 +60,16 @@ namespace IsraelHiking.API.Controllers
             var profile = ProfileType.Foot;
             switch (type)
             {
-                case "Hike":
+                case RoutingType.HIKE:
                     profile = ProfileType.Foot;
                     break;
-                case "Bike":
+                case RoutingType.BIKE:
                     profile = ProfileType.Bike;
                     break;
-                case "4WD":
+                case RoutingType.FOUR_WHEEL_DRIVE:
                     profile = ProfileType.Car;
                     break;
-                case "None":
+                case RoutingType.NONE:
                     profile = ProfileType.None;
                     break;
             }

@@ -31,7 +31,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetRouting_HikingBadFromPoint_ShouldReturnInvalidModelState()
         {
-            var results = _controller.GetRouting("from", "1,1", "Hike").Result as InvalidModelStateResult;
+            var results = _controller.GetRouting("from", "1,1", RoutingType.HIKE).Result as InvalidModelStateResult;
 
             Assert.IsNotNull(results);
         }
@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetRouting_BikeBadToPoint_ShouldReturnInvalidModelState()
         {
-            var results = _controller.GetRouting("1,1", "to", "Bike").Result as InvalidModelStateResult;
+            var results = _controller.GetRouting("1,1", "to", RoutingType.BIKE).Result as InvalidModelStateResult;
 
             Assert.IsNotNull(results);
         }
@@ -47,7 +47,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetRouting_None_ShouldReturnLineStringWithTwoPoints()
         {
-            var results = _controller.GetRouting("1,1", "2,2", "None").Result as OkNegotiatedContentResult<FeatureCollection>;
+            var results = _controller.GetRouting("1,1", "2,2", RoutingType.NONE).Result as OkNegotiatedContentResult<FeatureCollection>;
             var content = results.Content;
             
             Assert.AreEqual(1, content.Features.Count);
@@ -71,7 +71,7 @@ namespace IsraelHiking.API.Tests.Controllers
                     new GeographicPosition(2,2)
                 })));
 
-            var results = _controller.GetRouting("1,1", "2,2", "4WD").Result as OkNegotiatedContentResult<FeatureCollection>;
+            var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkNegotiatedContentResult<FeatureCollection>;
             var content = results.Content;
 
             Assert.AreEqual(1, content.Features.Count);
