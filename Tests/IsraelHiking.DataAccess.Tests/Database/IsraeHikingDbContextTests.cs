@@ -62,54 +62,51 @@ namespace IsraelHiking.DataAccess.Tests.Database
             }
         }
 
-        //// HM TODO: use this code to migrate the database.
-        //[Ignore]
-        //[TestMethod]
-        //public void UpdateDatabase()
-        //{
-        //    using (var context = new IsraelHikingDbContext())
-        //    {
-        //        var list = context.SiteUrls.ToList();
-        //        foreach (var siteUrl in list)
-        //        {
-        //            var dataContainerOld = JsonConvert.DeserializeObject<DataContainerOld>(siteUrl.JsonData);
-        //            if (dataContainerOld.routes.Count == 0 && dataContainerOld.markers.Count == 0)
-        //            {
-        //                context.SiteUrls.Remove(siteUrl);
-        //                continue;
-        //            }
-        //            var dataContainer = new DataContainer
-        //            {
-        //                routes = dataContainerOld.routes.Select(r => new RouteData
-        //                {
-        //                    name = r.name,
-        //                    segments = r.segments.Select(s => new RouteSegmentData
-        //                    {
-        //                        latlngzs = s.latlngzs,
-        //                        routePoint = new MarkerData {latlng = s.routePoint},
-        //                        routingType = s.routingType
-        //                    }).ToList()
-        //                }).ToList(),
-        //                northEast = dataContainerOld.northEast,
-        //                southWest = dataContainerOld.southWest,
-        //                baseLayer = dataContainerOld.baseLayer,
-        //                overlays = dataContainerOld.overlays
-        //            };
-        //            if (dataContainer.routes.Count == 0)
-        //            {
-        //                dataContainer.routes.Add(new RouteData {name = "Markers"});
-        //            }
-        //            dataContainer.routes.First().markers.AddRange(dataContainerOld.markers);
-        //            foreach (var routeData in dataContainer.routes)
-        //            {
-        //                routeData.id = Guid.NewGuid().ToString();
-        //            }
-        //            var jsonData = JsonConvert.SerializeObject(dataContainer, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
-        //            siteUrl.JsonData = jsonData;
-        //            context.MarkAsModified(siteUrl);
-        //        }
-        //        context.SaveChanges();
-        //    }
-        //}
+        //// HM TODO: use this code to migrate the database - migration was done to routing type and None issue #208.
+        [TestMethod]
+        [Ignore]
+        public void UpdateDatabase()
+        {
+            using (var context = new IsraelHikingDbContext())
+            {
+                var list = context.SiteUrls.ToList();
+                foreach (var siteUrl in list)
+                {
+                    var dataContainer = JsonConvert.DeserializeObject<DataContainer>(siteUrl.JsonData);
+                    if (dataContainer.routes.Count == 0 && dataContainer.markers.Count == 0)
+                    {
+                        continue;
+                    }
+                    foreach (var routeData in dataContainer.routes)
+                    {
+                        for (int routeSegmentIndex = 0; routeSegmentIndex < routeData.segments.Count; routeSegmentIndex++)
+                        {
+                            var routeSegmentData = routeData.segments[routeSegmentIndex];
+                            if (routeSegmentIndex <= 0)
+                            {
+                                continue;
+                            }
+                            var previousReouteSegment = routeData.segments[routeSegmentIndex - 1];
+                            if (previousReouteSegment.routingType == "None" && 
+                                !previousReouteSegment.latlngzs.Last().Equals(routeSegmentData.latlngzs.First()))
+                            {
+                                routeSegmentData.latlngzs.Insert(0, previousReouteSegment.latlngzs.Last());
+                            }
+
+                            if (routeSegmentData.routingType == "None" &&
+                                !routeSegmentData.latlngzs.First().Equals(previousReouteSegment.latlngzs.Last()))
+                            {
+                                routeSegmentData.latlngzs[0] = previousReouteSegment.latlngzs.Last();
+                            }
+                        }
+                    }
+
+                    var jsonData = JsonConvert.SerializeObject(dataContainer, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                    siteUrl.JsonData = jsonData;
+                    context.MarkAsModified(siteUrl);
+                }
+                context.SaveChanges();
+            }
+        }
     }
 }

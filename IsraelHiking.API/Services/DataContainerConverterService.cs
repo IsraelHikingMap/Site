@@ -48,7 +48,7 @@ namespace IsraelHiking.API.Services
             var container = _gpxDataContainerConverter.ToDataContainer(gpx);
             if (gpx.creator != DataContainer.ISRAEL_HIKING_MAP)
             {
-                container.routes = ManipulateRoutesData(container.routes, "h");
+                container.routes = ManipulateRoutesData(container.routes, "Hike");
             }
             return container;
         }

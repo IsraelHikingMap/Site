@@ -1,7 +1,7 @@
 ﻿namespace IsraelHiking.Services.Layers.RouteLayers {
     export class RouteLayerFactory {
         public static IS_ROUTING_PER_POINT_KEY = "isRoutingPerPoint";
-        public static ROUTING_TYPE = "routingType";
+        public static ROUTING_TYPE = "routing-type";
         public static ROUTE_OPACITY = "routeOpacity";
 
         public static COLORS = [
@@ -77,7 +77,7 @@
             let route = {
                 properties: {
                     name: name,
-                    currentRoutingType: this.localStorageService.get(RouteLayerFactory.ROUTING_TYPE) || "h",
+                    currentRoutingType: this.localStorageService.get(RouteLayerFactory.ROUTING_TYPE) || "Hike",
                     isRoutingPerPoint: this.localStorageService.get(RouteLayerFactory.IS_ROUTING_PER_POINT_KEY) ? true : false,
                     isVisible: true,
                     pathOptions: {

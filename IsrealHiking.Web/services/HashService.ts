@@ -56,7 +56,7 @@
             } else {
                 this.$location.search({});
             }
-            
+
         }
 
         public updateLocation = (latlng: L.LatLng, zoom: number) => {
@@ -104,11 +104,26 @@
                     array.push({
                         latlngzs: [],
                         routePoint: L.latLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])),
-                        routingType: pointStrings[0]
+                        routingType: this.convertCharacterToRoutingType(pointStrings[0])
                     } as Common.RouteSegmentData);
                 }
             }
             return array;
+        }
+
+        private convertCharacterToRoutingType(routingTypeCharacter: string): Common.RoutingType {
+            switch (routingTypeCharacter) {
+                case "h":
+                    return "Hike";
+                case "b":
+                    return "Bike";
+                case "f":
+                    return "4WD";
+                case "n":
+                    return "None";
+                default:
+                    return "Hike";
+            }
         }
 
         private stringToBaseLayer(addressOrKey: string): Common.LayerData {

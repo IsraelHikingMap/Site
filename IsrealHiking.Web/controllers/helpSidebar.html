@@ -4,7 +4,7 @@
     <div class="row">
         <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-question"></i></button></div>
         <div class="col-sm-5">&nbsp;This dialog.&nbsp;</div>
-        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-crosshairs"></i></button></div>
+        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-location-arrow"></i></button></div>
         <div class="col-sm-5">&nbsp;Move the map to your current location.&nbsp;</div>
     </div>
     <div class="row">
@@ -24,24 +24,39 @@
         <div class="col-sm-11">&nbsp;Toggle drawing. use <i>escape</i> to stop, and click to edit a point.&nbsp;</div>
     </div>
     <div class="row">
-        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-area-chart"></i></button></div>
-        <div class="col-sm-5">&nbsp;Route statistics.&nbsp;</div>
+        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-remove"></i></button></div>
+        <div class="col-sm-5">&nbsp;Clear.&nbsp;</div>
+        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-map-marker"></i></button></div>
+        <div class="col-sm-5">&nbsp;Toggle marker drawing.&nbsp;</div>
+    </div>
+    <div class="row">
         <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/hike.svg" /></button></div>
         <div class="col-sm-5">&nbsp;Hike routing.&nbsp;</div>
-    </div>
-    <div class="row">
         <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/bike.svg" /></button></div>
         <div class="col-sm-5">&nbsp;Bike routing.&nbsp;</div>
+    </div>
+    <div class="row">
         <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/four-by-four.svg" /></button></div>
         <div class="col-sm-5">&nbsp;4x4 routing.&nbsp;</div>
+        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/none.svg" /></button></div>
+        <div class="col-sm-5">&nbsp;Straight lines.&nbsp;</div>
     </div>
     <div class="row">
+        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-area-chart"></i></button></div>
+        <div class="col-sm-5">&nbsp;Route statistics.&nbsp;</div>
         <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-undo"></i></button></div>
         <div class="col-sm-5">&nbsp;Undo last action.&nbsp;</div>
-        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/map-editing.svg" /></button></div>
-        <div class="col-sm-5">&nbsp;Edit the map in OSM.&nbsp;</div>
     </div>
     <div class="row">
+        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-search"></i></button></div>
+        <div class="col-sm-5">&nbsp;Search.&nbsp;</div>
+        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-share-alt"></i></button>
+        </div>
+        <div class="col-sm-5">&nbsp;Share your work.&nbsp;</div>
+    </div>
+    <div class="row">
+        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/map-editing.svg" /></button></div>
+        <div class="col-sm-5">&nbsp;Edit the map in OSM.&nbsp;</div>
         <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-info"></i></button></div>
         <div class="col-sm-5">&nbsp;See more information.&nbsp;</div>
     </div>
@@ -49,27 +64,39 @@
         <div class="col-xs-12" style="text-align: center">Layers controller (left side)</div>
     </div>
     <div class="row">
-        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-map-marker"></i></button></div>
-        <div class="col-sm-5">&nbsp;Toggle marker drawing.&nbsp;</div>
-        <div class="col-sm-1"><button class="btn btn-warning btn-xs help-button"><i class="fa fa-lg fa-gear"></i></button></div>
+        <div class="col-sm-1">
+            <button class="btn btn-warning btn-xs help-button"><i class="fa fa-lg fa-gear"></i></button>
+        </div>
         <div class="col-sm-5">&nbsp;Toggle advanced layer usage.&nbsp;</div>
     </div>
     <div class="row">
-        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-eye-slash"></i></button></div>
+        <div class="col-sm-1">
+            <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-eye-slash"></i></button>
+        </div>
         <div class="col-sm-5">&nbsp;Hide layer.&nbsp;</div>
-        <div class="col-sm-1"><button class="btn btn-warning btn-xs help-button"><i class="fa fa-lg fa-wrench"></i></button></div>
+        <div class="col-sm-1">
+            <button class="btn btn-warning btn-xs help-button"><i class="fa fa-lg fa-wrench"></i></button>
+        </div>
         <div class="col-sm-5">&nbsp;Open layer properties.&nbsp;</div>
     </div>
     <div class="row">
-        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-bolt"></i></button></div>
+        <div class="col-sm-1">
+            <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-bolt"></i></button>
+        </div>
         <div class="col-sm-5">&nbsp;Change routing from single point to full route.&nbsp;</div>
-        <div class="col-sm-1"><button class="btn btn-danger btn-xs help-button"><i class="fa fa-lg fa-trash"></i></button></div>
+        <div class="col-sm-1">
+            <button class="btn btn-danger btn-xs help-button"><i class="fa fa-lg fa-trash"></i></button>
+        </div>
         <div class="col-sm-5">&nbsp;Delete a layer.&nbsp;</div>
     </div>
     <div class="row">
-        <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-arrows-h"></i></button></div>
+        <div class="col-sm-1">
+            <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-arrows-h"></i></button>
+        </div>
         <div class="col-sm-5">&nbsp;reverse route direction.&nbsp;</div>
-        <div class="col-sm-1"><button class="btn btn-success btn-xs help-button"><i class="fa fa-lg fa-check"></i></button></div>
+        <div class="col-sm-1">
+            <button class="btn btn-success btn-xs help-button"><i class="fa fa-lg fa-check"></i></button>
+        </div>
         <div class="col-sm-5">&nbsp;Save layer properties.&nbsp;</div>
     </div>
     <p>

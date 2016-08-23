@@ -15,8 +15,8 @@
             this.geojsonParser = parserFactory.create(Parsers.ParserType.geojson);
         }
 
-        public getRoute(latlngStart: L.LatLng, latlngEnd: L.LatLng, profile: string): angular.IPromise<Common.RouteSegmentData[]> {
-            var address = Common.Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng + "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + profile;
+        public getRoute(latlngStart: L.LatLng, latlngEnd: L.LatLng, routinType: Common.RoutingType): angular.IPromise<Common.RouteSegmentData[]> {
+            var address = Common.Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng + "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
             var deferred = this.$q.defer();
             var noneRouter = new NoneRouter(this.$q);
             this.$http.get(address, { timeout: 4500 } as angular.IRequestShortcutConfig)

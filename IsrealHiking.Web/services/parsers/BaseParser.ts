@@ -93,12 +93,12 @@
             routeData.segments.push({
                 routePoint: latlngzs[0],
                 latlngzs: [latlngzs[0], latlngzs[0]],
-                routingType: "h"
+                routingType: "Hike"
             } as Common.RouteSegmentData);
             routeData.segments.push({
                 routePoint: latlngzs[latlngzs.length - 1],
                 latlngzs: latlngzs,
-                routingType: "h"
+                routingType: "Hike"
             } as Common.RouteSegmentData);
             return routeData;
         }
@@ -114,7 +114,7 @@
                     routeData.segments.push({
                         latlngzs: [latLng, latLng],
                         routePoint: latLng,
-                        routingType: "h"
+                        routingType: "Hike"
                     } as Common.RouteSegmentData);
                 }
                 let latlngzs = BaseParser.createLatlngArray(lineCoordinates);
@@ -122,7 +122,7 @@
                     routeData.segments.push({
                         latlngzs: latlngzs,
                         routePoint: latlngzs[0],
-                        routingType: "h"
+                        routingType: "Hike"
                     } as Common.RouteSegmentData);
                 }
             }

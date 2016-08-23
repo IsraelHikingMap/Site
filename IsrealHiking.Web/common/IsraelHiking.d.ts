@@ -1,5 +1,5 @@
 ﻿declare namespace IsraelHiking.Common {
-    type RoutingType = "h" | "b" | "f" | "n";
+    type RoutingType = "Hike" | "Bike" | "4WD" | "None";
 
     export interface SiteUrl {
         Id: string;

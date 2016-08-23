@@ -5,7 +5,7 @@
 
 namespace IsraelHiking.Tests {
     describe("Router Service", () => {
-        const ADDRESS = Common.Urls.routing + "?from=1,1&to=2,2&type=h";
+        const ADDRESS = Common.Urls.routing + "?from=1,1&to=2,2&type=Hike";
         var $q: angular.IQService;        
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
@@ -39,7 +39,7 @@ namespace IsraelHiking.Tests {
                     } as GeoJSON.LineString
                 } as GeoJSON.Feature<GeoJSON.LineString>
             ] } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
-            routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "h").then((data) => {
+            routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
                 expect(data.length).toBe(2);
                 expect(data[1].latlngzs.length).toBe(3);
             }).finally(done);
@@ -48,7 +48,7 @@ namespace IsraelHiking.Tests {
 
         it("Should use none router when reponse is not a geojson", (done) => {
             $httpBackend.whenGET(ADDRESS).respond({});
-            routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "h").then((data) => {
+            routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
                 expect(data.length).toBe(1);
                 expect(data[0].latlngzs.length).toBe(2);
             }).finally(done);
@@ -57,7 +57,7 @@ namespace IsraelHiking.Tests {
 
         it("Should use none router when getting error response from server", (done) => {
             $httpBackend.whenGET(ADDRESS).respond(500, {});
-            routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "h").then((data) => {
+            routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
                 expect(data.length).toBe(1);
                 expect(data[0].latlngzs.length).toBe(2);
             }).finally(done);

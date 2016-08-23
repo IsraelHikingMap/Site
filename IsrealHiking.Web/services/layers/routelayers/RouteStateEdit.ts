@@ -203,7 +203,7 @@
             var polyline = this.createLoadingSegmentIndicatorPolyline([startSegment.routePoint, endSegment.routePoint]);
             var startLatLng = startSegment.routePoint;
             var startSegmentEndPoint = startSegment.latlngzs[startSegment.latlngzs.length - 1];
-            if (endSegment.routingType === "n") {
+            if (endSegment.routingType === "None") {
                 startLatLng = startSegmentEndPoint;
             }
             var promise = this.context.routerService.getRoute(startLatLng, endSegment.routePoint, endSegment.routingType);
@@ -211,7 +211,7 @@
             promise.then((data) => {
                 this.context.map.removeLayer(polyline);
                 var latlngs = data[data.length - 1].latlngzs;
-                if (startSegment.routingType === "n" && !startSegmentEndPoint.equals(latlngs[0])) {
+                if (startSegment.routingType === "None" && !startSegmentEndPoint.equals(latlngs[0])) {
                     // need to connect the non-routed segment in case it isn't
                     latlngs = [startSegmentEndPoint].concat(latlngs);
                 }

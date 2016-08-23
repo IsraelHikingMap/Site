@@ -103,7 +103,7 @@
 
             $scope.getRoutingType = (): Common.RoutingType => {
                 if (this.layersService.getSelectedRoute() == null) {
-                    return "n";
+                    return "None";
                 }
                 return this.layersService.getSelectedRoute().getRouteProperties().currentRoutingType;
             };

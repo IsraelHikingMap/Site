@@ -12,49 +12,15 @@ namespace IsraelHiking.API.Converters
 
         public static string FromXml(extensionsType extensions)
         {
-            return RoutingTypeToCharacter(extensions?.Any.FirstOrDefault(a => a.LocalName == ROUTING_TYPE)?.InnerText);
+            return extensions?.Any.FirstOrDefault(a => a.LocalName == ROUTING_TYPE)?.InnerText;
         }
 
         public static XmlElement ToXml(string type)
         {
             var doc = new XmlDocument();
             var element = doc.CreateElement(ROUTING_TYPE);
-            element.InnerText = RoutingTypeFromCharacter(type);
+            element.InnerText = type;
             return element;
-        }
-
-        private static string RoutingTypeFromCharacter(string routingTypeCharacter)
-        {
-            switch (routingTypeCharacter)
-            {
-                case "h":
-                    return "Hike";
-                case "b":
-                    return "Bike";
-                case "f":
-                    return "4WD";
-                case "n":
-                    return "None";
-                default:
-                    return "Hike";
-            }
-        }
-
-        private static string RoutingTypeToCharacter(string routingTypeCharacter)
-        {
-            switch (routingTypeCharacter)
-            {
-                case "Hike":
-                    return "h";
-                case "Bike":
-                    return "b";
-                case "4WD":
-                    return "f";
-                case "None":
-                    return "n";
-                default:
-                    return "h";
-            }
         }
     }
 

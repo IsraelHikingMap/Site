@@ -155,7 +155,7 @@ namespace IsraelHiking.Tests {
                             {
                                 latlngzs: [L.latLng(1, 1) as Common.LatLngZ],
                                 routePoint: L.latLng(1, 1),
-                                routingType: "h"
+                                routingType: "Hike"
                             } as Common.RouteSegmentData
                         ]
                     } as Common.RouteData

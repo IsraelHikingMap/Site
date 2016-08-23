@@ -304,7 +304,7 @@ namespace IsraelHiking.API.Tests.Services
             var converter = new GpxDataContainerConverter();
             var container = converter.ToDataContainer(Encoding.ASCII.GetBytes(gpxString).ToGpx());
 
-            var route = _service.SimplifyRouteData(container.routes.First(), "h");
+            var route = _service.SimplifyRouteData(container.routes.First(), "Hike");
 
             Assert.IsTrue(route.segments.Count <= 40);
         }
@@ -331,7 +331,7 @@ namespace IsraelHiking.API.Tests.Services
                 }
             });
 
-            var route = _service.SimplifyRouteData(container.routes.First(), "h");
+            var route = _service.SimplifyRouteData(container.routes.First(), "Hike");
 
             Assert.IsTrue(route.segments.Count <= 5);
         }
@@ -355,7 +355,7 @@ namespace IsraelHiking.API.Tests.Services
                 }
             });
 
-            var route = _service.SimplifyRouteData(container.routes.First(), "h");
+            var route = _service.SimplifyRouteData(container.routes.First(), "Hike");
 
             Assert.AreEqual(3, route.segments.Count);
         }
