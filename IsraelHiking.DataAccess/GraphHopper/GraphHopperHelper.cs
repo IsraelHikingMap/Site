@@ -11,7 +11,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
     {
         private const string GH_NEW_CACHE_FOLDER = "israel-and-palestine-latest.osm-gh-new";
         private const string GH_OLD_CACHE_FOLDER = "israel-and-palestine-latest.osm-gh-old";
-        private const string GRAPH_HOPPER_ROUTING_SERVICE_NAME = "\"Graph Hopper Routing\"";
+        private const string GRAPH_HOPPER_ROUTING_SERVICE_NAME = "\"Graph Hopper Routing Service\"";
         private const string GRAPHHOPPER = "GraphHopper";
 
         protected override string Name => GRAPH_HOPPER_ROUTING_SERVICE_NAME;

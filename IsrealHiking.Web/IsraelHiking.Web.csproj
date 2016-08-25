@@ -115,14 +115,14 @@
     <Content Include="directives\SyncFocusWithDirective.js" />
     <Content Include="fonts\fontawesome-webfont.svg" />
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
-    <Content Include="gulpfile.js" />
+    <None Include="gulpfile.js" />
     <Content Include="index.html" />
     <Content Include="OruxmapsDownload.html" />
     <Content Include="IsraelMTBmap.html" />
     <Content Include="OruxmapsDownload.js" />
-    <Content Include="package.json" />
-    <Content Include=".bowerrc" />
-    <Content Include="bower.json" />
+    <None Include="package.json" />
+    <None Include=".bowerrc" />
+    <None Include="bower.json" />
     <Content Include="scripts\angular-animate.js" />
     <Content Include="scripts\angular-file-saver.bundle.js" />
     <Content Include="scripts\angular-local-storage.js" />
@@ -174,9 +174,9 @@
     <Content Include="controllers\layersSidebar.html" />
     <Content Include="_oldSite\index.html" />
     <Content Include="_oldSite\IsraelMTBmap.html" />
-    <Content Include="packages.config">
+    <None Include="packages.config">
       <SubType>Designer</SubType>
-    </Content>
+    </None>
     <Content Include="_oldSite\redirect.js" />
     <Content Include="content\images\favicons\manifest.json" />
     <Content Include="fonts\fontawesome-webfont.eot" />
