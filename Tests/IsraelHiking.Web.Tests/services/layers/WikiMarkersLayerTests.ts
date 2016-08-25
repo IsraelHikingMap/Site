@@ -55,7 +55,6 @@ namespace IsraelHiking.Tests.Services.Layers {
 
 
         it("Should get wiki markers when zoom is above 12 on map move", () => {
-            mapService.map.setZoom(14);
             $httpBackend.whenJSONP(ADDRESS).respond({
                 query: {
                     geosearch: [
@@ -69,10 +68,11 @@ namespace IsraelHiking.Tests.Services.Layers {
                 } as IsraelHiking.Services.Layers.IWikiQuery 
                 
             } as IsraelHiking.Services.Layers.IWikiResponse);
+            mapService.map.panTo(L.latLng(0, 0));
 
             mapService.map.addLayer(wikiLayer);
-            mapService.map.panTo(L.latLng(0, 0));
-            
+            mapService.map.setZoom(15);
+
             $httpBackend.flush();
 
             $httpBackend.expectJSONP(ADDRESS);
