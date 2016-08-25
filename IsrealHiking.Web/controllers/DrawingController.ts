@@ -8,7 +8,7 @@
         getRoutingType(): Common.RoutingType;
         undo(e: Event): void;
         isUndoDisbaled(): boolean;
-        toggleStatistics(): void;
+        toggleStatistics(e: Event): void;
         isStatisticsOpen(): boolean;
     }
 
@@ -37,7 +37,8 @@
                 }
             });
 
-            $scope.toggleStatistics = () => {
+            $scope.toggleStatistics = (e: Event) => {
+                this.suppressEvents(e);
                 this.routeStatisticsService.toggle();
             }
 

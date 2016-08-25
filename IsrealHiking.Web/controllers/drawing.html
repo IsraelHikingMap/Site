@@ -6,6 +6,6 @@
     <a class="cursor-pointer" ng-show="editMode === 'Route'" ng-click="setRouting('Bike', $event)" ng-class="{'leaflet-active' : getRoutingType() == 'Bike' }" uib-tooltip="Bike routing" tooltip-placement="left"><img src="content/images/bike.svg"/></a>
     <a class="cursor-pointer" ng-show="editMode === 'Route'" ng-click="setRouting('4WD', $event)" ng-class="{'leaflet-active' : getRoutingType() == '4WD' }" uib-tooltip="4x4 routing" tooltip-placement="left"><img src="content/images/four-by-four.svg"/></a>
     <a class="cursor-pointer" ng-show="editMode === 'Route'" ng-click="setRouting('None', $event)" ng-class="{'leaflet-active' : getRoutingType() == 'None' }" uib-tooltip="Straight lines" tooltip-placement="left"><img src="content/images/none.svg" /></a>
-    <a class="cursor-pointer" ng-click="toggleStatistics()" ng-class="{'leaflet-active' : isStatisticsOpen() }" uib-tooltip="Route statistics" tooltip-placement="left"><i class="fa fa-area-chart fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleStatistics($event)" ng-class="{'leaflet-active' : isStatisticsOpen() }" uib-tooltip="Route statistics" tooltip-placement="left"><i class="fa fa-area-chart fa-lg"></i></a>
     <a class="cursor-pointer" ng-click="undo($event)" ng-class="{'leaflet-disabled' : isUndoDisbaled()}" uib-tooltip="Undo" tooltip-placement="left"><i class="fa fa-undo fa-lg"></i></a>
 </div>
