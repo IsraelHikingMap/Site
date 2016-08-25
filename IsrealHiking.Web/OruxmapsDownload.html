@@ -11,7 +11,8 @@
     <meta property="og:image:url" content="http://israelhiking.osm.org.il/content/images/favicons/android-chrome-192x192.png" />
     <meta property="og:image:secure_url" content="https://israelhiking.osm.org.il/content/images/favicons/android-chrome-192x192.png" />
     <meta content="utf-8" http-equiv="encoding">
-    <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible" />
+    <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Israel Hiking Map - Oruxmaps downlaod</title>
     <link rel="stylesheet" href="common.css" type="text/css" />
     <link rel="shortcut icon" href="/content/images/favicons/favicon.ico" type="image/x-icon">
@@ -21,32 +22,92 @@
 </head>
 <body ng-controller="OruxmapsController">
     <div class="container">
+        <div class="jumbotron" dir="{{isHebrew ? 'rtl' : 'ltr' }}">
+            <a href="/">
+                <img src="https://avatars0.githubusercontent.com/u/13288969?v=3&s=200" alt="" height="128"/>
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=com.orux.oruxmaps">
+                <img src="https://lh3.ggpht.com/lTMCqUVaptT1fMaecoVMWx_gNEYD9W6hr6GxC6EqabAZYpbQzbssIdR24X1LOF9eqYo=w300" alt="Oruxmpas" height="128"/>
+            </a>
+            <div ng-class="{'pull-left': isHebrew, 'pull-right': !isHebrew}">
+                <a href="" ng-click="isHebrew = !isHebrew" ng-show="isHebrew">English</a>
+                <a href="" ng-click="isHebrew = !isHebrew" ng-hide="isHebrew">עברית</a>
+            </div>
+        </div>
         <div class="row">
-            <div class="col-md-6">
+            <div class="col-md-12" ng-hide="isHebrew">
                 <h1>
-                    <img src="https://avatars0.githubusercontent.com/u/13288969?v=3&s=200" alt="" /> Israel Hiking Map
+                    <a href="/">Israel Hiking and Biking Maps</a> and <a href="https://play.google.com/store/apps/details?id=com.orux.oruxmaps" target="_blank">OruxMaps</a>
                 </h1>
-                <h3>
-                    Install or update Israel Hiking Map for offline use with <a href="https://play.google.com/store/apps/details?id=com.orux.oruxmaps" target="_blank">OruxMaps</a>
-                </h3>
+                <h3>Install or update using an Android device connected to the web</h3>
                 <p>Click on one of the links below from an Android device with OruxMaps 6.5.4 or later. The download may take several minutes, and afterwards you can enjoy the map with no need for a network connection.</p>
                 <ul>
                     <li ng-repeat="link in links">
-                        <a ng-click="redirect(link.url)" class="cursor-pointer">{{link.description}}</a>
+                        <a ng-href="{{redirect(link.url)}}" class="cursor-pointer">{{link.description}}</a>
+                    </li>
+                </ul>
+                <h4>Note:</h4>
+                <ul>
+                    <li>
+                        After the installation please refresh the offline maps by:<br>
+                        Maps &rarr; Switch map &rarr; OFFLINE &rarr; Refresh (the counter-clockwise arrows)
+                    </li>
+                    <li>
+                        The free space required for direct installation on an Android device is twice the size of the downloaded map.
+                    </li>
+                </ul>
+                <h3>Install or update using a PC connected to your Android device with a USB cable</h3>
+                <ul>
+                    <li>Click one of the above link for the requested map and wait for the zip file to finish downloading.</li>
+                    <li>Connect the Android device to your PC.</li>
+                    <li>If needed, change your Android device USB connection mode from "USB for charging" to "File transfers".</li>
+                    <li>On your PC:</li>
+                    <ul>
+                        <li>Open the downloaded zip file and copy the directory it contains to a temporary locaton, such as your Desktop.</li>
+                        <li>Move this directory into the "Oruxmaps\mapfiles" directory of the connected Android device.</li>
+                    </ul>
+                    <li>
+                        Open OruxMaps and refresh the offline maps by:<br>
+                        Maps &rarr; Switch map &rarr; OFFLINE &rarr; Refresh (the counter-clockwise arrows)
                     </li>
                 </ul>
             </div>
-            <div class="col-md-6" dir="rtl">
+            <div class="col-md-12" dir="rtl" ng-show="isHebrew">
                 <h1>
-                    <img src="https://avatars0.githubusercontent.com/u/13288969?v=3&s=200" alt="" /> מפת הטיולים החופשית
+                    <a href="/">מפות הטיולים והאופניים הפתוחות</a> ו- <a href="https://play.google.com/store/apps/details?id=com.orux.oruxmaps" target="_blank">OruxMaps</a>
                 </h1>
-                <h3>
-                    התקנה או עדכון של מפת הטיולים החופשית לשימוש לא מקוון ב- <a href="https://play.google.com/store/apps/details?id=com.orux.oruxmaps" target="_blank">OruxMaps</a>
-                </h3>
-                <p>לחצו על אחד הקישורים הנ"ל ממכשיר אנדרואיד שבו מותקנת OruxMaps מגרסה 6.5.4 או יותר. ההורדה עשויה להמשך דקות רבות, אך בסיומה תוכלו להשתמש במפה ללא צורך בגישה לרשת.</p>
+                <h3>התקנה או עדכון בעזרת מכשיר אנדרואיד המחובר לרשת</h3>
+                <p>לחצו על אחד הקישורים הבאים ממכשיר אנדרואיד שבו מותקנת OruxMaps מגרסה 6.5.4 או יותר. ההורדה עשויה להמשך דקות רבות, אך בסיומה תוכלו להשתמש במפה ללא צורך בגישה לרשת.</p>
                 <ul>
                     <li ng-repeat="link in links">
-                        <a ng-click="redirect(link.url)" class="cursor-pointer">{{link.descriptionHebrew}}</a>
+                        <a ng-href="{{redirect(link.url)}}" class="cursor-pointer">{{link.descriptionHebrew}}</a>
+                    </li>
+                </ul>
+                <p>שימו לב:</p>
+                <ul>
+                    <li>
+                        בסיום ההתקנה יש לעדכן את רשימת המפות הלא-מקוונות על ידי: <br>
+                        מפות &larr; החלף מפה &larr; Offline &larr; רענן (חיצים מסתובבים)
+                    </li>
+                    <li>
+                        המקום הפנוי הנדרש להתקנה ישירה במכשיר אנדרואיד הוא כפול מגודל המפה.
+                    </li>
+                </ul>
+                <h3>
+                    התקנה או עדכון באמצעות מחשב אישי שמחובר למכשיר האנדרואיד עם כבל USB
+                </h3>
+                <ul>
+                    <li>לחצו על אחד הקישורים למעלה עבור המפה הדרושה והמתינו לסיום הורדת קובץ ה zip.</li>
+                    <li>חברו את מכשיר האנדרואיד עם כבל USB.</li>
+                    <li>במידת הצורך, במכשיר האנדרואיד שנו את מצב חיבור ה USB מ "טעינה" ל "העברת קבצים".</li>
+                    <li>במחשב האישי:</li>
+                    <ul>
+                        <li>פתחו את קובץ ה zip והעתיקו את התיקיה שהוא מכיל למקום זמני כגון שולחן העבודה שלכם.</li>
+                        <li>העבירו את התיקיה שהעתקתם לתיקית "Oruxmaps\mapfiles" שבמכשיר האנדרואיד.</li>
+                    </ul>
+                    <li>
+                        פתחו את OruxMaps ורעננו את רשימת המפות הלא-מקוונות על ידי:<br>
+                        מפות &larr; החלף מפה &larr; Offline &larr; רענן (חיצים מסתובבים)
                     </li>
                 </ul>
             </div>
