@@ -2,24 +2,24 @@
 /// <reference path="../../../isrealhiking.web/common/Strings.ts" />
 /// <reference path="../../../isrealhiking.web/services/fileservice.ts" />
 
-namespace IsraelHiking.Tests {
+namespace IsraelHiking.Tests.Services {
     describe("File Service", () => {
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
         var upload: angular.angularFileUpload.IUploadService;
-        var fileSaver: Services.IFileSaver;
-        var fileService: Services.FileService;
+        var fileSaver: IsraelHiking.Services.IFileSaver;
+        var fileService: IsraelHiking.Services.FileService;
 
         beforeEach(() => {
             angular.mock.module("ngFileUpload");
             angular.mock.module("ngFileSaver");
-            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _Upload_: angular.angularFileUpload.IUploadService, _FileSaver_: Services.IFileSaver) => { // 
+            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _Upload_: angular.angularFileUpload.IUploadService, _FileSaver_: IsraelHiking.Services.IFileSaver) => { // 
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
                 upload = _Upload_;
                 fileSaver = _FileSaver_;
-                fileService = new Services.FileService($http, upload, fileSaver);
+                fileService = new IsraelHiking.Services.FileService($http, upload, fileSaver);
             });
         });
 

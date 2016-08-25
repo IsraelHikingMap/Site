@@ -1,10 +1,10 @@
 ﻿/// <reference path="../../../../isrealhiking.web/services/elevation/elevationprovider.ts" />
 /// <reference path="../../../../isrealhiking.web/common/urls.ts" />
 
-namespace IsraelHiking.Tests {
+namespace IsraelHiking.Tests.Services.Elevation {
     describe("Elevation Provider", () => {
         var ADDRESS = Common.Urls.elevation + "?point=0.0000,0.0000";
-        var elevationProvider: Services.Elevation.ElevationProvider;
+        var elevationProvider: IsraelHiking.Services.Elevation.ElevationProvider;
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
         var toastr: Toastr;
@@ -16,7 +16,7 @@ namespace IsraelHiking.Tests {
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
                 toastr = _toastr_;
-                elevationProvider = new Services.Elevation.ElevationProvider($http, toastr);
+                elevationProvider = new IsraelHiking.Services.Elevation.ElevationProvider($http, toastr);
             });
         });
 

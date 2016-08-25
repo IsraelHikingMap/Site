@@ -1,12 +1,12 @@
 ﻿/// <reference path="../../../isrealhiking.web/scripts/typings/angular-local-storage/angular-local-storage.d.ts" />
 /// <reference path="../../../isrealhiking.web/services/hashservice.ts" />
 
-namespace IsraelHiking.Tests {
+namespace IsraelHiking.Tests.Services {
     describe("Hash Service", () => {
         var $location: angular.ILocationService;        
         var $rootScope: angular.IScope;
         var localStorageService: angular.local.storage.ILocalStorageService;
-        var hashService: Services.HashService;
+        var hashService: IsraelHiking.Services.HashService;
 
         beforeEach(() => {
             angular.mock.module("LocalStorageModule");
@@ -19,7 +19,7 @@ namespace IsraelHiking.Tests {
         });
 
         it("Should initialize without any data", () => {
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             expect(hashService.latlng.lat).toBe(31.773);
             expect(hashService.latlng.lng).toBe(35.12);
@@ -29,7 +29,7 @@ namespace IsraelHiking.Tests {
         it("Should initialize location data", () => {
             spyOn($location, "path").and.returnValue("#/1/2/3");
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             expect(hashService.latlng.lat).toBe(2);
             expect(hashService.latlng.lng).toBe(3);
@@ -39,7 +39,7 @@ namespace IsraelHiking.Tests {
         it("Should initialize markers from search", () => {
             $location.search({markers: "1,1,title;2,2"});
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
             expect(dataContainer.markers.length).toBe(2);
@@ -50,7 +50,7 @@ namespace IsraelHiking.Tests {
         it("Should be tolerant to points with single coordinate in search", () => {
             $location.search({ markers: "1;2,2" });
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
             expect(dataContainer.markers.length).toBe(1);
@@ -58,28 +58,33 @@ namespace IsraelHiking.Tests {
         });
 
         it("Should initialize a routes from search", () => {
-            $location.search({ route_1: "h,1,2;b,3,4", route2: "h,5,6:f,7,8" });
+            $location.search({ route_1: "h,1,2;b,3,4", route2: "f,5,6:n,7,8" });
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
             expect(dataContainer.routes.length).toBe(2);
             expect(dataContainer.routes[0].name).toBe("route 1");
             expect(dataContainer.routes[0].segments[0].routePoint.lat).toBe(1);
+            expect(dataContainer.routes[0].segments[0].routingType).toBe("Hike");
             expect(dataContainer.routes[0].segments[1].routePoint.lng).toBe(4);
+            expect(dataContainer.routes[0].segments[1].routingType).toBe("Bike");
             expect(dataContainer.routes[1].name).toBe("route2");
             expect(dataContainer.routes[1].segments[0].routePoint.lng).toBe(6);
+            expect(dataContainer.routes[1].segments[0].routingType).toBe("4WD");
             expect(dataContainer.routes[1].segments[1].routePoint.lat).toBe(7);
+            expect(dataContainer.routes[1].segments[1].routingType).toBe("None");
         });
 
         it("Should initialize markers and routes from search", () => {
-            $location.search({ markers: "1,1,title;2,2", route_1: "h,1,2;b,3,4" });
+            $location.search({ markers: "1,1,title;2,2", route_1: "?,1,2;b,3,4" });
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
             expect(dataContainer.routes[0].name).toBe("route 1");
             expect(dataContainer.routes[0].segments[0].routePoint.lng).toBe(2);
+            expect(dataContainer.routes[0].segments[0].routingType).toBe("Hike");
             expect(dataContainer.routes[0].segments[1].routePoint.lat).toBe(3);
             expect(dataContainer.markers.length).toBe(2);
             expect(dataContainer.markers[0].title).toBe("title");
@@ -89,7 +94,7 @@ namespace IsraelHiking.Tests {
         it("Should initialize a baselayer address from search", () => {
             $location.search({ baselayer: "www.layer.com" });
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
             expect(dataContainer.baseLayer.address).toBe("www.layer.com");
@@ -99,7 +104,7 @@ namespace IsraelHiking.Tests {
         it("Should initialize a baselayer key from search", () => {
             $location.search({ baselayer: "Israel_Hiking_Map" });
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
             expect(dataContainer.baseLayer.key).toBe("Israel Hiking Map");
@@ -109,7 +114,7 @@ namespace IsraelHiking.Tests {
         it("Should handle empty object in search", () => {
             $location.search({});
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
             expect(dataContainer.baseLayer).toBeUndefined();
@@ -119,7 +124,7 @@ namespace IsraelHiking.Tests {
         it("Should inialize siteUrl from search", () => {
             $location.search({ s: "siteUrl" });
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             expect(hashService.siteUrl).toBe("siteUrl");
         });
@@ -127,7 +132,7 @@ namespace IsraelHiking.Tests {
         it("Should be cleared when siteUrl is given", () => {
             $location.search({ s: "siteUrl", route1: "h,1,1"});
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
             hashService.clear();
 
             expect($location.search()).toEqual({ s: "siteUrl" });
@@ -136,16 +141,25 @@ namespace IsraelHiking.Tests {
         it("Should be cleared when siteUrl is not given", () => {
             $location.search({ route1: "h,1,1" });
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
             hashService.clear();
 
             expect($location.search()).toEqual({});
         });
 
+        it("Should ignore url for external file", () => {
+            $location.search({ url: "external.file" });
+
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
+
+            let dataContainer = hashService.getDataContainer();
+            expect(dataContainer.routes.length).toEqual(0);
+        });
+
         it("Should update url with location", () => {
             spyOn($rootScope, "$$phase").and.returnValue(false);
 
-            hashService = new Services.HashService($location, $rootScope, localStorageService);
+            hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
             hashService.updateLocation(L.latLng(1, 2), 3);
 
             expect(hashService.latlng.lat).toBe(1);

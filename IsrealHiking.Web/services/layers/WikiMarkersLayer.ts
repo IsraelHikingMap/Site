@@ -1,14 +1,16 @@
-﻿namespace IsraelHiking.Services.Drawing {
-    interface IWikiPage {
+﻿namespace IsraelHiking.Services.Layers {
+    export interface IWikiPage {
         lat: number;
         lon: number;
         pageid: number;
         title: string;
     }
-    interface IWikiQuery {
+
+    export interface IWikiQuery {
         geosearch:  IWikiPage[];
     }
-    interface IWikiResponse {
+
+    export interface IWikiResponse {
         query: IWikiQuery;
     }
 
@@ -36,10 +38,9 @@
         }
 
         public onAdd(map: L.Map): void {
-            this.updateMarkers();
-            map.addLayer(this.markers);
             this.enabled = true;
             this.updateMarkers();
+            map.addLayer(this.markers);
         }
 
         public onRemove(map: L.Map): void {
@@ -54,10 +55,7 @@
             }
             let centerString = this.map.getCenter().lat + "|" + this.map.getCenter().lng;
             let url = `https://he.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=500&callback=JSON_CALLBACK`;
-            this.$http({
-                url: url,
-                method: "jsonp"
-            }).success((response: IWikiResponse) => {
+            this.$http.jsonp(url).success((response: IWikiResponse) => {
                 this.markers.clearLayers();
                 for (let page of response.query.geosearch) {
                     let marker = L.marker(L.latLng(page.lat, page.lon), { clickable: true, draggable: false, icon: this.wikiMarkerIcon, title: page.title} as L.MarkerOptions);

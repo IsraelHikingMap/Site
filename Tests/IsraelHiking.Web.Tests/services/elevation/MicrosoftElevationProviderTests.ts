@@ -8,11 +8,11 @@
 /// <reference path="../../../../isrealhiking.web/services/elevation/microsoftelevationprovider.ts" />
 
 
-namespace IsraelHiking.Tests {
+namespace IsraelHiking.Tests.Services.Elevation {
     export const ADDRESS = "http://dev.virtualearth.net/REST/v1/Elevation/List?jsonp=JSON_CALLBACK&key=ArUJIOvdEI-4sFS5-3PqMlDJP-00FMLrOeLIGkLRpfWIjfpOcESgnE-Zmk-ZimU2&points=0.0000,0.0000";
 
     describe("Microsoft Elevation Provider", () => {
-        var elevationProvider: Services.Elevation.MicrosoftElevationProvider;
+        var elevationProvider: IsraelHiking.Services.Elevation.MicrosoftElevationProvider;
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
         var toastr: Toastr;
@@ -24,13 +24,13 @@ namespace IsraelHiking.Tests {
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
                 toastr = _toastr_;
-                elevationProvider = new Services.Elevation.MicrosoftElevationProvider($http, toastr);
+                elevationProvider = new IsraelHiking.Services.Elevation.MicrosoftElevationProvider($http, toastr);
             });
         });
         
         it("Should update height data", () => {
             var latlngzs = [<Common.LatLngZ>{lat: 0, lng: 0, z: 0 }];
-            $httpBackend.when("JSONP", ADDRESS).respond({ resourceSets: [{ resources: [{ elevations: [1] }] }] });
+            $httpBackend.whenJSONP(ADDRESS).respond({ resourceSets: [{ resources: [{ elevations: [1] }] }] });
         
             elevationProvider.updateHeights(latlngzs);
             $httpBackend.flush();

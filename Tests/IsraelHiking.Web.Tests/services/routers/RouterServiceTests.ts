@@ -3,14 +3,14 @@
 /// <reference path="../../../../isrealhiking.web/services/routers/nonerouter.ts" />
 /// <reference path="../../../../isrealhiking.web/services/routers/routerservice.ts" />
 
-namespace IsraelHiking.Tests {
+namespace IsraelHiking.Tests.Services.Routers {
     describe("Router Service", () => {
         const ADDRESS = Common.Urls.routing + "?from=1,1&to=2,2&type=Hike";
         var $q: angular.IQService;        
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
         var toastr: Toastr;
-        var routeService: Services.Routers.RouterService;
+        var routeService: IsraelHiking.Services.Routers.RouterService;
 
         beforeEach(() => {
             angular.mock.module("toastr");
@@ -21,7 +21,7 @@ namespace IsraelHiking.Tests {
                 $q = _$q_;
                 toastr = _toastr_;
                 toastr.error = (): any => { };
-                routeService = new Services.Routers.RouterService($http, $q, toastr, new Services.Parsers.ParserFactory());
+                routeService = new IsraelHiking.Services.Routers.RouterService($http, $q, toastr, new IsraelHiking.Services.Parsers.ParserFactory());
             });
             
         });

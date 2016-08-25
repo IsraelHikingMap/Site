@@ -7,6 +7,7 @@
     "UseSourceMaps": true
   },
   "References": [
+    { "Path": "Tests\\IsraelHiking.Web.Tests\\services\\mapservicemockcreator.ts" },
     { "Path": "IsrealHiking.Web\\scripts\\angular.js" },
     { "Path": "IsrealHiking.Web\\scripts\\angular-mocks.js" },
     { "Path": "IsrealHiking.Web\\scripts\\leaflet-src.js" },
@@ -19,13 +20,14 @@
     { "Path": "IsrealHiking.Web\\common\\", "Includes": ["*.ts"]},
     { "Path": "IsrealHiking.Web\\services\\mapService.ts"},
     { "Path": "IsrealHiking.Web\\services\\ObjectWithMap.ts"},
-    { "Path": "IsrealHiking.Web\\services\\parsers\\BaseParser.ts"},
-    { "Path": "IsrealHiking.Web\\services\\parsers\\XmlParser.ts"},
     { "Path": "IsrealHiking.Web\\services\\elevation\\", "Includes": ["*.ts"]},
+    { "Path": "IsrealHiking.Web\\services\\layers\\wikimarkerslayer.ts" },
     { "Path": "IsrealHiking.Web\\services\\parsers\\", "Includes": ["*.ts"]},
     { "Path": "IsrealHiking.Web\\services\\routers\\", "Includes": ["*.ts"]},
     { "Path": "IsrealHiking.Web\\services\\SnappingService.ts"},
     { "Path": "IsrealHiking.Web\\services\\HashService.ts"},
+    { "Path": "IsrealHiking.Web\\services\\RouteStatisticsService.ts" },
+    { "Path": "IsrealHiking.Web\\services\\SidebarService.ts" },
     { "Path": "IsrealHiking.Web\\services\\FileService.ts"}
   ],
   "Tests": [

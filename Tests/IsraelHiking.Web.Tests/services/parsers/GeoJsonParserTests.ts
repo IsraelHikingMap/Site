@@ -4,13 +4,13 @@
 /// <reference path="../../../../isrealhiking.web/services/parsers/baseparser.ts" />
 /// <reference path="../../../../isrealhiking.web/services/parsers/geojsonparser.ts" />
 
-namespace IsraelHiking.Tests {
+namespace IsraelHiking.Tests.Services.Parsers {
     describe("GeoJson Parser", () => {
 
-        var geoJsonParser: Services.Parsers.GeoJsonParser;
+        var geoJsonParser: IsraelHiking.Services.Parsers.GeoJsonParser;
 
         beforeEach(() => {
-            geoJsonParser = new Services.Parsers.GeoJsonParser();
+            geoJsonParser = new IsraelHiking.Services.Parsers.GeoJsonParser();
         });
 
         it("Should parse geoJson point", () => {

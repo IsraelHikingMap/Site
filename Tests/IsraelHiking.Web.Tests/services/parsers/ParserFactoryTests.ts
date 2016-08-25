@@ -1,22 +1,22 @@
 ﻿/// <reference path="../../../../isrealhiking.web/services/parsers/parserfactory.ts" />
 
-namespace IsraelHiking.Tests {
+namespace IsraelHiking.Tests.Services.Parsers {
     describe("Parser Factory", () => {
 
-        var parserFactory: Services.Parsers.ParserFactory;
+        var parserFactory: IsraelHiking.Services.Parsers.ParserFactory;
 
         beforeEach(() => {
-            parserFactory = new Services.Parsers.ParserFactory();
+            parserFactory = new IsraelHiking.Services.Parsers.ParserFactory();
         });
 
         it("Should create geoJson Parser", () => {
-            var parser = parserFactory.create(Services.Parsers.ParserType.geojson);
+            var parser = parserFactory.create(IsraelHiking.Services.Parsers.ParserType.geojson);
 
             expect(parser).toBeDefined();
         });
 
         it("Should create osm Parser", () => {
-            var parser = parserFactory.create(Services.Parsers.ParserType.osm);
+            var parser = parserFactory.create(IsraelHiking.Services.Parsers.ParserType.osm);
 
             expect(parser).toBeDefined();
         });

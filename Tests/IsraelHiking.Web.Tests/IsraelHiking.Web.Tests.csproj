@@ -59,6 +59,10 @@
     <TypeScriptCompile Include="services\elevation\ElevationProviderTests.ts" />
     <TypeScriptCompile Include="services\elevation\MicrosoftElevationProviderTests.ts" />
     <TypeScriptCompile Include="services\FileServiceTests.ts" />
+    <TypeScriptCompile Include="services\layers\WikiMarkersLayerTests.ts" />
+    <TypeScriptCompile Include="services\MapServiceMockCreator.ts" />
+    <TypeScriptCompile Include="services\SidebarServiceTests.ts" />
+    <TypeScriptCompile Include="services\RouteStatisticsServiceTests.ts" />
     <TypeScriptCompile Include="services\SnappingServiceTests.ts" />
     <TypeScriptCompile Include="services\parsers\GeoJsonParserTests.ts" />
     <TypeScriptCompile Include="services\parsers\OsmParserTests.ts" />
@@ -66,9 +70,7 @@
     <TypeScriptCompile Include="services\HashServiceTests.ts" />
     <TypeScriptCompile Include="services\routers\RouterServiceTests.ts" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="services\layers\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

@@ -1,4 +1,5 @@
-﻿/// <reference path="../../../isrealhiking.web/services/mapservice.ts" />
+﻿/// <reference path="mapservicemockcreator.ts" />
+/// <reference path="../../../isrealhiking.web/services/mapservice.ts" />
 /// <reference path="../../../IsrealHiking.Web/scripts/typings/angularjs/angular-mocks.d.ts" />
 /// <reference path="../../../isrealhiking.web/scripts/typings/lodash/lodash.d.ts" />
 /// <reference path="../../../isrealhiking.web/services/snappingservice.ts" />
@@ -7,14 +8,14 @@
 /// <reference path="../../../isrealhiking.web/services/parsers/parserfactory.ts" />
 /// <reference path="../../../IsrealHiking.Web/scripts/typings/toastr/toastr.d.ts" />
 
-namespace IsraelHiking.Tests {
+namespace IsraelHiking.Tests.Services {
     describe("Snapping Service", () => {
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
-        var mapService: Services.MapService;
-        var parserFactory: Services.Parsers.ParserFactory;
+        var mapService: IsraelHiking.Services.MapService;
+        var parserFactory: IsraelHiking.Services.Parsers.ParserFactory;
         //var toastr: Toastr;
-        var snappingService: Services.SnappingService;
+        var snappingService: IsraelHiking.Services.SnappingService;
         var mapDiv: JQuery;
 
         var osmWay = "<?xml version='1.0' encoding='UTF-8'?>\
@@ -48,13 +49,11 @@ namespace IsraelHiking.Tests {
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
-                mapDiv = angular.element("<div>");
-                mapDiv.attr("id", "map");
-                _$document_.find("body").eq(0).append(mapDiv);
+                mapDiv = MapServiceMockCreator.createMapDiv(_$document_);
                 _toastr_.error = (): any => { };
-                mapService = new Services.MapService();
-                parserFactory = new Services.Parsers.ParserFactory();
-                snappingService = new Services.SnappingService($http, mapService, parserFactory, _toastr_);
+                mapService = new IsraelHiking.Services.MapService();
+                parserFactory = new IsraelHiking.Services.Parsers.ParserFactory();
+                snappingService = new IsraelHiking.Services.SnappingService($http, mapService, parserFactory, _toastr_);
                 snappingService.enable(true);
             });
         });
@@ -132,7 +131,7 @@ namespace IsraelHiking.Tests {
             let layers = L.layerGroup([]); 
             layers.addLayer(L.polyline([L.latLng(1, 1), L.latLng(1, 2)]));
 
-            let snap = snappingService.snapTo(L.latLng(1.01, 1), <Services.ISnappingOptions>{ layers: layers, sensitivity: 1000 });
+            let snap = snappingService.snapTo(L.latLng(1.01, 1), { layers: layers, sensitivity: 1000 } as IsraelHiking.Services.ISnappingOptions);
 
             expect(snap.latlng.lat).toBe(1.0);
             expect(snap.latlng.lng).toBe(1.0); 

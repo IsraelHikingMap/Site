@@ -1,9 +1,9 @@
 ﻿/// <reference path="../../../../isrealhiking.web/services/parsers/osmparser.ts" />
 
-namespace IsraelHiking.Tests {
+namespace IsraelHiking.Tests.Services.Parsers {
     describe("Osm Parser", () => {
 
-        var osmParser: Services.Parsers.OsmParser;
+        var osmParser: IsraelHiking.Services.Parsers.OsmParser;
         var osmString = '<?xml version="1.0" encoding="UTF-8"?>\
                             <osm version="0.6" generator="Overpass API">\
                             <note>The data included in this document is from www.openstreetmap.org. The data is made available under ODbL.</note>\
@@ -25,7 +25,7 @@ namespace IsraelHiking.Tests {
                             </osm>';
 
         beforeEach(() => {
-            osmParser = new Services.Parsers.OsmParser();
+            osmParser = new IsraelHiking.Services.Parsers.OsmParser();
         });
 
         it("Should parse osm string", () => {
