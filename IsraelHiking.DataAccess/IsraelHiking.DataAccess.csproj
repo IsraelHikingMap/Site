@@ -243,7 +243,7 @@
     <Content Include="ElasticSearch\lib\compress-lzf-1.0.2.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\elasticsearch-2.2.1.jar">
+    <Content Include="ElasticSearch\lib\elasticsearch-2.3.5.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ElasticSearch\lib\guava-18.0.jar">
@@ -255,16 +255,16 @@
     <Content Include="ElasticSearch\lib\hppc-0.7.1.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\jackson-core-2.6.2.jar">
+    <Content Include="ElasticSearch\lib\jackson-core-2.6.6.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\jackson-dataformat-cbor-2.6.2.jar">
+    <Content Include="ElasticSearch\lib\jackson-dataformat-cbor-2.6.6.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\jackson-dataformat-smile-2.6.2.jar">
+    <Content Include="ElasticSearch\lib\jackson-dataformat-smile-2.6.6.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\jackson-dataformat-yaml-2.6.2.jar">
+    <Content Include="ElasticSearch\lib\jackson-dataformat-yaml-2.6.6.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ElasticSearch\lib\jna-4.1.0.jar">
@@ -273,7 +273,7 @@
     <Content Include="ElasticSearch\lib\joda-convert-1.2.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\joda-time-2.8.2.jar">
+    <Content Include="ElasticSearch\lib\joda-time-2.9.4.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ElasticSearch\lib\jsr166e-1.1.0.jar">
@@ -285,46 +285,46 @@
     <Content Include="ElasticSearch\lib\log4j-1.2.17.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-analyzers-common-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-analyzers-common-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-backward-codecs-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-backward-codecs-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-core-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-core-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-grouping-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-grouping-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-highlighter-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-highlighter-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-join-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-join-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-memory-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-memory-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-misc-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-misc-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-queries-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-queries-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-queryparser-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-queryparser-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-sandbox-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-sandbox-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-spatial-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-spatial-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-spatial3d-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-spatial3d-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="ElasticSearch\lib\lucene-suggest-5.4.1.jar">
+    <Content Include="ElasticSearch\lib\lucene-suggest-5.5.0.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="ElasticSearch\lib\netty-3.10.5.Final.jar">
