@@ -33,7 +33,7 @@ namespace IsraelHiking.Services.Layers {
         private static ISRAEL_HIKING_MAP = "Israel Hiking Map";
         private static GOOGLE_EARTH = "Google Earth";
         private static HIKING_TRAILS = "Hiking Trails";
-        private static ATTRIBUTION = "<a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> data under <a href='http://opendatacommons.org/licenses/odbl/summary/' target='_blank\">ODbL</a>. ";
+        private static ATTRIBUTION = "<a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> data under <a href='http://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
         private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION + "Map style courtesy of <a href='http://mtbmap.no'>MTBmap.no.</a> ";
         private static BASE_LAYERS_KEY = "BaseLayers";
         private static OVERLAYS_KEY = "Overlays";
