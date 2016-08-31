@@ -189,7 +189,7 @@ if (item.Name.EndsWith("/"))
             this.Write("\t\t\t\t\t\t<td>");
             
             #line 82 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(item.Size / (1024 * 1024 * 1024)));
+            this.Write(this.ToStringHelper.ToStringWithCulture((item.Size * 1.0 / (1024 * 1024 * 1024)).ToString("F2")));
             
             #line default
             #line hidden
@@ -203,7 +203,7 @@ if (item.Name.EndsWith("/"))
             this.Write("\t\t\t\t\t\t<td>");
             
             #line 84 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(item.Size / (1024 * 1024)));
+            this.Write(this.ToStringHelper.ToStringWithCulture((item.Size * 1.0 / (1024 * 1024)).ToString("F2")));
             
             #line default
             #line hidden
@@ -217,7 +217,7 @@ if (item.Name.EndsWith("/"))
             this.Write("\t\t\t\t\t\t<td>");
             
             #line 86 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(item.Size / 1024));
+            this.Write(this.ToStringHelper.ToStringWithCulture((item.Size / 1024)));
             
             #line default
             #line hidden
@@ -245,7 +245,7 @@ if (item.Name.EndsWith("/"))
             this.Write("\t\t\t\t\t<td>");
             
             #line 90 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(item.LastModified));
+            this.Write(this.ToStringHelper.ToStringWithCulture(item.LastModified.ToString("dd/MM/yyyy HH:mm:ss")));
             
             #line default
             #line hidden
