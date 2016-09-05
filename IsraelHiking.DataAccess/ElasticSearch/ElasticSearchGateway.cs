@@ -59,11 +59,21 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                     .Query(
                         q => q.FunctionScore(
                             fs => fs.Query(
-                                iq => iq.MultiMatch(
-                                    mm => mm.Query(searchTerm)
-                                        .Fields(f => f.Fields(field + "^2", "properties.name*", "properties._name"))
-                                        .Type(TextQueryType.BestFields)
-                                        .Fuzziness(Fuzziness.Auto))
+                                iq => iq.DisMax(
+                                    dm => dm.Queries(
+                                        dmq => dmq.MultiMatch(
+                                            mm => mm.Query(searchTerm)
+                                                .Fields(f => f.Fields(field, "properties.name*", "properties._name"))
+                                                .Type(TextQueryType.BestFields)
+                                                .Fuzziness(Fuzziness.Auto)
+                                                ),
+                                        dmq => dmq.Match(
+                                            m => m.Query(searchTerm)
+                                                .Boost(1.2)
+                                                .Field(new Field().Name = field)
+                                                )
+                                            )
+                                        )
                             ).Functions(fn => fn.FieldValueFactor(f => f.Field("properties.search_factor")))
                         )
                     )

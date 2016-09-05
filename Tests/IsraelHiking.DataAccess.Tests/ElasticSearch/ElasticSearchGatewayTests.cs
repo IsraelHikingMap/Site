@@ -1,5 +1,4 @@
-﻿using System;
-using IsraelHiking.DataAccess.ElasticSearch;
+﻿using IsraelHiking.DataAccess.ElasticSearch;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch
@@ -13,7 +12,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         {
             ElasticSearchGateway gateway = new ElasticSearchGateway(new TraceLogger());
             gateway.Initialize();
-            var results = gateway.Search("בית שאן").Result;
+            var results = gateway.Search("מנות").Result;
             Assert.AreEqual(10, results.Count);
         }
     }

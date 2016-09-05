@@ -134,7 +134,6 @@ namespace IsraelHiking.API.Services
             }
             _elasticSearchGateway.UpdateData(smallCahceList).Wait();
             _logger.Info($"Finished updating Elastic Search, Indexed {total + smallCahceList.Count} records");
-
         }
 
         private IEnumerable<ICompleteOsmGeo> MergeElements(IReadOnlyCollection<ICompleteOsmGeo> elements)
