@@ -46,6 +46,7 @@ namespace IsraelHiking.Services.Layers {
         private $http: angular.IHttpService;
         private localStorageService: angular.local.storage.ILocalStorageService;
         private hashService: HashService;
+        private fileService: FileService;
         private routeLayerFactory: Layers.RouteLayers.RouteLayerFactory;
         private defaultAttribution: string;
         private overlayZIndex;
@@ -63,11 +64,13 @@ namespace IsraelHiking.Services.Layers {
             mapService: MapService,
             localStorageService: angular.local.storage.ILocalStorageService,
             routeLayerFactory: Layers.RouteLayers.RouteLayerFactory,
-            hashService: HashService) {
+            hashService: HashService,
+            fileService: FileService) {
             super(mapService);
             this.$http = $http;
             this.localStorageService = localStorageService;
             this.hashService = hashService;
+            this.fileService = fileService;
             this.routeLayerFactory = routeLayerFactory;
             this.selectedBaseLayer = null;
             this.selectedRoute = null;
@@ -309,7 +312,7 @@ namespace IsraelHiking.Services.Layers {
                 return;
             }
             if (this.hashService.externalUrl) {
-                this.$http.get(Common.Urls.files + "?url=" + this.hashService.externalUrl)
+                this.fileService.openFromUrl(this.hashService.externalUrl)
                     .success((dataContainer: Common.DataContainer) => {
                         this.setJsonData(dataContainer);
                     });

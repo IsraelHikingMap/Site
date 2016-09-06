@@ -148,6 +148,7 @@
     <Content Include="scripts\slider.js" />
     <Content Include="scripts\ui-bootstrap-tpls.js" />
     <Content Include="scripts\webcomponents.js" />
+    <Content Include="services\DragAndDropService.js" />
     <Content Include="services\layers\IDrawingLayer.js" />
     <Content Include="services\layers\poilayers\HoverHandlerPoi.js" />
     <Content Include="services\layers\poilayers\PoiLayer.js" />
@@ -275,6 +276,7 @@
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />
     <TypeScriptCompile Include="scripts\typings\ng-file-upload\ng-file-upload.d.ts" />
     <TypeScriptCompile Include="scripts\typings\toastr\toastr.d.ts" />
+    <TypeScriptCompile Include="services\DragAndDropService.ts" />
     <TypeScriptCompile Include="services\layers\IDrawingLayer.ts" />
     <TypeScriptCompile Include="services\layers\poilayers\PoiLayer.ts" />
     <TypeScriptCompile Include="services\layers\poilayers\PoiStateBase.ts" />

@@ -38,9 +38,13 @@
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
     app.service(Strings.Services.layersService, [Strings.Angular.http, Strings.Angular.window, Strings.Services.mapService,
-        Strings.Services.localStorageService, Strings.Services.routeLayerFactory, Strings.Services.hashService,
-        ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService) =>
-            new Services.Layers.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService)]);
+        Strings.Services.localStorageService, Strings.Services.routeLayerFactory, Strings.Services.hashService, Strings.Services.fileService,
+        ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService, fileService: Services.FileService) =>
+            new Services.Layers.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService, fileService)]);
+    app.service(Strings.Services.dragAndDropService, [Strings.Angular.timeout, Strings.Services.mapService, Strings.Services.fileService, Strings.Services.layersService, Strings.Services.toastr,
+        ($timeout: angular.ITimeoutService, mapservice: Services.MapService, fileService: Services.FileService, layersService: Services.Layers.LayersService, toastr: Toastr) =>
+        new Services.DragAndDropService($timeout, mapservice, fileService, layersService, toastr)
+    ]);
 
     app.controller(Strings.Controllers.mainMapController, [Strings.Angular.scope, Strings.Angular.compile, Strings.Services.mapService,
         Strings.Services.hashService, Strings.Services.sidebarService, Strings.Services.routeStatisticsService,
@@ -115,7 +119,7 @@
         templateUrl: "controllers/routeStatistics.html"
     } as angular.IDirective));
 
-    app.run([Strings.Services.googleChartApiPromise, () => {
+    app.run([Strings.Services.googleChartApiPromise, Strings.Services.dragAndDropService, () => {
         angular.element("link[type*=icon]").detach().appendTo("head");
     }]);
 

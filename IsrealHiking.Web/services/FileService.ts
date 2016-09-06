@@ -32,6 +32,10 @@
             } as angular.angularFileUpload.IFileUploadConfigFile);
         }
 
+        public openFromUrl = (url: string): angular.IHttpPromise<Common.DataContainer> => {
+            return this.$http.get(Common.Urls.files + "?url=" + url);
+        }
+
         private saveBytesResponseToFile = (data, fileName: string) => {
             var byteCharacters = atob(data);
             var byteNumbers = new Array(byteCharacters.length);

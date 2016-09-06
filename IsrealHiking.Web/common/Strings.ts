@@ -42,6 +42,7 @@
         export const fileSaver = "FileSaver";
         export const sidebarService = "sidebarService";
         export const routeStatisticsService = "routeStatisticsService";
+        export const dragAndDropService = "dragAndDropService";
     }
 
     export namespace Controllers {
