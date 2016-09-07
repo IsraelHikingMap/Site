@@ -84,6 +84,7 @@
     <Content Include="controllers\EditOSMController.js" />
     <Content Include="controllers\FileController.js" />
     <Content Include="controllers\fileSaveAs.css" />
+    <Content Include="controllers\info.css" />
     <Content Include="controllers\routePointPopup.html" />
     <Content Include="controllers\RouteProperties\routeProperties.css" />
     <Content Include="controllers\routeStatistics.css" />
@@ -96,7 +97,7 @@
     <Content Include="directives\Dropdown.html" />
     <Content Include="directives\DropdownDirective.js" />
     <Content Include="index.css" />
-    <Content Include="controllers\InfoHelpController.js" />
+    <Content Include="controllers\InfoController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerAddController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerEditController.js" />
     <Content Include="controllers\LayerProperties\LayerBaseController.js" />
@@ -215,9 +216,8 @@
     <Content Include="controllers\routeStatistics.html" />
     <Content Include="controllers\RouteProperties\routePropertiesModal.html" />
     <Content Include="controllers\LayerProperties\layerPropertiesModal.html" />
-    <Content Include="controllers\infoHelp.html" />
+    <Content Include="controllers\info.html" />
     <Content Include="controllers\file.html" />
-    <Content Include="controllers\helpSidebar.html" />
     <Content Include="controllers\markerPopup.html" />
     <Content Include="controllers\shareModal.html" />
     <Content Include="web.config">
@@ -312,7 +312,7 @@
     <TypeScriptCompile Include="controllers\EditOSMController.ts" />
     <TypeScriptCompile Include="controllers\FileController.ts" />
     <TypeScriptCompile Include="services\HashService.ts" />
-    <TypeScriptCompile Include="controllers\InfoHelpController.ts" />
+    <TypeScriptCompile Include="controllers\InfoController.ts" />
     <TypeScriptCompile Include="services\MapService.ts" />
     <TypeScriptCompile Include="services\parsers\BaseParser.ts" />
     <TypeScriptCompile Include="services\parsers\OsmParser.ts" />

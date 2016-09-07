@@ -75,9 +75,9 @@
         controller: Controllers.FileController,
         templateUrl: "controllers/file.html"
     } as angular.IDirective));
-    app.directive(Strings.Directives.infoHelpControl, () => ({
-        controller: Controllers.InfoHelpController,
-        templateUrl: "controllers/infoHelp.html"
+    app.directive(Strings.Directives.infoControl, () => ({
+        controller: Controllers.InfoController,
+        templateUrl: "controllers/info.html"
     } as angular.IDirective));
     app.directive(Strings.Directives.layersControl, () => ({
         controller: Controllers.LayersController,
@@ -100,12 +100,8 @@
         templateUrl: "controllers/zoom.html"
     } as angular.IDirective));
     app.directive(Strings.Directives.infoSidebar, () => ({
-        controller: Controllers.InfoHelpController,
+        controller: Controllers.InfoController,
         templateUrl: "controllers/infoSidebar.html"
-    } as angular.IDirective));
-    app.directive(Strings.Directives.helpSidebar, () => ({
-        controller: Controllers.InfoHelpController,
-        templateUrl: "controllers/helpSidebar.html"
     } as angular.IDirective));
     app.directive(Strings.Directives.layersSidebar, () => ({
         controller: Controllers.LayersController,

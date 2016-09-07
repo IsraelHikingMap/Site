@@ -1,0 +1,7 @@
+﻿.info-header a {
+    text-decoration: none;
+}
+
+.info-header a.active {
+    color: #ddd;
+}

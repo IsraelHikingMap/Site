@@ -57,14 +57,13 @@
         export const drawingControl = "drawingControl";
         export const editOsmControl = "editOsmControl";
         export const fileControl = "fileControl";
-        export const infoHelpControl = "infoHelpControl";
+        export const infoControl = "infoControl";
         export const layersControl = "layersControl";
         export const searchControl = "searchControl";
         export const shareControl = "shareControl";
         export const saveAsControl = "saveAsControl";
         export const zoomControl = "zoomControl";
         export const infoSidebar = "infoSidebar";
-        export const helpSidebar = "helpSidebar";
         export const layersSidebar = "layersSidebar";
         export const draggableResizable = "draggableResizable";
         export const routeStatisticsPopup = "routeStatisticsPopup";

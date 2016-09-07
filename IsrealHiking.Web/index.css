@@ -32,7 +32,7 @@
 
 #sidebar-wrapper .row:hover {
     text-decoration: none;
-    color: #fff;
+    color: #ddd;
     background: rgba(255,255,255,0.3);
 }
 

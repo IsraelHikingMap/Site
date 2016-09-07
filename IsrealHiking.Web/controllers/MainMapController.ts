@@ -51,7 +51,7 @@
             this.createContorl($scope, "file-control");
             this.createContorl($scope, "save-as-control");
             this.createContorl($scope, "edit-osm-control");
-            this.createContorl($scope, "info-help-control");
+            this.createContorl($scope, "info-control");
             this.createContorl($scope, "search-control", "topright");
             this.createContorl($scope, "drawing-control", "topright");
             this.createContorl($scope, "share-control", "topright");
