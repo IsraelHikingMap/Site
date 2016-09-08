@@ -126,6 +126,7 @@
     <None Include="bower.json" />
     <Content Include="scripts\angular-animate.js" />
     <Content Include="scripts\angular-file-saver.bundle.js" />
+    <Content Include="scripts\angular-gettext.js" />
     <Content Include="scripts\angular-local-storage.js" />
     <Content Include="scripts\angular-mocks.js" />
     <Content Include="scripts\angular-toastr.tpls.js" />
@@ -225,6 +226,11 @@
     </Content>
     <Content Include="controllers\infoSidebar.html" />
     <None Include="OSM2012.pubxml" />
+    <Content Include="translations\IsraelHiking.pot" />
+    <Content Include="translations\en-US.json" />
+    <Content Include="translations\en-US.po" />
+    <Content Include="translations\he.json" />
+    <Content Include="translations\he.po" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
@@ -257,6 +263,7 @@
     <TypeScriptCompile Include="directives\DropdownDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="OruxmapsDownload.ts" />
+    <TypeScriptCompile Include="scripts\typings\angular-gettext\angular-gettext.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-ui-bootstrap\angular-ui-bootstrap.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angularjs\angular-animate.d.ts" />
@@ -299,6 +306,7 @@
     <TypeScriptCompile Include="services\FileService.ts" />
     <TypeScriptCompile Include="services\IconsService.ts" />
     <TypeScriptCompile Include="services\layers\LayersService.ts" />
+    <TypeScriptCompile Include="services\ResourcesService.ts" />
     <TypeScriptCompile Include="services\RouteStatisticsService.ts" />
     <TypeScriptCompile Include="services\search\BaseSearchResultsProvider.ts" />
     <TypeScriptCompile Include="services\search\LocalSearchResultsProvider.ts" />
@@ -491,9 +499,7 @@
     <Compile Include="UnityResolver.cs" />
     <Compile Include="WebApiConfig.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="translations\" />
-  </ItemGroup>
+  <ItemGroup />
   <PropertyGroup>
     <VisualStudioVersion Condition="'$(VisualStudioVersion)' == ''">12.0</VisualStudioVersion>
   </PropertyGroup>

@@ -27,6 +27,7 @@
         export const upload = "Upload";
         export const toastr = "toastr";
         export const googleChartApiPromise = "googleChartApiPromise";
+        export const gettextCatalog = "gettextCatalog";
 
         export const parserFactory = "parserFactory";
         export const searchResultsProviderFactory = "searchResultsProviderFactory";
@@ -43,6 +44,7 @@
         export const sidebarService = "sidebarService";
         export const routeStatisticsService = "routeStatisticsService";
         export const dragAndDropService = "dragAndDropService";
+        export const resourcesService = "resourcesService";
     }
 
     export namespace Controllers {

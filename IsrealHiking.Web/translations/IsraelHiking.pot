@@ -1,0 +1,17 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
+
+#: services\ResourcesService.js:21
+msgid "About"
+msgstr ""
+
+#: services\ResourcesService.js:22
+msgid "Help"
+msgstr ""
+
+#: services\ResourcesService.js:23
+msgid "Legend"
+msgstr ""

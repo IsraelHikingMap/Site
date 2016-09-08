@@ -9,7 +9,8 @@ var gulp = require("gulp"),
   filter = require("gulp-filter"),
   less = require("gulp-less"),
   mainBowerFiles = require("main-bower-files"),
-  path = require("path");
+  path = require("path"),
+  gettext = require('gulp-angular-gettext');
 
 var paths = {
     webroot: "./"
@@ -18,6 +19,7 @@ paths.scripts = paths.webroot + "scripts";
 paths.content = paths.webroot + "content";
 paths.images = paths.content + "/images";
 paths.fonts = paths.webroot + "fonts";
+paths.traslations = paths.webroot + "translations/";
 
 
 var config = {
@@ -44,6 +46,18 @@ gulp.task("update-references", function () {
         .pipe(pngFilter)
         .pipe(gulp.dest(paths.images))
         .pipe(pngFilter.restore);
+});
+
+gulp.task("extract_to_pot", function () {
+    return gulp.src(["**/*.html", "**/*.js", "!node_modules/**", "!bower_components/**"])
+        .pipe(gettext.extract("IsraelHiking.pot", {}))
+        .pipe(gulp.dest(paths.traslations));
+});
+
+gulp.task("compile_translations", function () {
+    return gulp.src(paths.traslations + "*.po")
+        .pipe(gettext.compile({format: "json"}))
+        .pipe(gulp.dest(paths.traslations));
 });
 
 gulp.task("default", ["build"]);

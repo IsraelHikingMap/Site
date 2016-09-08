@@ -1,0 +1,26 @@
+# Harel Mazor <harel.mazor@gmail.com>, 2016. #zanata
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Project-Id-Version: \n"
+"MIME-Version: 1.0\n"
+"PO-Revision-Date: 2016-09-08 11:41-0400\n"
+"Last-Translator: Harel Mazor <harel.mazor@gmail.com>\n"
+"Language-Team: Hebrew\n"
+"Language: he\n"
+"X-Generator: Zanata 3.9.5\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+#: services\ResourcesService.js:21
+msgid "About"
+msgstr "אודות"
+
+#: services\ResourcesService.js:22
+msgid "Help"
+msgstr "עזרה"
+
+#: services\ResourcesService.js:23
+msgid "Legend"
+msgstr "מקרא"
+

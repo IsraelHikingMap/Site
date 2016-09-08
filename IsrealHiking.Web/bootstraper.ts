@@ -1,7 +1,12 @@
 ﻿namespace IsraelHiking {
+
+    export interface IRootScope extends angular.IScope {
+        resources: Services.ResourcesService;
+    }
+
     export var app = angular.module("IsraelHiking", [
         "ngFileUpload", "LocalStorageModule", "ui.bootstrap-slider",
-        "angular-loading-bar", "googlechart", "ngAnimate",
+        "angular-loading-bar", "googlechart", "ngAnimate", "gettext",
         "toastr", "ngFileSaver", "ui.bootstrap"]);
 
     L.Icon.Default.imagePath = "content/images/";
@@ -11,6 +16,9 @@
     app.service(Strings.Services.parserFactory, [() => new Services.Parsers.ParserFactory()]);
     app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
     app.service(Strings.Services.routeStatisticsService, [() => new Services.RouteStatisticsService()]);
+    app.service(Strings.Services.resourcesService, [Strings.Services.gettextCatalog,
+        (gettextCatalog: angular.gettext.gettextCatalog) =>
+            new Services.ResourcesService(gettextCatalog)]);
     app.service(Strings.Services.searchResultsProviderFactory, [Strings.Angular.http, Strings.Angular.q, Strings.Services.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Search.SearchResultsProviderFactory($http, $q, parserFactory)]);
@@ -43,7 +51,7 @@
             new Services.Layers.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService, fileService)]);
     app.service(Strings.Services.dragAndDropService, [Strings.Angular.timeout, Strings.Services.mapService, Strings.Services.fileService, Strings.Services.layersService, Strings.Services.toastr,
         ($timeout: angular.ITimeoutService, mapservice: Services.MapService, fileService: Services.FileService, layersService: Services.Layers.LayersService, toastr: Toastr) =>
-        new Services.DragAndDropService($timeout, mapservice, fileService, layersService, toastr)
+            new Services.DragAndDropService($timeout, mapservice, fileService, layersService, toastr)
     ]);
 
     app.controller(Strings.Controllers.mainMapController, [Strings.Angular.scope, Strings.Angular.compile, Strings.Services.mapService,
@@ -51,7 +59,7 @@
         ($scope: Controllers.IMainMapScope, $compile: angular.ICompileService, mapService: Services.MapService,
             hashService: Services.HashService, sidebarService: Services.SidebarService, routeStatisticsService: Services.RouteStatisticsService) =>
             new Controllers.MainMapcontoller($scope, $compile, mapService, hashService, sidebarService, routeStatisticsService)]);
-    
+
     // Directives:
     app.directive(Strings.Directives.dropdown, [() => new Directives.DropdownDirective()]);
     app.directive(Strings.Directives.syncFocusWith, () => new Directives.SyncFocusWithDirective());
@@ -68,9 +76,9 @@
         templateUrl: "controllers/drawing.html"
     } as angular.IDirective));
     app.directive(Strings.Directives.editOsmControl, () => ({
-            controller: Controllers.EditOSMController,
-            templateUrl: "controllers/editOSM.html"
-        } as angular.IDirective));
+        controller: Controllers.EditOSMController,
+        templateUrl: "controllers/editOSM.html"
+    } as angular.IDirective));
     app.directive(Strings.Directives.fileControl, () => ({
         controller: Controllers.FileController,
         templateUrl: "controllers/file.html"
@@ -115,9 +123,12 @@
         templateUrl: "controllers/routeStatistics.html"
     } as angular.IDirective));
 
-    app.run([Strings.Services.googleChartApiPromise, Strings.Services.dragAndDropService, () => {
-        angular.element("link[type*=icon]").detach().appendTo("head");
-    }]);
+    app.run([Strings.Angular.rootScope, Strings.Services.resourcesService, Strings.Services.googleChartApiPromise, Strings.Services.dragAndDropService,
+        ($rootScope: IRootScope, resourcesService: Services.ResourcesService) => {
+            angular.element("link[type*=icon]").detach().appendTo("head");
+            $rootScope.resources = resourcesService;
+            resourcesService.changeLanguage({ languageCode: "he", rtl: false } as Services.ILocale);
+        }]);
 
     app.config($compileProvider => {
         $compileProvider.aHrefSanitizationWhitelist(/[.*facebook][^\s*(whatsapp):]/);

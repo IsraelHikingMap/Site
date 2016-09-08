@@ -1,8 +1,8 @@
 ﻿<div>
     <h3 class="info-header">
-        <a class="cursor-pointer" ng-class="{active: state == 'legend'}" ng-click="state = 'legend'">Legend</a> |
-        <a class="cursor-pointer" ng-class="{active: state == 'help'}" ng-click="state = 'help'">Help</a> |
-        <a class="cursor-pointer" ng-class="{active: state == 'about'}" ng-click="state = 'about'">About</a>
+        <a class="cursor-pointer" ng-class="{active: state == 'legend'}" ng-click="state = 'legend'">{{resources.legend}}</a> |
+        <a class="cursor-pointer" ng-class="{active: state == 'help'}" ng-click="state = 'help'">{{resources.help}}</a> |
+        <a class="cursor-pointer" ng-class="{active: state == 'about'}" ng-click="state = 'about'">{{resources.about}}</a>
     </h3>  
 </div>
 <div ng-switch on="state">

@@ -10,6 +10,7 @@
     "gulp-filter": "*",
     "gulp-less": "*",
     "main-bower-files": "*",
-    "rimraf": "*"
+    "rimraf": "*",
+    "gulp-angular-gettext":  "*"
   }
 }
