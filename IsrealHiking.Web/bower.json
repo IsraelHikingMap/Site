@@ -10,10 +10,10 @@
     "angular-toastr": "*",
     "angular-google-chart": "*",
     "angular-loading-bar": "*",
+    "angular-gettext": "*",
     "angular-bootstrap": "*",
-    "bootstrap": "*",
     "angular-bootstrap-slider": "*",
-    "startbootstrap-simple-sidebar": "*",
+    "bootstrap": "*",
     "jquery": "*",
     "lodash": "*",
     "ng-file-upload": "*",
@@ -35,11 +35,6 @@
       "main": [
         "css/*.min.*",
         "fonts/*.*"
-      ]
-    },
-    "startbootstrap-simple-sidebar": {
-      "main": [
-        "css/simple-sidebar.css"
       ]
     },
     "angular-resizable": {
