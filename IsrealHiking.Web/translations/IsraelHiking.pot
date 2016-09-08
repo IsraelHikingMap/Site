@@ -4,14 +4,155 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Project-Id-Version: \n"
 
-#: services\ResourcesService.js:21
-msgid "About"
+#: services\ResourcesService.js:30
+msgid "4x4 Routing"
 msgstr ""
 
 #: services\ResourcesService.js:22
-msgid "Help"
+msgid "About"
+msgstr ""
+
+#: services\ResourcesService.js:44
+msgid "Add Base Layer"
+msgstr ""
+
+#: services\ResourcesService.js:46
+#: services\ResourcesService.js:48
+msgid "Add Overlay"
+msgstr ""
+
+#: services\ResourcesService.js:43
+msgid "Base Layer Options"
+msgstr ""
+
+#: services\ResourcesService.js:29
+msgid "Bike Routing"
+msgstr ""
+
+#: services\ResourcesService.js:25
+msgid "Clear"
+msgstr ""
+
+#: services\ResourcesService.js:40
+msgid "Delete Layer"
+msgstr ""
+
+#: services\ResourcesService.js:53
+msgid "Delete Route"
+msgstr ""
+
+#: services\ResourcesService.js:26
+msgid "Edit POI"
+msgstr ""
+
+#: services\ResourcesService.js:27
+msgid "Edit Route"
+msgstr ""
+
+#: services\ResourcesService.js:34
+msgid "Edit This Map Using OSM"
+msgstr ""
+
+#: services\ResourcesService.js:60
+msgid "GO!"
+msgstr ""
+
+#: services\ResourcesService.js:56
+msgid "Generate A URL To Share With Your Friends!"
 msgstr ""
 
 #: services\ResourcesService.js:23
+msgid "Help"
+msgstr ""
+
+#: services\ResourcesService.js:28
+msgid "Hike Routing"
+msgstr ""
+
+#: services\ResourcesService.js:41
+msgid "Layers"
+msgstr ""
+
+#: services\ResourcesService.js:24
 msgid "Legend"
+msgstr ""
+
+#: services\ResourcesService.js:35
+msgid "Open a File"
+msgstr ""
+
+#: services\ResourcesService.js:45
+msgid "Overlay Properties"
+msgstr ""
+
+#: services\ResourcesService.js:39
+msgid "Print"
+msgstr ""
+
+#: services\ResourcesService.js:50
+msgid "Reverse Route"
+msgstr ""
+
+#: services\ResourcesService.js:47
+msgid "Route Properties"
+msgstr ""
+
+#: services\ResourcesService.js:32
+msgid "Route Statistics"
+msgstr ""
+
+#: services\ResourcesService.js:38
+msgid "Save"
+msgstr ""
+
+#: services\ResourcesService.js:37
+msgid "Save As..."
+msgstr ""
+
+#: services\ResourcesService.js:36
+msgid "Save Current Work"
+msgstr ""
+
+#: services\ResourcesService.js:49
+msgid "Save Route to File"
+msgstr ""
+
+#: services\ResourcesService.js:54
+msgid "Search"
+msgstr ""
+
+#: services\ResourcesService.js:55
+msgid "Share"
+msgstr ""
+
+#: services\ResourcesService.js:59
+msgid "Show Me Where I am"
+msgstr ""
+
+#: services\ResourcesService.js:31
+msgid "Straight Lines"
+msgstr ""
+
+#: services\ResourcesService.js:42
+msgid "Toggle Advance Settings"
+msgstr ""
+
+#: services\ResourcesService.js:52
+msgid "Toggle Routing Type Per Point"
+msgstr ""
+
+#: services\ResourcesService.js:51
+msgid "Toggle Visibility"
+msgstr ""
+
+#: services\ResourcesService.js:33
+msgid "Undo"
+msgstr ""
+
+#: services\ResourcesService.js:57
+msgid "Zoom In"
+msgstr ""
+
+#: services\ResourcesService.js:58
+msgid "Zoom Out"
 msgstr ""

@@ -1,4 +1,10 @@
-﻿namespace IsraelHiking.Controllers {
+﻿declare namespace L {
+    export namespace control {
+        export function locate(options: any): L.Control;    
+    }
+}
+
+namespace IsraelHiking.Controllers {
     export interface IMainMapScope extends angular.IScope {
         sidebarService: Services.SidebarService;
         getIsSidebarVisible(): boolean;
@@ -37,7 +43,7 @@
                 return routeStatisticsService.isVisible;
             }
 
-            this.map.on("moveend",() => {
+            this.map.on("moveend", () => {
                 hashService.updateLocation(this.map.getCenter(), this.map.getZoom());
             });
         }
@@ -45,7 +51,7 @@
         private createControls = ($scope: angular.IRootScopeService) => {
             this.createContorl($scope, "zoom-control");
 
-            (L as any).control.locate({ compile: this.$compile, scope: $scope.$new(), icon: "fa fa-location-arrow", keepCurrentZoomLevel: true, follow: true }).addTo(this.map);
+            L.control.locate({ compile: this.$compile, scope: $scope.$new(), icon: "fa fa-location-arrow", keepCurrentZoomLevel: true, follow: true }).addTo(this.map);
 
             this.createContorl($scope, "layers-control");
             this.createContorl($scope, "file-control");

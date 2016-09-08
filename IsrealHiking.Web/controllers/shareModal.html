@@ -6,9 +6,9 @@
     <form class="form-horizontal">
         <div class="modal-body">
             <div class="form-group" ng-hide="shareAddress">
-                <label class="control-label col-md-8" uib-tooltip="Generate a URL to share with your friends!">Generate a URL to share with your friends!</label>
+                <label class="control-label col-md-8">{{resources.generateUrlToShareWithYourFriends}}</label>
                 <div class="col-md-4">
-                    <button class="btn btn-success" ng-click="generateUrl()" ng-disabled="isLoading">GO!</button>
+                    <button class="btn btn-success" ng-click="generateUrl()" ng-disabled="isLoading">{{resources.excitedGo}}</button>
                 </div>
             </div>
             <div ng-show="shareAddress">
