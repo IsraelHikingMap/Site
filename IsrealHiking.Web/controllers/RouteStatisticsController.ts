@@ -1,5 +1,5 @@
 ﻿namespace IsraelHiking.Controllers {
-    export interface IRouteStatisticsScope extends angular.IScope {
+    export interface IRouteStatisticsScope extends IRootScope {
         length: string;
         gain: string;
         loss: string;
@@ -17,18 +17,21 @@
         private routeLayer: Services.Layers.RouteLayers.RouteLayer;
         private hoverChartMarker: L.Marker;
         private kmMarkersGroup: L.LayerGroup<L.Marker>;
+        private $compile: angular.ICompileService;
         private routeDataChangedEventHandler: (data: {}) => void;
 
         constructor($scope: IRouteStatisticsScope,
             $window: angular.IWindowService,
             $timeout: angular.ITimeoutService,
+            $compile: angular.ICompileService,
             layersService: Services.Layers.LayersService,
             mapService: Services.MapService,
             routeStatisticsService: Services.RouteStatisticsService) {
             super(mapService);
 
             this.routeLayer = null;
-            this.kmMarkersGroup = L.layerGroup([]);
+            this.kmMarkersGroup = L.layerGroup([] as L.Marker[]);
+            this.$compile = $compile;
             this.initializeChart($scope);
             this.hoverChartMarker = L.marker(mapService.map.getCenter(), { opacity: 0.0 } as L.MarkerOptions);
             this.map.addLayer(this.hoverChartMarker);
@@ -89,8 +92,8 @@
             this.updateChart($scope);
         }
 
-        private toDisplayableUnit = (distance: number): string => {
-            return distance > 1000 ? (distance / 1000.0).toFixed(2) + "Km" : distance.toFixed(0) + "m";
+        private toDisplayableUnit = (distance: number, resources: Services.ResourcesService): string => {
+            return distance > 1000 ? (distance / 1000.0).toFixed(2) + resources.kmUnit : distance.toFixed(0) + resources.meterUnit;
         }
 
         private createKmMarker = (latlng: L.LatLng, markerNumber: number): L.Marker => {
@@ -145,7 +148,7 @@
                         { v: point.latlng.lng } as google.visualization.DataObjectCell,
                         { v: point.y } as google.visualization.DataObjectCell,
                         { v: 0 } as google.visualization.DataObjectCell,
-                        { v: `<div class="chart-tooltip">Distance:&nbsp;${point.x.toFixed(2)}&nbsp;Km<br/>Height:&nbsp;${point.y}&nbsp;m</div>` } as google.visualization.DataObjectCell]
+                        { v: this.getChartTooltip($scope, point) } as google.visualization.DataObjectCell]
                 } as google.visualization.DataObjectRow);
             }
             let routeColor = this.routeLayer.getRouteProperties().pathOptions.color;
@@ -158,12 +161,17 @@
                     max: max > 0 ? max * 1.1 : max * 0.9
                 } as google.visualization.ChartViewWindow;
             }
-            $scope.length = this.toDisplayableUnit(statistics.length);
-            $scope.gain = this.toDisplayableUnit(statistics.gain);
-            $scope.loss = this.toDisplayableUnit(statistics.loss);
+            $scope.length = this.toDisplayableUnit(statistics.length, $scope.resources);
+            $scope.gain = this.toDisplayableUnit(statistics.gain, $scope.resources);
+            $scope.loss = this.toDisplayableUnit(statistics.loss, $scope.resources);
 
             var icon = Services.IconsService.createRoundIcon(routeColor);
             this.hoverChartMarker.setIcon(icon);
+        }
+
+        private getChartTooltip($scope: IRouteStatisticsScope, point: Services.Layers.RouteLayers.IRouteStatisticsPoint) {
+            return `<div class="chart-tooltip">${$scope.resources.distance}:&nbsp;${point.x.toFixed(2)}&nbsp;${$scope.resources.kmUnit}<br/>` +
+                    `${$scope.resources.height}:&nbsp;${point.y}&nbsp;${$scope.resources.meterUnit}</div>`;
         }
 
         private initializeChart = ($scope: IRouteStatisticsScope) => {
@@ -174,11 +182,11 @@
                 cols: [
                     {
                         id: "distance",
-                        label: "Distance",
+                        label: $scope.resources.distance,
                         type: "number"
                     } as google.visualization.DataObjectColumn, {
                         id: "height",
-                        label: "Height",
+                        label: $scope.resources.height,
                         type: "number"
                     } as google.visualization.DataObjectColumn, {
                         id: "lat",
@@ -227,7 +235,7 @@
                 vAxis: {
                     baselineColor: color,
                     textStyle: { color: color },
-                    title: "Height (m)",
+                    title: $scope.resources.heightInMeters,
                     titleTextStyle: { color: color },
                     viewWindowMode: "explicit",
                     gridlines: {
@@ -237,7 +245,7 @@
                 hAxis: {
                     baselineColor: color,
                     textStyle: { color: color },
-                    title: "Distance (Km)",
+                    title: $scope.resources.distanceInKm,
                     titleTextStyle: { color: color },
                     format: "0.00",
                     gridlines: {

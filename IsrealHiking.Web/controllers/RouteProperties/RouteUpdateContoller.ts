@@ -22,6 +22,7 @@
             $scope.routeProperties = angular.copy(routeLayer.getRouteProperties());
             $scope.isNew = false;
             $scope.isReversed = false;
+            $scope.title = $scope.resources.routeProperties;
 
             $scope.saveRoute = (e: Event) => {
                 if ($scope.routeProperties.name !== routeLayer.getRouteProperties().name && layersService.isNameAvailable($scope.routeProperties.name) === false) {

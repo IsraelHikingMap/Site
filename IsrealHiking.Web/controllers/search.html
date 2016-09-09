@@ -1,5 +1,5 @@
 ﻿<div class="leaflet-bar" ng-hide="isShowingSearch">
-    <a class="cursor-pointer" ng-click="toggleSearchBar($event)" uib-tooltip="{{resources.search}}" tooltip-placement="left"><i class="fa fa-search fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleSearchBar($event)" uib-tooltip="{{resources.search}}" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-search fa-lg"></i></a>
 </div>
 <div ng-show="isShowingSearch" class="search-results-panel ihm-panel" disable-map-movement ng-keydown="keyDown($event)" tabindex="0">
     <table class="table-hover">
@@ -7,7 +7,7 @@
             <tr>
                 <th>
                     <div class="input-group">
-                        <input type="text" ng-model="searchTerm" ng-change="search(searchTerm)" class="form-control" placeholder="Search..." dir="{{isHebrew ? 'rtl' : 'ltr'}}" sync-focus-with="isShowingSearch" ng-click="ignoreClick($event)" />
+                        <input type="text" ng-model="searchTerm" ng-change="search(searchTerm)" class="form-control" placeholder="{{resources.searchPlaceHolder}}" dir="{{isHebrew ? 'rtl' : 'ltr'}}" sync-focus-with="isShowingSearch" ng-click="ignoreClick($event)" />
                         <a class="btn btn-default input-group-addon" ng-click="toggleSearchBar($event)"><i class="fa fa-search fa-lg"></i></a>
                     </div>
                 </th>

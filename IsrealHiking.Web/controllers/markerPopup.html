@@ -4,18 +4,18 @@
             <textarea rows="2" dir="rtl" class="form-control" type="text" ng-model="title" style="min-width: 100px" ng-change="updateWikiCoordinates(title)" />
         </div>
         <div class="form-group">
-            <a class="btn btn-default cursor-pointer input-group-addon" ng-click="setTitle(title)"><i class="fa fa-check"></i></a>
-            <a class="btn btn-danger cursor-pointer input-group-addon" ng-click="remove()"><i class="fa fa-trash"></i></a>
-            <a class="btn btn-warning cursor-pointer input-group-addon" ng-click="showCoordinates = !showCoordinates"><i class="fa fa-globe"></i></a>
+            <a class="btn btn-success cursor-pointer input-group-addon" ng-click="setTitle(title)" uib-tooltip="{{resources.save}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa fa-check"></i></a>
+            <a class="btn btn-danger cursor-pointer input-group-addon" ng-click="remove()" uib-tooltip="{{resources.deletePoi}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa fa-trash"></i></a>
+            <a class="btn btn-warning cursor-pointer input-group-addon" ng-click="showCoordinates = !showCoordinates" uib-tooltip="{{resources.showCoordinates}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa fa-globe"></i></a>
         </div>
     </form>
     <div ng-show="showCoordinates">
         <p>
-            Lat {{latLng.lat | number }}°, Lon {{latLng.lng | number}}°<br />
-            E {{itmCoordinates.East}} m, N {{itmCoordinates.North}} m
+            {{resources.latitudeAbbreviation}} {{latLng.lat | number }}°, {{resources.longitudeAbbreviation}} {{latLng.lng | number}}°<br />
+            {{resources.eastAbbreviation}} {{itmCoordinates.East}} {{resources.meterUnit}}, {{resources.northAbbreviation}} {{itmCoordinates.North}} {{resources.meterUnit}}
         </p>
         <p class="chome-wordwrap-fix">
-            Coordinates for <a href="https://he.wikipedia.org/">Wikipedia</a>: {{wikiCoordinatesString}}
+             <span ng-bind-html="resources.coordinatesForWikipedia"></span> {{wikiCoordinatesString}}
         </p>
     </div>
 </div>

@@ -5,7 +5,7 @@
             layersService: Services.Layers.LayersService,
             toastr: Toastr) {
             super($scope, mapService, layersService, toastr);
-            $scope.title = "Add Overlay";
+            $scope.title = $scope.resources.addOverlay;
             $scope.isNew = true;
         }
 

@@ -1,7 +1,7 @@
 ﻿<div class="modal-content">
     <div class="modal-header">
         <button type="button" class="close" aria-label="Close" ng-click="$close()"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title">Share Your Work</h4>
+        <h4 class="modal-title">{{resources.shareYourWork}}</h4>
     </div>
     <form class="form-horizontal">
         <div class="modal-body">
@@ -26,29 +26,29 @@
                 </div>
                 <hr />
                 <div class="form-group">
-                    <label class="control-label col-md-2">Embed Size </label>
+                    <label class="control-label col-md-2">{{resources.embedSize}} </label>
                     <div class="col-md-4">
                         <select ng-model="size" class="form-control" ng-change="setSize(size)">
-                            <option>Small</option>
-                            <option>Medium</option>
-                            <option>Large</option>
-                            <option>Custom</option>
+                            <option>{{resources.small}}</option>
+                            <option>{{resources.medium}}</option>
+                            <option>{{resources.large}}</option>
+                            <option>{{resources.custom}}</option>
                         </select>
                     </div>
                 </div>
-                <div class="form-group" ng-show="size == 'Custom'">
-                    <label class="control-label col-md-2">Width</label>
+                <div class="form-group" ng-show="size == resources.custom">
+                    <label class="control-label col-md-2">{{resources.width}}</label>
                     <div class="col-md-4">
                         <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)" />
                     </div>
-                    <label class="control-label col-md-2">Height</label>
+                    <label class="control-label col-md-2">{{resources.height}}</label>
                     <div class="col-md-4">
                         <input type="number" ng-model="height" class="form-control" ng-change="updateEmbedText(width, height)" />
                     </div>
                 </div>
-                <p class="col-md-offset-2 col-md-10">Copy and paste the code below in order to show this map on your webpage.</p>
+                <p class="col-md-offset-2 col-md-10">{{resources.copyPasteEmbedExplenation}}</p>
                 <div class="form-group">
-                    <label class="control-label col-md-2">HTML</label>
+                    <label class="control-label col-md-2">{{resources.HTML}}</label>
                     <div class="col-md-10">
                         <textarea rows="3" class="form-control" ng-model="embedText" />
                     </div>
@@ -56,8 +56,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-warning" ng-show="shareAddress" ng-click="clearShareAddress()">Clear</button>
-            <button type="button" class="btn btn-default" ng-click="$close()">Close</button>
+            <button type="button" class="btn btn-warning" ng-show="shareAddress" ng-click="clearShareAddress()">{{resources.clear}}</button>
+            <button type="button" class="btn btn-default" ng-click="$close()">{{resources.close}}</button>
         </div>
     </form>
 </div>

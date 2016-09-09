@@ -1,5 +1,9 @@
 ﻿namespace IsraelHiking {
 
+    // HM TODO: fix route properties windows.
+    // HM TODO: fix label of marker
+    // HM TODO: fix help
+
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;
     }
@@ -16,9 +20,9 @@
     app.service(Strings.Services.parserFactory, [() => new Services.Parsers.ParserFactory()]);
     app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
     app.service(Strings.Services.routeStatisticsService, [() => new Services.RouteStatisticsService()]);
-    app.service(Strings.Services.resourcesService, [Strings.Services.gettextCatalog,
-        (gettextCatalog: angular.gettext.gettextCatalog) =>
-            new Services.ResourcesService(gettextCatalog)]);
+    app.service(Strings.Services.resourcesService, [Strings.Angular.sce, Strings.Services.gettextCatalog,
+        ($sce: angular.ISCEService, gettextCatalog: angular.gettext.gettextCatalog) =>
+            new Services.ResourcesService($sce, gettextCatalog)]);
     app.service(Strings.Services.searchResultsProviderFactory, [Strings.Angular.http, Strings.Angular.q, Strings.Services.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Search.SearchResultsProviderFactory($http, $q, parserFactory)]);
@@ -127,7 +131,7 @@
         ($rootScope: IRootScope, resourcesService: Services.ResourcesService) => {
             angular.element("link[type*=icon]").detach().appendTo("head");
             $rootScope.resources = resourcesService;
-            resourcesService.changeLanguage({ languageCode: "he", rtl: false } as Services.ILocale);
+            resourcesService.changeLanguage({ languageCode: "he", rtl: true } as Services.ILocale);
         }]);
 
     app.config($compileProvider => {

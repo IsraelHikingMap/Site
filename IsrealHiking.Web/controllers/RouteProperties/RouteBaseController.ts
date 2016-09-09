@@ -1,8 +1,9 @@
 ﻿namespace IsraelHiking.Controllers.RouteProperties {
-    export interface IRouteBaseScope extends angular.IScope {
+    export interface IRouteBaseScope extends IRootScope {
         routeProperties: Services.Layers.RouteLayers.IRouteProperties;
         colors: { key: string, value: string }[];
         isNew: boolean;
+        title: string;
         getColorName(colorValue: string): string;
         saveRoute(e: Event);
     }

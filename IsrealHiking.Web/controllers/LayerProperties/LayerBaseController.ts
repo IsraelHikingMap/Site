@@ -1,5 +1,5 @@
 ﻿namespace IsraelHiking.Controllers.LayerProperties {
-    export interface ILayerBaseScope extends angular.IScope {
+    export interface ILayerBaseScope extends IRootScope {
         title: string;
         key: string;
         address: string;

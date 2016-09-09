@@ -162,6 +162,7 @@ You can find the project at: https://github.com/domoritz/leaflet-locatecontrol
             this._link = L.DomUtil.create('a', 'leaflet-bar-part leaflet-bar-part-single cursor-pointer', container);
             this._link.dataset.uibTooltip = '{{resources.showMeWhereIAm}}';
             this._link.dataset.tooltipPlacement = "right";
+            this._link.dataset.tooltipAppendToBody = "true";
             this._icon = L.DomUtil.create(this.options.iconElementTag, this.options.icon, this.options.compile(this._link)(this.options.scope)[0]);
 
             L.DomEvent

@@ -1,6 +1,6 @@
 ﻿namespace IsraelHiking.Controllers {
 
-    export interface IShareScope extends angular.IScope {
+    export interface IShareScope extends IRootScope {
         title: string;
         shareAddress: string;
         whatappShareAddress: string;
@@ -35,7 +35,7 @@
             $scope.title = "";
             $scope.width = 400;
             $scope.height = 300;
-            $scope.size = "Small";
+            $scope.size = $scope.resources.small;
             $scope.isLoading = false;
 
             $scope.clearShareAddress = () => {

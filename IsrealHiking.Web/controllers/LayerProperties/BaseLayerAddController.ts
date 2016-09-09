@@ -5,7 +5,7 @@
             layersService: Services.Layers.LayersService,
             toastr: Toastr) {
             super($scope, mapService, layersService, toastr);
-            $scope.title = "Add Base Layer";
+            $scope.title = $scope.resources.addBaseLayer;
             $scope.isNew = true;
         }
 

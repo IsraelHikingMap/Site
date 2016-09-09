@@ -20,6 +20,7 @@
         export const window = "$window";
         export const timeout = "$timeout";
         export const document = "$document";
+        export const sce = "$sce";
     }
 
     export namespace Services {

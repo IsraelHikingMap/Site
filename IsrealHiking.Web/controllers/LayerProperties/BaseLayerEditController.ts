@@ -5,7 +5,7 @@
             layersService: Services.Layers.LayersService,
             toastr: Toastr) {
             super($scope, mapService, layersService, toastr);
-            $scope.title = "Base Layer Properties";
+            $scope.title = $scope.resources.baseLayerProperties;
             $scope.isNew = false;
             $scope.key = $scope.layer.key;
             $scope.maxZoom = $scope.layer.maxZoom;

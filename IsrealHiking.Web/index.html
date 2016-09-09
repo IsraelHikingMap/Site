@@ -38,6 +38,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="content/leaflet.css" />
     <link rel="stylesheet" href="content/bootstrap.min.css" />
+    <link rel="stylesheet" href="//cdn.rawgit.com/morteza/bootstrap-rtl/v3.3.4/dist/css/bootstrap-rtl.min.css">
     <link rel="stylesheet" href="content/font-awesome.min.css" />
     <link rel="stylesheet" href="content/L.Control.Locate.css" />
     <link rel="stylesheet" href="content/angular-toastr.css" />
@@ -56,7 +57,7 @@
     <script src="scripts/jquery.js"></script>
     <script src="scripts/angular.js"></script>
 </head>
-<body ng-controller="mainMapController">
+<body ng-controller="mainMapController" ng-class="{flip: resources.direction == 'rtl'}" dir="{{resources.direction}}">
     <div id="wrapper" ng-class="{toggled: getIsSidebarVisible()}" class="full-page">
         <div id="sidebar-wrapper">
             <div class="container-fluid">

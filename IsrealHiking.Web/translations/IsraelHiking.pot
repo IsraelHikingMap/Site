@@ -8,6 +8,10 @@ msgstr ""
 msgid "4x4 Routing"
 msgstr ""
 
+#: services\ResourcesService.js:96
+msgid "A name to be displayed in the layers control"
+msgstr ""
+
 #: services\ResourcesService.js:22
 msgid "About"
 msgstr ""
@@ -17,28 +21,91 @@ msgid "Add Base Layer"
 msgstr ""
 
 #: services\ResourcesService.js:46
-#: services\ResourcesService.js:48
 msgid "Add Overlay"
 msgstr ""
 
+#: services\ResourcesService.js:48
+msgid "Add Route"
+msgstr ""
+
+#: services\ResourcesService.js:62
+msgid "Address"
+msgstr ""
+
 #: services\ResourcesService.js:43
-msgid "Base Layer Options"
+msgid "Base Layer Properties"
+msgstr ""
+
+#: services\ResourcesService.js:99
+msgid "Basic instructions on using this site"
 msgstr ""
 
 #: services\ResourcesService.js:29
 msgid "Bike Routing"
 msgstr ""
 
+#: services\ResourcesService.js:115
+msgid "Change routing from single segment to all segments"
+msgstr ""
+
 #: services\ResourcesService.js:25
 msgid "Clear"
+msgstr ""
+
+#: services\ResourcesService.js:106
+msgid "Clear all points"
+msgstr ""
+
+#: services\ResourcesService.js:91
+msgid "Close"
+msgstr ""
+
+#: services\ResourcesService.js:67
+msgid "Color"
+msgstr ""
+
+#: services\ResourcesService.js:70
+msgid "Coordinates for {{link}}Wikipedia{{linkend}}"
+msgstr ""
+
+#: services\ResourcesService.js:89
+msgid "Copy and paste the code below in order to show this map on your webpage."
+msgstr ""
+
+#: services\ResourcesService.js:88
+msgid "Custom"
 msgstr ""
 
 #: services\ResourcesService.js:40
 msgid "Delete Layer"
 msgstr ""
 
+#: services\ResourcesService.js:68
+msgid "Delete POI"
+msgstr ""
+
 #: services\ResourcesService.js:53
 msgid "Delete Route"
+msgstr ""
+
+#: services\ResourcesService.js:116
+msgid "Delete a layer"
+msgstr ""
+
+#: services\ResourcesService.js:78
+msgid "Distance"
+msgstr ""
+
+#: services\ResourcesService.js:82
+msgid "Distance (Km)"
+msgstr ""
+
+#: services\ResourcesService.js:126
+msgid "Download {{link}}Offline maps{{linkend}} directly to your android device for use with the OruxMaps application"
+msgstr ""
+
+#: services\ResourcesService.js:93
+msgid "E"
 msgstr ""
 
 #: services\ResourcesService.js:26
@@ -53,32 +120,144 @@ msgstr ""
 msgid "Edit This Map Using OSM"
 msgstr ""
 
+#: services\ResourcesService.js:110
+msgid "Edit the map in OSM"
+msgstr ""
+
+#: services\ResourcesService.js:84
+msgid "Embed Size"
+msgstr ""
+
 #: services\ResourcesService.js:60
 msgid "GO!"
+msgstr ""
+
+#: services\ResourcesService.js:73
+msgid "Gain"
 msgstr ""
 
 #: services\ResourcesService.js:56
 msgid "Generate A URL To Share With Your Friends!"
 msgstr ""
 
+#: services\ResourcesService.js:90
+msgid "HTML"
+msgstr ""
+
+#: services\ResourcesService.js:128
+msgid "Harel and Zeev"
+msgstr ""
+
+#: services\ResourcesService.js:79
+msgid "Height"
+msgstr ""
+
+#: services\ResourcesService.js:81
+msgid "Height (m)"
+msgstr ""
+
 #: services\ResourcesService.js:23
 msgid "Help"
+msgstr ""
+
+#: services\ResourcesService.js:122
+msgid "Helpful links:"
+msgstr ""
+
+#: services\ResourcesService.js:113
+msgid "Hide layer"
 msgstr ""
 
 #: services\ResourcesService.js:28
 msgid "Hike Routing"
 msgstr ""
 
+#: services\ResourcesService.js:123
+msgid "Interact with other users in our {{link}}Facebook group{{linkend}}"
+msgstr ""
+
+#: services\ResourcesService.js:77
+msgid "Km"
+msgstr ""
+
+#: services\ResourcesService.js:75
+msgid "Km POIs"
+msgstr ""
+
+#: services\ResourcesService.js:87
+msgid "Large"
+msgstr ""
+
+#: services\ResourcesService.js:94
+msgid "Lat"
+msgstr ""
+
 #: services\ResourcesService.js:41
 msgid "Layers"
+msgstr ""
+
+#: services\ResourcesService.js:111
+msgid "Layers controller (left side)"
+msgstr ""
+
+#: services\ResourcesService.js:125
+msgid "Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}"
 msgstr ""
 
 #: services\ResourcesService.js:24
 msgid "Legend"
 msgstr ""
 
+#: services\ResourcesService.js:72
+msgid "Length"
+msgstr ""
+
+#: services\ResourcesService.js:95
+msgid "Lon"
+msgstr ""
+
+#: services\ResourcesService.js:74
+msgid "Loss"
+msgstr ""
+
+#: services\ResourcesService.js:64
+msgid "Max Zoom"
+msgstr ""
+
+#: services\ResourcesService.js:86
+msgid "Medium"
+msgstr ""
+
+#: services\ResourcesService.js:63
+msgid "Min Zoom"
+msgstr ""
+
+#: services\ResourcesService.js:101
+msgid "Move the map to your current location"
+msgstr ""
+
+#: services\ResourcesService.js:92
+msgid "N"
+msgstr ""
+
+#: services\ResourcesService.js:61
+msgid "Name"
+msgstr ""
+
+#: services\ResourcesService.js:66
+msgid "Opacity"
+msgstr ""
+
 #: services\ResourcesService.js:35
 msgid "Open a File"
+msgstr ""
+
+#: services\ResourcesService.js:102
+msgid "Open a file"
+msgstr ""
+
+#: services\ResourcesService.js:114
+msgid "Open layer properties"
 msgstr ""
 
 #: services\ResourcesService.js:45
@@ -89,8 +268,20 @@ msgstr ""
 msgid "Print"
 msgstr ""
 
+#: services\ResourcesService.js:104
+msgid "Print the map"
+msgstr ""
+
+#: services\ResourcesService.js:124
+msgid "Request features and report bugs on our {{link}}Github project{{linkend}} page"
+msgstr ""
+
 #: services\ResourcesService.js:50
 msgid "Reverse Route"
+msgstr ""
+
+#: services\ResourcesService.js:117
+msgid "Reverse route's direction"
 msgstr ""
 
 #: services\ResourcesService.js:47
@@ -117,6 +308,14 @@ msgstr ""
 msgid "Save Route to File"
 msgstr ""
 
+#: services\ResourcesService.js:118
+msgid "Save layer properties"
+msgstr ""
+
+#: services\ResourcesService.js:103
+msgid "Save your work to a file"
+msgstr ""
+
 #: services\ResourcesService.js:54
 msgid "Search"
 msgstr ""
@@ -125,28 +324,92 @@ msgstr ""
 msgid "Share"
 msgstr ""
 
+#: services\ResourcesService.js:97
+msgid "Share Your Work"
+msgstr ""
+
+#: services\ResourcesService.js:109
+msgid "Share your work"
+msgstr ""
+
+#: services\ResourcesService.js:69
+msgid "Show Coordinates"
+msgstr ""
+
 #: services\ResourcesService.js:59
 msgid "Show Me Where I am"
+msgstr ""
+
+#: services\ResourcesService.js:85
+msgid "Small"
 msgstr ""
 
 #: services\ResourcesService.js:31
 msgid "Straight Lines"
 msgstr ""
 
+#: services\ResourcesService.js:127
+msgid "Thank you for your support!"
+msgstr ""
+
+#: services\ResourcesService.js:100
+msgid "This dialog"
+msgstr ""
+
+#: services\ResourcesService.js:121
+msgid "This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit."
+msgstr ""
+
 #: services\ResourcesService.js:42
-msgid "Toggle Advance Settings"
+msgid "Toggle Advanced Settings"
+msgstr ""
+
+#: services\ResourcesService.js:107
+msgid "Toggle POI drawing"
 msgstr ""
 
 #: services\ResourcesService.js:52
-msgid "Toggle Routing Type Per Point"
+msgid "Toggle Routing Type Per Segment"
 msgstr ""
 
 #: services\ResourcesService.js:51
 msgid "Toggle Visibility"
 msgstr ""
 
+#: services\ResourcesService.js:112
+msgid "Toggle advanced layers usage"
+msgstr ""
+
+#: services\ResourcesService.js:105
+msgid "Toggle drawing. Use escape to stop, and click to edit a point"
+msgstr ""
+
+#: services\ResourcesService.js:83
+msgid "Type to search..."
+msgstr ""
+
 #: services\ResourcesService.js:33
 msgid "Undo"
+msgstr ""
+
+#: services\ResourcesService.js:108
+msgid "Undo last action"
+msgstr ""
+
+#: services\ResourcesService.js:80
+msgid "Width"
+msgstr ""
+
+#: services\ResourcesService.js:65
+msgid "Width (px)"
+msgstr ""
+
+#: services\ResourcesService.js:71
+msgid "Wikipedia"
+msgstr ""
+
+#: services\ResourcesService.js:119
+msgid "You can use the following links"
 msgstr ""
 
 #: services\ResourcesService.js:57
@@ -155,4 +418,8 @@ msgstr ""
 
 #: services\ResourcesService.js:58
 msgid "Zoom Out"
+msgstr ""
+
+#: services\ResourcesService.js:76
+msgid "m"
 msgstr ""

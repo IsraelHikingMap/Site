@@ -13,6 +13,7 @@
             super($scope, mapService);
             $scope.routeProperties = routeLayerFactory.createRoute(layersService.createRouteName()).properties;
             $scope.isNew = true;
+            $scope.title = $scope.resources.addRoute;
 
             $scope.saveRoute = (e: Event) => {
                 if (layersService.isNameAvailable($scope.routeProperties.name) === false) {
