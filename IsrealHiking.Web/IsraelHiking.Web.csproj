@@ -27,6 +27,7 @@
     <Content Include="common\EventHelper.js" />
     <Content Include="common\Urls.js" />
     <Content Include="content\angular-toastr.css" />
+    <Content Include="content\bootstrap-rtl.css" />
     <Content Include="content\bootstrap-slider.css" />
     <Content Include="content\bootstrap-theme.min.css" />
     <Content Include="content\bootstrap.min.css" />
@@ -85,6 +86,8 @@
     <Content Include="controllers\FileController.js" />
     <Content Include="controllers\fileSaveAs.css" />
     <Content Include="controllers\info.css" />
+    <Content Include="controllers\language.html" />
+    <Content Include="controllers\languageModal.html" />
     <Content Include="controllers\routePointPopup.html" />
     <Content Include="controllers\RouteProperties\routeProperties.css" />
     <Content Include="controllers\routeStatistics.css" />
@@ -245,6 +248,7 @@
     <TypeScriptCompile Include="bootstraper.ts" />
     <TypeScriptCompile Include="common\EventHelper.ts" />
     <TypeScriptCompile Include="common\Urls.ts" />
+    <TypeScriptCompile Include="controllers\LanguageController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\BaseLayerAddController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\LayerBaseController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\BaseLayerEditController.ts" />

@@ -12,7 +12,7 @@
             <span>{{baseLayer.key}}</span>
         </div>
         <div class="col-xs-3" ng-show="advanced && baseLayer.isEditable">
-            <span class="pull-right" ng-click="editBaseLayer(baseLayer, $event)" uib-tooltip="{{resources.baseLayerProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
+            <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editBaseLayer(baseLayer, $event)" uib-tooltip="{{resources.baseLayerProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
         </div>
     </div>
 </div>
@@ -21,7 +21,7 @@
         <span>{{resources.addBaseLayer}}</span>
     </div>
     <div class="col-xs-3">
-        <span class="pull-right" uib-tooltip="{{resources.addBaseLayer}}" tooltip-placement="{{resources.start}}"><i class="fa fa-plus"></i></span>
+        <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" uib-tooltip="{{resources.addBaseLayer}}" tooltip-placement="{{resources.start}}"><i class="fa fa-plus"></i></span>
     </div>
 </div>
 <hr class="divider" />
@@ -35,7 +35,7 @@
             <span>{{overlay.key}}</span>
         </div>
         <div class="col-xs-3" ng-show="advanced && overlay.isEditable">
-            <span class="pull-right" ng-click="editOverlay(overlay, $event)" uib-tooltip="{{resources.overlayProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
+            <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editOverlay(overlay, $event)" uib-tooltip="{{resources.overlayProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
         </div>
     </div>
 </div>
@@ -45,7 +45,7 @@
         <span>{{resources.addOverlay}}</span>
     </div>
     <div class="col-xs-3">
-        <span class="pull-right" uib-tooltip="{{resources.addOverlay}}" tooltip-placement="{{resources.start}}"><i class="fa fa-plus"></i></span>
+        <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" uib-tooltip="{{resources.addOverlay}}" tooltip-placement="{{resources.start}}"><i class="fa fa-plus"></i></span>
     </div>
 </div>
 <hr class="divider" />
@@ -61,7 +61,7 @@
             <span ng-class="'fg-' + getRouteColorName(route)">{{getRouteName(route)}}</span>
         </div>
         <div class="col-xs-3">
-            <span class="pull-right" ng-click="editRoute(getRouteName(route), $event)" uib-tooltip="{{resources.routeProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench"></i></span>
+            <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editRoute(getRouteName(route), $event)" uib-tooltip="{{resources.routeProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench"></i></span>
         </div>
     </div>
 </div>
@@ -70,6 +70,6 @@
         <span>{{resources.addRoute}}</span>
     </div>
     <div class="col-xs-3">
-        <span class="pull-right" uib-tooltip="{{resources.addRoute}}" tooltip-placement="{{resources.start}}"><i class="fa fa-plus"></i></span>
+        <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" uib-tooltip="{{resources.addRoute}}" tooltip-placement="{{resources.start}}"><i class="fa fa-plus"></i></span>
     </div>
 </div>

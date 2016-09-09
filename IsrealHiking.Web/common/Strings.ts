@@ -66,6 +66,7 @@
         export const shareControl = "shareControl";
         export const saveAsControl = "saveAsControl";
         export const zoomControl = "zoomControl";
+        export const languageControl = "languageControl";
         export const infoSidebar = "infoSidebar";
         export const layersSidebar = "layersSidebar";
         export const draggableResizable = "draggableResizable";

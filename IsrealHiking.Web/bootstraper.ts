@@ -1,8 +1,8 @@
 ﻿namespace IsraelHiking {
 
-    // HM TODO: fix route properties windows.
     // HM TODO: fix label of marker
-    // HM TODO: fix help
+    // HM TODO: fix help - remove white spaces?
+    // HM TODO: fix height grash drag etc
 
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;
@@ -20,9 +20,9 @@
     app.service(Strings.Services.parserFactory, [() => new Services.Parsers.ParserFactory()]);
     app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
     app.service(Strings.Services.routeStatisticsService, [() => new Services.RouteStatisticsService()]);
-    app.service(Strings.Services.resourcesService, [Strings.Angular.sce, Strings.Services.gettextCatalog,
-        ($sce: angular.ISCEService, gettextCatalog: angular.gettext.gettextCatalog) =>
-            new Services.ResourcesService($sce, gettextCatalog)]);
+    app.service(Strings.Services.resourcesService, [Strings.Angular.sce, Strings.Services.localStorageService, Strings.Services.gettextCatalog,
+        ($sce: angular.ISCEService, localstorageService: angular.local.storage.ILocalStorageService, gettextCatalog: angular.gettext.gettextCatalog) =>
+            new Services.ResourcesService($sce, localstorageService, gettextCatalog)]);
     app.service(Strings.Services.searchResultsProviderFactory, [Strings.Angular.http, Strings.Angular.q, Strings.Services.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Search.SearchResultsProviderFactory($http, $q, parserFactory)]);
@@ -111,6 +111,10 @@
         controller: Controllers.ZoomController,
         templateUrl: "controllers/zoom.html"
     } as angular.IDirective));
+    app.directive(Strings.Directives.languageControl, () => ({
+        controller: Controllers.LanguageController,
+        templateUrl: "controllers/language.html"
+    } as angular.IDirective));
     app.directive(Strings.Directives.infoSidebar, () => ({
         controller: Controllers.InfoController,
         templateUrl: "controllers/infoSidebar.html"
@@ -131,7 +135,6 @@
         ($rootScope: IRootScope, resourcesService: Services.ResourcesService) => {
             angular.element("link[type*=icon]").detach().appendTo("head");
             $rootScope.resources = resourcesService;
-            resourcesService.changeLanguage({ languageCode: "he", rtl: true } as Services.ILocale);
         }]);
 
     app.config($compileProvider => {

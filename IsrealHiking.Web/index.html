@@ -38,7 +38,7 @@
     <!-- Stylesheets -->
     <link rel="stylesheet" href="content/leaflet.css" />
     <link rel="stylesheet" href="content/bootstrap.min.css" />
-    <link rel="stylesheet" href="//cdn.rawgit.com/morteza/bootstrap-rtl/v3.3.4/dist/css/bootstrap-rtl.min.css">
+    <link rel="stylesheet" ng-href="{{resources.direction == 'rtl' ? 'content/bootstrap-rtl.css' : ''}} ">
     <link rel="stylesheet" href="content/font-awesome.min.css" />
     <link rel="stylesheet" href="content/L.Control.Locate.css" />
     <link rel="stylesheet" href="content/angular-toastr.css" />
@@ -156,6 +156,7 @@
     <script src="controllers/EditOSMController.js"></script>
     <script src="controllers/FileController.js"></script>
     <script src="controllers/InfoController.js"></script>
+    <script src="controllers/LanguageController.js"></script>
     <script src="controllers/LayersController.js"></script>
     <script src="controllers/MarkerPopupController.js"></script>
     <script src="controllers/MainMapController.js"></script>

@@ -1,14 +1,20 @@
 ﻿// link to translations: https://translate.zanata.org/iteration/view/IsraelHiking/Main
 namespace IsraelHiking.Services {
 
-    export interface ILocale {
-        languageCode: string;
+    export interface ILanguage {
+        code: string;
         rtl: boolean;
+        label: string;
     }
+
+    const languageKey = "language";
 
     export class ResourcesService {
         private $sce: angular.ISCEService;
         private gettextCatalog: angular.gettext.gettextCatalog;
+        private currentLanguage: ILanguage;
+        private localStorageService: angular.local.storage.ILocalStorageService;
+
         public direction: string;
         public start: string;
         public end: string;
@@ -90,6 +96,7 @@ namespace IsraelHiking.Services {
         public longitudeAbbreviation: string;
         public layerNamePlaceHolder: string;
         public shareYourWork: string;
+        public language: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -122,12 +129,14 @@ namespace IsraelHiking.Services {
         public infoFooterThanks: string;
         public infoFooterHarelAndZeev: string;
 
-
         constructor($sce: angular.ISCEService,
+            localStorageService: angular.local.storage.ILocalStorageService,
             gettextCatalog: angular.gettext.gettextCatalog) {
             this.$sce = $sce;
             this.gettextCatalog = gettextCatalog;
-            this.setRtl(false);
+            this.localStorageService = localStorageService;
+            this.currentLanguage = localStorageService.get(languageKey) as ILanguage || { code: "en-US", rtl: false, label: "English"};
+            this.setLanguage(this.currentLanguage);
         }
 
         private setRtl = (rtl: boolean) => {
@@ -142,11 +151,15 @@ namespace IsraelHiking.Services {
             }
         }
 
-        public changeLanguage = (locale: ILocale): angular.IPromise<any> => {
-            this.setRtl(locale.rtl);
-            this.gettextCatalog.setCurrentLanguage(locale.languageCode);
+        public getLanguage = (): ILanguage => {
+            return this.currentLanguage;
+        }
 
-            return this.gettextCatalog.loadRemote(Common.Urls.translations + locale.languageCode + ".json")
+        public setLanguage = (language: ILanguage): angular.IPromise<any> => {
+            this.setRtl(language.rtl);
+            this.gettextCatalog.setCurrentLanguage(language.code);
+            this.localStorageService.set(languageKey, language);
+            return this.gettextCatalog.loadRemote(Common.Urls.translations + language.code + ".json")
                 .then(() => {
                     this.about = this.gettextCatalog.getString("About");
                     this.help = this.gettextCatalog.getString("Help");
@@ -224,6 +237,7 @@ namespace IsraelHiking.Services {
                     this.longitudeAbbreviation = this.gettextCatalog.getString("Lon");
                     this.layerNamePlaceHolder = this.gettextCatalog.getString("A name to be displayed in the layers control");
                     this.shareYourWork = this.gettextCatalog.getString("Share Your Work");
+                    this.language = this.gettextCatalog.getString("Language");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");
@@ -231,7 +245,7 @@ namespace IsraelHiking.Services {
                     this.helpOpen = this.gettextCatalog.getString("Open a file");
                     this.helpSave = this.gettextCatalog.getString("Save your work to a file");
                     this.helpPrint = this.gettextCatalog.getString("Print the map");
-                    this.helpPencil = this.gettextCatalog.getString("Toggle drawing. Use escape to stop, and click to edit a point"); 
+                    this.helpPencil = this.gettextCatalog.getString("Toggle drawing. Use escape to stop and click to edit a point"); 
                     this.helpClear = this.gettextCatalog.getString("Clear all points"); 
                     this.helpMapMarker = this.gettextCatalog.getString("Toggle POI drawing");
                     this.helpUndo = this.gettextCatalog.getString("Undo last action");
@@ -247,7 +261,7 @@ namespace IsraelHiking.Services {
                     this.helpCheck = this.gettextCatalog.getString("Save layer properties");
                     this.helpLinksExplenation = this.gettextCatalog.getString("You can use the following links");
                     // Info
-                    this.infoSubheader = this.$sce.trustAsHtml(this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.", { link: "<a href='http://www.openstreetmap.org/' target='_blank'>", linkend: "</a>" }));
+                    this.infoSubheader = this.$sce.trustAsHtml(this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.", { link: "<a dir='ltr' href='http://www.openstreetmap.org/' target='_blank'>", linkend: "</a>" }));
                     this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:"); 
                     this.infoFacebookLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Interact with other users in our {{link}}Facebook group{{linkend}}", { link: "<a href='https://www.facebook.com/groups/994960670559126/' target='_blank'>", linkend: "</a>" }));
                     this.infoGithubLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Request features and report bugs on our {{link}}Github project{{linkend}} page", { link: "<a href='http://www.github.com/IsraelHikingMap' target='_blank'>", linkend: "</a>" }));
