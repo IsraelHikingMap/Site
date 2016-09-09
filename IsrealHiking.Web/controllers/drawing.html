@@ -1,5 +1,5 @@
 ﻿<div class="leaflet-bar">
-    <a class="cursor-pointer" ng-click="clear($event)" uib-tooltip="Clear" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-remove fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="clear($event)" uib-tooltip="{{resources.clear}}" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-remove fa-lg"></i></a>
     <a class="cursor-pointer" ng-click="setEditMode('POI', $event)" ng-class="{'leaflet-active' : editMode === 'POI'}" uib-tooltip="{{resources.editPoi}}" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-map-marker fa-lg"></i></a>
     <a class="cursor-pointer" ng-click="setEditMode('Route', $event)" ng-class="{'leaflet-active' : editMode === 'Route'}" uib-tooltip="{{resources.editRoute}}" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-pencil fa-lg"></i></a>
     <a class="cursor-pointer" ng-show="editMode === 'Route'" ng-click="setRouting('Hike', $event)" ng-class="{'leaflet-active' : getRoutingType() == 'Hike' }" uib-tooltip="{{resources.hikeRouting}}" tooltip-placement="left" tooltip-append-to-body="true"><img src="content/images/hike.svg" alt=""/></a>
