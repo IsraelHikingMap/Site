@@ -1,12 +1,12 @@
 ﻿.resizable {
-    position: relative;
+    position: absolute;
 }
 
     .resizable.no-transition {
         transition: none !important;
     }
 
-.rg-right, .rg-left, .rg-top, .rg-bottom {
+.drag-handle-right, .drag-handle-left, .drag-handle-top, .drag-handle-bottom {
     display: block;
     width: 14px;
     height: 14px;
@@ -20,14 +20,14 @@
     background: transparent;
 }
 
-    .rg-right span, .rg-left span, .rg-top span, .rg-bottom span {
+    .drag-handle-right span, .drag-handle-left span, .drag-handle-top span, .drag-handle-bottom span {
         position: absolute;
         box-sizing: border-box;
         display: block;
         border: 1px solid white;
     }
 
-    .rg-right span, .rg-left span {
+    .drag-handle-right span, .drag-handle-left span {
         border-width: 0 3px;
         top: 50%;
         margin-top: -10px;
@@ -36,7 +36,7 @@
         width: 7px;
     }
 
-    .rg-top span, .rg-bottom span {
+    .drag-handle-top span, .drag-handle-bottom span {
         border-width: 3px 0;
         left: 50%;
         margin: 3.5px 0 0 -10px;
@@ -44,7 +44,7 @@
         height: 7px;
     }
 
-.rg-top {
+.drag-handle-top {
     cursor: row-resize;
     width: 100%;
     top: 0;
@@ -52,7 +52,7 @@
     margin: 0;
 }
 
-.rg-right {
+.drag-handle-right {
     cursor: col-resize;
     height: 100%;
     right: 0;
@@ -60,7 +60,7 @@
     margin: 0;
 }
 
-.rg-bottom {
+.drag-handle-bottom {
     cursor: row-resize;
     width: 100%;
     bottom: 0;
@@ -68,7 +68,7 @@
     margin: 0;
 }
 
-.rg-left {
+.drag-handle-left {
     cursor: col-resize;
     height: 100%;
     left: 0;

@@ -1,8 +1,9 @@
 ﻿namespace IsraelHiking {
 
     // HM TODO: fix label of marker
+    // HM TODO: fix marker popup tooltips when popup closes.
     // HM TODO: fix help - remove white spaces?
-    // HM TODO: fix height grash drag etc
+    // HM TODO: add coordinates to route points?
 
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;
@@ -124,8 +125,9 @@
         templateUrl: "controllers/layersSidebar.html"
     } as angular.IDirective));
 
-    app.directive(Strings.Directives.draggableResizable, [Strings.Angular.document, Strings.Angular.timeout,
-        ($document: angular.IDocumentService, $timeout: angular.ITimeoutService) => new Directives.DraggableResizableDirective($document, $timeout)]);
+    app.directive(Strings.Directives.draggableResizable, [Strings.Angular.document, Strings.Angular.timeout, Strings.Angular.window,
+        ($document: angular.IDocumentService, $timeout: angular.ITimeoutService, $window: angular.IWindowService) =>
+            new Directives.DraggableResizableDirective($document, $timeout, $window)]);
     app.directive(Strings.Directives.routeStatisticsPopup, () => ({
         controller: Controllers.RouteStatisticsController,
         templateUrl: "controllers/routeStatistics.html"

@@ -1,23 +1,24 @@
 ﻿namespace IsraelHiking.Directives {
     export interface IDraggableResizableScope extends angular.IScope {
         dragSelector: string;
-        directions: string[];
+        directions: Direction[];
     }
 
-    export interface IInfoEventArgs {
+    export interface IResizeEventArgs {
         width: number | boolean;
         height: number | boolean;
         id: string;
     }
 
-    type Axis = "x" | "y";
     type Direction = "left" | "right" | "top" | "bottom"
 
     export class DraggableResizableDirective implements angular.IDirective {
         constructor($document: angular.IDocumentService,
-            $timeout: angular.ITimeoutService) {
+            $timeout: angular.ITimeoutService,
+            $window: angular.IWindowService) {
             var toCall: Function;
-            var throttle = (functionToThrottle: Function) => {
+
+            function throttle(functionToThrottle: Function) {
                 if (toCall === undefined) {
                     toCall = functionToThrottle;
                     $timeout(() => {
@@ -30,86 +31,109 @@
                 }
             }
 
+            function getBaseMouseMoveEvent(event: JQueryEventObject): Touch | JQueryEventObject {
+                return (event.type.toLowerCase() === "mousemove")
+                    ? event
+                    : (event.originalEvent as TouchEvent).touches[0];
+            }
+
+            function getBaseMouseDownEvent(event: JQueryEventObject): Touch | JQueryEventObject {
+                return (event.type.toLowerCase() === "mousedown")
+                    ? event
+                    : (event.originalEvent as TouchEvent).touches[0];
+            }
+
+            function isHorizontal(dragDirection: Direction) {
+                return dragDirection === "left" || dragDirection === "right";
+            }
+
             return {
                 scope: {
                     dragSelector: "=",
                     directions: "="
                 },
-                link: ($scope: IDraggableResizableScope, element: JQuery, attr) => {
-                    let startX = 0, startY = 0, x = 0, y = 0;
+                link: ($scope: IDraggableResizableScope, element: JQuery) => {
 
                     let mouseDownEventString = "touchstart mousedown";
                     let mouseMoveEventString = "touchmove mousemove";
                     let mouseUpEventString = "touchend mouseup";
 
                     element.addClass("resizable");
-                    var style = window.getComputedStyle(element[0], null),
-                        width: number,
-                        height: number,
-                        start: number,
-                        dragDirection: Direction,
-                        axis: Axis,
-                        info = {} as IInfoEventArgs;
+                    var style = $window.getComputedStyle(element[0]);
+                    var dragDirection: Direction;
+                    var initialClientX: number;
+                    var initialClientY: number;
+                    var initialTop: number;
+                    var initialLeft: number;
+                    var initialRight: number;
+                    var initialHeight: number;
 
-                    let getBaseMouseMoveEvent = (event: JQueryEventObject): Touch | JQueryEventObject => {
-                        return (event.type.toLowerCase() === "mousemove")
-                            ? event
-                            : (event.originalEvent as TouchEvent).touches[0];
+                    function initialize(event: JQueryEventObject) {
+                        initialClientX = getBaseMouseDownEvent(event).clientX;
+                        initialClientY = getBaseMouseDownEvent(event).clientY;
+                        initialTop = parseInt(style.getPropertyValue("top"));
+                        initialLeft = parseInt(style.getPropertyValue("left"));
+                        initialRight = parseInt(style.getPropertyValue("right"));
+                        initialHeight = parseInt(style.getPropertyValue("height"));
                     }
 
-                    let getBaseMouseDownEvent = (event: JQueryEventObject): Touch | JQueryEventObject => {
-                        return (event.type.toLowerCase() === "mousedown")
-                            ? event
-                            : (event.originalEvent as TouchEvent).touches[0];
+                    element.on(mouseDownEventString, $scope.dragSelector, moveMouseDown);
+
+                    for (let direction of $scope.directions) {
+                        let grabber = angular.element("<div/>");
+                        grabber.addClass(`drag-handle-${direction}`);
+                        grabber.append(angular.element("<span/>"));
+                        element.append(grabber);
+                        grabber.on("dragstart", () => false);
+                        grabber.on(mouseDownEventString, e => { resizeMouseDown(e, direction); });
                     }
 
-                    let updateInfo = () => {
-                        info.width = false; info.height = false;
-                        if (axis === "x")
-                            info.width = parseInt(element[0].style.width);
-                        else
-                            info.height = parseInt(element[0].style.height);
-                        info.id = element[0].id;
+                    // resizable events
+                    function createResizeEventArgs(): IResizeEventArgs {
+                        let eventArgs = {} as IResizeEventArgs;
+                        eventArgs.width = false;
+                        eventArgs.height = false;
+                        if (isHorizontal(dragDirection)) {
+                            eventArgs.width = parseInt(element[0].style.width);
+                        } else {
+                            eventArgs.height = parseInt(element[0].style.height);
+                        }
+                        eventArgs.id = element[0].id;
+                        return eventArgs;
                     }
 
-                    let resizeMouseMove = (event: JQueryEventObject) => {
-                        let baseEvent = getBaseMouseMoveEvent(event);
-                        let offset = axis === "x" ? start - baseEvent.clientX : start - baseEvent.clientY;
+                    function resizeMouseMove(event: JQueryEventObject) {
+                        let offset = isHorizontal(dragDirection) ? getBaseMouseMoveEvent(event).clientX - initialClientX : getBaseMouseMoveEvent(event).clientY - initialClientY;
                         switch (dragDirection) {
                             case "top":
-                                element[0].style.height = (height + offset) + "px";
-                                break;
-                            case "right":
-                                element[0].style.width = (width - offset) + "px";
-                                break;
-                            case "bottom":
-                                element[0].style.height = (height - offset) + "px";
+                                element[0].style.height = (initialHeight - offset) + "px";
+                                element[0].style.top = (initialTop + offset) + "px";
                                 break;
                             case "left":
-                                element[0].style.width = (width + offset) + "px";
+                                element[0].style.left = (initialLeft + offset) + "px";
                                 break;
+                            case "bottom":
+                                element[0].style.height = (initialHeight + offset) + "px";
+                                break;
+                            case "right":
+                                element[0].style.right = (initialRight - offset) + "px";
+                                break;
+
                         }
-                        updateInfo();
-                        throttle(() => { $scope.$emit("angular-resizable.resizing", info); });
+                        throttle(() => { $scope.$emit("angular-resizable.resizing", createResizeEventArgs()); });
                     };
 
-                    var resizeMouseUp = () => {
-                        updateInfo();
-                        $scope.$emit("angular-resizable.resizeEnd", info);
+                    function resizeMouseUp() {
+                        $scope.$emit("angular-resizable.resizeEnd", createResizeEventArgs());
                         $scope.$apply();
                         $document.off(mouseUpEventString, resizeMouseUp);
                         $document.off(mouseMoveEventString, resizeMouseMove);
                         element.removeClass("no-transition");
                     };
 
-                    var resizeMouseDown = (event, direction) => {
+                    function resizeMouseDown(event: JQueryEventObject, direction: Direction) {
                         dragDirection = direction;
-                        axis = dragDirection === "left" || dragDirection === "right" ? "x" : "y";
-                        let baseEvent = getBaseMouseDownEvent(event);
-                        start = axis === "x" ? baseEvent.clientX : baseEvent.clientY;
-                        width = parseInt(style.getPropertyValue("width"));
-                        height = parseInt(style.getPropertyValue("height"));
-
+                        initialize(event);
                         //prevent transition while dragging
                         element.addClass("no-transition");
 
@@ -122,48 +146,35 @@
                         event.cancelBubble = true;
                         event.returnValue = false;
 
-                        updateInfo();
-                        $scope.$emit("angular-resizable.resizeStart", info);
+                        $scope.$emit("angular-resizable.resizeStart", createResizeEventArgs());
                         $scope.$apply();
                     };
 
-                    for (let direction of $scope.directions) {
-                        let grabber = angular.element("<div/>");
-                        grabber.addClass(`rg-${direction}`);
-                        grabber.append(angular.element("<span/>"));
-                        element.append(grabber);
-                        grabber.on("dragstart", () => false);
-                        grabber.on(mouseDownEventString, e => { resizeMouseDown(e, direction); });
+                    // draggable events
+                    function moveMouseMove(event: JQueryEventObject) {
+
+                        let clientX = getBaseMouseMoveEvent(event).clientX;
+                        let clientY = getBaseMouseMoveEvent(event).clientY;
+                        let offsetX = clientX - initialClientX;
+                        let offsetY = clientY - initialClientY;
+
+                        element[0].style.top = (initialTop + offsetY) + "px";
+                        element[0].style.left = (initialLeft + offsetX) + "px";
+                        element[0].style.right = (initialRight - offsetX) + "px";
                     }
 
-                    let moveMouseMove = (event: JQueryEventObject) => {
-
-                        let pageX = getBaseMouseMoveEvent(event).pageX;
-                        let pageY = getBaseMouseMoveEvent(event).pageY;
-                        x = pageX - startX;
-                        y = pageY - startY;
-                        element.css({
-                            top: y + "px",
-                            left: x + "px"
-                        });
-                    }
-
-                    let moveMouseUp = () => {
+                    function moveMouseUp() {
                         $document.off(mouseMoveEventString, moveMouseMove);
                         $document.off(mouseUpEventString, moveMouseUp);
                     }
 
-                    element.on(mouseDownEventString, $scope.dragSelector, event => {
-                        // HM TODO: fix touch screen exit and km markers
+                    function moveMouseDown(event: JQueryEventObject) {
                         // Prevent default dragging of selected content
                         event.preventDefault();
-                        let pageX = getBaseMouseDownEvent(event).pageX;
-                        let pageY = getBaseMouseDownEvent(event).pageY;
-                        startX = pageX - x;
-                        startY = pageY - y;
+                        initialize(event);
                         $document.on(mouseMoveEventString, moveMouseMove);
                         $document.on(mouseUpEventString, moveMouseUp);
-                    });
+                    }
                 }
             } as angular.IDirective;
         }
