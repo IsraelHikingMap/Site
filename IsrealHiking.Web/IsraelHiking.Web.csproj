@@ -170,6 +170,7 @@
     <Content Include="services\layers\routelayers\RouteStateReadOnly.js" />
     <Content Include="services\layers\routelayers\UndoHandler.js" />
     <Content Include="services\layers\WikiMarkersLayer.js" />
+    <Content Include="services\ResourcesService.js" />
     <Content Include="services\RouteStatisticsService.js" />
     <Content Include="services\search\BaseSearchResultsProvider.js" />
     <Content Include="services\search\LocalSearchResultsProvider.js" />
