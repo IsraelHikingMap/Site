@@ -8,18 +8,20 @@
             toastr: Toastr) {
             super(mapservice);
 
-            var dropbox = this.map.getContainer();
+            var dropbox = angular.element(this.map.getContainer());
 
-            dropbox.addEventListener("dragenter", () => { this.map.scrollWheelZoom.disable(); }, false);
-            dropbox.addEventListener("dragleave", () => { this.map.scrollWheelZoom.enable(); }, false);
-            dropbox.addEventListener("dragover", (e: DragEvent) => {
+            dropbox.on("dragenter", () => { this.map.scrollWheelZoom.disable(); });
+            dropbox.on("dragleave", () => { this.map.scrollWheelZoom.enable(); });
+            dropbox.on("dragover", (e: JQueryEventObject) => {
                 e.stopPropagation();
                 e.preventDefault();
-            }, false);
-            dropbox.addEventListener("drop", (e: DragEvent) => {
+            });
+            dropbox.on("drop", (e: JQueryEventObject) => {
                 e.stopPropagation();
                 e.preventDefault();
-                var files = Array.prototype.slice.apply(e.dataTransfer.files) as File[];
+                this.map.scrollWheelZoom.enable();
+                let transferData = (e.originalEvent as DragEvent).dataTransfer;
+                let files = Array.prototype.slice.apply(transferData.files) as File[];
                 if (files && files.length > 0) {
                     $timeout(() => {
                         for (let file of files) {
@@ -30,20 +32,18 @@
                             });
                         }
                     }, 25);
-                } else if (e.dataTransfer.items && e.dataTransfer.items.length > 0) {
-                    var items = Array.prototype.slice.apply(e.dataTransfer.items) as DataTransferItem[];
-                    for (let item of items.filter(itemToFind => itemToFind.type === "text/uri-list")) {
-                        item.getAsString((url) => {
-                            fileService.openFromUrl(url).success((dataContainer: Common.DataContainer) => {
-                                layersService.setJsonData(dataContainer);
-                            }).error(() => {
-                                toastr.error(`unable to load url: ${url}`);
-                            });
-                        });
-                    }
+                    return;
                 }
-                this.map.scrollWheelZoom.enable();
-            }, false);
+
+                let url = transferData.getData("text");
+                if (url) {
+                    fileService.openFromUrl(url).success((dataContainer: Common.DataContainer) => {
+                        layersService.setJsonData(dataContainer);
+                    }).error(() => {
+                        toastr.error(`unable to load url: ${url}`);
+                    });
+                }
+            });
         }
     }
 }
