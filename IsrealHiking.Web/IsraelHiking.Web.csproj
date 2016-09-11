@@ -231,9 +231,7 @@
     <None Include="OSM2012.pubxml" />
     <Content Include="translations\IsraelHiking.pot" />
     <Content Include="translations\en-US.json" />
-    <Content Include="translations\en-US.po" />
     <Content Include="translations\he.json" />
-    <Content Include="translations\he.po" />
     <None Include="web.Debug.config">
       <DependentUpon>web.config</DependentUpon>
     </None>
