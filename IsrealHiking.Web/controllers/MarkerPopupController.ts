@@ -4,13 +4,15 @@
         East: number;
     }
 
-    export interface IRemovableMarkerScope extends angular.IScope{
+    export interface IRemovableMarkerScope extends angular.IScope {
         remove(): void;
     }
 
     export interface IMarkerPopupScope extends IRemovableMarkerScope {
         title: string;
         itmCoordinates: INorthEast;
+        isSaveTooltipOpen: boolean;
+        isRemoveTooltipOpen: boolean; 
         marker: Services.Layers.PoiLayers.IMarkerWithTitle;
         poiLayer: Services.Layers.PoiLayers.PoiLayer;
         latLng: L.LatLng;
@@ -24,7 +26,8 @@
             $http: angular.IHttpService) {
 
             $scope.title = $scope.marker.title;
-
+            $scope.isRemoveTooltipOpen = false;
+            $scope.isSaveTooltipOpen = false;
             $scope.marker.on("popupopen", () => {
                 $scope.latLng = $scope.marker.getLatLng();
                 $scope.wikiCoordinatesString = this.getWikiCoordString($scope.latLng, $scope.marker.title);
@@ -38,8 +41,13 @@
                 });
             });
 
-            $scope.updateWikiCoordinates = (title: string) =>
-            {
+            $scope.marker.on("popupclose", () => {
+                // workaround to fix issue with tooltips remaining after close.
+                $scope.isRemoveTooltipOpen = false; 
+                $scope.isSaveTooltipOpen = false;
+            });
+
+            $scope.updateWikiCoordinates = (title: string) => {
                 $scope.wikiCoordinatesString = this.getWikiCoordString($scope.latLng, title);
             };
 

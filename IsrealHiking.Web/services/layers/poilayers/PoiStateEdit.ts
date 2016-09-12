@@ -96,6 +96,8 @@
             marker.off("mouseover");
             marker.off("mouseout");
             marker.off("dblclick");
+            marker.off("popupopen");
+            marker.off("popupclose");
             this.context.map.removeLayer(marker);
             this.hoverHandler.setState(RouteLayers.HoverHandlerBase.NONE);
         }

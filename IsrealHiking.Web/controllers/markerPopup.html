@@ -4,8 +4,8 @@
             <textarea rows="2" class="form-control" type="text" ng-model="title" style="min-width: 100px" ng-change="updateWikiCoordinates(title)"></textarea>
         </div>
         <div class="form-group">
-            <a class="btn btn-success cursor-pointer input-group-addon" ng-click="setTitle(title)" uib-tooltip="{{resources.save}}" tooltip-placement="top" tooltip-append-to-body="true"><i class="fa fa-check"></i></a>
-            <a class="btn btn-danger cursor-pointer input-group-addon" ng-click="remove()" uib-tooltip="{{resources.deletePoi}}" tooltip-placement="top" tooltip-append-to-body="true"><i class="fa fa-trash"></i></a>
+            <a class="btn btn-success cursor-pointer input-group-addon" ng-click="setTitle(title)" uib-tooltip="{{resources.save}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isSaveTooltipOpen"><i class="fa fa-check"></i></a>
+            <a class="btn btn-danger cursor-pointer input-group-addon" ng-click="remove()" uib-tooltip="{{resources.deletePoi}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isRemoveTooltipOpen"><i class="fa fa-trash"></i></a>
             <a class="btn btn-warning cursor-pointer input-group-addon" ng-click="showCoordinates = !showCoordinates" uib-tooltip="{{resources.showCoordinates}}" tooltip-placement="top" tooltip-append-to-body="true"><i class="fa fa-globe"></i></a>
         </div>
     </form>
@@ -15,7 +15,7 @@
             {{resources.eastAbbreviation}} {{itmCoordinates.East}} {{resources.meterUnit}}, {{resources.northAbbreviation}} {{itmCoordinates.North}} {{resources.meterUnit}}
         </p>
         <p class="chome-wordwrap-fix">
-             <span ng-bind-html="resources.coordinatesForWikipedia"></span> {{wikiCoordinatesString}}
+            <span ng-bind-html="resources.coordinatesForWikipedia"></span> {{wikiCoordinatesString}}
         </p>
     </div>
 </div>
