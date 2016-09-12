@@ -5,3 +5,15 @@
 .info-header a.active {
     color: #ddd;
 }
+
+.help-button {
+    width: 28px;
+    height: 28px;
+}
+
+/*
+.help-table .col-sm-5{
+    padding-left: 5px;
+    padding-right: 5px;
+}
+*/

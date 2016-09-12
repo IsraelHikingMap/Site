@@ -12,7 +12,8 @@
     <div ng-show="showCoordinates">
         <p>
             {{resources.latitudeAbbreviation}} {{latLng.lat | number }}°, {{resources.longitudeAbbreviation}} {{latLng.lng | number}}°<br />
-            {{resources.eastAbbreviation}} {{itmCoordinates.East}} {{resources.meterUnit}}, {{resources.northAbbreviation}} {{itmCoordinates.North}} {{resources.meterUnit}}
+            {{resources.eastAbbreviation}} {{itmCoordinates.East}} {{resources.meterUnit}}, {{resources.northAbbreviation}} {{itmCoordinates.North}} {{resources.meterUnit}}<br />
+            {{resources.elevation}} {{latLng.z}} {{resources.meterUnit}}
         </p>
         <p class="chome-wordwrap-fix">
             <span ng-bind-html="resources.coordinatesForWikipedia"></span> {{wikiCoordinatesString}}

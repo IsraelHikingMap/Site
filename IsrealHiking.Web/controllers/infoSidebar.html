@@ -24,68 +24,68 @@
             </p>
         </div>
     </div>
-    <div ng-switch-when="help">
+    <div ng-switch-when="help" class="help-table">
         <h4>{{resources.helpSubheader}}</h4>
         <div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-info"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.helpInfo}}.&nbsp;</div>
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-location-arrow"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.helpLocation}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpInfo}}.</div>
+                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-crosshairs"></i></button></div>
+                <div class="col-sm-5">{{resources.helpLocation}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-folder-open"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.helpOpen}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpOpen}}.</div>
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-save"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.helpSave}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpSave}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-print"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.helpPrint}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpPrint}}.</div>
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-files-o"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.saveAs}}&nbsp;</div>
+                <div class="col-sm-5">{{resources.saveAs}}</div>
             </div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-pencil"></i></button></div>
-                <div class="col-sm-11">&nbsp;{{resources.helpPencil}}.&nbsp;</div>
+                <div class="col-sm-11">{{resources.helpPencil}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-remove"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.helpClear}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpClear}}.</div>
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-map-marker"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.helpMapMarker}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpMapMarker}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/hike.svg" /></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.hikeRouting}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.hikeRouting}}.</div>
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/bike.svg" /></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.bikeRouting}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.bikeRouting}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/four-by-four.svg" /></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.fourWheelDriveRouting}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.fourWheelDriveRouting}}.</div>
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/none.svg" /></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.straightLines}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.straightLines}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-area-chart"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.routeStatistics}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.routeStatistics}}.</div>
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-undo"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.helpUndo}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpUndo}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-search"></i></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.search}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.search}}.</div>
                 <div class="col-sm-1">
                     <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-share-alt"></i></button>
                 </div>
-                <div class="col-sm-5">&nbsp;{{resources.helpShare}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpShare}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="content/images/map-editing.svg" /></button></div>
-                <div class="col-sm-5">&nbsp;{{resources.helpEditOsm}}.&nbsp;</div>
-                <!--<div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-info"></i></button></div>
-                <div class="col-sm-5">&nbsp;See more information.&nbsp;</div>-->
+                <div class="col-sm-5">{{resources.helpEditOsm}}.</div>
+                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-language"></i></button></div>
+                <div class="col-sm-5">{{resources.helpLanguage}}.</div>
             </div>
             <div class="row">
                 <div class="col-xs-12" style="text-align: center">{{resources.helpLayersSubHeader}}</div>
@@ -94,43 +94,49 @@
                 <div class="col-sm-1">
                     <button class="btn btn-warning btn-xs help-button"><i class="fa fa-lg fa-gear"></i></button>
                 </div>
-                <div class="col-sm-5">&nbsp;{{resources.helpGear}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpGear}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1">
                     <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-eye-slash"></i></button>
                 </div>
-                <div class="col-sm-5">&nbsp;{{resources.helpEyeSlash}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpEyeSlash}}.</div>
                 <div class="col-sm-1">
                     <button class="btn btn-warning btn-xs help-button"><i class="fa fa-lg fa-wrench"></i></button>
                 </div>
-                <div class="col-sm-5">&nbsp;{{resources.helpWrench}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpWrench}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1">
                     <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-bolt"></i></button>
                 </div>
-                <div class="col-sm-5">&nbsp;{{resources.helpRoutePerSegment}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpRoutePerSegment}}.</div>
                 <div class="col-sm-1">
                     <button class="btn btn-danger btn-xs help-button"><i class="fa fa-lg fa-trash"></i></button>
                 </div>
-                <div class="col-sm-5">&nbsp;{{resources.helpTrash}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpTrash}}.</div>
             </div>
             <div class="row">
                 <div class="col-sm-1">
                     <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-arrows-h"></i></button>
                 </div>
-                <div class="col-sm-5">&nbsp;{{resources.helpReverse}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpReverse}}.</div>
                 <div class="col-sm-1">
                     <button class="btn btn-success btn-xs help-button"><i class="fa fa-lg fa-check"></i></button>
                 </div>
-                <div class="col-sm-5">&nbsp;{{resources.helpCheck}}.&nbsp;</div>
+                <div class="col-sm-5">{{resources.helpCheck}}.</div>
             </div>
-            <p>
-                {{resources.helpLinksExplenation}} <br />
-                http://israelhiking.osm.org.il/#/?url=some-file-from-other-site, <br />
-                http://israelhiking.osm.org.il/#/?q=search-term
-            </p>
+            <br/>
+            <ul>
+                <li>
+                    {{resources.helpDragDrop}}
+                </li>
+                <li>
+                    {{resources.helpLinksExplenation}} <br />
+                    http://israelhiking.osm.org.il/#/?url=some-file-from-other-site, <br />
+                    http://israelhiking.osm.org.il/#/?q=search-term
+                </li>
+            </ul>
         </div>
     </div>
 </div>

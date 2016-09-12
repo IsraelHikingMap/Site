@@ -74,6 +74,7 @@
         templateUrl: "controllers/markerPopup.html"
     } as angular.IDirective));
     app.directive(Strings.Directives.routePointPopup, () => ({
+        controller: Controllers.MarkerPopupController,
         templateUrl: "controllers/routePointPopup.html"
     } as angular.IDirective));
     app.directive(Strings.Directives.drawingControl, () => ({

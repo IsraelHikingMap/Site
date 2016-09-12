@@ -51,11 +51,6 @@ body {
     word-wrap: break-word;
 }
 
-.help-button {
-    width: 28px;
-    height: 28px;
-}
-
 .loading-segment-indicator {
     -webkit-animation: dash .4s linear infinite;
     animation: dash .4s linear infinite;

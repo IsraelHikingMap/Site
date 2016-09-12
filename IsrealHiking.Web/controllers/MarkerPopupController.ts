@@ -6,30 +6,35 @@
 
     export interface IRemovableMarkerScope extends angular.IScope {
         remove(): void;
+        latLng: Common.LatLngZ;
+        elevation: number;
+        itmCoordinates: INorthEast;
+        isSaveTooltipOpen: boolean;
+        isRemoveTooltipOpen: boolean; 
+        wikiCoordinatesString: string;
+        marker: L.Marker;
+        updateWikiCoordinates(title: string): void;
     }
 
     export interface IMarkerPopupScope extends IRemovableMarkerScope {
         title: string;
-        itmCoordinates: INorthEast;
-        isSaveTooltipOpen: boolean;
-        isRemoveTooltipOpen: boolean; 
         marker: Services.Layers.PoiLayers.IMarkerWithTitle;
         poiLayer: Services.Layers.PoiLayers.PoiLayer;
-        latLng: L.LatLng;
-        wikiCoordinatesString: string;
         setTitle(title: string): void;
-        updateWikiCoordinates(title: string): void;
+        
     }
 
     export class MarkerPopupController {
         constructor($scope: IMarkerPopupScope,
-            $http: angular.IHttpService) {
+            $http: angular.IHttpService,
+            elevationProvider: Services.Elevation.ElevationProvider) {
 
             $scope.title = $scope.marker.title;
             $scope.isRemoveTooltipOpen = false;
             $scope.isSaveTooltipOpen = false;
             $scope.marker.on("popupopen", () => {
-                $scope.latLng = $scope.marker.getLatLng();
+                $scope.latLng = angular.extend({z: 0}, $scope.marker.getLatLng()) as Common.LatLngZ;
+
                 $scope.wikiCoordinatesString = this.getWikiCoordString($scope.latLng, $scope.marker.title);
                 $http.get(Common.Urls.itmGrid, {
                     params: {
@@ -39,6 +44,7 @@
                 } as angular.IRequestShortcutConfig).success((northEast: INorthEast) => {
                     $scope.itmCoordinates = northEast;
                 });
+                elevationProvider.updateHeights([$scope.latLng]);
             });
 
             $scope.marker.on("popupclose", () => {

@@ -34,7 +34,6 @@ namespace IsraelHiking.Services {
         public undo: string;
         public editThisMapUsingOsm: string;
         public openAFile: string;
-        public saveCurrentWork: string;
         public saveAs: string;
         public save: string;
         public print: string;
@@ -97,6 +96,7 @@ namespace IsraelHiking.Services {
         public layerNamePlaceHolder: string;
         public shareYourWork: string;
         public language: string;
+        public elevation: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -119,6 +119,8 @@ namespace IsraelHiking.Services {
         public helpReverse: string;
         public helpCheck: string;
         public helpLinksExplenation: string;
+        public helpLanguage: string;
+        public helpDragDrop: string;
         // Info
         public infoSubheader: string;
         public infoHelpfulLinks: string;
@@ -175,7 +177,6 @@ namespace IsraelHiking.Services {
                     this.undo = this.gettextCatalog.getString("Undo");
                     this.editThisMapUsingOsm = this.gettextCatalog.getString("Edit This Map Using OSM");
                     this.openAFile = this.gettextCatalog.getString("Open a File");
-                    this.saveCurrentWork = this.gettextCatalog.getString("Save Current Work");
                     this.saveAs = this.gettextCatalog.getString("Save As...");
                     this.save = this.gettextCatalog.getString("Save");
                     this.print = this.gettextCatalog.getString("Print");
@@ -238,6 +239,7 @@ namespace IsraelHiking.Services {
                     this.layerNamePlaceHolder = this.gettextCatalog.getString("A name to be displayed in the layers control");
                     this.shareYourWork = this.gettextCatalog.getString("Share Your Work");
                     this.language = this.gettextCatalog.getString("Language");
+                    this.elevation = this.gettextCatalog.getString("Elevation");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");
@@ -260,6 +262,8 @@ namespace IsraelHiking.Services {
                     this.helpReverse = this.gettextCatalog.getString("Reverse route's direction");
                     this.helpCheck = this.gettextCatalog.getString("Save layer properties");
                     this.helpLinksExplenation = this.gettextCatalog.getString("You can use the following links");
+                    this.helpLanguage = this.gettextCatalog.getString("Change language");
+                    this.helpDragDrop = this.gettextCatalog.getString("You can drag-and-drop files or URLs onto the map to load them.");
                     // Info
                     this.infoSubheader = this.$sce.trustAsHtml(this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.", { link: "<a dir='ltr' href='http://www.openstreetmap.org/' target='_blank'>", linkend: "</a>" }));
                     this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:"); 
