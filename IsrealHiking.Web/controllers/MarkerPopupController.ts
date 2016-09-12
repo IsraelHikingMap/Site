@@ -4,7 +4,7 @@
         East: number;
     }
 
-    export interface IRemovableMarkerScope extends angular.IScope {
+    export interface IRemovableMarkerScope extends IRootScope {
         remove(): void;
         latLng: Common.LatLngZ;
         elevation: number;
@@ -21,6 +21,7 @@
         marker: Services.Layers.PoiLayers.IMarkerWithTitle;
         poiLayer: Services.Layers.PoiLayers.PoiLayer;
         setTitle(title: string): void;
+        getDirection(title: string): string;
         
     }
 
@@ -69,6 +70,16 @@
                 }
                 $scope.poiLayer.dataChanged();
                 $scope.marker.closePopup();
+            }
+
+            $scope.getDirection = (title: string) => {
+                if (!title) {
+                    return $scope.resources.direction;
+                }
+                if (title.match(/^[\u0590-\u05FF]/) != null) {
+                    return "rtl";
+                }
+                return "ltr";
             }
         }
 

@@ -1,7 +1,7 @@
 ﻿<div class="marker-popup">
     <form ng-submit="setTitle(title)">
         <div class="form-group">
-            <textarea rows="2" class="form-control" type="text" ng-model="title" style="min-width: 100px" ng-change="updateWikiCoordinates(title)"></textarea>
+            <textarea rows="2" class="form-control" type="text" dir="{{getDirection(title)}}" ng-model="title" ng-change="updateWikiCoordinates(title)"></textarea>
         </div>
         <div class="form-group">
             <a class="btn btn-success cursor-pointer input-group-addon" ng-click="setTitle(title)" uib-tooltip="{{resources.save}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isSaveTooltipOpen"><i class="fa fa-check"></i></a>
@@ -9,7 +9,7 @@
             <a class="btn btn-warning cursor-pointer input-group-addon" ng-click="showCoordinates = !showCoordinates" uib-tooltip="{{resources.showCoordinates}}" tooltip-placement="top" tooltip-append-to-body="true"><i class="fa fa-globe"></i></a>
         </div>
     </form>
-    <div ng-show="showCoordinates">
+    <div ng-show="showCoordinates" ng-class="'text-' + resources.start">
         <p>
             {{resources.latitudeAbbreviation}} {{latLng.lat | number }}°, {{resources.longitudeAbbreviation}} {{latLng.lng | number}}°<br />
             {{resources.eastAbbreviation}} {{itmCoordinates.East}} {{resources.meterUnit}}, {{resources.northAbbreviation}} {{itmCoordinates.North}} {{resources.meterUnit}}<br />

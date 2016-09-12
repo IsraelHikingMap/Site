@@ -1,9 +1,6 @@
 ﻿namespace IsraelHiking {
 
     // HM TODO: fix label of marker
-    // HM TODO: fix help - remove white spaces?
-    // HM TODO: add coordinates to route points?
-    // HM TODO: add drag and drop to instructions.
 
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;
