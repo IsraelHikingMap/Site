@@ -88,6 +88,7 @@
     <Content Include="controllers\info.css" />
     <Content Include="controllers\language.html" />
     <Content Include="controllers\languageModal.html" />
+    <Content Include="controllers\markerPopup.css" />
     <Content Include="controllers\routePointPopup.html" />
     <Content Include="controllers\RouteProperties\routeProperties.css" />
     <Content Include="controllers\routeStatistics.css" />
