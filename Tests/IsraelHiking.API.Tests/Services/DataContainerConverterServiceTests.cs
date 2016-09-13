@@ -1,7 +1,11 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using GeoJSON.Net.Feature;
+using GeoJSON.Net.Geometry;
+using Ionic.Zip;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
@@ -11,6 +15,7 @@ using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using OsmSharp;
 
 namespace IsraelHiking.API.Tests.Services
 {
@@ -20,11 +25,13 @@ namespace IsraelHiking.API.Tests.Services
         private IDataContainerConverterService _converterService;
         private IGpsBabelGateway _gpsBabelGateway;
         private byte[] _randomBytes;
+        private gpxType _simpleGpx;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _randomBytes = new byte[] { 0, 1, 1, 0 };
+            _simpleGpx = new gpxType { wpt = new[] { new wptType() } };
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
             _converterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new DouglasPeuckerReductionService(new CoordinatesConverter()));
         }
@@ -44,11 +51,11 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToGeoJson_ShouldConvertToGeoJson()
         {
-            var dataContainer = new DataContainer();
-            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(new gpxType().ToBytes()));
+            var dataContainer = new DataContainer { markers = new List<MarkerData> { new MarkerData { latlng = new LatLng() } } };
+            //_gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(_simpleGpx.ToBytes()));
             var results = _converterService.ToAnyFormat(dataContainer, "geojson").Result.ToFeatureCollection();
 
-            Assert.AreEqual(0, results.Features.Count);
+            Assert.AreEqual(1, results.Features.Count);
         }
 
         [TestMethod]
@@ -65,48 +72,60 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToGpxSingleTrack_ShouldConvertToGpxUsingGpsBabelAndThenToGpxSingleTrack()
         {
-            var datacContainer = new DataContainer();
-            var gpxToConvert = new gpxType
+            var datacContainer = new DataContainer
             {
-                trk = new[]
+                routes = new List<RouteData>
                 {
-                    new trkType {trkseg = new[]
+                    new RouteData
                     {
-                        new trksegType {trkpt = new[] {new wptType {lat = 1, lon = 2}}},
-                        new trksegType {trkpt = new[] {new wptType {lat = 3, lon = 4}}}
-                    }},
-                    new trkType {trkseg = new[]
-                    {
-                        new trksegType {trkpt = new[] {new wptType {lat = 5, lon = 6}}},
-                        new trksegType {trkpt = new[] {new wptType {lat = 7, lon = 8}}}
-                    }}
+                        segments = new List<RouteSegmentData>
+                        {
+                            new RouteSegmentData
+                            {
+                                latlngzs = new List<LatLngZ>
+                                {
+                                    new LatLngZ {lat = 1, lng = 2},
+                                    new LatLngZ {lat = 3, lng = 4}
+                                }
+                            },
+                            new RouteSegmentData
+                            {
+                                latlngzs = new List<LatLngZ>
+                                {
+                                    new LatLngZ {lat = 5, lng = 6},
+                                    new LatLngZ {lat = 7, lng = 8}
+                                }
+                            }
+                        }
+                    }
                 }
             };
-
-            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Is<string>(x => x.Contains("gpx")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(Task.FromResult(gpxToConvert.ToBytes()));
 
             var results = _converterService.ToAnyFormat(datacContainer, "gpx_single_track").Result;
             var gpx = results.ToGpx();
 
-            Assert.AreEqual(2, gpx.trk.Length);
-            Assert.AreEqual(1, gpx.trk.Last().trkseg.Length);
-            Assert.AreEqual(5, gpx.trk.Last().trkseg.First().trkpt.First().lat);
-            Assert.AreEqual(8, gpx.trk.Last().trkseg.First().trkpt.Last().lon);
+            Assert.AreEqual(1, gpx.trk.Length);
+            Assert.AreEqual(1, gpx.trk.First().trkseg.Length);
+            Assert.AreEqual(1, gpx.trk.First().trkseg.First().trkpt.First().lat);
+            Assert.AreEqual(8, gpx.trk.First().trkseg.First().trkpt.Last().lon);
         }
 
         [TestMethod]
         public void ConvertGpxToDataContainer_ShouldConvertToDataContainer()
         {
-            var results = _converterService.ToDataContainer(new gpxType().ToBytes(), "gpx").Result;
+            var results = _converterService.ToDataContainer(_simpleGpx.ToBytes(), "gpx").Result;
 
+            Assert.AreEqual(1, results.markers.Count);
             Assert.AreEqual(0, results.routes.Count);
         }
 
-        
+
         [TestMethod]
         public void ConvertGpxToDataContainer_NonSiteFile_ShouldManipulateRouteData()
         {
-            var gpxToConvert = new gpxType { trk = new[] { new trkType {
+            var gpxToConvert = new gpxType
+            {
+                trk = new[] { new trkType {
                 trkseg = new[]
                 {
                     new trksegType
@@ -126,7 +145,8 @@ namespace IsraelHiking.API.Tests.Services
                         }
                     }
                 }
-            }}};
+            }}
+            };
 
             var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), "gpx").Result;
 
@@ -153,7 +173,8 @@ namespace IsraelHiking.API.Tests.Services
                         }
                     }
                 }
-            }}};
+            }}
+            };
 
             var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), "gpx").Result;
 
@@ -164,7 +185,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertGpxToDataContainer_NonSiteFileNoPointsInTrack_ShouldManipulateRouteData()
         {
-            var gpxToConvert = new gpxType { rte = new [] {  new rteType {  rtept = new wptType[0]} }};
+            var gpxToConvert = new gpxType { rte = new[] { new rteType { rtept = new wptType[0] } } };
 
             var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), "gpx").Result;
 
@@ -187,21 +208,49 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertGeoJsonToDataContainer_ShouldConvertToDataContainer()
         {
-            var collection = new FeatureCollection();
+            var collection = new FeatureCollection { Features = { new Feature(new Point(new GeographicPosition(1, 2, 3))) } };
 
             var dataContainer = _converterService.ToDataContainer(collection.ToBytes(), "geojson").Result;
 
             Assert.AreEqual(0, dataContainer.routes.Count);
+            Assert.AreEqual(1, dataContainer.markers.Count);
         }
 
         [TestMethod]
-        public void ConvertKmlToDataContainer_ShouldConvertToDataContainer()
+        public void ConvertTwlToDataContainer_ShouldConvertToDataContainer()
         {
-            _gpsBabelGateway.ConvertFileFromat(_randomBytes, Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(new gpxType().ToBytes()));
+            _gpsBabelGateway.ConvertFileFromat(_randomBytes, Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(_simpleGpx.ToBytes()));
 
             var dataContainer = _converterService.ToDataContainer(_randomBytes, "twl").Result;
 
             Assert.AreEqual(0, dataContainer.routes.Count);
+            Assert.AreEqual(1, dataContainer.markers.Count);
+        }
+
+        [TestMethod]
+        public void ConvertCustomToDataContainer_ShouldConvertToDataContainer()
+        {
+            _gpsBabelGateway.ConvertFileFromat(_randomBytes, "kuku", Arg.Any<string>()).Returns(Task.FromResult(_simpleGpx.ToBytes()));
+
+            var dataContainer = _converterService.ToDataContainer(_randomBytes, "kuku").Result;
+
+            Assert.AreEqual(0, dataContainer.routes.Count);
+            Assert.AreEqual(1, dataContainer.markers.Count);
+        }
+
+        [TestMethod]
+        public void ConvertKmzToDataContainer_ShouldConvertToDataContainer()
+        {
+            var zipfileStream = new MemoryStream();
+            ZipFile file = new ZipFile();
+            file.AddEntry("file.kml", new MemoryStream(_randomBytes));
+            file.Save(zipfileStream);
+            _gpsBabelGateway.ConvertFileFromat(Arg.Is<byte[]>(b => b.AsEnumerable().SequenceEqual(_randomBytes)), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(_simpleGpx.ToBytes()));
+
+            var dataContainer = _converterService.ToDataContainer(zipfileStream.ToArray(), "kmz").Result;
+
+            Assert.AreEqual(0, dataContainer.routes.Count);
+            Assert.AreEqual(1, dataContainer.markers.Count);
         }
     }
 }
