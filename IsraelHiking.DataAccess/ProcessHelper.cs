@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.IO;
 using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.DataAccess
@@ -17,17 +16,20 @@ namespace IsraelHiking.DataAccess
 
         public void Start(string fileName, string arguments, string workingDirectory, int timeOutInMilliseconds)
         {
-            _logger.Debug("Running: " + Path.Combine(workingDirectory, fileName) + " " + arguments);
-            using (var process = Process.Start(new ProcessStartInfo
+            var cmdArguments = "/c " + fileName + " " + arguments;
+            _logger.Debug("Running: cmd " + arguments);
+            using (var process = new Process())
             {
-                FileName = fileName,
-                Arguments = arguments,
-                WorkingDirectory = workingDirectory,
-                WindowStyle = ProcessWindowStyle.Hidden,
-            }))
-            {
-                process?.WaitForExit(timeOutInMilliseconds);
-                if (process?.ExitCode == 0)
+                process.StartInfo = new ProcessStartInfo
+                {
+                    FileName = "cmd",
+                    Arguments = cmdArguments,
+                    WorkingDirectory = workingDirectory,
+                    WindowStyle = ProcessWindowStyle.Hidden,
+                };
+                process.Start();
+                process.WaitForExit(timeOutInMilliseconds);
+                if (process.ExitCode == 0)
                 {
                     _logger.Debug($"Process {fileName} finished succesfully");
                 }

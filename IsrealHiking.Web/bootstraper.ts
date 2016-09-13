@@ -1,7 +1,5 @@
 ﻿namespace IsraelHiking {
 
-    // HM TODO: fix label of marker
-
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;
     }
