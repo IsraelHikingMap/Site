@@ -7,6 +7,14 @@
         width: 200px;
     }
 
+.save-as-control-container {
+    z-index: 10;
+}
+
+.ltr .dropdown-menu {
+    text-align: left !important;
+}
+
 /* Small Devices, Tablets */
 @media only screen and (min-width : 768px) {
     .save-as-panel {
