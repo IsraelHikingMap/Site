@@ -87,6 +87,7 @@
     <Content Include="controllers\fileSaveAs.css" />
     <Content Include="controllers\info.css" />
     <Content Include="controllers\language.html" />
+    <Content Include="controllers\LanguageController.js" />
     <Content Include="controllers\languageModal.html" />
     <Content Include="controllers\markerPopup.css" />
     <Content Include="controllers\routePointPopup.html" />

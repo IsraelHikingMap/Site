@@ -12,8 +12,8 @@ namespace IsraelHiking.Services {
     export class ResourcesService {
         private $sce: angular.ISCEService;
         private gettextCatalog: angular.gettext.gettextCatalog;
-        private currentLanguage: ILanguage;
         private localStorageService: angular.local.storage.ILocalStorageService;
+        public currentLanguage: ILanguage;
 
         public direction: string;
         public start: string;
@@ -97,6 +97,7 @@ namespace IsraelHiking.Services {
         public shareYourWork: string;
         public language: string;
         public elevation: string;
+        public slope: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -121,6 +122,7 @@ namespace IsraelHiking.Services {
         public helpLinksExplenation: string;
         public helpLanguage: string;
         public helpDragDrop: string;
+        public helpYoutubeLink: string;
         // Info
         public infoSubheader: string;
         public infoHelpfulLinks: string;
@@ -151,10 +153,6 @@ namespace IsraelHiking.Services {
                 this.start = "left";
                 this.end = "right";
             }
-        }
-
-        public getLanguage = (): ILanguage => {
-            return this.currentLanguage;
         }
 
         public setLanguage = (language: ILanguage): angular.IPromise<any> => {
@@ -240,6 +238,7 @@ namespace IsraelHiking.Services {
                     this.shareYourWork = this.gettextCatalog.getString("Share Your Work");
                     this.language = this.gettextCatalog.getString("Language");
                     this.elevation = this.gettextCatalog.getString("Elevation");
+                    this.slope = this.gettextCatalog.getString("Slope");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");
@@ -264,6 +263,7 @@ namespace IsraelHiking.Services {
                     this.helpLinksExplenation = this.gettextCatalog.getString("You can use the following links");
                     this.helpLanguage = this.gettextCatalog.getString("Change language");
                     this.helpDragDrop = this.gettextCatalog.getString("You can drag-and-drop files or URLs onto the map to load them.");
+                    this.helpYoutubeLink = this.gettextCatalog.getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}", { link: "<a href='https://www.youtube.com/playlist?list=PL8pYDecWd7EjQIyJpPAwSH3UbeZzzQpNo' target='_blank'>", linkend: "</a>" });
                     // Info
                     this.infoSubheader = this.$sce.trustAsHtml(this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.", { link: "<a dir='ltr' href='http://www.openstreetmap.org/' target='_blank'>", linkend: "</a>" }));
                     this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:"); 
@@ -273,6 +273,8 @@ namespace IsraelHiking.Services {
                     this.infoOruxmapDownloadLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Download {{link}}Offline maps{{linkend}} directly to your android device for use with the OruxMaps application", { link: "<a href='http://israelhiking.osm.org.il/OruxmapsDownload.html' target='_blank'>", linkend: "</a>" }));
                     this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
                     this.infoFooterHarelAndZeev = this.gettextCatalog.getString("Harel and Zeev");
+
+                    this.currentLanguage = language;
                 });
         }
     }

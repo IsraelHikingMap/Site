@@ -20,6 +20,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
 
     export interface IRouteStatisticsPoint extends L.Point {
         latlng: L.LatLng;
+        slope: number;
     }
 
     export interface IRouteStatistics {
@@ -168,12 +169,14 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             if (this.route.segments.length <= 0) {
                 return routeStatistics;
             }
-            let previousPoint = this.route.segments[0].latlngzs[0];;
+            let previousPoint = this.route.segments[0].latlngzs[0];
             for (let segment of this.route.segments) {
                 for (let latlngz of segment.latlngzs) {
-                    routeStatistics.length += previousPoint.distanceTo(latlngz);
+                    let distance = previousPoint.distanceTo(latlngz);
+                    routeStatistics.length += distance;
                     let point = L.point((routeStatistics.length / 1000), latlngz.z) as IRouteStatisticsPoint;
                     point.latlng = latlngz;
+                    point.slope = distance === 0 ? 0 : (latlngz.z - previousPoint.z) * 100 / distance;
                     routeStatistics.points.push(point);
                     previousPoint = latlngz;
                 }

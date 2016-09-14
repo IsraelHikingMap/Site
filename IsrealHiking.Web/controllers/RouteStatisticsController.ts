@@ -1,12 +1,14 @@
 ﻿namespace IsraelHiking.Controllers {
     export interface IRouteStatisticsScope extends IRootScope {
-        length: string;
-        gain: string;
-        loss: string;
+        length: number;
+        gain: number;
+        loss: number;
         isKmMarkersOn: boolean;
         isShowingKmMarkers(): boolean;
         chart: any;
         toggleKmMarker($event: Event): void;
+        getUnits(number: number): string;
+        toShortNumber(number: number): string;
         onMouseOver(rowIndex: number, colIndex: number): void;
         onMouseOut(): void;
         hide($event: Event): void;
@@ -66,6 +68,14 @@
                 routeStatisticsService.hide();
             }
 
+            $scope.getUnits = (number: number): string => {
+                return number > 1000 ? $scope.resources.kmUnit : $scope.resources.meterUnit;
+            };
+
+            $scope.toShortNumber = (number: number) => {
+                return number > 1000 ? (number / 1000.0).toFixed(2) : number.toFixed(0);
+            }
+
             $scope.$on("angular-resizable.resizing", () => {
                 $window.dispatchEvent(new Event("resize"));
             });
@@ -74,6 +84,13 @@
             $scope.$watch(() => routeStatisticsService.isVisible, () => {
                 $window.dispatchEvent(new Event("resize"));
             }, true);
+
+            $scope.$watch(() => $scope.resources.currentLanguage, () => {
+                $scope.chart.options.vAxis.title = $scope.resources.distanceInKm;
+                $scope.chart.options.hAxis.title = $scope.resources.heightInMeters;
+            },true);
+
+            
         }
 
         private routeChanged = ($scope: IRouteStatisticsScope, layersService: Services.Layers.LayersService) => {
@@ -90,10 +107,6 @@
         private onRouteDataChanged = ($scope: IRouteStatisticsScope) => {
             this.updateKmMarkers($scope.isKmMarkersOn);
             this.updateChart($scope);
-        }
-
-        private toDisplayableUnit = (distance: number, resources: Services.ResourcesService): string => {
-            return distance > 1000 ? (distance / 1000.0).toFixed(2) + resources.kmUnit : distance.toFixed(0) + resources.meterUnit;
         }
 
         private createKmMarker = (latlng: L.LatLng, markerNumber: number): L.Marker => {
@@ -161,17 +174,20 @@
                     max: max > 0 ? max * 1.1 : max * 0.9
                 } as google.visualization.ChartViewWindow;
             }
-            $scope.length = this.toDisplayableUnit(statistics.length, $scope.resources);
-            $scope.gain = this.toDisplayableUnit(statistics.gain, $scope.resources);
-            $scope.loss = this.toDisplayableUnit(statistics.loss, $scope.resources);
+            $scope.length = statistics.length;
+            $scope.gain = statistics.gain;
+            $scope.loss = statistics.loss;
 
             var icon = Services.IconsService.createRoundIcon(routeColor);
             this.hoverChartMarker.setIcon(icon);
         }
 
         private getChartTooltip($scope: IRouteStatisticsScope, point: Services.Layers.RouteLayers.IRouteStatisticsPoint) {
-            return `<div class="chart-tooltip">${$scope.resources.distance}:&nbsp;${point.x.toFixed(2)}&nbsp;${$scope.resources.kmUnit}<br/>` +
-                    `${$scope.resources.height}:&nbsp;${point.y}&nbsp;${$scope.resources.meterUnit}</div>`;
+            return `<div class="chart-tooltip"><p class="text-${$scope.resources.start}" dir="${$scope.resources.direction}">` +
+                `${$scope.resources.distance}: ${point.x.toFixed(2)} ${$scope.resources.kmUnit}<br/>` +
+                `${$scope.resources.height}: ${point.y} ${$scope.resources.meterUnit}<br/>` +
+                `${$scope.resources.slope}: <span dir="ltr">${point.slope.toFixed(0)}%</span>` +
+                `</p></div>`;
         }
 
         private initializeChart = ($scope: IRouteStatisticsScope) => {
@@ -226,7 +242,7 @@
                 intervals: { style: "area" },
                 tooltip: { isHtml: true },
                 chartArea: {
-                    left: 50,
+                    left: 100,
                     top: 10,
                     width: "100%",
                     height: "75%"

@@ -6,9 +6,9 @@
         <div class="col-md-12">
             <h5>
                 <span class="route-statistics-header-title">{{resources.routeStatistics}}:</span>
-                {{resources.length}}: {{length}},
-                {{resources.gain}}: {{gain}},
-                {{resources.loss}}: {{loss}}
+                {{resources.length}}: {{toShortNumber(length)}}{{getUnits(length)}},
+                {{resources.gain}}: {{toShortNumber(gain)}}{{getUnits(gain)}},
+                {{resources.loss}}: {{toShortNumber(loss)}}{{getUnits(loss)}}
             </h5>
         </div>
     </div>

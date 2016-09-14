@@ -27,7 +27,7 @@
                     label: "עברית"
                 }
             ];
-            $scope.selectedLanguage = $scope.resources.getLanguage();
+            $scope.selectedLanguage = $scope.resources.currentLanguage;
 
             $scope.setLanguage = (language: Services.ILanguage) => {
                 $scope.resources.setLanguage(language);
