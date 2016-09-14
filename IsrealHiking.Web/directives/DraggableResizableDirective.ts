@@ -107,7 +107,7 @@
                         switch (dragDirection) {
                             case "top":
                                 element[0].style.height = (initialHeight - offset) + "px";
-                                element[0].style.top = (initialTop + offset) + "px";
+                                element[0].style.top = getTop(initialTop + offset) + "px";
                                 break;
                             case "left":
                                 element[0].style.left = (initialLeft + offset) + "px";
@@ -158,9 +158,13 @@
                         let offsetX = clientX - initialClientX;
                         let offsetY = clientY - initialClientY;
 
-                        element[0].style.top = (initialTop + offsetY) + "px";
+                        element[0].style.top = getTop(initialTop + offsetY) + "px";
                         element[0].style.left = (initialLeft + offsetX) + "px";
                         element[0].style.right = (initialRight - offsetX) + "px";
+                    }
+
+                    function getTop(newTop :number): number {
+                        return (newTop < 0 ? 0 : newTop);
                     }
 
                     function moveMouseUp() {
