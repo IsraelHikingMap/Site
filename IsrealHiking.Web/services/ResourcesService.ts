@@ -132,6 +132,34 @@ namespace IsraelHiking.Services {
         public infoOruxmapDownloadLink: string;
         public infoFooterThanks: string;
         public infoFooterHarelAndZeev: string;
+        // Legend
+        public legendMarkedTrails: string;
+        public legendRedMarkedTrail: string;
+        public legendBlueMarkedTrail: string;
+        public legendGreenMarkedTrail: string;
+        public legendBlackMarkedTrail: string;
+        public legendIsraelTrail: string;
+        public legendRegionalTrail: string;
+        public legendTrails: string;
+        public legendAllVehicles: string;
+        public legendLight4WDVehicles: string;
+        public legendStrong4WDVehicles: string;
+        public legendPath: string;
+        public legendFootPath: string;
+        public legendBicyclePath: string;
+        public legendRoads: string;
+        public legendMotorway: string;
+        public legendTrunkTunnel: string;
+        public legendPrimary: string;
+        public legendSecondary: string;
+        public legendTeriary: string;
+        public legendUnclassified: string;
+        public legendRailway: string;
+        public legendRunwayTaxiway: string;
+        public legendPoi: string;
+        public legendPicnicArea: string;
+        public legendCampsite: string;
+        public legendViewpoint: string;
 
         constructor($sce: angular.ISCEService,
             localStorageService: angular.local.storage.ILocalStorageService,
@@ -273,6 +301,35 @@ namespace IsraelHiking.Services {
                     this.infoOruxmapDownloadLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Download {{link}}Offline maps{{linkend}} directly to your android device for use with the OruxMaps application", { link: "<a href='http://israelhiking.osm.org.il/OruxmapsDownload.html' target='_blank'>", linkend: "</a>" }));
                     this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
                     this.infoFooterHarelAndZeev = this.gettextCatalog.getString("Harel and Zeev");
+                    // Legend
+                    this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");
+                    this.legendRedMarkedTrail = this.gettextCatalog.getString("Red marked trail");
+                    this.legendBlueMarkedTrail = this.gettextCatalog.getString("Blue marked trail");
+                    this.legendGreenMarkedTrail = this.gettextCatalog.getString("Green marked trail");
+                    this.legendBlackMarkedTrail = this.gettextCatalog.getString("Black marked trail");
+                    this.legendIsraelTrail = this.gettextCatalog.getString("Israel Trail");
+                    this.legendRegionalTrail = this.gettextCatalog.getString("Regional trail");
+                    this.legendTrails = this.gettextCatalog.getString("Trails");
+                    this.legendAllVehicles = this.gettextCatalog.getString("All vehicles");
+                    this.legendLight4WDVehicles = this.gettextCatalog.getString("Light 4WD vehicles");
+                    this.legendStrong4WDVehicles = this.gettextCatalog.getString("Strong 4WD vehicles");
+                    this.legendPath = this.gettextCatalog.getString("Path");
+                    this.legendFootPath = this.gettextCatalog.getString("Foot path");
+                    this.legendBicyclePath = this.gettextCatalog.getString("Bicycle path");
+                    this.legendRoads = this.gettextCatalog.getString("Roads");
+                    this.legendMotorway = this.gettextCatalog.getString("Motorway");
+                    this.legendTrunkTunnel = this.gettextCatalog.getString("Trunk and Tunnel");
+                    this.legendPrimary = this.gettextCatalog.getString("Primary");
+                    this.legendSecondary = this.gettextCatalog.getString("Secondary");
+                    this.legendTeriary = this.gettextCatalog.getString("Teriary");
+                    this.legendUnclassified = this.gettextCatalog.getString("Unclassified");
+                    this.legendRailway = this.gettextCatalog.getString("Railway");
+                    this.legendRunwayTaxiway = this.gettextCatalog.getString("Runway and Taxiway");
+                    this.legendPoi = this.gettextCatalog.getString("Points of Interest");
+                    this.legendPicnicArea = this.gettextCatalog.getString("Picnic Area");
+                    this.legendCampsite = this.gettextCatalog.getString("Campsite");
+                    this.legendViewpoint = this.gettextCatalog.getString("Viewpoint");
+
 
                     this.currentLanguage = language;
                 });
