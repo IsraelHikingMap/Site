@@ -152,7 +152,7 @@ namespace IsraelHiking.Services {
         public legendTrunkTunnel: string;
         public legendPrimary: string;
         public legendSecondary: string;
-        public legendTeriary: string;
+        public legendTertiary: string;
         public legendUnclassified: string;
         public legendRailway: string;
         public legendRunwayTaxiway: string;
@@ -291,7 +291,7 @@ namespace IsraelHiking.Services {
                     this.helpLinksExplenation = this.gettextCatalog.getString("You can use the following links");
                     this.helpLanguage = this.gettextCatalog.getString("Change language");
                     this.helpDragDrop = this.gettextCatalog.getString("You can drag-and-drop files or URLs onto the map to load them.");
-                    this.helpYoutubeLink = this.gettextCatalog.getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}", { link: "<a href='https://www.youtube.com/playlist?list=PL8pYDecWd7EjQIyJpPAwSH3UbeZzzQpNo' target='_blank'>", linkend: "</a>" });
+                    this.helpYoutubeLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}.", { link: "<a href='https://www.youtube.com/playlist?list=PL8pYDecWd7EjQIyJpPAwSH3UbeZzzQpNo' target='_blank'>", linkend: "</a>" }));
                     // Info
                     this.infoSubheader = this.$sce.trustAsHtml(this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.", { link: "<a dir='ltr' href='http://www.openstreetmap.org/' target='_blank'>", linkend: "</a>" }));
                     this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:"); 
@@ -321,7 +321,7 @@ namespace IsraelHiking.Services {
                     this.legendTrunkTunnel = this.gettextCatalog.getString("Trunk and Tunnel");
                     this.legendPrimary = this.gettextCatalog.getString("Primary");
                     this.legendSecondary = this.gettextCatalog.getString("Secondary");
-                    this.legendTeriary = this.gettextCatalog.getString("Teriary");
+                    this.legendTertiary = this.gettextCatalog.getString("Tertiary");
                     this.legendUnclassified = this.gettextCatalog.getString("Unclassified");
                     this.legendRailway = this.gettextCatalog.getString("Railway");
                     this.legendRunwayTaxiway = this.gettextCatalog.getString("Runway and Taxiway");

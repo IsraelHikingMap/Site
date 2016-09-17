@@ -240,7 +240,7 @@
                             type: "Way"
                         },
                         {
-                            title: $scope.resources.legendTeriary,
+                            title: $scope.resources.legendTertiary,
                             latlng: L.latLng(31.557, 34.626),
                             zoom: 15,
                             id: id++,
