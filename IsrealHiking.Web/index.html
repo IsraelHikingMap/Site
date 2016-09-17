@@ -61,7 +61,7 @@
 <body ng-controller="mainMapController" ng-class="{flip: resources.direction == 'rtl'}" dir="{{resources.direction}}">
     <div id="wrapper" ng-class="{toggled: getIsSidebarVisible()}" class="full-page">
         <div id="sidebar-wrapper">
-            <div class="container-fluid">
+            <div class="container-fluid" dir="{{resources.direction}}">
                 <div class="sidebar-close">
                     <span class="cursor-pointer" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
                 </div>

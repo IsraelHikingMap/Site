@@ -23,10 +23,12 @@
     left: 5px;
 }
 
+/* added direction to fix issue with scroll bar and legend maps */
 #sidebar-wrapper {
     line-height: 24px;
     overflow-x: hidden;
     color: #999999;
+    direction: ltr;
 }
 
     #sidebar-wrapper .divider {

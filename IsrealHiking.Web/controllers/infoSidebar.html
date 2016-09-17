@@ -7,16 +7,16 @@
 </div>
 <div ng-switch on="state">
     <div ng-switch-when="legend">
-        <div ng-repeat="section in legendSections" class="legend-section">
+        <div ng-repeat="section in legendSections">
             <div class="legend-section-header">
                 <a class="cursor-pointer" ng-click="toggleSectionVisibility(section)"><h4><i class="fa" ng-class="{'fa-plus': !isSectionVisible(section), 'fa-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
             </div>
-            <ul ng-show="isSectionVisible(section)" class="legend-items">
-                <li ng-repeat="item in section.items" class="legend-item" ng-class="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
+            <div ng-show="isSectionVisible(section)" class="legend-items">
+                <div ng-repeat="item in section.items" class="legend-item" ng-class="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
                     <div class="legend-item-map" id="{{item.id}}"></div>
                     <span class="legend-item-text">{{item.title}}</span>
-                </li>
-            </ul>
+                </div>
+            </div>
         </div>
         <!--<img ng-src="{{getLegendImage()}}" class="img-responsive" alt="" width="100%"/>-->
     </div>

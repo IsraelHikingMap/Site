@@ -35,10 +35,10 @@
     border-radius: 0 0 3px 3px;
 }
 
-.legend-route .legend-item-map {
-    width: 200px;
-    height: 50px;
-}
+    .legend-route .legend-item-map {
+        width: 200px;
+        height: 50px;
+    }
 
 .legend-poi {
     display: table;
