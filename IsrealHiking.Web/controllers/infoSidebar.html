@@ -1,21 +1,19 @@
 ﻿<div>
     <h3 class="info-header">
-        <a class="cursor-pointer" ng-class="{active: state == 'legend'}" ng-click="state = 'legend'">{{resources.legend}}</a> |
-        <a class="cursor-pointer" ng-class="{active: state == 'help'}" ng-click="state = 'help'">{{resources.help}}</a> |
-        <a class="cursor-pointer" ng-class="{active: state == 'about'}" ng-click="state = 'about'">{{resources.about}}</a>
+        <a class="cursor-pointer" ng-class="{active: state == 'legend'}" ng-click="setState('legend')">{{resources.legend}}</a> |
+        <a class="cursor-pointer" ng-class="{active: state == 'help'}" ng-click="setState('help')">{{resources.help}}</a> |
+        <a class="cursor-pointer" ng-class="{active: state == 'about'}" ng-click="setState('about')">{{resources.about}}</a>
     </h3>
 </div>
 <div ng-switch on="state">
     <div ng-switch-when="legend">
-        <div ng-repeat="section in legendSections">
+        <div ng-repeat="section in legendSections" class="legend-section">
             <div class="legend-section-header">
-                <a class="cursor-pointer" ng-click="toggleSectionVisibility(section)"><h4><i class="fa" ng-class="{'fa-plus': !section.isVisible, 'fa-minus': section.isVisible }"></i> {{section.title}}</h4></a>
+                <a class="cursor-pointer" ng-click="toggleSectionVisibility(section)"><h4><i class="fa" ng-class="{'fa-plus': !isSectionVisible(section), 'fa-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
             </div>
-            <ul ng-show="section.isVisible" class="legend-list">
-                <li ng-repeat="item in section.items" ng-class="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
-                    <div class="legend-map-container">
-                        <div class="legend-item-map" id="{{item.id}}"></div>
-                    </div>
+            <ul ng-show="isSectionVisible(section)" class="legend-items">
+                <li ng-repeat="item in section.items" class="legend-item" ng-class="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
+                    <div class="legend-item-map" id="{{item.id}}"></div>
                     <span class="legend-item-text">{{item.title}}</span>
                 </li>
             </ul>

@@ -1,6 +1,7 @@
 ﻿namespace IsraelHiking.Controllers {
     type InfoState = "legend" | "help" | "about";
     type LegendItemType = "POI" | "Way";
+
     export interface ILegendItem {
         latlng: L.LatLng;
         zoom: number;
@@ -13,19 +14,26 @@
     export interface ILegendSection {
         items: ILegendItem[];
         title: string;
-        isVisible: boolean;
+        //isVisible: boolean;
+        id: number;
     }
 
     export interface IInfoScope extends IRootScope {
         state: InfoState;
         legendSections: ILegendSection[];
+        visibleSections: Map<number, boolean>;
         toggleInfo(e: Event): void;
         isActive(): boolean;
-        getLegendImage(): string;
+        //getLegendImage(): string;
+        setState(state: InfoState): void;
+        isSectionVisible(legendSection: ILegendSection): boolean;
         toggleSectionVisibility(legendSection: ILegendSection): void;
     }
 
     export class InfoController extends BaseMapController {
+
+        private layersService: Services.Layers.LayersService;
+        private $timeout: angular.ITimeoutService;
 
         constructor($scope: IInfoScope,
             $timeout: angular.ITimeoutService,
@@ -34,8 +42,11 @@
             layersService: Services.Layers.LayersService) {
             super(mapService);
 
-            $scope.state = "legend";
+            this.$timeout = $timeout;
+            this.layersService = layersService;
 
+            $scope.state = "legend";
+            $scope.visibleSections = {};
             this.initalizeLegendSections($scope);
 
             $scope.$watch(() => $scope.resources.currentLanguage, () => {
@@ -51,36 +62,51 @@
                 return sidebarService.viewName === "info";
             }
 
-            $scope.getLegendImage = () => {
-                return layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_MTB_MAP ?
-                    "/mtbtiles/legend.png" :
-                    "/tiles/legend.png";
+            //$scope.getLegendImage = () => {
+            //    return layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_MTB_MAP ?
+            //        "/mtbtiles/legend.png" :
+            //        "/tiles/legend.png";
+            //}
+
+            $scope.isSectionVisible = (section: ILegendSection) => {
+                return $scope.visibleSections[section.id] || false;
             }
 
             $scope.toggleSectionVisibility = (section: ILegendSection) => {
-                section.isVisible = !section.isVisible;
-                if (!section.isVisible) {
+                $scope.visibleSections[section.id] = !$scope.isSectionVisible(section);
+                if (!$scope.visibleSections[section.id]) {
                     return;
                 }
                 for (let item of section.items) {
                     if (item.map) {
                         continue;
                     }
-                    $timeout(() => {
-                        item.map = L.map(item.id.toString(),
-                            {
-                                center: item.latlng,
-                                zoom: item.zoom,
-                                zoomControl: false,
-                                attributionControl: false,
-                                dragging: false,
-                                scrollWheelZoom: false,
-                                doubleClickZoom: false,
-                                layers: [L.tileLayer(layersService.selectedBaseLayer.address)]
-                            });
-                    }, 200);
+                    this.initializeItemMap(item);
                 }
             };
+
+            $scope.setState = (state: InfoState) => {
+                $scope.state = state;
+                if (state === "legend") {
+                    this.initalizeLegendSections($scope);
+                }
+            }
+        }
+
+        private initializeItemMap = (item: ILegendItem): void => {
+            this.$timeout(() => {
+                item.map = L.map(item.id.toString(),
+                {
+                    center: item.latlng,
+                    zoom: item.zoom,
+                    zoomControl: false,
+                    attributionControl: false,
+                    dragging: false,
+                    scrollWheelZoom: false,
+                    doubleClickZoom: false,
+                    layers: [L.tileLayer(this.layersService.selectedBaseLayer.address)]
+                });
+            }, 200);
         }
 
         private initalizeLegendSections($scope: IInfoScope) {
@@ -88,7 +114,8 @@
             $scope.legendSections = [
                 {
                     title: $scope.resources.legendMarkedTrails,
-                    isVisible: false,
+                    //isVisible: false,
+                    id: id++,
                     items: [
                         {
                             title: $scope.resources.legendRedMarkedTrail,
@@ -151,7 +178,8 @@
                 },
                 {
                     title: $scope.resources.legendTrails,
-                    isVisible: false,
+                    //isVisible: false,
+                    id: id++,
                     items: [
                         {
                             title: $scope.resources.legendAllVehicles,
@@ -205,7 +233,8 @@
                 },
                 {
                     title: $scope.resources.legendRoads,
-                    isVisible: false,
+                    //isVisible: false,
+                    id: id++,
                     items: [
                         {
                             title: $scope.resources.legendMotorway,
@@ -275,7 +304,8 @@
                 },
                 {
                     title: $scope.resources.legendPoi,
-                    isVisible: false,
+                    //isVisible: false,
+                    id: id++,
                     items: [
                         {
                             title: $scope.resources.legendPicnicArea,
@@ -304,6 +334,15 @@
                     ]
                 }
             ];
+
+            for (let visibleSectionId in $scope.visibleSections) {
+                if ($scope.visibleSections.hasOwnProperty(visibleSectionId) && $scope.visibleSections[visibleSectionId]) {
+                    let section = _.find($scope.legendSections, sectionToFind => sectionToFind.id.toString() === visibleSectionId);
+                    for (let item of section.items) {
+                        this.initializeItemMap(item);
+                    }
+                }
+            }
         }
     }
 
