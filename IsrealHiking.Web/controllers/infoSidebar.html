@@ -8,13 +8,15 @@
 <div ng-switch on="state">
     <div ng-switch-when="legend">
         <div ng-repeat="section in legendSections">
-            <div class="legend-section-header">
-                <a class="cursor-pointer" ng-click="toggleSectionVisibility(section)"><h4><i class="fa" ng-class="{'fa-plus': !isSectionVisible(section), 'fa-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
-            </div>
-            <div ng-show="isSectionVisible(section)" class="legend-items">
-                <div ng-repeat="item in section.items" class="legend-item" ng-class="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
-                    <div class="legend-item-map" id="{{item.id}}"></div>
-                    <span class="legend-item-text">{{item.title}}</span>
+            <div class="legend-section">
+                <div class="legend-section-header">
+                    <a class="cursor-pointer" ng-click="toggleSectionVisibility(section)"><h4><i class="fa" ng-class="{'fa-plus': !isSectionVisible(section), 'fa-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
+                </div>
+                <div ng-show="isSectionVisible(section)">
+                    <div ng-repeat="item in section.items" class="legend-item" ng-class="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
+                        <div class="legend-item-map" id="{{item.id}}"></div>
+                        <span class="legend-item-text">{{item.title}}</span>
+                    </div>
                 </div>
             </div>
         </div>

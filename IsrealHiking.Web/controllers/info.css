@@ -16,10 +16,6 @@
     border-bottom: 1px solid #d0d0d0;
 }
 
-.legend-items {
-    list-style: none;
-}
-
 .legend-item {
     border: 1px solid #ddd;
     margin-bottom: 10px;
