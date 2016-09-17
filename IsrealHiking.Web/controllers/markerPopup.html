@@ -9,14 +9,8 @@
             <a class="btn btn-warning cursor-pointer input-group-addon" ng-click="showCoordinates = !showCoordinates" uib-tooltip="{{resources.showCoordinates}}" tooltip-placement="top" tooltip-append-to-body="true"><i class="fa fa-globe"></i></a>
         </div>
     </form>
-    <div ng-show="showCoordinates" ng-class="'text-' + resources.start">
-        <p>
-            {{resources.latitudeAbbreviation}} {{latLng.lat | number }}°, {{resources.longitudeAbbreviation}} {{latLng.lng | number}}°<br />
-            {{resources.eastAbbreviation}} {{itmCoordinates.East}} {{resources.meterUnit}}, {{resources.northAbbreviation}} {{itmCoordinates.North}} {{resources.meterUnit}}<br />
-            {{resources.elevation}} {{latLng.z}} {{resources.meterUnit}}
-        </p>
-        <p class="chome-wordwrap-fix">
-            <span ng-bind-html="resources.coordinatesForWikipedia"></span> {{wikiCoordinatesString}}
-        </p>
-    </div>
+    <div ng-include="'controllers/coordinatesMarkerPopup.html'"></div>
+    <p class="chome-wordwrap-fix" ng-show="showCoordinates">
+        <span ng-bind-html="resources.coordinatesForWikipedia"></span> {{wikiCoordinatesString}}
+    </p>
 </div>

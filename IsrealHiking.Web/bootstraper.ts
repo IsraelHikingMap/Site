@@ -2,6 +2,7 @@
 
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;
+        hasHebrewCharacters(word: string): boolean;
     }
 
     export var app = angular.module("IsraelHiking", [
@@ -72,6 +73,10 @@
         controller: Controllers.MarkerPopupController,
         templateUrl: "controllers/routePointPopup.html"
     } as angular.IDirective));
+    app.directive(Strings.Directives.searchResultsMarkerPopup, () => ({
+        controller: Controllers.MarkerPopupController,
+        templateUrl: "controllers/searchResultsMarkerPopup.html"
+    } as angular.IDirective));
     app.directive(Strings.Directives.drawingControl, () => ({
         controller: Controllers.DrawingController,
         templateUrl: "controllers/drawing.html"
@@ -133,6 +138,9 @@
         ($rootScope: IRootScope, resourcesService: Services.ResourcesService) => {
             angular.element("link[type*=icon]").detach().appendTo("head");
             $rootScope.resources = resourcesService;
+            $rootScope.hasHebrewCharacters = (word: string): boolean => {
+                return (word.match(/[\u0590-\u05FF]/gi) != null);
+            }
         }]);
 
     app.config($compileProvider => {

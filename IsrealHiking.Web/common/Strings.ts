@@ -57,6 +57,7 @@
         export const disableMapMovement = "disableMapMovement";
         export const markerPopup = "markerPopup";
         export const routePointPopup = "routePointPopup";
+        export const searchResultsMarkerPopup = "searchResultsMarkerPopup";
         export const drawingControl = "drawingControl";
         export const editOsmControl = "editOsmControl";
         export const fileControl = "fileControl";

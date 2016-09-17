@@ -22,7 +22,6 @@
         poiLayer: Services.Layers.PoiLayers.PoiLayer;
         setTitle(title: string): void;
         getDirection(title: string): string;
-        
     }
 
     export class MarkerPopupController {

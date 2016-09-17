@@ -7,14 +7,14 @@
             <tr>
                 <th>
                     <div class="input-group">
-                        <input type="text" ng-model="searchTerm" ng-change="search(searchTerm)" class="form-control" placeholder="{{resources.searchPlaceHolder}}" dir="{{isHebrew ? 'rtl' : 'ltr'}}" sync-focus-with="isShowingSearch" ng-click="ignoreClick($event)" />
+                        <input type="text" ng-model="searchTerm" ng-change="search(searchTerm)" class="form-control" placeholder="{{resources.searchPlaceHolder}}" dir="{{hasHebrewCharacters(searchTerm) ? 'rtl' : 'ltr'}}" sync-focus-with="isShowingSearch" ng-click="ignoreClick($event)" />
                         <a class="btn btn-default input-group-addon" ng-click="toggleSearchBar($event)"><i class="fa fa-search fa-lg"></i></a>
                     </div>
                 </th>
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="result in searchResults" ng-click="selectResult(result, $event)" dir="{{isHebrew ? 'rtl' : 'ltr'}}" ng-class="{'active-row': result == activeSearchResult}" class="cursor-pointer">
+            <tr ng-repeat="result in searchResults" ng-click="selectResult(result, $event)" dir="{{hasHebrewCharacters(result.name) ? 'rtl' : 'ltr'}}" ng-class="{'active-row': result == activeSearchResult}" class="cursor-pointer">
                 <td>
                     <p class="search-results-item">
                         <img ng-src="{{result.icon}}" height="16" width="16" ng-show="result.icon && !result.address" alt="" />

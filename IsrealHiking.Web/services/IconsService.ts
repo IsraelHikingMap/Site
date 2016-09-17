@@ -5,6 +5,13 @@
         "<i class='fa fa-circle fa-stack-1x icon-background' style='color:white;'></i>" +
         "<strong class='fa-stack-1x'>{{number}}</strong>" +
         "</span>";
+
+        private static SEARCH_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
+        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +
+        "<i class='fa fa-circle fa-stack-2x icon-background' style='color:white;'></i>" +
+        "<i class='fa fa-search fa-stack-1x icon-background' style='color:black;'></i>" +
+        "</span>";
+
         private static START_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
         "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +
         "<i class='fa fa-circle fa-stack-2x icon-background' style='color:white;'></i>" +
@@ -49,6 +56,16 @@
                 iconSize: L.point(32, 32),
                 iconAnchor: L.point(16, 32),
                 className: "km-marker",
+                popupAnchor: L.point(0, -30)
+            } as L.DivIconOptions);
+        }
+
+        public static createSearchMarkerIcon(): L.DivIcon {
+            return L.divIcon({
+                html: IconsService.SEARCH_MARKER_HTML,
+                iconSize: L.point(32, 32),
+                iconAnchor: L.point(16, 32),
+                className: "search-marker",
                 popupAnchor: L.point(0, -30)
             } as L.DivIconOptions);
         }

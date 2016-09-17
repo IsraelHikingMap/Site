@@ -1,8 +1,7 @@
 ﻿namespace IsraelHiking.Controllers {
 
-    export interface ISearchScope extends angular.IScope {
+    export interface ISearchScope extends IRootScope {
         isShowingSearch: boolean;
-        isHebrew: boolean;
         searchResults: Services.Search.ISearchResults[];
         searchTerm: string;
         activeSearchResult: Services.Search.ISearchResults;
@@ -17,6 +16,10 @@
         searchTerm: string;
     }
 
+    interface ISearchResultsMarkerPopup extends IRemovableMarkerScope {
+        convertToRoute(): void;
+    }
+
     export class SearchController extends BaseMapController {
         private static ENTER_KEY = 13;
         private static UP_KEY = 38;
@@ -24,21 +27,25 @@
 
         private requestsQueue: ISearchRequestQueueItem[];
         private layerGroup: L.LayerGroup<L.ILayer>;
+        private elevationProvider: Services.Elevation.ElevationProvider;
 
         constructor($scope: ISearchScope,
             $window: angular.IWindowService,
             $timeout: angular.ITimeoutService,
+            $compile: angular.ICompileService,
             mapService: Services.MapService,
             hashService: Services.HashService,
+            layersService: Services.Layers.LayersService,
+            elevationProvider: Services.Elevation.ElevationProvider,
             searchResultsProviderFactory: Services.Search.SearchResultsProviderFactory,
             toastr: Toastr) {
             super(mapService);
             this.requestsQueue = [];
             this.layerGroup = L.layerGroup();
             this.map.addLayer(this.layerGroup);
+            this.elevationProvider = elevationProvider;
             $scope.searchTerm = hashService.searchTerm;
             $scope.isShowingSearch = $scope.searchTerm.length > 0;
-            $scope.isHebrew = this.hasHebrewCharacters($scope.searchTerm);
             $scope.searchResults = [];
             $scope.activeSearchResult = null;
 
@@ -48,8 +55,6 @@
             }
 
             $scope.search = (searchTerm: string) => {
-                $scope.isHebrew = this.hasHebrewCharacters(searchTerm);
-
                 if (searchTerm.length <= 2) {
                     $scope.searchResults = [];
                     return;
@@ -60,7 +65,7 @@
 
                 var local = searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
 
-                local.getResults(searchTerm, $scope.isHebrew)
+                local.getResults(searchTerm, $scope.hasHebrewCharacters(searchTerm))
                     .then((results: Services.Search.ISearchResults[]) => {
                         let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
                         if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
@@ -78,12 +83,38 @@
                 $scope.isShowingSearch = false;
                 $scope.activeSearchResult = searchResults;
                 this.layerGroup.clearLayers();
-                this.map.fitBounds(searchResults.bounds, <L.Map.FitBoundsOptions>{ maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM });
-                var marker = L.marker(searchResults.latlng);
-                marker.bindPopup(searchResults.name || searchResults.address);
-                marker.once("dblclick", () => {
+                this.map.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
+                var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false}) as Services.Layers.PoiLayers.IMarkerWithTitle;
+                marker.title = searchResults.name || searchResults.address;
+                let newScope = $scope.$new() as ISearchResultsMarkerPopup;
+                newScope.marker = marker;
+                newScope.remove = () => {
                     this.layerGroup.clearLayers();
-                });
+                }
+                newScope.convertToRoute = () => {
+                    let segments = [] as Common.RouteSegmentData[];
+                    if (searchResults.latlngsArray.length > 0) {
+                        segments.push({
+                            latlngzs: this.convertToLatLngZArray([searchResults.latlngsArray[0][0], searchResults.latlngsArray[0][0]]),
+                            routePoint: searchResults.latlngsArray[0][0],
+                            routingType: "Hike"
+                        });
+                        for (let latlngs of searchResults.latlngsArray) {
+                            segments.push({
+                                latlngzs: this.convertToLatLngZArray(latlngs),
+                                routePoint: latlngs[latlngs.length - 1],
+                                routingType: "Hike"
+                            });
+                        }    
+                    }
+                    layersService.setJsonData({
+                        markers: [{ latlng: searchResults.latlng, title: marker.title }],
+                        routes: [{ segments: segments, name: marker.title}]
+                    } as Common.DataContainer);
+                    this.layerGroup.clearLayers();
+                }
+                marker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0]);
+
                 this.layerGroup.addLayer(marker);
                 for (let line of searchResults.latlngsArray) {
                     let polyLine = L.polyline(line, { opacity: 1, color: "Blue", weight: 3 } as L.PolylineOptions);
@@ -148,9 +179,14 @@
             });
         }
 
-        private hasHebrewCharacters(searchTerm: string): boolean {
-            return (searchTerm.match(/[\u0590-\u05FF]/gi) != null);
-        }
+        private convertToLatLngZArray = (latlngs: L.LatLng[]): Common.LatLngZ[] => {
+            let latlngZ = [] as  Common.LatLngZ[];
+            for (let latlng of latlngs) {
+                latlngZ.push(angular.extend({ z: 0 }, latlng));
+            }
+            this.elevationProvider.updateHeights(latlngZ);
+            return latlngZ;
+        } 
     }
 
 }
