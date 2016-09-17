@@ -78,7 +78,7 @@
                                 doubleClickZoom: false,
                                 layers: [L.tileLayer(layersService.selectedBaseLayer.address)]
                             });
-                    }, 10);
+                    }, 200);
                 }
             };
         }
@@ -279,7 +279,7 @@
                     items: [
                         {
                             title: $scope.resources.legendPicnicArea,
-                            latlng: L.latLng(32.629, 35.119),
+                            latlng: L.latLng(32.62849, 35.1192),
                             zoom: 16,
                             id: id++,
                             map: null,

@@ -11,14 +11,16 @@
             <div class="legend-section-header">
                 <a class="cursor-pointer" ng-click="toggleSectionVisibility(section)"><h4><i class="fa" ng-class="{'fa-plus': !section.isVisible, 'fa-minus': section.isVisible }"></i> {{section.title}}</h4></a>
             </div>
-            <ul ng-show="section.isVisible">
-                <li ng-repeat="item in section.items">
-                    <p>{{item.title}}</p>
-                    <div id="{{item.id}}" ng-class="{'legend-map-route': item.type == 'Way', 'legend-map-poi' : item.type == 'POI'}"></div>
+            <ul ng-show="section.isVisible" class="legend-list">
+                <li ng-repeat="item in section.items" ng-class="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
+                    <div class="legend-map-container">
+                        <div class="legend-item-map" id="{{item.id}}"></div>
+                    </div>
+                    <span class="legend-item-text">{{item.title}}</span>
                 </li>
             </ul>
         </div>
-        <img ng-src="{{getLegendImage()}}" class="img-responsive" alt="" width="100%"/>
+        <!--<img ng-src="{{getLegendImage()}}" class="img-responsive" alt="" width="100%"/>-->
     </div>
     <div ng-switch-when="about">
         <div>
