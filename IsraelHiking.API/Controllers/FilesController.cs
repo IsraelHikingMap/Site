@@ -33,7 +33,7 @@ namespace IsraelHiking.API.Controllers
         public async Task<DataContainer> GetRemoteFile(string url)
         {
             var response = await _remoteFileFetcher.GetFileContent(url);
-            var dataContainer = await _dataContainerConverterService.ToDataContainer(response.Content, Path.GetExtension(response.FileName));
+            var dataContainer = await _dataContainerConverterService.ToDataContainer(response.Content, response.FileName);
             foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
             {
                 latLngZ.z = await _elevationDataStorage.GetElevation(latLngZ.lat, latLngZ.lng);
@@ -72,7 +72,7 @@ namespace IsraelHiking.API.Controllers
             }
             var fileName = streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('"');
             var content = await streamProvider.Contents.First().ReadAsByteArrayAsync();
-            var dataContainer = await _dataContainerConverterService.ToDataContainer(content, Path.GetExtension(fileName));
+            var dataContainer = await _dataContainerConverterService.ToDataContainer(content, fileName);
             return Ok(dataContainer);
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -15,7 +16,6 @@ using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using OsmSharp;
 
 namespace IsraelHiking.API.Tests.Services
 {
@@ -52,7 +52,6 @@ namespace IsraelHiking.API.Tests.Services
         public void ConvertDataContainerToGeoJson_ShouldConvertToGeoJson()
         {
             var dataContainer = new DataContainer { markers = new List<MarkerData> { new MarkerData { latlng = new LatLng() } } };
-            //_gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(_simpleGpx.ToBytes()));
             var results = _converterService.ToAnyFormat(dataContainer, "geojson").Result.ToFeatureCollection();
 
             Assert.AreEqual(1, results.Features.Count);
@@ -248,6 +247,21 @@ namespace IsraelHiking.API.Tests.Services
             _gpsBabelGateway.ConvertFileFromat(Arg.Is<byte[]>(b => b.AsEnumerable().SequenceEqual(_randomBytes)), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(_simpleGpx.ToBytes()));
 
             var dataContainer = _converterService.ToDataContainer(zipfileStream.ToArray(), "kmz").Result;
+
+            Assert.AreEqual(0, dataContainer.routes.Count);
+            Assert.AreEqual(1, dataContainer.markers.Count);
+        }
+
+        [TestMethod]
+        public void ConvertGpxGzToDataContainer_ShouldConvertToDataContainer()
+        {
+            var gpxStream = new MemoryStream(_simpleGpx.ToBytes());
+            var compressedGzipStream = new MemoryStream();
+            using (var gZipStream = new GZipStream(compressedGzipStream, CompressionMode.Compress))
+            {
+                gpxStream.CopyTo(gZipStream);
+            }
+            var dataContainer = _converterService.ToDataContainer(compressedGzipStream.ToArray(), "file.gpx.gz").Result;
 
             Assert.AreEqual(0, dataContainer.routes.Count);
             Assert.AreEqual(1, dataContainer.markers.Count);

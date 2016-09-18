@@ -109,6 +109,13 @@
     <Compile Include="Controllers\RoutingController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\UrlsController.cs" />
+    <Compile Include="Converters\ConverterFlows\GeoJsonGpxConverterFlow.cs" />
+    <Compile Include="Converters\ConverterFlows\GpsBabelConverterFlow.cs" />
+    <Compile Include="Converters\ConverterFlows\GpxGeoJsonConverterFlow.cs" />
+    <Compile Include="Converters\ConverterFlows\GpxGzToGpxConverterFlow.cs" />
+    <Compile Include="Converters\ConverterFlows\GpxToSingleTrackGpxConverterFlow.cs" />
+    <Compile Include="Converters\ConverterFlows\GpxVersion1ToGpxVersion11ConverterFlow.cs" />
+    <Compile Include="Converters\ConverterFlows\KmzToKmlConverterFlow.cs" />
     <Compile Include="Converters\GpxDataContainerConverter.cs" />
     <Compile Include="Converters\GpxGeoJsonConverter.cs" />
     <Compile Include="Converters\OsmGeoJsonConverter.cs" />
@@ -120,6 +127,7 @@
     <Compile Include="Converters\IGpxGeoJsonConverter.cs" />
     <Compile Include="Services\DouglasPeuckerReductionService.cs" />
     <Compile Include="Services\GeoJsonFeatureHelper.cs" />
+    <Compile Include="Converters\ConverterFlows\IConverterFlowItem.cs" />
     <Compile Include="Services\IDouglasPeuckerReductionService.cs" />
     <Compile Include="Services\IOsmDataService.cs" />
     <Compile Include="Services\OsmDataService.cs" />
