@@ -14,7 +14,6 @@
     export interface ILegendSection {
         items: ILegendItem[];
         title: string;
-        //isVisible: boolean;
         id: number;
     }
 
@@ -24,7 +23,6 @@
         visibleSections: Map<number, boolean>;
         toggleInfo(e: Event): void;
         isActive(): boolean;
-        //getLegendImage(): string;
         setState(state: InfoState): void;
         isSectionVisible(legendSection: ILegendSection): boolean;
         toggleSectionVisibility(legendSection: ILegendSection): void;
@@ -62,12 +60,6 @@
                 return sidebarService.viewName === "info";
             }
 
-            //$scope.getLegendImage = () => {
-            //    return layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_MTB_MAP ?
-            //        "/mtbtiles/legend.png" :
-            //        "/tiles/legend.png";
-            //}
-
             $scope.isSectionVisible = (section: ILegendSection) => {
                 return $scope.visibleSections[section.id] || false;
             }
@@ -96,16 +88,16 @@
         private initializeItemMap = (item: ILegendItem): void => {
             this.$timeout(() => {
                 item.map = L.map(item.id.toString(),
-                {
-                    center: item.latlng,
-                    zoom: item.zoom,
-                    zoomControl: false,
-                    attributionControl: false,
-                    dragging: false,
-                    scrollWheelZoom: false,
-                    doubleClickZoom: false,
-                    layers: [L.tileLayer(this.layersService.selectedBaseLayer.address)]
-                });
+                    {
+                        center: item.latlng,
+                        zoom: item.zoom,
+                        zoomControl: false,
+                        attributionControl: false,
+                        dragging: false,
+                        scrollWheelZoom: false,
+                        doubleClickZoom: false,
+                        layers: [L.tileLayer(this.layersService.selectedBaseLayer.address)]
+                    });
             }, 200);
         }
 
@@ -114,7 +106,6 @@
             $scope.legendSections = [
                 {
                     title: $scope.resources.legendMarkedTrails,
-                    //isVisible: false,
                     id: id++,
                     items: [
                         {
@@ -135,7 +126,7 @@
                         },
                         {
                             title: $scope.resources.legendGreenMarkedTrail,
-                                latlng: L.latLng(30.4626, 34.6535),
+                            latlng: L.latLng(30.4626, 34.6535),
                             zoom: 15,
                             id: id++,
                             map: null,
@@ -143,109 +134,107 @@
                         },
                         {
                             title: $scope.resources.legendBlackMarkedTrail,
-                                latlng: L.latLng(32.9408850, 35.376500),
-                                zoom: 16,
+                            latlng: L.latLng(32.9408850, 35.376500),
+                            zoom: 16,
                             id: id++,
                             map: null,
                             type: "Way"
                         },
                         {
                             title: $scope.resources.legendIsraelTrail,
-                                latlng: L.latLng(31.5386, 34.8068),
+                            latlng: L.latLng(31.5386, 34.8068),
                             zoom: 15,
                             id: id++,
                             map: null,
                             type: "Way"
                         },
                         {
-                                title: "Purple Regional Trail",
-                                latlng: L.latLng(30.4967, 34.642),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Orange Regional Trail",
-                                latlng: L.latLng(32.7992, 35.451357),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            }
-                        ]
-                    },
-                    {
-                        title: "Singles",
-                        //isVisible: false,
-                        id: id++,
-                        items: [
-                            {
-                                title: "Unknown scale ",
-                                latlng: L.latLng(31.7181377, 35.074078),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Easy with Direction",
-                                latlng: L.latLng(31.8394124, 34.925923),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Moderate",
-                                latlng: L.latLng(32.5911896, 35.139556),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Advanced",
-                                latlng: L.latLng(32.5967000, 35.135100),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Challanging with Direction",
-                                latlng: L.latLng(31.8295000, 35.084302),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            }
-                        ]
-                    },
-                    {
-                        title: "Bicycle Trails",
-                        //isVisible: false,
-                        id: id++,
-                        items: [
-                            {
-                                title: "Local trail",
-                                latlng: L.latLng(30.6234487, 34.906955),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Regional Trail",
-                                latlng: L.latLng(31.8647653, 34.940742),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "National Trail",
-                                latlng: L.latLng(29.7095249, 34.940128),
+                            title: $scope.resources.legendPurpleRegionalTrail,
+                            latlng: L.latLng(30.4967, 34.642),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendOrangeRegionalTrail,
+                            latlng: L.latLng(32.7992, 35.451357),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        }
+                    ]
+                },
+                {
+                    title: $scope.resources.legendSingles,
+                    id: id++,
+                    items: [
+                        {
+                            title: $scope.resources.legendUnknownScale,
+                            latlng: L.latLng(31.7181377, 35.074078),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendEasyWithDirection,
+                            latlng: L.latLng(31.8394124, 34.925923),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendModerate,
+                            latlng: L.latLng(32.5911896, 35.139556),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendAdvanced,
+                            latlng: L.latLng(32.5967000, 35.135100),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendChallangingWithDirection,
+                            latlng: L.latLng(31.8295000, 35.084302),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        }
+                    ]
+                },
+                {
+                    title: $scope.resources.legendBicycleTrails,
+                    id: id++,
+                    items: [
+                        {
+                            title: $scope.resources.legendLocalTrail,
+                            latlng: L.latLng(30.6234487, 34.906955),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendRegionalTrail,
+                            latlng: L.latLng(31.8647653, 34.940742),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendNationalTrail,
+                            latlng: L.latLng(29.7095249, 34.940128),
                             zoom: 15,
                             id: id++,
                             map: null,
@@ -255,21 +244,20 @@
                 },
                 {
                     title: $scope.resources.legendTrails,
-                    //isVisible: false,
                     id: id++,
                     items: [
                         {
                             title: $scope.resources.legendAllVehicles,
-                                latlng: L.latLng(31.1402847, 34.675276),
-                                zoom: 16,
+                            latlng: L.latLng(31.1402847, 34.675276),
+                            zoom: 16,
                             id: id++,
                             map: null,
                             type: "Way"
                         },
                         {
                             title: $scope.resources.legendLight4WDVehicles,
-                                latlng: L.latLng(30.5885, 34.8847),
-                                zoom: 16,
+                            latlng: L.latLng(30.5885, 34.8847),
+                            zoom: 16,
                             id: id++,
                             map: null,
                             type: "Way"
@@ -284,24 +272,24 @@
                         },
                         {
                             title: $scope.resources.legendPath,
-                                latlng: L.latLng(31.2097, 35.291),
-                                zoom: 16,
+                            latlng: L.latLng(31.2097, 35.291),
+                            zoom: 16,
                             id: id++,
                             map: null,
                             type: "Way"
                         },
                         {
                             title: $scope.resources.legendFootPath,
-                                latlng: L.latLng(30.5362, 34.781),
-                                zoom: 16,
+                            latlng: L.latLng(30.5362, 34.781),
+                            zoom: 16,
                             id: id++,
                             map: null,
                             type: "Way"
                         },
                         {
                             title: $scope.resources.legendBicyclePath,
-                                latlng: L.latLng(31.633, 35.348),
-                                zoom: 16,
+                            latlng: L.latLng(31.633, 35.348),
+                            zoom: 16,
                             id: id++,
                             map: null,
                             type: "Way"
@@ -310,28 +298,27 @@
                 },
                 {
                     title: $scope.resources.legendRoads,
-                    //isVisible: false,
                     id: id++,
                     items: [
                         {
                             title: $scope.resources.legendMotorway,
-                                latlng: L.latLng(32.4088604, 34.946265),
+                            latlng: L.latLng(32.4088604, 34.946265),
                             zoom: 13,
                             id: id++,
                             map: null,
                             type: "Way"
                         },
                         {
-                                title: "Trunk",
-                                latlng: L.latLng(31.2540928, 35.109671),
-                                zoom: 14,
+                            title: $scope.resources.legendTrunk,
+                            latlng: L.latLng(31.2540928, 35.109671),
+                            zoom: 14,
                             id: id++,
                             map: null,
                             type: "Way"
                         },
                         {
                             title: $scope.resources.legendPrimary,
-                                latlng: L.latLng(31.7449610, 34.861808),
+                            latlng: L.latLng(31.7449610, 34.861808),
                             zoom: 13,
                             id: id++,
                             map: null,
@@ -339,7 +326,7 @@
                         },
                         {
                             title: $scope.resources.legendSecondary,
-                                latlng: L.latLng(31.7421349, 34.720887),
+                            latlng: L.latLng(31.7421349, 34.720887),
                             zoom: 13,
                             id: id++,
                             map: null,
@@ -371,7 +358,7 @@
                         },
                         {
                             title: $scope.resources.legendRunwayTaxiway,
-                                latlng: L.latLng(32.5960, 35.2300),
+                            latlng: L.latLng(32.5960, 35.2300),
                             zoom: 13,
                             id: id++,
                             map: null,
@@ -381,7 +368,6 @@
                 },
                 {
                     title: $scope.resources.legendPoi,
-                    //isVisible: false,
                     id: id++,
                     items: [
                         {
@@ -394,111 +380,122 @@
                         },
                         {
                             title: $scope.resources.legendCampsite,
-                                latlng: L.latLng(30.3312823, 35.101190),
-                                zoom: 16,
+                            latlng: L.latLng(30.3312823, 35.101190),
+                            zoom: 16,
                             id: id++,
                             map: null,
                             type: "POI"
                         },
                         {
                             title: $scope.resources.legendViewpoint,
-                                latlng: L.latLng(30.5972172, 34.772286),
-                                zoom: 16,
+                            latlng: L.latLng(30.5972172, 34.772286),
+                            zoom: 16,
                             id: id++,
                             map: null,
                             type: "POI"
-                            },
-                            {
-                                title: "Peak",
-                                latlng: L.latLng(32.9010649, 35.402584),
-                                zoom: 13,
-                                id: id++,
-                                map: null,
-                                type: "POI"
-                            },
-                            {
-                                title: "Ruin",
-                                latlng: L.latLng(32.9499110, 35.600000),
-                                zoom: 15,
-                                id: id++,
-                                map: null,
-                                type: "POI"
-                            },
-                            {
-                                title: "Archeological Site",
-                                latlng: L.latLng(30.7880108, 34.734390),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "POI"
-                            },
-                            {
-                                title: "Cave",
-                                latlng: L.latLng(30.9097767, 34.759085 ),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "POI"
-                            }
-                        ]
-                    },
-                    {
-                        title: "Regional Trails",
-                        //isVisible: false,
-                        id: id++,
-                        items: [
-                            {
-                                title: "Jerusalem Trail",
-                                latlng: L.latLng(31.7681051, 35.229898),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Sea to Sea Trail",
-                                latlng: L.latLng(33.0039669, 35.384796),
-                                zoom: 15,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Golan Trail",
-                                latlng: L.latLng(32.9979383, 35.816524),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Kenneret Trail",
-                                latlng: L.latLng(32.8935159, 35.629950),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Haifa Wadis Trail",
-                                latlng: L.latLng(32.7684757, 35.020230),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
-                            },
-                            {
-                                title: "Kinneret Bicycle Trail",
-                                latlng: L.latLng(32.8664313, 35.524077),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendPeak,
+                            latlng: L.latLng(32.9010649, 35.402584),
+                            zoom: 13,
+                            id: id++,
+                            map: null,
+                            type: "POI"
+                        },
+                        {
+                            title: $scope.resources.legendRuins,
+                            latlng: L.latLng(32.9499110, 35.600000),
+                            zoom: 15,
+                            id: id++,
+                            map: null,
+                            type: "POI"
+                        },
+                        {
+                            title: $scope.resources.legendArcheologicalSite,
+                            latlng: L.latLng(30.7880108, 34.734390),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "POI"
+                        },
+                        {
+                            title: $scope.resources.legendCave,
+                            latlng: L.latLng(30.9097767, 34.759085),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "POI"
+                        }
+                    ]
+                },
+                {
+                    title: $scope.resources.legendRegionalTrails,
+                    id: id++,
+                    items: [
+                        {
+                            title: $scope.resources.legendJerusalemTrail,
+                            latlng: L.latLng(31.7681051, 35.229898),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendSeatoSeaTrail,
+                            latlng: L.latLng(33.0039669, 35.384796),
+                            zoom: 15,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendGolanTrail,
+                            latlng: L.latLng(32.9979383, 35.816524),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendKinneretTrail,
+                            latlng: L.latLng(32.8935159, 35.629950),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendHaifaWadisTrail,
+                            latlng: L.latLng(32.7684757, 35.020230),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
+                        {
+                            title: $scope.resources.legendKinneretBicycleTrail,
+                            latlng: L.latLng(32.8664313, 35.524077),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "Way"
                         }
                     ]
                 }
             ];
 
+            if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_MTB_MAP) {
+                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendRegionalTrails);
+                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendMarkedTrails);
+            } else if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_HIKING_MAP) {
+                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendSingles);
+                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendBicycleTrails);
+            } else {
+                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendRegionalTrails);
+                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendMarkedTrails);
+                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendSingles);
+                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendBicycleTrails);
+            }
             for (let visibleSectionId in $scope.visibleSections) {
                 if ($scope.visibleSections.hasOwnProperty(visibleSectionId) && $scope.visibleSections[visibleSectionId]) {
                     let section = _.find($scope.legendSections, sectionToFind => sectionToFind.id.toString() === visibleSectionId);

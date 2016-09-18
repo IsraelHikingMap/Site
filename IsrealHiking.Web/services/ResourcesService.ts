@@ -149,7 +149,7 @@ namespace IsraelHiking.Services {
         public legendBicyclePath: string;
         public legendRoads: string;
         public legendMotorway: string;
-        public legendTrunkTunnel: string;
+        public legendTrunk: string;
         public legendPrimary: string;
         public legendSecondary: string;
         public legendTertiary: string;
@@ -160,6 +160,30 @@ namespace IsraelHiking.Services {
         public legendPicnicArea: string;
         public legendCampsite: string;
         public legendViewpoint: string;
+        public legendPeak: string;
+        public legendRuins: string;
+        public legendArcheologicalSite: string;
+        public legendCave: string;
+        public legendRegionalTrails: string;
+        public legendJerusalemTrail: string;
+        public legendSeatoSeaTrail: string;
+        public legendGolanTrail: string;
+        public legendKinneretTrail: string;
+        public legendHaifaWadisTrail: string;
+        public legendKinneretBicycleTrail: string;
+        public legendPurpleRegionalTrail: string;
+        public legendOrangeRegionalTrail: string;
+        public legendSingles: string;
+        public legendUnknownScale: string;
+        public legendEasyWithDirection: string;
+        public legendModerate: string;
+        public legendAdvanced: string;
+        public legendChallangingWithDirection: string;
+        public legendBicycleTrails: string;
+        public legendLocalTrail: string;
+        public legendNationalTrail: string;
+
+
 
         constructor($sce: angular.ISCEService,
             localStorageService: angular.local.storage.ILocalStorageService,
@@ -318,7 +342,7 @@ namespace IsraelHiking.Services {
                     this.legendBicyclePath = this.gettextCatalog.getString("Bicycle path");
                     this.legendRoads = this.gettextCatalog.getString("Roads");
                     this.legendMotorway = this.gettextCatalog.getString("Motorway");
-                    this.legendTrunkTunnel = this.gettextCatalog.getString("Trunk and Tunnel");
+                    this.legendTrunk = this.gettextCatalog.getString("Trunk");
                     this.legendPrimary = this.gettextCatalog.getString("Primary");
                     this.legendSecondary = this.gettextCatalog.getString("Secondary");
                     this.legendTertiary = this.gettextCatalog.getString("Tertiary");
@@ -329,7 +353,28 @@ namespace IsraelHiking.Services {
                     this.legendPicnicArea = this.gettextCatalog.getString("Picnic Area");
                     this.legendCampsite = this.gettextCatalog.getString("Campsite");
                     this.legendViewpoint = this.gettextCatalog.getString("Viewpoint");
-
+                    this.legendPeak = this.gettextCatalog.getString("Peak");
+                    this.legendRuins = this.gettextCatalog.getString("Ruins");
+                    this.legendArcheologicalSite = this.gettextCatalog.getString("Archeological Site");
+                    this.legendCave = this.gettextCatalog.getString("Cave");
+                    this.legendRegionalTrails = this.gettextCatalog.getString("Regional Trails");
+                    this.legendJerusalemTrail = this.gettextCatalog.getString("Jerusalem Trail");
+                    this.legendSeatoSeaTrail = this.gettextCatalog.getString("Sea to Sea Trail");
+                    this.legendGolanTrail = this.gettextCatalog.getString("Golan Trail");
+                    this.legendKinneretTrail = this.gettextCatalog.getString("Kinneret Trail");
+                    this.legendHaifaWadisTrail = this.gettextCatalog.getString("Haifa Wadis Trail");
+                    this.legendKinneretBicycleTrail = this.gettextCatalog.getString("Kinneret Bicycle Trail");
+                    this.legendPurpleRegionalTrail = this.gettextCatalog.getString("Purple Regional Trail");
+                    this.legendOrangeRegionalTrail = this.gettextCatalog.getString("Orange Regional Trail");
+                    this.legendSingles = this.gettextCatalog.getString("Singles");
+                    this.legendUnknownScale = this.gettextCatalog.getString("Unknown Scale");
+                    this.legendEasyWithDirection = this.gettextCatalog.getString("Easy with Direction");
+                    this.legendModerate = this.gettextCatalog.getString("Moderate");
+                    this.legendAdvanced = this.gettextCatalog.getString("Advanced");
+                    this.legendChallangingWithDirection = this.gettextCatalog.getString("Challanging with Direction");
+                    this.legendBicycleTrails = this.gettextCatalog.getString("Bicycle Trails");
+                    this.legendLocalTrail = this.gettextCatalog.getString("Local Trail");
+                    this.legendNationalTrail = this.gettextCatalog.getString("National Trail");
 
                     this.currentLanguage = language;
                 });
