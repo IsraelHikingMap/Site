@@ -70,7 +70,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                                         dmq => dmq.Match(
                                             m => m.Query(searchTerm)
                                                 .Boost(1.2)
-                                                .Field(new Field().Name = field)
+                                                .Field(new Field {Name = field })
                                                 )
                                             )
                                         )

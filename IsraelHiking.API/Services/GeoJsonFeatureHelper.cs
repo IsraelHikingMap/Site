@@ -32,6 +32,7 @@ namespace IsraelHiking.API.Services
     {
         private static readonly List<PropertiesData> Relations = new List<PropertiesData>
         {
+            new PropertiesData("place", "any", 1, "http://www.sjjb.co.uk/mapicons/png/accommodation_alpinehut.p.16.png", true),
             new PropertiesData("boundary", "national_park", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
             new PropertiesData("boundary", "protected_area", 1),
             new PropertiesData("leisure", "nature_reserve", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
