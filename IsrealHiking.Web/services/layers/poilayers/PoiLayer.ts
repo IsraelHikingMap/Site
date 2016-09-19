@@ -31,6 +31,7 @@
             this.undoHandler = new RouteLayers.UndoHandler<Common.MarkerData[]>();
             this.markers = [];
             this.pathOptions = { color: "green", opacity: 0.7 } as L.PathOptions;
+            this.undoHandler.addDataToUndoStack(this.getData());
             this.currentState = new PoiStateReadOnly(this);
         }
 

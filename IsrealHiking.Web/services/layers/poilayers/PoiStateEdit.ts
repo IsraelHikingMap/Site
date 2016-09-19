@@ -64,6 +64,7 @@
             let poiToRemove = _.find(this.context.markers, markerToFind => markerToFind === poi);
             this.context.markers.splice(this.context.markers.indexOf(poiToRemove), 1);
             this.destoryMarker(poiToRemove.marker);
+            this.context.dataChanged();
         }
 
         public initialize() {
