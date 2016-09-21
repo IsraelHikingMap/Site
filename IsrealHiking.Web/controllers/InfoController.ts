@@ -69,6 +69,7 @@
                 if (!$scope.visibleSections[section.id]) {
                     return;
                 }
+                angular.element("#sidebar-wrapper").animate({ scrollTop: angular.element(`#${section.id}`).offset().top }, "slow");
                 for (let item of section.items) {
                     if (item.map) {
                         continue;

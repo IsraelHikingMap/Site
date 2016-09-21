@@ -7,7 +7,7 @@
 </div>
 <div ng-switch on="state">
     <div ng-switch-when="legend">
-        <div ng-repeat="section in legendSections">
+        <div ng-repeat="section in legendSections" id="{{section.id}}">
             <div class="legend-section">
                 <div class="legend-section-header">
                     <a class="cursor-pointer" ng-click="toggleSectionVisibility(section)"><h4><i class="fa" ng-class="{'fa-plus': !isSectionVisible(section), 'fa-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
