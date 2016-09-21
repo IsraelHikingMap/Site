@@ -60,7 +60,7 @@
             $scope.setTitle = (newTitle: string) => {
                 let routeMarker = _.find($scope.poiLayer.markers, markerToFind => markerToFind.marker === $scope.marker);
                 routeMarker.title = newTitle;
-                $scope.marker.updateLabelContent(newTitle.replace(/\n/g, "<br/>"));
+                $scope.marker.updateLabelContent($scope.poiLayer.getHtmlTitle(newTitle));
                 $scope.marker.title = newTitle;
                 if (!newTitle) {
                     $scope.marker.hideLabel();

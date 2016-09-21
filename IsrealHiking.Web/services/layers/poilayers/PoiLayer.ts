@@ -64,8 +64,18 @@
             this.currentState.clear();
         }
 
-        public getBindLabelOptions = (): L.LabelOptions => {
-            return { noHide: true, className: "marker-label" } as L.LabelOptions;
+        public getHtmlTitle(title: string): string {
+            let lines = title.split("\n");
+            var htmlTitleArray = "";
+            for (let line of lines) {
+                if (!line) {
+                    continue;
+                }
+                // start with hebrew or not, ignoring non alphabetical characters.
+                let direction = (line.match(/^[^a-zA-Z]*[\u0591-\u05F4]/)) ? "rtl" : "ltr";
+                htmlTitleArray += `<div dir="${direction}">${line}</div>`;
+            }
+            return htmlTitleArray;
         }
 
         public getData = (): Common.MarkerData[] => {

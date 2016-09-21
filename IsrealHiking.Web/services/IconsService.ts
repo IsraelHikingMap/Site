@@ -46,7 +46,8 @@
                 iconSize: L.point(20, 36),
                 iconAnchor: L.point(10, 36),
                 className: "color-marker",
-                popupAnchor: L.point(0, -40)
+                popupAnchor: L.point(0, -40),
+                labelAnchor: L.point(-10, 20)
             } as L.DivIconOptions);
         }
 

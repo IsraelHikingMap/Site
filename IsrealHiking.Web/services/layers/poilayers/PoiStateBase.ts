@@ -25,7 +25,7 @@
             let pathOptions = this.context.pathOptions;
             let marker = L.marker(markerData.latlng, { draggable: isEditable, clickable: isEditable, riseOnHover: true, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions) as IMarkerWithTitle;
             marker.title = markerData.title || "";
-            marker.bindLabel(marker.title.replace(/\n/g, "<br/>"), this.context.getBindLabelOptions());
+            marker.bindLabel(this.context.getHtmlTitle(marker.title), { noHide: true, className: "marker-label" } as L.LabelOptions);
             marker.addTo(this.context.map);
             if (!marker.title) { // must be after adding to map...
                 marker.hideLabel();
