@@ -2,7 +2,7 @@
     <a class="cursor-pointer" ng-click="toggleSearchBar($event)" uib-tooltip="{{resources.search}}" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-search fa-lg"></i></a>
 </div>
 <div ng-show="isShowingSearch" class="search-results-panel ihm-panel" disable-map-movement ng-keydown="keyDown($event)" tabindex="0">
-    <table class="table-hover">
+    <table class="table-hover table-bordered">
         <thead>
             <tr>
                 <th>
@@ -14,15 +14,11 @@
             </tr>
         </thead>
         <tbody>
-            <tr ng-repeat="result in searchResults" ng-click="selectResult(result, $event)" dir="{{hasHebrewCharacters(result.name) ? 'rtl' : 'ltr'}}" ng-class="{'active-row': result == activeSearchResult}" class="cursor-pointer">
+            <tr class="cursor-pointer" ng-repeat="result in searchResults" ng-click="selectResult(result, $event)" dir="{{hasHebrewCharacters(result.name) ? 'rtl' : 'ltr'}}" ng-class="{'active-row': result == activeSearchResult}" >
                 <td>
                     <p class="search-results-item">
-                        <img ng-src="{{result.icon}}" height="16" width="16" ng-show="result.icon && !result.address" alt="" />
-                        {{result.name}}
-                    </p>
-                    <p class="search-results-item">
-                        <img ng-src="{{result.icon}}" height="16" width="16" ng-show="result.icon && result.address" alt="" />
-                        {{result.address}}
+                        <img ng-src="{{result.icon}}" height="16" width="16" ng-show="result.icon" alt="" />
+                        {{result.name}}{{result.address ? ', ' + result.address : ''}}
                     </p>
                 </td>
             </tr>

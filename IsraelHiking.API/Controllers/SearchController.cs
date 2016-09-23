@@ -17,7 +17,17 @@ namespace IsraelHiking.API.Controllers
         // GET api/search/searchTerm=abc&language=en
         public async Task<FeatureCollection> GetSearchResults(string id, string language = null)
         {
-            return new FeatureCollection(await _elasticSearchGateway.Search(id, language));
+            var fieldName = string.IsNullOrWhiteSpace(language) ? "name" : "name:" + language;
+            var features = await _elasticSearchGateway.Search(id, fieldName);
+            foreach (var feature in features)
+            {
+                var container = await _elasticSearchGateway.GetContainingFeature(feature);
+                if (container != null && container.Properties.ContainsKey(fieldName))
+                {
+                    feature.Properties["address"] = container.Properties[fieldName];
+                }
+            }
+            return new FeatureCollection(features);
         }
     }
 }

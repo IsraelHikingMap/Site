@@ -54,7 +54,6 @@ namespace IsraelHiking.API.Services
             _serverPath = serverPath;
             await _graphHopperHelper.Initialize(serverPath);
             await _elasticSearchHelper.Initialize(serverPath);
-            _elasticSearchGateway.Initialize();
             _logger.Info("Finished initializing OSM data service with server path: " + serverPath);
         }
 
@@ -112,7 +111,7 @@ namespace IsraelHiking.API.Services
             var converter = new OsmGeoJsonConverter();
             var smallCahceList = new List<Feature>(PAGE_SIZE);
             int total = 0;
-            await _elasticSearchGateway.DeleteAll();
+            _elasticSearchGateway.Initialize(deleteIndex: true);
             foreach (var name in namesDictionary.Keys)
             {
                 var list = MergeElements(namesDictionary[name]).Select(e => converter.ToGeoJson(e)).Where(f => f != null).ToList();

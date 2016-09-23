@@ -6,9 +6,9 @@ namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IElasticSearchGateway
     {
-        Task DeleteAll();
-        void Initialize(string uri = "http://localhost:9200/");
-        Task<List<Feature>> Search(string searchTerm, string languageCode = null);
+        void Initialize(string uri = "http://localhost:9200/", bool deleteIndex = false);
+        Task<List<Feature>> Search(string searchTerm, string fieldName);
         Task UpdateData(List<Feature> features);
+        Task<Feature> GetContainingFeature(Feature feature);
     }
 }

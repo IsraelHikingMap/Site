@@ -17,7 +17,8 @@
                     let singleResult = {
                         name: this.getName(feature, isHebrew),
                         latlngsArray: [],
-                        icon: feature.properties.icon
+                        icon: feature.properties.icon,
+                        address: feature.properties.address
                     } as ISearchResults;
                     try {
                         switch (feature.geometry.type) {
