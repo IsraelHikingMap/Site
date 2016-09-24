@@ -58,7 +58,6 @@ namespace IsraelHiking.API.Tests.Services
 
             _graphHopperHelper.Received(1).Initialize(serverPath);
             _elasticSearchHelper.Received(1).Initialize(serverPath);
-            _elasticSearchGateway.Received(1).Initialize();
         }
 
         [TestMethod]
