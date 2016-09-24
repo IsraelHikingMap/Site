@@ -146,9 +146,23 @@ namespace IsraelHiking.Services {
         public legendAllVehicles: string;
         public legendLight4WDVehicles: string;
         public legendStrong4WDVehicles: string;
+        public legendDifficult4WD: string;
         public legendPath: string;
         public legendFootPath: string;
         public legendBicyclePath: string;
+        public legendSteps: string;
+        public legendWater: string;
+        public legendStream: string;
+        public legendWadi: string;
+        public legendRiver: string;
+        public legendLakeReservoir: string;
+        public legendSeasonalLake: string;
+        public legendSpringPond: string;
+        public legendWaterHole: string;
+        public legendWaterWell: string;
+        public legendCistern: string;
+        public legendWaterfall: string;
+        public legendWaterTower: string;
         public legendRoads: string;
         public legendMotorway: string;
         public legendTrunk: string;
@@ -341,9 +355,23 @@ namespace IsraelHiking.Services {
                     this.legendAllVehicles = this.gettextCatalog.getString("All vehicles");
                     this.legendLight4WDVehicles = this.gettextCatalog.getString("Light 4WD vehicles");
                     this.legendStrong4WDVehicles = this.gettextCatalog.getString("Strong 4WD vehicles");
+                    this.legendDifficult4WD = this.gettextCatalog.getString("Difficult 4WD"); // עבירות קשה  
                     this.legendPath = this.gettextCatalog.getString("Path");
                     this.legendFootPath = this.gettextCatalog.getString("Foot path");
                     this.legendBicyclePath = this.gettextCatalog.getString("Bicycle path");
+                    this.legendSteps = this.gettextCatalog.getString("Steps"); // מדרגות
+                    this.legendWater = this.gettextCatalog.getString("Water"); // מים
+                    this.legendStream = this.gettextCatalog.getString("Stream"); // נחל איתן
+                    this.legendWadi = this.gettextCatalog.getString("Wadi"); // נחל אכזה
+                    this.legendRiver = this.gettextCatalog.getString("Water"); // נהר
+                    this.legendLakeReservoir = this.gettextCatalog.getString("Lake, Reservoir"); //  מקווה מים
+                    this.legendSeasonalLake = this.gettextCatalog.getString("Seasonal Lake, Reservoir, or Riverbed"); // אגם ומאגר עונתיים, נחל אכזב
+                    this.legendSpringPond = this.gettextCatalog.getString("Spring, Pond"); //מעיין, בריכה
+                    this.legendWaterHole = this.gettextCatalog.getString("Waterhole"); //גב
+                    this.legendWaterWell = this.gettextCatalog.getString("Water Well"); //באר
+                    this.legendCistern = this.gettextCatalog.getString("Cistern"); // בור
+                    this.legendWaterfall = this.gettextCatalog.getString("Waterfall"); // מפל
+                    this.legendWaterTower = this.gettextCatalog.getString("Water Tower"); // מגדל מים
                     this.legendRoads = this.gettextCatalog.getString("Roads");
                     this.legendMotorway = this.gettextCatalog.getString("Motorway");
                     this.legendTrunk = this.gettextCatalog.getString("Trunk");
