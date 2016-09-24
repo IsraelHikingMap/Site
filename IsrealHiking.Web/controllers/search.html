@@ -1,28 +1,15 @@
-﻿<div class="leaflet-bar" ng-hide="isShowingSearch">
+﻿<div class="leaflet-bar" ng-hide="isShowingSearch" >
     <a class="cursor-pointer" ng-click="toggleSearchBar($event)" uib-tooltip="{{resources.search}}" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-search fa-lg"></i></a>
 </div>
-<div ng-show="isShowingSearch" class="search-results-panel ihm-panel" disable-map-movement ng-keydown="keyDown($event)" tabindex="0">
-    <table class="table-hover table-bordered">
-        <thead>
-            <tr>
-                <th>
-                    <div class="input-group">
-                        <input type="text" ng-model="searchTerm" ng-change="search(searchTerm)" class="form-control" placeholder="{{resources.searchPlaceHolder}}" dir="{{hasHebrewCharacters(searchTerm) ? 'rtl' : 'ltr'}}" sync-focus-with="isShowingSearch" ng-click="ignoreClick($event)" />
-                        <a class="btn btn-default input-group-addon" ng-click="toggleSearchBar($event)"><i class="fa fa-search fa-lg"></i></a>
-                    </div>
-                </th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr class="cursor-pointer" ng-repeat="result in searchResults" ng-click="selectResult(result, $event)" dir="{{hasHebrewCharacters(result.name) ? 'rtl' : 'ltr'}}" ng-class="{'active-row': result == activeSearchResult}" >
-                <td>
-                    <p class="search-results-item">
-                        <img ng-src="{{result.icon}}" height="16" width="16" ng-show="result.icon" alt="" />
-                        {{result.name}}{{result.address ? ', ' + result.address : ''}}
-                    </p>
-                </td>
-            </tr>
-        </tbody>
-    </table>
+<div ng-show="isShowingSearch" class="leaflet-bar" ng-keydown="keyDown($event)" tabindex="0" disable-map-movement>
+    <div uib-dropdown is-open="isShowingSearch && searchResults.length > 0" auto-close="disabled">
+        <a class="cursor-pointer search-icon" ng-click="toggleSearchBar($event)"><i class="fa fa-search fa-lg"></i></a>
+        <input type="text" class="search-input" ng-model="searchTerm" ng-change="search(searchTerm)" placeholder="{{resources.searchPlaceHolder}}" dir="{{getDirection()}}" sync-focus-with="isShowingSearch" ng-click="ignoreClick($event)" />
+        <ul class="dropdown-menu search-dropdown" uib-dropdown-menu ng-click="$event.stopPropagation()">
+            <li ng-repeat="result in searchResults" dir="{{hasHebrewCharacters(result.name) ? 'rtl' : 'ltr'}}" class="{{'text-' + (hasHebrewCharacters(result.name) ? 'right' : 'left')}} search-results-item cursor-pointer" ng-class="{'search-results-selected': result == activeSearchResult}" ng-click="selectResult(result, $event)">
+                <img ng-src="{{result.icon}}" height="16" width="16" ng-show="result.icon" alt="" />
+                {{result.name}}{{result.address ? ', ' + result.address : ''}}
+            </li>
+        </ul>
+    </div>
 </div>
-

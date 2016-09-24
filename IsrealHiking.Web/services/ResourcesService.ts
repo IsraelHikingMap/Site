@@ -98,6 +98,8 @@ namespace IsraelHiking.Services {
         public language: string;
         public elevation: string;
         public slope: string;
+        public convertToRoute: string;
+        public removeSearchResults: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -291,6 +293,8 @@ namespace IsraelHiking.Services {
                     this.language = this.gettextCatalog.getString("Language");
                     this.elevation = this.gettextCatalog.getString("Elevation");
                     this.slope = this.gettextCatalog.getString("Slope");
+                    this.convertToRoute = this.gettextCatalog.getString("Convert to Route");
+                    this.removeSearchResults = this.gettextCatalog.getString("Remove Search Results");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");

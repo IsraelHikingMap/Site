@@ -10,6 +10,7 @@
         selectResult(address: Services.Search.ISearchResults, e: Event): void;
         ignoreClick(e: Event): void;
         keyDown(e: KeyboardEvent): void;
+        getDirection(): string;
     }
 
     interface ISearchRequestQueueItem {
@@ -147,6 +148,13 @@
                         }
                         break;
                 }
+            }
+
+            $scope.getDirection = () => {
+                if (!$scope.searchTerm) {
+                    return $scope.resources.direction;
+                }
+                return $scope.hasHebrewCharacters($scope.searchTerm) ? "rtl" : "ltr";
             }
 
             /**
