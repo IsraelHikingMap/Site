@@ -73,6 +73,9 @@
             };
 
             $scope.toShortNumber = (number: number) => {
+                if (number == null) {
+                    return "0";
+                }
                 return number > 1000 ? (number / 1000.0).toFixed(2) : number.toFixed(0);
             }
 

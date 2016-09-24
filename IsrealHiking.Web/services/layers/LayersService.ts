@@ -84,7 +84,7 @@ namespace IsraelHiking.Services.Layers {
             let lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
             this.defaultAttribution = LayersService.ATTRIBUTION + "Last update: " + lastModified;
             // default layers:
-            this.addBaseLayer({
+            let baseLayer = this.addBaseLayer({
                 key: LayersService.ISRAEL_HIKING_MAP,
                 address: LayersService.DEFAULT_TILES_ADDRESS,
                 isEditable: false
@@ -111,6 +111,9 @@ namespace IsraelHiking.Services.Layers {
             this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wiki", layer: new WikiMarkersLayer($http, mapService) as L.ILayer } as IOverlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
+            if (this.selectedBaseLayer == null) {
+                this.selectBaseLayer(baseLayer);
+            }
         }
 
         public addBaseLayer = (layerData: Common.LayerData, attribution?: string): IBaseLayer => {
@@ -309,6 +312,10 @@ namespace IsraelHiking.Services.Layers {
                         this.setJsonData(data);
                         this.addOverlaysFromHash(data.overlays);
                         this.hashService.clear();
+                    }).error(() => {
+                        let data = this.hashService.getDataContainer();
+                        this.setData(data, true);
+                        this.hashService.clear();
                     });
                 return;
             }
@@ -329,7 +336,6 @@ namespace IsraelHiking.Services.Layers {
                     this.toggleOverlay(overlay);
                 }
             }
-
         }
 
         public setJsonData = (data: Common.DataContainer) => {
