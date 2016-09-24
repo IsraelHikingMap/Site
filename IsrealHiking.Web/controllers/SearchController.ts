@@ -28,6 +28,8 @@
         private requestsQueue: ISearchRequestQueueItem[];
         private layerGroup: L.LayerGroup<L.ILayer>;
         private elevationProvider: Services.Elevation.ElevationProvider;
+        private searchResultsProviderFactory: Services.Search.SearchResultsProviderFactory;
+        private toastr: Toastr;
 
         constructor($scope: ISearchScope,
             $window: angular.IWindowService,
@@ -44,6 +46,8 @@
             this.layerGroup = L.layerGroup();
             this.map.addLayer(this.layerGroup);
             this.elevationProvider = elevationProvider;
+            this.searchResultsProviderFactory = searchResultsProviderFactory;
+            this.toastr = toastr;
             $scope.searchTerm = hashService.searchTerm;
             $scope.isShowingSearch = $scope.searchTerm.length > 0;
             $scope.searchResults = [];
@@ -59,24 +63,11 @@
                     $scope.searchResults = [];
                     return;
                 }
-                this.requestsQueue.push({
-                    searchTerm: searchTerm
-                } as ISearchRequestQueueItem);
+                this.internalSearch($scope);
+            }
 
-                var local = searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
-
-                local.getResults(searchTerm, $scope.hasHebrewCharacters(searchTerm))
-                    .then((results: Services.Search.ISearchResults[]) => {
-                        let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
-                        if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
-                            this.requestsQueue.splice(0, this.requestsQueue.length - 1);
-                            return;
-                        }
-                        $scope.searchResults = results;
-                        this.requestsQueue.splice(0);
-                    }, () => {
-                        toastr.warning("Unable to get search results.");
-                    });
+            if ($scope.isShowingSearch) {
+                $scope.search($scope.searchTerm);
             }
 
             $scope.selectResult = (searchResults: Services.Search.ISearchResults, e: Event) => {
@@ -127,10 +118,6 @@
                 this.suppressEvents(e);
             }
 
-            if ($scope.isShowingSearch) {
-                $scope.search($scope.searchTerm);
-            }
-
             $scope.ignoreClick = (e: Event) => {
                 this.suppressEvents(e);
             }
@@ -153,7 +140,11 @@
                         $scope.activeSearchResult = $scope.searchResults[index];
                         break;
                     case SearchController.ENTER_KEY:
-                        $scope.selectResult($scope.activeSearchResult, e);
+                        if ($scope.activeSearchResult) {
+                            $scope.selectResult($scope.activeSearchResult, e);
+                        } else {
+                            this.internalSearch($scope);
+                        }
                         break;
                 }
             }
@@ -186,7 +177,29 @@
             }
             this.elevationProvider.updateHeights(latlngZ);
             return latlngZ;
-        } 
+        }
+
+        private internalSearch = ($scope: ISearchScope) => {
+            let searchTerm = $scope.searchTerm;
+            this.requestsQueue.push({
+                searchTerm: searchTerm
+            } as ISearchRequestQueueItem);
+
+            var local = this.searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
+
+            local.getResults(searchTerm, $scope.hasHebrewCharacters(searchTerm))
+                .then((results: Services.Search.ISearchResults[]) => {
+                    let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
+                    if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
+                        this.requestsQueue.splice(0, this.requestsQueue.length - 1);
+                        return;
+                    }
+                    $scope.searchResults = results;
+                    this.requestsQueue.splice(0);
+                }, () => {
+                    this.toastr.warning("Unable to get search results.");
+                });
+        }
     }
 
 }
