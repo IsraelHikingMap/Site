@@ -518,7 +518,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Bridge - גשר",
+                            title: $scope.resources.legendBridge,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(32.115785, 34.9408268),
                             zoom: 16,
@@ -527,7 +527,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Tunnel - מנהרה",
+                            title: $scope.resources.legendTunnel,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(31.800750, 35.1934469),
                             zoom: 16,
@@ -538,7 +538,7 @@
                     ]
                 },
                 {
-                    title: "Transportation - תחבורה",
+                    title: $scope.resources.legendTransportation,
                     id: id++,
                     items: [
                         {
@@ -550,7 +550,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Railway Tunnel - מנהרת רכבת",
+                            title: $scope.resources.legendRailwayTunnel,
                             latlng: L.latLng(31.894930, 34.9952048),
                             zoom: 16,
                             id: id++,
@@ -558,7 +558,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Railway Station - תחנת רכבת",
+                            title: $scope.resources.legendRailwayStation,
                             latlng: L.latLng(32.164006, 34.8175406),
                             zoom: 16,
                             id: id++,
@@ -574,7 +574,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Aerialway - רכבל",
+                            title: $scope.resources.legendAerialway,
                             latlng: L.latLng(33.194320, 35.5600405),
                             zoom: 16,
                             id: id++,
@@ -628,7 +628,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Tree - עץ בודד",
+                            title: $scope.resources.legendTree,
                             latlng: L.latLng(30.909059, 34.7503607),
                             zoom: 16,
                             id: id++,
@@ -636,7 +636,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Synagogue - בית כנסת",
+                            title: $scope.resources.legendSynagogue,
                             latlng: L.latLng(30.850875, 34.7822589),
                             zoom: 16,
                             id: id++,
@@ -644,7 +644,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Church - כנסיה",
+                            title: $scope.resources.legendChurch,
                             latlng: L.latLng(32.7210574, 35.0627426),
                             zoom: 16,
                             id: id++,
@@ -652,7 +652,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Mosque - מסגד",
+                            title: $scope.resources.legendMosque,
                             latlng: L.latLng(32.5397514, 34.9137149),
                             zoom: 16,
                             id: id++,
@@ -660,7 +660,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Holy Place",
+                            title: $scope.resources.legendHolyPlace,
                             latlng: L.latLng(32.814602, 34.9871233),
                             zoom: 16,
                             id: id++,
@@ -668,7 +668,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Memorial - אנדרטה",
+                            title: $scope.resources.legendMemorial,
                             latlng: L.latLng(30.9181904, 35.1389056),
                             zoom: 16,
                             id: id++,
@@ -676,7 +676,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Monument - אתר הנצחה",
+                            title: $scope.resources.legendMonument,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(31.4608616, 34.5003406),
                             zoom: 16,
@@ -685,7 +685,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Observation Tower - מגדל תצפית",
+                            title: $scope.resources.legendObservationTower,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(31.518188, 34.8975115),
                             zoom: 16,
@@ -694,7 +694,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Antenna - אנטנה",
+                            title: $scope.resources.legendAntenna,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(31.8972804, 34.753103),
                             zoom: 16,
@@ -703,7 +703,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Power line - קו מתח גבוה",
+                            title: $scope.resources.legendPowerLine,
                             latlng: L.latLng(31.0381288, 35.2023074),
                             zoom: 16,
                             id: id++,
@@ -713,11 +713,11 @@
                     ]
                 },
                 {
-                    title: "Barriers  - מכשולים",
+                    title: $scope.resources.legendBarriers,
                     id: id++,
                     items: [
                         {
-                            title: "Gate - שער",
+                            title: $scope.resources.legendGate,
                             latlng: L.latLng(32.722562, 35.0182021),
                             zoom: 16,
                             id: id++,
@@ -725,7 +725,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Closed gate - שער סגור",
+                            title: $scope.resources.legendClosedGate,
                             latlng: L.latLng(32.5326335, 35.5364611),
                             zoom: 16,
                             id: id++,
@@ -733,7 +733,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Stile - מעבר להולכי רגל",
+                            title: $scope.resources.legendStile,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(33.015421, 35.2032667),
                             zoom: 16,
@@ -742,7 +742,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Block - מחסום",
+                            title: $scope.resources.legendBlock,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(30.5730456, 35.0763874),
                             zoom: 16,
@@ -751,7 +751,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Lift Gate - שער מתרומם",
+                            title: $scope.resources.legendLiftGate,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(31.1628851, 35.3668841),
                             zoom: 16,
@@ -760,7 +760,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Cattle Grid - מנע בקר",
+                            title: $scope.resources.legendCattleGrid,
                             latlng: L.latLng(31.5469925, 34.8662107),
                             zoom: 16,
                             id: id++,
@@ -768,7 +768,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Fence - גדר",
+                            title: $scope.resources.legendFence,
                             latlng: L.latLng(31.744669, 35.0464806),
                             zoom: 16,
                             id: id++,
@@ -776,7 +776,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Wall - קיר",
+                            title: $scope.resources.legendWall,
                             latlng: L.latLng(31.745796, 35.1680724),
                             zoom: 16,
                             id: id++,
@@ -784,7 +784,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Cliff - מצוק",
+                            title: $scope.resources.legendCliff,
                             latlng: L.latLng(30.562612, 34.6870565),
                             zoom: 16,
                             id: id++,
@@ -794,11 +794,11 @@
                     ]
                 },
                 {
-                    title: "Borders - גבולות",
+                    title: $scope.resources.legendBorders,
                     id: id++,
                     items: [
                         {
-                            title: "Nature Reserve, National Park - שמורת טבע, גן לאומי",
+                            title: $scope.resources.legendNatureReserveNationalPark,
                             latlng: L.latLng(30.918757, 34.7706127),
                             zoom: 15,
                             id: id++,
@@ -806,7 +806,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Military Area - שטח צבאי",
+                            title: $scope.resources.legendMilitaryArea,
                             latlng: L.latLng(31.212850, 34.6078000),
                             zoom: 16,
                             id: id++,
@@ -814,7 +814,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Area A - שטח A",
+                            title: $scope.resources.legendAreaA,
                             latlng: L.latLng(32.275980, 35.3625011),
                             zoom: 16,
                             id: id++,
@@ -822,7 +822,7 @@
                             type: "Way"
                         },
                         {
-                            title: "Area B - שטח B",
+                            title: $scope.resources.legendAreaB,
                             latlng: L.latLng(31.375623, 35.0551200),
                             zoom: 16,
                             id: id++,
@@ -830,7 +830,7 @@
                             type: "Way"
                         },
                         {
-                            title: "International Border - גבול בינלאומי",
+                            title: $scope.resources.legendInternationalBorder,
                             latlng: L.latLng(33.282037, 35.6545830),
                             zoom: 16,
                             id: id++,
@@ -838,7 +838,7 @@
                             type: "Way"
                         },
                         {
-                            title: "The Green Line - הקו הירוק",
+                            title: $scope.resources.legendTheGreenLine,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(31.372492, 35.2131299),
                             zoom: 15,
@@ -847,7 +847,7 @@
                             type: "Way"
                         },
                         {
-                            title: "The Purple Line - הקו הסגול",
+                            title: $scope.resources.legendThePurpleLine,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(33.104053, 35.8432388),
                             zoom: 14,
@@ -858,11 +858,11 @@
                     ]
                 },
                 {
-                    title: "Amenities - שרותי דרך",
+                    title: $scope.resources.legendAmenities,
                     id: id++,
                     items: [
                         {
-                            title: "Bike Shop - חנות אופניים",
+                            title: $scope.resources.legendBikeShop,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.103655, 34.8643425),
                             zoom: 14,
@@ -871,7 +871,7 @@
                             type: "POI"
                         },
                         {
-                            title: "First Aid - עזרה ראשונה",
+                            title: $scope.resources.legendFirstAid,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.087698, 34.9044684),
                             zoom: 13,
@@ -896,7 +896,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Drinking Water - מי שתיה",
+                            title: $scope.resources.legendDrinkingWater,
                             latlng: L.latLng(31.2572354, 35.1596253),
                             zoom: 16,
                             id: id++,
@@ -904,7 +904,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Café - בית קפה",
+                            title: $scope.resources.legendCafé,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(31.841830, 34.9697882),
                             zoom: 16,
@@ -913,7 +913,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Reastaurant - מסעדה",
+                            title: $scope.resources.legendReastaurant,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(31.830534, 35.0722647),
                             zoom: 16,
@@ -922,7 +922,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Parking - חניה",
+                            title: $scope.resources.legendParking,
                             latlng: L.latLng(30.831737, 34.7706771),
                             zoom: 16,
                             id: id++,
@@ -930,7 +930,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Fuel Station - תחנת דלק",
+                            title: $scope.resources.legendFuelStation,
                             latlng: L.latLng(31.104538, 34.8242998),
                             zoom: 16,
                             id: id++,
@@ -938,7 +938,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Convenience Store - מרכול",
+                            title: $scope.resources.legendConvenienceStore,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.094323, 34.7984970),
                             zoom: 16,
@@ -947,7 +947,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Lodging - לינה",
+                            title: $scope.resources.legendLodging,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(30.616876, 34.7959084),
                             zoom: 14,
@@ -956,7 +956,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Toilettes - שרותים",
+                            title: $scope.resources.legendToilettes,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.097891, 34.8056316),
                             zoom: 16,
@@ -965,7 +965,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Information Center - מרכז מידע",
+                            title: $scope.resources.legendInformationCenter,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(30.611540, 34.8035610),
                             zoom: 16,
@@ -974,7 +974,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Guidepost - שלט הכוונה",
+                            title: $scope.resources.legendGuidepost,
                             latlng: L.latLng(30.599868, 34.8085070),
                             zoom: 16,
                             id: id++,
@@ -984,11 +984,11 @@
                     ]
                 },
                 {
-                    title: "Areas - שטחים",
+                    title: $scope.resources.legendAreas,
                     id: id++,
                     items: [
                         {
-                            title: "City, Settelment - ישוב",
+                            title: $scope.resources.legendCitySettelment,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(30.490800, 35.1667000),
                             zoom: 13,
@@ -997,7 +997,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Orchard - מטע",
+                            title: $scope.resources.legendOrchard,
                             latlng: L.latLng(30.966883, 34.7150803),
                             zoom: 16,
                             id: id++,
@@ -1005,7 +1005,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Crop - שדה מעובד",
+                            title: $scope.resources.legendCrop,
                             latlng: L.latLng(31.289700, 34.5855000),
                             zoom: 16,
                             id: id++,
@@ -1013,7 +1013,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Woods - חורש",
+                            title: $scope.resources.legendWoods,
                             latlng: L.latLng(31.111483, 34.8333120),
                             zoom: 16,
                             id: id++,
@@ -1021,7 +1021,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Grass - דשא",
+                            title: $scope.resources.legendGrass,
                             latlng: L.latLng(32.112612, 34.91582358),
                             zoom: 16,
                             id: id++,
@@ -1029,7 +1029,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Scrub - צמחית בר",
+                            title: $scope.resources.legendScrub,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(32.485095, 34.8953676),
                             zoom: 16,
@@ -1038,7 +1038,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Sand - חול",
+                            title: $scope.resources.legendSand,
                             latlng: L.latLng(31.161293, 34.7459793),
                             zoom: 16,
                             id: id++,
@@ -1046,7 +1046,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Wetland - ביצה",
+                            title: $scope.resources.legendWetland,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.410690, 34.9005125),
                             zoom: 16,
@@ -1055,7 +1055,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Cemetary - בית קברות",
+                            title: $scope.resources.legendCemetary,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.831568, 35.7989717),
                             zoom: 16,
@@ -1064,7 +1064,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Quarry - מחצבה",
+                            title: $scope.resources.legendQuarry,
                             latlng: L.latLng(31.232942, 35.2049447),
                             zoom: 16,
                             id: id++,
@@ -1072,7 +1072,7 @@
                             type: "POI"
                         },
                         {
-                            title: "Construction Site - אתר בניה",
+                            title: $scope.resources.legendConstructionSite,
                             // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.034755, 34.7461963),
                             zoom: 16,
@@ -1109,3 +1109,4 @@
     }
 
 }  
+  

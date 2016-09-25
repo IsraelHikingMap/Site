@@ -170,16 +170,64 @@ namespace IsraelHiking.Services {
         public legendSecondary: string;
         public legendTertiary: string;
         public legendUnclassified: string;
+        public legendBridge: string;
+        public legendTunnel: string;
+        public legendTransportation: string;
         public legendRailway: string;
+        public legendRailwayTunnel: string;
+        public legendRailwayStation: string;
         public legendRunwayTaxiway: string;
+        public legendAerialway: string;
         public legendPoi: string;
         public legendPicnicArea: string;
         public legendCampsite: string;
+        public legendDrinkingWater: string;
+        public legendCafé: string;
+        public legendReastaurant: string;
+        public legendParking: string;
+        public legendFuelStation: string;
+        public legendConvenienceStore: string;
+        public legendLodging: string;
+        public legendToilettes: string;
+        public legendInformationCenter: string;
+        public legendGuidepost: string;
+        public legendConstructionSite: string;                          
         public legendViewpoint: string;
         public legendPeak: string;
         public legendRuins: string;
         public legendArcheologicalSite: string;
         public legendCave: string;
+        public legendTree: string;
+        public legendSynagogue: string;
+        public legendChurch: string;
+        public legendMosque: string;
+        public legendHolyPlace: string;
+        public legendMemorial: string;
+        public legendMonument: string;
+        public legendObservationTower: string;
+        public legendAntenna: string;
+        public legendPowerLine: string;
+        public legendBarriers: string;
+        public legendGate: string;
+        public legendClosedGate: string;
+        public legendStile: string;
+        public legendBlock: string;
+        public legendLiftGate: string;
+        public legendCattleGrid: string;
+        public legendFence: string;
+        public legendWall: string;
+        public legendCliff: string;
+        public legendBorders: string;
+        public legendNatureReserveNationalPark: string;
+        public legendMilitaryArea: string;
+        public legendAreaA: string;
+        public legendAreaB: string;
+        public legendInternationalBorder: string;
+        public legendTheGreenLine: string;
+        public legendThePurpleLine: string;
+        public legendAmenities: string;
+        public legendBikeShop: string;
+        public legendFirstAid: string;
         public legendRegionalTrails: string;
         public legendJerusalemTrail: string;
         public legendSeatoSeaTrail: string;
@@ -198,8 +246,17 @@ namespace IsraelHiking.Services {
         public legendBicycleTrails: string;
         public legendLocalTrail: string;
         public legendNationalTrail: string;
-
-
+        public legendAreas: string;
+        public legendCitySettelment: string;
+        public legendOrchard: string;
+        public legendCrop: string;
+        public legendWoods: string;
+        public legendGrass: string;
+        public legendScrub: string;
+        public legendSand: string;
+        public legendWetland: string;
+        public legendCemetary: string;
+        public legendQuarry: string;
 
         constructor($sce: angular.ISCEService,
             localStorageService: angular.local.storage.ILocalStorageService,
@@ -355,23 +412,23 @@ namespace IsraelHiking.Services {
                     this.legendAllVehicles = this.gettextCatalog.getString("All vehicles");
                     this.legendLight4WDVehicles = this.gettextCatalog.getString("Light 4WD vehicles");
                     this.legendStrong4WDVehicles = this.gettextCatalog.getString("Strong 4WD vehicles");
-                    this.legendDifficult4WD = this.gettextCatalog.getString("Difficult 4WD"); // עבירות קשה  
+                    this.legendDifficult4WD = this.gettextCatalog.getString("Difficult 4WD");  
                     this.legendPath = this.gettextCatalog.getString("Path");
                     this.legendFootPath = this.gettextCatalog.getString("Foot path");
                     this.legendBicyclePath = this.gettextCatalog.getString("Bicycle path");
-                    this.legendSteps = this.gettextCatalog.getString("Steps"); // מדרגות
-                    this.legendWater = this.gettextCatalog.getString("Water"); // מים
-                    this.legendStream = this.gettextCatalog.getString("Stream"); // נחל איתן
-                    this.legendWadi = this.gettextCatalog.getString("Wadi"); // נחל אכזה
-                    this.legendRiver = this.gettextCatalog.getString("Water"); // נהר
-                    this.legendLakeReservoir = this.gettextCatalog.getString("Lake, Reservoir"); //  מקווה מים
-                    this.legendSeasonalLake = this.gettextCatalog.getString("Seasonal Lake, Reservoir, or Riverbed"); // אגם ומאגר עונתיים, נחל אכזב
-                    this.legendSpringPond = this.gettextCatalog.getString("Spring, Pond"); //מעיין, בריכה
-                    this.legendWaterHole = this.gettextCatalog.getString("Waterhole"); //גב
-                    this.legendWaterWell = this.gettextCatalog.getString("Water Well"); //באר
-                    this.legendCistern = this.gettextCatalog.getString("Cistern"); // בור
-                    this.legendWaterfall = this.gettextCatalog.getString("Waterfall"); // מפל
-                    this.legendWaterTower = this.gettextCatalog.getString("Water Tower"); // מגדל מים
+                    this.legendSteps = this.gettextCatalog.getString("Steps"); 
+                    this.legendWater = this.gettextCatalog.getString("Water");
+                    this.legendStream = this.gettextCatalog.getString("Stream");
+                    this.legendWadi = this.gettextCatalog.getString("Wadi");
+                    this.legendRiver = this.gettextCatalog.getString("River");
+                    this.legendLakeReservoir = this.gettextCatalog.getString("Lake, Reservoir");
+                    this.legendSeasonalLake = this.gettextCatalog.getString("Seasonal Lake, Reservoir, or Riverbed");
+                    this.legendSpringPond = this.gettextCatalog.getString("Spring, Pond");
+                    this.legendWaterHole = this.gettextCatalog.getString("Waterhole");
+                    this.legendWaterWell = this.gettextCatalog.getString("Water Well");
+                    this.legendCistern = this.gettextCatalog.getString("Cistern");
+                    this.legendWaterfall = this.gettextCatalog.getString("Waterfall");
+                    this.legendWaterTower = this.gettextCatalog.getString("Water Tower");
                     this.legendRoads = this.gettextCatalog.getString("Roads");
                     this.legendMotorway = this.gettextCatalog.getString("Motorway");
                     this.legendTrunk = this.gettextCatalog.getString("Trunk");
@@ -379,16 +436,63 @@ namespace IsraelHiking.Services {
                     this.legendSecondary = this.gettextCatalog.getString("Secondary");
                     this.legendTertiary = this.gettextCatalog.getString("Tertiary");
                     this.legendUnclassified = this.gettextCatalog.getString("Unclassified");
+                    this.legendBridge = this.gettextCatalog.getString("Bridge");
+                    this.legendTunnel = this.gettextCatalog.getString("Tunnel");
+                    this.legendTransportation = this.gettextCatalog.getString("Transportation");
                     this.legendRailway = this.gettextCatalog.getString("Railway");
+                    this.legendRailwayTunnel = this.gettextCatalog.getString("Railway Tunnel");
+                    this.legendRailwayStation = this.gettextCatalog.getString("Railway Station");
                     this.legendRunwayTaxiway = this.gettextCatalog.getString("Runway and Taxiway");
+                    this.legendAerialway = this.gettextCatalog.getString("Aerialway");
                     this.legendPoi = this.gettextCatalog.getString("Points of Interest");
                     this.legendPicnicArea = this.gettextCatalog.getString("Picnic Area");
                     this.legendCampsite = this.gettextCatalog.getString("Campsite");
+                    this.legendDrinkingWater = this.gettextCatalog.getString("Drinking Water");
+                    this.legendCafé = this.gettextCatalog.getString("Café");
+                    this.legendReastaurant = this.gettextCatalog.getString("Reastaurant");
+                    this.legendParking = this.gettextCatalog.getString("Parking");
+                    this.legendFuelStation = this.gettextCatalog.getString("Fuel Station");
+                    this.legendConvenienceStore = this.gettextCatalog.getString("Convenience Store");
+                    this.legendLodging = this.gettextCatalog.getString("Lodging");
+                    this.legendToilettes = this.gettextCatalog.getString("Toilettes");
+                    this.legendInformationCenter = this.gettextCatalog.getString("Information Center");
+                    this.legendGuidepost = this.gettextCatalog.getString("Guidepost");
                     this.legendViewpoint = this.gettextCatalog.getString("Viewpoint");
                     this.legendPeak = this.gettextCatalog.getString("Peak");
                     this.legendRuins = this.gettextCatalog.getString("Ruins");
                     this.legendArcheologicalSite = this.gettextCatalog.getString("Archeological Site");
                     this.legendCave = this.gettextCatalog.getString("Cave");
+                    this.legendTree = this.gettextCatalog.getString("Tree");
+                    this.legendSynagogue = this.gettextCatalog.getString("Synagogue");
+                    this.legendChurch = this.gettextCatalog.getString("Church");
+                    this.legendMosque = this.gettextCatalog.getString("Mosque");
+                    this.legendHolyPlace = this.gettextCatalog.getString("Holy Place");
+                    this.legendMemorial = this.gettextCatalog.getString("Memorial");
+                    this.legendMonument = this.gettextCatalog.getString("Monument");
+                    this.legendObservationTower = this.gettextCatalog.getString("Observation Tower");
+                    this.legendAntenna = this.gettextCatalog.getString("Antenna"); 
+                    this.legendPowerLine = this.gettextCatalog.getString("Power Line");
+                    this.legendBarriers = this.gettextCatalog.getString("Barriers");
+                    this.legendGate = this.gettextCatalog.getString("Gate");
+                    this.legendClosedGate = this.gettextCatalog.getString("Closed Gate");
+                    this.legendStile = this.gettextCatalog.getString("Stile");
+                    this.legendBlock = this.gettextCatalog.getString("Block"); 
+                    this.legendLiftGate = this.gettextCatalog.getString("Lift Gate");
+                    this.legendCattleGrid = this.gettextCatalog.getString("Cattle Grid");
+                    this.legendFence = this.gettextCatalog.getString("Fence");
+                    this.legendWall = this.gettextCatalog.getString("Wall");
+                    this.legendCliff = this.gettextCatalog.getString("Cliff");
+                    this.legendBorders = this.gettextCatalog.getString("Borders");
+                    this.legendNatureReserveNationalPark = this.gettextCatalog.getString("Nature Reserve, National Park");
+                    this.legendMilitaryArea = this.gettextCatalog.getString("Military Area");
+                    this.legendAreaA = this.gettextCatalog.getString("Area A");
+                    this.legendAreaB = this.gettextCatalog.getString("Area B");
+                    this.legendInternationalBorder = this.gettextCatalog.getString("International Border");
+                    this.legendTheGreenLine = this.gettextCatalog.getString("The Green Line");
+                    this.legendThePurpleLine = this.gettextCatalog.getString("The Purple Line");
+                    this.legendAmenities = this.gettextCatalog.getString("Amenities");
+                    this.legendBikeShop = this.gettextCatalog.getString("Bike Shop");
+                    this.legendFirstAid = this.gettextCatalog.getString("First Aid");
                     this.legendRegionalTrails = this.gettextCatalog.getString("Regional Trails");
                     this.legendJerusalemTrail = this.gettextCatalog.getString("Jerusalem Trail");
                     this.legendSeatoSeaTrail = this.gettextCatalog.getString("Sea to Sea Trail");
@@ -407,6 +511,18 @@ namespace IsraelHiking.Services {
                     this.legendBicycleTrails = this.gettextCatalog.getString("Bicycle Trails");
                     this.legendLocalTrail = this.gettextCatalog.getString("Local Trail");
                     this.legendNationalTrail = this.gettextCatalog.getString("National Trail");
+                    this.legendAreas = this.gettextCatalog.getString("Areas");
+                    this.legendCitySettelment = this.gettextCatalog.getString("City, Settelment");
+                    this.legendOrchard = this.gettextCatalog.getString("Orchard");
+                    this.legendCrop = this.gettextCatalog.getString("Crop");
+                    this.legendWoods = this.gettextCatalog.getString("Woods");
+                    this.legendGrass = this.gettextCatalog.getString("Grass");
+                    this.legendScrub = this.gettextCatalog.getString("Scrub");
+                    this.legendSand = this.gettextCatalog.getString("Sand");
+                    this.legendWetland = this.gettextCatalog.getString("Wetland");
+                    this.legendCemetary = this.gettextCatalog.getString("Cemetary");
+                    this.legendQuarry = this.gettextCatalog.getString("Quarry");
+                    this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
 
                     this.currentLanguage = language;
                 });

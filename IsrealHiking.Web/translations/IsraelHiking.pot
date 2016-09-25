@@ -39,17 +39,47 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: services\ResourcesService.js:185
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:185
+#: services\ResourcesService.js:248
 msgid "Advanced"
 msgstr ""
 
+#: services\ResourcesService.js:185
+msgid "Aerialway"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:149
-#: services\ResourcesService.js:149
+#: services\ResourcesService.js:151
 msgid "All vehicles"
 msgstr ""
 
-#: services\ResourcesService.js:170
+#: services\ResourcesService.js:232
+msgid "Amenities"
+msgstr ""
+
+#: services\ResourcesService.js:212
+msgid "Antenna"
+msgstr ""
+
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:170
+#: services\ResourcesService.js:202
 msgid "Archeological Site"
+msgstr ""
+
+#: services\ResourcesService.js:227
+msgid "Area A"
+msgstr ""
+
+#: services\ResourcesService.js:228
+msgid "Area B"
+msgstr ""
+
+#: services\ResourcesService.js:253
+msgid "Areas"
+msgstr ""
+
+#: services\ResourcesService.js:214
+msgid "Barriers"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:48
@@ -58,16 +88,17 @@ msgid "Base Layer Properties"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:107
-#: services\ResourcesService.js:107
+#: services\ResourcesService.js:109
 msgid "Basic instructions on using this site"
 msgstr ""
 
-#: services\ResourcesService.js:187
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:187
+#: services\ResourcesService.js:250
 msgid "Bicycle Trails"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:154
-#: services\ResourcesService.js:154
+#: services\ResourcesService.js:157
 msgid "Bicycle path"
 msgstr ""
 
@@ -76,37 +107,79 @@ msgstr ""
 msgid "Bike Routing"
 msgstr ""
 
+#: services\ResourcesService.js:233
+msgid "Bike Shop"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:145
-#: services\ResourcesService.js:145
+#: services\ResourcesService.js:147
 msgid "Black marked trail"
 msgstr ""
 
+#: services\ResourcesService.js:218
+msgid "Block"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:143
-#: services\ResourcesService.js:143
+#: services\ResourcesService.js:145
 msgid "Blue marked trail"
 msgstr ""
 
+#: services\ResourcesService.js:224
+msgid "Borders"
+msgstr ""
+
+#: services\ResourcesService.js:178
+msgid "Bridge"
+msgstr ""
+
+#: services\ResourcesService.js:190
+msgid "Café"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:166
-#: services\ResourcesService.js:166
+#: services\ResourcesService.js:188
 msgid "Campsite"
 msgstr ""
 
-#: services\ResourcesService.js:171
+#: services\ResourcesService.js:220
+msgid "Cattle Grid"
+msgstr ""
+
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:171
+#: services\ResourcesService.js:203
 msgid "Cave"
 msgstr ""
 
-#: services\ResourcesService.js:186
+#: services\ResourcesService.js:262
+msgid "Cemetary"
+msgstr ""
+
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:186
+#: services\ResourcesService.js:249
 msgid "Challanging with Direction"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:128
-#: services\ResourcesService.js:128
+#: services\ResourcesService.js:130
 msgid "Change language"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:123
-#: services\ResourcesService.js:123
+#: services\ResourcesService.js:125
 msgid "Change routing from single segment to all segments"
+msgstr ""
+
+#: services\ResourcesService.js:206
+msgid "Church"
+msgstr ""
+
+#: services\ResourcesService.js:168
+msgid "Cistern"
+msgstr ""
+
+#: services\ResourcesService.js:254
+msgid "City, Settelment"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:31
@@ -115,8 +188,12 @@ msgid "Clear"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:114
-#: services\ResourcesService.js:114
+#: services\ResourcesService.js:116
 msgid "Clear all points"
+msgstr ""
+
+#: services\ResourcesService.js:223
+msgid "Cliff"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:96
@@ -124,9 +201,25 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
+#: services\ResourcesService.js:216
+msgid "Closed Gate"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:72
 #: services\ResourcesService.js:72
 msgid "Color"
+msgstr ""
+
+#: services\ResourcesService.js:264
+msgid "Construction Site"
+msgstr ""
+
+#: services\ResourcesService.js:194
+msgid "Convenience Store"
+msgstr ""
+
+#: services\ResourcesService.js:106
+msgid "Convert to Route"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:75
@@ -137,6 +230,10 @@ msgstr ""
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:94
 #: services\ResourcesService.js:94
 msgid "Copy and paste the code below in order to show this map on your webpage."
+msgstr ""
+
+#: services\ResourcesService.js:256
+msgid "Crop"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:93
@@ -160,8 +257,12 @@ msgid "Delete Route"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:124
-#: services\ResourcesService.js:124
+#: services\ResourcesService.js:126
 msgid "Delete a layer"
+msgstr ""
+
+#: services\ResourcesService.js:154
+msgid "Difficult 4WD"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:83
@@ -175,8 +276,12 @@ msgid "Distance (Km)"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:137
-#: services\ResourcesService.js:137
+#: services\ResourcesService.js:139
 msgid "Download {{link}}Offline maps{{linkend}} directly to your android device for use with the OruxMaps application"
+msgstr ""
+
+#: services\ResourcesService.js:189
+msgid "Drinking Water"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:98
@@ -184,7 +289,8 @@ msgstr ""
 msgid "E"
 msgstr ""
 
-#: services\ResourcesService.js:183
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:183
+#: services\ResourcesService.js:246
 msgid "Easy with Direction"
 msgstr ""
 
@@ -204,7 +310,7 @@ msgid "Edit This Map Using OSM"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:118
-#: services\ResourcesService.js:118
+#: services\ResourcesService.js:120
 msgid "Edit the map in OSM"
 msgstr ""
 
@@ -218,9 +324,21 @@ msgstr ""
 msgid "Embed Size"
 msgstr ""
 
+#: services\ResourcesService.js:221
+msgid "Fence"
+msgstr ""
+
+#: services\ResourcesService.js:234
+msgid "First Aid"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:153
-#: services\ResourcesService.js:153
+#: services\ResourcesService.js:156
 msgid "Foot path"
+msgstr ""
+
+#: services\ResourcesService.js:193
+msgid "Fuel Station"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:65
@@ -233,18 +351,31 @@ msgstr ""
 msgid "Gain"
 msgstr ""
 
+#: services\ResourcesService.js:215
+msgid "Gate"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:61
 #: services\ResourcesService.js:61
 msgid "Generate A URL To Share With Your Friends!"
 msgstr ""
 
-#: services\ResourcesService.js:175
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:175
+#: services\ResourcesService.js:238
 msgid "Golan Trail"
 msgstr ""
 
+#: services\ResourcesService.js:258
+msgid "Grass"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:144
-#: services\ResourcesService.js:144
+#: services\ResourcesService.js:146
 msgid "Green marked trail"
+msgstr ""
+
+#: services\ResourcesService.js:198
+msgid "Guidepost"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:95
@@ -252,12 +383,13 @@ msgstr ""
 msgid "HTML"
 msgstr ""
 
-#: services\ResourcesService.js:177
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:177
+#: services\ResourcesService.js:240
 msgid "Haifa Wadis Trail"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:139
-#: services\ResourcesService.js:139
+#: services\ResourcesService.js:141
 msgid "Harel and Zeev"
 msgstr ""
 
@@ -277,12 +409,12 @@ msgid "Help"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:133
-#: services\ResourcesService.js:133
+#: services\ResourcesService.js:135
 msgid "Helpful links:"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:121
-#: services\ResourcesService.js:121
+#: services\ResourcesService.js:123
 msgid "Hide layer"
 msgstr ""
 
@@ -291,25 +423,40 @@ msgstr ""
 msgid "Hike Routing"
 msgstr ""
 
+#: services\ResourcesService.js:208
+msgid "Holy Place"
+msgstr ""
+
+#: services\ResourcesService.js:197
+msgid "Information Center"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:134
-#: services\ResourcesService.js:134
+#: services\ResourcesService.js:136
 msgid "Interact with other users in our {{link}}Facebook group{{linkend}}"
 msgstr ""
 
+#: services\ResourcesService.js:229
+msgid "International Border"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:146
-#: services\ResourcesService.js:146
+#: services\ResourcesService.js:148
 msgid "Israel Trail"
 msgstr ""
 
-#: services\ResourcesService.js:173
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:173
+#: services\ResourcesService.js:236
 msgid "Jerusalem Trail"
 msgstr ""
 
-#: services\ResourcesService.js:178
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:178
+#: services\ResourcesService.js:241
 msgid "Kinneret Bicycle Trail"
 msgstr ""
 
-#: services\ResourcesService.js:176
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:176
+#: services\ResourcesService.js:239
 msgid "Kinneret Trail"
 msgstr ""
 
@@ -321,6 +468,10 @@ msgstr ""
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:80
 #: services\ResourcesService.js:80
 msgid "Km POIs"
+msgstr ""
+
+#: services\ResourcesService.js:163
+msgid "Lake, Reservoir"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:103
@@ -344,17 +495,17 @@ msgid "Layers"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:119
-#: services\ResourcesService.js:119
+#: services\ResourcesService.js:121
 msgid "Layers controller (left side)"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:136
-#: services\ResourcesService.js:136
+#: services\ResourcesService.js:138
 msgid "Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:130
-#: services\ResourcesService.js:130
+#: services\ResourcesService.js:132
 msgid "Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}."
 msgstr ""
 
@@ -368,13 +519,22 @@ msgstr ""
 msgid "Length"
 msgstr ""
 
+#: services\ResourcesService.js:219
+msgid "Lift Gate"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:150
-#: services\ResourcesService.js:150
+#: services\ResourcesService.js:152
 msgid "Light 4WD vehicles"
 msgstr ""
 
-#: services\ResourcesService.js:188
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:188
+#: services\ResourcesService.js:251
 msgid "Local Trail"
+msgstr ""
+
+#: services\ResourcesService.js:195
+msgid "Lodging"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:100
@@ -388,7 +548,7 @@ msgid "Loss"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:141
-#: services\ResourcesService.js:141
+#: services\ResourcesService.js:143
 msgid "Marked Trails"
 msgstr ""
 
@@ -402,22 +562,39 @@ msgstr ""
 msgid "Medium"
 msgstr ""
 
+#: services\ResourcesService.js:209
+msgid "Memorial"
+msgstr ""
+
+#: services\ResourcesService.js:226
+msgid "Military Area"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:68
 #: services\ResourcesService.js:68
 msgid "Min Zoom"
 msgstr ""
 
-#: services\ResourcesService.js:184
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:184
+#: services\ResourcesService.js:247
 msgid "Moderate"
 msgstr ""
 
+#: services\ResourcesService.js:210
+msgid "Monument"
+msgstr ""
+
+#: services\ResourcesService.js:207
+msgid "Mosque"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:156
-#: services\ResourcesService.js:156
+#: services\ResourcesService.js:172
 msgid "Motorway"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:109
-#: services\ResourcesService.js:109
+#: services\ResourcesService.js:111
 msgid "Move the map to your current location"
 msgstr ""
 
@@ -431,8 +608,17 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: services\ResourcesService.js:189
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:189
+#: services\ResourcesService.js:252
 msgid "National Trail"
+msgstr ""
+
+#: services\ResourcesService.js:225
+msgid "Nature Reserve, National Park"
+msgstr ""
+
+#: services\ResourcesService.js:211
+msgid "Observation Tower"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:71
@@ -446,17 +632,22 @@ msgid "Open a File"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:110
-#: services\ResourcesService.js:110
+#: services\ResourcesService.js:112
 msgid "Open a file"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:122
-#: services\ResourcesService.js:122
+#: services\ResourcesService.js:124
 msgid "Open layer properties"
 msgstr ""
 
-#: services\ResourcesService.js:180
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:180
+#: services\ResourcesService.js:243
 msgid "Orange Regional Trail"
+msgstr ""
+
+#: services\ResourcesService.js:255
+msgid "Orchard"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:50
@@ -464,27 +655,36 @@ msgstr ""
 msgid "Overlay Properties"
 msgstr ""
 
+#: services\ResourcesService.js:192
+msgid "Parking"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:152
-#: services\ResourcesService.js:152
+#: services\ResourcesService.js:155
 msgid "Path"
 msgstr ""
 
-#: services\ResourcesService.js:168
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:168
+#: services\ResourcesService.js:200
 msgid "Peak"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:165
-#: services\ResourcesService.js:165
+#: services\ResourcesService.js:187
 msgid "Picnic Area"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:164
-#: services\ResourcesService.js:164
+#: services\ResourcesService.js:186
 msgid "Points of Interest"
 msgstr ""
 
+#: services\ResourcesService.js:213
+msgid "Power Line"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:158
-#: services\ResourcesService.js:158
+#: services\ResourcesService.js:174
 msgid "Primary"
 msgstr ""
 
@@ -494,35 +694,57 @@ msgid "Print"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:112
-#: services\ResourcesService.js:112
+#: services\ResourcesService.js:114
 msgid "Print the map"
 msgstr ""
 
-#: services\ResourcesService.js:179
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:179
+#: services\ResourcesService.js:242
 msgid "Purple Regional Trail"
 msgstr ""
 
+#: services\ResourcesService.js:263
+msgid "Quarry"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:162
-#: services\ResourcesService.js:162
+#: services\ResourcesService.js:181
 msgid "Railway"
 msgstr ""
 
+#: services\ResourcesService.js:183
+msgid "Railway Station"
+msgstr ""
+
+#: services\ResourcesService.js:182
+msgid "Railway Tunnel"
+msgstr ""
+
+#: services\ResourcesService.js:191
+msgid "Reastaurant"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:142
-#: services\ResourcesService.js:142
+#: services\ResourcesService.js:144
 msgid "Red marked trail"
 msgstr ""
 
-#: services\ResourcesService.js:172
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:172
+#: services\ResourcesService.js:235
 msgid "Regional Trails"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:147
-#: services\ResourcesService.js:147
+#: services\ResourcesService.js:149
 msgid "Regional trail"
 msgstr ""
 
+#: services\ResourcesService.js:107
+msgid "Remove Search Results"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:135
-#: services\ResourcesService.js:135
+#: services\ResourcesService.js:137
 msgid "Request features and report bugs on our {{link}}Github project{{linkend}} page"
 msgstr ""
 
@@ -532,12 +754,16 @@ msgid "Reverse Route"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:125
-#: services\ResourcesService.js:125
+#: services\ResourcesService.js:127
 msgid "Reverse route's direction"
 msgstr ""
 
+#: services\ResourcesService.js:162
+msgid "River"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:155
-#: services\ResourcesService.js:155
+#: services\ResourcesService.js:171
 msgid "Roads"
 msgstr ""
 
@@ -551,13 +777,18 @@ msgstr ""
 msgid "Route Statistics"
 msgstr ""
 
-#: services\ResourcesService.js:169
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:169
+#: services\ResourcesService.js:201
 msgid "Ruins"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:163
-#: services\ResourcesService.js:163
+#: services\ResourcesService.js:184
 msgid "Runway and Taxiway"
+msgstr ""
+
+#: services\ResourcesService.js:260
+msgid "Sand"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:43
@@ -576,16 +807,21 @@ msgid "Save Route to File"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:126
-#: services\ResourcesService.js:126
+#: services\ResourcesService.js:128
 msgid "Save layer properties"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:111
-#: services\ResourcesService.js:111
+#: services\ResourcesService.js:113
 msgid "Save your work to a file"
 msgstr ""
 
-#: services\ResourcesService.js:174
+#: services\ResourcesService.js:259
+msgid "Scrub"
+msgstr ""
+
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:174
+#: services\ResourcesService.js:237
 msgid "Sea to Sea Trail"
 msgstr ""
 
@@ -594,8 +830,12 @@ msgstr ""
 msgid "Search"
 msgstr ""
 
+#: services\ResourcesService.js:164
+msgid "Seasonal Lake, Reservoir, or Riverbed"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:159
-#: services\ResourcesService.js:159
+#: services\ResourcesService.js:175
 msgid "Secondary"
 msgstr ""
 
@@ -610,7 +850,7 @@ msgid "Share Your Work"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:117
-#: services\ResourcesService.js:117
+#: services\ResourcesService.js:119
 msgid "Share your work"
 msgstr ""
 
@@ -624,7 +864,8 @@ msgstr ""
 msgid "Show Me Where I am"
 msgstr ""
 
-#: services\ResourcesService.js:181
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:181
+#: services\ResourcesService.js:244
 msgid "Singles"
 msgstr ""
 
@@ -638,33 +879,61 @@ msgstr ""
 msgid "Small"
 msgstr ""
 
+#: services\ResourcesService.js:165
+msgid "Spring, Pond"
+msgstr ""
+
+#: services\ResourcesService.js:158
+msgid "Steps"
+msgstr ""
+
+#: services\ResourcesService.js:217
+msgid "Stile"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:37
 #: services\ResourcesService.js:37
 msgid "Straight Lines"
 msgstr ""
 
+#: services\ResourcesService.js:160
+msgid "Stream"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:151
-#: services\ResourcesService.js:151
+#: services\ResourcesService.js:153
 msgid "Strong 4WD vehicles"
 msgstr ""
 
+#: services\ResourcesService.js:205
+msgid "Synagogue"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:160
-#: services\ResourcesService.js:160
+#: services\ResourcesService.js:176
 msgid "Tertiary"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:138
-#: services\ResourcesService.js:138
+#: services\ResourcesService.js:140
 msgid "Thank you for your support!"
 msgstr ""
 
+#: services\ResourcesService.js:230
+msgid "The Green Line"
+msgstr ""
+
+#: services\ResourcesService.js:231
+msgid "The Purple Line"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:108
-#: services\ResourcesService.js:108
+#: services\ResourcesService.js:110
 msgid "This dialog"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:132
-#: services\ResourcesService.js:132
+#: services\ResourcesService.js:134
 msgid "This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit."
 msgstr ""
 
@@ -674,7 +943,7 @@ msgid "Toggle Advanced Settings"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:115
-#: services\ResourcesService.js:115
+#: services\ResourcesService.js:117
 msgid "Toggle POI drawing"
 msgstr ""
 
@@ -689,26 +958,39 @@ msgid "Toggle Visibility"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:120
-#: services\ResourcesService.js:120
+#: services\ResourcesService.js:122
 msgid "Toggle advanced layers usage"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:113
-#: services\ResourcesService.js:113
+#: services\ResourcesService.js:115
 msgid "Toggle drawing. Use escape to stop and click to edit a point"
 msgstr ""
 
+#: services\ResourcesService.js:196
+msgid "Toilettes"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:148
-#: services\ResourcesService.js:148
+#: services\ResourcesService.js:150
 msgid "Trails"
 msgstr ""
 
-#: services\ResourcesService.js:157
-msgid "Trunk"
+#: services\ResourcesService.js:180
+msgid "Transportation"
+msgstr ""
+
+#: services\ResourcesService.js:204
+msgid "Tree"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:157
-msgid "Trunk and Tunnel"
+#: services\ResourcesService.js:173
+msgid "Trunk"
+msgstr ""
+
+#: services\ResourcesService.js:179
+msgid "Tunnel"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:88
@@ -717,7 +999,7 @@ msgid "Type to search..."
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:161
-#: services\ResourcesService.js:161
+#: services\ResourcesService.js:177
 msgid "Unclassified"
 msgstr ""
 
@@ -727,17 +1009,50 @@ msgid "Undo"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:116
-#: services\ResourcesService.js:116
+#: services\ResourcesService.js:118
 msgid "Undo last action"
 msgstr ""
 
-#: services\ResourcesService.js:182
+#: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:182
+#: services\ResourcesService.js:245
 msgid "Unknown Scale"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:167
-#: services\ResourcesService.js:167
+#: services\ResourcesService.js:199
 msgid "Viewpoint"
+msgstr ""
+
+#: services\ResourcesService.js:161
+msgid "Wadi"
+msgstr ""
+
+#: services\ResourcesService.js:222
+msgid "Wall"
+msgstr ""
+
+#: services\ResourcesService.js:159
+msgid "Water"
+msgstr ""
+
+#: services\ResourcesService.js:170
+msgid "Water Tower"
+msgstr ""
+
+#: services\ResourcesService.js:167
+msgid "Water Well"
+msgstr ""
+
+#: services\ResourcesService.js:169
+msgid "Waterfall"
+msgstr ""
+
+#: services\ResourcesService.js:166
+msgid "Waterhole"
+msgstr ""
+
+#: services\ResourcesService.js:261
+msgid "Wetland"
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:85
@@ -755,13 +1070,17 @@ msgstr ""
 msgid "Wikipedia"
 msgstr ""
 
+#: services\ResourcesService.js:257
+msgid "Woods"
+msgstr ""
+
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:129
-#: services\ResourcesService.js:129
+#: services\ResourcesService.js:131
 msgid "You can drag-and-drop files or URLs onto the map to load them."
 msgstr ""
 
 #: obj\OSM2012\Package\PackageTmp\services\ResourcesService.js:127
-#: services\ResourcesService.js:127
+#: services\ResourcesService.js:129
 msgid "You can use the following links"
 msgstr ""
 
