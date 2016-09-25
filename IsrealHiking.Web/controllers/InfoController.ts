@@ -359,7 +359,6 @@
                         },
                         {
                             title: $scope.resources.legendSteps,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(31.894805, 35.0051826),
                             zoom: 16,
                             id: id++,
@@ -390,7 +389,6 @@
                         },
                         {
                             title: $scope.resources.legendRiver,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.686559, 35.5675507),
                             zoom: 16,
                             id: id++,
@@ -407,7 +405,6 @@
                         },
                         {
                             title: $scope.resources.legendSeasonalLake,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(32.566527, 35.0658488),
                             zoom: 14,
                             id: id++,
@@ -448,7 +445,6 @@
                         },
                         {
                             title: $scope.resources.legendWaterfall,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(30.9369968, 35.0723868),
                             zoom: 16,
                             id: id++,
@@ -519,7 +515,6 @@
                         },
                         {
                             title: $scope.resources.legendBridge,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(32.115785, 34.9408268),
                             zoom: 16,
                             id: id++,
@@ -528,7 +523,6 @@
                         },
                         {
                             title: $scope.resources.legendTunnel,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(31.800750, 35.1934469),
                             zoom: 16,
                             id: id++,
@@ -677,7 +671,6 @@
                         },
                         {
                             title: $scope.resources.legendMonument,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(31.4608616, 34.5003406),
                             zoom: 16,
                             id: id++,
@@ -686,7 +679,6 @@
                         },
                         {
                             title: $scope.resources.legendObservationTower,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(31.518188, 34.8975115),
                             zoom: 16,
                             id: id++,
@@ -695,7 +687,6 @@
                         },
                         {
                             title: $scope.resources.legendAntenna,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(31.8972804, 34.753103),
                             zoom: 16,
                             id: id++,
@@ -734,7 +725,6 @@
                         },
                         {
                             title: $scope.resources.legendStile,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(33.015421, 35.2032667),
                             zoom: 16,
                             id: id++,
@@ -743,7 +733,6 @@
                         },
                         {
                             title: $scope.resources.legendBlock,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(30.5730456, 35.0763874),
                             zoom: 16,
                             id: id++,
@@ -752,7 +741,6 @@
                         },
                         {
                             title: $scope.resources.legendLiftGate,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(31.1628851, 35.3668841),
                             zoom: 16,
                             id: id++,
@@ -839,7 +827,6 @@
                         },
                         {
                             title: $scope.resources.legendTheGreenLine,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(31.372492, 35.2131299),
                             zoom: 15,
                             id: id++,
@@ -848,7 +835,6 @@
                         },
                         {
                             title: $scope.resources.legendThePurpleLine,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(33.104053, 35.8432388),
                             zoom: 14,
                             id: id++,
@@ -863,7 +849,6 @@
                     items: [
                         {
                             title: $scope.resources.legendBikeShop,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.103655, 34.8643425),
                             zoom: 14,
                             id: id++,
@@ -872,7 +857,6 @@
                         },
                         {
                             title: $scope.resources.legendFirstAid,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.087698, 34.9044684),
                             zoom: 13,
                             id: id++,
@@ -905,7 +889,6 @@
                         },
                         {
                             title: $scope.resources.legendCafé,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(31.841830, 34.9697882),
                             zoom: 16,
                             id: id++,
@@ -914,7 +897,6 @@
                         },
                         {
                             title: $scope.resources.legendReastaurant,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(31.830534, 35.0722647),
                             zoom: 16,
                             id: id++,
@@ -939,7 +921,6 @@
                         },
                         {
                             title: $scope.resources.legendConvenienceStore,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.094323, 34.7984970),
                             zoom: 16,
                             id: id++,
@@ -948,7 +929,6 @@
                         },
                         {
                             title: $scope.resources.legendLodging,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(30.616876, 34.7959084),
                             zoom: 14,
                             id: id++,
@@ -957,7 +937,6 @@
                         },
                         {
                             title: $scope.resources.legendToilettes,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.097891, 34.8056316),
                             zoom: 16,
                             id: id++,
@@ -966,7 +945,6 @@
                         },
                         {
                             title: $scope.resources.legendInformationCenter,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(30.611540, 34.8035610),
                             zoom: 16,
                             id: id++,
@@ -989,7 +967,6 @@
                     items: [
                         {
                             title: $scope.resources.legendCitySettelment,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(30.490800, 35.1667000),
                             zoom: 13,
                             id: id++,
@@ -1030,7 +1007,6 @@
                         },
                         {
                             title: $scope.resources.legendScrub,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_MTB_MAP 
                             latlng: L.latLng(32.485095, 34.8953676),
                             zoom: 16,
                             id: id++,
@@ -1047,7 +1023,6 @@
                         },
                         {
                             title: $scope.resources.legendWetland,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.410690, 34.9005125),
                             zoom: 16,
                             id: id++,
@@ -1056,7 +1031,6 @@
                         },
                         {
                             title: $scope.resources.legendCemetary,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.831568, 35.7989717),
                             zoom: 16,
                             id: id++,
@@ -1073,7 +1047,6 @@
                         },
                         {
                             title: $scope.resources.legendConstructionSite,
-                            // remove: IsraelHiking.Services.Layers.LayersService.ISRAEL_HIKING_MAP 
                             latlng: L.latLng(32.034755, 34.7461963),
                             zoom: 16,
                             id: id++,
@@ -1086,16 +1059,12 @@
             // End Of Legend content definition //
 
             if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_MTB_MAP) {
-                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendRegionalTrails);
-                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendMarkedTrails);
+                this.removeMtbUnwantedLegend($scope);
             } else if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_HIKING_MAP) {
-                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendSingles);
-                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendBicycleTrails);
+                this.removeIhmUnwantedLegend($scope);
             } else {
-                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendRegionalTrails);
-                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendMarkedTrails);
-                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendSingles);
-                _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendBicycleTrails);
+                this.removeMtbUnwantedLegend($scope);
+                this.removeIhmUnwantedLegend($scope);
             }
             for (let visibleSectionId in $scope.visibleSections) {
                 if ($scope.visibleSections.hasOwnProperty(visibleSectionId) && $scope.visibleSections[visibleSectionId]) {
@@ -1106,7 +1075,61 @@
                 }
             }
         }
-    }
 
+        private removeMtbUnwantedLegend($scope: IInfoScope) {
+            _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendRegionalTrails);
+            _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendMarkedTrails);
+
+            this.removeItemInSection($scope, $scope.resources.legendTrails, $scope.resources.legendSteps);
+
+            this.removeItemInSection($scope, $scope.resources.legendWater, $scope.resources.legendSeasonalLake);
+
+            this.removeItemInSection($scope, $scope.resources.legendRoads, $scope.resources.legendBridge);
+            this.removeItemInSection($scope, $scope.resources.legendRoads, $scope.resources.legendTunnel);
+
+            this.removeItemInSection($scope, $scope.resources.legendPoi, $scope.resources.legendMonument);
+
+            this.removeItemInSection($scope, $scope.resources.legendBarriers, $scope.resources.legendBlock);
+
+            this.removeItemInSection($scope, $scope.resources.legendBorders, $scope.resources.legendTheGreenLine);
+            this.removeItemInSection($scope, $scope.resources.legendBorders, $scope.resources.legendThePurpleLine);
+
+            this.removeItemInSection($scope, $scope.resources.legendAreas, $scope.resources.legendScrub);
+        }
+
+        private removeIhmUnwantedLegend($scope: IInfoScope) {
+            _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendSingles);
+            _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendBicycleTrails);
+
+            this.removeItemInSection($scope, $scope.resources.legendWater, $scope.resources.legendRiver);
+            this.removeItemInSection($scope, $scope.resources.legendWater, $scope.resources.legendWaterfall);
+
+            this.removeItemInSection($scope, $scope.resources.legendPoi, $scope.resources.legendObservationTower);
+            this.removeItemInSection($scope, $scope.resources.legendPoi, $scope.resources.legendAntenna);
+
+            this.removeItemInSection($scope, $scope.resources.legendBarriers, $scope.resources.legendStile);
+            this.removeItemInSection($scope, $scope.resources.legendBarriers, $scope.resources.legendLiftGate);
+
+            this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendBikeShop);
+            this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendFirstAid);
+            this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendCafé);
+            this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendReastaurant);
+            this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendConvenienceStore);
+            this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendLodging);
+            this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendToilettes);
+            this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendInformationCenter);
+            
+            this.removeItemInSection($scope, $scope.resources.legendAreas, $scope.resources.legendWetland);
+            this.removeItemInSection($scope, $scope.resources.legendAreas, $scope.resources.legendCemetary);
+            this.removeItemInSection($scope, $scope.resources.legendAreas, $scope.resources.legendConstructionSite);
+        }
+
+        private removeItemInSection($scope: IInfoScope, sectionTitle: string, title: string) {
+            let section = _.find($scope.legendSections, sectionToFind => sectionToFind.title === sectionTitle);
+            if (section) {
+                _.remove(section.items, itemToRemove => itemToRemove.title === title);
+            }
+        }
+    }
 }  
   

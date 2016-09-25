@@ -51,6 +51,8 @@
     .legend-poi .legend-item-text {
         vertical-align: middle;
         display: table-cell;
+        text-align: start;
+        width: 100%;
     }
 
 
