@@ -311,7 +311,7 @@
                         },
                         {
                             title: $scope.resources.legendLight4WDVehicles,
-                            latlng: L.latLng(30.5885, 34.8847),
+                            latlng: L.latLng(32.784185, 35.1049876),
                             zoom: 16,
                             id: id++,
                             map: null,
@@ -1080,6 +1080,7 @@
             _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendRegionalTrails);
             _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendMarkedTrails);
 
+            this.removeItemInSection($scope, $scope.resources.legendTrails, $scope.resources.legendDifficult4WD);
             this.removeItemInSection($scope, $scope.resources.legendTrails, $scope.resources.legendSteps);
 
             this.removeItemInSection($scope, $scope.resources.legendWater, $scope.resources.legendSeasonalLake);
