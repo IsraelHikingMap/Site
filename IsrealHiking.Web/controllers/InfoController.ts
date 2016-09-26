@@ -259,7 +259,7 @@
                         },
                         {
                             title: $scope.resources.legendChallangingWithDirection,
-                            latlng: L.latLng(31.8295000, 35.084302),
+                            latlng: L.latLng(33.198423, 35.5491829),
                             zoom: 16,
                             id: id++,
                             map: null,
@@ -281,7 +281,7 @@
                         },
                         {
                             title: $scope.resources.legendRegionalTrail,
-                            latlng: L.latLng(31.8647653, 34.940742),
+                            latlng: L.latLng(32.099950, 34.8055512),
                             zoom: 16,
                             id: id++,
                             map: null,
@@ -289,8 +289,8 @@
                         },
                         {
                             title: $scope.resources.legendNationalTrail,
-                            latlng: L.latLng(29.7095249, 34.940128),
-                            zoom: 15,
+                            latlng: L.latLng(29.982344, 35.0060463),
+                            zoom: 16,
                             id: id++,
                             map: null,
                             type: "Way"
@@ -311,7 +311,7 @@
                         },
                         {
                             title: $scope.resources.legendLight4WDVehicles,
-                            latlng: L.latLng(30.5885, 34.8847),
+                            latlng: L.latLng(32.784185, 35.1049876),
                             zoom: 16,
                             id: id++,
                             map: null,
@@ -1079,6 +1079,7 @@
             _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendRegionalTrails);
             _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendMarkedTrails);
 
+            this.removeItemInSection($scope, $scope.resources.legendTrails, $scope.resources.legendDifficult4WD);
             this.removeItemInSection($scope, $scope.resources.legendTrails, $scope.resources.legendSteps);
 
             this.removeItemInSection($scope, $scope.resources.legendWater, $scope.resources.legendSeasonalLake);
