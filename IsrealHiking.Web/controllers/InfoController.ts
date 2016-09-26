@@ -43,9 +43,10 @@
             this.$timeout = $timeout;
             this.layersService = layersService;
 
-            $scope.state = "legend";
+            
             $scope.visibleSections = {};
             this.initalizeLegendSections($scope);
+            $scope.state = $scope.legendSections.length > 0 ? "legend" : "about"; 
 
             $scope.$watch(() => $scope.resources.currentLanguage, () => {
                 this.initalizeLegendSections($scope);
