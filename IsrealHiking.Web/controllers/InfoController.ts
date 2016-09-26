@@ -1062,9 +1062,8 @@
                 this.removeMtbUnwantedLegend($scope);
             } else if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_HIKING_MAP) {
                 this.removeIhmUnwantedLegend($scope);
-            } else {
-                this.removeMtbUnwantedLegend($scope);
-                this.removeIhmUnwantedLegend($scope);
+            } else if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.GOOGLE_EARTH) {
+                $scope.legendSections = [];
             }
             for (let visibleSectionId in $scope.visibleSections) {
                 if ($scope.visibleSections.hasOwnProperty(visibleSectionId) && $scope.visibleSections[visibleSectionId]) {
