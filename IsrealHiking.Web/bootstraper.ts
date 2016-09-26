@@ -47,9 +47,10 @@
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
     app.service(Strings.Services.layersService, [Strings.Angular.http, Strings.Angular.window, Strings.Services.mapService,
-        Strings.Services.localStorageService, Strings.Services.routeLayerFactory, Strings.Services.hashService, Strings.Services.fileService,
-        ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService, routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService, fileService: Services.FileService) =>
-            new Services.Layers.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService, fileService)]);
+        Strings.Services.localStorageService, Strings.Services.routeLayerFactory, Strings.Services.hashService, Strings.Services.fileService, Strings.Services.resourcesService,
+        ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService,
+            routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService, fileService: Services.FileService, resourcesService: Services.ResourcesService) =>
+            new Services.Layers.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService, fileService, resourcesService)]);
     app.service(Strings.Services.dragAndDropService, [Strings.Angular.timeout, Strings.Services.mapService, Strings.Services.fileService, Strings.Services.layersService, Strings.Services.toastr,
         ($timeout: angular.ITimeoutService, mapservice: Services.MapService, fileService: Services.FileService, layersService: Services.Layers.LayersService, toastr: Toastr) =>
             new Services.DragAndDropService($timeout, mapservice, fileService, layersService, toastr)

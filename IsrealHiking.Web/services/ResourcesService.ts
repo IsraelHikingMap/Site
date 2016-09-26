@@ -100,6 +100,12 @@ namespace IsraelHiking.Services {
         public slope: string;
         public convertToRoute: string;
         public removeSearchResults: string;
+        public israelMTBMap: string;
+        public israelHikingMap: string;
+        public googleEarth: string;
+        public hikingTrails: string;
+        public wiki: string;
+        public route: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -266,6 +272,11 @@ namespace IsraelHiking.Services {
             this.localStorageService = localStorageService;
             this.currentLanguage = localStorageService.get(languageKey) as ILanguage || { code: "en-US", rtl: false, label: "English"};
             this.setLanguage(this.currentLanguage);
+            if (this.currentLanguage.code === "he") {
+                this.route = "מסלול"; // required for layers service to be initialized - this is an ugly workaround... :-/
+            } else {
+                this.route = "Route";
+            }
         }
 
         private setRtl = (rtl: boolean) => {
@@ -366,6 +377,11 @@ namespace IsraelHiking.Services {
                     this.slope = this.gettextCatalog.getString("Slope");
                     this.convertToRoute = this.gettextCatalog.getString("Convert to Route");
                     this.removeSearchResults = this.gettextCatalog.getString("Remove Search Results");
+                    this.israelMTBMap = this.gettextCatalog.getString("Israel MTB Map");
+                    this.israelHikingMap = this.gettextCatalog.getString("Israel Hiking Map");
+                    this.googleEarth = this.gettextCatalog.getString("Google Earth");
+                    this.hikingTrails = this.gettextCatalog.getString("Hiking Trails");
+                    this.route = this.gettextCatalog.getString("Route");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");

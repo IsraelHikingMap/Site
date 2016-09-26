@@ -26,13 +26,12 @@ namespace IsraelHiking.Services.Layers {
     export class LayersService extends ObjectWithMap {
         public static ISRAEL_MTB_MAP = "Israel MTB Map";
         public static ISRAEL_HIKING_MAP = "Israel Hiking Map";
+        public static GOOGLE_EARTH = "Google Earth";
         public static DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
         public static MIN_ZOOM = 7;
         public static MAX_NATIVE_ZOOM = 16;
 
         private static MAX_ZOOM = 20;
-        
-        private static GOOGLE_EARTH = "Google Earth";
         private static HIKING_TRAILS = "Hiking Trails";
         private static ATTRIBUTION = "<a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> data under <a href='http://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
         private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION + "Map style courtesy of <a href='http://mtbmap.no'>MTBmap.no.</a> ";
@@ -49,6 +48,7 @@ namespace IsraelHiking.Services.Layers {
         private hashService: HashService;
         private fileService: FileService;
         private routeLayerFactory: Layers.RouteLayers.RouteLayerFactory;
+        private resourcesService: ResourcesService;
         private defaultAttribution: string;
         private overlayZIndex;
 
@@ -66,13 +66,15 @@ namespace IsraelHiking.Services.Layers {
             localStorageService: angular.local.storage.ILocalStorageService,
             routeLayerFactory: Layers.RouteLayers.RouteLayerFactory,
             hashService: HashService,
-            fileService: FileService) {
+            fileService: FileService,
+            resourcesService: ResourcesService) {
             super(mapService);
             this.$http = $http;
             this.localStorageService = localStorageService;
             this.hashService = hashService;
             this.fileService = fileService;
             this.routeLayerFactory = routeLayerFactory;
+            this.resourcesService = resourcesService;
             this.selectedBaseLayer = null;
             this.selectedRoute = null;
             this.baseLayers = [];
@@ -108,7 +110,7 @@ namespace IsraelHiking.Services.Layers {
                 maxZoom: LayersService.MAX_NATIVE_ZOOM
             } as ILayer);
             hikingTrailsOverlay.isEditable = false;
-            this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wiki", layer: new WikiMarkersLayer($http, mapService) as L.ILayer } as IOverlay);
+            this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: new WikiMarkersLayer($http, mapService) as L.ILayer } as IOverlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
             if (this.selectedBaseLayer == null) {
@@ -280,10 +282,10 @@ namespace IsraelHiking.Services.Layers {
 
         public createRouteName = () => {
             var index = 1;
-            var routeName = `Route ${index}`;
+            var routeName = `${this.resourcesService.route} ${index}`;
             while (_.some(this.routes, (routeLayer) => routeLayer.getRouteProperties().name === routeName)) {
                 index++;
-                routeName = `Route ${index}`;
+                routeName = `${this.resourcesService.route} ${index}`;
             }
             return routeName;
         }

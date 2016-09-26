@@ -9,7 +9,7 @@
             <span><i class="fa fa-lg" ng-class="{'fa-eye': baseLayer.selected, 'fa-eye-slash': !baseLayer.selected}"></i></span>
         </div>
         <div ng-class="{'col-xs-7': advanced && baseLayer.isEditable, 'col-xs-10': !(advanced && baseLayer.isEditable)}">
-            <span>{{baseLayer.key}}</span>
+            <span>{{baseLayer.key | translate}}</span>
         </div>
         <div class="col-xs-3" ng-show="advanced && baseLayer.isEditable">
             <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editBaseLayer(baseLayer, $event)" uib-tooltip="{{resources.baseLayerProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
@@ -32,7 +32,7 @@
             <span><i class="fa fa-lg" ng-class="{'fa-eye': overlay.visible, 'fa-eye-slash': !overlay.visible}"></i></span>
         </div>
         <div ng-class="{'col-xs-7': advanced && overlay.isEditable, 'col-xs-10': !(advanced && overlay.isEditable)}">
-            <span>{{overlay.key}}</span>
+            <span>{{overlay.key | translate}}</span>
         </div>
         <div class="col-xs-3" ng-show="advanced && overlay.isEditable">
             <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editOverlay(overlay, $event)" uib-tooltip="{{resources.overlayProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
