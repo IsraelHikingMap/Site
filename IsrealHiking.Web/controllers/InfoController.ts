@@ -20,7 +20,7 @@
     export interface IInfoScope extends IRootScope {
         state: InfoState;
         legendSections: ILegendSection[];
-        visibleSections: Map<number, boolean>;
+        visibleSectionId: number;
         toggleInfo(e: Event): void;
         isActive(): boolean;
         setState(state: InfoState): void;
@@ -43,10 +43,10 @@
             this.$timeout = $timeout;
             this.layersService = layersService;
 
-            
-            $scope.visibleSections = {};
+
+            $scope.visibleSectionId = -1;
             this.initalizeLegendSections($scope);
-            $scope.state = $scope.legendSections.length > 0 ? "legend" : "about"; 
+            $scope.state = $scope.legendSections.length > 0 ? "legend" : "about";
 
             $scope.$watch(() => $scope.resources.currentLanguage, () => {
                 this.initalizeLegendSections($scope);
@@ -62,21 +62,22 @@
             }
 
             $scope.isSectionVisible = (section: ILegendSection) => {
-                return $scope.visibleSections[section.id] || false;
+                return $scope.visibleSectionId === section.id;
             }
 
             $scope.toggleSectionVisibility = (section: ILegendSection) => {
-                $scope.visibleSections[section.id] = !$scope.isSectionVisible(section);
-                if (!$scope.visibleSections[section.id]) {
+                if ($scope.visibleSectionId === section.id) {
+                    $scope.visibleSectionId = -1;
                     return;
                 }
-                angular.element("#sidebar-wrapper").animate({ scrollTop: angular.element(`#${section.id}`).offset().top }, "slow");
+                $scope.visibleSectionId = section.id;
                 for (let item of section.items) {
                     if (item.map) {
                         continue;
                     }
                     this.initializeItemMap(item);
                 }
+                $timeout(() => angular.element("#sidebar-wrapper").animate({ scrollTop: angular.element(`#${section.id}`).offset().top + angular.element("#sidebar-wrapper").scrollTop() }, "slow"), 300);
             };
 
             $scope.setState = (state: InfoState) => {
@@ -413,14 +414,14 @@
                             type: "POI"
                         },
                         {
-                                title: $scope.resources.legendWetland,
-                                latlng: L.latLng(32.410690, 34.9005125),
-                                zoom: 16,
-                                id: id++,
-                                map: null,
-                                type: "POI"
-                            },
-                            {
+                            title: $scope.resources.legendWetland,
+                            latlng: L.latLng(32.410690, 34.9005125),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "POI"
+                        },
+                        {
                             title: $scope.resources.legendSpringPond,
                             latlng: L.latLng(31.780383, 35.057466),
                             zoom: 16,
@@ -1066,13 +1067,12 @@
             } else if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.GOOGLE_EARTH) {
                 $scope.legendSections = [];
             }
-            for (let visibleSectionId in $scope.visibleSections) {
-                if ($scope.visibleSections.hasOwnProperty(visibleSectionId) && $scope.visibleSections[visibleSectionId]) {
-                    let section = _.find($scope.legendSections, sectionToFind => sectionToFind.id.toString() === visibleSectionId);
-                    for (let item of section.items) {
-                        this.initializeItemMap(item);
-                    }
-                }
+            let section = _.find($scope.legendSections, sectionToFind => sectionToFind.id === $scope.visibleSectionId);
+            if (!section) {
+                return;
+            }
+            for (let item of section.items) {
+                this.initializeItemMap(item);
             }
         }
 
@@ -1121,7 +1121,7 @@
             this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendLodging);
             this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendToilettes);
             this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendInformationCenter);
-            
+
             this.removeItemInSection($scope, $scope.resources.legendAreas, $scope.resources.legendWetland);
             this.removeItemInSection($scope, $scope.resources.legendAreas, $scope.resources.legendCemetary);
             this.removeItemInSection($scope, $scope.resources.legendAreas, $scope.resources.legendConstructionSite);
@@ -1134,5 +1134,5 @@
             }
         }
     }
-}  
-  
+}
+
