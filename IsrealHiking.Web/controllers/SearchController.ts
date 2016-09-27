@@ -202,6 +202,11 @@
                         this.requestsQueue.splice(0, this.requestsQueue.length - 1);
                         return;
                     }
+                    if ($scope.searchTerm !== searchTerm) {
+                        // search term changed since it was requested.
+                        _.remove(this.requestsQueue, queueItem);
+                        return;
+                    }
                     $scope.searchResults = results;
                     this.requestsQueue.splice(0);
                 }, () => {
