@@ -336,7 +336,7 @@
                         },
                         {
                             title: $scope.resources.legendPath,
-                            latlng: L.latLng(31.2097, 35.291),
+                            latlng: L.latLng(31.145890, 34.5702167),
                             zoom: 16,
                             id: id++,
                             map: null,
@@ -413,6 +413,14 @@
                             type: "POI"
                         },
                         {
+                                title: $scope.resources.legendWetland,
+                                latlng: L.latLng(32.410690, 34.9005125),
+                                zoom: 16,
+                                id: id++,
+                                map: null,
+                                type: "POI"
+                            },
+                            {
                             title: $scope.resources.legendSpringPond,
                             latlng: L.latLng(31.780383, 35.057466),
                             zoom: 16,
@@ -1023,14 +1031,6 @@
                             type: "POI"
                         },
                         {
-                            title: $scope.resources.legendWetland,
-                            latlng: L.latLng(32.410690, 34.9005125),
-                            zoom: 16,
-                            id: id++,
-                            map: null,
-                            type: "POI"
-                        },
-                        {
                             title: $scope.resources.legendCemetary,
                             latlng: L.latLng(32.831568, 35.7989717),
                             zoom: 16,
@@ -1090,7 +1090,9 @@
 
             this.removeItemInSection($scope, $scope.resources.legendPoi, $scope.resources.legendMonument);
 
+            this.removeItemInSection($scope, $scope.resources.legendBarriers, $scope.resources.legendStile);
             this.removeItemInSection($scope, $scope.resources.legendBarriers, $scope.resources.legendBlock);
+            this.removeItemInSection($scope, $scope.resources.legendBarriers, $scope.resources.legendLiftGate);
 
             this.removeItemInSection($scope, $scope.resources.legendBorders, $scope.resources.legendTheGreenLine);
             this.removeItemInSection($scope, $scope.resources.legendBorders, $scope.resources.legendThePurpleLine);
