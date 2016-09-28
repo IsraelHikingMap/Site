@@ -4,8 +4,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
+using GeoAPI.Geometries;
 using Ionic.Zip;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
@@ -15,6 +14,8 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Services
@@ -207,7 +208,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertGeoJsonToDataContainer_ShouldConvertToDataContainer()
         {
-            var collection = new FeatureCollection { Features = { new Feature(new Point(new GeographicPosition(1, 2, 3))) } };
+            var collection = new FeatureCollection { Features = { new Feature(new Point(new Coordinate(1, 2, 3)), new AttributesTable()) } };
 
             var dataContainer = _converterService.ToDataContainer(collection.ToBytes(), "geojson").Result;
 

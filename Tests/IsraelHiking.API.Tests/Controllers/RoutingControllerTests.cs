@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http.Results;
-using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
+using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -53,22 +53,22 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.AreEqual(1, content.Features.Count);
             var lineString = content.Features.First().Geometry as LineString;
             Assert.IsNotNull(lineString);
-            var points = lineString.Coordinates.OfType<GeographicPosition>();
-            Assert.AreEqual(1, points.First().Latitude);
-            Assert.AreEqual(1, points.First().Latitude);
-            Assert.AreEqual(2, points.Last().Latitude);
-            Assert.AreEqual(2, points.Last().Latitude);
+            var points = lineString.Coordinates.OfType<Coordinate>();
+            Assert.AreEqual(1, points.First().X);
+            Assert.AreEqual(1, points.First().Y);
+            Assert.AreEqual(2, points.Last().X);
+            Assert.AreEqual(2, points.Last().Y);
         }
 
         [TestMethod]
         public void GetRouting_Car_ShouldReturnLineStringFromGateway()
         {
             _routingGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
-                .Returns(Task.FromResult(new LineString(new List<GeographicPosition>()
+                .Returns(Task.FromResult(new LineString(new []
                 {
-                    new GeographicPosition(1,1),
-                    new GeographicPosition(1.5,1.5),
-                    new GeographicPosition(2,2)
+                    new Coordinate(1,1),
+                    new Coordinate(1.5,1.5),
+                    new Coordinate(2,2)
                 })));
 
             var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkNegotiatedContentResult<FeatureCollection>;
@@ -77,12 +77,12 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.AreEqual(1, content.Features.Count);
             var lineString = content.Features.First().Geometry as LineString;
             Assert.IsNotNull(lineString);
-            var points = lineString.Coordinates.OfType<GeographicPosition>();
+            var points = lineString.Coordinates.OfType<Coordinate>();
             Assert.AreEqual(3, points.Count());
-            Assert.AreEqual(1, points.First().Latitude);
-            Assert.AreEqual(1, points.First().Latitude);
-            Assert.AreEqual(2, points.Last().Latitude);
-            Assert.AreEqual(2, points.Last().Latitude);
+            Assert.AreEqual(1, points.First().X);
+            Assert.AreEqual(1, points.First().Y);
+            Assert.AreEqual(2, points.Last().X);
+            Assert.AreEqual(2, points.Last().Y);
 
         }
     }

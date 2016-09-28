@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
+using GeoAPI.Geometries;
 using IsraelHiking.DataAccess.ElasticSearch;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 {
@@ -27,45 +27,40 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         {
             var gateway = new ElasticSearchGateway(new TraceLogger());
             gateway.Initialize();
+            var table1 = new AttributesTable();
+            table1.AddAttribute("name", "polygon");
+            table1.AddAttribute("place", "city");
+            table1.AddAttribute("osm_id", "1");
+            var table2 = new AttributesTable();
+            table2.AddAttribute("name", "street");
+            table2.AddAttribute("highway", "residential");
+            table2.AddAttribute("osm_id", "2");
             var features = new List<Feature>
             {
                 new Feature(
                     new Polygon(
-                        new List<LineString>
-                        {
-                            new LineString(
+                            new LinearRing(
                                 new[]
                                 {
-                                    new GeographicPosition(0, 0),
-                                    new GeographicPosition(1, 0),
-                                    new GeographicPosition(1, 1),
-                                    new GeographicPosition(0, 1),
-                                    new GeographicPosition(0, 0)
+                                    new Coordinate(0, 0),
+                                    new Coordinate(1, 0),
+                                    new Coordinate(1, 1),
+                                    new Coordinate(0, 1),
+                                    new Coordinate(0, 0)
                                 }
                             )
-                        }
                     ),
-                    new Dictionary<string, object>
-                    {
-                        {"name", "polygon"},
-                        {"place", "city"},
-                        {"osm_id", "1"}
-                    }
+                    table1
                 ),
                 new Feature(
                     new LineString(
                         new[]
                         {
-                            new GeographicPosition(0.5, 0.5),
-                            new GeographicPosition(0.6, 0.6)
+                            new Coordinate(0.5, 0.5), 
+                            new Coordinate(0.6, 0.6)
                         }
                     ),
-                    new Dictionary<string, object>
-                    {
-                        {"name", "street"},
-                        {"highway", "residential"},
-                        {"osm_id", "2"}
-                    }
+                    table2
                 )
             };
             gateway.UpdateData(features).Wait();

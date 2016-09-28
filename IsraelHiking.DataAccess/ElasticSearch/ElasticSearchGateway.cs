@@ -4,7 +4,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.DataAccessInterfaces;
 using Nest;
-using Feature = GeoJSON.Net.Feature.Feature;
+using NetTopologySuite.IO;
+using Newtonsoft.Json;
+using Feature = NetTopologySuite.Features.Feature;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
 {
@@ -27,27 +29,29 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 .DefaultIndex(OSM_INDEX)
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
+            
             if (deleteIndex && _elasticClient.IndexExists(OSM_INDEX).Exists)
             {
                 _elasticClient.DeleteIndex(OSM_INDEX);
             }
-            _elasticClient.CreateIndex(OSM_INDEX,
-                c => c.Mappings(
-                    ms => ms.Map<Feature>(m =>
-                        m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
-                            .Tree(GeoTree.Geohash)
-                            .TreeLevels(10)
-                            .DistanceErrorPercentage(0.025))))));
+            //_elasticClient.CreateIndex(OSM_INDEX,
+            //    c => c.Mappings(
+            //        ms => ms.Map<Feature>(m =>
+            //            m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
+            //                .Tree(GeoTree.Geohash)
+            //                .TreeLevels(10)
+            //                .DistanceErrorPercentage(0.2))))));
             _logger.Info("Finished initialing elastic search with uri: " + uri);
         }
 
         public async Task UpdateData(List<Feature> features)
         {
+            var writer = new NetTopologySuite.IO.GeoJsonWriter();
             var result = await _elasticClient.BulkAsync(bulk =>
             {
                 foreach (var feature in features)
                 {
-                    bulk.Index<Feature>(i => i.Document(feature).Id(GetId(feature)));
+                    bulk.Index<object>(i => i.Document(JsonConvert.DeserializeObject(writer.Write(feature))).Id(GetId(feature)));
                 }
                 return bulk;
             });
@@ -64,7 +68,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 return new List<Feature>();
             }
             var field = "properties." + fieldName;
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<object>(
                 s => s.Size(NUMBER_OF_RESULTS)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
@@ -90,7 +94,8 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                         )
                     )
             );
-            return response.Documents.ToList();
+            var reader = new GeoJsonReader();
+            return response.Documents.Select(d => reader.Read<Feature>(d.ToString())).ToList();
         }
 
         public async Task<Feature> GetContainingFeature(Feature feature)
@@ -119,7 +124,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
 
         private string GetId(Feature feature)
         {
-            return feature.Geometry.Type + "_" + feature.Properties["osm_id"];
+            return feature.Geometry.GeometryType + "_" + feature.Attributes["osm_id"];
         }
     }
 }

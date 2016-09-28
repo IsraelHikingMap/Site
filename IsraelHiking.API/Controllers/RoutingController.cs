@@ -1,12 +1,13 @@
-﻿using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using GeoAPI.Geometries;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -51,8 +52,11 @@ namespace IsraelHiking.API.Controllers
                     Profile = profile,
                 });
             }
-            var feature = new Feature(lineString, new FeatureProperties { Name = "Routing from " + from + " to " + to + " profile type: " + profile, Creator = "IsraelHikingMap" });
-            return Ok(new FeatureCollection(new List<Feature> { feature }));
+            var table = new AttributesTable();
+            table.AddAttribute("Name", "Routing from " + from + " to " + to + " profile type: " + profile);
+            table.AddAttribute("Creator", "IsraelHikingMap");
+            var feature = new Feature(lineString, table);
+            return Ok(new FeatureCollection(new Collection<IFeature> { feature }));
         }
 
         private static ProfileType ConvertProfile(string type)
@@ -76,7 +80,7 @@ namespace IsraelHiking.API.Controllers
             return profile;
         }
 
-        private async Task<GeographicPosition> GetGeographicPosition(string position)
+        private async Task<Coordinate> GetGeographicPosition(string position)
         {
             var splitted = position.Split(',');
             if (splitted.Length != 2)
@@ -87,7 +91,7 @@ namespace IsraelHiking.API.Controllers
             var lat = double.Parse(splitted.First());
             var lng = double.Parse(splitted.Last());
             var elevation = await _elevationDataStorage.GetElevation(lat, lng);
-            return new GeographicPosition(lat, lng, elevation);
+            return new Coordinate(lng, lat, elevation);
         }
     }
 }

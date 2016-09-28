@@ -1,7 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Web.Http;
-using GeoJSON.Net.Feature;
+using System.Web.Http.Description;
 using IsraelHiking.DataAccessInterfaces;
+using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -14,20 +17,14 @@ namespace IsraelHiking.API.Controllers
             _elasticSearchGateway = elasticSearchGateway;
         }
 
+        [ResponseType(typeof(FeatureCollection))]
+        [HttpGet]
         // GET api/search/searchTerm=abc&language=en
         public async Task<FeatureCollection> GetSearchResults(string id, string language = null)
         {
             var fieldName = string.IsNullOrWhiteSpace(language) ? "name" : "name:" + language;
             var features = await _elasticSearchGateway.Search(id, fieldName);
-            foreach (var feature in features)
-            {
-                var container = await _elasticSearchGateway.GetContainingFeature(feature);
-                if (container != null && container.Properties.ContainsKey(fieldName))
-                {
-                    feature.Properties["address"] = container.Properties[fieldName];
-                }
-            }
-            return new FeatureCollection(features);
+            return new FeatureCollection(new Collection<IFeature>(features.OfType<IFeature>().ToList()));
         }
     }
 }

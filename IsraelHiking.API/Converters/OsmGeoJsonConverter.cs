@@ -1,7 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
+using GeoAPI.Geometries;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 
@@ -42,19 +43,24 @@ namespace IsraelHiking.API.Converters
             }
         }
 
-        private Dictionary<string, object> ConvertTags(TagsCollectionBase tags, long id)
+        private IAttributesTable ConvertTags(TagsCollectionBase tags, long id)
         {
             var properties = tags.ToStringObjectDictionary();
             properties.Add("osm_id", id);
-            return properties;
+            var table = new AttributesTable();
+            foreach (var key in properties.Keys)
+            {
+                table.AddAttribute(key, properties[key]);
+            }
+            return table;
         }
 
-        private GeographicPosition ConvertNode(Node node)
+        private Coordinate ConvertNode(Node node)
         {
-            return new GeographicPosition(node.Latitude.Value, node.Longitude.Value);
+            return new Coordinate(node.Longitude.Value, node.Latitude.Value);
         }
 
-        private List<IGeometryObject> GetCoordinatesGroupsFromWays(IEnumerable<CompleteWay> ways)
+        private List<IGeometry> GetCoordinatesGroupsFromWays(IEnumerable<CompleteWay> ways)
         {
             var nodesGroups = new List<List<Node>>();
             var waysToGroup = new List<CompleteWay>(ways.Where(w => w.Nodes.Any()));
@@ -98,7 +104,7 @@ namespace IsraelHiking.API.Converters
             var nodes = relation.Members.Select(m => m.Member).OfType<Node>().ToList();
             if (nodes.Any())
             {
-                var multiPoint = new MultiPoint(nodes.Select(n => new Point(ConvertNode(n))).ToList());
+                var multiPoint = new MultiPoint(nodes.Select(n => new Point(ConvertNode(n)) as IPoint).ToArray());
                 return new Feature(multiPoint, ConvertTags(relation.Tags, relation.Id));
             }
 
@@ -107,20 +113,19 @@ namespace IsraelHiking.API.Converters
             {
                 return null;
             }
-            var multiLineString = new MultiLineString(coordinatesGroups.OfType<LineString>().ToList());
-            multiLineString.Coordinates.AddRange(coordinatesGroups.OfType<Polygon>().SelectMany(p => p.Coordinates));
+            var jointLines = coordinatesGroups.OfType<ILineString>().ToList();
+            jointLines.AddRange(coordinatesGroups.OfType<Polygon>().Select(p => new LineString(p.Coordinates) as ILineString));
+            var multiLineString = new MultiLineString(jointLines.ToArray());
             return new Feature(multiLineString, ConvertTags(relation.Tags, relation.Id));
         }
 
         private Feature ConvertToMultipolygon(CompleteRelation relation)
         {
-            var multiPolygon = new MultiPolygon();
             var outerWays = GetAllWaysByRole(relation).Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
             var outerCoordinatesGroups = GetCoordinatesGroupsFromWays(outerWays);
-            multiPolygon.Coordinates.AddRange(outerCoordinatesGroups.OfType<Polygon>());
             var innerWays = GetAllWaysByRole(relation).Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
-            var innerCoordinatesGroups = GetCoordinatesGroupsFromWays(innerWays).OfType<Polygon>().ToList();
-            multiPolygon.Coordinates.AddRange(innerCoordinatesGroups);
+            var innerCoordinatesGroups = GetCoordinatesGroupsFromWays(innerWays).OfType<IPolygon>().ToList();
+            var multiPolygon = new MultiPolygon(outerCoordinatesGroups.OfType<IPolygon>().Union(innerCoordinatesGroups).ToArray());
             return new Feature(multiPolygon, ConvertTags(relation.Tags, relation.Id));
         }
 
@@ -169,11 +174,11 @@ namespace IsraelHiking.API.Converters
             return relation.Tags[TYPE] == MULTIPOLYGON || relation.Tags[TYPE] == BOUNDARY;
         }
 
-        private IGeometryObject GetGeometryFromNodes(List<Node> nodes)
+        private IGeometry GetGeometryFromNodes(List<Node> nodes)
         {
-            var coordinates = nodes.Select(ConvertNode);
+            var coordinates = nodes.Select(ConvertNode).ToArray();
             return nodes.First().Id == nodes.Last().Id && nodes.Count >= 4
-                        ? new Polygon(new List<LineString> { new LineString(coordinates) }) as IGeometryObject
+                        ? new Polygon(new LinearRing(coordinates)) as IGeometry
                         : new LineString(coordinates);
         }
     }

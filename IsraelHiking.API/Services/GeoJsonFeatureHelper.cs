@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using GeoJSON.Net.Feature;
-using GeoJSON.Net.Geometry;
+using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services
 {
@@ -85,28 +85,28 @@ namespace IsraelHiking.API.Services
             PropertiesData data = null;
             if (feature.Geometry is MultiPolygon || feature.Geometry is MultiLineString)
             {
-                data = FindPropertiesData(feature.Properties, Relations);
+                data = FindPropertiesData(feature.Attributes, Relations);
             }
             if (feature.Geometry is LineString || feature.Geometry is Polygon)
             {
-                data = FindPropertiesData(feature.Properties, Ways);
+                data = FindPropertiesData(feature.Attributes, Ways);
             }
             if (feature.Geometry is Point)
             {
-                data = FindPropertiesData(feature.Properties, Nodes);
+                data = FindPropertiesData(feature.Attributes, Nodes);
             }
             return data;
         }
 
-        private static PropertiesData FindPropertiesData(Dictionary<string, object> properties, List<PropertiesData> priorityData)
+        private static PropertiesData FindPropertiesData(IAttributesTable attributesTable, List<PropertiesData> priorityData)
         {
-            return properties.Select(pair => priorityData.FirstOrDefault(p =>
+            return attributesTable.GetNames().Select(key => priorityData.FirstOrDefault(p =>
             {
-                if (pair.Key.Equals(p.Key, StringComparison.InvariantCultureIgnoreCase) == false)
+                if (key.Equals(p.Key, StringComparison.InvariantCultureIgnoreCase) == false)
                 {
                     return false;
                 }
-                return p.IsAnyValue || pair.Value.ToString().Equals(p.Value, StringComparison.CurrentCultureIgnoreCase);
+                return p.IsAnyValue || attributesTable[key].ToString().Equals(p.Value, StringComparison.CurrentCultureIgnoreCase);
             })).FirstOrDefault(data => data != null);
         }
     }

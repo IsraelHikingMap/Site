@@ -1,9 +1,8 @@
 ﻿using System.Linq;
-using GeoJSON.Net.Geometry;
 using IsraelHiking.API.Converters;
-using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Tests.Gpx
 {
@@ -25,12 +24,12 @@ namespace IsraelHiking.API.Tests.Gpx
             Assert.AreEqual(1, featureCollection.Features.Count);
             var point = featureCollection.Features.Select(f => f.Geometry).OfType<Point>().FirstOrDefault();
             Assert.IsNotNull(point);
-            var coordinates = point.Coordinates as GeographicPosition;
+            var coordinates = point.Coordinate;
             Assert.IsNotNull(coordinates);
-            Assert.AreEqual(gpx.wpt[0].name, featureCollection.Features.First().Properties["name"]);
-            Assert.AreEqual(null, (decimal?)coordinates.Altitude);
-            Assert.AreEqual(gpx.wpt[0].lat, (decimal)coordinates.Latitude);
-            Assert.AreEqual(gpx.wpt[0].lon, (decimal)coordinates.Longitude);
+            Assert.AreEqual(gpx.wpt[0].name, featureCollection.Features.First().Attributes["name"]);
+            Assert.IsTrue(double.IsNaN(coordinates.Z));
+            Assert.AreEqual(gpx.wpt[0].lat, (decimal)coordinates.Y);
+            Assert.AreEqual(gpx.wpt[0].lon, (decimal)coordinates.X);
         }
 
         [TestMethod]
@@ -156,7 +155,7 @@ namespace IsraelHiking.API.Tests.Gpx
             Assert.AreEqual(1, featureCollection.Features.Count);
             var lineString = featureCollection.Features.First().Geometry as LineString;
             Assert.IsNotNull(lineString);
-            Assert.AreEqual(2, lineString.Coordinates.Count);
+            Assert.AreEqual(2, lineString.Coordinates.Length);
         }
     }
 }

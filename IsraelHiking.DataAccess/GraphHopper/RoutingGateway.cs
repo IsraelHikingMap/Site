@@ -1,10 +1,11 @@
 ﻿using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using GeoJSON.Net.Geometry;
+using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccess.JsonResponse;
 using IsraelHiking.DataAccessInterfaces;
+using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 
 namespace IsraelHiking.DataAccess.GraphHopper
@@ -42,7 +43,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
                 _logger.Debug("Got routing: " + content);
                 var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
 
-                return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new GeographicPosition(c[1], c[0], c.Count > 2 ? c[2] : (double?)null)));
+                return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new Coordinate(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
             }
         }
     }

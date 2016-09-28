@@ -1,7 +1,8 @@
 ﻿using System.Linq;
-using GeoJSON.Net.Geometry;
+using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Geometries;
 using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 
@@ -46,12 +47,12 @@ namespace IsraelHiking.API.Tests.Converters
             var feature = _converter.ToGeoJson(node);
             var point = feature.Geometry as Point;
 
-            Assert.AreEqual(feature.Properties[NAME], NAME);
+            Assert.AreEqual(feature.Attributes[NAME], NAME);
             Assert.IsNotNull(point);
-            var position = point.Coordinates as GeographicPosition;
+            var position = point.Coordinate;
             Assert.IsNotNull(position);
-            Assert.AreEqual(node.Latitude, position.Latitude);
-            Assert.AreEqual(node.Longitude, position.Longitude);
+            Assert.AreEqual(node.Latitude, position.Y);
+            Assert.AreEqual(node.Longitude, position.X);
         }
 
         [TestMethod]
@@ -81,10 +82,10 @@ namespace IsraelHiking.API.Tests.Converters
             var feature = _converter.ToGeoJson(way);
             var lineString = feature.Geometry as LineString;
 
-            Assert.AreEqual(feature.Properties[NAME], NAME);
+            Assert.AreEqual(feature.Attributes[NAME], NAME);
             Assert.IsNotNull(lineString);
-            Assert.AreEqual(node1.Latitude, lineString.Coordinates.OfType<GeographicPosition>().First().Latitude);
-            Assert.AreEqual(node2.Longitude, lineString.Coordinates.OfType<GeographicPosition>().Last().Longitude);
+            Assert.AreEqual(node1.Latitude, lineString.Coordinates.First().Y);
+            Assert.AreEqual(node2.Longitude, lineString.Coordinates.Last().X);
         }
 
         [TestMethod]
@@ -101,10 +102,10 @@ namespace IsraelHiking.API.Tests.Converters
             var feature = _converter.ToGeoJson(way);
             var polygon = feature.Geometry as Polygon;
 
-            Assert.AreEqual(feature.Properties[NAME], NAME);
+            Assert.AreEqual(feature.Attributes[NAME], NAME);
             Assert.IsNotNull(polygon);
-            Assert.AreEqual(node1.Latitude, polygon.Coordinates.SelectMany(c => c.Coordinates).OfType<GeographicPosition>().First().Latitude);
-            Assert.AreEqual(node1.Longitude, polygon.Coordinates.SelectMany(c => c.Coordinates).OfType<GeographicPosition>().Last().Longitude);
+            Assert.AreEqual(node1.Latitude, polygon.Coordinates.First().Y);
+            Assert.AreEqual(node1.Longitude, polygon.Coordinates.Last().X);
         }
 
         [TestMethod]
@@ -124,9 +125,9 @@ namespace IsraelHiking.API.Tests.Converters
             var multiPolygon = feature.Geometry as MultiPolygon;
 
             Assert.IsNotNull(multiPolygon);
-            Assert.AreEqual(1, multiPolygon.Coordinates.Count);
-            Assert.AreEqual(node1.Latitude, multiPolygon.Coordinates.First().Coordinates.SelectMany(p => p.Coordinates).OfType<GeographicPosition>().First().Latitude);
-            Assert.AreEqual(node4.Longitude, multiPolygon.Coordinates.First().Coordinates.SelectMany(p => p.Coordinates).OfType<GeographicPosition>().Last().Longitude);
+            Assert.AreEqual(4, multiPolygon.Coordinates.Length);
+            Assert.AreEqual(node1.Latitude, multiPolygon.Coordinates.First().Y);
+            Assert.AreEqual(node4.Longitude, multiPolygon.Coordinates.Last().X);
         }
 
         [TestMethod]
@@ -147,9 +148,9 @@ namespace IsraelHiking.API.Tests.Converters
             var multiPolygon = feature.Geometry as MultiPolygon;
 
             Assert.IsNotNull(multiPolygon);
-            Assert.AreEqual(2, multiPolygon.Coordinates.Count);
-            Assert.AreEqual(node1.Latitude, multiPolygon.Coordinates.First().Coordinates.SelectMany(p => p.Coordinates).OfType<GeographicPosition>().First().Latitude);
-            Assert.AreEqual(node4.Longitude, multiPolygon.Coordinates.Last().Coordinates.SelectMany(p => p.Coordinates).OfType<GeographicPosition>().Last().Longitude);
+            Assert.AreEqual(4, multiPolygon.Coordinates.Length);
+            Assert.AreEqual(node1.Latitude, multiPolygon.Coordinates.First().Y);
+            Assert.AreEqual(node4.Longitude, multiPolygon.Coordinates.Last().X);
         }
 
         [TestMethod]
@@ -174,9 +175,9 @@ namespace IsraelHiking.API.Tests.Converters
             var multiPolygon = feature.Geometry as MultiPolygon;
 
             Assert.IsNotNull(multiPolygon);
-            Assert.AreEqual(1, multiPolygon.Coordinates.Count);
-            Assert.AreEqual(node1.Latitude, multiPolygon.Coordinates.First().Coordinates.SelectMany(p => p.Coordinates).OfType<GeographicPosition>().First().Latitude);
-            Assert.AreEqual(node4.Longitude, multiPolygon.Coordinates.Last().Coordinates.SelectMany(p => p.Coordinates).OfType<GeographicPosition>().Last().Longitude);
+            Assert.AreEqual(7, multiPolygon.Coordinates.Length);
+            Assert.AreEqual(node1.Latitude, multiPolygon.Coordinates.First().Y);
+            Assert.AreEqual(node4.Longitude, multiPolygon.Coordinates.Last().X);
         }
 
         [TestMethod]
@@ -193,13 +194,13 @@ namespace IsraelHiking.API.Tests.Converters
             var multiPoint = feature.Geometry as MultiPoint;
 
             Assert.IsNotNull(multiPoint);
-            Assert.AreEqual(2, multiPoint.Coordinates.Count);
-            var position1 = multiPoint.Coordinates.First().Coordinates as GeographicPosition;
+            Assert.AreEqual(2, multiPoint.Coordinates.Length);
+            var position1 = multiPoint.Coordinates.First();
             Assert.IsNotNull(position1);
-            Assert.AreEqual(node1.Latitude, position1.Latitude);
-            var position2 = multiPoint.Coordinates.Last().Coordinates as GeographicPosition;
+            Assert.AreEqual(node1.Latitude, position1.Y);
+            var position2 = multiPoint.Coordinates.Last();
             Assert.IsNotNull(position2);
-            Assert.AreEqual(node2.Longitude, position2.Longitude);
+            Assert.AreEqual(node2.Longitude, position2.X);
         }
 
         [TestMethod]
@@ -242,11 +243,11 @@ namespace IsraelHiking.API.Tests.Converters
             var multiLineString = feature.Geometry as MultiLineString;
 
             Assert.IsNotNull(multiLineString);
-            Assert.AreEqual(2, multiLineString.Coordinates.Count);
-            var lineString = multiLineString.Coordinates.First();
-            Assert.AreEqual(3, lineString.Coordinates.Count);
-            var polygon = multiLineString.Coordinates.Last();
-            Assert.AreEqual(5, polygon.Coordinates.Count);
+            Assert.AreEqual(2, multiLineString.Geometries.Length);
+            var lineString = multiLineString.Geometries.First();
+            Assert.AreEqual(3, lineString.Coordinates.Length);
+            var polygon = multiLineString.Geometries.Last();
+            Assert.AreEqual(5, polygon.Coordinates.Length);
             Assert.AreEqual(polygon.Coordinates.First(), polygon.Coordinates.Last());
         }
 
@@ -287,11 +288,11 @@ namespace IsraelHiking.API.Tests.Converters
             var multiLineString = feature.Geometry as MultiLineString;
 
             Assert.IsNotNull(multiLineString);
-            Assert.AreEqual(2, multiLineString.Coordinates.Count);
-            var lineString = multiLineString.Coordinates.First();
-            Assert.AreEqual(3, lineString.Coordinates.Count);
-            var polygon = multiLineString.Coordinates.Last();
-            Assert.AreEqual(5, polygon.Coordinates.Count);
+            Assert.AreEqual(8, multiLineString.Coordinates.Length);
+            var lineString = multiLineString.Geometries.First();
+            Assert.AreEqual(3, lineString.Coordinates.Length);
+            var polygon = multiLineString.Geometries.Last();
+            Assert.AreEqual(5, polygon.Coordinates.Length);
             Assert.AreEqual(polygon.Coordinates.First(), polygon.Coordinates.Last());
         }
 

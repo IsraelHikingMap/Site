@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using GeoJSON.Net.Feature;
 using IsraelHiking.API.Converters;
 using IsraelHiking.DataAccessInterfaces;
+using NetTopologySuite.Features;
 using OsmSharp.Osm;
 
 namespace IsraelHiking.API.Services
@@ -118,8 +118,8 @@ namespace IsraelHiking.API.Services
                 list.ForEach(feature =>
                 {
                     var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(feature);
-                    feature.Properties[SEARCH_FACTOR] = propertiesExtraData?.SearchFactor ?? PropertiesData.DefaultSearchFactor;
-                    feature.Properties[ICON] = propertiesExtraData?.Icon ?? string.Empty;
+                    feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? PropertiesData.DefaultSearchFactor);
+                    feature.Attributes.AddAttribute(ICON, propertiesExtraData?.Icon ?? string.Empty);
                 });
                 smallCahceList.AddRange(list);
                 if (smallCahceList.Count < PAGE_SIZE)

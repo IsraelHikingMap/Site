@@ -7,6 +7,7 @@ using System.Web.Http.ExceptionHandling;
 using IsraelHiking.API;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
+using NetTopologySuite.IO.Converters;
 
 [assembly: OwinStartup(typeof(IsraelHiking.Web.Startup))]
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
@@ -26,6 +27,16 @@ namespace IsraelHiking.Web
             config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
             config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
             config.Formatters.JsonFormatter.SerializerSettings.PreserveReferencesHandling = Newtonsoft.Json.PreserveReferencesHandling.None;
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new CoordinateConverter());
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new GeometryConverter());
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new FeatureCollectionConverter());
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new FeatureConverter());
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new AttributesTableConverter());
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new ICRSObjectConverter());
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new GeometryArrayConverter());
+            config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new EnvelopeConverter());
+            //this.Converters.Add((JsonConverter)new GeometryConverter(geometryFactory)); ??
+
             config.Services.Add(typeof(IExceptionLogger), logger);
             config.DependencyResolver = new UnityResolver(container);
             InitializeServices(container);

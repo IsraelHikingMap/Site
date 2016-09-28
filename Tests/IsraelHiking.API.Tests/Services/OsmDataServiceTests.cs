@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GeoJSON.Net.Feature;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
 using NSubstitute;
-using NSubstitute.ExceptionExtensions;
 using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 

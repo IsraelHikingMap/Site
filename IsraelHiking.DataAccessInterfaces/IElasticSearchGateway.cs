@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using GeoJSON.Net.Feature;
+using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccessInterfaces
 {

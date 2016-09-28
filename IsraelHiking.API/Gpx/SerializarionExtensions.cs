@@ -1,7 +1,8 @@
 ﻿using System.IO;
 using System.Xml.Serialization;
-using GeoJSON.Net.Feature;
 using IsraelHiking.API.Gpx.GpxTypes;
+using NetTopologySuite.Features;
+using NetTopologySuite.IO;
 using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Gpx
@@ -14,7 +15,7 @@ namespace IsraelHiking.API.Gpx
             {
                 var writer = new StreamWriter(outputStream);
                 var jsonWriter = new JsonTextWriter(writer);
-                var serializer = new JsonSerializer();
+                var serializer = new GeoJsonSerializer();
                 serializer.Serialize(jsonWriter, featureCollection);
                 jsonWriter.Flush();
                 return outputStream.ToArray();
@@ -25,7 +26,7 @@ namespace IsraelHiking.API.Gpx
         {
             using (var stream = new MemoryStream(featureCollectionContent))
             {
-                var serializer = new JsonSerializer();
+                var serializer = new GeoJsonSerializer();
                 using (var streamReader = new StreamReader(stream))
                 using (var jsonTextReader = new JsonTextReader(streamReader))
                 {
