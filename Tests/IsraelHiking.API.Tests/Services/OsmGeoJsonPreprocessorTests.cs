@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.DataAccessInterfaces;

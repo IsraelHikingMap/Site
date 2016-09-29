@@ -18,7 +18,7 @@ namespace IsraelHiking.API.Services
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
 
-        public OsmGeoJsonPreprocessor(ILogger logger, 
+        public OsmGeoJsonPreprocessor(ILogger logger,
             IOsmGeoJsonConverter osmGeoJsonConverter)
         {
             _logger = logger;
@@ -46,9 +46,16 @@ namespace IsraelHiking.API.Services
                 !(f.Geometry is LineString) &&
                 !(f.Geometry is MultiPoint) &&
                 !(f.Geometry is Point)).ToList();
+            _logger.Info("Total possible containers: " + containers.Count);
+            var counter = 0;
             foreach (var features in geoJsonNamesDictionary.Values)
             {
                 PreprocessGeoJson(features, containers);
+                counter++;
+                if (counter % 5000 == 0)
+                {
+                    _logger.Info($"Finished processing {counter} features");
+                }
             }
             _logger.Info("Finished GeoJson preprocessing");
             return geoJsonNamesDictionary;
@@ -61,7 +68,7 @@ namespace IsraelHiking.API.Services
             {
                 AddAddressField(feature, containers);
                 var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(feature);
-                feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? PropertiesData.DefaultSearchFactor);
+                feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? PropertiesData.DEFAULT_SEARCH_FACTOR);
                 feature.Attributes.AddAttribute(ICON, propertiesExtraData?.Icon ?? string.Empty);
             }
         }
@@ -69,7 +76,10 @@ namespace IsraelHiking.API.Services
         private void MergePlacesPoints(List<Feature> list)
         {
             var placesPoints = list.Where(f => f.Geometry is Point && f.Attributes.GetNames().Contains(PLACE)).ToList();
-            var nonPlacesPoints = list.Except(placesPoints).ToList();
+            var nonPlacesPoints = list.Except(placesPoints)
+                .Where(f => f.Geometry is Polygon || f.Geometry is MultiPolygon)
+                .OrderByDescending(f => f.Attributes.GetNames().Contains(PLACE))
+                .ToList();
             foreach (var feature in nonPlacesPoints)
             {
                 var placePoint = placesPoints.FirstOrDefault(p => p.Geometry.Within(feature.Geometry));
