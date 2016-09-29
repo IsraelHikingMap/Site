@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using IsraelHiking.API.Converters;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using OsmSharp.Osm;
 
 namespace IsraelHiking.API.Services
@@ -24,6 +25,7 @@ namespace IsraelHiking.API.Services
         private readonly INssmHelper _elasticSearchHelper;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
         private readonly IOsmRepository _osmRepository;
         private string _serverPath;
 
@@ -33,6 +35,7 @@ namespace IsraelHiking.API.Services
             IElasticSearchGateway elasticSearchGateway,
             INssmHelper elasticSearchHelper,
             IOsmRepository osmRepository,
+            IOsmGeoJsonConverter osmGeoJsonConverter,
             ILogger logger)
         {
             _graphHopperHelper = graphHopperHelper;
@@ -41,6 +44,7 @@ namespace IsraelHiking.API.Services
             _elasticSearchGateway = elasticSearchGateway;
             _elasticSearchHelper = elasticSearchHelper;
             _osmRepository = osmRepository;
+            _osmGeoJsonConverter = osmGeoJsonConverter;
             _logger = logger;
         }
 
@@ -108,20 +112,18 @@ namespace IsraelHiking.API.Services
         {
             _logger.Info("Updating Elastic Search OSM data");
             var namesDictionary = await _osmRepository.GetElementsWithName(osmFilePath);
-            var converter = new OsmGeoJsonConverter();
+            var geoJsonDictionary = ConvertDictionary(namesDictionary);
+            var containers = geoJsonDictionary.Values.SelectMany(v => v).Where(f =>
+                !(f.Geometry is MultiLineString) &&
+                !(f.Geometry is LineString) &&
+                !(f.Geometry is MultiPoint) &&
+                !(f.Geometry is Point)).ToList();
             var smallCahceList = new List<Feature>(PAGE_SIZE);
             int total = 0;
             _elasticSearchGateway.Initialize(deleteIndex: true);
-            foreach (var name in namesDictionary.Keys)
+            foreach (var name in geoJsonDictionary.Keys)
             {
-                var list = MergeElements(namesDictionary[name]).Select(e => converter.ToGeoJson(e)).Where(f => f != null).ToList();
-                list.ForEach(feature =>
-                {
-                    var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(feature);
-                    feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? PropertiesData.DefaultSearchFactor);
-                    feature.Attributes.AddAttribute(ICON, propertiesExtraData?.Icon ?? string.Empty);
-                });
-                smallCahceList.AddRange(list);
+                smallCahceList.AddRange(ManipulateOsmDataToGeoJson(name, geoJsonDictionary, containers));
                 if (smallCahceList.Count < PAGE_SIZE)
                 {
                     continue;
@@ -148,10 +150,6 @@ namespace IsraelHiking.API.Services
             {
                 return elements;
             }
-            foreach (var way in ways.Where(w => w.Tags.ContainsKey(PLACE)))
-            {
-                MergePlaceNode(nodes, way);
-            }
             MergeWaysInRelations(relations, ways, nodes);
             ways = MergeWays(ways);
             var mergedElements = new List<ICompleteOsmGeo>();
@@ -175,24 +173,7 @@ namespace IsraelHiking.API.Services
                     MergeTags(way, relation);
                     ways.Remove(wayToRemove);
                 }
-                if (relation.Tags.ContainsKey(PLACE))
-                {
-                    MergePlaceNode(nodes, relation);
-                }
             }
-        }
-
-        private void MergePlaceNode(ICollection<Node> nodes, ICompleteOsmGeo element)
-        {
-            var node = nodes.FirstOrDefault(n => n.Tags.ContainsKey(PLACE));
-            if (node == null)
-            {
-                return;
-            }
-            element.Tags.Add("lat", node.Latitude.ToString());
-            element.Tags.Add("lng", node.Longitude.ToString());
-            MergeTags(node, element);
-            nodes.Remove(node);
         }
 
         private void MergeTags(ICompleteOsmGeo fromItem, ICompleteOsmGeo toItem)
@@ -265,6 +246,101 @@ namespace IsraelHiking.API.Services
                 waysToMerge.RemoveAt(0);
             }
             return mergedWays;
+        }
+
+        private Dictionary<string, List<Feature>> ConvertDictionary(Dictionary<string, List<ICompleteOsmGeo>> namesDictionary)
+        {
+            _logger.Info("Converting OSM data to GeoJson, total distict names: " + namesDictionary.Keys.Count);
+            var geoJsonDictionary = new Dictionary<string, List<Feature>>();
+            for (int index = namesDictionary.Count - 1; index >= 0; index--)
+            {
+                var pair = namesDictionary.ElementAt(index);
+                var osmList = MergeElements(pair.Value)
+                        .Select(e => _osmGeoJsonConverter.ToGeoJson(e))
+                        .Where(f => f != null)
+                        .ToList();
+                if (osmList.Count > 0)
+                {
+                    geoJsonDictionary[pair.Key] = osmList;
+                }
+                namesDictionary.Remove(pair.Key);
+            }
+            _logger.Info("Finished converting OSM data to GeoJson");
+            return geoJsonDictionary;
+        }
+
+        private IEnumerable<Feature> ManipulateOsmDataToGeoJson(string name, Dictionary<string, List<Feature>> geoJsonDictionary, List<Feature> containers)
+        {
+            var list = geoJsonDictionary[name];
+            MergePlacesPoints(list);
+            foreach (var feature in list)
+            {
+                AddAddressField(feature, containers);
+                var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(feature);
+                feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? PropertiesData.DefaultSearchFactor);
+                feature.Attributes.AddAttribute(ICON, propertiesExtraData?.Icon ?? string.Empty);
+            }
+            return list;
+        }
+
+        private void MergePlacesPoints(List<Feature> list)
+        {
+            var placesPoints = list.Where(f => f.Geometry is Point && f.Attributes.GetNames().Contains(PLACE)).ToList();
+            var nonPlacesPoints = list.Except(placesPoints).ToList();
+            foreach (var feature in nonPlacesPoints)
+            {
+                var placePoint = placesPoints.FirstOrDefault(p => p.Geometry.Within(feature.Geometry));
+                if (placePoint == null)
+                {
+                    continue;
+                }
+                feature.Attributes.AddAttribute("lat", placePoint.Geometry.Coordinate.Y);
+                feature.Attributes.AddAttribute("lng", placePoint.Geometry.Coordinate.X);
+                foreach (var placePointAttributeName in placePoint.Attributes.GetNames())
+                {
+                    if (feature.Attributes.GetNames().Contains(placePointAttributeName) == false)
+                    {
+                        feature.Attributes.AddAttribute(placePointAttributeName, placePoint.Attributes[placePointAttributeName]);
+                    }
+                }
+                list.Remove(placePoint);
+                placesPoints.Remove(placePoint);
+            }
+        }
+
+        private void AddAddressField(Feature feature, List<Feature> containers)
+        {
+            if (!(feature.Geometry is Point) && !(feature.Geometry is LineString))
+            {
+                return;
+            }
+            Feature invalidFeature = null;
+            var containingGeoJson = containers.FirstOrDefault(f =>
+            {
+                try
+                {
+                    return f != feature && f.Geometry.Contains(feature.Geometry);
+                }
+                catch (Exception)
+                {
+                    _logger.Debug($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osm_id"]}");
+                    invalidFeature = f;
+                    return false;
+                }
+            });
+            if (invalidFeature != null)
+            {
+                containers.Remove(invalidFeature);
+            }
+            if (containingGeoJson == null)
+            {
+                return;
+            }
+            foreach (var attributeName in containingGeoJson.Attributes.GetNames().Where(n => n.StartsWith("name")))
+            {
+                var addressName = attributeName.Replace("name", "address");
+                feature.Attributes.AddAttribute(addressName, containingGeoJson.Attributes[attributeName]);
+            }
         }
     }
 }

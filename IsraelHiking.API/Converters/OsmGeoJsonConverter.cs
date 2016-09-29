@@ -8,7 +8,7 @@ using OsmSharp.Osm;
 
 namespace IsraelHiking.API.Converters
 {
-    public class OsmGeoJsonConverter
+    public class OsmGeoJsonConverter : IOsmGeoJsonConverter
     {
         private const string OUTER = "outer";
         private const string BOUNDARY = "boundary";

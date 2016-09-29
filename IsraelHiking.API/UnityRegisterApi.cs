@@ -13,6 +13,7 @@ namespace IsraelHiking.API
         {
             container.RegisterType<IGpxGeoJsonConverter, GpxGeoJsonConverter>();
             container.RegisterType<IGpxDataContainerConverter, GpxDataContainerConverter>();
+            container.RegisterType<IOsmGeoJsonConverter, OsmGeoJsonConverter>();
             container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
             container.RegisterType<IDataContainerConverterService, DataContainerConverterService>();
             container.RegisterType<IDouglasPeuckerReductionService, DouglasPeuckerReductionService>();

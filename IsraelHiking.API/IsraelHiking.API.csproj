@@ -130,6 +130,7 @@
     <Compile Include="Converters\ConverterFlows\KmzToKmlConverterFlow.cs" />
     <Compile Include="Converters\GpxDataContainerConverter.cs" />
     <Compile Include="Converters\GpxGeoJsonConverter.cs" />
+    <Compile Include="Converters\IOsmGeoJsonConverter.cs" />
     <Compile Include="Converters\OsmGeoJsonConverter.cs" />
     <Compile Include="Gpx\SerializarionExtensions.cs" />
     <Compile Include="Gpx\GpxTypes.cs">

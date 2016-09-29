@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -43,7 +44,7 @@ namespace IsraelHiking.API.Tests.Services
             _elasticSearchHelper = Substitute.For<INssmHelper>();
             _osmRepository = Substitute.For<IOsmRepository>();
             _osmDataService = new OsmDataService(_graphHopperHelper, _remoteFileFetcherGateway, _fileSystemHelper,
-                _elasticSearchGateway, _elasticSearchHelper, _osmRepository, Substitute.For<ILogger>());
+                _elasticSearchGateway, _elasticSearchHelper, _osmRepository, new OsmGeoJsonConverter(), Substitute.For<ILogger>());
         }
 
         [TestMethod]
