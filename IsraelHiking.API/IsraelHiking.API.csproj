@@ -143,10 +143,12 @@
     <Compile Include="Converters\ConverterFlows\IConverterFlowItem.cs" />
     <Compile Include="Services\IDouglasPeuckerReductionService.cs" />
     <Compile Include="Services\IOsmDataService.cs" />
+    <Compile Include="Services\IOsmGeoJsonPreprocessor.cs" />
     <Compile Include="Services\OsmDataService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataContainerConverterService.cs" />
     <Compile Include="Services\IDataContainerConverterService.cs" />
+    <Compile Include="Services\OsmGeoJsonPreprocessor.cs" />
     <Compile Include="UnityRegisterApi.cs" />
   </ItemGroup>
   <ItemGroup>

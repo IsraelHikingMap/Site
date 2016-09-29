@@ -1,13 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NSubstitute;
-using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 
 namespace IsraelHiking.API.Tests.Services
@@ -22,17 +20,7 @@ namespace IsraelHiking.API.Tests.Services
         private IElasticSearchGateway _elasticSearchGateway;
         private INssmHelper _elasticSearchHelper;
         private IOsmRepository _osmRepository;
-
-        private Node CreateNode(int id)
-        {
-            return new Node
-            {
-                Id = id,
-                Latitude = id,
-                Longitude = id,
-                Tags = new TagsCollection {{"name", "name"}}
-            };
-        }
+        private IOsmGeoJsonPreprocessor _osmGeoJsonPreprocessor;
 
         [TestInitialize]
         public void TestInitialize()
@@ -43,8 +31,9 @@ namespace IsraelHiking.API.Tests.Services
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _elasticSearchHelper = Substitute.For<INssmHelper>();
             _osmRepository = Substitute.For<IOsmRepository>();
+            _osmGeoJsonPreprocessor = Substitute.For<IOsmGeoJsonPreprocessor>();
             _osmDataService = new OsmDataService(_graphHopperHelper, _remoteFileFetcherGateway, _fileSystemHelper,
-                _elasticSearchGateway, _elasticSearchHelper, _osmRepository, new OsmGeoJsonConverter(), Substitute.For<ILogger>());
+                _elasticSearchGateway, _elasticSearchHelper, _osmRepository, _osmGeoJsonPreprocessor, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -89,184 +78,16 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
-        public void UpdateData_UpdateElasticSearchOneNode_ShouldUpdateGraphHopper()
-        {
-            var node = CreateNode(1);
-            var osmElements = new List<ICompleteOsmGeo> { node };
-            _osmRepository.GetElementsWithName(Arg.Any<string>())
-                .Returns(
-                    Task.FromResult(new Dictionary<string, List<ICompleteOsmGeo>>
-                        {
-                            {"name", osmElements}
-                        }
-                    )
-                );
-            _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
-
-            _osmDataService.Initialize(string.Empty);
-            _osmDataService.UpdateData(OsmDataServiceOperations.UpdateElasticSearch).Wait();
-
-            _elasticSearchGateway.Received(1).UpdateData(Arg.Any<List<Feature>>());
-        }
-
-        [TestMethod]
         public void UpdateData_UpdateElasticSearchTwoNodes_ShouldUpdateGraphHopper()
         {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var osmElements = new List<ICompleteOsmGeo> { node1, node2 };
-            _osmRepository.GetElementsWithName(Arg.Any<string>())
-                .Returns(
-                    Task.FromResult(new Dictionary<string, List<ICompleteOsmGeo>>
-                        {
-                            {"name", osmElements}
-                        }
-                    )
-                );
+            _osmGeoJsonPreprocessor.Preprocess(Arg.Any<Dictionary<string, List<ICompleteOsmGeo>>>())
+                .Returns(new Dictionary<string, List<Feature>> { { "name", new List<Feature> { new Feature()} } });
             _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
 
             _osmDataService.Initialize(string.Empty);
             _osmDataService.UpdateData(OsmDataServiceOperations.UpdateElasticSearch).Wait();
 
-            _elasticSearchGateway.Received(1).UpdateData(Arg.Any<List<Feature>>());
-        }
-
-        [TestMethod]
-        public void UpdateData_UpdateElasticSearchOneNodeOneRelation_ShouldUpdateGraphHopper()
-        {
-            var node = CreateNode(1);
-            var relation = CompleteRelation.Create(2);
-            relation.Members.Add(new CompleteRelationMember { Member = node });
-            var osmElements = new List<ICompleteOsmGeo> { node, relation };
-            _osmRepository.GetElementsWithName(Arg.Any<string>())
-                .Returns(
-                    Task.FromResult(new Dictionary<string, List<ICompleteOsmGeo>>
-                        {
-                            {"name", osmElements}
-                        }
-                    )
-                );
-            _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
-
-            _osmDataService.Initialize(string.Empty);
-            _osmDataService.UpdateData(OsmDataServiceOperations.UpdateElasticSearch).Wait();
-
-            _elasticSearchGateway.Received(1).UpdateData(Arg.Any<List<Feature>>());
-        }
-
-        [TestMethod]
-        public void UpdateData_UpdateElasticSearchTwoWaysThatCantBeMerged_ShouldUpdateGraphHopper()
-        {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var node3 = CreateNode(3);
-            var node4 = CreateNode(4);
-            var way1 = CompleteWay.Create(5);
-            way1.Nodes.AddRange(new [] { node1, node2});
-            way1.Tags.Add("waterway", "stream");
-            var way2 = CompleteWay.Create(6);
-            way2.Nodes.AddRange(new[] { node3, node4 });
-            var osmElements = new List<ICompleteOsmGeo> { node1, node2, node3, node4, way1, way2 };
-            _osmRepository.GetElementsWithName(Arg.Any<string>())
-                .Returns(
-                    Task.FromResult(new Dictionary<string, List<ICompleteOsmGeo>>
-                        {
-                            {"name", osmElements}
-                        }
-                    )
-                );
-            _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
-
-            _osmDataService.Initialize(string.Empty);
-            _osmDataService.UpdateData(OsmDataServiceOperations.UpdateElasticSearch).Wait();
-
-            _elasticSearchGateway.Received(1).UpdateData(Arg.Any<List<Feature>>());
-        }
-
-        [TestMethod]
-        public void UpdateData_UpdateElasticSearchWithComplexData_ShouldUpdateGraphHopper()
-        {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var node3 = CreateNode(3);
-            var node4 = CreateNode(4);
-            var node5 = CreateNode(5);
-            var node6 = CreateNode(6);
-            var node7 = CreateNode(7);
-            var node8 = CreateNode(8);
-            node8.Tags.Add("place", "any");
-            var way1 = CompleteWay.Create(9);
-            way1.Tags.Add("name", "name");
-            way1.Tags.Add("place", "any");
-            way1.Nodes.AddRange(new[] { node2, node3 });
-            var way2 = CompleteWay.Create(10);
-            way2.Tags.Add("name", "name");
-            way2.Tags.Add("place", "any");
-            way2.Nodes.AddRange(new [] { node1, node2});
-            var way3 = CompleteWay.Create(11);
-            way3.Tags.Add("name", "name");
-            way3.Tags.Add("place", "any");
-            way3.Nodes.AddRange(new[] { node3, node4, node1 });
-            var way4 = CompleteWay.Create(12);
-            way4.Tags.Add("name", "name");
-            way4.Tags.Add("place", "any");
-            way4.Nodes.AddRange(new[] { node5, node6 });
-            var way5 = CompleteWay.Create(13);
-            way5.Tags.Add("name", "name");
-            way5.Tags.Add("place", "any");
-            way5.Nodes.AddRange(new[] { node7, node6 });
-            var relations = CompleteRelation.Create(16);
-            relations.Tags.Add("name", "name");
-            relations.Tags.Add("place", "any");
-            relations.Members.Add(new CompleteRelationMember { Member = way4 });
-            relations.Members.Add(new CompleteRelationMember { Member = way5 });
-            var osmElements = new List<ICompleteOsmGeo> {node1, node2, node3, node4, node5, node6, node7, node8, way1, way2, way3, way4, relations};
-
-            _osmRepository.GetElementsWithName(Arg.Any<string>())
-                .Returns(
-                    Task.FromResult(new Dictionary<string, List<ICompleteOsmGeo>>
-                        {
-                            {"name", osmElements}
-                        }
-                    )
-                );
-            _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
-
-            _osmDataService.Initialize(string.Empty);
-            _osmDataService.UpdateData(OsmDataServiceOperations.UpdateElasticSearch).Wait();
-
-            _elasticSearchGateway.Received(1).UpdateData(Arg.Any<List<Feature>>());
-        }
-
-        [TestMethod]
-        public void UpdateData_UpdateElasticSearchMergeWaysSameDirection_ShouldUpdateGraphHopper()
-        {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var node3 = CreateNode(3);
-            var way1 = CompleteWay.Create(4);
-            way1.Tags.Add("name", "name");
-            way1.Tags.Add("place", "name");
-            way1.Nodes.AddRange(new[] { node2, node3 });
-            var way2 = CompleteWay.Create(5);
-            way2.Tags.Add("name", "name");
-            way2.Tags.Add("place", "name");
-            way2.Nodes.AddRange(new[] { node1, node3 });
-            var osmElements = new List<ICompleteOsmGeo> { node1, node2, node3, way1, way2 };
-
-            _osmRepository.GetElementsWithName(Arg.Any<string>())
-                .Returns(
-                    Task.FromResult(new Dictionary<string, List<ICompleteOsmGeo>>
-                        {
-                            {"name", osmElements}
-                        }
-                    )
-                );
-            _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
-
-            _osmDataService.Initialize(string.Empty);
-            _osmDataService.UpdateData(OsmDataServiceOperations.UpdateElasticSearch).Wait();
-
+            _osmRepository.Received(1).GetElementsWithName(Arg.Any<string>());
             _elasticSearchGateway.Received(1).UpdateData(Arg.Any<List<Feature>>());
         }
 
