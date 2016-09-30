@@ -105,7 +105,7 @@
                     } as Common.DataContainer);
                     this.layerGroup.clearLayers();
                 }
-                marker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0]);
+                marker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
 
                 this.layerGroup.addLayer(marker);
                 for (let line of searchResults.latlngsArray) {
