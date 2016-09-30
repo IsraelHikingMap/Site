@@ -228,7 +228,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 currentSegment.routingType = nextSegment.routingType;
             }
             var lastSegment = data.segments[data.segments.length - 1];
-            var lastPoint = lastSegment.latlngzs[lastSegment.latlngzs.length - 1];
+            var lastPoint = lastSegment.latlngzs[0]; // this is becuase we already reversed that segment's points
             lastSegment.latlngzs = [lastPoint, lastPoint];
             data.segments.reverse();
             this.setData(data);

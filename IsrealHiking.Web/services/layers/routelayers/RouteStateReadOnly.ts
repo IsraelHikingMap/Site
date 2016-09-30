@@ -19,7 +19,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.initialize();
         }
 
-        private addPolyline(latlngzs: L.LatLng[]) {
+        private addPolyline(latlngzs: L.LatLng[]): void {
             let routePathOptions = this.context.route.properties.pathOptions;
             let pathOptions = { delay: "2000", pulseColor: routePathOptions.color, dashArray: "30 10", opacity: routePathOptions.opacity, color: "transparent", weight: routePathOptions.weight } as L.AntPathOptions;
             let polyline = L.polyline.antPath(latlngzs, pathOptions);
@@ -69,7 +69,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 this.addPolyline(groupedLatLngs);
                 groupedLatLngs = segment.latlngzs;
             }
-            let polyLine = this.addPolyline(groupedLatLngs);
+            this.addPolyline(groupedLatLngs);
         }
 
         public clear() {
