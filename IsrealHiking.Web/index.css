@@ -12,14 +12,13 @@
 }
 
 .sidebar-close {
-    position: absolute;
-    right: 5px;
+    position: fixed;
+    left: 230px;
     top: 0;
     z-index: 100;
 }
 
 .flip .sidebar-close {
-    right: auto;
     left: 5px;
 }
 
@@ -29,6 +28,7 @@
     overflow-x: hidden;
     color: #999999;
     direction: ltr;
+    overflow-y: scroll;
 }
 
     #sidebar-wrapper .divider {
@@ -52,6 +52,10 @@
 }
 
 @media(min-width:768px) {
+    .sidebar-close {
+        left: 360px;
+    }
+
     #wrapper {
         padding-left: 0;
     }

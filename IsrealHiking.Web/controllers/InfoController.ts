@@ -77,7 +77,7 @@
                     }
                     this.initializeItemMap(item);
                 }
-                $timeout(() => angular.element("#sidebar-wrapper").animate({ scrollTop: angular.element(`#${section.id}`).offset().top + angular.element("#sidebar-wrapper").scrollTop() }, "slow"), 300);
+                $timeout(() => angular.element("#sidebar-wrapper").animate({ scrollTop: angular.element(`#${section.id}`).offset().top + angular.element("#sidebar-wrapper").scrollTop() - 60 }, "slow"), 300);
             };
 
             $scope.setState = (state: InfoState) => {

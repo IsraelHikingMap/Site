@@ -62,7 +62,7 @@
     <div id="wrapper" ng-class="{toggled: getIsSidebarVisible()}" class="full-page">
         <div id="sidebar-wrapper">
             <div class="container-fluid" dir="{{resources.direction}}">
-                <div class="sidebar-close">
+                <div class="sidebar-close" ng-show="getIsSidebarVisible()">
                     <span class="cursor-pointer" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
                 </div>
                 <div ng-switch on="sidebarService.viewName">
