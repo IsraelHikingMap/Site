@@ -42,9 +42,21 @@ namespace IsraelHiking.API.Converters
             return new gpxType
             {
                 creator = DataContainer.ISRAEL_HIKING_MAP,
-                wpt = collection.Features.Where(f => f.Geometry is Point).Select(CreateWayPoint).ToArray(),
-                rte = collection.Features.Where(f => f.Geometry is LineString).Select(CreateRoute).ToArray(),
-                trk = collection.Features.Where(f => f.Geometry is MultiLineString).Select(CreateTrack).ToArray(),
+                wpt = collection.Features.Where(f => f.Geometry is Point)
+                    .Select(CreateWayPoint)
+                    .Union(collection.Features.Where(f => f.Geometry is MultiPoint)
+                        .SelectMany(CreateWayPointsFromMultiPoint))
+                    .ToArray(),
+                rte = collection.Features.Where(f => f.Geometry is LineString)
+                    .Select(CreateRouteFromLineString)
+                    .Union(collection.Features.Where(f => f.Geometry is Polygon)
+                        .Select(CreateRouteFromPolygon))
+                    .ToArray(),
+                trk = collection.Features.Where(f => f.Geometry is MultiLineString)
+                    .Select(CreateTrackFromMultiLineString)
+                    .Union(collection.Features.Where(f => f.Geometry is MultiPolygon)
+                        .Select(CreateTrackFromMultiPolygon))
+                    .ToArray()
             };
         }
 
@@ -62,6 +74,13 @@ namespace IsraelHiking.API.Converters
             return CreateWayPoint(position, GetFeatureName(pointFeature));
         }
 
+        private wptType[] CreateWayPointsFromMultiPoint(IFeature pointFeature)
+        {
+            var multiPoint = (MultiPoint)pointFeature.Geometry;
+            var positions = multiPoint.Coordinates;
+            return positions.Select(p => CreateWayPoint(p, GetFeatureName(pointFeature))).ToArray();
+        }
+
         private wptType CreateWayPoint(Coordinate position, string name)
         {
             return new wptType
@@ -74,9 +93,9 @@ namespace IsraelHiking.API.Converters
             };
         }
 
-        private rteType CreateRoute(IFeature lineStringFeature)
+        private rteType CreateRouteFromLineString(IFeature lineStringFeature)
         {
-            var lineString = lineStringFeature.Geometry as LineString;
+            var lineString = (LineString)lineStringFeature.Geometry;
 
             return new rteType
             {
@@ -85,14 +104,40 @@ namespace IsraelHiking.API.Converters
                 
             };
         }
+        private rteType CreateRouteFromPolygon(IFeature lineStringFeature)
+        {
+            var polygon = (Polygon)lineStringFeature.Geometry;
 
-        private trkType CreateTrack(IFeature multiLineStringFeature)
+            return new rteType
+            {
+                name = GetFeatureName(lineStringFeature),
+                rtept = polygon?.Coordinates.Select(p => CreateWayPoint(p, null)).ToArray()
+
+            };
+        }
+
+        private trkType CreateTrackFromMultiLineString(IFeature multiLineStringFeature)
         {
             var multiLineString = multiLineStringFeature.Geometry as MultiLineString;
             return new trkType
             {
                 name = GetFeatureName(multiLineStringFeature),
                 trkseg = multiLineString?.Geometries.OfType<ILineString>().Select(
+                    ls => new trksegType
+                    {
+                        trkpt = ls.Coordinates.Select(p => CreateWayPoint(p, null))
+                            .ToArray()
+                    }).ToArray()
+            };
+        }
+
+        private trkType CreateTrackFromMultiPolygon(IFeature multiLineStringFeature)
+        {
+            var multiPolygon = multiLineStringFeature.Geometry as MultiPolygon;
+            return new trkType
+            {
+                name = GetFeatureName(multiLineStringFeature),
+                trkseg = multiPolygon?.Geometries.OfType<Polygon>().Select(
                     ls => new trksegType
                     {
                         trkpt = ls.Coordinates.Select(p => CreateWayPoint(p, null))

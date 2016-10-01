@@ -116,7 +116,11 @@ namespace IsraelHiking.API.Services
                 }
                 catch (Exception)
                 {
-                    _logger.Debug($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osm_id"]}");
+                    var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(f.Geometry);
+                    if (!isValidOp.IsValid)
+                    {
+                        _logger.Debug($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osm_id"]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                    }
                     invalidFeature = f;
                     return false;
                 }

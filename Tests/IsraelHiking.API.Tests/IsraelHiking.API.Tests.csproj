@@ -119,6 +119,7 @@
     <Compile Include="Controllers\SearchControllerTests.cs" />
     <Compile Include="Controllers\UrlsControllerTests.cs" />
     <Compile Include="Converters\OsmGeoJsonConverterTests.cs" />
+    <Compile Include="Converters\GpxGeoJsonConverterTests.cs" />
     <Compile Include="Gpx\GpxGeoJsonConverterTests.cs" />
     <Compile Include="Gpx\GpxDataContainerConverterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
