@@ -5,8 +5,8 @@
     <div uib-dropdown is-open="isShowingSearch && searchResults.length > 0" auto-close="disabled">
         <a class="cursor-pointer search-icon" ng-click="toggleSearchBar($event)"><i class="fa fa-search fa-lg"></i></a>
         <input type="text" class="search-input" ng-model="searchTerm" ng-change="search(searchTerm)" placeholder="{{resources.searchPlaceHolder}}" dir="{{getDirection()}}" sync-focus-with="isShowingSearch" ng-click="ignoreClick($event)" />
-        <ul class="dropdown-menu search-dropdown" uib-dropdown-menu ng-click="$event.stopPropagation()">
-            <li ng-repeat="result in searchResults" dir="{{hasHebrewCharacters(result.name) ? 'rtl' : 'ltr'}}" class="{{'text-' + (hasHebrewCharacters(result.name) ? 'right' : 'left')}} search-results-item cursor-pointer" ng-class="{'search-results-selected': result == activeSearchResult}" ng-click="selectResult(result, $event)">
+        <ul class="dropdown-menu dropdown-list" uib-dropdown-menu ng-click="$event.stopPropagation()">
+            <li ng-repeat="result in searchResults" dir="{{hasHebrewCharacters(result.name) ? 'rtl' : 'ltr'}}" class="{{'text-' + (hasHebrewCharacters(result.name) ? 'right' : 'left')}} dropdown-item cursor-pointer" ng-class="{'search-results-selected': result == activeSearchResult}" ng-click="selectResult(result, $event)">
                 <img ng-src="{{result.icon}}" height="16" width="16" ng-show="result.icon" alt="" />
                 {{result.name}}{{result.address ? ', ' + result.address : ''}}
             </li>

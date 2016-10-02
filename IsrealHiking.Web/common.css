@@ -41,10 +41,16 @@ body {
     top: -2px;
 }
 
-.ihm-panel {
-    background-color: #FFF;
-    border: 1px solid transparent;
-    border-radius: 4px;
+.dropdown-list {
+    min-width: 100%;
+}
+
+.dropdown-item {
+    padding: 10px;
+}
+
+.dropdown-item:hover {
+    background-color: #ddd;
 }
 
 .chome-wordwrap-fix {

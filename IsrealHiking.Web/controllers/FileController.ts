@@ -10,12 +10,14 @@
         formats: IFormatViewModel[];
         selectedFormat: IFormatViewModel;
         isShowingSaveAs: boolean;
+        isFromatsDropdownOpen: boolean;
         open($files): void;
         save(e: Event): void;
         toggleSaveAs(e: Event): void;
         saveAs(format: IFormatViewModel, e: Event): void;
         print(e: Event): void;
         ignoreClick(e: Event): void;
+        selectFormat(format: IFormatViewModel, e: Event): void;
     }
 
     export class FileController extends BaseMapController {
@@ -30,6 +32,7 @@
             super(mapService);
 
             $scope.isShowingSaveAs = false;
+            $scope.isFromatsDropdownOpen = false;
             $scope.formats = [
                 {
                     label: "GPX version 1.1 (.gpx)",
@@ -101,6 +104,12 @@
 
             $scope.ignoreClick = (e: Event) => {
                 e.stopPropagation();
+            }
+
+            $scope.selectFormat = (format: IFormatViewModel, e: Event) => {
+                $scope.selectedFormat = format;
+                $scope.isFromatsDropdownOpen = false;
+                this.suppressEvents(e);
             }
 
             angular.element($window).bind("keydown", (e: JQueryEventObject) => {

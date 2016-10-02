@@ -1,27 +1,53 @@
 ﻿/* Extra Small Devices, Phones */
-.save-as-panel {
-    width: 250px;
+
+.save-as-dropdown {
+    float: right;
+    height: 26px;
 }
 
-    .save-as-panel .dropdown-toggle {
+    .save-as-dropdown .dropdown-toggle {
         width: 200px;
+        height: 26px;
+        border-top-left-radius: 0 !important;
+        border-top-right-radius: 4px !important;
+        border-bottom-right-radius: 4px !important;
+        border-bottom-left-radius: 0 !important;
+        border: none;
+        padding: 0 10px;
+        border-left: 1px solid #ccc;
     }
+
+
+    .save-as-dropdown .dropdown-menu {
+        text-align: left !important;
+    }
+
+.leaflet-touch .dropdown-toggle {
+    height: 30px;
+}
 
 .save-as-control-container {
     z-index: 10;
 }
 
-.ltr .dropdown-menu {
-    text-align: left !important;
+    .save-as-control-container .leaflet-bar {
+        display: inline-block;
+    }
+
+
+
+.save-as-button {
+    float: right;
+    border-top-left-radius: 4px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-bottom-left-radius: 4px !important;
 }
+
 
 /* Small Devices, Tablets */
 @media only screen and (min-width : 768px) {
-    .save-as-panel {
-        width: 300px;
+    .save-as-dropdown .dropdown-toggle {
+        width: 250px;
     }
-
-        .save-as-panel .dropdown-toggle {
-            width: 250px;
-        }
 }
