@@ -378,10 +378,10 @@
     <Content Include="GPSBabel\Qt5Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="GraphHopper\graphhopper-tools-0.6.0.jar">
+    <Content Include="GraphHopper\graphhopper-tools-0.8-SNAPSHOT.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="GraphHopper\graphhopper-web-0.6.0-with-dep.jar">
+    <Content Include="GraphHopper\graphhopper-web-0.8-SNAPSHOT-with-dep.jar">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
   </ItemGroup>
