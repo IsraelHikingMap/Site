@@ -18,8 +18,8 @@
                         name: this.getName(feature, isHebrew),
                         latlngsArray: [],
                         icon: feature.properties.icon,
-                        address: feature.properties.address
-                    } as ISearchResults;
+                        address: isHebrew ? feature.properties.address : feature.properties["address:en"]
+                } as ISearchResults;
                     try {
                         switch (feature.geometry.type) {
                             case Strings.GeoJson.point:
@@ -59,6 +59,7 @@
                         }
                         let geo = L.geoJson(feature);
                         singleResult.bounds = geo.getBounds();
+                        singleResult.displayName = singleResult.name + (singleResult.address ? `, ${singleResult.address}` : "");
                         results.push(singleResult);
                     }
                     catch (error) {

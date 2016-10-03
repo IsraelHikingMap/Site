@@ -36,6 +36,8 @@
                     }
                     let searchResult = {
                         name: route.name,
+                        displayName: route.name,
+                        address: "",
                         searchTerm: searchTerm,
                         icon: "/content/images/OSM-relation.png",
                         latlngsArray: []

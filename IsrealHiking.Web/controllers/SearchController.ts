@@ -1,16 +1,35 @@
 ﻿namespace IsraelHiking.Controllers {
 
-    export interface ISearchScope extends IRootScope {
-        isShowingSearch: boolean;
-        searchResults: Services.Search.ISearchResults[];
+    // HM TODO: save state when user closes search panel.
+    // HM TODO: focus
+    // HM TODO: close when selected.
+    // HM TODO: more tooltips
+    // HM TODO: errors translation?
+
+    declare type SearchState = "Hidden" | "Regular" | "Directional";
+
+    export interface ISearchContext {
         searchTerm: string;
-        activeSearchResult: Services.Search.ISearchResults;
-        toggleSearchBar(e: Event);
-        search(searchTerm: string);
-        selectResult(address: Services.Search.ISearchResults, e: Event): void;
+        searchResults: Services.Search.ISearchResults[];
+        selectedSearchResults: Services.Search.ISearchResults;
+        highlightedSearchResults: Services.Search.ISearchResults;
+    }
+
+    export interface ISearchScope extends IRootScope {
+        state: SearchState;
+        fromContext: ISearchContext;
+        toContext: ISearchContext;
+        routingType: Common.RoutingType;
+        setState(newState: SearchState, e: Event): void;
+        search(searchContext: ISearchContext);
+        keyDown(searchContext: ISearchContext, e: KeyboardEvent): void;
+        getDirection(words: string): string;
+        getTextAlignment(words: string): string;
+        moveToResults(searchResults: Services.Search.ISearchResults, e: Event): void;
+        selectResults(searchContext: ISearchContext, results: Services.Search.ISearchResults, e: Event): void;
         ignoreClick(e: Event): void;
-        keyDown(e: KeyboardEvent): void;
-        getDirection(): string;
+        searchRoute(e: Event): void;
+        setRouting(routingType: Common.RoutingType, e: Event): void;
     }
 
     interface ISearchRequestQueueItem {
@@ -27,9 +46,10 @@
         private static DOWN_KEY = 40;
 
         private requestsQueue: ISearchRequestQueueItem[];
-        private layerGroup: L.LayerGroup<L.ILayer>;
+        private featureGroup: L.FeatureGroup<L.ILayer>;
         private elevationProvider: Services.Elevation.ElevationProvider;
-        private searchResultsProviderFactory: Services.Search.SearchResultsProviderFactory;
+        private localSearchResultsProvider: Services.Search.ISearchResultsProvider;
+        private layersService: Services.Layers.LayersService;
         private toastr: Toastr;
 
         constructor($scope: ISearchScope,
@@ -41,47 +61,59 @@
             layersService: Services.Layers.LayersService,
             elevationProvider: Services.Elevation.ElevationProvider,
             searchResultsProviderFactory: Services.Search.SearchResultsProviderFactory,
+            routerService: Services.Routers.RouterService,
             toastr: Toastr) {
             super(mapService);
             this.requestsQueue = [];
-            this.layerGroup = L.layerGroup();
-            this.map.addLayer(this.layerGroup);
+            this.featureGroup = L.featureGroup();
+            this.map.addLayer(this.featureGroup);
             this.elevationProvider = elevationProvider;
-            this.searchResultsProviderFactory = searchResultsProviderFactory;
+            this.layersService = layersService;
+            this.localSearchResultsProvider = searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
             this.toastr = toastr;
-            $scope.searchTerm = hashService.searchTerm;
-            $scope.isShowingSearch = $scope.searchTerm.length > 0;
-            $scope.searchResults = [];
-            $scope.activeSearchResult = null;
+            $scope.routingType = "Hike";
+            $scope.fromContext = {
+                searchTerm: "",
+                searchResults: [],
+                selectedSearchResults: null,
+                highlightedSearchResults: null
+            } as ISearchContext;
+            $scope.toContext = {
+                searchTerm: "",
+                searchResults: [],
+                selectedSearchResults: null,
+                highlightedSearchResults: null
+            } as ISearchContext;
+            $scope.fromContext.searchTerm = hashService.searchTerm;
+            $scope.state = $scope.fromContext.searchTerm ? "Regular" : "Hidden";
 
-            $scope.toggleSearchBar = (e: Event) => {
-                $scope.isShowingSearch = !$scope.isShowingSearch;
+            $scope.setState = (newState: SearchState, e: Event) => {
+                $scope.state = $scope.state === newState ? "Hidden" : newState;
                 this.suppressEvents(e);
             }
 
-            $scope.search = (searchTerm: string) => {
-                if (searchTerm.length <= 2) {
-                    $scope.searchResults = [];
+            $scope.search = (searchContext: ISearchContext) => {
+                if (searchContext.searchTerm.length <= 2) {
+                    searchContext.searchResults = [];
                     return;
                 }
-                this.internalSearch($scope);
+                this.internalSearch($scope, searchContext);
             }
 
-            if ($scope.isShowingSearch) {
-                $scope.search($scope.searchTerm);
+            if ($scope.state === "Regular") {
+                $scope.search($scope.fromContext);
             }
 
-            $scope.selectResult = (searchResults: Services.Search.ISearchResults, e: Event) => {
-                $scope.isShowingSearch = false;
-                $scope.activeSearchResult = searchResults;
-                this.layerGroup.clearLayers();
+            $scope.moveToResults = (searchResults: Services.Search.ISearchResults, e: Event) => {
+                $scope.setState("Hidden", e);
+                this.featureGroup.clearLayers();
                 this.map.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
                 var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false}) as Services.Layers.PoiLayers.IMarkerWithTitle;
                 marker.title = searchResults.name || searchResults.address;
                 let newScope = $scope.$new() as ISearchResultsMarkerPopup;
                 newScope.marker = marker;
                 newScope.remove = () => {
-                    this.layerGroup.clearLayers();
+                    this.featureGroup.clearLayers();
                 }
                 newScope.convertToRoute = () => {
                     let segments = [] as Common.RouteSegmentData[];
@@ -103,14 +135,14 @@
                         markers: [{ latlng: searchResults.latlng, title: marker.title }],
                         routes: [{ segments: segments, name: marker.title}]
                     } as Common.DataContainer);
-                    this.layerGroup.clearLayers();
+                    this.featureGroup.clearLayers();
                 }
                 marker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
 
-                this.layerGroup.addLayer(marker);
+                this.featureGroup.addLayer(marker);
                 for (let line of searchResults.latlngsArray) {
-                    let polyLine = L.polyline(line, { opacity: 1, color: "Blue", weight: 3 } as L.PolylineOptions);
-                    this.layerGroup.addLayer(polyLine);
+                    let polyLine = L.polyline(line, this.getPathOprtions());
+                    this.featureGroup.addLayer(polyLine);
                 }
 
                 $timeout(() => {
@@ -123,38 +155,109 @@
                 this.suppressEvents(e);
             }
 
-            $scope.keyDown = (e: KeyboardEvent): void => {
-                if ($scope.isShowingSearch === false) {
+            $scope.keyDown = (searchContext: ISearchContext, e: KeyboardEvent): void => {
+                if ($scope.state === "Hidden") {
                     return;
                 }
-                let index = $scope.searchResults.indexOf($scope.activeSearchResult);
+                let index = searchContext.searchResults.indexOf(searchContext.highlightedSearchResults);
                 switch (e.keyCode) {
                     case SearchController.UP_KEY:
-                        index = (index - 1) % $scope.searchResults.length;
+                        index = (index - 1) % searchContext.searchResults.length;
                         if (index < 0) {
-                            index = $scope.searchResults.length - 1;
+                            index = searchContext.searchResults.length - 1;
                         }
-                        $scope.activeSearchResult = $scope.searchResults[index];
+                        searchContext.highlightedSearchResults = searchContext.searchResults[index];
                         break;
                     case SearchController.DOWN_KEY:
-                        index = (index + 1) % $scope.searchResults.length;
-                        $scope.activeSearchResult = $scope.searchResults[index];
+                        index = (index + 1) % searchContext.searchResults.length;
+                        searchContext.highlightedSearchResults = searchContext.searchResults[index];
                         break;
                     case SearchController.ENTER_KEY:
-                        if ($scope.activeSearchResult) {
-                            $scope.selectResult($scope.activeSearchResult, e);
+                        if (searchContext.highlightedSearchResults) {
+                            $scope.selectResults(searchContext, searchContext.highlightedSearchResults, e);
                         } else {
-                            this.internalSearch($scope);
+                            this.internalSearch($scope, searchContext);
                         }
                         break;
                 }
             }
 
-            $scope.getDirection = () => {
-                if (!$scope.searchTerm) {
+            $scope.selectResults = (searchContext: ISearchContext, searchResult: Services.Search.ISearchResults, e: Event) => {
+                searchContext.selectedSearchResults = searchResult;
+                searchContext.highlightedSearchResults = searchResult;
+                if ($scope.state === "Regular") {
+                    $scope.moveToResults(searchResult, e);
+                }
+            };
+
+            $scope.getDirection = (words: string) => {
+                if (!words) {
                     return $scope.resources.direction;
                 }
-                return $scope.hasHebrewCharacters($scope.searchTerm) ? "rtl" : "ltr";
+                return $scope.hasHebrewCharacters(words) ? "rtl" : "ltr";
+            }
+
+            $scope.getTextAlignment = (words: string) => {
+                return `text-${$scope.getDirection(words) === "rtl" ? "right" : "left"}`;
+            }
+
+            $scope.setRouting = (routingType: Common.RoutingType, e: Event) => {
+                $scope.routingType = routingType;
+                this.suppressEvents(e);
+            }
+
+            $scope.searchRoute = (e: Event) => {
+                this.suppressEvents(e);
+                if (!$scope.fromContext.selectedSearchResults) {
+                    toastr.warning($scope.resources.pleaseSelectFrom);
+                    return;
+                }
+                if (!$scope.toContext.selectedSearchResults) {
+                    toastr.warning($scope.resources.pleaseSelectTo);
+                    return;
+                }
+                routerService.getRoute($scope.fromContext.selectedSearchResults.latlng, $scope.toContext.selectedSearchResults.latlng, $scope.routingType).then((response: Common.RouteSegmentData[]) => {
+                    this.featureGroup.clearLayers();
+                    for (let segment of response) {
+                        let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
+                        this.featureGroup.addLayer(polyLine);
+                    }
+                    var markerFrom = L.marker($scope.fromContext.selectedSearchResults.latlng, { icon: Services.IconsService.createStartIcon(), draggable: false }) as Services.Layers.PoiLayers.IMarkerWithTitle;
+                    markerFrom.title = $scope.fromContext.selectedSearchResults.name || $scope.fromContext.selectedSearchResults.address;
+                    var markerTo = L.marker($scope.toContext.selectedSearchResults.latlng, { icon: Services.IconsService.createEndIcon(), draggable: false }) as Services.Layers.PoiLayers.IMarkerWithTitle;
+                    markerTo.title = $scope.toContext.selectedSearchResults.name || $scope.toContext.selectedSearchResults.address;
+
+                    let convertToRoute = () => {
+                        layersService.setJsonData({
+                            markers: [
+                                { latlng: markerFrom.getLatLng(), title: markerFrom.title },
+                                { latlng: markerTo.getLatLng(), title: markerTo.title }
+                            ],
+                            routes: [{ segments: response, name: markerFrom.title + "-" + markerTo.title }]
+                        } as Common.DataContainer);
+                        this.featureGroup.clearLayers();
+                    }
+
+                    let newScopeFrom = $scope.$new() as ISearchResultsMarkerPopup;
+                    newScopeFrom.marker = markerFrom;
+                    newScopeFrom.remove = () => {
+                        this.featureGroup.clearLayers();
+                    }
+                    newScopeFrom.convertToRoute = convertToRoute;
+                    let newScopeTo = $scope.$new() as ISearchResultsMarkerPopup;
+                    newScopeTo.marker = markerTo;
+                    newScopeTo.remove = () => {
+                        this.featureGroup.clearLayers();
+                    }
+                    newScopeTo.convertToRoute = convertToRoute;
+
+                    markerFrom.bindPopup($compile("<div search-results-marker-popup></div>")(newScopeFrom)[0], { className: "marker-popup" } as L.PopupOptions);
+                    markerTo.bindPopup($compile("<div search-results-marker-popup></div>")(newScopeTo)[0], { className: "marker-popup" } as L.PopupOptions);
+                    this.featureGroup.addLayer(markerFrom);
+                    this.featureGroup.addLayer(markerTo);
+
+                    this.map.fitBounds(this.featureGroup.getBounds());
+                });
             }
 
             /**
@@ -166,7 +269,7 @@
                 }
                 switch (String.fromCharCode(e.which).toLowerCase()) {
                     case "f":
-                        $scope.toggleSearchBar(e);
+                        $scope.setState("Regular", e);
                         break;
                     default:
                         return true;
@@ -187,31 +290,33 @@
             return latlngZ;
         }
 
-        private internalSearch = ($scope: ISearchScope) => {
-            let searchTerm = $scope.searchTerm;
+        private internalSearch = ($scope: ISearchScope, searchContext: ISearchContext) => {
+            let searchTerm = searchContext.searchTerm;
             this.requestsQueue.push({
                 searchTerm: searchTerm
             } as ISearchRequestQueueItem);
 
-            var local = this.searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
-
-            local.getResults(searchTerm, $scope.hasHebrewCharacters(searchTerm))
+            this.localSearchResultsProvider.getResults(searchTerm, hasHebrewCharacters(searchTerm))
                 .then((results: Services.Search.ISearchResults[]) => {
                     let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
                     if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                         this.requestsQueue.splice(0, this.requestsQueue.length - 1);
                         return;
                     }
-                    if ($scope.searchTerm !== searchTerm) {
+                    if (searchContext.searchTerm !== searchTerm) {
                         // search term changed since it was requested.
                         _.remove(this.requestsQueue, queueItem);
                         return;
                     }
-                    $scope.searchResults = results;
+                    searchContext.searchResults = results;
                     this.requestsQueue.splice(0);
                 }, () => {
-                    this.toastr.warning("Unable to get search results.");
+                    this.toastr.warning($scope.resources.unableToGetSearchResults);
                 });
+        }
+
+        private getPathOprtions = (): L.PathOptions => {
+            return { opacity: 1, color: "Blue", weight: 3 } as L.PathOptions;
         }
     }
 

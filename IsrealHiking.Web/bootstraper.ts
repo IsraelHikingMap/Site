@@ -139,12 +139,14 @@
         ($rootScope: IRootScope, resourcesService: Services.ResourcesService) => {
             angular.element("link[type*=icon]").detach().appendTo("head");
             $rootScope.resources = resourcesService;
-            $rootScope.hasHebrewCharacters = (word: string): boolean => {
-                return (word.match(/[\u0590-\u05FF]/gi) != null);
-            }
+            $rootScope.hasHebrewCharacters = hasHebrewCharacters;
         }]);
 
     app.config($compileProvider => {
         $compileProvider.aHrefSanitizationWhitelist(/[.*facebook][^\s*(whatsapp):]/);
     });
+
+    export function hasHebrewCharacters(word: string): boolean {
+        return word && (word.match(/[\u0590-\u05FF]/gi) != null);
+    }
 }

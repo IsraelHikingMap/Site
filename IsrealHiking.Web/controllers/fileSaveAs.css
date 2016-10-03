@@ -31,10 +31,12 @@
 }
 
     .save-as-control-container .leaflet-bar {
-        display: inline-block;
+        display: table;
     }
 
-
+        .save-as-control-container .leaflet-bar .dropdown {
+            display: table;
+        }
 
 .save-as-button {
     float: right;

@@ -2,12 +2,25 @@
     z-index: 8;
 }
 
-.search-icon {
+.search-dropdown-container {
+    display: table;
+}
+
+.search-icon-first {
     float: right;
     border-top-left-radius: 0 !important;
     border-top-right-radius: 4px !important;
     border-bottom-right-radius: 4px !important;
     border-bottom-left-radius: 0 !important;
+    border-bottom: 0 !important;
+}
+
+.search-icon-last {
+    float: right;
+    border-top-left-radius: 4px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-bottom-left-radius: 4px !important;
     border-bottom: 0 !important;
 }
 
@@ -23,19 +36,63 @@
     outline: none;
     border: none;
     border-right: 1px solid #ccc;
-    border-top-left-radius: 4px !important;
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    border-bottom-left-radius: 4px !important;
+    border-left: 1px solid #ccc;
+    float: right;
+    background-color: white;
 }
+
+.search-input-directional {
+    display: table;
+    cursor: pointer;
+}
+
+    .search-input-directional:hover {
+        background-color: #f4f4f4;
+    }
+
+    .search-input-directional span {
+        display: table-cell;
+        vertical-align: middle;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+.search-routing-directional {
+    border-radius: 4px;
+    background-color: white;
+}
+    
+    .search-routing-directional a {
+        border-left: 1px solid #ccc;
+        border-bottom: 0 !important;
+        border-radius: 0 !important;
+        margin-right: 1px;
+        margin-left: 1px;
+    }
+
+    .search-routing-directional a:first-child {
+        border-top-left-radius: 4px !important;
+        border-bottom-left-radius: 4px !important;
+        margin-left: 0;
+    }
+
+    .search-routing-directional a:last-child {
+        border-left: 1px solid #ccc;
+        border-bottom: 0 !important;
+        border-top-right-radius: 4px !important;
+        border-bottom-right-radius: 4px !important;
+        margin-right: 0;
+    }
 
 .search-results-item {
     padding: 10px;
 }
 
-.search-results-item:hover {
-    background-color: #ddd;
-}
+    .search-results-item:hover {
+        background-color: #ddd;
+    }
 
 .search-results-selected {
     background-color: #bddef9;

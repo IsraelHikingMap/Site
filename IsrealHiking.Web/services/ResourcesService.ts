@@ -131,6 +131,11 @@ namespace IsraelHiking.Services {
         public helpLanguage: string;
         public helpDragDrop: string;
         public helpYoutubeLink: string;
+        public unableToGetSearchResults: string;
+        public from: string;
+        public to: string;
+        public pleaseSelectFrom: string;
+        public pleaseSelectTo: string;
         // Info
         public infoSubheader: string;
         public infoHelpfulLinks: string;
@@ -407,6 +412,11 @@ namespace IsraelHiking.Services {
                     this.helpLanguage = this.gettextCatalog.getString("Change language");
                     this.helpDragDrop = this.gettextCatalog.getString("You can drag-and-drop files or URLs onto the map to load them.");
                     this.helpYoutubeLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}.", { link: "<a href='https://www.youtube.com/playlist?list=PL8pYDecWd7EjQIyJpPAwSH3UbeZzzQpNo' target='_blank'>", linkend: "</a>" }));
+                    this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
+                    this.from = this.gettextCatalog.getString("From");
+                    this.to = this.gettextCatalog.getString("To");
+                    this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
+                    this.pleaseSelectTo = this.gettextCatalog.getString("Please select to...");
                     // Info
                     this.infoSubheader = this.$sce.trustAsHtml(this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.", { link: "<a dir='ltr' href='http://www.openstreetmap.org/' target='_blank'>", linkend: "</a>" }));
                     this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:"); 

@@ -99,6 +99,7 @@
                 addresses.push({
                     name: name,
                     address: formattedAddress,
+                    displayName: name + (formattedAddress ? `, ${formattedAddress}` : ""),
                     icon: data.icon,
                     latlng: L.latLng(data.lat, data.lon),
                     latlngsArray: [latlngs],

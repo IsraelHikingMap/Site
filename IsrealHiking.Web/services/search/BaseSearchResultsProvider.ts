@@ -12,6 +12,7 @@
         latlng: L.LatLng;
         latlngsArray: L.LatLng[][];
         bounds: L.LatLngBounds;
+        displayName: string;
     }
 
     export abstract class BaseSearchResultsProvider implements ISearchResultsProvider {
