@@ -99,9 +99,6 @@
     <Content Include="controllers\ZoomController.js" />
     <Content Include="directives\DraggableResizable.css" />
     <Content Include="directives\DraggableResizableDirective.js" />
-    <Content Include="directives\Dropdown.css" />
-    <Content Include="directives\Dropdown.html" />
-    <Content Include="directives\DropdownDirective.js" />
     <Content Include="index.css" />
     <Content Include="controllers\InfoController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerAddController.js" />
@@ -267,7 +264,6 @@
     <TypeScriptCompile Include="controllers\ZoomController.ts" />
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
     <TypeScriptCompile Include="directives\DraggableResizableDirective.ts" />
-    <TypeScriptCompile Include="directives\DropdownDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
     <TypeScriptCompile Include="OruxmapsDownload.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-gettext\angular-gettext.d.ts" />

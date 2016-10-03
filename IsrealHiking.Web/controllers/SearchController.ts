@@ -1,35 +1,31 @@
 ﻿namespace IsraelHiking.Controllers {
 
-    // HM TODO: save state when user closes search panel.
-    // HM TODO: focus
-    // HM TODO: close when selected.
-    // HM TODO: more tooltips
-    // HM TODO: errors translation?
-
-    declare type SearchState = "Hidden" | "Regular" | "Directional";
-
     export interface ISearchContext {
         searchTerm: string;
         searchResults: Services.Search.ISearchResults[];
         selectedSearchResults: Services.Search.ISearchResults;
         highlightedSearchResults: Services.Search.ISearchResults;
+        hasFocus: boolean;
     }
 
     export interface ISearchScope extends IRootScope {
-        state: SearchState;
+        isVisible: boolean;
+        isDirectional: boolean;
         fromContext: ISearchContext;
         toContext: ISearchContext;
         routingType: Common.RoutingType;
-        setState(newState: SearchState, e: Event): void;
+        toggleVisibility(e: Event);
+        toggleDirectional(e: Event);
         search(searchContext: ISearchContext);
         keyDown(searchContext: ISearchContext, e: KeyboardEvent): void;
         getDirection(words: string): string;
         getTextAlignment(words: string): string;
         moveToResults(searchResults: Services.Search.ISearchResults, e: Event): void;
         selectResults(searchContext: ISearchContext, results: Services.Search.ISearchResults, e: Event): void;
-        ignoreClick(e: Event): void;
+        changeFocus(searchContext: ISearchContext, e: Event): void;
         searchRoute(e: Event): void;
         setRouting(routingType: Common.RoutingType, e: Event): void;
+        removeSelectedResults(searchContext: ISearchContext): void;
     }
 
     interface ISearchRequestQueueItem {
@@ -71,6 +67,8 @@
             this.layersService = layersService;
             this.localSearchResultsProvider = searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
             this.toastr = toastr;
+            $scope.isVisible = false;
+            $scope.isDirectional = false;
             $scope.routingType = "Hike";
             $scope.fromContext = {
                 searchTerm: "",
@@ -85,10 +83,18 @@
                 highlightedSearchResults: null
             } as ISearchContext;
             $scope.fromContext.searchTerm = hashService.searchTerm;
-            $scope.state = $scope.fromContext.searchTerm ? "Regular" : "Hidden";
+            $scope.isVisible = $scope.fromContext.searchTerm ? true : false;
+            this.setFocus($scope);
 
-            $scope.setState = (newState: SearchState, e: Event) => {
-                $scope.state = $scope.state === newState ? "Hidden" : newState;
+            $scope.toggleVisibility = (e: Event) => {
+                $scope.isVisible = !$scope.isVisible;
+                this.setFocus($scope);
+                this.suppressEvents(e);
+            }
+
+            $scope.toggleDirectional = (e: Event) => {
+                $scope.isDirectional = !$scope.isDirectional;
+                this.setFocus($scope);
                 this.suppressEvents(e);
             }
 
@@ -100,12 +106,12 @@
                 this.internalSearch($scope, searchContext);
             }
 
-            if ($scope.state === "Regular") {
+            if ($scope.isVisible) {
                 $scope.search($scope.fromContext);
             }
 
             $scope.moveToResults = (searchResults: Services.Search.ISearchResults, e: Event) => {
-                $scope.setState("Hidden", e);
+                $scope.toggleVisibility(e);
                 this.featureGroup.clearLayers();
                 this.map.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
                 var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false}) as Services.Layers.PoiLayers.IMarkerWithTitle;
@@ -151,12 +157,18 @@
                 this.suppressEvents(e);
             }
 
-            $scope.ignoreClick = (e: Event) => {
+            $scope.changeFocus = (searchContext: ISearchContext, e: Event) => {
+                searchContext.hasFocus = true;
+                if (searchContext === $scope.fromContext) {
+                    $scope.toContext.hasFocus = false;
+                } else {
+                    $scope.fromContext.hasFocus = false;
+                }
                 this.suppressEvents(e);
             }
 
             $scope.keyDown = (searchContext: ISearchContext, e: KeyboardEvent): void => {
-                if ($scope.state === "Hidden") {
+                if ($scope.isVisible === false) {
                     return;
                 }
                 let index = searchContext.searchResults.indexOf(searchContext.highlightedSearchResults);
@@ -185,9 +197,10 @@
             $scope.selectResults = (searchContext: ISearchContext, searchResult: Services.Search.ISearchResults, e: Event) => {
                 searchContext.selectedSearchResults = searchResult;
                 searchContext.highlightedSearchResults = searchResult;
-                if ($scope.state === "Regular") {
+                if (!$scope.isDirectional) {
                     $scope.moveToResults(searchResult, e);
                 }
+                this.setFocus($scope);
             };
 
             $scope.getDirection = (words: string) => {
@@ -199,6 +212,11 @@
 
             $scope.getTextAlignment = (words: string) => {
                 return `text-${$scope.getDirection(words) === "rtl" ? "right" : "left"}`;
+            }
+
+            $scope.removeSelectedResults = (searchContext: ISearchContext) => {
+                searchContext.selectedSearchResults = null;
+                this.setFocus($scope);
             }
 
             $scope.setRouting = (routingType: Common.RoutingType, e: Event) => {
@@ -269,7 +287,7 @@
                 }
                 switch (String.fromCharCode(e.which).toLowerCase()) {
                     case "f":
-                        $scope.setState("Regular", e);
+                        $scope.toggleVisibility(e);
                         break;
                     default:
                         return true;
@@ -317,6 +335,26 @@
 
         private getPathOprtions = (): L.PathOptions => {
             return { opacity: 1, color: "Blue", weight: 3 } as L.PathOptions;
+        }
+
+        private setFocus = ($scope: ISearchScope) => {
+            $scope.fromContext.hasFocus = false;
+            $scope.toContext.hasFocus = false;
+            if ($scope.isVisible === false) {
+                return;
+            }
+            if (!$scope.isDirectional) {
+                $scope.fromContext.hasFocus = true;
+            } else {
+                if ($scope.fromContext.selectedSearchResults) {
+                    $scope.toContext.hasFocus = true;
+                } else {
+                    $scope.fromContext.hasFocus = true;
+                }
+                if ($scope.toContext.selectedSearchResults) {
+                    $scope.toContext.hasFocus = false;
+                }
+            }
         }
     }
 

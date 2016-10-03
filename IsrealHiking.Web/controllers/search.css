@@ -62,6 +62,8 @@
 .search-routing-directional {
     border-radius: 4px;
     background-color: white;
+    margin-bottom: 10px;
+    margin-top: 10px;
 }
     
     .search-routing-directional a {

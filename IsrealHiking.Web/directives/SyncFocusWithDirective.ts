@@ -1,21 +1,25 @@
 ﻿namespace IsraelHiking.Directives {
+    export interface ISyncFocusScope extends angular.IScope {
+        syncFocusWith: boolean;
+    }
+
     export class SyncFocusWithDirective {
-        constructor() {
-            return <angular.IDirective>{
+        constructor($timeout: angular.ITimeoutService) {
+            return {
                 restrict: "A",
                 scope: {
-                    focusValue: "=syncFocusWith"
+                    syncFocusWith: "="
                 },
-                link: ($scope, $element, attrs) => {
-                    $scope.$watch("focusValue", (currentValue, previousValue) => {
-                        if (currentValue === true && !previousValue) {
-                            setTimeout(() => $element[0].focus(), 0);
-                        } else if (currentValue === false && previousValue) {
-                            setTimeout(() => $element[0].blur(), 0);
+                link: ($scope: ISyncFocusScope, $element, attrs: any) => {
+                    $scope.$watch(() => $scope.syncFocusWith, (currentValue: boolean) => {
+                        if (currentValue) {
+                            $timeout(() => $element[0].focus(), 100);
+                        } else {
+                            $timeout(() => $element[0].blur(), 100);
                         }
                     });
                 }
-            }
+            } as angular.IDirective;
         }
     }
 }

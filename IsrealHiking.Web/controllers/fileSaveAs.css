@@ -22,6 +22,14 @@
         text-align: left !important;
     }
 
+.dropdown-toggle {
+    text-transform: none !important;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
 .leaflet-touch .dropdown-toggle {
     height: 30px;
 }

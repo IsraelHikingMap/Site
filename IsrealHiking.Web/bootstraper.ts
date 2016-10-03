@@ -1,5 +1,7 @@
 ﻿namespace IsraelHiking {
 
+    // HM TODO: errors translation
+
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;
         hasHebrewCharacters(word: string): boolean;
@@ -63,9 +65,8 @@
             new Controllers.MainMapcontoller($scope, $compile, mapService, hashService, sidebarService, routeStatisticsService)]);
 
     // Directives:
-    app.directive(Strings.Directives.dropdown, [() => new Directives.DropdownDirective()]);
-    app.directive(Strings.Directives.syncFocusWith, () => new Directives.SyncFocusWithDirective());
-    app.directive(Strings.Directives.disableMapMovement, [Strings.Services.mapService, (mapService: Services.MapService) => new Directives.DisableMapMovementDirective(mapService)]);
+    app.directive(Strings.Directives.disableMapMovement, () => new Directives.DisableMapMovementDirective());
+    app.directive(Strings.Directives.syncFocusWith, [Strings.Angular.timeout, ($timeout: angular.ITimeoutService) => new Directives.SyncFocusWithDirective($timeout)]);
     app.directive(Strings.Directives.markerPopup, () => ({
         controller: Controllers.MarkerPopupController,
         templateUrl: "controllers/markerPopup.html"
