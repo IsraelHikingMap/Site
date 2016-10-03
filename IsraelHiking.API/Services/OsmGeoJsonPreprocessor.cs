@@ -40,6 +40,16 @@ namespace IsraelHiking.API.Services
                     geoJsonNamesDictionary[pair.Key] = osmList;
                 }
             }
+
+            geoJsonNamesDictionary.Values.SelectMany(v => v).ToList().ForEach(g =>
+            {
+                var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(g.Geometry);
+                if (!isValidOp.IsValid)
+                {
+                    _logger.Debug($"http://www.openstreetmap.org/{(g.Geometry.GeometryType == "Polygon" ? "way" : "relation")}/{g.Attributes["osm_id"]} {isValidOp.ValidationError.Message}({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                }
+            });
+            
             _logger.Info("Finished converting OSM data to GeoJson, Starting GeoJson preprocessing");
             var containers = geoJsonNamesDictionary.Values.SelectMany(v => v).Where(f =>
                 !(f.Geometry is MultiLineString) &&

@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Converters
             return new Coordinate(node.Longitude.Value, node.Latitude.Value);
         }
 
-        private List<IGeometry> GetCoordinatesGroupsFromWays(IEnumerable<CompleteWay> ways)
+        private List<IGeometry> GetGeometriesFromWays(IEnumerable<CompleteWay> ways)
         {
             var nodesGroups = new List<List<Node>>();
             var waysToGroup = new List<CompleteWay>(ways.Where(w => w.Nodes.Any()));
@@ -108,13 +108,13 @@ namespace IsraelHiking.API.Converters
                 return new Feature(multiPoint, ConvertTags(relation.Tags, relation.Id));
             }
 
-            var coordinatesGroups = GetCoordinatesGroupsFromWays(GetAllWays(relation));
-            if (!coordinatesGroups.Any())
+            var geometries = GetGeometriesFromWays(GetAllWays(relation));
+            if (!geometries.Any())
             {
                 return null;
             }
-            var jointLines = coordinatesGroups.OfType<ILineString>().ToList();
-            jointLines.AddRange(coordinatesGroups.OfType<Polygon>().Select(p => new LineString(p.Coordinates) as ILineString));
+            var jointLines = geometries.OfType<ILineString>().ToList();
+            jointLines.AddRange(geometries.OfType<Polygon>().Select(p => new LineString(p.Coordinates) as ILineString));
             var multiLineString = new MultiLineString(jointLines.ToArray());
             return new Feature(multiLineString, ConvertTags(relation.Tags, relation.Id));
         }
@@ -122,11 +122,25 @@ namespace IsraelHiking.API.Converters
         private Feature ConvertToMultipolygon(CompleteRelation relation)
         {
             var outerWays = GetAllWaysByRole(relation).Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
-            var outerCoordinatesGroups = GetCoordinatesGroupsFromWays(outerWays);
+            var outerPolygons = GetGeometriesFromWays(outerWays).OfType<IPolygon>().ToList();
             var innerWays = GetAllWaysByRole(relation).Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
-            var innerCoordinatesGroups = GetCoordinatesGroupsFromWays(innerWays).OfType<IPolygon>().ToList();
-            var multiPolygon = new MultiPolygon(outerCoordinatesGroups.OfType<IPolygon>().Union(innerCoordinatesGroups).ToArray());
+            var innerPolygons = GetGeometriesFromWays(innerWays).OfType<IPolygon>().ToList();
+            MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
+            var multiPolygon = new MultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
             return new Feature(multiPolygon, ConvertTags(relation.Tags, relation.Id));
+        }
+
+        private void MergeInnerIntoOuterPolygon(ref List<IPolygon> outerPolygons, ref List<IPolygon> innerPolygons)
+        {
+            var newOuterPolygons = new List<IPolygon>();
+            foreach (var outerPolygon in outerPolygons)
+            {
+                var currentInnerPolygons = innerPolygons.Where(p => p.Within(outerPolygon)).ToArray();
+                var holes = currentInnerPolygons.Select(p => new LinearRing(p.Coordinates) as ILinearRing).ToArray();
+                innerPolygons = innerPolygons.Except(currentInnerPolygons).ToList();
+                newOuterPolygons.Add(new Polygon(new LinearRing(outerPolygon.Coordinates), holes));
+            }
+            outerPolygons = newOuterPolygons;
         }
 
         public static List<CompleteWay> GetAllWays(CompleteRelation relation)

@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
@@ -20,6 +19,16 @@ namespace IsraelHiking.API.Tests.Converters
             {
                 Longitude = number,
                 Latitude = number,
+                Id = number
+            };
+        }
+
+        private Node CreateNode(int number, double latitude, double logitude)
+        {
+            return new Node
+            {
+                Longitude = logitude,
+                Latitude = latitude,
                 Id = number
             };
         }
@@ -296,5 +305,33 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.AreEqual(polygon.Coordinates.First(), polygon.Coordinates.Last());
         }
 
+
+        [TestMethod]
+        public void ToGeoJson_MultiPolygonWithHole_ShouldReturnMultiPlygonWithSinglePolygon()
+        {
+            var node1 = CreateNode(1, 0, 0);
+            var node2 = CreateNode(2, 1, 0);
+            var node3 = CreateNode(3, 1, 1);
+            var node4 = CreateNode(4, 0, 1);
+            var node5 = CreateNode(5, 0.5, 0.5);
+            var node6 = CreateNode(6, 0.5, 0.6);
+            var node7 = CreateNode(7, 0.6, 0.6);
+            var node8 = CreateNode(8, 0.6, 0.5);
+            var wayOuter = CompleteWay.Create(9);
+            wayOuter.Nodes.AddRange(new [] {node1, node2, node3, node4, node1});
+            var wayInner = CompleteWay.Create(9);
+            wayInner.Nodes.AddRange(new[] { node5, node6, node7, node8, node5 });
+            var relation = CompleteRelation.Create(10);
+            relation.Members.Add(new CompleteRelationMember { Member = wayInner, Role = "inner"});
+            relation.Members.Add(new CompleteRelationMember { Member = wayOuter, Role = "outer" });
+            relation.Tags.Add("boundary", "true");
+
+            var geoJson = _converter.ToGeoJson(relation);
+
+            var multiPlygon = geoJson.Geometry as MultiPolygon;
+            Assert.IsNotNull(multiPlygon);
+            Assert.IsTrue(multiPlygon.IsValid);
+            Assert.AreEqual(1, multiPlygon.Geometries.Length);
+        }
     }
 }
