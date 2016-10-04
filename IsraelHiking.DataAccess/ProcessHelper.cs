@@ -16,13 +16,18 @@ namespace IsraelHiking.DataAccess
 
         public void Start(string fileName, string arguments, string workingDirectory, int timeOutInMilliseconds)
         {
-            var cmdArguments = "/c " + fileName + " " + arguments;
-            _logger.Debug("Running: cmd " + arguments);
+            var processToRun = "cmd";
+            var cmdArguments = arguments;
+            if (fileName != "cmd")
+            {
+                cmdArguments = $"/c {fileName} {arguments}";
+            }
+            _logger.Debug($"Running: {processToRun} {cmdArguments}");
             using (var process = new Process())
             {
                 process.StartInfo = new ProcessStartInfo
                 {
-                    FileName = "cmd",
+                    FileName = processToRun,
                     Arguments = cmdArguments,
                     WorkingDirectory = workingDirectory,
                     WindowStyle = ProcessWindowStyle.Hidden,

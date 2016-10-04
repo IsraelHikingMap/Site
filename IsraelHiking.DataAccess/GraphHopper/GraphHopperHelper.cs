@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.ServiceProcess;
 using System.Threading.Tasks;
 using IsraelHiking.DataAccessInterfaces;
 
@@ -16,7 +15,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
 
         protected override string Name => GRAPH_HOPPER_ROUTING_SERVICE_NAME;
         protected override string Description => "A routing service for israel hiking site";
-        protected override string CommandLine => "java -cp \"*;web\\*\" com.graphhopper.http.GHServer config=config-example.properties graph.location=israel-and-palestine-latest.osm-gh osmreader.osm=israel-and-palestine-latest.osm.pbf jetty.port=8989";
+        protected override string CommandLine => "java -cp \"*;web\\*\" com.graphhopper.http.GHServer config=config-example.properties graph.location=israel-and-palestine-latest.osm-gh datareader.file=israel-and-palestine-latest.osm.pbf jetty.port=8989";
         protected override string RelativePath => GRAPHHOPPER;
 
         public GraphHopperHelper(ILogger logger, IProcessHelper processHelper) : base(logger, processHelper) { }
@@ -32,7 +31,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
 
                 Logger.Info("Creating graph hopper cache based on latest pbf file");
                 ProcessHelper.Start("cmd",
-                    $"/c java -cp \"*\" com.graphhopper.tools.Import config=config-example.properties osmreader.osm={osmFilePath} graph.location={GH_NEW_CACHE_FOLDER} > UpdateCache.log",
+                    $"/c java -cp \"*\" com.graphhopper.tools.Import config=config-example.properties datareader.file={osmFilePath} graph.location={GH_NEW_CACHE_FOLDER} > UpdateCache.log",
                     WorkingDirectory, 30*60*1000);
 
                 Stop();
