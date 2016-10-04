@@ -1,7 +1,9 @@
 ﻿namespace IsraelHiking.Services {
 
     export class DragAndDropService extends ObjectWithMap {
+
         constructor($timeout: angular.ITimeoutService,
+            resourcesService: ResourcesService,
             mapservice: MapService,
             fileService: FileService,
             layersService: Layers.LayersService,
@@ -28,7 +30,7 @@
                             fileService.openFromFile(file).success((dataContainer: Common.DataContainer) => {
                                 layersService.setJsonData(dataContainer);
                             }).error(() => {
-                                toastr.error(`unable to load file: ${file.name}`);
+                                toastr.error(resourcesService.unableToLoadFromFile + `: ${file.name}`);
                             });
                         }
                     }, 25);
@@ -40,7 +42,7 @@
                     fileService.openFromUrl(url).success((dataContainer: Common.DataContainer) => {
                         layersService.setJsonData(dataContainer);
                     }).error(() => {
-                        toastr.error(`unable to load url: ${url}`);
+                        toastr.error(resourcesService.unableToLoadFromUrl + `: ${url}`);
                     });
                 }
             });

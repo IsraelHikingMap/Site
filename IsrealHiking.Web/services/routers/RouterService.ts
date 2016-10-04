@@ -2,15 +2,18 @@
     export class RouterService {
         private $http: angular.IHttpService;
         private $q: angular.IQService;
+        private resourcesService: ResourcesService;
         private toastr: Toastr;
         private geojsonParser: Parsers.IParser;
 
         constructor($http: angular.IHttpService,
             $q: angular.IQService,
+            resourcesService: ResourcesService,
             toastr: Toastr,
             parserFactory: Parsers.ParserFactory) {
             this.$http = $http;
             this.$q = $q;
+            this.resourcesService = resourcesService;
             this.toastr = toastr;
             this.geojsonParser = parserFactory.create(Parsers.ParserType.geojson);
         }
@@ -29,7 +32,7 @@
                         failed = true;
                     }
                     if (failed || !data || data.routes.length === 0 || data.routes[0].segments.length < 2) {
-                        this.toastr.error(`Failed routing from ${latlngStart} to ${latlngEnd}`, "Routing");
+                        this.toastr.error(this.resourcesService.routingFailed + ` ${latlngStart} => ${latlngEnd}`);
                         noneRouter.getRoute(latlngStart, latlngEnd).then((noneRouterData) => {
                             deferred.resolve(noneRouterData);
                         });
@@ -37,7 +40,7 @@
                         deferred.resolve(data.routes[0].segments);
                     }
                 }).error(() => {
-                    this.toastr.error(`Failed routing from ${latlngStart} to ${latlngEnd}`, "Routing");
+                    this.toastr.error(this.resourcesService.routingFailed + ` ${latlngStart} => ${latlngEnd}`);
                     noneRouter.getRoute(latlngStart, latlngEnd).then((data) => {
                         deferred.resolve(data);
                     });

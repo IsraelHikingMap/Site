@@ -6,7 +6,7 @@
         extension: string,
     }
 
-    export interface IFileScope extends angular.IScope {
+    export interface IFileScope extends IRootScope {
         formats: IFormatViewModel[];
         selectedFormat: IFormatViewModel;
         isShowingSaveAs: boolean;
@@ -65,7 +65,7 @@
                 fileService.openFromFile(file).success((dataContainer: Common.DataContainer) => {
                     layersService.setJsonData(dataContainer);
                 }).error(() => {
-                    toastr.error("Failed to load file.");
+                    toastr.error($scope.resources.unableToLoadFromFile);
                 });
             }
 
@@ -73,7 +73,7 @@
                 var data = layersService.getData();
                 fileService.saveToFile("IsraelHikingMap.gpx", "gpx", data)
                     .then(() => { }, () => {
-                        toastr.error("Unable to save file...");
+                        toastr.error($scope.resources.unableToSaveToFile);
                     });
                 this.suppressEvents(e);
             }
@@ -87,7 +87,7 @@
                 var data = layersService.getData();
                 fileService.saveToFile(`IsraelHikingMap.${format.extension}`, format.outputFormat, data)
                     .then(() => { }, () => {
-                        toastr.error("Unable to save file...");
+                        toastr.error($scope.resources.unableToSaveToFile);
                     });
                 $scope.isShowingSaveAs = false;
                 this.suppressEvents(e);

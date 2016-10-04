@@ -77,7 +77,7 @@
                     $scope.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
                     $scope.embedText = this.getEmbedText($scope);
                 }).error(() => {
-                    toastr.error("Unable to generate URL, please try again later...");
+                    toastr.error($scope.resources.unableToGenerateUrl);
                 }).finally(() => {
                     $scope.isLoading = false;
                 });

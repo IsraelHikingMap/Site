@@ -17,7 +17,7 @@
 
             $scope.saveRoute = (e: Event) => {
                 if (layersService.isNameAvailable($scope.routeProperties.name) === false) {
-                    toastr.error("The route name is already in use, please select another name.", "Route Name");
+                    toastr.error($scope.resources.routeNameAlreadyInUse);
                     this.suppressEvents(e);
                     return;
                 }

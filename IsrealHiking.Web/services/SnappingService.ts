@@ -16,20 +16,23 @@
     }
 
     export class SnappingService extends ObjectWithMap {
-        public snappings: L.LayerGroup<L.Polyline>;
+        public snappings: L.LayerGroup<L.ILayer>;
         private $http: angular.IHttpService;
+        private resourcesService: ResourcesService;
         private osmParser: Parsers.IParser;
         private toastr: Toastr;
         private enabled: boolean;
         private requestsQueue: ISnappingRequestQueueItem[];
 
         constructor($http: angular.IHttpService,
+            resourcesService: ResourcesService,
             mapService: MapService,
             parserFactory: Parsers.ParserFactory,
             toastr: Toastr) {
             super(mapService);
 
             this.$http = $http;
+            this.resourcesService = resourcesService;
             this.osmParser = parserFactory.create(Parsers.ParserType.osm);
             this.snappings = L.layerGroup([]);
             this.map.addLayer(this.snappings);
@@ -78,7 +81,7 @@
                 }
                 this.requestsQueue.splice(0);
             }).error(() => {
-                this.toastr.error("Unable to get overpass data for snapping...");
+                this.toastr.warning(this.resourcesService.unableToGetDataForSnapping);
                 this.snappings.clearLayers();
             });
         }

@@ -119,7 +119,12 @@ namespace IsraelHiking.Services {
         public pleaseAddPointsToRoute: string;
         public unableToSaveToFile: string;
         public unableToLoadFromFile: string;
+        public unableToLoadFromUrl: string;
         public routeNameAlreadyInUse: string;
+        public unableToGenerateUrl: string;
+        public unableToGetElevationData: string;
+        public unableToGetDataForSnapping: string;
+        public routingFailed: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -408,8 +413,13 @@ namespace IsraelHiking.Services {
                     this.routeIsHidden = this.gettextCatalog.getString("Route is hidden...");
                     this.pleaseAddPointsToRoute = this.gettextCatalog.getString("Please add points to route...");
                     this.unableToSaveToFile = this.gettextCatalog.getString("Unable to save to file...");
-                    this.unableToLoadFromFile = this.gettextCatalog.getString("Uable to load from file...");
+                    this.unableToLoadFromFile = this.gettextCatalog.getString("Unable to load from file...");
+                    this.unableToLoadFromUrl = this.gettextCatalog.getString("Unable to load from URL...");
                     this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route name is already in use, please select another name...");
+                    this.unableToGenerateUrl = this.gettextCatalog.getString("Unable to generate URL, please try again later...");
+                    this.unableToGetElevationData = this.gettextCatalog.getString("Unable to get elevation data:");
+                    this.unableToGetDataForSnapping = this.gettextCatalog.getString("Unable to get data for snapping...");
+                    this.routingFailed = this.gettextCatalog.getString("Routing failed:");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");

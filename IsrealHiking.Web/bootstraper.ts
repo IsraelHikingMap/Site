@@ -25,21 +25,21 @@
     app.service(Strings.Services.searchResultsProviderFactory, [Strings.Angular.http, Strings.Angular.q, Strings.Services.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
             new Services.Search.SearchResultsProviderFactory($http, $q, parserFactory)]);
-    app.service(Strings.Services.microsoftElevationProvider, [Strings.Angular.http, Strings.Services.toastr,
-        ($http: angular.IHttpService, toastr: Toastr) =>
-            new Services.Elevation.MicrosoftElevationProvider($http, toastr)]);
-    app.service(Strings.Services.elevationProvider, [Strings.Angular.http, Strings.Services.toastr,
-        ($http: angular.IHttpService, toastr: Toastr) =>
-            new Services.Elevation.ElevationProvider($http, toastr)]);
-    app.service(Strings.Services.routerService, [Strings.Angular.http, Strings.Angular.q, Strings.Services.toastr, Strings.Services.parserFactory,
-        ($http: angular.IHttpService, $q: angular.IQService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
-            new Services.Routers.RouterService($http, $q, toastr, parserFactory)]);
+    app.service(Strings.Services.microsoftElevationProvider, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.toastr,
+        ($http: angular.IHttpService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
+            new Services.Elevation.MicrosoftElevationProvider($http, resourcesService, toastr)]);
+    app.service(Strings.Services.elevationProvider, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.toastr,
+        ($http: angular.IHttpService, resourcesService: Services.ResourcesService,toastr: Toastr) =>
+            new Services.Elevation.ElevationProvider($http, resourcesService, toastr)]);
+    app.service(Strings.Services.routerService, [Strings.Angular.http, Strings.Angular.q, Strings.Services.resourcesService, Strings.Services.toastr, Strings.Services.parserFactory,
+        ($http: angular.IHttpService, $q: angular.IQService, resourcesService: Services.ResourcesService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
+            new Services.Routers.RouterService($http, $q, resourcesService, toastr, parserFactory)]);
     app.service(Strings.Services.fileService, [Strings.Angular.http, Strings.Services.upload, Strings.Services.fileSaver,
         ($http: angular.IHttpService, upload: angular.angularFileUpload.IUploadService, fileSaver: Services.IFileSaver) =>
             new Services.FileService($http, upload, fileSaver)]);
-    app.service(Strings.Services.snappingService, [Strings.Angular.http, Strings.Services.mapService, Strings.Services.parserFactory, Strings.Services.toastr,
-        ($http: angular.IHttpService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
-            new Services.SnappingService($http, mapService, parserFactory, toastr)]);
+    app.service(Strings.Services.snappingService, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.mapService, Strings.Services.parserFactory, Strings.Services.toastr,
+        ($http: angular.IHttpService, resourcesService: Services.ResourcesService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
+            new Services.SnappingService($http, resourcesService, mapService, parserFactory, toastr)]);
     app.service(Strings.Services.routeLayerFactory,
         [Strings.Angular.q, Strings.Angular.compile, Strings.Angular.rootScope, Strings.Angular.timeout, Strings.Services.localStorageService,
             Strings.Services.mapService, Strings.Services.routerService, Strings.Services.snappingService, Strings.Services.elevationProvider,
@@ -53,9 +53,9 @@
         ($http: angular.IHttpService, $window: angular.IWindowService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService,
             routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService, fileService: Services.FileService, resourcesService: Services.ResourcesService) =>
             new Services.Layers.LayersService($http, $window, mapService, localStorageService, routeLayerFactory, hashService, fileService, resourcesService)]);
-    app.service(Strings.Services.dragAndDropService, [Strings.Angular.timeout, Strings.Services.mapService, Strings.Services.fileService, Strings.Services.layersService, Strings.Services.toastr,
-        ($timeout: angular.ITimeoutService, mapservice: Services.MapService, fileService: Services.FileService, layersService: Services.Layers.LayersService, toastr: Toastr) =>
-            new Services.DragAndDropService($timeout, mapservice, fileService, layersService, toastr)
+    app.service(Strings.Services.dragAndDropService, [Strings.Angular.timeout, Strings.Services.resourcesService, Strings.Services.mapService, Strings.Services.fileService, Strings.Services.layersService, Strings.Services.toastr,
+        ($timeout: angular.ITimeoutService, resourcesService: Services.ResourcesService, mapservice: Services.MapService, fileService: Services.FileService, layersService: Services.Layers.LayersService, toastr: Toastr) =>
+            new Services.DragAndDropService($timeout, resourcesService, mapservice, fileService, layersService, toastr)
     ]);
 
     app.controller(Strings.Controllers.mainMapController, [Strings.Angular.scope, Strings.Angular.compile, Strings.Services.mapService,
