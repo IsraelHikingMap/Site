@@ -140,29 +140,6 @@ namespace IsraelHiking.API.Tests.Converters
         }
 
         [TestMethod]
-        public void ToGeoJson_RelationWithOuterAndInner_ShouldReturnMultiPolygon()
-        {
-            var node1 = CreateNode(1);
-            var node2 = CreateNode(2);
-            var node3 = CreateNode(3);
-            var node4 = CreateNode(1);
-            var way = CompleteWay.Create(4);
-            way.Nodes.AddRange(new[] { node1, node2, node3, node4 });
-            var relation = CompleteRelation.Create(5);
-            relation.Tags.Add("type", "boundary");
-            relation.Members.Add(new CompleteRelationMember { Member = way, Role = "outer" });
-            relation.Members.Add(new CompleteRelationMember { Member = way, Role = "inner" });
-
-            var feature = _converter.ToGeoJson(relation);
-            var multiPolygon = feature.Geometry as MultiPolygon;
-
-            Assert.IsNotNull(multiPolygon);
-            Assert.AreEqual(4, multiPolygon.Coordinates.Length);
-            Assert.AreEqual(node1.Latitude, multiPolygon.Coordinates.First().Y);
-            Assert.AreEqual(node4.Longitude, multiPolygon.Coordinates.Last().X);
-        }
-
-        [TestMethod]
         public void ToGeoJson_RelationWithTwoSubRelationsWithInnerRole_ShouldReturnMultiPolygon()
         {
             var node1 = CreateNode(1);
