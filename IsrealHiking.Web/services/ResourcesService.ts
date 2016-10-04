@@ -106,13 +106,20 @@ namespace IsraelHiking.Services {
         public hikingTrails: string;
         public wiki: string;
         public route: string;
-        public unableToGetSearchResults: string;
         public from: string;
         public to: string;
-        public pleaseSelectFrom: string;
-        public pleaseSelectTo: string;
         public directionalSearch: string;
         public regularSearch: string;
+        public moveToRoute: string;
+        // Errors & Warnings
+        public unableToGetSearchResults: string;
+        public pleaseSelectFrom: string;
+        public pleaseSelectTo: string;
+        public routeIsHidden: string;
+        public pleaseAddPointsToRoute: string;
+        public unableToSaveToFile: string;
+        public unableToLoadFromFile: string;
+        public routeNameAlreadyInUse: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -389,13 +396,20 @@ namespace IsraelHiking.Services {
                     this.googleEarth = this.gettextCatalog.getString("Google Earth");
                     this.hikingTrails = this.gettextCatalog.getString("Hiking Trails");
                     this.route = this.gettextCatalog.getString("Route");
-                    this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.from = this.gettextCatalog.getString("From");
                     this.to = this.gettextCatalog.getString("To");
-                    this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
-                    this.pleaseSelectTo = this.gettextCatalog.getString("Please select to...");
                     this.directionalSearch = this.gettextCatalog.getString("Directional Search");
                     this.regularSearch = this.gettextCatalog.getString("Regular Search");
+                    this.moveToRoute = this.gettextCatalog.getString("Move to Route");
+                    // Errors & Warnings
+                    this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
+                    this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
+                    this.pleaseSelectTo = this.gettextCatalog.getString("Please select to...");
+                    this.routeIsHidden = this.gettextCatalog.getString("Route is hidden...");
+                    this.pleaseAddPointsToRoute = this.gettextCatalog.getString("Please add points to route...");
+                    this.unableToSaveToFile = this.gettextCatalog.getString("Unable to save to file...");
+                    this.unableToLoadFromFile = this.gettextCatalog.getString("Uable to load from file...");
+                    this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route name is already in use, please select another name...");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");

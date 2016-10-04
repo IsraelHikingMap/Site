@@ -253,5 +253,18 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             }
             this.currentState.reRoute();
         }
+
+        public center = (): void => {
+            if (this.route.segments.length === 0) {
+                return;
+            }
+            let featureGroup = L.featureGroup([]);
+            for (let segment of this.route.segments) {
+                console.log(segment.polyline);
+                featureGroup.addLayer(L.polyline(segment.latlngzs));
+            }
+            this.map.fitBounds(featureGroup.getBounds());
+            featureGroup.clearLayers();
+        }
     }
 }

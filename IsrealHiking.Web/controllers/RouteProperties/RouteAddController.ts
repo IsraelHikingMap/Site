@@ -10,7 +10,7 @@
             layersService: Services.Layers.LayersService,
             routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory,
             toastr: Toastr) {
-            super($scope, mapService);
+            super($scope, localStorageService, mapService);
             $scope.routeProperties = routeLayerFactory.createRoute(layersService.createRouteName()).properties;
             $scope.isNew = true;
             $scope.title = $scope.resources.addRoute;

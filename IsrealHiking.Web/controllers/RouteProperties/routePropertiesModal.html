@@ -13,7 +13,7 @@
                     </div>
                 </div>
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-6" ng-show="isAdvanced">
                         <div class="form-group">
                             <label class="control-label col-md-6">{{resources.widthInPixels}}</label>
                             <div class="col-md-6">
@@ -41,10 +41,10 @@
         <div class="modal-footer">
             <div class="row">
                 <div class="col-md-12 col-xs-12 modal-footer-btns">
-                    <button type="button" ng-hide="isNew" ng-click="saveRouteToFile($event)" class="btn btn-default" uib-tooltip="{{resources.saveRouteToFile}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa fa-lg fa-save"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="isReversed = !isReversed" class="btn btn-default" uib-tooltip="{{resources.reverseRoute}}" tooltip-placement="bottom" tooltip-append-to-body="true" ng-class="{'active': isReversed }"><i class="fa fa-lg fa-arrows-h"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="routeProperties.isVisible = !routeProperties.isVisible" class="btn btn-default" uib-tooltip="{{resources.toggleVisibility}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa fa-lg" ng-class="{'fa-eye': routeProperties.isVisible, 'fa-eye-slash': !routeProperties.isVisible}"></i></button>
-                    <button type="button" ng-hide="isNew" ng-click="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" class="btn btn-default" uib-tooltip="{{resources.toggleRoutingPerSegment}}" tooltip-placement="bottom" tooltip-append-to-body="true" ng-class="{'active': routeProperties.isRoutingPerPoint }"><i class="fa fa-bolt"></i></button>
+                    <button type="button" ng-hide="isNew || !isAdvanced" ng-click="saveRouteToFile($event)" class="btn btn-default" uib-tooltip="{{resources.saveRouteToFile}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa fa-lg fa-save"></i></button>
+                    <button type="button" ng-hide="isNew || !isAdvanced" ng-click="isReversed = !isReversed" class="btn btn-default" uib-tooltip="{{resources.reverseRoute}}" tooltip-placement="bottom" tooltip-append-to-body="true" ng-class="{'active': isReversed }"><i class="fa fa-lg fa-arrows-h"></i></button>
+                    <button type="button" ng-hide="isNew || !isAdvanced" ng-click="moveToRoute($event)" class="btn btn-default" uib-tooltip="{{resources.moveToRoute}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa fa-lg fa-crosshairs"></i></button>
+                    <button type="button" ng-hide="isNew || !isAdvanced" ng-click="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" class="btn btn-default" uib-tooltip="{{resources.toggleRoutingPerSegment}}" tooltip-placement="bottom" tooltip-append-to-body="true" ng-class="{'active': routeProperties.isRoutingPerPoint }"><i class="fa fa-bolt"></i></button>
                     <button type="button" ng-hide="isNew" ng-click="deleteRoute($event); $close()" class="btn btn-danger" uib-tooltip="{{resources.deleteRoute}}" tooltip-placement="bottom" tooltip-append-to-body><i class="fa fa-lg fa-trash"></i></button>
                     <button type="submit" class="btn btn-success" uib-tooltip="{{resources.save}}" tooltip-placement="bottom"><i class="fa fa-check"></i></button>
                 </div>

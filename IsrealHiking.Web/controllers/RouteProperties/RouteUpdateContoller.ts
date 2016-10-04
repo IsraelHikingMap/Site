@@ -2,7 +2,7 @@
     export interface IRouteUpdateScope extends IRouteBaseScope {
         name: string;
         isReversed: boolean;
-        toggleVisibility(e: Event): void;
+        moveToRoute(e: Event): void;
         deleteRoute(e: Event): void;
         reverseRoute(e: Event): void;
         saveRouteToFile(e: Event);
@@ -17,7 +17,7 @@
             layersService: Services.Layers.LayersService,
             fileService: Services.FileService,
             toastr: Toastr) {
-            super($scope, mapService);
+            super($scope, localStorageService, mapService);
             let routeLayer = layersService.getRouteByName($scope.name);
             $scope.routeProperties = angular.copy(routeLayer.getRouteProperties());
             $scope.isNew = false;
@@ -26,7 +26,7 @@
 
             $scope.saveRoute = (e: Event) => {
                 if ($scope.routeProperties.name !== routeLayer.getRouteProperties().name && layersService.isNameAvailable($scope.routeProperties.name) === false) {
-                    toastr.error("The route name is already in use, please select another name.", "Route Name");
+                    toastr.error($scope.resources.routeNameAlreadyInUse);
                 } 
                 if ($scope.routeProperties.isVisible !== routeLayer.getRouteProperties().isVisible) {
                     layersService.changeRouteState(routeLayer);
@@ -48,8 +48,20 @@
                 } as Common.DataContainer;
                 fileService.saveToFile($scope.routeProperties.name + ".gpx", "gpx", data)
                     .then(() => {}, () => {
-                        toastr.error("Unable to save route to file...");
+                        toastr.error($scope.resources.unableToSaveToFile);
                     });
+                this.suppressEvents(e);
+            }
+
+            $scope.moveToRoute = (e: Event) => {
+                if (routeLayer.getData().segments.length === 0) {
+                    toastr.error($scope.resources.pleaseAddPointsToRoute);
+                    return;
+                }
+                if (!$scope.routeProperties.isVisible) {
+                    toastr.warning($scope.resources.routeIsHidden);
+                }
+                routeLayer.center();
                 this.suppressEvents(e);
             }
         }

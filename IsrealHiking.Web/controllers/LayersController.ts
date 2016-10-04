@@ -25,7 +25,7 @@
     }
 
     export class LayersController extends BaseMapController {
-        private static SHOW_ADVANCED_KEY = "showAdvancedLayerControl";
+        public static SHOW_ADVANCED_KEY = "showAdvancedLayerControl";
 
         constructor($scope: ILayersScope,
             $uibModal: angular.ui.bootstrap.IModalService,
