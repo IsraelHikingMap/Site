@@ -33,7 +33,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
                         vehicle = "bike2";
                         break;
                     case ProfileType.Car:
-                        vehicle = "car";
+                        vehicle = "car4wd";
                         break;
                 }
                 var requestAddress = "http://localhost:8989/route?instructions=false&points_encoded=false&elevation=true&point=" + request.From + "&point=" + request.To + "&vehicle=" + vehicle;
