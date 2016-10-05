@@ -13,6 +13,7 @@
     { "Path": "IsrealHiking.Web\\scripts\\leaflet-src.js" },
     { "Path": "IsrealHiking.Web\\scripts\\angular-toastr.tpls.js" },
     { "Path": "IsrealHiking.Web\\scripts\\angular-local-storage.js" },
+    { "Path": "IsrealHiking.Web\\scripts\\angular-gettext.js" },
     { "Path": "IsrealHiking.Web\\scripts\\lodash.js" },
     { "Path": "IsrealHiking.Web\\scripts\\osm_geojson.js" },
     { "Path": "IsrealHiking.Web\\scripts\\ng-file-upload.js" },
@@ -28,7 +29,8 @@
     { "Path": "IsrealHiking.Web\\services\\HashService.ts"},
     { "Path": "IsrealHiking.Web\\services\\RouteStatisticsService.ts" },
     { "Path": "IsrealHiking.Web\\services\\SidebarService.ts" },
-    { "Path": "IsrealHiking.Web\\services\\FileService.ts"}
+    { "Path": "IsrealHiking.Web\\services\\FileService.ts"},
+    { "Path": "IsrealHiking.Web\\services\\ResourcesService.ts"}
   ],
   "Tests": [
     {

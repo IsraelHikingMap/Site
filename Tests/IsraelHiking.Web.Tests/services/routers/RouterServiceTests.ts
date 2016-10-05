@@ -14,14 +14,17 @@ namespace IsraelHiking.Tests.Services.Routers {
 
         beforeEach(() => {
             angular.mock.module("toastr");
-            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$q_: angular.IQService, _toastr_: Toastr) => { // 
+            angular.mock.module("LocalStorageModule");
+            angular.mock.module("gettext");
+            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$q_: angular.IQService, _localStorageService_: angular.local.storage.ILocalStorageService, _gettextCatalog_: angular.gettext.gettextCatalog, _toastr_: Toastr) => { // 
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
                 $q = _$q_;
                 toastr = _toastr_;
                 toastr.error = (): any => { };
-                routeService = new IsraelHiking.Services.Routers.RouterService($http, $q, toastr, new IsraelHiking.Services.Parsers.ParserFactory());
+                $httpBackend.whenGET(url => url.indexOf(Common.Urls.translations) !== -1).respond(404, {}); // ignore resources get request
+                routeService = new IsraelHiking.Services.Routers.RouterService($http, $q, new IsraelHiking.Services.ResourcesService(null, _localStorageService_, _gettextCatalog_), toastr, new IsraelHiking.Services.Parsers.ParserFactory());
             });
             
         });

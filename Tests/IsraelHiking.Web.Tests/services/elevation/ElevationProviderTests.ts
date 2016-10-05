@@ -1,4 +1,6 @@
-﻿/// <reference path="../../../../isrealhiking.web/services/elevation/elevationprovider.ts" />
+﻿/// <reference path="../../../../isrealhiking.web/scripts/typings/angular-gettext/angular-gettext.d.ts" />
+/// <reference path="../../../../isrealhiking.web/services/ResourcesService.ts" />
+/// <reference path="../../../../isrealhiking.web/services/elevation/elevationprovider.ts" />
 /// <reference path="../../../../isrealhiking.web/common/urls.ts" />
 
 namespace IsraelHiking.Tests.Services.Elevation {
@@ -11,12 +13,15 @@ namespace IsraelHiking.Tests.Services.Elevation {
 
         beforeEach(() => {
             angular.mock.module("toastr");
-            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _toastr_: Toastr) => { // 
+            angular.mock.module("LocalStorageModule");
+            angular.mock.module("gettext");
+            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _localStorageService_: angular.local.storage.ILocalStorageService, _gettextCatalog_: angular.gettext.gettextCatalog, _toastr_: Toastr) => { // 
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
                 toastr = _toastr_;
-                elevationProvider = new IsraelHiking.Services.Elevation.ElevationProvider($http, toastr);
+                $httpBackend.whenGET(url => url.indexOf(Common.Urls.translations) !== -1).respond(404, {}); // ignore resources get request
+                elevationProvider = new IsraelHiking.Services.Elevation.ElevationProvider($http, new IsraelHiking.Services.ResourcesService(null, _localStorageService_, _gettextCatalog_), toastr);
             });
         });
 

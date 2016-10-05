@@ -45,7 +45,9 @@ namespace IsraelHiking.Tests.Services {
 
         beforeEach(() => {
             angular.mock.module("toastr");
-            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$document_: angular.IDocumentService, _toastr_:  Toastr) => {
+            angular.mock.module("LocalStorageModule");
+            angular.mock.module("gettext");
+            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$document_: angular.IDocumentService, _localStorageService_: angular.local.storage.ILocalStorageService, _gettextCatalog_: angular.gettext.gettextCatalog, _toastr_:  Toastr) => {
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
@@ -53,7 +55,8 @@ namespace IsraelHiking.Tests.Services {
                 _toastr_.error = (): any => { };
                 mapService = new IsraelHiking.Services.MapService();
                 parserFactory = new IsraelHiking.Services.Parsers.ParserFactory();
-                snappingService = new IsraelHiking.Services.SnappingService($http, mapService, parserFactory, _toastr_);
+                $httpBackend.whenGET(url => url.indexOf(Common.Urls.translations) !== -1).respond(404, {}); // ignore resources get request
+                snappingService = new IsraelHiking.Services.SnappingService($http, new IsraelHiking.Services.ResourcesService(null, _localStorageService_, _gettextCatalog_), mapService, parserFactory, _toastr_);
                 snappingService.enable(true);
             });
         });
