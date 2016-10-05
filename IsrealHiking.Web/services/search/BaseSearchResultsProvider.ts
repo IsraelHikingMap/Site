@@ -13,6 +13,7 @@
         latlngsArray: L.LatLng[][];
         bounds: L.LatLngBounds;
         displayName: string;
+        feature: GeoJSON.Feature<GeoJSON.GeometryObject>;
     }
 
     export abstract class BaseSearchResultsProvider implements ISearchResultsProvider {

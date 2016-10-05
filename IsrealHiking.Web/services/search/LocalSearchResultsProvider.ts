@@ -18,7 +18,8 @@
                         name: this.getName(feature, isHebrew),
                         latlngsArray: [],
                         icon: feature.properties.icon,
-                        address: isHebrew ? feature.properties.address : feature.properties["address:en"]
+                        address: isHebrew ? feature.properties.address : feature.properties["address:en"],
+                        feature: feature
                 } as ISearchResults;
                     try {
                         switch (feature.geometry.type) {

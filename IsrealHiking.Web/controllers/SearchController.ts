@@ -52,6 +52,7 @@
             $window: angular.IWindowService,
             $timeout: angular.ITimeoutService,
             $compile: angular.ICompileService,
+            $http: angular.IHttpService,
             mapService: Services.MapService,
             hashService: Services.HashService,
             layersService: Services.Layers.LayersService,
@@ -122,26 +123,33 @@
                     this.featureGroup.clearLayers();
                 }
                 newScope.convertToRoute = () => {
-                    let segments = [] as Common.RouteSegmentData[];
-                    if (searchResults.latlngsArray.length > 0) {
-                        segments.push({
-                            latlngzs: this.convertToLatLngZArray([searchResults.latlngsArray[0][0], searchResults.latlngsArray[0][0]]),
-                            routePoint: searchResults.latlngsArray[0][0],
-                            routingType: "Hike"
-                        });
-                        for (let latlngs of searchResults.latlngsArray) {
-                            segments.push({
-                                latlngzs: this.convertToLatLngZArray(latlngs),
-                                routePoint: latlngs[latlngs.length - 1],
-                                routingType: "Hike"
-                            });
-                        }    
-                    }
-                    layersService.setJsonData({
-                        markers: [{ latlng: searchResults.latlng, title: marker.title }],
-                        routes: [{ segments: segments, name: marker.title}]
-                    } as Common.DataContainer);
-                    this.featureGroup.clearLayers();
+                    $http.post(Common.Urls.search, searchResults.feature).then((response: {data: Common.DataContainer }) => {
+                        layersService.setJsonData({
+                            markers: [{ latlng: searchResults.latlng, title: marker.title }],
+                            routes: response.data.routes
+                        } as Common.DataContainer);
+                        this.featureGroup.clearLayers();
+                    });
+                    //let segments = [] as Common.RouteSegmentData[];
+                    //if (searchResults.latlngsArray.length > 0) {
+                    //    segments.push({
+                    //        latlngzs: this.convertToLatLngZArray([searchResults.latlngsArray[0][0], searchResults.latlngsArray[0][0]]),
+                    //        routePoint: searchResults.latlngsArray[0][0],
+                    //        routingType: "Hike"
+                    //    });
+                    //    for (let latlngs of searchResults.latlngsArray) {
+                    //        segments.push({
+                    //            latlngzs: this.convertToLatLngZArray(latlngs),
+                    //            routePoint: latlngs[latlngs.length - 1],
+                    //            routingType: "Hike"
+                    //        });
+                    //    }    
+                    //}
+                    //layersService.setJsonData({
+                    //    markers: [{ latlng: searchResults.latlng, title: marker.title }],
+                    //    routes: [{ segments: segments, name: marker.title}]
+                    //} as Common.DataContainer);
+                    //this.featureGroup.clearLayers();
                 }
                 marker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
 
@@ -246,6 +254,7 @@
                     markerTo.title = $scope.toContext.selectedSearchResults.name || $scope.toContext.selectedSearchResults.address;
 
                     let convertToRoute = () => {
+                        
                         layersService.setJsonData({
                             markers: [
                                 { latlng: markerFrom.getLatLng(), title: markerFrom.title },

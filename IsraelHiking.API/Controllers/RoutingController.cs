@@ -15,15 +15,12 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly IRoutingGateway _routingGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
-        private readonly ILogger _logger;
 
         public RoutingController(IRoutingGateway routingGateway,
-            IElevationDataStorage elevationDataStorage,
-            ILogger logger)
+            IElevationDataStorage elevationDataStorage)
         {
             _routingGateway = routingGateway;
             _elevationDataStorage = elevationDataStorage;
-            _logger = logger;
         }
 
         [ResponseType(typeof(FeatureCollection))]

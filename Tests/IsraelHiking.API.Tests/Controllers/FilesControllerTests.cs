@@ -96,10 +96,13 @@ namespace IsraelHiking.API.Tests.Controllers
                     }
                 }
             };
+            var expectedGpx = _gpxDataContainerConverter.ToGpx(dataContainer);
+            expectedGpx.creator = "IsraelHikingMap";
 
             var bytes = _controller.PostSaveFile("gpx", dataContainer).Result;
 
-            CollectionAssert.AreEqual(_gpxDataContainerConverter.ToGpx(dataContainer).ToBytes(), bytes);
+            
+            CollectionAssert.AreEqual(expectedGpx.ToBytes(), bytes);
         }
 
         [TestMethod]

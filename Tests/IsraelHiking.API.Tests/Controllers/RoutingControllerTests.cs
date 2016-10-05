@@ -25,7 +25,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _routingGateway = Substitute.For<IRoutingGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            _controller = new RoutingController(_routingGateway, _elevationDataStorage, Substitute.For<ILogger>());
+            _controller = new RoutingController(_routingGateway, _elevationDataStorage);
         }
 
         [TestMethod]

@@ -99,7 +99,7 @@ namespace IsraelHiking.API.Tests.Gpx
                             {
                                 trkpt = new[]
                                 {
-                                    new wptType {lat = 11, lon = 12, ele = 13, eleSpecified = true},
+                                    new wptType {lat = 4, lon = 5, ele = 6, eleSpecified = true},
                                     new wptType {lat = 14, lon = 15}
                                 }
                             }

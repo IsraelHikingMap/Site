@@ -111,6 +111,7 @@ namespace IsraelHiking.Services {
         public directionalSearch: string;
         public regularSearch: string;
         public moveToRoute: string;
+        public namePlaceHolder: string;
         // Errors & Warnings
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
@@ -406,6 +407,7 @@ namespace IsraelHiking.Services {
                     this.directionalSearch = this.gettextCatalog.getString("Directional Search");
                     this.regularSearch = this.gettextCatalog.getString("Regular Search");
                     this.moveToRoute = this.gettextCatalog.getString("Move to Route");
+                    this.namePlaceHolder = this.gettextCatalog.getString("A name to be displayed in the layer control");
                     // Errors & Warnings
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

@@ -42,6 +42,18 @@
     position: absolute;
 }
 
+.route-statistics-close {
+    position: absolute;
+    right: 5px;
+    top: 0;
+    z-index: 100;
+}
+
+.flip .route-statistics-close {
+    right: auto;
+    left: 5px;
+}
+
 /* Extra Small Devices, Phones */
 @media only screen and (min-width : 480px) {
     .route-statistics-popup {

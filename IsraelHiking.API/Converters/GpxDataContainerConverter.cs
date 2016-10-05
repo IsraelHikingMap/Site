@@ -31,7 +31,6 @@ namespace IsraelHiking.API.Converters
             var routes = container.routes ?? new List<RouteData>();
             return new gpxType
             {
-                creator = DataContainer.ISRAEL_HIKING_MAP,
                 wpt = container.markers.Select(ToWptType).ToArray(),
                 rte = new rteType[0],
                 trk = routes.Select(r => new trkType

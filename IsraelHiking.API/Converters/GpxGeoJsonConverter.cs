@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.Common;
@@ -10,6 +11,7 @@ namespace IsraelHiking.API.Converters
     public class GpxGeoJsonConverter : IGpxGeoJsonConverter
     {
         private const string NAME = "name";
+        private const string CREATOR = "Creator";
 
         public FeatureCollection ToGeoJson(gpxType gpx)
         {
@@ -31,17 +33,17 @@ namespace IsraelHiking.API.Converters
                     continue;
                 }
                 var lineStringList = track.trkseg.Select(segment => new LineString(segment.trkpt.Select(CreateGeoPosition).ToArray()) as ILineString).ToArray();
-                var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.name));
+                var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.name, gpx.creator));
                 collection.Features.Add(feature);
             }
-            return collection;        
+            return collection;
         }
 
         public gpxType ToGpx(FeatureCollection collection)
         {
             return new gpxType
             {
-                creator = DataContainer.ISRAEL_HIKING_MAP,
+                creator = collection.Features.FirstOrDefault(f => f.Attributes.GetNames().Contains(CREATOR))?.Attributes[CREATOR]?.ToString() ?? string.Empty,
                 wpt = collection.Features.Where(f => f.Geometry is Point)
                     .Select(CreateWayPoint)
                     .Union(collection.Features.Where(f => f.Geometry is MultiPoint)
@@ -49,13 +51,11 @@ namespace IsraelHiking.API.Converters
                     .ToArray(),
                 rte = collection.Features.Where(f => f.Geometry is LineString)
                     .Select(CreateRouteFromLineString)
-                    .Union(collection.Features.Where(f => f.Geometry is Polygon)
-                        .Select(CreateRouteFromPolygon))
+                    .Union(collection.Features.Where(f => f.Geometry is Polygon).Select(CreateRouteFromPolygon))
+                    .Union(collection.Features.Where(f => f.Geometry is MultiPolygon).SelectMany(CreateRoutesFromMultiPolygon))
                     .ToArray(),
                 trk = collection.Features.Where(f => f.Geometry is MultiLineString)
-                    .Select(CreateTrackFromMultiLineString)
-                    .Union(collection.Features.Where(f => f.Geometry is MultiPolygon)
-                        .Select(CreateTrackFromMultiPolygon))
+                    .SelectMany(CreateTracksFromMultiLineString)
                     .ToArray()
             };
         }
@@ -69,7 +69,7 @@ namespace IsraelHiking.API.Converters
 
         private wptType CreateWayPoint(IFeature pointFeature)
         {
-            var point = (Point) pointFeature.Geometry;
+            var point = (Point)pointFeature.Geometry;
             var position = point.Coordinate;
             return CreateWayPoint(position, GetFeatureName(pointFeature));
         }
@@ -101,7 +101,7 @@ namespace IsraelHiking.API.Converters
             {
                 name = GetFeatureName(lineStringFeature),
                 rtept = lineString?.Coordinates.Select(p => CreateWayPoint(p, null)).ToArray()
-                
+
             };
         }
         private rteType CreateRouteFromPolygon(IFeature lineStringFeature)
@@ -112,38 +112,63 @@ namespace IsraelHiking.API.Converters
             {
                 name = GetFeatureName(lineStringFeature),
                 rtept = polygon?.Coordinates.Select(p => CreateWayPoint(p, null)).ToArray()
-
             };
         }
 
-        private trkType CreateTrackFromMultiLineString(IFeature multiLineStringFeature)
+        private trkType[] CreateTracksFromMultiLineString(IFeature multiLineStringFeature)
         {
             var multiLineString = multiLineStringFeature.Geometry as MultiLineString;
-            return new trkType
+            if (multiLineString == null)
             {
-                name = GetFeatureName(multiLineStringFeature),
-                trkseg = multiLineString?.Geometries.OfType<ILineString>().Select(
-                    ls => new trksegType
-                    {
-                        trkpt = ls.Coordinates.Select(p => CreateWayPoint(p, null))
-                            .ToArray()
-                    }).ToArray()
-            };
+                return new trkType[0];
+            }
+            var name = GetFeatureName(multiLineStringFeature);
+            var tracks = new List<trkType>();
+            var currentTrack = new trkType { name = name, trkseg = new trksegType[0]};
+            foreach (var lineString in multiLineString.Geometries.OfType<ILineString>().Where(ls => ls.Coordinates.Any()))
+            {
+                var currentSegment = new trksegType
+                {
+                    trkpt = lineString.Coordinates.Select(p => CreateWayPoint(p, null)).ToArray()
+                };
+                if (currentTrack.trkseg.Length == 0)
+                {
+                    currentTrack.trkseg = new[] {currentSegment};
+                    continue;
+                }
+                var lastPointInTrack = currentTrack.trkseg.Last().trkpt.Last();
+                var firstPointInSegment = currentSegment.trkpt.First();
+                if (lastPointInTrack.lat == firstPointInSegment.lat && lastPointInTrack.lon == firstPointInSegment.lon)
+                {
+                    var list = currentTrack.trkseg.ToList();
+                    list.Add(currentSegment);
+                    currentTrack.trkseg = list.ToArray();
+                }
+                else
+                {
+                    // need to start a new track.
+                    tracks.Add(currentTrack);
+                    currentTrack = new trkType {name = name, trkseg = new[] {currentSegment}};
+                }
+            }
+            tracks.Add(currentTrack);
+            return tracks.ToArray();
         }
 
-        private trkType CreateTrackFromMultiPolygon(IFeature multiLineStringFeature)
+        private rteType[] CreateRoutesFromMultiPolygon(IFeature multiPolygonFeature)
         {
-            var multiPolygon = multiLineStringFeature.Geometry as MultiPolygon;
-            return new trkType
+            var multiPolygon = multiPolygonFeature.Geometry as MultiPolygon;
+            var name = GetFeatureName(multiPolygonFeature);
+            if (multiPolygon == null)
             {
-                name = GetFeatureName(multiLineStringFeature),
-                trkseg = multiPolygon?.Geometries.OfType<Polygon>().Select(
-                    ls => new trksegType
-                    {
-                        trkpt = ls.Coordinates.Select(p => CreateWayPoint(p, null))
-                            .ToArray()
-                    }).ToArray()
-            };
+                return new rteType[0];
+            }
+            return multiPolygon.Geometries.OfType<Polygon>().Select(
+                p => new rteType
+                {
+                    rtept = p.Coordinates.Select(c => CreateWayPoint(c, null)).ToArray(),
+                    name = name
+                }).ToArray();
         }
 
         private IAttributesTable CreateNameProperties(string name)
@@ -153,10 +178,10 @@ namespace IsraelHiking.API.Converters
             return table;
         }
 
-        private IAttributesTable CreateMultiLineProperties(string name)
+        private IAttributesTable CreateMultiLineProperties(string name, string creator)
         {
             var table = CreateNameProperties(name);
-            table.AddAttribute("Creator", DataContainer.ISRAEL_HIKING_MAP);
+            table.AddAttribute(CREATOR, creator);
             return table;
         }
 
