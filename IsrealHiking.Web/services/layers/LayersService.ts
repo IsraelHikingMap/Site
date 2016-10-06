@@ -469,7 +469,7 @@ namespace IsraelHiking.Services.Layers {
             return container;
         }
 
-        public setData = (dataContainer: Common.DataContainer, reroute: boolean) => {
+        private setData = (dataContainer: Common.DataContainer, reroute: boolean) => {
             if (dataContainer.routes.length === 0) {
                 dataContainer.routes.push({
                     name: this.createRouteName(),
@@ -485,7 +485,7 @@ namespace IsraelHiking.Services.Layers {
                 this.map.addLayer(routeLayer);
                 this.selectRoute(routeLayer);
             }
-            this.markers.setData(dataContainer.markers || []);
+            this.markers.setData(this.markers.getData().concat(dataContainer.markers || []));
 
             if (dataContainer.northEast != null && dataContainer.southWest != null) {
                 this.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));
