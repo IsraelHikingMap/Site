@@ -89,8 +89,8 @@
             }, true);
 
             $scope.$watch(() => $scope.resources.currentLanguage, () => {
-                $scope.chart.options.vAxis.title = $scope.resources.distanceInKm;
-                $scope.chart.options.hAxis.title = $scope.resources.heightInMeters;
+                $scope.chart.options.vAxis.title = $scope.resources.heightInMeters;
+                $scope.chart.options.hAxis.title = $scope.resources.distanceInKm;
             },true);
 
             

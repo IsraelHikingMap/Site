@@ -1,6 +1,6 @@
 ﻿namespace IsraelHiking {
 
-    // HM TODO: errors translation
+    // HM TODO: סובב מכתש רמון geojson convertion issue?
 
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;

@@ -49,7 +49,7 @@ gulp.task("update-references", function () {
 });
 
 gulp.task("extract_to_pot", function () {
-    return gulp.src(["**/*.html", "**/*.js", "!node_modules/**", "!bower_components/**"])
+    return gulp.src(["**/*.html", "**/*.js", "!node_modules/**", "!bower_components/**", "!obj/**", "!bin/**"])
         .pipe(gettext.extract("IsraelHiking.pot", {}))
         .pipe(gulp.dest(paths.traslations));
 });

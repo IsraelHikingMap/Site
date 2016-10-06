@@ -111,7 +111,6 @@ namespace IsraelHiking.Services {
         public directionalSearch: string;
         public regularSearch: string;
         public moveToRoute: string;
-        public namePlaceHolder: string;
         // Errors & Warnings
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
@@ -390,7 +389,7 @@ namespace IsraelHiking.Services {
                     this.eastAbbreviation = this.gettextCatalog.getString("E");
                     this.latitudeAbbreviation = this.gettextCatalog.getString("Lat");
                     this.longitudeAbbreviation = this.gettextCatalog.getString("Lon");
-                    this.layerNamePlaceHolder = this.gettextCatalog.getString("A name to be displayed in the layers control");
+                    this.layerNamePlaceHolder = this.gettextCatalog.getString("A name to be displayed in the layers controller");
                     this.shareYourWork = this.gettextCatalog.getString("Share Your Work");
                     this.language = this.gettextCatalog.getString("Language");
                     this.elevation = this.gettextCatalog.getString("Elevation");
@@ -407,7 +406,6 @@ namespace IsraelHiking.Services {
                     this.directionalSearch = this.gettextCatalog.getString("Directional Search");
                     this.regularSearch = this.gettextCatalog.getString("Regular Search");
                     this.moveToRoute = this.gettextCatalog.getString("Move to Route");
-                    this.namePlaceHolder = this.gettextCatalog.getString("A name to be displayed in the layer control");
                     // Errors & Warnings
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

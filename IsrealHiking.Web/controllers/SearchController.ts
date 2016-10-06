@@ -130,26 +130,6 @@
                         } as Common.DataContainer);
                         this.featureGroup.clearLayers();
                     });
-                    //let segments = [] as Common.RouteSegmentData[];
-                    //if (searchResults.latlngsArray.length > 0) {
-                    //    segments.push({
-                    //        latlngzs: this.convertToLatLngZArray([searchResults.latlngsArray[0][0], searchResults.latlngsArray[0][0]]),
-                    //        routePoint: searchResults.latlngsArray[0][0],
-                    //        routingType: "Hike"
-                    //    });
-                    //    for (let latlngs of searchResults.latlngsArray) {
-                    //        segments.push({
-                    //            latlngzs: this.convertToLatLngZArray(latlngs),
-                    //            routePoint: latlngs[latlngs.length - 1],
-                    //            routingType: "Hike"
-                    //        });
-                    //    }    
-                    //}
-                    //layersService.setJsonData({
-                    //    markers: [{ latlng: searchResults.latlng, title: marker.title }],
-                    //    routes: [{ segments: segments, name: marker.title}]
-                    //} as Common.DataContainer);
-                    //this.featureGroup.clearLayers();
                 }
                 marker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
 
@@ -284,6 +264,10 @@
                     this.featureGroup.addLayer(markerTo);
 
                     this.map.fitBounds(this.featureGroup.getBounds());
+
+                    $timeout(() => {
+                        markerTo.openPopup();
+                    }, 300);
                 });
             }
 
