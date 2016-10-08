@@ -44,6 +44,7 @@ namespace IsraelHiking.Services.Layers {
         private static OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";
 
         private $http: angular.IHttpService;
+        private $q: angular.IQService;
         private localStorageService: angular.local.storage.ILocalStorageService;
         private hashService: HashService;
         private fileService: FileService;
@@ -59,9 +60,10 @@ namespace IsraelHiking.Services.Layers {
         public routeChangedEvent: Common.EventHelper<{}>;
         public selectedBaseLayer: IBaseLayer;
         public selectedRoute: Layers.RouteLayers.RouteLayer;
+        public initializationPromise: angular.IPromise<any>;
 
         constructor($http: angular.IHttpService,
-            $window: angular.IWindowService,
+            $q: angular.IQService,
             mapService: MapService,
             localStorageService: angular.local.storage.ILocalStorageService,
             routeLayerFactory: Layers.RouteLayers.RouteLayerFactory,
@@ -70,6 +72,7 @@ namespace IsraelHiking.Services.Layers {
             resourcesService: ResourcesService) {
             super(mapService);
             this.$http = $http;
+            this.$q = $q;
             this.localStorageService = localStorageService;
             this.hashService = hashService;
             this.fileService = fileService;
@@ -86,7 +89,7 @@ namespace IsraelHiking.Services.Layers {
             let lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
             this.defaultAttribution = LayersService.ATTRIBUTION + "Last update: " + lastModified;
             // default layers:
-            let baseLayer = this.addBaseLayer({
+            this.addBaseLayer({
                 key: LayersService.ISRAEL_HIKING_MAP,
                 address: LayersService.DEFAULT_TILES_ADDRESS,
                 isEditable: false
@@ -113,9 +116,6 @@ namespace IsraelHiking.Services.Layers {
             this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: new WikiMarkersLayer($http, mapService) as L.ILayer } as IOverlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
-            if (this.selectedBaseLayer == null) {
-                this.selectBaseLayer(baseLayer);
-            }
         }
 
         public addBaseLayer = (layerData: Common.LayerData, attribution?: string): IBaseLayer => {
@@ -307,6 +307,8 @@ namespace IsraelHiking.Services.Layers {
         }
 
         private addDataFromHash = () => {
+            let deferred = this.$q.defer();
+            this.initializationPromise = deferred.promise;
             if (this.hashService.siteUrl) {
                 this.$http.get(Common.Urls.urls + this.hashService.siteUrl)
                     .success((siteUrl: Common.SiteUrl) => {
@@ -314,22 +316,28 @@ namespace IsraelHiking.Services.Layers {
                         this.setJsonData(data);
                         this.addOverlaysFromHash(data.overlays);
                         this.hashService.clear();
+                        deferred.resolve();
                     }).error(() => {
                         let data = this.hashService.getDataContainer();
                         this.setData(data, true);
                         this.hashService.clear();
+                        deferred.resolve();
                     });
                 return;
             }
             if (this.hashService.externalUrl) {
                 this.fileService.openFromUrl(this.hashService.externalUrl)
                     .success((dataContainer: Common.DataContainer) => {
+                        // #252: if we want to support base layer with url - uncomment this:
+                        //dataContainer.baseLayer = this.hashService.getDataContainer().baseLayer;
                         this.setJsonData(dataContainer);
+                        deferred.resolve();
                     });
             } else {
                 let data = this.hashService.getDataContainer();
                 this.setData(data, true);
                 this.addBaseLayerFromHash(data.baseLayer);
+                deferred.resolve();
             }
             this.hashService.clear();
             for (let overlayKey of (this.localStorageService.get(LayersService.ACTIVE_OVERLAYS_KEY) || []) as string[]) {

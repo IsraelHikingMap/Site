@@ -1060,13 +1060,15 @@
             ];
             // End Of Legend content definition //
 
-            if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_MTB_MAP) {
-                this.removeMtbUnwantedLegend($scope);
-            } else if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_HIKING_MAP) {
-                this.removeIhmUnwantedLegend($scope);
-            } else if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.GOOGLE_EARTH) {
-                $scope.legendSections = [];
-            }
+            this.layersService.initializationPromise.then(() => {
+                if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_MTB_MAP) {
+                    this.removeMtbUnwantedLegend($scope);
+                } else if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.ISRAEL_HIKING_MAP) {
+                    this.removeIhmUnwantedLegend($scope);
+                } else if (this.layersService.selectedBaseLayer.key === Services.Layers.LayersService.GOOGLE_EARTH) {
+                    $scope.legendSections = [];
+                }
+            });
             let section = _.find($scope.legendSections, sectionToFind => sectionToFind.id === $scope.visibleSectionId);
             if (!section) {
                 return;

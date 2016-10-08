@@ -260,7 +260,6 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             }
             let featureGroup = L.featureGroup([]);
             for (let segment of this.route.segments) {
-                console.log(segment.polyline);
                 featureGroup.addLayer(L.polyline(segment.latlngzs));
             }
             this.map.fitBounds(featureGroup.getBounds());
