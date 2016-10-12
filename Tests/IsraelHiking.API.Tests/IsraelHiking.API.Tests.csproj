@@ -118,6 +118,7 @@
     <Compile Include="Controllers\RoutingControllerTests.cs" />
     <Compile Include="Controllers\FileExplorerControllerTests.cs" />
     <Compile Include="Controllers\SearchControllerTests.cs" />
+    <Compile Include="Controllers\OpenGraphControllerTests.cs" />
     <Compile Include="Controllers\UrlsControllerTests.cs" />
     <Compile Include="Converters\OsmGeoJsonConverterTests.cs" />
     <Compile Include="Converters\GpxGeoJsonConverterTests.cs" />

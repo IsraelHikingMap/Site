@@ -4,16 +4,22 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
+//using IsraelHiking.API.Services;
+//using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Controllers
 {
     public class UrlsController : ApiController
     {
         private IIsraelHikingRepository _repository;
+        //private IImageCreationService _imageCreationService;
 
-        public UrlsController(IIsraelHikingRepository repository)
+        public UrlsController(IIsraelHikingRepository repository
+            //, IImageCreationService imageCreationService
+            )
         {
             _repository = repository;
+            //_imageCreationService = imageCreationService;
         }
 
         // GET api/Urls/abc
@@ -44,6 +50,7 @@ namespace IsraelHiking.API.Controllers
                 id = GetRandomString(10, random);
             }
             siteUrl.Id = id;
+            //siteUrl.Thumbnail = await _imageCreationService.Create(JsonConvert.DeserializeObject<DataContainer>(siteUrl.JsonData));
             await _repository.AddUrl(siteUrl);
             return Ok(siteUrl);
         }

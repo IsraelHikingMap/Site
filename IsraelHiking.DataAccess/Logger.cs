@@ -8,37 +8,37 @@ namespace IsraelHiking.DataAccess
 {
     public class Logger : ExceptionLogger, ILogger
     {
-        private readonly ILog log = LogManager.GetLogger(typeof(Logger));
+        private readonly ILog _log = LogManager.GetLogger(typeof(Logger));
 
         public void Info(string message)
         {
-            log.Info(message);
+            _log.Info(message);
         }
 
         public void Debug(string message)
         {
-            log.Debug(message);
+            _log.Debug(message);
         }
 
         public void Warn(string message)
         {
-            log.Warn(message);
+            _log.Warn(message);
         }
 
         public void Error(string message)
         {
-            log.Error(message);
+            _log.Error(message);
         }
 
         public override async Task LogAsync(ExceptionLoggerContext context, CancellationToken cancellationToken)
         {
-            log.Error(context.Exception.ToString());
+            _log.Error(context.Exception.ToString());
             await base.LogAsync(context, cancellationToken);
         }
 
         public override void Log(ExceptionLoggerContext context)
         {
-            log.Error(context.Exception.ToString());
+            _log.Error(context.Exception.ToString());
             base.Log(context);
         }
     }

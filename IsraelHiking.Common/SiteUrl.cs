@@ -13,5 +13,6 @@ namespace IsraelHiking.Common
         public string JsonData { get; set; }
         public string ModifyKey { get; set; }
         public int ViewsCount { get; set; }
+        //public byte[] Thumbnail { get; set; }
     }
 }

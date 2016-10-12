@@ -19,6 +19,7 @@ namespace IsraelHiking.API
             container.RegisterType<IDouglasPeuckerReductionService, DouglasPeuckerReductionService>();
             container.RegisterType<IOsmGeoJsonPreprocessor, OsmGeoJsonPreprocessor>();
             container.RegisterType<IOsmDataService, OsmDataService>();
+            container.RegisterType<IImageCreationService, ImageCreationService>();
         }
     }
 }
