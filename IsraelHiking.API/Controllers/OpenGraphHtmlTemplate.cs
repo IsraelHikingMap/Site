@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Controllers
     <meta content=""utf-8"" http-equiv=""encoding"">
     <meta content=""IE=edge, chrome=1"" http-equiv=""X-UA-Compatible"" />
     <meta property=""og:site_name"" content=""IsraelHiking.OSM.org.il"" />
-    <meta property=""og:type"" content=""activity"" />
+    <meta property=""og:type"" content=""website"" />
     <meta property=""og:title"" content=""Israel Hiking Map"" />
     <meta property=""og:image"" content=""");
             
@@ -61,8 +61,11 @@ namespace IsraelHiking.API.Controllers
             #line default
             #line hidden
             this.Write(@""" />
+	<meta property=""og:image:width"" content=""600"" />
+    <meta property=""og:image:height"" content=""315"" />
+    <meta property=""og:description"" content=""בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע."" />
     <meta name=""title"" content=""Israel Hiking Map"" />
-    <meta name=""description"" content=""Whether on foot, riding a bike or driving a 4WD vehicle, you'll find everything you need here in order to plan an outdoor trip."" />
+    <meta name=""description"" content=""בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע."" />
     <meta name=""keyword"" content=""hike,bike,outdoor,israel hiking,map,navigation,route planning,nominatim,סימון שבילים,אופניים,מפה,ניווט,שטח,טיול,מטיבי לכת,ג'יפים,רכיבה,הליכה,טבע"" />
     <meta name=""robot"" content=""index,follow"" />
     <meta name=""msapplication-TileColor"" content=""#2b5797"">
@@ -70,6 +73,7 @@ namespace IsraelHiking.API.Controllers
     <meta name=""msapplication-config"" content=""/content/images/favicons/browserconfig.xml"">
     <meta name=""theme-color"" content=""#0a42bb"">
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"" />
+    <title>Israel Hiking Map</title>
 </head>
 <body>
 </body>
