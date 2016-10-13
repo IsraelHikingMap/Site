@@ -1,5 +1,11 @@
 REM @ECHO OFF
-REM Copy GraphHopper JAR files to Site repository
+REM
+REM This script updates the JAR files in the
+REM ```IsraelHikingMap\Site```repository from the latest JAR files built in the
+REM ```IsraelHikingMap\graphhopper``` repository.
+REM
+REM It uses ```~dp0``` to determine the location of the target directory
+REM
 
 SETLOCAL ENABLEDELAYEDEXPANSION
 
