@@ -76,8 +76,9 @@ namespace IsraelHiking.API.Services
                                 .Select(l => ConvertLatLngZToPoint(l, backgroundImage))
                                 .ToArray());
             DrawRouteOnImage(backgroundImage.Image, points);
+            var resizedForFacebook = new Bitmap(backgroundImage.Image, new Size(600, 315));
             var imageStream = new MemoryStream();
-            backgroundImage.Image.Save(imageStream, ImageFormat.Png);
+            resizedForFacebook.Save(imageStream, ImageFormat.Png);
             return imageStream.ToArray();
         }
 
