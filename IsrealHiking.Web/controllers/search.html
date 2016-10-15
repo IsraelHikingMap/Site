@@ -18,7 +18,7 @@
 <div ng-show="isVisible && isDirectional">
     <div uib-dropdown is-open="isVisible && isDirectional && fromContext.searchResults.length > 0 && !fromContext.selectedSearchResults" auto-close="disabled" ng-keydown="keyDown(fromContext, $event)" class="search-dropdown-container leaflet-bar">
         <a class="cursor-pointer search-icon-first" ng-click="toggleVisibility($event)"><i class="fa fa-search fa-lg"></i></a>
-        <div class="search-input search-input-directional" ng-show="fromContext.selectedSearchResults" ng-click="removeSelectedResults(fromContext)" dir="{{getDirection(fromContext.selectedSearchResults.name)}}">
+        <div class="search-input search-input-directional" ng-show="fromContext.selectedSearchResults" ng-click="removeSelectedResults(fromContext, $event)" dir="{{getDirection(fromContext.selectedSearchResults.name)}}">
             <span><i class="fa fa-remove text-danger"></i> {{fromContext.selectedSearchResults.displayName}}</span>
         </div>
         <input type="text" class="search-input" ng-model="fromContext.searchTerm" ng-change="search(fromContext)" placeholder="{{resources.from}}" dir="{{getDirection(fromContext.searchTerm)}}" ng-click="changeFocus(fromContext, $event)" ng-hide="fromContext.selectedSearchResults" sync-focus-with="fromContext.hasFocus" tabindex="0" disable-map-movement />
@@ -39,7 +39,7 @@
     <br />
     <div uib-dropdown is-open="isVisible && isDirectional && toContext.searchResults.length > 0 && !toContext.selectedSearchResults" auto-close="disabled" ng-keydown="keyDown(toContext, $event)" class="search-dropdown-container leaflet-bar">
         <a class="search-icon-first" ng-click="toggleVisibility($event)"><i class="fa fa-search fa-lg"></i></a>
-        <div class="search-input search-input-directional" ng-show="toContext.selectedSearchResults" ng-click="removeSelectedResults(toContext)" dir="{{getDirection(toContext.selectedSearchResults.name)}}">
+        <div class="search-input search-input-directional" ng-show="toContext.selectedSearchResults" ng-click="removeSelectedResults(toContext, $event)" dir="{{getDirection(toContext.selectedSearchResults.name)}}">
             <span><i class="fa fa-remove text-danger"></i> {{toContext.selectedSearchResults.displayName}}</span>
         </div>
         <input type="text" class="search-input" ng-model="toContext.searchTerm" ng-change="search(toContext)" placeholder="{{resources.to}}" dir="{{getDirection(toContext.searchTerm)}}" ng-click="changeFocus(toContext, $event)" ng-hide="toContext.selectedSearchResults" sync-focus-with="toContext.hasFocus" tabindex="0" disable-map-movement />

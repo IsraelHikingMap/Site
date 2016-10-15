@@ -25,7 +25,7 @@
         changeFocus(searchContext: ISearchContext, e: Event): void;
         searchRoute(e: Event): void;
         setRouting(routingType: Common.RoutingType, e: Event): void;
-        removeSelectedResults(searchContext: ISearchContext): void;
+        removeSelectedResults(searchContext: ISearchContext, e: Event): void;
     }
 
     interface ISearchRequestQueueItem {
@@ -152,7 +152,8 @@
                 } else {
                     $scope.fromContext.hasFocus = false;
                 }
-                this.suppressEvents(e);
+                e.stopPropagation();
+                //this.suppressEvents(e);
             }
 
             $scope.keyDown = (searchContext: ISearchContext, e: KeyboardEvent): void => {
@@ -202,9 +203,10 @@
                 return `text-${$scope.getDirection(words) === "rtl" ? "right" : "left"}`;
             }
 
-            $scope.removeSelectedResults = (searchContext: ISearchContext) => {
+            $scope.removeSelectedResults = (searchContext: ISearchContext, e: Event) => {
                 searchContext.selectedSearchResults = null;
                 this.setFocus($scope);
+                this.suppressEvents(e);
             }
 
             $scope.setRouting = (routingType: Common.RoutingType, e: Event) => {
