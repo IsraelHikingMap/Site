@@ -84,17 +84,10 @@
 						<td><i class='fa fa-lg fa-file-text-o'></i></td>
 					<#}#>
 					<td><a href="<#=item.Link#>"><#=item.Name#></a></td>
-					<#if (item.Name.EndsWith("/"))
-					{#>
+					<#if (item.Name.EndsWith("/")) {#>
 						<td></td>
-					<#} else if (item.Size > 1024 * 1024 * 1024) {#>
-						<td><#=(item.Size * 1.0 / (1024 * 1024 * 1024)).ToString("G2")#> Gb</td>
-					<#} else if (item.Size > 1024 * 1024) {#>
-						<td><#=(item.Size * 1.0 / (1024 * 1024)).ToString("G2")#> Mb</td>
-					<#} else if (item.Size > 1024) {#>
-						<td><#=(item.Size / 1024)#> Kb</td>
 					<#} else {#>
-						<td><#=item.Size#> b</td>
+						<td><#=GetSizeString(item.Size)#></td>
 					<#}#>
 					<td><#=item.LastModified.ToString("dd/MM/yyyy HH:mm")#></td>
 				</tr>

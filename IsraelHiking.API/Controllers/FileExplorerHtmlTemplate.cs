@@ -184,84 +184,41 @@ if (item.Name.EndsWith("/"))
             this.Write("</a></td>\r\n\t\t\t\t\t");
             
             #line 87 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-if (item.Name.EndsWith("/"))
-					{
+if (item.Name.EndsWith("/")) {
             
             #line default
             #line hidden
             this.Write("\t\t\t\t\t\t<td></td>\r\n\t\t\t\t\t");
             
-            #line 90 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-} else if (item.Size > 1024 * 1024 * 1024) {
-            
-            #line default
-            #line hidden
-            this.Write("\t\t\t\t\t\t<td>");
-            
-            #line 91 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture((item.Size * 1.0 / (1024 * 1024 * 1024)).ToString("G2")));
-            
-            #line default
-            #line hidden
-            this.Write(" Gb</td>\r\n\t\t\t\t\t");
-            
-            #line 92 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-} else if (item.Size > 1024 * 1024) {
-            
-            #line default
-            #line hidden
-            this.Write("\t\t\t\t\t\t<td>");
-            
-            #line 93 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture((item.Size * 1.0 / (1024 * 1024)).ToString("G2")));
-            
-            #line default
-            #line hidden
-            this.Write(" Mb</td>\r\n\t\t\t\t\t");
-            
-            #line 94 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-} else if (item.Size > 1024) {
-            
-            #line default
-            #line hidden
-            this.Write("\t\t\t\t\t\t<td>");
-            
-            #line 95 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture((item.Size / 1024)));
-            
-            #line default
-            #line hidden
-            this.Write(" Kb</td>\r\n\t\t\t\t\t");
-            
-            #line 96 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
+            #line 89 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
 } else {
             
             #line default
             #line hidden
             this.Write("\t\t\t\t\t\t<td>");
             
-            #line 97 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
-            this.Write(this.ToStringHelper.ToStringWithCulture(item.Size));
+            #line 90 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(GetSizeString(item.Size)));
             
             #line default
             #line hidden
-            this.Write(" b</td>\r\n\t\t\t\t\t");
+            this.Write("</td>\r\n\t\t\t\t\t");
             
-            #line 98 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
+            #line 91 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
 }
             
             #line default
             #line hidden
             this.Write("\t\t\t\t\t<td>");
             
-            #line 99 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
+            #line 92 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(item.LastModified.ToString("dd/MM/yyyy HH:mm")));
             
             #line default
             #line hidden
             this.Write("</td>\r\n\t\t\t\t</tr>\r\n\t\t\t");
             
-            #line 101 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
+            #line 94 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\FileExplorerHtmlTemplate.tt"
 }
             
             #line default

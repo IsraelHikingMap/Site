@@ -81,7 +81,7 @@ namespace IsraelHiking.API.Tests.Services
         public void UpdateData_UpdateElasticSearchTwoNodes_ShouldUpdateGraphHopper()
         {
             _osmGeoJsonPreprocessor.Preprocess(Arg.Any<Dictionary<string, List<ICompleteOsmGeo>>>())
-                .Returns(new Dictionary<string, List<Feature>> { { "name", new List<Feature> { new Feature()} } });
+                .Returns(new Dictionary<string, List<Feature>> { { "name", new List<Feature> { new Feature() } } });
             _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
 
             _osmDataService.Initialize(string.Empty);

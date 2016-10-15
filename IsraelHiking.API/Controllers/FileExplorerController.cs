@@ -19,6 +19,33 @@ namespace IsraelHiking.API.Controllers
         {
             FileExplorerViewModel = viewModel;
         }
+
+        public string GetSizeString(double number)
+        {
+            string units;
+            double convertedNumber;
+            if (number > 1024 * 1024 * 1024)
+            {
+                units = "Gb";
+                convertedNumber = number * 1.0 / (1024 * 1024 * 1024);
+            }
+            else if (number > 1024 * 1024)
+            {
+                units = "Mb";
+                convertedNumber = number * 1.0 / (1024 * 1024);
+            }
+            else if (number > 1024)
+            {
+                units = "Kb";
+                convertedNumber = number / 1024;
+            }
+            else
+            {
+                units = "b";
+                convertedNumber = number;
+            }
+            return Convert.ToDouble($"{convertedNumber:G2}").ToString("R0") + " " + units;
+        }
     }
 
     public class FileExplorerController : ApiController
@@ -77,9 +104,9 @@ namespace IsraelHiking.API.Controllers
                 Size = _fileSystemHelper.GetSize(file)
             }).ToList());
             string baseHeaderName = baseUri.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Last() + "/";
-            fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry {Name = baseHeaderName, Link = baseUri});
+            fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry { Name = baseHeaderName, Link = baseUri });
             var currentLink = baseUri;
-            foreach (var header in path.Split(new [] {'/'},  StringSplitOptions.RemoveEmptyEntries))
+            foreach (var header in path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries))
             {
                 currentLink += header + "/";
                 fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry
