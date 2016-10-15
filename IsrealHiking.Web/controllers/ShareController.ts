@@ -109,7 +109,7 @@
 
         private getShareAddressWithoutProtocol = ($scope: IShareScope) => {
             if ($scope.siteUrlId) {
-                return `//${this.$window.location.host}/#/?s=${$scope.siteUrlId}`;
+                return `//${this.$window.location.host}/#!/?s=${$scope.siteUrlId}`;
             }
             return this.$window.location.href;
         }
