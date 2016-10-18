@@ -1,4 +1,8 @@
-﻿.bg-blue {
+﻿.center-image {
+    margin: 0 auto;
+}
+
+.bg-blue {
     background: #0000FF;
 }
 

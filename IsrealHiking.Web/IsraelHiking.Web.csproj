@@ -75,6 +75,8 @@
     <Content Include="content\images\none.svg" />
     <Content Include="content\images\os-israel-logo.png" />
     <Content Include="content\images\os-israel-logo_transparent.png" />
+    <Content Include="content\images\routing-all.png" />
+    <Content Include="content\images\routing-per-point.png" />
     <Content Include="content\L.Control.Locate.css" />
     <Content Include="content\leaflet.css" />
     <Content Include="content\loading-bar.css" />

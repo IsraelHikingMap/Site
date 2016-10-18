@@ -7,6 +7,7 @@
         reverseRoute(e: Event): void;
         saveRouteToFile(e: Event);
         toggleRoutingPerPoint(e: Event): void;
+        getRoutingTypeImage(): void;
     }
 
     export class RouteUpdateController extends RouteBaseController {
@@ -63,6 +64,12 @@
                 }
                 routeLayer.center();
                 this.suppressEvents(e);
+            }
+
+            $scope.getRoutingTypeImage = () => {
+                return $scope.routeProperties.isRoutingPerPoint
+                    ? "/content/images/routing-per-point.png"
+                    : "/content/images/routing-all.png";
             }
         }
     }
