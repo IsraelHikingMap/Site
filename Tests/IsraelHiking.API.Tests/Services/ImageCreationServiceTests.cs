@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.IO.MemoryMappedFiles;
 using System.Threading.Tasks;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
@@ -74,7 +72,7 @@ namespace IsraelHiking.API.Tests.Services
             var ressults = _imageCreationService.Create(dataContainer).Result;
 
             Assert.IsTrue(ressults.Length > 0);
-            _remoteFileFetcherGateway.Received(1).GetFileContent(Arg.Any<string>());
+            _remoteFileFetcherGateway.Received(2).GetFileContent(Arg.Any<string>());
         }
 
         [TestMethod]
@@ -89,7 +87,7 @@ namespace IsraelHiking.API.Tests.Services
             var ressults = _imageCreationService.Create(dataContainer).Result;
 
             Assert.IsTrue(ressults.Length > 0);
-            _remoteFileFetcherGateway.Received(4).GetFileContent(Arg.Any<string>());
+            _remoteFileFetcherGateway.Received(2).GetFileContent(Arg.Any<string>());
         }
 
         [TestMethod]
@@ -104,7 +102,7 @@ namespace IsraelHiking.API.Tests.Services
             var ressults = _imageCreationService.Create(dataContainer).Result;
 
             Assert.IsTrue(ressults.Length > 0);
-            _remoteFileFetcherGateway.Received(4).GetFileContent(Arg.Any<string>());
+            _remoteFileFetcherGateway.Received(8).GetFileContent(Arg.Any<string>());
         }
 
         [TestMethod]
@@ -119,7 +117,7 @@ namespace IsraelHiking.API.Tests.Services
             var ressults = _imageCreationService.Create(dataContainer).Result;
 
             Assert.IsTrue(ressults.Length > 0);
-            _remoteFileFetcherGateway.Received(16).GetFileContent(Arg.Any<string>());
+            _remoteFileFetcherGateway.Received(8).GetFileContent(Arg.Any<string>());
         }
 
         [TestMethod]
@@ -134,7 +132,7 @@ namespace IsraelHiking.API.Tests.Services
             var ressults = _imageCreationService.Create(dataContainer).Result;
 
             Assert.IsTrue(ressults.Length > 0);
-            _remoteFileFetcherGateway.Received(16).GetFileContent(Arg.Any<string>());
+            _remoteFileFetcherGateway.Received(8).GetFileContent(Arg.Any<string>());
         }
 
         [TestMethod]
@@ -149,7 +147,7 @@ namespace IsraelHiking.API.Tests.Services
             var ressults = _imageCreationService.Create(dataContainer).Result;
 
             Assert.IsTrue(ressults.Length > 0);
-            _remoteFileFetcherGateway.Received(16).GetFileContent(Arg.Any<string>());
+            _remoteFileFetcherGateway.Received(8).GetFileContent(Arg.Any<string>());
         }
 
         [TestMethod]
@@ -166,7 +164,7 @@ namespace IsraelHiking.API.Tests.Services
             var ressults = _imageCreationService.Create(dataContainer).Result;
 
             Assert.IsTrue(ressults.Length > 0);
-            _remoteFileFetcherGateway.Received(16).GetFileContent(Arg.Any<string>());
+            _remoteFileFetcherGateway.Received(8).GetFileContent(Arg.Any<string>());
         }
     }
 }

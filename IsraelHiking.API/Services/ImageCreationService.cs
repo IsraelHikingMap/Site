@@ -14,19 +14,23 @@ namespace IsraelHiking.API.Services
     internal class BackgroundImage
     {
         public Image Image { get; set; }
-        public int X { get; set; }
-        public int Y { get; set; }
+        public Point TopLeft { get; set; }
+        public Point Tiles { get; set; }
         public double N { get; set; }
-        public int Ratio { get; set; }
+        public int Zoom { get; set; }
+        
     }
 
     public class ImageCreationService : IImageCreationService
     {
         private const int TILE_SIZE = 256; // pixels
-        private const int TARGET_TILE_SIZE = 256 * 4; // pixels
+        private const int NUMBER_OF_TILES_FOR_IMAGE_X = 4; // no units
+        private const int NUMBER_OF_TILES_FOR_IMAGE_Y = 2; // no units
+        private const int TARGET_TILE_SIZE_X = TILE_SIZE * NUMBER_OF_TILES_FOR_IMAGE_X; // pixels
+        private const int TARGET_TILE_SIZE_Y = TILE_SIZE * NUMBER_OF_TILES_FOR_IMAGE_X; // pixels
         private const float CIRCLE_SIZE = 12; // pixels
         private const int MAX_ZOOM = 16;
-        private const int NUMBER_OF_TILES_FOR_IMAGE = 4;
+        
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
 
         private int _reoutePenIndex;
@@ -82,97 +86,69 @@ namespace IsraelHiking.API.Services
             return imageStream.ToArray();
         }
 
-        private int GetDeltaAndZoom(LatLng[] allLocations, out int zoom)
+        private BackgroundImage InitBackgroundImageTiles(LatLng[] allLocations)
         {
-            zoom = MAX_ZOOM;
+            var zoom = MAX_ZOOM;
             var n = Math.Pow(2, zoom);
-            var xTilesDelta = Math.Ceiling(GetXTile(allLocations.Max(l => l.lng), n)) - Math.Floor(GetXTile(allLocations.Min(l => l.lng), n));
-            var yTilesDelta = Math.Ceiling(GetYTile(allLocations.Min(l => l.lat), n)) - Math.Floor(GetYTile(allLocations.Max(l => l.lat), n));
-            var maxTilesDelta = (int)Math.Max(xTilesDelta, yTilesDelta);
-            while (maxTilesDelta > NUMBER_OF_TILES_FOR_IMAGE)
+            var tiles = new Point
             {
-                maxTilesDelta = (maxTilesDelta + 1) / 2;
+                X = (int)Math.Ceiling(Math.Ceiling(GetXTile(allLocations.Max(l => l.lng), n)) - Math.Floor(GetXTile(allLocations.Min(l => l.lng), n))),
+                Y = (int)Math.Ceiling(Math.Ceiling(GetYTile(allLocations.Min(l => l.lat), n)) - Math.Floor(GetYTile(allLocations.Max(l => l.lat), n)))
+            };
+            while (tiles.X > NUMBER_OF_TILES_FOR_IMAGE_X || tiles.Y > NUMBER_OF_TILES_FOR_IMAGE_Y)
+            {
                 zoom--;
+                n = Math.Pow(2, zoom);
+                tiles.X = (int)Math.Ceiling(Math.Ceiling(GetXTile(allLocations.Max(l => l.lng), n)) - Math.Floor(GetXTile(allLocations.Min(l => l.lng), n)));
+                tiles.Y = (int)Math.Ceiling(Math.Ceiling(GetYTile(allLocations.Min(l => l.lat), n)) - Math.Floor(GetYTile(allLocations.Max(l => l.lat), n)));
             }
-            return maxTilesDelta;
+            return new BackgroundImage
+            {
+                Tiles = tiles,
+                Zoom = zoom,
+                N = n
+            };
         }
 
         private async Task<BackgroundImage> GetBackGroundImage(string addressTemplate, LatLng[] allLocations)
         {
-            int zoom;
-            int maxTilesDelta = GetDeltaAndZoom(allLocations, out zoom);
-            var n = Math.Pow(2, zoom);
-            var left = (int)GetXTile(allLocations.Min(l => l.lng), n);
-            var top = (int)GetYTile(allLocations.Max(l => l.lat), n);
-            var right = (int)GetXTile(allLocations.Max(l => l.lng), n);
-            var bottom = (int)GetYTile(allLocations.Min(l => l.lat), n);
-            int ratio = maxTilesDelta;
-            switch (maxTilesDelta)
+            var backgroundImage = InitBackgroundImageTiles(allLocations);
+            var topLeft = new Point((int)GetXTile(allLocations.Min(l => l.lng), backgroundImage.N), (int)GetYTile(allLocations.Max(l => l.lat), backgroundImage.N));
+            var bottomRight = new Point((int)GetXTile(allLocations.Max(l => l.lng), backgroundImage.N), (int)GetYTile(allLocations.Min(l => l.lat), backgroundImage.N));
+            if (backgroundImage.Tiles.X == 2 && backgroundImage.Tiles.Y == 1)
             {
-                case 1:
-                    break;
-                case 2:
-                    if (left == right)
-                    {
-                        right++;
-                    }
-                    if (top == bottom)
-                    {
-                        top--;
-                    }
-                    break;
-                default:
-                    ratio = NUMBER_OF_TILES_FOR_IMAGE;
-                    if (right - left + 1 < NUMBER_OF_TILES_FOR_IMAGE)
-                    {
-                        right++;
-                    }
-                    if (right - left + 1 < NUMBER_OF_TILES_FOR_IMAGE)
-                    {
-                        left--;
-                    }
-                    if (right - left + 1 < NUMBER_OF_TILES_FOR_IMAGE)
-                    {
-                        right++;
-                    }
-
-                    if (bottom - top + 1 < NUMBER_OF_TILES_FOR_IMAGE)
-                    {
-                        top--;
-                    }
-                    if (bottom - top + 1 < NUMBER_OF_TILES_FOR_IMAGE)
-                    {
-                        bottom++;
-                    }
-                    if (bottom - top + 1 < NUMBER_OF_TILES_FOR_IMAGE)
-                    {
-                        top--;
-                    }
-                    break;
+                // no need to do anything.
             }
-            return new BackgroundImage
+            else if (backgroundImage.Tiles.X == 1 && backgroundImage.Tiles.Y == 1)
             {
-                Image = await CreateSingleImageFromTiles(top, left, bottom, right, zoom, addressTemplate),
-                N = Math.Pow(2, zoom),
-                X = left,
-                Y = top,
-                Ratio = ratio
-            };
+                backgroundImage.Tiles = new Point(2, 1);
+                bottomRight.X++;
+            }
+            else
+            {
+                backgroundImage.Tiles = new Point(NUMBER_OF_TILES_FOR_IMAGE_X, NUMBER_OF_TILES_FOR_IMAGE_Y);
+                UpdateImageRectangle(ref topLeft, ref bottomRight);
+            }
+            backgroundImage.TopLeft = topLeft;
+            backgroundImage.Image = await CreateSingleImageFromTiles(topLeft, bottomRight, backgroundImage.Zoom, addressTemplate);
+            return backgroundImage;
         }
 
-        private async Task<Image> CreateSingleImageFromTiles(int top, int left, int bottom, int right, int zoom, string addressTemplate)
+        private async Task<Image> CreateSingleImageFromTiles(Point topLeft, Point bottomRight, int zoom, string addressTemplate)
         {
-            var bitmap = new Bitmap(TARGET_TILE_SIZE, TARGET_TILE_SIZE);
-            var verticalTiles = (bottom - top + 1);
-            var targetSize = TARGET_TILE_SIZE / verticalTiles;
+            var bitmap = new Bitmap(TARGET_TILE_SIZE_X, TARGET_TILE_SIZE_Y);
+            var verticalTiles = bottomRight.Y - topLeft.Y + 1;
+            var horizontalTiles = bottomRight.X - topLeft.X + 1;
+            var targetSizeX = TARGET_TILE_SIZE_X / horizontalTiles;
+            var targetSizeY = TARGET_TILE_SIZE_Y / verticalTiles;
             using (var graphics = Graphics.FromImage(bitmap))
             {
-                for (int x = 0; x < right - left + 1; x++)
+                for (int x = 0; x < horizontalTiles; x++)
                 {
                     for (int y = 0; y < verticalTiles; y++)
                     {
-                        graphics.DrawImage(await GetTileImage(left + x, top + y, zoom, addressTemplate),
-                            new Rectangle(x * targetSize, y * targetSize, targetSize, targetSize),
+                        graphics.DrawImage(await GetTileImage(topLeft.X + x, topLeft.Y + y, zoom, addressTemplate),
+                            new Rectangle(x * targetSizeX, y * targetSizeY, targetSizeX, targetSizeY),
                             new Rectangle(0, 0, TILE_SIZE, TILE_SIZE),
                             GraphicsUnit.Pixel);
                     }
@@ -236,9 +212,30 @@ namespace IsraelHiking.API.Services
 
         private PointF ConvertLatLngZToPoint(LatLngZ latLng, BackgroundImage backgroundImage)
         {
-            var x = (float)((GetXTile(latLng.lng, backgroundImage.N) - backgroundImage.X) * TARGET_TILE_SIZE / backgroundImage.Ratio);
-            var y = (float)((GetYTile(latLng.lat, backgroundImage.N) - backgroundImage.Y) * TARGET_TILE_SIZE / backgroundImage.Ratio);
+            var x = (float)((GetXTile(latLng.lng, backgroundImage.N) - backgroundImage.TopLeft.X) * TARGET_TILE_SIZE_X / backgroundImage.Tiles.X);
+            var y = (float)((GetYTile(latLng.lat, backgroundImage.N) - backgroundImage.TopLeft.Y) * TARGET_TILE_SIZE_Y / backgroundImage.Tiles.Y);
             return new PointF(x, y);
+        }
+
+        private void UpdateImageRectangle(ref Point topLeft, ref Point bottomRight)
+        {
+            if (bottomRight.X - topLeft.X + 1 < NUMBER_OF_TILES_FOR_IMAGE_X)
+            {
+                bottomRight.X++;
+            }
+            if (bottomRight.X - topLeft.X + 1 < NUMBER_OF_TILES_FOR_IMAGE_X)
+            {
+                topLeft.X--;
+            }
+            if (bottomRight.X - topLeft.X + 1 < NUMBER_OF_TILES_FOR_IMAGE_X)
+            {
+                bottomRight.X++;
+            }
+
+            if (bottomRight.Y - topLeft.Y + 1 < NUMBER_OF_TILES_FOR_IMAGE_Y)
+            {
+                topLeft.Y--;
+            }
         }
     }
 }
