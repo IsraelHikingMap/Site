@@ -328,8 +328,7 @@ namespace IsraelHiking.Services.Layers {
             if (this.hashService.externalUrl) {
                 this.fileService.openFromUrl(this.hashService.externalUrl)
                     .success((dataContainer: Common.DataContainer) => {
-                        // #252: if we want to support base layer with url - uncomment this:
-                        //dataContainer.baseLayer = this.hashService.getDataContainer().baseLayer;
+                        dataContainer.baseLayer = this.hashService.getDataContainer().baseLayer;
                         this.setJsonData(dataContainer);
                         deferred.resolve();
                     });
@@ -412,6 +411,9 @@ namespace IsraelHiking.Services.Layers {
                     customName = key + index.toString();
                     layer = _.find(this.baseLayers, (baseLayerToFind) => baseLayerToFind.key === customName);
                 } while (layer != null);
+                key = customName;
+                layerData.minZoom = LayersService.MIN_ZOOM;
+                layerData.maxZoom = LayersService.MAX_NATIVE_ZOOM;
             }
 
             var newLayer = this.addBaseLayer({
