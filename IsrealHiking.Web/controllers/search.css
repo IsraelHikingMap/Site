@@ -39,6 +39,7 @@
     border-left: 1px solid #ccc;
     float: right;
     background-color: white;
+    border-radius: 0;
 }
 
 .search-input-directional {

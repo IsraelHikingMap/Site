@@ -152,8 +152,10 @@
                 } else {
                     $scope.fromContext.hasFocus = false;
                 }
-                e.stopPropagation();
-                //this.suppressEvents(e);
+                if (e.currentTarget != null) {
+                    angular.element(e.currentTarget).focus();
+                }
+                this.suppressEvents(e);
             }
 
             $scope.keyDown = (searchContext: ISearchContext, e: KeyboardEvent): void => {
