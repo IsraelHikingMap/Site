@@ -28,7 +28,7 @@ namespace IsraelHiking.API.Converters
     {
         public gpxType ToGpx(DataContainer container)
         {
-            var routes = container.routes ?? new List<RouteData>();
+            var routes = (container.routes ?? new List<RouteData>()).Where(r => r.segments.SelectMany(s => s.latlngzs).Any());
             return new gpxType
             {
                 wpt = container.markers.Select(ToWptType).ToArray(),
@@ -113,7 +113,7 @@ namespace IsraelHiking.API.Converters
             {
                 lat = (double)point.lat,
                 lng = (double)point.lon,
-                z = (double)point.ele,
+                z = (double)point.ele
             };
         }
 
@@ -132,7 +132,7 @@ namespace IsraelHiking.API.Converters
             {
                 lat = (decimal)marker.latlng.lat,
                 lon = (decimal)marker.latlng.lng,
-                name = marker.title,
+                name = marker.title
             };
         }
 
@@ -143,7 +143,7 @@ namespace IsraelHiking.API.Converters
                 lat = (decimal)latLngZ.lat,
                 lon = (decimal)latLngZ.lng,
                 ele = (decimal)latLngZ.z,
-                eleSpecified = true,
+                eleSpecified = true
             };
         }
 
