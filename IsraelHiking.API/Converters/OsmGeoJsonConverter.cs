@@ -66,18 +66,18 @@ namespace IsraelHiking.API.Converters
             var waysToGroup = new List<CompleteWay>(ways.Where(w => w.Nodes.Any()));
             while (waysToGroup.Any())
             {
-                var currentNodes = new List<Node>(waysToGroup.First().Nodes);
-                waysToGroup.RemoveAt(0);
-                var group = nodesGroups.FirstOrDefault(g => currentNodes.Last().Id == g.First().Id 
-                || currentNodes.First().Id == g.Last().Id
-                || currentNodes.First().Id == g.First().Id 
-                || currentNodes.Last().Id == g.Last().Id);
-                if (group == null)
+                var wayToGroup = waysToGroup.FirstOrDefault(w =>
+                    nodesGroups.Any(g => CanBeLinked(w.Nodes, g)));
+
+                if (wayToGroup == null)
                 {
-                    group = currentNodes;
-                    nodesGroups.Add(group);
+                    nodesGroups.Add(new List<Node>(waysToGroup.First().Nodes));
+                    waysToGroup.RemoveAt(0);
                     continue;
                 }
+                var currentNodes = new List<Node>(wayToGroup.Nodes);
+                waysToGroup.Remove(wayToGroup);
+                var group = nodesGroups.First(g => CanBeLinked(currentNodes, g));
                 if (currentNodes.First().Id == group.First().Id || currentNodes.Last().Id == group.Last().Id)
                 {
                     currentNodes.Reverse(); // direction of this way is incompatible with other ways.
@@ -92,6 +92,14 @@ namespace IsraelHiking.API.Converters
                 group.InsertRange(0, currentNodes);
             }
             return nodesGroups.Select(GetGeometryFromNodes).ToList();
+        }
+
+        private bool CanBeLinked(List<Node> nodes1, List<Node> nodes2)
+        {
+            return nodes1.Last().Id == nodes2.First().Id
+                   || nodes1.First().Id == nodes2.Last().Id
+                   || nodes1.First().Id == nodes2.First().Id
+                   || nodes1.Last().Id == nodes2.Last().Id;
         }
 
         private Feature ConvertRelation(CompleteRelation relation)

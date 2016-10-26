@@ -310,5 +310,33 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.IsTrue(multiPlygon.IsValid);
             Assert.AreEqual(1, multiPlygon.Geometries.Length);
         }
+
+        [TestMethod]
+        public void ToGeoJson_UnsortedRelation_ShouldReturnMultiLineStringAfterGrouping()
+        {
+            var node1 = CreateNode(1);
+            var node2 = CreateNode(2);
+            var node3 = CreateNode(3);
+            var node4 = CreateNode(4);
+            var wayPartOfLineString1 = CompleteWay.Create(8);
+            var wayPartOfLineString2 = CompleteWay.Create(9);
+            var wayPartOfLineString3 = CompleteWay.Create(10);
+            wayPartOfLineString1.Nodes.AddRange(new[] { node1, node2 });
+            wayPartOfLineString2.Nodes.AddRange(new[] { node3, node4 });
+            wayPartOfLineString3.Nodes.AddRange(new[] { node3, node2 });
+            var relation = CompleteRelation.Create(11);
+            relation.Tags.Add(NAME, NAME);
+            relation.Members.Add(new CompleteRelationMember { Member = wayPartOfLineString1 });
+            relation.Members.Add(new CompleteRelationMember { Member = wayPartOfLineString2 });
+            relation.Members.Add(new CompleteRelationMember { Member = wayPartOfLineString3 });
+
+            var feature = _converter.ToGeoJson(relation);
+            var multiLineString = feature.Geometry as MultiLineString;
+
+            Assert.IsNotNull(multiLineString);
+            Assert.AreEqual(1, multiLineString.Geometries.Length);
+            var lineString = multiLineString.Geometries.First();
+            Assert.AreEqual(4, lineString.Coordinates.Length);
+        }
     }
 }
