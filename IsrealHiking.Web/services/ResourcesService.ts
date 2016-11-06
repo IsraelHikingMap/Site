@@ -158,7 +158,7 @@ namespace IsraelHiking.Services {
         public infoOsmWikiLink: string;
         public infoOruxmapDownloadLink: string;
         public infoFooterThanks: string;
-        public infoFooterHarelAndZeev: string;
+        public infoFooterAuthors: string;
         // Legend
         public legendMarkedTrails: string;
         public legendRedMarkedTrail: string;
@@ -453,7 +453,7 @@ namespace IsraelHiking.Services {
                     this.infoOsmWikiLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}", { link: "<a href='http://wiki.openstreetmap.org/wiki/WikiProject_Israel' target='_blank'>", linkend: "</a>" }));
                     this.infoOruxmapDownloadLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Download {{link}}Offline maps{{linkend}} directly to your android device for use with the OruxMaps application", { link: "<a href='http://israelhiking.osm.org.il/OruxmapsDownload.html' target='_blank'>", linkend: "</a>" }));
                     this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
-                    this.infoFooterHarelAndZeev = this.gettextCatalog.getString("Harel and Zeev");
+                    this.infoFooterAuthors = this.gettextCatalog.getString("Harel, Zeev and Guy");
                     // Legend
                     this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");
                     this.legendRedMarkedTrail = this.gettextCatalog.getString("Red marked trail");

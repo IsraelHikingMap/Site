@@ -49,6 +49,8 @@ You can find the project at: https://github.com/domoritz/leaflet-locatecontrol
             setView: 'untilPan',
             /** Keep the current map zoom level when setting the view and only pan. */
             keepCurrentZoomLevel: false,
+            /** Smooth pan and zoom to the location of the marker. Only works in Leaflet 1.0+. */
+            flyTo: false,
             /**
              * The user location can be inside and outside the current view when the user clicks on the
              * control that is already active. Both cases can be configures separately.
@@ -62,6 +64,12 @@ You can find the project at: https://github.com/domoritz/leaflet-locatecontrol
                 /** What should happen if the user clicks on the control while the location is outside the current view. */
                 outOfView: 'setView',
             },
+            /**
+             * If set, save the map bounds just before centering to the user's
+             * location. When control is disabled, set the view back to the
+             * bounds that were saved.
+             */
+            returnToPrevBounds: false,
             /** If set, a circle that shows the location accuracy is drawn. */
             drawCircle: true,
             /** If set, the marker at the users' location is drawn. */
@@ -158,6 +166,7 @@ You can find the project at: https://github.com/domoritz/leaflet-locatecontrol
             this._layer = this.options.layer || new L.LayerGroup();
             this._layer.addTo(map);
             this._event = undefined;
+            this._prevBounds = null;
 
             this._link = L.DomUtil.create('a', 'leaflet-bar-part leaflet-bar-part-single cursor-pointer', container);
             this._link.dataset.uibTooltip = '{{resources.showMeWhereIAm}}';
@@ -197,9 +206,16 @@ You can find the project at: https://github.com/domoritz/leaflet-locatecontrol
                         break;
                     case 'stop':
                         this.stop();
+                        if (this.options.returnToPrevBounds) {
+                            var f = this.options.flyTo ? this._map.flyToBounds : this._map.fitBounds;
+                            f.bind(this._map)(this._prevBounds);
+                        }
                         break;
                 }
             } else {
+                if (this.options.returnToPrevBounds) {
+                  this._prevBounds = this._map.getBounds();
+                }
                 this.start();
             }
 
@@ -280,19 +296,21 @@ You can find the project at: https://github.com/domoritz/leaflet-locatecontrol
          * Zoom (unless we should keep the zoom level) and an to the current view.
          */
         setView: function() {
+            this._drawMarker();
             if (this._isOutsideMapBounds()) {
                 this.options.onLocationOutsideMapBounds(this);
             } else {
                 if (this.options.keepCurrentZoomLevel) {
-                    this._map.panTo([this._event.latitude, this._event.longitude]);
+                    var f = this.options.flyTo ? this._map.flyTo : this._map.panTo;
+                    f.bind(this._map)([this._event.latitude, this._event.longitude]);
                 } else {
-                    this._map.fitBounds(this._event.bounds, {
+                    var f = this.options.flyTo ? this._map.flyToBounds : this._map.fitBounds;
+                    f.bind(this._map)(this._event.bounds, {
                         padding: this.options.circlePadding,
                         maxZoom: this.options.locateOptions.maxZoom
                     });
                 }
             }
-            this._drawMarker();
         },
 
         /**

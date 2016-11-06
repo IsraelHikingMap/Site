@@ -349,7 +349,7 @@ msgid "Haifa Wadis Trail"
 msgstr ""
 
 #: services\ResourcesService.js:165
-msgid "Harel and Zeev"
+msgid "Harel, Zeev and Guy"
 msgstr ""
 
 #: services\ResourcesService.js:84

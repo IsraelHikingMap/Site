@@ -1,6 +1,6 @@
 /**
  * An Angular module that gives you access to the browsers local storage
- * @version v0.4.0 - 2016-08-26
+ * @version v0.5.1 - 2016-09-27
  * @link https://github.com/grevory/angular-local-storage
  * @author grevory <greg@gregpike.ca>
  * @license MIT License, http://www.opensource.org/licenses/MIT
@@ -11,6 +11,7 @@ var isDefined = angular.isDefined,
   isNumber = angular.isNumber,
   isObject = angular.isObject,
   isArray = angular.isArray,
+  isString = angular.isString,
   extend = angular.extend,
   toJson = angular.toJson;
 
@@ -412,7 +413,8 @@ angular
             if (thisCookie.indexOf(deriveQualifiedKey(key) + '=') === 0) {
               var storedValues = decodeURIComponent(thisCookie.substring(prefix.length + key.length + 1, thisCookie.length));
               try {
-                return JSON.parse(storedValues);
+                var parsedValue = JSON.parse(storedValues);
+                return typeof(parsedValue) === 'number' ? storedValues : parsedValue;
               } catch(e) {
                 return storedValues;
               }
@@ -477,13 +479,13 @@ angular
             if ($window.addEventListener) {
                 $window.addEventListener("storage", handleStorageChangeCallback, false);
                 $rootScope.$on('$destroy', function() {
-                  $window.removeEventListener("storage", handleStorageChangeCallback);
+                    $window.removeEventListener("storage", handleStorageChangeCallback);
                 });
             } else if($window.attachEvent){
                 // attachEvent and detachEvent are proprietary to IE v6-10
                 $window.attachEvent("onstorage", handleStorageChangeCallback);
                 $rootScope.$on('$destroy', function() {
-                  $window.detachEvent("onstorage", handleStorageChangeCallback);
+                    $window.detachEvent("onstorage", handleStorageChangeCallback);
                 });
             }
         }
@@ -492,7 +494,7 @@ angular
         function handleStorageChangeCallback(e) {
             if (!e) { e = $window.event; }
             if (notify.setItem) {
-                if (isKeyPrefixOurs(e.key)) {
+                if (isString(e.key) && isKeyPrefixOurs(e.key)) {
                     var key = underiveQualifiedKey(e.key);
                     // Use timeout, to avoid using $rootScope.$apply.
                     $timeout(function () {
