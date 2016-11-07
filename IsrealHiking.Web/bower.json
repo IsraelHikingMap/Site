@@ -14,15 +14,16 @@
     "angular-bootstrap": "*",
     "angular-bootstrap-slider": "*",
     "bootstrap": "*",
-    "bootstrap-rtl": "*", 
+    "bootstrap-rtl": "*",
     "jquery": "*",
     "lodash": "*",
     "ng-file-upload": "*",
     "font-awesome": "*",
-    "leaflet": "*",
+    "leaflet": "0.7.7",
     "Leaflet.label": "*",
     "leaflet.locatecontrol": "*",
-    "leaflet-ant-path": "*"
+    "leaflet-ant-path": "*",
+    "x2js": "*"
   },
   "overrides": {
     "bootstrap": {

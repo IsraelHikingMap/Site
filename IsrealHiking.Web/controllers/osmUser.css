@@ -1,0 +1,24 @@
+﻿.osm-user-container {
+    display: table;
+}
+
+.leaflet-touch .osm-user-display {
+    height: 30px;
+}
+
+.osm-user-display {
+    display: table-cell;
+    vertical-align: middle;
+    background: white;
+    border-right: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    padding-left: 12px;
+    padding-right: 12px;
+    height: 26px;
+}
+
+.osm-user-display span {
+    margin-left: 4px;
+    margin-right: 4px;
+}
+

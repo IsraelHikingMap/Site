@@ -50,6 +50,7 @@ namespace IsraelHiking.Services.Layers {
         private fileService: FileService;
         private routeLayerFactory: Layers.RouteLayers.RouteLayerFactory;
         private resourcesService: ResourcesService;
+        private toastr: Toastr;
         private defaultAttribution: string;
         private overlayZIndex;
 
@@ -69,7 +70,8 @@ namespace IsraelHiking.Services.Layers {
             routeLayerFactory: Layers.RouteLayers.RouteLayerFactory,
             hashService: HashService,
             fileService: FileService,
-            resourcesService: ResourcesService) {
+            resourcesService: ResourcesService,
+            toastr: Toastr) {
             super(mapService);
             this.$http = $http;
             this.$q = $q;
@@ -78,6 +80,7 @@ namespace IsraelHiking.Services.Layers {
             this.fileService = fileService;
             this.routeLayerFactory = routeLayerFactory;
             this.resourcesService = resourcesService;
+            this.toastr = toastr;
             this.selectedBaseLayer = null;
             this.selectedRoute = null;
             this.baseLayers = [];
@@ -316,6 +319,7 @@ namespace IsraelHiking.Services.Layers {
                         this.setJsonData(data);
                         this.addOverlaysFromHash(data.overlays);
                         this.hashService.clear();
+                        this.toastr.info(siteUrl.Title);
                         deferred.resolve();
                     }).error(() => {
                         let data = this.hashService.getDataContainer();

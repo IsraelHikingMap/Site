@@ -1,7 +1,5 @@
 ﻿namespace IsraelHiking {
 
-    // HM TODO: סובב מכתש רמון geojson convertion issue?
-
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;
         hasHebrewCharacters(word: string): boolean;
@@ -18,6 +16,7 @@
     app.service(Strings.Services.mapService, [() => new Services.MapService()]);
     app.service(Strings.Services.parserFactory, [() => new Services.Parsers.ParserFactory()]);
     app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
+    app.service(Strings.Services.osmUserService, [Strings.Angular.q, ($q: angular.IQService) => new Services.OsmUserService($q)]);
     app.service(Strings.Services.routeStatisticsService, [() => new Services.RouteStatisticsService()]);
     app.service(Strings.Services.resourcesService, [Strings.Angular.sce, Strings.Services.localStorageService, Strings.Services.gettextCatalog,
         ($sce: angular.ISCEService, localstorageService: angular.local.storage.ILocalStorageService, gettextCatalog: angular.gettext.gettextCatalog) =>
@@ -29,7 +28,7 @@
         ($http: angular.IHttpService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
             new Services.Elevation.MicrosoftElevationProvider($http, resourcesService, toastr)]);
     app.service(Strings.Services.elevationProvider, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.toastr,
-        ($http: angular.IHttpService, resourcesService: Services.ResourcesService,toastr: Toastr) =>
+        ($http: angular.IHttpService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
             new Services.Elevation.ElevationProvider($http, resourcesService, toastr)]);
     app.service(Strings.Services.routerService, [Strings.Angular.http, Strings.Angular.q, Strings.Services.resourcesService, Strings.Services.toastr, Strings.Services.parserFactory,
         ($http: angular.IHttpService, $q: angular.IQService, resourcesService: Services.ResourcesService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
@@ -49,10 +48,10 @@
         ($location: angular.ILocationService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.HashService($location, $rootScope, localStorageService)]);
     app.service(Strings.Services.layersService, [Strings.Angular.http, Strings.Angular.q, Strings.Services.mapService,
-        Strings.Services.localStorageService, Strings.Services.routeLayerFactory, Strings.Services.hashService, Strings.Services.fileService, Strings.Services.resourcesService,
+        Strings.Services.localStorageService, Strings.Services.routeLayerFactory, Strings.Services.hashService, Strings.Services.fileService, Strings.Services.resourcesService, Strings.Services.toastr,
         ($http: angular.IHttpService, $q: angular.IQService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService,
-            routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService, fileService: Services.FileService, resourcesService: Services.ResourcesService) =>
-            new Services.Layers.LayersService($http, $q, mapService, localStorageService, routeLayerFactory, hashService, fileService, resourcesService)]);
+            routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService, fileService: Services.FileService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
+            new Services.Layers.LayersService($http, $q, mapService, localStorageService, routeLayerFactory, hashService, fileService, resourcesService, toastr)]);
     app.service(Strings.Services.dragAndDropService, [Strings.Angular.timeout, Strings.Services.resourcesService, Strings.Services.mapService, Strings.Services.fileService, Strings.Services.layersService, Strings.Services.toastr,
         ($timeout: angular.ITimeoutService, resourcesService: Services.ResourcesService, mapservice: Services.MapService, fileService: Services.FileService, layersService: Services.Layers.LayersService, toastr: Toastr) =>
             new Services.DragAndDropService($timeout, resourcesService, mapservice, fileService, layersService, toastr)
@@ -111,6 +110,10 @@
         controller: Controllers.FileController,
         templateUrl: "controllers/fileSaveAs.html"
     } as angular.IDirective));
+    app.directive(Strings.Directives.osmUserControl, () => ({
+        controller: Controllers.OsmUserController,
+        templateUrl: "controllers/osmUser.html"
+    } as angular.IDirective));
     app.directive(Strings.Directives.zoomControl, () => ({
         controller: Controllers.ZoomController,
         templateUrl: "controllers/zoom.html"
@@ -143,8 +146,9 @@
             $rootScope.hasHebrewCharacters = hasHebrewCharacters;
         }]);
 
-    app.config($compileProvider => {
+    app.config(($compileProvider, toastrConfig) => {
         $compileProvider.aHrefSanitizationWhitelist(/[.*facebook][^\s*(whatsapp):]/);
+        angular.extend(toastrConfig, { positionClass: "toast-top-center" });
     });
 
     export function hasHebrewCharacters(word: string): boolean {

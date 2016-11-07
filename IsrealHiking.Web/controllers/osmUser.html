@@ -1,0 +1,25 @@
+﻿<div class="leaflet-bar" ng-hide="userService.isLoggedIn()">
+    <div class="osm-user-container">
+        <a class="control-icon-first" ng-click="login($event)"><i class="fa fa-sign-in"></i></a>
+        <div class="pull-right">
+            <div class="osm-user-display cursor-pointer" ng-click="login($event)">
+                <span class="pull-right"><i class="fa fa-frown-o fa-lg"></i></span>
+                <span class="pull-right">{{resources.unknownUser}}</span>
+            </div>
+        </div>
+        <a class="cursor-pointer control-icon-last" uib-popover="{{resources.osmLoginExplenation}}" popover-placement="bottom-right" popover-append-to-body="true"><i class="fa fa-question"></i></a>
+    </div>
+</div>
+
+<div class="leaflet-bar" ng-show="userService.isLoggedIn()">
+    <div class="osm-user-container">
+        <a class="control-icon-first" ng-click="userService.logout()"><i class="fa fa-sign-out"></i></a>
+        <div class="pull-right">
+            <div class="osm-user-display">
+                <img class="pull-right" ng-src="{{userService.imageUrl}}" alt="" width="16" height="16" />
+                <span class="pull-right">{{userService.displayName}}</span>
+            </div>
+        </div>
+        <a class="cursor-pointer control-icon-last" ng-click="openUserDetails($event)"><i class="fa fa-wrench"></i></a>
+    </div>
+</div>

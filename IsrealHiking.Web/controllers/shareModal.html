@@ -5,13 +5,49 @@
     </div>
     <form class="form-horizontal">
         <div class="modal-body">
-            <div class="form-group" ng-hide="shareAddress">
-                <label class="control-label col-md-8">{{resources.generateUrlToShareWithYourFriends}}</label>
-                <div class="col-md-4">
-                    <button class="btn btn-success" ng-click="generateUrl()" ng-disabled="isLoading">{{resources.excitedGo}}</button>
+            <div ng-hide="shareAddress">
+                <div class="form-group">
+                    <label class="col-md-2 control-label">{{resources.title}}</label>
+                    <div class="col-md-10">
+                        <input type="text" ng-model="title" class="form-control" placeholder="{{resources.title}}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-md-8">{{resources.generateUrlToShareWithYourFriends}}</label>
+                    <div class="col-md-4">
+                        <button class="btn btn-success btn-block" ng-click="generateUrl()" ng-disabled="isLoading">{{resources.excitedGo}}</button>
+                        <!--<button class="btn btn-success" ng-click="showOffroadForm = !showOffroadForm" ng-disabled="isLoading">Off road icon?</button>-->
+                    </div>
                 </div>
             </div>
+            <!--
+            <div ng-show="showOffroadForm">
+                <div class="form-group">
+                    <label class="col-md-2">User E-Mail</label>
+                    <div class="col-md-10">
+                        <input type="text" ng-model="userMail" class="form-control" placeholder="User E-Mail"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2">{{resources.title}}</label>
+                    <div class="col-md-10">
+                        <input type="text" ng-model="title" class="form-control" placeholder="{{resources.title}}"/>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-md-2">Description</label>
+                    <div class="col-md-10">
+                        <input type="text" ng-model="routeDescription" class="form-control" placeholder="Description"/>
+                    </div>
+
+                </div>
+                <button type="button" ng-click="sendToOffroad(userMail, title, routeDescription)" class="btn btn-success">Send!</button>
+            </div>
+            -->
             <div ng-show="shareAddress">
+                <div class="col-xs-offset-1">
+                    <h4>{{title}}</h4>
+                </div>
                 <div class="form-group">
                     <a href="{{shareAddress}}" target="_blank" class="col-xs-offset-1 chome-wordwrap-fix">{{shareAddress}}</a>
                 </div>
@@ -24,7 +60,7 @@
                         <a ng-href="{{facebookShareAddress}}" class="btn btn-default" target="_blank"><i class="fa fa-facebook"></i></a>
                     </div>
                 </div>
-                <hr />
+                <hr/>
                 <div class="form-group">
                     <label class="control-label col-md-2">{{resources.embedSize}} </label>
                     <div class="col-md-4">
@@ -39,18 +75,18 @@
                 <div class="form-group" ng-show="size == resources.custom">
                     <label class="control-label col-md-2">{{resources.width}}</label>
                     <div class="col-md-4">
-                        <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)" />
+                        <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)"/>
                     </div>
                     <label class="control-label col-md-2">{{resources.height}}</label>
                     <div class="col-md-4">
-                        <input type="number" ng-model="height" class="form-control" ng-change="updateEmbedText(width, height)" />
+                        <input type="number" ng-model="height" class="form-control" ng-change="updateEmbedText(width, height)"/>
                     </div>
                 </div>
                 <p class="col-md-offset-2 col-md-10">{{resources.copyPasteEmbedExplenation}}</p>
                 <div class="form-group">
                     <label class="control-label col-md-2">{{resources.HTML}}</label>
                     <div class="col-md-10">
-                        <textarea rows="3" class="form-control" ng-model="embedText" />
+                        <textarea rows="3" class="form-control" ng-model="embedText"/>
                     </div>
                 </div>
             </div>

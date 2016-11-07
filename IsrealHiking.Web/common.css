@@ -11,7 +11,8 @@ body {
 }
 
 .tooltip-inner {
-    white-space: nowrap;
+    min-width: 150px;
+    
 }
 
 .modal-footer .modal-footer-btns {
@@ -39,6 +40,24 @@ body {
 
 .icon-background {
     top: -2px;
+}
+
+.control-icon-first {
+    float: right;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 4px !important;
+    border-bottom-right-radius: 4px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom: 0 !important;
+}
+
+.control-icon-last {
+    float: right;
+    border-top-left-radius: 4px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-bottom-left-radius: 4px !important;
+    border-bottom: 0 !important;
 }
 
 .dropdown-list {

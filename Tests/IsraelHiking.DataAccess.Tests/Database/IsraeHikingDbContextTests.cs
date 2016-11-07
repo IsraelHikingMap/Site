@@ -62,7 +62,7 @@ namespace IsraelHiking.DataAccess.Tests.Database
             }
         }
 
-        //// HM TODO: use this code to migrate the database - migration was done to routing type and None issue #208.
+        // HM TODO: use this code to migrate the database - migration was done to routing type and None issue #208.
         [TestMethod]
         [Ignore]
         public void UpdateDatabase()

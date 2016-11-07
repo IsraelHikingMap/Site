@@ -6,24 +6,6 @@
     display: table;
 }
 
-.search-icon-first {
-    float: right;
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 4px !important;
-    border-bottom-right-radius: 4px !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom: 0 !important;
-}
-
-.search-icon-last {
-    float: right;
-    border-top-left-radius: 4px !important;
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    border-bottom-left-radius: 4px !important;
-    border-bottom: 0 !important;
-}
-
 .leaflet-touch .search-input {
     height: 30px;
 }

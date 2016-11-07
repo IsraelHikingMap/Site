@@ -93,6 +93,11 @@
     <Content Include="controllers\LanguageController.js" />
     <Content Include="controllers\languageModal.html" />
     <Content Include="controllers\markerPopup.css" />
+    <Content Include="controllers\oauth-close-window.html" />
+    <Content Include="controllers\osmUser.css" />
+    <Content Include="controllers\osmUser.html" />
+    <Content Include="controllers\OsmUserController.js" />
+    <Content Include="controllers\osmUserDetailsModal.html" />
     <Content Include="controllers\routePointPopup.html" />
     <Content Include="controllers\RouteProperties\routeProperties.css" />
     <Content Include="controllers\routeStatistics.css" />
@@ -151,11 +156,13 @@
     <Content Include="scripts\lodash.js" />
     <Content Include="scripts\ng-file-upload.js" />
     <Content Include="scripts\ng-google-chart.js" />
+    <Content Include="scripts\osmauth.min.js" />
     <Content Include="scripts\osm_geojson.js" />
     <Content Include="scripts\slider.js" />
     <Content Include="scripts\ui-bootstrap-tpls.js" />
     <Content Include="scripts\webcomponents.js" />
     <Content Include="controllers\searchResultsMarkerPopup.html" />
+    <Content Include="scripts\xml2json.min.js" />
     <Content Include="services\DragAndDropService.js" />
     <Content Include="services\layers\IDrawingLayer.js" />
     <Content Include="services\layers\poilayers\HoverHandlerPoi.js" />
@@ -173,6 +180,7 @@
     <Content Include="services\layers\routelayers\RouteStateReadOnly.js" />
     <Content Include="services\layers\routelayers\UndoHandler.js" />
     <Content Include="services\layers\WikiMarkersLayer.js" />
+    <Content Include="services\OsmUserService.js" />
     <Content Include="services\ResourcesService.js" />
     <Content Include="services\RouteStatisticsService.js" />
     <Content Include="services\search\BaseSearchResultsProvider.js" />
@@ -256,6 +264,7 @@
     <TypeScriptCompile Include="controllers\LayerProperties\BaseLayerEditController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\OverlayAddController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\OverlayEditController.ts" />
+    <TypeScriptCompile Include="controllers\OsmUserController.ts" />
     <TypeScriptCompile Include="controllers\RouteProperties\RouteAddController.ts" />
     <TypeScriptCompile Include="controllers\LayersController.ts" />
     <TypeScriptCompile Include="controllers\RouteProperties\RouteBaseController.ts" />
@@ -288,6 +297,7 @@
     <TypeScriptCompile Include="scripts\typings\lodash\lodash.d.ts" />
     <TypeScriptCompile Include="scripts\typings\ng-file-upload\ng-file-upload.d.ts" />
     <TypeScriptCompile Include="scripts\typings\toastr\toastr.d.ts" />
+    <TypeScriptCompile Include="scripts\typings\x2js\xml2json.d.ts" />
     <TypeScriptCompile Include="services\DragAndDropService.ts" />
     <TypeScriptCompile Include="services\layers\IDrawingLayer.ts" />
     <TypeScriptCompile Include="services\layers\poilayers\PoiLayer.ts" />
@@ -311,6 +321,7 @@
     <TypeScriptCompile Include="services\FileService.ts" />
     <TypeScriptCompile Include="services\IconsService.ts" />
     <TypeScriptCompile Include="services\layers\LayersService.ts" />
+    <TypeScriptCompile Include="services\OsmUserService.ts" />
     <TypeScriptCompile Include="services\ResourcesService.ts" />
     <TypeScriptCompile Include="services\RouteStatisticsService.ts" />
     <TypeScriptCompile Include="services\search\BaseSearchResultsProvider.ts" />

@@ -58,10 +58,11 @@ namespace IsraelHiking.Controllers {
             this.createContorl($scope, "save-as-control");
             this.createContorl($scope, "edit-osm-control");
             this.createContorl($scope, "info-control");
-            this.createContorl($scope, "language-control", "topright");
+            this.createContorl($scope, "osm-user-control", "topright");
             this.createContorl($scope, "search-control", "topright");
             this.createContorl($scope, "drawing-control", "topright");
             this.createContorl($scope, "share-control", "topright");
+            this.createContorl($scope, "language-control", "topright");
 
             L.control.scale({ imperial: false } as L.ScaleOptions).addTo(this.map);
         }

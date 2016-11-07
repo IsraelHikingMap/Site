@@ -46,6 +46,7 @@
         export const routeStatisticsService = "routeStatisticsService";
         export const dragAndDropService = "dragAndDropService";
         export const resourcesService = "resourcesService";
+        export const osmUserService = "osmUserService";
     }
 
     export namespace Controllers {
@@ -68,6 +69,7 @@
         export const saveAsControl = "saveAsControl";
         export const zoomControl = "zoomControl";
         export const languageControl = "languageControl";
+        export const osmUserControl = "osmUserControl";
         export const infoSidebar = "infoSidebar";
         export const layersSidebar = "layersSidebar";
         export const draggableResizable = "draggableResizable";

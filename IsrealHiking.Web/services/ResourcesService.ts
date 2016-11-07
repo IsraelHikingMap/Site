@@ -111,6 +111,13 @@ namespace IsraelHiking.Services {
         public directionalSearch: string;
         public regularSearch: string;
         public moveToRoute: string;
+        public unknownUser: string;
+        public myTraces: string;
+        public noTraces: string;
+        public myShares: string;
+        public noShares: string;
+        public title: string;
+        public osmLoginExplenation: string;
         // Errors & Warnings
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
@@ -125,6 +132,9 @@ namespace IsraelHiking.Services {
         public unableToGetElevationData: string;
         public unableToGetDataForSnapping: string;
         public routingFailed: string;
+        public pleaseSelectARoute: string;
+        public pleaseAddRoutePoints: string;
+        public unableToLogin: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -406,6 +416,14 @@ namespace IsraelHiking.Services {
                     this.directionalSearch = this.gettextCatalog.getString("Directional Search");
                     this.regularSearch = this.gettextCatalog.getString("Regular Search");
                     this.moveToRoute = this.gettextCatalog.getString("Move to Route");
+                    this.unknownUser = this.gettextCatalog.getString("Unknown User");
+                    this.myTraces = this.gettextCatalog.getString("My Traces");
+                    this.noTraces = this.gettextCatalog.getString("No traces, you should really upload some to OSM.");
+                    this.myShares = this.gettextCatalog.getString("My Shares");
+                    this.noShares = this.gettextCatalog.getString("No shares, our fault, will be added soon!");
+                    this.title = this.gettextCatalog.getString("Title");
+                    this.osmLoginExplenation = this.gettextCatalog.getString("Click on the frowny-face to login to OSM. We'll make it worth your while!");
+                    
                     // Errors & Warnings
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -420,6 +438,9 @@ namespace IsraelHiking.Services {
                     this.unableToGetElevationData = this.gettextCatalog.getString("Unable to get elevation data:");
                     this.unableToGetDataForSnapping = this.gettextCatalog.getString("Unable to get data for snapping...");
                     this.routingFailed = this.gettextCatalog.getString("Routing failed:");
+                    this.pleaseSelectARoute = this.gettextCatalog.getString("Please select a route...");
+                    this.pleaseAddRoutePoints = this.gettextCatalog.getString("Please add points to the route...");
+                    this.unableToLogin = this.gettextCatalog.getString("Unable to login...");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");
