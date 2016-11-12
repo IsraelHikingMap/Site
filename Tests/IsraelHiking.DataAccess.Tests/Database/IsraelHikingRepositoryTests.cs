@@ -159,17 +159,6 @@ namespace IsraelHiking.DataAccess.Tests.Database
         }
 
         [TestMethod]
-        public void GetUrlByModifyKey_ShouldReturnOne()
-        {
-            var siteUrl = new SiteUrl { ModifyKey = "42" };
-            SetupSiteUrls(new List<SiteUrl> { siteUrl });
-
-            var results = _israelHikingRepository.GetUrlByModifyKey(siteUrl.ModifyKey).Result;
-
-            Assert.AreEqual(siteUrl, results);
-        }
-
-        [TestMethod]
         public void AddUrl_ShouldAdd()
         {
             var newSiteUrl = new SiteUrl();

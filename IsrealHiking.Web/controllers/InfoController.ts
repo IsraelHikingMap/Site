@@ -1,6 +1,7 @@
 ﻿namespace IsraelHiking.Controllers {
     type InfoState = "legend" | "help" | "about";
     type LegendItemType = "POI" | "Way";
+    type ApplicationType = "Locus" | "OruxMaps"
 
     export interface ILegendItem {
         latlng: L.LatLng;
@@ -26,6 +27,10 @@
         setState(state: InfoState): void;
         isSectionVisible(legendSection: ILegendSection): boolean;
         toggleSectionVisibility(legendSection: ILegendSection): void;
+        openOfflineModal(): void;
+        getDownloadUrl(app: string, mapType: string, zoom: number);
+        getMobileInstallationInstructions(app: ApplicationType): string;
+        getDesktopInstallationInstructions(app: ApplicationType): string;
     }
 
     export class InfoController extends BaseMapController {
@@ -35,6 +40,7 @@
 
         constructor($scope: IInfoScope,
             $timeout: angular.ITimeoutService,
+            $uibModal: angular.ui.bootstrap.IModalService,
             sidebarService: Services.SidebarService,
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService) {
@@ -46,7 +52,7 @@
 
             $scope.visibleSectionId = -1;
             this.initalizeLegendSections($scope);
-            $scope.state = $scope.legendSections.length > 0 ? "legend" : "about";
+            $scope.state = "about";
 
             $scope.$watch(() => $scope.resources.currentLanguage, () => {
                 this.initalizeLegendSections($scope);
@@ -85,6 +91,51 @@
                 if (state === "legend") {
                     this.initalizeLegendSections($scope);
                 }
+            }
+
+            $scope.openOfflineModal = () => {
+                $uibModal.open({
+                    scope: $scope,
+                    templateUrl: "controllers/infoOfflineDownloadModal.html"
+                });
+            }
+
+            $scope.getDownloadUrl = (app: ApplicationType, mapType: string, zoom: number) => {
+                let protocol = "http://";
+                let extension = ".zip";
+                if (navigator.userAgent.match(/Android/i)) {
+                    if (app === "OruxMaps") {
+                        protocol = "orux-map://";
+                    } else if (app === "Locus") {
+                        protocol = "locus-actions://http/";
+                        extension = ".xml";
+                    }
+                }
+                let address = `${protocol}israelhiking.osm.org.il/Oruxmaps/Israel`;
+                if (mapType === "IHM") {
+                    address += "Hiking";
+                } else if (mapType === "MTB") {
+                    address += "MTB";
+                }
+                if (zoom === 16) {
+                    address += "16";
+                }
+                address += extension;
+                return address;
+            }
+
+            $scope.getMobileInstallationInstructions = (app: ApplicationType) => {
+                if (app === "Locus") {
+                    return $scope.resources.installationInstructionsMobileLocus;
+                }
+                return $scope.resources.installationInstructionsMobileOruxMaps;
+            }
+
+            $scope.getDesktopInstallationInstructions = (app: ApplicationType) => {
+                if (app === "Locus") {
+                    return $scope.resources.installationInstructionsDesktopLocus;
+                }
+                return $scope.resources.installationInstructionsDesktopOruxMaps;
             }
         }
 

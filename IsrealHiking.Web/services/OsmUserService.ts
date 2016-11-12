@@ -12,14 +12,20 @@ namespace IsraelHiking.Services {
         private oauth;
         private x2Js: IX2JS;
         private $q: angular.IQService;
+        private $http: angular.IHttpService;
 
         public displayName: string;
         public imageUrl: string;
+        public changeSets: number;
         public traces: any[];
-        public shares: any[];
+        public shares: Common.SiteUrl[];
+        public userId: string;
 
-        constructor($q: angular.IQService) {
+        constructor($q: angular.IQService,
+            $http: angular.IHttpService) {
             this.$q = $q;
+            this.$http = $http;
+
             this.oauth = osmAuth({
                 oauth_consumer_key: "H5Us9nv9eDyFpKbBTiURf7ZqfdBArNddv10n6R6U",
                 oauth_secret: "ccYaQUKLz26XEzbNd8uWoQ6HwbcnrUUp8milXnXG",
@@ -27,7 +33,7 @@ namespace IsraelHiking.Services {
                 landing: "controllers/oauth-close-window.html"
             }) as IOsmAuthService;
             if (this.oauth.authenticated()) {
-                this.getDetails();
+                this.refreshDetails();
             }
             this.x2Js = new X2JS();
             this.traces = [];
@@ -43,11 +49,16 @@ namespace IsraelHiking.Services {
         }
 
         public login = (): angular.IPromise<{}> => {
-            return this.getDetails();
+            return this.refreshDetails();
         }
 
-        private getDetails = (): angular.IPromise<{}> => {
+        public getSiteUrlPostfix(id: string) {
+            return `/#!/?s=${id}`;
+        }
+
+        public refreshDetails = (): angular.IPromise<{}> => {
             let deferred = this.$q.defer();
+            var sharesPromise = null;
             this.oauth.xhr({
                 method: "GET",
                 path: "/api/0.6/user/details"
@@ -58,7 +69,11 @@ namespace IsraelHiking.Services {
                 }
                 let detailJson = this.x2Js.xml2json(details) as any;
                 this.displayName = detailJson.osm.user._display_name;
-                this.imageUrl = detailJson.osm.user.img._href;
+                if (detailJson.osm.user.img && detailJson.osm.user.img._href) {
+                    this.imageUrl = detailJson.osm.user.img._href;
+                }
+                this.changeSets = detailJson.osm.user.changesets._count;
+                this.userId = detailJson.osm.user._id;
                 this.oauth.xhr({
                     method: "GET",
                     path: "/api/0.6/user/gpx_files"
@@ -70,7 +85,7 @@ namespace IsraelHiking.Services {
                     let tracesJson = this.x2Js.xml2json(traces) as any;
                     this.traces = [];
                     for (let traceJson of tracesJson.osm.gpx_file) {
-                        let url = `https://www.openstreetmap.org/user/${traceJson._user}/traces/${traceJson._id}`; 
+                        let url = `https://www.openstreetmap.org/user/${traceJson._user}/traces/${traceJson._id}`;
                         this.traces.push({
                             fileName: traceJson._name,
                             description: traceJson.description,
@@ -80,10 +95,11 @@ namespace IsraelHiking.Services {
                     }
                     deferred.resolve();
                 });
-
-                // HM TODO: get shares from API by osm user id
+                sharesPromise = this.$http.get(Common.Urls.userUrls + this.userId).then((response: { data: Common.SiteUrl[] }) => {
+                    this.shares = response.data;
+                });
             });
-            return deferred.promise;
+            return this.$q.all([deferred.promise, this.$q.when(sharesPromise)]);
         }
     }
 }

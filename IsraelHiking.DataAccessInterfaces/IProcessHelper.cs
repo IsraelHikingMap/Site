@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace IsraelHiking.DataAccessInterfaces
+﻿namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IProcessHelper
     {

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IsraelHiking.API.Gpx;
+﻿using IsraelHiking.API.Gpx;
 
 namespace IsraelHiking.API.Converters.ConverterFlows
 {

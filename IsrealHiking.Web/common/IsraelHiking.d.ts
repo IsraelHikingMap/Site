@@ -6,6 +6,7 @@
         Title: string;
         JsonData: string;
         ModifyKey: string;
+        OsmUserId: string;
     }
 
     export interface LayerData {

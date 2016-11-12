@@ -1,12 +1,9 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccess.Database;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
-using NSubstitute;
 
 namespace IsraelHiking.DataAccess.Tests.Database
 {
@@ -48,17 +45,16 @@ namespace IsraelHiking.DataAccess.Tests.Database
             {
                 Assert.AreEqual(1, context.SiteUrls.Count());
             }
-            var key = "key";
             using (var context = new IsraelHikingDbContext())
             {
-                var siteUrlToUpdate = new SiteUrl {Id = id, ModifyKey = key};
+                var siteUrlToUpdate = new SiteUrl {Id = id, Title = "title"};
                 context.MarkAsModified(siteUrlToUpdate);
                 context.SaveChanges();
             }
 
             using (var context = new IsraelHikingDbContext())
             {
-                Assert.IsNotNull(context.SiteUrls.FirstOrDefault(x => x.ModifyKey == key));
+                Assert.IsNotNull(context.SiteUrls.FirstOrDefault(x => x.Title == "title"));
             }
         }
 

@@ -22,3 +22,6 @@
     margin-right: 4px;
 }
 
+.modal-header .progress {
+    margin-bottom: 0 !important;
+}

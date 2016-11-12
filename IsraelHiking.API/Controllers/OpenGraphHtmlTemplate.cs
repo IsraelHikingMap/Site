@@ -9,11 +9,6 @@
 // ------------------------------------------------------------------------------
 namespace IsraelHiking.API.Controllers
 {
-    using System.Linq;
-    using System.Text;
-    using System.Collections.Generic;
-    using System;
-    
     /// <summary>
     /// Class to produce the template output
     /// </summary>

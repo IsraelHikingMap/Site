@@ -1,0 +1,38 @@
+﻿<div class="modal-content">
+    <div class="modal-header">
+        <button type="button" class="close" aria-label="Close" ng-click="$close()"><span aria-hidden="true">&times;</span></button>
+        <h3>{{resources.infoDownloadMapForOfflineUse}}</h3>
+        {{resources.mapsAreUpdatedEveryTwoDays}}
+    </div>
+    <div class="modal-body">
+        <h5 class="text-center">{{resources.application}}</h5>
+        <div class="btn-group btn-group-justified" ng-init="app = 'Locus'">
+            <a class="btn btn-default" ng-click="app = 'Locus'" ng-class="{active: app == 'Locus'}">Locus</a>
+            <a class="btn btn-default" ng-click="app = 'OruxMaps'" ng-class="{active: app == 'OruxMaps'}">OruxMaps</a>
+        </div>
+        <h5 class="text-center">{{resources.map}}</h5>
+        <div class="btn-group btn-group-justified" ng-init="mapType = 'IHM'">
+            <a class="btn btn-default" ng-click="mapType = 'IHM'" ng-class="{active: mapType == 'IHM'}">{{resources.israelHikingMap}}</a>
+            <a class="btn btn-default" ng-click="mapType = 'MTB'" ng-class="{active: mapType == 'MTB'}">{{resources.israelMTBMap}}</a>
+        </div>
+        <h5 class="text-center">{{resources.detailsLevel}} ({{resources.upToZoom}})</h5>
+        <div class="btn-group btn-group-justified" ng-init="zoom = '15'">
+            <a class="btn btn-default" ng-click="zoom = 15" ng-class="{active: zoom == '15'}">15 [750Mb]</a>
+            <a class="btn btn-default" ng-click="zoom = 16" ng-class="{active: zoom == '16'}">16 [2.2Gb]</a>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-md-12 col-xs-12">
+                <a ng-href="{{getDownloadUrl(app, mapType, zoom)}}" class="btn btn-success btn-block"><i class="fa fa-download fa-lg"></i> {{resources.startDownload}}</a>
+            </div>
+        </div>
+        <h4>{{resources.installationInstructions}}</h4>
+        <p>{{resources.offlineMapBenifits}}</p>
+        <div class="visible-sm visible-xs">
+            <ul ng-bind-html="getMobileInstallationInstructions(app)"></ul>
+        </div>
+        <div class="hidden-sm hidden-xs">
+            <ul ng-bind-html="getDesktopInstallationInstructions(app)"></ul>
+        </div>
+    </div>
+</div>

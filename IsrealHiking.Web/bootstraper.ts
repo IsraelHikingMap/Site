@@ -16,7 +16,8 @@
     app.service(Strings.Services.mapService, [() => new Services.MapService()]);
     app.service(Strings.Services.parserFactory, [() => new Services.Parsers.ParserFactory()]);
     app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
-    app.service(Strings.Services.osmUserService, [Strings.Angular.q, ($q: angular.IQService) => new Services.OsmUserService($q)]);
+    app.service(Strings.Services.osmUserService, [Strings.Angular.q, Strings.Angular.http,
+        ($q: angular.IQService, $http: angular.IHttpService) => new Services.OsmUserService($q, $http)]);
     app.service(Strings.Services.routeStatisticsService, [() => new Services.RouteStatisticsService()]);
     app.service(Strings.Services.resourcesService, [Strings.Angular.sce, Strings.Services.localStorageService, Strings.Services.gettextCatalog,
         ($sce: angular.ISCEService, localstorageService: angular.local.storage.ILocalStorageService, gettextCatalog: angular.gettext.gettextCatalog) =>
@@ -148,6 +149,7 @@
 
     app.config(($compileProvider, toastrConfig) => {
         $compileProvider.aHrefSanitizationWhitelist(/[.*facebook][^\s*(whatsapp):]/);
+        $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|orux-map|locus-actions):/);
         angular.extend(toastrConfig, { positionClass: "toast-top-center" });
     });
 

@@ -89,6 +89,7 @@
     <Content Include="controllers\FileController.js" />
     <Content Include="controllers\fileSaveAs.css" />
     <Content Include="controllers\info.css" />
+    <Content Include="controllers\infoOfflineDownloadModal.html" />
     <Content Include="controllers\language.html" />
     <Content Include="controllers\LanguageController.js" />
     <Content Include="controllers\languageModal.html" />

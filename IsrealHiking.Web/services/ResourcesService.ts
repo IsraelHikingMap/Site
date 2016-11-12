@@ -118,6 +118,25 @@ namespace IsraelHiking.Services {
         public noShares: string;
         public title: string;
         public osmLoginExplenation: string;
+        public application: string;
+        public map: string;
+        public startDownload: string;
+        public views: string;
+        public lastViewed: string;
+        public detailsLevel: string;
+        public upToZoom: string;
+        public installationInstructions: string;
+        public offlineMapBenifits: string;
+        public installationInstructionsMobileOruxMaps: string;
+        public installationInstructionsMobileLocus: string;
+        public installationInstructionsDesktopOruxMaps: string;
+        public installationInstructionsDesktopLocus: string;
+        public mapsAreUpdatedEveryTwoDays: string;
+        public junior: string;
+        public partner: string;
+        public master: string;
+        public guru: string;
+        public changes: string;
         // Errors & Warnings
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
@@ -165,8 +184,8 @@ namespace IsraelHiking.Services {
         public infoHelpfulLinks: string;
         public infoFacebookLink: string;
         public infoGithubLink: string;
+        public infoDownloadMapForOfflineUse: string;
         public infoOsmWikiLink: string;
-        public infoOruxmapDownloadLink: string;
         public infoFooterThanks: string;
         public infoFooterAuthors: string;
         // Legend
@@ -420,10 +439,30 @@ namespace IsraelHiking.Services {
                     this.myTraces = this.gettextCatalog.getString("My Traces");
                     this.noTraces = this.gettextCatalog.getString("No traces, you should really upload some to OSM.");
                     this.myShares = this.gettextCatalog.getString("My Shares");
-                    this.noShares = this.gettextCatalog.getString("No shares, our fault, will be added soon!");
+                    this.noShares = this.gettextCatalog.getString("No shares, now is the time to start sharing your work!");
                     this.title = this.gettextCatalog.getString("Title");
                     this.osmLoginExplenation = this.gettextCatalog.getString("Click on the frowny-face to login to OSM. We'll make it worth your while!");
+                    this.application = this.gettextCatalog.getString("Application");
+                    this.map = this.gettextCatalog.getString("Map");
+                    this.startDownload = this.gettextCatalog.getString("Start Download");
+                    this.views = this.gettextCatalog.getString("Views");
+                    this.lastViewed = this.gettextCatalog.getString("Last Viewed");
+                    this.detailsLevel = this.gettextCatalog.getString("Details Level");
+                    this.upToZoom = this.gettextCatalog.getString("Up to zoom");
+                    this.installationInstructions = this.gettextCatalog.getString("Installation Instructions");
+                    this.offlineMapBenifits = this.gettextCatalog.getString("The download may take several minutes, and afterwards you can enjoy the map with no need for a network connection.");
                     
+                    this.installationInstructionsMobileOruxMaps = this.$sce.trustAsHtml(this.gettextCatalog.getString("<li>After the download compeletes please refresh the offline maps by:<br>Maps &rarr; Switch map &rarr; OFFLINE &rarr; Refresh (the counter-clockwise arrows)</li><li>The free space required for direct installation on an Android device is twice the size of the downloaded map.</li>"));
+                    this.installationInstructionsMobileLocus = this.$sce.trustAsHtml(this.gettextCatalog.getString("<li>Wait for the downalod to complete.</li>"));
+                    this.installationInstructionsDesktopOruxMaps = this.$sce.trustAsHtml(this.gettextCatalog.getString("<li>Click on of the above button for the requested map and wait for the zip file to finish downloading.</li><li>Connect the Android device to your PC.</li><li>If needed, change your Android device USB connection mode from 'USB for charging' to 'File transfers'.</li><li>On your PC:</li><ul><li>Open the downloaded zip file and copy the directory it contains to a temporary locaton, such as your Desktop.</li><li>Move this directory into the 'Oruxmaps\mapfiles' directory of the connected Android device.</li></ul><li>Open OruxMaps and refresh the offline maps by:<br>Maps &rarr; Switch map &rarr; OFFLINE &rarr; Refresh (the counter-clockwise arrows)</li>"));
+                    // HM TODO: finish locus desktop instructions
+                    this.installationInstructionsDesktopLocus = this.$sce.trustAsHtml(this.gettextCatalog.getString("Still unknown."));
+                    this.mapsAreUpdatedEveryTwoDays = this.gettextCatalog.getString("Maps are updated every two days");
+                    this.junior = this.gettextCatalog.getString("Junior");
+                    this.partner = this.gettextCatalog.getString("Partner");
+                    this.master = this.gettextCatalog.getString("Master");
+                    this.guru = this.gettextCatalog.getString("Guru");
+                    this.changes = this.gettextCatalog.getString("Changes");
                     // Errors & Warnings
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -472,7 +511,7 @@ namespace IsraelHiking.Services {
                     this.infoFacebookLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Interact with other users in our {{link}}Facebook group{{linkend}}", { link: "<a href='https://www.facebook.com/groups/994960670559126/' target='_blank'>", linkend: "</a>" }));
                     this.infoGithubLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Request features and report bugs on our {{link}}Github project{{linkend}} page", { link: "<a href='http://www.github.com/IsraelHikingMap' target='_blank'>", linkend: "</a>" }));
                     this.infoOsmWikiLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}", { link: "<a href='http://wiki.openstreetmap.org/wiki/WikiProject_Israel' target='_blank'>", linkend: "</a>" }));
-                    this.infoOruxmapDownloadLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Download {{link}}Offline maps{{linkend}} directly to your android device for use with the OruxMaps application", { link: "<a href='http://israelhiking.osm.org.il/OruxmapsDownload.html' target='_blank'>", linkend: "</a>" }));
+                    this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
                     this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
                     this.infoFooterAuthors = this.gettextCatalog.getString("Harel, Zeev and Guy");
                     // Legend

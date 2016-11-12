@@ -10,12 +10,12 @@
 }
 
 #wrapper.toggled .info-header {
-    width: 235px;
+    width: 215px;
 }
     
 @media (min-width:768px) {
     #wrapper.toggled .info-header {
-        width: 385px;
+        width: 360px;
     } 
 }
 

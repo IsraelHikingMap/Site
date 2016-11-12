@@ -1,6 +1,8 @@
-﻿using IsraelHiking.Common;
+﻿using System.Collections.Generic;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using System.Data.Entity;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess.Database
@@ -19,9 +21,16 @@ namespace IsraelHiking.DataAccess.Database
             return _dbContext.SiteUrls.FirstOrDefaultAsync(s => s.Id == id);
         }
 
-        public Task<SiteUrl> GetUrlByModifyKey(string modifyKey)
+        public async Task<List<SiteUrl>> GetUrlsByUser(string osmUserId)
         {
-            return _dbContext.SiteUrls.FirstOrDefaultAsync(s => s.ModifyKey == modifyKey);
+            if (string.IsNullOrWhiteSpace(osmUserId))
+            {
+                return new List<SiteUrl>();
+            }
+            return await _dbContext.SiteUrls.Where(s => s.OsmUserId == osmUserId)
+                .OrderByDescending(s => s.LastViewed)
+                .ToListAsync()
+                .ConfigureAwait(false); ;
         }
 
         public async Task AddUrl(SiteUrl siteUrl)

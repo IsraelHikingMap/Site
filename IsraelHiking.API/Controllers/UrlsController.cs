@@ -12,14 +12,10 @@ namespace IsraelHiking.API.Controllers
     public class UrlsController : ApiController
     {
         private IIsraelHikingRepository _repository;
-        //private IImageCreationService _imageCreationService;
 
-        public UrlsController(IIsraelHikingRepository repository
-            //, IImageCreationService imageCreationService
-            )
+        public UrlsController(IIsraelHikingRepository repository)
         {
             _repository = repository;
-            //_imageCreationService = imageCreationService;
         }
 
         // GET api/Urls/abc
@@ -36,13 +32,20 @@ namespace IsraelHiking.API.Controllers
             return Ok(siteUrl);
         }
 
+        // GET api/UserUrls/abc
+        [Route("api/userurls/{id}")]
+        public async Task<IHttpActionResult> GetSiteUrlForUser(string id)
+        {
+            var siteUrls = await _repository.GetUrlsByUser(id);
+            return Ok(siteUrls);
+        }
+
         // POST api/urls
         public async Task<IHttpActionResult> PostSiteUrl(SiteUrl siteUrl)
         {
             var random = new Random(Guid.NewGuid().GetHashCode());
             siteUrl.CreationDate = DateTime.Now;
             siteUrl.LastViewed = DateTime.Now;
-            siteUrl.ModifyKey = GetRandomString(10, random);
             siteUrl.ViewsCount = 0;
             var id = GetRandomString(10, random);
             while (await _repository.GetUrlById(id) != null)
@@ -50,23 +53,26 @@ namespace IsraelHiking.API.Controllers
                 id = GetRandomString(10, random);
             }
             siteUrl.Id = id;
-            //siteUrl.Thumbnail = await _imageCreationService.Create(JsonConvert.DeserializeObject<DataContainer>(siteUrl.JsonData));
             await _repository.AddUrl(siteUrl);
             return Ok(siteUrl);
         }
 
-        // PUT api/urls/abc
-        public async Task<IHttpActionResult> PutSiteUrl(string id, SiteUrl siteUrl)
+        // Delete delete/urls/abc
+        /// <summary>
+        /// Removes the user from the url, leaves it as public.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        public async Task<IHttpActionResult> DeleteSiteUrl(string id)
         {
-            var siteUrlFromDatabase = await _repository.GetUrlByModifyKey(id);
+            var siteUrlFromDatabase = await _repository.GetUrlById(id);
             if (siteUrlFromDatabase == null)
             {
                 return NotFound();
             }
-            siteUrlFromDatabase.JsonData = siteUrl.JsonData;
-            siteUrlFromDatabase.LastViewed = DateTime.Now;
+            siteUrlFromDatabase.OsmUserId = string.Empty;
             await _repository.Update(siteUrlFromDatabase);
-            return Ok(siteUrlFromDatabase);
+            return Ok();
         }
 
         private static string GetRandomString(int length, Random random)

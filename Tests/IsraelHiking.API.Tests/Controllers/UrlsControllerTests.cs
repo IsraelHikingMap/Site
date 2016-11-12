@@ -15,16 +15,12 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private UrlsController _controller;
         private IIsraelHikingRepository _israelHikingRepository;
-        //private IImageCreationService _imageCreationService;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _israelHikingRepository = Substitute.For<IIsraelHikingRepository>();
-            //_imageCreationService = Substitute.For<IImageCreationService>();
-            _controller = new UrlsController(_israelHikingRepository
-                //, _imageCreationService
-                );
+            _controller = new UrlsController(_israelHikingRepository);
         }
 
         [TestMethod]
@@ -67,24 +63,15 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void PutSiteUrl_ItemNotInDatabase_ShouldNotFound()
+        public void DeleteSiteUrl_ItemNotInDatabase_ShouldUpdate()
         {
-            var siteUrl = new SiteUrl { Id = "42" };
+            var siteUrl = new SiteUrl { Id = "42", OsmUserId = "1" };
+            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(Task.FromResult(siteUrl));
 
-            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as NotFoundResult;
-
-            Assert.IsNotNull(results);
-        }
-
-        [TestMethod]
-        public void PutSiteUrl_ItemNotInDatabase_ShouldUpdate()
-        {
-            var siteUrl = new SiteUrl { Id = "42", ModifyKey = "1" };
-            _israelHikingRepository.GetUrlByModifyKey(siteUrl.ModifyKey).Returns(Task.FromResult(siteUrl));
-
-            _controller.PutSiteUrl(siteUrl.ModifyKey, siteUrl).Wait();
+            _controller.DeleteSiteUrl(siteUrl.Id).Wait();
 
             _israelHikingRepository.Received(1).Update(siteUrl);
+            Assert.AreEqual(string.Empty, siteUrl.OsmUserId);
             _controller.Dispose();
         }
     }

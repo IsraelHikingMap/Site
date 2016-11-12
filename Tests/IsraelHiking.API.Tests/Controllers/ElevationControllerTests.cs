@@ -1,5 +1,4 @@
-﻿using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IsraelHiking.API.Controllers;
 using NSubstitute;
 using IsraelHiking.DataAccessInterfaces;

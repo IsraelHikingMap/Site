@@ -1,11 +1,38 @@
 ﻿<div class="info-header">
     <h3>
+        <a class="cursor-pointer" ng-class="{active: state == 'about'}" ng-click="setState('about')">{{resources.about}}</a> |
         <a class="cursor-pointer" ng-class="{active: state == 'legend'}" ng-click="setState('legend')" ng-show="legendSections.length > 0">{{resources.legend}}</a> |
-        <a class="cursor-pointer" ng-class="{active: state == 'help'}" ng-click="setState('help')">{{resources.help}}</a> |
-        <a class="cursor-pointer" ng-class="{active: state == 'about'}" ng-click="setState('about')">{{resources.about}}</a>
+        <a class="cursor-pointer" ng-class="{active: state == 'help'}" ng-click="setState('help')">{{resources.help}}</a>
     </h3>
 </div>
 <div ng-switch on="state" class="info-container">
+    <div ng-switch-when="about">
+        <div>
+            <p><span ng-bind-html="resources.infoSubheader"></span></p>
+            <h4>{{resources.infoHelpfulLinks}}</h4>
+            <table class="table">
+                <tr>
+                    <td><i class="fa fa-facebook"></i></td>
+                    <td><span ng-bind-html="resources.infoFacebookLink"></span></td>
+                </tr>
+                <tr>
+                    <td><i class="fa fa-github"></i></td>
+                    <td><span ng-bind-html="resources.infoGithubLink"></span></td>
+                </tr>
+                <tr>
+                    <td><i class="fa fa-wikipedia-w"></i></td>
+                    <td><span ng-bind-html="resources.infoOsmWikiLink"></span></td>
+                </tr>
+                <tr>
+                    <td><i class="fa fa-download"></i></td>
+                    <td><a class="cursor-pointer" ng-click="openOfflineModal()">{{resources.infoDownloadMapForOfflineUse}}</a></td>
+                </tr>
+            </table>
+            <p>
+                <i>{{resources.infoFooterThanks}}<br>{{resources.infoFooterAuthors}}<br /></i>
+            </p>
+        </div>
+    </div>
     <div ng-switch-when="legend">
         <div ng-repeat="section in legendSections" id="{{section.id}}">
             <div class="legend-section">
@@ -21,73 +48,90 @@
             </div>
         </div>
     </div>
-    <div ng-switch-when="about">
-        <div>
-            <p><span ng-bind-html="resources.infoSubheader"></span></p>
-            <h4>{{resources.infoHelpfulLinks}}</h4>
-            <ul>
-                <li ng-bind-html="resources.infoFacebookLink"></li>
-                <li ng-bind-html="resources.infoGithubLink"></li>
-                <li ng-bind-html="resources.infoOsmWikiLink"></li>
-                <li ng-bind-html="resources.infoOruxmapDownloadLink"></li>
-            </ul>
-            <p>
-                <i>{{resources.infoFooterThanks}}<br>{{resources.infoFooterAuthors}}<br/></i>
-            </p>
-        </div>
-    </div>
     <div ng-switch-when="help" class="help-table">
         <h4>{{resources.helpSubheader}}</h4>
         <p ng-bind-html="resources.helpYoutubeLink"></p>
         <div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-info"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-info"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpInfo}}.</div>
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-crosshairs"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-crosshairs"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpLocation}}.</div>
             </div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-folder-open"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-folder-open"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpOpen}}.</div>
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-save"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-save"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpSave}}.</div>
             </div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-print"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-print"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpPrint}}.</div>
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-files-o"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-files-o"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.saveAs}}</div>
             </div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-pencil"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-pencil"></i></button>
+                </div>
                 <div class="col-sm-11">{{resources.helpPencil}}.</div>
             </div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-remove"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-remove"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpClear}}.</div>
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-map-marker"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-map-marker"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpMapMarker}}.</div>
             </div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="/content/images/hike.svg" /></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><img src="/content/images/hike.svg" /></button>
+                </div>
                 <div class="col-sm-5">{{resources.hikeRouting}}.</div>
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="/content/images/bike.svg" /></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><img src="/content/images/bike.svg" /></button>
+                </div>
                 <div class="col-sm-5">{{resources.bikeRouting}}.</div>
             </div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="/content/images/four-by-four.png" /></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><img src="/content/images/four-by-four.png" /></button>
+                </div>
                 <div class="col-sm-5">{{resources.fourWheelDriveRouting}}.</div>
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="/content/images/none.svg" /></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><img src="/content/images/none.svg" /></button>
+                </div>
                 <div class="col-sm-5">{{resources.straightLines}}.</div>
             </div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-area-chart"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-area-chart"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.routeStatistics}}.</div>
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-undo"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-undo"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpUndo}}.</div>
             </div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-search"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-search"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.search}}.</div>
                 <div class="col-sm-1">
                     <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-share-alt"></i></button>
@@ -95,9 +139,13 @@
                 <div class="col-sm-5">{{resources.helpShare}}.</div>
             </div>
             <div class="row">
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><img src="/content/images/map-editing.svg" /></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><img src="/content/images/map-editing.svg" /></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpEditOsm}}.</div>
-                <div class="col-sm-1"><button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-language"></i></button></div>
+                <div class="col-sm-1">
+                    <button class="btn btn-default btn-xs help-button"><i class="fa fa-lg fa-language"></i></button>
+                </div>
                 <div class="col-sm-5">{{resources.helpLanguage}}.</div>
             </div>
             <div class="row">
@@ -139,7 +187,7 @@
                 </div>
                 <div class="col-sm-5">{{resources.helpCheck}}.</div>
             </div>
-            <br/>
+            <br />
             <ul>
                 <li>
                     {{resources.helpDragDrop}}

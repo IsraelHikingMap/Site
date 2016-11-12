@@ -1,5 +1,6 @@
 ﻿using IsraelHiking.Common;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces
@@ -8,7 +9,7 @@ namespace IsraelHiking.DataAccessInterfaces
     {
         Task AddUrl(SiteUrl siteUrl);
         Task<SiteUrl> GetUrlById(string id);
-        Task<SiteUrl> GetUrlByModifyKey(string modifyKey);
+        Task<List<SiteUrl>> GetUrlsByUser(string osmUserId);
         Task Update(object obj);
     }
 }

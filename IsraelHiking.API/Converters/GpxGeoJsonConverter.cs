@@ -2,7 +2,6 @@
 using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx.GpxTypes;
-using IsraelHiking.Common;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 

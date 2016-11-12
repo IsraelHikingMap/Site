@@ -39,6 +39,7 @@
 
     export class ShareController extends BaseMapController {
         private $window: angular.IWindowService;
+        private osmUserService: Services.OsmUserService;
 
         constructor($scope: IShareScope,
             $uibModal: angular.ui.bootstrap.IModalService,
@@ -46,10 +47,12 @@
             $window: angular.IWindowService,
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService,
+            osmUserService: Services.OsmUserService,
             toastr: Toastr) {
             super(mapService);
 
             this.$window = $window;
+            this.osmUserService = osmUserService;
             $scope.title = "";
             $scope.width = 400;
             $scope.height = 300;
@@ -88,7 +91,8 @@
                 $scope.isLoading = true;
                 var siteUrl = {
                     Title: $scope.title,
-                    JsonData: JSON.stringify(layersService.getData())
+                    JsonData: JSON.stringify(layersService.getData()),
+                    OsmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
                 } as Common.SiteUrl;
                 $http.post(Common.Urls.urls, siteUrl).success((siteUrlResponse: Common.SiteUrl) => {
                     $scope.siteUrlId = siteUrlResponse.Id;
@@ -164,7 +168,7 @@
 
         private getShareAddressWithoutProtocol = ($scope: IShareScope) => {
             if ($scope.siteUrlId) {
-                return `//${this.$window.location.host}/#!/?s=${$scope.siteUrlId}`;
+                return `//${this.$window.location.host}${this.osmUserService.getSiteUrlPostfix($scope.siteUrlId)}`;
             }
             return this.$window.location.href;
         }
