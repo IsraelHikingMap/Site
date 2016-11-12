@@ -29,6 +29,12 @@
         "<i class='fa fa-circle fa-stack-1x' style='color:white'></i>" +
         "</span>";
 
+        private static TRACE_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
+        "<i class='fa fa-map-marker fa-3x fa-stack-2x' style='color:white;'></i>" +
+        "<i class='fa fa-circle fa-stack-2x icon-background' style='color:white;'></i>" +
+        "<i class='fa fa-cog fa-stack-1x icon-background' style='color:blue;'></i>" +
+        "</span>";
+
         private static COLOR_MARKER_HTML = "<i class='fa fa-map-marker fa-3x' style='color:{{color}};text-shadow: 3px 3px 3px #000;'></i>";
 
         public static createRoundIcon(color: string): L.DivIcon {
@@ -64,6 +70,16 @@
         public static createSearchMarkerIcon(): L.DivIcon {
             return L.divIcon({
                 html: IconsService.SEARCH_MARKER_HTML,
+                iconSize: L.point(32, 32),
+                iconAnchor: L.point(16, 32),
+                className: "search-marker",
+                popupAnchor: L.point(0, -30)
+            } as L.DivIconOptions);
+        }
+
+        public static createTraceMarkerIcon(): L.DivIcon {
+            return L.divIcon({
+                html: IconsService.TRACE_MARKER_HTML,
                 iconSize: L.point(32, 32),
                 iconAnchor: L.point(16, 32),
                 className: "search-marker",

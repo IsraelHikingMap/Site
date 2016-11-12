@@ -32,7 +32,7 @@
         searchTerm: string;
     }
 
-    interface ISearchResultsMarkerPopup extends IRemovableMarkerScope {
+    export interface ISearchResultsMarkerPopup extends IRemovableMarkerScope {
         convertToRoute(): void;
     }
 

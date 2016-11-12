@@ -13,6 +13,7 @@
     "angular-gettext": "*",
     "angular-bootstrap": "*",
     "angular-bootstrap-slider": "*",
+    "angular-clipboard": "*",
     "bootstrap": "*",
     "bootstrap-rtl": "*",
     "jquery": "*",

@@ -9,6 +9,11 @@
 // ------------------------------------------------------------------------------
 namespace IsraelHiking.API.Controllers
 {
+    using System.Linq;
+    using System.Text;
+    using System.Collections.Generic;
+    using System;
+    
     /// <summary>
     /// Class to produce the template output
     /// </summary>
@@ -33,8 +38,14 @@ namespace IsraelHiking.API.Controllers
     <meta content=""IE=edge, chrome=1"" http-equiv=""X-UA-Compatible"" />
     <meta property=""og:site_name"" content=""IsraelHiking.OSM.org.il"" />
     <meta property=""og:type"" content=""website"" />
-    <meta property=""og:title"" content=""Israel Hiking Map"" />
-    <meta property=""og:image"" content=""");
+    <meta property=""og:title"" content=""");
+            
+            #line 16 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\OpenGraphHtmlTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Title));
+            
+            #line default
+            #line hidden
+            this.Write("\" />\r\n    <meta property=\"og:image\" content=\"");
             
             #line 17 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\OpenGraphHtmlTemplate.tt"
             this.Write(this.ToStringHelper.ToStringWithCulture(ThumbnailUrl));
@@ -55,12 +66,29 @@ namespace IsraelHiking.API.Controllers
             
             #line default
             #line hidden
+            this.Write("\" />\r\n\t<meta property=\"og:image:width\" content=\"600\" />\r\n    <meta property=\"og:i" +
+                    "mage:height\" content=\"315\" />\r\n    <meta property=\"og:description\" content=\"");
+            
+            #line 22 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\OpenGraphHtmlTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Description));
+            
+            #line default
+            #line hidden
+            this.Write("\" />\r\n    <meta name=\"title\" content=\"");
+            
+            #line 23 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\OpenGraphHtmlTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Title));
+            
+            #line default
+            #line hidden
+            this.Write("\" />\r\n    <meta name=\"description\" content=\"");
+            
+            #line 24 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\OpenGraphHtmlTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Description));
+            
+            #line default
+            #line hidden
             this.Write(@""" />
-	<meta property=""og:image:width"" content=""600"" />
-    <meta property=""og:image:height"" content=""315"" />
-    <meta property=""og:description"" content=""בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע."" />
-    <meta name=""title"" content=""Israel Hiking Map"" />
-    <meta name=""description"" content=""בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע."" />
     <meta name=""keyword"" content=""hike,bike,outdoor,israel hiking,map,navigation,route planning,nominatim,סימון שבילים,אופניים,מפה,ניווט,שטח,טיול,מטיבי לכת,ג'יפים,רכיבה,הליכה,טבע"" />
     <meta name=""robot"" content=""index,follow"" />
     <meta name=""msapplication-TileColor"" content=""#2b5797"">
@@ -68,11 +96,14 @@ namespace IsraelHiking.API.Controllers
     <meta name=""msapplication-config"" content=""/content/images/favicons/browserconfig.xml"">
     <meta name=""theme-color"" content=""#0a42bb"">
     <meta name=""viewport"" content=""width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"" />
-    <title>Israel Hiking Map</title>
-</head>
-<body>
-</body>
-</html>");
+    <title>");
+            
+            #line 32 "D:\Github\IsraelHikingMap\Site\IsraelHiking.API\Controllers\OpenGraphHtmlTemplate.tt"
+            this.Write(this.ToStringHelper.ToStringWithCulture(Title));
+            
+            #line default
+            #line hidden
+            this.Write("</title>\r\n</head>\r\n<body>\r\n</body>\r\n</html>");
             return this.GenerationEnvironment.ToString();
         }
     }

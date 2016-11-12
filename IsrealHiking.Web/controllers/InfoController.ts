@@ -1,7 +1,7 @@
 ﻿namespace IsraelHiking.Controllers {
     type InfoState = "legend" | "help" | "about";
     type LegendItemType = "POI" | "Way";
-    type ApplicationType = "Locus" | "OruxMaps"
+    type ApplicationType = "Locus" | "OruxMaps" | "Offroad";
 
     export interface ILegendItem {
         latlng: L.LatLng;
@@ -54,9 +54,10 @@
             this.initalizeLegendSections($scope);
             $scope.state = "about";
 
-            $scope.$watch(() => $scope.resources.currentLanguage, () => {
-                this.initalizeLegendSections($scope);
-            });
+            $scope.$watch(() => $scope.resources.currentLanguage,
+                () => {
+                    this.initalizeLegendSections($scope);
+                });
 
             $scope.toggleInfo = (e: Event) => {
                 sidebarService.toggle("info");
@@ -83,7 +84,14 @@
                     }
                     this.initializeItemMap(item);
                 }
-                $timeout(() => angular.element("#sidebar-wrapper").animate({ scrollTop: angular.element(`#${section.id}`).offset().top + angular.element("#sidebar-wrapper").scrollTop() - 60 }, "slow"), 300);
+                $timeout(() => angular.element("#sidebar-wrapper")
+                    .animate({
+                            scrollTop: angular.element(`#${section.id}`).offset().top +
+                                angular.element("#sidebar-wrapper").scrollTop() -
+                                60
+                        },
+                        "slow"),
+                    300);
             };
 
             $scope.setState = (state: InfoState) => {
@@ -109,6 +117,8 @@
                     } else if (app === "Locus") {
                         protocol = "locus-actions://http/";
                         extension = ".xml";
+                    } else if (app === "Offroad") {
+                        protocol = "offroad://";
                     }
                 }
                 let address = `${protocol}israelhiking.osm.org.il/Oruxmaps/Israel`;
@@ -128,14 +138,20 @@
                 if (app === "Locus") {
                     return $scope.resources.installationInstructionsMobileLocus;
                 }
-                return $scope.resources.installationInstructionsMobileOruxMaps;
+                if (app === "OruxMaps") {
+                    return $scope.resources.installationInstructionsMobileOruxMaps;
+                }
+                return $scope.resources.installationInstructionsMobileOffroad;
             }
 
             $scope.getDesktopInstallationInstructions = (app: ApplicationType) => {
                 if (app === "Locus") {
                     return $scope.resources.installationInstructionsDesktopLocus;
                 }
-                return $scope.resources.installationInstructionsDesktopOruxMaps;
+                if (app === "OruxMaps") {
+                    return $scope.resources.installationInstructionsDesktopOruxMaps;
+                }
+                return $scope.resources.installationInstructionsDesktopOffroad;
             }
         }
 

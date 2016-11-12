@@ -4,8 +4,8 @@
     export interface SiteUrl {
         Id: string;
         Title: string;
+        Description: string;
         JsonData: string;
-        ModifyKey: string;
         OsmUserId: string;
     }
 

@@ -117,6 +117,9 @@ namespace IsraelHiking.Services {
         public myShares: string;
         public noShares: string;
         public title: string;
+        public titlePlaceHolder: string;
+        public description: string;
+        public descriptionPlaceHolder: string;
         public osmLoginExplenation: string;
         public application: string;
         public map: string;
@@ -129,8 +132,10 @@ namespace IsraelHiking.Services {
         public offlineMapBenifits: string;
         public installationInstructionsMobileOruxMaps: string;
         public installationInstructionsMobileLocus: string;
+        public installationInstructionsMobileOffroad: string;
         public installationInstructionsDesktopOruxMaps: string;
         public installationInstructionsDesktopLocus: string;
+        public installationInstructionsDesktopOffroad: string;
         public mapsAreUpdatedEveryTwoDays: string;
         public junior: string;
         public partner: string;
@@ -441,6 +446,9 @@ namespace IsraelHiking.Services {
                     this.myShares = this.gettextCatalog.getString("My Shares");
                     this.noShares = this.gettextCatalog.getString("No shares, now is the time to start sharing your work!");
                     this.title = this.gettextCatalog.getString("Title");
+                    this.titlePlaceHolder = this.gettextCatalog.getString("The title for your share.");
+                    this.description = this.gettextCatalog.getString("Description");
+                    this.descriptionPlaceHolder = this.gettextCatalog.getString("A few words about what you are sharing.");
                     this.osmLoginExplenation = this.gettextCatalog.getString("Click on the frowny-face to login to OSM. We'll make it worth your while!");
                     this.application = this.gettextCatalog.getString("Application");
                     this.map = this.gettextCatalog.getString("Map");
@@ -451,12 +459,12 @@ namespace IsraelHiking.Services {
                     this.upToZoom = this.gettextCatalog.getString("Up to zoom");
                     this.installationInstructions = this.gettextCatalog.getString("Installation Instructions");
                     this.offlineMapBenifits = this.gettextCatalog.getString("The download may take several minutes, and afterwards you can enjoy the map with no need for a network connection.");
-                    
-                    this.installationInstructionsMobileOruxMaps = this.$sce.trustAsHtml(this.gettextCatalog.getString("<li>After the download compeletes please refresh the offline maps by:<br>Maps &rarr; Switch map &rarr; OFFLINE &rarr; Refresh (the counter-clockwise arrows)</li><li>The free space required for direct installation on an Android device is twice the size of the downloaded map.</li>"));
-                    this.installationInstructionsMobileLocus = this.$sce.trustAsHtml(this.gettextCatalog.getString("<li>Wait for the downalod to complete.</li>"));
-                    this.installationInstructionsDesktopOruxMaps = this.$sce.trustAsHtml(this.gettextCatalog.getString("<li>Click on of the above button for the requested map and wait for the zip file to finish downloading.</li><li>Connect the Android device to your PC.</li><li>If needed, change your Android device USB connection mode from 'USB for charging' to 'File transfers'.</li><li>On your PC:</li><ul><li>Open the downloaded zip file and copy the directory it contains to a temporary locaton, such as your Desktop.</li><li>Move this directory into the 'Oruxmaps\mapfiles' directory of the connected Android device.</li></ul><li>Open OruxMaps and refresh the offline maps by:<br>Maps &rarr; Switch map &rarr; OFFLINE &rarr; Refresh (the counter-clockwise arrows)</li>"));
-                    // HM TODO: finish locus desktop instructions
-                    this.installationInstructionsDesktopLocus = this.$sce.trustAsHtml(this.gettextCatalog.getString("Still unknown."));
+                    this.installationInstructionsMobileOruxMaps = this.$sce.trustAsHtml(this.gettextCatalog.getString("Installation instructions for OruxMaps on mobile - surround each new line with <li></li>"));
+                    this.installationInstructionsMobileLocus = this.$sce.trustAsHtml(this.gettextCatalog.getString("Installation instructions for Locus on mobile - surround each new line with <li></li>"));
+                    this.installationInstructionsMobileOffroad = this.$sce.trustAsHtml(this.gettextCatalog.getString("Installation instructions for Offroad on mobile - surround each new line with <li></li>"));
+                    this.installationInstructionsDesktopOruxMaps = this.$sce.trustAsHtml(this.gettextCatalog.getString("Installation instructions for OruxMaps on desktop - surround each new line with <li></li>"));
+                    this.installationInstructionsDesktopLocus = this.$sce.trustAsHtml(this.gettextCatalog.getString("Installation instructions for Locus on desktop - surround each new line with <li></li>"));
+                    this.installationInstructionsDesktopOffroad = this.$sce.trustAsHtml(this.gettextCatalog.getString("Installation instructions for Offroad on desktop - surround each new line with <li></li>"));
                     this.mapsAreUpdatedEveryTwoDays = this.gettextCatalog.getString("Maps are updated every two days");
                     this.junior = this.gettextCatalog.getString("Junior");
                     this.partner = this.gettextCatalog.getString("Partner");

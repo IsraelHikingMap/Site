@@ -9,13 +9,19 @@
                 <div class="form-group">
                     <label class="col-md-2 control-label">{{resources.title}}</label>
                     <div class="col-md-10">
-                        <input type="text" ng-model="title" class="form-control" placeholder="{{resources.title}}" />
+                        <input type="text" ng-model="title" class="form-control" placeholder="{{resources.titlePlaceHolder}}"/>
                     </div>
                 </div>
                 <div class="form-group">
-                    <label class="control-label col-md-8">{{resources.generateUrlToShareWithYourFriends}}</label>
-                    <div class="col-md-4">
-                        <button class="btn btn-success btn-block" ng-click="generateUrl()" ng-disabled="isLoading">{{resources.excitedGo}}</button>
+                    <label class="col-md-2 control-label">{{resources.description}}</label>
+                    <div class="col-md-10">
+                        <textarea type="text" ng-model="description" class="form-control" placeholder="{{resources.descriptionPlaceHolder}}"></textarea>
+                    </div>
+                </div>
+                <div class="form-group">
+
+                    <div class="col-md-offset-2 col-md-10">
+                        <button class="btn btn-success btn-block" ng-click="generateUrl(title, description)" ng-disabled="isLoading">{{resources.generateUrlToShareWithYourFriends}}</button>
                         <!--<button class="btn btn-success" ng-click="showOffroadForm = !showOffroadForm" ng-disabled="isLoading">Off road icon?</button>-->
                     </div>
                 </div>
@@ -45,22 +51,33 @@
             </div>
             -->
             <div ng-show="shareAddress">
-                <div class="col-xs-offset-1">
-                    <h4>{{title}}</h4>
-                </div>
-                <div class="form-group">
-                    <a href="{{shareAddress}}" target="_blank" class="col-xs-offset-1 chome-wordwrap-fix">{{shareAddress}}</a>
-                </div>
-                <div class="col-xs-offset-1">
-                    <div class="visible-sm visible-xs">
-                        <a ng-href="{{whatappShareAddress}}" class="btn btn-default"><i class="fa fa-whatsapp"></i></a>
-                        <a ng-href="{{facebookShareAddress}}" class="btn btn-default" target="_blank"><i class="fa fa-facebook"></i></a>
+                <div class="row">
+                    <div class="col-md-4 col-xs-12">
+                        <img ng-src="{{imageUrl}}" class="img-responsive" />
                     </div>
-                    <div class="hidden-sm hidden-xs">
-                        <a ng-href="{{facebookShareAddress}}" class="btn btn-default" target="_blank"><i class="fa fa-facebook"></i></a>
+                    <div class="col-md-8 col-xs-12">
+                        <div class="row">
+                            <div class="col-xs-9">
+                                <h4>{{title}} - {{description}}</h4>
+                            </div>
+                            <div class="col-xs-3">
+                                <a href="{{facebookShareAddress}}" class="btn btn-default btn-block" target="_blank"><i class="fa fa-facebook"></i></a>
+                                <div class="visible-sm visible-xs">
+                                    <a ng-href="{{whatappShareAddress}}" class="btn btn-default btn-block"><i class="fa fa-whatsapp"></i></a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-xs-9">
+                                <a href="{{shareAddress}}" target="_blank">{{shareAddress}}</a>
+                            </div>
+                            <div class="col-xs-3">
+                                <a class="btn btn-block btn-info" clipboard supported="true" text="shareAddress"><i class="fa fa-clipboard"></i></a>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <hr/>
+                <hr />
                 <div class="form-group">
                     <label class="control-label col-md-2">{{resources.embedSize}} </label>
                     <div class="col-md-4">
@@ -75,18 +92,18 @@
                 <div class="form-group" ng-show="size == resources.custom">
                     <label class="control-label col-md-2">{{resources.width}}</label>
                     <div class="col-md-4">
-                        <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)"/>
+                        <input type="number" ng-model="width" class="form-control" ng-change="updateEmbedText(width, height)" />
                     </div>
                     <label class="control-label col-md-2">{{resources.height}}</label>
                     <div class="col-md-4">
-                        <input type="number" ng-model="height" class="form-control" ng-change="updateEmbedText(width, height)"/>
+                        <input type="number" ng-model="height" class="form-control" ng-change="updateEmbedText(width, height)" />
                     </div>
                 </div>
                 <p class="col-md-offset-2 col-md-10">{{resources.copyPasteEmbedExplenation}}</p>
                 <div class="form-group">
                     <label class="control-label col-md-2">{{resources.HTML}}</label>
                     <div class="col-md-10">
-                        <textarea rows="3" class="form-control" ng-model="embedText"/>
+                        <textarea rows="3" class="form-control" ng-model="embedText"></textarea>
                     </div>
                 </div>
             </div>

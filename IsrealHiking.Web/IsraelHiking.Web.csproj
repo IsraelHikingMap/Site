@@ -136,6 +136,7 @@
     <None Include=".bowerrc" />
     <None Include="bower.json" />
     <Content Include="scripts\angular-animate.js" />
+    <Content Include="scripts\angular-clipboard.js" />
     <Content Include="scripts\angular-file-saver.bundle.js" />
     <Content Include="scripts\angular-gettext.js" />
     <Content Include="scripts\angular-local-storage.js" />

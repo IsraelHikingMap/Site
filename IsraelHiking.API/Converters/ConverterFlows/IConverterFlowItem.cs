@@ -12,6 +12,7 @@
         public const string CSV_BABEL_FORMAT = "csv";
         public const string GPX_SINGLE_TRACK = "gpx_single_track";
         public const string GPX_GZ = "gpx.gz";
+        public const string GPX_BZ2 = "gpx.bz2";
     }
 
     public interface IConverterFlowItem

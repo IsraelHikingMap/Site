@@ -131,6 +131,7 @@
     <Compile Include="Controllers\UrlsController.cs" />
     <Compile Include="Converters\ConverterFlows\GeoJsonGpxConverterFlow.cs" />
     <Compile Include="Converters\ConverterFlows\GpsBabelConverterFlow.cs" />
+    <Compile Include="Converters\ConverterFlows\GpxBz2ToGpxConverterFlow.cs" />
     <Compile Include="Converters\ConverterFlows\GpxGeoJsonConverterFlow.cs" />
     <Compile Include="Converters\ConverterFlows\GpxGzToGpxConverterFlow.cs" />
     <Compile Include="Converters\ConverterFlows\GpxToSingleTrackGpxConverterFlow.cs" />

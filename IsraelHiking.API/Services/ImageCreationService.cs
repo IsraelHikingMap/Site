@@ -32,6 +32,7 @@ namespace IsraelHiking.API.Services
         private const int MAX_ZOOM = 16;
         
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
+        private readonly ILogger _logger;
 
         private int _reoutePenIndex;
         private readonly Pen _outLinerPen;
@@ -40,11 +41,11 @@ namespace IsraelHiking.API.Services
         private readonly Pen _endRoutePen;
         private readonly Brush _circleFillBrush;
 
-
-        public ImageCreationService(IRemoteFileFetcherGateway remoteFileFetcherGateway)
+        public ImageCreationService(IRemoteFileFetcherGateway remoteFileFetcherGateway, ILogger logger)
         {
             _reoutePenIndex = 0;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
+            _logger = logger;
             _outLinerPen = new Pen(Color.White, 11) { LineJoin = LineJoin.Bevel };
             _routePenArray = new[]
             {
@@ -69,6 +70,7 @@ namespace IsraelHiking.API.Services
 
         public async Task<byte[]> Create(DataContainer dataContainer)
         {
+            _logger.Debug("Creating image for thumbnail started.");
             var allLocations = dataContainer.routes.SelectMany(r => r.segments).SelectMany(s => s.latlngzs.OfType<LatLng>()).ToArray();
             if (!allLocations.Any())
             {
@@ -83,6 +85,7 @@ namespace IsraelHiking.API.Services
             var resizedForFacebook = new Bitmap(backgroundImage.Image, new Size(600, 315));
             var imageStream = new MemoryStream();
             resizedForFacebook.Save(imageStream, ImageFormat.Png);
+            _logger.Debug("Creating image for thumbnail completed.");
             return imageStream.ToArray();
         }
 

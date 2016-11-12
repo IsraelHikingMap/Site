@@ -8,6 +8,14 @@ namespace IsraelHiking.Services {
         logout(): void;
     }
 
+    export interface ITrace {
+        fileName: string;
+        description: string;
+        url: string;
+        imageUrl: string;
+        dataUrl: string;
+    }
+
     export class OsmUserService {
         private oauth;
         private x2Js: IX2JS;
@@ -17,7 +25,7 @@ namespace IsraelHiking.Services {
         public displayName: string;
         public imageUrl: string;
         public changeSets: number;
-        public traces: any[];
+        public traces: ITrace[];
         public shares: Common.SiteUrl[];
         public userId: string;
 
@@ -85,12 +93,18 @@ namespace IsraelHiking.Services {
                     let tracesJson = this.x2Js.xml2json(traces) as any;
                     this.traces = [];
                     for (let traceJson of tracesJson.osm.gpx_file) {
-                        let url = `https://www.openstreetmap.org/user/${traceJson._user}/traces/${traceJson._id}`;
+                        if (traceJson._visibility === "private") {
+                            continue;
+                        }
+                        let baseOsm = "https://www.openstreetmap.org/";
+                        let url = `${baseOsm}user/${traceJson._user}/traces/${traceJson._id}`;
+                        let dataUrl = `${baseOsm}trace/${traceJson._id}/data`;
                         this.traces.push({
                             fileName: traceJson._name,
                             description: traceJson.description,
                             url: url,
-                            imageUrl: url + "/icon"
+                            imageUrl: url + "/picture",
+                            dataUrl: dataUrl
                         });
                     }
                     deferred.resolve();
@@ -100,6 +114,24 @@ namespace IsraelHiking.Services {
                 });
             });
             return this.$q.all([deferred.promise, this.$q.when(sharesPromise)]);
+        }
+
+        public updateSiteUrl = (siteUrl: Common.SiteUrl): angular.IPromise<{}> => {
+            return this.$http.put(Common.Urls.urls + siteUrl.Id, siteUrl);
+        }
+
+        public deleteSiteUrl = (siteUrl: Common.SiteUrl): angular.IPromise<void> => {
+            return this.$http.delete(Common.Urls.urls + siteUrl.Id).then(() => {
+                _.remove(this.shares, s => s.Id === siteUrl.Id);
+            });
+        }
+
+        public getImageFromSiteUrlId = (siteUrl: Common.SiteUrl) => {
+            return Common.Urls.images + siteUrl.Id;
+        }
+
+        public getUrlFromSiteUrlId = (siteUrl: Common.SiteUrl) => {
+            return Common.Urls.baseAddress + this.getSiteUrlPostfix(siteUrl.Id);
         }
     }
 }

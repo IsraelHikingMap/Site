@@ -13,15 +13,15 @@
     <meta content="IE=edge, chrome=1" http-equiv="X-UA-Compatible" />
     <meta property="og:site_name" content="IsraelHiking.OSM.org.il" />
     <meta property="og:type" content="website" />
-    <meta property="og:title" content="Israel Hiking Map" />
+    <meta property="og:title" content="<#=Title#>" />
     <meta property="og:image" content="<#=ThumbnailUrl#>" />
     <meta property="og:image:url" content="<#=ThumbnailUrl#>" />
     <meta property="og:image:secure_url" content="<#=ThumbnailUrl.Replace("http", "https")#>" />
 	<meta property="og:image:width" content="600" />
     <meta property="og:image:height" content="315" />
-    <meta property="og:description" content="בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." />
-    <meta name="title" content="Israel Hiking Map" />
-    <meta name="description" content="בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." />
+    <meta property="og:description" content="<#=Description#>" />
+    <meta name="title" content="<#=Title#>" />
+    <meta name="description" content="<#=Description#>" />
     <meta name="keyword" content="hike,bike,outdoor,israel hiking,map,navigation,route planning,nominatim,סימון שבילים,אופניים,מפה,ניווט,שטח,טיול,מטיבי לכת,ג'יפים,רכיבה,הליכה,טבע" />
     <meta name="robot" content="index,follow" />
     <meta name="msapplication-TileColor" content="#2b5797">
@@ -29,7 +29,7 @@
     <meta name="msapplication-config" content="/content/images/favicons/browserconfig.xml">
     <meta name="theme-color" content="#0a42bb">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Israel Hiking Map</title>
+    <title><#=Title#></title>
 </head>
 <body>
 </body>

@@ -37,12 +37,19 @@ namespace IsraelHiking.DataAccess.GraphHopper
                         break;
                 }
                 var requestAddress = "http://localhost:8989/route?instructions=false&points_encoded=false&elevation=true&point=" + request.From + "&point=" + request.To + "&vehicle=" + vehicle;
-                _logger.Debug("Get routing for: " + requestAddress);
                 var response = await httpClient.GetAsync(requestAddress);
                 var content = await response.Content.ReadAsStringAsync();
-                _logger.Debug("Got routing: " + content);
                 var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
-
+                if (jsonResponse.paths.Count <= 0)
+                {
+                    return new LineString(new Coordinate[0]);
+                }
+                if (jsonResponse.paths.First().points.coordinates.Count == 1)
+                {
+                    var jsonCoordinates = jsonResponse.paths.First().points.coordinates.First();
+                    var convertedCoordiates = new Coordinate(jsonCoordinates[0], jsonCoordinates[1], jsonCoordinates.Count > 2 ? jsonCoordinates[2] : 0.0);
+                    return new LineString(new [] { convertedCoordiates, convertedCoordiates});
+                }
                 return new LineString(jsonResponse.paths.First().points.coordinates.Select(c => new Coordinate(c[0], c[1], c.Count > 2 ? c[2] : 0.0)).ToArray());
             }
         }

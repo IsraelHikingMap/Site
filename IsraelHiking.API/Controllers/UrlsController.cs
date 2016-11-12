@@ -57,6 +57,20 @@ namespace IsraelHiking.API.Controllers
             return Ok(siteUrl);
         }
 
+        // PUT api/urls/42
+        public async Task<IHttpActionResult> PutSiteUrl(string id, SiteUrl siteUrl)
+        {
+            var siteUrlFromDatabase = await _repository.GetUrlById(id);
+            if (siteUrlFromDatabase == null)
+            {
+                return NotFound();
+            }
+            siteUrlFromDatabase.Title = siteUrl.Title;
+            siteUrlFromDatabase.Description = siteUrl.Description;
+            await _repository.Update(siteUrlFromDatabase);
+            return Ok(siteUrlFromDatabase);
+        }
+
         // Delete delete/urls/abc
         /// <summary>
         /// Removes the user from the url, leaves it as public.

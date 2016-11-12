@@ -34,7 +34,8 @@ namespace IsraelHiking.API.Services
                 new GpxToSingleTrackGpxConverterFlow(),
                 new KmzToKmlConverterFlow(),
                 new GpxGzToGpxConverterFlow(),
-                new GpxVersion1ToGpxVersion11ConverterFlow(_gpsBabelGateway)
+                new GpxVersion1ToGpxVersion11ConverterFlow(_gpsBabelGateway),
+                new GpxBz2ToGpxConverterFlow()
             };
             var supportedGpsBabelFormats = new List<string>
             {
@@ -130,6 +131,10 @@ namespace IsraelHiking.API.Services
             if (fileNameOrFormat.EndsWith("gpx.gz"))
             {
                 return FlowFormats.GPX_GZ;
+            }
+            if (fileNameOrFormat.EndsWith("gpx.bz2"))
+            {
+                return FlowFormats.GPX_BZ2;
             }
             if (fileNameOrFormat.EndsWith("kml"))
             {
