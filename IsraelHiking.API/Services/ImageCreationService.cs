@@ -18,7 +18,6 @@ namespace IsraelHiking.API.Services
         public Point Tiles { get; set; }
         public double N { get; set; }
         public int Zoom { get; set; }
-        
     }
 
     public class ImageCreationService : IImageCreationService
@@ -28,7 +27,9 @@ namespace IsraelHiking.API.Services
         private const int NUMBER_OF_TILES_FOR_IMAGE_Y = 2; // no units
         private const int TARGET_TILE_SIZE_X = TILE_SIZE * NUMBER_OF_TILES_FOR_IMAGE_X; // pixels
         private const int TARGET_TILE_SIZE_Y = TILE_SIZE * NUMBER_OF_TILES_FOR_IMAGE_X; // pixels
-        private const float CIRCLE_SIZE = 12; // pixels
+        private const float CIRCLE_SIZE_X = 24; // pixels
+        private const float CIRCLE_SIZE_Y = 28; // pixels
+        private const float PEN_WIDTH = 13; // pixels
         private const int MAX_ZOOM = 16;
         
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
@@ -46,26 +47,26 @@ namespace IsraelHiking.API.Services
             _reoutePenIndex = 0;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
             _logger = logger;
-            _outLinerPen = new Pen(Color.White, 11) { LineJoin = LineJoin.Bevel };
+            _outLinerPen = new Pen(Color.White, PEN_WIDTH + 8) { LineJoin = LineJoin.Bevel };
             _routePenArray = new[]
             {
-                new Pen(Color.Blue, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Red, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Orange, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Pink, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Green, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Purple, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Turquoise, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Yellow, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Brown, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Cyan, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Gray, 7) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.FromArgb(255, 16, 16, 16), 7) {LineJoin = LineJoin.Bevel}
+                new Pen(Color.Blue, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Red, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Orange, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Pink, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Green, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Purple, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Turquoise, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Yellow, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Brown, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Cyan, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.Gray, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
+                new Pen(Color.FromArgb(255, 16, 16, 16), PEN_WIDTH) {LineJoin = LineJoin.Bevel}
             };
 
             _circleFillBrush = Brushes.White;
-            _startRoutePen = new Pen(Color.Green, 5);
-            _endRoutePen = new Pen(Color.Red, 5);
+            _startRoutePen = new Pen(Color.Green, 7);
+            _endRoutePen = new Pen(Color.Red, 7);
         }
 
         public async Task<byte[]> Create(DataContainer dataContainer)
@@ -185,10 +186,10 @@ namespace IsraelHiking.API.Services
                     }
                     graphics.DrawLines(_outLinerPen, points);
                     graphics.DrawLines(_routePenArray[_reoutePenIndex++], points);
-                    graphics.FillEllipse(_circleFillBrush, points.First().X - CIRCLE_SIZE / 2, points.First().Y - CIRCLE_SIZE / 2, CIRCLE_SIZE, CIRCLE_SIZE);
-                    graphics.DrawEllipse(_startRoutePen, points.First().X - CIRCLE_SIZE / 2, points.First().Y - CIRCLE_SIZE / 2, CIRCLE_SIZE, CIRCLE_SIZE);
-                    graphics.FillEllipse(_circleFillBrush, points.Last().X - CIRCLE_SIZE / 2, points.Last().Y - CIRCLE_SIZE / 2, CIRCLE_SIZE, CIRCLE_SIZE);
-                    graphics.DrawEllipse(_endRoutePen, points.Last().X - CIRCLE_SIZE / 2, points.Last().Y - CIRCLE_SIZE / 2, CIRCLE_SIZE, CIRCLE_SIZE);
+                    graphics.FillEllipse(_circleFillBrush, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                    graphics.DrawEllipse(_startRoutePen, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                    graphics.FillEllipse(_circleFillBrush, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                    graphics.DrawEllipse(_endRoutePen, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
                 }
             }
         }
@@ -210,7 +211,7 @@ namespace IsraelHiking.API.Services
                         .Replace("{x}", x.ToString())
                         .Replace("{y}", y.ToString());
             var fileResponse = await _remoteFileFetcherGateway.GetFileContent(file);
-            return Image.FromStream(new MemoryStream(fileResponse.Content), true);
+            return fileResponse.Content.Any() ? Image.FromStream(new MemoryStream(fileResponse.Content), true) : new Bitmap(TILE_SIZE, TILE_SIZE);
         }
 
         private PointF ConvertLatLngZToPoint(LatLngZ latLng, BackgroundImage backgroundImage)

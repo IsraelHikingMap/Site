@@ -76,6 +76,28 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
+        public void Zoom16_RouteInSingleTileTileIsMissing_ShouldUseEmptyBitmaps()
+        {
+            var dataContainer = GetDataContainer(new List<LatLngZ>
+            {
+                new LatLngZ {lat = 0.0001, lng = 0.0001},
+                new LatLngZ {lat = 0.0002, lng = 0.0002}
+            });
+            _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>())
+                .Returns(
+                    Task.FromResult(new RemoteFileFetcherGatewayResponse
+                    {
+                        FileName = "missing.png",
+                        Content = new byte[0]
+                    }));
+
+            var ressults = _imageCreationService.Create(dataContainer).Result;
+
+            Assert.IsTrue(ressults.Length > 0);
+            _remoteFileFetcherGateway.Received(2).GetFileContent(Arg.Any<string>());
+        }
+
+        [TestMethod]
         public void Zoom16_RouteInTwoHorizontalTile_ShouldResize4Tile2Times()
         {
             var dataContainer = GetDataContainer(new List<LatLngZ>

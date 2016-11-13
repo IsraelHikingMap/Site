@@ -31,15 +31,23 @@ namespace IsraelHiking.DataAccess
                 _logger.Debug("Getting file from: " + url);
                 client.Timeout = TimeSpan.FromMinutes(10);
                 var response = await client.GetAsync(url);
-                var fileName = (response.Content.Headers.ContentDisposition != null)
-                    ? response.Content.Headers.ContentDisposition.FileName.Trim('"')
-                    : url.Substring(url.LastIndexOf("/") + 1);
-                var content = await response.Content.ReadAsByteArrayAsync();
-                _logger.Debug("File was retrieved successfully from: " + url);
+                var fileName = response.Content.Headers.ContentDisposition?.FileName.Trim('"') ?? 
+                    url.Substring(url.LastIndexOf("/", StringComparison.Ordinal) + 1);
+                var content = new byte[0];
+                if (response.IsSuccessStatusCode)
+                {
+                    content = await response.Content.ReadAsByteArrayAsync();
+                    _logger.Debug("File was retrieved successfully from: " + url);
+                }
+                else
+                {
+                    _logger.Debug("Unable to retrieve file from: " + url + ", Status code: " + response.StatusCode);
+                }
+                
                 return new RemoteFileFetcherGatewayResponse
                 {
                     Content = content,
-                    FileName = fileName,
+                    FileName = fileName
                 };
             }
         }
