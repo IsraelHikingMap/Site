@@ -85,9 +85,8 @@
                                     {{resources.lastViewed}}: {{siteUrl.LastViewed | date:'dd/MM/yyyy'}}
                                 </div>
                                 <div class="col-xs-3">
-                                    <a class="btn btn-danger btn-block" ng-click="editMode = false; userService.deleteSiteUrl(siteUrl)"><i class="fa fa-trash"></i></a>
                                     <a class="btn btn-block btn-info" clipboard supported="true" text="getUrlFromSiteUrlId(siteUrl)"><i class="fa fa-clipboard"></i></a>
-
+                                    <a class="btn btn-danger btn-block" ng-click="editMode = false; userService.deleteSiteUrl(siteUrl)"><i class="fa fa-trash"></i></a>
                                 </div>
                             </div>
                         </div>

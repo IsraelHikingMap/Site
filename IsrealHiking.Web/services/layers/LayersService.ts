@@ -319,7 +319,7 @@ namespace IsraelHiking.Services.Layers {
                         this.setJsonData(data);
                         this.addOverlaysFromHash(data.overlays);
                         this.hashService.clear();
-                        this.toastr.info(siteUrl.Title);
+                        this.toastr.info(siteUrl.Description, siteUrl.Title);
                         deferred.resolve();
                     }).error(() => {
                         let data = this.hashService.getDataContainer();
