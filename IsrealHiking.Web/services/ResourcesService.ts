@@ -142,7 +142,15 @@ namespace IsraelHiking.Services {
         public master: string;
         public guru: string;
         public changes: string;
-        // Errors & Warnings
+        public userEmail: string;
+        public userEmailMutedOffroad: string;
+        public difficulty: string;
+        public easy: string;
+        public moderate: string;
+        public hard: string;
+        public activity: string;
+        public send: string;
+        // Toasts: Errors/Warnings/Success
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
         public pleaseSelectTo: string;
@@ -159,6 +167,8 @@ namespace IsraelHiking.Services {
         public pleaseSelectARoute: string;
         public pleaseAddRoutePoints: string;
         public unableToLogin: string;
+        public routeSentSuccessfully: string;
+        public unableToSendRoute: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -471,7 +481,15 @@ namespace IsraelHiking.Services {
                     this.master = this.gettextCatalog.getString("Master");
                     this.guru = this.gettextCatalog.getString("Guru");
                     this.changes = this.gettextCatalog.getString("Changes");
-                    // Errors & Warnings
+                    this.userEmail = this.gettextCatalog.getString("User E-Mail");
+                    this.userEmailMutedOffroad = this.gettextCatalog.getString("Use the e-mail you used to login to off-road app.");
+                    this.difficulty = this.gettextCatalog.getString("Difficulty");
+                    this.easy = this.gettextCatalog.getString("Easy");
+                    this.moderate = this.gettextCatalog.getString("Moderate");
+                    this.hard = this.gettextCatalog.getString("Hard");
+                    this.activity = this.gettextCatalog.getString("Activity");
+                    this.send = this.gettextCatalog.getString("Send!");
+                    // Toasts: Errors/Warnings/Success
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
                     this.pleaseSelectTo = this.gettextCatalog.getString("Please select to...");
@@ -488,6 +506,8 @@ namespace IsraelHiking.Services {
                     this.pleaseSelectARoute = this.gettextCatalog.getString("Please select a route...");
                     this.pleaseAddRoutePoints = this.gettextCatalog.getString("Please add points to the route...");
                     this.unableToLogin = this.gettextCatalog.getString("Unable to login...");
+                    this.routeSentSuccessfully = this.gettextCatalog.getString("Route sent successfully.");
+                    this.unableToSendRoute = this.gettextCatalog.getString("Unable to send route...");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");

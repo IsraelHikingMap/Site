@@ -9,7 +9,7 @@
                 <div class="form-group">
                     <label class="col-md-2 control-label">{{resources.title}}</label>
                     <div class="col-md-10">
-                        <input type="text" ng-model="title" class="form-control" placeholder="{{resources.titlePlaceHolder}}"/>
+                        <input type="text" ng-model="title" class="form-control" placeholder="{{resources.titlePlaceHolder}}" />
                     </div>
                 </div>
                 <div class="form-group">
@@ -19,37 +19,11 @@
                     </div>
                 </div>
                 <div class="form-group">
-
                     <div class="col-md-offset-2 col-md-10">
                         <button class="btn btn-success btn-block" ng-click="generateUrl(title, description)" ng-disabled="isLoading">{{resources.generateUrlToShareWithYourFriends}}</button>
-                        <!--<button class="btn btn-success" ng-click="showOffroadForm = !showOffroadForm" ng-disabled="isLoading">Off road icon?</button>-->
                     </div>
                 </div>
             </div>
-            <!--
-            <div ng-show="showOffroadForm">
-                <div class="form-group">
-                    <label class="col-md-2">User E-Mail</label>
-                    <div class="col-md-10">
-                        <input type="text" ng-model="userMail" class="form-control" placeholder="User E-Mail"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2">{{resources.title}}</label>
-                    <div class="col-md-10">
-                        <input type="text" ng-model="title" class="form-control" placeholder="{{resources.title}}"/>
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="col-md-2">Description</label>
-                    <div class="col-md-10">
-                        <input type="text" ng-model="routeDescription" class="form-control" placeholder="Description"/>
-                    </div>
-
-                </div>
-                <button type="button" ng-click="sendToOffroad(userMail, title, routeDescription)" class="btn btn-success">Send!</button>
-            </div>
-            -->
             <div ng-show="shareAddress">
                 <div class="row">
                     <div class="col-md-4 col-xs-12">
@@ -65,6 +39,7 @@
                                 <div class="visible-sm visible-xs">
                                     <a ng-href="{{whatappShareAddress}}" class="btn btn-default btn-block"><i class="fa fa-whatsapp"></i></a>
                                 </div>
+                                <!--<a class="btn btn-default btn-block cursor-pointer" ng-click="showOffroadForm = 'true'" ng-class="{active: showOffroadForm}"><i class="fa fa-car"></i></a>-->
                             </div>
                         </div>
                         <div class="row">
@@ -78,6 +53,39 @@
                     </div>
                 </div>
                 <hr />
+                <div ng-show="showOffroadForm">
+                    <div class="form-group row">
+                        <label class="control-label col-md-2">{{resources.userEmail}}</label>
+                        <div class="col-md-10">
+                            <input type="text" ng-model="offroadRequest.userMail" class="form-control" placeholder="{{resources.userEmail}}" />
+                        </div>
+                        <div class="col-md-10">
+                            <small class="form-text text-muted">{{resources.userEmailMutedOffroad}}</small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="control-label col-md-2">{{resources.difficulty}}</label>
+                        <div class="col-md-4">
+                            <select ng-model="offroadRequest.difficultyLevel" class="form-control">
+                                <option value="1">{{resources.easy}}</option>
+                                <option value="3">{{resources.moderate}}</option>
+                                <option value="5">{{resources.hard}}</option>
+                            </select>
+                        </div>
+                        <label class="control-label col-md-2">{{resources.activity}}</label>
+                        <div class="col-md-4">
+                            <a class="btn btn-default" ng-click="offroadRequest.activityType = 'Walking'" ng-class="{active: offroadRequest.activityType == 'Walking'}"><img src="/content/images/hike.svg"/></a>
+                            <a class="btn btn-default" ng-click="offroadRequest.activityType = 'Cycling'" ng-class="{active: offroadRequest.activityType == 'Cycling'}"><img src="/content/images/bike.svg"/></a>
+                            <a class="btn btn-default" ng-click="offroadRequest.activityType = 'OffRoading'" ng-class="{active: offroadRequest.activityType == 'OffRoading'}"><img src="/content/images/four-by-four.png"/></a>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <div class="col-md-offset-2 col-md-4">
+                            <a class="cursor-pointer btn btn-success btn-block" ng-click="sendToOffroad()"><i class="fa fa-send fa-lg"></i> {{resources.send}}</a>
+                        </div>
+                    </div>
+                    <hr />
+                </div>
                 <div class="form-group">
                     <label class="control-label col-md-2">{{resources.embedSize}} </label>
                     <div class="col-md-4">

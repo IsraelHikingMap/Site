@@ -8,11 +8,22 @@
 
     export interface IOffroadPostRequest {
         userMail: string;
-        activityType: string;
         title: string;
         description: string;
+        activityType: string;
+        difficultyLevel: string;
         sharingCode: number; //should be 5 fixed
         path: IIOffroadCoordinates[];
+        mapItems: IIOffroadMarker[];
+        external_url: string;
+    }
+
+    export interface IIOffroadMarker {
+        title: string;
+        description: string;
+        visibilityLevel: string;
+        mapItemType: string;
+        point: IIOffroadCoordinates;
     }
 
     export interface IShareScope extends IRootScope {
@@ -27,22 +38,26 @@
         embedText: string;
         isLoading: boolean;
         siteUrlId: string;
+        offroadRequest: IOffroadPostRequest;
         openShare(e: Event);
         updateEmbedText(width: number, height: number): void;
         generateUrl(title: string, description: string): void;
         clearShareAddress(): void;
         setSize(size: string): void;
-        sendToOffroad(userMail: string, title: string, description: string): void;
+        sendToOffroad(): void;
     }
 
     export class ShareController extends BaseMapController {
         private $window: angular.IWindowService;
         private osmUserService: Services.OsmUserService;
 
+        private static USER_EMAIL_KEY = "offroadUserEmail";
+
         constructor($scope: IShareScope,
             $uibModal: angular.ui.bootstrap.IModalService,
             $http: angular.IHttpService,
             $window: angular.IWindowService,
+            localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService,
             osmUserService: Services.OsmUserService,
@@ -74,9 +89,25 @@
 
             $scope.openShare = (e: Event) => {
                 $scope.embedText = this.getEmbedText($scope);
-                $scope.title = layersService.getSelectedRoute() == null
-                    ? ""
-                    : layersService.getSelectedRoute().getData().name;
+                if (layersService.getSelectedRoute() != null) {
+                    let route = layersService.getSelectedRoute().getData();
+                    $scope.title = route.name;
+                    $scope.offroadRequest = {} as IOffroadPostRequest;
+                    $scope.offroadRequest.userMail = localStorageService.get(ShareController.USER_EMAIL_KEY) as string || "";
+                    $scope.offroadRequest.activityType = "OffRoading";
+                    $scope.offroadRequest.difficultyLevel = "3";
+                    if (route.segments.length > 0) {
+                        switch (route.segments[route.segments.length - 1].routingType) {
+                            case "Hike":
+                                $scope.offroadRequest.activityType = "Walking";
+                                break;
+                            case "Bike":
+                                $scope.offroadRequest.activityType = "Cycling";
+                                break;
+                        }    
+                    }
+                }
+                
                 $uibModal.open({
                     templateUrl: "controllers/shareModal.html",
                     scope: $scope
@@ -86,6 +117,8 @@
 
             $scope.generateUrl = (title: string, description: string) => {
                 $scope.isLoading = true;
+                $scope.offroadRequest.title = title;
+                $scope.offroadRequest.description = description;
                 var siteUrl = {
                     Title: title,
                     Description: description,
@@ -126,7 +159,8 @@
             }
 
             // currently can't be done from the UI until we decide how it should act.
-            $scope.sendToOffroad = (userMail, title, description) => {
+            $scope.sendToOffroad = () => {
+                localStorageService.set(ShareController.USER_EMAIL_KEY, $scope.offroadRequest.userMail);
                 if (layersService.getSelectedRoute() == null) {
                     toastr.warning($scope.resources.pleaseSelectARoute);
                     return;
@@ -136,24 +170,32 @@
                     toastr.warning($scope.resources.pleaseAddPointsToRoute);
                     return;
                 }
-                let postData = {
-                    userMail: userMail,
-                    title: title,
-                    activityType: "offRoading",
-                    description: description,
-                    sharingCode: 5, //fixed
-                    path: []
-                } as IOffroadPostRequest;
+                $scope.offroadRequest.sharingCode = 5; //fixed
+                $scope.offroadRequest.path = [];
+                $scope.offroadRequest.mapItems = [];
+                $scope.offroadRequest.external_url = $scope.shareAddress;
+
                 for (let segment of route.segments) {
                     for (let latlngz of segment.latlngzs) {
-                        postData.path.push({ altitude: latlngz.z, latitude: latlngz.lat, longitude: latlngz.lng });
+                        $scope.offroadRequest.path.push({ altitude: latlngz.z, latitude: latlngz.lat, longitude: latlngz.lng });
                     }
                 }
+                let index = 0;
+                for (let marker of layersService.getMarkers().markers) {
+                    $scope.offroadRequest.mapItems.push({
+                        title: `Point ${index++}`,
+                        mapItemType: "POI",
+                        visibilityLevel: "Track",
+                        description: marker.title,
+                        point: { latitude: marker.latlng.lat, longitude: marker.latlng.lng, altitude: 0 }
+                    });
+                }
                 let address = "https://brilliant-will-93906.appspot.com/_ah/api/myAdventureApi/v1/tracks/external";
-                $http.post(address, postData).then(() => {
-                    toastr.success("Route sent to off-road successfully");
+                $http.post(address, $scope.offroadRequest).then(() => {
+                    toastr.success($scope.resources.routeSentSuccessfully);
                 }, (err) => {
-                    toastr.error(`Unable to sent route to off-road, ${JSON.stringify(err)}`);
+                    toastr.error($scope.resources.unableToSendRoute);
+                    console.error(err);
                 });
             }
         }
