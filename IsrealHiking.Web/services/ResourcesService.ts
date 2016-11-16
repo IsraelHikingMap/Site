@@ -150,6 +150,14 @@ namespace IsraelHiking.Services {
         public hard: string;
         public activity: string;
         public send: string;
+        public view: string;
+        public edit: string;
+        public update: string;
+        public copyUrl: string;
+        public delete: string;
+        public editRouteDetails: string;
+        public shareWithFacebook: string;
+        public shareWithOffroad: string;
         // Toasts: Errors/Warnings/Success
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
@@ -489,6 +497,14 @@ namespace IsraelHiking.Services {
                     this.hard = this.gettextCatalog.getString("Hard");
                     this.activity = this.gettextCatalog.getString("Activity");
                     this.send = this.gettextCatalog.getString("Send!");
+                    this.view = this.gettextCatalog.getString("View");
+                    this.edit = this.gettextCatalog.getString("Edit");
+                    this.update = this.gettextCatalog.getString("Update");
+                    this.copyUrl = this.gettextCatalog.getString("Copy Link");
+                    this.delete = this.gettextCatalog.getString("Delete");
+                    this.editRouteDetails = this.gettextCatalog.getString("Edit Route Details");
+                    this.shareWithFacebook = this.gettextCatalog.getString("Share With Facebook");
+                    this.shareWithOffroad = this.gettextCatalog.getString("Share With off-road");
                     // Toasts: Errors/Warnings/Success
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

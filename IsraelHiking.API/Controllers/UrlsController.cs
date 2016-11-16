@@ -4,8 +4,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
-//using IsraelHiking.API.Services;
-//using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -32,11 +30,11 @@ namespace IsraelHiking.API.Controllers
             return Ok(siteUrl);
         }
 
-        // GET api/UserUrls/abc
-        [Route("api/userurls/{id}")]
-        public async Task<IHttpActionResult> GetSiteUrlForUser(string id)
+        // GET api/Urls/abc
+        [Authorize]
+        public async Task<IHttpActionResult> GetSiteUrlForUser()
         {
-            var siteUrls = await _repository.GetUrlsByUser(id);
+            var siteUrls = await _repository.GetUrlsByUser(User.Identity.Name);
             return Ok(siteUrls);
         }
 
@@ -58,12 +56,17 @@ namespace IsraelHiking.API.Controllers
         }
 
         // PUT api/urls/42
+        [Authorize]
         public async Task<IHttpActionResult> PutSiteUrl(string id, SiteUrl siteUrl)
         {
             var siteUrlFromDatabase = await _repository.GetUrlById(id);
             if (siteUrlFromDatabase == null)
             {
                 return NotFound();
+            }
+            if (siteUrlFromDatabase.OsmUserId != User.Identity.Name)
+            {
+                return BadRequest("You can't update someone else's share!");
             }
             siteUrlFromDatabase.Title = siteUrl.Title;
             siteUrlFromDatabase.Description = siteUrl.Description;
@@ -77,6 +80,7 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
+        [Authorize]
         public async Task<IHttpActionResult> DeleteSiteUrl(string id)
         {
             var siteUrlFromDatabase = await _repository.GetUrlById(id);
@@ -84,8 +88,11 @@ namespace IsraelHiking.API.Controllers
             {
                 return NotFound();
             }
-            siteUrlFromDatabase.OsmUserId = string.Empty;
-            await _repository.Update(siteUrlFromDatabase);
+            if (siteUrlFromDatabase.OsmUserId != User.Identity.Name)
+            {
+                return BadRequest("You can't delete someone else's share!");
+            }
+            await _repository.Delete(siteUrlFromDatabase);
             return Ok();
         }
 

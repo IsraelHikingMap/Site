@@ -28,26 +28,10 @@
             fileService: Services.FileService,
             layersService: Services.Layers.LayersService) {
             super(mapService);
-            $scope.userService = osmUserService;
-            $scope.ranks = [
-                {
-                    name: $scope.resources.junior,
-                    points: 10
-                },
-                {
-                    name: $scope.resources.partner,
-                    points: 100
-                },
-                {
-                    name: $scope.resources.master,
-                    points: 1000
-                },
-                {
-                    name: $scope.resources.guru,
-                    points: Infinity
-                }
-            ];
 
+            $scope.userService = osmUserService;
+            this.initializeRanks($scope);
+            $scope.$watch(() => $scope.resources.language, () => this.initializeRanks($scope));
 
             $scope.login = (e: Event) => {
                 this.suppressEvents(e);
@@ -140,6 +124,27 @@
 
         private getPathOprtions = (): L.PathOptions => {
             return { opacity: 0.7, color: "Blue", weight: 3 } as L.PathOptions;
+        }
+
+        private initializeRanks = ($scope: IOsmUserScope) => {
+            $scope.ranks = [
+                {
+                    name: $scope.resources.junior,
+                    points: 10
+                },
+                {
+                    name: $scope.resources.partner,
+                    points: 100
+                },
+                {
+                    name: $scope.resources.master,
+                    points: 1000
+                },
+                {
+                    name: $scope.resources.guru,
+                    points: Infinity
+                }
+            ];
         }
     }
 

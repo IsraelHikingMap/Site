@@ -16,8 +16,12 @@
     app.service(Strings.Services.mapService, [() => new Services.MapService()]);
     app.service(Strings.Services.parserFactory, [() => new Services.Parsers.ParserFactory()]);
     app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
-    app.service(Strings.Services.osmUserService, [Strings.Angular.q, Strings.Angular.http,
-        ($q: angular.IQService, $http: angular.IHttpService) => new Services.OsmUserService($q, $http)]);
+    app.service(Strings.Services.authorizationInterceptorService, [Strings.Angular.q, Strings.Angular.injector, Strings.Services.localStorageService,
+        ($q: angular.IQService, $injector: angular.auto.IInjectorService, localStorageService: angular.local.storage.ILocalStorageService) =>
+            new Services.AuthorizationInterceptorService($q, $injector, localStorageService)]);
+    app.service(Strings.Services.osmUserService, [Strings.Angular.q, Strings.Angular.http, Strings.Services.localStorageService,
+        ($q: angular.IQService, $http: angular.IHttpService, localStorageService: angular.local.storage.ILocalStorageService) =>
+            new Services.OsmUserService($q, $http, localStorageService)]);
     app.service(Strings.Services.routeStatisticsService, [() => new Services.RouteStatisticsService()]);
     app.service(Strings.Services.resourcesService, [Strings.Angular.sce, Strings.Services.localStorageService, Strings.Services.gettextCatalog,
         ($sce: angular.ISCEService, localstorageService: angular.local.storage.ILocalStorageService, gettextCatalog: angular.gettext.gettextCatalog) =>
@@ -147,10 +151,11 @@
             $rootScope.hasHebrewCharacters = hasHebrewCharacters;
         }]);
 
-    app.config(($compileProvider, toastrConfig) => {
+    app.config(($compileProvider, $httpProvider, toastrConfig) => {
         $compileProvider.aHrefSanitizationWhitelist(/[.*facebook][^\s*(whatsapp):]/);
         $compileProvider.aHrefSanitizationWhitelist(/^\s*(https?|orux-map|locus-actions|offroad):/);
         angular.extend(toastrConfig, { positionClass: "toast-top-center" });
+        $httpProvider.interceptors.push(Strings.Services.authorizationInterceptorService);
     });
 
     export function hasHebrewCharacters(word: string): boolean {

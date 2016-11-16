@@ -7,6 +7,7 @@ using System.Web.Http.ExceptionHandling;
 using IsraelHiking.API;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Owin.Security.OAuth;
 using NetTopologySuite.IO.Converters;
 
 [assembly: OwinStartup(typeof(IsraelHiking.Web.Startup))]
@@ -22,6 +23,10 @@ namespace IsraelHiking.Web
             var container = CreateUnityContainer(logger);
             logger.Info("Starting Israel Hiking Server.");
             var config = new HttpConfiguration();
+            app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions
+            {
+                AccessTokenProvider = new OsmAccessTokenProvider()
+            });
             WebApiConfig.Register(config);
 
             config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
@@ -35,7 +40,6 @@ namespace IsraelHiking.Web
             config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new ICRSObjectConverter());
             config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new GeometryArrayConverter());
             config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new EnvelopeConverter());
-            //this.Converters.Add((JsonConverter)new GeometryConverter(geometryFactory)); ??
 
             config.Services.Add(typeof(IExceptionLogger), logger);
             config.DependencyResolver = new UnityResolver(container);

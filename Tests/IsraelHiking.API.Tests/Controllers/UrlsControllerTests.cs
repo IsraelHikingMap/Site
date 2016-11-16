@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Security.Claims;
+using System.Security.Principal;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Results;
 using IsraelHiking.API.Controllers;
@@ -15,6 +18,14 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private UrlsController _controller;
         private IIsraelHikingRepository _israelHikingRepository;
+
+        private void SetupIdentity(string osmUserId = "42")
+        {
+            var identity = new GenericIdentity(osmUserId);
+            identity.AddClaim(new Claim(ClaimTypes.Name, osmUserId));
+
+            Thread.CurrentPrincipal = new GenericPrincipal(identity, new string[0]);
+        }
 
         [TestInitialize]
         public void TestInitialize()
@@ -65,13 +76,13 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void DeleteSiteUrl_ItemNotInDatabase_ShouldUpdate()
         {
-            var siteUrl = new SiteUrl { Id = "42", OsmUserId = "1" };
+            var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
             _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(Task.FromResult(siteUrl));
+            SetupIdentity(siteUrl.OsmUserId);
 
             _controller.DeleteSiteUrl(siteUrl.Id).Wait();
 
-            _israelHikingRepository.Received(1).Update(siteUrl);
-            Assert.AreEqual(string.Empty, siteUrl.OsmUserId);
+            _israelHikingRepository.Received(1).Delete(siteUrl);
             _controller.Dispose();
         }
     }

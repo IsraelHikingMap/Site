@@ -33,6 +33,12 @@ namespace IsraelHiking.DataAccess.Database
                 .ConfigureAwait(false); ;
         }
 
+        public Task Delete(SiteUrl siteUrl)
+        {
+            _dbContext.SiteUrls.Remove(siteUrl);
+            return _dbContext.SaveChangesAsync();
+        }
+
         public async Task AddUrl(SiteUrl siteUrl)
         {
             _dbContext.SiteUrls.Add(siteUrl);

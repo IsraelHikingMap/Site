@@ -12,7 +12,7 @@
     <DebugSymbols>true</DebugSymbols>
     <TypeScriptToolsVersion>1.8</TypeScriptToolsVersion>
     <UseIISExpress>true</UseIISExpress>
-    <IISExpressSSLPort />
+    <IISExpressSSLPort>44322</IISExpressSSLPort>
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
     <IISExpressUseClassicPipelineMode />
@@ -73,6 +73,7 @@
     <Content Include="content\images\marker-shadow-small.png" />
     <Content Include="content\images\marker-shadow.png" />
     <Content Include="content\images\none.svg" />
+    <Content Include="content\images\off-road.png" />
     <Content Include="content\images\os-israel-logo.png" />
     <Content Include="content\images\os-israel-logo_transparent.png" />
     <Content Include="content\images\routing-all.png" />
@@ -300,6 +301,7 @@
     <TypeScriptCompile Include="scripts\typings\ng-file-upload\ng-file-upload.d.ts" />
     <TypeScriptCompile Include="scripts\typings\toastr\toastr.d.ts" />
     <TypeScriptCompile Include="scripts\typings\x2js\xml2json.d.ts" />
+    <TypeScriptCompile Include="services\AuthorizationInterceptorService.ts" />
     <TypeScriptCompile Include="services\DragAndDropService.ts" />
     <TypeScriptCompile Include="services\layers\IDrawingLayer.ts" />
     <TypeScriptCompile Include="services\layers\poilayers\PoiLayer.ts" />
@@ -433,6 +435,14 @@
       <HintPath>..\packages\Microsoft.Owin.Hosting.3.0.1\lib\net45\Microsoft.Owin.Hosting.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Microsoft.Owin.Security, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.3.0.1\lib\net45\Microsoft.Owin.Security.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Microsoft.Owin.Security.OAuth, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <HintPath>..\packages\Microsoft.Owin.Security.OAuth.3.0.1\lib\net45\Microsoft.Owin.Security.OAuth.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="Microsoft.Owin.StaticFiles, Version=3.0.1.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.Owin.StaticFiles.3.0.1\lib\net45\Microsoft.Owin.StaticFiles.dll</HintPath>
       <Private>True</Private>
@@ -467,6 +477,10 @@
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=9.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="OAuth, Version=1.0.0.0, Culture=neutral, PublicKeyToken=75b3c62967edc2a2, processorArchitecture=MSIL">
+      <HintPath>..\packages\OAuth.1.0.3\lib\net40\OAuth.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="OsmSharp, Version=1.3.5.0, Culture=neutral, processorArchitecture=MSIL">
@@ -510,6 +524,7 @@
       <HintPath>..\packages\Microsoft.AspNet.WebApi.Client.5.2.3\lib\net45\System.Net.Http.Formatting.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Cors, Version=5.2.3.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
       <HintPath>..\packages\Microsoft.AspNet.Cors.5.2.3\lib\net45\System.Web.Cors.dll</HintPath>
       <Private>True</Private>
@@ -523,12 +538,14 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System.Xml" />
+    <Reference Include="System.Xml.Linq" />
     <Reference Include="Zlib.Portable, Version=1.11.0.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\Zlib.Portable.1.11.0\lib\portable-net4+sl5+wp8+win8+wpa81+MonoTouch+MonoAndroid\Zlib.Portable.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="OsmAccessTokenProvider.cs" />
     <Compile Include="Startup.cs" />
     <Compile Include="UnityResolver.cs" />
     <Compile Include="WebApiConfig.cs" />

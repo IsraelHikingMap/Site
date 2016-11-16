@@ -324,7 +324,10 @@ namespace IsraelHiking.Services.Layers {
                     }).error(() => {
                         let data = this.hashService.getDataContainer();
                         this.setData(data, true);
+                        this.addBaseLayerFromHash(data.baseLayer);
+                        this.hashService.siteUrl = "";
                         this.hashService.clear();
+                        this.toastr.warning(this.resourcesService.unableToLoadFromUrl);
                         deferred.resolve();
                     });
                 return;

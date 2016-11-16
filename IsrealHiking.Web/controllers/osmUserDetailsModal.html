@@ -42,8 +42,8 @@
                                     {{trace.description}}
                                 </div>
                                 <div class="col-xs-3">
-                                    <a class="cursor-pointer btn btn-default btn-block" ng-click="showTrace(trace)"><i class="fa fa-eye"></i></a>
-                                    <a class="cursor-pointer btn btn-default btn-block" ng-click="editTrace(trace)"><i class="fa fa-pencil"></i></a>
+                                    <a class="cursor-pointer btn btn-default btn-block" ng-click="showTrace(trace)" uib-tooltip="{{resources.view}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-eye"></i></a>
+                                    <a class="cursor-pointer btn btn-default btn-block" ng-click="editTrace(trace)" uib-tooltip="{{resources.edit}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-pencil"></i></a>
                                 </div>
                             </div>
                         </div>
@@ -71,10 +71,10 @@
                                 </div>
                                 <div class="col-xs-3">
                                     <div ng-hide="editMode">
-                                        <a class="btn btn-default btn-block" ng-click="editMode = true"><i class="fa fa-pencil"></i></a>
+                                        <a class="btn btn-default btn-block" ng-click="editMode = true" uib-tooltip="{{resources.editRouteDetails}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-pencil"></i></a>
                                     </div>
                                     <div ng-show="editMode">
-                                        <a class="btn btn-success btn-block" ng-click="editMode = false; userService.updateSiteUrl(siteUrl)"><i class="fa fa-check"></i></a>
+                                        <a class="btn btn-success btn-block" ng-click="editMode = false; userService.updateSiteUrl(siteUrl)" uib-tooltip="{{resources.update}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-check"></i></a>
                                     </div>
                                 </div>
                             </div>
@@ -85,8 +85,8 @@
                                     {{resources.lastViewed}}: {{siteUrl.LastViewed | date:'dd/MM/yyyy'}}
                                 </div>
                                 <div class="col-xs-3">
-                                    <a class="btn btn-block btn-info" clipboard supported="true" text="getUrlFromSiteUrlId(siteUrl)"><i class="fa fa-clipboard"></i></a>
-                                    <a class="btn btn-danger btn-block" ng-click="editMode = false; userService.deleteSiteUrl(siteUrl)"><i class="fa fa-trash"></i></a>
+                                    <a class="btn btn-block btn-info" clipboard supported="true" text="userService.getUrlFromSiteUrlId(siteUrl)" uib-tooltip="{{resources.copyUrl}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-clipboard"></i></a>
+                                    <a class="btn btn-danger btn-block" ng-click="editMode = false; userService.deleteSiteUrl(siteUrl)" uib-tooltip="{{resources.delete}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-trash"></i></a>
                                 </div>
                             </div>
                         </div>

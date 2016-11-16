@@ -47,6 +47,7 @@
         export const dragAndDropService = "dragAndDropService";
         export const resourcesService = "resourcesService";
         export const osmUserService = "osmUserService";
+        export const authorizationInterceptorService = "authorizationInterceptorService";
     }
 
     export namespace Controllers {

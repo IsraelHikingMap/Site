@@ -4,7 +4,6 @@
         public static baseAddress = window.location.protocol + "//" + window.location.host;
         public static apiBase = Urls.baseAddress + "/api/";
         public static urls = Urls.apiBase + "urls/";
-        public static userUrls = Urls.apiBase + "userurls/";
         public static elevation = Urls.apiBase + "elevation";
         public static routing = Urls.apiBase + "routing";
         public static itmGrid = Urls.apiBase + "itmGrid";

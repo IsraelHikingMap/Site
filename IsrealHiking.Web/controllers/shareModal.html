@@ -35,11 +35,11 @@
                                 <h4>{{title}} - {{description}}</h4>
                             </div>
                             <div class="col-xs-3">
-                                <a href="{{facebookShareAddress}}" class="btn btn-default btn-block" target="_blank"><i class="fa fa-facebook"></i></a>
+                                <a href="{{facebookShareAddress}}" class="btn btn-default btn-block" target="_blank" uib-tooltip="{{resources.shareWithFacebook}}" tooltip-placement="{{resources.start}}"><i class="fa fa-facebook"></i></a>
                                 <div class="visible-sm visible-xs">
                                     <a ng-href="{{whatappShareAddress}}" class="btn btn-default btn-block"><i class="fa fa-whatsapp"></i></a>
                                 </div>
-                                <!--<a class="btn btn-default btn-block cursor-pointer" ng-click="showOffroadForm = 'true'" ng-class="{active: showOffroadForm}"><i class="fa fa-car"></i></a>-->
+                                <!--<a class="btn btn-default btn-block cursor-pointer" ng-click="showOffroadForm = 'true'" ng-class="{active: showOffroadForm}" uib-tooltip="{{resources.shareWithOffroad}}" tooltip-placement="{{resources.start}}"><img src="/content/images/off-road.png" alt="" width="16" height="16"/></a>-->
                             </div>
                         </div>
                         <div class="row">
@@ -47,7 +47,7 @@
                                 <a href="{{shareAddress}}" target="_blank">{{shareAddress}}</a>
                             </div>
                             <div class="col-xs-3">
-                                <a class="btn btn-block btn-info" clipboard supported="true" text="shareAddress"><i class="fa fa-clipboard"></i></a>
+                                <a class="btn btn-block btn-info" clipboard supported="true" text="shareAddress" uib-tooltip="{{resources.copyUrl}}" tooltip-placement="{{resources.start}}"><i class="fa fa-clipboard"></i></a>
                             </div>
                         </div>
                     </div>

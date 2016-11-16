@@ -10,6 +10,7 @@ namespace IsraelHiking.DataAccessInterfaces
         Task AddUrl(SiteUrl siteUrl);
         Task<SiteUrl> GetUrlById(string id);
         Task<List<SiteUrl>> GetUrlsByUser(string osmUserId);
+        Task Delete(SiteUrl siteUrl);
         Task Update(object obj);
     }
 }
