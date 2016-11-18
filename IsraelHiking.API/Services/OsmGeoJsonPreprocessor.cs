@@ -5,6 +5,7 @@ using IsraelHiking.API.Converters;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 
 namespace IsraelHiking.API.Services
@@ -17,6 +18,19 @@ namespace IsraelHiking.API.Services
 
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
+
+        private class TagKeyComparer : IEqualityComparer<Tag>
+        {
+            public bool Equals(Tag x, Tag y)
+            {
+                return x.Key == y.Key;
+            }
+
+            public int GetHashCode(Tag obj)
+            {
+                return obj.Key.GetHashCode();
+            }
+        }
 
         public OsmGeoJsonPreprocessor(ILogger logger,
             IOsmGeoJsonConverter osmGeoJsonConverter)
@@ -257,9 +271,9 @@ namespace IsraelHiking.API.Services
 
         private void MergeTags(ICompleteOsmGeo fromItem, ICompleteOsmGeo toItem)
         {
-            foreach (var tag in fromItem.Tags)
+            foreach (var tag in fromItem.Tags.Except(toItem.Tags, new TagKeyComparer()))
             {
-                toItem.Tags.AddOrReplace(tag);
+                toItem.Tags.Add(tag);
             }
         }
     }
