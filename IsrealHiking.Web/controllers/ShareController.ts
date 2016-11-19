@@ -12,7 +12,8 @@
         description: string;
         activityType: string;
         difficultyLevel: string;
-        sharingCode: number; //should be 5 fixed
+        sharingCode: number; //should be 1 fixed
+        backgroundServeUrl: string;
         path: IIOffroadCoordinates[];
         mapItems: IIOffroadMarker[];
         external_url: string;
@@ -170,10 +171,11 @@
                     toastr.warning($scope.resources.pleaseAddPointsToRoute);
                     return;
                 }
-                $scope.offroadRequest.sharingCode = 5; //fixed
+                $scope.offroadRequest.sharingCode = 1; //fixed
                 $scope.offroadRequest.path = [];
                 $scope.offroadRequest.mapItems = [];
                 $scope.offroadRequest.external_url = $scope.shareAddress;
+                $scope.offroadRequest.backgroundServeUrl = Common.Urls.images + $scope.siteUrlId;
 
                 for (let segment of route.segments) {
                     for (let latlngz of segment.latlngzs) {
