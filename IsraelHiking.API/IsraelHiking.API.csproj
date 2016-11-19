@@ -126,6 +126,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>OpenGraphHtmlTemplate.tt</DependentUpon>
     </Compile>
+    <Compile Include="Controllers\OsmController.cs" />
     <Compile Include="Controllers\RoutingController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
     <Compile Include="Controllers\UrlsController.cs" />

@@ -1,0 +1,25 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using IsraelHiking.Common;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using OsmSharp.Osm;
+
+namespace IsraelHiking.DataAccess.Tests
+{
+    [TestClass]
+    public class OverpassGatewayTests
+    {
+        [TestMethod]
+        public void GetHighways()
+        {
+            var northEast = new LatLng {lat = 31.6331, lng = 34.9286};
+            var southWest = new LatLng {lat = 31.6320, lng = 34.9266};
+            var gateway = new OverpassGateway();
+            var highways = gateway.GetHighways(northEast, southWest).Result;
+            Assert.AreEqual(1, highways.Count);
+        }
+    }
+}

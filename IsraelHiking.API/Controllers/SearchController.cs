@@ -52,7 +52,7 @@ namespace IsraelHiking.API.Controllers
             var dataContainer = await _dataContainerConverterService.ToDataContainer(featureCollection.ToBytes(), name + ".geojson");
             foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
             {
-                latLngZ.z = await _elevationDataStorage.GetElevation(latLngZ.lat, latLngZ.lng);
+                latLngZ.z = await _elevationDataStorage.GetElevation(latLngZ);
             }
             return dataContainer;
         }

@@ -65,8 +65,6 @@
     <TypeScriptCompile Include="services\RouteStatisticsServiceTests.ts" />
     <TypeScriptCompile Include="services\SnappingServiceTests.ts" />
     <TypeScriptCompile Include="services\parsers\GeoJsonParserTests.ts" />
-    <TypeScriptCompile Include="services\parsers\OsmParserTests.ts" />
-    <TypeScriptCompile Include="services\parsers\ParserFactoryTests.ts" />
     <TypeScriptCompile Include="services\HashServiceTests.ts" />
     <TypeScriptCompile Include="services\routers\RouterServiceTests.ts" />
   </ItemGroup>

@@ -1,9 +1,26 @@
 ﻿namespace IsraelHiking.Services.Search {
-    export class LocalSearchResultsProvider extends BaseSearchResultsProvider {
+
+    export interface ISearchResults {
+        name: string;
+        address: string;
+        icon: string;
+        searchTerm: string;
+        latlng: L.LatLng;
+        latlngsArray: L.LatLng[][];
+        bounds: L.LatLngBounds;
+        displayName: string;
+        feature: GeoJSON.Feature<GeoJSON.GeometryObject>;
+    }
+
+    export class LocalSearchResultsProvider {
+
+        private $http: angular.IHttpService;
+        private $q: angular.IQService;
 
         constructor($http: angular.IHttpService,
             $q: angular.IQService) {
-            super($http, $q);
+            this.$http = $http;
+            this.$q = $q;
         }
 
         public getResults = (searchTerm: string, isHebrew: boolean): angular.IPromise<ISearchResults[]> => {
@@ -25,33 +42,33 @@
                         switch (feature.geometry.type) {
                             case Strings.GeoJson.point:
                                 var point = feature.geometry as GeoJSON.Point;
-                                singleResult.latlng = Services.Parsers.BaseParser.createLatlng(point.coordinates) as L.LatLng;
+                                singleResult.latlng = Services.Parsers.GeoJsonParser.createLatlng(point.coordinates) as L.LatLng;
                                 break;
                             case Strings.GeoJson.lineString:
                                 var lineString = feature.geometry as GeoJSON.LineString;
-                                singleResult.latlng = Services.Parsers.BaseParser.createLatlng(lineString.coordinates[0]) as L.LatLng;
-                                singleResult.latlngsArray.push(Services.Parsers.BaseParser.createLatlngArray(lineString.coordinates));
+                                singleResult.latlng = Services.Parsers.GeoJsonParser.createLatlng(lineString.coordinates[0]) as L.LatLng;
+                                singleResult.latlngsArray.push(Services.Parsers.GeoJsonParser.createLatlngArray(lineString.coordinates));
                                 break;
                             case Strings.GeoJson.multiLineString:
                                 var multiLineString = feature.geometry as GeoJSON.MultiLineString;
-                                singleResult.latlng = Services.Parsers.BaseParser.createLatlng(multiLineString.coordinates[0][0]) as L.LatLng;
+                                singleResult.latlng = Services.Parsers.GeoJsonParser.createLatlng(multiLineString.coordinates[0][0]) as L.LatLng;
                                 for (let currentCoordinatesArray of multiLineString.coordinates) {
-                                    singleResult.latlngsArray.push(Services.Parsers.BaseParser.createLatlngArray(currentCoordinatesArray));
+                                    singleResult.latlngsArray.push(Services.Parsers.GeoJsonParser.createLatlngArray(currentCoordinatesArray));
                                 }
                                 break;
                             case Strings.GeoJson.polygone:
                                 var polygone = feature.geometry as GeoJSON.Polygon;
-                                singleResult.latlng = Services.Parsers.BaseParser.createLatlng(polygone.coordinates[0][0]) as L.LatLng;
+                                singleResult.latlng = Services.Parsers.GeoJsonParser.createLatlng(polygone.coordinates[0][0]) as L.LatLng;
                                 for (let currentCoordinatesArray of polygone.coordinates) {
-                                    singleResult.latlngsArray.push(Services.Parsers.BaseParser.createLatlngArray(currentCoordinatesArray));
+                                    singleResult.latlngsArray.push(Services.Parsers.GeoJsonParser.createLatlngArray(currentCoordinatesArray));
                                 }
                                 break;
                             case Strings.GeoJson.multiPolygon:
                                 var multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
-                                singleResult.latlng = Services.Parsers.BaseParser.createLatlng(multiPolygone.coordinates[0][0][0]) as L.LatLng;
+                                singleResult.latlng = Services.Parsers.GeoJsonParser.createLatlng(multiPolygone.coordinates[0][0][0]) as L.LatLng;
                                 for (let currentPolygoneCoordinates of multiPolygone.coordinates) {
                                     for (let currentCoordinatesArray of currentPolygoneCoordinates) {
-                                        singleResult.latlngsArray.push(Services.Parsers.BaseParser.createLatlngArray(currentCoordinatesArray));
+                                        singleResult.latlngsArray.push(Services.Parsers.GeoJsonParser.createLatlngArray(currentCoordinatesArray));
                                     }
                                 }
                         }

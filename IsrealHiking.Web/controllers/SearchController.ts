@@ -44,7 +44,7 @@
         private requestsQueue: ISearchRequestQueueItem[];
         private featureGroup: L.FeatureGroup<L.ILayer>;
         private elevationProvider: Services.Elevation.ElevationProvider;
-        private localSearchResultsProvider: Services.Search.ISearchResultsProvider;
+        private localSearchResultsProvider: Services.Search.LocalSearchResultsProvider;
         private layersService: Services.Layers.LayersService;
         private toastr: Toastr;
 
@@ -57,7 +57,7 @@
             hashService: Services.HashService,
             layersService: Services.Layers.LayersService,
             elevationProvider: Services.Elevation.ElevationProvider,
-            searchResultsProviderFactory: Services.Search.SearchResultsProviderFactory,
+            localsearchResultsProvider: Services.Search.LocalSearchResultsProvider,
             routerService: Services.Routers.RouterService,
             toastr: Toastr) {
             super(mapService);
@@ -66,7 +66,7 @@
             this.map.addLayer(this.featureGroup);
             this.elevationProvider = elevationProvider;
             this.layersService = layersService;
-            this.localSearchResultsProvider = searchResultsProviderFactory.create(Services.Search.SearchProviderType.local);
+            this.localSearchResultsProvider = localsearchResultsProvider;
             this.toastr = toastr;
             $scope.isVisible = false;
             $scope.isDirectional = false;

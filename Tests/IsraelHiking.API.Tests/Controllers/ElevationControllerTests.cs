@@ -3,6 +3,7 @@ using IsraelHiking.API.Controllers;
 using NSubstitute;
 using IsraelHiking.DataAccessInterfaces;
 using System.Linq;
+using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -15,8 +16,8 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetElevation_TwoPoints_ShouldReturnThem()
         {
             var elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            elevationDataStorage.GetElevation(31.8239, 35.0375).Returns(1);
-            elevationDataStorage.GetElevation(31.8213, 35.0965).Returns(2);
+            elevationDataStorage.GetElevation(new LatLng(31.8239, 35.0375)).Returns(1);
+            elevationDataStorage.GetElevation(new LatLng(31.8213, 35.0965)).Returns(2);
             _elevationController = new ElevationController(elevationDataStorage);
 
             var response = _elevationController.GetElevation(new[] { "31.8239,35.0375", "31.8213,35.0965" }).Result.ToArray();

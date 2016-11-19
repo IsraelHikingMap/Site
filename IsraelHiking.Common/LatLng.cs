@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 
 namespace IsraelHiking.Common
 {
@@ -28,6 +29,29 @@ namespace IsraelHiking.Common
             {
                 return (lat.GetHashCode()*397) ^ lng.GetHashCode();
             }
+        }
+
+        public LatLng()
+        {
+            lat = 0;
+            lng = 0;
+        }
+
+        public LatLng(double latitude, double longitude)
+        {
+            lat = latitude;
+            lng = longitude;
+        }
+
+        public LatLng(string latlngString) : this()
+        {
+            var split = latlngString.Split(',');
+            if (split.Length != 2)
+            {
+                return;
+            }
+            lat = double.Parse(split.First());
+            lng = double.Parse(split.Last());
         }
     }
 }

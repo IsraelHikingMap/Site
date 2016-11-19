@@ -14,7 +14,7 @@
 
     // Services:
     app.service(Strings.Services.mapService, [() => new Services.MapService()]);
-    app.service(Strings.Services.parserFactory, [() => new Services.Parsers.ParserFactory()]);
+    app.service(Strings.Services.geoJsonParser, [() => new Services.Parsers.GeoJsonParser()]);
     app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
     app.service(Strings.Services.authorizationInterceptorService, [Strings.Angular.q, Strings.Angular.injector, Strings.Services.localStorageService,
         ($q: angular.IQService, $injector: angular.auto.IInjectorService, localStorageService: angular.local.storage.ILocalStorageService) =>
@@ -26,24 +26,24 @@
     app.service(Strings.Services.resourcesService, [Strings.Angular.sce, Strings.Services.localStorageService, Strings.Services.gettextCatalog,
         ($sce: angular.ISCEService, localstorageService: angular.local.storage.ILocalStorageService, gettextCatalog: angular.gettext.gettextCatalog) =>
             new Services.ResourcesService($sce, localstorageService, gettextCatalog)]);
-    app.service(Strings.Services.searchResultsProviderFactory, [Strings.Angular.http, Strings.Angular.q, Strings.Services.parserFactory,
-        ($http: angular.IHttpService, $q: angular.IQService, parserFactory: Services.Parsers.ParserFactory) =>
-            new Services.Search.SearchResultsProviderFactory($http, $q, parserFactory)]);
+    app.service(Strings.Services.localSearchResultsProvider, [Strings.Angular.http, Strings.Angular.q,
+        ($http: angular.IHttpService, $q: angular.IQService) =>
+            new Services.Search.LocalSearchResultsProvider($http, $q)]);
     app.service(Strings.Services.microsoftElevationProvider, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.toastr,
         ($http: angular.IHttpService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
             new Services.Elevation.MicrosoftElevationProvider($http, resourcesService, toastr)]);
     app.service(Strings.Services.elevationProvider, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.toastr,
         ($http: angular.IHttpService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
             new Services.Elevation.ElevationProvider($http, resourcesService, toastr)]);
-    app.service(Strings.Services.routerService, [Strings.Angular.http, Strings.Angular.q, Strings.Services.resourcesService, Strings.Services.toastr, Strings.Services.parserFactory,
-        ($http: angular.IHttpService, $q: angular.IQService, resourcesService: Services.ResourcesService, toastr: Toastr, parserFactory: Services.Parsers.ParserFactory) =>
-            new Services.Routers.RouterService($http, $q, resourcesService, toastr, parserFactory)]);
+    app.service(Strings.Services.routerService, [Strings.Angular.http, Strings.Angular.q, Strings.Services.resourcesService, Strings.Services.toastr, Strings.Services.geoJsonParser,
+        ($http: angular.IHttpService, $q: angular.IQService, resourcesService: Services.ResourcesService, toastr: Toastr, geoJsonParser: Services.Parsers.GeoJsonParser) =>
+            new Services.Routers.RouterService($http, $q, resourcesService, toastr, geoJsonParser)]);
     app.service(Strings.Services.fileService, [Strings.Angular.http, Strings.Services.upload, Strings.Services.fileSaver,
         ($http: angular.IHttpService, upload: angular.angularFileUpload.IUploadService, fileSaver: Services.IFileSaver) =>
             new Services.FileService($http, upload, fileSaver)]);
-    app.service(Strings.Services.snappingService, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.mapService, Strings.Services.parserFactory, Strings.Services.toastr,
-        ($http: angular.IHttpService, resourcesService: Services.ResourcesService, mapService: Services.MapService, parserFactory: Services.Parsers.ParserFactory, toastr: Toastr) =>
-            new Services.SnappingService($http, resourcesService, mapService, parserFactory, toastr)]);
+    app.service(Strings.Services.snappingService, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.mapService, Strings.Services.toastr,
+        ($http: angular.IHttpService, resourcesService: Services.ResourcesService, mapService: Services.MapService, toastr: Toastr) =>
+            new Services.SnappingService($http, resourcesService, mapService, toastr)]);
     app.service(Strings.Services.routeLayerFactory,
         [Strings.Angular.q, Strings.Angular.compile, Strings.Angular.rootScope, Strings.Angular.timeout, Strings.Services.localStorageService,
             Strings.Services.mapService, Strings.Services.routerService, Strings.Services.snappingService, Strings.Services.elevationProvider,

@@ -3,45 +3,18 @@
 /// <reference path="../../../IsrealHiking.Web/scripts/typings/angularjs/angular-mocks.d.ts" />
 /// <reference path="../../../isrealhiking.web/scripts/typings/lodash/lodash.d.ts" />
 /// <reference path="../../../isrealhiking.web/services/snappingservice.ts" />
-/// <reference path="../../../IsrealHiking.Web/services/parsers/BaseParser.ts" />
 /// <reference path="../../../isrealhiking.web/services/objectwithmap.ts" />
-/// <reference path="../../../isrealhiking.web/services/parsers/parserfactory.ts" />
 /// <reference path="../../../IsrealHiking.Web/scripts/typings/toastr/toastr.d.ts" />
+/// <reference path="../../../IsrealHiking.Web/scripts/typings/geojson/geojson.d.ts" />
 
 namespace IsraelHiking.Tests.Services {
     describe("Snapping Service", () => {
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
         var mapService: IsraelHiking.Services.MapService;
-        var parserFactory: IsraelHiking.Services.Parsers.ParserFactory;
         //var toastr: Toastr;
         var snappingService: IsraelHiking.Services.SnappingService;
         var mapDiv: JQuery;
-
-        var osmWay = "<?xml version='1.0' encoding='UTF-8'?>\
-                        <osm version='0.6' generator='JOSM'>\
-                          <node id='1' lat='34.0666735' lon='-118.734254'>\
-                            <tag k='name' v='Santa Monica Mountains National Recreation Area' />\
-                            <tag k='leisure' v='park' />\
-                            <tag k='ele' v='243' />\
-                          </node>\
-                          <node id='2' lat='34.0723400' lon='-118.7343501' />\
-                          <node id='3' lat='34.0670965' lon='-118.7322253' />\
-                          <node id='4' lat='34.0724577' lon='-118.7364799' />\
-                          <node id='5' lat='34.0671122' lon='-118.7364725' />\
-                          <node id='6' lat='34.0722227' lon='-118.7322321' />\
-                          <way id='7'>\
-                            <nd ref='1' />\
-                            <nd ref='2' />\
-                            <nd ref='3' />\
-                            <nd ref='4' />\
-                            <nd ref='5' />\
-                            <nd ref='6' />\
-                            <tag k='park:type' v='state_park' />\
-                            <tag k='name' v='Malibu Creek State Park' />\
-                            <tag k='leisure' v='park' />\
-                          </way>\
-                        </osm>";
 
         beforeEach(() => {
             angular.mock.module("toastr");
@@ -54,9 +27,8 @@ namespace IsraelHiking.Tests.Services {
                 mapDiv = MapServiceMockCreator.createMapDiv(_$document_);
                 _toastr_.error = (): any => { };
                 mapService = new IsraelHiking.Services.MapService();
-                parserFactory = new IsraelHiking.Services.Parsers.ParserFactory();
                 $httpBackend.whenGET(url => url.indexOf(Common.Urls.translations) !== -1).respond(404, {}); // ignore resources get request
-                snappingService = new IsraelHiking.Services.SnappingService($http, new IsraelHiking.Services.ResourcesService(null, _localStorageService_, _gettextCatalog_), mapService, parserFactory, _toastr_);
+                snappingService = new IsraelHiking.Services.SnappingService($http, new IsraelHiking.Services.ResourcesService(null, _localStorageService_, _gettextCatalog_), mapService, _toastr_);
                 snappingService.enable(true);
             });
         });
@@ -80,10 +52,17 @@ namespace IsraelHiking.Tests.Services {
             expect(snappingService.snappings.getLayers().length).toBe(0);
         });
 
-
-
         it("Should add one snappings layer when zoom is 14", () => {
-            $httpBackend.whenGET(() => true).respond(osmWay);
+            let features = [
+                {
+                    type: "Feature",
+                    geometry: {
+                        type: "LineString",
+                        coordinates: [[1, 2], [3, 4]]
+                    } as GeoJSON.LineString
+                } as GeoJSON.Feature<GeoJSON.LineString>
+            ];
+            $httpBackend.whenGET(() => true).respond(features);
 
             mapService.map.setZoom(14);
             $httpBackend.flush();

@@ -59,9 +59,9 @@ namespace IsraelHiking.DataAccess
             return Task.WhenAll(_initializationTaskPerLatLng.Values);
         }
 
-        public async Task<double> GetElevation(double lat, double lng)
+        public async Task<double> GetElevation(LatLng latLng)
         {
-            var key = new LatLng { lat = (int)lat, lng = (int)lng };
+            var key = new LatLng { lat = (int)latLng.lat, lng = (int)latLng.lng };
             if (_initializationTaskPerLatLng.ContainsKey(key) == false)
             {
                 return 0;
@@ -73,8 +73,8 @@ namespace IsraelHiking.DataAccess
             }
             var array = _elevationData[key];
             var samplesSize = 1.0 / array.GetLength(0);
-            var latIndex = (array.GetLength(0) - 1) - (int)((lat - key.lat) / samplesSize);
-            var lngIndex = (int)((lng - key.lng) / samplesSize);
+            var latIndex = (array.GetLength(0) - 1) - (int)((latLng.lat - key.lat) / samplesSize);
+            var lngIndex = (int)((latLng.lng - key.lng) / samplesSize);
 
             return array[latIndex, lngIndex];
         }

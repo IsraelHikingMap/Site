@@ -1,6 +1,7 @@
 ﻿using System.Configuration;
 using System.IO;
 using System.Reflection;
+using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IsraelHiking.DataAccess.Tests
@@ -16,7 +17,7 @@ namespace IsraelHiking.DataAccess.Tests
 
             elevationDataStorage.Initialize().Wait();
 
-            Assert.AreEqual(0, elevationDataStorage.GetElevation(32, 35).Result);
+            Assert.AreEqual(0, elevationDataStorage.GetElevation(new LatLng(32, 35)).Result);
         }
 
         [TestMethod]
@@ -28,8 +29,8 @@ namespace IsraelHiking.DataAccess.Tests
 
             elevationDataStorage.Initialize().Wait();
 
-            Assert.AreEqual(0, elevationDataStorage.GetElevation(0,0));
-            Assert.AreEqual(207, elevationDataStorage.GetElevation(32, 35));
+            Assert.AreEqual(0, elevationDataStorage.GetElevation(new LatLng(0,0)));
+            Assert.AreEqual(207, elevationDataStorage.GetElevation(new LatLng(32, 35)));
         }
     }
 }

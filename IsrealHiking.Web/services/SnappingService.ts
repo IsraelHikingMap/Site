@@ -19,7 +19,6 @@
         public snappings: L.LayerGroup<L.ILayer>;
         private $http: angular.IHttpService;
         private resourcesService: ResourcesService;
-        private osmParser: Parsers.IParser;
         private toastr: Toastr;
         private enabled: boolean;
         private requestsQueue: ISnappingRequestQueueItem[];
@@ -27,13 +26,11 @@
         constructor($http: angular.IHttpService,
             resourcesService: ResourcesService,
             mapService: MapService,
-            parserFactory: Parsers.ParserFactory,
             toastr: Toastr) {
             super(mapService);
 
             this.$http = $http;
             this.resourcesService = resourcesService;
-            this.osmParser = parserFactory.create(Parsers.ParserType.osm);
             this.snappings = L.layerGroup([]);
             this.map.addLayer(this.snappings);
             this.toastr = toastr;
@@ -57,28 +54,24 @@
                 boundsString: boundsString
             } as ISnappingRequestQueueItem);
 
-            this.$http.get(Common.Urls.overpass, {
+            this.$http.get(Common.Urls.osm, {
                 params: {
-                    data: `(way["highway"](${boundsString});>;);out;`
+                    northEast: bounds.getNorthEast().lat + "," + bounds.getNorthEast().lng,
+                    southWest: bounds.getSouthWest().lat + "," + bounds.getSouthWest().lng
                 }
-            }).success((osm: string) => {
-                var data = this.osmParser.parse(osm);
+            }).success((features: GeoJSON.Feature<GeoJSON.GeometryObject>[]) => {
                 let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.boundsString === boundsString);
                 if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                     this.requestsQueue.splice(0, this.requestsQueue.length - 1);
                     return;
                 }
                 this.snappings.clearLayers();
-                let topN = _.take(data.routes, 500); // performance issue - taking random first 500
-                for (let route of topN) {
-                    for (let segment of route.segments) {
-                        if (segment.latlngzs.length < 2 ||
-                            (segment.latlngzs.length === 2 && segment.latlngzs[0].equals(segment.latlngzs[1]))) {
-                            continue;
-                        }
-                        this.snappings.addLayer(L.polyline(segment.latlngzs, { opacity: 0 } as L.PolylineOptions));
-                    }
+                for (let feature of features) {
+                    var lineString = feature.geometry as GeoJSON.LineString;
+                    let latlngsArray = Services.Parsers.GeoJsonParser.createLatlngArray(lineString.coordinates);
+                    this.snappings.addLayer(L.polyline(latlngsArray, { opacity: 0 } as L.PolylineOptions));
                 }
+
                 this.requestsQueue.splice(0);
             }).error(() => {
                 this.toastr.warning(this.resourcesService.unableToGetDataForSnapping);

@@ -30,8 +30,8 @@
         export const googleChartApiPromise = "googleChartApiPromise";
         export const gettextCatalog = "gettextCatalog";
 
-        export const parserFactory = "parserFactory";
-        export const searchResultsProviderFactory = "searchResultsProviderFactory";
+        export const geoJsonParser = "geoJsonParser";
+        export const localSearchResultsProvider = "localSearchResultsProvider";
         export const routerService = "routerService";
         export const routeLayerFactory = "routeLayerFactory";
         export const hashService = "hashService";

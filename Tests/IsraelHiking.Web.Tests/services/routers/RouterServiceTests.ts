@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../../isrealhiking.web/services/parsers/iparser.ts" />
-/// <reference path="../../../../isrealhiking.web/services/parsers/baseparser.ts" />
+﻿/// <reference path="../../../../isrealhiking.web/services/parsers/GeoJsonParser.ts" />
 /// <reference path="../../../../isrealhiking.web/services/routers/nonerouter.ts" />
 /// <reference path="../../../../isrealhiking.web/services/routers/routerservice.ts" />
 
@@ -24,7 +23,7 @@ namespace IsraelHiking.Tests.Services.Routers {
                 toastr = _toastr_;
                 toastr.error = (): any => { };
                 $httpBackend.whenGET(url => url.indexOf(Common.Urls.translations) !== -1).respond(404, {}); // ignore resources get request
-                routeService = new IsraelHiking.Services.Routers.RouterService($http, $q, new IsraelHiking.Services.ResourcesService(null, _localStorageService_, _gettextCatalog_), toastr, new IsraelHiking.Services.Parsers.ParserFactory());
+                routeService = new IsraelHiking.Services.Routers.RouterService($http, $q, new IsraelHiking.Services.ResourcesService(null, _localStorageService_, _gettextCatalog_), toastr, new IsraelHiking.Services.Parsers.GeoJsonParser());
             });
             
         });
