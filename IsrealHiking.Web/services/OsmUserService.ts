@@ -19,6 +19,8 @@ namespace IsraelHiking.Services {
     export class OsmUserService {
         public static AUTHORIZATION_DATA_KEY = "osmAuthorizationToken";
 
+        private static BASE_URL = "https://www.openstreetmap.org";
+
         private oauth;
         private x2Js: IX2JS;
         private $q: angular.IQService;
@@ -43,7 +45,8 @@ namespace IsraelHiking.Services {
                 oauth_consumer_key: "H5Us9nv9eDyFpKbBTiURf7ZqfdBArNddv10n6R6U",
                 oauth_secret: "ccYaQUKLz26XEzbNd8uWoQ6HwbcnrUUp8milXnXG",
                 auto: true, // show a login form if the user is not authenticated and you try to do a call
-                landing: "controllers/oauth-close-window.html"
+                landing: "controllers/oauth-close-window.html",
+                url: OsmUserService.BASE_URL
             }) as IOsmAuthService;
             if (this.isLoggedIn()) {
                 this.refreshDetails();
@@ -80,8 +83,8 @@ namespace IsraelHiking.Services {
                     deferred.reject(detailsError);
                     return;
                 }
-                let authToken = localStorage.getItem("http://www.openstreetmap.orgoauth_token"); // using native storage since it is saved with ohauth
-                let authTokenSecret = localStorage.getItem("http://www.openstreetmap.orgoauth_token_secret");
+                let authToken = localStorage.getItem(`${OsmUserService.BASE_URL}oauth_token`); // using native storage since it is saved with ohauth
+                let authTokenSecret = localStorage.getItem(`${OsmUserService.BASE_URL}oauth_token_secret`);
                 this.localStorageService.set(OsmUserService.AUTHORIZATION_DATA_KEY, authToken + ";" + authTokenSecret);
                 let detailJson = this.x2Js.xml2json(details) as any;
                 this.displayName = detailJson.osm.user._display_name;

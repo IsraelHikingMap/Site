@@ -57,7 +57,7 @@
             hashService: Services.HashService,
             layersService: Services.Layers.LayersService,
             elevationProvider: Services.Elevation.ElevationProvider,
-            localsearchResultsProvider: Services.Search.LocalSearchResultsProvider,
+            localSearchResultsProvider: Services.Search.LocalSearchResultsProvider,
             routerService: Services.Routers.RouterService,
             toastr: Toastr) {
             super(mapService);
@@ -66,7 +66,7 @@
             this.map.addLayer(this.featureGroup);
             this.elevationProvider = elevationProvider;
             this.layersService = layersService;
-            this.localSearchResultsProvider = localsearchResultsProvider;
+            this.localSearchResultsProvider = localSearchResultsProvider;
             this.toastr = toastr;
             $scope.isVisible = false;
             $scope.isDirectional = false;

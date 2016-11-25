@@ -26,7 +26,8 @@
             mapService: Services.MapService,
             osmUserService: Services.OsmUserService,
             fileService: Services.FileService,
-            layersService: Services.Layers.LayersService) {
+            layersService: Services.Layers.LayersService,
+            toastr: Toastr) {
             super(mapService);
 
             $scope.userService = osmUserService;
