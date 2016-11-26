@@ -1,8 +1,15 @@
 ﻿<div class="modal-content">
     <div class="modal-header">
         <button type="button" class="close" aria-label="Close" ng-click="$close()"><span aria-hidden="true">&times;</span></button>
-        <h3>{{resources.infoDownloadMapForOfflineUse}}</h3>
-        {{resources.mapsAreUpdatedEveryTwoDays}}
+        <div class="row">
+            <div class="col-xs-8">
+                <h3>{{resources.infoDownloadMapForOfflineUse}}</h3>
+                {{resources.mapsAreUpdatedEveryTwoDays}}
+            </div>
+            <div class="col-xs-4">
+                <a href="{{getGooglePlayStoreAddress(app)}}"><img src="/content/images/google-play-badge.png" class="img-responsive" /></a>
+            </div>
+        </div>
     </div>
     <div class="modal-body">
         <h5 class="text-center">{{resources.application}}</h5>

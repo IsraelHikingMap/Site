@@ -31,6 +31,7 @@
         getDownloadUrl(app: string, mapType: string, zoom: number);
         getMobileInstallationInstructions(app: ApplicationType): string;
         getDesktopInstallationInstructions(app: ApplicationType): string;
+        getGooglePlayStoreAddress(app: ApplicationType): string;
     }
 
     export class InfoController extends BaseMapController {
@@ -152,6 +153,18 @@
                     return $scope.resources.installationInstructionsDesktopOruxMaps;
                 }
                 return $scope.resources.installationInstructionsDesktopOffroad;
+            }
+
+            $scope.getGooglePlayStoreAddress = (app: ApplicationType) => {
+                if (app === "Locus") {
+                    return "https://play.google.com/store/apps/details?id=menion.android.locus";
+                }
+                if (app === "OruxMaps") {
+                    return "https://play.google.com/store/apps/details?id=com.orux.oruxmaps";
+                }
+                if (app === "Offroad") {
+                    return "https://play.google.com/store/apps/details?id=com.myadventure.myadventure";
+                }
             }
         }
 
