@@ -1,4 +1,5 @@
-﻿using System.Net.Http;
+﻿using System.Net;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -15,8 +16,12 @@ namespace IsraelHiking.API.Controllers
         public OpenGraphHtmlTemplate(string thumbnailUrl, string title, string description)
         {
             ThumbnailUrl = thumbnailUrl;
-            Title = string.IsNullOrWhiteSpace(title) ? "Israel Hiking Map Shared Route" : title;
-            Description = string.IsNullOrWhiteSpace(description) ? "בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." : description;
+            Title = string.IsNullOrWhiteSpace(title) 
+                ? "Israel Hiking Map Shared Route" 
+                : WebUtility.HtmlEncode(title);
+            Description = string.IsNullOrWhiteSpace(description) 
+                ? "בין אם אתם יוצאים לטיול רגלי, רכיבה על אופניים או נסיעה ברכב שטח, כאן תוכלו למצוא כל מה שאתם צריכים על מנת לתכנן את הביקור הבא שלכם בטבע." 
+                : WebUtility.HtmlEncode(description);
         }
     }
 

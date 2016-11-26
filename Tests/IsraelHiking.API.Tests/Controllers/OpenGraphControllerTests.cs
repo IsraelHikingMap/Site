@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var urlHelper = Substitute.For<UrlHelper>();
             urlHelper.Content(Arg.Any<string>()).Returns(x => x[0]);
             var repository = Substitute.For<IIsraelHikingRepository>();
-            repository.GetUrlById(Arg.Any<string>()).Returns(Task.FromResult(new SiteUrl()));
+            repository.GetUrlById(Arg.Any<string>()).Returns(Task.FromResult(new SiteUrl { Title = "somthing with <>\""}));
             var controller = new OpenGraphController(repository, Substitute.For<ILogger>()) { Url = urlHelper };
 
             var response = controller.GetHtml("42").Result as ResponseMessageResult;
@@ -29,6 +29,9 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(content);
             var pageHtml = content.ReadAsStringAsync().Result;
             Assert.IsTrue(pageHtml.Contains("api/images"));
+            Assert.IsTrue(pageHtml.Contains("&gt;"));
+            Assert.IsTrue(pageHtml.Contains("&lt;"));
+            Assert.IsTrue(pageHtml.Contains("&quot;"));
         }
     }
 }
