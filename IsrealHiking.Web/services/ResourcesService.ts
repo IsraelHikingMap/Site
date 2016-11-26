@@ -158,6 +158,7 @@ namespace IsraelHiking.Services {
         public editRouteDetails: string;
         public shareWithFacebook: string;
         public shareWithOffroad: string;
+        public findMissingParts: string;
         // Toasts: Errors/Warnings/Success
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
@@ -505,6 +506,7 @@ namespace IsraelHiking.Services {
                     this.editRouteDetails = this.gettextCatalog.getString("Edit Route Details");
                     this.shareWithFacebook = this.gettextCatalog.getString("Share With Facebook");
                     this.shareWithOffroad = this.gettextCatalog.getString("Share With off-road");
+                    this.findMissingParts = this.gettextCatalog.getString("Find Missing Parts");
                     // Toasts: Errors/Warnings/Success
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -550,7 +552,7 @@ namespace IsraelHiking.Services {
                     this.helpDragDrop = this.gettextCatalog.getString("You can drag-and-drop files or URLs onto the map to load them.");
                     this.helpYoutubeLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}.", { link: "<a href='https://www.youtube.com/playlist?list=PL8pYDecWd7EjQIyJpPAwSH3UbeZzzQpNo' target='_blank'>", linkend: "</a>" }));
                     // Info
-                    this.infoSubheader = this.$sce.trustAsHtml(this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.", { link: "<a dir='ltr' href='http://www.openstreetmap.org/' target='_blank'>", linkend: "</a>" }));
+                    this.infoSubheader = this.$sce.trustAsHtml(this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.", { link: "<a dir='ltr' href='https://www.openstreetmap.org/' target='_blank'>", linkend: "</a>" }));
                     this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:"); 
                     this.infoFacebookLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Interact with other users in our {{link}}Facebook group{{linkend}}", { link: "<a href='https://www.facebook.com/groups/994960670559126/' target='_blank'>", linkend: "</a>" }));
                     this.infoGithubLink = this.$sce.trustAsHtml(this.gettextCatalog.getString("Request features and report bugs on our {{link}}Github project{{linkend}} page", { link: "<a href='http://www.github.com/IsraelHikingMap' target='_blank'>", linkend: "</a>" }));

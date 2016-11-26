@@ -128,7 +128,7 @@
     <Compile Include="Gpx\GpxDataContainerConverterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataContainerConverterServiceTests.cs" />
-    <Compile Include="Services\DouglasPeuckerReductionServiceTests.cs" />
+    <Compile Include="Services\RouteDataSplitterServiceTests.cs" />
     <Compile Include="Services\OsmDataServiceTests.cs" />
     <Compile Include="Services\OsmGeoJsonPreprocessorTests.cs" />
     <Compile Include="Services\ImageCreationServiceTests.cs" />

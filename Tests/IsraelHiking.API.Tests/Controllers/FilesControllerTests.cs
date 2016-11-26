@@ -54,7 +54,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _removeFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
             _gpxDataContainerConverter = new GpxDataContainerConverter();
-            _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new DouglasPeuckerReductionService(new CoordinatesConverter()));
+            _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new RouteDataSplitterService(new CoordinatesConverter(), new DouglasPeuckerReductionService()));
             _controller = new FilesController(_elevationDataStorage, _removeFileFetcherGateway, _dataContainerConverterService);
         }
 

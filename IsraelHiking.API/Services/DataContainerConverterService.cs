@@ -11,21 +11,22 @@ namespace IsraelHiking.API.Services
 {
     public class DataContainerConverterService : IDataContainerConverterService
     {
-        private const string GPX = "gpx";
+        public const string GPX = "gpx";
+
         private const string ISRAEL_HIKING_MAP = "IsraelHikingMap";
         private readonly IGpsBabelGateway _gpsBabelGateway;
         private readonly IGpxDataContainerConverter _gpxDataContainerConverter;
-        private readonly IDouglasPeuckerReductionService _douglasPeuckerReductionService;
+        private readonly IRouteDataSplitterService _routeDataSplitterService;
         private readonly List<IConverterFlowItem> _converterFlowItems;
 
         public DataContainerConverterService(IGpsBabelGateway gpsBabelGateway,
             IGpxGeoJsonConverter gpxGeoJsonConverter,
             IGpxDataContainerConverter gpxDataContainerConverter,
-            IDouglasPeuckerReductionService douglasPeuckerReductionService)
+            IRouteDataSplitterService routeDataSplitterService)
         {
             _gpsBabelGateway = gpsBabelGateway;
             _gpxDataContainerConverter = gpxDataContainerConverter;
-            _douglasPeuckerReductionService = douglasPeuckerReductionService;
+            _routeDataSplitterService = routeDataSplitterService;
 
             _converterFlowItems = new List<IConverterFlowItem>
             {
@@ -66,12 +67,12 @@ namespace IsraelHiking.API.Services
             var container = _gpxDataContainerConverter.ToDataContainer(gpx);
             if (gpx.creator != ISRAEL_HIKING_MAP)
             {
-                container.routes = ManipulateRoutesData(container.routes, RoutingType.HIKE);
+                container.routes = container.routes.Select(r => _routeDataSplitterService.Split(r, RoutingType.HIKE)).ToList();
             }
             return container;
         }
 
-        private Task<byte[]> Convert(byte[] content, string inputFileNameOrFormat, string outputFileExtension)
+        public Task<byte[]> Convert(byte[] content, string inputFileNameOrFormat, string outputFileExtension)
         {
             return Task.Run(() =>
             {
@@ -141,11 +142,6 @@ namespace IsraelHiking.API.Services
                 return FlowFormats.KML_BABEL_FORMAT;
             }
             return fileNameOrFormat.ToLower().Split('.').LastOrDefault() ?? string.Empty;
-        }
-
-        private List<RouteData> ManipulateRoutesData(IEnumerable<RouteData> routesData, string routingType)
-        {
-            return routesData.Select(r => _douglasPeuckerReductionService.SimplifyRouteData(r, routingType)).ToList();
         }
     }
 }

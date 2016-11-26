@@ -14,6 +14,7 @@ namespace IsraelHiking.Services {
         url: string;
         imageUrl: string;
         dataUrl: string;
+        id: string;
     }
 
     export class OsmUserService {
@@ -108,14 +109,16 @@ namespace IsraelHiking.Services {
                             continue;
                         }
                         let baseOsm = "https://www.openstreetmap.org/";
-                        let url = `${baseOsm}user/${traceJson._user}/traces/${traceJson._id}`;
-                        let dataUrl = `${baseOsm}trace/${traceJson._id}/data`;
+                        let id = traceJson._id;
+                        let url = `${baseOsm}user/${traceJson._user}/traces/${id}`;
+                        let dataUrl = `${baseOsm}trace/${id}/data`;
                         this.traces.push({
                             fileName: traceJson._name,
                             description: traceJson.description,
                             url: url,
                             imageUrl: url + "/picture",
-                            dataUrl: dataUrl
+                            dataUrl: dataUrl,
+                            id: id
                         });
                     }
                     deferred.resolve();
@@ -143,6 +146,32 @@ namespace IsraelHiking.Services {
 
         public getUrlFromSiteUrlId = (siteUrl: Common.SiteUrl) => {
             return Common.Urls.baseAddress + this.getSiteUrlPostfix(siteUrl.Id);
+        }
+
+        public getMissingParts(trace: ITrace): angular.IHttpPromise<{}> {
+            return this.$http.post(Common.Urls.osm + "?url=" + trace.dataUrl, {});
+        }
+
+        public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, center: L.LatLng): string {
+            let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
+            return `${OsmUserService.BASE_URL}/edit#${background}&map=${zoom}/${center.lat}/${center.lng}`;
+        }
+
+        public getEditOsmGpxAddress(baseLayerAddress: string, gpxId: string) {
+            let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
+            return `${OsmUserService.BASE_URL}/edit?gpx=${gpxId}#${background}`;
+        }
+
+        private getBackgroundStringForOsmAddress(baseLayerAddress: string): string {
+            let background = "background=bing";
+            if (baseLayerAddress !== "") {
+                if (baseLayerAddress.indexOf("/") === 0) {
+                    baseLayerAddress = Common.Urls.baseAddress + baseLayerAddress;
+                }
+                let address = baseLayerAddress.indexOf("{s}") === -1 ? baseLayerAddress : Common.Urls.baseAddress + Services.Layers.LayersService.DEFAULT_TILES_ADDRESS;
+                background = `background=custom:${address}`;
+            }
+            return background;
         }
     }
 }

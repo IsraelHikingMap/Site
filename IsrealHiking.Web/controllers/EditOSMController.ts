@@ -8,22 +8,15 @@
         constructor($scope: IEditOSMScope,
             $window: angular.IWindowService,
             mapService: Services.MapService,
-            layersService: Services.Layers.LayersService) {
+            layersService: Services.Layers.LayersService,
+            osmUserService: Services.OsmUserService) {
             super(mapService);
 
             $scope.editOsm = (e: Event) => {
                 let center = this.map.getCenter();
                 let zoom = this.map.getZoom();
                 let baseLayerAddress = layersService.selectedBaseLayer.address;
-                let background = "background=bing";
-                if (baseLayerAddress !== "") {
-                    if (baseLayerAddress.indexOf("/") === 0) {
-                        baseLayerAddress = Common.Urls.baseAddress + baseLayerAddress;
-                    }
-                    let address = baseLayerAddress.indexOf("{s}") === -1 ? baseLayerAddress : Common.Urls.baseAddress + Services.Layers.LayersService.DEFAULT_TILES_ADDRESS;
-                    background = `background=custom:${address}`;
-                }
-                $window.open(`http://www.openstreetmap.org/edit#${background}&map=${zoom}/${center.lat}/${center.lng}`);
+                $window.open(osmUserService.getEditOsmLocationAddress(baseLayerAddress, zoom, center));
                 this.suppressEvents(e);
             };
         } 

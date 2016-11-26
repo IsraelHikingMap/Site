@@ -15,12 +15,15 @@
         getPorgessbarType(): string;
         showTrace(trace: Services.ITrace): void;
         editTrace(trace: Services.ITrace): void;
+        findMissingParts(trace: Services.ITrace): void;
+        editInOsm(trace: Services.ITrace): void;
     }
 
     export class OsmUserController extends BaseMapController {
         private modalInstnace: angular.ui.bootstrap.IModalServiceInstance;
 
         constructor($scope: IOsmUserScope,
+            $window: angular.IWindowService,
             $uibModal: angular.ui.bootstrap.IModalService,
             $compile: angular.ICompileService,
             mapService: Services.MapService,
@@ -120,6 +123,27 @@
                 fileService.openFromUrl(trace.dataUrl).success((dataContainer) => {
                     layersService.setJsonData(dataContainer);
                 });
+            }
+
+            $scope.editInOsm = (trace: Services.ITrace) => {
+                let baseLayerAddress = layersService.selectedBaseLayer.address;
+                $window.open(osmUserService.getEditOsmGpxAddress(baseLayerAddress, trace.id));
+            }
+
+            $scope.findMissingParts = (trace: Services.ITrace): void => {
+                osmUserService.getMissingParts(trace)
+                    .then((response: { data: GeoJSON.FeatureCollection<GeoJSON.LineString> }) => {
+                        let geoJson = response.data;
+                        if (geoJson.features.length === 0) {
+                            toastr.warning("No missing routes :-)");
+                            return;
+                        }
+                        this.modalInstnace.close();
+                        var geoJsonLayer = L.geoJson(geoJson);
+                        geoJsonLayer.addTo(this.map);
+                        // HM TODO: make this better
+                        this.map.fitBounds(geoJsonLayer.getBounds());
+                    });
             }
         }
 

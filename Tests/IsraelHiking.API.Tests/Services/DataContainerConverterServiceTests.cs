@@ -34,7 +34,7 @@ namespace IsraelHiking.API.Tests.Services
             _randomBytes = new byte[] { 0, 1, 1, 0 };
             _simpleGpx = new gpxType { wpt = new[] { new wptType() } };
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
-            _converterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new DouglasPeuckerReductionService(new CoordinatesConverter()));
+            _converterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new RouteDataSplitterService(new CoordinatesConverter(), new DouglasPeuckerReductionService()));
         }
 
         [TestMethod]

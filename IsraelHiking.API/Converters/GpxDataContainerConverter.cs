@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Xml;
+using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.Common;
 
@@ -38,19 +39,22 @@ namespace IsraelHiking.API.Converters
                     name = r.name,
                     trkseg = r.segments.Select(ToTrksegType).ToArray()
                 }).ToArray()
-            };
+            }.UpdateBounds();
         }
 
         public DataContainer ToDataContainer(gpxType gpx)
         {
+            gpx.UpdateBounds();
             var container = new DataContainer
             {
                 markers = (gpx.wpt ?? new wptType[0]).Select(ToMarkerData).ToList(),
                 routes = ConvertRoutesToRoutesData(gpx.rte ?? new rteType[0])
             };
             container.routes.AddRange(ConvertTracksToRouteData(gpx.trk ?? new trkType[0]));
-            UpdateBoundingBox(container);
-
+            if (gpx.metadata?.bounds != null)
+            {
+                UpdateBoundingBox(container, gpx.metadata.bounds);
+            }
             return container;
         }
 
@@ -86,24 +90,18 @@ namespace IsraelHiking.API.Converters
             return tracks;
         }
 
-        private void UpdateBoundingBox(DataContainer container)
+        private void UpdateBoundingBox(DataContainer container, boundsType bounds)
         {
-            var allPoints = container.routes.SelectMany(r => r.segments.SelectMany(s => s.latlngzs)).OfType<LatLng>().ToList();
-            allPoints.AddRange(container.markers.Select(m => m.latlng));
-            if (allPoints.Any() == false)
+            container.northEast = new LatLngZ 
             {
-                return;
-            }
-            container.northEast = new LatLngZ
-            {
-                lat = allPoints.Max(l => l.lat),
-                lng = allPoints.Max(l => l.lng)
+                lat = (double)bounds.maxlat,
+                lng = (double)bounds.maxlon
             };
 
             container.southWest = new LatLngZ
             {
-                lat = allPoints.Min(l => l.lat),
-                lng = allPoints.Min(l => l.lng)
+                lat = (double)bounds.minlat,
+                lng = (double)bounds.minlon
             };
         }
 

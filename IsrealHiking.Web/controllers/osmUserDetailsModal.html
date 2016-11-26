@@ -12,7 +12,7 @@
                     </div>
                     <div class="col-md-6 col-xs-12">
                         <h5>{{userService.changeSets}} {{resources.changes}}</h5>
-                        <div uib-progressbar class="progress-striped" value="getRankPercentage()" type="{{getPorgessbarType()}}">{{getRankPercentage() | number}}%</div>
+                        <div uib-progressbar class="progress-striped" value="getRankPercentage()" type="{{getPorgessbarType()}}">{{getRankPercentage() | number : 1}}%</div>
                     </div>
                 </div>
             </div>
@@ -54,6 +54,8 @@
                                 <div class="col-xs-3">
                                     <a class="cursor-pointer btn btn-default btn-block" ng-click="showTrace(trace)" uib-tooltip="{{resources.view}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-eye"></i></a>
                                     <a class="cursor-pointer btn btn-default btn-block" ng-click="editTrace(trace)" uib-tooltip="{{resources.edit}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-pencil"></i></a>
+                                    <a class="cursor-pointer btn btn-default btn-block" ng-click="editInOsm(trace)" uib-tooltip="{{resources.editThisMapUsingOsm}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><img src="/content/images/map-editing.svg" alt="" /></a>
+                                    <a class="cursor-pointer btn btn-default btn-block" ng-click="findMissingParts(trace)" uib-tooltip="{{resources.findMissingParts}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-plus"></i></a>
                                 </div>
                             </div>
                         </div>

@@ -1,9 +1,11 @@
-﻿using IsraelHiking.Common;
+﻿using System.Collections.Generic;
+using GeoAPI.Geometries;
+using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Services
 {
     public interface IDouglasPeuckerReductionService
     {
-        RouteData SimplifyRouteData(RouteData routeData, string routingType);
+        List<int> GetSimplifiedRouteIndexes(IReadOnlyList<Coordinate> points, double tolerance);
     }
 }

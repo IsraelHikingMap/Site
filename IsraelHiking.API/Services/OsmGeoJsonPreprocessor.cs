@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Services
                 var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(g.Geometry);
                 if (!isValidOp.IsValid)
                 {
-                    _logger.Debug($"http://www.openstreetmap.org/{(g.Geometry.GeometryType == "Polygon" ? "way" : "relation")}/{g.Attributes["osm_id"]} {isValidOp.ValidationError.Message}({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                    _logger.Debug($"https://www.openstreetmap.org/{(g.Geometry.GeometryType == "Polygon" ? "way" : "relation")}/{g.Attributes["osm_id"]} {isValidOp.ValidationError.Message}({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                 }
             });
             

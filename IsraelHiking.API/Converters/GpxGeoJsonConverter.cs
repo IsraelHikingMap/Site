@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -56,7 +57,7 @@ namespace IsraelHiking.API.Converters
                 trk = collection.Features.Where(f => f.Geometry is MultiLineString)
                     .SelectMany(CreateTracksFromMultiLineString)
                     .ToArray()
-            };
+            }.UpdateBounds();
         }
 
         private Coordinate CreateGeoPosition(wptType wayPoint)

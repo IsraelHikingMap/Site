@@ -11,7 +11,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 namespace IsraelHiking.API.Tests.Services
 {
     [TestClass]
-    public class DouglasPeuckerReductionServiceTests
+    public class RouteDataSplitterServiceTests
     {
         #region GPX string data
 
@@ -289,12 +289,12 @@ namespace IsraelHiking.API.Tests.Services
 
         #endregion
 
-        private DouglasPeuckerReductionService _service;
+        private RouteDataSplitterService _service;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _service = new DouglasPeuckerReductionService(new CoordinatesConverter());
+            _service = new RouteDataSplitterService(new CoordinatesConverter(), new DouglasPeuckerReductionService());
         }
 
         [TestMethod]
@@ -303,7 +303,7 @@ namespace IsraelHiking.API.Tests.Services
             var converter = new GpxDataContainerConverter();
             var container = converter.ToDataContainer(Encoding.ASCII.GetBytes(gpxString).ToGpx());
 
-            var route = _service.SimplifyRouteData(container.routes.First(), RoutingType.HIKE);
+            var route = _service.Split(container.routes.First(), RoutingType.HIKE);
 
             Assert.IsTrue(route.segments.Count <= 40);
         }
@@ -330,7 +330,7 @@ namespace IsraelHiking.API.Tests.Services
                 }
             });
 
-            var route = _service.SimplifyRouteData(container.routes.First(), RoutingType.HIKE);
+            var route = _service.Split(container.routes.First(), RoutingType.HIKE);
 
             Assert.IsTrue(route.segments.Count <= 5);
         }
@@ -354,7 +354,7 @@ namespace IsraelHiking.API.Tests.Services
                 }
             });
 
-            var route = _service.SimplifyRouteData(container.routes.First(), RoutingType.HIKE);
+            var route = _service.Split(container.routes.First(), RoutingType.HIKE);
 
             Assert.AreEqual(3, route.segments.Count);
         }

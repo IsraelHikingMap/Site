@@ -7,5 +7,6 @@ namespace IsraelHiking.API.Services
     {
         Task<DataContainer> ToDataContainer(byte[] content, string fileName);
         Task<byte[]> ToAnyFormat(DataContainer dataContainer, string format);
+        Task<byte[]> Convert(byte[] content, string inputFileNameOrFormat, string outputFileExtension);
     }
 }

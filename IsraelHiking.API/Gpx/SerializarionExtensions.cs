@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Xml.Serialization;
 using IsraelHiking.API.Gpx.GpxTypes;
 using NetTopologySuite.Features;
@@ -52,6 +53,38 @@ namespace IsraelHiking.API.Gpx
                 xmlSerializer.Serialize(outputStream, gpx);
                 return outputStream.ToArray();
             }
+        }
+
+        public static gpxType UpdateBounds(this gpxType gpx)
+        {
+            if (gpx.metadata?.bounds != null &&
+                gpx.metadata.bounds.minlat != 0 &&
+                gpx.metadata.bounds.maxlat != 0 &&
+                gpx.metadata.bounds.minlon != 0 &&
+                gpx.metadata.bounds.maxlon != 0)
+            {
+                return gpx;
+            }
+            var points = (gpx.rte ?? new rteType[0]).Where(r => r.rtept != null).SelectMany(r => r.rtept).ToArray();
+            points = points.Concat(gpx.wpt ?? new wptType[0]).ToArray();
+            points = points.Concat((gpx.trk ?? new trkType[0]).Where(r => r.trkseg != null).SelectMany(t => t.trkseg).SelectMany(s => s.trkpt)).ToArray();
+            if (!points.Any())
+            {
+                return gpx;
+            }
+            if (gpx.metadata == null)
+            {
+                gpx.metadata = new metadataType {bounds = new boundsType()};
+            }
+            
+            gpx.metadata.bounds = new boundsType
+            {
+                minlat = points.Min(p => p.lat),
+                maxlat = points.Max(p => p.lat),
+                minlon = points.Min(p => p.lon),
+                maxlon = points.Max(p => p.lon)
+            };
+            return gpx;
         }
     }
 }
