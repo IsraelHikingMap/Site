@@ -35,37 +35,5 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.AreEqual(3, gpx.rte.Length);
             Assert.AreEqual(2, gpx.trk.Length);
         }
-
-        [TestMethod]
-        public void LineStringAngleTest()
-        {
-            var coordinate1 = new Coordinate(0, 0);
-            var coordinate2 = new Coordinate(-1, 1);
-            var coordinate3 = new Coordinate(-2, 2);
-            var xDiff = coordinate2.X - coordinate1.X;
-            var yDiff = coordinate2.Y - coordinate1.Y;
-            var angel1 = Math.Atan(yDiff / xDiff) * 180 / Math.PI;
-            if (xDiff < 0)
-            {
-                angel1 += 180;
-            }
-            if (angel1 < 0)
-            {
-                angel1 += 360;
-            }
-            xDiff = coordinate3.X - coordinate2.X;
-            yDiff = coordinate3.Y - coordinate2.Y;
-            var angel2 = Math.Atan(yDiff / xDiff) * 180 / Math.PI;
-            if (xDiff < 0)
-            {
-                angel2 += 180;
-            }
-            if (angel2 < 0)
-            {
-                angel2 += 360;
-            }
-            var angleDifference = Math.Abs(angel1 - angel2);
-            Assert.IsTrue(angleDifference > 150 && angleDifference < 210);
-        }
     }
 }
