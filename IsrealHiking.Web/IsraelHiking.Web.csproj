@@ -62,6 +62,7 @@
     <Content Include="content\images\favicons\mstile-70x70.png" />
     <Content Include="content\images\favicons\safari-pinned-tab.svg" />
     <Content Include="content\images\four-by-four.png" />
+    <Content Include="content\images\google-play-badge.png" />
     <Content Include="content\images\hike.svg" />
     <Content Include="content\images\layers-2x.png" />
     <Content Include="content\images\layers.png" />
