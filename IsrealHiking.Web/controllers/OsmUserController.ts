@@ -15,7 +15,7 @@
         getPorgessbarType(): string;
         showTrace(trace: Services.ITrace): void;
         editTrace(trace: Services.ITrace): void;
-        findMissingParts(trace: Services.ITrace): void;
+        findUnmappedRoutes(trace: Services.ITrace): void;
         editInOsm(trace: Services.ITrace): void;
     }
 
@@ -130,12 +130,12 @@
                 $window.open(osmUserService.getEditOsmGpxAddress(baseLayerAddress, trace.id));
             }
 
-            $scope.findMissingParts = (trace: Services.ITrace): void => {
+            $scope.findUnmappedRoutes = (trace: Services.ITrace): void => {
                 osmUserService.getMissingParts(trace)
                     .then((response: { data: GeoJSON.FeatureCollection<GeoJSON.LineString> }) => {
                         let geoJson = response.data;
                         if (geoJson.features.length === 0) {
-                            toastr.warning("No missing routes :-)");
+                            toastr.success($scope.resources.noUnmappedRoutes);
                             return;
                         }
                         this.modalInstnace.close();

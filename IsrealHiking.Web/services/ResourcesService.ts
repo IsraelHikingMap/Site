@@ -158,7 +158,7 @@ namespace IsraelHiking.Services {
         public editRouteDetails: string;
         public shareWithFacebook: string;
         public shareWithOffroad: string;
-        public findMissingParts: string;
+        public findUnmappedRoutes: string;
         // Toasts: Errors/Warnings/Success
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
@@ -178,6 +178,7 @@ namespace IsraelHiking.Services {
         public unableToLogin: string;
         public routeSentSuccessfully: string;
         public unableToSendRoute: string;
+        public noUnmappedRoutes: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -506,7 +507,7 @@ namespace IsraelHiking.Services {
                     this.editRouteDetails = this.gettextCatalog.getString("Edit Route Details");
                     this.shareWithFacebook = this.gettextCatalog.getString("Share With Facebook");
                     this.shareWithOffroad = this.gettextCatalog.getString("Share With off-road");
-                    this.findMissingParts = this.gettextCatalog.getString("Find Missing Parts");
+                    this.findUnmappedRoutes = this.gettextCatalog.getString("Find Unmapped Routes");
                     // Toasts: Errors/Warnings/Success
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -526,6 +527,7 @@ namespace IsraelHiking.Services {
                     this.unableToLogin = this.gettextCatalog.getString("Unable to login...");
                     this.routeSentSuccessfully = this.gettextCatalog.getString("Route sent successfully.");
                     this.unableToSendRoute = this.gettextCatalog.getString("Unable to send route...");
+                    this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");

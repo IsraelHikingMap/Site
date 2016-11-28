@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
@@ -21,9 +19,7 @@ namespace IsraelHiking.API.Controllers
 {
     public class OsmController : ApiController
     {
-        private const double CLOSEST_POINT_TOLERANCE = 30; // meters
-        private const double MINIMAL_MISSING_PART_LENGTH = 200; // meters
-        private const double ANGLE_VARIATION = 30; // degrees
+        private const double SIMPLIFICATION_TOLERANCE = 15; // meters
 
         private readonly IOverpassGateway _overpassGateway;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
@@ -31,13 +27,15 @@ namespace IsraelHiking.API.Controllers
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IDouglasPeuckerReductionService _douglasPeuckerReductionService;
         private readonly ICoordinatesConverter _coordinatesConverter;
+        private readonly IGpxSplitterService _gpxSplitterService;
 
         public OsmController(IOverpassGateway overpassGateway,
             IOsmGeoJsonConverter osmGeoJsonConverter,
             IRemoteFileFetcherGateway remoteFileFetcherGateway,
             IDataContainerConverterService dataContainerConverterService,
             ICoordinatesConverter coordinatesConverter, 
-            IDouglasPeuckerReductionService douglasPeuckerReductionService)
+            IDouglasPeuckerReductionService douglasPeuckerReductionService, 
+            IGpxSplitterService gpxSplitterService)
         {
             _overpassGateway = overpassGateway;
             _osmGeoJsonConverter = osmGeoJsonConverter;
@@ -45,6 +43,7 @@ namespace IsraelHiking.API.Controllers
             _dataContainerConverterService = dataContainerConverterService;
             _coordinatesConverter = coordinatesConverter;
             _douglasPeuckerReductionService = douglasPeuckerReductionService;
+            _gpxSplitterService = gpxSplitterService;
         }
 
         public async Task<List<Feature>> GetHighways(string northEast, string southWest)
@@ -57,106 +56,15 @@ namespace IsraelHiking.API.Controllers
         public async Task<FeatureCollection> PostGpsTrace(string url)
         {
             var response = await _remoteFileFetcherGateway.GetFileContent(url);
-            // HM TODO: remove this:
-            //response.Content = File.ReadAllBytes(@"D:\off-road.io export5405355290918912.gpx");
-            //response.FileName = "off-road.io export5405355290918912.gpx";
-            //
             var gpxBytes = await _dataContainerConverterService.Convert(response.Content, response.FileName, DataContainerConverterService.GPX);
-            var gpx = gpxBytes.ToGpx();
-            gpx.UpdateBounds();
+            var gpx = gpxBytes.ToGpx().UpdateBounds();
             var routingType = GetRoutingType(gpx);
             var lineStringsInArea = await GetLineStringsInArea(gpx.metadata.bounds);
-            var split = SplitGpx(gpx, lineStringsInArea);
-            SimplifyLines(split);
+            var manipulatedLines = ManipulateGpxIntoAddibleLines(gpx, lineStringsInArea);
             var attributesTable = new AttributesTable();
             attributesTable.AddAttribute("routingType", routingType);
-            var features = split.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
+            var features = manipulatedLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
             return new FeatureCollection( new Collection<IFeature>(features));
-        }
-
-        private List<LineString> SplitGpx(gpxType gpx, List<LineString> lineStrings)
-        {
-            var gpxSplit = new List<LineString>();
-            var gpxLines = GetLineStings(gpx);
-            foreach (var lineString in gpxLines)
-            {
-                var waypointsGroup = new List<Coordinate>();
-                foreach (var coordinate in lineString.Coordinates.Reverse())
-                {
-                    if (waypointsGroup.Count > 0 && waypointsGroup.Last().Equals(coordinate))
-                    {
-                        continue;
-                    }
-                    if (IsSharpTurn(coordinate, waypointsGroup))
-                    {
-                        var previousPoint = waypointsGroup.Last();
-                        AddLineString(gpxSplit, waypointsGroup.ToArray(), lineStrings);
-                        waypointsGroup = new List<Coordinate> { previousPoint };
-                    }
-                    if (IsCloseToALine(coordinate, lineStrings) == false)
-                    {
-                        waypointsGroup.Add(coordinate);
-                        continue;
-                    }
-                    waypointsGroup.Add(coordinate);
-                    AddLineString(gpxSplit, waypointsGroup.ToArray(), lineStrings);
-                    waypointsGroup = new List<Coordinate> {coordinate};
-                }
-                AddLineString(gpxSplit, waypointsGroup.ToArray(), lineStrings);
-            }
-
-            // return only lists with non-mapped points that are long enough
-            return gpxSplit.Where(l => l.Length > MINIMAL_MISSING_PART_LENGTH).ToList();
-        }
-
-        private bool IsSharpTurn(Coordinate coordinate, List<Coordinate> waypointsGroup)
-        {
-            if (waypointsGroup.Count < 2)
-            {
-                return false;
-            }
-            var angle1 = GetAngle(waypointsGroup.Last(), coordinate);
-            var angle2 = GetAngle(waypointsGroup[waypointsGroup.Count - 2], waypointsGroup.Last());
-            var angleDifference = Math.Abs(angle1 - angle2);
-            return (angleDifference > 180 - ANGLE_VARIATION) && (angleDifference < 180 + ANGLE_VARIATION);
-        }
-
-        private double GetAngle(Coordinate coordinate1, Coordinate coordinate2)
-        {
-            // Can't use LineString's angle due to bug in NTS: https://github.com/NetTopologySuite/NetTopologySuite/issues/136
-            var xDiff = coordinate2.X - coordinate1.X;
-            var yDiff = coordinate2.Y - coordinate1.Y;
-            var angle = Math.Atan(yDiff / xDiff) * 180 / Math.PI;
-            if (xDiff < 0)
-            {
-                angle += 180;
-            }
-            if (angle < 0)
-            {
-                angle += 360;
-            }
-            return angle;
-        }
-
-        private void AddLineString(ICollection<LineString> gpxSplit, Coordinate[] coordinates, List<LineString> lineStrings)
-        {
-            if (coordinates.Length < 3)
-            {
-                return;
-            }
-            var lineString = new LineString(coordinates);
-            gpxSplit.Add(lineString);
-            lineStrings.Add(lineString);
-        }
-
-        private bool IsCloseToALine(Coordinate coordinate, List<LineString> lineStrings)
-        {
-            var point = new Point(coordinate);
-            if (!lineStrings.Any())
-            {
-                return false;
-            }
-            return lineStrings.Min(l => l.Distance(point)) < CLOSEST_POINT_TOLERANCE;
         }
 
         private async Task<List<LineString>> GetLineStringsInArea(boundsType bounds)
@@ -165,16 +73,17 @@ namespace IsraelHiking.API.Controllers
             return highways.Select(highway => ToItmLineString(highway.Nodes)).ToList();
         }
 
-        private void SimplifyLines(List<LineString> lineStings)
+        private List<LineString> SimplifyLines(List<LineString> lineStings)
         {
-            for (int lineStringIndex = 0; lineStringIndex < lineStings.Count; lineStringIndex++)
+            var lines = new List<LineString>();
+            foreach (var lineSting in lineStings)
             {
-                var lineSting = lineStings[lineStringIndex];
                 var simplifiedIndexes = _douglasPeuckerReductionService.GetSimplifiedRouteIndexes(
-                        lineSting.Coordinates, CLOSEST_POINT_TOLERANCE / 2);
+                    lineSting.Coordinates, SIMPLIFICATION_TOLERANCE);
                 var coordinates = lineSting.Coordinates.Where((w, i) => simplifiedIndexes.Contains(i)).ToArray();
-                lineStings[lineStringIndex] = new LineString(coordinates);
+                lines.Add(new LineString(coordinates));
             }
+            return lines;
         }
 
         private string GetRoutingType(IReadOnlyCollection<wptType[]> waypointsGoups)
@@ -245,7 +154,7 @@ namespace IsraelHiking.API.Controllers
             return GetRoutingType(waypointsGroups);
         }
 
-        private List<LineString> GetLineStings(gpxType gpx)
+        private List<LineString> ManipulateGpxIntoAddibleLines(gpxType gpx, List<LineString> lineStringsInArea)
         {
             var lineStings = (gpx.rte ?? new rteType[0])
                 .Select(route => ToItmLineString(route.rtept)).ToList();
@@ -253,6 +162,10 @@ namespace IsraelHiking.API.Controllers
                 .Select(track => track.trkseg.SelectMany(s => s.trkpt).ToArray())
                 .Select(ToItmLineString);
             lineStings.AddRange(tracksPointsList);
+
+            lineStings = _gpxSplitterService.Split(lineStings, lineStringsInArea);
+            lineStings = SimplifyLines(lineStings);
+
             return lineStings;
         }
     }

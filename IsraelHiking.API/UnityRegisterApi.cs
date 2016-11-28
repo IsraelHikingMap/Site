@@ -18,6 +18,7 @@ namespace IsraelHiking.API
             container.RegisterType<IDataContainerConverterService, DataContainerConverterService>();
             container.RegisterType<IDouglasPeuckerReductionService, DouglasPeuckerReductionService>();
             container.RegisterType<IRouteDataSplitterService, RouteDataSplitterService>();
+            container.RegisterType<IGpxSplitterService, GpxSplitterService>();
             container.RegisterType<IOsmGeoJsonPreprocessor, OsmGeoJsonPreprocessor>();
             container.RegisterType<IOsmDataService, OsmDataService>();
             container.RegisterType<IImageCreationService, ImageCreationService>();
