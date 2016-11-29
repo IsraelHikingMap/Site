@@ -21,7 +21,9 @@ namespace IsraelHiking.API.Tests.Services
         public void TestInitialize()
         {
             _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
-            _imageCreationService = new ImageCreationService(_remoteFileFetcherGateway, Substitute.For<ILogger>());
+            var factory = Substitute.For<IHttpGatewayFactory>();
+            factory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(_remoteFileFetcherGateway);
+            _imageCreationService = new ImageCreationService(factory, Substitute.For<ILogger>());
             SetupRemoteFileFetcherWithBlankTile();
         }
 

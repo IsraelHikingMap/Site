@@ -2,6 +2,7 @@
 using IsraelHiking.DataAccess.ElasticSearch;
 using IsraelHiking.DataAccess.GPSBabel;
 using IsraelHiking.DataAccess.GraphHopper;
+using IsraelHiking.DataAccess.Osm;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Practices.Unity;
 
@@ -14,7 +15,8 @@ namespace IsraelHiking.DataAccess
             container.RegisterInstance(logger);
             container.RegisterType<IProcessHelper, ProcessHelper>();
             container.RegisterType<IFileSystemHelper, FileSystemHelper>();
-            container.RegisterType<IRemoteFileFetcherGateway, RemoteFileFetcherGateway>();
+            container.RegisterType<IHttpGatewayFactory, HttpGatewayFactory>();
+            container.RegisterType<IRemoteFileSizeFetcherGateway, RemoteFileFetcherGateway>();
             container.RegisterType<IIsraelHikingDbContext, IsraelHikingDbContext>();
             container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();

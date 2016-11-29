@@ -6,6 +6,7 @@ using IsraelHiking.DataAccess;
 using System.Web.Http.ExceptionHandling;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
+using IsraelHiking.Common;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Owin.Security.OAuth;
@@ -26,7 +27,9 @@ namespace IsraelHiking.Web
             var config = new HttpConfiguration();
             app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions
             {
-                AccessTokenProvider = new OsmAccessTokenProvider(container.Resolve<IOsmUserCache>())
+                AccessTokenProvider = new OsmAccessTokenProvider(
+                    container.Resolve<IHttpGatewayFactory>(),
+                    container.Resolve<LruCache<string, TokenAndSecret>>())
             });
             WebApiConfig.Register(config);
 

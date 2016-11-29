@@ -8,7 +8,7 @@ using NetTopologySuite.Geometries;
 using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.API.Services.Osm
 {
     public class OsmGeoJsonPreprocessor : IOsmGeoJsonPreprocessor
     {

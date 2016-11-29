@@ -1,6 +1,8 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Osm;
+using IsraelHiking.Common;
 using IsraelTransverseMercator;
 using Microsoft.Practices.Unity;
 
@@ -21,7 +23,7 @@ namespace IsraelHiking.API
             container.RegisterType<IGpxSplitterService, GpxSplitterService>();
             container.RegisterType<IOsmGeoJsonPreprocessor, OsmGeoJsonPreprocessor>();
             container.RegisterType<IOsmDataService, OsmDataService>();
-            container.RegisterType<IOsmUserCache, OsmUserCache>(new ContainerControlledLifetimeManager());
+            container.RegisterType<LruCache<string, TokenAndSecret>>(new ContainerControlledLifetimeManager());
             container.RegisterType<IImageCreationService, ImageCreationService>();
         }
     }

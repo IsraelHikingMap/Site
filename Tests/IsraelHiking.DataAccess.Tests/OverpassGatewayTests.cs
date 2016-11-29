@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
+using IsraelHiking.DataAccess.Osm;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using OsmSharp.Osm;
 
 namespace IsraelHiking.DataAccess.Tests
 {

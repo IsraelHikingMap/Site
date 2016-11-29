@@ -1,10 +1,9 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IOsmGateway
+    public interface IOsmGateway: IRemoteFileFetcherGateway
     {
-        Task<HttpResponseMessage> Get(string url, string token, string tokenSecret);
+        Task<string> GetUserId();
     }
 }

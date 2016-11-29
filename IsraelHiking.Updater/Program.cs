@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using IsraelHiking.API;
-using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Practices.Unity;

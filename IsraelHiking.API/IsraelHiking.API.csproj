@@ -156,16 +156,15 @@
     <Compile Include="Services\IGpxSplitterService.cs" />
     <Compile Include="Services\IImageCreationService.cs" />
     <Compile Include="Services\ImageCreationService.cs" />
-    <Compile Include="Services\IOsmDataService.cs" />
-    <Compile Include="Services\IOsmGeoJsonPreprocessor.cs" />
-    <Compile Include="Services\IOsmUserCache.cs" />
+    <Compile Include="Services\Osm\IOsmDataService.cs" />
+    <Compile Include="Services\Osm\IOsmGeoJsonPreprocessor.cs" />
     <Compile Include="Services\IRouteDataSplitterService.cs" />
-    <Compile Include="Services\OsmDataService.cs" />
+    <Compile Include="Services\Osm\OsmDataService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataContainerConverterService.cs" />
     <Compile Include="Services\IDataContainerConverterService.cs" />
-    <Compile Include="Services\OsmGeoJsonPreprocessor.cs" />
-    <Compile Include="Services\OsmUserCache.cs" />
+    <Compile Include="Services\Osm\OsmGeoJsonPreprocessor.cs" />
+    <Compile Include="Services\LruCache.cs" />
     <Compile Include="Services\RouteDataSplitterService.cs" />
     <Compile Include="UnityRegisterApi.cs" />
   </ItemGroup>

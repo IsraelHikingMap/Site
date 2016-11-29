@@ -12,16 +12,19 @@ namespace IsraelHiking.API.Controllers
     public class FilesController : ApiController
     {
         private readonly IElevationDataStorage _elevationDataStorage;
-        private readonly IRemoteFileFetcherGateway _remoteFileFetcher;
+        private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
+        private readonly LruCache<string, TokenAndSecret> _cache;
 
         public FilesController(IElevationDataStorage elevationDataStorage,
-            IRemoteFileFetcherGateway remoteFileFetcher, 
-            IDataContainerConverterService dataContainerConverterService)
+            IHttpGatewayFactory httpGatewayFactory, 
+            IDataContainerConverterService dataContainerConverterService,
+            LruCache<string, TokenAndSecret> cache)
         {
             _elevationDataStorage = elevationDataStorage;
-            _remoteFileFetcher = remoteFileFetcher;
+            _httpGatewayFactory = httpGatewayFactory;
             _dataContainerConverterService = dataContainerConverterService;
+            _cache = cache;
         }
         /// <summary>
         /// Gets a file from an external Url and converts it to data container
@@ -31,7 +34,8 @@ namespace IsraelHiking.API.Controllers
         // GET api/files?url=http://jeeptrip.co.il/routes/pd6bccre.twl
         public async Task<DataContainer> GetRemoteFile(string url)
         {
-            var response = await _remoteFileFetcher.GetFileContent(url);
+            var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(_cache.Get(User.Identity.Name));
+            var response = await fetcher.GetFileContent(url);
             var dataContainer = await _dataContainerConverterService.ToDataContainer(response.Content, response.FileName);
             foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
             {

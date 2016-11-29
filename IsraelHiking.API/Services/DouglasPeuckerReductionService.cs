@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
-using IsraelHiking.Common;
-using IsraelTransverseMercator;
 using NetTopologySuite.Geometries;
 using OsmSharp;
 

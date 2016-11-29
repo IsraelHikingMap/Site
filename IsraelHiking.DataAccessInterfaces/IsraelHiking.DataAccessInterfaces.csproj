@@ -86,6 +86,7 @@
     <Compile Include="IFileSystemHelper.cs" />
     <Compile Include="IGpsBabelGateway.cs" />
     <Compile Include="IGraphHopperHelper.cs" />
+    <Compile Include="IHttpGatewayFactory.cs" />
     <Compile Include="IIsraelHikingDbContext.cs" />
     <Compile Include="IIsraelHikingRepository.cs" />
     <Compile Include="ILogger.cs" />
@@ -95,6 +96,7 @@
     <Compile Include="IOverpassGateway.cs" />
     <Compile Include="IProcessHelper.cs" />
     <Compile Include="IRemoteFileFetcherGateway.cs" />
+    <Compile Include="IRemoteFileSizeFetcherGateway.cs" />
     <Compile Include="IRoutingGateway.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

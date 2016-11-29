@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.API.Services.Osm
 {
     public class OsmDataService : IOsmDataService
     {
@@ -13,7 +13,8 @@ namespace IsraelHiking.API.Services
         private const int PAGE_SIZE = 10000;
 
         private readonly ILogger _logger;
-        private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
+        private readonly IHttpGatewayFactory _httpGatewayFactory;
+        private readonly IRemoteFileSizeFetcherGateway _remoteFileSizeFetcherGateway;
         private readonly IGraphHopperHelper _graphHopperHelper;
         private readonly INssmHelper _elasticSearchHelper;
         private readonly IFileSystemHelper _fileSystemHelper;
@@ -23,7 +24,8 @@ namespace IsraelHiking.API.Services
         private string _serverPath;
 
         public OsmDataService(IGraphHopperHelper graphHopperHelper,
-            IRemoteFileFetcherGateway remoteFileFetcherGateway,
+            IHttpGatewayFactory httpGatewayFactory,
+            IRemoteFileSizeFetcherGateway remoteFileSizeFetcherGateway,
             IFileSystemHelper fileSystemHelper,
             IElasticSearchGateway elasticSearchGateway,
             INssmHelper elasticSearchHelper,
@@ -32,13 +34,14 @@ namespace IsraelHiking.API.Services
             ILogger logger)
         {
             _graphHopperHelper = graphHopperHelper;
-            _remoteFileFetcherGateway = remoteFileFetcherGateway;
+            _httpGatewayFactory = httpGatewayFactory;
+            _remoteFileSizeFetcherGateway = remoteFileSizeFetcherGateway;
             _fileSystemHelper = fileSystemHelper;
             _elasticSearchGateway = elasticSearchGateway;
             _elasticSearchHelper = elasticSearchHelper;
             _osmRepository = osmRepository;
-            _logger = logger;
             _osmGeoJsonPreprocessor = osmGeoJsonPreprocessor;
+            _logger = logger;
         }
 
         /// <summary>
@@ -93,10 +96,10 @@ namespace IsraelHiking.API.Services
         private async Task FetchOsmFile(string osmFilePath)
         {
             var address = "http://download.geofabrik.de/asia/" + PBF_FILE_NAME;
-            var length = await _remoteFileFetcherGateway.GetFileSize(address);
+            var length = await _remoteFileSizeFetcherGateway.GetFileSize(address);
             if (_fileSystemHelper.GetFileSize(osmFilePath) != length)
             {
-                var response = await _remoteFileFetcherGateway.GetFileContent(address);
+                var response = await _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).GetFileContent(address);
                 _fileSystemHelper.WriteAllBytes(osmFilePath, response.Content);
             }
         }

@@ -82,6 +82,7 @@
     <Compile Include="RouteSegmentData.cs" />
     <Compile Include="RoutingGatewayRequest.cs" />
     <Compile Include="SiteUrl.cs" />
+    <Compile Include="TokenAndSecret.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config">

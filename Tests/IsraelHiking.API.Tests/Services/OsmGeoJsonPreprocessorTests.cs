@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using IsraelHiking.API.Converters;
-using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;

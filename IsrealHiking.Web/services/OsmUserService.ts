@@ -105,13 +105,10 @@ namespace IsraelHiking.Services {
                     let tracesJson = this.x2Js.xml2json(traces) as any;
                     this.traces = [];
                     for (let traceJson of tracesJson.osm.gpx_file) {
-                        if (traceJson._visibility === "private") {
-                            continue;
-                        }
                         let baseOsm = "https://www.openstreetmap.org/";
                         let id = traceJson._id;
                         let url = `${baseOsm}user/${traceJson._user}/traces/${id}`;
-                        let dataUrl = `${baseOsm}trace/${id}/data`;
+                        let dataUrl = `${baseOsm}api/0.6/gpx/${id}/data`;
                         this.traces.push({
                             fileName: traceJson._name,
                             description: traceJson.description,

@@ -42,10 +42,10 @@ namespace IsraelHiking.API.Services
         private readonly Pen _endRoutePen;
         private readonly Brush _circleFillBrush;
 
-        public ImageCreationService(IRemoteFileFetcherGateway remoteFileFetcherGateway, ILogger logger)
+        public ImageCreationService(IHttpGatewayFactory httpGatewayFactory, ILogger logger)
         {
             _reoutePenIndex = 0;
-            _remoteFileFetcherGateway = remoteFileFetcherGateway;
+            _remoteFileFetcherGateway = httpGatewayFactory.CreateRemoteFileFetcherGateway(null);
             _logger = logger;
             _outLinerPen = new Pen(Color.White, PEN_WIDTH + 8) { LineJoin = LineJoin.Bevel };
             _routePenArray = new[]

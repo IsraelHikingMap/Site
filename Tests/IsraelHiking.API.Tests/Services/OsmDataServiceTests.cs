@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -16,6 +16,7 @@ namespace IsraelHiking.API.Tests.Services
         private IOsmDataService _osmDataService;
         private IGraphHopperHelper _graphHopperHelper;
         private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
+        private IRemoteFileSizeFetcherGateway _remoteFileSizeFetcherGateway;
         private IFileSystemHelper _fileSystemHelper;
         private IElasticSearchGateway _elasticSearchGateway;
         private INssmHelper _elasticSearchHelper;
@@ -27,12 +28,15 @@ namespace IsraelHiking.API.Tests.Services
         {
             _graphHopperHelper = Substitute.For<IGraphHopperHelper>();
             _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
+            var factory = Substitute.For<IHttpGatewayFactory>();
+            factory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(_remoteFileFetcherGateway);
+            _remoteFileSizeFetcherGateway = Substitute.For<IRemoteFileSizeFetcherGateway>();
             _fileSystemHelper = Substitute.For<IFileSystemHelper>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _elasticSearchHelper = Substitute.For<INssmHelper>();
             _osmRepository = Substitute.For<IOsmRepository>();
             _osmGeoJsonPreprocessor = Substitute.For<IOsmGeoJsonPreprocessor>();
-            _osmDataService = new OsmDataService(_graphHopperHelper, _remoteFileFetcherGateway, _fileSystemHelper,
+            _osmDataService = new OsmDataService(_graphHopperHelper, factory, _remoteFileSizeFetcherGateway, _fileSystemHelper,
                 _elasticSearchGateway, _elasticSearchHelper, _osmRepository, _osmGeoJsonPreprocessor, Substitute.For<ILogger>());
         }
 
@@ -66,7 +70,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void UpdateData_GetOsmFileWhenCurrentFileIsInDeifferentSize_ShouldGetTheFileFromTheWeb()
         {
-            _remoteFileFetcherGateway.GetFileSize(Arg.Any<string>()).Returns(Task.FromResult((long)10));
+            _remoteFileSizeFetcherGateway.GetFileSize(Arg.Any<string>()).Returns(Task.FromResult((long)10));
             _fileSystemHelper.GetFileSize(Arg.Any<string>()).Returns(1);
             _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(Task.FromResult(new RemoteFileFetcherGatewayResponse()));
 

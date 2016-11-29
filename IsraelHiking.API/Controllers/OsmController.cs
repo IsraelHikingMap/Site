@@ -23,27 +23,30 @@ namespace IsraelHiking.API.Controllers
 
         private readonly IOverpassGateway _overpassGateway;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
-        private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
+        private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IDouglasPeuckerReductionService _douglasPeuckerReductionService;
         private readonly ICoordinatesConverter _coordinatesConverter;
         private readonly IGpxSplitterService _gpxSplitterService;
+        private readonly LruCache<string, TokenAndSecret> _cache;
 
         public OsmController(IOverpassGateway overpassGateway,
             IOsmGeoJsonConverter osmGeoJsonConverter,
-            IRemoteFileFetcherGateway remoteFileFetcherGateway,
+            IHttpGatewayFactory httpGatewayFactory,
             IDataContainerConverterService dataContainerConverterService,
             ICoordinatesConverter coordinatesConverter, 
             IDouglasPeuckerReductionService douglasPeuckerReductionService, 
-            IGpxSplitterService gpxSplitterService)
+            IGpxSplitterService gpxSplitterService, 
+            LruCache<string, TokenAndSecret> cache)
         {
             _overpassGateway = overpassGateway;
             _osmGeoJsonConverter = osmGeoJsonConverter;
-            _remoteFileFetcherGateway = remoteFileFetcherGateway;
+            _httpGatewayFactory = httpGatewayFactory;
             _dataContainerConverterService = dataContainerConverterService;
             _coordinatesConverter = coordinatesConverter;
             _douglasPeuckerReductionService = douglasPeuckerReductionService;
             _gpxSplitterService = gpxSplitterService;
+            _cache = cache;
         }
 
         public async Task<List<Feature>> GetHighways(string northEast, string southWest)
@@ -55,7 +58,8 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         public async Task<FeatureCollection> PostGpsTrace(string url)
         {
-            var response = await _remoteFileFetcherGateway.GetFileContent(url);
+            var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(_cache.Get(User.Identity.Name));
+            var response = await fetcher.GetFileContent(url);
             var gpxBytes = await _dataContainerConverterService.Convert(response.Content, response.FileName, DataContainerConverterService.GPX);
             var gpx = gpxBytes.ToGpx().UpdateBounds();
             var routingType = GetRoutingType(gpx);

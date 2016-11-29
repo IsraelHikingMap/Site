@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.API.Services.Osm
 {
     [Flags]
     public enum OsmDataServiceOperations

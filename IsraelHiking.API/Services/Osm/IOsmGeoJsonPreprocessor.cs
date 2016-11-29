@@ -2,7 +2,7 @@
 using NetTopologySuite.Features;
 using OsmSharp.Osm;
 
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.API.Services.Osm
 {
     public interface IOsmGeoJsonPreprocessor
     {

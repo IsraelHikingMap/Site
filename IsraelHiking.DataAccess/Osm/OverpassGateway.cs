@@ -8,7 +8,7 @@ using OsmSharp.Osm;
 using OsmSharp.Osm.Streams.Complete;
 using OsmSharp.Osm.Xml.Streams;
 
-namespace IsraelHiking.DataAccess
+namespace IsraelHiking.DataAccess.Osm
 {
     public class OverpassGateway : IOverpassGateway
     {
