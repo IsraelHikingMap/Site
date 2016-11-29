@@ -97,6 +97,10 @@
       <HintPath>..\packages\Newtonsoft.Json.9.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="OAuth, Version=1.0.0.0, Culture=neutral, PublicKeyToken=75b3c62967edc2a2, processorArchitecture=MSIL">
+      <HintPath>..\packages\OAuth.1.0.3\lib\net40\OAuth.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="OsmSharp, Version=1.3.5.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\OsmSharp.Core.1.3.5\lib\net45\OsmSharp.dll</HintPath>
       <Private>True</Private>
@@ -165,6 +169,7 @@
     <Compile Include="JsonResponse\JsonGraphHopperResponse.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="BaseNssmHelper.cs" />
+    <Compile Include="OsmGateway.cs" />
     <Compile Include="OsmRepository.cs" />
     <Compile Include="OverpassGateway.cs" />
     <Compile Include="ProcessHelper.cs" />

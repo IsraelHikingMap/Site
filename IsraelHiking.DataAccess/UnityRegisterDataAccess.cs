@@ -24,6 +24,7 @@ namespace IsraelHiking.DataAccess
             container.RegisterType<IGraphHopperHelper, GraphHopperHelper>();
             container.RegisterType<INssmHelper, ElasticSearchHelper>();
             container.RegisterType<IOsmRepository, OsmRepository>();
+            container.RegisterType<IOsmGateway, OsmGateway>();
             container.RegisterType<IOverpassGateway, OverpassGateway>();
         }
     }

@@ -90,6 +90,7 @@
     <Compile Include="IIsraelHikingRepository.cs" />
     <Compile Include="ILogger.cs" />
     <Compile Include="INssmHelper.cs" />
+    <Compile Include="IOsmGateway.cs" />
     <Compile Include="IOsmRepository.cs" />
     <Compile Include="IOverpassGateway.cs" />
     <Compile Include="IProcessHelper.cs" />

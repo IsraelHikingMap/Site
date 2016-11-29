@@ -21,6 +21,7 @@ namespace IsraelHiking.API
             container.RegisterType<IGpxSplitterService, GpxSplitterService>();
             container.RegisterType<IOsmGeoJsonPreprocessor, OsmGeoJsonPreprocessor>();
             container.RegisterType<IOsmDataService, OsmDataService>();
+            container.RegisterType<IOsmUserCache, OsmUserCache>(new ContainerControlledLifetimeManager());
             container.RegisterType<IImageCreationService, ImageCreationService>();
         }
     }
