@@ -23,7 +23,6 @@
     "leaflet": "0.7.7",
     "Leaflet.label": "*",
     "leaflet.locatecontrol": "*",
-    "leaflet-ant-path": "*",
     "x2js": "*"
   },
   "overrides": {

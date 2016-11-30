@@ -1,14 +1,3 @@
-declare namespace L {
-    interface AntPathOptions extends PolylineOptions {
-        delay?: string;
-        pulseColor?: string;
-        paused?: boolean;
-    }
-    namespace polyline {
-        function antPath(latlngs: LatLng[], options: AntPathOptions): L.Polyline;
-    }
-}
-
 namespace IsraelHiking.Services.Layers.RouteLayers {
     export class RouteStateReadOnly extends RouteStateBase {
         private readOnlyLayers: L.LayerGroup<L.ILayer>;
@@ -20,9 +9,10 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         }
 
         private addPolyline(latlngzs: L.LatLng[]): void {
-            let routePathOptions = this.context.route.properties.pathOptions;
-            let pathOptions = { delay: "2000", pulseColor: routePathOptions.color, dashArray: "30 10", opacity: routePathOptions.opacity, color: "transparent", weight: routePathOptions.weight } as L.AntPathOptions;
-            let polyline = L.polyline.antPath(latlngzs, pathOptions);
+            let routePathOptions = angular.copy(this.context.route.properties.pathOptions) as L.PathOptions;
+            routePathOptions.dashArray = "30 10";
+            routePathOptions.className = "segment-readonly-indicator";
+            let polyline = L.polyline(latlngzs, routePathOptions);
             this.readOnlyLayers.addLayer(polyline);
         }
 

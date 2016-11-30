@@ -29,7 +29,8 @@ namespace IsraelHiking.Web
             {
                 AccessTokenProvider = new OsmAccessTokenProvider(
                     container.Resolve<IHttpGatewayFactory>(),
-                    container.Resolve<LruCache<string, TokenAndSecret>>())
+                    container.Resolve<LruCache<string, TokenAndSecret>>(),
+                    logger)
             });
             WebApiConfig.Register(config);
 

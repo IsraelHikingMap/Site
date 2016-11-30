@@ -11,13 +11,17 @@ namespace IsraelHiking.Web
 {
     public class OsmAccessTokenProvider : AuthenticationTokenProvider
     {
+        private readonly ILogger _logger;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
-        public OsmAccessTokenProvider(IHttpGatewayFactory httpGatewayFactory, LruCache<string, TokenAndSecret> cache)
+        public OsmAccessTokenProvider(IHttpGatewayFactory httpGatewayFactory, 
+            LruCache<string, TokenAndSecret> cache, 
+            ILogger logger)
         {
             _httpGatewayFactory = httpGatewayFactory;
             _cache = cache;
+            _logger = logger;
         }
 
         public override async Task ReceiveAsync(AuthenticationTokenReceiveContext context)
@@ -30,6 +34,7 @@ namespace IsraelHiking.Web
             {
                 var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
                 userId = await osmGateway.GetUserId();
+                _logger.Info("User " + userId + " had just logged in");
                 _cache.Add(userId, tokenAndSecret);
             }
             if (string.IsNullOrWhiteSpace(userId))

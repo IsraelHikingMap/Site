@@ -81,6 +81,11 @@ body {
     animation: dash .4s linear infinite;
 }
 
+.segment-readonly-indicator {
+    -webkit-animation: dash-long 1.0s linear infinite;
+    animation: dash-long 1.0s linear infinite;
+}
+
 @-webkit-keyframes dash {
     from {
         stroke-dashoffset: 20;
@@ -94,6 +99,26 @@ body {
 @keyframes dash {
     from {
         stroke-dashoffset: 20;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@-webkit-keyframes dash-long {
+    from {
+        stroke-dashoffset: 40;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes dash-long {
+    from {
+        stroke-dashoffset: 40;
     }
 
     to {
