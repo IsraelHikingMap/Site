@@ -32,24 +32,25 @@
             <div class="col-md-6">
                 <div class="input-group">
                     <div class="input-group-addon"><i class="fa fa-search"></i></div>
-                    <input type="text" class="form-control" placeholder="{{resources.searchPlaceHolder}}" ng-model="searchTerm"/>
+                    <input type="text" class="form-control" placeholder="{{resources.searchPlaceHolder}}" ng-model="searchTerm" />
                 </div>
             </div>
         </div>
-        <br/>
-        <br/>
+        <br />
+        <br />
         <div ng-switch on="state">
             <div ng-switch-when="traces">
                 <div ng-repeat="trace in userService.traces | filter:searchTerm">
                     <div class="row">
                         <div class="col-md-4 col-xs-12">
-                            <img ng-src="{{trace.imageUrl}}" class="img-responsive" alt=""/>
+                            <img ng-src="{{trace.imageUrl}}" class="img-responsive" alt="" />
                         </div>
                         <div class="col-md-8 col-xs-12">
                             <div class="row">
                                 <div class="col-xs-9">
-                                    <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.fileName}}</a><br/>
-                                    {{trace.description}}
+                                    <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.fileName}}</a><br />
+                                    {{trace.description}}<br />
+                                    {{trace.date | date:'dd/MM/yyyy'}}
                                 </div>
                                 <div class="col-xs-3">
                                     <a class="cursor-pointer btn btn-default btn-block" ng-click="showTrace(trace)" uib-tooltip="{{resources.view}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-eye"></i></a>
@@ -60,7 +61,7 @@
                             </div>
                         </div>
                     </div>
-                    <br/>
+                    <br />
                 </div>
                 <p ng-show="userService.traces.length == 0">{{resources.noTraces}}</p>
             </div>
@@ -68,7 +69,7 @@
                 <div ng-repeat="siteUrl in userService.shares | filter:searchTerm">
                     <div class="row">
                         <div class="col-md-4 col-xs-12">
-                            <img ng-src="{{userService.getImageFromSiteUrlId(siteUrl)}}" class="img-responsive"/>
+                            <img ng-src="{{userService.getImageFromSiteUrlId(siteUrl)}}" class="img-responsive" />
                         </div>
                         <div class="col-md-8 col-xs-12">
                             <div class="row">
@@ -77,8 +78,8 @@
                                         <h4>{{siteUrl.Title}} - {{siteUrl.Description}}</h4>
                                     </div>
                                     <div ng-show="editMode">
-                                        <input class="form-control" type="text" ng-model="siteUrl.Title" placeholder="{{resources.titlePlaceHolder}}"/>
-                                        <input class="form-control" type="text" ng-model="siteUrl.Description" placeholder="{{resources.descriptionPlaceHolder}}"/>
+                                        <input class="form-control" type="text" ng-model="siteUrl.Title" placeholder="{{resources.titlePlaceHolder}}" />
+                                        <input class="form-control" type="text" ng-model="siteUrl.Description" placeholder="{{resources.descriptionPlaceHolder}}" />
                                     </div>
                                 </div>
                                 <div class="col-xs-3">
@@ -92,8 +93,8 @@
                             </div>
                             <div class="row">
                                 <div class="col-xs-9">
-                                    <a href="{{userService.getUrlFromSiteUrlId(siteUrl)}}" target="_blank">{{userService.getUrlFromSiteUrlId(siteUrl)}}</a><br/>
-                                    {{resources.views}}: {{siteUrl.ViewsCount}}<br/>
+                                    <a href="{{userService.getUrlFromSiteUrlId(siteUrl)}}" target="_blank">{{userService.getUrlFromSiteUrlId(siteUrl)}}</a><br />
+                                    {{resources.views}}: {{siteUrl.ViewsCount}}<br />
                                     {{resources.lastViewed}}: {{siteUrl.LastViewed | date:'dd/MM/yyyy'}}
                                 </div>
                                 <div class="col-xs-3">
@@ -103,7 +104,7 @@
                             </div>
                         </div>
                     </div>
-                    <br/>
+                    <br />
                 </div>
                 <p ng-show="userService.shares.length == 0">{{resources.noShares}}</p>
             </div>

@@ -15,6 +15,7 @@ namespace IsraelHiking.Services {
         imageUrl: string;
         dataUrl: string;
         id: string;
+        date: Date;
     }
 
     export class OsmUserService {
@@ -115,7 +116,8 @@ namespace IsraelHiking.Services {
                             url: url,
                             imageUrl: url + "/picture",
                             dataUrl: dataUrl,
-                            id: id
+                            id: id,
+                            date: new Date(traceJson._timestamp)
                         });
                     }
                     deferred.resolve();
