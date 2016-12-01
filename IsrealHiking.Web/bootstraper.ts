@@ -62,11 +62,13 @@
             new Services.DragAndDropService($timeout, resourcesService, mapservice, fileService, layersService, toastr)
     ]);
 
-    app.controller(Strings.Controllers.mainMapController, [Strings.Angular.scope, Strings.Angular.compile, Strings.Services.mapService,
-        Strings.Services.hashService, Strings.Services.sidebarService, Strings.Services.routeStatisticsService,
-        ($scope: Controllers.IMainMapScope, $compile: angular.ICompileService, mapService: Services.MapService,
-            hashService: Services.HashService, sidebarService: Services.SidebarService, routeStatisticsService: Services.RouteStatisticsService) =>
-            new Controllers.MainMapcontoller($scope, $compile, mapService, hashService, sidebarService, routeStatisticsService)]);
+    app.controller(Strings.Controllers.mainMapController, [Strings.Angular.scope, Strings.Angular.location, Strings.Angular.window,
+        Strings.Angular.compile, Strings.Angular.timeout, Strings.Services.mapService,
+        Strings.Services.hashService, Strings.Services.sidebarService, Strings.Services.routeStatisticsService, Strings.Services.toastr,
+        ($scope: Controllers.IMainMapScope, $location: angular.ILocationService, $window: angular.IWindowService,
+            $compile: angular.ICompileService, $timeout: angular.ITimeoutService, mapService: Services.MapService,
+            hashService: Services.HashService, sidebarService: Services.SidebarService, routeStatisticsService: Services.RouteStatisticsService, toastr: Toastr) =>
+            new Controllers.MainMapcontoller($scope, $location, $window, $compile, $timeout, mapService, hashService, sidebarService, routeStatisticsService, toastr)]);
 
     // Directives:
     app.directive(Strings.Directives.disableMapMovement, () => new Directives.DisableMapMovementDirective());

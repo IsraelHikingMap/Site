@@ -1,11 +1,11 @@
 ﻿declare namespace L {
     export namespace control {
-        export function locate(options: any): L.Control;    
+        export function locate(options: any): L.Control;
     }
 }
 
 namespace IsraelHiking.Controllers {
-    export interface IMainMapScope extends angular.IScope {
+    export interface IMainMapScope extends IRootScope {
         sidebarService: Services.SidebarService;
         getIsSidebarVisible(): boolean;
         closeSidebar(): void;
@@ -14,19 +14,32 @@ namespace IsraelHiking.Controllers {
 
     export class MainMapcontoller extends BaseMapController {
         $compile: angular.ICompileService;
+        $location: angular.ILocationService;
+        $window: angular.IWindowService;
+        $timeout: angular.ITimeoutService;
+        toastr: Toastr;
 
         constructor($scope: IMainMapScope,
+            $location: angular.ILocationService,
+            $window: angular.IWindowService,
             $compile: angular.ICompileService,
+            $timeout: angular.ITimeoutService,
             mapService: Services.MapService,
             hashService: Services.HashService,
             sidebarService: Services.SidebarService,
-            routeStatisticsService: Services.RouteStatisticsService) {
+            routeStatisticsService: Services.RouteStatisticsService,
+            toastr: Toastr) {
             super(mapService);
 
             this.map = mapService.map;
             this.map.setZoom(hashService.zoom);
             this.map.panTo(hashService.latlng);
             this.$compile = $compile;
+            this.$location = $location;
+            this.$window = $window;
+            this.$timeout = $timeout;
+            this.toastr = toastr;
+
             this.createControls($scope);
 
             $scope.sidebarService = sidebarService;
@@ -48,10 +61,26 @@ namespace IsraelHiking.Controllers {
             });
         }
 
-        private createControls = ($scope: angular.IRootScopeService) => {
+        private createControls = ($scope: IRootScope) => {
             this.createContorl($scope, "zoom-control");
 
-            L.control.locate({ compile: this.$compile, scope: $scope.$new(), icon: "fa fa-crosshairs", keepCurrentZoomLevel: true, follow: true }).addTo(this.map);
+            L.control.locate({
+                compile: this.$compile,
+                scope: $scope.$new(),
+                icon: "fa fa-crosshairs",
+                keepCurrentZoomLevel: true,
+                follow: true,
+                onLocationError: () => {
+                    if (this.$location.protocol() === "https") {
+                        this.toastr.warning($scope.resources.unableToFindYourLocation);
+                    } else {
+                        this.toastr.warning($scope.resources.unableToFindYourLocation + "\n" + $scope.resources.redirectingToSecuredSite);
+                        this.$timeout(() => {
+                            this.$window.location.href = this.$location.absUrl().replace("http", "https");
+                        }, 3000);
+                    }
+                }
+            }).addTo(this.map);
 
             this.createContorl($scope, "layers-control");
             this.createContorl($scope, "file-control");

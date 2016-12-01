@@ -179,6 +179,8 @@ namespace IsraelHiking.Services {
         public routeSentSuccessfully: string;
         public unableToSendRoute: string;
         public noUnmappedRoutes: string;
+        public unableToFindYourLocation: string;
+        public redirectingToSecuredSite: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -528,6 +530,8 @@ namespace IsraelHiking.Services {
                     this.routeSentSuccessfully = this.gettextCatalog.getString("Route sent successfully.");
                     this.unableToSendRoute = this.gettextCatalog.getString("Unable to send route...");
                     this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");
+                    this.unableToFindYourLocation = this.gettextCatalog.getString("Unable to find your location...");
+                    this.redirectingToSecuredSite = this.gettextCatalog.getString("Redirecting to secure site.");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");
