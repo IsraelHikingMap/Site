@@ -2,17 +2,54 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Elasticsearch.Net;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Nest;
 using NetTopologySuite.IO;
+using NetTopologySuite.IO.Converters;
 using Newtonsoft.Json;
 using Feature = NetTopologySuite.Features.Feature;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
 {
+    public class GeoJsonSerializer : JsonNetSerializer
+    {
+        public GeoJsonSerializer(IConnectionSettingsValues settings) : base(settings)
+        {
+            OverwriteDefaultSerializers((s, cvs) =>
+            {
+                s.Converters.Add(new CoordinateConverter());
+                s.Converters.Add(new GeometryConverter());
+                s.Converters.Add(new FeatureCollectionConverter());
+                s.Converters.Add(new FeatureConverter());
+                s.Converters.Add(new AttributesTableConverter());
+                s.Converters.Add(new ICRSObjectConverter());
+                s.Converters.Add(new GeometryArrayConverter());
+                s.Converters.Add(new EnvelopeConverter());
+            });
+        }
+
+        public GeoJsonSerializer(IConnectionSettingsValues settings, JsonConverter statefulConverter) : base(settings, statefulConverter)
+        {
+            OverwriteDefaultSerializers((s, cvs) =>
+            {
+                s.Converters.Add(new CoordinateConverter());
+                s.Converters.Add(new GeometryConverter());
+                s.Converters.Add(new FeatureCollectionConverter());
+                s.Converters.Add(new FeatureConverter());
+                s.Converters.Add(new AttributesTableConverter());
+                s.Converters.Add(new ICRSObjectConverter());
+                s.Converters.Add(new GeometryArrayConverter());
+                s.Converters.Add(new EnvelopeConverter());
+            });
+        }
+    }
+
     public class ElasticSearchGateway : IElasticSearchGateway
     {
-        private const string OSM_INDEX = "osm";
+        private const string OSM_NAMES_INDEX = "osm_names";
+        private const string OSM_HIGHWAYS_INDEX = "osm_highways";
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
         private IElasticClient _elasticClient;
@@ -25,33 +62,49 @@ namespace IsraelHiking.DataAccess.ElasticSearch
         public void Initialize(string uri = "http://localhost:9200/", bool deleteIndex = false)
         {
             _logger.Info("Initialing elastic search with uri: " + uri);
-            var connectionString = new ConnectionSettings(new Uri(uri))
-                .DefaultIndex(OSM_INDEX)
+            var pool = new SingleNodeConnectionPool(new Uri(uri));
+            var connectionString = new ConnectionSettings(
+                    pool,
+                    new HttpConnection(),
+                    new SerializerFactory(s => new GeoJsonSerializer(s)))
+                .DefaultIndex(OSM_NAMES_INDEX)
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
-            
-            if (deleteIndex && _elasticClient.IndexExists(OSM_INDEX).Exists)
+            if (deleteIndex && _elasticClient.IndexExists(OSM_NAMES_INDEX).Exists)
             {
-                _elasticClient.DeleteIndex(OSM_INDEX);
+                _elasticClient.DeleteIndex(OSM_NAMES_INDEX);
             }
-            //_elasticClient.CreateIndex(OSM_INDEX,
-            //    c => c.Mappings(
-            //        ms => ms.Map<Feature>(m =>
-            //            m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
-            //                .Tree(GeoTree.Geohash)
-            //                .TreeLevels(10)
-            //                .DistanceErrorPercentage(0.2))))));
+            if (deleteIndex && _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX).Exists)
+            {
+                _elasticClient.DeleteIndex(OSM_HIGHWAYS_INDEX);
+                _elasticClient.CreateIndex(OSM_HIGHWAYS_INDEX,
+                    c => c.Mappings(
+                        ms => ms.Map<Feature>(m =>
+                            m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
+                                .Tree(GeoTree.Geohash)
+                                .TreeLevels(10)
+                                .DistanceErrorPercentage(0.2))))));
+            }
             _logger.Info("Finished initialing elastic search with uri: " + uri);
         }
 
-        public async Task UpdateData(List<Feature> features)
+        public Task UpdateNamesData(List<Feature> features)
         {
-            var writer = new NetTopologySuite.IO.GeoJsonWriter();
+            return UpdateData(features, OSM_NAMES_INDEX);
+        }
+
+        public Task UpdateHighwaysData(List<Feature> features)
+        {
+            return UpdateData(features, OSM_HIGHWAYS_INDEX);
+        }
+
+        public async Task UpdateData(List<Feature> features, string index)
+        {
             var result = await _elasticClient.BulkAsync(bulk =>
             {
                 foreach (var feature in features)
                 {
-                    bulk.Index<object>(i => i.Document(JsonConvert.DeserializeObject(writer.Write(feature))).Id(GetId(feature)));
+                    bulk.Index<Feature>(i => i.Index(index).Document(feature).Id(GetId(feature)));
                 }
                 return bulk;
             });
@@ -68,7 +121,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 return new List<Feature>();
             }
             var field = "properties." + fieldName;
-            var response = await _elasticClient.SearchAsync<object>(
+            var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Size(NUMBER_OF_RESULTS)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
@@ -86,7 +139,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                                         dmq => dmq.Match(
                                             m => m.Query(searchTerm)
                                                 .Boost(1.2)
-                                                .Field(new Field {Name = field})
+                                                .Field(new Field { Name = field })
                                         )
                                     )
                                 )
@@ -125,6 +178,25 @@ namespace IsraelHiking.DataAccess.ElasticSearch
         private string GetId(Feature feature)
         {
             return feature.Geometry.GeometryType + "_" + feature.Attributes["osm_id"];
+        }
+
+        public async Task<List<Feature>> GetHighways(LatLng northEast, LatLng southWest)
+        {
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Index(OSM_HIGHWAYS_INDEX).Size(5000).Query(
+                    q => q.GeoShapeEnvelope(
+                        e => e.Coordinates(new List<GeoCoordinate>
+                            {
+                                new GeoCoordinate(northEast.lat, northEast.lng),
+                                new GeoCoordinate(southWest.lat, southWest.lng)
+                            }).Field(f => f.Geometry)
+                            .Relation(GeoShapeRelation.Intersects)
+                    )
+                )
+            );
+            //var reader = new GeoJsonReader();
+            //return response.Documents.Select(d => reader.Read<Feature>(d.ToString())).ToList();
+            return response.Documents.ToList();
         }
     }
 }

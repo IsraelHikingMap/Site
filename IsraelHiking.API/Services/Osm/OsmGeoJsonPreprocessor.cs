@@ -276,5 +276,10 @@ namespace IsraelHiking.API.Services.Osm
                 toItem.Tags.Add(tag);
             }
         }
+
+        public List<Feature> Preprocess(List<CompleteWay> highways)
+        {
+            return highways.Select(_osmGeoJsonConverter.ToGeoJson).ToList();
+        }
     }
 }

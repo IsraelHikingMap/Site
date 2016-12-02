@@ -92,7 +92,7 @@ namespace IsraelHiking.API.Tests.Services
             _osmDataService.UpdateData(OsmDataServiceOperations.UpdateElasticSearch).Wait();
 
             _osmRepository.Received(1).GetElementsWithName(Arg.Any<string>());
-            _elasticSearchGateway.Received(1).UpdateData(Arg.Any<List<Feature>>());
+            _elasticSearchGateway.Received(1).UpdateNamesData(Arg.Any<List<Feature>>());
         }
 
 

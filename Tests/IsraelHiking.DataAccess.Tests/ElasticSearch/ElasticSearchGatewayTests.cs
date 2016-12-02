@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccess.ElasticSearch;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -12,7 +13,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
     public class ElasticSearchGatewayTests
     {
         [TestMethod]
-        [Ignore]
+        //[Ignore]
         public void Search_ShouldReturnResults()
         {
             var gateway = new ElasticSearchGateway(new TraceLogger());
@@ -63,10 +64,22 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
                     table2
                 )
             };
-            gateway.UpdateData(features).Wait();
+            gateway.UpdateNamesData(features).Wait();
             Task.Delay(2000).Wait();
             var results = gateway.GetContainingFeature(features[1]).Result;
             Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        //[Ignore]
+        public void GetHighways_ShouldReturnResults()
+        {
+            var gateway = new ElasticSearchGateway(new TraceLogger());
+            gateway.Initialize();
+            var northEast = new LatLng(31.7553, 35.0516);
+            var southWest = new LatLng(31.7467, 35.0251);
+            var results = gateway.GetHighways(northEast, southWest).Result;
+            Assert.AreEqual(10, results.Count);
         }
     }
 }

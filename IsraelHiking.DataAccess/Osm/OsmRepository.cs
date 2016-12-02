@@ -40,6 +40,25 @@ namespace IsraelHiking.DataAccess.Osm
             });
         }
 
+        public Task<List<CompleteWay>> GetAllHighways(string osmFilePath)
+        {
+            return Task.Run(() =>
+            {
+                using (var stream = _fileSystemHelper.FileOpenRead(osmFilePath))
+                {
+                    _logger.Info($"Reading {osmFilePath} to memory - extracting only highways.");
+                    var source = new PBFOsmStreamSource(stream);
+                    var completeSource = new OsmSimpleCompleteStreamSource(source);
+                    var higways = completeSource
+                        .OfType<CompleteWay>()
+                        .Where(o => o.Tags.ContainsKey("highway"))
+                        .ToList();
+                    _logger.Info("Finished getting highways. " + higways.Count);
+                    return higways;
+                }
+            });
+        }
+
         private string GetName(ICompleteOsmGeo osm)
         {
             if (osm.Tags.ContainsKey(NAME))

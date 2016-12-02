@@ -4,7 +4,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GeoAPI.Geometries;
-using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.API.Services;
@@ -13,7 +12,6 @@ using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using OsmSharp.Osm;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -21,38 +19,34 @@ namespace IsraelHiking.API.Controllers
     {
         private const double SIMPLIFICATION_TOLERANCE = 15; // meters
 
-        private readonly IOverpassGateway _overpassGateway;
-        private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IDouglasPeuckerReductionService _douglasPeuckerReductionService;
         private readonly ICoordinatesConverter _coordinatesConverter;
         private readonly IGpxSplitterService _gpxSplitterService;
+        private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
-        public OsmController(IOverpassGateway overpassGateway,
-            IOsmGeoJsonConverter osmGeoJsonConverter,
-            IHttpGatewayFactory httpGatewayFactory,
+        public OsmController(IHttpGatewayFactory httpGatewayFactory,
             IDataContainerConverterService dataContainerConverterService,
             ICoordinatesConverter coordinatesConverter, 
             IDouglasPeuckerReductionService douglasPeuckerReductionService, 
-            IGpxSplitterService gpxSplitterService, 
+            IGpxSplitterService gpxSplitterService,
+            IElasticSearchGateway elasticSearchGateway,
             LruCache<string, TokenAndSecret> cache)
         {
-            _overpassGateway = overpassGateway;
-            _osmGeoJsonConverter = osmGeoJsonConverter;
             _httpGatewayFactory = httpGatewayFactory;
             _dataContainerConverterService = dataContainerConverterService;
             _coordinatesConverter = coordinatesConverter;
             _douglasPeuckerReductionService = douglasPeuckerReductionService;
             _gpxSplitterService = gpxSplitterService;
             _cache = cache;
+            _elasticSearchGateway = elasticSearchGateway;
         }
 
         public async Task<List<Feature>> GetHighways(string northEast, string southWest)
         {
-            var highways = await _overpassGateway.GetHighways(new LatLng(northEast), new LatLng(southWest));
-            return highways.Select(_osmGeoJsonConverter.ToGeoJson).Where(g => g != null).ToList();
+            return await _elasticSearchGateway.GetHighways(new LatLng(northEast), new LatLng(southWest));
         }
 
         [Authorize]
@@ -63,21 +57,15 @@ namespace IsraelHiking.API.Controllers
             var gpxBytes = await _dataContainerConverterService.Convert(response.Content, response.FileName, DataContainerConverterService.GPX);
             var gpx = gpxBytes.ToGpx().UpdateBounds();
             var routingType = GetRoutingType(gpx);
-            var lineStringsInArea = await GetLineStringsInArea(gpx.metadata.bounds);
-            var manipulatedLines = ManipulateGpxIntoAddibleLines(gpx, lineStringsInArea);
+            var gpxLines = GpxToLineStrings(gpx);
+            var manipulatedLines = await ManipulateGpxIntoAddibleLines(gpxLines, gpx.metadata.bounds);
             var attributesTable = new AttributesTable();
             attributesTable.AddAttribute("routingType", routingType);
             var features = manipulatedLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
             return new FeatureCollection( new Collection<IFeature>(features));
         }
 
-        private async Task<List<LineString>> GetLineStringsInArea(boundsType bounds)
-        {
-            var highways = await _overpassGateway.GetHighways(new LatLng((double)bounds.maxlat, (double)bounds.maxlon), new LatLng((double)bounds.minlat, (double)bounds.minlon));
-            return highways.Select(highway => ToItmLineString(highway.Nodes)).ToList();
-        }
-
-        private List<LineString> SimplifyLines(List<LineString> lineStings)
+        private List<LineString> SimplifyLines(IEnumerable<LineString> lineStings)
         {
             var lines = new List<LineString>();
             foreach (var lineSting in lineStings)
@@ -120,16 +108,6 @@ namespace IsraelHiking.API.Controllers
             return RoutingType.FOUR_WHEEL_DRIVE;
         }
 
-        private LineString ToItmLineString(IEnumerable<Node> nodes)
-        {
-            var coordinates = nodes.Select(n =>
-            {
-                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon { Longitude = n.Longitude.Value, Latitude = n.Latitude.Value });
-                return new Coordinate(northEast.East, northEast.North);
-            }).ToArray();
-            return new LineString(coordinates);
-        }
-
         private LineString ToItmLineString(IEnumerable<wptType> waypoints)
         {
             var coordinates = waypoints.Select(wptType =>
@@ -138,6 +116,16 @@ namespace IsraelHiking.API.Controllers
                 return new Coordinate(northEast.East, northEast.North);
             }).ToArray();
             return new LineString(coordinates);
+        }
+
+        private LineString ToItmLineString(IEnumerable<Coordinate> coordinates)
+        {
+            var itmCoordinates = coordinates.Select(coordinate =>
+            {
+                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon {Longitude = coordinate.X, Latitude = coordinate.Y});
+                return new Coordinate(northEast.East, northEast.North);
+            }).ToArray();
+            return new LineString(itmCoordinates);
         }
 
         private LineString ToWgs84LineString(IEnumerable<Coordinate> coordinates)
@@ -158,7 +146,16 @@ namespace IsraelHiking.API.Controllers
             return GetRoutingType(waypointsGroups);
         }
 
-        private List<LineString> ManipulateGpxIntoAddibleLines(gpxType gpx, List<LineString> lineStringsInArea)
+        private async Task<IEnumerable<LineString>> ManipulateGpxIntoAddibleLines(List<LineString> gpxLines, boundsType bounds)
+        {
+            var highways = await _elasticSearchGateway.GetHighways(new LatLng((double)bounds.maxlat, (double)bounds.maxlon), new LatLng((double)bounds.minlat, (double)bounds.minlon));
+            var lineStringsInArea = highways.Select(highway => highway.Geometry).OfType<LineString>().Select(l => ToItmLineString(l.Coordinates)).ToList();
+            gpxLines = _gpxSplitterService.Split(gpxLines, lineStringsInArea);
+            gpxLines = SimplifyLines(gpxLines);
+            return gpxLines;
+        }
+
+        private List<LineString> GpxToLineStrings(gpxType gpx)
         {
             var lineStings = (gpx.rte ?? new rteType[0])
                 .Select(route => ToItmLineString(route.rtept)).ToList();
@@ -166,9 +163,6 @@ namespace IsraelHiking.API.Controllers
                 .Select(track => track.trkseg.SelectMany(s => s.trkpt).ToArray())
                 .Select(ToItmLineString);
             lineStings.AddRange(tracksPointsList);
-
-            lineStings = _gpxSplitterService.Split(lineStings, lineStringsInArea);
-            lineStings = SimplifyLines(lineStings);
 
             return lineStings;
         }

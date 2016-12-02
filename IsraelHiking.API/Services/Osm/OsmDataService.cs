@@ -109,11 +109,14 @@ namespace IsraelHiking.API.Services.Osm
             _logger.Info("Updating Elastic Search OSM data");
             var osmNamesDictionary = await _osmRepository.GetElementsWithName(osmFilePath);
             var geoJsonNamesDictionary = _osmGeoJsonPreprocessor.Preprocess(osmNamesDictionary);
+            var osmHighways = await _osmRepository.GetAllHighways(osmFilePath);
+            var geoJsonHighways = _osmGeoJsonPreprocessor.Preprocess(osmHighways);
             _elasticSearchGateway.Initialize(deleteIndex: true);
-            UpdateElesticSearchDataUsingPaging(geoJsonNamesDictionary);
+            UpdateElesticSearchNamesDataUsingPaging(geoJsonNamesDictionary);
+            UpdateElesticSearchHighwaysDataUsingPaging(geoJsonHighways);
         }
 
-        private void UpdateElesticSearchDataUsingPaging(Dictionary<string, List<Feature>> geoJsonNamesDictionary)
+        private void UpdateElesticSearchNamesDataUsingPaging(Dictionary<string, List<Feature>> geoJsonNamesDictionary)
         {
             var smallCahceList = new List<Feature>(PAGE_SIZE);
             int total = 0;
@@ -126,11 +129,31 @@ namespace IsraelHiking.API.Services.Osm
                 }
                 total += smallCahceList.Count;
                 _logger.Info($"Indexing {total} records");
-                _elasticSearchGateway.UpdateData(smallCahceList).Wait();
+                _elasticSearchGateway.UpdateNamesData(smallCahceList).Wait();
                 smallCahceList.Clear();
             }
-            _elasticSearchGateway.UpdateData(smallCahceList).Wait();
-            _logger.Info($"Finished updating Elastic Search, Indexed {total + smallCahceList.Count} records");
+            _elasticSearchGateway.UpdateNamesData(smallCahceList).Wait();
+            _logger.Info($"Finished updating Elastic Search names, Indexed {total + smallCahceList.Count} records");
+        }
+
+        private void UpdateElesticSearchHighwaysDataUsingPaging(List<Feature> highways)
+        {
+            var smallCahceList = new List<Feature>(PAGE_SIZE);
+            int total = 0;
+            foreach (var highway in highways)
+            {
+                smallCahceList.Add(highway);
+                if (smallCahceList.Count < PAGE_SIZE)
+                {
+                    continue;
+                }
+                total += smallCahceList.Count;
+                _logger.Info($"Indexing {total} records");
+                _elasticSearchGateway.UpdateHighwaysData(smallCahceList).Wait();
+                smallCahceList.Clear();
+            }
+            _elasticSearchGateway.UpdateNamesData(smallCahceList).Wait();
+            _logger.Info($"Finished updating Elastic Search highways, Indexed {total + smallCahceList.Count} records");
         }
     }
 }
