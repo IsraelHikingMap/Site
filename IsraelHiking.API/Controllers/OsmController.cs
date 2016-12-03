@@ -18,6 +18,7 @@ namespace IsraelHiking.API.Controllers
     public class OsmController : ApiController
     {
         private const double SIMPLIFICATION_TOLERANCE = 15; // meters
+        private const int MAX_NUMBER_OF_POINTS_PER_LINE = 1000;
 
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
@@ -29,8 +30,8 @@ namespace IsraelHiking.API.Controllers
 
         public OsmController(IHttpGatewayFactory httpGatewayFactory,
             IDataContainerConverterService dataContainerConverterService,
-            ICoordinatesConverter coordinatesConverter, 
-            IDouglasPeuckerReductionService douglasPeuckerReductionService, 
+            ICoordinatesConverter coordinatesConverter,
+            IDouglasPeuckerReductionService douglasPeuckerReductionService,
             IGpxSplitterService gpxSplitterService,
             IElasticSearchGateway elasticSearchGateway,
             LruCache<string, TokenAndSecret> cache)
@@ -58,11 +59,11 @@ namespace IsraelHiking.API.Controllers
             var gpx = gpxBytes.ToGpx().UpdateBounds();
             var routingType = GetRoutingType(gpx);
             var gpxLines = GpxToLineStrings(gpx);
-            var manipulatedLines = await ManipulateGpxIntoAddibleLines(gpxLines, gpx.metadata.bounds);
+            var manipulatedLines = await ManipulateGpxIntoAddibleLines(gpxLines);
             var attributesTable = new AttributesTable();
             attributesTable.AddAttribute("routingType", routingType);
             var features = manipulatedLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
-            return new FeatureCollection( new Collection<IFeature>(features));
+            return new FeatureCollection(new Collection<IFeature>(features));
         }
 
         private List<LineString> SimplifyLines(IEnumerable<LineString> lineStings)
@@ -96,12 +97,12 @@ namespace IsraelHiking.API.Controllers
                 var timeInHours = (waypoints.Last().time - waypoints.First().time).TotalHours;
                 velocityList.Add(lengthInKm / timeInHours);
             }
-            var velocity = velocityList.Sum()/velocityList.Count;
-            if (velocity <= 6)
+            var averageVelocity = velocityList.Sum() / velocityList.Count;
+            if (averageVelocity <= 6)
             {
                 return RoutingType.HIKE;
             }
-            if (velocity <= 12)
+            if (averageVelocity <= 12)
             {
                 return RoutingType.BIKE;
             }
@@ -122,7 +123,7 @@ namespace IsraelHiking.API.Controllers
         {
             var itmCoordinates = coordinates.Select(coordinate =>
             {
-                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon {Longitude = coordinate.X, Latitude = coordinate.Y});
+                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon { Longitude = coordinate.X, Latitude = coordinate.Y });
                 return new Coordinate(northEast.East, northEast.North);
             }).ToArray();
             return new LineString(itmCoordinates);
@@ -146,13 +147,47 @@ namespace IsraelHiking.API.Controllers
             return GetRoutingType(waypointsGroups);
         }
 
-        private async Task<IEnumerable<LineString>> ManipulateGpxIntoAddibleLines(List<LineString> gpxLines, boundsType bounds)
+        private async Task<IEnumerable<LineString>> ManipulateGpxIntoAddibleLines(List<LineString> gpxLines)
         {
-            var highways = await _elasticSearchGateway.GetHighways(new LatLng((double)bounds.maxlat, (double)bounds.maxlon), new LatLng((double)bounds.minlat, (double)bounds.minlon));
-            var lineStringsInArea = highways.Select(highway => highway.Geometry).OfType<LineString>().Select(l => ToItmLineString(l.Coordinates)).ToList();
-            gpxLines = _gpxSplitterService.Split(gpxLines, lineStringsInArea);
-            gpxLines = SimplifyLines(gpxLines);
-            return gpxLines;
+            var missingLines = await FindMissingLines(gpxLines);
+            var missingLinesWithoutLoops = new List<LineString>();
+            foreach (var missingLine in missingLines)
+            {
+                missingLinesWithoutLoops.AddRange(_gpxSplitterService.SplitSelfLoops(missingLine));
+            }
+            var missingLinesWithoutLoopsAndDuplications = new List<LineString>();
+            for (int index = 0; index < missingLinesWithoutLoops.Count; index++)
+            {
+                var missingLineWithoutLoops = missingLinesWithoutLoops[index];
+                missingLinesWithoutLoopsAndDuplications.AddRange(_gpxSplitterService.GetMissingLines(missingLineWithoutLoops, missingLinesWithoutLoops.Take(index).ToArray()));
+            }
+            missingLinesWithoutLoopsAndDuplications = SimplifyLines(missingLinesWithoutLoopsAndDuplications);
+            return missingLinesWithoutLoopsAndDuplications;
+        }
+
+        private async Task<List<LineString>> FindMissingLines(List<LineString> gpxLines)
+        {
+            var missingLines = new List<LineString>();
+            foreach (var gpxLine in gpxLines)
+            {
+                var northEast = _coordinatesConverter.ItmToWgs84(new NorthEast
+                {
+                    North = (int) gpxLine.Coordinates.Max(c => c.Y),
+                    East = (int) gpxLine.Coordinates.Max(c => c.X)
+                });
+                var southWest = _coordinatesConverter.ItmToWgs84(new NorthEast
+                {
+                    North = (int) gpxLine.Coordinates.Min(c => c.Y),
+                    East = (int) gpxLine.Coordinates.Min(c => c.X)
+                });
+                var highways = await _elasticSearchGateway.GetHighways(new LatLng {lat = northEast.Latitude, lng = northEast.Longitude}, new LatLng {lat = southWest.Latitude, lng = southWest.Longitude});
+                var lineStringsInArea = highways.Select(highway => highway.Geometry)
+                        .OfType<LineString>()
+                        .Select(l => ToItmLineString(l.Coordinates))
+                        .ToList();
+                missingLines.AddRange(_gpxSplitterService.GetMissingLines(gpxLine, lineStringsInArea));
+            }
+            return missingLines;
         }
 
         private List<LineString> GpxToLineStrings(gpxType gpx)
@@ -163,8 +198,29 @@ namespace IsraelHiking.API.Controllers
                 .Select(track => track.trkseg.SelectMany(s => s.trkpt).ToArray())
                 .Select(ToItmLineString);
             lineStings.AddRange(tracksPointsList);
-
+            SplitLinesByNumberOfPoints(lineStings);
             return lineStings;
+        }
+
+        private void SplitLinesByNumberOfPoints(List<LineString> lineStings)
+        {
+            bool needToLinesToSplit;
+            do
+            {
+                needToLinesToSplit = false;
+                for (int lineIndex = 0; lineIndex < lineStings.Count; lineIndex++)
+                {
+                    var line = lineStings[lineIndex];
+                    if (line.Count <= MAX_NUMBER_OF_POINTS_PER_LINE)
+                    {
+                        continue;
+                    }
+                    needToLinesToSplit = true;
+                    var newLine = line.Coordinates.Skip(line.Count/2).ToArray();
+                    lineStings.Add(new LineString(newLine));
+                    lineStings[lineIndex] = new LineString(line.Coordinates.Take(line.Count/2 + 1).ToArray());
+                }
+            } while (needToLinesToSplit);
         }
     }
 }

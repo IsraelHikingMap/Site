@@ -279,7 +279,7 @@ namespace IsraelHiking.API.Services.Osm
 
         public List<Feature> Preprocess(List<CompleteWay> highways)
         {
-            return highways.Select(_osmGeoJsonConverter.ToGeoJson).ToList();
+            return highways.Select(_osmGeoJsonConverter.ToGeoJson).Where(h => h != null).ToList();
         }
     }
 }

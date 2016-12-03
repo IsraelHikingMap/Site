@@ -1,11 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccess.ElasticSearch;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 {
@@ -13,7 +8,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
     public class ElasticSearchGatewayTests
     {
         [TestMethod]
-        //[Ignore]
+        [Ignore]
         public void Search_ShouldReturnResults()
         {
             var gateway = new ElasticSearchGateway(new TraceLogger());
@@ -24,54 +19,6 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
 
         [TestMethod]
         [Ignore]
-        public void FindShapes()
-        {
-            var gateway = new ElasticSearchGateway(new TraceLogger());
-            gateway.Initialize();
-            var table1 = new AttributesTable();
-            table1.AddAttribute("name", "polygon");
-            table1.AddAttribute("place", "city");
-            table1.AddAttribute("osm_id", "1");
-            var table2 = new AttributesTable();
-            table2.AddAttribute("name", "street");
-            table2.AddAttribute("highway", "residential");
-            table2.AddAttribute("osm_id", "2");
-            var features = new List<Feature>
-            {
-                new Feature(
-                    new Polygon(
-                            new LinearRing(
-                                new[]
-                                {
-                                    new Coordinate(0, 0),
-                                    new Coordinate(1, 0),
-                                    new Coordinate(1, 1),
-                                    new Coordinate(0, 1),
-                                    new Coordinate(0, 0)
-                                }
-                            )
-                    ),
-                    table1
-                ),
-                new Feature(
-                    new LineString(
-                        new[]
-                        {
-                            new Coordinate(0.5, 0.5), 
-                            new Coordinate(0.6, 0.6)
-                        }
-                    ),
-                    table2
-                )
-            };
-            gateway.UpdateNamesData(features).Wait();
-            Task.Delay(2000).Wait();
-            var results = gateway.GetContainingFeature(features[1]).Result;
-            Assert.IsNotNull(results);
-        }
-
-        [TestMethod]
-        //[Ignore]
         public void GetHighways_ShouldReturnResults()
         {
             var gateway = new ElasticSearchGateway(new TraceLogger());
@@ -79,7 +26,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var northEast = new LatLng(31.7553, 35.0516);
             var southWest = new LatLng(31.7467, 35.0251);
             var results = gateway.GetHighways(northEast, southWest).Result;
-            Assert.AreEqual(10, results.Count);
+            Assert.AreEqual(36, results.Count);
         }
     }
 }

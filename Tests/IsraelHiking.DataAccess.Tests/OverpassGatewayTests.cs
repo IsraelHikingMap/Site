@@ -19,6 +19,7 @@ namespace IsraelHiking.DataAccess.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void GetHighways()
         {
             var northEast = new LatLng { lat = 31.6331, lng = 34.9286 };
@@ -28,6 +29,7 @@ namespace IsraelHiking.DataAccess.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void GetHighwaysAroundATrace()
         {
             var coordinates = new[]

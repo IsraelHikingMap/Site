@@ -11,7 +11,6 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<List<Feature>> Search(string searchTerm, string fieldName);
         Task UpdateNamesData(List<Feature> features);
         Task UpdateHighwaysData(List<Feature> features);
-        Task<Feature> GetContainingFeature(Feature feature);
         Task<List<Feature>> GetHighways(LatLng northEast, LatLng southWest);
     }
 }

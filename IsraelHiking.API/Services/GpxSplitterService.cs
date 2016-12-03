@@ -11,75 +11,98 @@ namespace IsraelHiking.API.Services
         private const double MINIMAL_MISSING_PART_LENGTH = 200; // meters
 
         /// <summary>
-        /// This algorithm works as follows:
-        /// 1. Look for self loops in GPX file and split them into partial lines.
-        /// 2. Look for close neighbour points and remove duplicate lines both from gpx lines and lines from input.
+        /// This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
+        /// This can be used with both OSM lines and other parts of the same GPS trace.
+        /// The algorithm is faily simple - go over all the points in the given <see cref="gpxLine"/> and look for point that are close to <see cref="existingLineStrings"/>
         /// </summary>
-        /// <param name="gpxLines"></param>
-        /// <param name="existingLineStrings"></param>
-        /// <returns></returns>
-        public List<LineString> Split(List<LineString> gpxLines, IReadOnlyList<LineString> existingLineStrings)
+        /// <param name="gpxLine">The line to manipulate</param>
+        /// <param name="existingLineStrings">The lines to test agains</param>
+        /// <returns>a split line from the orignal line</returns>
+        public List<LineString> GetMissingLines(LineString gpxLine, IReadOnlyList<LineString> existingLineStrings)
         {
             var gpxSplit = new List<LineString>();
-            gpxLines = RemoveSelfLoop(gpxLines);
-            foreach (var lineString in gpxLines)
+            var waypointsGroup = new List<Coordinate>();
+            foreach (var coordinate in gpxLine.Coordinates)
             {
-                var waypointsGroup = new List<Coordinate>();
-                foreach (var coordinate in lineString.Coordinates)
+                if (waypointsGroup.Count > 0 && waypointsGroup.Last().Equals(coordinate))
                 {
-                    if (waypointsGroup.Count > 0 && waypointsGroup.Last().Equals(coordinate))
-                    {
-                        continue;
-                    }
-                    if (IsCloseToALine(coordinate, existingLineStrings.Concat(gpxSplit).ToArray()))
-                    {
-                        waypointsGroup.Add(coordinate);
-                        AddLineString(gpxSplit, waypointsGroup.ToArray());
-                        waypointsGroup = new List<Coordinate> {coordinate};
-                        continue;
-                    }
-                    waypointsGroup.Add(coordinate);
+                    continue;
                 }
-                AddLineString(gpxSplit, waypointsGroup.ToArray());
+                if (IsCloseToALine(coordinate, existingLineStrings.Concat(gpxSplit).ToArray()))
+                {
+                    waypointsGroup.Add(coordinate);
+                    AddLineString(gpxSplit, waypointsGroup.ToArray());
+                    waypointsGroup = new List<Coordinate> { coordinate };
+                    continue;
+                }
+                waypointsGroup.Add(coordinate);
             }
-            
-            // return only lists with non-mapped lines that are long enough
+            AddLineString(gpxSplit, waypointsGroup.ToArray());
             return gpxSplit.Where(l => l.Length > MINIMAL_MISSING_PART_LENGTH).ToList();
         }
 
-        private List<LineString> RemoveSelfLoop(List<LineString> gpxSplit)
+        /// <summary>
+        /// This part of the splitter if responsible for splitting a line with a self loop.
+        /// It will allway return lines that do not have self loop, but can be duplicate of one another
+        /// Use <see cref="GetMissingLines"/> method to remove those duplications.
+        /// </summary>
+        /// <param name="gpxLine">The line to look for self loops in</param>
+        /// <returns>a list of lines that do not have self loops</returns>
+        public List<LineString> SplitSelfLoops(LineString gpxLine)
         {
             var lines = new List<LineString>();
-            for (int gpxLineIndex = 0; gpxLineIndex < gpxSplit.Count; gpxLineIndex++)
+            for (int coordinateIndex = 0; coordinateIndex < gpxLine.Coordinates.Length; coordinateIndex++)
             {
-                for (int coordinateIndex = 0; coordinateIndex < gpxSplit[gpxLineIndex].Coordinates.Length; coordinateIndex++)
+                var indices = GetAllIndexesWithinTolerance(gpxLine, coordinateIndex);
+                var linesSplit = SliptLineByIndeices(gpxLine, indices);
+                gpxLine = linesSplit.First();
+                foreach (var lineString in linesSplit.Skip(1))
                 {
-                    var lineString = gpxSplit[gpxLineIndex];
-                    var outSideRadius = false;
-                    for (int nextCoordinateIndex = coordinateIndex + 1; nextCoordinateIndex < lineString.Coordinates.Length; nextCoordinateIndex++)
-                    {
-                        var nextCoordinate = lineString.Coordinates[nextCoordinateIndex];
-                        var nextCoordinatePoint = new Point(nextCoordinate);
-                        var distance = coordinateIndex > 1
-                            ? nextCoordinatePoint.Distance(new LineString(lineString.Coordinates.Take(coordinateIndex + 1).ToArray()))
-                            : nextCoordinatePoint.Distance(new Point(lineString.Coordinates[coordinateIndex]));
-                        if (distance < CLOSEST_POINT_TOLERANCE)
-                        {
-                            if (outSideRadius == false)
-                            {
-                                continue;
-                            }
-                            AddLineString(gpxSplit, lineString.Coordinates.Skip(nextCoordinateIndex).ToArray());
-                            gpxSplit[gpxLineIndex] = new LineString(lineString.Coordinates.Take(nextCoordinateIndex).ToArray());
-                            break;
-                        }
-                        outSideRadius = true;
-                    }
+                    AddLineString(lines, lineString.Coordinates);
                 }
-                AddLineString(lines, gpxSplit[gpxLineIndex].Coordinates);
             }
-
+            AddLineString(lines, gpxLine.Coordinates);
+            lines.Reverse();
             return lines;
+        }
+
+        private List<LineString> SliptLineByIndeices(LineString gpxLine, List<int> indices)
+        {
+            var lines = new List<LineString>();
+            var startingPointIndex = 0;
+            for (int i = 1; i < indices.Count; i++)
+            {
+                var index = indices[i];
+                var previousIndex = indices[i-1];
+                if (index - previousIndex == 1)
+                {
+                    continue;
+                }
+                AddLineString(lines, gpxLine.Coordinates.Skip(startingPointIndex).Take(index - startingPointIndex).ToArray());
+                startingPointIndex = index;
+            }
+            AddLineString(lines, gpxLine.Coordinates.Skip(startingPointIndex).ToArray());
+            return lines;
+        }
+
+        private List<int> GetAllIndexesWithinTolerance(LineString gpxLine, int coordinateIndex)
+        {
+            var list = new List<int> { coordinateIndex };
+            for (int nextCoordinateIndex = coordinateIndex + 1;
+                nextCoordinateIndex < gpxLine.Count;
+                nextCoordinateIndex++)
+            {
+                var nextCoordinate = gpxLine.Coordinates[nextCoordinateIndex];
+                var nextCoordinatePoint = new Point(nextCoordinate);
+                var distance = coordinateIndex > 0
+                    ? nextCoordinatePoint.Distance(new LineString(gpxLine.Coordinates.Take(coordinateIndex + 1).ToArray()))
+                    : nextCoordinatePoint.Distance(new Point(gpxLine.Coordinates[coordinateIndex]));
+                if (distance < CLOSEST_POINT_TOLERANCE)
+                {
+                    list.Add(nextCoordinateIndex);
+                }
+            }
+            return list;
         }
 
         private void AddLineString(ICollection<LineString> gpxSplit, Coordinate[] coordinates)

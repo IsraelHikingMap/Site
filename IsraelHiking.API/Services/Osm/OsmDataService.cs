@@ -152,7 +152,7 @@ namespace IsraelHiking.API.Services.Osm
                 _elasticSearchGateway.UpdateHighwaysData(smallCahceList).Wait();
                 smallCahceList.Clear();
             }
-            _elasticSearchGateway.UpdateNamesData(smallCahceList).Wait();
+            _elasticSearchGateway.UpdateHighwaysData(smallCahceList).Wait();
             _logger.Info($"Finished updating Elastic Search highways, Indexed {total + smallCahceList.Count} records");
         }
     }
