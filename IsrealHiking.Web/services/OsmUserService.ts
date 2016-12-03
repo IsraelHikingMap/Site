@@ -35,6 +35,7 @@ namespace IsraelHiking.Services {
         public traces: ITrace[];
         public shares: Common.SiteUrl[];
         public userId: string;
+        public loading: boolean;
 
         constructor($q: angular.IQService,
             $http: angular.IHttpService,
@@ -42,6 +43,7 @@ namespace IsraelHiking.Services {
             this.$q = $q;
             this.$http = $http;
             this.localStorageService = localStorageService;
+            this.loading = false;
 
             this.oauth = osmAuth({
                 oauth_consumer_key: "H5Us9nv9eDyFpKbBTiURf7ZqfdBArNddv10n6R6U",
@@ -75,6 +77,7 @@ namespace IsraelHiking.Services {
         }
 
         public refreshDetails = (): angular.IPromise<{}> => {
+            this.loading = true;
             let deferred = this.$q.defer();
             var sharesPromise = null;
             this.oauth.xhr({
@@ -82,6 +85,7 @@ namespace IsraelHiking.Services {
                 path: "/api/0.6/user/details"
             }, (detailsError, details) => {
                 if (detailsError) {
+                    this.loading = false;
                     deferred.reject(detailsError);
                     return;
                 }
@@ -126,7 +130,7 @@ namespace IsraelHiking.Services {
                     this.shares = response.data;
                 });
             });
-            return this.$q.all([deferred.promise, this.$q.when(sharesPromise)]);
+            return this.$q.all([deferred.promise, this.$q.when(sharesPromise)]).finally(() => this.loading = false);
         }
 
         public updateSiteUrl = (siteUrl: Common.SiteUrl): angular.IPromise<{}> => {
