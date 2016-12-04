@@ -8,7 +8,8 @@
     export var app = angular.module("IsraelHiking", [
         "ngFileUpload", "LocalStorageModule", "ui.bootstrap-slider",
         "angular-loading-bar", "googlechart", "ngAnimate", "gettext",
-        "toastr", "ngFileSaver", "ui.bootstrap", "angular-clipboard"]);
+        "toastr", "ngFileSaver", "ui.bootstrap", "angular-clipboard",
+        "angulartics", "angulartics.google.analytics"]);
 
     L.Icon.Default.imagePath = "content/images/";
 

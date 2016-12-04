@@ -14,6 +14,7 @@
     "angular-bootstrap": "*",
     "angular-bootstrap-slider": "*",
     "angular-clipboard": "*",
+    "angulartics-google-analytics": "*",
     "bootstrap": "*",
     "bootstrap-rtl": "*",
     "jquery": "*",

@@ -2,8 +2,6 @@
     export class Google { new(); }
 }
 
-declare var getLastModifiedDate: Function;
-
 namespace IsraelHiking.Services.Layers {
     export interface ILayer extends Common.LayerData {
         layer: L.ILayer;
@@ -51,7 +49,6 @@ namespace IsraelHiking.Services.Layers {
         private routeLayerFactory: Layers.RouteLayers.RouteLayerFactory;
         private resourcesService: ResourcesService;
         private toastr: Toastr;
-        private defaultAttribution: string;
         private overlayZIndex;
 
         public baseLayers: IBaseLayer[];
@@ -89,20 +86,18 @@ namespace IsraelHiking.Services.Layers {
             this.overlayZIndex = 10;
             this.routeChangedEvent = new Common.EventHelper<{}>();
             this.markers = this.routeLayerFactory.createPoiLayer();
-            let lastModified = (typeof getLastModifiedDate == "function") ? getLastModifiedDate() : (new Date(document.lastModified)).toDateString();
-            this.defaultAttribution = LayersService.ATTRIBUTION + "Last update: " + lastModified;
             // default layers:
             this.addBaseLayer({
                 key: LayersService.ISRAEL_HIKING_MAP,
                 address: LayersService.DEFAULT_TILES_ADDRESS,
                 isEditable: false
-            } as ILayer, this.defaultAttribution);
+            } as ILayer, LayersService.ATTRIBUTION);
 
             this.addBaseLayer({
                 key: LayersService.ISRAEL_MTB_MAP,
                 address: LayersService.MTB_TILES_ADDRESS,
                 isEditable: false
-            } as ILayer, LayersService.MTB_ATTRIBUTION + lastModified);
+            } as ILayer, LayersService.MTB_ATTRIBUTION);
             try {
                 this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: new L.Google() as any, selected: false, address: "", isEditable: false } as IBaseLayer);
             } catch (e) {
@@ -458,7 +453,7 @@ namespace IsraelHiking.Services.Layers {
                 minZoom: layerData.minZoom || LayersService.MIN_ZOOM,
                 maxNativeZoom: layerData.maxZoom || LayersService.MAX_NATIVE_ZOOM,
                 maxZoom: LayersService.MAX_ZOOM,
-                attribution: attribution || this.defaultAttribution
+                attribution: attribution || LayersService.ATTRIBUTION
             } as L.TileLayerOptions;
         }
 

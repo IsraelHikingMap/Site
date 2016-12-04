@@ -145,6 +145,8 @@
     <Content Include="scripts\angular-mocks.js" />
     <Content Include="scripts\angular-toastr.tpls.js" />
     <Content Include="scripts\angular.js" />
+    <Content Include="scripts\angulartics-ga.js" />
+    <Content Include="scripts\angulartics.js" />
     <Content Include="scripts\Blob.js" />
     <Content Include="scripts\bootstrap-slider.js" />
     <Content Include="scripts\bootstrap.js" />
