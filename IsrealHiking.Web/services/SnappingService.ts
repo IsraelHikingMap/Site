@@ -67,9 +67,17 @@
                 }
                 this.snappings.clearLayers();
                 for (let feature of features) {
-                    var lineString = feature.geometry as GeoJSON.LineString;
-                    let latlngsArray = Services.Parsers.GeoJsonParser.createLatlngArray(lineString.coordinates);
-                    this.snappings.addLayer(L.polyline(latlngsArray, { opacity: 0 } as L.PolylineOptions));
+                    switch (feature.geometry.type) {
+                    case Strings.GeoJson.lineString:
+                        var lineString = feature.geometry as GeoJSON.LineString;
+                        var latlngsArray = Services.Parsers.GeoJsonParser.createLatlngArray(lineString.coordinates);
+                        this.snappings.addLayer(L.polyline(latlngsArray, { opacity: 0 } as L.PolylineOptions));
+                        break;
+                    case Strings.GeoJson.polygon:
+                        var polygon = feature.geometry as GeoJSON.Polygon;
+                        var polygonLatlngsArray = Services.Parsers.GeoJsonParser.createLatlngArray(polygon.coordinates[0]);
+                        this.snappings.addLayer(L.polyline(polygonLatlngsArray, { opacity: 0 } as L.PolylineOptions));
+                    }
                 }
 
                 this.requestsQueue.splice(0);

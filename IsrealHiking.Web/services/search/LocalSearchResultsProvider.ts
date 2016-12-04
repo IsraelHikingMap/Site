@@ -56,7 +56,7 @@
                                     singleResult.latlngsArray.push(Services.Parsers.GeoJsonParser.createLatlngArray(currentCoordinatesArray));
                                 }
                                 break;
-                            case Strings.GeoJson.polygone:
+                            case Strings.GeoJson.polygon:
                                 var polygone = feature.geometry as GeoJSON.Polygon;
                                 singleResult.latlng = Services.Parsers.GeoJsonParser.createLatlng(polygone.coordinates[0][0]) as L.LatLng;
                                 for (let currentCoordinatesArray of polygone.coordinates) {

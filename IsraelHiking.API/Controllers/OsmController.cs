@@ -181,10 +181,7 @@ namespace IsraelHiking.API.Controllers
                     East = (int) gpxLine.Coordinates.Min(c => c.X)
                 });
                 var highways = await _elasticSearchGateway.GetHighways(new LatLng {lat = northEast.Latitude, lng = northEast.Longitude}, new LatLng {lat = southWest.Latitude, lng = southWest.Longitude});
-                var lineStringsInArea = highways.Select(highway => highway.Geometry)
-                        .OfType<LineString>()
-                        .Select(l => ToItmLineString(l.Coordinates))
-                        .ToList();
+                var lineStringsInArea = highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates)).ToList();
                 missingLines.AddRange(_gpxSplitterService.GetMissingLines(gpxLine, lineStringsInArea));
             }
             return missingLines;

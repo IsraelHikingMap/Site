@@ -2,7 +2,7 @@
     export namespace GeoJson {
         export const lineString = "LineString";
         export const multiLineString = "MultiLineString";
-        export const polygone = "Polygon";
+        export const polygon = "Polygon";
         export const multiPolygon = "MultiPolygon";
         export const point = "Point";
         export const multiPoint = "MultiPoint";

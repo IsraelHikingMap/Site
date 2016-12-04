@@ -41,7 +41,7 @@
                             var multiLineString = feature.geometry as GeoJSON.MultiLineString;
                             routeData = this.coordinatesArrayToData(multiLineString.coordinates, feature.properties.name);
                             break;
-                        case Strings.GeoJson.polygone:
+                        case Strings.GeoJson.polygon:
                             var polygone = feature.geometry as GeoJSON.Polygon;
                             routeData = this.coordinatesArrayToData(polygone.coordinates, feature.properties.name);
                             break;
