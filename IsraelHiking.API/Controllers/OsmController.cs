@@ -18,6 +18,7 @@ namespace IsraelHiking.API.Controllers
     public class OsmController : ApiController
     {
         private const double SIMPLIFICATION_TOLERANCE = 15; // meters
+        private const double MINIMAL_MISSING_PART_LENGTH = 200; // meters
         private const int MAX_NUMBER_OF_POINTS_PER_LINE = 1000;
 
         private readonly IHttpGatewayFactory _httpGatewayFactory;
@@ -155,11 +156,12 @@ namespace IsraelHiking.API.Controllers
             {
                 missingLinesWithoutLoops.AddRange(_gpxSplitterService.SplitSelfLoops(missingLine));
             }
+            missingLinesWithoutLoops.Reverse();
             var missingLinesWithoutLoopsAndDuplications = new List<LineString>();
             for (int index = 0; index < missingLinesWithoutLoops.Count; index++)
             {
                 var missingLineWithoutLoops = missingLinesWithoutLoops[index];
-                missingLinesWithoutLoopsAndDuplications.AddRange(_gpxSplitterService.GetMissingLines(missingLineWithoutLoops, missingLinesWithoutLoops.Take(index).ToArray()));
+                missingLinesWithoutLoopsAndDuplications.AddRange(_gpxSplitterService.GetMissingLines(missingLineWithoutLoops, missingLinesWithoutLoops.Take(index).ToArray(), SIMPLIFICATION_TOLERANCE));
             }
             missingLinesWithoutLoopsAndDuplications = SimplifyLines(missingLinesWithoutLoopsAndDuplications);
             return missingLinesWithoutLoopsAndDuplications;
@@ -182,7 +184,7 @@ namespace IsraelHiking.API.Controllers
                 });
                 var highways = await _elasticSearchGateway.GetHighways(new LatLng {lat = northEast.Latitude, lng = northEast.Longitude}, new LatLng {lat = southWest.Latitude, lng = southWest.Longitude});
                 var lineStringsInArea = highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates)).ToList();
-                missingLines.AddRange(_gpxSplitterService.GetMissingLines(gpxLine, lineStringsInArea));
+                missingLines.AddRange(_gpxSplitterService.GetMissingLines(gpxLine, lineStringsInArea, MINIMAL_MISSING_PART_LENGTH));
             }
             return missingLines;
         }

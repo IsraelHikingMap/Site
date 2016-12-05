@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +22,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var gpxLine = new LineString(new[] {new Coordinate(1, 1), new Coordinate(2, 2)});
 
-            var results = _service.GetMissingLines(gpxLine, new LineString[0]);
+            var results = _service.GetMissingLines(gpxLine, new LineString[0], 200);
 
             Assert.AreEqual(0, results.Count);
         }
@@ -33,7 +32,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var gpxLines = new LineString(new[] {new Coordinate(1, 1), new Coordinate(2, 2), new Coordinate(3, 3)});
 
-            var results = _service.GetMissingLines(gpxLines, new LineString[0]);
+            var results = _service.GetMissingLines(gpxLines, new LineString[0], 200);
 
             Assert.AreEqual(0, results.Count);
         }
@@ -43,7 +42,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var gpxLine = new LineString(new[] {new Coordinate(1, 1), new Coordinate(20, 20), new Coordinate(300, 300)});
 
-            var results = _service.GetMissingLines(gpxLine, new LineString[0]);
+            var results = _service.GetMissingLines(gpxLine, new LineString[0], 200);
 
             Assert.AreEqual(1, results.Count);
         }
@@ -63,7 +62,7 @@ namespace IsraelHiking.API.Tests.Services
             });
 
             var results = _service.GetMissingLines(gpxLine,
-                new[] {new LineString(new[] {new Coordinate(399, 399), new Coordinate(399, 0)})});
+                new[] {new LineString(new[] {new Coordinate(399, 399), new Coordinate(399, 0)})}, 200);
 
             Assert.AreEqual(2, results.Count);
         }
@@ -86,8 +85,8 @@ namespace IsraelHiking.API.Tests.Services
             var results = _service.SplitSelfLoops(gpxLine);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(5, results.First().Count);
-            Assert.AreEqual(3, results.Last().Count);
+            Assert.AreEqual(4, results.First().Count);
+            Assert.AreEqual(4, results.Last().Count);
         }
 
         [TestMethod]
@@ -108,8 +107,8 @@ namespace IsraelHiking.API.Tests.Services
             var results = _service.SplitSelfLoops(gpxLine);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(5, results.First().Count);
-            Assert.AreEqual(3, results.Last().Count);
+            Assert.AreEqual(3, results.First().Count);
+            Assert.AreEqual(5, results.Last().Count);
         }
 
         [TestMethod]
@@ -130,8 +129,8 @@ namespace IsraelHiking.API.Tests.Services
             var results = _service.SplitSelfLoops(gpxLine);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(5, results.First().Count);
-            Assert.AreEqual(3, results.Last().Count);
+            Assert.AreEqual(3, results.First().Count);
+            Assert.AreEqual(5, results.Last().Count);
         }
 
         [TestMethod]
@@ -147,7 +146,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(200, 200),
                 new Coordinate(200, 1),
                 new Coordinate(150, 1),
-                new Coordinate(50, 1)
+                new Coordinate(0, 1)
             });
 
             var results = _service.SplitSelfLoops(gpxLine);
@@ -157,9 +156,9 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         /// <summary>
-        ///     __   __         __   __
-        /// ___|  |_|  | => ___|  |_| _|
-        /// ___________|              
+        ///     __   __      __             __
+        /// ___|  |_|  | =>    |  ,           |
+        ///  __________|            __________|          
         /// </summary>
         [TestMethod]
         public void SplitSelfLoops_GpxCamelShape_ShouldSplitItAndRemoveLowerPart()
@@ -188,14 +187,15 @@ namespace IsraelHiking.API.Tests.Services
 
             var results = _service.SplitSelfLoops(gpxLine);
 
-            Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(13, results.First().Count);
+            Assert.AreEqual(2, results.Count);
+            Assert.AreEqual(3, results.First().Count);
+            Assert.AreEqual(9, results.Last().Count);
         }
 
         /// <summary>
-        ///     __ |        __       |
-        /// ___| _|| => ___| _| ,    | 
-        ///     |__|              |__|
+        ///     __ |        __      |
+        /// ___| _|| => ___|   ,    | 
+        ///     |__|             |__|
         /// </summary>
         [TestMethod]
         public void SplitSelfLoops_GpxQuestionMarkShape_ShouldSplitItAndRemoveDuplication()
@@ -221,7 +221,7 @@ namespace IsraelHiking.API.Tests.Services
             var results = _service.SplitSelfLoops(gpxLine);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(6, results.First().Count);
+            Assert.AreEqual(5, results.First().Count);
             Assert.AreEqual(8, results.Last().Count);
         }
     }

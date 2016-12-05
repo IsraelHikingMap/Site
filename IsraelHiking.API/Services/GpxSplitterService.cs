@@ -8,7 +8,6 @@ namespace IsraelHiking.API.Services
     public class GpxSplitterService : IGpxSplitterService
     {
         private const double CLOSEST_POINT_TOLERANCE = 30; // meters
-        private const double MINIMAL_MISSING_PART_LENGTH = 200; // meters
 
         /// <summary>
         /// This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
@@ -17,8 +16,9 @@ namespace IsraelHiking.API.Services
         /// </summary>
         /// <param name="gpxLine">The line to manipulate</param>
         /// <param name="existingLineStrings">The lines to test agains</param>
+        /// <param name="minimalMissingPartLength">The minimal length allowed to a trace that can be added</param>
         /// <returns>a split line from the orignal line</returns>
-        public List<LineString> GetMissingLines(LineString gpxLine, IReadOnlyList<LineString> existingLineStrings)
+        public List<LineString> GetMissingLines(LineString gpxLine, IReadOnlyList<LineString> existingLineStrings, double minimalMissingPartLength)
         {
             var gpxSplit = new List<LineString>();
             var waypointsGroup = new List<Coordinate>();
@@ -38,7 +38,7 @@ namespace IsraelHiking.API.Services
                 waypointsGroup.Add(coordinate);
             }
             AddLineString(gpxSplit, waypointsGroup.ToArray());
-            return gpxSplit.Where(l => l.Length > MINIMAL_MISSING_PART_LENGTH).ToList();
+            return gpxSplit.Where(l => l.Length > minimalMissingPartLength).ToList();
         }
 
         /// <summary>
@@ -51,6 +51,7 @@ namespace IsraelHiking.API.Services
         public List<LineString> SplitSelfLoops(LineString gpxLine)
         {
             var lines = new List<LineString>();
+            gpxLine = (LineString)gpxLine.Reverse();
             for (int coordinateIndex = 0; coordinateIndex < gpxLine.Coordinates.Length; coordinateIndex++)
             {
                 var indices = GetAllIndexesWithinTolerance(gpxLine, coordinateIndex);
@@ -62,7 +63,7 @@ namespace IsraelHiking.API.Services
                 }
             }
             AddLineString(lines, gpxLine.Coordinates);
-            lines.Reverse();
+            lines = lines.Select(l => (LineString)l.Reverse()).ToList();
             return lines;
         }
 
@@ -73,7 +74,7 @@ namespace IsraelHiking.API.Services
             for (int i = 1; i < indices.Count; i++)
             {
                 var index = indices[i];
-                var previousIndex = indices[i-1];
+                var previousIndex = indices[i - 1];
                 if (index - previousIndex == 1)
                 {
                     continue;
