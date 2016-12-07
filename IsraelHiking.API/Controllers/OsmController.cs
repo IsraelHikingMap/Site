@@ -17,8 +17,9 @@ namespace IsraelHiking.API.Controllers
 {
     public class OsmController : ApiController
     {
-        private const double SIMPLIFICATION_TOLERANCE = 15; // meters
+        private const double SIMPLIFICATION_TOLERANCE = 5; // meters
         private const double MINIMAL_MISSING_PART_LENGTH = 200; // meters
+        private const double MINIMAL_MISSING_SELF_LOOP_PART_LENGTH = 30; // meters
         private const int MAX_NUMBER_OF_POINTS_PER_LINE = 1000;
 
         private readonly IHttpGatewayFactory _httpGatewayFactory;
@@ -161,7 +162,7 @@ namespace IsraelHiking.API.Controllers
             for (int index = 0; index < missingLinesWithoutLoops.Count; index++)
             {
                 var missingLineWithoutLoops = missingLinesWithoutLoops[index];
-                missingLinesWithoutLoopsAndDuplications.AddRange(_gpxSplitterService.GetMissingLines(missingLineWithoutLoops, missingLinesWithoutLoops.Take(index).ToArray(), SIMPLIFICATION_TOLERANCE));
+                missingLinesWithoutLoopsAndDuplications.AddRange(_gpxSplitterService.GetMissingLines(missingLineWithoutLoops, missingLinesWithoutLoops.Take(index).ToArray(), MINIMAL_MISSING_SELF_LOOP_PART_LENGTH));
             }
             missingLinesWithoutLoopsAndDuplications = SimplifyLines(missingLinesWithoutLoopsAndDuplications);
             return missingLinesWithoutLoopsAndDuplications;

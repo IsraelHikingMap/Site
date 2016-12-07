@@ -13,7 +13,7 @@
         getRank(): IRank;
         getRankPercentage(): number;
         getPorgessbarType(): string;
-        showTrace(trace: Services.ITrace): void;
+        showTrace(trace: Services.ITrace): angular.IPromise<{}>;
         editTrace(trace: Services.ITrace): void;
         findUnmappedRoutes(trace: Services.ITrace): void;
         editInOsm(trace: Services.ITrace): void;
@@ -21,6 +21,7 @@
 
     export class OsmUserController extends BaseMapController {
         private modalInstnace: angular.ui.bootstrap.IModalServiceInstance;
+        private osmTraceLayer: L.LayerGroup<any>;
 
         constructor($scope: IOsmUserScope,
             $window: angular.IWindowService,
@@ -33,8 +34,10 @@
             toastr: Toastr) {
             super(mapService);
 
-            $scope.userService = osmUserService;
             this.initializeRanks($scope);
+            this.osmTraceLayer = L.layerGroup([]);
+
+            $scope.userService = osmUserService;
             $scope.$watch(() => $scope.resources.language, () => this.initializeRanks($scope));
 
             $scope.login = (e: Event) => {
@@ -84,20 +87,20 @@
                 return "success";
             }
 
-            $scope.showTrace = (trace: Services.ITrace) => {
+            $scope.showTrace = (trace: Services.ITrace): angular.IPromise<{}> => {
                 this.modalInstnace.close();
-                fileService.openFromUrl(trace.dataUrl).success((dataContainer) => {
-                    let layer = L.featureGroup([]);
+                return fileService.openFromUrl(trace.dataUrl).success((dataContainer) => {
+                    this.osmTraceLayer = L.featureGroup([]);
                     for (let route of dataContainer.routes) {
                         for (let segment of route.segments) {
                             let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
-                            layer.addLayer(polyLine);
+                            this.osmTraceLayer.addLayer(polyLine);
                         }
                     }
                     for (let markerData of dataContainer.markers) {
                         let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, riseOnHover: true, icon: Services.IconsService.createMarkerIconWithColor(this.getPathOprtions().color), opacity: this.getPathOprtions().opacity } as L.MarkerOptions);
                         marker.bindLabel(markerData.title, { noHide: true, className: "marker-label" } as L.LabelOptions);
-                        layer.addLayer(marker);
+                        this.osmTraceLayer.addLayer(marker);
                     }
                     let bounds = L.latLngBounds(dataContainer.southWest, dataContainer.northEast);
                     let mainMarker = L.marker(bounds.getCenter(), { icon: Services.IconsService.createTraceMarkerIcon(), draggable: false }) as Services.Layers.PoiLayers.IMarkerWithTitle; // marker to allow remove of this layer.
@@ -105,15 +108,15 @@
                     let newScope = $scope.$new() as ISearchResultsMarkerPopup;
                     newScope.marker = mainMarker;
                     newScope.remove = () => {
-                        layer.clearLayers();
+                        this.osmTraceLayer.clearLayers();
                     }
                     newScope.convertToRoute = () => {
                         layersService.setJsonData(dataContainer);
-                        layer.clearLayers();
+                        this.osmTraceLayer.clearLayers();
                     }
                     mainMarker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
-                    layer.addLayer(mainMarker);
-                    this.map.addLayer(layer);
+                    this.osmTraceLayer.addLayer(mainMarker);
+                    this.map.addLayer(this.osmTraceLayer);
                     this.map.fitBounds(bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
                 });
             }
@@ -138,17 +141,26 @@
                             toastr.success($scope.resources.noUnmappedRoutes);
                             return;
                         }
-                        this.modalInstnace.close();
-                        var geoJsonLayer = L.geoJson(geoJson);
-                        geoJsonLayer.addTo(this.map);
-                        // HM TODO: make this better
-                        this.map.fitBounds(geoJsonLayer.getBounds());
+                        $scope.showTrace(trace).then(() => {
+                            var geoJsonLayer = L.geoJson(geoJson, {
+                                onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
+                                    this.osmTraceLayer.addLayer(L.marker(feature.geometry.coordinates[0]));
+                                }, style: {
+                                    color: "red",
+                                    weight: 5,
+                                    opacity: 1
+                                } as any
+                            } as L.GeoJSONOptions);
+                            this.osmTraceLayer.addLayer(geoJsonLayer);
+                            // HM TODO: make this better
+                            this.map.fitBounds(geoJsonLayer.getBounds());
+                        });
                     });
             }
         }
 
         private getPathOprtions = (): L.PathOptions => {
-            return { opacity: 0.7, color: "Blue", weight: 3 } as L.PathOptions;
+            return { opacity: 0.5, color: "blue", weight: 3 } as L.PathOptions;
         }
 
         private initializeRanks = ($scope: IOsmUserScope) => {
