@@ -40,7 +40,7 @@
         <br />
         <div ng-switch on="state">
             <div ng-switch-when="traces">
-                <div ng-repeat="trace in userService.traces | filter:searchTerm">
+                <div ng-repeat="trace in userService.traces | filter:searchTerm | orderBy:'id':true ">
                     <div class="row">
                         <div class="col-md-4 col-xs-12">
                             <img ng-src="{{trace.imageUrl}}" class="img-responsive" alt="" />
