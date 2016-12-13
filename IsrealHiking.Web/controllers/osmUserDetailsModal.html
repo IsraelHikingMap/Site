@@ -40,35 +40,36 @@
         <br />
         <div ng-switch on="state">
             <div ng-switch-when="traces">
+                <a class="cursor-pointer" ngf-select ngf-multiple="false" ng-model="file" ngf-change="open(file)" uib-tooltip="{{resources.openAFile}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-folder-open fa-lg"></i></a>
                 <div ng-repeat="trace in userService.traces | filter:searchTerm">
                     <div class="row">
                         <div class="col-md-4 col-xs-12">
-                            <img ng-src="{{trace.imageUrl}}" class="img-responsive" alt="" />
+                            <img ng-src="{{trace.imageUrl}}" class="img-responsive" alt=""/>
                         </div>
                         <div class="col-md-8 col-xs-12">
                             <div class="row">
                                 <div class="col-xs-9">
-                                    <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.fileName}}</a><br />
-                                    {{trace.description}}<br />
+                                    <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.fileName}}</a><br/>
+                                    {{trace.description}}<br/>
                                     {{trace.date | date:'dd/MM/yyyy'}}
                                 </div>
                                 <div class="col-xs-3">
                                     <a class="cursor-pointer btn btn-default btn-block" ng-click="showTrace(trace)" uib-tooltip="{{resources.view}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-eye"></i></a>
                                     <a class="cursor-pointer btn btn-default btn-block" ng-click="editTrace(trace)" uib-tooltip="{{resources.edit}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-pencil"></i></a>
-                                    <a class="cursor-pointer btn btn-default btn-block" ng-click="editInOsm(trace)" uib-tooltip="{{resources.editThisMapUsingOsm}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><img src="/content/images/map-editing.svg" alt="" /></a>
+                                    <a class="cursor-pointer btn btn-default btn-block" ng-click="editInOsm(trace)" uib-tooltip="{{resources.editThisMapUsingOsm}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><img src="/content/images/map-editing.svg" alt=""/></a>
                                     <a class="cursor-pointer btn btn-default btn-block" ng-click="findUnmappedRoutes(trace)" uib-tooltip="{{resources.findUnmappedRoutes}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-plus"></i></a>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <br />
+                    <br/>
                 </div>
                 <div class="cssload-loader" ng-show="userService.loading">
                     <div class="cssload-inner cssload-one"></div>
                     <div class="cssload-inner cssload-two"></div>
                     <div class="cssload-inner cssload-three"></div>
                 </div>
-                <p ng-show="userService.traces.length == 0 && !userService.loading" >{{resources.noTraces}}</p>
+                <p ng-show="userService.traces.length == 0 && !userService.loading">{{resources.noTraces}}</p>
             </div>
             <div ng-switch-when="shares">
                 <div ng-repeat="siteUrl in userService.shares | filter : searchTerm">

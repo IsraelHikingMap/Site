@@ -17,6 +17,7 @@
         editTrace(trace: Services.ITrace): void;
         findUnmappedRoutes(trace: Services.ITrace): void;
         editInOsm(trace: Services.ITrace): void;
+        open(file: File): void;
     }
 
     export class OsmUserController extends BaseMapController {
@@ -27,6 +28,7 @@
             $window: angular.IWindowService,
             $uibModal: angular.ui.bootstrap.IModalService,
             $compile: angular.ICompileService,
+            Upload: angular.angularFileUpload.IUploadService,
             mapService: Services.MapService,
             osmUserService: Services.OsmUserService,
             fileService: Services.FileService,
@@ -36,6 +38,7 @@
 
             this.initializeRanks($scope);
             this.osmTraceLayer = L.layerGroup([]);
+            this.map.addLayer(this.osmTraceLayer);
 
             $scope.userService = osmUserService;
             $scope.$watch(() => $scope.resources.language, () => this.initializeRanks($scope));
@@ -90,7 +93,7 @@
             $scope.showTrace = (trace: Services.ITrace): angular.IPromise<{}> => {
                 this.modalInstnace.close();
                 return fileService.openFromUrl(trace.dataUrl).success((dataContainer) => {
-                    this.osmTraceLayer = L.featureGroup([]);
+                    this.osmTraceLayer.clearLayers();
                     for (let route of dataContainer.routes) {
                         for (let segment of route.segments) {
                             let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
@@ -116,7 +119,6 @@
                     }
                     mainMarker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
                     this.osmTraceLayer.addLayer(mainMarker);
-                    this.map.addLayer(this.osmTraceLayer);
                     this.map.fitBounds(bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
                 });
             }
@@ -133,6 +135,25 @@
                 $window.open(osmUserService.getEditOsmGpxAddress(baseLayerAddress, trace.id));
             }
 
+            $scope.open = (file: File): void => {
+                Upload.upload({
+                    url: Common.Urls.osm,
+                    params: {
+                        url: ""
+                    } as any,
+                    method: "POST",
+                    data: { file: file }
+                } as angular.angularFileUpload.IFileUploadConfigFile).then((response: { data: GeoJSON.FeatureCollection<GeoJSON.LineString> }) => {
+                    let geoJson = response.data;
+                    if (geoJson.features.length === 0) {
+                        toastr.success($scope.resources.noUnmappedRoutes);
+                        return;
+                    }
+                    this.modalInstnace.close();
+                    this.addMissingPartsToMap(geoJson);
+                });
+            }
+
             $scope.findUnmappedRoutes = (trace: Services.ITrace): void => {
                 osmUserService.getMissingParts(trace)
                     .then((response: { data: GeoJSON.FeatureCollection<GeoJSON.LineString> }) => {
@@ -142,18 +163,7 @@
                             return;
                         }
                         $scope.showTrace(trace).then(() => {
-                            var geoJsonLayer = L.geoJson(geoJson, {
-                                onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
-                                    this.osmTraceLayer.addLayer(L.marker(feature.geometry.coordinates[0]));
-                                }, style: {
-                                    color: "red",
-                                    weight: 5,
-                                    opacity: 1
-                                } as any
-                            } as L.GeoJSONOptions);
-                            this.osmTraceLayer.addLayer(geoJsonLayer);
-                            // HM TODO: make this better
-                            this.map.fitBounds(geoJsonLayer.getBounds());
+                            this.addMissingPartsToMap(geoJson);
                         });
                     });
             }
@@ -182,6 +192,23 @@
                     points: Infinity
                 }
             ];
+        }
+
+        private addMissingPartsToMap = (geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
+            var geoJsonLayer = L.geoJson(geoJson,
+            {
+                onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
+                    this.osmTraceLayer.addLayer(L.marker(feature.geometry.coordinates[0]));
+                },
+                style: {
+                    color: "red",
+                    weight: 5,
+                    opacity: 1
+                } as any
+            } as L.GeoJSONOptions);
+            this.osmTraceLayer.addLayer(geoJsonLayer);
+            // HM TODO: make this better
+            this.map.fitBounds(geoJsonLayer.getBounds());
         }
     }
 

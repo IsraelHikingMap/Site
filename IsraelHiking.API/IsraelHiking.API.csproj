@@ -148,11 +148,9 @@
     </Compile>
     <Compile Include="Converters\IGpxDataContainerConverter.cs" />
     <Compile Include="Converters\IGpxGeoJsonConverter.cs" />
-    <Compile Include="Services\DouglasPeuckerReductionService.cs" />
     <Compile Include="Services\GeoJsonFeatureHelper.cs" />
     <Compile Include="Converters\ConverterFlows\IConverterFlowItem.cs" />
     <Compile Include="Services\GpxSplitterService.cs" />
-    <Compile Include="Services\IDouglasPeuckerReductionService.cs" />
     <Compile Include="Services\IGpxSplitterService.cs" />
     <Compile Include="Services\IImageCreationService.cs" />
     <Compile Include="Services\ImageCreationService.cs" />
@@ -165,6 +163,7 @@
     <Compile Include="Services\IDataContainerConverterService.cs" />
     <Compile Include="Services\Osm\OsmGeoJsonPreprocessor.cs" />
     <Compile Include="Services\LruCache.cs" />
+    <Compile Include="Services\RadialDistanceByAngleSimplifier.cs" />
     <Compile Include="Services\RouteDataSplitterService.cs" />
     <Compile Include="UnityRegisterApi.cs" />
   </ItemGroup>

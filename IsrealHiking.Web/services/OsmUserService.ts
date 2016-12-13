@@ -107,7 +107,7 @@ namespace IsraelHiking.Services {
                         deferred.reject(tracesError);
                         return;
                     }
-                    let tracesJson = this.x2Js.xml2json(traces).osm.gpx_file.sort((a, b) =>  {return b._id - a._id;}) as any;
+                    let tracesJson = (this.x2Js.xml2json(traces)as any).osm.gpx_file.sort((a, b) =>  {return b._id - a._id;});
                     this.traces = [];
                     for (let traceJson of tracesJson) {
                         let baseOsm = "https://www.openstreetmap.org/";

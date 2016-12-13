@@ -294,7 +294,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestInitialize]
         public void TestInitialize()
         {
-            _service = new RouteDataSplitterService(new CoordinatesConverter(), new DouglasPeuckerReductionService());
+            _service = new RouteDataSplitterService(new CoordinatesConverter());
         }
 
         [TestMethod]
@@ -311,8 +311,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void SimplifyRoundRoute()
         {
-            var container = new DataContainer();
-            container.routes.Add(new RouteData
+            var routeToSimplify = new RouteData
             {
                 segments = new List<RouteSegmentData>
                 {
@@ -328,9 +327,9 @@ namespace IsraelHiking.API.Tests.Services
                         }
                     }
                 }
-            });
+            };
 
-            var route = _service.Split(container.routes.First(), RoutingType.HIKE);
+            var route = _service.Split(routeToSimplify, RoutingType.HIKE);
 
             Assert.IsTrue(route.segments.Count <= 5);
         }
@@ -338,8 +337,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void SimplifyRouteWithTwoPoints_ShouldNotBeSimplified()
         {
-            var container = new DataContainer();
-            container.routes.Add(new RouteData
+            var routeToSimplify = new RouteData
             {
                 segments = new List<RouteSegmentData>
                 {
@@ -352,11 +350,11 @@ namespace IsraelHiking.API.Tests.Services
                         }
                     }
                 }
-            });
+            };
 
-            var route = _service.Split(container.routes.First(), RoutingType.HIKE);
+            var route = _service.Split(routeToSimplify, RoutingType.HIKE);
 
-            Assert.AreEqual(3, route.segments.Count);
+            Assert.AreEqual(2, route.segments.Count);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
@@ -12,7 +13,8 @@ namespace IsraelHiking.API.Services
         /// <summary>
         /// This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
         /// This can be used with both OSM lines and other parts of the same GPS trace.
-        /// The algorithm is faily simple - go over all the points in the given <see cref="gpxLine"/> and look for point that are close to <see cref="existingLineStrings"/>
+        /// The algorithm is faily simple - 
+        /// Go over all the points in the given <see cref="gpxLine"/> and look for point that are close to <see cref="existingLineStrings"/>
         /// </summary>
         /// <param name="gpxLine">The line to manipulate</param>
         /// <param name="existingLineStrings">The lines to test agains</param>
@@ -52,58 +54,54 @@ namespace IsraelHiking.API.Services
         {
             var lines = new List<LineString>();
             gpxLine = (LineString)gpxLine.Reverse();
-            for (int coordinateIndex = 0; coordinateIndex < gpxLine.Coordinates.Length; coordinateIndex++)
-            {
-                var indices = GetAllIndexesWithinTolerance(gpxLine, coordinateIndex);
-                var linesSplit = SliptLineByIndeices(gpxLine, indices);
-                gpxLine = linesSplit.First();
-                foreach (var lineString in linesSplit.Skip(1))
-                {
-                    AddLineString(lines, lineString.Coordinates);
-                }
-            }
-            AddLineString(lines, gpxLine.Coordinates);
-            lines = lines.Select(l => (LineString)l.Reverse()).ToList();
-            return lines;
-        }
 
-        private List<LineString> SliptLineByIndeices(LineString gpxLine, List<int> indices)
-        {
-            var lines = new List<LineString>();
-            var startingPointIndex = 0;
-            for (int i = 1; i < indices.Count; i++)
+            int coordinateIndex = 0;
+            while (coordinateIndex < gpxLine.Coordinates.Length)
             {
-                var index = indices[i];
-                var previousIndex = indices[i - 1];
-                if (index - previousIndex == 1)
+                if (IsClosingALoop(gpxLine, coordinateIndex) == false)
                 {
+                    coordinateIndex++;
                     continue;
                 }
-                AddLineString(lines, gpxLine.Coordinates.Skip(startingPointIndex).Take(index - startingPointIndex).ToArray());
-                startingPointIndex = index;
+                AddLineString(lines, gpxLine.Coordinates.Take(coordinateIndex).ToArray());
+                gpxLine = new LineString(gpxLine.Coordinates.Skip(coordinateIndex).ToArray());
+                coordinateIndex = 0;
             }
-            AddLineString(lines, gpxLine.Coordinates.Skip(startingPointIndex).ToArray());
+            AddLineString(lines, gpxLine.Coordinates);
+
+            lines = lines.Select(l => (LineString)l.Reverse()).ToList();
+            lines.Reverse();
             return lines;
         }
 
-        private List<int> GetAllIndexesWithinTolerance(LineString gpxLine, int coordinateIndex)
+        private bool IsClosingALoop(LineString gpxLine, int currentIndex)
         {
-            var list = new List<int> { coordinateIndex };
-            for (int nextCoordinateIndex = coordinateIndex + 1;
-                nextCoordinateIndex < gpxLine.Count;
-                nextCoordinateIndex++)
+            int indexOfLinePrefix = currentIndex - 1;
+            var currentCoordinatePoint = new Point(gpxLine[currentIndex]);
+            while (indexOfLinePrefix >= 0)
             {
-                var nextCoordinate = gpxLine.Coordinates[nextCoordinateIndex];
-                var nextCoordinatePoint = new Point(nextCoordinate);
-                var distance = coordinateIndex > 0
-                    ? nextCoordinatePoint.Distance(new LineString(gpxLine.Coordinates.Take(coordinateIndex + 1).ToArray()))
-                    : nextCoordinatePoint.Distance(new Point(gpxLine.Coordinates[coordinateIndex]));
-                if (distance < CLOSEST_POINT_TOLERANCE)
+                if (currentCoordinatePoint.Distance(new Point(gpxLine.Coordinates[indexOfLinePrefix])) >
+                    CLOSEST_POINT_TOLERANCE)
                 {
-                    list.Add(nextCoordinateIndex);
+                    break;
                 }
+                indexOfLinePrefix--;
             }
-            return list;
+            if (indexOfLinePrefix < 0)
+            {
+                return false;
+            }
+            var distance = indexOfLinePrefix > 0
+                    ? currentCoordinatePoint.Distance(new LineString(gpxLine.Coordinates.Take(indexOfLinePrefix + 1).ToArray()))
+                    : currentCoordinatePoint.Distance(new Point(gpxLine.Coordinates[indexOfLinePrefix]));
+            //if (currentIndex < gpxLine.Count - 1)
+            //{
+            //    var lineString = new LineString(new [] { gpxLine[currentIndex], gpxLine[currentIndex + 1] });
+            //    distance = Math.Min(distance, indexOfLinePrefix > 0
+            //        ? lineString.Distance(new LineString(gpxLine.Coordinates.Take(indexOfLinePrefix + 1).ToArray()))
+            //        : lineString.Distance(new Point(gpxLine.Coordinates[indexOfLinePrefix])));
+            //}
+            return distance < CLOSEST_POINT_TOLERANCE;
         }
 
         private void AddLineString(ICollection<LineString> gpxSplit, Coordinate[] coordinates)

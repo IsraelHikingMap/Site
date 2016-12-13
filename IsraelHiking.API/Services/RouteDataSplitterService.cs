@@ -5,6 +5,7 @@ using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using IsraelTransverseMercator;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Simplify;
 
 namespace IsraelHiking.API.Services
 {
@@ -15,27 +16,24 @@ namespace IsraelHiking.API.Services
         private const int MINIMAL_SEGMENT_LENGTH = 500; // meters
 
         private readonly ICoordinatesConverter _coordinatesConverter;
-        private readonly IDouglasPeuckerReductionService _douglasPeuckerReductionService;
 
-        public RouteDataSplitterService(ICoordinatesConverter coordinatesConverter, 
-            IDouglasPeuckerReductionService douglasPeuckerReductionService)
+        public RouteDataSplitterService(ICoordinatesConverter coordinatesConverter)
         {
             _coordinatesConverter = coordinatesConverter;
-            _douglasPeuckerReductionService = douglasPeuckerReductionService;
         }
 
         public RouteData Split(RouteData routeData, string routingType)
         {
             var allRoutePoints = routeData.segments.SelectMany(s => s.latlngzs).ToList();
-            var lineString = ToWgs84LineString(allRoutePoints);
-            int maximumPoints = Math.Max(3, Math.Min((int)(lineString.Length / MINIMAL_SEGMENT_LENGTH), MAX_SEGMENTS_NUMBER));
+            var coordinates = ToWgs84Coordinates(allRoutePoints);
+            int maximumPoints = Math.Max(3, Math.Min((int)(new LineString(coordinates).Length / MINIMAL_SEGMENT_LENGTH), MAX_SEGMENTS_NUMBER));
             var currentTolerance = MINIMAL_TOLERANCE;
-            List<int> simplifiedRouteIndexes;
+            Coordinate[] simplifiedCoordinates;
             do
             {
-                simplifiedRouteIndexes = _douglasPeuckerReductionService.GetSimplifiedRouteIndexes(lineString.Coordinates, currentTolerance);
+                simplifiedCoordinates = DouglasPeuckerLineSimplifier.Simplify(coordinates, currentTolerance);
                 currentTolerance *= 2;
-            } while (simplifiedRouteIndexes.Count > maximumPoints);
+            } while (simplifiedCoordinates.Length > maximumPoints);
 
             var manipulatedRouteData = new RouteData
             {
@@ -47,11 +45,15 @@ namespace IsraelHiking.API.Services
                 name = routeData.name
             };
 
-            for (int index = 1; index < simplifiedRouteIndexes.Count; index++)
+            for (int index = 1; index < simplifiedCoordinates.Length; index++)
             {
-                var currentIndex = simplifiedRouteIndexes[index];
-                var previousIndex = simplifiedRouteIndexes[index - 1];
-                var latLngz = allRoutePoints.Skip(previousIndex).Take(currentIndex - previousIndex + 1).ToList();
+                var currentIndex = coordinates.ToList().IndexOf(simplifiedCoordinates[index]); //simplifiedRouteIndexes[index];
+                //simplifiedRouteIndexes[index - 1];
+                coordinates = coordinates.Skip(currentIndex).ToArray();
+
+                //var latLngz = allRoutePoints.Skip(previousIndex).Take(currentIndex - previousIndex + 1).ToList();
+                var latLngz = allRoutePoints.Take(currentIndex + 1).ToList();
+                allRoutePoints = allRoutePoints.Skip(currentIndex).ToList();
                 manipulatedRouteData.segments.Add(new RouteSegmentData
                 {
                     latlngzs = latLngz,
@@ -63,14 +65,13 @@ namespace IsraelHiking.API.Services
             return manipulatedRouteData;
         }
 
-        private LineString ToWgs84LineString(IEnumerable<LatLng> latLngs)
+        private Coordinate[] ToWgs84Coordinates(IEnumerable<LatLng> latLngs)
         {
-            var coordinates = latLngs.Select(latLng =>
+            return latLngs.Select(latLng =>
             {
                 var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon { Longitude = latLng.lng, Latitude = latLng.lat });
                 return new Coordinate(northEast.East, northEast.North);
             }).ToArray();
-            return new LineString(coordinates);
         }
     }
 }

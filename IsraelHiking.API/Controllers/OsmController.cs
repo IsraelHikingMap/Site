@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using GeoAPI.Geometries;
@@ -12,6 +13,7 @@ using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.Simplify;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -24,7 +26,6 @@ namespace IsraelHiking.API.Controllers
 
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
-        private readonly IDouglasPeuckerReductionService _douglasPeuckerReductionService;
         private readonly ICoordinatesConverter _coordinatesConverter;
         private readonly IGpxSplitterService _gpxSplitterService;
         private readonly IElasticSearchGateway _elasticSearchGateway;
@@ -33,7 +34,6 @@ namespace IsraelHiking.API.Controllers
         public OsmController(IHttpGatewayFactory httpGatewayFactory,
             IDataContainerConverterService dataContainerConverterService,
             ICoordinatesConverter coordinatesConverter,
-            IDouglasPeuckerReductionService douglasPeuckerReductionService,
             IGpxSplitterService gpxSplitterService,
             IElasticSearchGateway elasticSearchGateway,
             LruCache<string, TokenAndSecret> cache)
@@ -41,7 +41,6 @@ namespace IsraelHiking.API.Controllers
             _httpGatewayFactory = httpGatewayFactory;
             _dataContainerConverterService = dataContainerConverterService;
             _coordinatesConverter = coordinatesConverter;
-            _douglasPeuckerReductionService = douglasPeuckerReductionService;
             _gpxSplitterService = gpxSplitterService;
             _cache = cache;
             _elasticSearchGateway = elasticSearchGateway;
@@ -55,8 +54,7 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         public async Task<FeatureCollection> PostGpsTrace(string url)
         {
-            var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(_cache.Get(User.Identity.Name));
-            var response = await fetcher.GetFileContent(url);
+            var response = await GetFile(url);
             var gpxBytes = await _dataContainerConverterService.Convert(response.Content, response.FileName, DataContainerConverterService.GPX);
             var gpx = gpxBytes.ToGpx().UpdateBounds();
             var routingType = GetRoutingType(gpx);
@@ -68,15 +66,44 @@ namespace IsraelHiking.API.Controllers
             return new FeatureCollection(new Collection<IFeature>(features));
         }
 
+        private async Task<RemoteFileFetcherGatewayResponse> GetFile(string url)
+        {
+            if (string.IsNullOrEmpty(url) == false)
+            {
+                var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(_cache.Get(User.Identity.Name));
+                return await fetcher.GetFileContent(url);
+            }
+            var streamProvider = new MultipartMemoryStreamProvider();
+            var multipartFileStreamProvider = await Request.Content.ReadAsMultipartAsync(streamProvider);
+
+            if (multipartFileStreamProvider.Contents.Count == 0)
+            {
+                return new RemoteFileFetcherGatewayResponse();
+            }
+            return new RemoteFileFetcherGatewayResponse
+            {
+                Content = await streamProvider.Contents.First().ReadAsByteArrayAsync(),
+                FileName = streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('"')
+            };
+        }
+
+
         private List<LineString> SimplifyLines(IEnumerable<LineString> lineStings)
         {
             var lines = new List<LineString>();
             foreach (var lineSting in lineStings)
             {
-                var simplifiedIndexes = _douglasPeuckerReductionService.GetSimplifiedRouteIndexes(
-                    lineSting.Coordinates, SIMPLIFICATION_TOLERANCE);
-                var coordinates = lineSting.Coordinates.Where((w, i) => simplifiedIndexes.Contains(i)).ToArray();
-                lines.Add(new LineString(coordinates));
+                var simpleLine = DouglasPeuckerSimplifier.Simplify(lineSting, SIMPLIFICATION_TOLERANCE) as LineString;
+                if (simpleLine == null)
+                {
+                    continue;
+                }
+                simpleLine = RadialDistanceByAngleSimplifier.Simplify(simpleLine, MINIMAL_MISSING_SELF_LOOP_PART_LENGTH, 90);
+                if (simpleLine == null)
+                {
+                    continue;
+                }
+                lines.Add(simpleLine);
             }
             return lines;
         }
@@ -175,18 +202,19 @@ namespace IsraelHiking.API.Controllers
             {
                 var northEast = _coordinatesConverter.ItmToWgs84(new NorthEast
                 {
-                    North = (int) gpxLine.Coordinates.Max(c => c.Y),
-                    East = (int) gpxLine.Coordinates.Max(c => c.X)
+                    North = (int)gpxLine.Coordinates.Max(c => c.Y),
+                    East = (int)gpxLine.Coordinates.Max(c => c.X)
                 });
                 var southWest = _coordinatesConverter.ItmToWgs84(new NorthEast
                 {
-                    North = (int) gpxLine.Coordinates.Min(c => c.Y),
-                    East = (int) gpxLine.Coordinates.Min(c => c.X)
+                    North = (int)gpxLine.Coordinates.Min(c => c.Y),
+                    East = (int)gpxLine.Coordinates.Min(c => c.X)
                 });
-                var highways = await _elasticSearchGateway.GetHighways(new LatLng {lat = northEast.Latitude, lng = northEast.Longitude}, new LatLng {lat = southWest.Latitude, lng = southWest.Longitude});
+                var highways = await _elasticSearchGateway.GetHighways(new LatLng { lat = northEast.Latitude, lng = northEast.Longitude }, new LatLng { lat = southWest.Latitude, lng = southWest.Longitude });
                 var lineStringsInArea = highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates)).ToList();
                 missingLines.AddRange(_gpxSplitterService.GetMissingLines(gpxLine, lineStringsInArea, MINIMAL_MISSING_PART_LENGTH));
             }
+            MergeLines(missingLines);
             return missingLines;
         }
 
@@ -200,6 +228,22 @@ namespace IsraelHiking.API.Controllers
             lineStings.AddRange(tracksPointsList);
             SplitLinesByNumberOfPoints(lineStings);
             return lineStings;
+        }
+
+        private void MergeLines(List<LineString> missingLines)
+        {
+            for (int lineIndex = missingLines.Count - 1; lineIndex >= 1; lineIndex--)
+            {
+                var currentLineCoordinates = missingLines[lineIndex].Coordinates.ToList();
+                var previousLineCoordinates = missingLines[lineIndex - 1].Coordinates;
+                if (!currentLineCoordinates.First().Equals2D(previousLineCoordinates.Last()))
+                {
+                    continue;
+                }
+                currentLineCoordinates.RemoveAt(0);
+                missingLines[lineIndex - 1] = new LineString(previousLineCoordinates.Concat(currentLineCoordinates).ToArray());
+                missingLines.RemoveAt(lineIndex);
+            }
         }
 
         private void SplitLinesByNumberOfPoints(List<LineString> lineStings)
@@ -216,9 +260,16 @@ namespace IsraelHiking.API.Controllers
                         continue;
                     }
                     needToLinesToSplit = true;
-                    var newLine = line.Coordinates.Skip(line.Count/2).ToArray();
-                    lineStings.Add(new LineString(newLine));
-                    lineStings[lineIndex] = new LineString(line.Coordinates.Take(line.Count/2 + 1).ToArray());
+                    var newLine = new LineString(line.Coordinates.Skip(line.Count / 2).ToArray());
+                    if (lineIndex == lineStings.Count - 1)
+                    {
+                        lineStings.Add(newLine);
+                    }
+                    else
+                    {
+                        lineStings.Insert(lineIndex + 1, newLine);
+                    }
+                    lineStings[lineIndex] = new LineString(line.Coordinates.Take(line.Count / 2 + 1).ToArray());
                 }
             } while (needToLinesToSplit);
         }
