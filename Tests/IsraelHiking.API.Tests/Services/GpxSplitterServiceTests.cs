@@ -22,7 +22,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var gpxLine = new LineString(new[] {new Coordinate(1, 1), new Coordinate(2, 2)});
 
-            var results = _service.GetMissingLines(gpxLine, new LineString[0], 200);
+            var results = _service.GetMissingLines(gpxLine, new LineString[0], 200, 30);
 
             Assert.AreEqual(0, results.Count);
         }
@@ -32,7 +32,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var gpxLines = new LineString(new[] {new Coordinate(1, 1), new Coordinate(2, 2), new Coordinate(3, 3)});
 
-            var results = _service.GetMissingLines(gpxLines, new LineString[0], 200);
+            var results = _service.GetMissingLines(gpxLines, new LineString[0], 200, 30);
 
             Assert.AreEqual(0, results.Count);
         }
@@ -42,7 +42,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var gpxLine = new LineString(new[] {new Coordinate(1, 1), new Coordinate(20, 20), new Coordinate(300, 300)});
 
-            var results = _service.GetMissingLines(gpxLine, new LineString[0], 200);
+            var results = _service.GetMissingLines(gpxLine, new LineString[0], 200, 30);
 
             Assert.AreEqual(1, results.Count);
         }
@@ -62,7 +62,7 @@ namespace IsraelHiking.API.Tests.Services
             });
 
             var results = _service.GetMissingLines(gpxLine,
-                new[] {new LineString(new[] {new Coordinate(399, 399), new Coordinate(399, 0)})}, 200);
+                new[] {new LineString(new[] {new Coordinate(399, 399), new Coordinate(399, 0)})}, 200, 30);
 
             Assert.AreEqual(2, results.Count);
         }
@@ -85,7 +85,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(600, 0)
             });
 
-            var results = _service.SplitSelfLoops(gpxLine);
+            var results = _service.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
             Assert.AreEqual(4, results.First().Count);
@@ -110,7 +110,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(600, 0)
             });
 
-            var results = _service.SplitSelfLoops(gpxLine);
+            var results = _service.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
             Assert.AreEqual(3, results.First().Count);
@@ -136,7 +136,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(600, 0)
             });
 
-            var results = _service.SplitSelfLoops(gpxLine);
+            var results = _service.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
             Assert.AreEqual(3, results.First().Count);
@@ -159,7 +159,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0, 1)
             });
 
-            var results = _service.SplitSelfLoops(gpxLine);
+            var results = _service.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
             Assert.AreEqual(3, results.First().Count);
@@ -196,7 +196,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(100, -1),
             });
 
-            var results = _service.SplitSelfLoops(gpxLine);
+            var results = _service.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
             Assert.AreEqual(9, results.First().Count);
@@ -229,7 +229,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(601, 600)
             });
 
-            var results = _service.SplitSelfLoops(gpxLine);
+            var results = _service.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
             Assert.AreEqual(6, results.First().Count);
@@ -257,7 +257,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(320, 0),
             });
 
-            var results = _service.SplitSelfLoops(gpxLine);
+            var results = _service.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(3, results.First().Count);

@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
+using NetTopologySuite.Algorithm;
 using NetTopologySuite.Geometries;
-using OsmSharp.Math.Algorithms;
 
 namespace IsraelHiking.API.Services
 {
@@ -44,8 +44,8 @@ namespace IsraelHiking.API.Services
                 var coordinate = coordinates[coordinateIndex];
                 if (simplified.Count > 1)
                 {
-                    var angle1 = GetAngle(simplified[simplified.Count - 2], simplified.Last());
-                    var angle2 = GetAngle(simplified.Last(), coordinate);
+                    var angle1 = AngleUtility.ToDegrees(AngleUtility.Angle(simplified[simplified.Count - 2], simplified.Last()));
+                    var angle2 = AngleUtility.ToDegrees(AngleUtility.Angle(simplified.Last(), coordinate));
                     var angleDifference = Math.Abs(angle2 - angle1);
                     if ((angleDifference < 180 - AngleTolerance) || (angleDifference > 180 + AngleTolerance))
                     {
@@ -60,27 +60,6 @@ namespace IsraelHiking.API.Services
                 }
             }
             return simplified.Count <= 1 ? null : new LineString(simplified.ToArray());
-        }
-
-        private double GetAngle(Coordinate coordinate1, Coordinate coordinate2)
-        {
-            // Can't use LineString's angle due to bug in NTS: https://github.com/NetTopologySuite/NetTopologySuite/issues/136		
-            var xDiff = coordinate2.X - coordinate1.X;
-            if (xDiff == 0)
-            {
-                return 90;
-            }
-            var yDiff = coordinate2.Y - coordinate1.Y;
-            var angle = Math.Atan(yDiff / xDiff) * 180 / Math.PI;
-            if (xDiff < 0)
-            {
-                angle += 180;
-            }
-            if (angle < 0)
-            {
-                angle += 360;
-            }
-            return angle;
         }
     }
 }

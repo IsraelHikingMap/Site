@@ -8,8 +8,6 @@ namespace IsraelHiking.API.Services
 {
     public class GpxSplitterService : IGpxSplitterService
     {
-        private const double CLOSEST_POINT_TOLERANCE = 30; // meters
-
         /// <summary>
         /// This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
         /// This can be used with both OSM lines and other parts of the same GPS trace.
@@ -19,8 +17,9 @@ namespace IsraelHiking.API.Services
         /// <param name="gpxLine">The line to manipulate</param>
         /// <param name="existingLineStrings">The lines to test agains</param>
         /// <param name="minimalMissingPartLength">The minimal length allowed to a trace that can be added</param>
+        /// <param name="closestPointTolerance">The distace of the closest point allowed</param>
         /// <returns>a split line from the orignal line</returns>
-        public List<LineString> GetMissingLines(LineString gpxLine, IReadOnlyList<LineString> existingLineStrings, double minimalMissingPartLength)
+        public List<LineString> GetMissingLines(LineString gpxLine, IReadOnlyList<LineString> existingLineStrings, double minimalMissingPartLength, double closestPointTolerance)
         {
             var gpxSplit = new List<LineString>();
             var waypointsGroup = new List<Coordinate>();
@@ -30,7 +29,7 @@ namespace IsraelHiking.API.Services
                 {
                     continue;
                 }
-                if (IsCloseToALine(coordinate, existingLineStrings.Concat(gpxSplit).ToArray()))
+                if (IsCloseToALine(coordinate, existingLineStrings.Concat(gpxSplit).ToArray(), closestPointTolerance))
                 {
                     waypointsGroup.Add(coordinate);
                     AddLineString(gpxSplit, waypointsGroup.ToArray());
@@ -50,7 +49,7 @@ namespace IsraelHiking.API.Services
         /// </summary>
         /// <param name="gpxLine">The line to look for self loops in</param>
         /// <returns>a list of lines that do not have self loops</returns>
-        public List<LineString> SplitSelfLoops(LineString gpxLine)
+        public List<LineString> SplitSelfLoops(LineString gpxLine, double closestPointTolerance)
         {
             var lines = new List<LineString>();
             gpxLine = (LineString)gpxLine.Reverse();
@@ -58,7 +57,7 @@ namespace IsraelHiking.API.Services
             int coordinateIndex = 0;
             while (coordinateIndex < gpxLine.Coordinates.Length)
             {
-                if (IsClosingALoop(gpxLine, coordinateIndex) == false)
+                if (IsClosingALoop(gpxLine, coordinateIndex, closestPointTolerance) == false)
                 {
                     coordinateIndex++;
                     continue;
@@ -74,14 +73,14 @@ namespace IsraelHiking.API.Services
             return lines;
         }
 
-        private bool IsClosingALoop(LineString gpxLine, int currentIndex)
+        private bool IsClosingALoop(LineString gpxLine, int currentIndex, double closestPointTolerance)
         {
             int indexOfLinePrefix = currentIndex - 1;
             var currentCoordinatePoint = new Point(gpxLine[currentIndex]);
             while (indexOfLinePrefix >= 0)
             {
                 if (currentCoordinatePoint.Distance(new Point(gpxLine.Coordinates[indexOfLinePrefix])) >
-                    CLOSEST_POINT_TOLERANCE)
+                    closestPointTolerance)
                 {
                     break;
                 }
@@ -94,14 +93,7 @@ namespace IsraelHiking.API.Services
             var distance = indexOfLinePrefix > 0
                     ? currentCoordinatePoint.Distance(new LineString(gpxLine.Coordinates.Take(indexOfLinePrefix + 1).ToArray()))
                     : currentCoordinatePoint.Distance(new Point(gpxLine.Coordinates[indexOfLinePrefix]));
-            //if (currentIndex < gpxLine.Count - 1)
-            //{
-            //    var lineString = new LineString(new [] { gpxLine[currentIndex], gpxLine[currentIndex + 1] });
-            //    distance = Math.Min(distance, indexOfLinePrefix > 0
-            //        ? lineString.Distance(new LineString(gpxLine.Coordinates.Take(indexOfLinePrefix + 1).ToArray()))
-            //        : lineString.Distance(new Point(gpxLine.Coordinates[indexOfLinePrefix])));
-            //}
-            return distance < CLOSEST_POINT_TOLERANCE;
+            return distance < closestPointTolerance;
         }
 
         private void AddLineString(ICollection<LineString> gpxSplit, Coordinate[] coordinates)
@@ -114,14 +106,14 @@ namespace IsraelHiking.API.Services
             gpxSplit.Add(lineString);
         }
 
-        private bool IsCloseToALine(Coordinate coordinate, IReadOnlyList<LineString> lineStrings)
+        private bool IsCloseToALine(Coordinate coordinate, IReadOnlyList<LineString> lineStrings, double closestPointTolerance)
         {
             var point = new Point(coordinate);
             if (!lineStrings.Any())
             {
                 return false;
             }
-            return lineStrings.Min(l => l.Distance(point)) < CLOSEST_POINT_TOLERANCE;
+            return lineStrings.Min(l => l.Distance(point)) < closestPointTolerance;
         }
     }
 }

@@ -21,8 +21,10 @@ namespace IsraelHiking.API.Controllers
     {
         private const double SIMPLIFICATION_TOLERANCE = 5; // meters
         private const double MINIMAL_MISSING_PART_LENGTH = 200; // meters
-        private const double MINIMAL_MISSING_SELF_LOOP_PART_LENGTH = 30; // meters
+        private const double CLOSEST_POINT_TOLERANCE = 30; // meters
+        private const double MINIMAL_MISSING_SELF_LOOP_PART_LENGTH = CLOSEST_POINT_TOLERANCE; // meters
         private const int MAX_NUMBER_OF_POINTS_PER_LINE = 1000;
+        
 
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
@@ -182,40 +184,48 @@ namespace IsraelHiking.API.Controllers
             var missingLinesWithoutLoops = new List<LineString>();
             foreach (var missingLine in missingLines)
             {
-                missingLinesWithoutLoops.AddRange(_gpxSplitterService.SplitSelfLoops(missingLine));
+                missingLinesWithoutLoops.AddRange(_gpxSplitterService.SplitSelfLoops(missingLine, CLOSEST_POINT_TOLERANCE));
             }
             missingLinesWithoutLoops.Reverse();
             var missingLinesWithoutLoopsAndDuplications = new List<LineString>();
             for (int index = 0; index < missingLinesWithoutLoops.Count; index++)
             {
                 var missingLineWithoutLoops = missingLinesWithoutLoops[index];
-                missingLinesWithoutLoopsAndDuplications.AddRange(_gpxSplitterService.GetMissingLines(missingLineWithoutLoops, missingLinesWithoutLoops.Take(index).ToArray(), MINIMAL_MISSING_SELF_LOOP_PART_LENGTH));
+                missingLinesWithoutLoopsAndDuplications.AddRange(_gpxSplitterService.GetMissingLines(missingLineWithoutLoops, missingLinesWithoutLoops.Take(index).ToArray(), MINIMAL_MISSING_SELF_LOOP_PART_LENGTH, CLOSEST_POINT_TOLERANCE));
             }
+            missingLinesWithoutLoopsAndDuplications.Reverse();
             missingLinesWithoutLoopsAndDuplications = SimplifyLines(missingLinesWithoutLoopsAndDuplications);
-            return missingLinesWithoutLoopsAndDuplications;
+
+            return await MergeSimplifiedLines(missingLinesWithoutLoopsAndDuplications);
         }
 
         private async Task<List<LineString>> FindMissingLines(List<LineString> gpxLines)
         {
             var missingLines = new List<LineString>();
+            SplitLinesByNumberOfPoints(gpxLines);
             foreach (var gpxLine in gpxLines)
             {
-                var northEast = _coordinatesConverter.ItmToWgs84(new NorthEast
-                {
-                    North = (int)gpxLine.Coordinates.Max(c => c.Y),
-                    East = (int)gpxLine.Coordinates.Max(c => c.X)
-                });
-                var southWest = _coordinatesConverter.ItmToWgs84(new NorthEast
-                {
-                    North = (int)gpxLine.Coordinates.Min(c => c.Y),
-                    East = (int)gpxLine.Coordinates.Min(c => c.X)
-                });
-                var highways = await _elasticSearchGateway.GetHighways(new LatLng { lat = northEast.Latitude, lng = northEast.Longitude }, new LatLng { lat = southWest.Latitude, lng = southWest.Longitude });
-                var lineStringsInArea = highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates)).ToList();
-                missingLines.AddRange(_gpxSplitterService.GetMissingLines(gpxLine, lineStringsInArea, MINIMAL_MISSING_PART_LENGTH));
+                var lineStringsInArea = await GetLineStringsInArea(gpxLine);
+                missingLines.AddRange(_gpxSplitterService.GetMissingLines(gpxLine, lineStringsInArea, MINIMAL_MISSING_PART_LENGTH, CLOSEST_POINT_TOLERANCE));
             }
-            MergeLines(missingLines);
+            MergeBackLines(missingLines);
             return missingLines;
+        }
+
+        private async Task<List<LineString>> GetLineStringsInArea(LineString gpxLine)
+        {
+            var northEast = _coordinatesConverter.ItmToWgs84(new NorthEast
+            {
+                North = (int) gpxLine.Coordinates.Max(c => c.Y),
+                East = (int) gpxLine.Coordinates.Max(c => c.X)
+            });
+            var southWest = _coordinatesConverter.ItmToWgs84(new NorthEast
+            {
+                North = (int) gpxLine.Coordinates.Min(c => c.Y),
+                East = (int) gpxLine.Coordinates.Min(c => c.X)
+            });
+            var highways = await _elasticSearchGateway.GetHighways(new LatLng {lat = northEast.Latitude, lng = northEast.Longitude}, new LatLng {lat = southWest.Latitude, lng = southWest.Longitude});
+            return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates)).ToList();
         }
 
         private List<LineString> GpxToLineStrings(gpxType gpx)
@@ -226,11 +236,10 @@ namespace IsraelHiking.API.Controllers
                 .Select(track => track.trkseg.SelectMany(s => s.trkpt).ToArray())
                 .Select(ToItmLineString);
             lineStings.AddRange(tracksPointsList);
-            SplitLinesByNumberOfPoints(lineStings);
             return lineStings;
         }
 
-        private void MergeLines(List<LineString> missingLines)
+        private void MergeBackLines(List<LineString> missingLines)
         {
             for (int lineIndex = missingLines.Count - 1; lineIndex >= 1; lineIndex--)
             {
@@ -272,6 +281,32 @@ namespace IsraelHiking.API.Controllers
                     lineStings[lineIndex] = new LineString(line.Coordinates.Take(line.Count / 2 + 1).ToArray());
                 }
             } while (needToLinesToSplit);
+        }
+
+        private async Task<List<LineString>> MergeSimplifiedLines(List<LineString> simplifiedLines)
+        {
+            var mergedSimplifiedLines = new List<LineString>();
+            // HM TODO: this is a naive implementation, it should be made better - not all lines are merged.
+            for (int lineIndex = 1; lineIndex < simplifiedLines.Count; lineIndex++)
+            {
+                var currentLine = simplifiedLines[lineIndex];
+                var previousLine = simplifiedLines[lineIndex - 1];
+                var newLine = new LineString(new[] { previousLine.Coordinates.Last(), currentLine.Coordinates.First() });
+                if (newLine.Length >= CLOSEST_POINT_TOLERANCE*2)
+                {
+                    mergedSimplifiedLines.Add(previousLine);
+                    continue;
+                }
+                var linesInArea = await GetLineStringsInArea(newLine);
+                if (linesInArea.Concat(simplifiedLines).Except(new [] { currentLine, previousLine }).Any(l => l.Intersects(newLine)))
+                {
+                    mergedSimplifiedLines.Add(previousLine);
+                    continue;
+                }
+                simplifiedLines[lineIndex] = new LineString(previousLine.Coordinates.Concat(currentLine.Coordinates).ToArray());
+            }
+            mergedSimplifiedLines.Add(simplifiedLines.Last());
+            return mergedSimplifiedLines;
         }
     }
 }

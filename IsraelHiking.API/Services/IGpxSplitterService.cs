@@ -5,7 +5,7 @@ namespace IsraelHiking.API.Services
 {
     public interface IGpxSplitterService
     {
-        List<LineString> SplitSelfLoops(LineString gpxLine);
-        List<LineString> GetMissingLines(LineString gpxLine, IReadOnlyList<LineString> existingLineStrings, double minimalMissingPartLength);
+        List<LineString> SplitSelfLoops(LineString gpxLine, double closestPointTolerance);
+        List<LineString> GetMissingLines(LineString gpxLine, IReadOnlyList<LineString> existingLineStrings, double minimalMissingPartLength, double closestPointTolerance);
     }
 }

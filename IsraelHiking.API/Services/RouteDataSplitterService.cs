@@ -47,11 +47,9 @@ namespace IsraelHiking.API.Services
 
             for (int index = 1; index < simplifiedCoordinates.Length; index++)
             {
-                var currentIndex = coordinates.ToList().IndexOf(simplifiedCoordinates[index]); //simplifiedRouteIndexes[index];
-                //simplifiedRouteIndexes[index - 1];
+                var currentIndex = coordinates.ToList().IndexOf(simplifiedCoordinates[index]);
                 coordinates = coordinates.Skip(currentIndex).ToArray();
 
-                //var latLngz = allRoutePoints.Skip(previousIndex).Take(currentIndex - previousIndex + 1).ToList();
                 var latLngz = allRoutePoints.Take(currentIndex + 1).ToList();
                 allRoutePoints = allRoutePoints.Skip(currentIndex).ToList();
                 manipulatedRouteData.segments.Add(new RouteSegmentData
