@@ -41,7 +41,7 @@
         <div ng-switch on="state">
             <div ng-switch-when="traces">
                 <a class="cursor-pointer" ngf-select ngf-multiple="false" ng-model="file" ngf-change="open(file)" uib-tooltip="{{resources.openAFile}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-folder-open fa-lg"></i></a>
-                <div ng-repeat="trace in userService.traces | filter:searchTerm">
+                <div ng-repeat="trace in userService.traces | filter:searchTerm | orderBy:'id':true ">
                     <div class="row">
                         <div class="col-md-4 col-xs-12">
                             <img ng-src="{{trace.imageUrl}}" class="img-responsive" alt=""/>
