@@ -48,6 +48,7 @@ namespace IsraelHiking.API.Services
         /// Use <see cref="GetMissingLines"/> method to remove those duplications.
         /// </summary>
         /// <param name="gpxLine">The line to look for self loops in</param>
+        /// <param name="closestPointTolerance">The tolerance of the distance that is considered a self loop</param>
         /// <returns>a list of lines that do not have self loops</returns>
         public List<LineString> SplitSelfLoops(LineString gpxLine, double closestPointTolerance)
         {

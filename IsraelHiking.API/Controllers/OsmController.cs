@@ -24,7 +24,7 @@ namespace IsraelHiking.API.Controllers
         private const double CLOSEST_POINT_TOLERANCE = 30; // meters
         private const double MINIMAL_MISSING_SELF_LOOP_PART_LENGTH = CLOSEST_POINT_TOLERANCE; // meters
         private const int MAX_NUMBER_OF_POINTS_PER_LINE = 1000;
-        
+
 
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
@@ -124,11 +124,11 @@ namespace IsraelHiking.API.Controllers
                     velocityList.Add(0);
                     continue;
                 }
-                var lengthInKm = ToItmLineString(waypoints).Length / 1000;
+                var lengthInKm = ToItmLineString(waypoints).Length/1000;
                 var timeInHours = (waypoints.Last().time - waypoints.First().time).TotalHours;
-                velocityList.Add(lengthInKm / timeInHours);
+                velocityList.Add(lengthInKm/timeInHours);
             }
-            var averageVelocity = velocityList.Sum() / velocityList.Count;
+            var averageVelocity = velocityList.Sum()/velocityList.Count;
             if (averageVelocity <= 6)
             {
                 return RoutingType.HIKE;
@@ -144,7 +144,11 @@ namespace IsraelHiking.API.Controllers
         {
             var coordinates = waypoints.Select(wptType =>
             {
-                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon { Longitude = (double)wptType.lon, Latitude = (double)wptType.lat });
+                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon
+                {
+                    Longitude = (double) wptType.lon,
+                    Latitude = (double) wptType.lat
+                });
                 return new Coordinate(northEast.East, northEast.North);
             }).ToArray();
             return new LineString(coordinates);
@@ -154,7 +158,7 @@ namespace IsraelHiking.API.Controllers
         {
             var itmCoordinates = coordinates.Select(coordinate =>
             {
-                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon { Longitude = coordinate.X, Latitude = coordinate.Y });
+                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon {Longitude = coordinate.X, Latitude = coordinate.Y});
                 return new Coordinate(northEast.East, northEast.North);
             }).ToArray();
             return new LineString(itmCoordinates);
@@ -164,7 +168,11 @@ namespace IsraelHiking.API.Controllers
         {
             var cwgs84Coordinates = coordinates.Select(coordinate =>
             {
-                var latLng = _coordinatesConverter.ItmToWgs84(new NorthEast { North = (int)coordinate.Y, East = (int)coordinate.X });
+                var latLng = _coordinatesConverter.ItmToWgs84(new NorthEast
+                {
+                    North = (int) coordinate.Y,
+                    East = (int) coordinate.X
+                });
                 return new Coordinate(latLng.Longitude, latLng.Latitude);
             }).ToArray();
             return new LineString(cwgs84Coordinates);
@@ -196,7 +204,7 @@ namespace IsraelHiking.API.Controllers
             missingLinesWithoutLoopsAndDuplications.Reverse();
             missingLinesWithoutLoopsAndDuplications = SimplifyLines(missingLinesWithoutLoopsAndDuplications);
 
-            return await MergeSimplifiedLines(missingLinesWithoutLoopsAndDuplications);
+            return await MergeLines(missingLinesWithoutLoopsAndDuplications);
         }
 
         private async Task<List<LineString>> FindMissingLines(List<LineString> gpxLines)
@@ -269,7 +277,7 @@ namespace IsraelHiking.API.Controllers
                         continue;
                     }
                     needToLinesToSplit = true;
-                    var newLine = new LineString(line.Coordinates.Skip(line.Count / 2).ToArray());
+                    var newLine = new LineString(line.Coordinates.Skip(line.Count/2).ToArray());
                     if (lineIndex == lineStings.Count - 1)
                     {
                         lineStings.Add(newLine);
@@ -278,35 +286,91 @@ namespace IsraelHiking.API.Controllers
                     {
                         lineStings.Insert(lineIndex + 1, newLine);
                     }
-                    lineStings[lineIndex] = new LineString(line.Coordinates.Take(line.Count / 2 + 1).ToArray());
+                    lineStings[lineIndex] = new LineString(line.Coordinates.Take(line.Count/2 + 1).ToArray());
                 }
             } while (needToLinesToSplit);
         }
 
-        private async Task<List<LineString>> MergeSimplifiedLines(List<LineString> simplifiedLines)
+        private async Task<List<LineString>> MergeLines(List<LineString> lines)
         {
-            var mergedSimplifiedLines = new List<LineString>();
-            // HM TODO: this is a naive implementation, it should be made better - not all lines are merged.
-            for (int lineIndex = 1; lineIndex < simplifiedLines.Count; lineIndex++)
+            if (lines.Any() == false)
             {
-                var currentLine = simplifiedLines[lineIndex];
-                var previousLine = simplifiedLines[lineIndex - 1];
-                var newLine = new LineString(new[] { previousLine.Coordinates.Last(), currentLine.Coordinates.First() });
-                if (newLine.Length >= CLOSEST_POINT_TOLERANCE*2)
-                {
-                    mergedSimplifiedLines.Add(previousLine);
-                    continue;
-                }
-                var linesInArea = await GetLineStringsInArea(newLine);
-                if (linesInArea.Concat(simplifiedLines).Except(new [] { currentLine, previousLine }).Any(l => l.Intersects(newLine)))
-                {
-                    mergedSimplifiedLines.Add(previousLine);
-                    continue;
-                }
-                simplifiedLines[lineIndex] = new LineString(previousLine.Coordinates.Concat(currentLine.Coordinates).ToArray());
+                return new List<LineString>();
             }
-            mergedSimplifiedLines.Add(simplifiedLines.Last());
-            return mergedSimplifiedLines;
+            var mergedLines = new List<LineString> {lines.First()};
+            var linesToMerge = new List<LineString>(lines.Skip(1));
+            while (linesToMerge.Any())
+            {
+                var foundAWayToMergeTo = false;
+                for (var index = 0; index < linesToMerge.Count; index++)
+                {
+                    var lineToMerge = linesToMerge[index];
+                    var lineToMergeTo = await FindALineToMergeTo(linesToMerge, mergedLines, lineToMerge);
+                    if (lineToMergeTo == null)
+                    {
+                        continue;
+                    }
+                    var coordinates = lineToMerge.Coordinates;
+                    if (lineToMerge.Coordinates.First().Distance(lineToMergeTo.Coordinates.First()) < CLOSEST_POINT_TOLERANCE*2 ||
+                        lineToMerge.Coordinates.Last().Distance(lineToMergeTo.Coordinates.Last()) < CLOSEST_POINT_TOLERANCE*2)
+                    {
+                        coordinates = coordinates.Reverse().ToArray();
+                    }
+                    var mergedCoordinates = lineToMergeTo.Coordinates.ToList();
+                    if (coordinates.Last().Distance(lineToMergeTo.Coordinates.First()) < CLOSEST_POINT_TOLERANCE*2)
+                    {
+                        mergedCoordinates.InsertRange(0, coordinates);
+                    }
+                    else
+                    {
+                        mergedCoordinates.AddRange(coordinates);
+                    }
+                    linesToMerge.Remove(lineToMerge);
+                    index--;
+                    mergedLines[mergedLines.IndexOf(lineToMergeTo)] = new LineString(mergedCoordinates.ToArray());
+                    foundAWayToMergeTo = true;
+                }
+
+                if (foundAWayToMergeTo)
+                {
+                    continue;
+                }
+
+                mergedLines.Add(linesToMerge.First());
+                linesToMerge.RemoveAt(0);
+            }
+            return mergedLines;
+        }
+
+        private async Task<bool> CanBeMerged(Coordinate coordinate1, Coordinate coordinate2, List<LineString> simplifiedLines)
+        {
+            var newLine = new LineString(new[] {coordinate1, coordinate2});
+            if (newLine.Length >= CLOSEST_POINT_TOLERANCE*2)
+            {
+                return false;
+            }
+            var linesInArea = await GetLineStringsInArea(newLine);
+            if (linesInArea.Concat(simplifiedLines).Any(l => l.Intersects(newLine)))
+            {
+                return false;
+            }
+            return true;
+        }
+
+        private async Task<LineString> FindALineToMergeTo(List<LineString> linesToMerge, List<LineString> mergedLines, LineString lineToMerge)
+        {
+            foreach (var mergedLine in mergedLines)
+            {
+                var linesToTestAgainst = linesToMerge.Concat(mergedLines).Except(new[] { mergedLine, lineToMerge }).ToList();
+                if (await CanBeMerged(mergedLine.Coordinates.Last(), lineToMerge.Coordinates.First(), linesToTestAgainst) ||
+                    await CanBeMerged(mergedLine.Coordinates.First(), lineToMerge.Coordinates.Last(), linesToTestAgainst) ||
+                    await CanBeMerged(mergedLine.Coordinates.First(), lineToMerge.Coordinates.First(), linesToTestAgainst) ||
+                    await CanBeMerged(mergedLine.Coordinates.Last(), lineToMerge.Coordinates.Last(), linesToTestAgainst))
+                {
+                    return mergedLine;
+                }
+            }
+            return null;
         }
     }
 }
