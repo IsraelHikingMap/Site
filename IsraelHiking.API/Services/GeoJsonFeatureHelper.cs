@@ -32,19 +32,19 @@ namespace IsraelHiking.API.Services
     {
         private static readonly List<PropertiesData> Relations = new List<PropertiesData>
         {
-            new PropertiesData("place", "any", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/hut.png", true),
+            new PropertiesData("place", "any", 1, "http://www.sjjb.co.uk/mapicons/png/accommodation_youth_hostel.p.24.png", true),
             new PropertiesData("boundary", "national_park", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
             new PropertiesData("boundary", "protected_area", 1),
             new PropertiesData("leisure", "nature_reserve", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
-            new PropertiesData("route", "hiking", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/hiker.png"),
-            new PropertiesData("route", "bicycle", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/bike.png"),
-            new PropertiesData("route", "mtb", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/bike.png"),
+            new PropertiesData("route", "hiking", 1, "https://israelhiking.osm.org.il/content/images/hike.svg"),
+            new PropertiesData("route", "bicycle", 1, "https://israelhiking.osm.org.il/content/images/bike.svg"),
+            new PropertiesData("route", "mtb", 1, "https://israelhiking.osm.org.il/content/images/bike.svg"),
             new PropertiesData("waterway", "waterfall", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/waterfall.png")
         };
 
         private static readonly List<PropertiesData> Ways = new List<PropertiesData>
         {
-            new PropertiesData("place", "any", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/hut.png", true),
+            new PropertiesData("place", "any", 1, "http://www.sjjb.co.uk/mapicons/png/accommodation_youth_hostel.p.24.png", true),
             new PropertiesData("waterway", "stream", 1),
             new PropertiesData("waterway", "river", 1),
             new PropertiesData("waterway", "wadi", 1),
@@ -57,12 +57,12 @@ namespace IsraelHiking.API.Services
 
         private static readonly List<PropertiesData> Nodes = new List<PropertiesData>
         {
-            new PropertiesData("place", "any", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/hut.png", true),
+            new PropertiesData("place", "any", 1, "http://www.sjjb.co.uk/mapicons/png/accommodation_youth_hostel.p.24.png", true),
             new PropertiesData("landuse", "farmyard", 1),
             new PropertiesData("natural", "peak", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/peak.png"),
             new PropertiesData("natural", "spring", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/spring.png"),
             new PropertiesData("natural", "tree", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/tree.png"),
-            new PropertiesData("natural", "cave_entrance", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/cave_entrence.png"),
+            new PropertiesData("natural", "cave_entrance", 1, "http://www.sjjb.co.uk/mapicons/png/poi_cave.glow.32.png"),
             new PropertiesData("natural", "waterhole", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/water_hole.png"),
             new PropertiesData("water", "pond", 1),
             new PropertiesData("man_made", "water_well", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/well.png"),
