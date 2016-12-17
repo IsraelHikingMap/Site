@@ -99,14 +99,14 @@
                             let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
                             this.osmTraceLayer.addLayer(polyLine);
                         }
-                    }
-                    for (let markerData of dataContainer.markers) {
-                        let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, riseOnHover: true, icon: Services.IconsService.createMarkerIconWithColor(this.getPathOprtions().color), opacity: this.getPathOprtions().opacity } as L.MarkerOptions);
-                        marker.bindLabel(markerData.title, { noHide: true, className: "marker-label" } as L.LabelOptions);
-                        this.osmTraceLayer.addLayer(marker);
+                        for (let markerData of route.markers) {
+                            let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, riseOnHover: true, icon: Services.IconsService.createMarkerIconWithColor(this.getPathOprtions().color), opacity: this.getPathOprtions().opacity } as L.MarkerOptions);
+                            marker.bindLabel(markerData.title, { noHide: true, className: "marker-label" } as L.LabelOptions);
+                            this.osmTraceLayer.addLayer(marker);
+                        }
                     }
                     let bounds = L.latLngBounds(dataContainer.southWest, dataContainer.northEast);
-                    let mainMarker = L.marker(bounds.getCenter(), { icon: Services.IconsService.createTraceMarkerIcon(), draggable: false }) as Services.Layers.PoiLayers.IMarkerWithTitle; // marker to allow remove of this layer.
+                    let mainMarker = L.marker(bounds.getCenter(), { icon: Services.IconsService.createTraceMarkerIcon(), draggable: false }) as Services.Layers.RouteLayers.IMarkerWithTitle; // marker to allow remove of this layer.
                     mainMarker.title = trace.fileName;
                     let newScope = $scope.$new() as ISearchResultsMarkerPopup;
                     newScope.marker = mainMarker;

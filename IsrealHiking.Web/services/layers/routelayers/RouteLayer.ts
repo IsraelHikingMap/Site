@@ -5,6 +5,14 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         polyline: L.Polyline;
     }
 
+    export interface IMarkerWithTitle extends L.Marker {
+        title: string;
+    }
+
+    export interface IMarkerWithData extends Common.MarkerData {
+        marker: IMarkerWithTitle;
+    }
+
     export interface IRouteProperties {
         name: string;
         pathOptions: L.PathOptions;
@@ -15,6 +23,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
 
     export interface IRoute {
         segments: IRouteSegment[];
+        markers: IMarkerWithData[];
         properties: IRouteProperties;
     }
 
@@ -34,6 +43,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         public $q: angular.IQService;
         public $rootScope: angular.IRootScopeService;
         public $compile: angular.ICompileService;
+        public $timeout: angular.ITimeoutService;
         public snappingService: SnappingService;
         public routerService: Routers.RouterService;
         public elevationProvider: Elevation.IElevationProvider;
@@ -46,6 +56,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         constructor($q: angular.IQService,
             $rootScope: angular.IRootScopeService,
             $compile: angular.ICompileService,
+            $timeout: angular.ITimeoutService,
             mapService: MapService,
             snappingService: SnappingService,
             routerService: Routers.RouterService,
@@ -56,6 +67,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.$q = $q;
             this.$rootScope = $rootScope;
             this.$compile = $compile;
+            this.$timeout = $timeout;
             this.snappingService = snappingService;
             this.routerService = routerService;
             this.elevationProvider = elevationProvider;
@@ -89,7 +101,11 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         }
 
         public editRoute() {
-            this.currentState.setEditState();
+            this.currentState.setEditRouteState();
+        }
+
+        public editPoi() {
+            this.currentState.setEditPoiState();
         }
 
         public readOnly() {
@@ -126,8 +142,16 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                     routingType: segment.routingType
                 } as Common.RouteSegmentData);
             }
+            let markersData = [] as Common.MarkerData[];
+            for (let marker of this.route.markers) {
+                markersData.push({
+                    title: marker.title,
+                    latlng: marker.latlng
+                });
+            }
             return {
                 name: this.route.properties.name,
+                markers: markersData,
                 segments: segmentsData
             } as Common.RouteData;
         }
@@ -145,11 +169,17 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         private setDataInternal = (data: Common.RouteData) => {
             this.currentState.clear();
             this.route.segments = [];
+            this.route.markers = [];
             for (let segmentData of data.segments) {
                 let segment = angular.copy(segmentData) as IRouteSegment;
                 segment.polyline = null;
                 segment.routePointMarker = null;
                 this.route.segments.push(segment);
+            }
+            for (let markerData of data.markers) {
+                let marker = angular.copy(markerData) as IMarkerWithData;
+                marker.marker = null;
+                this.route.markers.push(marker);
             }
         }
 
@@ -205,6 +235,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         public clear = () => {
             this.currentState.clear();
             this.route.segments = [];
+            this.route.markers = [];
             this.dataChanged();
             this.currentState.initialize();
         }
@@ -264,6 +295,20 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             }
             this.map.fitBounds(featureGroup.getBounds());
             featureGroup.clearLayers();
+        }
+
+        public getHtmlTitle(title: string): string {
+            let lines = title.split("\n");
+            var htmlTitleArray = "";
+            for (let line of lines) {
+                if (!line) {
+                    continue;
+                }
+                // start with hebrew or not, ignoring non alphabetical characters.
+                let direction = (line.match(/^[^a-zA-Z]*[\u0591-\u05F4]/)) ? "rtl" : "ltr";
+                htmlTitleArray += `<div dir="${direction}">${line}</div>`;
+            }
+            return htmlTitleArray;
         }
     }
 }

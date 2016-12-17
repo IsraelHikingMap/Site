@@ -183,7 +183,7 @@
                     }
                 }
                 let index = 0;
-                for (let marker of layersService.getMarkers().markers) {
+                for (let marker of route.markers) {
                     $scope.offroadRequest.mapItems.push({
                         title: `Point ${index++}`,
                         mapItemType: "POI",

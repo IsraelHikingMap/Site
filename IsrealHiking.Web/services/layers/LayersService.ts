@@ -54,7 +54,6 @@ namespace IsraelHiking.Services.Layers {
         public baseLayers: IBaseLayer[];
         public overlays: IOverlay[];
         public routes: Layers.RouteLayers.RouteLayer[];
-        public markers: Layers.PoiLayers.PoiLayer;
         public routeChangedEvent: Common.EventHelper<{}>;
         public selectedBaseLayer: IBaseLayer;
         public selectedRoute: Layers.RouteLayers.RouteLayer;
@@ -85,7 +84,6 @@ namespace IsraelHiking.Services.Layers {
             this.routes = [];
             this.overlayZIndex = 10;
             this.routeChangedEvent = new Common.EventHelper<{}>();
-            this.markers = this.routeLayerFactory.createPoiLayer();
             // default layers:
             this.addBaseLayer({
                 key: LayersService.ISRAEL_HIKING_MAP,
@@ -362,11 +360,11 @@ namespace IsraelHiking.Services.Layers {
                         segment.latlngzs = latlngzs;
                         segment.routePoint = L.latLng(segment.routePoint.lat, segment.routePoint.lng);
                     }
-                }
-            }
-            if (data.markers) {
-                for (let marker of data.markers) {
-                    marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng);
+                    if (route.markers) {
+                        for (let marker of route.markers) {
+                            marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng);
+                        }
+                    }
                 }
             }
             this.setData(data, false);
@@ -375,10 +373,6 @@ namespace IsraelHiking.Services.Layers {
 
         public getSelectedRoute = (): RouteLayers.RouteLayer => {
             return this.selectedRoute;
-        }
-
-        public getMarkers = (): PoiLayers.PoiLayer => {
-            return this.markers;
         }
 
         public getRouteByName = (routeName: string): Layers.RouteLayers.RouteLayer => {
@@ -460,7 +454,6 @@ namespace IsraelHiking.Services.Layers {
         public getData = () => {
             var container = {
                 routes: [],
-                markers: [],
                 baseLayer: null,
                 overlays: [],
                 northEast: this.map.getBounds().getNorthEast(),
@@ -472,7 +465,6 @@ namespace IsraelHiking.Services.Layers {
                     container.routes.push(route.getData());
                 }
             }
-            container.markers = this.markers.getData();
             container.baseLayer = this.extractDataFromLayer(this.selectedBaseLayer);
             var visibaleOverlays = this.overlays.filter(overlay => overlay.visible);
             for (let overlayIndex = 0; overlayIndex < visibaleOverlays.length; overlayIndex++) {
@@ -485,6 +477,7 @@ namespace IsraelHiking.Services.Layers {
             if (dataContainer.routes.length === 0) {
                 dataContainer.routes.push({
                     name: this.createRouteName(),
+                    markers: [],
                     segments: []
                 } as Common.RouteData);
             }
@@ -497,7 +490,6 @@ namespace IsraelHiking.Services.Layers {
                 this.map.addLayer(routeLayer);
                 this.selectRoute(routeLayer);
             }
-            this.markers.setData(this.markers.getData().concat(dataContainer.markers || []));
 
             if (dataContainer.northEast != null && dataContainer.southWest != null) {
                 this.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));

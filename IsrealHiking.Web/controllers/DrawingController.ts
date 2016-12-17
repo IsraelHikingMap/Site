@@ -48,7 +48,7 @@
 
             $scope.clear = (e: Event) => {
                 this.suppressEvents(e);
-                let layer = this.getDrawingLayer($scope);
+                let layer = this.layersService.getSelectedRoute();
                 if (layer != null) {
                     layer.clear();
                 }
@@ -57,12 +57,10 @@
             $scope.setEditMode = (editMode: Services.Layers.EditMode, e: Event) => {
                 this.suppressEvents(e);
                 let selectedRoute = this.layersService.getSelectedRoute();
-                let markers = this.layersService.markers;
                 if ($scope.editMode === editMode) {
                     if (selectedRoute != null) {
                         selectedRoute.readOnly();
                     }
-                    markers.readOnly();
                     $scope.editMode = Services.Layers.EditModeString.none;
                     return;
                 }
@@ -70,13 +68,11 @@
                 switch (editMode) {
                     case Services.Layers.EditModeString.poi:
                         if (selectedRoute != null) {
-                            selectedRoute.readOnly();
+                            selectedRoute.editPoi();
+                            $scope.editMode = editMode;
                         }
-                        markers.edit();
-                        $scope.editMode = editMode;
                         return;
                     case Services.Layers.EditModeString.route:
-                        markers.readOnly();
                         if (selectedRoute != null) {
                             selectedRoute.editRoute();
                             $scope.editMode = editMode;
@@ -96,7 +92,7 @@
 
             $scope.undo = (e: Event) => {
                 this.suppressEvents(e);
-                let layer = this.getDrawingLayer($scope);
+                let layer = this.layersService.getSelectedRoute();
                 if (layer != null) {
                     layer.undo();
                 }
@@ -110,7 +106,7 @@
             };
 
             $scope.isUndoDisbaled = (): boolean => {
-                let layer = this.getDrawingLayer($scope);
+                let layer = this.layersService.getSelectedRoute();
                 return layer != null ? layer.isUndoDisbaled() : true;
             };
 
@@ -122,7 +118,7 @@
                 if (e.ctrlKey && String.fromCharCode(e.which).toLowerCase() === "z") {
                     $scope.undo(e);
                 } else if (e.keyCode === DrawingController.ESCAPE_KEYCODE) {
-                    let layer = this.getDrawingLayer($scope);
+                    let layer = this.layersService.getSelectedRoute();
                     if (layer != null) {
                         layer.readOnly();
                     }
@@ -134,16 +130,6 @@
                     $scope.$apply();
                 }
             });
-        }
-
-        private getDrawingLayer($scope: IDrawingScope): Services.Layers.IDrawingLayer {
-            if ($scope.editMode === Services.Layers.EditModeString.route && this.layersService.getSelectedRoute() != null) {
-                return this.layersService.getSelectedRoute();
-            }
-            if ($scope.editMode === Services.Layers.EditModeString.poi) {
-                return this.layersService.markers;
-            }
-            return null;
         }
     }
 }

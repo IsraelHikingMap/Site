@@ -52,7 +52,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertDataContainerToGeoJson_ShouldConvertToGeoJson()
         {
-            var dataContainer = new DataContainer { markers = new List<MarkerData> { new MarkerData { latlng = new LatLng() } } };
+            var dataContainer = new DataContainer { routes = new List<RouteData> { new RouteData { markers = new List<MarkerData> { new MarkerData { latlng = new LatLng() } } } } };
             var results = _converterService.ToAnyFormat(dataContainer, "geojson").Result.ToFeatureCollection();
 
             Assert.AreEqual(1, results.Features.Count);
@@ -115,10 +115,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             var results = _converterService.ToDataContainer(_simpleGpx.ToBytes(), "gpx").Result;
 
-            Assert.AreEqual(1, results.markers.Count);
-            Assert.AreEqual(0, results.routes.Count);
+            Assert.AreEqual(1, results.routes.Count);
         }
-
 
         [TestMethod]
         public void ConvertGpxToDataContainer_NonSiteFile_ShouldManipulateRouteData()
@@ -212,8 +210,7 @@ namespace IsraelHiking.API.Tests.Services
 
             var dataContainer = _converterService.ToDataContainer(collection.ToBytes(), "geojson").Result;
 
-            Assert.AreEqual(0, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(1, dataContainer.routes.Count);
         }
 
         [TestMethod]
@@ -223,8 +220,7 @@ namespace IsraelHiking.API.Tests.Services
 
             var dataContainer = _converterService.ToDataContainer(_randomBytes, "twl").Result;
 
-            Assert.AreEqual(0, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(1, dataContainer.routes.Count);
         }
 
         [TestMethod]
@@ -234,8 +230,7 @@ namespace IsraelHiking.API.Tests.Services
 
             var dataContainer = _converterService.ToDataContainer(_randomBytes, "kuku").Result;
 
-            Assert.AreEqual(0, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(1, dataContainer.routes.Count);
         }
 
         [TestMethod]
@@ -249,8 +244,7 @@ namespace IsraelHiking.API.Tests.Services
 
             var dataContainer = _converterService.ToDataContainer(zipfileStream.ToArray(), "kmz").Result;
 
-            Assert.AreEqual(0, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(1, dataContainer.routes.Count);
         }
 
         [TestMethod]
@@ -264,8 +258,7 @@ namespace IsraelHiking.API.Tests.Services
             }
             var dataContainer = _converterService.ToDataContainer(compressedGzipStream.ToArray(), "file.gpx.gz").Result;
 
-            Assert.AreEqual(0, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(1, dataContainer.routes.Count);
         }
     }
 }

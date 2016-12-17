@@ -22,6 +22,8 @@
 
     export class FileController extends BaseMapController {
 
+        layersService: Services.Layers.LayersService;
+
         constructor($scope: IFileScope,
             $window: angular.IWindowService,
             $document: angular.IDocumentService,
@@ -30,6 +32,7 @@
             fileService: Services.FileService,
             toastr: Toastr) {
             super(mapService);
+            this.layersService = layersService;
 
             $scope.isShowingSaveAs = false;
             $scope.isFromatsDropdownOpen = false;
@@ -54,6 +57,10 @@
                     label: "Single Track GPX (.gpx)",
                     extension: "gpx",
                     outputFormat: "gpx_single_track"
+                } as IFormatViewModel, {
+                    label: "All routes to a single Track GPX (.gpx)",
+                    extension: "gpx",
+                    outputFormat: "all_gpx_single_track"
                 } as IFormatViewModel
             ];
 
@@ -70,8 +77,8 @@
             }
 
             $scope.save = (e: Event) => {
-                var data = layersService.getData();
-                fileService.saveToFile("IsraelHikingMap.gpx", "gpx", data)
+                let data = this.getData();
+                fileService.saveToFile(this.getName(data)+ ".gpx", "gpx", data)
                     .then(() => { }, () => {
                         toastr.error($scope.resources.unableToSaveToFile);
                     });
@@ -84,8 +91,14 @@
             };
 
             $scope.saveAs = (format: IFormatViewModel, e: Event) => {
-                var data = layersService.getData();
-                fileService.saveToFile(`IsraelHikingMap.${format.extension}`, format.outputFormat, data)
+                let outputFormat = format.outputFormat;
+                let data = this.getData();
+                if (outputFormat === "all_gpx_single_track") {
+                    outputFormat = "gpx_single_track";
+                    data = layersService.getData();
+                }
+                let name = this.getName(data);
+                fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data)
                     .then(() => { }, () => {
                         toastr.error($scope.resources.unableToSaveToFile);
                     });
@@ -135,6 +148,23 @@
                 }
                 return true;
             });
-        }   
+        }
+
+        private getData(): Common.DataContainer {
+            if (this.layersService.getSelectedRoute() == null) {
+                return this.layersService.getData();
+            }
+            return {
+                routes: [this.layersService.getSelectedRoute().getData()]
+            } as Common.DataContainer;
+        }
+
+        private getName(data: Common.DataContainer): string {
+            let name = "IsraelHikingMap";
+            if (data.routes.length === 1 && data.routes[0].name) {
+                name = data.routes[0].name;
+            }
+            return name;
+        }
     }
 } 

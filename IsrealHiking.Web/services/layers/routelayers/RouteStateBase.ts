@@ -22,9 +22,33 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.context.setState(new RouteStateReadOnly(this.context));
         }
 
-        public setEditState(): void {
+        public setEditRouteState(): void {
             this.context.clearCurrentState();
-            this.context.setState(new RouteStateEdit(this.context));
+            this.context.setState(new RouteStateEditRoute(this.context));
+        }
+
+        public setEditPoiState(): void {
+            this.context.clearCurrentState();
+            this.context.setState(new RouteStateEditPoi(this.context));
+        }
+
+        protected createPoiMarker = (markerData: Common.MarkerData, isEditable: boolean): IMarkerWithTitle => {
+            let pathOptions = this.context.route.properties.pathOptions;
+            let marker = L.marker(markerData.latlng,
+            {
+                draggable: isEditable,
+                clickable: isEditable,
+                riseOnHover: true,
+                icon: IconsService.createMarkerIconWithColor(pathOptions.color),
+                opacity: pathOptions.opacity
+            } as L.MarkerOptions) as IMarkerWithTitle;
+            marker.title = markerData.title || "";
+            marker.bindLabel(this.context.getHtmlTitle(marker.title), { noHide: true, className: "marker-label" } as L.LabelOptions);
+            marker.addTo(this.context.map);
+            if (!marker.title) { // must be after adding to map...
+                marker.hideLabel();
+            }
+            return marker;
         }
     }
 }

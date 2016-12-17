@@ -29,12 +29,12 @@
 
     export interface RouteData {
         name: string;
+        markers: MarkerData[];
         segments: RouteSegmentData[];
     }
 
     export interface DataContainer {
         routes: RouteData[];
-        markers: MarkerData[];
         baseLayer: LayerData;
         overlays: LayerData[];
         northEast: L.LatLng;

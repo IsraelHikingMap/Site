@@ -65,9 +65,13 @@ namespace IsraelHiking.API.Services
         {
             var gpx = (await Convert(content, fileName, GPX)).ToGpx();
             var container = _gpxDataContainerConverter.ToDataContainer(gpx);
-            if (gpx.creator != ISRAEL_HIKING_MAP)
+            if (gpx.creator == ISRAEL_HIKING_MAP)
             {
-                container.routes = container.routes.Select(r => _routeDataSplitterService.Split(r, RoutingType.HIKE)).ToList();
+                return container;
+            }
+            foreach (var route in container.routes.Where(r => r.segments.SelectMany(s => s.latlngzs).Any()))
+            {
+                route.segments = _routeDataSplitterService.Split(route, RoutingType.HIKE).segments;
             }
             return container;
         }

@@ -22,7 +22,7 @@
                     return;
                 }
                 this.updateLocalStorage($scope, localStorageService);
-                layersService.addRoute({ properties: $scope.routeProperties, segments: []});
+                layersService.addRoute({ properties: $scope.routeProperties, segments: [], markers: []});
                 this.suppressEvents(e);
             }
 

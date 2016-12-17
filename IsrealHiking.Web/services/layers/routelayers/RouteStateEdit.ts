@@ -1,14 +1,16 @@
 ﻿namespace IsraelHiking.Services.Layers.RouteLayers {
-    export class RouteStateEdit extends RouteStateBase {
-        protected hoverHandler: IHoverHandler;
+    export abstract class RouteStateEdit extends RouteStateBase {
+        protected hoverHandler: HoverHandler;
         private selectedRouteSegmentIndex: number;
 
         constructor(context: RouteLayer) {
             super(context);
             this.selectedRouteSegmentIndex = -1;
-            this.hoverHandler = new HoverHandlerRoute(context, this.createMiddleMarker());
+            this.hoverHandler = new HoverHandler(context, this.createMiddleMarker());
             this.initialize();
         }
+
+        protected abstract addPoint(e: L.LeafletMouseEvent): void;
 
         public initialize() {
             this.context.map.on("click", this.addPoint, this);
@@ -16,8 +18,12 @@
             this.context.snappingService.enable(true);
             for (let segment of this.context.route.segments) {
                 segment.polyline = L.polyline(segment.latlngzs, this.context.route.properties.pathOptions);
-                segment.routePointMarker = this.createMarker(segment.routePoint);
+                segment.routePointMarker = this.createRouteMarker(segment.routePoint);
                 this.context.map.addLayer(segment.polyline);
+            }
+            for (let marker of this.context.route.markers) {
+                marker.marker = this.createMarkerWithEvents(marker);
+                this.context.map.addLayer(marker.marker);
             }
             this.updateStartAndEndMarkersIcons();
         }
@@ -27,40 +33,16 @@
                 this.context.map.removeLayer(segment.polyline);
                 this.destoryMarker(segment.routePointMarker);
             }
+            for (let marker of this.context.route.markers) {
+                this.destoryMarker(marker.marker);
+            }
             this.context.snappingService.enable(false);
             this.context.map.off("mousemove", this.hoverHandler.onMouseMove, this.hoverHandler);
             this.context.map.off("click", this.addPoint, this);
-            this.hoverHandler.setState(HoverHandlerBase.NONE);
+            this.hoverHandler.setState(HoverHandler.NONE);
         }
 
-        public getEditMode(): EditMode {
-            return EditModeString.route;
-        }
-
-        private addPoint(e: L.LeafletMouseEvent) {
-            let snappingResponse = this.context.snappingService.snapTo(e.latlng);
-            this.addPointToRoute(snappingResponse.latlng, this.context.route.properties.currentRoutingType).then(() => {
-                this.context.dataChanged();
-            });
-            this.hoverHandler.setState(HoverHandlerBase.NONE);
-        }
-
-        private addPointToRoute = (latlng: L.LatLng, routingType: string): angular.IPromise<{}> => {
-            this.context.route.segments.push(this.createRouteSegment(latlng, [this.context.getLatLngZFromLatLng(latlng), this.context.getLatLngZFromLatLng(latlng)], routingType));
-            this.updateStartAndEndMarkersIcons();
-            if (this.context.route.segments.length > 1) {
-                let endPointSegmentIndex = this.context.route.segments.length - 1;
-                return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
-            } else if (this.context.route.segments.length === 1) {
-                return this.context.elevationProvider.updateHeights(this.context.route.segments[0].latlngzs);
-            }
-            var deferred = this.context.$q.defer<{}>();
-            deferred.resolve();
-
-            return deferred.promise;
-        }
-
-        private createMarker = (latlng: L.LatLng): L.Marker => {
+        private createRouteMarker = (latlng: L.LatLng): L.Marker => {
             let pathOptions = this.context.route.properties.pathOptions;
             let marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
             this.setRouteMarkerEvents(marker);
@@ -154,7 +136,7 @@
 
         private setRouteMarkerEvents = (marker: L.Marker) => {
             marker.on("dragstart", () => {
-                this.hoverHandler.setState(HoverHandlerBase.ON_MARKER);
+                this.hoverHandler.setState(HoverHandler.ON_MARKER);
                 this.dragPointStart(marker);
             });
             marker.on("drag", () => {
@@ -162,24 +144,24 @@
             });
             marker.on("dragend", () => {
                 this.dragPointEnd(marker);
-                this.hoverHandler.setState(HoverHandlerBase.NONE);
+                this.hoverHandler.setState(HoverHandler.NONE);
             });
             marker.on("mouseover", () => {
-                if (this.hoverHandler.getState() !== HoverHandlerBase.DRAGGING) {
-                    this.hoverHandler.setState(HoverHandlerBase.ON_MARKER);
+                if (this.hoverHandler.getState() !== HoverHandler.DRAGGING) {
+                    this.hoverHandler.setState(HoverHandler.ON_MARKER);
                 }
             });
             marker.on("mouseout", () => {
-                if (this.hoverHandler.getState() !== HoverHandlerBase.DRAGGING) {
-                    this.hoverHandler.setState(HoverHandlerBase.NONE);
+                if (this.hoverHandler.getState() !== HoverHandler.DRAGGING) {
+                    this.hoverHandler.setState(HoverHandler.NONE);
                 }
             });
         }
 
         protected createRouteSegment = (latlng: L.LatLng, latlngzs: Common.LatLngZ[], routingType: string): IRouteSegment => {
             var routeSegment = {
-                routePointMarker: (this.hoverHandler.getState() !== HoverHandlerBase.DRAGGING)
-                    ? this.createMarker(latlng)
+                routePointMarker: (this.hoverHandler.getState() !== HoverHandler.DRAGGING)
+                    ? this.createRouteMarker(latlng)
                     : null,
                 routePoint: latlng,
                 polyline: L.polyline(latlngzs, this.context.route.properties.pathOptions),
@@ -243,7 +225,7 @@
         }
 
         private middleMarkerDragStart = (middleMarker: L.Marker) => {
-            this.hoverHandler.setState(HoverHandlerBase.DRAGGING);
+            this.hoverHandler.setState(HoverHandler.DRAGGING);
             let snappingResponse = this.context.snapToRoute(middleMarker.getLatLng());
             this.selectedRouteSegmentIndex = _.findIndex(this.context.route.segments, (segment) => segment.polyline === snappingResponse.polyline);
             let latlngzs = [this.context.getLatLngZFromLatLng(this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng()),
@@ -264,7 +246,7 @@
 
         private middleMarkerDragEnd = (middleMarker: L.Marker) => {
             let snappingResponse = this.context.snappingService.snapTo(middleMarker.getLatLng());
-            this.context.route.segments[this.selectedRouteSegmentIndex].routePointMarker = this.createMarker(snappingResponse.latlng);
+            this.context.route.segments[this.selectedRouteSegmentIndex].routePointMarker = this.createRouteMarker(snappingResponse.latlng);
             this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
             this.context.route.segments[this.selectedRouteSegmentIndex].latlngzs[this.context.route.segments[this.selectedRouteSegmentIndex].latlngzs.length - 1] = this.context.getLatLngZFromLatLng(snappingResponse.latlng);
             var selectedRouteSegmentIndex = this.selectedRouteSegmentIndex; // closure;
@@ -272,10 +254,10 @@
                 .then(() => this.runRouting(selectedRouteSegmentIndex, selectedRouteSegmentIndex + 1))
                 .then(() => this.context.dataChanged());
             this.selectedRouteSegmentIndex = -1;
-            this.hoverHandler.setState(HoverHandlerBase.NONE);
+            this.hoverHandler.setState(HoverHandler.NONE);
         }
 
-        protected createMiddleMarker = (): L.Marker => {
+        private createMiddleMarker = (): L.Marker => {
             var middleMarker = L.marker(this.context.map.getCenter(), { clickable: true, draggable: true, icon: IconsService.createRoundIcon(this.context.route.properties.pathOptions.color), opacity: 0.0 } as L.MarkerOptions);
             middleMarker.on("click", () => {
                 this.middleMarkerClick(middleMarker);
@@ -302,7 +284,7 @@
             this.context.route.segments.splice(this.context.route.segments.indexOf(segment), 1);
         }
 
-        private destoryMarker = (marker: L.Marker) => {
+        protected destoryMarker = (marker: L.Marker) => {
             if (marker == null) {
                 return;
             }
@@ -313,8 +295,11 @@
             marker.off("dragend");
             marker.off("mouseover");
             marker.off("mouseout");
+            marker.off("dblclick");
+            marker.off("popupopen");
+            marker.off("popupclose");
             this.context.map.removeLayer(marker);
-            this.hoverHandler.setState(HoverHandlerBase.NONE);
+            this.hoverHandler.setState(HoverHandler.NONE);
         }
 
         public reRoute = (): void => {
@@ -323,6 +308,51 @@
                 chain = chain.then(() => this.runRouting(segmentIndex - 1, segmentIndex));
             }
             chain.then(() => this.context.dataChanged());
+        }
+
+        protected createMarkerWithEvents(markerData: Common.MarkerData): IMarkerWithTitle {
+            let marker = this.createPoiMarker(markerData, true);
+            var newScope = this.context.$rootScope.$new() as Controllers.IMarkerPopupScope;
+            newScope.marker = marker;
+            newScope.routeLayer = this.context;
+            this.setPoiMarkerEvents(marker);
+            newScope.remove = () => {
+                let routeMarker = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
+                this.removePoi(routeMarker);
+            }
+            let popupHtml = this.context.$compile("<div marker-popup></div>")(newScope)[0];
+            marker.bindPopup(popupHtml);
+            return marker;
+        }
+
+        private setPoiMarkerEvents(marker: L.Marker) {
+            marker.on("dragstart", () => {
+                marker.closePopup();
+                this.hoverHandler.setState(RouteLayers.HoverHandler.DRAGGING);
+            });
+            marker.on("dragend", () => {
+                let markerInArray = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
+                markerInArray.latlng = marker.getLatLng();
+                this.context.dataChanged();
+                this.hoverHandler.setState(HoverHandler.NONE);
+            });
+            marker.on("mouseover", () => {
+                if (this.hoverHandler.getState() !== RouteLayers.HoverHandler.DRAGGING) {
+                    this.hoverHandler.setState(RouteLayers.HoverHandler.ON_MARKER);
+                }
+            });
+            marker.on("mouseout", () => {
+                if (this.hoverHandler.getState() !== RouteLayers.HoverHandler.DRAGGING) {
+                    this.hoverHandler.setState(RouteLayers.HoverHandler.NONE);
+                }
+            });
+        }
+
+        private removePoi = (poi: IMarkerWithData) => {
+            let poiToRemove = _.find(this.context.route.markers, markerToFind => markerToFind === poi);
+            this.context.route.markers.splice(this.context.route.markers.indexOf(poiToRemove), 1);
+            this.destoryMarker(poiToRemove.marker);
+            this.context.dataChanged();
         }
     }
 }

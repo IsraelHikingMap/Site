@@ -29,12 +29,13 @@ namespace IsraelHiking.API.Converters
     {
         public gpxType ToGpx(DataContainer container)
         {
-            var routes = (container.routes ?? new List<RouteData>()).Where(r => r.segments.SelectMany(s => s.latlngzs).Any());
+            var containerRoutes = container.routes ?? new List<RouteData>();
+            var nonEmptyRoutes = containerRoutes.Where(r => r.segments.SelectMany(s => s.latlngzs).Any());
             return new gpxType
             {
-                wpt = container.markers.Select(ToWptType).ToArray(),
+                wpt = containerRoutes.SelectMany(r => r.markers).Select(ToWptType).ToArray(),
                 rte = new rteType[0],
-                trk = routes.Select(r => new trkType
+                trk = nonEmptyRoutes.Select(r => new trkType
                 {
                     name = r.name,
                     trkseg = r.segments.Select(ToTrksegType).ToArray()
@@ -47,10 +48,20 @@ namespace IsraelHiking.API.Converters
             gpx.UpdateBounds();
             var container = new DataContainer
             {
-                markers = (gpx.wpt ?? new wptType[0]).Select(ToMarkerData).ToList(),
                 routes = ConvertRoutesToRoutesData(gpx.rte ?? new rteType[0])
             };
             container.routes.AddRange(ConvertTracksToRouteData(gpx.trk ?? new trkType[0]));
+            var markers = (gpx.wpt ?? new wptType[0]).Select(ToMarkerData).ToList();
+            if (markers.Any())
+            {
+                if (!container.routes.Any())
+                {
+                    var title = string.IsNullOrWhiteSpace(markers.First().title) ? "Markers" : markers.First().title;
+                    var name = markers.Count == 1 ? title : "Markers";
+                    container.routes.Add(new RouteData {name = name});
+                }
+                container.routes.First().markers = markers;
+            }
             if (gpx.metadata?.bounds != null)
             {
                 UpdateBoundingBox(container, gpx.metadata.bounds);

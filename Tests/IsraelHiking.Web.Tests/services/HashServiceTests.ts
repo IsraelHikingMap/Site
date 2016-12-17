@@ -42,9 +42,9 @@ namespace IsraelHiking.Tests.Services {
             hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
-            expect(dataContainer.markers.length).toBe(2);
-            expect(dataContainer.markers[0].title).toBe("title");
-            expect(dataContainer.markers[1].latlng.lat).toBe(2);
+            expect(dataContainer.routes[0].markers.length).toBe(2);
+            expect(dataContainer.routes[0].markers[0].title).toBe("title");
+            expect(dataContainer.routes[0].markers[1].latlng.lat).toBe(2);
         });
 
         it("Should be tolerant to points with single coordinate in search", () => {
@@ -53,8 +53,8 @@ namespace IsraelHiking.Tests.Services {
             hashService = new IsraelHiking.Services.HashService($location, $rootScope, localStorageService);
 
             let dataContainer = hashService.getDataContainer();
-            expect(dataContainer.markers.length).toBe(1);
-            expect(dataContainer.markers[0].latlng.lat).toBe(2);
+            expect(dataContainer.routes[0].markers.length).toBe(1);
+            expect(dataContainer.routes[0].markers[0].latlng.lat).toBe(2);
         });
 
         it("Should initialize a routes from search", () => {
@@ -86,9 +86,9 @@ namespace IsraelHiking.Tests.Services {
             expect(dataContainer.routes[0].segments[0].routePoint.lng).toBe(2);
             expect(dataContainer.routes[0].segments[0].routingType).toBe("Hike");
             expect(dataContainer.routes[0].segments[1].routePoint.lat).toBe(3);
-            expect(dataContainer.markers.length).toBe(2);
-            expect(dataContainer.markers[0].title).toBe("title");
-            expect(dataContainer.markers[1].latlng.lat).toBe(2);
+            expect(dataContainer.routes[0].markers.length).toBe(2);
+            expect(dataContainer.routes[0].markers[0].title).toBe("title");
+            expect(dataContainer.routes[0].markers[1].latlng.lat).toBe(2);
         });
 
         it("Should initialize a baselayer address from search", () => {

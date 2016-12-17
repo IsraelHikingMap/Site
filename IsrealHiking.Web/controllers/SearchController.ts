@@ -115,7 +115,7 @@
                 $scope.toggleVisibility(e);
                 this.featureGroup.clearLayers();
                 this.map.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
-                var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false}) as Services.Layers.PoiLayers.IMarkerWithTitle;
+                var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false}) as Services.Layers.RouteLayers.IMarkerWithTitle;
                 marker.title = searchResults.name || searchResults.address;
                 let newScope = $scope.$new() as ISearchResultsMarkerPopup;
                 newScope.marker = marker;
@@ -123,9 +123,12 @@
                     this.featureGroup.clearLayers();
                 }
                 newScope.convertToRoute = () => {
-                    $http.post(Common.Urls.search, searchResults.feature).then((response: {data: Common.DataContainer }) => {
+                    $http.post(Common.Urls.search, searchResults.feature).then((response: { data: Common.DataContainer }) => {
+                        if (response.data.routes.length > 0) {
+                            response.data.routes[0].markers = response.data.routes[0].markers || [];
+                            response.data.routes[0].markers.push({ latlng: searchResults.latlng, title: marker.title });
+                        }
                         layersService.setJsonData({
-                            markers: [{ latlng: searchResults.latlng, title: marker.title }],
                             routes: response.data.routes
                         } as Common.DataContainer);
                         this.featureGroup.clearLayers();
@@ -232,19 +235,23 @@
                         let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
                         this.featureGroup.addLayer(polyLine);
                     }
-                    var markerFrom = L.marker($scope.fromContext.selectedSearchResults.latlng, { icon: Services.IconsService.createStartIcon(), draggable: false }) as Services.Layers.PoiLayers.IMarkerWithTitle;
+                    var markerFrom = L.marker($scope.fromContext.selectedSearchResults.latlng, { icon: Services.IconsService.createStartIcon(), draggable: false }) as Services.Layers.RouteLayers.IMarkerWithTitle;
                     markerFrom.title = $scope.fromContext.selectedSearchResults.name || $scope.fromContext.selectedSearchResults.address;
-                    var markerTo = L.marker($scope.toContext.selectedSearchResults.latlng, { icon: Services.IconsService.createEndIcon(), draggable: false }) as Services.Layers.PoiLayers.IMarkerWithTitle;
+                    var markerTo = L.marker($scope.toContext.selectedSearchResults.latlng, { icon: Services.IconsService.createEndIcon(), draggable: false }) as Services.Layers.RouteLayers.IMarkerWithTitle;
                     markerTo.title = $scope.toContext.selectedSearchResults.name || $scope.toContext.selectedSearchResults.address;
 
                     let convertToRoute = () => {
-                        
                         layersService.setJsonData({
-                            markers: [
-                                { latlng: markerFrom.getLatLng(), title: markerFrom.title },
-                                { latlng: markerTo.getLatLng(), title: markerTo.title }
-                            ],
-                            routes: [{ segments: response, name: markerFrom.title + "-" + markerTo.title }]
+                            routes: [
+                                {
+                                    name: markerFrom.title + "-" + markerTo.title,
+                                    markers: [
+                                        { latlng: markerFrom.getLatLng(), title: markerFrom.title },
+                                        { latlng: markerTo.getLatLng(), title: markerTo.title }
+                                    ],
+                                    segments: response
+                                }
+                            ]
                         } as Common.DataContainer);
                         this.featureGroup.clearLayers();
                     }

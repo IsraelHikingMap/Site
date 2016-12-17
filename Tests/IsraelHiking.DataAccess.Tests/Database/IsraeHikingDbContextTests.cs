@@ -68,36 +68,34 @@ namespace IsraelHiking.DataAccess.Tests.Database
                 var list = context.SiteUrls.ToList();
                 foreach (var siteUrl in list)
                 {
-                    var dataContainer = JsonConvert.DeserializeObject<DataContainer>(siteUrl.JsonData);
-                    if (dataContainer.routes.Count == 0 && dataContainer.markers.Count == 0)
+                    //var dataContainerOld = JsonConvert.DeserializeObject<DataContainerOld>(siteUrl.JsonData);
+                    var dataContainerOld = JsonConvert.DeserializeObject<DataContainer>(siteUrl.JsonData);
+                    if (dataContainerOld.routes.Count == 0)// && dataContainerOld.markers.Count == 0)
                     {
                         continue;
                     }
-                    foreach (var routeData in dataContainer.routes)
+                    var dataContainerNew = new DataContainer
                     {
-                        for (int routeSegmentIndex = 0; routeSegmentIndex < routeData.segments.Count; routeSegmentIndex++)
+                        baseLayer = dataContainerOld.baseLayer,
+                        northEast = dataContainerOld.northEast,
+                        southWest = dataContainerOld.southWest,
+                        overlays = dataContainerOld.overlays,
+                        routes = dataContainerOld.routes.Select(old => new RouteData
                         {
-                            var routeSegmentData = routeData.segments[routeSegmentIndex];
-                            if (routeSegmentIndex <= 0)
-                            {
-                                continue;
-                            }
-                            var previousReouteSegment = routeData.segments[routeSegmentIndex - 1];
-                            if (previousReouteSegment.routingType == "None" && 
-                                !previousReouteSegment.latlngzs.Last().Equals(routeSegmentData.latlngzs.First()))
-                            {
-                                routeSegmentData.latlngzs.Insert(0, previousReouteSegment.latlngzs.Last());
-                            }
-
-                            if (routeSegmentData.routingType == "None" &&
-                                !routeSegmentData.latlngzs.First().Equals(previousReouteSegment.latlngzs.Last()))
-                            {
-                                routeSegmentData.latlngzs[0] = previousReouteSegment.latlngzs.Last();
-                            }
-                        }
-                    }
-
-                    var jsonData = JsonConvert.SerializeObject(dataContainer, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
+                            name = old.name,
+                            segments = old.segments
+                        }).ToList()
+                        
+                    };
+                    //if (dataContainerOld.markers.Any())
+                    //{
+                    //    if (!dataContainerNew.routes.Any())
+                    //    {
+                    //        dataContainerNew.routes.Add(new RouteData { name = "Markers" });
+                    //    }
+                    //    dataContainerNew.routes.First().markers = dataContainerOld.markers;
+                    //}
+                    var jsonData = JsonConvert.SerializeObject(dataContainerNew, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                     siteUrl.JsonData = jsonData;
                     context.MarkAsModified(siteUrl);
                 }

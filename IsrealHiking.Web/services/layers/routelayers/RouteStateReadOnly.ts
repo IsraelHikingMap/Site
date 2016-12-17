@@ -40,26 +40,28 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         public initialize() {
             this.context.map.addLayer(this.readOnlyLayers);
             this.readOnlyLayers.clearLayers();
-            if (this.context.route.segments.length <= 0) {
-                return;
-            }
-            this.createStartAndEndMarkers();
-            let groupedLatLngs = []; // gourp as many segment in order for the ant path to look smoother
-            for (let segment of this.context.route.segments) {
-                segment.routePointMarker = null;
-                segment.polyline = null;
-                if (groupedLatLngs.length === 0) {
+            if (this.context.route.segments.length > 0) {
+                this.createStartAndEndMarkers();
+                let groupedLatLngs = []; // gourp as many segment in order for the ant path to look smoother
+                for (let segment of this.context.route.segments) {
+                    segment.routePointMarker = null;
+                    segment.polyline = null;
+                    if (groupedLatLngs.length === 0) {
+                        groupedLatLngs = segment.latlngzs;
+                        continue;
+                    }
+                    if (groupedLatLngs[groupedLatLngs.length - 1].equals(segment.latlngzs[0])) {
+                        groupedLatLngs = groupedLatLngs.concat(segment.latlngzs);
+                        continue;
+                    }
+                    this.addPolyline(groupedLatLngs);
                     groupedLatLngs = segment.latlngzs;
-                    continue;
-                }
-                if (groupedLatLngs[groupedLatLngs.length - 1].equals(segment.latlngzs[0])) {
-                    groupedLatLngs = groupedLatLngs.concat(segment.latlngzs);
-                    continue;
                 }
                 this.addPolyline(groupedLatLngs);
-                groupedLatLngs = segment.latlngzs;
             }
-            this.addPolyline(groupedLatLngs);
+            for (let marker of this.context.route.markers) {
+                this.readOnlyLayers.addLayer(this.createPoiMarker(marker, false));
+            }
         }
 
         public clear() {

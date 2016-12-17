@@ -13,7 +13,6 @@ namespace IsraelHiking.Common
     public class DataContainer
     {
         public List<RouteData> routes { get; set; }
-        public List<MarkerData> markers { get; set; }
         public LatLng northEast { get; set; }
         public LatLng southWest { get; set; }
         public LayerData baseLayer { get; set; }
@@ -22,7 +21,6 @@ namespace IsraelHiking.Common
         public DataContainer()
         {
             routes = new List<RouteData>();
-            markers = new List<MarkerData>();
         }
     }
 }

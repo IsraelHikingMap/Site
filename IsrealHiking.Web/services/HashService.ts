@@ -1,5 +1,7 @@
 ﻿namespace IsraelHiking.Services {
     export class HashService {
+        public static MARKERS = "markers";
+
         private static ZOOM_KEY = "Zoom";
         private static LATLNG_KEY = "LatLng";
         private static ARRAY_DELIMITER = ";";
@@ -8,7 +10,6 @@
         private static DATA_DELIMITER = ",";
         private static PERSICION = 4;
         private static BASE_LAYER = "baselayer";
-        private static MARKERS = "markers";
         private static URL = "url";
 
         private $location: angular.ILocationService;
@@ -143,13 +144,14 @@
             let data = {
                 routes: []
             } as Common.DataContainer;
+            let markers = [];
             for (let parameter in searchObject) {
                 if (searchObject.hasOwnProperty(parameter)) {
                     if (parameter.toLocaleLowerCase() === HashService.URL) {
                         continue;
                     }
                     if (parameter === HashService.MARKERS) {
-                        data.markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || []);
+                        markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || []);
                         continue;
                     }
                     if (parameter === HashService.BASE_LAYER) {
@@ -160,6 +162,17 @@
                     }
                     data.routes.push(this.stringToRoute(searchObject[parameter], parameter.split("_").join(" ")));
                 }
+            }
+            if (markers.length > 0) {
+                if (data.routes.length === 0) {
+                    let name = markers.length === 1 ? markers[0].title || HashService.MARKERS : HashService.MARKERS; 
+                    data.routes.push({
+                        name: name,
+                        segments: [],
+                        markers: []
+                    });
+                }
+                data.routes[0].markers = markers;
             }
             return data;
         }

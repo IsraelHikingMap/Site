@@ -71,7 +71,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var dataContainer = _controller.GetRemoteFile(url).Result;
 
             Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
         }
 
         [TestMethod]
@@ -83,18 +83,18 @@ namespace IsraelHiking.API.Tests.Controllers
                 {
                     new RouteData
                     {
+                        markers = new List<MarkerData>
+                        {
+                            new MarkerData
+                            {
+                                latlng = new LatLng {lat = 10, lng = 10},
+                                title = "title"
+                            }
+                        },
                         segments = new List<RouteSegmentData>
                         {
                             new RouteSegmentData {latlngzs = new List<LatLngZ> {new LatLngZ()}}
                         }
-                    }
-                },
-                markers = new List<MarkerData>
-                {
-                    new MarkerData
-                    {
-                        latlng = new LatLng {lat = 10, lng = 10},
-                        title = "title"
                     }
                 }
             };
@@ -139,7 +139,7 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.AreEqual(1, dataContainer.routes.Count);
             Assert.AreEqual(1, dataContainer.routes.First().segments.Count);
             Assert.AreEqual(5, dataContainer.routes.First().segments.First().latlngzs.Count);
-            Assert.AreEqual(1, dataContainer.markers.Count);
+            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
         }
     }
 }

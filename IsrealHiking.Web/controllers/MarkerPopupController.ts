@@ -18,8 +18,8 @@
 
     export interface IMarkerPopupScope extends IRemovableMarkerScope {
         title: string;
-        marker: Services.Layers.PoiLayers.IMarkerWithTitle;
-        poiLayer: Services.Layers.PoiLayers.PoiLayer;
+        marker: Services.Layers.RouteLayers.IMarkerWithTitle;
+        routeLayer: Services.Layers.RouteLayers.RouteLayer;
         setTitle(title: string): void;
         getDirection(title: string): string;
     }
@@ -58,16 +58,16 @@
             };
 
             $scope.setTitle = (newTitle: string) => {
-                let routeMarker = _.find($scope.poiLayer.markers, markerToFind => markerToFind.marker === $scope.marker);
+                let routeMarker = _.find($scope.routeLayer.route.markers, markerToFind => markerToFind.marker === $scope.marker);
                 routeMarker.title = newTitle;
-                $scope.marker.updateLabelContent($scope.poiLayer.getHtmlTitle(newTitle));
+                $scope.marker.updateLabelContent($scope.routeLayer.getHtmlTitle(newTitle));
                 $scope.marker.title = newTitle;
                 if (!newTitle) {
                     $scope.marker.hideLabel();
                 } else {
                     $scope.marker.showLabel();
                 }
-                $scope.poiLayer.dataChanged();
+                $scope.routeLayer.dataChanged();
                 $scope.marker.closePopup();
             }
 

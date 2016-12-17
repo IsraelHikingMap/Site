@@ -12,10 +12,9 @@
         }
 
         public toDataContainer(geoJson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>): Common.DataContainer {
-
+            let markers = [];
             let data = {
-                routes: [] as Common.RouteData[],
-                markers: [] as Common.MarkerData[]
+                routes: [] as Common.RouteData[]
             } as Common.DataContainer;
             let leaftletGeoJson = L.geoJson(geoJson, {
                 onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
@@ -24,13 +23,13 @@
                         case Strings.GeoJson.point:
                             var point = feature.geometry as GeoJSON.Point;
                             var marker = this.createMarker(point.coordinates, feature.properties.name);
-                            data.markers.push(marker);
+                            markers.push(marker);
                             break;
                         case Strings.GeoJson.multiPoint:
                             var points = feature.geometry as GeoJSON.MultiPoint;
                             for (let pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
                                 let marker = this.createMarker(points.coordinates[pointIndex], feature.properties.name);
-                                data.markers.push(marker);
+                                markers.push(marker);
                             }
                             break;
                         case Strings.GeoJson.lineString:
@@ -59,6 +58,13 @@
                     }
                 }
             } as L.GeoJSONOptions);
+            if (markers.length > 0) {
+                if (data.routes.length === 0) {
+                    let name = markers.length === 1 ? markers[0].title || HashService.MARKERS : HashService.MARKERS;
+                    data.routes.push({ name: name, segments: [], markers: [] });
+                }
+                data.routes[0].markers = markers;
+            }
             data.northEast = leaftletGeoJson.getBounds().getNorthEast();
             data.southWest = leaftletGeoJson.getBounds().getSouthWest();
             return data;
@@ -143,20 +149,20 @@
                 features: [] as GeoJSON.Feature<GeoJSON.GeometryObject>[]
             } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 
-            for (let marker of data.markers) {
-                geoJson.features.push({
-                    type: "Feature",
-                    properties: {
-                        name: marker.title
-                    },
-                    geometry: {
-                        type: Strings.GeoJson.point,
-                        coordinates: [marker.latlng.lng, marker.latlng.lat]
-                    } as GeoJSON.Point
-                } as GeoJSON.Feature<GeoJSON.GeometryObject>);
-            }
-
             for (let routeData of data.routes) {
+                for (let marker of routeData.markers) {
+                    geoJson.features.push({
+                        type: "Feature",
+                        properties: {
+                            name: marker.title
+                        },
+                        geometry: {
+                            type: Strings.GeoJson.point,
+                            coordinates: [marker.latlng.lng, marker.latlng.lat]
+                        } as GeoJSON.Point
+                    } as GeoJSON.Feature<GeoJSON.GeometryObject>);
+                }
+
                 let multiLineStringCoordinates = [] as GeoJSON.Position[][];
 
                 for (let segment of routeData.segments) {
