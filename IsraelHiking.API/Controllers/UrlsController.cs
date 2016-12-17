@@ -2,22 +2,30 @@
 using IsraelHiking.DataAccessInterfaces;
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http;
+using IsraelHiking.API.Services;
+using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Controllers
 {
     public class UrlsController : ApiController
     {
         private IIsraelHikingRepository _repository;
+        private readonly IDataContainerConverterService _dataContainerConverterService;
 
-        public UrlsController(IIsraelHikingRepository repository)
+        public UrlsController(IIsraelHikingRepository repository, 
+            IDataContainerConverterService dataContainerConverterService)
         {
             _repository = repository;
+            _dataContainerConverterService = dataContainerConverterService;
         }
 
-        // GET api/Urls/abc
-        public async Task<IHttpActionResult> GetSiteUrl(string id)
+        // GET api/Urls/abc?format=gpx
+        public async Task<IHttpActionResult> GetSiteUrl(string id, string format = "")
         {
             var siteUrl = await _repository.GetUrlById(id);
             if (siteUrl == null)
@@ -27,10 +35,30 @@ namespace IsraelHiking.API.Controllers
             siteUrl.LastViewed = DateTime.Now;
             siteUrl.ViewsCount++;
             await _repository.Update(siteUrl);
-            return Ok(siteUrl);
+            if (string.IsNullOrWhiteSpace(format))
+            {
+                return Ok(siteUrl);
+            }
+            var fileResponse = await GetUrlAsFile(id, format, siteUrl);
+            return ResponseMessage(fileResponse);
         }
 
-        // GET api/Urls/abc
+        private async Task<HttpResponseMessage> GetUrlAsFile(string id, string format, SiteUrl siteUrl)
+        {
+            var bytes = await _dataContainerConverterService.ToAnyFormat(JsonConvert.DeserializeObject<DataContainer>(siteUrl.JsonData), format);
+            var result = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(bytes)
+            };
+            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
+            {
+                FileName = id + "." + format
+            };
+            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/format");
+            return result;
+        }
+
+        // GET api/Urls
         [Authorize]
         public async Task<IHttpActionResult> GetSiteUrlForUser()
         {
@@ -41,6 +69,10 @@ namespace IsraelHiking.API.Controllers
         // POST api/urls
         public async Task<IHttpActionResult> PostSiteUrl(SiteUrl siteUrl)
         {
+            if (string.IsNullOrWhiteSpace(siteUrl.OsmUserId) == false && siteUrl.OsmUserId != User.Identity.Name)
+            {
+                return BadRequest("You can't create a share as someone else!");
+            }
             var random = new Random(Guid.NewGuid().GetHashCode());
             siteUrl.CreationDate = DateTime.Now;
             siteUrl.LastViewed = DateTime.Now;
