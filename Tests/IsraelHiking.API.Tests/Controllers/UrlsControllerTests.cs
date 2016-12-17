@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web.Http.Results;
 using IsraelHiking.API.Controllers;
+using IsraelHiking.API.Services;
 //using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -31,7 +32,8 @@ namespace IsraelHiking.API.Tests.Controllers
         public void TestInitialize()
         {
             _israelHikingRepository = Substitute.For<IIsraelHikingRepository>();
-            _controller = new UrlsController(_israelHikingRepository);
+
+            _controller = new UrlsController(_israelHikingRepository, Substitute.For<IDataContainerConverterService>());
         }
 
         [TestMethod]
