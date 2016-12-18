@@ -11,6 +11,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         private hoverState: string;
         private context: RouteLayer;
         private hoverPolyline: L.Polyline;
+        private routeHover: boolean;
 
         constructor(context: RouteLayer, middleMarker: L.Marker) {
             this.context = context;
@@ -19,6 +20,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.middleMarker = middleMarker;
             this.hoverPolyline = L.polyline([]);
             this.setState(HoverHandler.NONE);
+            this.routeHover = true;
         }
 
         public getState = (): string => {
@@ -56,6 +58,12 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 this.hoverState === HoverHandler.DRAGGING) {
                 return;
             }
+            if (this.routeHover === false) {
+                this.setState(HoverHandler.ADD_POINT);
+                this.hoverMarker.setLatLng(e.latlng);
+                this.middleMarker.setOpacity(0.0);
+                return;
+            }
             let snapToResponse = this.context.snapToRoute(e.latlng);
             if (snapToResponse.polyline != null) {
                 this.setState(HoverHandler.ON_POLYLINE);
@@ -74,12 +82,12 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.hoverPolyline.setLatLngs([hoverStartPoint, snapToResponse.latlng]);
         }
 
-        public setHoverPolylineState(show: boolean): void {
-            if (show) {
-                this.hoverPolyline.setStyle(angular.extend({ dashArray: "10, 10" }, this.context.route.properties.pathOptions) as L.PolylineOptions);
-            } else {
-                this.hoverPolyline.setStyle({ opacity: 0 });
-            }
+        public setRouteHover(routeHover: boolean): void {
+            this.routeHover = routeHover;
+            let style = this.routeHover === false
+                ? { opacity: 0 } as L.PolylineOptions
+                : angular.extend({ dashArray: "10, 10" }, this.context.route.properties.pathOptions) as L.PolylineOptions;
+            this.hoverPolyline.setStyle(style);
 
         }
     }

@@ -3,7 +3,7 @@
     export class RouteStateEditPoi extends RouteStateEdit {
         constructor(context: RouteLayers.RouteLayer) {
             super(context);
-            this.hoverHandler.setHoverPolylineState(false);
+            this.hoverHandler.setRouteHover(false);
         }
 
         protected addPoint(e: L.LeafletMouseEvent) {
