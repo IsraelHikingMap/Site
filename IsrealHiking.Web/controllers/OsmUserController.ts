@@ -5,8 +5,11 @@
         points: number;
     }
 
+    type OsmUserState = "shares" | "traces";
+
     export interface IOsmUserScope extends IRootScope {
         ranks: IRank[];
+        state: OsmUserState;
         userService: Services.OsmUserService;
         login(e: Event);
         openUserDetails(e: Event);
@@ -18,9 +21,12 @@
         findUnmappedRoutes(trace: Services.ITrace): void;
         editInOsm(trace: Services.ITrace): void;
         open(file: File): void;
+        setState(state: OsmUserState): void;
     }
 
     export class OsmUserController extends BaseMapController {
+        private static OSM_USER_STATE_KEY = "OsmUserState";
+
         private modalInstnace: angular.ui.bootstrap.IModalServiceInstance;
         private osmTraceLayer: L.LayerGroup<any>;
 
@@ -33,6 +39,7 @@
             osmUserService: Services.OsmUserService,
             fileService: Services.FileService,
             layersService: Services.Layers.LayersService,
+            localStorageService: angular.local.storage.ILocalStorageService,
             toastr: Toastr) {
             super(mapService);
 
@@ -58,6 +65,7 @@
             $scope.openUserDetails = (e: Event) => {
                 this.suppressEvents(e);
                 osmUserService.refreshDetails();
+                $scope.state = localStorageService.get(OsmUserController.OSM_USER_STATE_KEY) as OsmUserState || "traces";
                 this.modalInstnace = $uibModal.open({
                     scope: $scope,
                     templateUrl: "controllers/osmUserDetailsModal.html"
@@ -166,6 +174,11 @@
                             this.addMissingPartsToMap(geoJson);
                         });
                     });
+            }
+
+            $scope.setState = (state: OsmUserState): void => {
+                localStorageService.set(OsmUserController.OSM_USER_STATE_KEY, state);
+                $scope.state = state;
             }
         }
 

@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using System.Web.Http.Results;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
-//using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;

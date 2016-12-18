@@ -24,9 +24,9 @@
     <div class="modal-body">
         <div class="row">
             <div class="col-md-6">
-                <div class="btn-group" ng-init="state = 'traces'">
-                    <a class="btn btn-default" ng-click="state = 'traces'" ng-class="{active: state == 'traces'}">{{resources.myTraces}}</a>
-                    <a class="btn btn-default" ng-click="state = 'shares'" ng-class="{active: state == 'shares'}">{{resources.myShares}}</a>
+                <div class="btn-group">
+                    <a class="btn btn-default" ng-click="setState('traces')" ng-class="{active: state == 'traces'}">{{resources.myTraces}}</a>
+                    <a class="btn btn-default" ng-click="setState('shares')" ng-class="{active: state == 'shares'}">{{resources.myShares}}</a>
                 </div>
             </div>
             <div class="col-md-6">
