@@ -44,6 +44,6 @@ namespace IsraelHiking.DataAccess.Osm
             }
         }
 
-        protected virtual void UpdateHeaders(HttpClient client, string url) { }
+        protected virtual void UpdateHeaders(HttpClient client, string url, string method = "GET") { }
     }
 }

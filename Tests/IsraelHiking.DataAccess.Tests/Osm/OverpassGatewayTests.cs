@@ -5,7 +5,7 @@ using IsraelHiking.DataAccess.Osm;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-namespace IsraelHiking.DataAccess.Tests
+namespace IsraelHiking.DataAccess.Tests.Osm
 {
     [TestClass]
     public class OverpassGatewayTests
