@@ -7,14 +7,14 @@ using NetTopologySuite.Geometries;
 namespace IsraelHiking.API.Tests.Services
 {
     [TestClass]
-    public class GpxSplitterServiceTests
+    public class GpxLoopsSplitterServiceTests
     {
-        private IGpxSplitterService _service;
+        private IGpxLoopsSplitterService _service;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _service = new GpxSplitterService();
+            _service = new GpxLoopsSplitterService();
         }
 
         [TestMethod]

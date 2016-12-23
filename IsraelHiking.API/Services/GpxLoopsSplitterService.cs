@@ -6,7 +6,7 @@ using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services
 {
-    public class GpxSplitterService : IGpxSplitterService
+    public class GpxLoopsSplitterService : IGpxLoopsSplitterService
     {
         /// <summary>
         /// This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
