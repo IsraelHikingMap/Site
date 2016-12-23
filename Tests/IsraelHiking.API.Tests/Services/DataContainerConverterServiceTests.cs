@@ -12,7 +12,6 @@ using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -24,6 +23,7 @@ namespace IsraelHiking.API.Tests.Services
     public class DataContainerConverterServiceTests
     {
         private IDataContainerConverterService _converterService;
+        private IRouteDataSplitterService _routeDataSplitterService;
         private IGpsBabelGateway _gpsBabelGateway;
         private byte[] _randomBytes;
         private gpxType _simpleGpx;
@@ -34,7 +34,8 @@ namespace IsraelHiking.API.Tests.Services
             _randomBytes = new byte[] { 0, 1, 1, 0 };
             _simpleGpx = new gpxType { wpt = new[] { new wptType() } };
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
-            _converterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), new RouteDataSplitterService(new CoordinatesConverter()));
+            _routeDataSplitterService = Substitute.For<IRouteDataSplitterService>();
+            _converterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), _routeDataSplitterService);
         }
 
         [TestMethod]
@@ -119,65 +120,93 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
+        public void ConvertGpxToDataContainer_NonSiteFileWithTwoSegmenets_ShouldManipulateRouteData()
+        {
+            var gpxToConvert = new gpxType
+            {
+                trk = new[]
+                {
+                    new trkType
+                    {
+                        trkseg = new[]
+                        {
+                            new trksegType
+                            {
+                                trkpt = new[]
+                                {
+                                    new wptType {lat = 1, lon = 2},
+                                    new wptType {lat = 3, lon = 4}
+                                }
+                            },
+                            new trksegType
+                            {
+                                trkpt = new[]
+                                {
+                                    new wptType {lat = 5, lon = 6},
+                                    new wptType {lat = 7, lon = 8}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var newRouteData = new RouteData
+            {
+                segments = new List<RouteSegmentData>
+                {
+                    new RouteSegmentData(),
+                    new RouteSegmentData(),
+                    new RouteSegmentData(),
+                    new RouteSegmentData()
+                }
+            };
+            _routeDataSplitterService.Split(Arg.Any<RouteData>(), Arg.Any<string>()).Returns(newRouteData);
+
+            var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), "gpx").Result;
+
+            Assert.AreEqual(1, dataContainer.routes.Count);
+            Assert.AreEqual(newRouteData.segments.Count, dataContainer.routes.First().segments.Count);
+        }
+
+        [TestMethod]
         public void ConvertGpxToDataContainer_NonSiteFile_ShouldManipulateRouteData()
         {
             var gpxToConvert = new gpxType
             {
-                trk = new[] { new trkType {
-                trkseg = new[]
+                trk = new[]
                 {
-                    new trksegType
+                    new trkType
                     {
-                        trkpt = new[]
+                        trkseg = new[]
                         {
-                            new wptType {lat = 1, lon = 2},
-                            new wptType {lat = 3, lon = 4}
-                        }
-                    },
-                    new trksegType
-                    {
-                        trkpt = new[]
-                        {
-                            new wptType {lat = 5, lon = 6},
-                            new wptType {lat = 7, lon = 8}
+                            new trksegType
+                            {
+                                trkpt = new[]
+                                {
+                                    new wptType {lat = 1, lon = 1},
+                                    new wptType {lat = 1, lon = 1.000001M},
+                                    new wptType {lat = 1, lon = 1.000002M},
+                                    new wptType {lat = 1, lon = 1.000003M}
+                                }
+                            }
                         }
                     }
                 }
-            }}
             };
-
-            var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), "gpx").Result;
-
-            Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(4, dataContainer.routes.First().segments.Count);
-        }
-
-        [TestMethod]
-        public void ConvertGpxToDataContainer_NonSiteFileShortTrack_ShouldManipulateRouteData()
-        {
-            var gpxToConvert = new gpxType
+            var newRouteData = new RouteData
             {
-                trk = new[] { new trkType {
-                trkseg = new[]
+                segments = new List<RouteSegmentData>
                 {
-                    new trksegType
-                    {
-                        trkpt = new[]
-                        {
-                            new wptType {lat = 1, lon = 1},
-                            new wptType {lat = 1, lon = 1.000001M},
-                            new wptType {lat = 1, lon = 1.000002M},
-                            new wptType {lat = 1, lon = 1.000003M}
-                        }
-                    }
+                    new RouteSegmentData(),
+                    new RouteSegmentData()
                 }
-            }}
             };
+            _routeDataSplitterService.Split(Arg.Any<RouteData>(), Arg.Any<string>()).Returns(newRouteData);
 
             var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), "gpx").Result;
 
             Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(2, dataContainer.routes.First().segments.Count);
+            Assert.AreEqual(newRouteData.segments.Count, dataContainer.routes.First().segments.Count);
         }
 
         [TestMethod]

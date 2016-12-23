@@ -5,8 +5,6 @@ namespace IsraelHiking.DataAccess
 {
     public class ProcessHelper : IProcessHelper
     {
-        public const string BIN_FOLDER_KEY = "binFolder";
-
         private readonly ILogger _logger;
 
         public ProcessHelper(ILogger logger)

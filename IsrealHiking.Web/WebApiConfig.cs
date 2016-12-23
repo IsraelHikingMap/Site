@@ -1,11 +1,11 @@
 ﻿using System.Web.Http;
-using IsraelHiking.API.Controllers;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.Web
 {
     public static class WebApiConfig
     {
-        public static void Register(HttpConfiguration config)
+        public static void Register(HttpConfiguration config, IConfigurationProvider configurationProvider)
         {
             // Web API configuration and services
 
@@ -18,7 +18,7 @@ namespace IsraelHiking.Web
                 defaults: new { id = RouteParameter.Optional }
             );
 
-            foreach (var folder in FileExplorerController.ListingDictionary.Keys)
+            foreach (var folder in configurationProvider.ListingDictionary.Keys)
             {
                 config.Routes.MapHttpRoute(
                 name: folder,

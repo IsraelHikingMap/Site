@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Simplify;
@@ -11,23 +12,22 @@ namespace IsraelHiking.API.Services
 {
     public class RouteDataSplitterService : IRouteDataSplitterService
     {
-        private const int MAX_SEGMENTS_NUMBER = 40; // points
-        private const int MINIMAL_TOLERANCE = 50; // meters
-        private const int MINIMAL_SEGMENT_LENGTH = 500; // meters
-
         private readonly ICoordinatesConverter _coordinatesConverter;
+        private readonly IConfigurationProvider _configurationProvider;
 
-        public RouteDataSplitterService(ICoordinatesConverter coordinatesConverter)
+        public RouteDataSplitterService(ICoordinatesConverter coordinatesConverter, 
+            IConfigurationProvider configurationProvider)
         {
             _coordinatesConverter = coordinatesConverter;
+            _configurationProvider = configurationProvider;
         }
 
         public RouteData Split(RouteData routeData, string routingType)
         {
             var allRoutePoints = routeData.segments.SelectMany(s => s.latlngzs).ToList();
             var coordinates = ToWgs84Coordinates(allRoutePoints);
-            int maximumPoints = Math.Max(3, Math.Min((int)(new LineString(coordinates).Length / MINIMAL_SEGMENT_LENGTH), MAX_SEGMENTS_NUMBER));
-            var currentTolerance = MINIMAL_TOLERANCE;
+            int maximumPoints = Math.Max(3, Math.Min((int)(new LineString(coordinates).Length / _configurationProvider.MinimalSegmentLength), _configurationProvider.MaxSegmentsNumber));
+            var currentTolerance = _configurationProvider.MinimalSplitSimplificationTolerace;
             Coordinate[] simplifiedCoordinates;
             do
             {

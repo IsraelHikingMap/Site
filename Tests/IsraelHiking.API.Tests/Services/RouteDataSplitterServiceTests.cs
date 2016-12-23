@@ -5,8 +5,10 @@ using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Services
 {
@@ -294,7 +296,11 @@ namespace IsraelHiking.API.Tests.Services
         [TestInitialize]
         public void TestInitialize()
         {
-            _service = new RouteDataSplitterService(new CoordinatesConverter());
+            var configurationProvider = Substitute.For<IConfigurationProvider>();
+            configurationProvider.MinimalSplitSimplificationTolerace.Returns(50);
+            configurationProvider.MaxSegmentsNumber.Returns(40);
+            configurationProvider.MinimalSegmentLength.Returns(500);
+            _service = new RouteDataSplitterService(new CoordinatesConverter(), configurationProvider);
         }
 
         [TestMethod]

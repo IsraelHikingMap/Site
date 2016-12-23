@@ -158,6 +158,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigurationProvider.cs" />
     <Compile Include="Database\IsraelHikingDbContext.cs" />
     <Compile Include="Database\IsraelHikingRepository.cs" />
     <Compile Include="ElasticSearch\ElasticSearchGateway.cs" />

@@ -18,6 +18,7 @@ namespace IsraelHiking.API.Services.Osm
 
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
+        private readonly IConfigurationProvider _configurationProvider;
 
         private class TagKeyComparer : IEqualityComparer<Tag>
         {
@@ -33,10 +34,12 @@ namespace IsraelHiking.API.Services.Osm
         }
 
         public OsmGeoJsonPreprocessor(ILogger logger,
-            IOsmGeoJsonConverter osmGeoJsonConverter)
+            IOsmGeoJsonConverter osmGeoJsonConverter, 
+            IConfigurationProvider configurationProvider)
         {
             _logger = logger;
             _osmGeoJsonConverter = osmGeoJsonConverter;
+            _configurationProvider = configurationProvider;
         }
 
         public Dictionary<string, List<Feature>> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary)
@@ -88,11 +91,12 @@ namespace IsraelHiking.API.Services.Osm
         private void PreprocessGeoJson(List<Feature> features, List<Feature> containers)
         {
             MergePlacesPoints(features);
+            var geoJsonFeatureHelper = new GeoJsonFeatureHelper(_configurationProvider);
             foreach (var feature in features)
             {
                 AddAddressField(feature, containers);
-                var propertiesExtraData = GeoJsonFeatureHelper.FindPropertiesData(feature);
-                feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? PropertiesData.DEFAULT_SEARCH_FACTOR);
+                var propertiesExtraData = geoJsonFeatureHelper.FindPropertiesData(feature);
+                feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? _configurationProvider.SearchFactor);
                 feature.Attributes.AddAttribute(ICON, propertiesExtraData?.Icon ?? string.Empty);
             }
         }

@@ -1,36 +1,45 @@
-﻿using System.Configuration;
-using System.IO;
+﻿using System.IO;
 using System.Reflection;
 using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace IsraelHiking.DataAccess.Tests
 {
     [TestClass]
     public class ElevationDataStorageTests
     {
+        private IConfigurationProvider _configurationProvider;
+        private IElevationDataStorage _elevationDataStorage;
+
+        [TestInitialize]
+        public void TestInitialize()
+        {
+            _configurationProvider = Substitute.For<IConfigurationProvider>();
+            _elevationDataStorage = new ElevationDataStorage(new TraceLogger(), _configurationProvider);
+        }
+
         [TestMethod]
         public void InitializeWithBadFolder_ShouldSucceed()
         {
-            var elevationDataStorage = new ElevationDataStorage(new TraceLogger());
-            ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY] = "InvalidFolder";
+            _configurationProvider.BinariesFolder.Returns("InvalidFolder");
 
-            elevationDataStorage.Initialize().Wait();
+            _elevationDataStorage.Initialize().Wait();
 
-            Assert.AreEqual(0, elevationDataStorage.GetElevation(new LatLng(32, 35)).Result);
+            Assert.AreEqual(0, _elevationDataStorage.GetElevation(new LatLng(32, 35)).Result);
         }
 
         [TestMethod]
         [Ignore] // This test takes too long...
         public void InitializeAndGet_ShouldSucceed()
         {
-            var elevationDataStorage = new ElevationDataStorage(new TraceLogger());
-            ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY] = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ElevationDataStorageTests)).Location) ?? string.Empty;
+            _configurationProvider.BinariesFolder.Returns(Path.GetDirectoryName(Assembly.GetAssembly(typeof(ElevationDataStorageTests)).Location) ?? string.Empty);
 
-            elevationDataStorage.Initialize().Wait();
+            _elevationDataStorage.Initialize().Wait();
 
-            Assert.AreEqual(0, elevationDataStorage.GetElevation(new LatLng(0,0)));
-            Assert.AreEqual(207, elevationDataStorage.GetElevation(new LatLng(32, 35)));
+            Assert.AreEqual(0, _elevationDataStorage.GetElevation(new LatLng(0,0)));
+            Assert.AreEqual(207, _elevationDataStorage.GetElevation(new LatLng(32, 35)));
         }
     }
 }

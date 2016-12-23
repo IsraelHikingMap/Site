@@ -1,7 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
@@ -14,23 +12,20 @@ namespace IsraelHiking.API.Services
 {
     public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
     {
-        private const double CLOSEST_POINT_TOLERANCE = 30; // meters
-        private const double SIMPLIFICATION_TOLERANCE = 5; // meters
-        private const double MINIMAL_MISSING_PART_LENGTH = 200; // meters
-        private const double MINIMAL_MISSING_SELF_LOOP_PART_LENGTH = CLOSEST_POINT_TOLERANCE; // meters
-        private const int MAX_NUMBER_OF_POINTS_PER_LINE = 1000;
-
         private readonly IGpxLoopsSplitterService _gpxLoopsSplitterService;
         private readonly ICoordinatesConverter _coordinatesConverter;
         private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IConfigurationProvider _configurationProvider;
 
         public AddibleGpxLinesFinderService(IGpxLoopsSplitterService gpxLoopsSplitterService, 
             ICoordinatesConverter coordinatesConverter, 
-            IElasticSearchGateway elasticSearchGateway)
+            IElasticSearchGateway elasticSearchGateway, 
+            IConfigurationProvider configurationProvider)
         {
             _gpxLoopsSplitterService = gpxLoopsSplitterService;
             _coordinatesConverter = coordinatesConverter;
             _elasticSearchGateway = elasticSearchGateway;
+            _configurationProvider = configurationProvider;
         }
 
         /// <summary>
@@ -49,14 +44,14 @@ namespace IsraelHiking.API.Services
             var missingLinesWithoutLoops = new List<LineString>();
             foreach (var missingLine in missingLines)
             {
-                missingLinesWithoutLoops.AddRange(_gpxLoopsSplitterService.SplitSelfLoops(missingLine, CLOSEST_POINT_TOLERANCE));
+                missingLinesWithoutLoops.AddRange(_gpxLoopsSplitterService.SplitSelfLoops(missingLine, _configurationProvider.ClosestPointTolerance));
             }
             missingLinesWithoutLoops.Reverse();
             var missingLinesWithoutLoopsAndDuplications = new List<LineString>();
             for (int index = 0; index < missingLinesWithoutLoops.Count; index++)
             {
                 var missingLineWithoutLoops = missingLinesWithoutLoops[index];
-                missingLinesWithoutLoopsAndDuplications.AddRange(_gpxLoopsSplitterService.GetMissingLines(missingLineWithoutLoops, missingLinesWithoutLoops.Take(index).ToArray(), MINIMAL_MISSING_SELF_LOOP_PART_LENGTH, CLOSEST_POINT_TOLERANCE));
+                missingLinesWithoutLoopsAndDuplications.AddRange(_gpxLoopsSplitterService.GetMissingLines(missingLineWithoutLoops, missingLinesWithoutLoops.Take(index).ToArray(), _configurationProvider.MinimalMissingSelfLoopPartLegth, _configurationProvider.ClosestPointTolerance));
             }
             missingLinesWithoutLoopsAndDuplications.Reverse();
             missingLinesWithoutLoopsAndDuplications = SimplifyLines(missingLinesWithoutLoopsAndDuplications);
@@ -69,12 +64,12 @@ namespace IsraelHiking.API.Services
             var lines = new List<LineString>();
             foreach (var lineSting in lineStings)
             {
-                var simpleLine = DouglasPeuckerSimplifier.Simplify(lineSting, SIMPLIFICATION_TOLERANCE) as LineString;
+                var simpleLine = DouglasPeuckerSimplifier.Simplify(lineSting, _configurationProvider.SimplificationTolerance) as LineString;
                 if (simpleLine == null)
                 {
                     continue;
                 }
-                simpleLine = RadialDistanceByAngleSimplifier.Simplify(simpleLine, MINIMAL_MISSING_SELF_LOOP_PART_LENGTH, 90);
+                simpleLine = RadialDistanceByAngleSimplifier.Simplify(simpleLine, _configurationProvider.MinimalMissingSelfLoopPartLegth, _configurationProvider.RadialSimplificationAngle);
                 if (simpleLine == null)
                 {
                     continue;
@@ -91,7 +86,7 @@ namespace IsraelHiking.API.Services
             foreach (var gpxLine in gpxLines)
             {
                 var lineStringsInArea = await GetLineStringsInArea(gpxLine);
-                missingLines.AddRange(_gpxLoopsSplitterService.GetMissingLines(gpxLine, lineStringsInArea, MINIMAL_MISSING_PART_LENGTH, CLOSEST_POINT_TOLERANCE));
+                missingLines.AddRange(_gpxLoopsSplitterService.GetMissingLines(gpxLine, lineStringsInArea, _configurationProvider.MinimalMissingPartLength, _configurationProvider.ClosestPointTolerance));
             }
             MergeBackLines(missingLines);
             return missingLines;
@@ -106,7 +101,7 @@ namespace IsraelHiking.API.Services
                 for (int lineIndex = 0; lineIndex < lineStings.Count; lineIndex++)
                 {
                     var line = lineStings[lineIndex];
-                    if (line.Count <= MAX_NUMBER_OF_POINTS_PER_LINE)
+                    if (line.Count <= _configurationProvider.MaxNumberOfPointsPerLine)
                     {
                         continue;
                     }
@@ -187,13 +182,14 @@ namespace IsraelHiking.API.Services
                         continue;
                     }
                     var coordinates = lineToMerge.Coordinates;
-                    if (lineToMerge.Coordinates.First().Distance(lineToMergeTo.Coordinates.First()) < CLOSEST_POINT_TOLERANCE * 2 ||
-                        lineToMerge.Coordinates.Last().Distance(lineToMergeTo.Coordinates.Last()) < CLOSEST_POINT_TOLERANCE * 2)
+                    var tolerance = _configurationProvider.ClosestPointTolerance*2;
+                    if (lineToMerge.Coordinates.First().Distance(lineToMergeTo.Coordinates.First()) < tolerance ||
+                        lineToMerge.Coordinates.Last().Distance(lineToMergeTo.Coordinates.Last()) < tolerance)
                     {
                         coordinates = coordinates.Reverse().ToArray();
                     }
                     var mergedCoordinates = lineToMergeTo.Coordinates.ToList();
-                    if (coordinates.Last().Distance(lineToMergeTo.Coordinates.First()) < CLOSEST_POINT_TOLERANCE * 2)
+                    if (coordinates.Last().Distance(lineToMergeTo.Coordinates.First()) < tolerance)
                     {
                         mergedCoordinates.InsertRange(0, coordinates);
                     }
@@ -237,7 +233,7 @@ namespace IsraelHiking.API.Services
         private async Task<bool> CanBeMerged(Coordinate coordinate1, Coordinate coordinate2, List<LineString> simplifiedLines)
         {
             var newLine = new LineString(new[] { coordinate1, coordinate2 });
-            if (newLine.Length >= CLOSEST_POINT_TOLERANCE * 2)
+            if (newLine.Length >= _configurationProvider.ClosestPointTolerance * 2)
             {
                 return false;
             }

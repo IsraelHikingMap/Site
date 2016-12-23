@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Configuration;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using IsraelHiking.API.Controllers;
@@ -19,9 +19,10 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestInitialize]
         public void TestInitialize()
         {
-            ConfigurationManager.AppSettings["Listing_Example"] = EXAMPLE_DIRECTORY;
             _fileSystemHelper = Substitute.For<IFileSystemHelper>();
-            _controller = new FileExplorerController(_fileSystemHelper);
+            var configurationManager = Substitute.For<IConfigurationProvider>();
+            configurationManager.ListingDictionary.Returns(new Dictionary<string, string> { { "example", EXAMPLE_DIRECTORY } });
+            _controller = new FileExplorerController(_fileSystemHelper, configurationManager);
         }
 
         [TestMethod]

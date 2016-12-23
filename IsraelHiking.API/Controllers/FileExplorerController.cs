@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -50,20 +48,13 @@ namespace IsraelHiking.API.Controllers
 
     public class FileExplorerController : ApiController
     {
-        private const string LISTING_KEY_PREFIX = "Listing_";
-        public static Dictionary<string, string> ListingDictionary { get; }
+        private readonly IConfigurationProvider _configurationProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
 
-        static FileExplorerController()
-        {
-            ListingDictionary = ConfigurationManager.AppSettings.AllKeys
-                .Where(k => k.StartsWith(LISTING_KEY_PREFIX))
-                .ToDictionary(k => k.Substring(LISTING_KEY_PREFIX.Length).ToLower(), k => ConfigurationManager.AppSettings[k]);
-        }
-
-        public FileExplorerController(IFileSystemHelper fileSystemHelper)
+        public FileExplorerController(IFileSystemHelper fileSystemHelper, IConfigurationProvider configurationProvider)
         {
             _fileSystemHelper = fileSystemHelper;
+            _configurationProvider = configurationProvider;
         }
 
         public HttpResponseMessage GetListingPage(string path)
@@ -128,7 +119,7 @@ namespace IsraelHiking.API.Controllers
                 listingKey = pathPrefix.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries).LastOrDefault() ?? string.Empty;
             }
             var key = listingKey.ToLower().TrimEnd('/');
-            return ListingDictionary.ContainsKey(key) ? ListingDictionary[key] : string.Empty;
+            return _configurationProvider.ListingDictionary.ContainsKey(key) ? _configurationProvider.ListingDictionary[key] : string.Empty;
         }
 
         private string GetBaseUri(string path)

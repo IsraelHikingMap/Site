@@ -1,11 +1,11 @@
-﻿using System.Configuration;
-using System.IO;
+﻿using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Xml.Linq;
 using IsraelHiking.DataAccess.GPSBabel;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 
 namespace IsraelHiking.DataAccess.Tests.GpsBabel
 {
@@ -18,8 +18,9 @@ namespace IsraelHiking.DataAccess.Tests.GpsBabel
         public void TestInitialize()
         {
             var logger = new TraceLogger();
-            _gpsBabelGateway = new GpsBabelGateway(logger, new ProcessHelper(logger));
-            ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY] = Path.GetDirectoryName(Assembly.GetAssembly(typeof(GpsBabelGatewayTests)).Location) ?? string.Empty;
+            var configurationProvider = Substitute.For<IConfigurationProvider>();
+            configurationProvider.BinariesFolder.Returns(Path.GetDirectoryName(Assembly.GetAssembly(typeof(GpsBabelGatewayTests)).Location) ?? string.Empty);
+            _gpsBabelGateway = new GpsBabelGateway(logger, new ProcessHelper(logger), configurationProvider);
         }
 
         [TestMethod]

@@ -32,7 +32,7 @@ namespace IsraelHiking.Web
                     container.Resolve<LruCache<string, TokenAndSecret>>(),
                     logger)
             });
-            WebApiConfig.Register(config);
+            WebApiConfig.Register(config, container.Resolve<IConfigurationProvider>());
 
             config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
             config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;

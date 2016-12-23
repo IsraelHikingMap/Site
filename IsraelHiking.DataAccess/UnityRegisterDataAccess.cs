@@ -28,6 +28,7 @@ namespace IsraelHiking.DataAccess
             container.RegisterType<IOsmRepository, OsmRepository>();
             container.RegisterType<IOsmGateway, OsmGateway>();
             container.RegisterType<IOverpassGateway, OverpassGateway>();
+            container.RegisterType<IConfigurationProvider, ConfigurationProvider>(new ContainerControlledLifetimeManager());
         }
     }
 }

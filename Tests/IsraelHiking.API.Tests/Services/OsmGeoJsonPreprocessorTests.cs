@@ -19,7 +19,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestInitialize]
         public void TestInitialize()
         {
-            _preprocessor = new OsmGeoJsonPreprocessor(Substitute.For<ILogger>(), new OsmGeoJsonConverter());
+            _preprocessor = new OsmGeoJsonPreprocessor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), Substitute.For<IConfigurationProvider>());
         }
 
         private Node CreateNode(int id)

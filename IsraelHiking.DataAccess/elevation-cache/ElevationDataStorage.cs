@@ -3,7 +3,6 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using System;
 using System.Collections.Concurrent;
-using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -13,23 +12,25 @@ namespace IsraelHiking.DataAccess
     public class ElevationDataStorage : IElevationDataStorage
     {
         private const string ELEVATION_CACHE = "elevation-cache";
-        private readonly ConcurrentDictionary<LatLng, short[,]> _elevationData;
         private readonly ILogger _logger;
+        private readonly IConfigurationProvider _configurationProvider;
+        private readonly ConcurrentDictionary<LatLng, short[,]> _elevationData;
         private readonly ConcurrentDictionary<LatLng, Task> _initializationTaskPerLatLng;
 
-        public ElevationDataStorage(ILogger logger)
+        public ElevationDataStorage(ILogger logger, IConfigurationProvider configurationProvider)
         {
             _logger = logger;
+            _configurationProvider = configurationProvider;
             _elevationData = new ConcurrentDictionary<LatLng, short[,]>();
             _initializationTaskPerLatLng = new ConcurrentDictionary<LatLng, Task>();
         }
 
         public Task Initialize()
         {
-            var elevationCacheFolder = Path.Combine(ConfigurationManager.AppSettings[ProcessHelper.BIN_FOLDER_KEY], ELEVATION_CACHE);
+            var elevationCacheFolder = Path.Combine(_configurationProvider.BinariesFolder, ELEVATION_CACHE);
             if (Directory.Exists(elevationCacheFolder) == false)
             {
-                _logger.Error($"!!! The folder: {elevationCacheFolder} does not exists, please change the binFolder key in the configuration file !!!");
+                _logger.Error($"!!! The folder: {elevationCacheFolder} does not exists, please change the BinariesFolder key in the configuration file !!!");
                 return Task.Run(() => { });
             }
             var hgtZipFiles = Directory.GetFiles(elevationCacheFolder, "*.hgt.zip");

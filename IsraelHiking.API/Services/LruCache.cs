@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Services
 {
     public class LruCache<TKey, TValue>
     {
-        private const int MAX_CACHE_SIZE = 200;
+        private readonly IConfigurationProvider _configurationProvider;
+
+        public LruCache(IConfigurationProvider configurationProvider)
+        {
+            _configurationProvider = configurationProvider;
+        }
 
         internal class CacheItem
         {
@@ -26,7 +32,7 @@ namespace IsraelHiking.API.Services
         public void Add(TKey key, TValue value)
         {
             _dictionary[key] = new CacheItem(value);
-            while (_dictionary.Keys.Count > MAX_CACHE_SIZE)
+            while (_dictionary.Keys.Count > _configurationProvider.MaxCacheSize)
             {
                 var pair = _dictionary.OrderBy(v => v.Value.LastUsed).First();
                 CacheItem cacheItem;
