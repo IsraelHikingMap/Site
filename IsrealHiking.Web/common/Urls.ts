@@ -14,5 +14,6 @@
         public static translations = Urls.baseAddress + "/translations/";
         public static overpass = window.location.protocol + "//overpass-api.de/api/interpreter";
         public static osm = Urls.apiBase + "osm/";
+        public static osmConfiguration = Urls.osm + "configuration";
     }
 }

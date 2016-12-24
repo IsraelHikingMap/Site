@@ -159,6 +159,9 @@ namespace IsraelHiking.Services {
         public shareWithFacebook: string;
         public shareWithOffroad: string;
         public findUnmappedRoutes: string;
+        public nonMarkedTrail: string;
+        public dirtRoad: string;
+        public addThisRouteToOsm: string;
         // Toasts: Errors/Warnings/Success
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
@@ -510,6 +513,9 @@ namespace IsraelHiking.Services {
                     this.shareWithFacebook = this.gettextCatalog.getString("Share With Facebook");
                     this.shareWithOffroad = this.gettextCatalog.getString("Share With off-road");
                     this.findUnmappedRoutes = this.gettextCatalog.getString("Find Unmapped Routes");
+                    this.nonMarkedTrail = this.gettextCatalog.getString("Non-Marked Trail");
+                    this.dirtRoad = this.gettextCatalog.getString("Dirt Road");
+                    this.addThisRouteToOsm = this.gettextCatalog.getString("Add This Route to OSM");
                     // Toasts: Errors/Warnings/Success
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -568,20 +574,20 @@ namespace IsraelHiking.Services {
                     this.infoFooterAuthors = this.gettextCatalog.getString("Harel, Zeev and Guy");
                     // Legend
                     this.legendMarkedTrails = this.gettextCatalog.getString("Marked Trails");
-                    this.legendRedMarkedTrail = this.gettextCatalog.getString("Red marked trail");
-                    this.legendBlueMarkedTrail = this.gettextCatalog.getString("Blue marked trail");
-                    this.legendGreenMarkedTrail = this.gettextCatalog.getString("Green marked trail");
-                    this.legendBlackMarkedTrail = this.gettextCatalog.getString("Black marked trail");
+                    this.legendRedMarkedTrail = this.gettextCatalog.getString("Red Marked Trail");
+                    this.legendBlueMarkedTrail = this.gettextCatalog.getString("Blue Marked Trail");
+                    this.legendGreenMarkedTrail = this.gettextCatalog.getString("Green Marked Trail");
+                    this.legendBlackMarkedTrail = this.gettextCatalog.getString("Black Marked Trail");
                     this.legendIsraelTrail = this.gettextCatalog.getString("Israel Trail");
-                    this.legendRegionalTrail = this.gettextCatalog.getString("Regional trail");
+                    this.legendRegionalTrail = this.gettextCatalog.getString("Regional Trail");
                     this.legendTrails = this.gettextCatalog.getString("Trails");
-                    this.legendAllVehicles = this.gettextCatalog.getString("All vehicles");
-                    this.legendLight4WDVehicles = this.gettextCatalog.getString("Light 4WD vehicles");
-                    this.legendStrong4WDVehicles = this.gettextCatalog.getString("Strong 4WD vehicles");
+                    this.legendAllVehicles = this.gettextCatalog.getString("All Vehicles");
+                    this.legendLight4WDVehicles = this.gettextCatalog.getString("Light 4WD Vehicles");
+                    this.legendStrong4WDVehicles = this.gettextCatalog.getString("Strong 4WD Vehicles");
                     this.legendDifficult4WD = this.gettextCatalog.getString("Difficult 4WD");  
                     this.legendPath = this.gettextCatalog.getString("Path");
-                    this.legendFootPath = this.gettextCatalog.getString("Foot path");
-                    this.legendBicyclePath = this.gettextCatalog.getString("Bicycle path");
+                    this.legendFootPath = this.gettextCatalog.getString("Foot Path");
+                    this.legendBicyclePath = this.gettextCatalog.getString("Bicycle Path");
                     this.legendSteps = this.gettextCatalog.getString("Steps"); 
                     this.legendWater = this.gettextCatalog.getString("Water");
                     this.legendStream = this.gettextCatalog.getString("Stream");

@@ -1,0 +1,29 @@
+﻿.symbol-button {
+    height: 30px;
+    width: 30px;
+    display:inline-block;
+    position:relative;
+    background-color:white;
+}
+
+.symbols-group {
+    text-align: justify;
+    font-size: 0.1px; /* IE 9/10 don't like font-size: 0; */
+}
+
+.symbols-group:after {
+    content: '';
+    width: 100%; /* Ensures there are at least 2 lines of text, so justification works */
+    display: inline-block;
+}
+
+.middle-line {
+    width:100%;
+    display:inline-block;
+    position:absolute;
+    top: 0;
+    height: 100%;
+    left: 33%;
+    right: 33%;
+    width: 34%;
+}

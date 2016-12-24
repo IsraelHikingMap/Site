@@ -32,7 +32,7 @@
         searchTerm: string;
     }
 
-    export interface ISearchResultsMarkerPopup extends IRemovableMarkerScope {
+    export interface ISearchResultsMarkerPopupScope extends MarkerPopup.IRemovableMarkerScope {
         convertToRoute(): void;
     }
 
@@ -117,7 +117,7 @@
                 this.map.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
                 var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false}) as Services.Layers.RouteLayers.IMarkerWithTitle;
                 marker.title = searchResults.name || searchResults.address;
-                let newScope = $scope.$new() as ISearchResultsMarkerPopup;
+                let newScope = $scope.$new() as ISearchResultsMarkerPopupScope;
                 newScope.marker = marker;
                 newScope.remove = () => {
                     this.featureGroup.clearLayers();
@@ -256,13 +256,13 @@
                         this.featureGroup.clearLayers();
                     }
 
-                    let newScopeFrom = $scope.$new() as ISearchResultsMarkerPopup;
+                    let newScopeFrom = $scope.$new() as ISearchResultsMarkerPopupScope;
                     newScopeFrom.marker = markerFrom;
                     newScopeFrom.remove = () => {
                         this.featureGroup.clearLayers();
                     }
                     newScopeFrom.convertToRoute = convertToRoute;
-                    let newScopeTo = $scope.$new() as ISearchResultsMarkerPopup;
+                    let newScopeTo = $scope.$new() as ISearchResultsMarkerPopupScope;
                     newScopeTo.marker = markerTo;
                     newScopeTo.remove = () => {
                         this.featureGroup.clearLayers();

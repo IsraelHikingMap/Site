@@ -25,6 +25,7 @@ namespace IsraelHiking.API
             container.RegisterType<IOsmDataService, OsmDataService>();
             container.RegisterType<LruCache<string, TokenAndSecret>>(new ContainerControlledLifetimeManager());
             container.RegisterType<IImageCreationService, ImageCreationService>();
+            container.RegisterType<IOsmLineAdderService, OsmLineAdderService>();
         }
     }
 }

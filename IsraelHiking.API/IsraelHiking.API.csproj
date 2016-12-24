@@ -156,6 +156,8 @@
     <Compile Include="Services\IGpxLoopsSplitterService.cs" />
     <Compile Include="Services\IImageCreationService.cs" />
     <Compile Include="Services\ImageCreationService.cs" />
+    <Compile Include="Services\Osm\IOsmLineAdderService.cs" />
+    <Compile Include="Services\Osm\OsmLineAdderService.cs" />
     <Compile Include="Services\Osm\IOsmDataService.cs" />
     <Compile Include="Services\Osm\IOsmGeoJsonPreprocessor.cs" />
     <Compile Include="Services\IRouteDataSplitterService.cs" />

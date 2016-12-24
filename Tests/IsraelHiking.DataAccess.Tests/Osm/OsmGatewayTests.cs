@@ -15,7 +15,7 @@ namespace IsraelHiking.DataAccess.Tests.Osm
         [TestInitialize]
         public void TestInitialize()
         {
-            _gateway = new OsmGateway(new TokenAndSecret("agd3FPYW8a69zGIgBASvA7FCf7afAXYZpPqCZuY0", "bkIORQQ5ISBmvMFqP2R4qe8BNtLXukOAEiCoTjeE"), new TraceLogger());
+            _gateway = new OsmGateway(new TokenAndSecret("agd3FPYW8a69zGIgBASvA7FCf7afAXYZpPqCZuY0", "bkIORQQ5ISBmvMFqP2R4qe8BNtLXukOAEiCoTjeE"), new ConfigurationProvider(), new TraceLogger());
         }
 
         [TestMethod]
@@ -75,6 +75,14 @@ namespace IsraelHiking.DataAccess.Tests.Osm
             var wayId = _gateway.CreateWay(id, way).Result;
             _gateway.CloseChangeset(id).Wait();
             Assert.AreNotEqual(string.Empty, wayId);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void GetCompleteWay()
+        {
+            var way = _gateway.GetCompleteWay("30969247").Result;
+            Assert.IsNotNull(way);
         }
     }
 }

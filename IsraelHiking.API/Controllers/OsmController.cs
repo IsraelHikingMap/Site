@@ -8,6 +8,7 @@ using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.API.Services;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
@@ -23,6 +24,8 @@ namespace IsraelHiking.API.Controllers
         private readonly ICoordinatesConverter _coordinatesConverter;
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
+        private readonly IOsmLineAdderService _osmLineAdderService;
+        private readonly IConfigurationProvider _configurationProvider;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
         public OsmController(IHttpGatewayFactory httpGatewayFactory,
@@ -30,13 +33,17 @@ namespace IsraelHiking.API.Controllers
             ICoordinatesConverter coordinatesConverter,
             IElasticSearchGateway elasticSearchGateway,
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
+            IOsmLineAdderService osmLineAdderService,
+            IConfigurationProvider configurationProvider,
             LruCache<string, TokenAndSecret> cache)
         {
             _httpGatewayFactory = httpGatewayFactory;
             _dataContainerConverterService = dataContainerConverterService;
             _coordinatesConverter = coordinatesConverter;
-            _addibleGpxLinesFinderService = addibleGpxLinesFinderService;
             _elasticSearchGateway = elasticSearchGateway;
+            _addibleGpxLinesFinderService = addibleGpxLinesFinderService;
+            _osmLineAdderService = osmLineAdderService;
+            _configurationProvider = configurationProvider;
             _cache = cache;
         }
 
@@ -45,17 +52,35 @@ namespace IsraelHiking.API.Controllers
             return await _elasticSearchGateway.GetHighways(new LatLng(northEast), new LatLng(southWest));
         }
 
+        [HttpGet]
+        [Route("api/osm/configuration")]
+        public object GetConfigurations()
+        {
+            return new
+            {
+                ConsumerKey = _configurationProvider.OsmConsumerKey,
+                ConsumerSecret = _configurationProvider.OsmConsumerSecret,
+                BaseAddress = _configurationProvider.OsmBaseAddress
+            };
+        }
+
         [Authorize]
+        public async Task PutGpsTraceIntoOsm(Feature feature)
+        {
+            var tags = feature.Attributes.GetNames().ToDictionary(n => n, n => feature.Attributes[n].ToString());
+            await _osmLineAdderService.Add(feature.Geometry as LineString, tags, _cache.Get(User.Identity.Name));
+        }
+
         public async Task<FeatureCollection> PostGpsTrace(string url)
         {
             var response = await GetFile(url);
             var gpxBytes = await _dataContainerConverterService.Convert(response.Content, response.FileName, DataContainerConverterService.GPX);
             var gpx = gpxBytes.ToGpx().UpdateBounds();
-            var routingType = GetRoutingType(gpx);
+            var highwayType = GetHighwayType(gpx);
             var gpxLines = GpxToLineStrings(gpx);
             var manipulatedLines = await _addibleGpxLinesFinderService.GetLines(gpxLines);
             var attributesTable = new AttributesTable();
-            attributesTable.AddAttribute("routingType", routingType);
+            attributesTable.AddAttribute("highway", highwayType);
             var features = manipulatedLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
             return new FeatureCollection(new Collection<IFeature>(features));
         }
@@ -81,12 +106,12 @@ namespace IsraelHiking.API.Controllers
             };
         }
 
-        private string GetRoutingType(gpxType gpx)
+        private string GetHighwayType(gpxType gpx)
         {
             var waypointsGroups = new List<wptType[]>();
             waypointsGroups.AddRange((gpx.rte ?? new rteType[0]).Select(route => route.rtept).Where(ps => ps.All(p => p.timeSpecified)).ToArray());
             waypointsGroups.AddRange((gpx.trk ?? new trkType[0]).Select(track => track.trkseg.SelectMany(s => s.trkpt).ToArray()).Where(ps => ps.All(p => p.timeSpecified)));
-            return GetRoutingTypeFromWaypoints(waypointsGroups);
+            return GetHighwayTypeFromWaypoints(waypointsGroups);
         }
 
         /// <summary>
@@ -94,12 +119,12 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="waypointsGoups">A list of group of points</param>
         /// <returns>The calculated routing type</returns>
-        private string GetRoutingTypeFromWaypoints(IReadOnlyCollection<wptType[]> waypointsGoups)
+        private string GetHighwayTypeFromWaypoints(IReadOnlyCollection<wptType[]> waypointsGoups)
         {
             var velocityList = new List<double>();
             if (waypointsGoups.Count == 0)
             {
-                return RoutingType.HIKE;
+                return "track";
             }
             foreach (var waypoints in waypointsGoups)
             {
@@ -115,13 +140,13 @@ namespace IsraelHiking.API.Controllers
             var averageVelocity = velocityList.Sum()/velocityList.Count;
             if (averageVelocity <= 6)
             {
-                return RoutingType.HIKE;
+                return "footway";
             }
             if (averageVelocity <= 12)
             {
-                return RoutingType.BIKE;
+                return "cycleway";
             }
-            return RoutingType.FOUR_WHEEL_DRIVE;
+            return "track";
         }
 
         private LineString ToItmLineString(IEnumerable<wptType> waypoints)

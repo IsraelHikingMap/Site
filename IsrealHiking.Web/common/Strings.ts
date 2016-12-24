@@ -57,9 +57,10 @@
     export namespace Directives {
         export const syncFocusWith = "syncFocusWith";
         export const disableMapMovement = "disableMapMovement";
-        export const markerPopup = "markerPopup";
-        export const routePointPopup = "routePointPopup";
+        export const poiMarkerPopup = "poiMarkerPopup";
+        export const routeMarkerPopup = "routeMarkerPopup";
         export const searchResultsMarkerPopup = "searchResultsMarkerPopup";
+        export const missingPartMarkerPopup = "missingPartMarkerPopup";
         export const drawingControl = "drawingControl";
         export const editOsmControl = "editOsmControl";
         export const fileControl = "fileControl";

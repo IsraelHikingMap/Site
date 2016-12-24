@@ -27,6 +27,7 @@
     export class OsmUserController extends BaseMapController {
         private static OSM_USER_STATE_KEY = "OsmUserState";
 
+        private $compile: angular.ICompileService;
         private modalInstnace: angular.ui.bootstrap.IModalServiceInstance;
         private osmTraceLayer: L.LayerGroup<any>;
 
@@ -43,6 +44,7 @@
             toastr: Toastr) {
             super(mapService);
 
+            this.$compile = $compile;
             this.initializeRanks($scope);
             this.osmTraceLayer = L.layerGroup([]);
             this.map.addLayer(this.osmTraceLayer);
@@ -116,7 +118,7 @@
                     let bounds = L.latLngBounds(dataContainer.southWest, dataContainer.northEast);
                     let mainMarker = L.marker(bounds.getCenter(), { icon: Services.IconsService.createTraceMarkerIcon(), draggable: false }) as Services.Layers.RouteLayers.IMarkerWithTitle; // marker to allow remove of this layer.
                     mainMarker.title = trace.fileName;
-                    let newScope = $scope.$new() as ISearchResultsMarkerPopup;
+                    let newScope = $scope.$new() as ISearchResultsMarkerPopupScope;
                     newScope.marker = mainMarker;
                     newScope.remove = () => {
                         this.osmTraceLayer.clearLayers();
@@ -158,7 +160,7 @@
                         return;
                     }
                     this.modalInstnace.close();
-                    this.addMissingPartsToMap(geoJson);
+                    this.addMissingPartsToMap($scope, geoJson);
                 });
             }
 
@@ -171,7 +173,7 @@
                             return;
                         }
                         $scope.showTrace(trace).then(() => {
-                            this.addMissingPartsToMap(geoJson);
+                            this.addMissingPartsToMap($scope, geoJson);
                         });
                     });
             }
@@ -207,20 +209,26 @@
             ];
         }
 
-        private addMissingPartsToMap = (geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
-            var geoJsonLayer = L.geoJson(geoJson,
-            {
-                onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
-                    this.osmTraceLayer.addLayer(L.marker(feature.geometry.coordinates[0]));
-                },
-                style: {
-                    color: "red",
-                    weight: 5,
-                    opacity: 1
-                } as any
-            } as L.GeoJSONOptions);
-            this.osmTraceLayer.addLayer(geoJsonLayer);
-            // HM TODO: make this better
+        private addMissingPartsToMap = ($scope: IOsmUserScope, geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
+            var geoJsonLayer = L.geoJson(geoJson);
+            for (let feature of geoJson.features) {
+                let lineString = feature.geometry as GeoJSON.LineString;
+                let latLngs = Services.Parsers.GeoJsonParser.createLatlngArray(lineString.coordinates);
+                let polyline = L.polyline(latLngs, { color: "red", weight: 5, opacity: 1 } as L.PolylineOptions);
+                this.osmTraceLayer.addLayer(polyline);
+                let marker = L.marker(latLngs[0], { draggable: false, clickable: true, icon: Services.IconsService.createMissingPartMarkerIcon() } as L.MarkerOptions);
+                let newScope = $scope.$new() as MarkerPopup.IMissingPartMarkerPopupScope;
+                newScope.marker = marker as Services.Layers.RouteLayers.IMarkerWithTitle;
+                newScope.feature = feature;
+                newScope.remove = () => {
+                    marker.closePopup();
+                    this.osmTraceLayer.removeLayer(polyline);
+                    this.osmTraceLayer.removeLayer(marker);
+                };
+                marker.bindPopup(this.$compile("<div missing-part-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
+                this.osmTraceLayer.addLayer(marker);
+            }
+
             this.map.fitBounds(geoJsonLayer.getBounds());
         }
     }

@@ -84,7 +84,7 @@
     <Content Include="content\loading-bar.css" />
     <Content Include="content\simple-sidebar.css" />
     <Content Include="controllers\BaseMapController.js" />
-    <Content Include="controllers\coordinatesMarkerPopup.html" />
+    <Content Include="controllers\MarkerPopup\coordinatesMarkerPopup.html" />
     <Content Include="controllers\DrawingController.js" />
     <Content Include="controllers\editOSM.html" />
     <Content Include="controllers\EditOSMController.js" />
@@ -95,13 +95,17 @@
     <Content Include="controllers\language.html" />
     <Content Include="controllers\LanguageController.js" />
     <Content Include="controllers\languageModal.html" />
-    <Content Include="controllers\markerPopup.css" />
+    <Content Include="controllers\MarkerPopup\markerPopup.css" />
+    <Content Include="controllers\MarkerPopup\missingPartMarker.css" />
+    <Content Include="controllers\MarkerPopup\missingPartMarkerPopup.html" />
+    <Content Include="controllers\MarkerPopup\MissingPartMarkerPopupController.js" />
+    <Content Include="controllers\MarkerPopup\PoiMarkerPopupController.js" />
     <Content Include="controllers\oauth-close-window.html" />
     <Content Include="controllers\osmUser.css" />
     <Content Include="controllers\osmUser.html" />
     <Content Include="controllers\OsmUserController.js" />
     <Content Include="controllers\osmUserDetailsModal.html" />
-    <Content Include="controllers\routePointPopup.html" />
+    <Content Include="controllers\MarkerPopup\routeMarkerPopup.html" />
     <Content Include="controllers\RouteProperties\routeProperties.css" />
     <Content Include="controllers\routeStatistics.css" />
     <Content Include="controllers\search.css" />
@@ -118,7 +122,7 @@
     <Content Include="controllers\LayerProperties\OverlayEditController.js" />
     <Content Include="controllers\LayersController.js" />
     <Content Include="controllers\MainMapController.js" />
-    <Content Include="controllers\MarkerPopupController.js" />
+    <Content Include="controllers\MarkerPopup\MarkerPopupController.js" />
     <Content Include="controllers\RouteProperties\RouteAddController.js" />
     <Content Include="controllers\RouteProperties\RouteBaseController.js" />
     <Content Include="controllers\RouteStatisticsController.js" />
@@ -165,7 +169,7 @@
     <Content Include="scripts\slider.js" />
     <Content Include="scripts\ui-bootstrap-tpls.js" />
     <Content Include="scripts\webcomponents.js" />
-    <Content Include="controllers\searchResultsMarkerPopup.html" />
+    <Content Include="controllers\MarkerPopup\searchResultsMarkerPopup.html" />
     <Content Include="scripts\xml2json.min.js" />
     <Content Include="services\DragAndDropService.js" />
     <Content Include="services\layers\IDrawingLayer.js" />
@@ -226,7 +230,7 @@
     <Content Include="controllers\LayerProperties\layerPropertiesModal.html" />
     <Content Include="controllers\info.html" />
     <Content Include="controllers\file.html" />
-    <Content Include="controllers\markerPopup.html" />
+    <Content Include="controllers\MarkerPopup\poiMarkerPopup.html" />
     <Content Include="controllers\shareModal.html" />
     <Content Include="web.config">
       <SubType>Designer</SubType>
@@ -256,6 +260,8 @@
     <TypeScriptCompile Include="controllers\LayerProperties\BaseLayerEditController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\OverlayAddController.ts" />
     <TypeScriptCompile Include="controllers\LayerProperties\OverlayEditController.ts" />
+    <TypeScriptCompile Include="controllers\MarkerPopup\MissingPartMarkerPopupController.ts" />
+    <TypeScriptCompile Include="controllers\MarkerPopup\PoiMarkerPopupController.ts" />
     <TypeScriptCompile Include="controllers\OsmUserController.ts" />
     <TypeScriptCompile Include="controllers\RouteProperties\RouteAddController.ts" />
     <TypeScriptCompile Include="controllers\LayersController.ts" />
@@ -319,7 +325,7 @@
     <TypeScriptCompile Include="controllers\BaseMapController.ts" />
     <TypeScriptCompile Include="controllers\DrawingController.ts" />
     <TypeScriptCompile Include="controllers\MainMapController.ts" />
-    <TypeScriptCompile Include="controllers\MarkerPopupController.ts" />
+    <TypeScriptCompile Include="controllers\MarkerPopup\MarkerPopupController.ts" />
     <TypeScriptCompile Include="controllers\EditOSMController.ts" />
     <TypeScriptCompile Include="controllers\FileController.ts" />
     <TypeScriptCompile Include="services\HashService.ts" />

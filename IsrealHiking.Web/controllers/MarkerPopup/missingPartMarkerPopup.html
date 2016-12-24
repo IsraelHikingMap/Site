@@ -1,0 +1,35 @@
+﻿<div class="marker-popup">
+    <div class="form-group">
+        <a class="btn btn-default cursor-pointer input-group-addon" ng-click="setHighwayType('footway')" ng-class="{'active' : getHighwayType() == 'footway' }" uib-tooltip="{{resources.legendFootPath}}" tooltip-placement="bottom" tooltip-append-to-body="true"><img src="/content/images/hike.svg" alt="" /></a>
+        <a class="btn btn-default cursor-pointer input-group-addon" ng-click="setHighwayType('cycleway')" ng-class="{'active' : getHighwayType() == 'cycleway' }" uib-tooltip="{{resources.legendBicyclePath}}" tooltip-placement="bottom" tooltip-append-to-body="true"><img src="/content/images/bike.svg" alt="" /></a>
+        <a class="btn btn-default cursor-pointer input-group-addon" ng-click="setHighwayType('path')" ng-class="{'active' : getHighwayType() == 'path' }" uib-tooltip="{{resources.legendPath}}" tooltip-placement="bottom" tooltip-append-to-body="true"><img src="/content/images/bike.svg" alt="" /><img src="/content/images/hike.svg" alt="" /></a>
+        <a class="btn btn-default cursor-pointer input-group-addon" ng-click="setHighwayType('track')" ng-class="{'active' : getHighwayType() == 'track' }" uib-tooltip="{{resources.dirtRoad}}" tooltip-placement="bottom" tooltip-append-to-body="true"><img src="/content/images/four-by-four.png" alt="" /></a>
+    </div>
+    <div class="form-group symbols-group">
+        <a class="btn btn-default cursor-pointer symbol-button" ng-click="setColor('none')" ng-class="{'active' : getColor() == 'none' }" uib-tooltip="{{resources.nonMarkedTrail}}" tooltip-placement="bottom" tooltip-append-to-body="true"></a>
+        <a class="btn btn-default cursor-pointer symbol-button" ng-click="setColor('red')" ng-class="{'active' : getColor() == 'red' }" uib-tooltip="{{resources.legendRedMarkedTrail}}" tooltip-placement="bottom" tooltip-append-to-body="true">
+            <span class="middle-line bg-red"></span>
+        </a>
+        <a class="btn btn-default cursor-pointer symbol-button" ng-click="setColor('blue')" ng-class="{'active' : getColor() == 'blue' }" uib-tooltip="{{resources.legendBlueMarkedTrail}}" tooltip-placement="bottom" tooltip-append-to-body="true">
+            <span class="middle-line bg-blue"></span>
+        </a>
+        <a class="btn btn-default cursor-pointer symbol-button" ng-click="setColor('green')" ng-class="{'active' : getColor() == 'green' }" uib-tooltip="{{resources.legendGreenMarkedTrail}}" tooltip-placement="bottom" tooltip-append-to-body="true">
+            <span class="middle-line bg-green"></span>
+        </a>
+        <a class="btn btn-default cursor-pointer symbol-button" ng-click="setColor('black')" ng-class="{'active' : getColor() == 'black' }" uib-tooltip="{{resources.legendBlackMarkedTrail}}" tooltip-placement="bottom" tooltip-append-to-body="true">
+            <span class="middle-line bg-dark"></span>
+        </a>
+        <a class="btn btn-default cursor-pointer symbol-button" ng-click="setColor('orange')" ng-class="{'active' : getColor() == 'orange' }" uib-tooltip="{{resources.legendOrangeRegionalTrail}}" tooltip-placement="bottom" tooltip-append-to-body="true">
+            <span class="middle-line bg-orange"></span>
+        </a>
+        <a class="btn btn-default cursor-pointer symbol-button" ng-click="setColor('purple')" ng-class="{'active' : getColor() == 'purple' }" uib-tooltip="{{resources.legendPurpleRegionalTrail}}" tooltip-placement="bottom" tooltip-append-to-body="true">
+            <span class="middle-line bg-purple"></span>
+        </a>
+    </div>
+    <div class="form-group">
+        <a class="btn btn-success cursor-pointer input-group-addon" ng-click="addMissingPartToOsm()" uib-tooltip="{{resources.addThisRouteToOsm}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isSaveTooltipOpen"><i class="fa fa-plus"></i></a>
+        <a class="btn btn-danger cursor-pointer input-group-addon" ng-click="remove()" uib-tooltip="{{resources.deleteRoute}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isRemoveTooltipOpen"><i class="fa fa-trash"></i></a>
+        <a class="btn btn-warning cursor-pointer input-group-addon" ng-click="showCoordinates = !showCoordinates" uib-tooltip="{{resources.showCoordinates}}" tooltip-placement="top" tooltip-append-to-body="true"><i class="fa fa-globe"></i></a>
+    </div>
+    <div ng-include="'controllers/MarkerPopup/coordinatesMarkerPopup.html'"></div>
+</div>

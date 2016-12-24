@@ -22,7 +22,7 @@
                 this.context.map.addLayer(segment.polyline);
             }
             for (let marker of this.context.route.markers) {
-                marker.marker = this.createMarkerWithEvents(marker);
+                marker.marker = this.createPoiMarkerWithEvents(marker);
                 this.context.map.addLayer(marker.marker);
             }
             this.updateStartAndEndMarkersIcons();
@@ -47,14 +47,14 @@
             let marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
             this.setRouteMarkerEvents(marker);
             marker.addTo(this.context.map);
-            let newScope = this.context.$rootScope.$new() as Controllers.IRemovableMarkerScope;
-            newScope.marker = marker;
+            let newScope = this.context.$rootScope.$new() as Controllers.MarkerPopup.IRemovableMarkerScope;
+            newScope.marker = marker as IMarkerWithTitle;
 
             newScope.remove = () => {
                 let segment = _.find(this.context.route.segments, segmentToFind => marker === segmentToFind.routePointMarker);
                 this.removeRouteSegment(segment); 
             }
-            marker.bindPopup(this.context.$compile("<div route-point-popup></div>")(newScope)[0]);
+            marker.bindPopup(this.context.$compile("<div route-marker-popup></div>")(newScope)[0]);
             return marker;
         }
 
@@ -310,9 +310,9 @@
             chain.then(() => this.context.dataChanged());
         }
 
-        protected createMarkerWithEvents(markerData: Common.MarkerData): IMarkerWithTitle {
+        protected createPoiMarkerWithEvents(markerData: Common.MarkerData): IMarkerWithTitle {
             let marker = this.createPoiMarker(markerData, true);
-            var newScope = this.context.$rootScope.$new() as Controllers.IMarkerPopupScope;
+            var newScope = this.context.$rootScope.$new() as Controllers.MarkerPopup.IPoiMarkerPopupScope;
             newScope.marker = marker;
             newScope.routeLayer = this.context;
             this.setPoiMarkerEvents(marker);
@@ -320,7 +320,7 @@
                 let routeMarker = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
                 this.removePoi(routeMarker);
             }
-            let popupHtml = this.context.$compile("<div marker-popup></div>")(newScope)[0];
+            let popupHtml = this.context.$compile("<div poi-marker-popup></div>")(newScope)[0];
             marker.bindPopup(popupHtml);
             return marker;
         }

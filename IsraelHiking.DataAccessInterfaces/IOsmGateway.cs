@@ -9,6 +9,7 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<string> CreateChangeset();
         Task<string> CreateNode(string changesetId, Node node);
         Task<string> CreateWay(string changesetId, Way way);
+        Task<CompleteWay> GetCompleteWay(string wayId);
         Task CloseChangeset(string changesetId);
     }
 }

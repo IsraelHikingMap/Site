@@ -16,6 +16,9 @@ namespace IsraelHiking.DataAccessInterfaces
         double SimplificationTolerance { get; }
         double ClosestPointTolerance { get; }
         string BinariesFolder { get; }
+        string OsmConsumerKey { get; }
+        string OsmConsumerSecret { get; }
+        string OsmBaseAddress { get; }
         Dictionary<string, string> ListingDictionary { get; }
     }
 }

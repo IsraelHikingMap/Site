@@ -11,6 +11,8 @@ using IsraelHiking.DataAccessInterfaces;
 using OAuth;
 using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
+using OsmSharp.Osm.Streams.Complete;
+using OsmSharp.Osm.Xml.Streams;
 using OsmSharp.Osm.Xml.v0_6;
 
 namespace IsraelHiking.DataAccess.Osm
@@ -18,37 +20,44 @@ namespace IsraelHiking.DataAccess.Osm
     public class OsmGateway : BaseFileFetcherGateway, IOsmGateway
     {
         private readonly TokenAndSecret _tokenAndSecret;
+        private readonly IConfigurationProvider _configurationProvider;
         private readonly MediaTypeFormatter _xmlMediaTypeFormatter;
 
-        
-        //private const string OSM_ADDRESS = "api06.dev.openstreetmap.org"; // DEV
-        private const string OSM_ADDRESS = "www.openstreetmap.org";
-        private const string OSM_API_BASE_ADDRESS = "http://" + OSM_ADDRESS + "/api/0.6/";
-        private const string OSM_USER_DETAILS_ADDRESS = OSM_API_BASE_ADDRESS + "user/details";
-        private const string OSM_CREATE_CHANGESET_ADDRESS = OSM_API_BASE_ADDRESS + "changeset/create";
-        private const string OSM_CLOSE_CHANGESET_ADDRESS = OSM_API_BASE_ADDRESS + "changeset/#id/close";
-        private const string OSM_CREATE_NODE_ADDRESS = OSM_API_BASE_ADDRESS + "node/create";
-        private const string OSM_CREATE_WAY_ADDRESS = OSM_API_BASE_ADDRESS + "way/create";
+        private readonly string _baseAddressWithoutProtocol;
+        private readonly string _userDetailsAddress;
+        private readonly string _createChangesetAddress;
+        private readonly string _closeChangesetAddress;
+        private readonly string _createNodeAddress;
+        private readonly string _createWayAddress;
+        private readonly string _getFullWayAddress;
 
-        public OsmGateway(TokenAndSecret tokenAndSecret, ILogger logger) : base(logger)
+        public OsmGateway(TokenAndSecret tokenAndSecret, IConfigurationProvider configurationProvider, ILogger logger) : base(logger)
         {
             _tokenAndSecret = tokenAndSecret;
+            _configurationProvider = configurationProvider;
             _xmlMediaTypeFormatter = new XmlMediaTypeFormatter {UseXmlSerializer = true};
+
+            var osmApiBaseAddress = _configurationProvider.OsmBaseAddress.Replace("https", "http") + "/api/0.6/";
+            _baseAddressWithoutProtocol = _configurationProvider.OsmBaseAddress.Replace("http://", "").Replace("https://", "");
+            _userDetailsAddress = osmApiBaseAddress + "user/details";
+            _createChangesetAddress = osmApiBaseAddress + "changeset/create";
+            _closeChangesetAddress = osmApiBaseAddress + "changeset/#id/close";
+            _createNodeAddress = osmApiBaseAddress + "node/create";
+            _createWayAddress = osmApiBaseAddress + "way/create";
+            _getFullWayAddress = osmApiBaseAddress + "way/#id/full";
         }
 
         protected override void UpdateHeaders(HttpClient client, string url, string method = "GET")
         {
-            if (url.Contains(OSM_ADDRESS) == false)
+            if (url.Contains(_baseAddressWithoutProtocol) == false)
             {
                 return;
             }
 
             var request = new OAuthRequest
             {
-                ConsumerKey = "H5Us9nv9eDyFpKbBTiURf7ZqfdBArNddv10n6R6U",
-                ConsumerSecret = "ccYaQUKLz26XEzbNd8uWoQ6HwbcnrUUp8milXnXG",
-                //ConsumerKey = "uR7K7PcxOyFG2FnTdTuEqAmlq6hTWPDmF4xknWxQ", // DEV
-                //ConsumerSecret = "hd8WnRpQQtzS04HeFMLUHN2JQtPWzQLOmA6OeE9l", // DEV
+                ConsumerKey = _configurationProvider.OsmConsumerKey,
+                ConsumerSecret = _configurationProvider.OsmConsumerSecret,
                 Token = _tokenAndSecret.Token,
                 TokenSecret = _tokenAndSecret.TokenSecret,
                 Type = OAuthRequestType.ProtectedResource,
@@ -65,8 +74,8 @@ namespace IsraelHiking.DataAccess.Osm
         {
             using (var client = new HttpClient())
             {
-                UpdateHeaders(client, OSM_USER_DETAILS_ADDRESS);
-                var response = await client.GetAsync(OSM_USER_DETAILS_ADDRESS);
+                UpdateHeaders(client, _userDetailsAddress);
+                var response = await client.GetAsync(_userDetailsAddress);
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     return string.Empty;
@@ -80,7 +89,7 @@ namespace IsraelHiking.DataAccess.Osm
         {
             using (var client = new HttpClient())
             {
-                UpdateHeaders(client, OSM_CREATE_CHANGESET_ADDRESS, "PUT");
+                UpdateHeaders(client, _createChangesetAddress, "PUT");
                 var changeSet = new osm
                 {
                     changeset = new[]
@@ -95,7 +104,7 @@ namespace IsraelHiking.DataAccess.Osm
                         }
                     }
                 };
-                var response = await client.PutAsync(OSM_CREATE_CHANGESET_ADDRESS, new ObjectContent(typeof(osm), changeSet, _xmlMediaTypeFormatter));
+                var response = await client.PutAsync(_createChangesetAddress, new ObjectContent(typeof(osm), changeSet, _xmlMediaTypeFormatter));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     return string.Empty;
@@ -108,7 +117,7 @@ namespace IsraelHiking.DataAccess.Osm
         {
             using (var client = new HttpClient())
             {
-                UpdateHeaders(client, OSM_CREATE_NODE_ADDRESS, "PUT");
+                UpdateHeaders(client, _createNodeAddress, "PUT");
                 var newNode = new osm
                 {
                     node = new[]
@@ -125,7 +134,7 @@ namespace IsraelHiking.DataAccess.Osm
                         }
                     }
                 };
-                var response = await client.PutAsync(OSM_CREATE_NODE_ADDRESS, new ObjectContent(typeof(osm), newNode, _xmlMediaTypeFormatter));
+                var response = await client.PutAsync(_createNodeAddress, new ObjectContent(typeof(osm), newNode, _xmlMediaTypeFormatter));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     return string.Empty;
@@ -138,7 +147,7 @@ namespace IsraelHiking.DataAccess.Osm
         {
             using (var client = new HttpClient())
             {
-                UpdateHeaders(client, OSM_CREATE_WAY_ADDRESS, "PUT");
+                UpdateHeaders(client, _createWayAddress, "PUT");
                 var newWay = new osm
                 {
                     way = new[]
@@ -152,7 +161,7 @@ namespace IsraelHiking.DataAccess.Osm
                         }
                     }
                 };
-                var response = await client.PutAsync(OSM_CREATE_WAY_ADDRESS, new ObjectContent(typeof(osm), newWay, _xmlMediaTypeFormatter));
+                var response = await client.PutAsync(_createWayAddress, new ObjectContent(typeof(osm), newWay, _xmlMediaTypeFormatter));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     return string.Empty;
@@ -161,11 +170,27 @@ namespace IsraelHiking.DataAccess.Osm
             }
         }
 
+        public async Task<CompleteWay> GetCompleteWay(string wayId)
+        {
+            using (var client = new HttpClient())
+            {
+                var address = _getFullWayAddress.Replace("#id", wayId);
+                var response = await client.GetAsync(address);
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    return null;
+                }
+                var streamSource = new XmlOsmStreamSource(await response.Content.ReadAsStreamAsync());
+                var completeSource = new OsmSimpleCompleteStreamSource(streamSource);
+                return completeSource.OfType<CompleteWay>().FirstOrDefault();
+            }
+        }
+
         public async Task CloseChangeset(string changesetId)
         {
             using (var client = new HttpClient())
             {
-                var address = OSM_CLOSE_CHANGESET_ADDRESS.Replace("#id", changesetId);
+                var address = _closeChangesetAddress.Replace("#id", changesetId);
                 UpdateHeaders(client, address, "PUT");
                 var response = await client.PutAsync(address, new StringContent(string.Empty));
                 if (response.StatusCode != HttpStatusCode.OK)

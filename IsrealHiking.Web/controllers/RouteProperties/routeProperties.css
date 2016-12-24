@@ -3,51 +3,51 @@
 }
 
 .bg-blue {
-    background: #0000FF;
+    background-color: #0000FF !important;
 }
 
 .bg-red {
-    background: #FF0000;
+    background-color: #FF0000 !important;
 }
 
 .bg-orange {
-    background: #FF6600;
+    background-color: #FF6600 !important;
 }
 
 .bg-pink {
-    background: #FF00DD;
+    background-color: #FF00DD !important;
 }
 
 .bg-green {
-    background: #008000;
+    background-color: #008000 !important;
 }
 
 .bg-purple {
-    background: #B700FF;
+    background-color: #B700FF !important;
 }
 
 .bg-turquize {
-    background: #00B0A4;
+    background-color: #00B0A4 !important;
 }
 
 .bg-yellow {
-    background: #FFFF00;
+    background-color: #FFFF00 !important;
 }
 
 .bg-brown {
-    background: #9C3E00;
+    background-color: #9C3E00 !important;
 }
 
 .bg-cyan {
-    background: #00FFFF;
+    background-color: #00FFFF !important;
 }
 
 .bg-gray {
-    background: #7F8282;
+    background-color: #7F8282 !important;
 }
 
 .bg-dark {
-    background: #101010;
+    background-color: #101010 !important;
 }
 
 .fg-marker {

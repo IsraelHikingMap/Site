@@ -1,15 +1,18 @@
-﻿using Microsoft.Owin;
+﻿using System;
+using Microsoft.Owin;
 using Owin;
 using System.Net.Http.Headers;
 using System.Web.Http;
 using IsraelHiking.DataAccess;
 using System.Web.Http.ExceptionHandling;
+using System.Web.Http.Validation;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Owin.Security.OAuth;
+using NetTopologySuite.Features;
 using NetTopologySuite.IO.Converters;
 
 [assembly: OwinStartup(typeof(IsraelHiking.Web.Startup))]
@@ -17,6 +20,14 @@ using NetTopologySuite.IO.Converters;
 
 namespace IsraelHiking.Web
 {
+    public class CustomBodyModelValidator : DefaultBodyModelValidator
+    {
+        public override bool ShouldValidateType(Type type)
+        {
+            return type!= typeof(Feature) && type != typeof(FeatureCollection) && base.ShouldValidateType(type);
+        }
+    }
+
     public class Startup
     {
         public void Configuration(IAppBuilder app)
@@ -47,6 +58,7 @@ namespace IsraelHiking.Web
             config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new EnvelopeConverter());
 
             config.Services.Add(typeof(IExceptionLogger), logger);
+            config.Services.Replace(typeof(IBodyModelValidator), new CustomBodyModelValidator());
             config.DependencyResolver = new UnityResolver(container);
             InitializeServices(container);
             app.UseWebApi(config);

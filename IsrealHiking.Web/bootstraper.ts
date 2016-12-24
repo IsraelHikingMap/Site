@@ -79,17 +79,21 @@
     // Directives:
     app.directive(Strings.Directives.disableMapMovement, () => new Directives.DisableMapMovementDirective());
     app.directive(Strings.Directives.syncFocusWith, [Strings.Angular.timeout, ($timeout: angular.ITimeoutService) => new Directives.SyncFocusWithDirective($timeout)]);
-    app.directive(Strings.Directives.markerPopup, () => ({
-        controller: Controllers.MarkerPopupController,
-        templateUrl: "controllers/markerPopup.html"
+    app.directive(Strings.Directives.poiMarkerPopup, () => ({
+        controller: Controllers.MarkerPopup.PoiMarkerPopupController,
+        templateUrl: "controllers/MarkerPopup/poiMarkerPopup.html"
     } as angular.IDirective));
-    app.directive(Strings.Directives.routePointPopup, () => ({
-        controller: Controllers.MarkerPopupController,
-        templateUrl: "controllers/routePointPopup.html"
+    app.directive(Strings.Directives.routeMarkerPopup, () => ({
+        controller: Controllers.MarkerPopup.MarkerPopupController,
+        templateUrl: "controllers/MarkerPopup/routeMarkerPopup.html"
     } as angular.IDirective));
     app.directive(Strings.Directives.searchResultsMarkerPopup, () => ({
-        controller: Controllers.MarkerPopupController,
-        templateUrl: "controllers/searchResultsMarkerPopup.html"
+        controller: Controllers.MarkerPopup.MarkerPopupController,
+        templateUrl: "controllers/MarkerPopup/searchResultsMarkerPopup.html"
+    } as angular.IDirective));
+    app.directive(Strings.Directives.missingPartMarkerPopup, () => ({
+        controller: Controllers.MarkerPopup.MissingPartMarkerPopupController,
+        templateUrl: "controllers/MarkerPopup/missingPartMarkerPopup.html"
     } as angular.IDirective));
     app.directive(Strings.Directives.drawingControl, () => ({
         controller: Controllers.DrawingController,
