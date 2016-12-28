@@ -124,13 +124,13 @@ namespace IsraelHiking.API.Services
         {
             var northEast = _coordinatesConverter.ItmToWgs84(new NorthEast
             {
-                North = (int)gpxLine.Coordinates.Max(c => c.Y),
-                East = (int)gpxLine.Coordinates.Max(c => c.X)
+                North = (int)(gpxLine.Coordinates.Max(c => c.Y) + _configurationProvider.ClosestPointTolerance),
+                East = (int)(gpxLine.Coordinates.Max(c => c.X) + _configurationProvider.ClosestPointTolerance)
             });
             var southWest = _coordinatesConverter.ItmToWgs84(new NorthEast
             {
-                North = (int)gpxLine.Coordinates.Min(c => c.Y),
-                East = (int)gpxLine.Coordinates.Min(c => c.X)
+                North = (int)(gpxLine.Coordinates.Min(c => c.Y) - _configurationProvider.ClosestPointTolerance),
+                East = (int)(gpxLine.Coordinates.Min(c => c.X) - _configurationProvider.ClosestPointTolerance)
             });
             var highways = await _elasticSearchGateway.GetHighways(new LatLng { lat = northEast.Latitude, lng = northEast.Longitude }, new LatLng { lat = southWest.Latitude, lng = southWest.Longitude });
             return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates)).ToList();

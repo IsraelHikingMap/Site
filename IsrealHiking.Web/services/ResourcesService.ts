@@ -184,6 +184,7 @@ namespace IsraelHiking.Services {
         public noUnmappedRoutes: string;
         public unableToFindYourLocation: string;
         public redirectingToSecuredSite: string;
+        public routeAddedSuccessfullyItWillTakeTime: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -538,6 +539,7 @@ namespace IsraelHiking.Services {
                     this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");
                     this.unableToFindYourLocation = this.gettextCatalog.getString("Unable to find your location...");
                     this.redirectingToSecuredSite = this.gettextCatalog.getString("Redirecting to secure site.");
+                    this.routeAddedSuccessfullyItWillTakeTime = this.gettextCatalog.getString("Route added successfully, It will take some time for the map to update.");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");

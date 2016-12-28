@@ -78,14 +78,32 @@ namespace IsraelHiking.API.Services.Osm
 
         private async Task<List<Feature>> GetHighwaysInArea(LineString line)
         {
+            var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon
+            {
+                Latitude = line.Coordinates.Max(c => c.Y),
+                Longitude = line.Coordinates.Max(c => c.X)
+            });
+            var southWest = _coordinatesConverter.Wgs84ToItm(new LatLon
+            {
+                Latitude = line.Coordinates.Min(c => c.Y),
+                Longitude = line.Coordinates.Min(c => c.X)
+            });
+            // adding tolerance perimiter to find ways.
+            northEast.North += (int) _configurationProvider.ClosestPointTolerance;
+            northEast.East += (int)_configurationProvider.ClosestPointTolerance;
+            southWest.North -= (int)_configurationProvider.ClosestPointTolerance;
+            southWest.East -= (int)_configurationProvider.ClosestPointTolerance;
+            var northEastLatLon = _coordinatesConverter.ItmToWgs84(northEast);
+            var southWestLatLon = _coordinatesConverter.ItmToWgs84(southWest);
+
             var highways = await _elasticSearchGateway.GetHighways(new LatLng
             {
-                lat = line.Coordinates.Max(c => c.Y),
-                lng = line.Coordinates.Max(c => c.X)
+                lat = northEastLatLon.Latitude,
+                lng = northEastLatLon.Longitude
             }, new LatLng
             {
-                lat = line.Coordinates.Min(c => c.Y),
-                lng = line.Coordinates.Min(c => c.X)
+                lat = southWestLatLon.Latitude,
+                lng = southWestLatLon.Longitude
             });
             return highways.ToList();
         }
@@ -123,7 +141,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task<string> AddWay(IEnumerable<string> nodeIds, Dictionary<string, string> tags, string chagesetId)
         {
             var way = Way.Create(0, nodeIds.Select(long.Parse).ToArray());
-            way.Tags = new TagsCollection(tags);
+            way.Tags = new TagsCollection(tags) {{"note", "Added by IHM algorithm - fixing maybe needed"}};
             return await _osmGateway.CreateWay(chagesetId, way);
         }
 

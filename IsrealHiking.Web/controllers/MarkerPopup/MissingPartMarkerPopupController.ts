@@ -32,13 +32,14 @@
             $scope.setColor = (color: string) => {
                 $scope.feature.properties["colour"] = color;
                 if (color === "none") {
-                    $scope.feature.properties["colour"] = "";
+                    delete $scope.feature.properties["colour"];
                 }
             }
 
             $scope.addMissingPartToOsm = () => {
                 osmUserService.addAMissingPart($scope.feature).then(() => {
-                    toastr.success($scope.resources.routeSentSuccessfully);
+                    toastr.success($scope.resources.routeAddedSuccessfullyItWillTakeTime);
+                    $scope.remove();
                 }, () => {
                     toastr.error($scope.resources.unableToSendRoute);
                 });
