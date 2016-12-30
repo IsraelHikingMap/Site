@@ -5,7 +5,7 @@
 
 namespace IsraelHiking.Tests.Services.Elevation {
     describe("Elevation Provider", () => {
-        var ADDRESS = Common.Urls.elevation + "?point=0.0000,0.0000";
+        var ADDRESS = Common.Urls.elevation + "?points=0.0000,0.0000";
         var elevationProvider: IsraelHiking.Services.Elevation.ElevationProvider;
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;

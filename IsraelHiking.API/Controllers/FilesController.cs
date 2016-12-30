@@ -5,10 +5,15 @@ using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
 using IsraelHiking.API.Services;
+using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
+using Swashbuckle.Swagger.Annotations;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <summary>
+    /// This controller allows fetching of remote files, opening of files and converting files
+    /// </summary>
     public class FilesController : ApiController
     {
         private readonly IElevationDataStorage _elevationDataStorage;
@@ -16,6 +21,13 @@ namespace IsraelHiking.API.Controllers
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
+        /// <summary>
+        /// Controller's constructor
+        /// </summary>
+        /// <param name="elevationDataStorage"></param>
+        /// <param name="httpGatewayFactory"></param>
+        /// <param name="dataContainerConverterService"></param>
+        /// <param name="cache"></param>
         public FilesController(IElevationDataStorage elevationDataStorage,
             IHttpGatewayFactory httpGatewayFactory, 
             IDataContainerConverterService dataContainerConverterService,
@@ -27,7 +39,7 @@ namespace IsraelHiking.API.Controllers
             _cache = cache;
         }
         /// <summary>
-        /// Gets a file from an external Url and converts it to data container
+        /// Gets a file from an external Url and converts it to <see cref="DataContainer"/>
         /// </summary>
         /// <param name="url">The url to fetch the file from</param>
         /// <returns>A data container after convertion</returns>
@@ -45,11 +57,11 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// This function is used to save file from data conatiner (client side presention) to any given format.
+        /// Converts <see cref="DataContainer"/> (client side presention) to any given format.
         /// </summary>
         /// <param name="format">The format to convert to</param>
         /// <param name="dataContainer">The container to convert</param>
-        /// <returns>a byte representation of file in the converted format</returns>
+        /// <returns>A byte representation of file in the converted format</returns>
         [HttpPost]
         // POST api/files?format=gpx
         public Task<byte[]> PostSaveFile(string format, [FromBody]DataContainer dataContainer)
@@ -58,12 +70,13 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// The uploaded file is converted to data container json 
+        /// Reads the uploaded file and converts it to <see cref="DataContainer"/>
         /// </summary>
-        /// <returns>A data container after conversion of the file uploaded</returns>
+        /// <returns>A <see cref="DataContainer"/> after conversion of the file uploaded</returns>
         [HttpPost]
         [Route("api/Files/open")]
         [ResponseType(typeof(DataContainer))]
+        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
         public async Task<IHttpActionResult> PostOpenFile()
         {
             var streamProvider = new MultipartMemoryStreamProvider();

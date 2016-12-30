@@ -10,11 +10,19 @@ using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <summary>
+    /// This controller is responsible for image creation
+    /// </summary>
     public class ImagesController : ApiController
     {
         private readonly IIsraelHikingRepository _israelHikingRepository;
         private readonly IImageCreationService _imageCreationService;
 
+        /// <summary>
+        /// Controller's constructor
+        /// </summary>
+        /// <param name="israelHikingRepository"></param>
+        /// <param name="imageCreationService"></param>
         public ImagesController(IIsraelHikingRepository israelHikingRepository, 
             IImageCreationService imageCreationService)
         {
@@ -22,6 +30,11 @@ namespace IsraelHiking.API.Controllers
             _imageCreationService = imageCreationService;
         }
 
+        /// <summary>
+        /// Creates an image for the relevant shared route in the database
+        /// </summary>
+        /// <param name="id">The share route ID</param>
+        /// <returns>An image</returns>
         public async Task<IHttpActionResult> GetImage(string id)
         {
             var url = await _israelHikingRepository.GetUrlById(id);

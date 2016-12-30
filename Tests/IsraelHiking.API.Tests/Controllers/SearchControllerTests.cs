@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
-using Newtonsoft.Json.Linq;
+using NetTopologySuite.Geometries;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -23,7 +24,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             var elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            
+
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
             _controller = new SearchController(_elasticSearchGateway, _dataContainerConverterService, elevationDataStorage);
         }
@@ -44,13 +45,12 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostConvertSearchResults_JsonObject_ShouldConvertToDataContianer()
         {
-            dynamic jsonObject = new JObject();
-            jsonObject.type = "Feature";
-            jsonObject.geometry = new JObject();
-            jsonObject.geometry.type = "LineString";
-            jsonObject.geometry.coordinates = new JArray(new JArray(1, 1), new JArray(2, 2));
-            jsonObject.properties = new JObject();
-            jsonObject.properties.name = "name";
+
+            var feature = new Feature(new LineString(new[]
+            {
+                new Coordinate(1, 1),
+                new Coordinate(2, 2)
+            }), new AttributesTable());
 
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>())
                 .Returns(new DataContainer
@@ -69,7 +69,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 });
 
 
-            var results = _controller.PostConvertSearchResults(jsonObject).Result;
+            var results = _controller.PostConvertSearchResults(feature).Result;
 
             Assert.AreEqual(1, results.routes.Count);
         }

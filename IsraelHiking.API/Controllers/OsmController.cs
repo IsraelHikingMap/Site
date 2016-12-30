@@ -9,14 +9,19 @@ using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
+using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using Swashbuckle.Swagger.Annotations;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <summary>
+    /// This controller is responsible for all OSM related requests
+    /// </summary>
     public class OsmController : ApiController
     {
         private readonly IHttpGatewayFactory _httpGatewayFactory;
@@ -28,6 +33,17 @@ namespace IsraelHiking.API.Controllers
         private readonly IConfigurationProvider _configurationProvider;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
+        /// <summary>
+        /// Controller's constructor
+        /// </summary>
+        /// <param name="httpGatewayFactory"></param>
+        /// <param name="dataContainerConverterService"></param>
+        /// <param name="coordinatesConverter"></param>
+        /// <param name="elasticSearchGateway"></param>
+        /// <param name="addibleGpxLinesFinderService"></param>
+        /// <param name="osmLineAdderService"></param>
+        /// <param name="configurationProvider"></param>
+        /// <param name="cache"></param>
         public OsmController(IHttpGatewayFactory httpGatewayFactory,
             IDataContainerConverterService dataContainerConverterService,
             ICoordinatesConverter coordinatesConverter,
@@ -47,11 +63,21 @@ namespace IsraelHiking.API.Controllers
             _cache = cache;
         }
 
+        /// <summary>
+        /// Get a list of highways in the given bounding box
+        /// </summary>
+        /// <param name="northEast">Bounding box's north-east coordinates</param>
+        /// <param name="southWest">Bounding box's south-west coordinates</param>
+        /// <returns>A list of features in GeoJSON format</returns>
         public async Task<List<Feature>> GetHighways(string northEast, string southWest)
         {
             return await _elasticSearchGateway.GetHighways(new LatLng(northEast), new LatLng(southWest));
         }
 
+        /// <summary>
+        /// Get the OSM server configuration
+        /// </summary>
+        /// <returns>The OSM server configurations</returns>
         [HttpGet]
         [Route("api/osm/configuration")]
         public object GetConfigurations()
@@ -64,6 +90,11 @@ namespace IsraelHiking.API.Controllers
             };
         }
 
+        /// <summary>
+        /// Adds a route to OSM - this requires to be logged in to OSM
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <returns></returns>
         [Authorize]
         public async Task PutGpsTraceIntoOsm(Feature feature)
         {
@@ -71,6 +102,12 @@ namespace IsraelHiking.API.Controllers
             await _osmLineAdderService.Add(feature.Geometry as LineString, tags, _cache.Get(User.Identity.Name));
         }
 
+        /// <summary>
+        /// Finds missing parts of a given route
+        /// </summary>
+        /// <param name="url">The url to fetch the file from</param>
+        /// <returns></returns>
+        [SwaggerOperationFilter(typeof(OptionalFileUploadParams))]
         public async Task<FeatureCollection> PostGpsTrace(string url)
         {
             var response = await GetFile(url);

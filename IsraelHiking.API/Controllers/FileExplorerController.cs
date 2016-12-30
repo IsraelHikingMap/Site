@@ -9,15 +9,24 @@ using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <summary>
+    /// This class can be used to create the HTML file listing page
+    /// </summary>
     public partial class FileExplorerHtmlTemplate
     {
         private FileExplorerViewModel FileExplorerViewModel { get; }
 
+        /// <param name="viewModel"></param>
         public FileExplorerHtmlTemplate(FileExplorerViewModel viewModel)
         {
             FileExplorerViewModel = viewModel;
         }
 
+        /// <summary>
+        /// Facilitates the creation of string of file sizes 
+        /// </summary>
+        /// <param name="number">The number of bytes</param>
+        /// <returns>A human readable string</returns>
         public string GetSizeString(double number)
         {
             string units;
@@ -46,17 +55,30 @@ namespace IsraelHiking.API.Controllers
         }
     }
 
+    /// <summary>
+    /// This controller allows viewing of the file system
+    /// </summary>
     public class FileExplorerController : ApiController
     {
         private readonly IConfigurationProvider _configurationProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
 
+        /// <summary>
+        /// Controller's contstructor
+        /// </summary>
+        /// <param name="fileSystemHelper"></param>
+        /// <param name="configurationProvider"></param>
         public FileExplorerController(IFileSystemHelper fileSystemHelper, IConfigurationProvider configurationProvider)
         {
             _fileSystemHelper = fileSystemHelper;
             _configurationProvider = configurationProvider;
         }
 
+        /// <summary>
+        /// Allows to see a given path in the file system
+        /// </summary>
+        /// <param name="path">The relative path</param>
+        /// <returns>An nice looking HTML page</returns>
         public HttpResponseMessage GetListingPage(string path)
         {
             path = path ?? string.Empty;

@@ -20,6 +20,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Debug\IsraelHiking.API.XML</DocumentationFile>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -28,6 +29,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <DocumentationFile>bin\Release\IsraelHiking.API.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="DotNetZip, Version=1.10.1.0, Culture=neutral, PublicKeyToken=6583c7c814667745, processorArchitecture=MSIL">
@@ -84,6 +86,10 @@
     </Reference>
     <Reference Include="protobuf-net, Version=2.1.0.0, Culture=neutral, PublicKeyToken=257b51d87d2e4d67, processorArchitecture=MSIL">
       <HintPath>..\packages\protobuf-net.2.1.0\lib\net45\protobuf-net.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
+    <Reference Include="Swashbuckle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cd1bb07a5ac7c7bc, processorArchitecture=MSIL">
+      <HintPath>..\packages\Swashbuckle.Core.5.5.3\lib\net40\Swashbuckle.Core.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
@@ -169,6 +175,11 @@
     <Compile Include="Services\LruCache.cs" />
     <Compile Include="Services\RadialDistanceByAngleSimplifier.cs" />
     <Compile Include="Services\RouteDataSplitterService.cs" />
+    <Compile Include="Swagger\AssignOAuthSecurityRequirements.cs" />
+    <Compile Include="Swagger\FeatureCollectionExampleFilter.cs" />
+    <Compile Include="Swagger\FeatureExampleFilter.cs" />
+    <Compile Include="Swagger\OptionalFileUploadParams.cs" />
+    <Compile Include="Swagger\RequiredFileUploadParams.cs" />
     <Compile Include="UnityRegisterApi.cs" />
   </ItemGroup>
   <ItemGroup>

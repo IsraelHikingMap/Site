@@ -8,12 +8,14 @@ using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Validation;
 using IsraelHiking.API;
 using IsraelHiking.API.Services;
+using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Owin.Security.OAuth;
 using NetTopologySuite.Features;
 using NetTopologySuite.IO.Converters;
+using Swashbuckle.Application;
 
 [assembly: OwinStartup(typeof(IsraelHiking.Web.Startup))]
 [assembly: log4net.Config.XmlConfigurator(Watch = true)]
@@ -24,7 +26,7 @@ namespace IsraelHiking.Web
     {
         public override bool ShouldValidateType(Type type)
         {
-            return type!= typeof(Feature) && type != typeof(FeatureCollection) && base.ShouldValidateType(type);
+            return type != typeof(Feature) && type != typeof(FeatureCollection) && base.ShouldValidateType(type);
         }
     }
 
@@ -56,7 +58,14 @@ namespace IsraelHiking.Web
             config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new ICRSObjectConverter());
             config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new GeometryArrayConverter());
             config.Formatters.JsonFormatter.SerializerSettings.Converters.Add(new EnvelopeConverter());
-
+            config.EnableSwagger(c =>
+            {
+                c.SingleApiVersion("v1", "IsraelHiking API");
+                c.SchemaFilter<FeatureExampleFilter>();
+                c.SchemaFilter<FeatureCollectionExampleFilter>();
+                c.OperationFilter<AssignOAuthSecurityRequirements>();
+                c.IncludeXmlComments($@"{AppDomain.CurrentDomain.BaseDirectory}\bin\israelhiking.api.xml");
+            }).EnableSwaggerUi();
             config.Services.Add(typeof(IExceptionLogger), logger);
             config.Services.Replace(typeof(IBodyModelValidator), new CustomBodyModelValidator());
             config.DependencyResolver = new UnityResolver(container);

@@ -12,11 +12,19 @@ using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <summary>
+    /// This controller handles the shared routes
+    /// </summary>
     public class UrlsController : ApiController
     {
         private IIsraelHikingRepository _repository;
         private readonly IDataContainerConverterService _dataContainerConverterService;
 
+        /// <summary>
+        /// Controller's constructor
+        /// </summary>
+        /// <param name="repository"></param>
+        /// <param name="dataContainerConverterService"></param>
         public UrlsController(IIsraelHikingRepository repository, 
             IDataContainerConverterService dataContainerConverterService)
         {
@@ -24,6 +32,12 @@ namespace IsraelHiking.API.Controllers
             _dataContainerConverterService = dataContainerConverterService;
         }
 
+        /// <summary>
+        /// Returns the data relevant to a given shared route
+        /// </summary>
+        /// <param name="id">The shared route ID</param>
+        /// <param name="format">The format to convert to, default is <see cref="DataContainer"/>, but you can use "gpx", "csv" and all other formats that can be opened in this site</param>
+        /// <returns>The shared route in the requested format</returns>
         // GET api/Urls/abc?format=gpx
         public async Task<IHttpActionResult> GetSiteUrl(string id, string format = "")
         {
@@ -58,6 +72,10 @@ namespace IsraelHiking.API.Controllers
             return result;
         }
 
+        /// <summary>
+        /// Get all shared routes for a specific user
+        /// </summary>
+        /// <returns>The user's shared routes</returns>
         // GET api/Urls
         [Authorize]
         public async Task<IHttpActionResult> GetSiteUrlForUser()
@@ -66,6 +84,11 @@ namespace IsraelHiking.API.Controllers
             return Ok(siteUrls);
         }
 
+        /// <summary>
+        /// Adds a shared route, user ID is optional
+        /// </summary>
+        /// <param name="siteUrl">The shared route's data</param>
+        /// <returns>Whether the operation succeeded or not</returns>
         // POST api/urls
         public async Task<IHttpActionResult> PostSiteUrl(SiteUrl siteUrl)
         {
@@ -87,6 +110,12 @@ namespace IsraelHiking.API.Controllers
             return Ok(siteUrl);
         }
 
+        /// <summary>
+        /// Update a shared route
+        /// </summary>
+        /// <param name="id">The shared route's ID</param>
+        /// <param name="siteUrl">The new shared route data</param>
+        /// <returns>Whether the operation succeeded or not</returns>
         // PUT api/urls/42
         [Authorize]
         public async Task<IHttpActionResult> PutSiteUrl(string id, SiteUrl siteUrl)
@@ -108,7 +137,7 @@ namespace IsraelHiking.API.Controllers
 
         // Delete delete/urls/abc
         /// <summary>
-        /// Removes the user from the url, leaves it as public.
+        /// Deletes the shared route.
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -134,6 +163,10 @@ namespace IsraelHiking.API.Controllers
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
         }
 
+        /// <summary>
+        /// Follows dispose pattern
+        /// </summary>
+        /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

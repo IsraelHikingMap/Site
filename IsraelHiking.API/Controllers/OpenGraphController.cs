@@ -7,6 +7,9 @@ using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <summary>
+    /// This class can be used to create the HTML facebook crawlable page
+    /// </summary>
     public partial class OpenGraphHtmlTemplate
     {
         private string ThumbnailUrl { get; }
@@ -25,11 +28,19 @@ namespace IsraelHiking.API.Controllers
         }
     }
 
+    /// <summary>
+    /// This contoller is used to return an HTML page for facebook crawler
+    /// </summary>
     public class OpenGraphController : ApiController
     {
         private readonly ILogger _logger;
-        private readonly IIsraelHikingRepository _repository; 
+        private readonly IIsraelHikingRepository _repository;
 
+        /// <summary>
+        /// Controller's constructor
+        /// </summary>
+        /// <param name="repository"></param>
+        /// <param name="logger"></param>
         public OpenGraphController(IIsraelHikingRepository repository, 
             ILogger logger)
         {
@@ -37,6 +48,11 @@ namespace IsraelHiking.API.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Get the HTML page needed for facebook crawler
+        /// </summary>
+        /// <param name="id">The ID of the shared route</param>
+        /// <returns>An HTML page with all relevant metadata</returns>
         public async Task<IHttpActionResult> GetHtml(string id)
         {
             _logger.Debug("Received a call to get html for: " + id);
