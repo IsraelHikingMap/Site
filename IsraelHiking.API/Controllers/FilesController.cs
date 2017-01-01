@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using GeoAPI.Geometries;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
@@ -51,7 +52,7 @@ namespace IsraelHiking.API.Controllers
             var dataContainer = await _dataContainerConverterService.ToDataContainer(response.Content, response.FileName);
             foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
             {
-                latLngZ.z = await _elevationDataStorage.GetElevation(latLngZ);
+                latLngZ.z = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLngZ));
             }
             return dataContainer;
         }

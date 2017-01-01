@@ -2,6 +2,6 @@
     <p>
         {{resources.latitudeAbbreviation}} {{latLng.lat | number:6 }}°, {{resources.longitudeAbbreviation}} {{latLng.lng | number:7}}°<br />
         {{resources.eastAbbreviation}} {{itmCoordinates.East}} {{resources.meterUnit}}, {{resources.northAbbreviation}} {{itmCoordinates.North}} {{resources.meterUnit}}<br />
-        {{resources.elevation}} <span dir="ltr">{{latLng.z}}</span> {{resources.meterUnit}}
+        {{resources.elevation}} <span dir="ltr">{{latLng.z | number:0}}</span> {{resources.meterUnit}}
     </p>
 </div>

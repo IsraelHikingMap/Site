@@ -203,6 +203,9 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             for (let segment of this.route.segments) {
                 for (let latlngz of segment.latlngzs) {
                     let distance = previousPoint.distanceTo(latlngz);
+                    if (distance < 1) {
+                        continue;
+                    }
                     routeStatistics.length += distance;
                     let point = L.point((routeStatistics.length / 1000), latlngz.z) as IRouteStatisticsPoint;
                     point.latlng = latlngz;

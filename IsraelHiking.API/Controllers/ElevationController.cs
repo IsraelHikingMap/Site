@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using System.Web.Http;
+using GeoAPI.Geometries;
 using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Controllers
@@ -29,7 +30,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>An array of elevation values according to given points order</returns>
         public async Task<double[]> GetElevation(string points)
         {
-            var tasks = points.Split('|').Select(async p => await _elevationDataStorage.GetElevation(new LatLng(p)));
+            var tasks = points.Split('|').Select(async p => await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(p)));
             return await Task.WhenAll(tasks);
         }
     }

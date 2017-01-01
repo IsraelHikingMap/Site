@@ -64,6 +64,10 @@ namespace IsraelHiking.API.Controllers
                     To = to,
                     Profile = profile,
                 });
+                foreach (var coordinate in lineString.Coordinates)
+                {
+                    coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
+                }
             }
             var table = new AttributesTable();
             table.AddAttribute("Name", "Routing from " + from + " to " + to + " profile type: " + profile);
@@ -103,7 +107,7 @@ namespace IsraelHiking.API.Controllers
             }
             var lat = double.Parse(splitted.First());
             var lng = double.Parse(splitted.Last());
-            var elevation = await _elevationDataStorage.GetElevation(new LatLng(lat, lng));
+            var elevation = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(position));
             return new Coordinate(lng, lat, elevation);
         }
     }

@@ -188,7 +188,7 @@
         private getChartTooltip($scope: IRouteStatisticsScope, point: Services.Layers.RouteLayers.IRouteStatisticsPoint) {
             return `<div class="chart-tooltip"><p class="text-${$scope.resources.start}" dir="${$scope.resources.direction}">` +
                 `${$scope.resources.distance}: ${point.x.toFixed(2)} ${$scope.resources.kmUnit}<br/>` +
-                `${$scope.resources.height}: ${point.y} ${$scope.resources.meterUnit}<br/>` +
+                `${$scope.resources.height}: ${point.y.toFixed(0)} ${$scope.resources.meterUnit}<br/>` +
                 `${$scope.resources.slope}: <span dir="ltr">${point.slope.toFixed(0)}%</span>` +
                 `</p></div>`;
         }

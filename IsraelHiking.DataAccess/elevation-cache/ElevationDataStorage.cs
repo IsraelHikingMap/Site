@@ -1,11 +1,12 @@
 ﻿using Ionic.Zip;
-using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GeoAPI.Geometries;
+using NetTopologySuite.Triangulate.QuadEdge;
 
 namespace IsraelHiking.DataAccess
 {
@@ -14,15 +15,15 @@ namespace IsraelHiking.DataAccess
         private const string ELEVATION_CACHE = "elevation-cache";
         private readonly ILogger _logger;
         private readonly IConfigurationProvider _configurationProvider;
-        private readonly ConcurrentDictionary<LatLng, short[,]> _elevationData;
-        private readonly ConcurrentDictionary<LatLng, Task> _initializationTaskPerLatLng;
+        private readonly ConcurrentDictionary<Coordinate, short[,]> _elevationData;
+        private readonly ConcurrentDictionary<Coordinate, Task> _initializationTaskPerLatLng;
 
         public ElevationDataStorage(ILogger logger, IConfigurationProvider configurationProvider)
         {
             _logger = logger;
             _configurationProvider = configurationProvider;
-            _elevationData = new ConcurrentDictionary<LatLng, short[,]>();
-            _initializationTaskPerLatLng = new ConcurrentDictionary<LatLng, Task>();
+            _elevationData = new ConcurrentDictionary<Coordinate, short[,]>();
+            _initializationTaskPerLatLng = new ConcurrentDictionary<Coordinate, Task>();
         }
 
         public Task Initialize()
@@ -39,7 +40,7 @@ namespace IsraelHiking.DataAccess
             {
                 var bottomLeftLat = int.Parse(Path.GetFileName(hgtZipFile).Substring(1, 2));
                 var bottomLeftLng = int.Parse(Path.GetFileName(hgtZipFile).Substring(4, 3));
-                var key = new LatLng { lat = bottomLeftLat, lng = bottomLeftLng };
+                var key = new Coordinate(bottomLeftLng, bottomLeftLat);
 
                 _initializationTaskPerLatLng[key] = Task.Run(() =>
                 {
@@ -60,9 +61,18 @@ namespace IsraelHiking.DataAccess
             return Task.WhenAll(_initializationTaskPerLatLng.Values);
         }
 
-        public async Task<double> GetElevation(LatLng latLng)
+        /// <summary>
+        /// Calculates the elevation of a point using a preloaded data, using intepolation of 3 points in a plane:
+        /// 3
+        /// |    p
+        /// |  
+        /// 1______2
+        /// </summary>
+        /// <param name="latLng">The point to calculate elevation for</param>
+        /// <returns>A task with the elevation results</returns>
+        public async Task<double> GetElevation(Coordinate latLng)
         {
-            var key = new LatLng { lat = (int)latLng.lat, lng = (int)latLng.lng };
+            var key = new Coordinate((int) latLng.X, (int) latLng.Y);
             if (_initializationTaskPerLatLng.ContainsKey(key) == false)
             {
                 return 0;
@@ -73,11 +83,17 @@ namespace IsraelHiking.DataAccess
                 return 0;
             }
             var array = _elevationData[key];
-            var samplesSize = 1.0 / array.GetLength(0);
-            var latIndex = (array.GetLength(0) - 1) - (int)((latLng.lat - key.lat) / samplesSize);
-            var lngIndex = (int)((latLng.lng - key.lng) / samplesSize);
+            var lat = (array.GetLength(0) - 1) - (latLng.Y - key.Y) * array.GetLength(0);
+            var lng = (latLng.X - key.X) * array.GetLength(1);
 
-            return array[latIndex, lngIndex];
+            if ((lat >= array.GetLength(0) - 1) || (lng >= array.GetLength(1) - 1))
+            {
+                return array[(int) lat, (int) lng];
+            }
+            var coordinate1 = new Coordinate((int)lng, (int)lat, array[(int)lat, (int)lng]);
+            var coordinate2 = new Coordinate((int)lng + 1, (int)lat, array[(int)lat, (int)lng + 1]);
+            var coordinate3 = new Coordinate((int)lng, (int)lat + 1, array[(int)lat + 1, (int)lng]);
+            return Vertex.InterpolateZ(new Coordinate(lng, lat), coordinate1, coordinate2, coordinate3);
         }
 
         private byte[] GetByteArrayFromZip(string hgtZipFile)
