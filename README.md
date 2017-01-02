@@ -46,7 +46,7 @@ The architecture is based on layers
 # Setting up this project
 In order to be able to build this site you'll need some tools:
 * Download and install [Visual Studio community 2015](https://www.visualstudio.com/downloads) or later.
-* From Tools &rarr; Etensions and Updates... &rarr; Click Online &rarr; search for the following and install them: 
+* From Tools &rarr; Extensions and Updates... &rarr; Click Online &rarr; search for the following and install them: 
   * Web Essentials 2015.3
   * Chutzpah Test Adapter for the test explorer
   * Chutzpah Test Runner Contet Menu Extension
