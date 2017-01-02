@@ -1,9 +1,7 @@
 ﻿namespace IsraelHiking {
     // HM TODO: statistics
-    // HM TODO: 404 page
     // HM TODO: address bar 
     // HM TODO: failed/missing share
-    // HM tODO: #275 - allow to get shared url with format flag.
 
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;

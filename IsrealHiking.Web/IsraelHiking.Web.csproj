@@ -141,6 +141,7 @@
     <None Include="package.json" />
     <None Include=".bowerrc" />
     <None Include="bower.json" />
+    <Content Include="resourceNotFound.html" />
     <Content Include="scripts\angular-animate.js" />
     <Content Include="scripts\angular-clipboard.js" />
     <Content Include="scripts\angular-file-saver.bundle.js" />
