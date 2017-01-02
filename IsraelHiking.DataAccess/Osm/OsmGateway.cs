@@ -85,7 +85,7 @@ namespace IsraelHiking.DataAccess.Osm
             }
         }
 
-        public async Task<string> CreateChangeset()
+        public async Task<string> CreateChangeset(string comment)
         {
             using (var client = new HttpClient())
             {
@@ -98,8 +98,8 @@ namespace IsraelHiking.DataAccess.Osm
                         {
                             tag = new[]
                             {
-                                new tag {k = "created_by", v = "Israel Hiking Map"},
-                                new tag {k = "comment", v = "Missing route finder algorithm"}
+                                new tag {k = "created_by", v = "IsraelHiking.osm.org.il"},
+                                new tag {k = "comment", v = comment}
                             }
                         }
                     }

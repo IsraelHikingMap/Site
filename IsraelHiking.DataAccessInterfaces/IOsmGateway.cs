@@ -6,7 +6,7 @@ namespace IsraelHiking.DataAccessInterfaces
     public interface IOsmGateway: IRemoteFileFetcherGateway
     {
         Task<string> GetUserId();
-        Task<string> CreateChangeset();
+        Task<string> CreateChangeset(string comment);
         Task<string> CreateNode(string changesetId, Node node);
         Task<string> CreateWay(string changesetId, Way way);
         Task<CompleteWay> GetCompleteWay(string wayId);

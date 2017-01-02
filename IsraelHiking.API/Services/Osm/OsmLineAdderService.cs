@@ -38,7 +38,7 @@ namespace IsraelHiking.API.Services.Osm
         public async Task Add(LineString line, Dictionary<string, string> tags, TokenAndSecret tokenAndSecret)
         {
             _osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
-            var chagesetId = await _osmGateway.CreateChangeset();
+            var chagesetId = await _osmGateway.CreateChangeset(CreateCommentFromTags(tags));
             var nodeIds = new List<string>();
             var nodesIdsThatNeedsToBeConnected = new Dictionary<string, string>();
             var highways = await GetHighwaysInArea(line);
@@ -141,7 +141,11 @@ namespace IsraelHiking.API.Services.Osm
         private async Task<string> AddWay(IEnumerable<string> nodeIds, Dictionary<string, string> tags, string chagesetId)
         {
             var way = Way.Create(0, nodeIds.Select(long.Parse).ToArray());
-            way.Tags = new TagsCollection(tags) {{"note", "Added by IHM algorithm - fixing maybe needed"}};
+            way.Tags = new TagsCollection(tags)
+            {
+                {"note", "Added by IHM algorithm - fixing maybe needed"},
+                {"source", "GPS" }
+            };
             return await _osmGateway.CreateWay(chagesetId, way);
         }
 
@@ -151,6 +155,21 @@ namespace IsraelHiking.API.Services.Osm
             var newlyaddedWays = await Task.WhenAll(tasksList);
             var newlyHighwaysFeatures = _geoJsonPreprocessor.Preprocess(newlyaddedWays.ToList());
             await _elasticSearchGateway.UpdateHighwaysData(newlyHighwaysFeatures);
+        }
+
+        private string CreateCommentFromTags(Dictionary<string, string> tags)
+        {
+            var colour = string.Empty;
+            if (tags.ContainsKey("colour"))
+            {
+                colour = tags["colour"] + " ";
+            }
+            var highway = "way";
+            if (tags.ContainsKey("highway"))
+            {
+                highway = tags["highway"];
+            }
+            return $"Added a missing {colour}{highway} from a GPS trace using IsraelHiking.osm.org.il";
         }
     }
 }

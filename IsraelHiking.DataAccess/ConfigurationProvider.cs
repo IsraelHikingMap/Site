@@ -32,7 +32,7 @@ namespace IsraelHiking.DataAccess
             MinimalSplitSimplificationTolerace = GetValueOrDefault(nameof(MinimalSplitSimplificationTolerace), 50); // meters
             MinimalSegmentLength = GetValueOrDefault(nameof(MinimalSegmentLength), 500); // meters
             ClosestPointTolerance = GetValueOrDefault(nameof(ClosestPointTolerance), 30); // meters
-            SimplificationTolerance = GetValueOrDefault(nameof(SimplificationTolerance), 5); // meters
+            SimplificationTolerance = GetValueOrDefault(nameof(SimplificationTolerance), 3); // meters
             MinimalMissingPartLength = GetValueOrDefault(nameof(MinimalMissingPartLength), 200); // meters
             MinimalMissingSelfLoopPartLegth = GetValueOrDefault(nameof(MinimalMissingSelfLoopPartLegth), ClosestPointTolerance); // meters
             MaxNumberOfPointsPerLine = GetValueOrDefault(nameof(MaxNumberOfPointsPerLine), 1000); // number

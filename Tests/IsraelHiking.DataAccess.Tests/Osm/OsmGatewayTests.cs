@@ -31,7 +31,7 @@ namespace IsraelHiking.DataAccess.Tests.Osm
         [Ignore]
         public void CreateChangeSet_ShouldBeCreated()
         {
-            var id = _gateway.CreateChangeset().Result;
+            var id = _gateway.CreateChangeset("").Result;
 
             Assert.AreNotEqual(-1, id);
         }
@@ -46,7 +46,7 @@ namespace IsraelHiking.DataAccess.Tests.Osm
                 {"natural", "spring"},
                 { "name", "IHM test"}
             };
-            var id = _gateway.CreateChangeset().Result;
+            var id = _gateway.CreateChangeset("").Result;
             var nodeId = _gateway.CreateNode(id, node).Result;
             _gateway.CloseChangeset(id).Wait();
             Assert.AreNotEqual(string.Empty, nodeId);
@@ -63,7 +63,7 @@ namespace IsraelHiking.DataAccess.Tests.Osm
                 { "name", "IHM node test"}
             };
             var node2 = Node.Create(0, 31.78354, 34.71688);
-            var id = _gateway.CreateChangeset().Result;
+            var id = _gateway.CreateChangeset("").Result;
             var nodeId1 = _gateway.CreateNode(id, node1).Result;
             var nodeId2 = _gateway.CreateNode(id, node2).Result;
             var way = Way.Create(0, long.Parse(nodeId1), long.Parse(nodeId2));
