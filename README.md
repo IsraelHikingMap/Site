@@ -45,8 +45,13 @@ The architecture is based on layers
 
 # Setting up this project
 In order to be able to build this site you'll need some tools:
-* Download and install [Visual Studio 2015](https://www.visualstudio.com/en-us/downloads/download-visual-studio-vs.aspx) or later.
-* Using nuget install/update the following: TypeScript, Web Essentials, Chutzpah (both runner and context menu), Power Shell Tools.
+* Download and install [Visual Studio community 2015](https://www.visualstudio.com/downloads) or later.
+* From Tools &rarr; Extensions and Updates... &rarr; Click Online &rarr; search for the following and install them: 
+  * Web Essentials 2015.3
+  * Chutzpah Test Adapter for the test explorer
+  * Chutzpah Test Runner Contet Menu Extension
+  * Power Shell Tools for visual studio 2015
+* Latest [typescript compiler](https://www.microsoft.com/en-us/download/details.aspx?id=48593) for visual studio.
 
 # Setup the server
 In order to be able to make the server work a few prerequisits are needed:
