@@ -1,7 +1,6 @@
 ﻿namespace IsraelHiking.Controllers {
 
     export interface ILanguageScope extends IRootScope {
-        languages: Services.ILanguage[];
         selectedLanguage: Services.ILanguage;
         setSelectredLanguage(language: Services.ILanguage): void;
         setLanguage(language: Services.ILanguage): void;
@@ -14,19 +13,6 @@
             mapService: Services.MapService) {
             super(mapService);
 
-            $scope.languages = [
-                {
-                    code: "en-US",
-                    rtl: false,
-                    label: "English"
-
-                },
-                {
-                    code: "he",
-                    rtl: true,
-                    label: "עברית"
-                }
-            ];
             $scope.selectedLanguage = $scope.resources.currentLanguage;
 
             $scope.setLanguage = (language: Services.ILanguage) => {

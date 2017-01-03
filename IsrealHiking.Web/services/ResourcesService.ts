@@ -1,19 +1,23 @@
 ﻿// link to translations: https://translate.zanata.org/iteration/view/IsraelHiking/Main
 namespace IsraelHiking.Services {
 
+    type LanguageCode = "en-US" | "he"
+
     export interface ILanguage {
-        code: string;
+        code: LanguageCode;
         rtl: boolean;
         label: string;
+        tilesFolder: string;
     }
 
-    const languageKey = "language";
+    const languageKey = "site-language";
 
     export class ResourcesService {
         private $sce: angular.ISCEService;
         private gettextCatalog: angular.gettext.gettextCatalog;
         private localStorageService: angular.local.storage.ILocalStorageService;
         public currentLanguage: ILanguage;
+        public availableLanguages: ILanguage[];
 
         public direction: string;
         public start: string;
@@ -349,7 +353,21 @@ namespace IsraelHiking.Services {
             this.$sce = $sce;
             this.gettextCatalog = gettextCatalog;
             this.localStorageService = localStorageService;
-            this.currentLanguage = localStorageService.get(languageKey) as ILanguage || { code: "en-US", rtl: false, label: "English"};
+            this.availableLanguages = [
+                {
+                    code: "he",
+                    rtl: true,
+                    label: "עברית",
+                    tilesFolder: "Hebrew"
+                },
+                {
+                    code: "en-US",
+                    rtl: false,
+                    label: "English",
+                    tilesFolder: "English"
+                }
+            ];
+            this.currentLanguage = localStorageService.get(languageKey) as ILanguage || this.availableLanguages[0];
             this.setLanguage(this.currentLanguage);
             if (this.currentLanguage.code === "he") {
                 this.route = "מסלול"; // required for layers service to be initialized - this is an ugly workaround... :-/

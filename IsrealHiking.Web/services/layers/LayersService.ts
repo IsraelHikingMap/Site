@@ -61,6 +61,7 @@ namespace IsraelHiking.Services.Layers {
 
         constructor($http: angular.IHttpService,
             $q: angular.IQService,
+            $rootScope: angular.IRootScopeService,
             mapService: MapService,
             localStorageService: angular.local.storage.ILocalStorageService,
             routeLayerFactory: Layers.RouteLayers.RouteLayerFactory,
@@ -87,13 +88,13 @@ namespace IsraelHiking.Services.Layers {
             // default layers:
             this.addBaseLayer({
                 key: LayersService.ISRAEL_HIKING_MAP,
-                address: LayersService.DEFAULT_TILES_ADDRESS,
+                address: this.resourcesService.currentLanguage.tilesFolder + LayersService.DEFAULT_TILES_ADDRESS,
                 isEditable: false
             } as ILayer, LayersService.ATTRIBUTION);
 
             this.addBaseLayer({
                 key: LayersService.ISRAEL_MTB_MAP,
-                address: LayersService.MTB_TILES_ADDRESS,
+                address: this.resourcesService.currentLanguage.tilesFolder + LayersService.MTB_TILES_ADDRESS,
                 isEditable: false
             } as ILayer, LayersService.MTB_ATTRIBUTION);
             try {
@@ -112,9 +113,11 @@ namespace IsraelHiking.Services.Layers {
             this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: new WikiMarkersLayer($http, mapService) as L.ILayer } as IOverlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
+            this.changeLanguage();
+            $rootScope.$watch(() => this.resourcesService.currentLanguage, () => { this.changeLanguage(); });
         }
 
-        public addBaseLayer = (layerData: Common.LayerData, attribution?: string): IBaseLayer => {
+        public addBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
             var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() === layerData.key.toLocaleLowerCase());
             if (layer != null) {
                 return layer; // layer exists
@@ -122,7 +125,11 @@ namespace IsraelHiking.Services.Layers {
 
             layer = angular.copy(layerData) as IBaseLayer;
             layer.layer = L.tileLayer(layerData.address, this.createOptionsFromLayerData(layerData, attribution));
-            this.baseLayers.push(layer);
+            if (position != undefined) {
+                this.baseLayers.splice(position, 0, layer);
+            } else {
+                this.baseLayers.push(layer);
+            }
             var baseLayers = this.localStorageService.get<Common.LayerData[]>(LayersService.BASE_LAYERS_KEY) || [];
             baseLayers.push(layerData);
             this.localStorageService.set(LayersService.BASE_LAYERS_KEY, this.unique(baseLayers));
@@ -151,8 +158,9 @@ namespace IsraelHiking.Services.Layers {
                 _.find(this.baseLayers, bl => bl.key.toLocaleLowerCase() === newLayer.key.toLocaleLowerCase()) != null) {
                 return `The name: '${newLayer.key}' is already in use.`;
             }
+            let position = this.baseLayers.indexOf(_.find(this.baseLayers, bl => bl.key === oldLayer.key));
             this.removeBaseLayer(oldLayer);
-            var layer = this.addBaseLayer(newLayer);
+            var layer = this.addBaseLayer(newLayer, null, position);
             this.selectBaseLayer(layer);
             return "";
         }
@@ -503,6 +511,24 @@ namespace IsraelHiking.Services.Layers {
                 minZoom: layer.minZoom,
                 maxZoom: layer.maxZoom
             } as Common.LayerData;
+        }
+
+        private changeLanguage() {
+            let selectedKey = this.selectedBaseLayer.key;
+
+            let ihmLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_HIKING_MAP);
+            this.removeBaseLayer(ihmLayer);
+            ihmLayer.layer = null;
+            ihmLayer.address = this.resourcesService.currentLanguage.tilesFolder + LayersService.DEFAULT_TILES_ADDRESS;
+            this.addBaseLayer(ihmLayer, LayersService.ATTRIBUTION, 0);
+
+            let mtbLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_MTB_MAP);
+            this.removeBaseLayer(mtbLayer);
+            mtbLayer.layer = null;
+            mtbLayer.address = this.resourcesService.currentLanguage.tilesFolder + LayersService.MTB_TILES_ADDRESS;
+            this.addBaseLayer(mtbLayer, LayersService.MTB_ATTRIBUTION, 1);
+
+            this.selectBaseLayer(_.find(this.baseLayers, bl => bl.key === selectedKey));
         }
     }
 }

@@ -5,7 +5,7 @@
     </div>
     <form class="form-horizontal" ng-submit="setLanguage(selectedLanguage); $close()">
         <div class="modal-body">
-            <div class="row" ng-repeat="language in languages">
+            <div class="row" ng-repeat="language in resources.availableLanguages">
                 <div class="col-xs-12">
                     <span class="cursor-pointer" ng-click="setSelectredLanguage(language)"><span class="fa fa-lg" ng-class="{'fa-check-circle': selectedLanguage.code == language.code, 'fa-circle-o': selectedLanguage.code != language.code}"></span> {{language.label}}</span>
                 </div>
