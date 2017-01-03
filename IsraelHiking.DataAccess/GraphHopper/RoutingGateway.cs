@@ -40,7 +40,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
                 var response = await httpClient.GetAsync(requestAddress);
                 var content = await response.Content.ReadAsStringAsync();
                 var jsonResponse = JsonConvert.DeserializeObject<JsonGraphHopperResponse>(content);
-                if (jsonResponse.paths.Count <= 0)
+                if (jsonResponse?.paths == null || !jsonResponse.paths.Any())
                 {
                     return new LineString(new Coordinate[0]);
                 }

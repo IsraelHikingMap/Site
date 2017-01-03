@@ -91,7 +91,7 @@ namespace IsraelHiking.API.Converters
             var tracks = trks.Where(t => t.trkseg != null && t.trkseg.Any()).Select(t => new RouteData
             {
                 name = t.name,
-                segments = t.trkseg.Where(seg => seg.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
+                segments = t.trkseg.Where(seg => seg?.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
                 {
                     latlngzs = seg.trkpt.Select(ToLatLngZ).ToList(),
                     routePoint = ToLatLngZ(seg.trkpt.Last()),

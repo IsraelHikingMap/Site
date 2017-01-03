@@ -64,6 +64,10 @@ namespace IsraelHiking.API.Controllers
                     To = to,
                     Profile = profile,
                 });
+                if (!lineString.Coordinates.Any())
+                {
+                    lineString = new LineString(new[] { pointFrom, pointTo });
+                }
                 foreach (var coordinate in lineString.Coordinates)
                 {
                     coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
