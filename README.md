@@ -51,7 +51,7 @@ In order to be able to build this site you'll need some tools:
   * Chutzpah Test Adapter for the test explorer
   * Chutzpah Test Runner Contet Menu Extension
   * Power Shell Tools for visual studio 2015
-* Download and install the latest [TypeScript for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48593) for visual studio.
+* Download and install the latest [TypeScript for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48593)
 
 # Setup the server
 In order to be able to make the server work a few prerequisits are needed:
