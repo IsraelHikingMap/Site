@@ -14,6 +14,6 @@
     </div>
     <div class="route-statistics-chart" google-chart chart="chart" agc-on-mouseover="onMouseOver(row, col)" agc-on-mouseout="onMouseOut()"></div>
     <div class="route-statistics-footer">
-        <a class="btn btn-default btn-xs" ng-click="toggleKmMarker($event)" ng-class="{active: isKmMarkersOn}"><i class="fa fa-map-marker"></i></a> {{resources.kmPoi}}
+        <a class="btn btn-default btn-xs" ng-click="toggleKmMarker($event)" ng-class="{active: isKmMarkersOn}" analytics-on="click" analytics-event="Toggle KM markers"><i class="fa fa-map-marker"></i></a> {{resources.kmPoi}}
     </div>
 </div>

@@ -20,7 +20,7 @@
                 </div>
                 <div class="form-group">
                     <div class="col-md-offset-2 col-md-10">
-                        <button class="btn btn-success btn-block" ng-click="generateUrl(title, description)" ng-disabled="isLoading">{{resources.generateUrlToShareWithYourFriends}}</button>
+                        <button class="btn btn-success btn-block" ng-click="generateUrl(title, description)" ng-disabled="isLoading" analytics-on="click" analytics-category="Share" analytics-event="Share create">{{resources.generateUrlToShareWithYourFriends}}</button>
                     </div>
                 </div>
             </div>
@@ -35,19 +35,19 @@
                                 <h4>{{title}} - {{description}}</h4>
                             </div>
                             <div class="col-xs-3">
-                                <a href="{{facebookShareAddress}}" class="btn btn-default btn-block" target="_blank" uib-tooltip="{{resources.shareWithFacebook}}" tooltip-placement="{{resources.start}}"><i class="fa fa-facebook"></i></a>
+                                <a href="{{facebookShareAddress}}" class="btn btn-default btn-block" target="_blank" uib-tooltip="{{resources.shareWithFacebook}}" tooltip-placement="{{resources.start}}" analytics-on="click" analytics-category="Share" analytics-event="Share facebook"><i class="fa fa-facebook"></i></a>
                                 <div class="visible-sm visible-xs">
-                                    <a ng-href="{{whatappShareAddress}}" class="btn btn-default btn-block"><i class="fa fa-whatsapp"></i></a>
+                                    <a ng-href="{{whatappShareAddress}}" class="btn btn-default btn-block" analytics-on="click" analytics-category="Share" analytics-event="Share whatapp"><i class="fa fa-whatsapp"></i></a>
                                 </div>
                                 <!--<a class="btn btn-default btn-block cursor-pointer" ng-click="showOffroadForm = 'true'" ng-class="{active: showOffroadForm}" uib-tooltip="{{resources.shareWithOffroad}}" tooltip-placement="{{resources.start}}"><img src="/content/images/off-road.png" alt="" width="16" height="16"/></a>-->
                             </div>
                         </div>
                         <div class="row">
                             <div class="col-xs-9">
-                                <a href="{{shareAddress}}" target="_blank">{{shareAddress}}</a>
+                                <a href="{{shareAddress}}" target="_blank" analytics-on="click" analytics-category="Share" analytics-event="Share test address">{{shareAddress}}</a>
                             </div>
                             <div class="col-xs-3">
-                                <a class="btn btn-block btn-info" clipboard supported="true" text="shareAddress" uib-tooltip="{{resources.copyUrl}}" tooltip-placement="{{resources.start}}"><i class="fa fa-clipboard"></i></a>
+                                <a class="btn btn-block btn-info" clipboard supported="true" text="shareAddress" uib-tooltip="{{resources.copyUrl}}" tooltip-placement="{{resources.start}}" analytics-on="click" analytics-category="Share" analytics-event="Share copy to clipboard"><i class="fa fa-clipboard"></i></a>
                             </div>
                         </div>
                     </div>
@@ -117,7 +117,7 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button type="button" class="btn btn-warning" ng-show="shareAddress" ng-click="clearShareAddress()">{{resources.clear}}</button>
+            <button type="button" class="btn btn-warning" ng-show="shareAddress" ng-click="clearShareAddress()" analytics-on="click" analytics-category="Share" analytics-event="Share clear">{{resources.clear}}</button>
         </div>
     </form>
 </div>

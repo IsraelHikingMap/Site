@@ -1,5 +1,5 @@
 ﻿<div ng-hide="isVisible" class="leaflet-bar">
-    <a class="cursor-pointer" ng-click="toggleVisibility($event)" uib-tooltip="{{resources.search}}" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-search fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleVisibility($event)" uib-tooltip="{{resources.search}}" tooltip-placement="left" tooltip-append-to-body="true" analytics-on="click" analytics-category="Search" analytics-event="Search toggle"><i class="fa fa-search fa-lg"></i></a>
 </div>
 <div ng-show="isVisible && !isDirectional" class="leaflet-bar">
     <div uib-dropdown is-open="isVisible && !isDirectional && fromContext.searchResults.length > 0" auto-close="disabled" ng-keydown="keyDown(fromContext, $event)" class="search-dropdown-container">
@@ -11,7 +11,7 @@
                 {{result.displayName}}
             </li>
         </ul>
-        <a class="cursor-pointer control-icon-last" ng-click="toggleDirectional($event)" uib-tooltip="{{resources.directionalSearch}}" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-plus fa-lg"></i></a>
+        <a class="cursor-pointer control-icon-last" ng-click="toggleDirectional($event)" uib-tooltip="{{resources.directionalSearch}}" tooltip-placement="left" tooltip-append-to-body="true" analytics-on="click" analytics-category="Search" analytics-event="Toggle directional search on"><i class="fa fa-plus fa-lg"></i></a>
     </div>
 </div>
 <div ng-show="isVisible && isDirectional">
@@ -27,7 +27,7 @@
                 {{result.displayName}}
             </li>
         </ul>
-        <a class="cursor-pointer control-icon-last" ng-click="toggleDirectional($event)" uib-tooltip="{{resources.regularSearch}}" tooltip-placement="left" tooltip-append-to-body="true"><i class="fa fa-minus fa-lg"></i></a>
+        <a class="cursor-pointer control-icon-last" ng-click="toggleDirectional($event)" uib-tooltip="{{resources.regularSearch}}" tooltip-placement="left" tooltip-append-to-body="true" analytics-on="click" analytics-category="Search" analytics-event="Toggle directional search off"><i class="fa fa-minus fa-lg"></i></a>
     </div>
     <div class="pull-left leaflet-bar search-routing-directional">
         <a class="cursor-pointer pull-left" ng-click="setRouting('Hike', $event)" ng-class="{'leaflet-active' : routingType == 'Hike' }" uib-tooltip="{{resources.hikeRouting}}" tooltip-placement="bottom" tooltip-append-to-body="true"><img src="/content/images/hike.svg" alt="" /></a>

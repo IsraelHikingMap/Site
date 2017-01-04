@@ -1,6 +1,6 @@
 ﻿<div class="row">
     <div class="col-xs-2">
-        <button class="btn btn-xs btn-warning" ng-click="toggleAdvanced($event)" uib-tooltip="{{resources.toggleAdvancedSettings}}" tooltip-placement="{{resources.end}}" ng-class="{'active': advanced }"><i class="fa fa-gear"></i></button>
+        <button class="btn btn-xs btn-warning" ng-click="toggleAdvanced($event)" uib-tooltip="{{resources.toggleAdvancedSettings}}" tooltip-placement="{{resources.end}}" ng-class="{'active': advanced }" analytics-on="click" analytics-event="Toggle advanced button"><i class="fa fa-gear"></i></button>
     </div>
 </div>
 <div ng-repeat="baseLayer in baseLayers">
@@ -12,11 +12,11 @@
             <span>{{baseLayer.key | translate}}</span>
         </div>
         <div class="col-xs-3" ng-show="advanced && baseLayer.isEditable">
-            <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editBaseLayer(baseLayer, $event)" uib-tooltip="{{resources.baseLayerProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
+            <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editBaseLayer(baseLayer, $event)" uib-tooltip="{{resources.baseLayerProperties}}" tooltip-placement="{{resources.start}}" analytics-on="click" analytics-event="Edit base layer"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
         </div>
     </div>
 </div>
-<div class="row add cursor-pointer" ng-show="advanced" ng-click="addBaseLayer($event)">
+<div class="row add cursor-pointer" ng-show="advanced" ng-click="addBaseLayer($event)" analytics-on="click" analytics-event="Add base layer">
     <div class="col-xs-offset-2 col-xs-7">
         <span>{{resources.addBaseLayer}}</span>
     </div>
@@ -35,12 +35,12 @@
             <span>{{overlay.key | translate}}</span>
         </div>
         <div class="col-xs-3" ng-show="advanced && overlay.isEditable">
-            <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editOverlay(overlay, $event)" uib-tooltip="{{resources.overlayProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
+            <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editOverlay(overlay, $event)" uib-tooltip="{{resources.overlayProperties}}" tooltip-placement="{{resources.start}}" analytics-on="click" analytics-event="Edit overlay"><i class="fa fa-lg fa-wrench fa-warning"></i></span>
         </div>
     </div>
 </div>
 
-<div class="row add cursor-pointer" ng-show="advanced" ng-click="addOverlay($event)">
+<div class="row add cursor-pointer" ng-show="advanced" ng-click="addOverlay($event)" analytics-on="click" analytics-event="Add overlay">
     <div class="col-xs-offset-2 col-xs-7">
         <span>{{resources.addOverlay}}</span>
     </div>
@@ -61,11 +61,11 @@
             <span ng-class="'fg-' + getRouteColorName(route)">{{getRouteName(route)}}</span>
         </div>
         <div class="col-xs-3">
-            <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editRoute(getRouteName(route), $event)" uib-tooltip="{{resources.routeProperties}}" tooltip-placement="{{resources.start}}"><i class="fa fa-lg fa-wrench"></i></span>
+            <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editRoute(getRouteName(route), $event)" uib-tooltip="{{resources.routeProperties}}" tooltip-placement="{{resources.start}}" analytics-on="click" analytics-category="Route" analytics-event="Edit route"><i class="fa fa-lg fa-wrench"></i></span>
         </div>
     </div>
 </div>
-<div class="row add cursor-pointer" ng-click="addRoute($event)" ng-show="advanced">
+<div class="row add cursor-pointer" ng-click="addRoute($event)" ng-show="advanced" analytics-on="click" analytics-category="Route" analytics-event="Add route">
     <div class="col-xs-offset-2 col-xs-7">
         <span>{{resources.addRoute}}</span>
     </div>

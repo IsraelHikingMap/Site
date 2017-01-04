@@ -1,6 +1,6 @@
 ﻿namespace IsraelHiking {
-    // HM TODO: statistics
-    // HM TODO: address bar 
+    // HM TODO: browser address bar changes
+    // HM TODO: download shortcut.
     // HM TODO: failed/missing share
 
     export interface IRootScope extends angular.IScope {

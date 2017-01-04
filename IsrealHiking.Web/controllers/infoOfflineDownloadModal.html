@@ -14,24 +14,24 @@
     <div class="modal-body">
         <h5 class="text-center">{{resources.application}}</h5>
         <div class="btn-group btn-group-justified" ng-init="app = 'Locus'">
-            <a class="btn btn-default" ng-click="app = 'Locus'" ng-class="{active: app == 'Locus'}">Locus</a>
-            <a class="btn btn-default" ng-click="app = 'OruxMaps'" ng-class="{active: app == 'OruxMaps'}">OruxMaps</a>
-            <!--<a class="btn btn-default" ng-click="app = 'Offroad'" ng-class="{active: app == 'Offroad'}">off-road</a>-->
+            <a class="btn btn-default" ng-click="app = 'Locus'" ng-class="{active: app == 'Locus'}" analytics-on="click" analytics-category="Download" analytics-event="Download Locus">Locus</a>
+            <a class="btn btn-default" ng-click="app = 'OruxMaps'" ng-class="{active: app == 'OruxMaps'}" analytics-on="click" analytics-category="Download" analytics-event="Download OruxMaps">OruxMaps</a>
+            <!--<a class="btn btn-default" ng-click="app = 'Offroad'" ng-class="{active: app == 'Offroad'}" analytics-on="click" analytics-category="Download" analytics-event="Download off-road">off-road</a>-->
         </div>
         <h5 class="text-center">{{resources.map}}</h5>
         <div class="btn-group btn-group-justified" ng-init="mapType = 'IHM'">
-            <a class="btn btn-default" ng-click="mapType = 'IHM'" ng-class="{active: mapType == 'IHM'}">{{resources.israelHikingMap}}</a>
-            <a class="btn btn-default" ng-click="mapType = 'MTB'" ng-class="{active: mapType == 'MTB'}">{{resources.israelMTBMap}}</a>
+            <a class="btn btn-default" ng-click="mapType = 'IHM'" ng-class="{active: mapType == 'IHM'}" analytics-on="click" analytics-category="Download" analytics-event="Download IHM">{{resources.israelHikingMap}}</a>
+            <a class="btn btn-default" ng-click="mapType = 'MTB'" ng-class="{active: mapType == 'MTB'}" analytics-on="click" analytics-category="Download" analytics-event="Download MTB">{{resources.israelMTBMap}}</a>
         </div>
         <h5 class="text-center">{{resources.detailsLevel}} ({{resources.upToZoom}})</h5>
         <div class="btn-group btn-group-justified" ng-init="zoom = '15'">
-            <a class="btn btn-default" ng-click="zoom = 15" ng-class="{active: zoom == '15'}">15 [750Mb]</a>
-            <a class="btn btn-default" ng-click="zoom = 16" ng-class="{active: zoom == '16'}">16 [2.2Gb]</a>
+            <a class="btn btn-default" ng-click="zoom = 15" ng-class="{active: zoom == '15'}" analytics-on="click" analytics-category="Download" analytics-event="Download zoom 15">15 [750Mb]</a>
+            <a class="btn btn-default" ng-click="zoom = 16" ng-class="{active: zoom == '16'}" analytics-on="click" analytics-category="Download" analytics-event="Download zoom 16">16 [2.2Gb]</a>
         </div>
         <br />
         <div class="row">
             <div class="col-md-12 col-xs-12">
-                <a ng-href="{{getDownloadUrl(app, mapType, zoom)}}" class="btn btn-success btn-block"><i class="fa fa-download fa-lg"></i> {{resources.startDownload}}</a>
+                <a ng-href="{{getDownloadUrl(app, mapType, zoom)}}" class="btn btn-success btn-block" analytics-on="click" analytics-category="Download" analytics-event="Download offline map"><i class="fa fa-download fa-lg"></i> {{resources.startDownload}}</a>
             </div>
         </div>
         <h4>{{resources.installationInstructions}}</h4>
