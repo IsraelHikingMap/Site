@@ -42,6 +42,7 @@
         constructor($scope: IInfoScope,
             $timeout: angular.ITimeoutService,
             $uibModal: angular.ui.bootstrap.IModalService,
+            hashService: Services.HashService,
             sidebarService: Services.SidebarService,
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService) {
@@ -59,6 +60,17 @@
                 () => {
                     this.initalizeLegendSections($scope);
                 });
+
+            $scope.openOfflineModal = () => {
+                $uibModal.open({
+                    scope: $scope,
+                    templateUrl: "controllers/infoOfflineDownloadModal.html"
+                });
+            }
+
+            if (hashService.download) {
+                $scope.openOfflineModal();
+            }
 
             $scope.toggleInfo = (e: Event) => {
                 sidebarService.toggle("info");
@@ -100,13 +112,6 @@
                 if (state === "legend") {
                     this.initalizeLegendSections($scope);
                 }
-            }
-
-            $scope.openOfflineModal = () => {
-                $uibModal.open({
-                    scope: $scope,
-                    templateUrl: "controllers/infoOfflineDownloadModal.html"
-                });
             }
 
             $scope.getDownloadUrl = (app: ApplicationType, mapType: string, zoom: number) => {

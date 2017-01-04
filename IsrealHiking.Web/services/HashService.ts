@@ -11,6 +11,7 @@
         private static PERSICION = 4;
         private static BASE_LAYER = "baselayer";
         private static URL = "url";
+        private static DOWNLOAD = "download";
 
         private $location: angular.ILocationService;
         private $rootScope: angular.IScope;
@@ -22,6 +23,7 @@
         public searchTerm: string;
         public externalUrl: string;
         public siteUrl: string;
+        public download: boolean;
 
         constructor($location: angular.ILocationService,
             $rootScope: angular.IScope,
@@ -160,6 +162,9 @@
                     if (parameter === "s") {
                         continue;
                     }
+                    if (parameter === HashService.DOWNLOAD) {
+                        continue;
+                    }
                     data.routes.push(this.stringToRoute(searchObject[parameter], parameter.split("_").join(" ")));
                 }
             }
@@ -184,6 +189,7 @@
             this.searchTerm = search.q || "";
             this.externalUrl = search.url || "";
             this.siteUrl = search.s || "";
+            this.download = search.download ? true : false;
             if (splittedpath.length === 4) {
                 this.zoom = parseInt(splittedpath[splittedpath.length - 3]);
                 this.latlng.lat = parseFloat(splittedpath[splittedpath.length - 2]);
