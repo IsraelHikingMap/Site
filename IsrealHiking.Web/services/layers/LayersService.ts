@@ -514,21 +514,29 @@ namespace IsraelHiking.Services.Layers {
         }
 
         private changeLanguage() {
-            let selectedKey = this.selectedBaseLayer.key;
-
             let ihmLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_HIKING_MAP);
-            this.removeBaseLayer(ihmLayer);
-            ihmLayer.layer = null;
-            ihmLayer.address = this.resourcesService.currentLanguage.tilesFolder + LayersService.DEFAULT_TILES_ADDRESS;
-            this.addBaseLayer(ihmLayer, LayersService.ATTRIBUTION, 0);
-
+            this.replaceBaseLayerAddress(ihmLayer,
+                this.resourcesService.currentLanguage.tilesFolder + LayersService.DEFAULT_TILES_ADDRESS,
+                LayersService.ATTRIBUTION, 0);
             let mtbLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_MTB_MAP);
-            this.removeBaseLayer(mtbLayer);
-            mtbLayer.layer = null;
-            mtbLayer.address = this.resourcesService.currentLanguage.tilesFolder + LayersService.MTB_TILES_ADDRESS;
-            this.addBaseLayer(mtbLayer, LayersService.MTB_ATTRIBUTION, 1);
+            this.replaceBaseLayerAddress(mtbLayer,
+                this.resourcesService.currentLanguage.tilesFolder + LayersService.MTB_TILES_ADDRESS,
+                LayersService.ATTRIBUTION, 1);
+        }
 
-            this.selectBaseLayer(_.find(this.baseLayers, bl => bl.key === selectedKey));
+        private replaceBaseLayerAddress(layer: IBaseLayer, newAddress: string, attribution: string, position: number) {
+            _.remove(this.baseLayers, (layerToRemove) => layer.key === layerToRemove.key);
+            if (this.selectedBaseLayer != null && this.selectedBaseLayer.key === layer.key) {
+                this.map.removeLayer(layer.layer);
+            }
+            layer.layer = null;
+            layer.address = newAddress;
+            layer.selected = false;
+            let newLayer = this.addBaseLayer(layer, attribution, position);
+            if (this.selectedBaseLayer != null && this.selectedBaseLayer.key === layer.key) {
+                this.selectedBaseLayer = null;
+                this.selectBaseLayer(newLayer);
+            }
         }
     }
 }
