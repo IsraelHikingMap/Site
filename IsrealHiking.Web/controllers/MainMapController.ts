@@ -59,6 +59,11 @@ namespace IsraelHiking.Controllers {
             this.map.on("moveend", () => {
                 hashService.updateLocation(this.map.getCenter(), this.map.getZoom());
             });
+
+            $scope.$on(Services.HashService.MAP_LOCATION_CHANGED, (e, latLngZ: Common.LatLngZ) => {
+                this.map.setZoom(latLngZ.z);
+                this.map.panTo(latLngZ);
+            });
         }
 
         private createControls = ($scope: IRootScope) => {

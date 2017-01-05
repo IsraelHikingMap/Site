@@ -1,6 +1,7 @@
 ﻿namespace IsraelHiking.Services {
     export class HashService {
         public static MARKERS = "markers";
+        public static MAP_LOCATION_CHANGED = "mapLocationChanged";
 
         private static ZOOM_KEY = "Zoom";
         private static LATLNG_KEY = "LatLng";
@@ -17,6 +18,7 @@
         private $rootScope: angular.IScope;
         private localStorageService: angular.local.storage.ILocalStorageService;
         private dataContainer: Common.DataContainer;
+        private changingAddress: boolean;
 
         public latlng: L.LatLng;
         public zoom: number;
@@ -26,6 +28,7 @@
         public download: boolean;
 
         constructor($location: angular.ILocationService,
+            $window: angular.IWindowService,
             $rootScope: angular.IScope,
             localStorageService: angular.local.storage.ILocalStorageService) {
             this.$location = $location;
@@ -35,8 +38,23 @@
             this.zoom = this.localStorageService.get<number>(HashService.ZOOM_KEY) || 13;
             this.dataContainer = { routes: [] } as Common.DataContainer;
             this.searchTerm = "";
+            this.changingAddress = false;
             this.addDataFromUrl();
             this.updateUrl();
+
+            this.$rootScope.$on("$locationChangeSuccess", () => {
+                if (this.changingAddress) {
+                    this.changingAddress = false;
+                    return;
+                }
+                let latLngZ = this.parsePathToGeoLocation();
+                if (latLngZ == null) {
+                    $window.location.href = this.$location.absUrl();
+                    $window.location.reload();
+                    return;
+                }
+                this.$rootScope.$broadcast(HashService.MAP_LOCATION_CHANGED, latLngZ);
+            });
         }
 
         public getDataContainer = (): Common.DataContainer => {
@@ -44,10 +62,11 @@
         }
 
         private updateUrl = () => {
-            var path = this.zoom +
+            var path = "/" + this.zoom +
                 "/" + this.latlng.lat.toFixed(HashService.PERSICION) +
                 "/" + this.latlng.lng.toFixed(HashService.PERSICION);
-            this.$location.path(path);
+            this.changingAddress = this.$location.path() !== path;
+            this.$location.path(path).replace();
             if (!this.$rootScope.$$phase) {
                 this.$rootScope.$apply();
             }
@@ -55,9 +74,9 @@
 
         public clear = () => {
             if (this.siteUrl) {
-                this.$location.search({ s: this.siteUrl });
+                this.$location.search({ s: this.siteUrl }).replace();
             } else {
-                this.$location.search({});
+                this.$location.search({}).replace();
             }
 
         }
@@ -183,19 +202,31 @@
         }
 
         private addDataFromUrl() {
-            var path = this.$location.path();
-            var splittedpath = path.split("/");
             var search = this.$location.search();
             this.searchTerm = search.q || "";
             this.externalUrl = search.url || "";
             this.siteUrl = search.s || "";
             this.download = search.download ? true : false;
-            if (splittedpath.length === 4) {
-                this.zoom = parseInt(splittedpath[splittedpath.length - 3]);
-                this.latlng.lat = parseFloat(splittedpath[splittedpath.length - 2]);
-                this.latlng.lng = parseFloat(splittedpath[splittedpath.length - 1]);
+            let latLngZ = this.parsePathToGeoLocation();
+            if (latLngZ != null) {
+                this.zoom = latLngZ.z;
+                this.latlng.lat = latLngZ.lat;
+                this.latlng.lng = latLngZ.lng;
             }
             this.dataContainer = this.urlStringToDataContainer(search);
+        }
+
+        private parsePathToGeoLocation(): Common.LatLngZ {
+            var path = this.$location.path();
+            var splittedpath = path.split("/");
+            if (splittedpath.length !== 4) {
+                return null;
+            }
+            return {
+                z: parseInt(splittedpath[splittedpath.length - 3]),
+                lat: parseFloat(splittedpath[splittedpath.length - 2]),
+                lng: parseFloat(splittedpath[splittedpath.length - 1])
+            } as Common.LatLngZ;
         }
     }
 } 

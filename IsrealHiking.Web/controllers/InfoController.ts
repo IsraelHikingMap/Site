@@ -51,7 +51,6 @@
             this.$timeout = $timeout;
             this.layersService = layersService;
 
-
             $scope.visibleSectionId = -1;
             this.initalizeLegendSections($scope);
             $scope.state = "about";
