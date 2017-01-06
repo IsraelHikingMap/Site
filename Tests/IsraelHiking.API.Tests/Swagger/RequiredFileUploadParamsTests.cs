@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using IsraelHiking.API.Swagger;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Swashbuckle.Swagger;
@@ -12,7 +13,7 @@ namespace IsraelHiking.API.Tests.Swagger
         public void Apply_ShouldAddFileUploadParams()
         {
             var fileUploadParams = new RequiredFileUploadParams();
-            var operation = new Operation();
+            var operation = new Operation { consumes = new List<string>()};
 
             fileUploadParams.Apply(operation, null, null);
 
