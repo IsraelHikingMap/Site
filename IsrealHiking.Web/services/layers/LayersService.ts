@@ -521,7 +521,7 @@ namespace IsraelHiking.Services.Layers {
             let mtbLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_MTB_MAP);
             this.replaceBaseLayerAddress(mtbLayer,
                 this.resourcesService.currentLanguage.tilesFolder + LayersService.MTB_TILES_ADDRESS,
-                LayersService.ATTRIBUTION, 1);
+                LayersService.MTB_ATTRIBUTION, 1);
         }
 
         private replaceBaseLayerAddress(layer: IBaseLayer, newAddress: string, attribution: string, position: number) {
