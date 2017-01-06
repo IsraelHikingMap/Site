@@ -80,6 +80,10 @@
       <HintPath>..\..\packages\protobuf-net.2.1.0\lib\net45\protobuf-net.dll</HintPath>
       <Private>True</Private>
     </Reference>
+    <Reference Include="Swashbuckle.Core, Version=1.0.0.0, Culture=neutral, PublicKeyToken=cd1bb07a5ac7c7bc, processorArchitecture=MSIL">
+      <HintPath>..\..\packages\Swashbuckle.Core.5.5.3\lib\net40\Swashbuckle.Core.dll</HintPath>
+      <Private>True</Private>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Configuration" />
     <Reference Include="System.Drawing" />
@@ -133,6 +137,10 @@
     <Compile Include="Services\OsmDataServiceTests.cs" />
     <Compile Include="Services\OsmGeoJsonPreprocessorTests.cs" />
     <Compile Include="Services\ImageCreationServiceTests.cs" />
+    <Compile Include="Swagger\FeatureCollectionExampleFilterTest.cs" />
+    <Compile Include="Swagger\FeatureExampleFilterTest.cs" />
+    <Compile Include="Swagger\RequiredFileUploadParamsTests.cs" />
+    <Compile Include="Swagger\OptionalFileUploadParamsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\IsraelHiking.API\IsraelHiking.API.csproj">
