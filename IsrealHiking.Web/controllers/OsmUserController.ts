@@ -5,11 +5,17 @@
         points: number;
     }
 
-    type OsmUserState = "shares" | "traces";
+    type OsmUserModalTab = "shares" | "traces";
+
+    export interface IOsmUserModalState {
+        selectedTab: OsmUserModalTab;
+        searchTerm: string;
+        scrollPosition: number;
+    }
 
     export interface IOsmUserScope extends IRootScope {
         ranks: IRank[];
-        state: OsmUserState;
+        state: IOsmUserModalState;
         userService: Services.OsmUserService;
         login(e: Event);
         openUserDetails(e: Event);
@@ -21,11 +27,13 @@
         findUnmappedRoutes(trace: Services.ITrace): void;
         editInOsm(trace: Services.ITrace): void;
         open(file: File): void;
-        setState(state: OsmUserState): void;
+        setSelectedTab(tab: OsmUserModalTab): void;
+        setSearchTerm(searchTerm: string): void;
     }
 
     export class OsmUserController extends BaseMapController {
-        private static OSM_USER_STATE_KEY = "OsmUserState";
+        private static OSM_USER_MODAL_CACHE_KEY = "OsmUserModalCache";
+        private static OSM_USER_MODAL_STATE_KEY = "OsmUserModalState";
 
         private $compile: angular.ICompileService;
         private modalInstnace: angular.ui.bootstrap.IModalServiceInstance;
@@ -35,12 +43,12 @@
             $window: angular.IWindowService,
             $uibModal: angular.ui.bootstrap.IModalService,
             $compile: angular.ICompileService,
+            $cacheFactory: angular.ICacheFactoryService,
             Upload: angular.angularFileUpload.IUploadService,
             mapService: Services.MapService,
             osmUserService: Services.OsmUserService,
             fileService: Services.FileService,
             layersService: Services.Layers.LayersService,
-            localStorageService: angular.local.storage.ILocalStorageService,
             toastr: Toastr) {
             super(mapService);
 
@@ -48,6 +56,15 @@
             this.initializeRanks($scope);
             this.osmTraceLayer = L.layerGroup([]);
             this.map.addLayer(this.osmTraceLayer);
+
+            let defaultState = {
+                selectedTab: "traces",
+                scrollPosition: 0,
+                searchTerm: ""
+            } as IOsmUserModalState;
+            let cache = $cacheFactory.get(OsmUserController.OSM_USER_MODAL_CACHE_KEY) || $cacheFactory(OsmUserController.OSM_USER_MODAL_CACHE_KEY);
+            $scope.state = cache.get(OsmUserController.OSM_USER_MODAL_STATE_KEY) as IOsmUserModalState || defaultState;
+            cache.put(OsmUserController.OSM_USER_MODAL_STATE_KEY, $scope.state);
 
             $scope.userService = osmUserService;
             $scope.$watch(() => $scope.resources.language, () => this.initializeRanks($scope));
@@ -67,10 +84,25 @@
             $scope.openUserDetails = (e: Event) => {
                 this.suppressEvents(e);
                 osmUserService.refreshDetails();
-                $scope.state = localStorageService.get(OsmUserController.OSM_USER_STATE_KEY) as OsmUserState || "traces";
+                $scope.state = cache.get(OsmUserController.OSM_USER_MODAL_STATE_KEY) as IOsmUserModalState;
+                    
                 this.modalInstnace = $uibModal.open({
                     scope: $scope,
                     templateUrl: "controllers/osmUserDetailsModal.html"
+                });
+
+                this.modalInstnace.opened.then(() => {
+                    let modalElement = angular.element(".modal");
+                    modalElement.delay(700)
+                        .animate({
+                                scrollTop: $scope.state.scrollPosition
+                            },
+                            "slow");
+                    modalElement.on("scroll", () => {
+                        $scope.state.scrollPosition = modalElement.scrollTop();
+                        cache.put(OsmUserController.OSM_USER_MODAL_STATE_KEY, $scope.state);
+                    });
+                    
                 });
             }
 
@@ -178,9 +210,15 @@
                     });
             }
 
-            $scope.setState = (state: OsmUserState): void => {
-                localStorageService.set(OsmUserController.OSM_USER_STATE_KEY, state);
-                $scope.state = state;
+            $scope.setSelectedTab = (tab: OsmUserModalTab): void => {
+                $scope.state.selectedTab = tab;
+                cache.put(OsmUserController.OSM_USER_MODAL_STATE_KEY, $scope.state);
+            }
+
+            $scope.setSearchTerm = (searchTerm: string): void =>
+            {
+                $scope.state.searchTerm = searchTerm;
+                cache.put(OsmUserController.OSM_USER_MODAL_STATE_KEY, $scope.state);
             }
         }
 

@@ -1,7 +1,4 @@
 ﻿namespace IsraelHiking {
-    // HM TODO: browser address bar changes
-    // HM TODO: download shortcut.
-    // HM TODO: failed/missing share
 
     export interface IRootScope extends angular.IScope {
         resources: Services.ResourcesService;
