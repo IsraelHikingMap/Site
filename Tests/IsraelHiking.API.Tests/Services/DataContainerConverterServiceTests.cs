@@ -289,5 +289,20 @@ namespace IsraelHiking.API.Tests.Services
 
             Assert.AreEqual(1, dataContainer.routes.Count);
         }
+
+        [TestMethod]
+        public void ConvertGpxBz2ToDataContainer_ShouldConvertToDataContainer()
+        {
+            var gpxStream = new MemoryStream(_simpleGpx.ToBytes());
+            var compressedBz2Stream = new MemoryStream();
+            using (var bzipStream = new Ionic.BZip2.BZip2OutputStream(compressedBz2Stream))
+            {
+                gpxStream.CopyTo(bzipStream);
+            }
+
+            var dataContainer = _converterService.ToDataContainer(compressedBz2Stream.ToArray(), "file.gpx.bz2").Result;
+
+            Assert.AreEqual(1, dataContainer.routes.Count);
+        }
     }
 }
