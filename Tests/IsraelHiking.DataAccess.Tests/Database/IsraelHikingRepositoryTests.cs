@@ -14,6 +14,8 @@ using NSubstitute;
 
 namespace IsraelHiking.DataAccess.Tests.Database
 {
+    #region Test Database Mocks
+
     [ExcludeFromCodeCoverage]
     internal class TestDbAsyncQueryProvider<TEntity> : IDbAsyncQueryProvider
     {
@@ -106,6 +108,8 @@ namespace IsraelHiking.DataAccess.Tests.Database
         object IDbAsyncEnumerator.Current => Current;
     }
 
+    #endregion
+
     [TestClass]
     public class IsraelHikingRepositoryTests
     {
@@ -159,6 +163,27 @@ namespace IsraelHiking.DataAccess.Tests.Database
         }
 
         [TestMethod]
+        public void GetUrlsByUser_NoId_ShouldReturnNone()
+        {
+            var results = _israelHikingRepository.GetUrlsByUser(null).Result;
+
+            Assert.AreEqual(0, results.Count);
+        }
+
+        [TestMethod]
+        public void GetUrlsByUser_ShouldReturnOne()
+        {
+            var siteUrl = new SiteUrl { Id = "42", OsmUserId = "1" };
+            var siteUrl2 = new SiteUrl { Id = "42", OsmUserId = "2" };
+            SetupSiteUrls(new List<SiteUrl> { siteUrl, siteUrl2 });
+
+            var results = _israelHikingRepository.GetUrlsByUser(siteUrl.OsmUserId).Result;
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(siteUrl, results.First());
+        }
+
+        [TestMethod]
         public void AddUrl_ShouldAdd()
         {
             var newSiteUrl = new SiteUrl();
@@ -177,6 +202,17 @@ namespace IsraelHiking.DataAccess.Tests.Database
             _israelHikingRepository.Update(newSiteUrl).Wait();
 
             _israelHikingDbContext.Received(1).MarkAsModified(newSiteUrl);
+            _israelHikingDbContext.Received(1).SaveChangesAsync();
+        }
+
+        [TestMethod]
+        public void Delete_ShouldDeleteFromDatabase()
+        {
+            var newSiteUrl = new SiteUrl();
+
+            _israelHikingRepository.Delete(newSiteUrl).Wait();
+
+            _israelHikingDbContext.Received(1).SiteUrls.Remove(newSiteUrl);
             _israelHikingDbContext.Received(1).SaveChangesAsync();
         }
     }

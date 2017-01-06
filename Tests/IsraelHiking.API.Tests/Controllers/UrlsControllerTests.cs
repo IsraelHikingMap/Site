@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading;
@@ -9,6 +10,7 @@ using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -18,6 +20,7 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private UrlsController _controller;
         private IIsraelHikingRepository _israelHikingRepository;
+        private IDataContainerConverterService _containerConverterService;
 
         private void SetupIdentity(string osmUserId = "42")
         {
@@ -31,8 +34,8 @@ namespace IsraelHiking.API.Tests.Controllers
         public void TestInitialize()
         {
             _israelHikingRepository = Substitute.For<IIsraelHikingRepository>();
-
-            _controller = new UrlsController(_israelHikingRepository, Substitute.For<IDataContainerConverterService>());
+            _containerConverterService = Substitute.For<IDataContainerConverterService>();
+            _controller = new UrlsController(_israelHikingRepository, _containerConverterService);
         }
 
         [TestMethod]
@@ -55,6 +58,22 @@ namespace IsraelHiking.API.Tests.Controllers
             var content = results.Content;
             Assert.IsNotNull(results);
             Assert.AreEqual(id, content.Id);
+        }
+
+        [TestMethod]
+        public void GetSiteUrl_ItemInDatabase_ShouldReturnItAccordingToFromat()
+        {
+            var id = "someId";
+            var bytes = new byte[] {1};
+            _israelHikingRepository.GetUrlById(id).Returns(Task.FromResult(new SiteUrl { Id = id, JsonData = JsonConvert.SerializeObject(new DataContainer()) }));
+            _containerConverterService.ToAnyFormat(Arg.Any<DataContainer>(), "gpx").Returns(Task.FromResult(bytes));
+
+            var results = _controller.GetSiteUrl(id, "gpx").Result as ResponseMessageResult;
+
+            Assert.IsNotNull(results);
+            var content = results.Response.Content;
+            Assert.IsNotNull(content);
+            Assert.AreEqual(bytes.Length, content.ReadAsByteArrayAsync().Result.Length);
         }
 
         [TestMethod]
