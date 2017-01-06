@@ -27,7 +27,7 @@
         </a>
     </div>
     <div class="form-group">
-        <a class="btn btn-success cursor-pointer input-group-addon" ng-click="addMissingPartToOsm()" uib-tooltip="{{resources.addThisRouteToOsm}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isSaveTooltipOpen"><i class="fa fa-plus"></i></a>
+        <a class="btn btn-success cursor-pointer input-group-addon" ng-click="addMissingPartToOsm()" uib-tooltip="{{resources.addThisRouteToOsm}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isSaveTooltipOpen" analytics-on="click" analytics-event="Add missing part to OSM"><i class="fa fa-plus"></i></a>
         <a class="btn btn-danger cursor-pointer input-group-addon" ng-click="remove()" uib-tooltip="{{resources.deleteRoute}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isRemoveTooltipOpen"><i class="fa fa-trash"></i></a>
         <a class="btn btn-warning cursor-pointer input-group-addon" ng-click="showCoordinates = !showCoordinates" uib-tooltip="{{resources.showCoordinates}}" tooltip-placement="top" tooltip-append-to-body="true"><i class="fa fa-globe"></i></a>
     </div>
