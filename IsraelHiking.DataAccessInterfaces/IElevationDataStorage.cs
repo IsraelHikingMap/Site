@@ -1,6 +1,5 @@
 ﻿using System.Threading.Tasks;
 using GeoAPI.Geometries;
-using IsraelHiking.Common;
 
 namespace IsraelHiking.DataAccessInterfaces
 {

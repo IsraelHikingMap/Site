@@ -134,6 +134,7 @@
     <Compile Include="Services\DataContainerConverterServiceTests.cs" />
     <Compile Include="Services\GpxLoopsSplitterServiceTests.cs" />
     <Compile Include="Services\LruCacheTests.cs" />
+    <Compile Include="Services\RadialDistanceByAngleSimplifierTests.cs" />
     <Compile Include="Services\RouteDataSplitterServiceTests.cs" />
     <Compile Include="Services\OsmDataServiceTests.cs" />
     <Compile Include="Services\OsmGeoJsonPreprocessorTests.cs" />

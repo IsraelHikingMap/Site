@@ -52,7 +52,7 @@ namespace IsraelHiking.Tests.Services {
             expect(snappingService.snappings.getLayers().length).toBe(0);
         });
 
-        it("Should add one snappings layer when zoom is 14", () => {
+        it("Should add one snappings linestring when zoom is 14", () => {
             let features = [
                 {
                     type: "Feature",
@@ -61,6 +61,24 @@ namespace IsraelHiking.Tests.Services {
                         coordinates: [[1, 2], [3, 4]]
                     } as GeoJSON.LineString
                 } as GeoJSON.Feature<GeoJSON.LineString>
+            ];
+            $httpBackend.whenGET(() => true).respond(features);
+
+            mapService.map.setZoom(14);
+            $httpBackend.flush();
+
+            expect(snappingService.snappings.getLayers().length).toBe(1);
+        });
+
+        it("Should add one snappings polygon when zoom is 14", () => {
+            let features = [
+                {
+                    type: "Feature",
+                    geometry: {
+                        type: "Polygon",
+                        coordinates: [[[1, 2], [3, 4], [5,6], [1,2]]]
+                    } as GeoJSON.Polygon
+                } as GeoJSON.Feature<GeoJSON.Polygon>
             ];
             $httpBackend.whenGET(() => true).respond(features);
 

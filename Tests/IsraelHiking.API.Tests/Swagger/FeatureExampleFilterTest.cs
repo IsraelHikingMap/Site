@@ -1,5 +1,4 @@
-﻿using System;
-using IsraelHiking.API.Swagger;
+﻿using IsraelHiking.API.Swagger;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using Swashbuckle.Swagger;

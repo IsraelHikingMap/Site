@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Net.Http;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading;
