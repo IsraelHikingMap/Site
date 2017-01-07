@@ -1,5 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using System.Web.Http.Results;
 using GeoAPI.Geometries;
@@ -27,19 +31,41 @@ namespace IsraelHiking.API.Tests.Controllers
         private IOsmLineAdderService _osmLineAdderService;
         private IHttpGatewayFactory _httpGatewayFactory;
         private IDataContainerConverterService _dataContainerConverterService;
+        private IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
+
+        private string SetupGpxUrl(gpxType gpx, List<LineString> addibleLines = null)
+        {
+            var url = "url";
+            var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
+            var fileResponse = new RemoteFileFetcherGatewayResponse
+            {
+                FileName = url,
+                Content = new byte[0]
+            };
+            fetcher.GetFileContent(url).Returns(Task.FromResult(fileResponse));
+            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>())
+                .Returns(gpx.ToBytes());
+            _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
+            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(Task.FromResult(
+                addibleLines ?? new List <LineString>
+                {
+                    new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
+                }.AsEnumerable()
+            ));
+            return url;
+        }
 
         [TestInitialize]
         public void TestInitialize()
         {
             _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            var coordinatesConverter = Substitute.For<ICoordinatesConverter>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            var addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
+            _addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
             _osmLineAdderService = Substitute.For<IOsmLineAdderService>();
             _configurationProvider = Substitute.For<IConfigurationProvider>();
-            _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, coordinatesConverter,
-                _elasticSearchGateway, addibleGpxLinesFinderService, _osmLineAdderService, _configurationProvider,
+            _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, new CoordinatesConverter(), 
+                _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, _configurationProvider,
                 new LruCache<string, TokenAndSecret>(_configurationProvider));
         }
 
@@ -89,21 +115,124 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostGpsTrace_UrlProvidedForEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
         {
-            var url = "url";
-            var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
-            var fileResponse = new RemoteFileFetcherGatewayResponse
-            {
-                FileName = url,
-                Content = new byte[0]
-            };
-            fetcher.GetFileContent(url).Returns(Task.FromResult(fileResponse));
-            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(new gpxType().ToBytes());
-            _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
-
+            var url = SetupGpxUrl(new gpxType(), new List<LineString>());
             var results = _controller.PostGpsTrace(url).Result as OkNegotiatedContentResult<FeatureCollection>;
 
             Assert.IsNotNull(results);
             Assert.AreEqual(0, results.Content.Features.Count);
+        }
+
+        [TestMethod]
+        public void PostGpsTrace_FileProvidedForFootwayGpxFile_ShouldReturnFeatureCollection()
+        {
+            var gpx = new gpxType
+            {
+                rte = new[]
+                {
+                    new rteType
+                    {
+                        rtept = new[]
+                        {
+                            new wptType {lat = 0, lon = 0, timeSpecified = false, time = DateTime.Now},
+                            new wptType {lat = 0.00001M, lon = 0.00001M, timeSpecified = true, time = DateTime.Now.AddMinutes(1)},
+                        }
+                    }
+                },
+                trk = new[]
+                {
+                    new trkType
+                    {
+                        trkseg = new[]
+                        {
+                            new trksegType
+                            {
+                                trkpt = new[]
+                                {
+                                    new wptType {lat = 0.00002M, lon = 0.00002M, timeSpecified = true, time = DateTime.Now.AddMinutes(2)},
+                                    new wptType {lat = 0.00003M, lon = 0.00003M, timeSpecified = true, time = DateTime.Now.AddMinutes(3)}
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+            var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
+            var multipartContent = new MultipartContent();
+            var streamContent = new StreamContent(new MemoryStream());
+            streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "\"files\"",
+                FileName = "\"SomeFile.gpx\""
+            };
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/gpx");
+            multipartContent.Add(streamContent);
+            _controller.Request = new HttpRequestMessage { Content = multipartContent };
+            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
+            _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
+            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(Task.FromResult(
+                new List<LineString>
+                {
+                    new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
+                }.AsEnumerable()
+            ));
+
+            var results = _controller.PostGpsTrace().Result as OkNegotiatedContentResult<FeatureCollection>;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Content.Features.Count);
+            Assert.IsTrue(results.Content.Features.First().Attributes.GetValues().Contains("footway"));
+        }
+
+        [TestMethod]
+        public void PostGpsTrace_UrlProvidedForCyclewayGpxFile_ShouldReturnFeatureCollection()
+        {
+            var gpx = new gpxType
+            {
+                rte = new[]
+                {
+                    new rteType
+                    {
+                        rtept = new[]
+                        {
+                            new wptType {lat = 0, lon = 0, timeSpecified = true, time = DateTime.Now},
+                            new wptType {lat = 0.001M, lon = 0.001M, timeSpecified = true, time = DateTime.Now.AddMinutes(1)},
+                        }
+                    }
+                }
+            };
+            var url = SetupGpxUrl(gpx);
+
+            var results = _controller.PostGpsTrace(url).Result as OkNegotiatedContentResult<FeatureCollection>;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Content.Features.Count);
+            Assert.IsTrue(results.Content.Features.First().Attributes.GetValues().Contains("cycleway"));
+        }
+
+        [TestMethod]
+        public void PostGpsTrace_UrlProvidedForTrackGpxFile_ShouldReturnFeatureCollection()
+        {
+            var gpx = new gpxType
+            {
+                rte = new[]
+                {
+                    new rteType
+                    {
+                        rtept = new[]
+                        {
+                            new wptType {lat = 0, lon = 0, timeSpecified = true, time = DateTime.Now},
+                            new wptType {lat = 0.01M, lon = 0.01M, timeSpecified = true, time = DateTime.Now.AddMinutes(1)},
+                        }
+                    }
+                }
+            };
+            var url = SetupGpxUrl(gpx);
+
+            var results = _controller.PostGpsTrace(url).Result as OkNegotiatedContentResult<FeatureCollection>;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Content.Features.Count);
+            Assert.IsTrue(results.Content.Features.First().Attributes.GetValues().Contains("track"));
         }
     }
 }

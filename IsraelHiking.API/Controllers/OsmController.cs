@@ -154,6 +154,7 @@ namespace IsraelHiking.API.Controllers
 
         /// <summary>
         /// Determines routing type by calculating the average speed of each set of points.
+        /// Assuming all the point sent has time specified.
         /// </summary>
         /// <param name="waypointsGoups">A list of group of points</param>
         /// <returns>The calculated routing type</returns>
@@ -166,11 +167,6 @@ namespace IsraelHiking.API.Controllers
             }
             foreach (var waypoints in waypointsGoups)
             {
-                if (waypoints.Last().timeSpecified == false || waypoints.First().timeSpecified == false)
-                {
-                    velocityList.Add(0);
-                    continue;
-                }
                 var lengthInKm = ToItmLineString(waypoints).Length/1000;
                 var timeInHours = (waypoints.Last().time - waypoints.First().time).TotalHours;
                 velocityList.Add(lengthInKm/timeInHours);
