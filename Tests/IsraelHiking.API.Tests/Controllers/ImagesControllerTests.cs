@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using System.Web.Http.Results;
+﻿using System.Web.Http.Results;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
@@ -41,7 +40,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 Id = "1",
                 JsonData = JsonConvert.SerializeObject(new DataContainer())
             };
-            _repository.GetUrlById(siteUrl.Id).Returns(Task.FromResult(siteUrl));
+            _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
 
             var results = _controller.GetImage(siteUrl.Id).Result as ResponseMessageResult;
 

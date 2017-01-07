@@ -2,7 +2,6 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
-using System.Threading.Tasks;
 using System.Web.Http.Results;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Gpx;
@@ -65,8 +64,8 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var url = "someurl";
             byte[] bytes = Encoding.ASCII.GetBytes(GPX_DATA);
-            _remoteFileFetcherGateway.GetFileContent(url).Returns(Task.FromResult(new RemoteFileFetcherGatewayResponse { Content = bytes, FileName = "file.KML" }));
-            _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Is<string>(x => x.Contains("kml")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(Task.FromResult(bytes));
+            _remoteFileFetcherGateway.GetFileContent(url).Returns(new RemoteFileFetcherGatewayResponse { Content = bytes, FileName = "file.KML" });
+            _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Is<string>(x => x.Contains("kml")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(bytes);
 
             var dataContainer = _controller.GetRemoteFile(url).Result;
 

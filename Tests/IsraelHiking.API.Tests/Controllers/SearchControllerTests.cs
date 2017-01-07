@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
@@ -34,7 +33,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var list = new List<Feature>();
 
-            _elasticSearchGateway.Search("searchTerm", "name:en").Returns(Task.FromResult(list));
+            _elasticSearchGateway.Search("searchTerm", "name:en").Returns(list);
 
             var results = _controller.GetSearchResults("searchTerm", "en").Result;
 

@@ -1,5 +1,4 @@
 ﻿using System.Net.Http;
-using System.Threading.Tasks;
 using System.Web.Http.Results;
 using System.Web.Http.Routing;
 using IsraelHiking.API.Controllers;
@@ -19,7 +18,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var urlHelper = Substitute.For<UrlHelper>();
             urlHelper.Content(Arg.Any<string>()).Returns(x => x[0]);
             var repository = Substitute.For<IIsraelHikingRepository>();
-            repository.GetUrlById(Arg.Any<string>()).Returns(Task.FromResult(new SiteUrl { Title = "somthing with <>\""}));
+            repository.GetUrlById(Arg.Any<string>()).Returns(new SiteUrl { Title = "somthing with <>\""});
             var controller = new OpenGraphController(repository, Substitute.For<ILogger>()) { Url = urlHelper };
 
             var response = controller.GetHtml("42").Result as ResponseMessageResult;

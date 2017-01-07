@@ -4,7 +4,6 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading.Tasks;
 using System.Web.Http.Results;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
@@ -42,16 +41,16 @@ namespace IsraelHiking.API.Tests.Controllers
                 FileName = url,
                 Content = new byte[0]
             };
-            fetcher.GetFileContent(url).Returns(Task.FromResult(fileResponse));
+            fetcher.GetFileContent(url).Returns(fileResponse);
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>())
                 .Returns(gpx.ToBytes());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
-            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(Task.FromResult(
+            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
                 addibleLines ?? new List <LineString>
                 {
                     new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
                 }.AsEnumerable()
-            ));
+            );
             return url;
         }
 
@@ -73,7 +72,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetHighway_ShouldGetSome()
         {
             var list = new List<Feature> { new Feature(new LineString(new Coordinate[0]), new AttributesTable())};
-            _elasticSearchGateway.GetHighways(Arg.Any<LatLng>(), Arg.Any<LatLng>()).Returns(Task.FromResult(list));
+            _elasticSearchGateway.GetHighways(Arg.Any<LatLng>(), Arg.Any<LatLng>()).Returns(list);
 
             var results = _controller.GetHighways("0,0", "1,1").Result;
 
@@ -169,12 +168,12 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.Request = new HttpRequestMessage { Content = multipartContent };
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
-            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(Task.FromResult(
+            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
                 new List<LineString>
                 {
                     new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
                 }.AsEnumerable()
-            ));
+            );
 
             var results = _controller.PostGpsTrace().Result as OkNegotiatedContentResult<FeatureCollection>;
 

@@ -9,7 +9,7 @@ using NSubstitute;
 using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 
-namespace IsraelHiking.API.Tests.Services
+namespace IsraelHiking.API.Tests.Services.Osm
 {
     [TestClass]
     public class OsmGeoJsonPreprocessorTests

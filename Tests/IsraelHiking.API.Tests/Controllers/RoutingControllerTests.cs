@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Threading.Tasks;
 using System.Web.Http.Results;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
@@ -63,12 +62,12 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetRouting_Car_ShouldReturnLineStringFromGateway()
         {
             _routingGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
-                .Returns(Task.FromResult(new LineString(new []
+                .Returns(new LineString(new []
                 {
                     new Coordinate(1,1),
                     new Coordinate(1.5,1.5),
                     new Coordinate(2,2)
-                })));
+                }));
 
             var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkNegotiatedContentResult<FeatureCollection>;
             var content = results.Content;

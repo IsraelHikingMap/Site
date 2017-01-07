@@ -49,7 +49,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetSiteUrl_ItemInDatabase_ShouldReturnIt()
         {
             var id = "someId";
-            _israelHikingRepository.GetUrlById(id).Returns(Task.FromResult(new SiteUrl {Id = id}));
+            _israelHikingRepository.GetUrlById(id).Returns(new SiteUrl {Id = id});
 
             var results = _controller.GetSiteUrl(id).Result as OkNegotiatedContentResult<SiteUrl>;
 
@@ -64,8 +64,8 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var id = "someId";
             var bytes = new byte[] {1};
-            _israelHikingRepository.GetUrlById(id).Returns(Task.FromResult(new SiteUrl { Id = id, JsonData = JsonConvert.SerializeObject(new DataContainer()) }));
-            _containerConverterService.ToAnyFormat(Arg.Any<DataContainer>(), "gpx").Returns(Task.FromResult(bytes));
+            _israelHikingRepository.GetUrlById(id).Returns(new SiteUrl { Id = id, JsonData = JsonConvert.SerializeObject(new DataContainer()) });
+            _containerConverterService.ToAnyFormat(Arg.Any<DataContainer>(), "gpx").Returns(bytes);
 
             var results = _controller.GetSiteUrl(id, "gpx").Result as ResponseMessageResult;
 
@@ -81,7 +81,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var id = "someId";
             var list = new List<SiteUrl> {new SiteUrl {OsmUserId = id}};
             SetupIdentity(id);
-            _israelHikingRepository.GetUrlsByUser(id).Returns(Task.FromResult(list));
+            _israelHikingRepository.GetUrlsByUser(id).Returns(list);
 
             var results = _controller.GetSiteUrlForUser().Result as OkNegotiatedContentResult<List<SiteUrl>>;
 
@@ -121,7 +121,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PutSiteUrl_ItemNotInDatabase_ShouldReturnBadRequest()
         {
             var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
-            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(Task.FromResult<SiteUrl>(null));
+            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns((SiteUrl)null);
 
             var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as NotFoundResult;
 
@@ -133,7 +133,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PutSiteUrl_ItemDoesNotBelongToUSer_ShouldReturnBadRequest()
         {
             var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
-            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(Task.FromResult(siteUrl));
+            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
             SetupIdentity("1");
 
             var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as BadRequestErrorMessageResult;
@@ -146,7 +146,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PutSiteUrl_ItemBelongsToUSer_ShouldUpdateIt()
         {
             var siteUrl = new SiteUrl { Id = "1", OsmUserId = "1" };
-            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(Task.FromResult(siteUrl));
+            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
             SetupIdentity(siteUrl.OsmUserId);
 
             var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as OkNegotiatedContentResult<SiteUrl>;
@@ -160,7 +160,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void DeleteSiteUrl_ItemNotInDatabase_ShouldRemoveIt()
         {
             var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
-            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(Task.FromResult(siteUrl));
+            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
             SetupIdentity(siteUrl.OsmUserId);
 
             _controller.DeleteSiteUrl(siteUrl.Id).Wait();

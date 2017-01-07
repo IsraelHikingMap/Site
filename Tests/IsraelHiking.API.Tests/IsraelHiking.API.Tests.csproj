@@ -135,10 +135,11 @@
     <Compile Include="Services\DataContainerConverterServiceTests.cs" />
     <Compile Include="Services\GpxLoopsSplitterServiceTests.cs" />
     <Compile Include="Services\LruCacheTests.cs" />
+    <Compile Include="Services\Osm\OsmLineAdderServiceTests.cs" />
     <Compile Include="Services\RadialDistanceByAngleSimplifierTests.cs" />
     <Compile Include="Services\RouteDataSplitterServiceTests.cs" />
-    <Compile Include="Services\OsmDataServiceTests.cs" />
-    <Compile Include="Services\OsmGeoJsonPreprocessorTests.cs" />
+    <Compile Include="Services\Osm\OsmDataServiceTests.cs" />
+    <Compile Include="Services\Osm\OsmGeoJsonPreprocessorTests.cs" />
     <Compile Include="Services\ImageCreationServiceTests.cs" />
     <Compile Include="Swagger\FeatureCollectionExampleFilterTest.cs" />
     <Compile Include="Swagger\FeatureExampleFilterTest.cs" />

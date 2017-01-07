@@ -12,6 +12,9 @@ using OsmSharp.Osm;
 
 namespace IsraelHiking.API.Services.Osm
 {
+    /// <summary>
+    /// This class is responsible of adding a given line to OSM
+    /// </summary>
     public class OsmLineAdderService : IOsmLineAdderService
     {
         private readonly IElasticSearchGateway _elasticSearchGateway;
@@ -22,6 +25,14 @@ namespace IsraelHiking.API.Services.Osm
 
         private IOsmGateway _osmGateway;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="elasticSearchGateway"></param>
+        /// <param name="coordinatesConverter"></param>
+        /// <param name="configurationProvider"></param>
+        /// <param name="geoJsonPreprocessor"></param>
+        /// <param name="httpGatewayFactory"></param>
         public OsmLineAdderService(IElasticSearchGateway elasticSearchGateway, 
             ICoordinatesConverter coordinatesConverter, 
             IConfigurationProvider configurationProvider, 
@@ -35,6 +46,13 @@ namespace IsraelHiking.API.Services.Osm
             _httpGatewayFactory = httpGatewayFactory;
         }
 
+        /// <summary>
+        /// Use this method to add a line to OSM, this algorithm tries to add the line to existing lines in OSM
+        /// </summary>
+        /// <param name="line">The line to add</param>
+        /// <param name="tags">The tags to add to the line</param>
+        /// <param name="tokenAndSecret">Used as OSM credentials</param>
+        /// <returns></returns>
         public async Task Add(LineString line, Dictionary<string, string> tags, TokenAndSecret tokenAndSecret)
         {
             _osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);

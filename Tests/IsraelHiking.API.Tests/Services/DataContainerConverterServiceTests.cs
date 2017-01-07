@@ -3,7 +3,6 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using Ionic.Zip;
 using IsraelHiking.API.Converters;
@@ -63,7 +62,7 @@ namespace IsraelHiking.API.Tests.Services
         public void ConvertDataContainerToKml_ShouldConvertToKmlUsingGpsBabel()
         {
             var datacContainer = new DataContainer();
-            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(_randomBytes));
+            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_randomBytes);
 
             var results = _converterService.ToAnyFormat(datacContainer, "kml").Result;
 
@@ -225,7 +224,7 @@ namespace IsraelHiking.API.Tests.Services
             string gpxVersion1 = "<?xml version='1.0' encoding='UTF-8'?><gpx version='1.0' creator='GPSBabel - http://www.gpsbabel.org' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://www.topografix.com/GPX/1/0' xsi:schemaLocation='http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd'><rte><rtept lat='33.1187173918366' lon='35.6488631636844'><ele>0.000000</ele><name>A001</name><cmt>60963[1] דרך עפר היוצאת מעיקול בכביש 959 - נקודת ההתחלה</cmt><desc>60963[1] דרך עפר היוצאת מעיקול בכביש 959 - נקודת ההתחלה</desc></rtept></rte></gpx>";
             byte[] bytes = Encoding.UTF8.GetBytes(gpxVersion1);
             var gpx = new gpxType { rte = new[] { new rteType { rtept = new wptType[0] } } };
-            _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(gpx.ToBytes()));
+            _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
 
             var dataContainer = _converterService.ToDataContainer(bytes, "gpx").Result;
 
@@ -245,7 +244,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertTwlToDataContainer_ShouldConvertToDataContainer()
         {
-            _gpsBabelGateway.ConvertFileFromat(_randomBytes, Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(_simpleGpx.ToBytes()));
+            _gpsBabelGateway.ConvertFileFromat(_randomBytes, Arg.Any<string>(), Arg.Any<string>()).Returns(_simpleGpx.ToBytes());
 
             var dataContainer = _converterService.ToDataContainer(_randomBytes, "twl").Result;
 
@@ -255,7 +254,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertCustomToDataContainer_ShouldConvertToDataContainer()
         {
-            _gpsBabelGateway.ConvertFileFromat(_randomBytes, "kuku", Arg.Any<string>()).Returns(Task.FromResult(_simpleGpx.ToBytes()));
+            _gpsBabelGateway.ConvertFileFromat(_randomBytes, "kuku", Arg.Any<string>()).Returns(_simpleGpx.ToBytes());
 
             var dataContainer = _converterService.ToDataContainer(_randomBytes, "kuku").Result;
 
@@ -269,7 +268,7 @@ namespace IsraelHiking.API.Tests.Services
             ZipFile file = new ZipFile();
             file.AddEntry("file.kml", new MemoryStream(_randomBytes));
             file.Save(zipfileStream);
-            _gpsBabelGateway.ConvertFileFromat(Arg.Is<byte[]>(b => b.AsEnumerable().SequenceEqual(_randomBytes)), Arg.Any<string>(), Arg.Any<string>()).Returns(Task.FromResult(_simpleGpx.ToBytes()));
+            _gpsBabelGateway.ConvertFileFromat(Arg.Is<byte[]>(b => b.AsEnumerable().SequenceEqual(_randomBytes)), Arg.Any<string>(), Arg.Any<string>()).Returns(_simpleGpx.ToBytes());
 
             var dataContainer = _converterService.ToDataContainer(zipfileStream.ToArray(), "kmz").Result;
 

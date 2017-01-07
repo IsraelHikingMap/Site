@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -8,7 +7,7 @@ using NetTopologySuite.Features;
 using NSubstitute;
 using OsmSharp.Osm;
 
-namespace IsraelHiking.API.Tests.Services
+namespace IsraelHiking.API.Tests.Services.Osm
 {
     [TestClass]
     public class OsmDataServiceTests
@@ -70,9 +69,9 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void UpdateData_GetOsmFileWhenCurrentFileIsInDeifferentSize_ShouldGetTheFileFromTheWeb()
         {
-            _remoteFileSizeFetcherGateway.GetFileSize(Arg.Any<string>()).Returns(Task.FromResult((long)10));
+            _remoteFileSizeFetcherGateway.GetFileSize(Arg.Any<string>()).Returns(10);
             _fileSystemHelper.GetFileSize(Arg.Any<string>()).Returns(1);
-            _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(Task.FromResult(new RemoteFileFetcherGatewayResponse()));
+            _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse());
 
             _osmDataService.Initialize(string.Empty);
             _osmDataService.UpdateData(OsmDataServiceOperations.GetOsmFile).Wait();
