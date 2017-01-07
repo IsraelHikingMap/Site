@@ -123,7 +123,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
             _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(Task.FromResult<SiteUrl>(null));
 
-            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as BadRequestErrorMessageResult;
+            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as NotFoundResult;
 
             Assert.IsNotNull(results);
             _israelHikingRepository.DidNotReceive().Update(Arg.Any<SiteUrl>());
@@ -136,7 +136,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(Task.FromResult(siteUrl));
             SetupIdentity("1");
 
-            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as BadRequestResult;
+            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as BadRequestErrorMessageResult;
 
             Assert.IsNotNull(results);
             _israelHikingRepository.DidNotReceive().Update(Arg.Any<SiteUrl>());

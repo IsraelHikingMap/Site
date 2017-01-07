@@ -13,7 +13,7 @@ namespace IsraelHiking.API.Tests.Swagger
         public void Apply_ShouldAddFileUploadParams()
         {
             var fileUploadParams = new OptionalFileUploadParams();
-            var operation = new Operation { consumes = new List<string>() };
+            var operation = new Operation { consumes = new List<string>()};
 
             fileUploadParams.Apply(operation, null, null);
 

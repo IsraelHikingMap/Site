@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.DataAccess
@@ -20,9 +21,11 @@ namespace IsraelHiking.DataAccess
         public double MinimalSegmentLength { get; }
         public double SearchFactor { get; }
         public string BinariesFolder { get; }
-        public string OsmConsumerKey { get; }
-        public string OsmConsumerSecret { get; }
-        public string OsmBaseAddress { get; }
+        public OsmConfiguraionData OsmConfiguraion { get; set; }
+
+        //public string OsmConsumerKey { get; }
+        //public string OsmConsumerSecret { get; }
+        //public string OsmBaseAddress { get; }
         public Dictionary<string, string> ListingDictionary { get; }
 
         public ConfigurationProvider()
@@ -39,9 +42,11 @@ namespace IsraelHiking.DataAccess
             RadialSimplificationAngle = GetValueOrDefault(nameof(RadialSimplificationAngle), 90); // degrees
             SearchFactor = GetValueOrDefault(nameof(SearchFactor), 0.5); // number
             BinariesFolder = GetValueOrDefault(nameof(BinariesFolder), string.Empty);
-            OsmConsumerKey = GetValueOrDefault(nameof(OsmConsumerKey), "H5Us9nv9eDyFpKbBTiURf7ZqfdBArNddv10n6R6U");
-            OsmConsumerSecret = GetValueOrDefault(nameof(OsmConsumerSecret), "ccYaQUKLz26XEzbNd8uWoQ6HwbcnrUUp8milXnXG");
-            OsmBaseAddress = GetValueOrDefault(nameof(OsmBaseAddress), "https://www.openstreetmap.org");
+            OsmConfiguraion = new OsmConfiguraionData {
+                ConsumerKey = GetValueOrDefault(nameof(OsmConfiguraionData.ConsumerKey), "H5Us9nv9eDyFpKbBTiURf7ZqfdBArNddv10n6R6U"),
+                ConsumerSecret = GetValueOrDefault(nameof(OsmConfiguraionData.ConsumerSecret), "ccYaQUKLz26XEzbNd8uWoQ6HwbcnrUUp8milXnXG"),
+                BaseAddress = GetValueOrDefault(nameof(OsmConfiguraionData.BaseAddress), "https://www.openstreetmap.org"),
+            };
             const string listingKeyPrefix = "Listing_";
             ListingDictionary = ConfigurationManager.AppSettings.AllKeys
                 .Where(k => k.StartsWith(listingKeyPrefix))

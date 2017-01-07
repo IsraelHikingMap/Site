@@ -37,8 +37,8 @@ namespace IsraelHiking.DataAccess.Osm
             _configurationProvider = configurationProvider;
             _xmlMediaTypeFormatter = new XmlMediaTypeFormatter {UseXmlSerializer = true};
 
-            var osmApiBaseAddress = _configurationProvider.OsmBaseAddress.Replace("https", "http") + "/api/0.6/";
-            _baseAddressWithoutProtocol = _configurationProvider.OsmBaseAddress.Replace("http://", "").Replace("https://", "");
+            var osmApiBaseAddress = _configurationProvider.OsmConfiguraion.BaseAddress.Replace("https", "http") + "/api/0.6/";
+            _baseAddressWithoutProtocol = _configurationProvider.OsmConfiguraion.BaseAddress.Replace("http://", "").Replace("https://", "");
             _userDetailsAddress = osmApiBaseAddress + "user/details";
             _createChangesetAddress = osmApiBaseAddress + "changeset/create";
             _closeChangesetAddress = osmApiBaseAddress + "changeset/#id/close";
@@ -56,8 +56,8 @@ namespace IsraelHiking.DataAccess.Osm
 
             var request = new OAuthRequest
             {
-                ConsumerKey = _configurationProvider.OsmConsumerKey,
-                ConsumerSecret = _configurationProvider.OsmConsumerSecret,
+                ConsumerKey = _configurationProvider.OsmConfiguraion.ConsumerKey,
+                ConsumerSecret = _configurationProvider.OsmConfiguraion.ConsumerSecret,
                 Token = _tokenAndSecret.Token,
                 TokenSecret = _tokenAndSecret.TokenSecret,
                 Type = OAuthRequestType.ProtectedResource,

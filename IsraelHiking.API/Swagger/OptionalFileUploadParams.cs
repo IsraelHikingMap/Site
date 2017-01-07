@@ -1,4 +1,5 @@
-﻿using System.Web.Http.Description;
+﻿using System.Collections.Generic;
+using System.Web.Http.Description;
 using Swashbuckle.Swagger;
 
 namespace IsraelHiking.API.Swagger
@@ -17,16 +18,17 @@ namespace IsraelHiking.API.Swagger
         public void Apply(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
         {
             operation.consumes.Add("application/form-data");
-            operation.parameters = new[]
+            if (operation.parameters == null)
             {
-                new Parameter
-                {
-                    name = "file",
-                    @in = "formData",
-                    required = false,
-                    type = "file"
-                }
-            };
+                operation.parameters = new List<Parameter>();
+            }
+            operation.parameters.Add(new Parameter
+            {
+                name = "file",
+                @in = "formData",
+                required = false,
+                type = "file"
+            });
         }
     }
 }

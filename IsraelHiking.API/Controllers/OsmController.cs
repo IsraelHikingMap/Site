@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
+using System.Web.Http.Description;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
@@ -80,14 +81,9 @@ namespace IsraelHiking.API.Controllers
         /// <returns>The OSM server configurations</returns>
         [HttpGet]
         [Route("api/osm/configuration")]
-        public object GetConfigurations()
+        public OsmConfiguraionData GetConfigurations()
         {
-            return new
-            {
-                ConsumerKey = _configurationProvider.OsmConsumerKey,
-                ConsumerSecret = _configurationProvider.OsmConsumerSecret,
-                BaseAddress = _configurationProvider.OsmBaseAddress
-            };
+            return _configurationProvider.OsmConfiguraion;
         }
 
         /// <summary>
@@ -105,13 +101,18 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Finds missing parts of a given route
         /// </summary>
-        /// <param name="url">The url to fetch the file from</param>
+        /// <param name="url">The url to fetch the file from - optional, use file upload if not provided</param>
         /// <returns></returns>
         [SwaggerOperationFilter(typeof(OptionalFileUploadParams))]
-        public async Task<FeatureCollection> PostGpsTrace(string url)
+        [ResponseType(typeof(FeatureCollection))]
+        public async Task<IHttpActionResult> PostGpsTrace(string url = "")
         {
-            var response = await GetFile(url);
-            var gpxBytes = await _dataContainerConverterService.Convert(response.Content, response.FileName, DataContainerConverterService.GPX);
+            var fileFetcherGatewayResponse = await GetFile(url);
+            if (fileFetcherGatewayResponse == null)
+            {
+                return BadRequest("Url is not provided or file is empty...");
+            }
+            var gpxBytes = await _dataContainerConverterService.Convert(fileFetcherGatewayResponse.Content, fileFetcherGatewayResponse.FileName, DataContainerConverterService.GPX);
             var gpx = gpxBytes.ToGpx().UpdateBounds();
             var highwayType = GetHighwayType(gpx);
             var gpxLines = GpxToLineStrings(gpx);
@@ -119,7 +120,7 @@ namespace IsraelHiking.API.Controllers
             var attributesTable = new AttributesTable();
             attributesTable.AddAttribute("highway", highwayType);
             var features = manipulatedLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
-            return new FeatureCollection(new Collection<IFeature>(features));
+            return Ok(new FeatureCollection(new Collection<IFeature>(features)));
         }
 
         private async Task<RemoteFileFetcherGatewayResponse> GetFile(string url)
@@ -134,7 +135,7 @@ namespace IsraelHiking.API.Controllers
 
             if (multipartFileStreamProvider.Contents.Count == 0)
             {
-                return new RemoteFileFetcherGatewayResponse();
+                return null;
             }
             return new RemoteFileFetcherGatewayResponse
             {

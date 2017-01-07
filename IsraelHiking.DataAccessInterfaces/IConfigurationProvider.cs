@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using IsraelHiking.Common;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
@@ -16,9 +17,8 @@ namespace IsraelHiking.DataAccessInterfaces
         double SimplificationTolerance { get; }
         double ClosestPointTolerance { get; }
         string BinariesFolder { get; }
-        string OsmConsumerKey { get; }
-        string OsmConsumerSecret { get; }
-        string OsmBaseAddress { get; }
+        OsmConfiguraionData OsmConfiguraion { get; set; }
+        
         Dictionary<string, string> ListingDictionary { get; }
     }
 }

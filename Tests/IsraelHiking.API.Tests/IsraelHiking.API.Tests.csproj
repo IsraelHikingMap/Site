@@ -120,6 +120,7 @@
     <Compile Include="Controllers\FilesControllerTests.cs" />
     <Compile Include="Controllers\ElevationControllerTests.cs" />
     <Compile Include="Controllers\ItmGridControllerTests.cs" />
+    <Compile Include="Controllers\OsmControllerTests.cs" />
     <Compile Include="Controllers\RoutingControllerTests.cs" />
     <Compile Include="Controllers\FileExplorerControllerTests.cs" />
     <Compile Include="Controllers\SearchControllerTests.cs" />
