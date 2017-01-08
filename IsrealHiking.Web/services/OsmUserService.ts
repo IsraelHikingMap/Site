@@ -112,7 +112,8 @@ namespace IsraelHiking.Services {
                     }
                     let tracesJson = this.x2Js.xml2json(traces) as any;
                     this.traces = [];
-                    for (let traceJson of tracesJson.osm.gpx_file || []) {
+                    let files = [].concat(tracesJson.osm.gpx_file);
+                    for (let traceJson of files) {
                         let id = traceJson._id;
                         let url = `${this.baseUrl}/user/${traceJson._user}/traces/${id}`;
                         let dataUrl = `${this.baseUrl}/api/0.6/gpx/${id}/data`;
@@ -177,7 +178,7 @@ namespace IsraelHiking.Services {
                 if (baseLayerAddress.indexOf("/") === 0) {
                     baseLayerAddress = Common.Urls.baseAddress + baseLayerAddress;
                 }
-                let address = baseLayerAddress.indexOf("{s}") === -1 ? baseLayerAddress : Common.Urls.baseAddress + Services.Layers.LayersService.DEFAULT_TILES_ADDRESS;
+                let address = baseLayerAddress.replace("{s}", "s");
                 background = `background=custom:${address}`;
             }
             return background;

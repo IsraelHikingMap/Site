@@ -61,6 +61,7 @@
     <TypeScriptCompile Include="services\FileServiceTests.ts" />
     <TypeScriptCompile Include="services\layers\WikiMarkersLayerTests.ts" />
     <TypeScriptCompile Include="services\MapServiceMockCreator.ts" />
+    <TypeScriptCompile Include="services\OsmUserServiceTests.ts" />
     <TypeScriptCompile Include="services\ResourcesServiceTests.ts" />
     <TypeScriptCompile Include="services\SidebarServiceTests.ts" />
     <TypeScriptCompile Include="services\RouteStatisticsServiceTests.ts" />

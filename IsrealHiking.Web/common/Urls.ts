@@ -15,5 +15,9 @@
         public static overpass = window.location.protocol + "//overpass-api.de/api/interpreter";
         public static osm = Urls.apiBase + "osm/";
         public static osmConfiguration = Urls.osm + "configuration";
+
+        public static DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
+        public static MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
+        public static OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";
     }
 }

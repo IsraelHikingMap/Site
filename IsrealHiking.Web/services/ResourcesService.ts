@@ -10,7 +10,7 @@ namespace IsraelHiking.Services {
         tilesFolder: string;
     }
 
-    const languageKey = "site-language";
+    const languageKey = "current-language";
 
     export class ResourcesService {
         private $sce: angular.ISCEService;
@@ -358,13 +358,13 @@ namespace IsraelHiking.Services {
                     code: "he",
                     rtl: true,
                     label: "עברית",
-                    tilesFolder: "Hebrew"
+                    tilesFolder: "/Hebrew"
                 },
                 {
                     code: "en-US",
                     rtl: false,
                     label: "English",
-                    tilesFolder: "English"
+                    tilesFolder: "/English"
                 }
             ];
             this.currentLanguage = localStorageService.get(languageKey) as ILanguage || this.availableLanguages[0];

@@ -18,6 +18,7 @@
     { "Path": "IsrealHiking.Web\\scripts\\osm_geojson.js" },
     { "Path": "IsrealHiking.Web\\scripts\\ng-file-upload.js" },
     { "Path": "IsrealHiking.Web\\scripts\\angular-file-saver.bundle.js" },
+    { "Path": "IsrealHiking.Web\\scripts\\xml2json.min.js" },
     { "Path": "IsrealHiking.Web\\common\\", "Includes": ["*.ts"]},
     { "Path": "IsrealHiking.Web\\services\\mapService.ts"},
     { "Path": "IsrealHiking.Web\\services\\ObjectWithMap.ts"},
@@ -29,8 +30,9 @@
     { "Path": "IsrealHiking.Web\\services\\HashService.ts"},
     { "Path": "IsrealHiking.Web\\services\\RouteStatisticsService.ts" },
     { "Path": "IsrealHiking.Web\\services\\SidebarService.ts" },
-    { "Path": "IsrealHiking.Web\\services\\FileService.ts"},
-    { "Path": "IsrealHiking.Web\\services\\ResourcesService.ts"}
+    { "Path": "IsrealHiking.Web\\services\\FileService.ts" },
+    { "Path": "IsrealHiking.Web\\services\\ResourcesService.ts"},
+    { "Path": "IsrealHiking.Web\\services\\OsmUserService.ts"}
   ],
   "Tests": [
     {

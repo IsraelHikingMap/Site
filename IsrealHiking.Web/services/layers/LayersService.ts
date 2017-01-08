@@ -25,7 +25,6 @@ namespace IsraelHiking.Services.Layers {
         public static ISRAEL_MTB_MAP = "Israel MTB Map";
         public static ISRAEL_HIKING_MAP = "Israel Hiking Map";
         public static GOOGLE_EARTH = "Google Earth";
-        public static DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
         public static MIN_ZOOM = 7;
         public static MAX_NATIVE_ZOOM = 16;
 
@@ -38,8 +37,6 @@ namespace IsraelHiking.Services.Layers {
         private static ACTIVE_BASELAYER_KEY = "ActiveBaseLayer";
         private static ACTIVE_OVERLAYS_KEY = "ActiveOverlays";
         private static CUSTOM_LAYER = "Custom Layer";
-        private static MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
-        private static OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";
 
         private $http: angular.IHttpService;
         private $q: angular.IQService;
@@ -88,13 +85,13 @@ namespace IsraelHiking.Services.Layers {
             // default layers:
             this.addBaseLayer({
                 key: LayersService.ISRAEL_HIKING_MAP,
-                address: this.resourcesService.currentLanguage.tilesFolder + LayersService.DEFAULT_TILES_ADDRESS,
+                address: this.resourcesService.currentLanguage.tilesFolder + Common.Urls.DEFAULT_TILES_ADDRESS,
                 isEditable: false
             } as ILayer, LayersService.ATTRIBUTION);
 
             this.addBaseLayer({
                 key: LayersService.ISRAEL_MTB_MAP,
-                address: this.resourcesService.currentLanguage.tilesFolder + LayersService.MTB_TILES_ADDRESS,
+                address: this.resourcesService.currentLanguage.tilesFolder + Common.Urls.MTB_TILES_ADDRESS,
                 isEditable: false
             } as ILayer, LayersService.MTB_ATTRIBUTION);
             try {
@@ -105,7 +102,7 @@ namespace IsraelHiking.Services.Layers {
 
             let hikingTrailsOverlay = this.addOverlay({
                 key: LayersService.HIKING_TRAILS,
-                address: LayersService.OVERLAY_TILES_ADDRESS,
+                address: Common.Urls.OVERLAY_TILES_ADDRESS,
                 minZoom: LayersService.MIN_ZOOM,
                 maxZoom: LayersService.MAX_NATIVE_ZOOM
             } as ILayer);
@@ -516,11 +513,11 @@ namespace IsraelHiking.Services.Layers {
         private changeLanguage() {
             let ihmLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_HIKING_MAP);
             this.replaceBaseLayerAddress(ihmLayer,
-                this.resourcesService.currentLanguage.tilesFolder + LayersService.DEFAULT_TILES_ADDRESS,
+                this.resourcesService.currentLanguage.tilesFolder + Common.Urls.DEFAULT_TILES_ADDRESS,
                 LayersService.ATTRIBUTION, 0);
             let mtbLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_MTB_MAP);
             this.replaceBaseLayerAddress(mtbLayer,
-                this.resourcesService.currentLanguage.tilesFolder + LayersService.MTB_TILES_ADDRESS,
+                this.resourcesService.currentLanguage.tilesFolder + Common.Urls.MTB_TILES_ADDRESS,
                 LayersService.MTB_ATTRIBUTION, 1);
         }
 
