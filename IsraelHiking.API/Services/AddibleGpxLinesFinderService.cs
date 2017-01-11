@@ -10,6 +10,7 @@ using NetTopologySuite.Simplify;
 
 namespace IsraelHiking.API.Services
 {
+    /// <inheritdoc/>
     public class AddibleGpxLinesFinderService : IAddibleGpxLinesFinderService
     {
         private readonly IGpxLoopsSplitterService _gpxLoopsSplitterService;
@@ -17,6 +18,13 @@ namespace IsraelHiking.API.Services
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IConfigurationProvider _configurationProvider;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="gpxLoopsSplitterService"></param>
+        /// <param name="coordinatesConverter"></param>
+        /// <param name="elasticSearchGateway"></param>
+        /// <param name="configurationProvider"></param>
         public AddibleGpxLinesFinderService(IGpxLoopsSplitterService gpxLoopsSplitterService, 
             ICoordinatesConverter coordinatesConverter, 
             IElasticSearchGateway elasticSearchGateway, 
@@ -28,16 +36,7 @@ namespace IsraelHiking.API.Services
             _configurationProvider = configurationProvider;
         }
 
-        /// <summary>
-        /// This method does the following to every line:
-        /// 1. removed all the points that are close to existing lines from OSM (stored in the ES database)
-        /// 2. Split the remaining lines so that after the split there are no self loops in each line
-        /// 3. remove duplicate lines (caused by splitting self loops)
-        /// 4. Simplify lines using Douglas-Peucker and Radial angle simlifires
-        /// 5. Merge the lines back if possible
-        /// </summary>
-        /// <param name="gpxLines">The lines to manipulate</param>
-        /// <returns>The lines after manupulation</returns>
+        /// <inheritdoc/>
         public async Task<IEnumerable<LineString>> GetLines(List<LineString> gpxLines)
         {
             var missingLines = await FindMissingLines(gpxLines);

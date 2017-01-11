@@ -141,6 +141,7 @@
     <Compile Include="Services\Osm\OsmDataServiceTests.cs" />
     <Compile Include="Services\Osm\OsmGeoJsonPreprocessorTests.cs" />
     <Compile Include="Services\ImageCreationServiceTests.cs" />
+    <Compile Include="Services\AddibleGpxLinesFinderServiceTests.cs" />
     <Compile Include="Swagger\FeatureCollectionExampleFilterTest.cs" />
     <Compile Include="Swagger\FeatureExampleFilterTest.cs" />
     <Compile Include="Swagger\RequiredFileUploadParamsTests.cs" />

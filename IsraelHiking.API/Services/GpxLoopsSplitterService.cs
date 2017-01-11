@@ -5,19 +5,10 @@ using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services
 {
+    /// <inheritdoc/>
     public class GpxLoopsSplitterService : IGpxLoopsSplitterService
     {
-        /// <summary>
-        /// This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
-        /// This can be used with both OSM lines and other parts of the same GPS trace.
-        /// The algorithm is faily simple - 
-        /// Go over all the points in the given <see cref="gpxLine"/> and look for point that are close to <see cref="existingLineStrings"/>
-        /// </summary>
-        /// <param name="gpxLine">The line to manipulate</param>
-        /// <param name="existingLineStrings">The lines to test agains</param>
-        /// <param name="minimalMissingPartLength">The minimal length allowed to a trace that can be added</param>
-        /// <param name="closestPointTolerance">The distace of the closest point allowed</param>
-        /// <returns>a split line from the orignal line</returns>
+        /// <inheritdoc/>
         public List<LineString> GetMissingLines(LineString gpxLine, IReadOnlyList<LineString> existingLineStrings, double minimalMissingPartLength, double closestPointTolerance)
         {
             var gpxSplit = new List<LineString>();
@@ -41,14 +32,7 @@ namespace IsraelHiking.API.Services
             return gpxSplit.Where(l => l.Length > minimalMissingPartLength).ToList();
         }
 
-        /// <summary>
-        /// This part of the splitter if responsible for splitting a line with a self loop.
-        /// It will allway return lines that do not have self loop, but can be duplicate of one another
-        /// Use <see cref="GetMissingLines"/> method to remove those duplications.
-        /// </summary>
-        /// <param name="gpxLine">The line to look for self loops in</param>
-        /// <param name="closestPointTolerance">The tolerance of the distance that is considered a self loop</param>
-        /// <returns>a list of lines that do not have self loops</returns>
+        /// <inheritdoc/>
         public List<LineString> SplitSelfLoops(LineString gpxLine, double closestPointTolerance)
         {
             var lines = new List<LineString>();
