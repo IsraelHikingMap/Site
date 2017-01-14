@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Linq;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using IsraelHiking.DataAccessInterfaces;
 using NSubstitute;
 
@@ -23,6 +24,15 @@ namespace IsraelHiking.DataAccess.Tests
             var response = gateway.GetFileContent("http://jeeptrip.co.il/routes/pd6bccre.twl").Result;
 
             Assert.AreEqual("pd6bccre.twl", response.FileName);
+        }
+
+        [TestMethod]
+        public void TestGateway_InvalidFile()
+        {
+            var gateway = new RemoteFileFetcherGateway(Substitute.For<ILogger>());
+            var response = gateway.GetFileContent("http://israelhiking.osm.org.il/Tiles/11/1228/826.png").Result;
+
+            Assert.IsFalse(response.Content.Any());
         }
     }
 }

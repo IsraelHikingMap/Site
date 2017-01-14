@@ -168,7 +168,7 @@ namespace IsraelHiking.API.Services
                 : dataContainer.baseLayer.address;
             if (address.StartsWith("http") == false && address.StartsWith("www") == false)
             {
-                address = "http://israelhiking.osm.org.il/" + address;
+                address = "http://israelhiking.osm.org.il" + address;
             }
             return address;
         }

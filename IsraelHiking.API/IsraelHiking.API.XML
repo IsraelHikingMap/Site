@@ -1,0 +1,1081 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>IsraelHiking.API</name>
+    </assembly>
+    <members>
+        <member name="T:IsraelHiking.API.Controllers.FileExplorerHtmlTemplate">
+            <summary>
+            Class to produce the template output
+            </summary>
+            <summary>
+            This class can be used to create the HTML file listing page
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplate.TransformText">
+            <summary>
+            Create the template output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplate.#ctor(IsraelHiking.Common.FileExplorer.FileExplorerViewModel)">
+            <param name="viewModel"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplate.GetSizeString(System.Double)">
+            <summary>
+            Facilitates the creation of string of file sizes 
+            </summary>
+            <param name="number">The number of bytes</param>
+            <returns>A human readable string</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase">
+            <summary>
+            Base class for this transformation
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.GenerationEnvironment">
+            <summary>
+            The string builder that generation-time code is using to assemble generated output
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Errors">
+            <summary>
+            The error collection for the generation process
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.indentLengths">
+            <summary>
+            A list of the lengths of each indent that was added with PushIndent
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.CurrentIndent">
+            <summary>
+            Gets the current indent we use when adding lines to the output
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Session">
+            <summary>
+            Current transformation session
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Write(System.String)">
+            <summary>
+            Write text directly into the generated output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.WriteLine(System.String)">
+            <summary>
+            Write text directly into the generated output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Write(System.String,System.Object[])">
+            <summary>
+            Write formatted text directly into the generated output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.WriteLine(System.String,System.Object[])">
+            <summary>
+            Write formatted text directly into the generated output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Error(System.String)">
+            <summary>
+            Raise an error
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Warning(System.String)">
+            <summary>
+            Raise a warning
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.PushIndent(System.String)">
+            <summary>
+            Increase the indent
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.PopIndent">
+            <summary>
+            Remove the last indent that was added with PushIndent
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ClearIndent">
+            <summary>
+            Remove any indentation
+            </summary>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ToStringInstanceHelper">
+            <summary>
+            Utility class to produce culture-oriented representation of an object as a string.
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ToStringInstanceHelper.FormatProvider">
+            <summary>
+            Gets or sets format provider to be used by ToStringWithCulture method.
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ToStringInstanceHelper.ToStringWithCulture(System.Object)">
+            <summary>
+            This is called from the compile/run appdomain to convert objects within an expression block to a string
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ToStringHelper">
+            <summary>
+            Helper to produce culture-oriented representation of an object as a string
+            </summary>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.FileExplorerController">
+            <summary>
+            This controller allows viewing of the file system
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerController.#ctor(IsraelHiking.DataAccessInterfaces.IFileSystemHelper,IsraelHiking.DataAccessInterfaces.IConfigurationProvider)">
+            <summary>
+            Controller's contstructor
+            </summary>
+            <param name="fileSystemHelper"></param>
+            <param name="configurationProvider"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FileExplorerController.GetListingPage(System.String)">
+            <summary>
+            Allows to see a given path in the file system
+            </summary>
+            <param name="path">The relative path</param>
+            <returns>An nice looking HTML page</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.FilesController">
+            <summary>
+            This controller allows fetching of remote files, opening of files and converting files
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FilesController.#ctor(IsraelHiking.DataAccessInterfaces.IElevationDataStorage,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.API.Services.IDataContainerConverterService,IsraelHiking.API.Services.LruCache{System.String,IsraelHiking.Common.TokenAndSecret})">
+            <summary>
+            Controller's constructor
+            </summary>
+            <param name="elevationDataStorage"></param>
+            <param name="httpGatewayFactory"></param>
+            <param name="dataContainerConverterService"></param>
+            <param name="cache"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FilesController.GetRemoteFile(System.String)">
+            <summary>
+            Gets a file from an external Url and converts it to <see cref="T:IsraelHiking.Common.DataContainer"/>
+            </summary>
+            <param name="url">The url to fetch the file from</param>
+            <returns>A data container after convertion</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FilesController.PostSaveFile(System.String,IsraelHiking.Common.DataContainer)">
+            <summary>
+            Converts <see cref="T:IsraelHiking.Common.DataContainer"/> (client side presention) to any given format.
+            </summary>
+            <param name="format">The format to convert to</param>
+            <param name="dataContainer">The container to convert</param>
+            <returns>A byte representation of file in the converted format</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.FilesController.PostOpenFile">
+            <summary>
+            Reads the uploaded file and converts it to <see cref="T:IsraelHiking.Common.DataContainer"/>
+            </summary>
+            <returns>A <see cref="T:IsraelHiking.Common.DataContainer"/> after conversion of the file uploaded</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.ElevationController">
+            <summary>
+            This controller allows elevation queries
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.ElevationController.#ctor(IsraelHiking.DataAccessInterfaces.IElevationDataStorage)">
+            <summary>
+            Controller's constructor
+            </summary>
+            <param name="elevationDataStorage"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.ElevationController.GetElevation(System.String)">
+            <summary>
+            Get elevation for the given points.
+            </summary>
+            <param name="points">The points array - each point should be latitude,longitude and use '|' to separate between points</param>
+            <returns>An array of elevation values according to given points order</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.ImagesController">
+            <summary>
+            This controller is responsible for image creation
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.ImagesController.#ctor(IsraelHiking.DataAccessInterfaces.IIsraelHikingRepository,IsraelHiking.API.Services.IImageCreationService)">
+            <summary>
+            Controller's constructor
+            </summary>
+            <param name="israelHikingRepository"></param>
+            <param name="imageCreationService"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.ImagesController.GetImage(System.String)">
+            <summary>
+            Creates an image for the relevant shared route in the database
+            </summary>
+            <param name="id">The share route ID</param>
+            <returns>An image</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.ItmGridController">
+            <summary>
+            This controller facilitates for conversion between WGS84 coordinates to ITM coordinates
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.ItmGridController.#ctor(IsraelTransverseMercator.ICoordinatesConverter)">
+            <summary>
+            Controller's constructor
+            </summary>
+            <param name="coordinatesConverter"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.ItmGridController.GetItmCoordinates(System.Double,System.Double)">
+            <summary>
+            Converts latitude longitude to ITM coordinates
+            </summary>
+            <param name="lat">Latitude coordinate</param>
+            <param name="lon">Longitude coordinate</param>
+            <returns>North-East value in ITM coordinates</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.OpenGraphHtmlTemplate">
+            <summary>
+            This class can be used to create the HTML facebook crawlable page
+            </summary>
+            <summary>
+            Class to produce the template output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplate.TransformText">
+            <summary>
+            Create the template output
+            </summary>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.OpenGraphController">
+            <summary>
+            This contoller is used to return an HTML page for facebook crawler
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphController.#ctor(IsraelHiking.DataAccessInterfaces.IIsraelHikingRepository,IsraelHiking.DataAccessInterfaces.ILogger)">
+            <summary>
+            Controller's constructor
+            </summary>
+            <param name="repository"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphController.GetHtml(System.String)">
+            <summary>
+            Get the HTML page needed for facebook crawler
+            </summary>
+            <param name="id">The ID of the shared route</param>
+            <returns>An HTML page with all relevant metadata</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase">
+            <summary>
+            Base class for this transformation
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.GenerationEnvironment">
+            <summary>
+            The string builder that generation-time code is using to assemble generated output
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Errors">
+            <summary>
+            The error collection for the generation process
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.indentLengths">
+            <summary>
+            A list of the lengths of each indent that was added with PushIndent
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.CurrentIndent">
+            <summary>
+            Gets the current indent we use when adding lines to the output
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Session">
+            <summary>
+            Current transformation session
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Write(System.String)">
+            <summary>
+            Write text directly into the generated output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.WriteLine(System.String)">
+            <summary>
+            Write text directly into the generated output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Write(System.String,System.Object[])">
+            <summary>
+            Write formatted text directly into the generated output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.WriteLine(System.String,System.Object[])">
+            <summary>
+            Write formatted text directly into the generated output
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Error(System.String)">
+            <summary>
+            Raise an error
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Warning(System.String)">
+            <summary>
+            Raise a warning
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.PushIndent(System.String)">
+            <summary>
+            Increase the indent
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.PopIndent">
+            <summary>
+            Remove the last indent that was added with PushIndent
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ClearIndent">
+            <summary>
+            Remove any indentation
+            </summary>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ToStringInstanceHelper">
+            <summary>
+            Utility class to produce culture-oriented representation of an object as a string.
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ToStringInstanceHelper.FormatProvider">
+            <summary>
+            Gets or sets format provider to be used by ToStringWithCulture method.
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ToStringInstanceHelper.ToStringWithCulture(System.Object)">
+            <summary>
+            This is called from the compile/run appdomain to convert objects within an expression block to a string
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ToStringHelper">
+            <summary>
+            Helper to produce culture-oriented representation of an object as a string
+            </summary>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.OsmController">
+            <summary>
+            This controller is responsible for all OSM related requests
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OsmController.#ctor(IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.API.Services.IDataContainerConverterService,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.API.Services.IAddibleGpxLinesFinderService,IsraelHiking.API.Services.Osm.IOsmLineAdderService,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,IsraelHiking.API.Services.LruCache{System.String,IsraelHiking.Common.TokenAndSecret})">
+            <summary>
+            Controller's constructor
+            </summary>
+            <param name="httpGatewayFactory"></param>
+            <param name="dataContainerConverterService"></param>
+            <param name="coordinatesConverter"></param>
+            <param name="elasticSearchGateway"></param>
+            <param name="addibleGpxLinesFinderService"></param>
+            <param name="osmLineAdderService"></param>
+            <param name="configurationProvider"></param>
+            <param name="cache"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OsmController.GetHighways(System.String,System.String)">
+            <summary>
+            Get a list of highways in the given bounding box
+            </summary>
+            <param name="northEast">Bounding box's north-east coordinates</param>
+            <param name="southWest">Bounding box's south-west coordinates</param>
+            <returns>A list of features in GeoJSON format</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OsmController.GetConfigurations">
+            <summary>
+            Get the OSM server configuration
+            </summary>
+            <returns>The OSM server configurations</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OsmController.PutGpsTraceIntoOsm(NetTopologySuite.Features.Feature)">
+            <summary>
+            Adds a route to OSM - this requires to be logged in to OSM
+            </summary>
+            <param name="feature"></param>
+            <returns></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OsmController.PostGpsTrace(System.String)">
+            <summary>
+            Finds missing parts of a given route
+            </summary>
+            <param name="url">The url to fetch the file from - optional, use file upload if not provided</param>
+            <returns></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OsmController.PostUploadGpsTrace">
+            <summary>
+            Allows upload of traces to OSM
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.OsmController.GetHighwayTypeFromWaypoints(System.Collections.Generic.IReadOnlyCollection{IsraelHiking.API.Gpx.GpxTypes.wptType[]})">
+            <summary>
+            Determines routing type by calculating the average speed of each set of points.
+            Assuming all the point sent has time specified.
+            </summary>
+            <param name="waypointsGoups">A list of group of points</param>
+            <returns>The calculated routing type</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.RoutingController">
+            <summary>
+            This controller allows routing between two points
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.RoutingController.#ctor(IsraelHiking.DataAccessInterfaces.IRoutingGateway,IsraelHiking.DataAccessInterfaces.IElevationDataStorage)">
+            <summary>
+            Controller's constructor
+            </summary>
+            <param name="routingGateway"></param>
+            <param name="elevationDataStorage"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.RoutingController.GetRouting(System.String,System.String,System.String)">
+            <summary>
+            Creates a route bwteeen the given points according to routing type
+            </summary>
+            <param name="from">The start point of the route</param>
+            <param name="to">The end point of the route</param>
+            <param name="type">The type of routing: "Hike", "Bike", "4WD", "None"</param>
+            <returns>The calculated route</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.SearchController">
+            <summary>
+            This contoller allows search of geo-locations
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.SearchController.#ctor(IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.API.Services.IDataContainerConverterService,IsraelHiking.DataAccessInterfaces.IElevationDataStorage)">
+            <summary>
+            Controller's constructor
+            </summary>
+            <param name="elasticSearchGateway"></param>
+            <param name="dataContainerConverterService"></param>
+            <param name="elevationDataStorage"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.SearchController.GetSearchResults(System.String,System.String)">
+            <summary>
+            Gets a geo location by search term
+            </summary>
+            <param name="id">A string to search for</param>
+            <param name="language">The language to search in</param>
+            <returns></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.SearchController.PostConvertSearchResults(NetTopologySuite.Features.Feature)">
+            <summary>
+            Converts a search results to <see cref="T:IsraelHiking.Common.DataContainer"/>
+            </summary>
+            <param name="feature">The feature to convert</param>
+            <returns>The converted feature</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Controllers.UrlsController">
+            <summary>
+            This controller handles the shared routes
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.UrlsController.#ctor(IsraelHiking.DataAccessInterfaces.IIsraelHikingRepository,IsraelHiking.API.Services.IDataContainerConverterService)">
+            <summary>
+            Controller's constructor
+            </summary>
+            <param name="repository"></param>
+            <param name="dataContainerConverterService"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.UrlsController.GetSiteUrl(System.String,System.String)">
+            <summary>
+            Returns the data relevant to a given shared route
+            </summary>
+            <param name="id">The shared route ID</param>
+            <param name="format">The format to convert to, default is <see cref="T:IsraelHiking.Common.DataContainer"/>, but you can use "gpx", "csv" and all other formats that can be opened in this site</param>
+            <returns>The shared route in the requested format</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.UrlsController.GetSiteUrlForUser">
+            <summary>
+            Get all shared routes for a specific user
+            </summary>
+            <returns>The user's shared routes</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.UrlsController.PostSiteUrl(IsraelHiking.Common.SiteUrl)">
+            <summary>
+            Adds a shared route, user ID is optional
+            </summary>
+            <param name="siteUrl">The shared route's data</param>
+            <returns>Whether the operation succeeded or not</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.UrlsController.PutSiteUrl(System.String,IsraelHiking.Common.SiteUrl)">
+            <summary>
+            Update a shared route
+            </summary>
+            <param name="id">The shared route's ID</param>
+            <param name="siteUrl">The new shared route data</param>
+            <returns>Whether the operation succeeded or not</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.UrlsController.DeleteSiteUrl(System.String)">
+            <summary>
+            Deletes the shared route.
+            </summary>
+            <param name="id"></param>
+            <returns></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Controllers.UrlsController.Dispose(System.Boolean)">
+            <summary>
+            Follows dispose pattern
+            </summary>
+            <param name="disposing"></param>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.gpxType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.gpxType.metadata">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.gpxType.wpt">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.gpxType.rte">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.gpxType.trk">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.gpxType.extensions">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.gpxType.version">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.gpxType.creator">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.metadataType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.name">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.desc">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.author">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.copyright">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.link">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.time">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.timeSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.keywords">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.bounds">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.metadataType.extensions">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.personType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.personType.name">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.personType.email">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.personType.link">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.emailType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.emailType.id">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.emailType.domain">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.trksegType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trksegType.trkpt">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trksegType.extensions">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.wptType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.ele">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.eleSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.time">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.timeSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.magvar">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.magvarSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.geoidheight">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.geoidheightSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.name">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.cmt">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.desc">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.src">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.link">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.sym">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.type">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.fix">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.fixSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.sat">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.hdop">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.hdopSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.vdop">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.vdopSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.pdop">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.pdopSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.ageofdgpsdata">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.ageofdgpsdataSpecified">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.dgpsid">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.extensions">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.lat">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.wptType.lon">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.linkType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.linkType.text">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.linkType.type">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.linkType.href">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.fixType">
+            <remarks/>
+        </member>
+        <member name="F:IsraelHiking.API.Gpx.GpxTypes.fixType.none">
+            <remarks/>
+        </member>
+        <member name="F:IsraelHiking.API.Gpx.GpxTypes.fixType.Item2d">
+            <remarks/>
+        </member>
+        <member name="F:IsraelHiking.API.Gpx.GpxTypes.fixType.Item3d">
+            <remarks/>
+        </member>
+        <member name="F:IsraelHiking.API.Gpx.GpxTypes.fixType.dgps">
+            <remarks/>
+        </member>
+        <member name="F:IsraelHiking.API.Gpx.GpxTypes.fixType.pps">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.extensionsType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.extensionsType.Any">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.trkType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trkType.name">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trkType.cmt">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trkType.desc">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trkType.src">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trkType.link">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trkType.number">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trkType.type">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trkType.extensions">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.trkType.trkseg">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.rteType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.rteType.name">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.rteType.cmt">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.rteType.desc">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.rteType.src">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.rteType.link">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.rteType.number">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.rteType.type">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.rteType.extensions">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.rteType.rtept">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.boundsType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.boundsType.minlat">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.boundsType.minlon">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.boundsType.maxlat">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.boundsType.maxlon">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Gpx.GpxTypes.copyrightType">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.copyrightType.year">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.copyrightType.license">
+            <remarks/>
+        </member>
+        <member name="P:IsraelHiking.API.Gpx.GpxTypes.copyrightType.author">
+            <remarks/>
+        </member>
+        <member name="T:IsraelHiking.API.Services.AddibleGpxLinesFinderService">
+            <inheritdoc/>
+        </member>
+        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.#ctor(IsraelHiking.API.Services.IGpxLoopsSplitterService,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.IConfigurationProvider)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="gpxLoopsSplitterService"></param>
+            <param name="coordinatesConverter"></param>
+            <param name="elasticSearchGateway"></param>
+            <param name="configurationProvider"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.GetLines(System.Collections.Generic.List{NetTopologySuite.Geometries.LineString})">
+            <inheritdoc/>
+        </member>
+        <member name="T:IsraelHiking.API.Services.GpxLoopsSplitterService">
+            <inheritdoc/>
+        </member>
+        <member name="M:IsraelHiking.API.Services.GpxLoopsSplitterService.GetMissingLines(NetTopologySuite.Geometries.LineString,System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
+            <inheritdoc/>
+        </member>
+        <member name="M:IsraelHiking.API.Services.GpxLoopsSplitterService.SplitSelfLoops(NetTopologySuite.Geometries.LineString,System.Double)">
+            <inheritdoc/>
+        </member>
+        <member name="T:IsraelHiking.API.Services.IAddibleGpxLinesFinderService">
+            <summary>
+            Splits gpx lines into addible lines and removes duplicate parts
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Services.IAddibleGpxLinesFinderService.GetLines(System.Collections.Generic.List{NetTopologySuite.Geometries.LineString})">
+            <summary>
+            This method does the following to every line:
+            1. removed all the points that are close to existing lines from OSM (stored in the ES database)
+            2. Split the remaining lines so that after the split there are no self loops in each line
+            3. remove duplicate lines (caused by splitting self loops)
+            4. Simplify lines using Douglas-Peucker and Radial angle simlifires
+            5. Merge the lines back if possible
+            </summary>
+            <param name="gpxLines">The lines to manipulate</param>
+            <returns>The lines after manupulation</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Services.IGpxLoopsSplitterService">
+            <summary>
+            This interface facilitates for breaking a gpx that might have a loop into non-loop gpx lines
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Services.IGpxLoopsSplitterService.GetMissingLines(NetTopologySuite.Geometries.LineString,System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
+            <summary>
+            This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
+            This can be used with both OSM lines and other parts of the same GPS trace.
+            The algorithm is faily simple - 
+            Go over all the points in the given <see cref="T:NetTopologySuite.Geometries.LineString"/> and look for point that are close to existingLineStrings />
+            </summary>
+            <param name="gpxLine">The line to manipulate</param>
+            <param name="existingLineStrings">The lines to test agains</param>
+            <param name="minimalMissingPartLength">The minimal length allowed to a trace that can be added</param>
+            <param name="closestPointTolerance">The distace of the closest point allowed</param>
+            <returns>a split line from the orignal line</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Services.IGpxLoopsSplitterService.SplitSelfLoops(NetTopologySuite.Geometries.LineString,System.Double)">
+            <summary>
+            This part of the splitter if responsible for splitting a line with a self loop.
+            It will allway return lines that do not have self loop, but can be duplicate of one another
+            Use <see cref="M:IsraelHiking.API.Services.IGpxLoopsSplitterService.GetMissingLines(NetTopologySuite.Geometries.LineString,System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)"/> method to remove those duplications.
+            </summary>
+            <param name="gpxLine">The line to look for self loops in</param>
+            <param name="closestPointTolerance">The tolerance of the distance that is considered a self loop</param>
+            <returns>a list of lines that do not have self loops</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Services.Osm.OsmLineAdderService">
+            <summary>
+            This class is responsible of adding a given line to OSM
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.#ctor(IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,IsraelHiking.API.Services.Osm.IOsmGeoJsonPreprocessor,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="elasticSearchGateway"></param>
+            <param name="coordinatesConverter"></param>
+            <param name="configurationProvider"></param>
+            <param name="geoJsonPreprocessor"></param>
+            <param name="httpGatewayFactory"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.Add(NetTopologySuite.Geometries.LineString,System.Collections.Generic.Dictionary{System.String,System.String},IsraelHiking.Common.TokenAndSecret)">
+            <summary>
+            Use this method to add a line to OSM, this algorithm tries to add the line to existing lines in OSM
+            </summary>
+            <param name="line">The line to add</param>
+            <param name="tags">The tags to add to the line</param>
+            <param name="tokenAndSecret">Used as OSM credentials</param>
+            <returns></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.OsmDataService.Initialize(System.String)">
+            <summary>
+            Initializes the service.
+            </summary>
+            <param name="serverPath">Bin folder where all dlls are.</param>
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.OsmGeoJsonPreprocessor.MergeWays(System.Collections.Generic.List{OsmSharp.Osm.CompleteWay})">
+            <summary>
+            This method create a new list of ways based on the given list. 
+            The merge is done by looking into the ways' nodes and combine ways which start or end with the same node. 
+            </summary>
+            <param name="ways">The ways to merge</param>
+            <returns>The merged ways</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Services.DataContainerConverterService.GetConvertersList(System.String,System.String)">
+            <summary>
+            This method created a list containig the converters needed in order to get from input to output.
+            The algorithm used here is simple and assumes maximum 2 converters.
+            </summary>
+            <param name="inputFormat"></param>
+            <param name="outputFormat"></param>
+            <returns></returns>
+        </member>
+        <member name="T:IsraelHiking.API.Services.LruCache`2">
+            <summary>
+            Least recently used cache - vary basic implementation.
+            </summary>
+            <typeparam name="TKey">Key's type</typeparam>
+            <typeparam name="TValue">Value's type</typeparam>
+        </member>
+        <member name="M:IsraelHiking.API.Services.LruCache`2.#ctor(IsraelHiking.DataAccessInterfaces.IConfigurationProvider)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="configurationProvider"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Services.LruCache`2.Add(`0,`1)">
+            <summary>
+            Add item the the cache
+            </summary>
+            <param name="key">The key</param>
+            <param name="value">The value</param>
+        </member>
+        <member name="M:IsraelHiking.API.Services.LruCache`2.Get(`0)">
+            <summary>
+            Get item from the cache
+            </summary>
+            <param name="key">The key</param>
+            <returns>The item</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Services.LruCache`2.ReverseGet(`1)">
+            <summary>
+            Get the first value that matches the key, assuming this case is one-to-one mostly.
+            </summary>
+            <param name="value">The value to look for</param>
+            <returns>The key</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Services.RadialDistanceByAngleSimplifier">
+            <summary>
+            This class simplifies a line string by removing points that create a sharp turn within a radius from previous point.
+            This class follows the NTS simplifier pattern
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Services.RadialDistanceByAngleSimplifier.DistanceTolerance">
+            <summary>
+            The radial distance tolerance - the lower it is the less simplified the line will be
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Services.RadialDistanceByAngleSimplifier.AngleTolerance">
+            <summary>
+            The angle tolerance - the lower the number will be the less simplified the line will be
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Services.RadialDistanceByAngleSimplifier.Simplify(GeoAPI.Geometries.IGeometry,System.Double,System.Double)">
+            <summary>
+            This simplifies a line by getting the radial distance tolerance and angle distance tolerance
+            </summary>
+            <param name="geometry">The geometry to simplify</param>
+            <param name="distanceTolerance">The radial distance tolerance</param>
+            <param name="angleTolerace">The angle tolerance in degrees</param>
+            <returns>A simlified <see cref="T:NetTopologySuite.Geometries.LineString"/></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Services.RadialDistanceByAngleSimplifier.#ctor(GeoAPI.Geometries.IGeometry)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="geometry">The geometry to simplify</param>
+        </member>
+        <member name="M:IsraelHiking.API.Services.RadialDistanceByAngleSimplifier.GetResultGeometry">
+            <summary>
+            Simplifies the geometry
+            </summary>
+            <returns>A simplified <see cref="T:NetTopologySuite.Geometries.LineString"/></returns>
+        </member>
+        <member name="T:IsraelHiking.API.Swagger.AssignOAuthSecurityRequirements">
+            <summary>
+            Adds the authentication icon for calls that require authentication
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Swagger.AssignOAuthSecurityRequirements.Apply(Swashbuckle.Swagger.Operation,Swashbuckle.Swagger.SchemaRegistry,System.Web.Http.Description.ApiDescription)">
+            <summary>
+            Adds authentication using token
+            </summary>
+            <param name="operation"></param>
+            <param name="schemaRegistry"></param>
+            <param name="apiDescription"></param>
+        </member>
+        <member name="T:IsraelHiking.API.Swagger.FeatureCollectionExampleFilter">
+            <summary>
+            Provides example for feature collection in swagger API
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Swagger.FeatureCollectionExampleFilter.Apply(Swashbuckle.Swagger.Schema,Swashbuckle.Swagger.SchemaRegistry,System.Type)">
+            <summary>
+            Checks and updates the schema if the relevant type is found
+            </summary>
+            <param name="schema">The schema</param>
+            <param name="schemaRegistry">The schema registry</param>
+            <param name="type">The type</param>
+        </member>
+        <member name="T:IsraelHiking.API.Swagger.FeatureExampleFilter">
+            <summary>
+            Provides example for feature in swagger API
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Swagger.FeatureExampleFilter.Apply(Swashbuckle.Swagger.Schema,Swashbuckle.Swagger.SchemaRegistry,System.Type)">
+            <summary>
+            Checks and updates the schema if the relevant type is found
+            </summary>
+            <param name="schema">The schema</param>
+            <param name="schemaRegistry">The schema registry</param>
+            <param name="type">The type</param>
+        </member>
+        <member name="T:IsraelHiking.API.Swagger.OptionalFileUploadParams">
+            <summary>
+            Allows optional file upload for swagger API 
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Swagger.OptionalFileUploadParams.Apply(Swashbuckle.Swagger.Operation,Swashbuckle.Swagger.SchemaRegistry,System.Web.Http.Description.ApiDescription)">
+            <summary>
+            Adds the file upload parameter - this should be used as an attribute to a API call
+            </summary>
+            <param name="operation"></param>
+            <param name="schemaRegistry"></param>
+            <param name="apiDescription"></param>
+        </member>
+        <member name="T:IsraelHiking.API.Swagger.RequiredFileUploadParams">
+            <summary>
+            Allows required file upload for swagger API 
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Swagger.RequiredFileUploadParams.Apply(Swashbuckle.Swagger.Operation,Swashbuckle.Swagger.SchemaRegistry,System.Web.Http.Description.ApiDescription)">
+            <summary>
+            Adds the file upload parameter - this should be used as an attribute to a API call
+            </summary>
+            <param name="operation"></param>
+            <param name="schemaRegistry"></param>
+            <param name="apiDescription"></param>
+        </member>
+    </members>
+</doc>
