@@ -24,7 +24,7 @@
     <div class="modal-body">
         <div class="row">
             <div class="col-md-6">
-                <div class="btn-group">
+                <div class="btn-group btn-group-justified">
                     <a class="btn btn-default" ng-click="setSelectedTab('traces')" ng-class="{active: state.selectedTab == 'traces'}">{{resources.myTraces}}</a>
                     <a class="btn btn-default" ng-click="setSelectedTab('shares')" ng-class="{active: state.selectedTab == 'shares'}">{{resources.myShares}}</a>
                 </div>
@@ -37,10 +37,14 @@
             </div>
         </div>
         <br />
-        <br />
         <div ng-switch on="state.selectedTab">
             <div ng-switch-when="traces">
-                <!--<a class="cursor-pointer" ngf-select ngf-multiple="false" ng-model="file" ngf-change="open(file)" uib-tooltip="{{resources.openAFile}}" tooltip-placement="{{resources.start}}" tooltip-append-to-body="true"><i class="fa fa-folder-open fa-lg"></i></a>-->
+                <div class="row">
+                    <div class="col-md-6 col-xs-12">
+                        <a class="cursor-pointer btn btn-success btn-block" ngf-select ngf-multiple="false" ng-model="file" ngf-change="uploadToOsm(file)" analytics-on="click" analytics-category="OSM" analytics-event="Upload OSM trace"><i class="fa fa-folder-open fa-lg"></i> {{resources.uploadFileToOsm}}</a>
+                    </div>
+                </div>
+                <br />
                 <div ng-repeat="trace in userService.traces | filter:state.searchTerm | orderBy:'id':true ">
                     <div class="row">
                         <div class="col-md-4 col-xs-12">

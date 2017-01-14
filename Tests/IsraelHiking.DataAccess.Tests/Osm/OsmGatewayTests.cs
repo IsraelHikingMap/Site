@@ -1,7 +1,9 @@
-﻿using IsraelHiking.Common;
+﻿using System.IO;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccess.Osm;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NSubstitute;
 using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 
@@ -15,7 +17,14 @@ namespace IsraelHiking.DataAccess.Tests.Osm
         [TestInitialize]
         public void TestInitialize()
         {
-            _gateway = new OsmGateway(new TokenAndSecret("agd3FPYW8a69zGIgBASvA7FCf7afAXYZpPqCZuY0", "bkIORQQ5ISBmvMFqP2R4qe8BNtLXukOAEiCoTjeE"), new ConfigurationProvider(), new TraceLogger());
+            var configurationProvider = Substitute.For<IConfigurationProvider>();
+            configurationProvider.OsmConfiguraion.Returns(new OsmConfiguraionData
+            {
+                BaseAddress = "http://api06.dev.openstreetmap.org",
+                ConsumerKey = "uR7K7PcxOyFG2FnTdTuEqAmlq6hTWPDmF4xknWxQ",
+                ConsumerSecret = "hd8WnRpQQtzS04HeFMLUHN2JQtPWzQLOmA6OeE9l"
+            });
+            _gateway = new OsmGateway(new TokenAndSecret("IwrfBMSqyuq3haudBUgfrjflXnvhAcbTvqVBa47l", "eBY4iWlGNMrvERH56vp0jjU8RsVhsroQIns5MQGz"), configurationProvider, new TraceLogger());
         }
 
         [TestMethod]
@@ -83,6 +92,14 @@ namespace IsraelHiking.DataAccess.Tests.Osm
         {
             var way = _gateway.GetCompleteWay("30969247").Result;
             Assert.IsNotNull(way);
+        }
+
+        [TestMethod]
+        [Ignore]
+        public void UploadFile()
+        {
+            var bytes = File.ReadAllBytes(@"filename.gpx");
+            _gateway.UploadFile("file.gpx", new MemoryStream(bytes)).Wait();
         }
     }
 }

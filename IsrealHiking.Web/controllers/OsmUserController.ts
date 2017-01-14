@@ -29,6 +29,7 @@
         open(file: File): void;
         setSelectedTab(tab: OsmUserModalTab): void;
         setSearchTerm(searchTerm: string): void;
+        uploadToOsm(file: File): void;
     }
 
     export class OsmUserController extends BaseMapController {
@@ -219,6 +220,18 @@
             {
                 $scope.state.searchTerm = searchTerm;
                 cache.put(OsmUserController.OSM_USER_MODAL_STATE_KEY, $scope.state);
+            }
+
+            $scope.uploadToOsm = (file: File) => {
+                Upload.upload({
+                    url: Common.Urls.osmUploadTrace,
+                    method: "POST",
+                    data: { file: file }
+                } as angular.angularFileUpload.IFileUploadConfigFile).then(() => {
+                    toastr.success($scope.resources.fileUploadedSuccefullyItWillTakeTime);
+                }, () => {
+                    toastr.error($scope.resources.unableToUploadFile);
+                });
             }
         }
 

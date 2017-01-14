@@ -54,6 +54,20 @@ namespace IsraelHiking.API.Tests.Controllers
             return url;
         }
 
+        private void SetupUploadFile()
+        {
+            var multipartContent = new MultipartContent();
+            var streamContent = new StreamContent(new MemoryStream());
+            streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
+            {
+                Name = "\"files\"",
+                FileName = "\"SomeFile.gpx\""
+            };
+            streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/gpx");
+            multipartContent.Add(streamContent);
+            _controller.Request = new HttpRequestMessage { Content = multipartContent };
+        }
+
         [TestInitialize]
         public void TestInitialize()
         {
@@ -156,16 +170,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 }
             };
             var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
-            var multipartContent = new MultipartContent();
-            var streamContent = new StreamContent(new MemoryStream());
-            streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue("form-data")
-            {
-                Name = "\"files\"",
-                FileName = "\"SomeFile.gpx\""
-            };
-            streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/gpx");
-            multipartContent.Add(streamContent);
-            _controller.Request = new HttpRequestMessage { Content = multipartContent };
+            SetupUploadFile();
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
             _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
@@ -232,6 +237,18 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Content.Features.Count);
             Assert.IsTrue(results.Content.Features.First().Attributes.GetValues().Contains("track"));
+        }
+
+        [TestMethod]
+        public void PostUploadGpsTrace_UploadFile_ShouldSendItToOsmGateway()
+        {
+            SetupUploadFile();
+            var gateway = Substitute.For<IOsmGateway>();
+            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(gateway);
+
+            _controller.PostUploadGpsTrace().Wait();
+
+            gateway.Received(1).UploadFile(Arg.Any<string>(), Arg.Any<MemoryStream>());
         }
     }
 }

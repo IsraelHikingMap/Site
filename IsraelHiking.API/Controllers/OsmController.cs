@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -121,6 +122,21 @@ namespace IsraelHiking.API.Controllers
             attributesTable.AddAttribute("highway", highwayType);
             var features = manipulatedLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
             return Ok(new FeatureCollection(new Collection<IFeature>(features)));
+        }
+
+        /// <summary>
+        /// Allows upload of traces to OSM
+        /// </summary>
+        /// <returns></returns>
+        [Authorize]
+        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
+        [Route("api/osm/trace")]
+        public async Task<IHttpActionResult> PostUploadGpsTrace()
+        {
+            var response = await GetFile(string.Empty);
+            var gateway = _httpGatewayFactory.CreateOsmGateway(_cache.Get(User.Identity.Name));
+            await gateway.UploadFile(response.FileName, new MemoryStream(response.Content));
+            return Ok();
         }
 
         private async Task<RemoteFileFetcherGatewayResponse> GetFile(string url)

@@ -166,6 +166,7 @@ namespace IsraelHiking.Services {
         public nonMarkedTrail: string;
         public dirtRoad: string;
         public addThisRouteToOsm: string;
+        public uploadFileToOsm: string;
         // Toasts: Errors/Warnings/Success
         public unableToGetSearchResults: string;
         public pleaseSelectFrom: string;
@@ -189,6 +190,8 @@ namespace IsraelHiking.Services {
         public unableToFindYourLocation: string;
         public redirectingToSecuredSite: string;
         public routeAddedSuccessfullyItWillTakeTime: string;
+        public fileUploadedSuccefullyItWillTakeTime: string;
+        public unableToUploadFile: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -535,6 +538,7 @@ namespace IsraelHiking.Services {
                     this.nonMarkedTrail = this.gettextCatalog.getString("Non-Marked Trail");
                     this.dirtRoad = this.gettextCatalog.getString("Dirt Road");
                     this.addThisRouteToOsm = this.gettextCatalog.getString("Add This Route to OSM");
+                    this.uploadFileToOsm = this.gettextCatalog.getString("Upload a trace");
                     // Toasts: Errors/Warnings/Success
                     this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                     this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -558,6 +562,8 @@ namespace IsraelHiking.Services {
                     this.unableToFindYourLocation = this.gettextCatalog.getString("Unable to find your location...");
                     this.redirectingToSecuredSite = this.gettextCatalog.getString("Redirecting to secure site.");
                     this.routeAddedSuccessfullyItWillTakeTime = this.gettextCatalog.getString("Route added successfully, It will take some time for the map to update.");
+                    this.fileUploadedSuccefullyItWillTakeTime = this.gettextCatalog.getString("File uploaded successfully, It will take some time to add it to OSM database.");
+                    this.unableToUploadFile = this.gettextCatalog.getString("Unable to upload the file...");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");

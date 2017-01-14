@@ -19,7 +19,7 @@ namespace IsraelHiking.Services {
     }
 
     export class OsmUserService {
-        public static AUTHORIZATION_DATA_KEY = "osmAuthorizationToken";
+        public static AUTHORIZATION_DATA_KEY = "OSMAuthorizationToken";
 
         private oauth;
         private x2Js: IX2JS;
@@ -53,6 +53,9 @@ namespace IsraelHiking.Services {
                     landing: "controllers/oauth-close-window.html",
                     url: this.baseUrl
                 }) as IOsmAuthService;
+                if (this.localStorageService.get(OsmUserService.AUTHORIZATION_DATA_KEY) == null) {
+                    this.oauth.logout();
+                }
                 if (this.isLoggedIn()) {
                     this.refreshDetails();
                 }
@@ -112,7 +115,7 @@ namespace IsraelHiking.Services {
                     }
                     let tracesJson = this.x2Js.xml2json(traces) as any;
                     this.traces = [];
-                    let files = [].concat(tracesJson.osm.gpx_file);
+                    let files = [].concat(tracesJson.osm.gpx_file || []);
                     for (let traceJson of files) {
                         let id = traceJson._id;
                         let url = `${this.baseUrl}/user/${traceJson._user}/traces/${id}`;

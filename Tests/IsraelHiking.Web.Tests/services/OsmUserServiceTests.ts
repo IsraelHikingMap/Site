@@ -50,7 +50,10 @@ namespace IsraelHiking.Tests.Services {
                             ConsumerSecret: "ConsumerSecret"
                         }
                     });
-                oauth = { authenticated: () => false };
+                oauth = {
+                    authenticated: () => false,
+                    logout: () => {}
+                };
                 osmAuth = () => {
                     return oauth;
                 };
@@ -70,11 +73,6 @@ namespace IsraelHiking.Tests.Services {
                         ConsumerSecret: "ConsumerSecret"
                     }
                 });
-            osmAuth = () => {
-                return {
-                    authenticated: () => { return false; }
-                }
-            };
             osmUserService = new IsraelHiking.Services.OsmUserService($q, $http, localStorageService);
             $httpBackend.flush();
             expect(osmUserService.isLoggedIn()).toBe(false);
@@ -91,14 +89,11 @@ namespace IsraelHiking.Tests.Services {
                         ConsumerSecret: "ConsumerSecret"
                     }
                 });
-            osmAuth = () => {
-                return {
-                    authenticated: () => { return true; },
-                    xhr: (addressObject, callback: Function) => {
-                        callback("error");
-                    }
-                }
+            oauth.authenticated = () => { return true; };
+            oauth.xhr = (addressObject, callback: Function) => {
+                callback("error");
             };
+
             osmUserService = new IsraelHiking.Services.OsmUserService($q, $http, localStorageService);
             $httpBackend.flush();
             osmUserService.login();

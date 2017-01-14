@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
+using System.Text;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -30,6 +32,7 @@ namespace IsraelHiking.DataAccess.Osm
         private readonly string _createNodeAddress;
         private readonly string _createWayAddress;
         private readonly string _getFullWayAddress;
+        private readonly string _createTraceAddress;
 
         public OsmGateway(TokenAndSecret tokenAndSecret, IConfigurationProvider configurationProvider, ILogger logger) : base(logger)
         {
@@ -45,6 +48,7 @@ namespace IsraelHiking.DataAccess.Osm
             _createNodeAddress = osmApiBaseAddress + "node/create";
             _createWayAddress = osmApiBaseAddress + "way/create";
             _getFullWayAddress = osmApiBaseAddress + "way/#id/full";
+            _createTraceAddress = osmApiBaseAddress + "gpx/create";
         }
 
         protected override void UpdateHeaders(HttpClient client, string url, string method = "GET")
@@ -126,9 +130,9 @@ namespace IsraelHiking.DataAccess.Osm
                         {
                             changeset = long.Parse(changesetId),
                             changesetSpecified = true,
-                            lat = node.Latitude.Value,
+                            lat = node.Latitude ?? 0.0,
                             latSpecified = true,
-                            lon = node.Longitude.Value,
+                            lon = node.Longitude?? 0.0,
                             lonSpecified = true,
                             tag = ConvertTags(node.Tags)
                         }
@@ -196,6 +200,38 @@ namespace IsraelHiking.DataAccess.Osm
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     throw new Exception("Unable to close changeset with id: " + changesetId);
+                }
+            }
+        }
+
+        public async Task UploadFile(string fileName, MemoryStream fileStream)
+        {
+            using (var client = new HttpClient())
+            {
+                UpdateHeaders(client, _createTraceAddress, "POST");
+                var parameters = new Dictionary<string, string>
+                {
+                    { "description", fileName },
+                    { "visibility", "private" },
+                    { "tags", "" },
+                };
+                var multipartFormDataContent = new MultipartFormDataContent();
+                foreach (var keyValuePair in parameters)
+                {
+                    multipartFormDataContent.Add(new StringContent(keyValuePair.Value),
+                        $"\"{keyValuePair.Key}\"");
+                }
+                var streamContent = new StreamContent(fileStream);
+                streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/gpx+xml");
+                var headerValue = "form-data; name=\"file\"; filename=\"" + fileName + "\"";
+                headerValue = new string(Encoding.UTF8.GetBytes(headerValue).Select(b => (char) b).ToArray()); // handle issue with utf8 characters.
+                streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue(headerValue);
+                multipartFormDataContent.Add(streamContent);
+
+                var response = await client.PostAsync(_createTraceAddress, multipartFormDataContent);
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new Exception("Unable to upload the file: " + fileName);
                 }
             }
         }

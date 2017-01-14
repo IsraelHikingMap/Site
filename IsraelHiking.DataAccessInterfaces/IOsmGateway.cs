@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using OsmSharp.Osm;
 
 namespace IsraelHiking.DataAccessInterfaces
@@ -11,5 +12,6 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<string> CreateWay(string changesetId, Way way);
         Task<CompleteWay> GetCompleteWay(string wayId);
         Task CloseChangeset(string changesetId);
+        Task UploadFile(string fileName, MemoryStream fileStream);
     }
 }
