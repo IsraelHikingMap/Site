@@ -98,11 +98,11 @@
                 }
                 $timeout(() => angular.element("#sidebar-wrapper")
                     .animate({
-                            scrollTop: angular.element(`#${section.id}`).offset().top +
-                                angular.element("#sidebar-wrapper").scrollTop() -
-                                60
-                        },
-                        "slow"),
+                        scrollTop: angular.element(`#${section.id}`).offset().top +
+                        angular.element("#sidebar-wrapper").scrollTop() -
+                        60
+                    },
+                    "slow"),
                     300);
             };
 
@@ -114,29 +114,36 @@
             }
 
             $scope.getDownloadUrl = (app: ApplicationType, mapType: string, zoom: number) => {
-                let protocol = "http://";
+                let protocol = "https://";
                 let extension = ".zip";
+                let filesFolder = "OruxMaps";
                 if (navigator.userAgent.match(/Android/i)) {
-                    if (app === "OruxMaps") {
-                        protocol = "orux-map://";
-                    } else if (app === "Locus") {
-                        protocol = "locus-actions://http/";
-                        extension = ".xml";
-                    } else if (app === "Offroad") {
-                        protocol = "offroad://";
+                    switch (app) {
+                        case "Locus":
+                            protocol = "locus-actions://https/";
+                            extension = ".xml";
+                            filesFolder = "LocusMap";
+                            break;
+                        case "OruxMaps":
+                            protocol = "orux-map://";
+                            break;
+                        case "Offroad":
+                            protocol = "offroad://";
+                            break;
                     }
                 }
-                let address = `${protocol}israelhiking.osm.org.il/Oruxmaps/Israel`;
+
+                let fileName = "Israel";
                 if (mapType === "IHM") {
-                    address += "Hiking";
+                    fileName += "Hiking";
                 } else if (mapType === "MTB") {
-                    address += "MTB";
+                    fileName += "MTB";
                 }
                 if (zoom === 16) {
-                    address += "16";
+                    fileName += "16";
                 }
-                address += extension;
-                return address;
+                fileName += extension;
+                return `${protocol}israelhiking.osm.org.il${$scope.resources.currentLanguage.tilesFolder}/${filesFolder}/${fileName}`;
             }
 
             $scope.getMobileInstallationInstructions = (app: ApplicationType) => {
