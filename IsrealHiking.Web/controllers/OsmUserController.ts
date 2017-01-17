@@ -223,6 +223,9 @@
             }
 
             $scope.uploadToOsm = (file: File) => {
+                if (!file) {
+                    return;
+                }
                 Upload.upload({
                     url: Common.Urls.osmUploadTrace,
                     method: "POST",

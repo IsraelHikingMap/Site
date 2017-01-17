@@ -222,11 +222,7 @@ namespace IsraelHiking.DataAccess.Osm
                         $"\"{keyValuePair.Key}\"");
                 }
                 var streamContent = new StreamContent(fileStream);
-                streamContent.Headers.ContentType = new MediaTypeHeaderValue("application/gpx+xml");
-                var headerValue = "form-data; name=\"file\"; filename=\"" + fileName + "\"";
-                headerValue = new string(Encoding.UTF8.GetBytes(headerValue).Select(b => (char) b).ToArray()); // handle issue with utf8 characters.
-                streamContent.Headers.ContentDisposition = new ContentDispositionHeaderValue(headerValue);
-                multipartFormDataContent.Add(streamContent);
+                multipartFormDataContent.Add(streamContent, "file", Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(fileName)));
 
                 var response = await client.PostAsync(_createTraceAddress, multipartFormDataContent);
                 if (response.StatusCode != HttpStatusCode.OK)

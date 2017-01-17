@@ -98,8 +98,10 @@ namespace IsraelHiking.DataAccess.Tests.Osm
         [Ignore]
         public void UploadFile()
         {
-            var bytes = File.ReadAllBytes(@"filename.gpx");
-            _gateway.UploadFile("file.gpx", new MemoryStream(bytes)).Wait();
+            //var file = @"C:\Users\harel\Desktop\834159359.gpx";
+            var file = @"C:\Users\harel\Desktop\tracklogs-oruxmaps\2014-04-12 עין פיק__20140412_1537.gpx";
+            var bytes = File.ReadAllBytes(file);
+            _gateway.UploadFile(Path.GetFileName(file), new MemoryStream(bytes)).Wait();
         }
     }
 }
