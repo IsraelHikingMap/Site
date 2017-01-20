@@ -522,8 +522,213 @@
             </summary>
             <param name="disposing"></param>
         </member>
+        <member name="T:IsraelHiking.API.Converters.ConverterFlows.GeoJsonGpxConverterFlow">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GeoJsonGpxConverterFlow.Input">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GeoJsonGpxConverterFlow.Output">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GeoJsonGpxConverterFlow.#ctor(IsraelHiking.API.Converters.IGpxGeoJsonConverter)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="gpxGeoJsonConverter"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GeoJsonGpxConverterFlow.Transform(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="T:IsraelHiking.API.Converters.ConverterFlows.GpsBabelConverterFlow">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpsBabelConverterFlow.Input">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpsBabelConverterFlow.Output">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GpsBabelConverterFlow.#ctor(IsraelHiking.DataAccessInterfaces.IGpsBabelGateway,System.String,System.String)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="gpsBabelGateway"></param>
+            <param name="input"></param>
+            <param name="output"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GpsBabelConverterFlow.Transform(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="T:IsraelHiking.API.Converters.ConverterFlows.GpxGeoJsonConverterFlow">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpxGeoJsonConverterFlow.Input">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpxGeoJsonConverterFlow.Output">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GpxGeoJsonConverterFlow.#ctor(IsraelHiking.API.Converters.IGpxGeoJsonConverter)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="gpxGeoJsonConverter"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GpxGeoJsonConverterFlow.Transform(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="T:IsraelHiking.API.Converters.ConverterFlows.GpxGzToGpxConverterFlow">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpxGzToGpxConverterFlow.Input">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpxGzToGpxConverterFlow.Output">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GpxGzToGpxConverterFlow.Transform(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="T:IsraelHiking.API.Converters.ConverterFlows.GpxToSingleTrackGpxConverterFlow">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpxToSingleTrackGpxConverterFlow.Input">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpxToSingleTrackGpxConverterFlow.Output">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GpxToSingleTrackGpxConverterFlow.Transform(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="T:IsraelHiking.API.Converters.ConverterFlows.GpxVersion1ToGpxVersion11ConverterFlow">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpxVersion1ToGpxVersion11ConverterFlow.Input">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.GpxVersion1ToGpxVersion11ConverterFlow.Output">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GpxVersion1ToGpxVersion11ConverterFlow.#ctor(IsraelHiking.DataAccessInterfaces.IGpsBabelGateway)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="gpsBabelGateway"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GpxVersion1ToGpxVersion11ConverterFlow.Transform(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.GpxVersion1ToGpxVersion11ConverterFlow.IsGpxVersion1(System.Byte[])">
+            <summary>
+            Checks the header of the GPX file and returns if the file is GPX version 1.0
+            </summary>
+            <param name="content">The file content to test</param>
+            <returns>True if this is a GPX version 1.0 content</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Converters.ConverterFlows.KmzToKmlConverterFlow">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.KmzToKmlConverterFlow.Input">
+            <inheritdoc />
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.KmzToKmlConverterFlow.Output">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.KmzToKmlConverterFlow.Transform(System.Byte[])">
+            <inheritdoc />
+        </member>
+        <member name="T:IsraelHiking.API.Converters.ConverterFlows.FlowFormats">
+            <summary>
+            List of constants that are used for GPSBabel mostly
+            </summary>
+        </member>
+        <member name="T:IsraelHiking.API.Converters.ConverterFlows.IConverterFlowItem">
+            <summary>
+            Flow item is used to link between two formats
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.ConverterFlows.IConverterFlowItem.Transform(System.Byte[])">
+            <summary>
+            This method does the "heavy lifting" be doing the conversion
+            </summary>
+            <param name="content">The file content to convert</param>
+            <returns>Converted file content</returns>
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.IConverterFlowItem.Input">
+            <summary>
+            The input format
+            </summary>
+        </member>
+        <member name="P:IsraelHiking.API.Converters.ConverterFlows.IConverterFlowItem.Output">
+            <summary>
+            The output format
+            </summary>
+        </member>
+        <member name="T:IsraelHiking.API.Converters.GpxDataContainerConverter">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.GpxDataContainerConverter.ToGpx(IsraelHiking.Common.DataContainer)">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.GpxDataContainerConverter.ToDataContainer(IsraelHiking.API.Gpx.GpxTypes.gpxType)">
+            <inheritdoc />
+        </member>
+        <member name="T:IsraelHiking.API.Converters.GpxGeoJsonConverter">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.GpxGeoJsonConverter.ToGeoJson(IsraelHiking.API.Gpx.GpxTypes.gpxType)">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Converters.GpxGeoJsonConverter.ToGpx(NetTopologySuite.Features.FeatureCollection)">
+            <inheritdoc />   
+        </member>
+        <member name="T:IsraelHiking.API.Converters.IGpxDataContainerConverter">
+            <summary>
+            Converts between <see cref="T:IsraelHiking.API.Gpx.GpxTypes.gpxType"/> and <see cref="T:IsraelHiking.Common.DataContainer"/>
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.IGpxDataContainerConverter.ToDataContainer(IsraelHiking.API.Gpx.GpxTypes.gpxType)">
+            <summary>
+            Converts from <see cref="T:IsraelHiking.API.Gpx.GpxTypes.gpxType"/> to <see cref="T:IsraelHiking.Common.DataContainer"/>
+            </summary>
+            <param name="gpx">The GPX data to convert</param>
+            <returns>The data container</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.IGpxDataContainerConverter.ToGpx(IsraelHiking.Common.DataContainer)">
+            <summary>
+            Converts from <see cref="T:IsraelHiking.Common.DataContainer"/> to <see cref="T:IsraelHiking.API.Gpx.GpxTypes.gpxType"/>
+            </summary>
+            <param name="container">The data container to convert</param>
+            <returns>The gpx data</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Converters.IGpxGeoJsonConverter">
+            <summary>
+            Converts between GPX and GeoJson format
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.IGpxGeoJsonConverter.ToGeoJson(IsraelHiking.API.Gpx.GpxTypes.gpxType)">
+            <summary>
+            Convetrs <see cref="T:IsraelHiking.API.Gpx.GpxTypes.gpxType"/> to <see cref="T:NetTopologySuite.Features.FeatureCollection"/>
+            </summary>
+            <param name="gpx">The GPX data to convert</param>
+            <returns>The GeoJson data</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.IGpxGeoJsonConverter.ToGpx(NetTopologySuite.Features.FeatureCollection)">
+            <summary>
+            Converts <see cref="T:NetTopologySuite.Features.FeatureCollection"/> to <see cref="T:IsraelHiking.API.Gpx.GpxTypes.gpxType"/>
+            </summary>
+            <param name="collection">The GeoJson data to convert</param>
+            <returns>The GPX data </returns>
+        </member>
         <member name="T:IsraelHiking.API.Gpx.GpxTypes.gpxType">
             <remarks/>
+        </member>
+        <member name="M:IsraelHiking.API.Gpx.GpxTypes.gpxType.#ctor">
+            <summary>
+            gpx main type
+            </summary>
         </member>
         <member name="P:IsraelHiking.API.Gpx.GpxTypes.gpxType.metadata">
             <remarks/>
@@ -894,10 +1099,47 @@
             <param name="closestPointTolerance">The tolerance of the distance that is considered a self loop</param>
             <returns>a list of lines that do not have self loops</returns>
         </member>
-        <member name="T:IsraelHiking.API.Services.Osm.OsmLineAdderService">
+        <member name="T:IsraelHiking.API.Services.IImageCreationService">
+            <summary>
+            This service is responsible for creating images for data container
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Services.IImageCreationService.Create(IsraelHiking.Common.DataContainer)">
+            <summary>
+            Creates an image from the data in <see cref="T:IsraelHiking.Common.DataContainer"/>
+            </summary>
+            <param name="dataContainer">The data to create the iamge from</param>
+            <returns>Bitmap image represented as bytes</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Services.ImageCreationService">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Services.ImageCreationService.#ctor(IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.DataAccessInterfaces.ILogger)">
+            <summary>
+            Contstructor, creates relevant colors and brushes
+            </summary>
+            <param name="httpGatewayFactory"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Services.ImageCreationService.Create(IsraelHiking.Common.DataContainer)">
+            <inheritdoc />
+        </member>
+        <member name="T:IsraelHiking.API.Services.Osm.IOsmLineAdderService">
             <summary>
             This class is responsible of adding a given line to OSM
             </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.IOsmLineAdderService.Add(NetTopologySuite.Geometries.LineString,System.Collections.Generic.Dictionary{System.String,System.String},IsraelHiking.Common.TokenAndSecret)">
+            <summary>
+            Use this method to add a line to OSM, this algorithm tries to add the line to existing lines in OSM
+            </summary>
+            <param name="line">The line to add</param>
+            <param name="tags">The tags to add to the line</param>
+            <param name="tokenAndSecret">Used as OSM credentials</param>
+            <returns></returns>
+        </member>
+        <member name="T:IsraelHiking.API.Services.Osm.OsmLineAdderService">
+            <inheritdoc/>
         </member>
         <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.#ctor(IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,IsraelHiking.API.Services.Osm.IOsmGeoJsonPreprocessor,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory)">
             <summary>
@@ -910,12 +1152,13 @@
             <param name="httpGatewayFactory"></param>
         </member>
         <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.Add(NetTopologySuite.Geometries.LineString,System.Collections.Generic.Dictionary{System.String,System.String},IsraelHiking.Common.TokenAndSecret)">
+            <inheritdoc/>
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.FilterConnectionWays(System.Collections.Generic.List{IsraelHiking.API.Services.Osm.OsmLineAdderService.ConnectionWayData})">
             <summary>
-            Use this method to add a line to OSM, this algorithm tries to add the line to existing lines in OSM
+            This method filters connections ways that are connecting sequential nodes to the same highway.
             </summary>
-            <param name="line">The line to add</param>
-            <param name="tags">The tags to add to the line</param>
-            <param name="tokenAndSecret">Used as OSM credentials</param>
+            <param name="connectionWays"></param>
             <returns></returns>
         </member>
         <member name="M:IsraelHiking.API.Services.Osm.OsmDataService.Initialize(System.String)">
@@ -932,6 +1175,32 @@
             <param name="ways">The ways to merge</param>
             <returns>The merged ways</returns>
         </member>
+        <member name="T:IsraelHiking.API.Services.DataContainerConverterService">
+            <inheritdoc />
+        </member>
+        <member name="F:IsraelHiking.API.Services.DataContainerConverterService.GPX">
+            <summary>
+            Gpx file extension constant string
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Services.DataContainerConverterService.#ctor(IsraelHiking.DataAccessInterfaces.IGpsBabelGateway,IsraelHiking.API.Converters.IGpxGeoJsonConverter,IsraelHiking.API.Converters.IGpxDataContainerConverter,IsraelHiking.API.Services.IRouteDataSplitterService)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="gpsBabelGateway"></param>
+            <param name="gpxGeoJsonConverter"></param>
+            <param name="gpxDataContainerConverter"></param>
+            <param name="routeDataSplitterService"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Services.DataContainerConverterService.ToAnyFormat(IsraelHiking.Common.DataContainer,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Services.DataContainerConverterService.ToDataContainer(System.Byte[],System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Services.DataContainerConverterService.Convert(System.Byte[],System.String,System.String)">
+            <inheritdoc />
+        </member>
         <member name="M:IsraelHiking.API.Services.DataContainerConverterService.GetConvertersList(System.String,System.String)">
             <summary>
             This method created a list containig the converters needed in order to get from input to output.
@@ -940,6 +1209,36 @@
             <param name="inputFormat"></param>
             <param name="outputFormat"></param>
             <returns></returns>
+        </member>
+        <member name="T:IsraelHiking.API.Services.IDataContainerConverterService">
+            <summary>
+            Conversion service from and to <see cref="T:IsraelHiking.Common.DataContainer"/>
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Services.IDataContainerConverterService.ToDataContainer(System.Byte[],System.String)">
+            <summary>
+            Converts bytes to <see cref="T:IsraelHiking.Common.DataContainer"/>
+            </summary>
+            <param name="content">File content in bytes</param>
+            <param name="fileName">File name</param>
+            <returns>Converted <see cref="T:IsraelHiking.Common.DataContainer"/></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Services.IDataContainerConverterService.ToAnyFormat(IsraelHiking.Common.DataContainer,System.String)">
+            <summary>
+            Converts <see cref="T:IsraelHiking.Common.DataContainer"/> to any format
+            </summary>
+            <param name="dataContainer">The data container</param>
+            <param name="format">The format to convert to like GPX, KML etc.</param>
+            <returns>Converted file in the form of bytes</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Services.IDataContainerConverterService.Convert(System.Byte[],System.String,System.String)">
+            <summary>
+            Converts any format to any format
+            </summary>
+            <param name="content">The file content to convert</param>
+            <param name="inputFileNameOrFormat">The input file format</param>
+            <param name="outputFileExtension">The output file format</param>
+            <returns>Converted data</returns>
         </member>
         <member name="T:IsraelHiking.API.Services.LruCache`2">
             <summary>

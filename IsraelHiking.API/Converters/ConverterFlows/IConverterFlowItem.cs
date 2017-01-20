@@ -1,6 +1,9 @@
 ﻿namespace IsraelHiking.API.Converters.ConverterFlows
 {
-    public static class FlowFormats
+    /// <summary>
+    /// List of constants that are used for GPSBabel mostly
+    /// </summary>
+    internal static class FlowFormats
     {
         public const string GEOJSON = "geojson";
         public const string GPX = "gpx";
@@ -15,10 +18,24 @@
         public const string GPX_BZ2 = "gpx.bz2";
     }
 
+    /// <summary>
+    /// Flow item is used to link between two formats
+    /// </summary>
     public interface IConverterFlowItem
     {
+        /// <summary>
+        /// This method does the "heavy lifting" be doing the conversion
+        /// </summary>
+        /// <param name="content">The file content to convert</param>
+        /// <returns>Converted file content</returns>
         byte[] Transform(byte[] content);
+        /// <summary>
+        /// The input format
+        /// </summary>
         string Input { get; }
+        /// <summary>
+        /// The output format
+        /// </summary>
         string Output { get; }
     }
 }

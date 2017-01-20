@@ -20,6 +20,7 @@ namespace IsraelHiking.API.Services
         public int Zoom { get; set; }
     }
 
+    ///<inheritdoc />
     public class ImageCreationService : IImageCreationService
     {
         private const int TILE_SIZE = 256; // pixels
@@ -42,6 +43,11 @@ namespace IsraelHiking.API.Services
         private readonly Pen _endRoutePen;
         private readonly Brush _circleFillBrush;
 
+        /// <summary>
+        /// Contstructor, creates relevant colors and brushes
+        /// </summary>
+        /// <param name="httpGatewayFactory"></param>
+        /// <param name="logger"></param>
         public ImageCreationService(IHttpGatewayFactory httpGatewayFactory, ILogger logger)
         {
             _reoutePenIndex = 0;
@@ -69,6 +75,7 @@ namespace IsraelHiking.API.Services
             _endRoutePen = new Pen(Color.Red, 7);
         }
 
+        ///<inheritdoc />
         public async Task<byte[]> Create(DataContainer dataContainer)
         {
             _logger.Debug("Creating image for thumbnail started.");
@@ -164,7 +171,7 @@ namespace IsraelHiking.API.Services
         private static string GetAddressTemplate(DataContainer dataContainer)
         {
             var address = string.IsNullOrWhiteSpace(dataContainer.baseLayer.address)
-                ? "http://israelhiking.osm.org.il/tiles/{z}/{x}/{y}.png"
+                ? "http://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png"
                 : dataContainer.baseLayer.address;
             if (address.StartsWith("http") == false && address.StartsWith("www") == false)
             {

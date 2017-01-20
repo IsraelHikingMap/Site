@@ -8,7 +8,7 @@ using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services
 {
-    public class PropertiesData
+    internal class PropertiesData
     {
         public string Key { get; }
         public string Value { get; }
@@ -27,12 +27,11 @@ namespace IsraelHiking.API.Services
     }
 
     [ExcludeFromCodeCoverage]
-    public class GeoJsonFeatureHelper
+    internal class GeoJsonFeatureHelper
     {
         private readonly List<PropertiesData> _relations;
         private readonly List<PropertiesData> _ways; 
         private readonly List<PropertiesData> _nodes;
-        
 
         public GeoJsonFeatureHelper(IConfigurationProvider configurationProvider)
         {

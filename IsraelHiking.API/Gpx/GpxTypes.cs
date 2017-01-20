@@ -38,6 +38,9 @@ namespace IsraelHiking.API.Gpx.GpxTypes {
         
         private string creatorField;
         
+        /// <summary>
+        /// gpx main type
+        /// </summary>
         public gpxType() {
             this.versionField = "1.1";
         }

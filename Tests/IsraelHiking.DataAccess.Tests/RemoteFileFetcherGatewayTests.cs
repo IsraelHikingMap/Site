@@ -30,7 +30,7 @@ namespace IsraelHiking.DataAccess.Tests
         public void TestGateway_InvalidFile()
         {
             var gateway = new RemoteFileFetcherGateway(Substitute.For<ILogger>());
-            var response = gateway.GetFileContent("http://israelhiking.osm.org.il/Tiles/11/1228/826.png").Result;
+            var response = gateway.GetFileContent("http://israelhiking.osm.org.il/Hebrew/Tiles/11/1228/826.png").Result;
 
             Assert.IsFalse(response.Content.Any());
         }

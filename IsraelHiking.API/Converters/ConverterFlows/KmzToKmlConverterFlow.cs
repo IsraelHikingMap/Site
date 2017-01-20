@@ -3,12 +3,15 @@ using System.Linq;
 using Ionic.Zip;
 
 namespace IsraelHiking.API.Converters.ConverterFlows
-{
+{///<inheritdoc />
     public class KmzToKmlConverterFlow : IConverterFlowItem
     {
+        ///<inheritdoc />
         public string Input => FlowFormats.KMZ;
+        ///<inheritdoc />
         public string Output => FlowFormats.KML_BABEL_FORMAT;
 
+        ///<inheritdoc />
         public byte[] Transform(byte[] content)
         {
             using (var contentStream = new MemoryStream(content))

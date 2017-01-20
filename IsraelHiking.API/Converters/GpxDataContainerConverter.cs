@@ -7,7 +7,7 @@ using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Converters
 {
-    public static class RoutingTypeConverter
+    internal static class RoutingTypeConverter
     {
         private const string ROUTING_TYPE = "RoutingType";
 
@@ -25,8 +25,10 @@ namespace IsraelHiking.API.Converters
         }
     }
 
+    ///<inheritdoc />
     public class GpxDataContainerConverter : IGpxDataContainerConverter
     {
+        ///<inheritdoc />
         public gpxType ToGpx(DataContainer container)
         {
             var containerRoutes = container.routes ?? new List<RouteData>();
@@ -43,6 +45,7 @@ namespace IsraelHiking.API.Converters
             }.UpdateBounds();
         }
 
+        ///<inheritdoc />
         public DataContainer ToDataContainer(gpxType gpx)
         {
             gpx.UpdateBounds();

@@ -4,11 +4,15 @@ using IsraelHiking.API.Gpx.GpxTypes;
 
 namespace IsraelHiking.API.Converters.ConverterFlows
 {
+    ///<inheritdoc />
     public class GpxToSingleTrackGpxConverterFlow : IConverterFlowItem
     {
+        ///<inheritdoc />
         public string Input => FlowFormats.GPX_BABEL_FORMAT;
+        ///<inheritdoc />
         public string Output => FlowFormats.GPX_SINGLE_TRACK;
 
+        ///<inheritdoc />
         public byte[] Transform(byte[] content)
         {
             var gpx = content.ToGpx();

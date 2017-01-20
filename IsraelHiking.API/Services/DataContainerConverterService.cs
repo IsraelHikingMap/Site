@@ -9,8 +9,12 @@ using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Services
 {
+    ///<inheritdoc />
     public class DataContainerConverterService : IDataContainerConverterService
     {
+        /// <summary>
+        /// Gpx file extension constant string
+        /// </summary>
         public const string GPX = "gpx";
 
         private const string ISRAEL_HIKING_MAP = "IsraelHikingMap";
@@ -19,6 +23,13 @@ namespace IsraelHiking.API.Services
         private readonly IRouteDataSplitterService _routeDataSplitterService;
         private readonly List<IConverterFlowItem> _converterFlowItems;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="gpsBabelGateway"></param>
+        /// <param name="gpxGeoJsonConverter"></param>
+        /// <param name="gpxDataContainerConverter"></param>
+        /// <param name="routeDataSplitterService"></param>
         public DataContainerConverterService(IGpsBabelGateway gpsBabelGateway,
             IGpxGeoJsonConverter gpxGeoJsonConverter,
             IGpxDataContainerConverter gpxDataContainerConverter,
@@ -54,6 +65,7 @@ namespace IsraelHiking.API.Services
             }
         }
 
+        ///<inheritdoc />
         public Task<byte[]> ToAnyFormat(DataContainer dataContainer, string format)
         {
             var gpx = _gpxDataContainerConverter.ToGpx(dataContainer);
@@ -61,6 +73,7 @@ namespace IsraelHiking.API.Services
             return Convert(gpx.ToBytes(), GPX, format);
         }
 
+        ///<inheritdoc />
         public async Task<DataContainer> ToDataContainer(byte[] content, string fileName)
         {
             var gpx = (await Convert(content, fileName, GPX)).ToGpx();
@@ -76,6 +89,7 @@ namespace IsraelHiking.API.Services
             return container;
         }
 
+        ///<inheritdoc />
         public Task<byte[]> Convert(byte[] content, string inputFileNameOrFormat, string outputFileExtension)
         {
             return Task.Run(() =>

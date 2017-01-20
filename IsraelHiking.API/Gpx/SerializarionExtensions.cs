@@ -8,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Gpx
 {
-    public static class SerializarionExtensions
+    internal static class SerializarionExtensions
     {
         public static byte[] ToBytes(this FeatureCollection featureCollection)
         {

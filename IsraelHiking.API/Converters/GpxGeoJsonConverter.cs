@@ -8,11 +8,13 @@ using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Converters
 {
+    ///<inheritdoc />
     public class GpxGeoJsonConverter : IGpxGeoJsonConverter
     {
         private const string NAME = "name";
         private const string CREATOR = "Creator";
 
+        ///<inheritdoc />
         public FeatureCollection ToGeoJson(gpxType gpx)
         {
             var collection = new FeatureCollection();
@@ -39,6 +41,7 @@ namespace IsraelHiking.API.Converters
             return collection;
         }
 
+        ///<inheritdoc />   
         public gpxType ToGpx(FeatureCollection collection)
         {
             return new gpxType
