@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Services.Osm;
@@ -27,28 +26,159 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             var geoJsonPreProcessor = Substitute.For<IOsmGeoJsonPreprocessor>();
             _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
-            _service = new OsmLineAdderService(_elasticSearchGateway, new CoordinatesConverter(), Substitute.For<IConfigurationProvider>(), geoJsonPreProcessor, _httpGatewayFactory);
+            var configurationProvide = Substitute.For<IConfigurationProvider>();
+            configurationProvide.ClosestPointTolerance.Returns(30);
+            _service = new OsmLineAdderService(_elasticSearchGateway, new CoordinatesConverter(), configurationProvide, geoJsonPreProcessor, _httpGatewayFactory);
+        }
+
+        private IOsmGateway SetupOsmGateway(string changesetId)
+        {
+            var osmGateway = Substitute.For<IOsmGateway>();
+            var nodeId = 10;
+            osmGateway.CreateChangeset(Arg.Any<string>()).Returns(changesetId);
+            osmGateway.CreateNode(changesetId, Arg.Any<Node>()).Returns((x) => Task.Run(() => (++nodeId).ToString()));
+            _httpGatewayFactory.CreateOsmGateway(null).Returns(osmGateway);
+            return osmGateway;
+        }
+
+        private void SetupHighway(int wayId, Coordinate[] coordinates, IOsmGateway osmGateway)
+        {
+            var table = new AttributesTable();
+            table.AddAttribute("osm_id", wayId.ToString());
+
+            _elasticSearchGateway.GetHighways(Arg.Any<LatLng>(), Arg.Any<LatLng>()).Returns(new List<Feature>
+            {
+                new Feature(new LineString(coordinates), table)
+            });
+            var osmCompleteWay = CompleteWay.Create(wayId);
+            var id = 1;
+            foreach (var coordinate in coordinates)
+            {
+                osmCompleteWay.Nodes.Add(Node.Create(id++, coordinate.Y, coordinate.X));
+            }
+            osmGateway.GetCompleteWay(wayId.ToString()).Returns(osmCompleteWay);
         }
 
         [TestMethod]
-        public void AddLine_NoHighwaysInArea_ShouldAddTheLine()
+        public void AddLineWithTags_NoHighwaysInArea_ShouldAddTheLine()
         {
-            var tokenAndSecret = new TokenAndSecret(string.Empty, string.Empty);
-            var osmGateway = Substitute.For<IOsmGateway>();
-            var changesetId = "1";
-            var random = new Random(0);
-            osmGateway.CreateChangeset(Arg.Any<string>()).Returns(changesetId);
-            osmGateway.CreateNode(changesetId, Arg.Any<Node>()).Returns((x) => Task.FromResult(random.Next(100).ToString()));
-            _httpGatewayFactory.CreateOsmGateway(tokenAndSecret).Returns(osmGateway);
+            string changesetId = "1";
+            var osmGateway = SetupOsmGateway(changesetId);
             _elasticSearchGateway.GetHighways(Arg.Any<LatLng>(), Arg.Any<LatLng>()).Returns(new List<Feature>());
+            var tags = new Dictionary<string, string>
+            {
+                {"highway", "track"},
+                {"colour", "blue"}
+            };
 
-            _service.Add(new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)}),
-                new Dictionary<string, string>(), tokenAndSecret).Wait();
+            _service.Add(new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)}), tags, null).Wait();
 
             osmGateway.Received(1).CreateChangeset(Arg.Any<string>());
             osmGateway.Received(1).CloseChangeset(changesetId);
             osmGateway.Received(2).CreateNode(changesetId, Arg.Any<Node>());
             osmGateway.Received(1).CreateWay(changesetId, Arg.Any<Way>());
+        }
+
+        [TestMethod]
+        public void AddLine_OneHighwayNearStart_ShouldAddTheLineAndConnectIt()
+        {
+            var osmGateway = SetupOsmGateway("42");
+            SetupHighway(42, new[] { new Coordinate(0.00001, 0), new Coordinate(-1, 0) }, osmGateway);           
+
+            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
+
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 3));
+        }
+
+        [TestMethod]
+        public void AddLine_OneHighwayNearEnd_ShouldAddTheLineAndConnectIt()
+        {
+            var osmGateway = SetupOsmGateway("42");
+            SetupHighway(42, new[] { new Coordinate(0, 1.0001), new Coordinate(0, 2) }, osmGateway);
+
+            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
+
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 3));
+        }
+
+        /// <summary>
+        /// V shape line close to stright line
+        ///     \ /
+        ///      V
+        ///      |
+        /// </summary>
+        [TestMethod]
+        public void AddVShapeLine_OneHighwayNearMiddle_ShouldAddTheLineWithAnotherLine()
+        {
+            var osmGateway = SetupOsmGateway("42");
+            SetupHighway(42, new[] { new Coordinate(0, 0), new Coordinate(0, -1) }, osmGateway);
+
+            _service.Add(new LineString(new[]
+            {
+                new Coordinate(-0.1, 0.01),
+                new Coordinate(-0.0001, 0),
+                new Coordinate(0.1, 0.01)
+            }), new Dictionary<string, string>(), null).Wait();
+
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 3));
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
+        }
+
+        /// <summary>
+        /// U shape line close to stright line
+        ///     \_/
+        ///      |
+        /// </summary>
+        [TestMethod]
+        public void AddUShapeDenseLine_OneHighwayNearMiddle_OnlyOneConnectingLine()
+        {
+            var osmGateway = SetupOsmGateway("42");
+            SetupHighway(42, new[] { new Coordinate(0, 0), new Coordinate(0, -1) }, osmGateway);
+
+            _service.Add(new LineString(new[]
+            {
+                new Coordinate(-0.1, 0.01),
+                new Coordinate(-0.0001, 0),
+                new Coordinate(0.0001, 0),
+                new Coordinate(0.1, 0.01)
+            }), new Dictionary<string, string>(), null).Wait();
+
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 4));
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
+            osmGateway.Received(2).CreateWay(Arg.Any<string>(), Arg.Any<Way>());
+        }
+
+        /// <summary>
+        /// \_/\_/
+        ///  |__|
+        /// </summary>
+        [TestMethod]
+        public void AddWShapeDenseLine_HighwayUShape_TwoConnectingLines()
+        {
+            var osmGateway = SetupOsmGateway("42");
+            SetupHighway(42, new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(0, -1),
+                    new Coordinate(1, -1),
+                    new Coordinate(1, 0),
+                },
+                osmGateway);
+
+            _service.Add(new LineString(new[]
+            {
+                new Coordinate(-1, 1),
+                new Coordinate(-0.0001, 0),
+                new Coordinate(0.0001, 0),
+                new Coordinate(0.5, 1),
+                new Coordinate(0.9999, 0),
+                new Coordinate(1.0001, 0),
+                new Coordinate(1.0001, 1),
+            }), new Dictionary<string, string>(), null).Wait();
+
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 7));
+            osmGateway.Received(2).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
+            osmGateway.Received(3).CreateWay(Arg.Any<string>(), Arg.Any<Way>());
         }
     }
 }

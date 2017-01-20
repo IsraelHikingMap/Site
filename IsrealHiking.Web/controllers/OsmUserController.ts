@@ -232,6 +232,7 @@
                     data: { file: file }
                 } as angular.angularFileUpload.IFileUploadConfigFile).then(() => {
                     toastr.success($scope.resources.fileUploadedSuccefullyItWillTakeTime);
+                    osmUserService.refreshDetails();
                 }, () => {
                     toastr.error($scope.resources.unableToUploadFile);
                 });
