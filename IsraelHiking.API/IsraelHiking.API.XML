@@ -684,6 +684,18 @@
         <member name="M:IsraelHiking.API.Converters.GpxGeoJsonConverter.ToGpx(NetTopologySuite.Features.FeatureCollection)">
             <inheritdoc />   
         </member>
+        <member name="T:IsraelHiking.API.Converters.IOsmGeoJsonConverter">
+            <summary>
+            Converts from OSM to GeoJson
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Converters.IOsmGeoJsonConverter.ToGeoJson(OsmSharp.Osm.ICompleteOsmGeo)">
+            <summary>
+            Converts from <see cref="T:OsmSharp.Osm.ICompleteOsmGeo"/> to <see cref="T:NetTopologySuite.Features.Feature"/>
+            </summary>
+            <param name="completeOsmGeo">The OSM element to convert</param>
+            <returns>The GeoJson data</returns>
+        </member>
         <member name="T:IsraelHiking.API.Converters.IGpxDataContainerConverter">
             <summary>
             Converts between <see cref="T:IsraelHiking.API.Gpx.GpxTypes.gpxType"/> and <see cref="T:IsraelHiking.Common.DataContainer"/>
