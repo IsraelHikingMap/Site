@@ -69,14 +69,14 @@
             }
 
             $scope.getUnits = (number: number): string => {
-                return number > 1000 ? $scope.resources.kmUnit : $scope.resources.meterUnit;
+                return Math.abs(number) > 1000 ? $scope.resources.kmUnit : $scope.resources.meterUnit;
             };
 
             $scope.toShortNumber = (number: number) => {
                 if (number == null) {
                     return "0";
                 }
-                return number > 1000 ? (number / 1000.0).toFixed(2) : number.toFixed(0);
+                return Math.abs(number) > 1000 ? (number / 1000.0).toFixed(2) : number.toFixed(0);
             }
 
             $scope.$on("angular-resizable.resizing", () => {
