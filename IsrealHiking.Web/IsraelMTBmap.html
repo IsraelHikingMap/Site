@@ -10,13 +10,23 @@
 </head>
 <body>
     <script>
-	var href = location.href.replace("IsraelMTBmap.html", "index.html");
-	if (href.indexOf("#") === -1) {
-	    href += "#/";
-	}
-	href += (href.indexOf("?") !== -1) ? "&" : "?";
-	href += "baselayer=Israel_MTB_Map";
-	window.location.href = href;
+        (function (i, s, o, g, r, a, m) {
+            i['GoogleAnalyticsObject'] = r; i[r] = i[r] || function () {
+                (i[r].q = i[r].q || []).push(arguments)
+            }, i[r].l = 1 * new Date(); a = s.createElement(o),
+            m = s.getElementsByTagName(o)[0]; a.async = 1; a.src = g; m.parentNode.insertBefore(a, m)
+        })(window, document, 'script', 'https://www.google-analytics.com/analytics.js', 'ga');
+
+        ga('create', 'UA-65030725-3', 'auto');
+        ga('send', 'pageview');
+
+        var href = location.href.replace("IsraelMTBmap.html", "index.html");
+        if (href.indexOf("#") === -1) {
+            href += "#/";
+        }
+        href += (href.indexOf("?") !== -1) ? "&" : "?";
+        href += "baselayer=Israel_MTB_Map";
+        window.location.href = href;
     </script>
 </body>
 </html>

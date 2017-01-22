@@ -74,8 +74,8 @@
     <Content Include="content\images\marker-shadow.png" />
     <Content Include="content\images\none.svg" />
     <Content Include="content\images\off-road.png" />
-    <Content Include="content\images\os-israel-logo.png" />
-    <Content Include="content\images\os-israel-logo_transparent.png" />
+    <Content Include="content\images\osm-israel-logo.png" />
+    <Content Include="content\images\osm-israel-logo-transparent.png" />
     <Content Include="content\images\routing-all.png" />
     <Content Include="content\images\routing-per-point.png" />
     <Content Include="content\L.Control.Locate.css" />
@@ -136,7 +136,6 @@
     <Content Include="index.html" />
     <Content Include="OruxmapsDownload.html" />
     <Content Include="IsraelMTBmap.html" />
-    <Content Include="OruxmapsDownload.js" />
     <None Include="package.json" />
     <None Include=".bowerrc" />
     <None Include="bower.json" />
@@ -274,7 +273,6 @@
     <TypeScriptCompile Include="directives\DisableMapMovementDirective.ts" />
     <TypeScriptCompile Include="directives\DraggableResizableDirective.ts" />
     <TypeScriptCompile Include="directives\SyncFocusWithDirective.ts" />
-    <TypeScriptCompile Include="OruxmapsDownload.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-gettext\angular-gettext.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-local-storage\angular-local-storage.d.ts" />
     <TypeScriptCompile Include="scripts\typings\angular-ui-bootstrap\angular-ui-bootstrap.d.ts" />
