@@ -180,5 +180,30 @@ namespace IsraelHiking.API.Tests.Services.Osm
             osmGateway.Received(2).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
             osmGateway.Received(3).CreateWay(Arg.Any<string>(), Arg.Any<Way>());
         }
+
+        [TestMethod]
+        public void TriangleBug_OneHighway_OneConnectingLines()
+        {
+            var osmGateway = SetupOsmGateway("42");
+            SetupHighway(42, new[]
+                {
+                    new Coordinate(34.83509, 30.87568),
+                    new Coordinate(34.83503, 30.87574),
+                    new Coordinate(34.83481, 30.87598)
+                },
+                osmGateway);
+            
+            _service.Add(new LineString(new[]
+            {
+                new Coordinate(34.9354262, 30.8753466),
+                new Coordinate(34.8352167, 30.8754542),
+                new Coordinate(34.8353618,30.8757884),
+                new Coordinate(34.7352248,30.8760586)
+            }), new Dictionary<string, string>(), null).Wait();
+
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 4));
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
+            osmGateway.Received(2).CreateWay(Arg.Any<string>(), Arg.Any<Way>());
+        }
     }
 }
