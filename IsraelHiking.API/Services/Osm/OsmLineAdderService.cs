@@ -60,7 +60,7 @@ namespace IsraelHiking.API.Services.Osm
             _osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
             var chagesetId = await _osmGateway.CreateChangeset(CreateCommentFromTags(tags));
             var nodeIds = new List<string>();
-            var connectionWays = new List<ConnectionWayData>();
+            //var connectionWays = new List<ConnectionWayData>();
             var highways = await GetHighwaysInArea(line);
             var itmHighways = highways.Select(ToItmLineString).ToList();
             foreach (var lineCoordinate in line.Coordinates)
@@ -83,17 +83,17 @@ namespace IsraelHiking.API.Services.Osm
                     nodeIds.Add(connectionWay.ExsitingNodeId);
                     continue;
                 }
-                connectionWay.NewNodeId = nodeId;
-                connectionWay.IndexOnNewWay = line.Coordinates.ToList().IndexOf(lineCoordinate);
-                connectionWays.Add(connectionWay);
+                //connectionWay.NewNodeId = nodeId;
+                //connectionWay.IndexOnNewWay = line.Coordinates.ToList().IndexOf(lineCoordinate);
+                //connectionWays.Add(connectionWay);
             }
             var newWayId = await AddWay(nodeIds, tags, chagesetId);
             var newlyAddedWayIds = new List<string> {newWayId};
-            connectionWays = FilterConnectionWays(connectionWays);
-            foreach (var nodeOnExistingWay in connectionWays)
-            {
-                newlyAddedWayIds.Add(await AddWay(new[] { nodeOnExistingWay.NewNodeId, nodeOnExistingWay.ExsitingNodeId}, tags, chagesetId));
-            }
+            //connectionWays = FilterConnectionWays(connectionWays);
+            //foreach (var nodeOnExistingWay in connectionWays)
+            //{
+            //    newlyAddedWayIds.Add(await AddWay(new[] { nodeOnExistingWay.NewNodeId, nodeOnExistingWay.ExsitingNodeId}, tags, chagesetId));
+            //}
             await _osmGateway.CloseChangeset(chagesetId);
             await AddWaysToElasticSearch(newlyAddedWayIds);
         }
