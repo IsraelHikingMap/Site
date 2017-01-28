@@ -498,16 +498,16 @@
                         },
                         {
                             title: $scope.resources.legendSeasonalLake,
-                            latlng: L.latLng(32.566527, 35.0658488),
-                            zoom: 14,
+                            latlng: L.latLng(31.7849, 34.8694),
+                            zoom: 13,
                             id: id++,
                             map: null,
                             type: "POI"
                         },
                         {
                             title: $scope.resources.legendWetland,
-                            latlng: L.latLng(32.410690, 34.9005125),
-                            zoom: 16,
+                            latlng: L.latLng(32.24501, 34.85836),
+                            zoom: 13,
                             id: id++,
                             map: null,
                             type: "POI"
@@ -530,7 +530,7 @@
                         },
                         {
                             title: $scope.resources.legendWaterWell,
-                            latlng: L.latLng(30.3513872, 34.7330626),
+                            latlng: L.latLng(31.2748449, 34.5187547),
                             zoom: 16,
                             id: id++,
                             map: null,
@@ -723,6 +723,14 @@
                             type: "POI"
                         },
                         {
+                            title: $scope.resources.legendAttraction,
+                            latlng: L.latLng(32.8644745, 35.7402285 ),
+                            zoom: 16,
+                            id: id++,
+                            map: null,
+                            type: "POI"
+                        },
+                        {
                             title: $scope.resources.legendTree,
                             latlng: L.latLng(30.909059, 34.7503607),
                             zoom: 16,
@@ -886,6 +894,14 @@
                     title: $scope.resources.legendBorders,
                     id: id++,
                     items: [
+                        {
+                            title: $scope.resources.legendBikePark,
+                            latlng: L.latLng(30.8728, 34.7713),
+                            zoom: 15,
+                            id: id++,
+                            map: null,
+                            type: "Way"
+                        },
                         {
                             title: $scope.resources.legendNatureReserveNationalPark,
                             latlng: L.latLng(30.918757, 34.7706127),
@@ -1198,13 +1214,16 @@
             _.remove($scope.legendSections, sectionToRemove => sectionToRemove.title === $scope.resources.legendBicycleTrails);
 
             this.removeItemInSection($scope, $scope.resources.legendWater, $scope.resources.legendRiver);
+            this.removeItemInSection($scope, $scope.resources.legendWater, $scope.resources.legendWetland);
             this.removeItemInSection($scope, $scope.resources.legendWater, $scope.resources.legendWaterfall);
 
+            this.removeItemInSection($scope, $scope.resources.legendPoi, $scope.resources.legendAttraction);
             this.removeItemInSection($scope, $scope.resources.legendPoi, $scope.resources.legendObservationTower);
             this.removeItemInSection($scope, $scope.resources.legendPoi, $scope.resources.legendAntenna);
 
             this.removeItemInSection($scope, $scope.resources.legendBarriers, $scope.resources.legendStile);
             this.removeItemInSection($scope, $scope.resources.legendBarriers, $scope.resources.legendLiftGate);
+            this.removeItemInSection($scope, $scope.resources.legendBorders, $scope.resources.legendBikePark);
 
             this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendBikeShop);
             this.removeItemInSection($scope, $scope.resources.legendAmenities, $scope.resources.legendFirstAid);

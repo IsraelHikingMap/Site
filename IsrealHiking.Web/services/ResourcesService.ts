@@ -289,6 +289,7 @@ namespace IsraelHiking.Services {
         public legendRuins: string;
         public legendArcheologicalSite: string;
         public legendCave: string;
+        public legendAttraction: string;
         public legendTree: string;
         public legendSynagogue: string;
         public legendChurch: string;
@@ -310,6 +311,7 @@ namespace IsraelHiking.Services {
         public legendWall: string;
         public legendCliff: string;
         public legendBorders: string;
+        public legendBikePark: string;
         public legendNatureReserveNationalPark: string;
         public legendMilitaryArea: string;
         public legendAreaA: string;
@@ -660,6 +662,7 @@ namespace IsraelHiking.Services {
                     this.legendRuins = this.gettextCatalog.getString("Ruins");
                     this.legendArcheologicalSite = this.gettextCatalog.getString("Archeological Site");
                     this.legendCave = this.gettextCatalog.getString("Cave");
+                    this.legendAttraction = this.gettextCatalog.getString("Attraction");
                     this.legendTree = this.gettextCatalog.getString("Tree");
                     this.legendSynagogue = this.gettextCatalog.getString("Synagogue");
                     this.legendChurch = this.gettextCatalog.getString("Church");
@@ -681,6 +684,7 @@ namespace IsraelHiking.Services {
                     this.legendWall = this.gettextCatalog.getString("Wall");
                     this.legendCliff = this.gettextCatalog.getString("Cliff");
                     this.legendBorders = this.gettextCatalog.getString("Borders");
+                    this.legendBikePark = this.gettextCatalog.getString("Bike Park");
                     this.legendNatureReserveNationalPark = this.gettextCatalog.getString("Nature Reserve, National Park");
                     this.legendMilitaryArea = this.gettextCatalog.getString("Military Area");
                     this.legendAreaA = this.gettextCatalog.getString("Area A");
