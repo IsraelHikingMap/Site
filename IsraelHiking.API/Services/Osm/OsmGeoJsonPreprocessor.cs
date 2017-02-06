@@ -164,7 +164,14 @@ namespace IsraelHiking.API.Services.Osm
             foreach (var attributeName in containingGeoJson.Attributes.GetNames().Where(n => n.StartsWith("name")))
             {
                 var addressName = attributeName.Replace("name", "address");
-                feature.Attributes.AddAttribute(addressName, containingGeoJson.Attributes[attributeName]);
+                if (feature.Attributes.Exists(addressName))
+                {
+                    feature.Attributes[addressName] = containingGeoJson.Attributes[attributeName];
+                }
+                else
+                { 
+                    feature.Attributes.AddAttribute(addressName, containingGeoJson.Attributes[attributeName]);
+                }
             }
         }
 
