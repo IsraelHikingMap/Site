@@ -45,12 +45,22 @@ The architecture is based on layers
 
 # Setting up this project
 In order to be able to build this site you'll need some tools:
+* Download and install the [LTS version of Node.js](https://nodejs.org/en/) for Windows.
+  * Notice and save the node.js installation directory. It is usually ```C:\Program Files\nodejs\```
 * Download and install [Visual Studio community 2015](https://www.visualstudio.com/downloads) or later.
-* From Tools &rarr; Extensions and Updates... &rarr; Click Online &rarr; search for the following and install them: 
-  * Web Essentials 2015.3
-  * Chutzpah Test Adapter for the test explorer
-  * Chutzpah Test Runner Contet Menu Extension
-  * Power Shell Tools for visual studio 2015
+* From Visual Studio's _Tools &rarr; Options..._
+  * Go to _Projects and Solutions &rarr; External Web Tools_.
+  * Add the above node.js installation directory as a new directory.
+  * Using the up arrow, move the node.js installation directory up to the second place in the list - just after ```.\node_modules\.bin```.
+  * Click _OK_ to close the dialog.
+  * Exit Visual Studio and re-open it.
+* From Visual Studio's _Tools &rarr; Extensions and Updates..._ 
+  * Go to _Online_
+  * Search for the following and install them: 
+    * Web Essentials 2015.3
+    * Chutzpah Test Adapter for the test explorer
+    * Chutzpah Test Runner Contet Menu Extension
+    * Power Shell Tools for visual studio 2015
 * Download and install the latest [TypeScript for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48593)
 
 # Setup the server
