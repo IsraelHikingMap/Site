@@ -44,7 +44,7 @@ msgstr ""
 msgid "Address"
 msgstr ""
 
-#: services\ResourcesService.js:335
+#: services\ResourcesService.js:337
 msgid "Advanced"
 msgstr ""
 
@@ -56,11 +56,11 @@ msgstr ""
 msgid "All Vehicles"
 msgstr ""
 
-#: services\ResourcesService.js:319
+#: services\ResourcesService.js:321
 msgid "Amenities"
 msgstr ""
 
-#: services\ResourcesService.js:299
+#: services\ResourcesService.js:300
 msgid "Antenna"
 msgstr ""
 
@@ -72,19 +72,23 @@ msgstr ""
 msgid "Archeological Site"
 msgstr ""
 
-#: services\ResourcesService.js:314
+#: services\ResourcesService.js:316
 msgid "Area A"
 msgstr ""
 
-#: services\ResourcesService.js:315
+#: services\ResourcesService.js:317
 msgid "Area B"
 msgstr ""
 
-#: services\ResourcesService.js:340
+#: services\ResourcesService.js:342
 msgid "Areas"
 msgstr ""
 
-#: services\ResourcesService.js:301
+#: services\ResourcesService.js:291
+msgid "Attraction"
+msgstr ""
+
+#: services\ResourcesService.js:302
 msgid "Barriers"
 msgstr ""
 
@@ -100,15 +104,19 @@ msgstr ""
 msgid "Bicycle Path"
 msgstr ""
 
-#: services\ResourcesService.js:337
+#: services\ResourcesService.js:339
 msgid "Bicycle Trails"
+msgstr ""
+
+#: services\ResourcesService.js:313
+msgid "Bike Park"
 msgstr ""
 
 #: services\ResourcesService.js:35
 msgid "Bike Routing"
 msgstr ""
 
-#: services\ResourcesService.js:320
+#: services\ResourcesService.js:322
 msgid "Bike Shop"
 msgstr ""
 
@@ -116,7 +124,7 @@ msgstr ""
 msgid "Black Marked Trail"
 msgstr ""
 
-#: services\ResourcesService.js:305
+#: services\ResourcesService.js:306
 msgid "Block"
 msgstr ""
 
@@ -124,7 +132,7 @@ msgstr ""
 msgid "Blue Marked Trail"
 msgstr ""
 
-#: services\ResourcesService.js:311
+#: services\ResourcesService.js:312
 msgid "Borders"
 msgstr ""
 
@@ -140,7 +148,7 @@ msgstr ""
 msgid "Campsite"
 msgstr ""
 
-#: services\ResourcesService.js:307
+#: services\ResourcesService.js:308
 msgid "Cattle Grid"
 msgstr ""
 
@@ -148,11 +156,11 @@ msgstr ""
 msgid "Cave"
 msgstr ""
 
-#: services\ResourcesService.js:349
+#: services\ResourcesService.js:351
 msgid "Cemetary"
 msgstr ""
 
-#: services\ResourcesService.js:336
+#: services\ResourcesService.js:338
 msgid "Challanging with Direction"
 msgstr ""
 
@@ -168,7 +176,7 @@ msgstr ""
 msgid "Changes"
 msgstr ""
 
-#: services\ResourcesService.js:293
+#: services\ResourcesService.js:294
 msgid "Church"
 msgstr ""
 
@@ -176,7 +184,7 @@ msgstr ""
 msgid "Cistern"
 msgstr ""
 
-#: services\ResourcesService.js:341
+#: services\ResourcesService.js:343
 msgid "City, Settelment"
 msgstr ""
 
@@ -192,7 +200,7 @@ msgstr ""
 msgid "Click on the frowny-face to login to OSM. We'll make it worth your while!"
 msgstr ""
 
-#: services\ResourcesService.js:310
+#: services\ResourcesService.js:311
 msgid "Cliff"
 msgstr ""
 
@@ -200,7 +208,7 @@ msgstr ""
 msgid "Close"
 msgstr ""
 
-#: services\ResourcesService.js:303
+#: services\ResourcesService.js:304
 msgid "Closed Gate"
 msgstr ""
 
@@ -208,7 +216,7 @@ msgstr ""
 msgid "Color"
 msgstr ""
 
-#: services\ResourcesService.js:351
+#: services\ResourcesService.js:353
 msgid "Construction Site"
 msgstr ""
 
@@ -232,7 +240,7 @@ msgstr ""
 msgid "Copy and paste the code below in order to show this map on your webpage."
 msgstr ""
 
-#: services\ResourcesService.js:343
+#: services\ResourcesService.js:345
 msgid "Crop"
 msgstr ""
 
@@ -308,7 +316,7 @@ msgstr ""
 msgid "Easy"
 msgstr ""
 
-#: services\ResourcesService.js:333
+#: services\ResourcesService.js:335
 msgid "Easy with Direction"
 msgstr ""
 
@@ -344,7 +352,7 @@ msgstr ""
 msgid "Embed Size"
 msgstr ""
 
-#: services\ResourcesService.js:308
+#: services\ResourcesService.js:309
 msgid "Fence"
 msgstr ""
 
@@ -356,7 +364,7 @@ msgstr ""
 msgid "Find Unmapped Routes"
 msgstr ""
 
-#: services\ResourcesService.js:321
+#: services\ResourcesService.js:323
 msgid "First Aid"
 msgstr ""
 
@@ -380,7 +388,7 @@ msgstr ""
 msgid "Gain"
 msgstr ""
 
-#: services\ResourcesService.js:302
+#: services\ResourcesService.js:303
 msgid "Gate"
 msgstr ""
 
@@ -388,7 +396,7 @@ msgstr ""
 msgid "Generate A URL To Share With Your Friends!"
 msgstr ""
 
-#: services\ResourcesService.js:325
+#: services\ResourcesService.js:327
 msgid "Golan Trail"
 msgstr ""
 
@@ -396,7 +404,7 @@ msgstr ""
 msgid "Google Earth"
 msgstr ""
 
-#: services\ResourcesService.js:345
+#: services\ResourcesService.js:347
 msgid "Grass"
 msgstr ""
 
@@ -416,7 +424,7 @@ msgstr ""
 msgid "HTML"
 msgstr ""
 
-#: services\ResourcesService.js:327
+#: services\ResourcesService.js:329
 msgid "Haifa Wadis Trail"
 msgstr ""
 
@@ -456,7 +464,7 @@ msgstr ""
 msgid "Hiking Trails"
 msgstr ""
 
-#: services\ResourcesService.js:295
+#: services\ResourcesService.js:296
 msgid "Holy Place"
 msgstr ""
 
@@ -496,7 +504,7 @@ msgstr ""
 msgid "Interact with other users in our {{link}}Facebook group{{linkend}}"
 msgstr ""
 
-#: services\ResourcesService.js:316
+#: services\ResourcesService.js:318
 msgid "International Border"
 msgstr ""
 
@@ -512,7 +520,7 @@ msgstr ""
 msgid "Israel Trail"
 msgstr ""
 
-#: services\ResourcesService.js:323
+#: services\ResourcesService.js:325
 msgid "Jerusalem Trail"
 msgstr ""
 
@@ -520,11 +528,11 @@ msgstr ""
 msgid "Junior"
 msgstr ""
 
-#: services\ResourcesService.js:328
+#: services\ResourcesService.js:330
 msgid "Kinneret Bicycle Trail"
 msgstr ""
 
-#: services\ResourcesService.js:326
+#: services\ResourcesService.js:328
 msgid "Kinneret Trail"
 msgstr ""
 
@@ -580,7 +588,7 @@ msgstr ""
 msgid "Length"
 msgstr ""
 
-#: services\ResourcesService.js:306
+#: services\ResourcesService.js:307
 msgid "Lift Gate"
 msgstr ""
 
@@ -588,7 +596,7 @@ msgstr ""
 msgid "Light 4WD Vehicles"
 msgstr ""
 
-#: services\ResourcesService.js:338
+#: services\ResourcesService.js:340
 msgid "Local Trail"
 msgstr ""
 
@@ -628,11 +636,11 @@ msgstr ""
 msgid "Medium"
 msgstr ""
 
-#: services\ResourcesService.js:296
+#: services\ResourcesService.js:297
 msgid "Memorial"
 msgstr ""
 
-#: services\ResourcesService.js:313
+#: services\ResourcesService.js:315
 msgid "Military Area"
 msgstr ""
 
@@ -641,15 +649,15 @@ msgid "Min Zoom"
 msgstr ""
 
 #: services\ResourcesService.js:153
-#: services\ResourcesService.js:334
+#: services\ResourcesService.js:336
 msgid "Moderate"
 msgstr ""
 
-#: services\ResourcesService.js:297
+#: services\ResourcesService.js:298
 msgid "Monument"
 msgstr ""
 
-#: services\ResourcesService.js:294
+#: services\ResourcesService.js:295
 msgid "Mosque"
 msgstr ""
 
@@ -681,11 +689,11 @@ msgstr ""
 msgid "Name"
 msgstr ""
 
-#: services\ResourcesService.js:339
+#: services\ResourcesService.js:341
 msgid "National Trail"
 msgstr ""
 
-#: services\ResourcesService.js:312
+#: services\ResourcesService.js:314
 msgid "Nature Reserve, National Park"
 msgstr ""
 
@@ -705,7 +713,7 @@ msgstr ""
 msgid "Non-Marked Trail"
 msgstr ""
 
-#: services\ResourcesService.js:298
+#: services\ResourcesService.js:299
 msgid "Observation Tower"
 msgstr ""
 
@@ -725,11 +733,11 @@ msgstr ""
 msgid "Open layer properties"
 msgstr ""
 
-#: services\ResourcesService.js:330
+#: services\ResourcesService.js:332
 msgid "Orange Regional Trail"
 msgstr ""
 
-#: services\ResourcesService.js:342
+#: services\ResourcesService.js:344
 msgid "Orchard"
 msgstr ""
 
@@ -781,7 +789,7 @@ msgstr ""
 msgid "Points of Interest"
 msgstr ""
 
-#: services\ResourcesService.js:300
+#: services\ResourcesService.js:301
 msgid "Power Line"
 msgstr ""
 
@@ -797,11 +805,11 @@ msgstr ""
 msgid "Print the map"
 msgstr ""
 
-#: services\ResourcesService.js:329
+#: services\ResourcesService.js:331
 msgid "Purple Regional Trail"
 msgstr ""
 
-#: services\ResourcesService.js:350
+#: services\ResourcesService.js:352
 msgid "Quarry"
 msgstr ""
 
@@ -833,7 +841,7 @@ msgstr ""
 msgid "Regional Trail"
 msgstr ""
 
-#: services\ResourcesService.js:322
+#: services\ResourcesService.js:324
 msgid "Regional Trails"
 msgstr ""
 
@@ -901,7 +909,7 @@ msgstr ""
 msgid "Runway and Taxiway"
 msgstr ""
 
-#: services\ResourcesService.js:347
+#: services\ResourcesService.js:349
 msgid "Sand"
 msgstr ""
 
@@ -925,11 +933,11 @@ msgstr ""
 msgid "Save your work to a file"
 msgstr ""
 
-#: services\ResourcesService.js:346
+#: services\ResourcesService.js:348
 msgid "Scrub"
 msgstr ""
 
-#: services\ResourcesService.js:324
+#: services\ResourcesService.js:326
 msgid "Sea to Sea Trail"
 msgstr ""
 
@@ -977,7 +985,7 @@ msgstr ""
 msgid "Show Me Where I am"
 msgstr ""
 
-#: services\ResourcesService.js:331
+#: services\ResourcesService.js:333
 msgid "Singles"
 msgstr ""
 
@@ -1001,7 +1009,7 @@ msgstr ""
 msgid "Steps"
 msgstr ""
 
-#: services\ResourcesService.js:304
+#: services\ResourcesService.js:305
 msgid "Stile"
 msgstr ""
 
@@ -1017,7 +1025,7 @@ msgstr ""
 msgid "Strong 4WD Vehicles"
 msgstr ""
 
-#: services\ResourcesService.js:292
+#: services\ResourcesService.js:293
 msgid "Synagogue"
 msgstr ""
 
@@ -1029,11 +1037,11 @@ msgstr ""
 msgid "Thank you for your support!"
 msgstr ""
 
-#: services\ResourcesService.js:317
+#: services\ResourcesService.js:319
 msgid "The Green Line"
 msgstr ""
 
-#: services\ResourcesService.js:318
+#: services\ResourcesService.js:320
 msgid "The Purple Line"
 msgstr ""
 
@@ -1101,7 +1109,7 @@ msgstr ""
 msgid "Transportation"
 msgstr ""
 
-#: services\ResourcesService.js:291
+#: services\ResourcesService.js:292
 msgid "Tree"
 msgstr ""
 
@@ -1173,7 +1181,7 @@ msgstr ""
 msgid "Undo last action"
 msgstr ""
 
-#: services\ResourcesService.js:332
+#: services\ResourcesService.js:334
 msgid "Unknown Scale"
 msgstr ""
 
@@ -1217,7 +1225,7 @@ msgstr ""
 msgid "Wadi"
 msgstr ""
 
-#: services\ResourcesService.js:309
+#: services\ResourcesService.js:310
 msgid "Wall"
 msgstr ""
 
@@ -1241,7 +1249,7 @@ msgstr ""
 msgid "Waterhole"
 msgstr ""
 
-#: services\ResourcesService.js:348
+#: services\ResourcesService.js:350
 msgid "Wetland"
 msgstr ""
 
@@ -1257,7 +1265,7 @@ msgstr ""
 msgid "Wikipedia"
 msgstr ""
 
-#: services\ResourcesService.js:344
+#: services\ResourcesService.js:346
 msgid "Woods"
 msgstr ""
 
