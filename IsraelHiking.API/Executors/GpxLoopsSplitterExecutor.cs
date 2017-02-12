@@ -49,7 +49,8 @@ namespace IsraelHiking.API.Executors
                     continue;
                 }
                 AddLineString(lines, reversedGpxLine.Coordinates.Take(indexOfClosingLine).ToArray());
-                reversedGpxLine = new LineString(reversedGpxLine.Coordinates.Skip(indexOfClosingLine).ToArray());
+                var reminingPoints = reversedGpxLine.Coordinates.Skip(indexOfClosingLine).ToArray();
+                reversedGpxLine = reminingPoints.Length > 1 ? new LineString(reminingPoints) : new LineString(new Coordinate[0]);
                 coordinateIndex = 0;
             }
             AddLineString(lines, reversedGpxLine.Coordinates);

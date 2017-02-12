@@ -111,7 +111,7 @@ namespace IsraelHiking.API.Controllers
             var fileFetcherGatewayResponse = await GetFile(url);
             if (fileFetcherGatewayResponse == null)
             {
-                return BadRequest("Url is not provided or the file is empty...");
+                return BadRequest("Url is not provided or the file is empty... " + url);
             }
             var gpxBytes = await _dataContainerConverterService.Convert(fileFetcherGatewayResponse.Content, fileFetcherGatewayResponse.FileName, DataContainerConverterService.GPX);
             var gpx = gpxBytes.ToGpx().UpdateBounds();
@@ -153,7 +153,7 @@ namespace IsraelHiking.API.Controllers
             var streamProvider = new MultipartMemoryStreamProvider();
             var multipartFileStreamProvider = await Request.Content.ReadAsMultipartAsync(streamProvider);
 
-            if (multipartFileStreamProvider.Contents.Count == 0)
+            if (multipartFileStreamProvider?.Contents?.FirstOrDefault() == null)
             {
                 return null;
             }
@@ -168,7 +168,7 @@ namespace IsraelHiking.API.Controllers
         {
             var waypointsGroups = new List<wptType[]>();
             waypointsGroups.AddRange((gpx.rte ?? new rteType[0]).Select(route => route.rtept).Where(ps => ps.All(p => p.timeSpecified)).ToArray());
-            waypointsGroups.AddRange((gpx.trk ?? new trkType[0]).Select(track => track.trkseg.SelectMany(s => s.trkpt).ToArray()).Where(ps => ps.All(p => p.timeSpecified)));
+            waypointsGroups.AddRange((gpx.trk ?? new trkType[0]).Where(t => t.trkseg != null).Select(track => track.trkseg.SelectMany(s => s.trkpt).ToArray()).Where(ps => ps.All(p => p.timeSpecified)));
             return GetHighwayTypeFromWaypoints(waypointsGroups);
         }
 
@@ -185,7 +185,7 @@ namespace IsraelHiking.API.Controllers
             {
                 return "track";
             }
-            foreach (var waypoints in waypointsGoups)
+            foreach (var waypoints in waypointsGoups.Where(g => g.Length > 1))
             {
                 var lengthInKm = ToItmLineString(waypoints).Length/1000;
                 var timeInHours = (waypoints.Last().time - waypoints.First().time).TotalHours;
