@@ -50,38 +50,91 @@ namespace IsraelHiking.API.Services
         }
 
         /// <summary>
-        /// Simplifies the geometry
+        /// Simplifies the geometry, allways keeps the first and last points
         /// </summary>
         /// <returns>A simplified <see cref="LineString"/></returns>
         public LineString GetResultGeometry()
         {
             var coordinates = _geometry.Coordinates;
-            if (coordinates.Length == 0)
+            if (coordinates.Length <= 1)
             {
                 return null;
             }
-            var simplified = new List<Coordinate> {coordinates.First()};
-            for (int coordinateIndex = 1; coordinateIndex < coordinates.Length; coordinateIndex++)
+            if (coordinates.Length == 2 && coordinates.First().Distance(coordinates.Last()) < DistanceTolerance)
+            {
+                return null;
+            }
+            if (coordinates.Length == 2)
+            {
+                return new LineString(coordinates);
+            }
+            var simplified = new List<Coordinate> { coordinates.First(), coordinates.Skip(1).First() };
+            for (int coordinateIndex = 2; coordinateIndex < coordinates.Length - 1; coordinateIndex++)
             {
                 var coordinate = coordinates[coordinateIndex];
-                if (simplified.Count > 1)
+                if (SimplifyByAngle(coordinateIndex, coordinates, simplified))
                 {
-                    var angle1 = AngleUtility.ToDegrees(AngleUtility.Angle(simplified[simplified.Count - 2], simplified.Last()));
-                    var angle2 = AngleUtility.ToDegrees(AngleUtility.Angle(simplified.Last(), coordinate));
-                    var angleDifference = Math.Abs(angle2 - angle1);
-                    if ((angleDifference < 180 - AngleTolerance) || (angleDifference > 180 + AngleTolerance))
-                    {
-                        simplified.Add(coordinate);
-                        continue;
-                    }
+                    continue;
                 }
-                
+                //var angle1 = AngleUtility.ToDegrees(AngleUtility.Angle(simplified[simplified.Count - 2], simplified.Last()));
+                //var angle2 = AngleUtility.ToDegrees(AngleUtility.Angle(simplified.Last(), coordinate));
+                //var angleDifference = Math.Abs(angle2 - angle1);
+                //if ((angleDifference < 180 - AngleTolerance) || (angleDifference > 180 + AngleTolerance))
+                //{
+                //    simplified.Add(coordinate);
+                //    continue;
+                //}
+
                 if (coordinate.Distance(simplified.Last()) > DistanceTolerance)
                 {
                     simplified.Add(coordinate);
                 }
             }
-            return simplified.Count <= 1 ? null : new LineString(simplified.ToArray());
+            simplified.Add(coordinates.Last());
+            if (simplified.Count == 2 && simplified.First().Distance(simplified.Last()) < DistanceTolerance)
+            {
+                return null;
+            }
+
+            return new LineString(simplified.ToArray());
+        }
+
+        private bool SimplifyByAngle(int coordinateIndex, Coordinate[] coordinates, List<Coordinate> simplified)
+        {
+            var coordinate = coordinates[coordinateIndex];
+            var angleDifference = GetAngleDifference(simplified[simplified.Count - 2], simplified.Last(), coordinate);
+            if (IsObtuseAngle(angleDifference))
+            {
+                simplified.Add(coordinate);
+                return true;
+            }
+            // sharp angle
+            if (coordinateIndex + 1 < coordinates.Length && 
+                (coordinate.Distance(simplified.Last()) < DistanceTolerance ||
+                simplified.Last().Distance(simplified[simplified.Count - 2]) < DistanceTolerance))
+            {
+                angleDifference = GetAngleDifference(simplified[simplified.Count - 2], simplified.Last(), coordinates[coordinateIndex + 1]);
+                if (IsObtuseAngle(angleDifference))
+                {
+                    return false;
+                }
+                simplified.Remove(simplified.Last());
+                simplified.Add(coordinate);
+                return true;
+            }
+            return false;
+        }
+
+        private double GetAngleDifference(Coordinate coordinate1, Coordinate coordinate2, Coordinate coordinate3)
+        {
+            var angle1 = AngleUtility.ToDegrees(AngleUtility.Angle(coordinate1, coordinate2));
+            var angle2 = AngleUtility.ToDegrees(AngleUtility.Angle(coordinate2, coordinate3));
+            return Math.Abs(angle2 - angle1);
+        }
+
+        private bool IsObtuseAngle(double angle)
+        {
+            return (angle < 180 - AngleTolerance) || (angle > 180 + AngleTolerance);
         }
     }
 }

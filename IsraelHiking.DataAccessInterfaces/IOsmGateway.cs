@@ -10,6 +10,7 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<string> CreateChangeset(string comment);
         Task<string> CreateNode(string changesetId, Node node);
         Task<string> CreateWay(string changesetId, Way way);
+        Task UpdateWay(string changesetId, Way way);
         Task<CompleteWay> GetCompleteWay(string wayId);
         Task CloseChangeset(string changesetId);
         Task UploadFile(string fileName, MemoryStream fileStream);

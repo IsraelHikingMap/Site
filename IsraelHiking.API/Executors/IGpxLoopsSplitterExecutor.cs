@@ -1,12 +1,12 @@
 ﻿using System.Collections.Generic;
 using NetTopologySuite.Geometries;
 
-namespace IsraelHiking.API.Services
+namespace IsraelHiking.API.Executors
 {
     /// <summary>
     /// This interface facilitates for breaking a gpx that might have a loop into non-loop gpx lines
     /// </summary>
-    public interface IGpxLoopsSplitterService
+    public interface IGpxLoopsSplitterExecutor
     {
         /// <summary>
         /// This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
@@ -29,5 +29,6 @@ namespace IsraelHiking.API.Services
         /// <param name="closestPointTolerance">The tolerance of the distance that is considered a self loop</param>
         /// <returns>a list of lines that do not have self loops</returns>
         List<LineString> SplitSelfLoops(LineString gpxLine, double closestPointTolerance);
+
     }
 }

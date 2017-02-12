@@ -28,6 +28,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
             var configurationProvide = Substitute.For<IConfigurationProvider>();
             configurationProvide.ClosestPointTolerance.Returns(30);
+            configurationProvide.DistanceToExisitngLineMergeThreshold.Returns(1);
             _service = new OsmLineAdderService(_elasticSearchGateway, new CoordinatesConverter(), configurationProvide, geoJsonPreProcessor, _httpGatewayFactory);
         }
 
@@ -94,7 +95,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         public void AddLine_OneHighwayNearEnd_ShouldAddTheLineAndConnectIt()
         {
             var osmGateway = SetupOsmGateway("42");
-            SetupHighway(42, new[] { new Coordinate(0, 1.0001), new Coordinate(0, 2) }, osmGateway);
+            SetupHighway(42, new[] { new Coordinate(0, 1.0000001), new Coordinate(0, 2) }, osmGateway);
 
             _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
 
@@ -115,13 +116,12 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             _service.Add(new LineString(new[]
             {
-                new Coordinate(-0.1, 0.01),
+                new Coordinate(-0.1, 0.001),
                 new Coordinate(-0.0001, 0),
-                new Coordinate(0.1, 0.01)
+                new Coordinate(0.1, 0.001)
             }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 3));
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 4));
         }
 
         /// <summary>
@@ -130,7 +130,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         ///      |
         /// </summary>
         [TestMethod]
-        public void AddUShapeDenseLine_OneHighwayNearMiddle_OnlyOneConnectingLine()
+        public void AddUShapeDenseLine_OneHighwayNearMiddle_OnlyOneExtraPoint()
         {
             var osmGateway = SetupOsmGateway("42");
             SetupHighway(42, new[] { new Coordinate(0, 0), new Coordinate(0, -1) }, osmGateway);
@@ -143,9 +143,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(0.1, 0.01)
             }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 4));
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
-            osmGateway.Received(2).CreateWay(Arg.Any<string>(), Arg.Any<Way>());
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 5));
         }
 
         /// <summary>
@@ -153,7 +151,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         ///  |__|
         /// </summary>
         [TestMethod]
-        public void AddWShapeDenseLine_HighwayUShape_TwoConnectingLines()
+        public void AddWShapeDenseLine_HighwayUShape_TwoExtraPoints()
         {
             var osmGateway = SetupOsmGateway("42");
             SetupHighway(42, new[]
@@ -176,9 +174,32 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(1.0001, 1),
             }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 7));
-            osmGateway.Received(2).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
-            osmGateway.Received(3).CreateWay(Arg.Any<string>(), Arg.Any<Way>());
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 9));
+        }
+
+        /// <summary>
+        ///  _|_
+        /// </summary>
+        [TestMethod]
+        public void AddStraightLine_HighwaySparseOrthogonalStrightLine_ShouldUpdateExitingWay()
+        {
+            var osmGateway = SetupOsmGateway("42");
+            SetupHighway(42, new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(1, 0),
+                },
+                osmGateway);
+
+            _service.Add(new LineString(new[]
+            {
+                new Coordinate(0.5, 1),
+                new Coordinate(0.5, 0),
+            }), new Dictionary<string, string>(), null).Wait();
+
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
+            osmGateway.Received(2).CreateNode(Arg.Any<string>(), Arg.Any<Node>());
+            osmGateway.Received(1).UpdateWay(Arg.Any<string>(), Arg.Any<Way>());
         }
 
         [TestMethod]
@@ -202,8 +223,6 @@ namespace IsraelHiking.API.Tests.Services.Osm
             }), new Dictionary<string, string>(), null).Wait();
 
             osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 4));
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
-            osmGateway.Received(2).CreateWay(Arg.Any<string>(), Arg.Any<Way>());
         }
     }
 }

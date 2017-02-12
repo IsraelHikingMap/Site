@@ -148,6 +148,8 @@
     <Compile Include="Converters\GpxGeoJsonConverter.cs" />
     <Compile Include="Converters\IOsmGeoJsonConverter.cs" />
     <Compile Include="Converters\OsmGeoJsonConverter.cs" />
+    <Compile Include="Executors\GpxProlongerExecutor.cs" />
+    <Compile Include="Executors\IGpxProlongerExecutor.cs" />
     <Compile Include="Gpx\SerializarionExtensions.cs" />
     <Compile Include="Gpx\GpxTypes.cs">
       <DependentUpon>GpxTypes.xsd</DependentUpon>
@@ -157,11 +159,12 @@
     <Compile Include="Services\GeoJsonFeatureHelper.cs" />
     <Compile Include="Converters\ConverterFlows\IConverterFlowItem.cs" />
     <Compile Include="Services\AddibleGpxLinesFinderService.cs" />
-    <Compile Include="Services\GpxLoopsSplitterService.cs" />
+    <Compile Include="Executors\GpxLoopsSplitterExecutor.cs" />
     <Compile Include="Services\IAddibleGpxLinesFinderService.cs" />
-    <Compile Include="Services\IGpxLoopsSplitterService.cs" />
+    <Compile Include="Executors\IGpxLoopsSplitterExecutor.cs" />
     <Compile Include="Services\IImageCreationService.cs" />
     <Compile Include="Services\ImageCreationService.cs" />
+    <Compile Include="Services\LineStringExtensions.cs" />
     <Compile Include="Services\Osm\IOsmLineAdderService.cs" />
     <Compile Include="Services\Osm\OsmLineAdderService.cs" />
     <Compile Include="Services\Osm\IOsmDataService.cs" />
@@ -219,6 +222,7 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

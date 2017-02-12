@@ -100,7 +100,7 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Finds missing parts of a given route
+        /// Finds unmapped parts of a given route
         /// </summary>
         /// <param name="url">The url to fetch the file from - optional, use file upload if not provided</param>
         /// <returns></returns>
@@ -111,16 +111,20 @@ namespace IsraelHiking.API.Controllers
             var fileFetcherGatewayResponse = await GetFile(url);
             if (fileFetcherGatewayResponse == null)
             {
-                return BadRequest("Url is not provided or file is empty...");
+                return BadRequest("Url is not provided or the file is empty...");
             }
             var gpxBytes = await _dataContainerConverterService.Convert(fileFetcherGatewayResponse.Content, fileFetcherGatewayResponse.FileName, DataContainerConverterService.GPX);
             var gpx = gpxBytes.ToGpx().UpdateBounds();
             var highwayType = GetHighwayType(gpx);
-            var gpxLines = GpxToLineStrings(gpx);
-            var manipulatedLines = await _addibleGpxLinesFinderService.GetLines(gpxLines);
+            var gpxItmLines = GpxToItmLineStrings(gpx);
+            var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
             var attributesTable = new AttributesTable();
             attributesTable.AddAttribute("highway", highwayType);
-            var features = manipulatedLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
+            if (string.IsNullOrEmpty(url) == false)
+            {
+                attributesTable.AddAttribute("source", url);
+            }
+            var features = manipulatedItmLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
             return Ok(new FeatureCollection(new Collection<IFeature>(features)));
         }
 
@@ -209,8 +213,16 @@ namespace IsraelHiking.API.Controllers
                     Latitude = (double) wptType.lat
                 });
                 return new Coordinate(northEast.East, northEast.North);
-            }).ToArray();
-            return new LineString(coordinates);
+            });
+            var nonDuplicates = new List<Coordinate>();
+            foreach (var coordinate in coordinates)
+            {
+                if (nonDuplicates.Count <= 0 || !nonDuplicates.Last().Equals2D(coordinate))
+                {
+                    nonDuplicates.Add(coordinate);
+                }
+            }
+            return new LineString(nonDuplicates.ToArray());
         }
 
         private LineString ToWgs84LineString(IEnumerable<Coordinate> coordinates)
@@ -223,11 +235,19 @@ namespace IsraelHiking.API.Controllers
                     East = (int) coordinate.X
                 });
                 return new Coordinate(latLng.Longitude, latLng.Latitude);
-            }).ToArray();
-            return new LineString(cwgs84Coordinates);
+            });
+            var nonDuplicates = new List<Coordinate>();
+            foreach (var coordinate in cwgs84Coordinates)
+            {
+                if (nonDuplicates.Count <= 0 || !nonDuplicates.Last().Equals2D(coordinate))
+                {
+                    nonDuplicates.Add(coordinate);
+                }
+            }
+            return new LineString(nonDuplicates.ToArray());
         }
 
-        private List<LineString> GpxToLineStrings(gpxType gpx)
+        private List<LineString> GpxToItmLineStrings(gpxType gpx)
         {
             var lineStings = (gpx.rte ?? new rteType[0])
                 .Select(route => ToItmLineString(route.rtept)).ToList();

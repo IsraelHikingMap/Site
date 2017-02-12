@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -99,36 +100,46 @@ namespace IsraelHiking.API.Controllers
                 return ConvertListingToReponse(new FileExplorerViewModel());
             }
             var fileExplorerViewModel = new FileExplorerViewModel();
-            var directories = _fileSystemHelper.GetNonHiddenDirectories(fullPath);
-            fileExplorerViewModel.Entries.AddRange(
-                directories.Select(directory => new FileSystemEntry
-                {
-                    Name = _fileSystemHelper.GetShortName(directory) + "/",
-                    LastModified = _fileSystemHelper.GetLastModifiedDate(directory),
-                    Size = 0,
-                    Link = currenUri + _fileSystemHelper.GetShortName(directory) + "/"
-                }).ToList());
-            var files = _fileSystemHelper.GetNonHiddenFiles(fullPath);
-            fileExplorerViewModel.Entries.AddRange(files.Select(file => new FileSystemEntry
-            {
-                Name = _fileSystemHelper.GetShortName(file),
-                LastModified = _fileSystemHelper.GetLastModifiedDate(file),
-                Link = currenUri + _fileSystemHelper.GetShortName(file),
-                Size = _fileSystemHelper.GetSize(file)
-            }).ToList());
+            fileExplorerViewModel.Entries.AddRange(ConvertDirectories(fullPath, currenUri));
+            fileExplorerViewModel.Entries.AddRange(ConvertFiles(fullPath, currenUri));
             string baseHeaderName = baseUri.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries).Last() + "/";
             fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry { Name = baseHeaderName, Link = baseUri });
             var currentLink = baseUri;
             foreach (var header in path.Split(new[] { '/' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                currentLink += header + "/";
+                var headerWithDelimiter = header + "/";
+                currentLink += headerWithDelimiter;
                 fileExplorerViewModel.CurrentEntryPath.Add(new FileSystemEntry
                 {
-                    Name = header + "/",
+                    Name = headerWithDelimiter,
                     Link = currentLink
                 });
             }
             return ConvertListingToReponse(fileExplorerViewModel);
+        }
+
+        private List<FileSystemEntry> ConvertFiles(string fullPath, string currenUri)
+        {
+            var files = _fileSystemHelper.GetNonHiddenFiles(fullPath);
+            return files.Select(file => new FileSystemEntry
+            {
+                Name = _fileSystemHelper.GetShortName(file),
+                LastModified = _fileSystemHelper.GetLastModifiedDate(file),
+                Link = currenUri + _fileSystemHelper.GetShortName(file),
+                Size = _fileSystemHelper.GetSize(file)
+            }).ToList();
+        }
+
+        private List<FileSystemEntry> ConvertDirectories(string fullPath, string currenUri)
+        {
+            var directories = _fileSystemHelper.GetNonHiddenDirectories(fullPath);
+            return directories.Select(directory => new FileSystemEntry
+            {
+                Name = _fileSystemHelper.GetShortName(directory) + "/",
+                LastModified = _fileSystemHelper.GetLastModifiedDate(directory),
+                Size = 0,
+                Link = currenUri + _fileSystemHelper.GetShortName(directory) + "/"
+            }).ToList();
         }
 
         private string GetListingPhysicalPath(string path)

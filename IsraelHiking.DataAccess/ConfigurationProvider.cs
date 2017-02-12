@@ -18,14 +18,13 @@ namespace IsraelHiking.DataAccess
         public double MinimalMissingSelfLoopPartLegth { get; }
         public double RadialSimplificationAngle { get; }
         public double MinimalSplitSimplificationTolerace { get; }
+        public double DistanceToExisitngLineMergeThreshold { get; }
+        public double MaximalProlongLineLength { get; }
         public double MinimalSegmentLength { get; }
         public double SearchFactor { get; }
         public string BinariesFolder { get; }
         public OsmConfiguraionData OsmConfiguraion { get; set; }
 
-        //public string OsmConsumerKey { get; }
-        //public string OsmConsumerSecret { get; }
-        //public string OsmBaseAddress { get; }
         public Dictionary<string, string> ListingDictionary { get; }
 
         public ConfigurationProvider()
@@ -33,6 +32,8 @@ namespace IsraelHiking.DataAccess
             MaxCacheSize = GetValueOrDefault(nameof(MaxCacheSize), 200); // number 
             MaxSegmentsNumber = GetValueOrDefault(nameof(MaxSegmentsNumber), 40); // number
             MinimalSplitSimplificationTolerace = GetValueOrDefault(nameof(MinimalSplitSimplificationTolerace), 50); // meters
+            DistanceToExisitngLineMergeThreshold = GetValueOrDefault(nameof(DistanceToExisitngLineMergeThreshold), 5); // meters
+            MaximalProlongLineLength = GetValueOrDefault(nameof(MaximalProlongLineLength), 200); // meters
             MinimalSegmentLength = GetValueOrDefault(nameof(MinimalSegmentLength), 500); // meters
             ClosestPointTolerance = GetValueOrDefault(nameof(ClosestPointTolerance), 30); // meters
             SimplificationTolerance = GetValueOrDefault(nameof(SimplificationTolerance), 3); // meters

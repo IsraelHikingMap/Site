@@ -400,7 +400,7 @@
         </member>
         <member name="M:IsraelHiking.API.Controllers.OsmController.PostGpsTrace(System.String)">
             <summary>
-            Finds missing parts of a given route
+            Finds unmapped parts of a given route
             </summary>
             <param name="url">The url to fetch the file from - optional, use file upload if not provided</param>
             <returns></returns>
@@ -734,6 +734,79 @@
             <param name="collection">The GeoJson data to convert</param>
             <returns>The GPX data </returns>
         </member>
+        <member name="T:IsraelHiking.API.Executors.GpxProlongerExecutor">
+            <inheritdoc/>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.GpxProlongerExecutor.ProlongLineStart(NetTopologySuite.Geometries.LineString,GeoAPI.Geometries.Coordinate[],System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
+            <inheritdoc/>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.GpxProlongerExecutor.ProlongLineEnd(NetTopologySuite.Geometries.LineString,GeoAPI.Geometries.Coordinate[],System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
+            <inheritdoc/>
+        </member>
+        <member name="T:IsraelHiking.API.Executors.IGpxProlongerExecutor">
+            <summary>
+            This interface facilitates for prolonging a line based on original gps trace
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.IGpxProlongerExecutor.ProlongLineEnd(NetTopologySuite.Geometries.LineString,GeoAPI.Geometries.Coordinate[],System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
+            <summary>
+            This method prolongs the line's end according to the original coordinates
+            </summary>
+            <param name="lineToProlong">The line to prolong</param>
+            <param name="originalCoordinates">The original coordinates that start from the line's end</param>
+            <param name="existingLineStrings">Existing lines in the area</param>
+            <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
+            <param name="maximalLength">The maximal length to try and prolong the line</param>
+            <returns>A prolonged line</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.IGpxProlongerExecutor.ProlongLineStart(NetTopologySuite.Geometries.LineString,GeoAPI.Geometries.Coordinate[],System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
+            <summary>
+            This method prolongs the line's start according to the original coordinates
+            </summary>
+            <param name="lineToProlong">The line to prolong</param>
+            <param name="originalCoordinates">The original coordinates that end in the line's start position</param>
+            <param name="existingLineStrings">Existing lines in the area</param>
+            <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
+            <param name="maximalLength">The maximal length to try and prolong the line</param>
+            <returns>A prolonged line</returns>
+        </member>
+        <member name="T:IsraelHiking.API.Executors.GpxLoopsSplitterExecutor">
+            <inheritdoc/>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.GpxLoopsSplitterExecutor.GetMissingLines(NetTopologySuite.Geometries.LineString,System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
+            <inheritdoc/>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.GpxLoopsSplitterExecutor.SplitSelfLoops(NetTopologySuite.Geometries.LineString,System.Double)">
+            <inheritdoc/>
+        </member>
+        <member name="T:IsraelHiking.API.Executors.IGpxLoopsSplitterExecutor">
+            <summary>
+            This interface facilitates for breaking a gpx that might have a loop into non-loop gpx lines
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.IGpxLoopsSplitterExecutor.GetMissingLines(NetTopologySuite.Geometries.LineString,System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
+            <summary>
+            This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
+            This can be used with both OSM lines and other parts of the same GPS trace.
+            The algorithm is faily simple - 
+            Go over all the points in the given <see cref="T:NetTopologySuite.Geometries.LineString"/> and look for point that are close to existingLineStrings />
+            </summary>
+            <param name="gpxLine">The line to manipulate</param>
+            <param name="existingLineStrings">The lines to test agains</param>
+            <param name="minimalMissingPartLength">The minimal length allowed to a trace that can be added</param>
+            <param name="closestPointTolerance">The distace of the closest point allowed</param>
+            <returns>a split line from the orignal line</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.IGpxLoopsSplitterExecutor.SplitSelfLoops(NetTopologySuite.Geometries.LineString,System.Double)">
+            <summary>
+            This part of the splitter if responsible for splitting a line with a self loop.
+            It will allway return lines that do not have self loop, but can be duplicate of one another
+            Use <see cref="M:IsraelHiking.API.Executors.IGpxLoopsSplitterExecutor.GetMissingLines(NetTopologySuite.Geometries.LineString,System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)"/> method to remove those duplications.
+            </summary>
+            <param name="gpxLine">The line to look for self loops in</param>
+            <param name="closestPointTolerance">The tolerance of the distance that is considered a self loop</param>
+            <returns>a list of lines that do not have self loops</returns>
+        </member>
         <member name="T:IsraelHiking.API.Gpx.GpxTypes.gpxType">
             <remarks/>
         </member>
@@ -1045,25 +1118,17 @@
         <member name="T:IsraelHiking.API.Services.AddibleGpxLinesFinderService">
             <inheritdoc/>
         </member>
-        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.#ctor(IsraelHiking.API.Services.IGpxLoopsSplitterService,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.IConfigurationProvider)">
+        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.#ctor(IsraelHiking.API.Executors.IGpxLoopsSplitterExecutor,IsraelHiking.API.Executors.IGpxProlongerExecutor,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.IConfigurationProvider)">
             <summary>
             Constructor
             </summary>
-            <param name="gpxLoopsSplitterService"></param>
+            <param name="gpxLoopsSplitterExecutor"></param>
+            <param name="gpxProlongerExecutor"></param>
             <param name="coordinatesConverter"></param>
             <param name="elasticSearchGateway"></param>
             <param name="configurationProvider"></param>
         </member>
         <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.GetLines(System.Collections.Generic.List{NetTopologySuite.Geometries.LineString})">
-            <inheritdoc/>
-        </member>
-        <member name="T:IsraelHiking.API.Services.GpxLoopsSplitterService">
-            <inheritdoc/>
-        </member>
-        <member name="M:IsraelHiking.API.Services.GpxLoopsSplitterService.GetMissingLines(NetTopologySuite.Geometries.LineString,System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
-            <inheritdoc/>
-        </member>
-        <member name="M:IsraelHiking.API.Services.GpxLoopsSplitterService.SplitSelfLoops(NetTopologySuite.Geometries.LineString,System.Double)">
             <inheritdoc/>
         </member>
         <member name="T:IsraelHiking.API.Services.IAddibleGpxLinesFinderService">
@@ -1077,39 +1142,11 @@
             1. removed all the points that are close to existing lines from OSM (stored in the ES database)
             2. Split the remaining lines so that after the split there are no self loops in each line
             3. remove duplicate lines (caused by splitting self loops)
-            4. Simplify lines using Douglas-Peucker and Radial angle simlifires
+            4. Simplify lines using Douglas-Peucker and Radial angle simplifires
             5. Merge the lines back if possible
             </summary>
-            <param name="gpxLines">The lines to manipulate</param>
+            <param name="gpxItmLines">The lines to manipulate</param>
             <returns>The lines after manupulation</returns>
-        </member>
-        <member name="T:IsraelHiking.API.Services.IGpxLoopsSplitterService">
-            <summary>
-            This interface facilitates for breaking a gpx that might have a loop into non-loop gpx lines
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Services.IGpxLoopsSplitterService.GetMissingLines(NetTopologySuite.Geometries.LineString,System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)">
-            <summary>
-            This part of this splitter will remove line that already exsits and will split lines that are close to an exsiting line.
-            This can be used with both OSM lines and other parts of the same GPS trace.
-            The algorithm is faily simple - 
-            Go over all the points in the given <see cref="T:NetTopologySuite.Geometries.LineString"/> and look for point that are close to existingLineStrings />
-            </summary>
-            <param name="gpxLine">The line to manipulate</param>
-            <param name="existingLineStrings">The lines to test agains</param>
-            <param name="minimalMissingPartLength">The minimal length allowed to a trace that can be added</param>
-            <param name="closestPointTolerance">The distace of the closest point allowed</param>
-            <returns>a split line from the orignal line</returns>
-        </member>
-        <member name="M:IsraelHiking.API.Services.IGpxLoopsSplitterService.SplitSelfLoops(NetTopologySuite.Geometries.LineString,System.Double)">
-            <summary>
-            This part of the splitter if responsible for splitting a line with a self loop.
-            It will allway return lines that do not have self loop, but can be duplicate of one another
-            Use <see cref="M:IsraelHiking.API.Services.IGpxLoopsSplitterService.GetMissingLines(NetTopologySuite.Geometries.LineString,System.Collections.Generic.IReadOnlyList{NetTopologySuite.Geometries.LineString},System.Double,System.Double)"/> method to remove those duplications.
-            </summary>
-            <param name="gpxLine">The line to look for self loops in</param>
-            <param name="closestPointTolerance">The tolerance of the distance that is considered a self loop</param>
-            <returns>a list of lines that do not have self loops</returns>
         </member>
         <member name="T:IsraelHiking.API.Services.IImageCreationService">
             <summary>
@@ -1165,13 +1202,6 @@
         </member>
         <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.Add(NetTopologySuite.Geometries.LineString,System.Collections.Generic.Dictionary{System.String,System.String},IsraelHiking.Common.TokenAndSecret)">
             <inheritdoc/>
-        </member>
-        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.FilterConnectionWays(System.Collections.Generic.List{IsraelHiking.API.Services.Osm.OsmLineAdderService.ConnectionWayData})">
-            <summary>
-            This method filters connections ways that are connecting sequential nodes to the same highway.
-            </summary>
-            <param name="connectionWays"></param>
-            <returns></returns>
         </member>
         <member name="M:IsraelHiking.API.Services.Osm.OsmDataService.Initialize(System.String)">
             <summary>
@@ -1319,7 +1349,7 @@
         </member>
         <member name="M:IsraelHiking.API.Services.RadialDistanceByAngleSimplifier.GetResultGeometry">
             <summary>
-            Simplifies the geometry
+            Simplifies the geometry, allways keeps the first and last points
             </summary>
             <returns>A simplified <see cref="T:NetTopologySuite.Geometries.LineString"/></returns>
         </member>

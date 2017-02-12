@@ -129,11 +129,12 @@
     <Compile Include="Controllers\UrlsControllerTests.cs" />
     <Compile Include="Converters\OsmGeoJsonConverterTests.cs" />
     <Compile Include="Converters\GpxGeoJsonConverterTests.cs" />
+    <Compile Include="Executors\GpxProlongerExecutorTests.cs" />
     <Compile Include="Gpx\GpxGeoJsonConverterTests.cs" />
     <Compile Include="Gpx\GpxDataContainerConverterTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataContainerConverterServiceTests.cs" />
-    <Compile Include="Services\GpxLoopsSplitterServiceTests.cs" />
+    <Compile Include="Executors\GpxLoopsSplitterExecutorTests.cs" />
     <Compile Include="Services\LruCacheTests.cs" />
     <Compile Include="Services\Osm\OsmLineAdderServiceTests.cs" />
     <Compile Include="Services\RadialDistanceByAngleSimplifierTests.cs" />

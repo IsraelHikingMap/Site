@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using IsraelHiking.API.Converters;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
@@ -19,7 +20,8 @@ namespace IsraelHiking.API
             container.RegisterType<ICoordinatesConverter, CoordinatesConverter>();
             container.RegisterType<IDataContainerConverterService, DataContainerConverterService>();
             container.RegisterType<IRouteDataSplitterService, RouteDataSplitterService>();
-            container.RegisterType<IGpxLoopsSplitterService, GpxLoopsSplitterService>();
+            container.RegisterType<IGpxProlongerExecutor, GpxProlongerExecutor>();
+            container.RegisterType<IGpxLoopsSplitterExecutor, GpxLoopsSplitterExecutor>();
             container.RegisterType<IAddibleGpxLinesFinderService, AddibleGpxLinesFinderService>();
             container.RegisterType<IOsmGeoJsonPreprocessor, OsmGeoJsonPreprocessor>();
             container.RegisterType<IOsmDataService, OsmDataService>();

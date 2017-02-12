@@ -12,6 +12,8 @@ namespace IsraelHiking.DataAccessInterfaces
         double MinimalMissingSelfLoopPartLegth { get; }
         double MinimalSegmentLength { get; }
         double MinimalSplitSimplificationTolerace { get; }
+        double DistanceToExisitngLineMergeThreshold { get; }
+        double MaximalProlongLineLength { get; }
         double RadialSimplificationAngle { get; }
         double SearchFactor { get; }
         double SimplificationTolerance { get; }

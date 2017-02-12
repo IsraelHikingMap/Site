@@ -14,11 +14,11 @@ namespace IsraelHiking.API.Services
         /// 1. removed all the points that are close to existing lines from OSM (stored in the ES database)
         /// 2. Split the remaining lines so that after the split there are no self loops in each line
         /// 3. remove duplicate lines (caused by splitting self loops)
-        /// 4. Simplify lines using Douglas-Peucker and Radial angle simlifires
+        /// 4. Simplify lines using Douglas-Peucker and Radial angle simplifires
         /// 5. Merge the lines back if possible
         /// </summary>
-        /// <param name="gpxLines">The lines to manipulate</param>
+        /// <param name="gpxItmLines">The lines to manipulate</param>
         /// <returns>The lines after manupulation</returns>
-        Task<IEnumerable<LineString>> GetLines(List<LineString> gpxLines);
+        Task<IEnumerable<LineString>> GetLines(List<LineString> gpxItmLines);
     }
 }

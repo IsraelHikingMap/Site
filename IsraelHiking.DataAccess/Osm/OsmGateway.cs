@@ -31,7 +31,8 @@ namespace IsraelHiking.DataAccess.Osm
         private readonly string _closeChangesetAddress;
         private readonly string _createNodeAddress;
         private readonly string _createWayAddress;
-        private readonly string _getFullWayAddress;
+        private readonly string _wayAddress;
+        private readonly string _completeWayAddress;
         private readonly string _createTraceAddress;
 
         public OsmGateway(TokenAndSecret tokenAndSecret, IConfigurationProvider configurationProvider, ILogger logger) : base(logger)
@@ -47,7 +48,8 @@ namespace IsraelHiking.DataAccess.Osm
             _closeChangesetAddress = osmApiBaseAddress + "changeset/#id/close";
             _createNodeAddress = osmApiBaseAddress + "node/create";
             _createWayAddress = osmApiBaseAddress + "way/create";
-            _getFullWayAddress = osmApiBaseAddress + "way/#id/full";
+            _wayAddress = osmApiBaseAddress + "way/#id";
+            _completeWayAddress = _wayAddress + "/full";
             _createTraceAddress = osmApiBaseAddress + "gpx/create";
         }
 
@@ -174,11 +176,43 @@ namespace IsraelHiking.DataAccess.Osm
             }
         }
 
+        public async Task UpdateWay(string changesetId, Way way)
+        {
+            using (var client = new HttpClient())
+            {
+                var address = _wayAddress.Replace("#id", way.Id.ToString());
+                UpdateHeaders(client, address, "PUT");
+                var updatedWay = new osm
+                {
+                    way = new[]
+                    {
+                        new way
+                        {
+                            changeset = long.Parse(changesetId),
+                            changesetSpecified = true,
+                            nd = way.Nodes.Select(n => new nd {@ref = n, refSpecified = true}).ToArray(),
+                            tag = ConvertTags(way.Tags),
+                            versionSpecified = way.Version.HasValue,
+                            version = way.Version ?? 0,
+                            idSpecified = way.Id.HasValue,
+                            id = way.Id ?? 0
+                        }
+                    }
+                };
+                var response = await client.PutAsync(address, new ObjectContent(typeof(osm), updatedWay, _xmlMediaTypeFormatter));
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Unable to update way with id: {way.Id} {message}");
+                }
+            }
+        }
+
         public async Task<CompleteWay> GetCompleteWay(string wayId)
         {
             using (var client = new HttpClient())
             {
-                var address = _getFullWayAddress.Replace("#id", wayId);
+                var address = _completeWayAddress.Replace("#id", wayId);
                 var response = await client.GetAsync(address);
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
@@ -199,7 +233,8 @@ namespace IsraelHiking.DataAccess.Osm
                 var response = await client.PutAsync(address, new StringContent(string.Empty));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    throw new Exception("Unable to close changeset with id: " + changesetId);
+                    var message = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Unable to close changeset with id: {changesetId} {message}");
                 }
             }
         }

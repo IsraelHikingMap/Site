@@ -17,20 +17,20 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
-        public void SimplifyLine_AllPointsAreInABunch_ShouldReturnNull()
+        public void SimplifyLine_ZigZag_ShouldReturnRemoveIt()
         {
             var line = new LineString(new[]
             {
                 new Coordinate(0,0),
                 new Coordinate(10, 0),
-                new Coordinate(0, 0),
-                new Coordinate(10, 0),
+                new Coordinate(1, 0),
+                new Coordinate(11, 0),
                 new Coordinate(0, 0),
             });
 
             var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 30);
 
-            Assert.IsNull(simplified);
+            Assert.AreEqual(line.Coordinates.Length - 1, simplified.Coordinates.Length);
         }
 
         [TestMethod]

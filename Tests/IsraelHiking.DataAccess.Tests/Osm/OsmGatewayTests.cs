@@ -96,6 +96,19 @@ namespace IsraelHiking.DataAccess.Tests.Osm
 
         [TestMethod]
         [Ignore]
+        public void UpdateWay()
+        {
+            var id = _gateway.CreateChangeset("test - add middle node in way").Result;
+            var way = _gateway.GetCompleteWay("4302709797").Result;
+            var simpleWay = (Way)way.ToSimple();
+            simpleWay.Nodes.Insert(1, 4305934441);
+            _gateway.UpdateWay(id, simpleWay).Wait();
+            _gateway.CloseChangeset(id).Wait();
+
+        }
+
+        [TestMethod]
+        [Ignore]
         public void UploadFile()
         {
             //var file = @"C:\Users\harel\Desktop\834159359.gpx";

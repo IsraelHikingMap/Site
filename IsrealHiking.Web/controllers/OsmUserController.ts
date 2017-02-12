@@ -269,7 +269,8 @@
             for (let feature of geoJson.features) {
                 let lineString = feature.geometry as GeoJSON.LineString;
                 let latLngs = Services.Parsers.GeoJsonParser.createLatlngArray(lineString.coordinates);
-                let polyline = L.polyline(latLngs, { color: "red", weight: 5, opacity: 1 } as L.PolylineOptions);
+                let unselectedPathOptions = { color: "red", weight: 3, opacity: 1 } as L.PathOptions;
+                let polyline = L.polyline(latLngs, unselectedPathOptions);
                 this.osmTraceLayer.addLayer(polyline);
                 let marker = L.marker(latLngs[0], { draggable: false, clickable: true, icon: Services.IconsService.createMissingPartMarkerIcon() } as L.MarkerOptions);
                 let newScope = $scope.$new() as MarkerPopup.IMissingPartMarkerPopupScope;
@@ -277,10 +278,14 @@
                 newScope.feature = feature;
                 newScope.remove = () => {
                     marker.closePopup();
+                    marker.off("popupopen");
+                    marker.off("popupclose");
                     this.osmTraceLayer.removeLayer(polyline);
                     this.osmTraceLayer.removeLayer(marker);
                 };
                 marker.bindPopup(this.$compile("<div missing-part-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
+                marker.on("popupopen", () => { polyline.setStyle({ color: "DarkRed ", weight: 5, opacity: 1 } as L.PathOptions); });
+                marker.on("popupclose", () => { polyline.setStyle(unselectedPathOptions); });
                 this.osmTraceLayer.addLayer(marker);
             }
 
