@@ -160,6 +160,7 @@ namespace IsraelHiking.API.Tests.Services
             _configurationProvider.MaxNumberOfPointsPerLine.Returns(3);
             _configurationProvider.ClosestPointTolerance.Returns(5);
             _configurationProvider.DistanceToExisitngLineMergeThreshold.Returns(1);
+            _configurationProvider.MaximalProlongLineLength.Returns(200);
             SetupHighways(new List<LineString> {
                 new LineString(new [] { new Coordinate(0,0), new Coordinate(0,10)}),
                 new LineString(new [] { new Coordinate(0,40), new Coordinate(0,50)})

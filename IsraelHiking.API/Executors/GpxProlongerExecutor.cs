@@ -2,6 +2,7 @@
 using System.Linq;
 using GeoAPI.Geometries;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.LinearReferencing;
 
 namespace IsraelHiking.API.Executors
 {
@@ -10,9 +11,9 @@ namespace IsraelHiking.API.Executors
     public class GpxProlongerExecutor : IGpxProlongerExecutor
     {
         /// <inheritdoc/>
-        public LineString ProlongLineStart(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingLineStrings, double minimalDistance, double maximalLength)
+        public LineString ProlongLineStart(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingItmHighways, double minimalDistance, double maximalLength)
         {
-            var coordinateToAdd = ProlongLine(lineToProlong.Coordinates.First(), originalCoordinates.Reverse().ToArray(), lineToProlong, existingLineStrings, minimalDistance, maximalLength);
+            var coordinateToAdd = ProlongLine(lineToProlong.Coordinates.First(), originalCoordinates.Reverse().ToArray(), lineToProlong, existingItmHighways, minimalDistance, maximalLength);
             if (coordinateToAdd != null)
             {
                 return new LineString(new[] { coordinateToAdd }.Concat(lineToProlong.Coordinates).ToArray());
@@ -21,9 +22,9 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public LineString ProlongLineEnd(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingLineStrings, double minimalDistance, double maximalLength)
+        public LineString ProlongLineEnd(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingItmHighways, double minimalDistance, double maximalLength)
         {
-            var coordinateToAdd = ProlongLine(lineToProlong.Coordinates.Last(), originalCoordinates, lineToProlong, existingLineStrings, minimalDistance, maximalLength);
+            var coordinateToAdd = ProlongLine(lineToProlong.Coordinates.Last(), originalCoordinates, lineToProlong, existingItmHighways, minimalDistance, maximalLength);
             if (coordinateToAdd != null)
             {
                 return new LineString(lineToProlong.Coordinates.Concat(new[] { coordinateToAdd }).ToArray());
@@ -31,17 +32,17 @@ namespace IsraelHiking.API.Executors
             return lineToProlong;
         }
 
-        private Coordinate ProlongLine(Coordinate startCoordinate, Coordinate[] originalCoordinates, LineString lineToProlong, IReadOnlyList<LineString> existingLineStrings, double minimalDistance, double maximalLength)
+        private Coordinate ProlongLine(Coordinate startCoordinate, Coordinate[] originalCoordinates, LineString lineToProlong, IReadOnlyList<LineString> existingItmHighways, double minimalDistance, double maximalLength)
         {
-            Coordinate prolongCoordinate = startCoordinate;
-            var point = new Point(startCoordinate);
+            var prolongCoordinate = startCoordinate;
+            var lineToTestAgainst = new LineString(new [] {startCoordinate, prolongCoordinate});
             var originalLineIndex = 0;
-            if (!existingLineStrings.Any())
+            if (!existingItmHighways.Any())
             {
                 return null;
             }
-            var closestLine = existingLineStrings.OrderBy(l => point.Distance(l)).First();
-            while (closestLine.Distance(point) >= minimalDistance)
+            var closestLine = existingItmHighways.OrderBy(l => lineToTestAgainst.Distance(l)).First();
+            while (closestLine.Distance(lineToTestAgainst) >= minimalDistance)
             {
                 if (originalLineIndex >= originalCoordinates.Length)
                 {
@@ -53,28 +54,58 @@ namespace IsraelHiking.API.Executors
                 }
                 prolongCoordinate = originalCoordinates[originalLineIndex];
                 originalLineIndex++;
-                point = new Point(prolongCoordinate);
-                closestLine = existingLineStrings.OrderBy(l => point.Distance(l)).First();
+                lineToTestAgainst = new LineString(new[] { startCoordinate, prolongCoordinate });
+                closestLine = existingItmHighways.OrderBy(l => lineToTestAgainst.Distance(l)).First();
             }
 
+            var coordinateToAdd = GetCoordinateToAdd(lineToTestAgainst, closestLine, minimalDistance);
+            var connectionLine = new LineString(new[] { startCoordinate, coordinateToAdd });
+            if (connectionLine.Crosses(lineToProlong))
+            {
+                return null;
+            }
+            var crossedLines = existingItmHighways.Where(l => l.Crosses(connectionLine)).ToArray();
+            if (crossedLines.Any() == false)
+            {
+                return coordinateToAdd;
+            }
+            foreach (var crossedLine in crossedLines)
+            {
+                coordinateToAdd = GetCoordinateToAdd(lineToTestAgainst, crossedLine, minimalDistance);
+                connectionLine = new LineString(new[] { startCoordinate, coordinateToAdd });
+                if (crossedLines.Any(l => l.Crosses(connectionLine)) == false)
+                {
+                    return coordinateToAdd;
+                }
+            }
+            return null;
+        }
+
+        private static Coordinate GetCoordinateToAdd(LineString lineToTestAgainst, LineString closestLine, double minimalDistance)
+        {
             Coordinate coordinateToAdd;
-            if (closestLine.Coordinates.Last().Distance(point.Coordinate) < minimalDistance * 1.5)
+            var closestCoordinate = lineToTestAgainst.Coordinates.Last();
+            if (closestLine.Coordinates.Last().Distance(closestCoordinate) < minimalDistance*1.5)
             {
                 coordinateToAdd = closestLine.Coordinates.Last();
             }
-            else if (closestLine.Coordinates.First().Distance(point.Coordinate) < minimalDistance * 1.5)
+            else if (closestLine.Coordinates.First().Distance(closestCoordinate) < minimalDistance*1.5)
             {
                 coordinateToAdd = closestLine.Coordinates.First();
             }
             else
             {
-                var lineToAdd = new LineString(new[] { startCoordinate, point.Coordinate });
-                coordinateToAdd = lineToAdd.Buffer(minimalDistance).Intersection(closestLine).Coordinate;
-            }
-            var connectionLine = new LineString(new[] { startCoordinate, coordinateToAdd });
-            if (connectionLine.Crosses(lineToProlong) || existingLineStrings.Any(l => l.Crosses(connectionLine)))
-            {
-                return null;
+                var closestCoordinateOnExitingLine = closestLine.Coordinates.OrderBy(c => c.Distance(closestCoordinate)).First();
+                if (closestCoordinateOnExitingLine.Distance(closestCoordinate) < minimalDistance)
+                {
+                    coordinateToAdd = closestCoordinateOnExitingLine;
+                }
+                else
+                {
+                    var line = new LengthIndexedLine(closestLine);
+                    var projectedIndex = line.Project(closestCoordinate);
+                    coordinateToAdd = line.ExtractPoint(projectedIndex);
+                }
             }
             return coordinateToAdd;
         }

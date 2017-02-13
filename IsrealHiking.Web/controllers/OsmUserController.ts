@@ -280,12 +280,14 @@
                     marker.closePopup();
                     marker.off("popupopen");
                     marker.off("popupclose");
+                    polyline.off("click");
                     this.osmTraceLayer.removeLayer(polyline);
                     this.osmTraceLayer.removeLayer(marker);
                 };
                 marker.bindPopup(this.$compile("<div missing-part-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
-                marker.on("popupopen", () => { polyline.setStyle({ color: "DarkRed ", weight: 5, opacity: 1 } as L.PathOptions); });
+                marker.on("popupopen", () => { polyline.setStyle({ color: "DarkRed", weight: 5, opacity: 1 } as L.PathOptions); });
                 marker.on("popupclose", () => { polyline.setStyle(unselectedPathOptions); });
+                polyline.on("click", () => { marker.openPopup() });
                 this.osmTraceLayer.addLayer(marker);
             }
 

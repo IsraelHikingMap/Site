@@ -14,21 +14,21 @@ namespace IsraelHiking.API.Executors
         /// </summary>
         /// <param name="lineToProlong">The line to prolong</param>
         /// <param name="originalCoordinates">The original coordinates that start from the line's end</param>
-        /// <param name="existingLineStrings">Existing lines in the area</param>
+        /// <param name="existingItmHighways">Existing lines in the area</param>
         /// <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
         /// <param name="maximalLength">The maximal length to try and prolong the line</param>
         /// <returns>A prolonged line</returns>
-        LineString ProlongLineEnd(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingLineStrings, double minimalDistance, double maximalLength);
+        LineString ProlongLineEnd(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingItmHighways, double minimalDistance, double maximalLength);
 
         /// <summary>
         /// This method prolongs the line's start according to the original coordinates
         /// </summary>
         /// <param name="lineToProlong">The line to prolong</param>
         /// <param name="originalCoordinates">The original coordinates that end in the line's start position</param>
-        /// <param name="existingLineStrings">Existing lines in the area</param>
+        /// <param name="existingItmHighways">Existing lines in the area</param>
         /// <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
         /// <param name="maximalLength">The maximal length to try and prolong the line</param>
         /// <returns>A prolonged line</returns>
-        LineString ProlongLineStart(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingLineStrings, double minimalDistance, double maximalLength);
+        LineString ProlongLineStart(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingItmHighways, double minimalDistance, double maximalLength);
     }
 }

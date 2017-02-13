@@ -119,6 +119,7 @@ namespace IsraelHiking.API.Services.Osm
             var indexToInsert = indexOnWay;
             if (indexOnWay != closestItmHighway.Coordinates.Length - 1)
             {
+                // HM TODO: fix this using projection
                 var postItmLine = new LineString(new [] { closestItmHighway.Coordinates[indexOnWay], closestItmHighway.Coordinates[indexOnWay + 1] });
                 if (postItmLine.Distance(itmPoint) <= _configurationProvider.DistanceToExisitngLineMergeThreshold)
                 {

@@ -7,6 +7,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.LinearReferencing;
 using NetTopologySuite.Simplify;
 
 namespace IsraelHiking.API.Services
@@ -57,7 +58,7 @@ namespace IsraelHiking.API.Services
             linesToReturn = await ProlongLinesAccordingToOriginalGpx(linesToReturn, gpxItmLines);
             linesToReturn = MergeBackLines(linesToReturn); // after adding parts, possible merge options
             linesToReturn = SimplifyLines(linesToReturn); // need to simplify to remove sharp corners
-            // HM TODO: move intersection points after simplification?
+            linesToReturn = AdjustIntersections(linesToReturn); // intersections may have moved after simplification
             return linesToReturn;
 
             //return await MergeLines(missingLinesWithoutLoopsAndDuplications);
@@ -232,6 +233,63 @@ namespace IsraelHiking.API.Services
                     currentPositionIndex = gpxItmLines[currentLineIndex].Coordinates.Length - 1;
                 }
                 lookupCoordinate = gpxItmLines[currentLineIndex].Coordinates[currentPositionIndex];
+            }
+        }
+
+        private List<LineString> AdjustIntersections(List<LineString> gpxItmLines)
+        {
+            var adjustedLines = new List<LineString>();
+
+            for (int currnetLineIndex = gpxItmLines.Count - 1; currnetLineIndex >= 0; currnetLineIndex--)
+            {
+                var currentLine = gpxItmLines[currnetLineIndex];
+                for (int previousLineIndex = 0; previousLineIndex < currnetLineIndex; previousLineIndex++)
+                {
+                    var previousLine = gpxItmLines[previousLineIndex];
+                    currentLine = GetLineWithExtraPoints(currentLine, previousLine.Coordinates.First());
+                    currentLine = GetLineWithExtraPoints(currentLine, previousLine.Coordinates.Last());
+                }
+                var currentCoordinates = currentLine.Coordinates.ToList();
+                ReplaceEdgeIfNeeded(adjustedLines, currentCoordinates.First(), currentCoordinates);
+                ReplaceEdgeIfNeeded(adjustedLines, currentCoordinates.Last(), currentCoordinates);
+                adjustedLines.Add(new LineString(currentCoordinates.ToArray()));
+            }
+            return adjustedLines;
+        }
+
+        private LineString GetLineWithExtraPoints(LineString currentLine, Coordinate coordinateToAddIfNeeded)
+        {
+            var point = new Point(coordinateToAddIfNeeded);
+            if (currentLine.Distance(point) >= _configurationProvider.DistanceToExisitngLineMergeThreshold)
+            {
+                // coordinate not close enough
+                return currentLine;
+            }
+            var closestCoordinateOnGpx = currentLine.Coordinates.OrderBy(c => c.Distance(coordinateToAddIfNeeded)).First();
+            if (closestCoordinateOnGpx.Distance(coordinateToAddIfNeeded) <
+                _configurationProvider.DistanceToExisitngLineMergeThreshold)
+            {
+                // line already has a close enough coordinate
+                return currentLine;
+            }
+            // need to add a coordinate to the line
+            var coordinates = currentLine.Coordinates.ToList();
+            var line = new LocationIndexedLine(currentLine);
+            var projectedLocation = line.Project(coordinateToAddIfNeeded);
+            var coordinateToAdd = line.ExtractPoint(projectedLocation);
+            coordinates.Insert(projectedLocation.SegmentIndex + 1, coordinateToAdd);
+            return new LineString(coordinates.ToArray());
+        }
+
+        private void ReplaceEdgeIfNeeded(List<LineString> adjustedLines, Coordinate coordinate, List<Coordinate> currentCoordinates)
+        {
+            var coordinateReplacement = adjustedLines.SelectMany(l => l.Coordinates)
+                .Where(c => c.Distance(coordinate) < _configurationProvider.DistanceToExisitngLineMergeThreshold)
+                .OrderBy(c => c.Distance(coordinate))
+                .FirstOrDefault();
+            if (coordinateReplacement != null)
+            {
+                currentCoordinates[currentCoordinates.IndexOf(coordinate)] = coordinateReplacement;
             }
         }
     }

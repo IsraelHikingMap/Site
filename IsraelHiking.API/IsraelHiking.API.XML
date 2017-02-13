@@ -754,7 +754,7 @@
             </summary>
             <param name="lineToProlong">The line to prolong</param>
             <param name="originalCoordinates">The original coordinates that start from the line's end</param>
-            <param name="existingLineStrings">Existing lines in the area</param>
+            <param name="existingItmHighways">Existing lines in the area</param>
             <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
             <param name="maximalLength">The maximal length to try and prolong the line</param>
             <returns>A prolonged line</returns>
@@ -765,7 +765,7 @@
             </summary>
             <param name="lineToProlong">The line to prolong</param>
             <param name="originalCoordinates">The original coordinates that end in the line's start position</param>
-            <param name="existingLineStrings">Existing lines in the area</param>
+            <param name="existingItmHighways">Existing lines in the area</param>
             <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
             <param name="maximalLength">The maximal length to try and prolong the line</param>
             <returns>A prolonged line</returns>
