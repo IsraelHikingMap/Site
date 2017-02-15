@@ -244,8 +244,8 @@
                         },
                         {
                             title: $scope.resources.legendPurpleRegionalTrail,
-                            latlng: L.latLng(30.4967, 34.642),
-                            zoom: 16,
+                            latlng: L.latLng(33.0476, 35.3844),
+                            zoom: 15,
                             id: id++,
                             map: null,
                             type: "Way"
