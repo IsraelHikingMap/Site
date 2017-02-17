@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>())
                 .Returns(gpx.ToBytes());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
-            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
+            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<ILineString>>()).Returns(
                 addibleLines ?? new List <LineString>
                 {
                     new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
@@ -78,7 +78,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _osmLineAdderService = Substitute.For<IOsmLineAdderService>();
             _configurationProvider = Substitute.For<IConfigurationProvider>();
             _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, new CoordinatesConverter(), 
-                _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, _configurationProvider,
+                _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, _configurationProvider, GeometryFactory.Default,
                 new LruCache<string, TokenAndSecret>(_configurationProvider));
         }
 
@@ -173,7 +173,7 @@ namespace IsraelHiking.API.Tests.Controllers
             SetupUploadFile();
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
-            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<LineString>>()).Returns(
+            _addibleGpxLinesFinderService.GetLines(Arg.Any<List<ILineString>>()).Returns(
                 new List<LineString>
                 {
                     new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})

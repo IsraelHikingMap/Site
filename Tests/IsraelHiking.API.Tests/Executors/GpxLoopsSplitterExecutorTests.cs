@@ -14,7 +14,7 @@ namespace IsraelHiking.API.Tests.Executors
         [TestInitialize]
         public void TestInitialize()
         {
-            _executor = new GpxLoopsSplitterExecutor();
+            _executor = new GpxLoopsSplitterExecutor(GeometryFactory.Default);
         }
 
         [TestMethod]
@@ -98,8 +98,8 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(4, results.First().Count);
-            Assert.AreEqual(4, results.Last().Count);
+            Assert.AreEqual(4, results.First().Coordinates.Length);
+            Assert.AreEqual(4, results.Last().Coordinates.Length);
         }
         /// <summary>
         ///       _               _
@@ -123,8 +123,8 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(3, results.First().Count);
-            Assert.AreEqual(5, results.Last().Count);
+            Assert.AreEqual(3, results.First().Coordinates.Length);
+            Assert.AreEqual(5, results.Last().Coordinates.Length);
         }
 
         /// <summary>
@@ -149,8 +149,8 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(3, results.First().Count);
-            Assert.AreEqual(5, results.Last().Count);
+            Assert.AreEqual(3, results.First().Coordinates.Length);
+            Assert.AreEqual(5, results.Last().Coordinates.Length);
         }
 
         [TestMethod]
@@ -172,8 +172,8 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(3, results.First().Count);
-            Assert.AreEqual(6, results.Last().Count);
+            Assert.AreEqual(3, results.First().Coordinates.Length);
+            Assert.AreEqual(6, results.Last().Coordinates.Length);
         }
 
         /// <summary>
@@ -209,8 +209,8 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(9, results.First().Count);
-            Assert.AreEqual(9, results.Last().Count);
+            Assert.AreEqual(9, results.First().Coordinates.Length);
+            Assert.AreEqual(9, results.Last().Coordinates.Length);
         }
 
         /// <summary>
@@ -242,8 +242,8 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(2, results.Count);
-            Assert.AreEqual(6, results.First().Count);
-            Assert.AreEqual(8, results.Last().Count);
+            Assert.AreEqual(6, results.First().Coordinates.Length);
+            Assert.AreEqual(8, results.Last().Coordinates.Length);
         }
 
         /// <summary>
@@ -269,7 +269,7 @@ namespace IsraelHiking.API.Tests.Executors
             var results = _executor.SplitSelfLoops(gpxLine, 30);
 
             Assert.AreEqual(1, results.Count);
-            Assert.AreEqual(4, results.Last().Count);
+            Assert.AreEqual(4, results.Last().Coordinates.Length);
         }
     }
 }

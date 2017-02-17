@@ -33,6 +33,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private readonly IOsmLineAdderService _osmLineAdderService;
         private readonly IConfigurationProvider _configurationProvider;
+        private readonly IGeometryFactory _geometryFactory;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
         /// <summary>
@@ -45,6 +46,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="addibleGpxLinesFinderService"></param>
         /// <param name="osmLineAdderService"></param>
         /// <param name="configurationProvider"></param>
+        /// <param name="geometryFactory"></param>
         /// <param name="cache"></param>
         public OsmController(IHttpGatewayFactory httpGatewayFactory,
             IDataContainerConverterService dataContainerConverterService,
@@ -53,6 +55,7 @@ namespace IsraelHiking.API.Controllers
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
             IOsmLineAdderService osmLineAdderService,
             IConfigurationProvider configurationProvider,
+            IGeometryFactory geometryFactory,
             LruCache<string, TokenAndSecret> cache)
         {
             _httpGatewayFactory = httpGatewayFactory;
@@ -62,7 +65,9 @@ namespace IsraelHiking.API.Controllers
             _addibleGpxLinesFinderService = addibleGpxLinesFinderService;
             _osmLineAdderService = osmLineAdderService;
             _configurationProvider = configurationProvider;
+            _geometryFactory = geometryFactory;
             _cache = cache;
+            
         }
 
         /// <summary>
@@ -203,7 +208,7 @@ namespace IsraelHiking.API.Controllers
             return "track";
         }
 
-        private LineString ToItmLineString(IEnumerable<wptType> waypoints)
+        private ILineString ToItmLineString(IEnumerable<wptType> waypoints)
         {
             var coordinates = waypoints.Select(wptType =>
             {
@@ -222,7 +227,7 @@ namespace IsraelHiking.API.Controllers
                     nonDuplicates.Add(coordinate);
                 }
             }
-            return new LineString(nonDuplicates.ToArray());
+            return _geometryFactory.CreateLineString(nonDuplicates.ToArray());
         }
 
         private LineString ToWgs84LineString(IEnumerable<Coordinate> coordinates)
@@ -247,7 +252,7 @@ namespace IsraelHiking.API.Controllers
             return new LineString(nonDuplicates.ToArray());
         }
 
-        private List<LineString> GpxToItmLineStrings(gpxType gpx)
+        private List<ILineString> GpxToItmLineStrings(gpxType gpx)
         {
             var lineStings = (gpx.rte ?? new rteType[0])
                 .Select(route => ToItmLineString(route.rtept)).ToList();

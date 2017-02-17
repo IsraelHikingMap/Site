@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using NetTopologySuite.Geometries;
+using GeoAPI.Geometries;
 
 namespace IsraelHiking.API.Services
 {
@@ -19,6 +19,6 @@ namespace IsraelHiking.API.Services
         /// </summary>
         /// <param name="gpxItmLines">The lines to manipulate</param>
         /// <returns>The lines after manupulation</returns>
-        Task<IEnumerable<LineString>> GetLines(List<LineString> gpxItmLines);
+        Task<IEnumerable<ILineString>> GetLines(List<ILineString> gpxItmLines);
     }
 }

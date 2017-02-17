@@ -8,7 +8,6 @@ using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.LinearReferencing;
 using NSubstitute;
 using OsmSharp.Osm;
 

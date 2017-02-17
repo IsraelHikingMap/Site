@@ -33,6 +33,10 @@ namespace IsraelHiking.API.Tests.Services
                 });
                 return new Coordinate(latLng.Longitude, latLng.Latitude);
             }).ToArray()), new AttributesTable())).ToList();
+            foreach (var highway in highways)
+            {
+                highway.Attributes.AddAttribute("osm_id", "1");
+            }
             _elasticSearchGateway.GetHighways(Arg.Any<LatLng>(), Arg.Any<LatLng>()).Returns(highways);
         }
 
@@ -41,7 +45,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _configurationProvider = Substitute.For<IConfigurationProvider>();
-            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(), new GpxProlongerExecutor(), new CoordinatesConverter(), _elasticSearchGateway, _configurationProvider);
+            var geometryFactory = GeometryFactory.Default;
+            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new CoordinatesConverter(), _elasticSearchGateway, _configurationProvider, geometryFactory, Substitute.For<ILogger>());
         }
         
         [TestMethod]
@@ -51,7 +56,7 @@ namespace IsraelHiking.API.Tests.Services
             _configurationProvider.MaxNumberOfPointsPerLine.Returns(5);
             SetupHighways();
 
-            var results = _service.GetLines(new List<LineString> {gpxLine}).Result.ToArray();
+            var results = _service.GetLines(new List<ILineString> {gpxLine}).Result.ToArray();
 
             Assert.AreEqual(1, results.Length);
             Assert.AreEqual(gpxLine.Coordinates.Length, results.First().Coordinates.Length);
@@ -72,7 +77,7 @@ namespace IsraelHiking.API.Tests.Services
             _configurationProvider.MaxNumberOfPointsPerLine.Returns(3);
             SetupHighways();
 
-            var results = _service.GetLines(new List<LineString> { gpxLine }).Result.ToArray();
+            var results = _service.GetLines(new List<ILineString> { gpxLine }).Result.ToArray();
 
             Assert.AreEqual(1, results.Length);
             Assert.AreEqual(gpxLine.Coordinates.First(), results.First().Coordinates.First());
@@ -99,7 +104,7 @@ namespace IsraelHiking.API.Tests.Services
                 new LineString(new [] { new Coordinate(0,40), new Coordinate(0,50)})
             });
 
-            var results = _service.GetLines(new List<LineString> { gpxItmLine }).Result.ToArray();
+            var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();
 
             Assert.AreEqual(1, results.Length);
             Assert.AreEqual(10, results.First().Coordinates.First().Y);
@@ -127,7 +132,7 @@ namespace IsraelHiking.API.Tests.Services
             _configurationProvider.ClosestPointTolerance.Returns(5);
             SetupHighways();
 
-            var results = _service.GetLines(new List<LineString> { gpxItmLine }).Result.ToArray();
+            var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();
 
             Assert.AreEqual(1, results.Length);
             Assert.AreEqual(gpxItmLine.Coordinates[5], results.First().Coordinates.First());
@@ -166,7 +171,7 @@ namespace IsraelHiking.API.Tests.Services
                 new LineString(new [] { new Coordinate(0,40), new Coordinate(0,50)})
             });
 
-            var results = _service.GetLines(new List<LineString> { gpxItmLine }).Result.ToArray();
+            var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();
 
             Assert.AreEqual(1, results.Length);
             Assert.AreEqual(10, results.First().Coordinates.First().Y);

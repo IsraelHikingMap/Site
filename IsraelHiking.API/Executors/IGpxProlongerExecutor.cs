@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using GeoAPI.Geometries;
-using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Executors
 {
@@ -18,7 +17,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
         /// <param name="maximalLength">The maximal length to try and prolong the line</param>
         /// <returns>A prolonged line</returns>
-        LineString ProlongLineEnd(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingItmHighways, double minimalDistance, double maximalLength);
+        ILineString ProlongLineEnd(ILineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<ILineString> existingItmHighways, double minimalDistance, double maximalLength);
 
         /// <summary>
         /// This method prolongs the line's start according to the original coordinates
@@ -29,6 +28,6 @@ namespace IsraelHiking.API.Executors
         /// <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
         /// <param name="maximalLength">The maximal length to try and prolong the line</param>
         /// <returns>A prolonged line</returns>
-        LineString ProlongLineStart(LineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<LineString> existingItmHighways, double minimalDistance, double maximalLength);
+        ILineString ProlongLineStart(ILineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<ILineString> existingItmHighways, double minimalDistance, double maximalLength);
     }
 }
