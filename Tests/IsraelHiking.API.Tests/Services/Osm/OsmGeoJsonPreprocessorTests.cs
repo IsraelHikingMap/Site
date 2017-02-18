@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using IsraelHiking.API.Converters;
-using IsraelHiking.API.Services.Osm;
+using IsraelHiking.API.Executors;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
@@ -14,12 +14,12 @@ namespace IsraelHiking.API.Tests.Services.Osm
     [TestClass]
     public class OsmGeoJsonPreprocessorTests
     {
-        private IOsmGeoJsonPreprocessor _preprocessor;
+        private IOsmGeoJsonPreprocessorExecutor _preprocessorExecutor;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _preprocessor = new OsmGeoJsonPreprocessor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), Substitute.For<IConfigurationProvider>());
+            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), Substitute.For<IConfigurationProvider>());
         }
 
         private Node CreateNode(int id)
@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var osmElements = new List<ICompleteOsmGeo> { node };
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
 
-            var results = _preprocessor.Preprocess(dictionary);
+            var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(1, results.Keys.Count);
             Assert.AreEqual(1, results[results.Keys.First()].Count);
@@ -72,7 +72,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var osmElements = new List<ICompleteOsmGeo> { node1, node2, node3, node4, way1, way2 };
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
 
-            var results = _preprocessor.Preprocess(dictionary);
+            var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(5, results[results.Keys.First()].Count);
             Assert.AreEqual(4, results[results.Keys.First()].Count(f => f.Geometry is Point));
@@ -96,7 +96,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var osmElements = new List<ICompleteOsmGeo> { node1, node2, node3, way1, way2 };
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
 
-            var results = _preprocessor.Preprocess(dictionary);
+            var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(1, results[results.Keys.First()].Count(f => f.Geometry is LineString));
         }
@@ -141,7 +141,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var osmElements = new List<ICompleteOsmGeo> { node1, node2, node3, node4, node5, node6, node7, node8, way1, way2, way3, way4, relations };
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
 
-            var results = _preprocessor.Preprocess(dictionary);
+            var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(10, results[results.Keys.First()].Count);
             Assert.AreEqual(1, results[results.Keys.First()].Count(f => f.Geometry is Polygon));
@@ -171,7 +171,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { container, osmElements1 }, { line, osmElements2 } };
 
-            var results = _preprocessor.Preprocess(dictionary);
+            var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(1, results[line].Count);
             Assert.AreEqual(1, results[container].Count);
@@ -194,11 +194,40 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
 
-            var results = _preprocessor.Preprocess(dictionary);
+            var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(1, results[results.Keys.First()].Count);
             Assert.AreEqual(0.5, results[results.Keys.First()].First().Attributes["lat"]);
             Assert.AreEqual(0.6, results[results.Keys.First()].First().Attributes["lng"]);
+        }
+
+        [TestMethod]
+        public void PreprocessWithOneWayTag_ShouldMergeAndReverse()
+        {
+            var node1 = CreateNode(1, 0, 0);
+            var node2 = CreateNode(2, 1, 1);
+            var node3 = CreateNode(3, 2, 2);
+            var node4 = CreateNode(4, 3, 3);
+            var node5 = CreateNode(5, 4, 4);
+            var node6 = CreateNode(6, 5, 5);
+            var way1 = CompleteWay.Create(7);
+            var way2 = CompleteWay.Create(8);
+            var way3 = CompleteWay.Create(9);
+            way1.Nodes.AddRange(new[] { node1, node2, node3 });
+            way2.Nodes.AddRange(new[] { node5, node4, node3 });
+            way3.Nodes.AddRange(new[] { node5, node6 });
+            way1.Tags.Add("name", "name");
+            way2.Tags.Add("name", "name");
+            way2.Tags.Add("oneway", "true");
+            way3.Tags.Add("name", "name");
+            var osmElements = new List<ICompleteOsmGeo> { way1, way2, way3 };
+            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
+
+            var results = _preprocessorExecutor.Preprocess(dictionary);
+
+            Assert.AreEqual(1, results[results.Keys.First()].Count);
+            Assert.AreEqual(node6.Coordinate.Latitude, results[results.Keys.First()].First().Geometry.Coordinates.First().Y);
+            Assert.AreEqual(node6.Coordinate.Longitude, results[results.Keys.First()].First().Geometry.Coordinates.First().X);
         }
     }
 }

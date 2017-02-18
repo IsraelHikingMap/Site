@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -24,7 +25,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         public void TestInitialize()
         {
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            var geoJsonPreProcessor = Substitute.For<IOsmGeoJsonPreprocessor>();
+            var geoJsonPreProcessor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
             _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
             var configurationProvide = Substitute.For<IConfigurationProvider>();
             configurationProvide.ClosestPointTolerance.Returns(30);

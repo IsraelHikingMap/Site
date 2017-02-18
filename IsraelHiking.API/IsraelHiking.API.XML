@@ -820,6 +820,50 @@
             <param name="closestPointTolerance">The tolerance of the distance that is considered a self loop</param>
             <returns>a list of lines that do not have self loops</returns>
         </member>
+        <member name="T:IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor">
+            <summary>
+            This executor is responsible for preprocessing the OSM data for elastic search database
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor.Preprocess(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{OsmSharp.Osm.ICompleteOsmGeo}})">
+            <summary>
+            Preprocess OSM geometry into geojson features
+            </summary>
+            <param name="osmNamesDictionary"></param>
+            <returns></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor.Preprocess(System.Collections.Generic.List{OsmSharp.Osm.CompleteWay})">
+            <summary>
+            Preprocess highways into features - line strings
+            </summary>
+            <param name="highways"></param>
+            <returns></returns>
+        </member>
+        <member name="T:IsraelHiking.API.Executors.OsmGeoJsonPreprocessorExecutor">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Executors.OsmGeoJsonPreprocessorExecutor.#ctor(IsraelHiking.DataAccessInterfaces.ILogger,IsraelHiking.API.Converters.IOsmGeoJsonConverter,IsraelHiking.DataAccessInterfaces.IConfigurationProvider)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="logger"></param>
+            <param name="osmGeoJsonConverter"></param>
+            <param name="configurationProvider"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.OsmGeoJsonPreprocessorExecutor.Preprocess(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{OsmSharp.Osm.ICompleteOsmGeo}})">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Executors.OsmGeoJsonPreprocessorExecutor.MergeWays(System.Collections.Generic.List{OsmSharp.Osm.CompleteWay})">
+            <summary>
+            This method create a new list of ways based on the given list. 
+            The merge is done by looking into the ways' nodes and combine ways which start or end with the same node. 
+            </summary>
+            <param name="ways">The ways to merge</param>
+            <returns>The merged ways</returns>
+        </member>
+        <member name="M:IsraelHiking.API.Executors.OsmGeoJsonPreprocessorExecutor.Preprocess(System.Collections.Generic.List{OsmSharp.Osm.CompleteWay})">
+            <inheritdoc />
+        </member>
         <member name="T:IsraelHiking.API.Gpx.GpxTypes.gpxType">
             <remarks/>
         </member>
@@ -1215,32 +1259,84 @@
         <member name="T:IsraelHiking.API.Services.Osm.OsmLineAdderService">
             <inheritdoc/>
         </member>
-        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.#ctor(IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,IsraelHiking.API.Services.Osm.IOsmGeoJsonPreprocessor,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory)">
+        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.#ctor(IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory)">
             <summary>
             Constructor
             </summary>
             <param name="elasticSearchGateway"></param>
             <param name="coordinatesConverter"></param>
             <param name="configurationProvider"></param>
-            <param name="geoJsonPreprocessor"></param>
+            <param name="geoJsonPreprocessorExecutor"></param>
             <param name="httpGatewayFactory"></param>
         </member>
         <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.Add(NetTopologySuite.Geometries.LineString,System.Collections.Generic.Dictionary{System.String,System.String},IsraelHiking.Common.TokenAndSecret)">
             <inheritdoc/>
         </member>
-        <member name="M:IsraelHiking.API.Services.Osm.OsmDataService.Initialize(System.String)">
+        <member name="F:IsraelHiking.API.Services.Osm.OsmDataServiceOperations.None">
+            <summary>
+            Don't do anything 
+            </summary>
+        </member>
+        <member name="F:IsraelHiking.API.Services.Osm.OsmDataServiceOperations.GetOsmFile">
+            <summary>
+            Download the OSM file from the server if needed
+            </summary>
+        </member>
+        <member name="F:IsraelHiking.API.Services.Osm.OsmDataServiceOperations.UpdateElasticSearch">
+            <summary>
+            Update Elastic Search Repository
+            </summary>
+        </member>
+        <member name="F:IsraelHiking.API.Services.Osm.OsmDataServiceOperations.UpdateGraphHopper">
+            <summary>
+            Update GraphHopper repository
+            </summary>
+        </member>
+        <member name="F:IsraelHiking.API.Services.Osm.OsmDataServiceOperations.All">
+            <summary>
+            Do All the possible operations
+            </summary>
+        </member>
+        <member name="T:IsraelHiking.API.Services.Osm.IOsmDataService">
+            <summary>
+            This servise is responsible for analyzing OSM data and updating the local repositories
+            </summary>
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.IOsmDataService.Initialize(System.String)">
             <summary>
             Initializes the service.
             </summary>
             <param name="serverPath">Bin folder where all dlls are.</param>
         </member>
-        <member name="M:IsraelHiking.API.Services.Osm.OsmGeoJsonPreprocessor.MergeWays(System.Collections.Generic.List{OsmSharp.Osm.CompleteWay})">
+        <member name="M:IsraelHiking.API.Services.Osm.IOsmDataService.UpdateData(IsraelHiking.API.Services.Osm.OsmDataServiceOperations)">
             <summary>
-            This method create a new list of ways based on the given list. 
-            The merge is done by looking into the ways' nodes and combine ways which start or end with the same node. 
+            Gets and updates the OSM data in a local repositories
             </summary>
-            <param name="ways">The ways to merge</param>
-            <returns>The merged ways</returns>
+            <param name="operations">The operations to perform on the data</param>
+            <returns></returns>
+        </member>
+        <member name="T:IsraelHiking.API.Services.Osm.OsmDataService">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.OsmDataService.#ctor(IsraelHiking.DataAccessInterfaces.IGraphHopperHelper,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.DataAccessInterfaces.IRemoteFileSizeFetcherGateway,IsraelHiking.DataAccessInterfaces.IFileSystemHelper,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.INssmHelper,IsraelHiking.DataAccessInterfaces.IOsmRepository,IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor,IsraelHiking.DataAccessInterfaces.ILogger)">
+            <summary>
+            Constructor
+            </summary>
+            <param name="graphHopperHelper"></param>
+            <param name="httpGatewayFactory"></param>
+            <param name="remoteFileSizeFetcherGateway"></param>
+            <param name="fileSystemHelper"></param>
+            <param name="elasticSearchGateway"></param>
+            <param name="elasticSearchHelper"></param>
+            <param name="osmRepository"></param>
+            <param name="osmGeoJsonPreprocessorExecutor"></param>
+            <param name="logger"></param>
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.OsmDataService.Initialize(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:IsraelHiking.API.Services.Osm.OsmDataService.UpdateData(IsraelHiking.API.Services.Osm.OsmDataServiceOperations)">
+            <inheritdoc />
         </member>
         <member name="T:IsraelHiking.API.Services.DataContainerConverterService">
             <inheritdoc />

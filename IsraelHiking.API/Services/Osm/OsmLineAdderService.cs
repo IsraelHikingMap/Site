@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
@@ -18,7 +19,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly ICoordinatesConverter _coordinatesConverter;
         private readonly IConfigurationProvider _configurationProvider;
-        private readonly IOsmGeoJsonPreprocessor _geoJsonPreprocessor;
+        private readonly IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
 
         private IOsmGateway _osmGateway;
@@ -29,18 +30,18 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="elasticSearchGateway"></param>
         /// <param name="coordinatesConverter"></param>
         /// <param name="configurationProvider"></param>
-        /// <param name="geoJsonPreprocessor"></param>
+        /// <param name="geoJsonPreprocessorExecutor"></param>
         /// <param name="httpGatewayFactory"></param>
         public OsmLineAdderService(IElasticSearchGateway elasticSearchGateway,
             ICoordinatesConverter coordinatesConverter,
             IConfigurationProvider configurationProvider,
-            IOsmGeoJsonPreprocessor geoJsonPreprocessor,
+            IOsmGeoJsonPreprocessorExecutor geoJsonPreprocessorExecutor,
             IHttpGatewayFactory httpGatewayFactory)
         {
             _elasticSearchGateway = elasticSearchGateway;
             _coordinatesConverter = coordinatesConverter;
             _configurationProvider = configurationProvider;
-            _geoJsonPreprocessor = geoJsonPreprocessor;
+            _geoJsonPreprocessorExecutor = geoJsonPreprocessorExecutor;
             _httpGatewayFactory = httpGatewayFactory;
         }
 
@@ -216,7 +217,7 @@ namespace IsraelHiking.API.Services.Osm
         {
             var tasksList = wayIds.Select(wayId => _osmGateway.GetCompleteWay(wayId)).ToList();
             var newlyaddedWays = await Task.WhenAll(tasksList);
-            var newlyHighwaysFeatures = _geoJsonPreprocessor.Preprocess(newlyaddedWays.ToList());
+            var newlyHighwaysFeatures = _geoJsonPreprocessorExecutor.Preprocess(newlyaddedWays.ToList());
             await _elasticSearchGateway.UpdateHighwaysData(newlyHighwaysFeatures);
         }
 

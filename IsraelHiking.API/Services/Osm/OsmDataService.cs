@@ -2,11 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using IsraelHiking.API.Executors;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Services.Osm
 {
+    /// <inheritdoc />
     public class OsmDataService : IOsmDataService
     {
         private const string PBF_FILE_NAME = "israel-and-palestine-latest.osm.pbf";
@@ -19,10 +21,22 @@ namespace IsraelHiking.API.Services.Osm
         private readonly INssmHelper _elasticSearchHelper;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IElasticSearchGateway _elasticSearchGateway;
-        private readonly IOsmGeoJsonPreprocessor _osmGeoJsonPreprocessor;
+        private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
         private string _serverPath;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="graphHopperHelper"></param>
+        /// <param name="httpGatewayFactory"></param>
+        /// <param name="remoteFileSizeFetcherGateway"></param>
+        /// <param name="fileSystemHelper"></param>
+        /// <param name="elasticSearchGateway"></param>
+        /// <param name="elasticSearchHelper"></param>
+        /// <param name="osmRepository"></param>
+        /// <param name="osmGeoJsonPreprocessorExecutor"></param>
+        /// <param name="logger"></param>
         public OsmDataService(IGraphHopperHelper graphHopperHelper,
             IHttpGatewayFactory httpGatewayFactory,
             IRemoteFileSizeFetcherGateway remoteFileSizeFetcherGateway,
@@ -30,7 +44,7 @@ namespace IsraelHiking.API.Services.Osm
             IElasticSearchGateway elasticSearchGateway,
             INssmHelper elasticSearchHelper,
             IOsmRepository osmRepository,
-            IOsmGeoJsonPreprocessor osmGeoJsonPreprocessor,
+            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             ILogger logger)
         {
             _graphHopperHelper = graphHopperHelper;
@@ -40,14 +54,11 @@ namespace IsraelHiking.API.Services.Osm
             _elasticSearchGateway = elasticSearchGateway;
             _elasticSearchHelper = elasticSearchHelper;
             _osmRepository = osmRepository;
-            _osmGeoJsonPreprocessor = osmGeoJsonPreprocessor;
+            _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _logger = logger;
         }
 
-        /// <summary>
-        /// Initializes the service.
-        /// </summary>
-        /// <param name="serverPath">Bin folder where all dlls are.</param>
+        /// <inheritdoc />
         public async Task Initialize(string serverPath)
         {
             _logger.Info("Initializing OSM data service with server path: " + serverPath);
@@ -57,6 +68,7 @@ namespace IsraelHiking.API.Services.Osm
             _logger.Info("Finished initializing OSM data service with server path: " + serverPath);
         }
 
+        /// <inheritdoc />
         public async Task UpdateData(OsmDataServiceOperations operations)
         {
             try
@@ -102,15 +114,19 @@ namespace IsraelHiking.API.Services.Osm
                 var response = await _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).GetFileContent(address);
                 _fileSystemHelper.WriteAllBytes(osmFilePath, response.Content);
             }
+            else
+            {
+                _logger.Info("No need to download file, existing file size is the same as the server");
+            }
         }
 
         private async Task UpdateElasticSearchFromFile(string osmFilePath)
         {
             _logger.Info("Updating Elastic Search OSM data");
             var osmNamesDictionary = await _osmRepository.GetElementsWithName(osmFilePath);
-            var geoJsonNamesDictionary = _osmGeoJsonPreprocessor.Preprocess(osmNamesDictionary);
+            var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
             var osmHighways = await _osmRepository.GetAllHighways(osmFilePath);
-            var geoJsonHighways = _osmGeoJsonPreprocessor.Preprocess(osmHighways);
+            var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
             _elasticSearchGateway.Initialize(deleteIndex: true);
             UpdateElesticSearchNamesDataUsingPaging(geoJsonNamesDictionary);
             UpdateElesticSearchHighwaysDataUsingPaging(geoJsonHighways);

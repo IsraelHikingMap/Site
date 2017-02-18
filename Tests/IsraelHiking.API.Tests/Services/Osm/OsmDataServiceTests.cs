@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -20,7 +21,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         private IElasticSearchGateway _elasticSearchGateway;
         private INssmHelper _elasticSearchHelper;
         private IOsmRepository _osmRepository;
-        private IOsmGeoJsonPreprocessor _osmGeoJsonPreprocessor;
+        private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
 
         [TestInitialize]
         public void TestInitialize()
@@ -34,9 +35,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _elasticSearchHelper = Substitute.For<INssmHelper>();
             _osmRepository = Substitute.For<IOsmRepository>();
-            _osmGeoJsonPreprocessor = Substitute.For<IOsmGeoJsonPreprocessor>();
+            _osmGeoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
             _osmDataService = new OsmDataService(_graphHopperHelper, factory, _remoteFileSizeFetcherGateway, _fileSystemHelper,
-                _elasticSearchGateway, _elasticSearchHelper, _osmRepository, _osmGeoJsonPreprocessor, Substitute.For<ILogger>());
+                _elasticSearchGateway, _elasticSearchHelper, _osmRepository, _osmGeoJsonPreprocessorExecutor, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -83,7 +84,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void UpdateData_UpdateElasticSearchTwoNodes_ShouldUpdateGraphHopper()
         {
-            _osmGeoJsonPreprocessor.Preprocess(Arg.Any<Dictionary<string, List<ICompleteOsmGeo>>>())
+            _osmGeoJsonPreprocessorExecutor.Preprocess(Arg.Any<Dictionary<string, List<ICompleteOsmGeo>>>())
                 .Returns(new Dictionary<string, List<Feature>> { { "name", new List<Feature> { new Feature() } } });
             _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
 

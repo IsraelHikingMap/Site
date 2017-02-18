@@ -168,13 +168,13 @@
     <Compile Include="Services\Osm\IOsmLineAdderService.cs" />
     <Compile Include="Services\Osm\OsmLineAdderService.cs" />
     <Compile Include="Services\Osm\IOsmDataService.cs" />
-    <Compile Include="Services\Osm\IOsmGeoJsonPreprocessor.cs" />
+    <Compile Include="Executors\IOsmGeoJsonPreprocessorExecutor.cs" />
     <Compile Include="Services\IRouteDataSplitterService.cs" />
     <Compile Include="Services\Osm\OsmDataService.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Services\DataContainerConverterService.cs" />
     <Compile Include="Services\IDataContainerConverterService.cs" />
-    <Compile Include="Services\Osm\OsmGeoJsonPreprocessor.cs" />
+    <Compile Include="Executors\OsmGeoJsonPreprocessorExecutor.cs" />
     <Compile Include="Services\LruCache.cs" />
     <Compile Include="Services\RadialDistanceByAngleSimplifier.cs" />
     <Compile Include="Services\RouteDataSplitterService.cs" />

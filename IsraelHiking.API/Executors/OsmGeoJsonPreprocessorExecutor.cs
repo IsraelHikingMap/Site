@@ -2,15 +2,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using IsraelHiking.API.Converters;
+using IsraelHiking.API.Services;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 
-namespace IsraelHiking.API.Services.Osm
+namespace IsraelHiking.API.Executors
 {
-    public class OsmGeoJsonPreprocessor : IOsmGeoJsonPreprocessor
+    /// <inheritdoc />
+    public class OsmGeoJsonPreprocessorExecutor : IOsmGeoJsonPreprocessorExecutor
     {
         private const string PLACE = "place";
         private const string ICON = "icon";
@@ -33,7 +35,13 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
-        public OsmGeoJsonPreprocessor(ILogger logger,
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="logger"></param>
+        /// <param name="osmGeoJsonConverter"></param>
+        /// <param name="configurationProvider"></param>
+        public OsmGeoJsonPreprocessorExecutor(ILogger logger,
             IOsmGeoJsonConverter osmGeoJsonConverter, 
             IConfigurationProvider configurationProvider)
         {
@@ -42,6 +50,7 @@ namespace IsraelHiking.API.Services.Osm
             _configurationProvider = configurationProvider;
         }
 
+        /// <inheritdoc />
         public Dictionary<string, List<Feature>> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary)
         {
             _logger.Info("Preprocessing OSM data to GeoJson, total distict names: " + osmNamesDictionary.Keys.Count);
@@ -236,21 +245,21 @@ namespace IsraelHiking.API.Services.Osm
                 for (var index = waysToMerge.Count - 1; index >= 0; index--)
                 {
                     var wayToMerge = waysToMerge[index];
-                    var wayToMergeTo =
-                        mergedWays.FirstOrDefault(
-                            mw =>
-                                mw.Nodes.Last().Id == wayToMerge.Nodes.First().Id ||
-                                mw.Nodes.First().Id == wayToMerge.Nodes.Last().Id ||
-                                mw.Nodes.First().Id == wayToMerge.Nodes.First().Id ||
-                                mw.Nodes.Last().Id == wayToMerge.Nodes.Last().Id);
+                    var wayToMergeTo = mergedWays.FirstOrDefault(mw => CanBeMerged(mw, wayToMerge));
                     if (wayToMergeTo == null)
                     {
                         continue;
                     }
-                    if (wayToMerge.Nodes.First().Id == wayToMergeTo.Nodes.First().Id ||
-                        wayToMerge.Nodes.Last().Id == wayToMergeTo.Nodes.Last().Id)
+                    if (CanBeReverseMerged(wayToMergeTo, wayToMerge))
                     {
-                        wayToMerge.Nodes.Reverse();
+                        if (wayToMerge.Tags.ContainsKey("oneway") && wayToMerge.Tags["oneway"] == "true")
+                        {
+                            wayToMergeTo.Nodes.Reverse();
+                        }
+                        else
+                        {
+                            wayToMerge.Nodes.Reverse();
+                        }
                     }
                     var nodes = wayToMerge.Nodes;
                     if (nodes.Last().Id == wayToMergeTo.Nodes.First().Id)
@@ -280,6 +289,19 @@ namespace IsraelHiking.API.Services.Osm
             return mergedWays;
         }
 
+        private bool CanBeMerged(CompleteWay way1, CompleteWay way2)
+        {
+            return way1.Nodes.Last().Id == way2.Nodes.First().Id ||
+                   way1.Nodes.First().Id == way2.Nodes.Last().Id ||
+                   CanBeReverseMerged(way1, way2);
+        }
+
+        private bool CanBeReverseMerged(CompleteWay way1, CompleteWay way2)
+        {
+            return way1.Nodes.First().Id == way2.Nodes.First().Id ||
+                   way1.Nodes.Last().Id == way2.Nodes.Last().Id;
+        }
+
         private void MergeTags(ICompleteOsmGeo fromItem, ICompleteOsmGeo toItem)
         {
             foreach (var tag in fromItem.Tags.Except(toItem.Tags, new TagKeyComparer()))
@@ -288,6 +310,7 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
+        /// <inheritdoc />
         public List<Feature> Preprocess(List<CompleteWay> highways)
         {
             return highways.Select(_osmGeoJsonConverter.ToGeoJson).Where(h => h != null).ToList();
