@@ -78,6 +78,14 @@
 
             $scope.save = (e: Event) => {
                 let data = this.getData();
+                if (data.routes.length === 0) {
+                    toastr.warning($scope.resources.unableToSaveAnEmptyRoute);
+                    return;
+                }
+                if (_.every(data.routes, r => r.segments.length === 0 && r.markers.length === 0)) {
+                    toastr.warning($scope.resources.unableToSaveAnEmptyRoute);
+                    return;
+                }
                 fileService.saveToFile(this.getName(data)+ ".gpx", "gpx", data)
                     .then(() => { }, () => {
                         toastr.error($scope.resources.unableToSaveToFile);

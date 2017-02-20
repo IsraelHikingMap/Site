@@ -192,6 +192,7 @@ namespace IsraelHiking.Services {
         public routeAddedSuccessfullyItWillTakeTime: string;
         public fileUploadedSuccefullyItWillTakeTime: string;
         public unableToUploadFile: string;
+        public unableToSaveAnEmptyRoute: string;
         // Help
         public helpSubheader: string;
         public helpInfo: string;
@@ -566,6 +567,7 @@ namespace IsraelHiking.Services {
                     this.routeAddedSuccessfullyItWillTakeTime = this.gettextCatalog.getString("Route added successfully, It will take some time for the map to update.");
                     this.fileUploadedSuccefullyItWillTakeTime = this.gettextCatalog.getString("File uploaded successfully, It will take some time to add it to OSM database.");
                     this.unableToUploadFile = this.gettextCatalog.getString("Unable to upload the file...");
+                    this.unableToSaveAnEmptyRoute = this.gettextCatalog.getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
                     // Help
                     this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                     this.helpInfo = this.gettextCatalog.getString("This dialog");

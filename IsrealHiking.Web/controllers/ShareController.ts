@@ -90,13 +90,13 @@
 
             $scope.openShare = (e: Event) => {
                 $scope.embedText = this.getEmbedText($scope);
+                $scope.offroadRequest = {} as IOffroadPostRequest;
+                $scope.offroadRequest.userMail = localStorageService.get(ShareController.USER_EMAIL_KEY) as string || "";
+                $scope.offroadRequest.activityType = "OffRoading";
+                $scope.offroadRequest.difficultyLevel = "3";
                 if (layersService.getSelectedRoute() != null) {
                     let route = layersService.getSelectedRoute().getData();
                     $scope.title = route.name;
-                    $scope.offroadRequest = {} as IOffroadPostRequest;
-                    $scope.offroadRequest.userMail = localStorageService.get(ShareController.USER_EMAIL_KEY) as string || "";
-                    $scope.offroadRequest.activityType = "OffRoading";
-                    $scope.offroadRequest.difficultyLevel = "3";
                     if (route.segments.length > 0) {
                         switch (route.segments[route.segments.length - 1].routingType) {
                             case "Hike":
@@ -120,10 +120,17 @@
                 $scope.isLoading = true;
                 $scope.offroadRequest.title = title;
                 $scope.offroadRequest.description = description;
+                var dataToSave = layersService.getData();
+                for (let routeIndex = dataToSave.routes.length - 1; routeIndex >= 0; routeIndex--) {
+                    let route = dataToSave.routes[routeIndex];
+                    if (route.segments.length === 0 && route.markers.length === 0) {
+                        dataToSave.routes.splice(routeIndex, 1);
+                    }
+                }
                 var siteUrl = {
                     Title: title,
                     Description: description,
-                    JsonData: JSON.stringify(layersService.getData()),
+                    JsonData: JSON.stringify(dataToSave),
                     OsmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
                 } as Common.SiteUrl;
                 $http.post(Common.Urls.urls, siteUrl).success((siteUrlResponse: Common.SiteUrl) => {
