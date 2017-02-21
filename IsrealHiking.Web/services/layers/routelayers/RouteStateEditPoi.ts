@@ -11,7 +11,8 @@
             this.context.route.markers.push({
                 latlng: e.latlng,
                 marker: marker,
-                title: ""
+                title: "",
+                type: ""
             });
             this.context.$timeout(() => marker.openPopup(), 200);
             this.context.dataChanged();

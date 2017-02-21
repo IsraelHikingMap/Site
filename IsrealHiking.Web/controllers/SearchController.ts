@@ -126,7 +126,7 @@
                     $http.post(Common.Urls.search, searchResults.feature).then((response: { data: Common.DataContainer }) => {
                         if (response.data.routes.length > 0) {
                             response.data.routes[0].markers = response.data.routes[0].markers || [];
-                            response.data.routes[0].markers.push({ latlng: searchResults.latlng, title: marker.title });
+                            response.data.routes[0].markers.push({ latlng: searchResults.latlng, title: marker.title, type: "" });
                         }
                         layersService.setJsonData({
                             routes: response.data.routes

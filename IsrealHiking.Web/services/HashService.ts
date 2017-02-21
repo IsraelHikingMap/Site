@@ -111,8 +111,9 @@
                 }
                 array.push({
                     latlng: new L.LatLng(parseFloat(markerStringSplit[0]), parseFloat(markerStringSplit[1])),
-                    title: title
-                } as Common.MarkerData);
+                    title: title,
+                    type: ""
+                });
             }
             return array;
         }

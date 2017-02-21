@@ -73,7 +73,8 @@
         private createMarker(coordinates: GeoJSON.Position, message?: string): Common.MarkerData {
             return {
                 latlng: GeoJsonParser.createLatlng(coordinates),
-                title: message
+                title: message,
+                type: ""
             } as Common.MarkerData;
         }
 

@@ -25,6 +25,7 @@
     { "Path": "IsrealHiking.Web\\services\\elevation\\", "Includes": ["*.ts"]},
     { "Path": "IsrealHiking.Web\\services\\layers\\wikimarkerslayer.ts" },
     { "Path": "IsrealHiking.Web\\services\\parsers\\", "Includes": ["*.ts"]},
+    { "Path": "IsrealHiking.Web\\services\\IconsService.ts"},
     { "Path": "IsrealHiking.Web\\services\\routers\\", "Includes": ["*.ts"]},
     { "Path": "IsrealHiking.Web\\services\\SnappingService.ts"},
     { "Path": "IsrealHiking.Web\\services\\HashService.ts"},

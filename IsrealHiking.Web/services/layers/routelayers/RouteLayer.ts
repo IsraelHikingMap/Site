@@ -148,7 +148,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                     title: marker.title,
                     latlng: marker.latlng,
                     type: marker.type
-                } as Common.MarkerData);
+                });
             }
             return {
                 name: this.route.properties.name,
