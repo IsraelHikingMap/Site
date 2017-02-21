@@ -44,7 +44,7 @@
 
         private createRouteMarker = (latlng: L.LatLng): L.Marker => {
             let pathOptions = this.context.route.properties.pathOptions;
-            let marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
+            let marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createRouteMarkerIcon(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
             this.setRouteMarkerEvents(marker);
             marker.addTo(this.context.map);
             let newScope = this.context.$rootScope.$new() as Controllers.MarkerPopup.IRemovableMarkerScope;
@@ -65,7 +65,7 @@
             this.context.route.segments[this.context.route.segments.length - 1].routePointMarker.setIcon(IconsService.createEndIcon());
             this.context.route.segments[0].routePointMarker.setIcon(IconsService.createStartIcon());
             for (let routeSegmentIndex = 1; routeSegmentIndex < this.context.route.segments.length - 1; routeSegmentIndex++) {
-                this.context.route.segments[routeSegmentIndex].routePointMarker.setIcon(IconsService.createMarkerIconWithColor(this.context.route.properties.pathOptions.color));
+                this.context.route.segments[routeSegmentIndex].routePointMarker.setIcon(IconsService.createRouteMarkerIcon(this.context.route.properties.pathOptions.color));
             }
         }
 

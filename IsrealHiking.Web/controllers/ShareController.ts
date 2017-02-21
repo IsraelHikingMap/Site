@@ -150,15 +150,15 @@
 
             $scope.setSize = (size: string) => {
                 switch (size) {
-                    case "Small":
+                    case $scope.resources.small:
                         $scope.width = 400;
                         $scope.height = 300;
                         break;
-                    case "Medium":
+                    case $scope.resources.medium:
                         $scope.width = 600;
                         $scope.height = 450;
                         break;
-                    case "Large":
+                    case $scope.resources.large:
                         $scope.width = 800;
                         $scope.height = 600;
                         break;
@@ -166,7 +166,6 @@
                 $scope.embedText = this.getEmbedText($scope);
             }
 
-            // currently can't be done from the UI until we decide how it should act.
             $scope.sendToOffroad = () => {
                 localStorageService.set(ShareController.USER_EMAIL_KEY, $scope.offroadRequest.userMail);
                 if (layersService.getSelectedRoute() == null) {

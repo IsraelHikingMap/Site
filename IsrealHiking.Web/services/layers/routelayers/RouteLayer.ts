@@ -146,8 +146,9 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             for (let marker of this.route.markers) {
                 markersData.push({
                     title: marker.title,
-                    latlng: marker.latlng
-                });
+                    latlng: marker.latlng,
+                    type: marker.type
+                } as Common.MarkerData);
             }
             return {
                 name: this.route.properties.name,
@@ -312,6 +313,10 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 htmlTitleArray += `<div dir="${direction}">${line}</div>`;
             }
             return htmlTitleArray;
+        }
+
+        public getColorName(): string {
+            return _.find(RouteLayerFactory.COLORS, colorToFind => colorToFind.value === this.getRouteProperties().pathOptions.color).key;
         }
     }
 }

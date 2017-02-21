@@ -1,9 +1,16 @@
 ﻿namespace IsraelHiking.Controllers.MarkerPopup {
 
+    interface IIconsGroup {
+        icons: string[];
+    }
+
     export interface IPoiMarkerPopupScope extends IRemovableMarkerScope {
         wikiCoordinatesString: string;
+        markerType: string;
         routeLayer: Services.Layers.RouteLayers.RouteLayer;
-        setTitle(title: string): void;
+        iconsGroups: IIconsGroup[];
+        save(title: string, markerType: string): void;
+        setMerkerType(markerType: string): void;
         getDirection(title: string): string;
         updateWikiCoordinates(title: string): void;
     }
@@ -14,6 +21,22 @@
             elevationProvider: Services.Elevation.ElevationProvider) {
             super($scope, $http, elevationProvider);
 
+            let routeMarker = _.find($scope.routeLayer.route.markers, markerToFind => markerToFind.marker === $scope.marker);
+            $scope.markerType = routeMarker.type || "star";
+            $scope.iconsGroups = [];
+            $scope.iconsGroups.push({
+                icons: ["car", "bike", "hike", "four-by-four"]
+            });
+            $scope.iconsGroups.push({
+                icons: ["arrow-left", "arrow-right", "heart", "star"]
+            });
+            $scope.iconsGroups.push({
+                icons: ["bed", "binoculars", "fire", "flag"]
+            });
+            $scope.iconsGroups.push({
+                icons: ["coffee", "cutlery", "shopping-cart", "tree"]
+            });
+
             $scope.marker.on("popupopen", () => {
                 $scope.wikiCoordinatesString = this.getWikiCoordString($scope.latLng, $scope.marker.title);
             });
@@ -22,11 +45,19 @@
                 $scope.wikiCoordinatesString = this.getWikiCoordString($scope.latLng, title);
             };
 
-            $scope.setTitle = (newTitle: string) => {
+            $scope.setMerkerType = (markerType: string): void => {
+                $scope.markerType = markerType;
+            }
+
+            $scope.save = (newTitle: string, markerType: string) => {
                 let routeMarker = _.find($scope.routeLayer.route.markers, markerToFind => markerToFind.marker === $scope.marker);
                 routeMarker.title = newTitle;
+                routeMarker.type = markerType;
                 $scope.marker.updateLabelContent($scope.routeLayer.getHtmlTitle(newTitle));
                 $scope.marker.title = newTitle;
+                let color = $scope.routeLayer.getRouteProperties().pathOptions.color;
+                $scope.marker.setIcon(Services.IconsService.createMarkerIconWithColorAndType(color, markerType));
+
                 if (!newTitle) {
                     $scope.marker.hideLabel();
                 } else {

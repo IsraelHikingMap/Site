@@ -30,10 +30,10 @@
         <a class="cursor-pointer control-icon-last" ng-click="toggleDirectional($event)" uib-tooltip="{{resources.regularSearch}}" tooltip-placement="left" tooltip-append-to-body="true" analytics-on="click" analytics-category="Search" analytics-event="Toggle directional search off"><i class="fa fa-minus fa-lg"></i></a>
     </div>
     <div class="pull-left leaflet-bar search-routing-directional">
-        <a class="cursor-pointer pull-left" ng-click="setRouting('Hike', $event)" ng-class="{'leaflet-active' : routingType == 'Hike' }" uib-tooltip="{{resources.hikeRouting}}" tooltip-placement="bottom" tooltip-append-to-body="true"><img src="/content/images/hike.svg" alt="" /></a>
-        <a class="cursor-pointer pull-left" ng-click="setRouting('Bike', $event)" ng-class="{'leaflet-active' : routingType == 'Bike' }" uib-tooltip="{{resources.bikeRouting}}" tooltip-placement="bottom" tooltip-append-to-body="true"><img src="/content/images/bike.svg" alt="" /></a>
-        <a class="cursor-pointer pull-left" ng-click="setRouting('4WD', $event)" ng-class="{'leaflet-active' : routingType == '4WD' }" uib-tooltip="{{resources.fourWheelDriveRouting}}" tooltip-placement="bottom" tooltip-append-to-body="true"><img src="/content/images/four-by-four.png" alt="" /></a>
-        <a class="cursor-pointer pull-left" ng-click="setRouting('None', $event)" ng-class="{'leaflet-active' : routingType == 'None' }" uib-tooltip="{{resources.straightLines}}" tooltip-placement="bottom" tooltip-append-to-body="true"><img src="/content/images/none.svg" /></a>
+        <a class="cursor-pointer pull-left" ng-click="setRouting('Hike', $event)" ng-class="{'leaflet-active' : routingType == 'Hike' }" uib-tooltip="{{resources.hikeRouting}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa icon-hike fa-lg"></i></a>
+        <a class="cursor-pointer pull-left" ng-click="setRouting('Bike', $event)" ng-class="{'leaflet-active' : routingType == 'Bike' }" uib-tooltip="{{resources.bikeRouting}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa icon-bike fa-lg"></i></a>
+        <a class="cursor-pointer pull-left" ng-click="setRouting('4WD', $event)" ng-class="{'leaflet-active' : routingType == '4WD' }" uib-tooltip="{{resources.fourWheelDriveRouting}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa icon-four-by-four fa-lg"></i></a>
+        <a class="cursor-pointer pull-left" ng-click="setRouting('None', $event)" ng-class="{'leaflet-active' : routingType == 'None' }" uib-tooltip="{{resources.straightLines}}" tooltip-placement="bottom" tooltip-append-to-body="true"><i class="fa icon-none fa-lg"></i></a>
     </div>
     <br />
     <div uib-dropdown is-open="isVisible && isDirectional && toContext.searchResults.length > 0 && !toContext.selectedSearchResults" auto-close="disabled" ng-keydown="keyDown(toContext, $event)" class="search-dropdown-container leaflet-bar">

@@ -127,7 +127,7 @@
             }
 
             $scope.getRouteColorName = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
-                return _.find(Services.Layers.RouteLayers.RouteLayerFactory.COLORS, colorToFind => colorToFind.value === routeLayer.getRouteProperties().pathOptions.color).key;
+                return routeLayer.getColorName();
             }
 
             $scope.getRouteName = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {

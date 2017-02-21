@@ -39,11 +39,12 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 draggable: isEditable,
                 clickable: isEditable,
                 riseOnHover: true,
-                icon: IconsService.createMarkerIconWithColor(pathOptions.color),
+                icon: IconsService.createMarkerIconWithColorAndType(pathOptions.color, markerData.type),
                 opacity: pathOptions.opacity
             } as L.MarkerOptions) as IMarkerWithTitle;
             marker.title = markerData.title || "";
-            marker.bindLabel(this.context.getHtmlTitle(marker.title), { noHide: true, className: "marker-label" } as L.LabelOptions);
+            let colorName = this.context.getColorName();
+            marker.bindLabel(this.context.getHtmlTitle(marker.title), { noHide: true, className: `marker-label fg-${colorName}` } as L.LabelOptions);
             marker.addTo(this.context.map);
             if (!marker.title) { // must be after adding to map...
                 marker.hideLabel();

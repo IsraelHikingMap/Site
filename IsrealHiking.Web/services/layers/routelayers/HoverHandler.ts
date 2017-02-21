@@ -16,11 +16,12 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         constructor(context: RouteLayer, middleMarker: L.Marker) {
             this.context = context;
             let pathOptions = this.context.route.properties.pathOptions;
-            this.hoverMarker = L.marker(this.context.map.getCenter(), { clickable: false, icon: IconsService.createMarkerIconWithColor(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
+            this.hoverMarker = L.marker(this.context.map.getCenter(), { clickable: false, opacity: pathOptions.opacity } as L.MarkerOptions);
             this.middleMarker = middleMarker;
             this.hoverPolyline = L.polyline([]);
             this.setState(HoverHandler.NONE);
             this.routeHover = true;
+            this.setMarkerIcon();
         }
 
         public getState = (): string => {
@@ -88,7 +89,15 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 ? { opacity: 0 } as L.PolylineOptions
                 : angular.extend({ dashArray: "10, 10" }, this.context.route.properties.pathOptions) as L.PolylineOptions;
             this.hoverPolyline.setStyle(style);
+            this.setMarkerIcon();
+        }
 
+        private setMarkerIcon(): void {
+            let pathOptions = this.context.route.properties.pathOptions;
+            let markerIcon = this.routeHover === false
+                ? IconsService.createPoiHoverMarkerIcon(pathOptions.color)
+                : IconsService.createRouteMarkerIcon(pathOptions.color);
+            this.hoverMarker.setIcon(markerIcon);
         }
     }
 }

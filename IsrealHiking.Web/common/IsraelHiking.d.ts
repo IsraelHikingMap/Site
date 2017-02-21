@@ -19,6 +19,7 @@
     export interface MarkerData {
         latlng: L.LatLng;
         title: string;
+        type: string;
     }
 
     export interface RouteSegmentData {

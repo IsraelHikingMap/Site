@@ -31,6 +31,7 @@
     <Content Include="content\bootstrap-theme.min.css" />
     <Content Include="content\bootstrap.min.css" />
     <Content Include="content\font-awesome.min.css" />
+    <Content Include="content\icons.css" />
     <Content Include="content\images\bike.svg" />
     <Content Include="content\images\favicons\android-chrome-144x144.png" />
     <Content Include="content\images\favicons\android-chrome-192x192.png" />
@@ -68,7 +69,6 @@
     <Content Include="content\images\layers.svg" />
     <Content Include="content\images\map-editing.svg" />
     <Content Include="content\images\marker-icon-2x.png" />
-    <Content Include="content\images\marker-icon-wiki.png" />
     <Content Include="content\images\marker-icon.png" />
     <Content Include="content\images\marker-shadow-small.png" />
     <Content Include="content\images\marker-shadow.png" />
@@ -112,6 +112,8 @@
     <Content Include="controllers\ZoomController.js" />
     <Content Include="directives\DraggableResizable.css" />
     <Content Include="directives\DraggableResizableDirective.js" />
+    <Content Include="fonts\fontawesome-webfont.svg" />
+    <Content Include="fonts\IsraelHikingMap.svg" />
     <Content Include="index.css" />
     <Content Include="controllers\InfoController.js" />
     <Content Include="controllers\LayerProperties\BaseLayerAddController.js" />
@@ -130,8 +132,14 @@
     <Content Include="controllers\ShareController.js" />
     <Content Include="directives\DisableMapMovementDirective.js" />
     <Content Include="directives\SyncFocusWithDirective.js" />
-    <Content Include="fonts\fontawesome-webfont.svg" />
-    <Content Include="fonts\glyphicons-halflings-regular.svg" />
+    <Content Include="fonts\IsraelHikingMap.eot" />
+    <Content Include="fonts\IsraelHikingMap.ttf" />
+    <Content Include="fonts\IsraelHikingMap.woff" />
+    <Content Include="fonts\fontawesome-webfont.eot" />
+    <Content Include="fonts\fontawesome-webfont.ttf" />
+    <Content Include="fonts\fontawesome-webfont.woff" />
+    <Content Include="fonts\fontawesome-webfont.woff2" />
+    <Content Include="fonts\FontAwesome.otf" />
     <None Include="gulpfile.js" />
     <Content Include="index.html" />
     <Content Include="OruxmapsDownload.html" />
@@ -196,15 +204,6 @@
     </None>
     <Content Include="_oldSite\redirect.js" />
     <Content Include="content\images\favicons\manifest.json" />
-    <Content Include="fonts\fontawesome-webfont.eot" />
-    <Content Include="fonts\fontawesome-webfont.ttf" />
-    <Content Include="fonts\fontawesome-webfont.woff" />
-    <Content Include="fonts\fontawesome-webfont.woff2" />
-    <Content Include="fonts\FontAwesome.otf" />
-    <Content Include="fonts\glyphicons-halflings-regular.eot" />
-    <Content Include="fonts\glyphicons-halflings-regular.ttf" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff" />
-    <Content Include="fonts\glyphicons-halflings-regular.woff2" />
     <None Include="Localhost.pubxml" />
     <Content Include="services\elevation\ElevationProvider.js" />
     <Content Include="services\elevation\IElevationProvider.js" />

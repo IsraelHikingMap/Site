@@ -24,14 +24,9 @@
             mapService: MapService) {
             super(mapService);
             this.$http = $http;
-            this.markers = L.layerGroup([]);
+            this.markers = L.layerGroup([] as L.Marker[]);
             this.enabled = false;
-            this.wikiMarkerIcon = L.icon({
-                iconSize: L.point(50, 50),
-                iconAnchor: L.point(25, 50),
-                popupAnchor: L.point(0, -48),
-                iconUrl: "/content/images/marker-icon-wiki.png"
-            } as L.IconOptions);
+            this.wikiMarkerIcon = IconsService.createWikipediaIcon();
             this.map.on("moveend", () => {
                 this.updateMarkers();
             });

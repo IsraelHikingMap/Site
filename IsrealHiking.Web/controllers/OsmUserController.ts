@@ -143,7 +143,8 @@
                             this.osmTraceLayer.addLayer(polyLine);
                         }
                         for (let markerData of route.markers) {
-                            let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, riseOnHover: true, icon: Services.IconsService.createMarkerIconWithColor(this.getPathOprtions().color), opacity: this.getPathOprtions().opacity } as L.MarkerOptions);
+                            let icon = Services.IconsService.createPoiDefaultMarkerIcon(this.getPathOprtions().color);
+                            let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, riseOnHover: true, icon: icon, opacity: this.getPathOprtions().opacity } as L.MarkerOptions);
                             marker.bindLabel(markerData.title, { noHide: true, className: "marker-label" } as L.LabelOptions);
                             this.osmTraceLayer.addLayer(marker);
                         }

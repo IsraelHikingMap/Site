@@ -37,8 +37,9 @@ body {
     opacity: 0.5;
 }
 
-.icon-background {
+.stack-icon-top {
     top: -2px;
+    font-size: 0.75em !important;
 }
 
 .control-icon-first {

@@ -8,6 +8,9 @@
     white-space: nowrap;
     border: 1px solid black;
     opacity: 0.8 !important;
+    margin-top: 20px;
+    margin-right: 10px;
+    margin-left: -10px;
 }
 
 .marker-popup {
