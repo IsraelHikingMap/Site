@@ -142,8 +142,6 @@
     <Content Include="fonts\FontAwesome.otf" />
     <None Include="gulpfile.js" />
     <Content Include="index.html" />
-    <Content Include="OruxmapsDownload.html" />
-    <Content Include="IsraelMTBmap.html" />
     <None Include="package.json" />
     <None Include=".bowerrc" />
     <None Include="bower.json" />
@@ -197,12 +195,9 @@
     <Content Include="services\search\LocalSearchResultsProvider.js" />
     <Content Include="services\SidebarService.js" />
     <Content Include="controllers\layersSidebar.html" />
-    <Content Include="_oldSite\index.html" />
-    <Content Include="_oldSite\IsraelMTBmap.html" />
     <None Include="packages.config">
       <SubType>Designer</SubType>
     </None>
-    <Content Include="_oldSite\redirect.js" />
     <Content Include="content\images\favicons\manifest.json" />
     <None Include="Localhost.pubxml" />
     <Content Include="services\elevation\ElevationProvider.js" />
