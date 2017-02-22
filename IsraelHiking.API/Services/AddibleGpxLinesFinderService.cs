@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Services
         /// <inheritdoc/>
         public async Task<IEnumerable<ILineString>> GetLines(List<ILineString> gpxItmLines)
         {
-            _logger.Info("Looking for unmapped routes started");
+            _logger.Info($"Looking for unmapped routes started on {gpxItmLines.Count} traces");
             var linesToReturn = await FindMissingLines(gpxItmLines);
 
             linesToReturn = SplitSelfLoopsAndRemoveDuplication(linesToReturn);

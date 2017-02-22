@@ -129,10 +129,18 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostGpsTrace_UrlProvidedForEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
         {
             var url = SetupGpxUrl(new gpxType(), new List<LineString>());
-            var results = _controller.PostGpsTrace(url).Result as OkNegotiatedContentResult<FeatureCollection>;
+            var results = _controller.PostGpsTrace(url).Result as BadRequestErrorMessageResult;
 
             Assert.IsNotNull(results);
-            Assert.AreEqual(0, results.Content.Features.Count);
+        }
+
+        [TestMethod]
+        public void PostGpsTrace_UrlProvidedForSemiEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
+        {
+            var url = SetupGpxUrl(new gpxType { trk = new[] { new trkType() } }, new List<LineString>());
+            var results = _controller.PostGpsTrace(url).Result as BadRequestErrorMessageResult;
+
+            Assert.IsNotNull(results);
         }
 
         [TestMethod]
@@ -241,6 +249,18 @@ namespace IsraelHiking.API.Tests.Controllers
 
         [TestMethod]
         public void PostUploadGpsTrace_UploadFile_ShouldSendItToOsmGateway()
+        {
+            SetupUploadFile();
+            var gateway = Substitute.For<IOsmGateway>();
+            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(gateway);
+
+            _controller.PostUploadGpsTrace().Wait();
+
+            gateway.Received(1).UploadFile(Arg.Any<string>(), Arg.Any<MemoryStream>());
+        }
+
+        [TestMethod]
+        public void PostUploadGpsTrace_UploadEmptyFile_ShouldReturnBadRequest()
         {
             SetupUploadFile();
             var gateway = Substitute.For<IOsmGateway>();
