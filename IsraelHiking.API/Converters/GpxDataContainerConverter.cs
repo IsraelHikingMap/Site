@@ -134,7 +134,8 @@ namespace IsraelHiking.API.Converters
             return new MarkerData
             {
                 latlng = ToLatLngZ(point),
-                title = point.name
+                title = point.name,
+                type = point.type
             };
         }
 
@@ -144,7 +145,8 @@ namespace IsraelHiking.API.Converters
             {
                 lat = (decimal)marker.latlng.lat,
                 lon = (decimal)marker.latlng.lng,
-                name = marker.title
+                name = marker.title,
+                type = marker.type
             };
         }
 
