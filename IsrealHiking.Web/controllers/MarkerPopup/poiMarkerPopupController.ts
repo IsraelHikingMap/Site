@@ -23,12 +23,13 @@
 
             let routeMarker = _.find($scope.routeLayer.route.markers, markerToFind => markerToFind.marker === $scope.marker);
             $scope.markerType = routeMarker.type || "star";
+            console.log($scope.markerType);
             $scope.iconsGroups = [];
             $scope.iconsGroups.push({
                 icons: ["car", "bike", "hike", "four-by-four"]
             });
             $scope.iconsGroups.push({
-                icons: ["arrow-left", "arrow-right", "heart", "star"]
+                icons: ["arrow-left", "arrow-right", "tint", "star"]
             });
             $scope.iconsGroups.push({
                 icons: ["bed", "binoculars", "fire", "flag"]
@@ -39,6 +40,13 @@
 
             $scope.marker.on("popupopen", () => {
                 $scope.wikiCoordinatesString = this.getWikiCoordString($scope.latLng, $scope.marker.title);
+                $scope.markerType = routeMarker.type || "star";
+            });
+
+            $scope.marker.on("popupclose", () => {
+                let routeMarker = _.find($scope.routeLayer.route.markers, markerToFind => markerToFind.marker === $scope.marker);
+                let color = $scope.routeLayer.getRouteProperties().pathOptions.color;
+                $scope.marker.setIcon(Services.IconsService.createMarkerIconWithColorAndType(color, routeMarker.type));
             });
 
             $scope.updateWikiCoordinates = (title: string) => {
@@ -47,6 +55,8 @@
 
             $scope.setMerkerType = (markerType: string): void => {
                 $scope.markerType = markerType;
+                let color = $scope.routeLayer.getRouteProperties().pathOptions.color;
+                $scope.marker.setIcon(Services.IconsService.createMarkerIconWithColorAndType(color, markerType));
             }
 
             $scope.save = (newTitle: string, markerType: string) => {
@@ -55,9 +65,6 @@
                 routeMarker.type = markerType;
                 $scope.marker.updateLabelContent($scope.routeLayer.getHtmlTitle(newTitle));
                 $scope.marker.title = newTitle;
-                let color = $scope.routeLayer.getRouteProperties().pathOptions.color;
-                $scope.marker.setIcon(Services.IconsService.createMarkerIconWithColorAndType(color, markerType));
-
                 if (!newTitle) {
                     $scope.marker.hideLabel();
                 } else {
