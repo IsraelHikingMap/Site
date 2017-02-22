@@ -122,6 +122,10 @@ namespace IsraelHiking.API.Controllers
             var gpx = gpxBytes.ToGpx().UpdateBounds();
             var highwayType = GetHighwayType(gpx);
             var gpxItmLines = GpxToItmLineStrings(gpx);
+            if (!gpxItmLines.Any())
+            {
+                return BadRequest("File does not contain any traces...");
+            }
             var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
             var attributesTable = new AttributesTable();
             attributesTable.AddAttribute("highway", highwayType);
@@ -254,13 +258,14 @@ namespace IsraelHiking.API.Controllers
 
         private List<ILineString> GpxToItmLineStrings(gpxType gpx)
         {
-            var lineStings = (gpx.rte ?? new rteType[0])
-                .Select(route => ToItmLineString(route.rtept)).ToList();
-            var tracksPointsList = (gpx.trk ?? new trkType[0])
-                .Select(track => track.trkseg.SelectMany(s => s.trkpt).ToArray())
-                .Select(ToItmLineString);
-            lineStings.AddRange(tracksPointsList);
-            return lineStings;
+            return (gpx.rte ?? new rteType[0])
+                .Select(route => ToItmLineString(route.rtept))
+                .Concat((gpx.trk ?? new trkType[0])
+                .Select(track => (track.trkseg ?? new trksegType[0])
+                .SelectMany(s => s.trkpt))
+                .Select(ToItmLineString))
+                .Where(l => l.Coordinates.Any())
+                .ToList();
         }
     }
 }
