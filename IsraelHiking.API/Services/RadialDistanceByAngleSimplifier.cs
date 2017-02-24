@@ -83,11 +83,6 @@ namespace IsraelHiking.API.Services
                 }
             }
             simplified.Add(coordinates.Last());
-            if (simplified.Count == 2 && simplified.First().Distance(simplified.Last()) < DistanceTolerance)
-            {
-                return null;
-            }
-
             return new LineString(simplified.ToArray());
         }
 

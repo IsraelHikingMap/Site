@@ -110,20 +110,5 @@ namespace IsraelHiking.API.Tests.Services
 
             Assert.AreEqual(line.Coordinates.Length, simplified.Coordinates.Length);
         }
-
-        [TestMethod]
-        public void SimplifyLine_EntireLineShouldBeSimplified_ShouldReturnNull()
-        {
-            var line = new LineString(new[]
-            {
-                new Coordinate(0,0),
-                new Coordinate(10, 0),
-                new Coordinate(0, 0)
-            });
-
-            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 90);
-
-            Assert.IsNull(simplified);
-        }
     }
 }
