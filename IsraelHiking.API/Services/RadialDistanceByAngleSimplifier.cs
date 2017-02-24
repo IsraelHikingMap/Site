@@ -76,14 +76,6 @@ namespace IsraelHiking.API.Services
                 {
                     continue;
                 }
-                //var angle1 = AngleUtility.ToDegrees(AngleUtility.Angle(simplified[simplified.Count - 2], simplified.Last()));
-                //var angle2 = AngleUtility.ToDegrees(AngleUtility.Angle(simplified.Last(), coordinate));
-                //var angleDifference = Math.Abs(angle2 - angle1);
-                //if ((angleDifference < 180 - AngleTolerance) || (angleDifference > 180 + AngleTolerance))
-                //{
-                //    simplified.Add(coordinate);
-                //    continue;
-                //}
 
                 if (coordinate.Distance(simplified.Last()) > DistanceTolerance)
                 {
