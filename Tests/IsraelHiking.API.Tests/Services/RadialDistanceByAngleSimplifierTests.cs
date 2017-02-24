@@ -1,4 +1,5 @@
-﻿using GeoAPI.Geometries;
+﻿using System.Linq;
+using GeoAPI.Geometries;
 using IsraelHiking.API.Services;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
@@ -17,20 +18,49 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
-        public void SimplifyLine_ZigZag_ShouldReturnRemoveIt()
+        public void SimplifyEmptyLine_VeryShort_ShouldReturnNull()
         {
             var line = new LineString(new[]
             {
                 new Coordinate(0,0),
-                new Coordinate(10, 0),
-                new Coordinate(1, 0),
-                new Coordinate(11, 0),
-                new Coordinate(0, 0),
+                new Coordinate(10, 0)
             });
 
-            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 30);
+            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 90);
 
-            Assert.AreEqual(line.Coordinates.Length - 1, simplified.Coordinates.Length);
+            Assert.IsNull(simplified);
+        }
+
+        [TestMethod]
+        public void SimplifyEmptyLine_AlreadySimplified_ShouldReturnIt()
+        {
+            var line = new LineString(new[]
+            {
+                new Coordinate(0,0),
+                new Coordinate(100, 0)
+            });
+
+            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 90);
+
+            Assert.AreEqual(simplified.Count, line.Count);
+        }
+
+        [TestMethod]
+        public void SimplifyLine_ZigZag_ShouldReturnRemoveIt()
+        {
+            var coordinateThatShouldBeRemoved = new Coordinate(1, 0);
+            var line = new LineString(new[]
+            {
+                new Coordinate(0,0),
+                new Coordinate(10, 0),
+                coordinateThatShouldBeRemoved,
+                new Coordinate(11, 0),
+                new Coordinate(0, 0)
+            });
+
+            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 90);
+
+            Assert.IsFalse(simplified.Coordinates.Contains(coordinateThatShouldBeRemoved));
         }
 
         [TestMethod]
@@ -44,7 +74,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(300, 0),
             });
 
-            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 30);
+            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 90);
 
             Assert.AreEqual(line.Coordinates.Length, simplified.Coordinates.Length);
         }
@@ -57,12 +87,43 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0,0),
                 new Coordinate(100, 0),
                 new Coordinate(100, 20),
-                new Coordinate(100, 200),
+                new Coordinate(100, 200)
             });
 
             var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 90);
 
             Assert.AreEqual(line.Coordinates.Length - 1, simplified.Coordinates.Length);
+        }
+
+        [TestMethod]
+        public void SimplifyLine_ShouldNotSimplifyByAngleDueToDistance_ShouldReturnSimplifiedLine()
+        {
+            var line = new LineString(new[]
+            {
+                new Coordinate(0,0),
+                new Coordinate(100, 0),
+                new Coordinate(0, 1),
+                new Coordinate(100, 1)
+            });
+
+            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 90);
+
+            Assert.AreEqual(line.Coordinates.Length, simplified.Coordinates.Length);
+        }
+
+        [TestMethod]
+        public void SimplifyLine_EntireLineShouldBeSimplified_ShouldReturnNull()
+        {
+            var line = new LineString(new[]
+            {
+                new Coordinate(0,0),
+                new Coordinate(10, 0),
+                new Coordinate(0, 0)
+            });
+
+            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 90);
+
+            Assert.IsNull(simplified);
         }
     }
 }

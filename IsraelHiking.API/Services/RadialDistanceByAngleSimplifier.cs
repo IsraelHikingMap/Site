@@ -91,11 +91,22 @@ namespace IsraelHiking.API.Services
             return new LineString(simplified.ToArray());
         }
 
+        /// <summary>
+        /// Will add another point to the simplified list if the angle is within tolerance.
+        /// In case it's not within tolrance it will check if the next point's angle is also not within tolerance 
+        /// and in this case it will remove the previous point from the simplified list.
+        /// This will ensure that angles within the simplified list will not violate the angle tolrance.
+        /// In case the distance between two points is large enough the angle tolerance violation is allowed.
+        /// </summary>
+        /// <param name="coordinateIndex">Current coordinate index</param>
+        /// <param name="coordinates">The original coordinates</param>
+        /// <param name="simplified">The simplified coordinates</param>
+        /// <returns>True if the simplified list was changed</returns>
         private bool SimplifyByAngle(int coordinateIndex, Coordinate[] coordinates, List<Coordinate> simplified)
         {
             var coordinate = coordinates[coordinateIndex];
             var angleDifference = GetAngleDifference(simplified[simplified.Count - 2], simplified.Last(), coordinate);
-            if (IsObtuseAngle(angleDifference))
+            if (IsAngleWithinTolerance(angleDifference))
             {
                 simplified.Add(coordinate);
                 return true;
@@ -106,7 +117,7 @@ namespace IsraelHiking.API.Services
                 simplified.Last().Distance(simplified[simplified.Count - 2]) < DistanceTolerance))
             {
                 angleDifference = GetAngleDifference(simplified[simplified.Count - 2], simplified.Last(), coordinates[coordinateIndex + 1]);
-                if (IsObtuseAngle(angleDifference))
+                if (IsAngleWithinTolerance(angleDifference))
                 {
                     return false;
                 }
@@ -124,7 +135,7 @@ namespace IsraelHiking.API.Services
             return Math.Abs(angle2 - angle1);
         }
 
-        private bool IsObtuseAngle(double angle)
+        private bool IsAngleWithinTolerance(double angle)
         {
             return (angle < 180 - AngleTolerance) || (angle > 180 + AngleTolerance);
         }
