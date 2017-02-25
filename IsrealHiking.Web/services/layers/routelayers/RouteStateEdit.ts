@@ -318,6 +318,7 @@
             this.setPoiMarkerEvents(marker);
             newScope.remove = () => {
                 let routeMarker = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
+                routeMarker.marker.closePopup();
                 this.removePoi(routeMarker);
             }
             let popupHtml = this.context.$compile("<div poi-marker-popup></div>")(newScope)[0];

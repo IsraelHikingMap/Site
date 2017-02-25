@@ -23,7 +23,6 @@
 
             let routeMarker = _.find($scope.routeLayer.route.markers, markerToFind => markerToFind.marker === $scope.marker);
             $scope.markerType = routeMarker.type || "star";
-            console.log($scope.markerType);
             $scope.iconsGroups = [];
             $scope.iconsGroups.push({
                 icons: ["car", "bike", "hike", "four-by-four"]
