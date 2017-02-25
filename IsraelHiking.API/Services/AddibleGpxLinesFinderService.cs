@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -54,8 +55,8 @@ namespace IsraelHiking.API.Services
         public async Task<IEnumerable<ILineString>> GetLines(List<ILineString> gpxItmLines)
         {
             _logger.Info($"Looking for unmapped routes started on {gpxItmLines.Count} traces");
-            var linesToReturn = await FindMissingLines(gpxItmLines);
 
+            var linesToReturn = await FindMissingLines(gpxItmLines);
             linesToReturn = SplitSelfLoopsAndRemoveDuplication(linesToReturn);
             linesToReturn = SimplifyLines(linesToReturn);
             linesToReturn = await ProlongLinesAccordingToOriginalGpx(linesToReturn, gpxItmLines);
@@ -112,7 +113,7 @@ namespace IsraelHiking.API.Services
         private async Task<List<ILineString>> FindMissingLines(List<ILineString> gpxItmLines)
         {
             var missingLinesSplit = new List<ILineString>();
-            var splitItmLines = SplitLinesByNumberOfPoints(gpxItmLines);
+            var splitItmLines = SplitLines(gpxItmLines);
             foreach (var itmLine in splitItmLines)
             {
                 var lineStringsInArea = await GetLineStringsInArea(itmLine, _configurationProvider.ClosestPointTolerance);
@@ -122,17 +123,30 @@ namespace IsraelHiking.API.Services
             return MergeBackLines(missingLinesSplit);
         }
 
-        private List<ILineString> SplitLinesByNumberOfPoints(List<ILineString> itmLineStings)
+        private List<ILineString> SplitLines(List<ILineString> itmLineStings)
         {
             var splitLines = new List<ILineString>();
             foreach (var itmLineSting in itmLineStings)
-            {
-                var numberOfDivides = (itmLineSting.Coordinates.Length - 1)/_configurationProvider.MaxNumberOfPointsPerLine;
+            {   
+                var numberOfDividesForPoints = (itmLineSting.Coordinates.Length - 1)/_configurationProvider.MaxNumberOfPointsPerLine;
+                var numberOfDividesForLength = (int)(itmLineSting.Length / _configurationProvider.MaxLengthPerLine);
+                var numberOfDivides = Math.Max(numberOfDividesForPoints, numberOfDividesForLength);
+                if (numberOfDivides == 0)
+                {
+                    splitLines.Add(itmLineSting);
+                    continue;
+                }
+                var maxNumberOfPointsPerLine = Math.Max(1, (itmLineSting.Coordinates.Length - 1)/ numberOfDivides);
+
                 for (int segmentIndex = 0; segmentIndex <= numberOfDivides; segmentIndex++)
                 {
+                    if (itmLineSting.Coordinates.Length - segmentIndex*maxNumberOfPointsPerLine <= 1)
+                    {
+                        continue;
+                    }
                     var splitLineToAdd = _geometryFactory.CreateLineString(itmLineSting.Coordinates
-                        .Skip(segmentIndex*_configurationProvider.MaxNumberOfPointsPerLine)
-                        .Take(_configurationProvider.MaxNumberOfPointsPerLine + 1).ToArray());
+                        .Skip(segmentIndex* maxNumberOfPointsPerLine)
+                        .Take(maxNumberOfPointsPerLine + 1).ToArray());
                     splitLines.Add(splitLineToAdd);
                 }
             }

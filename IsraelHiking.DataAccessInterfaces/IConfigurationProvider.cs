@@ -7,6 +7,7 @@ namespace IsraelHiking.DataAccessInterfaces
     { 
         int MaxCacheSize { get; }
         int MaxNumberOfPointsPerLine { get; }
+        int MaxLengthPerLine { get; }
         int MaxSegmentsNumber { get; }
         double MinimalMissingPartLength { get; }
         double MinimalMissingSelfLoopPartLegth { get; }

@@ -12,6 +12,7 @@ namespace IsraelHiking.DataAccess
         public int MaxCacheSize { get; }
         public int MaxSegmentsNumber { get; }
         public int MaxNumberOfPointsPerLine { get; }
+        public int MaxLengthPerLine { get; }
         public double ClosestPointTolerance { get; }
         public double SimplificationTolerance { get; }
         public double MinimalMissingPartLength { get; }
@@ -40,6 +41,7 @@ namespace IsraelHiking.DataAccess
             MinimalMissingPartLength = GetValueOrDefault(nameof(MinimalMissingPartLength), 200); // meters
             MinimalMissingSelfLoopPartLegth = GetValueOrDefault(nameof(MinimalMissingSelfLoopPartLegth), ClosestPointTolerance); // meters
             MaxNumberOfPointsPerLine = GetValueOrDefault(nameof(MaxNumberOfPointsPerLine), 1000); // number
+            MaxLengthPerLine = GetValueOrDefault(nameof(MaxLengthPerLine), 3000); // meters
             RadialSimplificationAngle = GetValueOrDefault(nameof(RadialSimplificationAngle), 90); // degrees
             SearchFactor = GetValueOrDefault(nameof(SearchFactor), 0.5); // number
             BinariesFolder = GetValueOrDefault(nameof(BinariesFolder), string.Empty);
