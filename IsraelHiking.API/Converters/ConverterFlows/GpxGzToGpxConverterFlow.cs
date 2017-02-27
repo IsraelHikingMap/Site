@@ -1,5 +1,5 @@
 ﻿using System.IO;
-using System.IO.Compression;
+using ICSharpCode.SharpZipLib.GZip;
 
 namespace IsraelHiking.API.Converters.ConverterFlows
 {
@@ -16,7 +16,7 @@ namespace IsraelHiking.API.Converters.ConverterFlows
         {
             using (var contentStream = new MemoryStream(content))
             using (var memoryStreamDecompressed = new MemoryStream())
-            using (var decompressionStream = new GZipStream(contentStream, CompressionMode.Decompress))
+            using (var decompressionStream = new GZipInputStream(contentStream))
             {
                 decompressionStream.CopyTo(memoryStreamDecompressed);
                 var bytes = memoryStreamDecompressed.ToArray();

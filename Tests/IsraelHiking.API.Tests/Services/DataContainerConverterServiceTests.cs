@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.IO;
-using System.IO.Compression;
 using System.Linq;
 using System.Text;
 using GeoAPI.Geometries;
-using Ionic.Zip;
+using ICSharpCode.SharpZipLib.BZip2;
+using ICSharpCode.SharpZipLib.GZip;
+using ICSharpCode.SharpZipLib.Zip;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
@@ -265,9 +266,13 @@ namespace IsraelHiking.API.Tests.Services
         public void ConvertKmzToDataContainer_ShouldConvertToDataContainer()
         {
             var zipfileStream = new MemoryStream();
-            ZipFile file = new ZipFile();
-            file.AddEntry("file.kml", new MemoryStream(_randomBytes));
-            file.Save(zipfileStream);
+            var zipOutputStream = new ZipOutputStream(zipfileStream);
+            ZipEntry entry = new ZipEntry("file.kml");
+            zipOutputStream.PutNextEntry(entry);
+            new MemoryStream(_randomBytes).CopyTo(zipOutputStream);
+            zipOutputStream.CloseEntry();
+            zipOutputStream.Close();
+
             _gpsBabelGateway.ConvertFileFromat(Arg.Is<byte[]>(b => b.AsEnumerable().SequenceEqual(_randomBytes)), Arg.Any<string>(), Arg.Any<string>()).Returns(_simpleGpx.ToBytes());
 
             var dataContainer = _converterService.ToDataContainer(zipfileStream.ToArray(), "kmz").Result;
@@ -280,7 +285,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var gpxStream = new MemoryStream(_simpleGpx.ToBytes());
             var compressedGzipStream = new MemoryStream();
-            using (var gZipStream = new GZipStream(compressedGzipStream, CompressionMode.Compress))
+            using (var gZipStream = new GZipOutputStream(compressedGzipStream))
             {
                 gpxStream.CopyTo(gZipStream);
             }
@@ -294,7 +299,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var gpxStream = new MemoryStream(_simpleGpx.ToBytes());
             var compressedBz2Stream = new MemoryStream();
-            using (var bzipStream = new Ionic.BZip2.BZip2OutputStream(compressedBz2Stream))
+            using (var bzipStream = new BZip2OutputStream(compressedBz2Stream))
             {
                 gpxStream.CopyTo(bzipStream);
             }

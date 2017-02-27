@@ -12,7 +12,7 @@ namespace IsraelHiking.DataAccess
             return Directory.Exists(path) || File.Exists(path);
         }
 
-        public long GetFileSize(string path)
+        public long GetSize(string path)
         {
             return File.Exists(path) ? new FileInfo(path).Length : 0;
         }
@@ -55,11 +55,6 @@ namespace IsraelHiking.DataAccess
                 return new FileInfo(path).LastWriteTime;
             }
             return DateTime.Now;
-        }
-
-        public long GetSize(string fileName)
-        {
-            return new FileInfo(fileName).Length;
         }
 
         public void WriteAllBytes(string filePath, byte[] content)

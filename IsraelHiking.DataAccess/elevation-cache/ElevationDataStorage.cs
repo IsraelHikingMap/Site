@@ -1,11 +1,11 @@
-﻿using Ionic.Zip;
-using IsraelHiking.DataAccessInterfaces;
+﻿using IsraelHiking.DataAccessInterfaces;
 using System;
 using System.Collections.Concurrent;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using ICSharpCode.SharpZipLib.Core;
+using ICSharpCode.SharpZipLib.Zip;
 using NetTopologySuite.Triangulate.QuadEdge;
 
 namespace IsraelHiking.DataAccess
@@ -15,13 +15,15 @@ namespace IsraelHiking.DataAccess
         private const string ELEVATION_CACHE = "elevation-cache";
         private readonly ILogger _logger;
         private readonly IConfigurationProvider _configurationProvider;
+        private readonly IFileSystemHelper _fileSystemHelper;
         private readonly ConcurrentDictionary<Coordinate, short[,]> _elevationData;
         private readonly ConcurrentDictionary<Coordinate, Task> _initializationTaskPerLatLng;
 
-        public ElevationDataStorage(ILogger logger, IConfigurationProvider configurationProvider)
+        public ElevationDataStorage(ILogger logger, IConfigurationProvider configurationProvider, IFileSystemHelper fileSystemHelper)
         {
             _logger = logger;
             _configurationProvider = configurationProvider;
+            _fileSystemHelper = fileSystemHelper;
             _elevationData = new ConcurrentDictionary<Coordinate, short[,]>();
             _initializationTaskPerLatLng = new ConcurrentDictionary<Coordinate, Task>();
         }
@@ -96,17 +98,24 @@ namespace IsraelHiking.DataAccess
             return Vertex.InterpolateZ(new Coordinate(lng, lat), coordinate1, coordinate2, coordinate3);
         }
 
-        private byte[] GetByteArrayFromZip(string hgtZipFile)
+        private byte[] GetByteArrayFromZip(string hgtZipFilePath)
         {
-            using (ZipFile zip = ZipFile.Read(hgtZipFile))
+            using (var memoryStream = new MemoryStream())
+            using (var hgtStream = _fileSystemHelper.FileOpenRead(hgtZipFilePath))
             {
-                var entry = zip.Entries.First(e => e.FileName.Contains("hgt"));
-                using (var ms = new MemoryStream())
+                var hgtZipFile = new ZipFile(hgtStream);
+                foreach (ZipEntry zipEntry in hgtZipFile)
                 {
-                    entry.Extract(ms);
-                    return ms.ToArray();
+                    if (zipEntry.Name.Contains("hgt") == false)
+                    {
+                        continue;
+                    }
+                    var zipStream = hgtZipFile.GetInputStream(zipEntry);
+                    StreamUtils.Copy(zipStream, memoryStream, new byte[4096]);
+                    return memoryStream.ToArray();
                 }
             }
+            throw new Exception("Unable to find hgt file in : " + hgtZipFilePath);
         }
     }
 }

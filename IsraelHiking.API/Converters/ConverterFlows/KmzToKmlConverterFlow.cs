@@ -1,6 +1,5 @@
 ﻿using System.IO;
-using System.Linq;
-using Ionic.Zip;
+using ICSharpCode.SharpZipLib.Zip;
 
 namespace IsraelHiking.API.Converters.ConverterFlows
 {///<inheritdoc />
@@ -14,19 +13,25 @@ namespace IsraelHiking.API.Converters.ConverterFlows
         ///<inheritdoc />
         public byte[] Transform(byte[] content)
         {
-            using (var contentStream = new MemoryStream(content))
-            using (var file = ZipFile.Read(contentStream))
-            using (var memoryStreamDecompressed = new MemoryStream())
+            using (var outputStream = new MemoryStream())
+            using (var inputStream = new MemoryStream(content))
             {
-                var fileEntry = file.Entries.FirstOrDefault(f => f.FileName.EndsWith(".kml"));
-                if (fileEntry == null)
+                using (var zipInputStream = new ZipInputStream(inputStream))
                 {
-                    return new byte[0];
+                    var entry = zipInputStream.GetNextEntry();
+                    while (entry != null)
+                    {
+                        if (entry.IsFile && entry.Name.EndsWith(".kml"))
+                        {
+                            zipInputStream.CopyTo(outputStream);
+                            return outputStream.ToArray();
+                        }
+                        entry = zipInputStream.GetNextEntry();
+                    }
                 }
-                fileEntry.Extract(memoryStreamDecompressed);
-                var bytes = memoryStreamDecompressed.ToArray();
-                return bytes;
+                return new byte[0];
             }
+
         }
     }
 }

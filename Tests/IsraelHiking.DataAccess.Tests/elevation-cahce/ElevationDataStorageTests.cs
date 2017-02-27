@@ -17,7 +17,7 @@ namespace IsraelHiking.DataAccess.Tests
         public void TestInitialize()
         {
             _configurationProvider = Substitute.For<IConfigurationProvider>();
-            _elevationDataStorage = new ElevationDataStorage(new TraceLogger(), _configurationProvider);
+            _elevationDataStorage = new ElevationDataStorage(new TraceLogger(), _configurationProvider, new FileSystemHelper());
         }
 
         [TestMethod]

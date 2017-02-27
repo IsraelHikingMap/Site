@@ -6,7 +6,6 @@ namespace IsraelHiking.DataAccessInterfaces
     public interface IFileSystemHelper
     {
         bool Exists(string path);
-        long GetFileSize(string path);
         string[] GetNonHiddenDirectories(string path);
         string[] GetNonHiddenFiles(string path);
         DateTime GetLastModifiedDate(string path);

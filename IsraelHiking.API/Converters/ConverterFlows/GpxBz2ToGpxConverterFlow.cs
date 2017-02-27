@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using ICSharpCode.SharpZipLib.BZip2;
 
 namespace IsraelHiking.API.Converters.ConverterFlows
 {
@@ -10,7 +11,7 @@ namespace IsraelHiking.API.Converters.ConverterFlows
         public byte[] Transform(byte[] content)
         {
             using (var contentStream = new MemoryStream(content))
-            using (var bzipStream = new Ionic.BZip2.BZip2InputStream(contentStream))
+            using (var bzipStream = new BZip2InputStream(contentStream))
             using (var memoryStreamDecompressed = new MemoryStream())
             {
                 bzipStream.CopyTo(memoryStreamDecompressed);

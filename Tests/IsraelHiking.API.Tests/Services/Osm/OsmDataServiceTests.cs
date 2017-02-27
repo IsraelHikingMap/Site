@@ -71,7 +71,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         public void UpdateData_GetOsmFileWhenCurrentFileIsInDeifferentSize_ShouldGetTheFileFromTheWeb()
         {
             _remoteFileSizeFetcherGateway.GetFileSize(Arg.Any<string>()).Returns(10);
-            _fileSystemHelper.GetFileSize(Arg.Any<string>()).Returns(1);
+            _fileSystemHelper.GetSize(Arg.Any<string>()).Returns(1);
             _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse());
 
             _osmDataService.Initialize(string.Empty);

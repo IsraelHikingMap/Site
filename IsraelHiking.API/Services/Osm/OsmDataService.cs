@@ -109,7 +109,7 @@ namespace IsraelHiking.API.Services.Osm
         {
             var address = "http://download.geofabrik.de/asia/" + PBF_FILE_NAME;
             var length = await _remoteFileSizeFetcherGateway.GetFileSize(address);
-            if (_fileSystemHelper.GetFileSize(osmFilePath) != length)
+            if (_fileSystemHelper.GetSize(osmFilePath) != length)
             {
                 var response = await _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).GetFileContent(address);
                 _fileSystemHelper.WriteAllBytes(osmFilePath, response.Content);
