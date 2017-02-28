@@ -182,7 +182,7 @@ namespace IsraelHiking.Services.Layers {
 
         public isNameAvailable = (name: string) => {
             var route = this.getRouteByName(name);
-            return route == null;
+            return route == null && name != null && name !== "";
         }
 
         public removeBaseLayer = (baseLayer: IBaseLayer) => {
