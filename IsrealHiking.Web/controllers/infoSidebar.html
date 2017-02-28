@@ -1,7 +1,7 @@
 ﻿<div class="info-header">
     <h3>
         <a class="cursor-pointer" ng-class="{active: state == 'about'}" ng-click="setState('about')" analytics-on="click" analytics-category="Info" analytics-event="Info about select">{{resources.about}}</a> |
-        <a class="cursor-pointer" ng-class="{active: state == 'legend'}" ng-click="setState('legend')" ng-show="legendSections.length > 0"  analytics-on="click" analytics-category="Info" analytics-event="Info legend select">{{resources.legend}}</a> |
+        <span ng-show="legendSections.length > 0"><a class="cursor-pointer" ng-class="{active: state == 'legend'}" ng-click="setState('legend')" analytics-on="click" analytics-category="Info" analytics-event="Info legend select">{{resources.legend}}</a> |</span>
         <a class="cursor-pointer" ng-class="{active: state == 'help'}" ng-click="setState('help')" analytics-on="click" analytics-category="Info" analytics-event="Info help select">{{resources.help}}</a>
     </h3>
 </div>
@@ -194,8 +194,10 @@
                 </li>
                 <li>
                     {{resources.helpLinksExplenation}} <br />
-                    http://israelhiking.osm.org.il/#/?url=some-file-from-other-site&amp;baselayer=base-layer-name-or-address-optional, <br />
-                    http://israelhiking.osm.org.il/#/?q=search-term
+                    <div dir="ltr" class="text-left">
+                        http://israelhiking.osm.org.il/#/?url=some-file-from-other-site&amp;baselayer=base-layer-name-or-address-optional <br />
+                        http://israelhiking.osm.org.il/#/?q=search-term
+                    </div>
                 </li>
             </ul>
         </div>
