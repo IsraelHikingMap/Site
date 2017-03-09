@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
-using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -30,7 +29,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var configurationProvide = Substitute.For<IConfigurationProvider>();
             configurationProvide.ClosestPointTolerance.Returns(30);
             configurationProvide.DistanceToExisitngLineMergeThreshold.Returns(1);
-            _service = new OsmLineAdderService(_elasticSearchGateway, new CoordinatesConverter(), configurationProvide, geoJsonPreProcessor, _httpGatewayFactory);
+            _service = new OsmLineAdderService(_elasticSearchGateway, new ItmWgs84MathTransfrom(), configurationProvide, geoJsonPreProcessor, _httpGatewayFactory);
         }
 
         private IOsmGateway SetupOsmGateway(string changesetId)
@@ -38,7 +37,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var osmGateway = Substitute.For<IOsmGateway>();
             var nodeId = 10;
             osmGateway.CreateChangeset(Arg.Any<string>()).Returns(changesetId);
-            osmGateway.CreateNode(changesetId, Arg.Any<Node>()).Returns((x) => Task.Run(() => (++nodeId).ToString()));
+            osmGateway.CreateNode(changesetId, Arg.Any<Node>()).Returns(x => Task.Run(() => (++nodeId).ToString()));
             _httpGatewayFactory.CreateOsmGateway(null).Returns(osmGateway);
             return osmGateway;
         }
@@ -48,7 +47,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var table = new AttributesTable();
             table.AddAttribute("osm_id", wayId.ToString());
 
-            _elasticSearchGateway.GetHighways(Arg.Any<LatLng>(), Arg.Any<LatLng>()).Returns(new List<Feature>
+            _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>
             {
                 new Feature(new LineString(coordinates), table)
             });
@@ -66,7 +65,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         {
             string changesetId = "1";
             var osmGateway = SetupOsmGateway(changesetId);
-            _elasticSearchGateway.GetHighways(Arg.Any<LatLng>(), Arg.Any<LatLng>()).Returns(new List<Feature>());
+            _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>());
             var tags = new Dictionary<string, string>
             {
                 {"highway", "track"},
@@ -85,11 +84,11 @@ namespace IsraelHiking.API.Tests.Services.Osm
         public void AddLine_OneHighwayNearStart_ShouldAddTheLineAndConnectIt()
         {
             var osmGateway = SetupOsmGateway("42");
-            SetupHighway(42, new[] { new Coordinate(0.00001, 0), new Coordinate(-1, 0) }, osmGateway);           
+            SetupHighway(42, new[] { new Coordinate(0.0000001, 0), new Coordinate(-1, 0) }, osmGateway);           
 
             _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 3));
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
         }
 
         [TestMethod]
@@ -100,7 +99,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 3));
+            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Count == 2));
         }
 
         /// <summary>

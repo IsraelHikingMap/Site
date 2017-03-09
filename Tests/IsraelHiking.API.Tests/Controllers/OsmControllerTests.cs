@@ -77,7 +77,8 @@ namespace IsraelHiking.API.Tests.Controllers
             _addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
             _osmLineAdderService = Substitute.For<IOsmLineAdderService>();
             _configurationProvider = Substitute.For<IConfigurationProvider>();
-            _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, new CoordinatesConverter(), 
+            
+            _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, new ItmWgs84MathTransfrom(), 
                 _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, _configurationProvider, GeometryFactory.Default,
                 new LruCache<string, TokenAndSecret>(_configurationProvider));
         }
@@ -86,7 +87,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetHighway_ShouldGetSome()
         {
             var list = new List<Feature> { new Feature(new LineString(new Coordinate[0]), new AttributesTable())};
-            _elasticSearchGateway.GetHighways(Arg.Any<LatLng>(), Arg.Any<LatLng>()).Returns(list);
+            _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(list);
 
             var results = _controller.GetHighways("0,0", "1,1").Result;
 

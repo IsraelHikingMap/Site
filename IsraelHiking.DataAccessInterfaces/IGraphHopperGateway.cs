@@ -4,7 +4,7 @@ using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IRoutingGateway
+    public interface IGraphHopperGateway
     {
         Task<LineString> GetRouting(RoutingGatewayRequest request);
     }

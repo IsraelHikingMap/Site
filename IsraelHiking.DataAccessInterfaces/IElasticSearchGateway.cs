@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using IsraelHiking.Common;
+using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccessInterfaces
@@ -11,6 +11,6 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<List<Feature>> Search(string searchTerm, string fieldName);
         Task UpdateNamesData(List<Feature> features);
         Task UpdateHighwaysData(List<Feature> features);
-        Task<List<Feature>> GetHighways(LatLng northEast, LatLng southWest);
+        Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace IsraelHiking.DataAccess.JsonResponse
+namespace IsraelHiking.DataAccess.GraphHopper
 {
     public class JsonGraphHopperResponse
     {

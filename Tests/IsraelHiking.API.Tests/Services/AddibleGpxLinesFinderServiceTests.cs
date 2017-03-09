@@ -3,7 +3,6 @@ using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
-using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,21 +22,13 @@ namespace IsraelHiking.API.Tests.Services
         private void SetupHighways(List<LineString> lineStrings = null)
         {
             lineStrings = lineStrings ?? new List<LineString>();
-            var conveter = new CoordinatesConverter();
-            var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(c =>
-            {
-                var latLng = conveter.ItmToWgs84(new NorthEast
-                {
-                    North = (int)c.Y,
-                    East = (int)c.X
-                });
-                return new Coordinate(latLng.Longitude, latLng.Latitude);
-            }).ToArray()), new AttributesTable())).ToList();
+            var conveter = new ItmWgs84MathTransfrom();
+            var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(conveter.Transform).ToArray()), new AttributesTable())).ToList();
             foreach (var highway in highways)
             {
                 highway.Attributes.AddAttribute("osm_id", "1");
             }
-            _elasticSearchGateway.GetHighways(Arg.Any<LatLng>(), Arg.Any<LatLng>()).Returns(highways);
+            _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(highways);
         }
 
         [TestInitialize]
@@ -46,7 +37,7 @@ namespace IsraelHiking.API.Tests.Services
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _configurationProvider = Substitute.For<IConfigurationProvider>();
             var geometryFactory = GeometryFactory.Default;
-            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new CoordinatesConverter(), _elasticSearchGateway, _configurationProvider, geometryFactory, Substitute.For<ILogger>());
+            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new ItmWgs84MathTransfrom(), _elasticSearchGateway, _configurationProvider, geometryFactory, Substitute.For<ILogger>());
         }
         
         [TestMethod]
@@ -108,8 +99,8 @@ namespace IsraelHiking.API.Tests.Services
             var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();
 
             Assert.AreEqual(1, results.Length);
-            Assert.AreEqual(10, results.First().Coordinates.First().Y);
-            Assert.AreEqual(40, results.First().Coordinates.Last().Y);
+            Assert.AreEqual(10, results.First().Coordinates.First().Y, 1);
+            Assert.AreEqual(40, results.First().Coordinates.Last().Y, 1);
         }
 
         [TestMethod]
@@ -175,8 +166,8 @@ namespace IsraelHiking.API.Tests.Services
             var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();
 
             Assert.AreEqual(1, results.Length);
-            Assert.AreEqual(10, results.First().Coordinates.First().Y);
-            Assert.AreEqual(40, results.First().Coordinates.Last().Y);
+            Assert.AreEqual(10, results.First().Coordinates.First().Y, 1);
+            Assert.AreEqual(40, results.First().Coordinates.Last().Y, 1);
         }
 
         [TestMethod]

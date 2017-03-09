@@ -3,18 +3,17 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccess.JsonResponse;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 
 namespace IsraelHiking.DataAccess.GraphHopper
 {
-    public class RoutingGateway : IRoutingGateway
+    public class GraphHopperGateway : IGraphHopperGateway
     {
         private readonly ILogger _logger;
 
-        public RoutingGateway(ILogger logger)
+        public GraphHopperGateway(ILogger logger)
         {
             _logger = logger;
         }

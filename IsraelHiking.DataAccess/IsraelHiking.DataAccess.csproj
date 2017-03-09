@@ -167,7 +167,7 @@
     <Compile Include="FileSystemHelper.cs" />
     <Compile Include="GPSBabel\GpsBabelGateway.cs" />
     <Compile Include="GraphHopper\GraphHopperHelper.cs" />
-    <Compile Include="JsonResponse\JsonGraphHopperResponse.cs" />
+    <Compile Include="GraphHopper\JsonGraphHopperResponse.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="BaseNssmHelper.cs" />
     <Compile Include="Osm\BaseFileFetcherGateway.cs" />
@@ -177,7 +177,7 @@
     <Compile Include="Osm\OverpassGateway.cs" />
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="RemoteFileFetcherGateway.cs" />
-    <Compile Include="GraphHopper\RoutingGateway.cs" />
+    <Compile Include="GraphHopper\GraphHopperGateway.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnityRegisterDataAccess.cs" />
   </ItemGroup>

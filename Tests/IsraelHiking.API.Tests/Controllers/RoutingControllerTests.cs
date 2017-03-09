@@ -15,15 +15,15 @@ namespace IsraelHiking.API.Tests.Controllers
     public class RoutingControllerTests
     {
         private RoutingController _controller;
-        private IRoutingGateway _routingGateway;
+        private IGraphHopperGateway _graphHopperGateway;
         private IElevationDataStorage _elevationDataStorage;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _routingGateway = Substitute.For<IRoutingGateway>();
+            _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            _controller = new RoutingController(_routingGateway, _elevationDataStorage);
+            _controller = new RoutingController(_graphHopperGateway, _elevationDataStorage);
         }
 
         [TestMethod]
@@ -61,7 +61,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetRouting_Car_ShouldReturnLineStringFromGateway()
         {
-            _routingGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
+            _graphHopperGateway.GetRouting(Arg.Any<RoutingGatewayRequest>())
                 .Returns(new LineString(new []
                 {
                     new Coordinate(1,1),

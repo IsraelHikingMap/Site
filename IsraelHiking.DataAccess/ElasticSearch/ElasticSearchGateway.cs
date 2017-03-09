@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using IsraelHiking.Common;
+using GeoAPI.Geometries;
 using IsraelHiking.DataAccessInterfaces;
 using Nest;
 using NetTopologySuite.IO;
@@ -119,15 +119,15 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             return feature.Geometry.GeometryType + "_" + feature.Attributes["osm_id"];
         }
 
-        public async Task<List<Feature>> GetHighways(LatLng northEast, LatLng southWest)
+        public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)
         {
             var response = await _elasticClient.SearchAsync<object>(
                 s => s.Index(OSM_HIGHWAYS_INDEX).Size(5000).Query(
                     q => q.GeoShapeEnvelope(
                         e => e.Coordinates(new List<GeoCoordinate>
                             {
-                                new GeoCoordinate(southWest.lat, northEast.lng),
-                                new GeoCoordinate(northEast.lat, southWest.lng)
+                                new GeoCoordinate(southWest.Y, northEast.X),
+                                new GeoCoordinate(northEast.Y, southWest.X)
                             }).Field("geometry")
                             .Relation(GeoShapeRelation.Intersects)
                     )

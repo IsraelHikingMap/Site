@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelTransverseMercator;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp.Collections.Tags;
@@ -17,7 +17,7 @@ namespace IsraelHiking.API.Services.Osm
     public class OsmLineAdderService : IOsmLineAdderService
     {
         private readonly IElasticSearchGateway _elasticSearchGateway;
-        private readonly ICoordinatesConverter _coordinatesConverter;
+        private readonly IMathTransform _itmWgs84MathTransform;
         private readonly IConfigurationProvider _configurationProvider;
         private readonly IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
@@ -28,18 +28,18 @@ namespace IsraelHiking.API.Services.Osm
         /// Constructor
         /// </summary>
         /// <param name="elasticSearchGateway"></param>
-        /// <param name="coordinatesConverter"></param>
+        /// <param name="itmWgs84MathTransform"></param>
         /// <param name="configurationProvider"></param>
         /// <param name="geoJsonPreprocessorExecutor"></param>
         /// <param name="httpGatewayFactory"></param>
         public OsmLineAdderService(IElasticSearchGateway elasticSearchGateway,
-            ICoordinatesConverter coordinatesConverter,
+            IMathTransform itmWgs84MathTransform,
             IConfigurationProvider configurationProvider,
             IOsmGeoJsonPreprocessorExecutor geoJsonPreprocessorExecutor,
             IHttpGatewayFactory httpGatewayFactory)
         {
             _elasticSearchGateway = elasticSearchGateway;
-            _coordinatesConverter = coordinatesConverter;
+            _itmWgs84MathTransform = itmWgs84MathTransform;
             _configurationProvider = configurationProvider;
             _geoJsonPreprocessorExecutor = geoJsonPreprocessorExecutor;
             _httpGatewayFactory = httpGatewayFactory;
@@ -75,10 +75,15 @@ namespace IsraelHiking.API.Services.Osm
                     var closestItmHighway = itmHighways.First(hw => hw.GetOsmId() == closestCompleteWay.Id.ToString());
                     var closestItmPointInWay = closestItmHighway.Coordinates.OrderBy(c => c.Distance(itmPoint.Coordinate)).First();
                     var indexOnWay = closestItmHighway.Coordinates.ToList().IndexOf(closestItmPointInWay);
+                    var closestNodeId = closestCompleteWay.Nodes[indexOnWay].Id.ToString();
+                    if (nodeIds.Any() && nodeIds.Last() == closestNodeId)
+                    {
+                        continue;
+                    }
                     if (closestItmPointInWay.Distance(itmPoint.Coordinate) <= _configurationProvider.DistanceToExisitngLineMergeThreshold)
                     {
                         // close hihgway, adding the node id from that highway
-                        nodeIds.Add(closestCompleteWay.Nodes[indexOnWay].Id.ToString());
+                        nodeIds.Add(closestNodeId);
                         continue;
                     }
                     // need to add a new node to existing highway
@@ -111,7 +116,12 @@ namespace IsraelHiking.API.Services.Osm
                 }
                 var indexInLine = closeLine.Coordinates.ToList().IndexOf(closestPointInExistingLine.Coordinate);
                 var completeWay = await _osmGateway.GetCompleteWay(closeLine.GetOsmId());
-                nodeIds.Add(completeWay.Nodes[indexInLine].Id.ToString());
+                var nodeId = completeWay.Nodes[indexInLine].Id.ToString();
+                if (nodeIds.Any() && nodeIds.Last() == nodeId)
+                {
+                    continue;
+                }
+                nodeIds.Add(nodeId);
             }
         }
 
@@ -134,40 +144,32 @@ namespace IsraelHiking.API.Services.Osm
 
         private async Task<List<Feature>> GetHighwaysInArea(LineString line)
         {
-            var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon
+            var northEast = _itmWgs84MathTransform.Inverse().Transform(new Coordinate
             {
-                Latitude = line.Coordinates.Max(c => c.Y),
-                Longitude = line.Coordinates.Max(c => c.X)
+                Y = line.Coordinates.Max(c => c.Y),
+                X = line.Coordinates.Max(c => c.X)
             });
-            var southWest = _coordinatesConverter.Wgs84ToItm(new LatLon
+            var southWest = _itmWgs84MathTransform.Inverse().Transform(new Coordinate
             {
-                Latitude = line.Coordinates.Min(c => c.Y),
-                Longitude = line.Coordinates.Min(c => c.X)
+                Y = line.Coordinates.Min(c => c.Y),
+                X = line.Coordinates.Min(c => c.X)
             });
             // adding tolerance perimiter to find ways.
-            northEast.North += (int) _configurationProvider.ClosestPointTolerance;
-            northEast.East += (int)_configurationProvider.ClosestPointTolerance;
-            southWest.North -= (int)_configurationProvider.ClosestPointTolerance;
-            southWest.East -= (int)_configurationProvider.ClosestPointTolerance;
-            var northEastLatLon = _coordinatesConverter.ItmToWgs84(northEast);
-            var southWestLatLon = _coordinatesConverter.ItmToWgs84(southWest);
+            northEast.Y += (int) _configurationProvider.ClosestPointTolerance;
+            northEast.X += (int)_configurationProvider.ClosestPointTolerance;
+            southWest.Y -= (int)_configurationProvider.ClosestPointTolerance;
+            southWest.X -= (int)_configurationProvider.ClosestPointTolerance;
+            var northEastLatLon = _itmWgs84MathTransform.Transform(northEast);
+            var southWestLatLon = _itmWgs84MathTransform.Transform(southWest);
 
-            var highways = await _elasticSearchGateway.GetHighways(new LatLng
-            {
-                lat = northEastLatLon.Latitude,
-                lng = northEastLatLon.Longitude
-            }, new LatLng
-            {
-                lat = southWestLatLon.Latitude,
-                lng = southWestLatLon.Longitude
-            });
+            var highways = await _elasticSearchGateway.GetHighways(northEastLatLon, southWestLatLon);
             return highways.ToList();
         }
 
         private Point GetItmCoordinate(Coordinate coordinate)
         {
-            var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon { Latitude = coordinate.Y, Longitude = coordinate.X });
-            return new Point(northEast.East, northEast.North);
+            var northEast = _itmWgs84MathTransform.Inverse().Transform(coordinate);
+            return new Point(northEast);
         }
 
         private async Task<CompleteWay> GetClosetHighway(Coordinate coordinate, List<LineString> itmHighways)
@@ -189,11 +191,7 @@ namespace IsraelHiking.API.Services.Osm
 
         private LineString ToItmLineString(Feature feature)
         {
-            var itmCoordinates = feature.Geometry.Coordinates.Select(coordinate =>
-            {
-                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon { Longitude = coordinate.X, Latitude = coordinate.Y });
-                return new Coordinate(northEast.East, northEast.North);
-            }).ToArray();
+            var itmCoordinates = feature.Geometry.Coordinates.Select(_itmWgs84MathTransform.Inverse().Transform).ToArray();
             var lineString = new LineString(itmCoordinates);
             lineString.SetOsmId(feature.Attributes["osm_id"].ToString());
             return lineString;

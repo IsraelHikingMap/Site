@@ -20,7 +20,7 @@ namespace IsraelHiking.DataAccess
             container.RegisterType<IIsraelHikingDbContext, IsraelHikingDbContext>();
             container.RegisterType<IIsraelHikingRepository, IsraelHikingRepository>();
             container.RegisterType<IGpsBabelGateway, GpsBabelGateway>();
-            container.RegisterType<IRoutingGateway, RoutingGateway>();
+            container.RegisterType<IGraphHopperGateway, GraphHopperGateway>();
             container.RegisterType<IElasticSearchGateway, ElasticSearchGateway>(new ContainerControlledLifetimeManager());
             container.RegisterType<IElevationDataStorage, ElevationDataStorage>(new ContainerControlledLifetimeManager());
             container.RegisterType<IGraphHopperHelper, GraphHopperHelper>();

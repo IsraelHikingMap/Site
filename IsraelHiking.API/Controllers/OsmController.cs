@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Web.Http;
 using System.Web.Http.Description;
+using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
@@ -14,7 +15,6 @@ using IsraelHiking.API.Services.Osm;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelTransverseMercator;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Swashbuckle.Swagger.Annotations;
@@ -28,7 +28,7 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
-        private readonly ICoordinatesConverter _coordinatesConverter;
+        private readonly IMathTransform _itmWgs84MathTransform;
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private readonly IOsmLineAdderService _osmLineAdderService;
@@ -41,7 +41,7 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="httpGatewayFactory"></param>
         /// <param name="dataContainerConverterService"></param>
-        /// <param name="coordinatesConverter"></param>
+        /// <param name="itmWgs84MathTransform"></param>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="addibleGpxLinesFinderService"></param>
         /// <param name="osmLineAdderService"></param>
@@ -50,7 +50,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="cache"></param>
         public OsmController(IHttpGatewayFactory httpGatewayFactory,
             IDataContainerConverterService dataContainerConverterService,
-            ICoordinatesConverter coordinatesConverter,
+            IMathTransform itmWgs84MathTransform,
             IElasticSearchGateway elasticSearchGateway,
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
             IOsmLineAdderService osmLineAdderService,
@@ -60,14 +60,13 @@ namespace IsraelHiking.API.Controllers
         {
             _httpGatewayFactory = httpGatewayFactory;
             _dataContainerConverterService = dataContainerConverterService;
-            _coordinatesConverter = coordinatesConverter;
+            _itmWgs84MathTransform = itmWgs84MathTransform;
             _elasticSearchGateway = elasticSearchGateway;
             _addibleGpxLinesFinderService = addibleGpxLinesFinderService;
             _osmLineAdderService = osmLineAdderService;
             _configurationProvider = configurationProvider;
             _geometryFactory = geometryFactory;
             _cache = cache;
-            
         }
 
         /// <summary>
@@ -78,7 +77,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of features in GeoJSON format</returns>
         public async Task<List<Feature>> GetHighways(string northEast, string southWest)
         {
-            return await _elasticSearchGateway.GetHighways(new LatLng(northEast), new LatLng(southWest));
+            return await _elasticSearchGateway.GetHighways(new Coordinate().FromLatLng(northEast), new Coordinate().FromLatLng(southWest));
         }
 
         /// <summary>
@@ -214,15 +213,7 @@ namespace IsraelHiking.API.Controllers
 
         private ILineString ToItmLineString(IEnumerable<wptType> waypoints)
         {
-            var coordinates = waypoints.Select(wptType =>
-            {
-                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon
-                {
-                    Longitude = (double) wptType.lon,
-                    Latitude = (double) wptType.lat
-                });
-                return new Coordinate(northEast.East, northEast.North);
-            });
+            var coordinates = waypoints.Select(wptType => _itmWgs84MathTransform.Inverse().Transform(new Coordinate((double) wptType.lon, (double) wptType.lat)));
             var nonDuplicates = new List<Coordinate>();
             foreach (var coordinate in coordinates)
             {
@@ -236,15 +227,7 @@ namespace IsraelHiking.API.Controllers
 
         private LineString ToWgs84LineString(IEnumerable<Coordinate> coordinates)
         {
-            var cwgs84Coordinates = coordinates.Select(coordinate =>
-            {
-                var latLng = _coordinatesConverter.ItmToWgs84(new NorthEast
-                {
-                    North = (int) coordinate.Y,
-                    East = (int) coordinate.X
-                });
-                return new Coordinate(latLng.Longitude, latLng.Latitude);
-            });
+            var cwgs84Coordinates = coordinates.Select(_itmWgs84MathTransform.Transform);
             var nonDuplicates = new List<Coordinate>();
             foreach (var coordinate in cwgs84Coordinates)
             {

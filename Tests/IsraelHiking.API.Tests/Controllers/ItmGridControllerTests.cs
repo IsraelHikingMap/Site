@@ -1,5 +1,6 @@
-﻿using IsraelHiking.API.Controllers;
-using IsraelTransverseMercator;
+﻿using GeoAPI.CoordinateSystems.Transformations;
+using GeoAPI.Geometries;
+using IsraelHiking.API.Controllers;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -13,15 +14,16 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetItmCoordinates_ShouldConvertToNorthEast()
         {
-            var northEast = new NorthEast { North = 3, East = 4 };
-            var converter = Substitute.For<ICoordinatesConverter>();
-            converter.Wgs84ToItm(Arg.Any<LatLon>()).Returns(northEast);
+            var northEast = new Coordinate { Y = 3, X = 4 };
+            var converter = Substitute.For<IMathTransform>();
+            converter.Inverse().Returns(converter);
+            converter.Transform(Arg.Any<Coordinate>()).Returns(northEast);
             _itmGridController = new ItmGridController(converter);
 
             var response = _itmGridController.GetItmCoordinates(1, 2);
 
-            Assert.AreEqual(northEast.North, response.North);
-            Assert.AreEqual(northEast.East, response.East);
+            Assert.AreEqual(northEast.X, response.East);
+            Assert.AreEqual(northEast.Y, response.North);
         }
     }
 }

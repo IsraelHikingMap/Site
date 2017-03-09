@@ -300,7 +300,7 @@ namespace IsraelHiking.API.Tests.Services
             configurationProvider.MinimalSplitSimplificationTolerace.Returns(50);
             configurationProvider.MaxSegmentsNumber.Returns(40);
             configurationProvider.MinimalSegmentLength.Returns(500);
-            _service = new RouteDataSplitterService(new CoordinatesConverter(), configurationProvider);
+            _service = new RouteDataSplitterService(new ItmWgs84MathTransfrom(), configurationProvider);
         }
 
         [TestMethod]

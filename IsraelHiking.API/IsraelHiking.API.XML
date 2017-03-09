@@ -218,11 +218,11 @@
             This controller facilitates for conversion between WGS84 coordinates to ITM coordinates
             </summary>
         </member>
-        <member name="M:IsraelHiking.API.Controllers.ItmGridController.#ctor(IsraelTransverseMercator.ICoordinatesConverter)">
+        <member name="M:IsraelHiking.API.Controllers.ItmGridController.#ctor(GeoAPI.CoordinateSystems.Transformations.IMathTransform)">
             <summary>
             Controller's constructor
             </summary>
-            <param name="coordinatesConverter"></param>
+            <param name="itmWgs84MathTransform"></param>
         </member>
         <member name="M:IsraelHiking.API.Controllers.ItmGridController.GetItmCoordinates(System.Double,System.Double)">
             <summary>
@@ -364,13 +364,13 @@
             This controller is responsible for all OSM related requests
             </summary>
         </member>
-        <member name="M:IsraelHiking.API.Controllers.OsmController.#ctor(IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.API.Services.IDataContainerConverterService,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.API.Services.IAddibleGpxLinesFinderService,IsraelHiking.API.Services.Osm.IOsmLineAdderService,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,GeoAPI.Geometries.IGeometryFactory,IsraelHiking.API.Services.LruCache{System.String,IsraelHiking.Common.TokenAndSecret})">
+        <member name="M:IsraelHiking.API.Controllers.OsmController.#ctor(IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.API.Services.IDataContainerConverterService,GeoAPI.CoordinateSystems.Transformations.IMathTransform,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.API.Services.IAddibleGpxLinesFinderService,IsraelHiking.API.Services.Osm.IOsmLineAdderService,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,GeoAPI.Geometries.IGeometryFactory,IsraelHiking.API.Services.LruCache{System.String,IsraelHiking.Common.TokenAndSecret})">
             <summary>
             Controller's constructor
             </summary>
             <param name="httpGatewayFactory"></param>
             <param name="dataContainerConverterService"></param>
-            <param name="coordinatesConverter"></param>
+            <param name="itmWgs84MathTransform"></param>
             <param name="elasticSearchGateway"></param>
             <param name="addibleGpxLinesFinderService"></param>
             <param name="osmLineAdderService"></param>
@@ -425,11 +425,11 @@
             This controller allows routing between two points
             </summary>
         </member>
-        <member name="M:IsraelHiking.API.Controllers.RoutingController.#ctor(IsraelHiking.DataAccessInterfaces.IRoutingGateway,IsraelHiking.DataAccessInterfaces.IElevationDataStorage)">
+        <member name="M:IsraelHiking.API.Controllers.RoutingController.#ctor(IsraelHiking.DataAccessInterfaces.IGraphHopperGateway,IsraelHiking.DataAccessInterfaces.IElevationDataStorage)">
             <summary>
             Controller's constructor
             </summary>
-            <param name="routingGateway"></param>
+            <param name="graphHopperGateway"></param>
             <param name="elevationDataStorage"></param>
         </member>
         <member name="M:IsraelHiking.API.Controllers.RoutingController.GetRouting(System.String,System.String,System.String)">
@@ -1175,13 +1175,13 @@
         <member name="T:IsraelHiking.API.Services.AddibleGpxLinesFinderService">
             <inheritdoc/>
         </member>
-        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.#ctor(IsraelHiking.API.Executors.IGpxLoopsSplitterExecutor,IsraelHiking.API.Executors.IGpxProlongerExecutor,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,GeoAPI.Geometries.IGeometryFactory,IsraelHiking.DataAccessInterfaces.ILogger)">
+        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.#ctor(IsraelHiking.API.Executors.IGpxLoopsSplitterExecutor,IsraelHiking.API.Executors.IGpxProlongerExecutor,GeoAPI.CoordinateSystems.Transformations.IMathTransform,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,GeoAPI.Geometries.IGeometryFactory,IsraelHiking.DataAccessInterfaces.ILogger)">
             <summary>
             Constructor
             </summary>
             <param name="gpxLoopsSplitterExecutor"></param>
             <param name="gpxProlongerExecutor"></param>
-            <param name="coordinatesConverter"></param>
+            <param name="itmWgs84MathTransfrom"></param>
             <param name="elasticSearchGateway"></param>
             <param name="configurationProvider"></param>
             <param name="geometryFactory"></param>
@@ -1259,12 +1259,12 @@
         <member name="T:IsraelHiking.API.Services.Osm.OsmLineAdderService">
             <inheritdoc/>
         </member>
-        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.#ctor(IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelTransverseMercator.ICoordinatesConverter,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory)">
+        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.#ctor(IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,GeoAPI.CoordinateSystems.Transformations.IMathTransform,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory)">
             <summary>
             Constructor
             </summary>
             <param name="elasticSearchGateway"></param>
-            <param name="coordinatesConverter"></param>
+            <param name="itmWgs84MathTransform"></param>
             <param name="configurationProvider"></param>
             <param name="geoJsonPreprocessorExecutor"></param>
             <param name="httpGatewayFactory"></param>

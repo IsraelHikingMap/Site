@@ -98,7 +98,7 @@
     <Compile Include="IProcessHelper.cs" />
     <Compile Include="IRemoteFileFetcherGateway.cs" />
     <Compile Include="IRemoteFileSizeFetcherGateway.cs" />
-    <Compile Include="IRoutingGateway.cs" />
+    <Compile Include="IGraphHopperGateway.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -2,11 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
-using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelTransverseMercator;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
 using NetTopologySuite.Simplify;
@@ -18,7 +17,7 @@ namespace IsraelHiking.API.Services
     {
         private readonly IGpxLoopsSplitterExecutor _gpxLoopsSplitterExecutor;
         private readonly IGpxProlongerExecutor _gpxProlongerExecutor;
-        private readonly ICoordinatesConverter _coordinatesConverter;
+        private readonly IMathTransform _itmWgs84MathTransfrom;
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IConfigurationProvider _configurationProvider;
         private readonly IGeometryFactory _geometryFactory;
@@ -29,14 +28,14 @@ namespace IsraelHiking.API.Services
         /// </summary>
         /// <param name="gpxLoopsSplitterExecutor"></param>
         /// <param name="gpxProlongerExecutor"></param>
-        /// <param name="coordinatesConverter"></param>
+        /// <param name="itmWgs84MathTransfrom"></param>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="configurationProvider"></param>
         /// <param name="geometryFactory"></param>
         /// <param name="logger"></param>
         public AddibleGpxLinesFinderService(IGpxLoopsSplitterExecutor gpxLoopsSplitterExecutor,
             IGpxProlongerExecutor gpxProlongerExecutor,
-            ICoordinatesConverter coordinatesConverter, 
+            IMathTransform itmWgs84MathTransfrom, 
             IElasticSearchGateway elasticSearchGateway, 
             IConfigurationProvider configurationProvider,
             IGeometryFactory geometryFactory,
@@ -44,7 +43,7 @@ namespace IsraelHiking.API.Services
         {
             _gpxLoopsSplitterExecutor = gpxLoopsSplitterExecutor;
             _gpxProlongerExecutor = gpxProlongerExecutor;
-            _coordinatesConverter = coordinatesConverter;
+            _itmWgs84MathTransfrom = itmWgs84MathTransfrom;
             _elasticSearchGateway = elasticSearchGateway;
             _configurationProvider = configurationProvider;
             _geometryFactory = geometryFactory;
@@ -183,27 +182,23 @@ namespace IsraelHiking.API.Services
 
         private async Task<List<ILineString>> GetLineStringsInArea(ILineString gpxItmLine, double tolerance)
         {
-            var northEast = _coordinatesConverter.ItmToWgs84(new NorthEast
+            var northEast = _itmWgs84MathTransfrom.Transform(new Coordinate
             {
-                North = (int)(gpxItmLine.Coordinates.Max(c => c.Y) + tolerance),
-                East = (int)(gpxItmLine.Coordinates.Max(c => c.X) + tolerance)
+                Y = (int)(gpxItmLine.Coordinates.Max(c => c.Y) + tolerance),
+                X = (int)(gpxItmLine.Coordinates.Max(c => c.X) + tolerance)
             });
-            var southWest = _coordinatesConverter.ItmToWgs84(new NorthEast
+            var southWest = _itmWgs84MathTransfrom.Transform(new Coordinate
             {
-                North = (int)(gpxItmLine.Coordinates.Min(c => c.Y) - tolerance),
-                East = (int)(gpxItmLine.Coordinates.Min(c => c.X) - tolerance)
+                Y = (int)(gpxItmLine.Coordinates.Min(c => c.Y) - tolerance),
+                X = (int)(gpxItmLine.Coordinates.Min(c => c.X) - tolerance)
             });
-            var highways = await _elasticSearchGateway.GetHighways(new LatLng { lat = northEast.Latitude, lng = northEast.Longitude }, new LatLng { lat = southWest.Latitude, lng = southWest.Longitude });
+            var highways = await _elasticSearchGateway.GetHighways(northEast, southWest);
             return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.Attributes["osm_id"].ToString())).ToList();
         }
 
         private ILineString ToItmLineString(IEnumerable<Coordinate> coordinates, string id)
         {
-            var itmCoordinates = coordinates.Select(coordinate =>
-            {
-                var northEast = _coordinatesConverter.Wgs84ToItm(new LatLon { Longitude = coordinate.X, Latitude = coordinate.Y });
-                return new Coordinate(northEast.East, northEast.North);
-            }).ToArray();
+            var itmCoordinates = coordinates.Select(_itmWgs84MathTransfrom.Inverse().Transform).ToArray();
             var line = _geometryFactory.CreateLineString(itmCoordinates);
             line.SetOsmId(id);
             return line;

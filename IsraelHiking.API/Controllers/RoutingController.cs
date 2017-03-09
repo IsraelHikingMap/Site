@@ -16,18 +16,18 @@ namespace IsraelHiking.API.Controllers
     /// </summary>
     public class RoutingController : ApiController
     {
-        private readonly IRoutingGateway _routingGateway;
+        private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="routingGateway"></param>
+        /// <param name="graphHopperGateway"></param>
         /// <param name="elevationDataStorage"></param>
-        public RoutingController(IRoutingGateway routingGateway,
+        public RoutingController(IGraphHopperGateway graphHopperGateway,
             IElevationDataStorage elevationDataStorage)
         {
-            _routingGateway = routingGateway;
+            _graphHopperGateway = graphHopperGateway;
             _elevationDataStorage = elevationDataStorage;
         }
 
@@ -58,7 +58,7 @@ namespace IsraelHiking.API.Controllers
             }
             else
             {
-                lineString = await _routingGateway.GetRouting(new RoutingGatewayRequest
+                lineString = await _graphHopperGateway.GetRouting(new RoutingGatewayRequest
                 {
                     From = from,
                     To = to,
