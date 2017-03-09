@@ -5,22 +5,22 @@ namespace IsraelHiking.DataAccess.Tests
 {
     internal class TraceLogger : ILogger
     {
-        public void Debug(string message)
+        public void LogDebug(string message)
         {
             Trace.WriteLine(message);
         }
 
-        public void Error(string message)
+        public void LogError(string message)
         {
             Trace.WriteLine(message);
         }
 
-        public void Info(string message)
+        public void LogInformation(string message)
         {
             Trace.WriteLine(message);
         }
 
-        public void Warn(string message)
+        public void LogWarning(string message)
         {
             Trace.WriteLine(message);
         }

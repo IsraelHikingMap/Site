@@ -34,7 +34,7 @@ namespace IsraelHiking.DataAccess
                 _nssm = Path.Combine(serverPath, NSSM_EXE);
                 if (File.Exists(_nssm) == false)
                 {
-                    Logger.Error("NSSM file is missing at: " + _nssm);
+                    Logger.LogError("NSSM file is missing at: " + _nssm);
                 }
                 WorkingDirectory = Path.Combine(serverPath, RelativePath);
                 var serviceController = GetService();
@@ -59,7 +59,7 @@ namespace IsraelHiking.DataAccess
 
         private void InstallService()
         {
-            Logger.Info($"Adding {Name} service to windows...");
+            Logger.LogInformation($"Adding {Name} service to windows...");
             var installArguments = $"install {Name} {CommandLine}";
             ProcessHelper.Start(_nssm, installArguments, WorkingDirectory);
             ProcessHelper.Start(_nssm, $"set {Name} AppDirectory \"{WorkingDirectory}\"", WorkingDirectory);
@@ -69,27 +69,27 @@ namespace IsraelHiking.DataAccess
             var serviceController = GetService();
             if (serviceController == null || serviceController.Status != ServiceControllerStatus.Running)
             {
-                Logger.Error($"Unable to add {Name} service to windows...");
+                Logger.LogError($"Unable to add {Name} service to windows...");
             }
             else
             {
-                Logger.Info($"Added {Name} service to windows...");
+                Logger.LogInformation($"Added {Name} service to windows...");
             }
         }
 
         private void UninstallService()
         {
-            Logger.Info($"Removeing {Name} service from windows...");
+            Logger.LogInformation($"Removeing {Name} service from windows...");
             ProcessHelper.Start(_nssm, $"stop {Name}", WorkingDirectory);
             ProcessHelper.Start(_nssm, $"remove {Name} confirm", WorkingDirectory);
             Task.Delay(new TimeSpan(0, 0, 0, 3)).Wait();
             if (GetService() != null)
             {
-                Logger.Error($"Unable to remove {Name} service to windows...");
+                Logger.LogError($"Unable to remove {Name} service to windows...");
             }
             else
             {
-                Logger.Info($"Removed {Name} service to windows...");
+                Logger.LogInformation($"Removed {Name} service to windows...");
             }
         }
 

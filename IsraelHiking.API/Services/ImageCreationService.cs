@@ -78,7 +78,7 @@ namespace IsraelHiking.API.Services
         ///<inheritdoc />
         public async Task<byte[]> Create(DataContainer dataContainer)
         {
-            _logger.Debug("Creating image for thumbnail started.");
+            _logger.LogDebug("Creating image for thumbnail started.");
             var allLocations = dataContainer.routes.SelectMany(r => r.segments).SelectMany(s => s.latlngzs.OfType<LatLng>()).ToArray();
             if (!allLocations.Any())
             {
@@ -93,7 +93,7 @@ namespace IsraelHiking.API.Services
             var resizedForFacebook = new Bitmap(backgroundImage.Image, new Size(600, 315));
             var imageStream = new MemoryStream();
             resizedForFacebook.Save(imageStream, ImageFormat.Png);
-            _logger.Debug("Creating image for thumbnail completed.");
+            _logger.LogDebug("Creating image for thumbnail completed.");
             return imageStream.ToArray();
         }
 

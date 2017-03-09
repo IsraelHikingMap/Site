@@ -33,11 +33,11 @@ namespace IsraelHiking.DataAccess
             var elevationCacheFolder = Path.Combine(_configurationProvider.BinariesFolder, ELEVATION_CACHE);
             if (Directory.Exists(elevationCacheFolder) == false)
             {
-                _logger.Error($"!!! The folder: {elevationCacheFolder} does not exists, please change the BinariesFolder key in the configuration file !!!");
+                _logger.LogError($"!!! The folder: {elevationCacheFolder} does not exists, please change the BinariesFolder key in the configuration file !!!");
                 return Task.Run(() => { });
             }
             var hgtZipFiles = Directory.GetFiles(elevationCacheFolder, "*.hgt.zip");
-            _logger.Debug("Found " + hgtZipFiles.Length + " files in: " + elevationCacheFolder);
+            _logger.LogDebug("Found " + hgtZipFiles.Length + " files in: " + elevationCacheFolder);
             foreach (var hgtZipFile in hgtZipFiles)
             {
                 var bottomLeftLat = int.Parse(Path.GetFileName(hgtZipFile).Substring(1, 2));
@@ -46,7 +46,7 @@ namespace IsraelHiking.DataAccess
 
                 _initializationTaskPerLatLng[key] = Task.Run(() =>
                 {
-                    _logger.Debug("Reading file " + hgtZipFile);
+                    _logger.LogDebug("Reading file " + hgtZipFile);
                     var byteArray = GetByteArrayFromZip(hgtZipFile);
                     int samples = (short) (Math.Sqrt(byteArray.Length/2.0) + 0.5);
                     var elevationArray = new short[samples, samples];
@@ -56,7 +56,7 @@ namespace IsraelHiking.DataAccess
                         elevationArray[(byteIndex/2)/samples, (byteIndex/2)%samples] = currentElevation;
                     }
                     _elevationData[key] = elevationArray;
-                    _logger.Debug("Finished reading file " + hgtZipFile);
+                    _logger.LogDebug("Finished reading file " + hgtZipFile);
                 });
             }
 

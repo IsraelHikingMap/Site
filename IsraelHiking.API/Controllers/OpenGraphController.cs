@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>An HTML page with all relevant metadata</returns>
         public async Task<IHttpActionResult> GetHtml(string id)
         {
-            _logger.Debug("Received a call to get html for: " + id);
+            _logger.LogDebug("Received a call to get html for: " + id);
             var url = await _repository.GetUrlById(id);
             var response = new HttpResponseMessage
             {

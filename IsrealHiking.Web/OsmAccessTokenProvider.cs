@@ -34,7 +34,7 @@ namespace IsraelHiking.Web
             {
                 var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
                 userId = await osmGateway.GetUserId();
-                _logger.Info("User " + userId + " had just logged in");
+                _logger.LogInformation("User " + userId + " had just logged in");
                 _cache.Add(userId, tokenAndSecret);
             }
             if (string.IsNullOrWhiteSpace(userId))

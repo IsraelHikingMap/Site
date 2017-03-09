@@ -36,7 +36,7 @@ namespace IsraelHiking.Web
         {
             var logger = new Logger();
             var container = CreateUnityContainer(logger);
-            logger.Info("Starting Israel Hiking Server.");
+            logger.LogInformation("Starting Israel Hiking Server.");
             var config = new HttpConfiguration();
             app.UseOAuthBearerAuthentication(new OAuthBearerAuthenticationOptions
             {
@@ -71,7 +71,7 @@ namespace IsraelHiking.Web
             config.DependencyResolver = new UnityResolver(container);
             InitializeServices(container);
             app.UseWebApi(config);
-            logger.Info("Israel Hiking Server is up and running.");
+            logger.LogInformation("Israel Hiking Server is up and running.");
         }
 
         private IUnityContainer CreateUnityContainer(ILogger logger)
@@ -85,9 +85,9 @@ namespace IsraelHiking.Web
         private void InitializeServices(IUnityContainer container)
         {
             var logger = container.Resolve<ILogger>();
-            logger.Info("Initializing Elevation data and Elastic Search Service");
+            logger.LogInformation("Initializing Elevation data and Elastic Search Service");
             container.Resolve<IElasticSearchGateway>().Initialize();
-            container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.Info("Finished loading elevation data from files."));
+            container.Resolve<IElevationDataStorage>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading elevation data from files."));
         }
     }
 }

@@ -20,7 +20,7 @@ namespace IsraelHiking.DataAccess
             {
                 cmdArguments = $"/c {fileName} {arguments}";
             }
-            _logger.Debug($"Running: {processToRun} {cmdArguments}");
+            _logger.LogDebug($"Running: {processToRun} {cmdArguments}");
             using (var process = new Process())
             {
                 process.StartInfo = new ProcessStartInfo
@@ -34,11 +34,11 @@ namespace IsraelHiking.DataAccess
                 process.WaitForExit(timeOutInMilliseconds);
                 if (process.ExitCode == 0)
                 {
-                    _logger.Debug($"Process {fileName} finished succesfully");
+                    _logger.LogDebug($"Process {fileName} finished succesfully");
                 }
                 else
                 {
-                    _logger.Error($"Process {fileName} did not finished succesfully");
+                    _logger.LogError($"Process {fileName} did not finished succesfully");
                 }
             }
         }

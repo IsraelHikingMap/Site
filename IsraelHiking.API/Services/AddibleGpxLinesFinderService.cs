@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Services
         /// <inheritdoc/>
         public async Task<IEnumerable<ILineString>> GetLines(List<ILineString> gpxItmLines)
         {
-            _logger.Info($"Looking for unmapped routes started on {gpxItmLines.Count} traces");
+            _logger.LogInformation($"Looking for unmapped routes started on {gpxItmLines.Count} traces");
 
             var linesToReturn = await FindMissingLines(gpxItmLines);
             linesToReturn = SplitSelfLoopsAndRemoveDuplication(linesToReturn);
@@ -63,7 +63,7 @@ namespace IsraelHiking.API.Services
             linesToReturn = SimplifyLines(linesToReturn); // need to simplify to remove sharp corners
             linesToReturn = AdjustIntersections(linesToReturn); // intersections may have moved after simplification
 
-            _logger.Info($"Looking for unmapped routes finished, found {linesToReturn.Count} routes.");
+            _logger.LogInformation($"Looking for unmapped routes finished, found {linesToReturn.Count} routes.");
             return linesToReturn;
         }
 
@@ -309,7 +309,7 @@ namespace IsraelHiking.API.Services
                 }
                 currentLineIndex = gpxItmLines.Count - 1;
                 currentPositionIndex = gpxItmLines[currentLineIndex].Coordinates.Length - 1;
-                _logger.Error("Can't find coordinate: " + currentCoordinate + " in lines: " + string.Join("\n", gpxItmLines.Select(l => l.ToString())));
+                _logger.LogError("Can't find coordinate: " + currentCoordinate + " in lines: " + string.Join("\n", gpxItmLines.Select(l => l.ToString())));
                 break;
             }
         }

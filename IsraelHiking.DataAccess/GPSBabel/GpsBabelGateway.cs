@@ -38,7 +38,7 @@ namespace IsraelHiking.DataAccess.GPSBabel
                 File.Delete(inputTempfileName);
                 var outputContent = File.ReadAllBytes(outputTempfileName);
                 File.Delete(outputTempfileName);
-                _logger.Debug("Finished converting data from: " + inputFormat + " to: " + outputFormat);
+                _logger.LogDebug("Finished converting data from: " + inputFormat + " to: " + outputFormat);
                 return outputContent;
             });
         }

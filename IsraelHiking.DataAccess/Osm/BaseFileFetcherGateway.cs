@@ -19,7 +19,7 @@ namespace IsraelHiking.DataAccess.Osm
         {
             using (var client = new HttpClient())
             {
-                _logger.Debug("Getting file from: " + url);
+                _logger.LogDebug("Getting file from: " + url);
                 UpdateHeaders(client, url);
                 client.Timeout = TimeSpan.FromMinutes(10);
                 var response = await client.GetAsync(url);
@@ -29,11 +29,11 @@ namespace IsraelHiking.DataAccess.Osm
                 if (response.IsSuccessStatusCode)
                 {
                     content = await response.Content.ReadAsByteArrayAsync();
-                    _logger.Debug("File was retrieved successfully from: " + url);
+                    _logger.LogDebug("File was retrieved successfully from: " + url);
                 }
                 else
                 {
-                    _logger.Debug("Unable to retrieve file from: " + url + ", Status code: " + response.StatusCode);
+                    _logger.LogDebug("Unable to retrieve file from: " + url + ", Status code: " + response.StatusCode);
                 }
 
                 return new RemoteFileFetcherGatewayResponse

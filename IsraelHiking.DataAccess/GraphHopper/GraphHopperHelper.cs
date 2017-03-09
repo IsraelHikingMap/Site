@@ -29,7 +29,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
                 var newDirectory = Path.Combine(WorkingDirectory, GH_NEW_CACHE_FOLDER);
                 DeleteDirectories();
 
-                Logger.Info("Creating graph hopper cache based on latest pbf file");
+                Logger.LogInformation("Creating graph hopper cache based on latest pbf file");
                 ProcessHelper.Start("cmd",
                     $"/c java -cp \"*\" com.graphhopper.tools.Import config=config-example.properties datareader.file={osmFilePath} graph.location={GH_NEW_CACHE_FOLDER} > UpdateCache.log",
                     WorkingDirectory, 30*60*1000);
@@ -41,10 +41,10 @@ namespace IsraelHiking.DataAccess.GraphHopper
                     {
                         if (Directory.Exists(currentDirectory))
                         {
-                            Logger.Info($"moving {currentDirectory} to {oldDirectory}");
+                            Logger.LogInformation($"moving {currentDirectory} to {oldDirectory}");
                             Directory.Move(currentDirectory, oldDirectory);
                         }
-                        Logger.Info($"moving {newDirectory} to {currentDirectory}");
+                        Logger.LogInformation($"moving {newDirectory} to {currentDirectory}");
                         Directory.Move(newDirectory, currentDirectory);
                     }
                     DeleteDirectories();
@@ -62,14 +62,14 @@ namespace IsraelHiking.DataAccess.GraphHopper
             var newDirectory = Path.Combine(WorkingDirectory, GH_NEW_CACHE_FOLDER);
             foreach (var directory in new[] { oldDirectory, newDirectory }.Where(Directory.Exists))
             {
-                Logger.Info("Deleting " + directory);
+                Logger.LogInformation("Deleting " + directory);
                 try
                 {
                     Directory.Delete(directory, true);
                 }
                 catch (Exception ex)
                 {
-                    Logger.Error($"Unable to delete {directory} {ex}");
+                    Logger.LogError($"Unable to delete {directory} {ex}");
                 }
             }
         }

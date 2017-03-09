@@ -27,14 +27,14 @@ namespace IsraelHiking.DataAccess.Osm
             {
                 using (var stream = _fileSystemHelper.FileOpenRead(osmFilePath))
                 {
-                    _logger.Info($"Reading {osmFilePath} to memory - extracting only elements with name.");
+                    _logger.LogInformation($"Reading {osmFilePath} to memory - extracting only elements with name.");
                     var source = new PBFOsmStreamSource(stream);
                     var completeSource = new OsmSimpleCompleteStreamSource(source);
                     var namesDictionary = completeSource
                         .Where(o => string.IsNullOrWhiteSpace(GetName(o)) == false)
                         .GroupBy(GetName)
                         .ToDictionary(g => g.Key, g => g.ToList());
-                    _logger.Info("Finished grouping data by name.");
+                    _logger.LogInformation("Finished grouping data by name.");
                     return namesDictionary;
                 }
             });
@@ -46,14 +46,14 @@ namespace IsraelHiking.DataAccess.Osm
             {
                 using (var stream = _fileSystemHelper.FileOpenRead(osmFilePath))
                 {
-                    _logger.Info($"Reading {osmFilePath} to memory - extracting only highways.");
+                    _logger.LogInformation($"Reading {osmFilePath} to memory - extracting only highways.");
                     var source = new PBFOsmStreamSource(stream);
                     var completeSource = new OsmSimpleCompleteStreamSource(source);
                     var higways = completeSource
                         .OfType<CompleteWay>()
                         .Where(o => o.Tags.ContainsKey("highway"))
                         .ToList();
-                    _logger.Info("Finished getting highways. " + higways.Count);
+                    _logger.LogInformation("Finished getting highways. " + higways.Count);
                     return higways;
                 }
             });

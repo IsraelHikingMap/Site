@@ -59,7 +59,7 @@ namespace IsraelHiking.Updater
             }
             catch (Exception ex)
             {
-                logger.Error("Failed updating OSM data with exception: " + ex);
+                logger.LogError("Failed updating OSM data with exception: " + ex);
             }
         }
     }

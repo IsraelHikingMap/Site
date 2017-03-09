@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public Dictionary<string, List<Feature>> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary)
         {
-            _logger.Info("Preprocessing OSM data to GeoJson, total distict names: " + osmNamesDictionary.Keys.Count);
+            _logger.LogInformation("Preprocessing OSM data to GeoJson, total distict names: " + osmNamesDictionary.Keys.Count);
             var geoJsonNamesDictionary = new Dictionary<string, List<Feature>>();
             foreach (var pair in osmNamesDictionary)
             {
@@ -72,17 +72,17 @@ namespace IsraelHiking.API.Executors
                 var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(g.Geometry);
                 if (!isValidOp.IsValid)
                 {
-                    _logger.Debug($"https://www.openstreetmap.org/{(g.Geometry.GeometryType == "Polygon" ? "way" : "relation")}/{g.Attributes["osm_id"]} {isValidOp.ValidationError.Message}({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                    _logger.LogDebug($"https://www.openstreetmap.org/{(g.Geometry.GeometryType == "Polygon" ? "way" : "relation")}/{g.Attributes["osm_id"]} {isValidOp.ValidationError.Message}({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                 }
             });
             
-            _logger.Info("Finished converting OSM data to GeoJson, Starting GeoJson preprocessing");
+            _logger.LogInformation("Finished converting OSM data to GeoJson, Starting GeoJson preprocessing");
             var containers = geoJsonNamesDictionary.Values.SelectMany(v => v).Where(f =>
                 !(f.Geometry is MultiLineString) &&
                 !(f.Geometry is LineString) &&
                 !(f.Geometry is MultiPoint) &&
                 !(f.Geometry is Point)).ToList();
-            _logger.Info("Total possible containers: " + containers.Count);
+            _logger.LogInformation("Total possible containers: " + containers.Count);
             var counter = 0;
             foreach (var features in geoJsonNamesDictionary.Values)
             {
@@ -90,10 +90,10 @@ namespace IsraelHiking.API.Executors
                 counter++;
                 if (counter % 5000 == 0)
                 {
-                    _logger.Info($"Finished processing {counter} features");
+                    _logger.LogInformation($"Finished processing {counter} features");
                 }
             }
-            _logger.Info("Finished GeoJson preprocessing");
+            _logger.LogInformation("Finished GeoJson preprocessing");
             return geoJsonNamesDictionary;
         }
 
@@ -156,7 +156,7 @@ namespace IsraelHiking.API.Executors
                     var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(f.Geometry);
                     if (!isValidOp.IsValid)
                     {
-                        _logger.Debug($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osm_id"]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                        _logger.LogDebug($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osm_id"]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                     }
                     invalidFeature = f;
                     return false;

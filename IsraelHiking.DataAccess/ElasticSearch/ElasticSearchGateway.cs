@@ -26,7 +26,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
 
         public void Initialize(string uri = "http://localhost:9200/", bool deleteIndex = false)
         {
-            _logger.Info("Initialing elastic search with uri: " + uri);
+            _logger.LogInformation("Initialing elastic search with uri: " + uri);
             var connectionString = new ConnectionSettings(
                 new Uri(uri))
                 .DefaultIndex(OSM_NAMES_INDEX)
@@ -47,7 +47,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                                 .Tree(GeoTree.Geohash)
                                 .TreeLevels(10)
                                 .DistanceErrorPercentage(0.2))))));
-            _logger.Info("Finished initialing elastic search with uri: " + uri);
+            _logger.LogInformation("Finished initialing elastic search with uri: " + uri);
         }
 
         public Task UpdateNamesData(List<Feature> features)
@@ -73,7 +73,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             });
             if (result.IsValid == false)
             {
-                result.ItemsWithErrors.ToList().ForEach(i => _logger.Error("Inserting " + i.Id + " falied with error: " + i.Error.Reason + " caused by: " + i.Error.CausedBy.Reason));
+                result.ItemsWithErrors.ToList().ForEach(i => _logger.LogError("Inserting " + i.Id + " falied with error: " + i.Error.Reason + " caused by: " + i.Error.CausedBy.Reason));
             }
         }
 

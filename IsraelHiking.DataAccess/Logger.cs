@@ -10,22 +10,22 @@ namespace IsraelHiking.DataAccess
     {
         private readonly ILog _log = LogManager.GetLogger(typeof(Logger));
 
-        public void Info(string message)
+        public void LogInformation(string message)
         {
             _log.Info(message);
         }
 
-        public void Debug(string message)
+        public void LogDebug(string message)
         {
             _log.Debug(message);
         }
 
-        public void Warn(string message)
+        public void LogWarning(string message)
         {
             _log.Warn(message);
         }
 
-        public void Error(string message)
+        public void LogError(string message)
         {
             _log.Error(message);
         }

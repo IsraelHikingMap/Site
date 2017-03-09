@@ -61,11 +61,11 @@ namespace IsraelHiking.API.Services.Osm
         /// <inheritdoc />
         public async Task Initialize(string serverPath)
         {
-            _logger.Info("Initializing OSM data service with server path: " + serverPath);
+            _logger.LogInformation("Initializing OSM data service with server path: " + serverPath);
             _serverPath = serverPath;
             await _graphHopperHelper.Initialize(serverPath);
             await _elasticSearchHelper.Initialize(serverPath);
-            _logger.Info("Finished initializing OSM data service with server path: " + serverPath);
+            _logger.LogInformation("Finished initializing OSM data service with server path: " + serverPath);
         }
 
         /// <inheritdoc />
@@ -75,10 +75,10 @@ namespace IsraelHiking.API.Services.Osm
             {
                 if (operations == OsmDataServiceOperations.None)
                 {
-                    _logger.Warn("No operations are requested, doing nothing...");
+                    _logger.LogWarning("No operations are requested, doing nothing...");
                     return;
                 }
-                _logger.Info("Updating OSM data");
+                _logger.LogInformation("Updating OSM data");
                 var osmFilePath = Path.Combine(_serverPath, PBF_FILE_NAME);
                 if ((operations & OsmDataServiceOperations.GetOsmFile) != 0)
                 {
@@ -86,7 +86,7 @@ namespace IsraelHiking.API.Services.Osm
                 }
                 if (_fileSystemHelper.Exists(osmFilePath) == false)
                 {
-                    _logger.Error(osmFilePath + " File is missing. Fatal error - exiting.");
+                    _logger.LogError(osmFilePath + " File is missing. Fatal error - exiting.");
                     return;
                 }
                 if ((operations & OsmDataServiceOperations.UpdateElasticSearch) != 0)
@@ -97,11 +97,11 @@ namespace IsraelHiking.API.Services.Osm
                 {
                     await _graphHopperHelper.UpdateData(osmFilePath);
                 }
-                _logger.Info("Finished Updating OSM data");
+                _logger.LogInformation("Finished Updating OSM data");
             }
             catch (Exception ex)
             {
-                _logger.Error(ex.ToString());
+                _logger.LogError(ex.ToString());
             }
         }
 
@@ -116,13 +116,13 @@ namespace IsraelHiking.API.Services.Osm
             }
             else
             {
-                _logger.Info("No need to download file, existing file size is the same as the server");
+                _logger.LogInformation("No need to download file, existing file size is the same as the server");
             }
         }
 
         private async Task UpdateElasticSearchFromFile(string osmFilePath)
         {
-            _logger.Info("Updating Elastic Search OSM data");
+            _logger.LogInformation("Updating Elastic Search OSM data");
             var osmNamesDictionary = await _osmRepository.GetElementsWithName(osmFilePath);
             var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
             var osmHighways = await _osmRepository.GetAllHighways(osmFilePath);
@@ -144,12 +144,12 @@ namespace IsraelHiking.API.Services.Osm
                     continue;
                 }
                 total += smallCahceList.Count;
-                _logger.Info($"Indexing {total} records");
+                _logger.LogInformation($"Indexing {total} records");
                 _elasticSearchGateway.UpdateNamesData(smallCahceList).Wait();
                 smallCahceList.Clear();
             }
             _elasticSearchGateway.UpdateNamesData(smallCahceList).Wait();
-            _logger.Info($"Finished updating Elastic Search names, Indexed {total + smallCahceList.Count} records");
+            _logger.LogInformation($"Finished updating Elastic Search names, Indexed {total + smallCahceList.Count} records");
         }
 
         private void UpdateElesticSearchHighwaysDataUsingPaging(List<Feature> highways)
@@ -164,12 +164,12 @@ namespace IsraelHiking.API.Services.Osm
                     continue;
                 }
                 total += smallCahceList.Count;
-                _logger.Info($"Indexing {total} records");
+                _logger.LogInformation($"Indexing {total} records");
                 _elasticSearchGateway.UpdateHighwaysData(smallCahceList).Wait();
                 smallCahceList.Clear();
             }
             _elasticSearchGateway.UpdateHighwaysData(smallCahceList).Wait();
-            _logger.Info($"Finished updating Elastic Search highways, Indexed {total + smallCahceList.Count} records");
+            _logger.LogInformation($"Finished updating Elastic Search highways, Indexed {total + smallCahceList.Count} records");
         }
     }
 }

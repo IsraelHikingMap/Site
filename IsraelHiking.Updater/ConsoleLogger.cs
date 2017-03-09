@@ -5,22 +5,22 @@ namespace IsraelHiking.Updater
 {
     public class ConsoleLogger : ILogger
     {
-        public void Debug(string message)
+        public void LogDebug(string message)
         {
             WriteToConsole("Debug:", message);
         }
 
-        public void Error(string message)
+        public void LogError(string message)
         {
             WriteToConsole("Error:", message);
         }
 
-        public void Info(string message)
+        public void LogInformation(string message)
         {
             WriteToConsole("Info :", message);
         }
 
-        public void Warn(string message)
+        public void LogWarning(string message)
         {
             WriteToConsole("Warn :", message);
         }
