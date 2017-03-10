@@ -17,14 +17,6 @@ namespace IsraelHiking.Web
                 routeTemplate: "api/{controller}/{id}",
                 defaults: new { id = RouteParameter.Optional }
             );
-
-            foreach (var folder in configurationProvider.ListingDictionary.Keys)
-            {
-                config.Routes.MapHttpRoute(
-                name: folder,
-                routeTemplate: folder + "/{*path}",
-                defaults: new { controller = "FileExplorer" });
-            }
         }
     }
 }

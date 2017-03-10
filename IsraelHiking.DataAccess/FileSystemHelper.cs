@@ -12,49 +12,22 @@ namespace IsraelHiking.DataAccess
             return Directory.Exists(path) || File.Exists(path);
         }
 
+        public bool IsHidden(string path)
+        {
+            if (Directory.Exists(path))
+            {
+                return new DirectoryInfo(path).Attributes.HasFlag(FileAttributes.Hidden);
+            }
+            if (File.Exists(path))
+            {
+                return new FileInfo(path).Attributes.HasFlag(FileAttributes.Hidden) && !path.EndsWith("web.config");
+            }
+            return false;
+        }
+
         public long GetSize(string path)
         {
             return File.Exists(path) ? new FileInfo(path).Length : 0;
-        }
-
-        public string[] GetNonHiddenDirectories(string path)
-        {
-            return Directory.GetDirectories(path)
-                .Where(d => !new DirectoryInfo(d).Attributes.HasFlag(FileAttributes.Hidden))
-                .ToArray();
-        }
-
-        public string[] GetNonHiddenFiles(string path)
-        {
-            return Directory.GetFiles(path)
-                .Where(f => !new FileInfo(f).Attributes.HasFlag(FileAttributes.Hidden) && !f.EndsWith("web.config"))
-                .ToArray();
-        }
-
-        public string GetShortName(string path)
-        {
-            if (Directory.Exists(path))
-            {
-                return new DirectoryInfo(path).Name;
-            }
-            if (File.Exists(path))
-            {
-                return new FileInfo(path).Name;
-            }
-            return string.Empty;
-        }
-
-        public DateTime GetLastModifiedDate(string path)
-        {
-            if (Directory.Exists(path))
-            {
-                return new DirectoryInfo(path).LastWriteTime;
-            }
-            if (File.Exists(path))
-            {
-                return new FileInfo(path).LastWriteTime;
-            }
-            return DateTime.Now;
         }
 
         public void WriteAllBytes(string filePath, byte[] content)

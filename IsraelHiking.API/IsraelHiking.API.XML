@@ -4,142 +4,21 @@
         <name>IsraelHiking.API</name>
     </assembly>
     <members>
-        <member name="T:IsraelHiking.API.Controllers.FileExplorerHtmlTemplate">
+        <member name="T:IsraelHiking.API.Controllers.BootstrapFontAwesomeDirectoryFormatter">
             <summary>
-            Class to produce the template output
-            </summary>
-            <summary>
-            This class can be used to create the HTML file listing page
+            This is a directory formatter that uses bootstrap and font awesome
             </summary>
         </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplate.TransformText">
+        <member name="M:IsraelHiking.API.Controllers.BootstrapFontAwesomeDirectoryFormatter.#ctor(IsraelHiking.DataAccessInterfaces.IFileSystemHelper)">
             <summary>
-            Create the template output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplate.#ctor(IsraelHiking.Common.FileExplorer.FileExplorerViewModel)">
-            <param name="viewModel"></param>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplate.GetSizeString(System.Double)">
-            <summary>
-            Facilitates the creation of string of file sizes 
-            </summary>
-            <param name="number">The number of bytes</param>
-            <returns>A human readable string</returns>
-        </member>
-        <member name="T:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase">
-            <summary>
-            Base class for this transformation
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.GenerationEnvironment">
-            <summary>
-            The string builder that generation-time code is using to assemble generated output
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Errors">
-            <summary>
-            The error collection for the generation process
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.indentLengths">
-            <summary>
-            A list of the lengths of each indent that was added with PushIndent
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.CurrentIndent">
-            <summary>
-            Gets the current indent we use when adding lines to the output
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Session">
-            <summary>
-            Current transformation session
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Write(System.String)">
-            <summary>
-            Write text directly into the generated output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.WriteLine(System.String)">
-            <summary>
-            Write text directly into the generated output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Write(System.String,System.Object[])">
-            <summary>
-            Write formatted text directly into the generated output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.WriteLine(System.String,System.Object[])">
-            <summary>
-            Write formatted text directly into the generated output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Error(System.String)">
-            <summary>
-            Raise an error
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.Warning(System.String)">
-            <summary>
-            Raise a warning
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.PushIndent(System.String)">
-            <summary>
-            Increase the indent
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.PopIndent">
-            <summary>
-            Remove the last indent that was added with PushIndent
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ClearIndent">
-            <summary>
-            Remove any indentation
-            </summary>
-        </member>
-        <member name="T:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ToStringInstanceHelper">
-            <summary>
-            Utility class to produce culture-oriented representation of an object as a string.
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ToStringInstanceHelper.FormatProvider">
-            <summary>
-            Gets or sets format provider to be used by ToStringWithCulture method.
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ToStringInstanceHelper.ToStringWithCulture(System.Object)">
-            <summary>
-            This is called from the compile/run appdomain to convert objects within an expression block to a string
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.FileExplorerHtmlTemplateBase.ToStringHelper">
-            <summary>
-            Helper to produce culture-oriented representation of an object as a string
-            </summary>
-        </member>
-        <member name="T:IsraelHiking.API.Controllers.FileExplorerController">
-            <summary>
-            This controller allows viewing of the file system
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerController.#ctor(IsraelHiking.DataAccessInterfaces.IFileSystemHelper,IsraelHiking.DataAccessInterfaces.IConfigurationProvider)">
-            <summary>
-            Controller's contstructor
+            Constructor
             </summary>
             <param name="fileSystemHelper"></param>
-            <param name="configurationProvider"></param>
         </member>
-        <member name="M:IsraelHiking.API.Controllers.FileExplorerController.GetListingPage(System.String)">
+        <member name="M:IsraelHiking.API.Controllers.BootstrapFontAwesomeDirectoryFormatter.GenerateContentAsync(Microsoft.Owin.IOwinContext,System.Collections.Generic.IEnumerable{Microsoft.Owin.FileSystems.IFileInfo})">
             <summary>
-            Allows to see a given path in the file system
+            Generates an HTML view for a directory.
             </summary>
-            <param name="path">The relative path</param>
-            <returns>An nice looking HTML page</returns>
         </member>
         <member name="T:IsraelHiking.API.Controllers.FilesController">
             <summary>

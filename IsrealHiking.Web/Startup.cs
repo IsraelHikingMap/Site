@@ -7,12 +7,15 @@ using IsraelHiking.DataAccess;
 using System.Web.Http.ExceptionHandling;
 using System.Web.Http.Validation;
 using IsraelHiking.API;
+using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
 using Microsoft.Practices.Unity;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Owin.FileSystems;
 using Microsoft.Owin.Security.OAuth;
+using Microsoft.Owin.StaticFiles;
 using NetTopologySuite.Features;
 using NetTopologySuite.IO.Converters;
 using Swashbuckle.Application;
@@ -70,6 +73,15 @@ namespace IsraelHiking.Web
             config.Services.Replace(typeof(IBodyModelValidator), new CustomBodyModelValidator());
             config.DependencyResolver = new UnityResolver(container);
             InitializeServices(container);
+            foreach (var keyValue in container.Resolve<IConfigurationProvider>().ListingDictionary)
+            {
+                app.UseDirectoryBrowser(new DirectoryBrowserOptions
+                {
+                    FileSystem = new PhysicalFileSystem(keyValue.Value),
+                    RequestPath = new PathString("/" + keyValue.Key),
+                    Formatter = new BootstrapFontAwesomeDirectoryFormatter(container.Resolve<IFileSystemHelper>())
+                });
+            }
             app.UseWebApi(config);
             logger.LogInformation("Israel Hiking Server is up and running.");
         }
