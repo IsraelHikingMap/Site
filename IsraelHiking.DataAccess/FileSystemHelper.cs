@@ -1,16 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Owin.FileSystems;
 
 namespace IsraelHiking.DataAccess
 {
-    public class FileSystemHelper : IFileSystemHelper
+    public class FileSystemHelper : IFileSystemHelper, IFileProvider
     {
-        public bool Exists(string path)
-        {
-            return Directory.Exists(path) || File.Exists(path);
-        }
 
         public bool IsHidden(string path)
         {
@@ -25,24 +21,42 @@ namespace IsraelHiking.DataAccess
             return false;
         }
 
-        public long GetSize(string path)
-        {
-            return File.Exists(path) ? new FileInfo(path).Length : 0;
-        }
 
         public void WriteAllBytes(string filePath, byte[] content)
         {
             File.WriteAllBytes(filePath, content);
         }
 
-        public Stream FileOpenRead(string filePath)
-        {
-            return File.OpenRead(filePath);
-        }
-
         public string GetCurrentDirectory()
         {
             return Directory.GetCurrentDirectory();
+        }
+
+        private class IHMFileInfo : IFileInfo
+        {
+            private readonly string _path;
+
+            public IHMFileInfo(string path)
+            {
+                _path = path;
+            }
+
+            public Stream CreateReadStream()
+            {
+                return File.OpenRead(_path);
+            }
+
+            public long Length => new FileInfo(_path).Length;
+
+            public string PhysicalPath => _path;
+            public string Name => new FileInfo(_path).Name;
+            public DateTime LastModified => new FileInfo(_path).LastWriteTime;
+            public bool IsDirectory => Directory.Exists(_path);
+        }
+
+        public IFileInfo GetFileInfo(string path)
+        {
+            return new IHMFileInfo(path);
         }
     }
 }

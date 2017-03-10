@@ -1,8 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Owin.FileSystems;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NSubstitute;
@@ -17,6 +19,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
         private IGraphHopperHelper _graphHopperHelper;
         private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private IRemoteFileSizeFetcherGateway _remoteFileSizeFetcherGateway;
+        private IFileProvider _fileProvider;
         private IFileSystemHelper _fileSystemHelper;
         private IElasticSearchGateway _elasticSearchGateway;
         private INssmHelper _elasticSearchHelper;
@@ -31,12 +34,13 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var factory = Substitute.For<IHttpGatewayFactory>();
             factory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(_remoteFileFetcherGateway);
             _remoteFileSizeFetcherGateway = Substitute.For<IRemoteFileSizeFetcherGateway>();
+            _fileProvider = Substitute.For<IFileProvider>();
             _fileSystemHelper = Substitute.For<IFileSystemHelper>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _elasticSearchHelper = Substitute.For<INssmHelper>();
             _osmRepository = Substitute.For<IOsmRepository>();
             _osmGeoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
-            _osmDataService = new OsmDataService(_graphHopperHelper, factory, _remoteFileSizeFetcherGateway, _fileSystemHelper,
+            _osmDataService = new OsmDataService(_graphHopperHelper, factory, _remoteFileSizeFetcherGateway, _fileProvider, _fileSystemHelper,
                 _elasticSearchGateway, _elasticSearchHelper, _osmRepository, _osmGeoJsonPreprocessorExecutor, Substitute.For<ILogger>());
         }
 
@@ -71,7 +75,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
         public void UpdateData_GetOsmFileWhenCurrentFileIsInDeifferentSize_ShouldGetTheFileFromTheWeb()
         {
             _remoteFileSizeFetcherGateway.GetFileSize(Arg.Any<string>()).Returns(10);
-            _fileSystemHelper.GetSize(Arg.Any<string>()).Returns(1);
+            var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.Length.Returns(1);
+            _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
             _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse());
 
             _osmDataService.Initialize(string.Empty);
@@ -86,7 +92,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
         {
             _osmGeoJsonPreprocessorExecutor.Preprocess(Arg.Any<Dictionary<string, List<ICompleteOsmGeo>>>())
                 .Returns(new Dictionary<string, List<Feature>> { { "name", new List<Feature> { new Feature() } } });
-            _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
+            var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.PhysicalPath.Returns(Directory.GetCurrentDirectory());
+            _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
 
             _osmDataService.Initialize(string.Empty);
             _osmDataService.UpdateData(OsmDataServiceOperations.UpdateElasticSearch).Wait();
@@ -99,7 +107,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestMethod]
         public void UpdateData_UpdateGraphHopper_ShouldUpdateGraphHopper()
         {
-            _fileSystemHelper.Exists(Arg.Any<string>()).Returns(true);
+            var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.PhysicalPath.Returns(Directory.GetCurrentDirectory());
+            _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
 
             _osmDataService.Initialize(string.Empty);
             _osmDataService.UpdateData(OsmDataServiceOperations.UpdateGraphHopper).Wait();

@@ -15,15 +15,15 @@ namespace IsraelHiking.DataAccess
         private const string ELEVATION_CACHE = "elevation-cache";
         private readonly ILogger _logger;
         private readonly IConfigurationProvider _configurationProvider;
-        private readonly IFileSystemHelper _fileSystemHelper;
+        private readonly IFileProvider _fileProvider;
         private readonly ConcurrentDictionary<Coordinate, short[,]> _elevationData;
         private readonly ConcurrentDictionary<Coordinate, Task> _initializationTaskPerLatLng;
 
-        public ElevationDataStorage(ILogger logger, IConfigurationProvider configurationProvider, IFileSystemHelper fileSystemHelper)
+        public ElevationDataStorage(ILogger logger, IConfigurationProvider configurationProvider, IFileProvider fileProvider)
         {
             _logger = logger;
             _configurationProvider = configurationProvider;
-            _fileSystemHelper = fileSystemHelper;
+            _fileProvider = fileProvider;
             _elevationData = new ConcurrentDictionary<Coordinate, short[,]>();
             _initializationTaskPerLatLng = new ConcurrentDictionary<Coordinate, Task>();
         }
@@ -101,7 +101,7 @@ namespace IsraelHiking.DataAccess
         private byte[] GetByteArrayFromZip(string hgtZipFilePath)
         {
             using (var memoryStream = new MemoryStream())
-            using (var hgtStream = _fileSystemHelper.FileOpenRead(hgtZipFilePath))
+            using (var hgtStream = _fileProvider.GetFileInfo(hgtZipFilePath).CreateReadStream())
             {
                 var hgtZipFile = new ZipFile(hgtStream);
                 foreach (ZipEntry zipEntry in hgtZipFile)

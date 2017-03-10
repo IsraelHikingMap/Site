@@ -1089,13 +1089,14 @@
         <member name="T:IsraelHiking.API.Services.Osm.OsmDataService">
             <inheritdoc />
         </member>
-        <member name="M:IsraelHiking.API.Services.Osm.OsmDataService.#ctor(IsraelHiking.DataAccessInterfaces.IGraphHopperHelper,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.DataAccessInterfaces.IRemoteFileSizeFetcherGateway,IsraelHiking.DataAccessInterfaces.IFileSystemHelper,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.INssmHelper,IsraelHiking.DataAccessInterfaces.IOsmRepository,IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor,IsraelHiking.DataAccessInterfaces.ILogger)">
+        <member name="M:IsraelHiking.API.Services.Osm.OsmDataService.#ctor(IsraelHiking.DataAccessInterfaces.IGraphHopperHelper,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.DataAccessInterfaces.IRemoteFileSizeFetcherGateway,IsraelHiking.DataAccessInterfaces.IFileProvider,IsraelHiking.DataAccessInterfaces.IFileSystemHelper,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.INssmHelper,IsraelHiking.DataAccessInterfaces.IOsmRepository,IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor,IsraelHiking.DataAccessInterfaces.ILogger)">
             <summary>
             Constructor
             </summary>
             <param name="graphHopperHelper"></param>
             <param name="httpGatewayFactory"></param>
             <param name="remoteFileSizeFetcherGateway"></param>
+            <param name="fileProvider"></param>
             <param name="fileSystemHelper"></param>
             <param name="elasticSearchGateway"></param>
             <param name="elasticSearchHelper"></param>

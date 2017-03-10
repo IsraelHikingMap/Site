@@ -15,6 +15,7 @@ namespace IsraelHiking.DataAccess
             container.RegisterInstance(logger);
             container.RegisterType<IProcessHelper, ProcessHelper>();
             container.RegisterType<IFileSystemHelper, FileSystemHelper>();
+            container.RegisterType<IFileProvider, FileSystemHelper>();
             container.RegisterType<IHttpGatewayFactory, HttpGatewayFactory>();
             container.RegisterType<IRemoteFileSizeFetcherGateway, RemoteFileFetcherGateway>();
             container.RegisterType<IIsraelHikingDbContext, IsraelHikingDbContext>();

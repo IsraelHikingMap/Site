@@ -13,19 +13,19 @@ namespace IsraelHiking.DataAccess.Osm
         private const string NAME = "name";
 
         private readonly ILogger _logger;
-        private readonly IFileSystemHelper _fileSystemHelper;
+        private readonly IFileProvider _fileProvider;
 
-        public OsmRepository(ILogger logger, IFileSystemHelper fileSystemHelper)
+        public OsmRepository(ILogger logger, IFileProvider fileProvider)
         {
             _logger = logger;
-            _fileSystemHelper = fileSystemHelper;
+            _fileProvider = fileProvider;
         }
 
         public Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(string osmFilePath)
         {
             return Task.Run(() =>
             {
-                using (var stream = _fileSystemHelper.FileOpenRead(osmFilePath))
+                using (var stream = _fileProvider.GetFileInfo(osmFilePath).CreateReadStream())
                 {
                     _logger.LogInformation($"Reading {osmFilePath} to memory - extracting only elements with name.");
                     var source = new PBFOsmStreamSource(stream);
@@ -44,7 +44,7 @@ namespace IsraelHiking.DataAccess.Osm
         {
             return Task.Run(() =>
             {
-                using (var stream = _fileSystemHelper.FileOpenRead(osmFilePath))
+                using (var stream = _fileProvider.GetFileInfo(osmFilePath).CreateReadStream())
                 {
                     _logger.LogInformation($"Reading {osmFilePath} to memory - extracting only highways.");
                     var source = new PBFOsmStreamSource(stream);

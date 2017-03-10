@@ -19,6 +19,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IRemoteFileSizeFetcherGateway _remoteFileSizeFetcherGateway;
         private readonly IGraphHopperHelper _graphHopperHelper;
         private readonly INssmHelper _elasticSearchHelper;
+        private readonly IFileProvider _fileProvider;
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
@@ -31,6 +32,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="graphHopperHelper"></param>
         /// <param name="httpGatewayFactory"></param>
         /// <param name="remoteFileSizeFetcherGateway"></param>
+        /// <param name="fileProvider"></param>
         /// <param name="fileSystemHelper"></param>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="elasticSearchHelper"></param>
@@ -40,6 +42,7 @@ namespace IsraelHiking.API.Services.Osm
         public OsmDataService(IGraphHopperHelper graphHopperHelper,
             IHttpGatewayFactory httpGatewayFactory,
             IRemoteFileSizeFetcherGateway remoteFileSizeFetcherGateway,
+            IFileProvider fileProvider,
             IFileSystemHelper fileSystemHelper,
             IElasticSearchGateway elasticSearchGateway,
             INssmHelper elasticSearchHelper,
@@ -50,12 +53,14 @@ namespace IsraelHiking.API.Services.Osm
             _graphHopperHelper = graphHopperHelper;
             _httpGatewayFactory = httpGatewayFactory;
             _remoteFileSizeFetcherGateway = remoteFileSizeFetcherGateway;
+            _fileProvider = fileProvider;
             _fileSystemHelper = fileSystemHelper;
             _elasticSearchGateway = elasticSearchGateway;
             _elasticSearchHelper = elasticSearchHelper;
             _osmRepository = osmRepository;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _logger = logger;
+            
         }
 
         /// <inheritdoc />
@@ -84,7 +89,7 @@ namespace IsraelHiking.API.Services.Osm
                 {
                     await FetchOsmFile(osmFilePath);
                 }
-                if (_fileSystemHelper.Exists(osmFilePath) == false)
+                if (_fileProvider.GetFileInfo(osmFilePath).Exists() == false)
                 {
                     _logger.LogError(osmFilePath + " File is missing. Fatal error - exiting.");
                     return;
@@ -109,7 +114,8 @@ namespace IsraelHiking.API.Services.Osm
         {
             var address = "http://download.geofabrik.de/asia/" + PBF_FILE_NAME;
             var length = await _remoteFileSizeFetcherGateway.GetFileSize(address);
-            if (_fileSystemHelper.GetSize(osmFilePath) != length)
+            var fileInfo = _fileProvider.GetFileInfo(osmFilePath);
+            if (!fileInfo.Exists() || fileInfo.Length != length)
             {
                 var response = await _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).GetFileContent(address);
                 _fileSystemHelper.WriteAllBytes(osmFilePath, response.Content);
