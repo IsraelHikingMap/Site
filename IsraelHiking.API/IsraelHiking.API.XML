@@ -111,19 +111,6 @@
             <param name="lon">Longitude coordinate</param>
             <returns>North-East value in ITM coordinates</returns>
         </member>
-        <member name="T:IsraelHiking.API.Controllers.OpenGraphHtmlTemplate">
-            <summary>
-            This class can be used to create the HTML facebook crawlable page
-            </summary>
-            <summary>
-            Class to produce the template output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplate.TransformText">
-            <summary>
-            Create the template output
-            </summary>
-        </member>
         <member name="T:IsraelHiking.API.Controllers.OpenGraphController">
             <summary>
             This contoller is used to return an HTML page for facebook crawler
@@ -142,101 +129,6 @@
             </summary>
             <param name="id">The ID of the shared route</param>
             <returns>An HTML page with all relevant metadata</returns>
-        </member>
-        <member name="T:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase">
-            <summary>
-            Base class for this transformation
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.GenerationEnvironment">
-            <summary>
-            The string builder that generation-time code is using to assemble generated output
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Errors">
-            <summary>
-            The error collection for the generation process
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.indentLengths">
-            <summary>
-            A list of the lengths of each indent that was added with PushIndent
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.CurrentIndent">
-            <summary>
-            Gets the current indent we use when adding lines to the output
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Session">
-            <summary>
-            Current transformation session
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Write(System.String)">
-            <summary>
-            Write text directly into the generated output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.WriteLine(System.String)">
-            <summary>
-            Write text directly into the generated output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Write(System.String,System.Object[])">
-            <summary>
-            Write formatted text directly into the generated output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.WriteLine(System.String,System.Object[])">
-            <summary>
-            Write formatted text directly into the generated output
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Error(System.String)">
-            <summary>
-            Raise an error
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.Warning(System.String)">
-            <summary>
-            Raise a warning
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.PushIndent(System.String)">
-            <summary>
-            Increase the indent
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.PopIndent">
-            <summary>
-            Remove the last indent that was added with PushIndent
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ClearIndent">
-            <summary>
-            Remove any indentation
-            </summary>
-        </member>
-        <member name="T:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ToStringInstanceHelper">
-            <summary>
-            Utility class to produce culture-oriented representation of an object as a string.
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ToStringInstanceHelper.FormatProvider">
-            <summary>
-            Gets or sets format provider to be used by ToStringWithCulture method.
-            </summary>
-        </member>
-        <member name="M:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ToStringInstanceHelper.ToStringWithCulture(System.Object)">
-            <summary>
-            This is called from the compile/run appdomain to convert objects within an expression block to a string
-            </summary>
-        </member>
-        <member name="P:IsraelHiking.API.Controllers.OpenGraphHtmlTemplateBase.ToStringHelper">
-            <summary>
-            Helper to produce culture-oriented representation of an object as a string
-            </summary>
         </member>
         <member name="T:IsraelHiking.API.Controllers.OsmController">
             <summary>

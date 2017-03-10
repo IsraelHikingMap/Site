@@ -138,11 +138,6 @@
     <Compile Include="Controllers\ImagesController.cs" />
     <Compile Include="Controllers\ItmGridController.cs" />
     <Compile Include="Controllers\OpenGraphController.cs" />
-    <Compile Include="Controllers\OpenGraphHtmlTemplate.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>OpenGraphHtmlTemplate.tt</DependentUpon>
-    </Compile>
     <Compile Include="Controllers\OsmController.cs" />
     <Compile Include="Controllers\RoutingController.cs" />
     <Compile Include="Controllers\SearchController.cs" />
@@ -218,10 +213,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Controllers\OpenGraphHtmlTemplate.tt">
-      <Generator>TextTemplatingFilePreprocessor</Generator>
-      <LastGenOutput>OpenGraphHtmlTemplate.cs</LastGenOutput>
-    </Content>
     <Content Include="IsraelHiking.API.XML">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
