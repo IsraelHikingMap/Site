@@ -1,11 +1,11 @@
 ﻿/// <reference path="../../scripts/typings/jasmine/jasmine.d.ts" />
-/// <reference path="../../../../isrealhiking.web/scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../../isrealhiking.web/scripts/typings/leaflet/leaflet.d.ts" />
-/// <reference path="../../../../isrealhiking.web/scripts/typings/angularjs/angular-mocks.d.ts" />
-/// <reference path="../../../../isrealhiking.web/scripts/typings/toastr/toastr.d.ts" />
-/// <reference path="../../../../isrealhiking.web/services/elevation/ielevationprovider.ts" />
-/// <reference path="../../../../isrealhiking.web/common/israelhiking.d.ts" />
-/// <reference path="../../../../isrealhiking.web/services/elevation/microsoftelevationprovider.ts" />
+/// <reference path="../../../../IsraelHiking.web/scripts/typings/angularjs/angular.d.ts" />
+/// <reference path="../../../../IsraelHiking.web/scripts/typings/leaflet/leaflet.d.ts" />
+/// <reference path="../../../../IsraelHiking.web/scripts/typings/angularjs/angular-mocks.d.ts" />
+/// <reference path="../../../../IsraelHiking.web/scripts/typings/toastr/toastr.d.ts" />
+/// <reference path="../../../../IsraelHiking.web/services/elevation/ielevationprovider.ts" />
+/// <reference path="../../../../IsraelHiking.web/common/israelhiking.d.ts" />
+/// <reference path="../../../../IsraelHiking.web/services/elevation/microsoftelevationprovider.ts" />
 
 
 namespace IsraelHiking.Tests.Services.Elevation {
