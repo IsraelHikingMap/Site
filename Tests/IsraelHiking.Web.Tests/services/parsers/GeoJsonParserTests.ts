@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../IsrealHiking.Web/scripts/typings/geojson/geojson.d.ts" />
-/// <reference path="../../../../isrealhiking.web/common/israelhiking.d.ts" />
-/// <reference path="../../../../isrealhiking.web/services/parsers/geojsonparser.ts" />
+﻿/// <reference path="../../../../israelhiking.Web/scripts/typings/geojson/geojson.d.ts" />
+/// <reference path="../../../../israelhiking.web/common/israelhiking.d.ts" />
+/// <reference path="../../../../israelhiking.web/services/parsers/geojsonparser.ts" />
 
 namespace IsraelHiking.Tests.Services.Parsers {
     describe("GeoJson Parser", () => {

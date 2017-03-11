@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../../isrealhiking.web/services/parsers/GeoJsonParser.ts" />
-/// <reference path="../../../../isrealhiking.web/services/routers/nonerouter.ts" />
-/// <reference path="../../../../isrealhiking.web/services/routers/routerservice.ts" />
+﻿/// <reference path="../../../../israelhiking.web/services/parsers/GeoJsonParser.ts" />
+/// <reference path="../../../../israelhiking.web/services/routers/nonerouter.ts" />
+/// <reference path="../../../../israelhiking.web/services/routers/routerservice.ts" />
 
 namespace IsraelHiking.Tests.Services.Routers {
     describe("Router Service", () => {

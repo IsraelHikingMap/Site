@@ -1,4 +1,4 @@
-﻿/// <reference path="../../../isrealhiking.web/services/routestatisticsservice.ts" />
+﻿/// <reference path="../../../israelhiking.web/services/routestatisticsservice.ts" />
 
 namespace IsraelHiking.Tests.Services {
     describe("Route Statistics Service", () => {

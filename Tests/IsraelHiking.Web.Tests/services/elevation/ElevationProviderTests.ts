@@ -1,7 +1,7 @@
-﻿/// <reference path="../../../../isrealhiking.web/scripts/typings/angular-gettext/angular-gettext.d.ts" />
-/// <reference path="../../../../isrealhiking.web/services/ResourcesService.ts" />
-/// <reference path="../../../../isrealhiking.web/services/elevation/elevationprovider.ts" />
-/// <reference path="../../../../isrealhiking.web/common/urls.ts" />
+﻿/// <reference path="../../../../IsraelHiking.web/scripts/typings/angular-gettext/angular-gettext.d.ts" />
+/// <reference path="../../../../IsraelHiking.web/services/ResourcesService.ts" />
+/// <reference path="../../../../IsraelHiking.web/services/elevation/elevationprovider.ts" />
+/// <reference path="../../../../IsraelHiking.web/common/urls.ts" />
 
 namespace IsraelHiking.Tests.Services.Elevation {
     describe("Elevation Provider", () => {

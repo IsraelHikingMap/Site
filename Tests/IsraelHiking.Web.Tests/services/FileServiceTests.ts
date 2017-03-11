@@ -1,6 +1,6 @@
-﻿/// <reference path="../../../isrealhiking.web/scripts/typings/ng-file-upload/ng-file-upload.d.ts" />
-/// <reference path="../../../isrealhiking.web/common/Strings.ts" />
-/// <reference path="../../../isrealhiking.web/services/fileservice.ts" />
+﻿/// <reference path="../../../IsraelHiking.web/scripts/typings/ng-file-upload/ng-file-upload.d.ts" />
+/// <reference path="../../../IsraelHiking.web/common/Strings.ts" />
+/// <reference path="../../../IsraelHiking.web/services/fileservice.ts" />
 
 namespace IsraelHiking.Tests.Services {
     describe("File Service", () => {
