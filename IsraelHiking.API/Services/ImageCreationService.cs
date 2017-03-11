@@ -171,11 +171,11 @@ namespace IsraelHiking.API.Services
         private static string GetAddressTemplate(DataContainer dataContainer)
         {
             var address = string.IsNullOrWhiteSpace(dataContainer.baseLayer.address)
-                ? "http://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png"
+                ? "https://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png"
                 : dataContainer.baseLayer.address;
             if (address.StartsWith("http") == false && address.StartsWith("www") == false)
             {
-                address = "http://israelhiking.osm.org.il" + address;
+                address = "https://israelhiking.osm.org.il" + address;
             }
             return address;
         }
@@ -193,6 +193,7 @@ namespace IsraelHiking.API.Services
                     }
                     graphics.DrawLines(_outLinerPen, points);
                     graphics.DrawLines(_routePenArray[_reoutePenIndex++], points);
+                    _reoutePenIndex = _reoutePenIndex % _routePenArray.Length;
                     graphics.FillEllipse(_circleFillBrush, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
                     graphics.DrawEllipse(_startRoutePen, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
                     graphics.FillEllipse(_circleFillBrush, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
