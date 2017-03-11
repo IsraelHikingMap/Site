@@ -1,13 +1,13 @@
 ﻿using System.IO;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccess.Osm;
+using IsraelHiking.DataAccess.OpenStreetMap;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using OsmSharp.Collections.Tags;
 using OsmSharp.Osm;
 
-namespace IsraelHiking.DataAccess.Tests.Osm
+namespace IsraelHiking.DataAccess.Tests.OpenStreetMap
 {
     [TestClass]
     public class OsmGatewayTests

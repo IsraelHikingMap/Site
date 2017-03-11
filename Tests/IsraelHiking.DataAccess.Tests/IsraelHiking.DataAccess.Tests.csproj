@@ -142,8 +142,7 @@
     <Compile Include="ElasticSearch\ElasticSearchGatewayTests.cs" />
     <Compile Include="elevation-cahce\ElevationDataStorageTests.cs" />
     <Compile Include="GpsBabel\GpsBabelGatewayTests.cs" />
-    <Compile Include="Osm\OverpassGatewayTests.cs" />
-    <Compile Include="Osm\OsmGatewayTests.cs" />
+    <Compile Include="OpenStreetMap\OsmGatewayTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RemoteFileFetcherGatewayTests.cs" />
     <Compile Include="GraphHopper\GraphHopperHelperTests.cs" />

@@ -3,7 +3,7 @@ using IsraelHiking.DataAccess.Database;
 using IsraelHiking.DataAccess.ElasticSearch;
 using IsraelHiking.DataAccess.GPSBabel;
 using IsraelHiking.DataAccess.GraphHopper;
-using IsraelHiking.DataAccess.Osm;
+using IsraelHiking.DataAccess.OpenStreetMap;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Practices.Unity;
 
@@ -29,7 +29,6 @@ namespace IsraelHiking.DataAccess
             container.RegisterType<INssmHelper, ElasticSearchHelper>();
             container.RegisterType<IOsmRepository, OsmRepository>();
             container.RegisterType<IOsmGateway, OsmGateway>();
-            container.RegisterType<IOverpassGateway, OverpassGateway>();
             container.RegisterType<IOptions<ConfigurationData>, Options>(new ContainerControlledLifetimeManager());
         }
     }

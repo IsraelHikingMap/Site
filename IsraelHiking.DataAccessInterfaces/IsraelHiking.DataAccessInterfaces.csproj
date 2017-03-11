@@ -98,7 +98,6 @@
     <Compile Include="INssmHelper.cs" />
     <Compile Include="IOsmGateway.cs" />
     <Compile Include="IOsmRepository.cs" />
-    <Compile Include="IOverpassGateway.cs" />
     <Compile Include="IProcessHelper.cs" />
     <Compile Include="IRemoteFileFetcherGateway.cs" />
     <Compile Include="IRemoteFileSizeFetcherGateway.cs" />
