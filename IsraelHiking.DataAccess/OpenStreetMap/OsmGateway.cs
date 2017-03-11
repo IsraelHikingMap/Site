@@ -17,7 +17,7 @@ using OsmSharp.Osm.Streams.Complete;
 using OsmSharp.Osm.Xml.Streams;
 using OsmSharp.Osm.Xml.v0_6;
 
-namespace IsraelHiking.DataAccess.Osm
+namespace IsraelHiking.DataAccess.OpenStreetMap
 {
     public class OsmGateway : BaseFileFetcherGateway, IOsmGateway
     {

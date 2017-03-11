@@ -174,11 +174,10 @@
     <Compile Include="GraphHopper\JsonGraphHopperResponse.cs" />
     <Compile Include="Logger.cs" />
     <Compile Include="BaseNssmHelper.cs" />
-    <Compile Include="Osm\BaseFileFetcherGateway.cs" />
-    <Compile Include="Osm\HttpGatewayFactory.cs" />
-    <Compile Include="Osm\OsmGateway.cs" />
-    <Compile Include="Osm\OsmRepository.cs" />
-    <Compile Include="Osm\OverpassGateway.cs" />
+    <Compile Include="BaseFileFetcherGateway.cs" />
+    <Compile Include="HttpGatewayFactory.cs" />
+    <Compile Include="OpenStreetMap\OsmGateway.cs" />
+    <Compile Include="OpenStreetMap\OsmRepository.cs" />
     <Compile Include="ProcessHelper.cs" />
     <Compile Include="RemoteFileFetcherGateway.cs" />
     <Compile Include="GraphHopper\GraphHopperGateway.cs" />

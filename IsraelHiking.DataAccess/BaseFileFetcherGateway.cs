@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 
-namespace IsraelHiking.DataAccess.Osm
+namespace IsraelHiking.DataAccess
 {
     public abstract class BaseFileFetcherGateway : IRemoteFileFetcherGateway
     {

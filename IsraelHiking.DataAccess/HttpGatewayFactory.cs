@@ -1,7 +1,8 @@
 ﻿using IsraelHiking.Common;
+using IsraelHiking.DataAccess.OpenStreetMap;
 using IsraelHiking.DataAccessInterfaces;
 
-namespace IsraelHiking.DataAccess.Osm
+namespace IsraelHiking.DataAccess
 {
     public class HttpGatewayFactory : IHttpGatewayFactory
     {

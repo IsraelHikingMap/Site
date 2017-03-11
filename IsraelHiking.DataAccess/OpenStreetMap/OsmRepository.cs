@@ -6,7 +6,7 @@ using OsmSharp.Osm;
 using OsmSharp.Osm.PBF.Streams;
 using OsmSharp.Osm.Streams.Complete;
 
-namespace IsraelHiking.DataAccess.Osm
+namespace IsraelHiking.DataAccess.OpenStreetMap
 {
     public class OsmRepository : IOsmRepository
     {
