@@ -1,4 +1,5 @@
-﻿using IsraelHiking.DataAccess.Database;
+﻿using IsraelHiking.Common;
+using IsraelHiking.DataAccess.Database;
 using IsraelHiking.DataAccess.ElasticSearch;
 using IsraelHiking.DataAccess.GPSBabel;
 using IsraelHiking.DataAccess.GraphHopper;
@@ -29,7 +30,7 @@ namespace IsraelHiking.DataAccess
             container.RegisterType<IOsmRepository, OsmRepository>();
             container.RegisterType<IOsmGateway, OsmGateway>();
             container.RegisterType<IOverpassGateway, OverpassGateway>();
-            container.RegisterType<IConfigurationProvider, ConfigurationProvider>(new ContainerControlledLifetimeManager());
+            container.RegisterType<IOptions<ConfigurationData>, Options>(new ContainerControlledLifetimeManager());
         }
     }
 }

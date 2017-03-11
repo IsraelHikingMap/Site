@@ -135,7 +135,7 @@
             This controller is responsible for all OSM related requests
             </summary>
         </member>
-        <member name="M:IsraelHiking.API.Controllers.OsmController.#ctor(IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.API.Services.IDataContainerConverterService,GeoAPI.CoordinateSystems.Transformations.IMathTransform,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.API.Services.IAddibleGpxLinesFinderService,IsraelHiking.API.Services.Osm.IOsmLineAdderService,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,GeoAPI.Geometries.IGeometryFactory,IsraelHiking.API.Services.LruCache{System.String,IsraelHiking.Common.TokenAndSecret})">
+        <member name="M:IsraelHiking.API.Controllers.OsmController.#ctor(IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory,IsraelHiking.API.Services.IDataContainerConverterService,GeoAPI.CoordinateSystems.Transformations.IMathTransform,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.API.Services.IAddibleGpxLinesFinderService,IsraelHiking.API.Services.Osm.IOsmLineAdderService,IsraelHiking.DataAccessInterfaces.IOptions{IsraelHiking.Common.ConfigurationData},GeoAPI.Geometries.IGeometryFactory,IsraelHiking.API.Services.LruCache{System.String,IsraelHiking.Common.TokenAndSecret})">
             <summary>
             Controller's constructor
             </summary>
@@ -145,7 +145,7 @@
             <param name="elasticSearchGateway"></param>
             <param name="addibleGpxLinesFinderService"></param>
             <param name="osmLineAdderService"></param>
-            <param name="configurationProvider"></param>
+            <param name="options"></param>
             <param name="geometryFactory"></param>
             <param name="cache"></param>
         </member>
@@ -622,13 +622,14 @@
         <member name="T:IsraelHiking.API.Executors.OsmGeoJsonPreprocessorExecutor">
             <inheritdoc />
         </member>
-        <member name="M:IsraelHiking.API.Executors.OsmGeoJsonPreprocessorExecutor.#ctor(IsraelHiking.DataAccessInterfaces.ILogger,IsraelHiking.API.Converters.IOsmGeoJsonConverter,IsraelHiking.DataAccessInterfaces.IConfigurationProvider)">
+        <member name="M:IsraelHiking.API.Executors.OsmGeoJsonPreprocessorExecutor.#ctor(IsraelHiking.DataAccessInterfaces.ILogger,IsraelHiking.API.Converters.IOsmGeoJsonConverter,IsraelHiking.API.Services.IGeoJsonFeatureHelper,IsraelHiking.DataAccessInterfaces.IOptions{IsraelHiking.Common.ConfigurationData})">
             <summary>
             Constructor
             </summary>
             <param name="logger"></param>
             <param name="osmGeoJsonConverter"></param>
-            <param name="configurationProvider"></param>
+            <param name="geoJsonFeatureHelper"></param>
+            <param name="options"></param>
         </member>
         <member name="M:IsraelHiking.API.Executors.OsmGeoJsonPreprocessorExecutor.Preprocess(System.Collections.Generic.Dictionary{System.String,System.Collections.Generic.List{OsmSharp.Osm.ICompleteOsmGeo}})">
             <inheritdoc />
@@ -955,7 +956,7 @@
         <member name="T:IsraelHiking.API.Services.AddibleGpxLinesFinderService">
             <inheritdoc/>
         </member>
-        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.#ctor(IsraelHiking.API.Executors.IGpxLoopsSplitterExecutor,IsraelHiking.API.Executors.IGpxProlongerExecutor,GeoAPI.CoordinateSystems.Transformations.IMathTransform,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,GeoAPI.Geometries.IGeometryFactory,IsraelHiking.DataAccessInterfaces.ILogger)">
+        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.#ctor(IsraelHiking.API.Executors.IGpxLoopsSplitterExecutor,IsraelHiking.API.Executors.IGpxProlongerExecutor,GeoAPI.CoordinateSystems.Transformations.IMathTransform,IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,IsraelHiking.DataAccessInterfaces.IOptions{IsraelHiking.Common.ConfigurationData},GeoAPI.Geometries.IGeometryFactory,IsraelHiking.DataAccessInterfaces.ILogger)">
             <summary>
             Constructor
             </summary>
@@ -963,7 +964,7 @@
             <param name="gpxProlongerExecutor"></param>
             <param name="itmWgs84MathTransfrom"></param>
             <param name="elasticSearchGateway"></param>
-            <param name="configurationProvider"></param>
+            <param name="options"></param>
             <param name="geometryFactory"></param>
             <param name="logger"></param>
         </member>
@@ -1047,13 +1048,13 @@
         <member name="T:IsraelHiking.API.Services.Osm.OsmLineAdderService">
             <inheritdoc/>
         </member>
-        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.#ctor(IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,GeoAPI.CoordinateSystems.Transformations.IMathTransform,IsraelHiking.DataAccessInterfaces.IConfigurationProvider,IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory)">
+        <member name="M:IsraelHiking.API.Services.Osm.OsmLineAdderService.#ctor(IsraelHiking.DataAccessInterfaces.IElasticSearchGateway,GeoAPI.CoordinateSystems.Transformations.IMathTransform,IsraelHiking.DataAccessInterfaces.IOptions{IsraelHiking.Common.ConfigurationData},IsraelHiking.API.Executors.IOsmGeoJsonPreprocessorExecutor,IsraelHiking.DataAccessInterfaces.IHttpGatewayFactory)">
             <summary>
             Constructor
             </summary>
             <param name="elasticSearchGateway"></param>
             <param name="itmWgs84MathTransform"></param>
-            <param name="configurationProvider"></param>
+            <param name="options"></param>
             <param name="geoJsonPreprocessorExecutor"></param>
             <param name="httpGatewayFactory"></param>
         </member>
@@ -1199,11 +1200,11 @@
             <typeparam name="TKey">Key's type</typeparam>
             <typeparam name="TValue">Value's type</typeparam>
         </member>
-        <member name="M:IsraelHiking.API.Services.LruCache`2.#ctor(IsraelHiking.DataAccessInterfaces.IConfigurationProvider)">
+        <member name="M:IsraelHiking.API.Services.LruCache`2.#ctor(IsraelHiking.DataAccessInterfaces.IOptions{IsraelHiking.Common.ConfigurationData})">
             <summary>
             Constructor
             </summary>
-            <param name="configurationProvider"></param>
+            <param name="options"></param>
         </member>
         <member name="M:IsraelHiking.API.Services.LruCache`2.Add(`0,`1)">
             <summary>

@@ -168,6 +168,7 @@
     <Compile Include="Executors\GpxLoopsSplitterExecutor.cs" />
     <Compile Include="Services\IAddibleGpxLinesFinderService.cs" />
     <Compile Include="Executors\IGpxLoopsSplitterExecutor.cs" />
+    <Compile Include="Services\IGeoJsonFeatureHelper.cs" />
     <Compile Include="Services\IImageCreationService.cs" />
     <Compile Include="Services\ImageCreationService.cs" />
     <Compile Include="Services\LineStringExtensions.cs" />

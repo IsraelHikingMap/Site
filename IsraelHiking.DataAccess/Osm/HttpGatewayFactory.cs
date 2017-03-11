@@ -5,11 +5,11 @@ namespace IsraelHiking.DataAccess.Osm
 {
     public class HttpGatewayFactory : IHttpGatewayFactory
     {
-        private readonly IConfigurationProvider _configurationProvider;
         private readonly ILogger _logger;
-        public HttpGatewayFactory(IConfigurationProvider configurationProvider, ILogger logger)
+        private readonly IOptions<ConfigurationData> _options;
+        public HttpGatewayFactory(IOptions<ConfigurationData> options, ILogger logger)
         {
-            _configurationProvider = configurationProvider;
+            _options = options;
             _logger = logger;
         }
 
@@ -19,12 +19,12 @@ namespace IsraelHiking.DataAccess.Osm
             {
                 return new RemoteFileFetcherGateway(_logger);
             }
-            return new OsmGateway(tokenAndSecret, _configurationProvider, _logger);
+            return new OsmGateway(tokenAndSecret, _options, _logger);
         }
 
         public IOsmGateway CreateOsmGateway(TokenAndSecret tokenAndSecret)
         {
-            return new OsmGateway(tokenAndSecret, _configurationProvider, _logger);
+            return new OsmGateway(tokenAndSecret, _options, _logger);
         }
     }
 }

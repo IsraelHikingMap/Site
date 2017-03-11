@@ -296,11 +296,16 @@ namespace IsraelHiking.API.Tests.Services
         [TestInitialize]
         public void TestInitialize()
         {
-            var configurationProvider = Substitute.For<IConfigurationProvider>();
-            configurationProvider.MinimalSplitSimplificationTolerace.Returns(50);
-            configurationProvider.MaxSegmentsNumber.Returns(40);
-            configurationProvider.MinimalSegmentLength.Returns(500);
-            _service = new RouteDataSplitterService(new ItmWgs84MathTransfrom(), configurationProvider);
+            var options = new ConfigurationData
+            {
+                MinimalSplitSimplificationTolerace = 50,
+                MaxSegmentsNumber = 40,
+                MinimalSegmentLength = 500
+            };
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(options);
+            
+            _service = new RouteDataSplitterService(new ItmWgs84MathTransfrom(), optionsProvider);
         }
 
         [TestMethod]

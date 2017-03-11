@@ -13,21 +13,21 @@ namespace IsraelHiking.API.Services
     public class RouteDataSplitterService : IRouteDataSplitterService
     {
         private readonly IMathTransform _itmWgs84MathTransform;
-        private readonly IConfigurationProvider _configurationProvider;
+        private readonly ConfigurationData _options;
 
         public RouteDataSplitterService(IMathTransform itmWgs84MathTransform, 
-            IConfigurationProvider configurationProvider)
+            IOptions<ConfigurationData> options)
         {
             _itmWgs84MathTransform = itmWgs84MathTransform;
-            _configurationProvider = configurationProvider;
+            _options = options.Value;
         }
 
         public RouteData Split(RouteData routeData, string routingType)
         {
             var allRoutePoints = routeData.segments.SelectMany(s => s.latlngzs).ToList();
             var coordinates = ToWgs84Coordinates(allRoutePoints);
-            int maximumPoints = Math.Max(3, Math.Min((int)(new LineString(coordinates).Length / _configurationProvider.MinimalSegmentLength), _configurationProvider.MaxSegmentsNumber));
-            var currentTolerance = _configurationProvider.MinimalSplitSimplificationTolerace;
+            int maximumPoints = Math.Max(3, Math.Min((int)(new LineString(coordinates).Length / _options.MinimalSegmentLength), _options.MaxSegmentsNumber));
+            var currentTolerance = _options.MinimalSplitSimplificationTolerace;
             Coordinate[] simplifiedCoordinates;
             do
             {

@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -26,10 +27,15 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             var geoJsonPreProcessor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
             _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
-            var configurationProvide = Substitute.For<IConfigurationProvider>();
-            configurationProvide.ClosestPointTolerance.Returns(30);
-            configurationProvide.DistanceToExisitngLineMergeThreshold.Returns(1);
-            _service = new OsmLineAdderService(_elasticSearchGateway, new ItmWgs84MathTransfrom(), configurationProvide, geoJsonPreProcessor, _httpGatewayFactory);
+            var options = new ConfigurationData
+            {
+                ClosestPointTolerance = 30,
+                DistanceToExisitngLineMergeThreshold = 1
+            };
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(options);
+            
+            _service = new OsmLineAdderService(_elasticSearchGateway, new ItmWgs84MathTransfrom(), optionsProvider, geoJsonPreProcessor, _httpGatewayFactory);
         }
 
         private IOsmGateway SetupOsmGateway(string changesetId)

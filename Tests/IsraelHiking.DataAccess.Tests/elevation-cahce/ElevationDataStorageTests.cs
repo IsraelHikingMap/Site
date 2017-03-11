@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using System.Reflection;
 using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -10,20 +11,22 @@ namespace IsraelHiking.DataAccess.Tests
     [TestClass]
     public class ElevationDataStorageTests
     {
-        private IConfigurationProvider _configurationProvider;
+        private ConfigurationData _options;
         private IElevationDataStorage _elevationDataStorage;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _configurationProvider = Substitute.For<IConfigurationProvider>();
-            _elevationDataStorage = new ElevationDataStorage(new TraceLogger(), _configurationProvider, new FileSystemHelper());
+            _options = new ConfigurationData();
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(_options);
+            _elevationDataStorage = new ElevationDataStorage(new TraceLogger(), optionsProvider, new FileSystemHelper());
         }
 
         [TestMethod]
         public void InitializeWithBadFolder_ShouldSucceed()
         {
-            _configurationProvider.BinariesFolder.Returns("InvalidFolder");
+            _options.BinariesFolder = "InvalidFolder";
 
             _elevationDataStorage.Initialize().Wait();
 
@@ -33,7 +36,7 @@ namespace IsraelHiking.DataAccess.Tests
         [TestMethod]
         public void InitializeAndGet_ShouldSucceed()
         {
-            _configurationProvider.BinariesFolder.Returns(Path.GetDirectoryName(Assembly.GetAssembly(typeof(ElevationDataStorageTests)).Location) ?? string.Empty);
+            _options.BinariesFolder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(ElevationDataStorageTests)).Location) ?? string.Empty;
 
             _elevationDataStorage.Initialize().Wait();
 

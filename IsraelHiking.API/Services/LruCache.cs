@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Linq;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.API.Services
@@ -12,16 +13,16 @@ namespace IsraelHiking.API.Services
     /// <typeparam name="TValue">Value's type</typeparam>
     public class LruCache<TKey, TValue>
     {
-        private readonly IConfigurationProvider _configurationProvider;
+        private readonly ConfigurationData _options;
         private readonly ConcurrentDictionary<TKey, CacheItem> _dictionary = new ConcurrentDictionary<TKey, CacheItem>();
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="configurationProvider"></param>
-        public LruCache(IConfigurationProvider configurationProvider)
+        /// <param name="options"></param>
+        public LruCache(IOptions<ConfigurationData> options)
         {
-            _configurationProvider = configurationProvider;
+            _options = options.Value;
         }
 
         private class CacheItem
@@ -45,7 +46,7 @@ namespace IsraelHiking.API.Services
         public void Add(TKey key, TValue value)
         {
             _dictionary[key] = new CacheItem(value);
-            while (_dictionary.Keys.Count > _configurationProvider.MaxCacheSize)
+            while (_dictionary.Keys.Count > _options.MaxCacheSize)
             {
                 var pair = _dictionary.OrderBy(v => v.Value.LastUsed).First();
                 CacheItem cacheItem;

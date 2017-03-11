@@ -1,7 +1,9 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Remoting.Metadata;
 using System.Xml.Linq;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccess.GPSBabel;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,9 +20,13 @@ namespace IsraelHiking.DataAccess.Tests.GpsBabel
         public void TestInitialize()
         {
             var logger = new TraceLogger();
-            var configurationProvider = Substitute.For<IConfigurationProvider>();
-            configurationProvider.BinariesFolder.Returns(Path.GetDirectoryName(Assembly.GetAssembly(typeof(GpsBabelGatewayTests)).Location) ?? string.Empty);
-            _gpsBabelGateway = new GpsBabelGateway(logger, new ProcessHelper(logger), configurationProvider);
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            var options = new ConfigurationData
+            {
+                BinariesFolder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(GpsBabelGatewayTests)).Location) ?? string.Empty
+            };
+            optionsProvider.Value.Returns(options);
+            _gpsBabelGateway = new GpsBabelGateway(logger, new ProcessHelper(logger), optionsProvider);
         }
 
         [TestMethod]

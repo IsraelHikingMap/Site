@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
+using IsraelHiking.Common;
 using NetTopologySuite.Triangulate.QuadEdge;
 
 namespace IsraelHiking.DataAccess
@@ -14,15 +15,15 @@ namespace IsraelHiking.DataAccess
     {
         private const string ELEVATION_CACHE = "elevation-cache";
         private readonly ILogger _logger;
-        private readonly IConfigurationProvider _configurationProvider;
         private readonly IFileProvider _fileProvider;
         private readonly ConcurrentDictionary<Coordinate, short[,]> _elevationData;
         private readonly ConcurrentDictionary<Coordinate, Task> _initializationTaskPerLatLng;
+        private readonly ConfigurationData _options;
 
-        public ElevationDataStorage(ILogger logger, IConfigurationProvider configurationProvider, IFileProvider fileProvider)
+        public ElevationDataStorage(ILogger logger, IOptions<ConfigurationData> options, IFileProvider fileProvider)
         {
             _logger = logger;
-            _configurationProvider = configurationProvider;
+            _options = options.Value;
             _fileProvider = fileProvider;
             _elevationData = new ConcurrentDictionary<Coordinate, short[,]>();
             _initializationTaskPerLatLng = new ConcurrentDictionary<Coordinate, Task>();
@@ -30,7 +31,7 @@ namespace IsraelHiking.DataAccess
 
         public Task Initialize()
         {
-            var elevationCacheFolder = Path.Combine(_configurationProvider.BinariesFolder, ELEVATION_CACHE);
+            var elevationCacheFolder = Path.Combine(_options.BinariesFolder, ELEVATION_CACHE);
             if (Directory.Exists(elevationCacheFolder) == false)
             {
                 _logger.LogError($"!!! The folder: {elevationCacheFolder} does not exists, please change the BinariesFolder key in the configuration file !!!");

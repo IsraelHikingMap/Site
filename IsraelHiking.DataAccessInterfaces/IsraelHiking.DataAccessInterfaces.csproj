@@ -85,7 +85,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="IConfigurationProvider.cs" />
+    <Compile Include="IOptions.cs" />
     <Compile Include="IElasticSearchGateway.cs" />
     <Compile Include="IElevationDataStorage.cs" />
     <Compile Include="IFileSystemHelper.cs" />

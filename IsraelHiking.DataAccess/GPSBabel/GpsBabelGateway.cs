@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Threading.Tasks;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 
 namespace IsraelHiking.DataAccess.GPSBabel
@@ -8,15 +9,15 @@ namespace IsraelHiking.DataAccess.GPSBabel
     {
         private readonly ILogger _logger;
         private readonly IProcessHelper _processHelper;
-        private readonly IConfigurationProvider _configurationProvider;
+        private readonly ConfigurationData _options;
         private const string GPS_BABEL_EXE = "gpsbabel.exe";
         private const string GPSBABEL_DIRECTORY = "GPSBabel";
 
-        public GpsBabelGateway(ILogger logger, IProcessHelper processHelper, IConfigurationProvider configurationProvider)
+        public GpsBabelGateway(ILogger logger, IProcessHelper processHelper, IOptions<ConfigurationData> options)
         {
             _logger = logger;
             _processHelper = processHelper;
-            _configurationProvider = configurationProvider;
+            _options = options.Value;
         }
 
         public Task<byte[]> ConvertFileFromat(byte[] content, string inputFormat, string outputFormat)
@@ -31,7 +32,7 @@ namespace IsraelHiking.DataAccess.GPSBabel
                 // file names are created to overcome utf-8 issues in file name.
                 var outputTempfileName = Path.GetTempFileName();
                 File.WriteAllBytes(inputTempfileName, content);
-                var workingDirectory = Path.Combine(_configurationProvider.BinariesFolder, GPSBABEL_DIRECTORY);
+                var workingDirectory = Path.Combine(_options.BinariesFolder, GPSBABEL_DIRECTORY);
                 var arguments = "-N -i " + inputFormat + " -f \"" + inputTempfileName + "\" -o " + outputFormat + " -F \"" +
                                 outputTempfileName + "\"";
                 _processHelper.Start(GPS_BABEL_EXE, arguments, workingDirectory);

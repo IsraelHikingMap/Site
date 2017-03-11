@@ -26,11 +26,11 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private OsmController _controller;
         private IElasticSearchGateway _elasticSearchGateway;
-        private IConfigurationProvider _configurationProvider;
         private IOsmLineAdderService _osmLineAdderService;
         private IHttpGatewayFactory _httpGatewayFactory;
         private IDataContainerConverterService _dataContainerConverterService;
         private IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
+        private ConfigurationData _options;
 
         private string SetupGpxUrl(gpxType gpx, List<LineString> addibleLines = null)
         {
@@ -76,11 +76,12 @@ namespace IsraelHiking.API.Tests.Controllers
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _addibleGpxLinesFinderService = Substitute.For<IAddibleGpxLinesFinderService>();
             _osmLineAdderService = Substitute.For<IOsmLineAdderService>();
-            _configurationProvider = Substitute.For<IConfigurationProvider>();
-            
+            _options = new ConfigurationData();
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(_options);
             _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, new ItmWgs84MathTransfrom(), 
-                _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, _configurationProvider, GeometryFactory.Default,
-                new LruCache<string, TokenAndSecret>(_configurationProvider));
+                _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, optionsProvider, GeometryFactory.Default,
+                new LruCache<string, TokenAndSecret>(optionsProvider));
         }
 
         [TestMethod]
@@ -98,7 +99,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetConfiguration_ShouldReturnIt()
         {
             var osmConfiguration = new OsmConfiguraionData {BaseAddress = "baseAddress"};
-            _configurationProvider.OsmConfiguraion.Returns(osmConfiguration);
+            _options.OsmConfiguraion = osmConfiguration;
 
             var results = _controller.GetConfigurations();
 

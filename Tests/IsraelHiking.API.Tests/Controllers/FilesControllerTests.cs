@@ -55,8 +55,10 @@ namespace IsraelHiking.API.Tests.Controllers
             var factory = Substitute.For<IHttpGatewayFactory>();
             factory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(_remoteFileFetcherGateway);
             _gpxDataContainerConverter = new GpxDataContainerConverter();
-            _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransfrom(), Substitute.For<IConfigurationProvider>()));
-            _controller = new FilesController(_elevationDataStorage, factory, _dataContainerConverterService, new LruCache<string, TokenAndSecret>(Substitute.For<IConfigurationProvider>()));
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(new ConfigurationData());
+            _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransfrom(), optionsProvider));
+            _controller = new FilesController(_elevationDataStorage, factory, _dataContainerConverterService, new LruCache<string, TokenAndSecret>(optionsProvider));
         }
 
         [TestMethod]

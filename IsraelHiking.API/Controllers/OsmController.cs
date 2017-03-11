@@ -32,9 +32,9 @@ namespace IsraelHiking.API.Controllers
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private readonly IOsmLineAdderService _osmLineAdderService;
-        private readonly IConfigurationProvider _configurationProvider;
         private readonly IGeometryFactory _geometryFactory;
         private readonly LruCache<string, TokenAndSecret> _cache;
+        private readonly ConfigurationData _options;
 
         /// <summary>
         /// Controller's constructor
@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="elasticSearchGateway"></param>
         /// <param name="addibleGpxLinesFinderService"></param>
         /// <param name="osmLineAdderService"></param>
-        /// <param name="configurationProvider"></param>
+        /// <param name="options"></param>
         /// <param name="geometryFactory"></param>
         /// <param name="cache"></param>
         public OsmController(IHttpGatewayFactory httpGatewayFactory,
@@ -54,7 +54,7 @@ namespace IsraelHiking.API.Controllers
             IElasticSearchGateway elasticSearchGateway,
             IAddibleGpxLinesFinderService addibleGpxLinesFinderService,
             IOsmLineAdderService osmLineAdderService,
-            IConfigurationProvider configurationProvider,
+            IOptions<ConfigurationData> options,
             IGeometryFactory geometryFactory,
             LruCache<string, TokenAndSecret> cache)
         {
@@ -64,7 +64,7 @@ namespace IsraelHiking.API.Controllers
             _elasticSearchGateway = elasticSearchGateway;
             _addibleGpxLinesFinderService = addibleGpxLinesFinderService;
             _osmLineAdderService = osmLineAdderService;
-            _configurationProvider = configurationProvider;
+            _options = options.Value;
             _geometryFactory = geometryFactory;
             _cache = cache;
         }
@@ -88,7 +88,7 @@ namespace IsraelHiking.API.Controllers
         [Route("api/osm/configuration")]
         public OsmConfiguraionData GetConfigurations()
         {
-            return _configurationProvider.OsmConfiguraion;
+            return _options.OsmConfiguraion;
         }
 
         /// <summary>

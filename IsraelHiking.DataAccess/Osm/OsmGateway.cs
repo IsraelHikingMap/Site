@@ -22,7 +22,7 @@ namespace IsraelHiking.DataAccess.Osm
     public class OsmGateway : BaseFileFetcherGateway, IOsmGateway
     {
         private readonly TokenAndSecret _tokenAndSecret;
-        private readonly IConfigurationProvider _configurationProvider;
+        private readonly ConfigurationData _options;
         private readonly MediaTypeFormatter _xmlMediaTypeFormatter;
 
         private readonly string _baseAddressWithoutProtocol;
@@ -35,14 +35,14 @@ namespace IsraelHiking.DataAccess.Osm
         private readonly string _completeWayAddress;
         private readonly string _createTraceAddress;
 
-        public OsmGateway(TokenAndSecret tokenAndSecret, IConfigurationProvider configurationProvider, ILogger logger) : base(logger)
+        public OsmGateway(TokenAndSecret tokenAndSecret, IOptions<ConfigurationData> options, ILogger logger) : base(logger)
         {
             _tokenAndSecret = tokenAndSecret;
-            _configurationProvider = configurationProvider;
+            _options = options.Value;
             _xmlMediaTypeFormatter = new XmlMediaTypeFormatter {UseXmlSerializer = true};
 
-            var osmApiBaseAddress = _configurationProvider.OsmConfiguraion.BaseAddress.Replace("https", "http") + "/api/0.6/";
-            _baseAddressWithoutProtocol = _configurationProvider.OsmConfiguraion.BaseAddress.Replace("http://", "").Replace("https://", "");
+            var osmApiBaseAddress = _options.OsmConfiguraion.BaseAddress.Replace("https", "http") + "/api/0.6/";
+            _baseAddressWithoutProtocol = _options.OsmConfiguraion.BaseAddress.Replace("http://", "").Replace("https://", "");
             _userDetailsAddress = osmApiBaseAddress + "user/details";
             _createChangesetAddress = osmApiBaseAddress + "changeset/create";
             _closeChangesetAddress = osmApiBaseAddress + "changeset/#id/close";
@@ -62,8 +62,8 @@ namespace IsraelHiking.DataAccess.Osm
 
             var request = new OAuthRequest
             {
-                ConsumerKey = _configurationProvider.OsmConfiguraion.ConsumerKey,
-                ConsumerSecret = _configurationProvider.OsmConfiguraion.ConsumerSecret,
+                ConsumerKey = _options.OsmConfiguraion.ConsumerKey,
+                ConsumerSecret = _options.OsmConfiguraion.ConsumerSecret,
                 Token = _tokenAndSecret.Token,
                 TokenSecret = _tokenAndSecret.TokenSecret,
                 Type = OAuthRequestType.ProtectedResource,

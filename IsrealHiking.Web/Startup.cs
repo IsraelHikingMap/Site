@@ -48,7 +48,7 @@ namespace IsraelHiking.Web
                     container.Resolve<LruCache<string, TokenAndSecret>>(),
                     logger)
             });
-            WebApiConfig.Register(config, container.Resolve<IConfigurationProvider>());
+            WebApiConfig.Register(config);
 
             config.Formatters.JsonFormatter.SupportedMediaTypes.Add(new MediaTypeHeaderValue("text/html"));
             config.Formatters.JsonFormatter.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore;
@@ -73,7 +73,7 @@ namespace IsraelHiking.Web
             config.Services.Replace(typeof(IBodyModelValidator), new CustomBodyModelValidator());
             config.DependencyResolver = new UnityResolver(container);
             InitializeServices(container);
-            foreach (var keyValue in container.Resolve<IConfigurationProvider>().ListingDictionary)
+            foreach (var keyValue in container.Resolve<IOptions<ConfigurationData>>().Value.ListingDictionary)
             {
                 app.UseDirectoryBrowser(new DirectoryBrowserOptions
                 {

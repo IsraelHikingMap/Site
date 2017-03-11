@@ -2,6 +2,8 @@
 using System.Linq;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
+using IsraelHiking.API.Services;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
@@ -19,7 +21,10 @@ namespace IsraelHiking.API.Tests.Services.Osm
         [TestInitialize]
         public void TestInitialize()
         {
-            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), Substitute.For<IConfigurationProvider>());
+            var options = new ConfigurationData();
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(options);
+            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), new GeoJsonFeatureHelper(optionsProvider), optionsProvider);
         }
 
         private Node CreateNode(int id)

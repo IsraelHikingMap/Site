@@ -18,9 +18,9 @@ namespace IsraelHiking.API.Services.Osm
     {
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IMathTransform _itmWgs84MathTransform;
-        private readonly IConfigurationProvider _configurationProvider;
         private readonly IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
+        private readonly ConfigurationData _options;
 
         private IOsmGateway _osmGateway;
 
@@ -29,18 +29,18 @@ namespace IsraelHiking.API.Services.Osm
         /// </summary>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="itmWgs84MathTransform"></param>
-        /// <param name="configurationProvider"></param>
+        /// <param name="options"></param>
         /// <param name="geoJsonPreprocessorExecutor"></param>
         /// <param name="httpGatewayFactory"></param>
         public OsmLineAdderService(IElasticSearchGateway elasticSearchGateway,
             IMathTransform itmWgs84MathTransform,
-            IConfigurationProvider configurationProvider,
+            IOptions<ConfigurationData> options,
             IOsmGeoJsonPreprocessorExecutor geoJsonPreprocessorExecutor,
             IHttpGatewayFactory httpGatewayFactory)
         {
             _elasticSearchGateway = elasticSearchGateway;
             _itmWgs84MathTransform = itmWgs84MathTransform;
-            _configurationProvider = configurationProvider;
+            _options = options.Value;
             _geoJsonPreprocessorExecutor = geoJsonPreprocessorExecutor;
             _httpGatewayFactory = httpGatewayFactory;
         }
@@ -80,7 +80,7 @@ namespace IsraelHiking.API.Services.Osm
                     {
                         continue;
                     }
-                    if (closestItmPointInWay.Distance(itmPoint.Coordinate) <= _configurationProvider.DistanceToExisitngLineMergeThreshold)
+                    if (closestItmPointInWay.Distance(itmPoint.Coordinate) <= _options.DistanceToExisitngLineMergeThreshold)
                     {
                         // close hihgway, adding the node id from that highway
                         nodeIds.Add(closestNodeId);
@@ -106,11 +106,11 @@ namespace IsraelHiking.API.Services.Osm
         private async Task AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<string> nodeIds, List<LineString> itmHighways)
         {
             var lineSegment = new LineString(new [] { GetItmCoordinate(previousCoordinate).Coordinate, GetItmCoordinate(coordinate).Coordinate});
-            var closeLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _configurationProvider.DistanceToExisitngLineMergeThreshold);
+            var closeLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.DistanceToExisitngLineMergeThreshold);
             foreach (var closeLine in closeLines)
             {
                 var closestPointInExistingLine = closeLine.Coordinates.Select(c => new Point(c)).OrderBy(p => p.Distance(lineSegment)).First();
-                if (closestPointInExistingLine.Distance(lineSegment) > _configurationProvider.DistanceToExisitngLineMergeThreshold)
+                if (closestPointInExistingLine.Distance(lineSegment) > _options.DistanceToExisitngLineMergeThreshold)
                 {
                     continue;
                 }
@@ -132,7 +132,7 @@ namespace IsraelHiking.API.Services.Osm
             {
                 // HM TODO: fix this using projection
                 var postItmLine = new LineString(new [] { closestItmHighway.Coordinates[indexOnWay], closestItmHighway.Coordinates[indexOnWay + 1] });
-                if (postItmLine.Distance(itmPoint) <= _configurationProvider.DistanceToExisitngLineMergeThreshold)
+                if (postItmLine.Distance(itmPoint) <= _options.DistanceToExisitngLineMergeThreshold)
                 {
                     indexToInsert = indexOnWay + 1;
                 }
@@ -155,10 +155,10 @@ namespace IsraelHiking.API.Services.Osm
                 X = line.Coordinates.Min(c => c.X)
             });
             // adding tolerance perimiter to find ways.
-            northEast.Y += _configurationProvider.ClosestPointTolerance;
-            northEast.X += _configurationProvider.ClosestPointTolerance;
-            southWest.Y -= _configurationProvider.ClosestPointTolerance;
-            southWest.X -= _configurationProvider.ClosestPointTolerance;
+            northEast.Y += _options.ClosestPointTolerance;
+            northEast.X += _options.ClosestPointTolerance;
+            southWest.Y -= _options.ClosestPointTolerance;
+            southWest.X -= _options.ClosestPointTolerance;
             var northEastLatLon = _itmWgs84MathTransform.Transform(northEast);
             var southWestLatLon = _itmWgs84MathTransform.Transform(southWest);
 
@@ -179,7 +179,7 @@ namespace IsraelHiking.API.Services.Osm
             {
                 return null;
             }
-            var closestHighway = itmHighways.Where(l => l.Distance(point) <= _configurationProvider.DistanceToExisitngLineMergeThreshold)
+            var closestHighway = itmHighways.Where(l => l.Distance(point) <= _options.DistanceToExisitngLineMergeThreshold)
                 .OrderBy(l => l.Distance(point))
                 .FirstOrDefault();
             if (closestHighway == null)

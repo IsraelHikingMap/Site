@@ -32,6 +32,7 @@ namespace IsraelHiking.API
             container.RegisterType<IGeometryFactory, GeometryFactory>(new ContainerControlledLifetimeManager(), new InjectionConstructor(new PrecisionModel(100000000)));
             container.RegisterType<IImageCreationService, ImageCreationService>();
             container.RegisterType<IOsmLineAdderService, OsmLineAdderService>();
+            container.RegisterType<IGeoJsonFeatureHelper, GeoJsonFeatureHelper>(new ContainerControlledLifetimeManager());
         }
     }
 }

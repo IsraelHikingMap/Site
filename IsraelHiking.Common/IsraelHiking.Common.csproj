@@ -73,6 +73,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConfigurationData.cs" />
     <Compile Include="CoordinateExtensions.cs" />
     <Compile Include="DataContainer.cs" />
     <Compile Include="FeatureProperties.cs" />

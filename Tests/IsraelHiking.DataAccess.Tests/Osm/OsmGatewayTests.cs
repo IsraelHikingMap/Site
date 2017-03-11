@@ -17,14 +17,16 @@ namespace IsraelHiking.DataAccess.Tests.Osm
         [TestInitialize]
         public void TestInitialize()
         {
-            var configurationProvider = Substitute.For<IConfigurationProvider>();
-            configurationProvider.OsmConfiguraion.Returns(new OsmConfiguraionData
+            var options = new ConfigurationData();
+            options.OsmConfiguraion.Returns(new OsmConfiguraionData
             {
                 BaseAddress = "http://api06.dev.openstreetmap.org",
                 ConsumerKey = "uR7K7PcxOyFG2FnTdTuEqAmlq6hTWPDmF4xknWxQ",
                 ConsumerSecret = "hd8WnRpQQtzS04HeFMLUHN2JQtPWzQLOmA6OeE9l"
             });
-            _gateway = new OsmGateway(new TokenAndSecret("IwrfBMSqyuq3haudBUgfrjflXnvhAcbTvqVBa47l", "eBY4iWlGNMrvERH56vp0jjU8RsVhsroQIns5MQGz"), configurationProvider, new TraceLogger());
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(options);
+            _gateway = new OsmGateway(new TokenAndSecret("IwrfBMSqyuq3haudBUgfrjflXnvhAcbTvqVBa47l", "eBY4iWlGNMrvERH56vp0jjU8RsVhsroQIns5MQGz"), optionsProvider, new TraceLogger());
         }
 
         [TestMethod]

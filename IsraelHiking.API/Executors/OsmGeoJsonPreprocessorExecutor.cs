@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -20,7 +21,8 @@ namespace IsraelHiking.API.Executors
 
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
-        private readonly IConfigurationProvider _configurationProvider;
+        private readonly IGeoJsonFeatureHelper _geoJsonFeatureHelper;
+        private readonly ConfigurationData _options;
 
         private class TagKeyComparer : IEqualityComparer<Tag>
         {
@@ -40,14 +42,17 @@ namespace IsraelHiking.API.Executors
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="osmGeoJsonConverter"></param>
-        /// <param name="configurationProvider"></param>
+        /// <param name="geoJsonFeatureHelper"></param>
+        /// <param name="options"></param>
         public OsmGeoJsonPreprocessorExecutor(ILogger logger,
-            IOsmGeoJsonConverter osmGeoJsonConverter, 
-            IConfigurationProvider configurationProvider)
+            IOsmGeoJsonConverter osmGeoJsonConverter,
+            IGeoJsonFeatureHelper geoJsonFeatureHelper,
+            IOptions<ConfigurationData> options)
         {
             _logger = logger;
             _osmGeoJsonConverter = osmGeoJsonConverter;
-            _configurationProvider = configurationProvider;
+            _geoJsonFeatureHelper = geoJsonFeatureHelper;
+            _options = options.Value;
         }
 
         /// <inheritdoc />
@@ -100,12 +105,11 @@ namespace IsraelHiking.API.Executors
         private void PreprocessGeoJson(List<Feature> features, List<Feature> containers)
         {
             MergePlacesPoints(features);
-            var geoJsonFeatureHelper = new GeoJsonFeatureHelper(_configurationProvider);
             foreach (var feature in features)
             {
                 AddAddressField(feature, containers);
-                var propertiesExtraData = geoJsonFeatureHelper.FindPropertiesData(feature);
-                feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? _configurationProvider.SearchFactor);
+                var propertiesExtraData = _geoJsonFeatureHelper.FindPropertiesData(feature);
+                feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? _options.SearchFactor);
                 feature.Attributes.AddAttribute(ICON, propertiesExtraData?.Icon ?? string.Empty);
             }
         }

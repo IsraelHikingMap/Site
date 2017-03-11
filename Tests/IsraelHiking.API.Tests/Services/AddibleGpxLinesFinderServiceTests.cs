@@ -3,6 +3,7 @@ using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -17,7 +18,7 @@ namespace IsraelHiking.API.Tests.Services
     {
         private IAddibleGpxLinesFinderService _service;
         private IElasticSearchGateway _elasticSearchGateway;
-        private IConfigurationProvider _configurationProvider;
+        private ConfigurationData _options;
 
         private void SetupHighways(List<LineString> lineStrings = null)
         {
@@ -35,17 +36,23 @@ namespace IsraelHiking.API.Tests.Services
         public void TestInitialize()
         {
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _configurationProvider = Substitute.For<IConfigurationProvider>();
+            _options = new ConfigurationData();
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(_options);
             var geometryFactory = GeometryFactory.Default;
-            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new ItmWgs84MathTransfrom(), _elasticSearchGateway, _configurationProvider, geometryFactory, Substitute.For<ILogger>());
+            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new ItmWgs84MathTransfrom(), _elasticSearchGateway, optionsProvider, geometryFactory, Substitute.For<ILogger>());
         }
         
         [TestMethod]
         public void GetLines_StraightLine_ShouldReturnAsIs()
         {
             var gpxLine = new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1), new Coordinate(2, 1) });
-            _configurationProvider.MaxNumberOfPointsPerLine.Returns(5);
-            _configurationProvider.MaxLengthPerLine.Returns(5);
+            _options.MaxNumberOfPointsPerLine = 5;
+            _options.MaxLengthPerLine = 5;
+            _options.MinimalMissingPartLength = 0;
+            _options.ClosestPointTolerance = 0;
+            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.SimplificationTolerance = 0;
             SetupHighways();
 
             var results = _service.GetLines(new List<ILineString> {gpxLine}).Result.ToArray();
@@ -66,7 +73,11 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0, 4),
                 new Coordinate(0, 5)
             });
-            _configurationProvider.MaxNumberOfPointsPerLine.Returns(3);
+            _options.MaxNumberOfPointsPerLine = 3;
+            _options.MinimalMissingPartLength = 0;
+            _options.ClosestPointTolerance = 0;
+            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.SimplificationTolerance = 0;
             SetupHighways();
 
             var results = _service.GetLines(new List<ILineString> { gpxLine }).Result.ToArray();
@@ -88,9 +99,12 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0, 40),
                 new Coordinate(0, 50)
             });
-            _configurationProvider.MaxNumberOfPointsPerLine.Returns(3);
-            _configurationProvider.ClosestPointTolerance.Returns(5);
-            _configurationProvider.DistanceToExisitngLineMergeThreshold.Returns(1);
+            _options.MaxNumberOfPointsPerLine = 3;
+            _options.ClosestPointTolerance = 5;
+            _options.DistanceToExisitngLineMergeThreshold = 1;
+            _options.MinimalMissingPartLength = 0;
+            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.SimplificationTolerance = 0;
             SetupHighways(new List<LineString> {
                 new LineString(new [] { new Coordinate(0,0), new Coordinate(0,10)}),
                 new LineString(new [] { new Coordinate(0,40), new Coordinate(0,50)})
@@ -120,8 +134,9 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0, 10),
                 new Coordinate(0, 0)
             });
-            _configurationProvider.MaxNumberOfPointsPerLine.Returns(4);
-            _configurationProvider.ClosestPointTolerance.Returns(5);
+            _options.MaxNumberOfPointsPerLine = 4;
+            _options.ClosestPointTolerance = 5;
+            _options.MinimalMissingPartLength = 0;
             SetupHighways();
 
             var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();
@@ -154,10 +169,14 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0, 40),
                 new Coordinate(0, 50)
             });
-            _configurationProvider.MaxNumberOfPointsPerLine.Returns(3);
-            _configurationProvider.ClosestPointTolerance.Returns(5);
-            _configurationProvider.DistanceToExisitngLineMergeThreshold.Returns(1);
-            _configurationProvider.MaximalProlongLineLength.Returns(200);
+            _options.MaxNumberOfPointsPerLine = 3;
+            _options.ClosestPointTolerance = 5;
+            _options.DistanceToExisitngLineMergeThreshold = 1;
+            _options.MaximalProlongLineLength = 200;
+            _options.MinimalMissingPartLength = 0;
+            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.SimplificationTolerance = 0;
+
             SetupHighways(new List<LineString> {
                 new LineString(new [] { new Coordinate(0,0), new Coordinate(0,10)}),
                 new LineString(new [] { new Coordinate(0,40), new Coordinate(0,50)})
@@ -181,11 +200,14 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0, 30),
                 new Coordinate(0, 40),
             });
-            _configurationProvider.MaxNumberOfPointsPerLine.Returns(3);
-            _configurationProvider.ClosestPointTolerance.Returns(5);
-            _configurationProvider.MaxLengthPerLine.Returns(3);
-            _configurationProvider.DistanceToExisitngLineMergeThreshold.Returns(1);
-            _configurationProvider.MaximalProlongLineLength.Returns(200);
+            _options.MaxNumberOfPointsPerLine = 3;
+            _options.ClosestPointTolerance = 5;
+            _options.MaxLengthPerLine = 3;
+            _options.DistanceToExisitngLineMergeThreshold = 1;
+            _options.MaximalProlongLineLength = 200;
+            _options.MinimalMissingPartLength = 0;
+            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.SimplificationTolerance = 0;
             SetupHighways();
 
             var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();
@@ -216,11 +238,15 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(40, 0),
                 new Coordinate(50, 0),
             });
-            _configurationProvider.MaxNumberOfPointsPerLine.Returns(1000);
-            _configurationProvider.ClosestPointTolerance.Returns(10);
-            _configurationProvider.MaxLengthPerLine.Returns(3000);
-            _configurationProvider.DistanceToExisitngLineMergeThreshold.Returns(5);
-            _configurationProvider.MaximalProlongLineLength.Returns(200);
+            _options.MaxNumberOfPointsPerLine = 1000;
+            _options.ClosestPointTolerance = 10;
+            _options.MaxLengthPerLine = 3000;
+            _options.DistanceToExisitngLineMergeThreshold = 5;
+            _options.MaximalProlongLineLength = 200;
+            _options.MinimalMissingPartLength = 0;
+            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.SimplificationTolerance = 0;
+            
             SetupHighways();
 
             var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();

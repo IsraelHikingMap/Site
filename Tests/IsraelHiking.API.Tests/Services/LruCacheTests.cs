@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using IsraelHiking.API.Services;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -10,19 +11,21 @@ namespace IsraelHiking.API.Tests.Services
     public class LruCacheTests
     {
         private LruCache<string, string> _cache;
-        private IConfigurationProvider _configurationProvider;
+        private ConfigurationData _options;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _configurationProvider = Substitute.For<IConfigurationProvider>();
-            _cache = new LruCache<string, string>(_configurationProvider);
+            _options = new ConfigurationData();
+            var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
+            optionsProvider.Value.Returns(_options);
+            _cache = new LruCache<string, string>(optionsProvider);
         }
 
         [TestMethod]
         public void Add_ShouldAdd()
         {
-            _configurationProvider.MaxCacheSize.Returns(2);
+            _options.MaxCacheSize = 2;
 
             _cache.Add("1", "1");
 
@@ -32,7 +35,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void AddBeyondMax_ShouldRemoveAndAdd()
         {
-            _configurationProvider.MaxCacheSize.Returns(1);
+            _options.MaxCacheSize = 1;
 
             _cache.Add("1", "1");
             Task.Delay(50).Wait();
@@ -44,7 +47,7 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ReverseGet_ShouldGet()
         {
-            _configurationProvider.MaxCacheSize.Returns(1);
+            _options.MaxCacheSize = 1;
 
             _cache.Add("1", "11");
 
