@@ -45,6 +45,7 @@ namespace IsraelHiking.Common
                 ConsumerSecret = "ccYaQUKLz26XEzbNd8uWoQ6HwbcnrUUp8milXnXG",
                 BaseAddress ="https://www.openstreetmap.org"
             };
+            ListingDictionary = new Dictionary<string, string>();
         }
     }
 }
