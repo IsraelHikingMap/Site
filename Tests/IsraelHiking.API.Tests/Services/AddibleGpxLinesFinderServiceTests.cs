@@ -192,5 +192,42 @@ namespace IsraelHiking.API.Tests.Services
 
             Assert.AreEqual(0, results.Length);
         }
+
+        [TestMethod]
+        public void GetLines_TShapeLine_ShouldNotCreateAUShape()
+        {
+            var gpxItmLine = new LineString(new[]
+            {
+                new Coordinate(0, 0),
+                new Coordinate(10, 0),
+                new Coordinate(20, 0),
+                new Coordinate(20, 10),
+                new Coordinate(20, 20),
+                new Coordinate(20, 30),
+                new Coordinate(20, 40),
+                new Coordinate(20, 50),
+                new Coordinate(23, 50),
+                new Coordinate(23, 40),
+                new Coordinate(23, 30),
+                new Coordinate(23, 20),
+                new Coordinate(23, 10),
+                new Coordinate(23, 0),
+                new Coordinate(30, 0),
+                new Coordinate(40, 0),
+                new Coordinate(50, 0),
+            });
+            _configurationProvider.MaxNumberOfPointsPerLine.Returns(1000);
+            _configurationProvider.ClosestPointTolerance.Returns(10);
+            _configurationProvider.MaxLengthPerLine.Returns(3000);
+            _configurationProvider.DistanceToExisitngLineMergeThreshold.Returns(5);
+            _configurationProvider.MaximalProlongLineLength.Returns(200);
+            SetupHighways();
+
+            var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();
+
+            Assert.AreEqual(2, results.Length);
+            Assert.AreEqual(gpxItmLine.Coordinates.First(), results.First().Coordinates.First());
+            Assert.AreEqual(gpxItmLine.Coordinates.Last(), results.Last().Coordinates.Last());
+        }
     }
 }

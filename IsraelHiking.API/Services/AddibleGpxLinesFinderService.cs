@@ -58,7 +58,8 @@ namespace IsraelHiking.API.Services
             var linesToReturn = await FindMissingLines(gpxItmLines);
             linesToReturn = SplitSelfLoopsAndRemoveDuplication(linesToReturn);
             linesToReturn = SimplifyLines(linesToReturn);
-            linesToReturn = await ProlongLinesAccordingToOriginalGpx(linesToReturn, gpxItmLines);
+            linesToReturn = await ProlongLinesEndAccordingToOriginalGpx(linesToReturn, gpxItmLines);
+            linesToReturn = await ProlongLinesStartAccordingToOriginalGpx(linesToReturn, gpxItmLines);
             linesToReturn = MergeBackLines(linesToReturn); // after adding parts, possible merge options
             linesToReturn = SimplifyLines(linesToReturn); // need to simplify to remove sharp corners
             linesToReturn = AdjustIntersections(linesToReturn); // intersections may have moved after simplification
@@ -184,13 +185,13 @@ namespace IsraelHiking.API.Services
         {
             var northEast = _itmWgs84MathTransfrom.Transform(new Coordinate
             {
-                Y = (int)(gpxItmLine.Coordinates.Max(c => c.Y) + tolerance),
-                X = (int)(gpxItmLine.Coordinates.Max(c => c.X) + tolerance)
+                Y = gpxItmLine.Coordinates.Max(c => c.Y) + tolerance,
+                X = gpxItmLine.Coordinates.Max(c => c.X) + tolerance
             });
             var southWest = _itmWgs84MathTransfrom.Transform(new Coordinate
             {
-                Y = (int)(gpxItmLine.Coordinates.Min(c => c.Y) - tolerance),
-                X = (int)(gpxItmLine.Coordinates.Min(c => c.X) - tolerance)
+                Y = gpxItmLine.Coordinates.Min(c => c.Y) - tolerance,
+                X = gpxItmLine.Coordinates.Min(c => c.X) - tolerance
             });
             var highways = await _elasticSearchGateway.GetHighways(northEast, southWest);
             return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.Attributes["osm_id"].ToString())).ToList();
@@ -206,13 +207,12 @@ namespace IsraelHiking.API.Services
 
         /// <summary>
         /// This method is try to prolong all lines according to original GPS trace.
-        /// for each line it prolongs the end of the line
-        /// it checks if it's better to prolong the previous line end or the current line start and prolongs accordingly.
+        /// for each line it prolongs the end of the line.
         /// </summary>
         /// <param name="linesToProlong"></param>
         /// <param name="gpxItmLines"></param>
         /// <returns></returns>
-        private async Task<List<ILineString>> ProlongLinesAccordingToOriginalGpx(List<ILineString> linesToProlong, List<ILineString> gpxItmLines)
+        private async Task<List<ILineString>> ProlongLinesEndAccordingToOriginalGpx(List<ILineString> linesToProlong, List<ILineString> gpxItmLines)
         {
             var prolongedLines = new List<ILineString>();
             var currentLineIndex = gpxItmLines.Count - 1;
@@ -220,8 +220,6 @@ namespace IsraelHiking.API.Services
             for (int lineIndex = linesToProlong.Count - 1; lineIndex >= 0; lineIndex--)
             {
                 var prolongedLine = linesToProlong[lineIndex];
-                var previousLineToProlong = lineIndex > 0 ? linesToProlong[lineIndex - 1] : null;
-                // prolong end
                 var currentCoordinate = prolongedLine.Coordinates.Last();
                 UpdateIndexes(currentCoordinate, gpxItmLines, ref currentLineIndex, ref currentPositionIndex);
                 var originalCoordinates = gpxItmLines[currentLineIndex].Coordinates.Skip(currentPositionIndex).ToArray();
@@ -233,12 +231,39 @@ namespace IsraelHiking.API.Services
                     lineStringInArea.Concat(prolongedLines).Concat(linesToProlong.Take(lineIndex)).ToArray(),
                     _configurationProvider.DistanceToExisitngLineMergeThreshold,
                     _configurationProvider.MaximalProlongLineLength);
-                // prolong start 
-                currentCoordinate = prolongedLine.Coordinates.First();
-                UpdateIndexes(currentCoordinate, gpxItmLines, ref currentLineIndex, ref currentPositionIndex);
-                originalCoordinates = gpxItmLines[currentLineIndex].Coordinates.Take(currentPositionIndex + 1).ToArray();
 
-                lineStringInArea = await GetLineStringsInArea(new LineString(new[] {currentCoordinate, currentCoordinate}),
+                prolongedLines.Add(prolongedLine);
+            }
+            prolongedLines.Reverse(); // reverse back to keep the original order of the lines
+            return prolongedLines;
+        }
+
+        /// <summary>
+        /// This method is try to prolong all lines according to original GPS trace.
+        /// for each line it prolongs the start of the line unless the previous line was already prolonged to intersect it.
+        /// </summary>
+        /// <param name="linesToProlong"></param>
+        /// <param name="gpxItmLines"></param>
+        /// <returns></returns>
+        private async Task<List<ILineString>> ProlongLinesStartAccordingToOriginalGpx(List<ILineString> linesToProlong, List<ILineString> gpxItmLines)
+        {
+            var prolongedLines = new List<ILineString>();
+            var currentLineIndex = gpxItmLines.Count - 1;
+            var currentPositionIndex = gpxItmLines[currentLineIndex].Coordinates.Length - 1;
+            for (int lineIndex = linesToProlong.Count - 1; lineIndex >= 0; lineIndex--)
+            {
+                var prolongedLine = linesToProlong[lineIndex];
+                var previousLineToProlong = lineIndex > 0 ? linesToProlong[lineIndex - 1] : null;
+                if (previousLineToProlong != null && previousLineToProlong.Intersects(prolongedLine))
+                {
+                    prolongedLines.Add(prolongedLine);
+                    continue;
+                }
+                var currentCoordinate = prolongedLine.Coordinates.First();
+                UpdateIndexes(currentCoordinate, gpxItmLines, ref currentLineIndex, ref currentPositionIndex);
+                var originalCoordinates = gpxItmLines[currentLineIndex].Coordinates.Take(currentPositionIndex + 1).ToArray();
+
+                var lineStringInArea = await GetLineStringsInArea(new LineString(new[] { currentCoordinate, currentCoordinate }),
                             _configurationProvider.MaximalProlongLineLength);
                 var prolongedLineStart = _gpxProlongerExecutor.ProlongLineStart(prolongedLine,
                     originalCoordinates,
@@ -246,37 +271,9 @@ namespace IsraelHiking.API.Services
                     _configurationProvider.DistanceToExisitngLineMergeThreshold,
                     _configurationProvider.MaximalProlongLineLength);
 
-                if (previousLineToProlong == null)
-                {
                     prolongedLines.Add(prolongedLineStart);
-                    continue;
-                }
-                // prolong end of previous line
-                currentCoordinate = previousLineToProlong.Coordinates.Last();
-                UpdateIndexes(currentCoordinate, gpxItmLines, ref currentLineIndex, ref currentPositionIndex);
-                originalCoordinates = gpxItmLines[currentLineIndex].Coordinates.Skip(currentPositionIndex).ToArray();
-
-                lineStringInArea = await GetLineStringsInArea(new LineString(new[] { currentCoordinate, currentCoordinate }),
-                            _configurationProvider.MaximalProlongLineLength);
-                previousLineToProlong = _gpxProlongerExecutor.ProlongLineEnd(previousLineToProlong,
-                    originalCoordinates,
-                    lineStringInArea.Concat(prolongedLines).Concat(linesToProlong.Take(lineIndex - 1)).Concat(new [] { prolongedLine }).ToArray(),
-                    _configurationProvider.DistanceToExisitngLineMergeThreshold,
-                    _configurationProvider.MaximalProlongLineLength);
-
-                if (previousLineToProlong.Coordinates.Last().Equals2D(prolongedLine.Coordinates.First()))
-                {
-                    // adds the prolonged line without prolonging the start
-                    prolongedLines.Add(prolongedLine);
-                }
-                else
-                {
-                    // adds the prolonged line while prolonging the start
-                    prolongedLines.Add(prolongedLineStart);
-                }
             }
-            // lines were added from end to begginging, reversing them to keep them in the original order.
-            prolongedLines.Reverse();
+            prolongedLines.Reverse(); // reverse back to keep the original order of the lines
             return prolongedLines;
         }
 
@@ -332,6 +329,7 @@ namespace IsraelHiking.API.Services
                 ReplaceEdgeIfNeeded(adjustedLines, currentCoordinates.Last(), currentCoordinates);
                 adjustedLines.Add(_geometryFactory.CreateLineString(currentCoordinates.ToArray()));
             }
+            adjustedLines.Reverse(); // reverse back to keep the original order of the lines
             return adjustedLines;
         }
 

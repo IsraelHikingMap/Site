@@ -54,5 +54,21 @@ namespace IsraelHiking.API.Tests.Executors
 
             Assert.IsTrue(existingLines.Last().Intersects(results));
         }
+
+        [TestMethod]
+        public void ProlongEnd_PointsCrossesNearEndOfLine_ShouldAddPointToEndOfLine()
+        {
+            var lineToProlong = new LineString(new[] { new Coordinate(0, 0), new Coordinate(1, 0) });
+            var originlaCoordinates = new[] { new Coordinate(1, 0), new Coordinate(10, 0) };
+            var coordinateThatShouldBeAdded = new Coordinate(8, -8);
+            var existingLines = new List<LineString>
+            {
+                new LineString(new[] { coordinateThatShouldBeAdded, new Coordinate(10, 8), new Coordinate(17,12) })
+            };
+
+            var results = _executor.ProlongLineEnd(lineToProlong, originlaCoordinates, existingLines, 5, 200);
+
+            Assert.IsTrue(results.Coordinates.Last().Equals2D(coordinateThatShouldBeAdded));
+        }
     }
 }

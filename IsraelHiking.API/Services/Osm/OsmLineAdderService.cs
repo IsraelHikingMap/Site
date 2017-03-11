@@ -155,10 +155,10 @@ namespace IsraelHiking.API.Services.Osm
                 X = line.Coordinates.Min(c => c.X)
             });
             // adding tolerance perimiter to find ways.
-            northEast.Y += (int) _configurationProvider.ClosestPointTolerance;
-            northEast.X += (int)_configurationProvider.ClosestPointTolerance;
-            southWest.Y -= (int)_configurationProvider.ClosestPointTolerance;
-            southWest.X -= (int)_configurationProvider.ClosestPointTolerance;
+            northEast.Y += _configurationProvider.ClosestPointTolerance;
+            northEast.X += _configurationProvider.ClosestPointTolerance;
+            southWest.Y -= _configurationProvider.ClosestPointTolerance;
+            southWest.X -= _configurationProvider.ClosestPointTolerance;
             var northEastLatLon = _itmWgs84MathTransform.Transform(northEast);
             var southWestLatLon = _itmWgs84MathTransform.Transform(southWest);
 

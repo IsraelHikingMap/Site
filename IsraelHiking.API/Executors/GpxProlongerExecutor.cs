@@ -96,27 +96,46 @@ namespace IsraelHiking.API.Executors
             return null;
         }
 
+        /// <summary>
+        /// This methods tries to find the coordinate to add on the closest line and prefers to return one of the edges if possible.
+        /// </summary>
+        /// <param name="lineToTestAgainst"></param>
+        /// <param name="closestLine"></param>
+        /// <param name="minimalDistance"></param>
+        /// <returns></returns>
         private Coordinate GetCoordinateToAdd(ILineString lineToTestAgainst, ILineString closestLine, double minimalDistance)
         {
             var closestCoordinate = lineToTestAgainst.Coordinates.Last();
-            if (closestLine.Coordinates.Last().Distance(closestCoordinate) < minimalDistance*1.5)
+            var edgeCoordinate = GetEdgeCoordiante(closestLine, closestCoordinate, minimalDistance, 1.5);
+            if (edgeCoordinate != null)
             {
-                return closestLine.Coordinates.Last();
+                return edgeCoordinate;
             }
-            if (closestLine.Coordinates.First().Distance(closestCoordinate) < minimalDistance*1.5)
+            if (lineToTestAgainst.Intersects(closestLine))
             {
-                return closestLine.Coordinates.First();
+                var intecsectionCoordinate = lineToTestAgainst.Intersection(closestLine).Coordinates.First();
+                edgeCoordinate = GetEdgeCoordiante(closestLine, intecsectionCoordinate, minimalDistance, 3);
+                return edgeCoordinate ?? intecsectionCoordinate;
             }
             var closestCoordinateOnExitingLine = closestLine.Coordinates.OrderBy(c => c.Distance(closestCoordinate)).First();
             if (closestCoordinateOnExitingLine.Distance(closestCoordinate) < minimalDistance)
             {
                 return closestCoordinateOnExitingLine;
             }
+            
             var closestLineIndexed = new LengthIndexedLine(closestLine);
             var closestCoordinateProjectedIndex = closestLineIndexed.Project(closestCoordinate);
-            var returnValue = closestLineIndexed.ExtractPoint(closestCoordinateProjectedIndex);
-            _geometryFactory.PrecisionModel.MakePrecise(returnValue);
-            return returnValue;
+            var projectedCoordinate = closestLineIndexed.ExtractPoint(closestCoordinateProjectedIndex);
+            _geometryFactory.PrecisionModel.MakePrecise(projectedCoordinate);
+            edgeCoordinate = GetEdgeCoordiante(closestLine, projectedCoordinate, minimalDistance, 3);
+            return edgeCoordinate ?? projectedCoordinate;
+        }
+
+        private Coordinate GetEdgeCoordiante(ILineString closestLine, Coordinate closestCoordinate, double minimalDistance, double distanceFactor)
+        {
+            var edgeCoordinates = new[] {closestLine.Coordinates.First(), closestLine.Coordinates.Last()};
+            return edgeCoordinates.OrderBy(c => c.Distance(closestCoordinate))
+                    .FirstOrDefault(c => c.Distance(closestCoordinate) < minimalDistance*distanceFactor);
         }
     }
 }

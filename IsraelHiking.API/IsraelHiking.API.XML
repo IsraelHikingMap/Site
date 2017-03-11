@@ -521,6 +521,15 @@
         <member name="M:IsraelHiking.API.Executors.GpxProlongerExecutor.ProlongLineEnd(GeoAPI.Geometries.ILineString,GeoAPI.Geometries.Coordinate[],System.Collections.Generic.IReadOnlyList{GeoAPI.Geometries.ILineString},System.Double,System.Double)">
             <inheritdoc/>
         </member>
+        <member name="M:IsraelHiking.API.Executors.GpxProlongerExecutor.GetCoordinateToAdd(GeoAPI.Geometries.ILineString,GeoAPI.Geometries.ILineString,System.Double)">
+            <summary>
+            This methods tries to find the coordinate to add on the closest line and prefers to return one of the edges if possible.
+            </summary>
+            <param name="lineToTestAgainst"></param>
+            <param name="closestLine"></param>
+            <param name="minimalDistance"></param>
+            <returns></returns>
+        </member>
         <member name="T:IsraelHiking.API.Executors.IGpxProlongerExecutor">
             <summary>
             This interface facilitates for prolonging a line based on original gps trace
@@ -961,11 +970,19 @@
         <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.GetLines(System.Collections.Generic.List{GeoAPI.Geometries.ILineString})">
             <inheritdoc/>
         </member>
-        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.ProlongLinesAccordingToOriginalGpx(System.Collections.Generic.List{GeoAPI.Geometries.ILineString},System.Collections.Generic.List{GeoAPI.Geometries.ILineString})">
+        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.ProlongLinesEndAccordingToOriginalGpx(System.Collections.Generic.List{GeoAPI.Geometries.ILineString},System.Collections.Generic.List{GeoAPI.Geometries.ILineString})">
             <summary>
             This method is try to prolong all lines according to original GPS trace.
-            for each line it prolongs the end of the line
-            it checks if it's better to prolong the previous line end or the current line start and prolongs accordingly.
+            for each line it prolongs the end of the line.
+            </summary>
+            <param name="linesToProlong"></param>
+            <param name="gpxItmLines"></param>
+            <returns></returns>
+        </member>
+        <member name="M:IsraelHiking.API.Services.AddibleGpxLinesFinderService.ProlongLinesStartAccordingToOriginalGpx(System.Collections.Generic.List{GeoAPI.Geometries.ILineString},System.Collections.Generic.List{GeoAPI.Geometries.ILineString})">
+            <summary>
+            This method is try to prolong all lines according to original GPS trace.
+            for each line it prolongs the start of the line unless the previous line was already prolonged to intersect it.
             </summary>
             <param name="linesToProlong"></param>
             <param name="gpxItmLines"></param>
