@@ -1,7 +1,7 @@
 ﻿namespace IsraelHiking.Controllers.MarkerPopup {
     export interface INorthEast {
-        North: number;
-        East: number;
+        north: number;
+        east: number;
     }
 
     export interface IRemovableMarkerScope extends IRootScope {

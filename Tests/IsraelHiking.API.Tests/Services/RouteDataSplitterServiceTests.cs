@@ -9,6 +9,7 @@ using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Tests.Services
 {

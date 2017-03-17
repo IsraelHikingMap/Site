@@ -1,16 +1,16 @@
 ﻿using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Controllers
 {
     /// <summary>
     /// This contoller is used to return an HTML page for facebook crawler
     /// </summary>
-    public class OpenGraphController : ApiController
+    [Route("api/[controller]")]
+    public class OpenGraphController : Controller
     {
         private readonly ILogger _logger;
         private readonly IIsraelHikingRepository _repository;
@@ -32,16 +32,18 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="id">The ID of the shared route</param>
         /// <returns>An HTML page with all relevant metadata</returns>
-        public async Task<IHttpActionResult> GetHtml(string id)
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetHtml(string id)
         {
             _logger.LogDebug("Received a call to get html for: " + id);
             var url = await _repository.GetUrlById(id);
-            var response = new HttpResponseMessage
+            var contentResult = new ContentResult
             {
-                Content = new StringContent(GetPage(url.Title, Url.Content("~/api/images/" + url.Id), url.Description))
+                Content = GetPage(url.Title, Url.Content("~/api/images/" + url.Id), url.Description),
+                ContentType = "text/html"
             };
-            response.Content.Headers.ContentType = new MediaTypeHeaderValue("text/html");
-            return ResponseMessage(response);
+            return contentResult;
         }
 
         private string GetPage(string title, string thumbnailUrl, string description)

@@ -1,7 +1,9 @@
 ﻿using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
 {
+    /* HM TODO: bring this back
     public class ElasticSearchHelper : BaseNssmHelper
     {
         protected override string RelativePath => "ElasticSearch";
@@ -12,7 +14,6 @@ namespace IsraelHiking.DataAccess.ElasticSearch
         public ElasticSearchHelper(ILogger logger, IProcessHelper processHelper) : base(logger, processHelper)
         {
         }
-
-
     }
+    */
 }

@@ -4,11 +4,12 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Owin.FileSystems;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NSubstitute;
-using OsmSharp.Osm;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
+using OsmSharp.Complete;
 
 namespace IsraelHiking.API.Tests.Services.Osm
 {
@@ -88,11 +89,29 @@ namespace IsraelHiking.API.Tests.Services.Osm
         }
 
         [TestMethod]
+        public void UpdateData_NoOsmFile_ShouldStop()
+        {
+            _remoteFileSizeFetcherGateway.GetFileSize(Arg.Any<string>()).Returns(10);
+            var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.Length.Returns(1);
+            fileInfo.Exists.Returns(false);
+            _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
+            _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse());
+
+            _osmDataService.Initialize(string.Empty);
+            _osmDataService.UpdateData(OsmDataServiceOperations.GetOsmFile).Wait();
+
+            _remoteFileFetcherGateway.Received(1).GetFileContent(Arg.Any<string>());
+            _elasticSearchGateway.DidNotReceive().UpdateNamesData(Arg.Any<List<Feature>>());
+        }
+
+        [TestMethod]
         public void UpdateData_UpdateElasticSearchTwoNodes_ShouldUpdateGraphHopper()
         {
             _osmGeoJsonPreprocessorExecutor.Preprocess(Arg.Any<Dictionary<string, List<ICompleteOsmGeo>>>())
                 .Returns(new Dictionary<string, List<Feature>> { { "name", new List<Feature> { new Feature() } } });
             var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.Exists.Returns(true);
             fileInfo.PhysicalPath.Returns(Directory.GetCurrentDirectory());
             _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
 
@@ -110,6 +129,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var fileInfo = Substitute.For<IFileInfo>();
             fileInfo.PhysicalPath.Returns(Directory.GetCurrentDirectory());
             _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(fileInfo);
+            fileInfo.Exists.Returns(true);
 
             _osmDataService.Initialize(string.Empty);
             _osmDataService.UpdateData(OsmDataServiceOperations.UpdateGraphHopper).Wait();

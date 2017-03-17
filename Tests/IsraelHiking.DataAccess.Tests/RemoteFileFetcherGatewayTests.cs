@@ -1,7 +1,7 @@
 ﻿using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using IsraelHiking.DataAccessInterfaces;
 using NSubstitute;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess.Tests
 {

@@ -5,9 +5,8 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.DataAccessInterfaces;
 using Nest;
-using NetTopologySuite.IO;
-using Newtonsoft.Json;
 using Feature = NetTopologySuite.Features.Feature;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
 {
@@ -42,8 +41,8 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             }
             _elasticClient.CreateIndex(OSM_HIGHWAYS_INDEX,
                     c => c.Mappings(
-                        ms => ms.Map<object>(m =>
-                            m.Properties(ps => ps.GeoShape(g => g.Name("geometry")
+                        ms => ms.Map<Feature>(m =>
+                            m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
                                 .Tree(GeoTree.Geohash)
                                 .TreeLevels(10)
                                 .DistanceErrorPercentage(0.2))))));
@@ -62,12 +61,11 @@ namespace IsraelHiking.DataAccess.ElasticSearch
 
         public async Task UpdateData(List<Feature> features, string index)
         {
-            var writer = new GeoJsonWriter();
             var result = await _elasticClient.BulkAsync(bulk =>
             {
                 foreach (var feature in features)
                 {
-                    bulk.Index<object>(i => i.Index(index).Document(JsonConvert.DeserializeObject(writer.Write(feature))).Id(GetId(feature)));
+                    bulk.Index<Feature>(i => i.Index(index).Document(feature).Id(GetId(feature)));
                 }
                 return bulk;
             });
@@ -84,7 +82,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 return new List<Feature>();
             }
             var field = "properties." + fieldName;
-            var response = await _elasticClient.SearchAsync<object>(
+            var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Size(NUMBER_OF_RESULTS)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
@@ -102,7 +100,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                                         dmq => dmq.Match(
                                             m => m.Query(searchTerm)
                                                 .Boost(1.2)
-                                                .Field(new Field { Name = field })
+                                                .Field(new Field(field))
                                         )
                                     )
                                 )
@@ -110,8 +108,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                         )
                     )
             );
-            var reader = new GeoJsonReader();
-            return response.Documents.Select(d => reader.Read<Feature>(d.ToString())).ToList();
+            return response.Documents.ToList();
         }
 
         private string GetId(Feature feature)
@@ -121,7 +118,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
 
         public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)
         {
-            var response = await _elasticClient.SearchAsync<object>(
+            var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_HIGHWAYS_INDEX).Size(5000).Query(
                     q => q.GeoShapeEnvelope(
                         e => e.Coordinates(new List<GeoCoordinate>
@@ -133,8 +130,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                     )
                 )
             );
-            var reader = new GeoJsonReader();
-            return response.Documents.Select(d => reader.Read<Feature>(d.ToString())).ToList();
+            return response.Documents.ToList();
         }
     }
 }

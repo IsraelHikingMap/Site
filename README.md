@@ -17,6 +17,7 @@ The technology stack of this site is base on the following frameworks:
 * [GraphHopper](https://graphhopper.com/)
 * [Elastic Search and NEST](https://www.elastic.co/)
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite)
+* [OsmSharp](http://www.osmsharp.com/)
 
 
 # Architecture and folder stucture of UI
@@ -37,8 +38,9 @@ The architecture is based heavily on AngularJS:
 # Architecture of Server
 The architecture is based on layers
 * Contollers - the top most layer to catch all the requests
-* Services - other logic used by controllers
+* Services - responible for orchastrating executors
 * Converters - converters logic between types of geo structures
+* Executers - basic logical building blocks 
 * DataAccessInterfaces - a slim layer to decouple business logic from data access
 * DataAccess - database, file system and network request are processed in this layer
 * Updater will be discussed below.  
@@ -47,7 +49,7 @@ The architecture is based on layers
 In order to be able to build this site you'll need some tools:
 * Download and install the [LTS version of Node.js](https://nodejs.org/en/) for Windows.
   * Notice and save the node.js installation directory. It is usually ```C:\Program Files\nodejs\```
-* Download and install [Visual Studio community 2015](https://www.visualstudio.com/downloads) or later.
+* Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later.
 * From Visual Studio's _Tools &rarr; Options..._
   * Go to _Projects and Solutions &rarr; External Web Tools_.
   * Add the above node.js installation directory as a new directory.
@@ -57,11 +59,9 @@ In order to be able to build this site you'll need some tools:
 * From Visual Studio's _Tools &rarr; Extensions and Updates..._ 
   * Go to _Online_
   * Search for the following and install them: 
-    * Web Essentials 2015.3
+    * Web Essentials 2017
     * Chutzpah Test Adapter for the test explorer
     * Chutzpah Test Runner Contet Menu Extension
-    * Power Shell Tools for visual studio 2015
-* Download and install the latest [TypeScript for Visual Studio 2015](https://www.microsoft.com/en-us/download/details.aspx?id=48593)
 
 # Setup the server
 In order to be able to make the server work a few prerequisits are needed:

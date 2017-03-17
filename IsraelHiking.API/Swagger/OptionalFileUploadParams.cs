@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Web.Http.Description;
-using Swashbuckle.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace IsraelHiking.API.Swagger
 {
@@ -9,25 +9,19 @@ namespace IsraelHiking.API.Swagger
     /// </summary>
     public class OptionalFileUploadParams : IOperationFilter
     {
-        /// <summary>
-        /// Adds the file upload parameter - this should be used as an attribute to a API call
-        /// </summary>
-        /// <param name="operation"></param>
-        /// <param name="schemaRegistry"></param>
-        /// <param name="apiDescription"></param>
-        public void Apply(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
+        public void Apply(Operation operation, OperationFilterContext context)
         {
-            operation.consumes.Add("application/form-data");
-            if (operation.parameters == null)
+            operation.Consumes.Add("application/form-data");
+            if (operation.Parameters == null)
             {
-                operation.parameters = new List<Parameter>();
+                operation.Parameters = new List<IParameter>();
             }
-            operation.parameters.Add(new Parameter
+            operation.Parameters.Add(new BodyParameter
             {
-                name = "file",
-                @in = "formData",
-                required = false,
-                type = "file"
+                Name = "file",
+                In = "formData",
+                Required = false,
+                // type file?
             });
         }
     }

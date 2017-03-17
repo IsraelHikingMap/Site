@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -9,16 +9,16 @@ namespace IsraelHiking.DataAccess.Database
 {
     public class IsraelHikingRepository : IIsraelHikingRepository
     {
-        private IIsraelHikingDbContext _dbContext;
+        private IsraelHikingDbContext _dbContext;
 
-        public IsraelHikingRepository(IIsraelHikingDbContext context)
+        public IsraelHikingRepository(IsraelHikingDbContext context)
         {
             _dbContext = context;
         }
 
         public Task<SiteUrl> GetUrlById(string id)
         {
-            return _dbContext.SiteUrls.FirstOrDefaultAsync(s => s.Id == id);
+            return _dbContext.SiteUrls.FindAsync(id);
         }
 
         public async Task<List<SiteUrl>> GetUrlsByUser(string osmUserId)
@@ -47,7 +47,7 @@ namespace IsraelHiking.DataAccess.Database
 
         public async Task Update(object obj)
         {
-            _dbContext.MarkAsModified(obj);
+            _dbContext.Entry(obj).State = EntityState.Modified;
             await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 

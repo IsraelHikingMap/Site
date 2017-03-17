@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess
 {

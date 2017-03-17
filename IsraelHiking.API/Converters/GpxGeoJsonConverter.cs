@@ -176,8 +176,10 @@ namespace IsraelHiking.API.Converters
 
         private IAttributesTable CreateNameProperties(string name)
         {
-            var table = new AttributesTable();
-            table.AddAttribute(NAME, name);
+            var table = new AttributesTable
+            {
+                { NAME, name }
+            };
             return table;
         }
 

@@ -13,8 +13,8 @@ namespace IsraelHiking.DataAccess.Tests.GraphHopper
         public void Initialize_ShouldAddService()
         {
             var logger = new TraceLogger();
-            GraphHopperHelper init = new GraphHopperHelper(logger, new ProcessHelper(logger));
-            init.Initialize(Path.GetDirectoryName(Assembly.GetAssembly(typeof(GraphHopperHelperTests)).Location));
+            //GraphHopperHelper init = new GraphHopperHelper(logger, new ProcessHelper(logger));
+            //init.Initialize(Path.GetDirectoryName(Assembly.GetAssembly(typeof(GraphHopperHelperTests)).Location));
         }
     }
 }

@@ -10,6 +10,8 @@ using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
 using NetTopologySuite.Simplify;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
 {

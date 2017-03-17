@@ -8,8 +8,10 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using OsmSharp.Collections.Tags;
-using OsmSharp.Osm;
+using OsmSharp;
+using OsmSharp.Complete;
+using OsmSharp.Tags;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services.Osm
 {
@@ -68,7 +70,7 @@ namespace IsraelHiking.API.Services.Osm
                     if (closestCompleteWay == null)
                     {
                         // no close highways, adding a new node
-                        nodeIds.Add(await _osmGateway.CreateNode(changesetId, Node.Create(0, coordinate.Y, coordinate.X)));
+                        nodeIds.Add(await _osmGateway.CreateNode(changesetId, new Node { Id = 0, Latitude = coordinate.Y, Longitude = coordinate.X }));
                         continue;
                     }
                     var itmPoint = GetItmCoordinate(coordinate);
@@ -87,7 +89,7 @@ namespace IsraelHiking.API.Services.Osm
                         continue;
                     }
                     // need to add a new node to existing highway
-                    var newNodeId = await _osmGateway.CreateNode(changesetId, Node.Create(0, coordinate.Y, coordinate.X));
+                    var newNodeId = await _osmGateway.CreateNode(changesetId, new Node { Id = 0, Latitude = coordinate.Y, Longitude = coordinate.X });
                     nodeIds.Add(newNodeId);
                     var simpleWay = AddNewNodeToExistingWay(newNodeId, closestCompleteWay, closestItmHighway, indexOnWay, itmPoint);
                     await _osmGateway.UpdateWay(changesetId, simpleWay);
@@ -137,8 +139,13 @@ namespace IsraelHiking.API.Services.Osm
                     indexToInsert = indexOnWay + 1;
                 }
             }
-            var simpleWay = (Way)closestCompleteWay.ToSimple();
-            simpleWay.Nodes.Insert(indexToInsert, long.Parse(nodeId));
+            // HM TODO: use the following instead.
+            //var simpleWay = (Way)closestCompleteWay.ToSimple();
+
+            var simpleWay = new Way { Tags = closestCompleteWay.Tags, Id = closestCompleteWay.Id, Version = closestCompleteWay.Version, Nodes = closestCompleteWay.Nodes.Select(n => n.Id.Value).ToArray() };
+            var updatedList = simpleWay.Nodes.ToList();
+            updatedList.Insert(indexToInsert, long.Parse(nodeId));
+            simpleWay.Nodes = updatedList.ToArray();
             return simpleWay;
         }
 
@@ -199,7 +206,7 @@ namespace IsraelHiking.API.Services.Osm
 
         private async Task<string> AddWayToOsm(IEnumerable<string> nodeIds, Dictionary<string, string> tags, string chagesetId)
         {
-            var way = Way.Create(0, nodeIds.Select(long.Parse).ToArray());
+            var way = new Way { Id = 0, Nodes = nodeIds.Select(long.Parse).ToArray() };
             way.Tags = new TagsCollection(tags)
             {
                 {"note", "Added by IHM algorithm - fixing maybe needed"}

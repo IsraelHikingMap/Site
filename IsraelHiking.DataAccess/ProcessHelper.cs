@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess
 {
@@ -28,7 +29,7 @@ namespace IsraelHiking.DataAccess
                     FileName = processToRun,
                     Arguments = cmdArguments,
                     WorkingDirectory = workingDirectory,
-                    WindowStyle = ProcessWindowStyle.Hidden,
+                    CreateNoWindow = true,
                 };
                 process.Start();
                 process.WaitForExit(timeOutInMilliseconds);

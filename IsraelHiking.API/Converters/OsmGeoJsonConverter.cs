@@ -3,8 +3,9 @@ using System.Linq;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using OsmSharp.Collections.Tags;
-using OsmSharp.Osm;
+using OsmSharp.Complete;
+using OsmSharp;
+using OsmSharp.Tags;
 
 namespace IsraelHiking.API.Converters
 {
@@ -23,12 +24,12 @@ namespace IsraelHiking.API.Converters
             }
             switch (completeOsmGeo.Type)
             {
-                case CompleteOsmType.Node:
+                case OsmGeoType.Node:
                     var node = completeOsmGeo as Node;
                     return new Feature(new Point(ConvertNode(node)), ConvertTags(node.Tags, node.Id.Value));
-                case CompleteOsmType.Way:
+                case OsmGeoType.Way:
                     var way = completeOsmGeo as CompleteWay;
-                    if (way == null || way.Nodes.Count <= 1)
+                    if (way == null || way.Nodes.Count() <= 1)
                     {
                         // can't convert a way with 1 coordinates to geojson.
                         return null;
@@ -36,7 +37,7 @@ namespace IsraelHiking.API.Converters
                     var properties = ConvertTags(way.Tags, way.Id);
                     var geometry = GetGeometryFromNodes(way.Nodes);
                     return new Feature(geometry, properties);
-                case CompleteOsmType.Relation:
+                case OsmGeoType.Relation:
                     return ConvertRelation(completeOsmGeo as CompleteRelation);
                 default:
                     return null;
@@ -45,12 +46,12 @@ namespace IsraelHiking.API.Converters
 
         private IAttributesTable ConvertTags(TagsCollectionBase tags, long id)
         {
-            var properties = tags.ToStringObjectDictionary();
-            properties.Add("osm_id", id);
+            var properties = tags.ToDictionary(t => t.Key, t => t.Value);
+            properties.Add("osm_id", id.ToString());
             var table = new AttributesTable();
             foreach (var key in properties.Keys)
             {
-                table.AddAttribute(key, properties[key]);
+                table.Add(key, properties[key]);
             }
             return table;
         }
@@ -67,7 +68,7 @@ namespace IsraelHiking.API.Converters
             while (waysToGroup.Any())
             {
                 var wayToGroup = waysToGroup.FirstOrDefault(w =>
-                    nodesGroups.Any(g => CanBeLinked(w.Nodes, g)));
+                    nodesGroups.Any(g => CanBeLinked(w.Nodes, g.ToArray())));
 
                 if (wayToGroup == null)
                 {
@@ -77,7 +78,7 @@ namespace IsraelHiking.API.Converters
                 }
                 var currentNodes = new List<Node>(wayToGroup.Nodes);
                 waysToGroup.Remove(wayToGroup);
-                var group = nodesGroups.First(g => CanBeLinked(currentNodes, g));
+                var group = nodesGroups.First(g => CanBeLinked(currentNodes.ToArray(), g.ToArray()));
                 if (currentNodes.First().Id == group.First().Id || currentNodes.Last().Id == group.Last().Id)
                 {
                     currentNodes.Reverse(); // direction of this way is incompatible with other ways.
@@ -91,10 +92,10 @@ namespace IsraelHiking.API.Converters
                 currentNodes.Remove(currentNodes.Last());
                 group.InsertRange(0, currentNodes);
             }
-            return nodesGroups.Select(GetGeometryFromNodes).ToList();
+            return nodesGroups.Select(g => GetGeometryFromNodes(g.ToArray())).ToList();
         }
 
-        private bool CanBeLinked(List<Node> nodes1, List<Node> nodes2)
+        private bool CanBeLinked(Node[] nodes1, Node[] nodes2)
         {
             return nodes1.Last().Id == nodes2.First().Id
                    || nodes1.First().Id == nodes2.Last().Id
@@ -159,8 +160,9 @@ namespace IsraelHiking.API.Converters
         private static Dictionary<string, List<CompleteWay>> GetAllWaysByRole(CompleteRelation relation)
         {
             var dicionary = relation.Members.GroupBy(m => m.Role ?? string.Empty)
-                .ToDictionary(g => g.Key, g => g.Select(k => k.Member).OfType<CompleteWay>().ToList());
-            if (relation.Members.All(m => m.Member.Type != CompleteOsmType.Relation))
+                .ToDictionary(g => g.Key, g => g.Select(k => k.Member)
+                .OfType<CompleteWay>().ToList());
+            if (relation.Members.All(m => m.Member.Type != OsmGeoType.Relation))
             {
                 return dicionary;
             }
@@ -183,7 +185,7 @@ namespace IsraelHiking.API.Converters
             return dicionary;
         }
 
-        private bool IsMultipolygon(CompleteOsmBase relation)
+        private bool IsMultipolygon(ICompleteOsmGeo relation)
         {
             if (relation.Tags.ContainsKey(BOUNDARY))
             {
@@ -196,10 +198,10 @@ namespace IsraelHiking.API.Converters
             return relation.Tags[TYPE] == MULTIPOLYGON || relation.Tags[TYPE] == BOUNDARY;
         }
 
-        private IGeometry GetGeometryFromNodes(List<Node> nodes)
+        private IGeometry GetGeometryFromNodes(Node[] nodes)
         {
             var coordinates = nodes.Select(ConvertNode).ToArray();
-            return nodes.First().Id == nodes.Last().Id && nodes.Count >= 4
+            return nodes.First().Id == nodes.Last().Id && nodes.Length >= 4
                         ? new Polygon(new LinearRing(coordinates)) as IGeometry
                         : new LineString(coordinates);
         }

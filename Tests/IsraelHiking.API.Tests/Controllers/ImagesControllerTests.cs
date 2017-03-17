@@ -1,11 +1,11 @@
-﻿using System.Web.Http.Results;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using NSubstitute;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -42,7 +42,7 @@ namespace IsraelHiking.API.Tests.Controllers
             };
             _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
 
-            var results = _controller.GetImage(siteUrl.Id).Result as ResponseMessageResult;
+            var results = _controller.GetImage(siteUrl.Id).Result as FileContentResult;
 
             Assert.IsNotNull(results);
         }

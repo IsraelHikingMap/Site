@@ -8,6 +8,10 @@ using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
 using IsraelHiking.Common;
 using NetTopologySuite.Triangulate.QuadEdge;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.FileProviders;
+using System.Linq;
 
 namespace IsraelHiking.DataAccess
 {
@@ -31,18 +35,17 @@ namespace IsraelHiking.DataAccess
 
         public Task Initialize()
         {
-            var elevationCacheFolder = Path.Combine(_options.BinariesFolder, ELEVATION_CACHE);
-            if (Directory.Exists(elevationCacheFolder) == false)
+            if (_fileProvider.GetDirectoryContents(ELEVATION_CACHE).Any() == false)
             {
-                _logger.LogError($"!!! The folder: {elevationCacheFolder} does not exists, please change the BinariesFolder key in the configuration file !!!");
-                return Task.Run(() => { });
+                _logger.LogError($"!!! The folder: {ELEVATION_CACHE} does not exists, please change the BinariesFolder key in the configuration file !!!");
+                return Task.Run(() => { throw new Exception(_fileProvider.GetFileInfo(ELEVATION_CACHE).PhysicalPath); });
             }
-            var hgtZipFiles = Directory.GetFiles(elevationCacheFolder, "*.hgt.zip");
-            _logger.LogDebug("Found " + hgtZipFiles.Length + " files in: " + elevationCacheFolder);
+            var hgtZipFiles = _fileProvider.GetDirectoryContents(ELEVATION_CACHE);
+            _logger.LogDebug("Found " + hgtZipFiles.Count() + " files in: " + _fileProvider.GetFileInfo(ELEVATION_CACHE).PhysicalPath);
             foreach (var hgtZipFile in hgtZipFiles)
             {
-                var bottomLeftLat = int.Parse(Path.GetFileName(hgtZipFile).Substring(1, 2));
-                var bottomLeftLng = int.Parse(Path.GetFileName(hgtZipFile).Substring(4, 3));
+                var bottomLeftLat = int.Parse(hgtZipFile.Name.Substring(1, 2));
+                var bottomLeftLng = int.Parse(hgtZipFile.Name.Substring(4, 3));
                 var key = new Coordinate(bottomLeftLng, bottomLeftLat);
 
                 _initializationTaskPerLatLng[key] = Task.Run(() =>
@@ -99,10 +102,10 @@ namespace IsraelHiking.DataAccess
             return Vertex.InterpolateZ(new Coordinate(lng, lat), coordinate1, coordinate2, coordinate3);
         }
 
-        private byte[] GetByteArrayFromZip(string hgtZipFilePath)
+        private byte[] GetByteArrayFromZip(IFileInfo hgtZipFileInfo)
         {
             using (var memoryStream = new MemoryStream())
-            using (var hgtStream = _fileProvider.GetFileInfo(hgtZipFilePath).CreateReadStream())
+            using (var hgtStream = hgtZipFileInfo.CreateReadStream())
             {
                 var hgtZipFile = new ZipFile(hgtStream);
                 foreach (ZipEntry zipEntry in hgtZipFile)
@@ -116,7 +119,7 @@ namespace IsraelHiking.DataAccess
                     return memoryStream.ToArray();
                 }
             }
-            throw new Exception("Unable to find hgt file in : " + hgtZipFilePath);
+            throw new Exception("Unable to find hgt file in : " + hgtZipFileInfo.Name);
         }
     }
 }

@@ -11,6 +11,6 @@
     "gulp-less": "*",
     "main-bower-files": "*",
     "rimraf": "*",
-    "gulp-angular-gettext":  "*"
+    "gulp-angular-gettext": "*"
   }
 }

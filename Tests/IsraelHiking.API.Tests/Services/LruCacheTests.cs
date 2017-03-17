@@ -4,6 +4,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Tests.Services
 {

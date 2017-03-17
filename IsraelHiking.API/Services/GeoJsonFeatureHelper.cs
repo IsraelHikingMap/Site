@@ -6,6 +6,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
 {
@@ -27,7 +28,6 @@ namespace IsraelHiking.API.Services
         }
     }
 
-    [ExcludeFromCodeCoverage]
     public class GeoJsonFeatureHelper : IGeoJsonFeatureHelper
     {
         private readonly List<PropertiesData> _relations;
@@ -111,7 +111,7 @@ namespace IsraelHiking.API.Services
         {
             return attributesTable.GetNames().Select(key => priorityData.FirstOrDefault(p =>
             {
-                if (key.Equals(p.Key, StringComparison.InvariantCultureIgnoreCase) == false)
+                if (key.Equals(p.Key, StringComparison.OrdinalIgnoreCase) == false)
                 {
                     return false;
                 }

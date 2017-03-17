@@ -1,12 +1,14 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.ServiceProcess;
+//using System.ServiceProcess;
 using System.Threading.Tasks;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess
 {
+    /* HM TODO: bring this back
     public abstract class BaseNssmHelper : INssmHelper
     {
         private const string NSSM_EXE = "nssm.exe";
@@ -101,4 +103,5 @@ namespace IsraelHiking.DataAccess
 
 
     }
+    */
 }

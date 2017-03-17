@@ -1,11 +1,10 @@
-﻿using System.Net.Http;
-using System.Web.Http.Results;
-using System.Web.Http.Routing;
-using IsraelHiking.API.Controllers;
+﻿using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -15,18 +14,16 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetHtml_ShouldReturnIt()
         {
-            var urlHelper = Substitute.For<UrlHelper>();
+            var urlHelper = Substitute.For<IUrlHelper>();
             urlHelper.Content(Arg.Any<string>()).Returns(x => x[0]);
             var repository = Substitute.For<IIsraelHikingRepository>();
             repository.GetUrlById(Arg.Any<string>()).Returns(new SiteUrl { Title = "somthing with <>\""});
             var controller = new OpenGraphController(repository, Substitute.For<ILogger>()) { Url = urlHelper };
 
-            var response = controller.GetHtml("42").Result as ResponseMessageResult;
+            var response = controller.GetHtml("42").Result as ContentResult;
 
             Assert.IsNotNull(response);
-            var content = response.Response.Content as StringContent;
-            Assert.IsNotNull(content);
-            var pageHtml = content.ReadAsStringAsync().Result;
+            var pageHtml = response.Content;
             Assert.IsTrue(pageHtml.Contains("api/images"));
             Assert.IsTrue(pageHtml.Contains("&gt;"));
             Assert.IsTrue(pageHtml.Contains("&lt;"));

@@ -266,12 +266,13 @@ namespace IsraelHiking.API.Tests.Services
         public void ConvertKmzToDataContainer_ShouldConvertToDataContainer()
         {
             var zipfileStream = new MemoryStream();
-            var zipOutputStream = new ZipOutputStream(zipfileStream);
-            ZipEntry entry = new ZipEntry("file.kml");
-            zipOutputStream.PutNextEntry(entry);
-            new MemoryStream(_randomBytes).CopyTo(zipOutputStream);
-            zipOutputStream.CloseEntry();
-            zipOutputStream.Close();
+            using (var zipOutputStream = new ZipOutputStream(zipfileStream))
+            {
+                ZipEntry entry = new ZipEntry("file.kml");
+                zipOutputStream.PutNextEntry(entry);
+                new MemoryStream(_randomBytes).CopyTo(zipOutputStream);
+                zipOutputStream.CloseEntry();
+            }
 
             _gpsBabelGateway.ConvertFileFromat(Arg.Is<byte[]>(b => b.AsEnumerable().SequenceEqual(_randomBytes)), Arg.Any<string>(), Arg.Any<string>()).Returns(_simpleGpx.ToBytes());
 

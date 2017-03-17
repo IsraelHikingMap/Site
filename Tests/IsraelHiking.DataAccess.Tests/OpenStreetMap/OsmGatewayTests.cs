@@ -4,8 +4,10 @@ using IsraelHiking.DataAccess.OpenStreetMap;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
-using OsmSharp.Collections.Tags;
-using OsmSharp.Osm;
+using OsmSharp;
+using Microsoft.Extensions.Options;
+using OsmSharp.Tags;
+using System.Linq;
 
 namespace IsraelHiking.DataAccess.Tests.OpenStreetMap
 {
@@ -51,7 +53,7 @@ namespace IsraelHiking.DataAccess.Tests.OpenStreetMap
         [Ignore]
         public void AddNodeToOsm()
         {
-            var node = Node.Create(0, 31.78324, 34.71752);
+            var node = new Node { Id = 0, Latitude = 31.78324, Longitude = 34.71752 };
             node.Tags = new TagsCollection
             {
                 {"natural", "spring"},
@@ -67,17 +69,17 @@ namespace IsraelHiking.DataAccess.Tests.OpenStreetMap
         [Ignore]
         public void AddWayToOsm()
         {
-            var node1 = Node.Create(0, 31.78324, 34.71752);
+            var node1 = new Node { Id = 0, Latitude = 31.78324, Longitude = 34.71752 };
             node1.Tags = new TagsCollection
             {
                 {"natural", "spring"},
                 { "name", "IHM node test"}
             };
-            var node2 = Node.Create(0, 31.78354, 34.71688);
+            var node2 = new Node { Id = 0, Latitude = 31.78354, Longitude = 34.71688 };
             var id = _gateway.CreateChangeset("").Result;
             var nodeId1 = _gateway.CreateNode(id, node1).Result;
             var nodeId2 = _gateway.CreateNode(id, node2).Result;
-            var way = Way.Create(0, long.Parse(nodeId1), long.Parse(nodeId2));
+            var way = new Way { Id = 0, Nodes = new[] { long.Parse(nodeId1), long.Parse(nodeId2) } };
             way.Tags = new TagsCollection
             {
                 {"highway", "track"},
@@ -102,11 +104,13 @@ namespace IsraelHiking.DataAccess.Tests.OpenStreetMap
         {
             var id = _gateway.CreateChangeset("test - add middle node in way").Result;
             var way = _gateway.GetCompleteWay("4302709797").Result;
-            var simpleWay = (Way)way.ToSimple();
-            simpleWay.Nodes.Insert(1, 4305934441);
+            //var simpleWay = (Way)way.ToSimple();
+            var simpleWay = new Way { Tags = way.Tags, Id = way.Id, Version = way.Version };
+            var list = way.Nodes.Select(n => n.Id.Value).ToList();
+            list.Insert(1, 4305934441);
+            simpleWay.Nodes = list.ToArray();
             _gateway.UpdateWay(id, simpleWay).Wait();
             _gateway.CloseChangeset(id).Wait();
-
         }
 
         [TestMethod]

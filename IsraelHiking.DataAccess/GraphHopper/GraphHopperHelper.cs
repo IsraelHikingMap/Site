@@ -3,9 +3,11 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess.GraphHopper
 {
+    /* HM TODO: bring this back
     public class GraphHopperHelper : BaseNssmHelper, IGraphHopperHelper
     {
         private const string GH_NEW_CACHE_FOLDER = "israel-and-palestine-latest.osm-gh-new";
@@ -74,4 +76,5 @@ namespace IsraelHiking.DataAccess.GraphHopper
             }
         }
     }
+    */
 }

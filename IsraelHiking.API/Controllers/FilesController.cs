@@ -1,21 +1,21 @@
 ﻿using IsraelHiking.DataAccessInterfaces;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Description;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Services;
-using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
-using Swashbuckle.Swagger.Annotations;
+using Microsoft.AspNetCore.Mvc;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using System.IO;
 
 namespace IsraelHiking.API.Controllers
 {
     /// <summary>
     /// This controller allows fetching of remote files, opening of files and converting files
     /// </summary>
-    public class FilesController : ApiController
+    [Route("api/[controller]")]
+    public class FilesController : Controller
     {
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
@@ -44,6 +44,7 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="url">The url to fetch the file from</param>
         /// <returns>A data container after convertion</returns>
+        [HttpGet]
         // GET api/files?url=http://jeeptrip.co.il/routes/pd6bccre.twl
         public async Task<DataContainer> GetRemoteFile(string url)
         {
@@ -75,22 +76,20 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <returns>A <see cref="DataContainer"/> after conversion of the file uploaded</returns>
         [HttpPost]
-        [Route("api/Files/open")]
-        [ResponseType(typeof(DataContainer))]
-        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
-        public async Task<IHttpActionResult> PostOpenFile()
+        [Route("open")]
+        public async Task<IActionResult> PostOpenFile(ICollection<IFormFile> files)
         {
-            var streamProvider = new MultipartMemoryStreamProvider();
-            var multipartFileStreamProvider = await Request.Content.ReadAsMultipartAsync(streamProvider);
-
-            if (multipartFileStreamProvider.Contents.Count == 0)
+            if (files.Count == 0)
             {
                 return BadRequest();
             }
-            var fileName = streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('"');
-            var content = await streamProvider.Contents.First().ReadAsByteArrayAsync();
-            var dataContainer = await _dataContainerConverterService.ToDataContainer(content, fileName);
-            return Ok(dataContainer);
+            using (var memoryStream = new MemoryStream())
+            {
+                var fileName = files.First().FileName;
+                await files.First().CopyToAsync(memoryStream);
+                var dataContainer = await _dataContainerConverterService.ToDataContainer(memoryStream.ToArray(), fileName);
+                return Ok(dataContainer);
+            }
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿/// <reference path="../../../israelhiking.web/services/sidebarservice.ts" />
+﻿/// <reference path="../../../israelhiking.web/wwwroot/services/sidebarservice.ts" />
 
 namespace IsraelHiking.Tests.Services {
     describe("Sidebar Statistics Service", () => {

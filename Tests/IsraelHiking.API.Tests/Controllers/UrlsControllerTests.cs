@@ -1,9 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Security.Claims;
-using System.Security.Principal;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http.Results;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
@@ -11,6 +8,8 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using NSubstitute;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -23,10 +22,13 @@ namespace IsraelHiking.API.Tests.Controllers
 
         private void SetupIdentity(string osmUserId = "42")
         {
-            var identity = new GenericIdentity(osmUserId);
-            identity.AddClaim(new Claim(ClaimTypes.Name, osmUserId));
-
-            Thread.CurrentPrincipal = new GenericPrincipal(identity, new string[0]);
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
+                    new Claim(ClaimTypes.Name, osmUserId)
+            }));
+            _controller.ControllerContext = new ControllerContext()
+            {
+                HttpContext = new DefaultHttpContext { User = user }
+            };
         }
 
         [TestInitialize]
@@ -49,12 +51,12 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetSiteUrl_ItemInDatabase_ShouldReturnIt()
         {
             var id = "someId";
-            _israelHikingRepository.GetUrlById(id).Returns(new SiteUrl {Id = id});
+            _israelHikingRepository.GetUrlById(id).Returns(new SiteUrl { Id = id });
 
-            var results = _controller.GetSiteUrl(id).Result as OkNegotiatedContentResult<SiteUrl>;
+            var results = _controller.GetSiteUrl(id).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
-            var content = results.Content;
+            var content = results.Value as SiteUrl;
             Assert.IsNotNull(results);
             Assert.AreEqual(id, content.Id);
         }
@@ -63,39 +65,39 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetSiteUrl_ItemInDatabase_ShouldReturnItAccordingToFromat()
         {
             var id = "someId";
-            var bytes = new byte[] {1};
+            var bytes = new byte[] { 1 };
             _israelHikingRepository.GetUrlById(id).Returns(new SiteUrl { Id = id, JsonData = JsonConvert.SerializeObject(new DataContainer()) });
             _containerConverterService.ToAnyFormat(Arg.Any<DataContainer>(), "gpx").Returns(bytes);
 
-            var results = _controller.GetSiteUrl(id, "gpx").Result as ResponseMessageResult;
+            var results = _controller.GetSiteUrl(id, "gpx").Result as FileContentResult;
 
             Assert.IsNotNull(results);
-            var content = results.Response.Content;
+            var content = results.FileContents;
             Assert.IsNotNull(content);
-            Assert.AreEqual(bytes.Length, content.ReadAsByteArrayAsync().Result.Length);
+            Assert.AreEqual(bytes.Length, content.Length);
         }
 
         [TestMethod]
         public void GetSiteUrlForUser_ItemInDatabase_ShouldReturnItAccordingToFromat()
         {
             var id = "someId";
-            var list = new List<SiteUrl> {new SiteUrl {OsmUserId = id}};
+            var list = new List<SiteUrl> { new SiteUrl { OsmUserId = id } };
             SetupIdentity(id);
             _israelHikingRepository.GetUrlsByUser(id).Returns(list);
 
-            var results = _controller.GetSiteUrlForUser().Result as OkNegotiatedContentResult<List<SiteUrl>>;
+            var results = _controller.GetSiteUrlForUser().Result as OkObjectResult;
 
             Assert.IsNotNull(results);
-            Assert.AreEqual(list.Count, results.Content.Count);
+            Assert.AreEqual(list.Count, (results.Value as List<SiteUrl>).Count);
         }
 
         [TestMethod]
         public void PostSiteUrl_IncorrectUser_ShouldReturnBadRequest()
         {
-            var url = new SiteUrl {OsmUserId = "1"};
+            var url = new SiteUrl { OsmUserId = "1" };
             SetupIdentity("2");
 
-            var results = _controller.PostSiteUrl(url).Result as BadRequestErrorMessageResult;
+            var results = _controller.PostSiteUrl(url).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -107,12 +109,12 @@ namespace IsraelHiking.API.Tests.Controllers
             queue.Enqueue(new SiteUrl());
             queue.Enqueue(null);
             _israelHikingRepository.GetUrlById(Arg.Any<string>())
-                .Returns(x => Task.FromResult(new SiteUrl()), x => Task.FromResult((SiteUrl) null));
+                .Returns(x => Task.FromResult(new SiteUrl()), x => Task.FromResult((SiteUrl)null));
 
-            var results = _controller.PostSiteUrl(new SiteUrl()).Result as OkNegotiatedContentResult<SiteUrl>;
+            var results = _controller.PostSiteUrl(new SiteUrl()).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
-            var content = results.Content;
+            var content = results.Value as SiteUrl;
             Assert.IsNotNull(results);
             Assert.AreEqual(10, content.Id.Length);
         }
@@ -136,7 +138,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
             SetupIdentity("1");
 
-            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as BadRequestErrorMessageResult;
+            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
             _israelHikingRepository.DidNotReceive().Update(Arg.Any<SiteUrl>());
@@ -149,7 +151,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
             SetupIdentity(siteUrl.OsmUserId);
 
-            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as OkNegotiatedContentResult<SiteUrl>;
+            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
             _israelHikingRepository.Received(1).Update(Arg.Any<SiteUrl>());

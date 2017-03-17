@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
-using OsmSharp.Osm;
+using OsmSharp.Complete;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
