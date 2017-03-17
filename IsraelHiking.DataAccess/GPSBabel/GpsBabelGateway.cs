@@ -2,6 +2,8 @@
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.DataAccess.GPSBabel
 {

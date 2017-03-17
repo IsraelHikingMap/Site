@@ -2,29 +2,29 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Description;
-using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
-using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using Swashbuckle.Swagger.Annotations;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using GeoAPI.CoordinateSystems.Transformations;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Controllers
 {
     /// <summary>
     /// This controller is responsible for all OSM related requests
     /// </summary>
-    public class OsmController : ApiController
+    [Route("api/[controller]")]
+    public class OsmController : Controller
     {
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IDataContainerConverterService _dataContainerConverterService;
@@ -75,6 +75,8 @@ namespace IsraelHiking.API.Controllers
         /// <param name="northEast">Bounding box's north-east coordinates</param>
         /// <param name="southWest">Bounding box's south-west coordinates</param>
         /// <returns>A list of features in GeoJSON format</returns>
+        // GET api/osm?northeast=1.2,3.4&southwest=5.6,7.8
+        [HttpGet]
         public async Task<List<Feature>> GetHighways(string northEast, string southWest)
         {
             return await _elasticSearchGateway.GetHighways(new Coordinate().FromLatLng(northEast), new Coordinate().FromLatLng(southWest));
@@ -85,7 +87,7 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <returns>The OSM server configurations</returns>
         [HttpGet]
-        [Route("api/osm/configuration")]
+        [Route("configuration")]
         public OsmConfiguraionData GetConfigurations()
         {
             return _options.OsmConfiguraion;
@@ -97,6 +99,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="feature"></param>
         /// <returns></returns>
         [Authorize]
+        [HttpPut]
         public async Task PutGpsTraceIntoOsm(Feature feature)
         {
             var tags = feature.Attributes.GetNames().ToDictionary(n => n, n => feature.Attributes[n].ToString());
@@ -108,11 +111,10 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="url">The url to fetch the file from - optional, use file upload if not provided</param>
         /// <returns></returns>
-        [SwaggerOperationFilter(typeof(OptionalFileUploadParams))]
-        [ResponseType(typeof(FeatureCollection))]
-        public async Task<IHttpActionResult> PostGpsTrace(string url = "")
+        [HttpPost]
+        public async Task<IActionResult> PostGpsTrace([FromBody]ICollection<IFormFile> files, [FromQuery]string url = "")
         {
-            var fileFetcherGatewayResponse = await GetFile(url);
+            var fileFetcherGatewayResponse = await GetFile(url, files);
             if (fileFetcherGatewayResponse == null)
             {
                 return BadRequest("Url is not provided or the file is empty... " + url);
@@ -127,10 +129,10 @@ namespace IsraelHiking.API.Controllers
             }
             var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
             var attributesTable = new AttributesTable();
-            attributesTable.AddAttribute("highway", highwayType);
+            attributesTable.Add("highway", highwayType);
             if (string.IsNullOrEmpty(url) == false)
             {
-                attributesTable.AddAttribute("source", url);
+                attributesTable.Add("source", url);
             }
             var features = manipulatedItmLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
             return Ok(new FeatureCollection(new Collection<IFeature>(features)));
@@ -141,35 +143,36 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <returns></returns>
         [Authorize]
-        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
-        [Route("api/osm/trace")]
-        public async Task<IHttpActionResult> PostUploadGpsTrace()
+        [Route("trace")]
+        [HttpPost]
+        public async Task<IActionResult> PostUploadGpsTrace(ICollection<IFormFile> files)
         {
-            var response = await GetFile(string.Empty);
+            var response = await GetFile(string.Empty, files);
             var gateway = _httpGatewayFactory.CreateOsmGateway(_cache.Get(User.Identity.Name));
             await gateway.UploadFile(response.FileName, new MemoryStream(response.Content));
             return Ok();
         }
 
-        private async Task<RemoteFileFetcherGatewayResponse> GetFile(string url)
+        private async Task<RemoteFileFetcherGatewayResponse> GetFile(string url, ICollection<IFormFile> files)
         {
             if (string.IsNullOrEmpty(url) == false)
             {
                 var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(_cache.Get(User.Identity.Name));
                 return await fetcher.GetFileContent(url);
             }
-            var streamProvider = new MultipartMemoryStreamProvider();
-            var multipartFileStreamProvider = await Request.Content.ReadAsMultipartAsync(streamProvider);
-
-            if (multipartFileStreamProvider?.Contents?.FirstOrDefault() == null)
+            if (files == null || !files.Any())
             {
                 return null;
             }
-            return new RemoteFileFetcherGatewayResponse
+            using (var memeoryStream = new MemoryStream())
             {
-                Content = await streamProvider.Contents.First().ReadAsByteArrayAsync(),
-                FileName = streamProvider.Contents.First().Headers.ContentDisposition.FileName.Trim('"')
-            };
+                await files.First().CopyToAsync(memeoryStream);
+                return new RemoteFileFetcherGatewayResponse
+                {
+                    Content = memeoryStream.ToArray(),
+                    FileName = files.First().FileName
+                };
+            }
         }
 
         private string GetHighwayType(gpxType gpx)
@@ -227,9 +230,9 @@ namespace IsraelHiking.API.Controllers
 
         private LineString ToWgs84LineString(IEnumerable<Coordinate> coordinates)
         {
-            var cwgs84Coordinates = coordinates.Select(_itmWgs84MathTransform.Transform);
+            var wgs84Coordinates = coordinates.Select(_itmWgs84MathTransform.Transform);
             var nonDuplicates = new List<Coordinate>();
-            foreach (var coordinate in cwgs84Coordinates)
+            foreach (var coordinate in wgs84Coordinates)
             {
                 if (nonDuplicates.Count <= 0 || !nonDuplicates.Last().Equals2D(coordinate))
                 {

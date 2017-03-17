@@ -4,9 +4,9 @@ using System.Linq;
 using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.Simplify;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
 {

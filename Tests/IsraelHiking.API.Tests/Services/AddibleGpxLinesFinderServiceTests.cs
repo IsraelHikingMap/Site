@@ -10,6 +10,8 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.API.Tests.Services
 {

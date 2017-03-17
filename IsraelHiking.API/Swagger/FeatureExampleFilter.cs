@@ -1,10 +1,9 @@
-﻿using System;
-using GeoAPI.Geometries;
+﻿using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
 using Newtonsoft.Json;
-using Swashbuckle.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace IsraelHiking.API.Swagger
 {
@@ -13,29 +12,24 @@ namespace IsraelHiking.API.Swagger
     /// </summary>
     public class FeatureExampleFilter : ISchemaFilter
     {
-        /// <summary>
-        /// Checks and updates the schema if the relevant type is found
-        /// </summary>
-        /// <param name="schema">The schema</param>
-        /// <param name="schemaRegistry">The schema registry</param>
-        /// <param name="type">The type</param>
-        public void Apply(Schema schema, SchemaRegistry schemaRegistry, Type type)
+        public void Apply(Schema model, SchemaFilterContext context)
         {
-            if (type != typeof(Feature))
+            if (context.SystemType != typeof(Feature))
             {
                 return;
             }
-            var writer = new GeoJsonWriter();
-            var exampleFeatureString = writer.Write(
-                new Feature(new LineString(new[]
-                    {
-                        new Coordinate(1, 2),
-                        new Coordinate(3, 4),
-                    }),
-                    new AttributesTable())
-            );
-            schema.example = JsonConvert.DeserializeObject(exampleFeatureString);
-            schema.@default = JsonConvert.DeserializeObject(exampleFeatureString);
+            // HM TODO: fix this
+            //var writer = new GeoJsonWriter();
+            //var exampleFeatureString = writer.Write(
+            //    new Feature(new LineString(new[]
+            //        {
+            //            new Coordinate(1, 2),
+            //            new Coordinate(3, 4),
+            //        }),
+            //        new AttributesTable())
+            //);
+            //model.Example = JsonConvert.DeserializeObject(exampleFeatureString);
+            //model.Default = JsonConvert.DeserializeObject(exampleFeatureString);
         }
     }
 }

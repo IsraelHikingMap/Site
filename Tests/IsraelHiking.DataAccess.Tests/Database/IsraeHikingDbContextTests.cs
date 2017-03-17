@@ -4,6 +4,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccess.Database;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
+using Microsoft.EntityFrameworkCore;
 
 namespace IsraelHiking.DataAccess.Tests.Database
 {
@@ -13,7 +14,7 @@ namespace IsraelHiking.DataAccess.Tests.Database
         /// <summary>
         /// This file name is the same one from the connection string in the app config of the test assembly.
         /// </summary>
-        private const string TEST_SQLITE_FILE_NAME = "Test.sqlite";
+        private const string TEST_SQLITE_FILE_NAME = "IsraelHiking.sqlite";
 
         /// <summary>
         /// Since there is a problem deleting and recreating the database on the same process all the checks are made in a single test method...
@@ -48,7 +49,7 @@ namespace IsraelHiking.DataAccess.Tests.Database
             using (var context = new IsraelHikingDbContext())
             {
                 var siteUrlToUpdate = new SiteUrl {Id = id, Title = "title"};
-                context.MarkAsModified(siteUrlToUpdate);
+                context.Entry(siteUrlToUpdate).State = EntityState.Modified;
                 context.SaveChanges();
             }
 
@@ -97,7 +98,7 @@ namespace IsraelHiking.DataAccess.Tests.Database
                     //}
                     var jsonData = JsonConvert.SerializeObject(dataContainerNew, Formatting.None, new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore });
                     siteUrl.JsonData = jsonData;
-                    context.MarkAsModified(siteUrl);
+                    context.Entry(siteUrl).State = EntityState.Modified;
                 }
                 context.SaveChanges();
             }

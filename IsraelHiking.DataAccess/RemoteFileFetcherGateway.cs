@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using IsraelHiking.DataAccessInterfaces;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess
 {

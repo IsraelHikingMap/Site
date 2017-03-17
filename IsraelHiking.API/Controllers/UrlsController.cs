@@ -2,20 +2,20 @@
 using IsraelHiking.DataAccessInterfaces;
 using System;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web.Http;
 using IsraelHiking.API.Services;
 using Newtonsoft.Json;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.Net.Http.Headers;
 
 namespace IsraelHiking.API.Controllers
 {
     /// <summary>
     /// This controller handles the shared routes
     /// </summary>
-    public class UrlsController : ApiController
+    [Route("api/[controller]")]
+    public class UrlsController : Controller
     {
         private IIsraelHikingRepository _repository;
         private readonly IDataContainerConverterService _dataContainerConverterService;
@@ -39,7 +39,9 @@ namespace IsraelHiking.API.Controllers
         /// <param name="format">The format to convert to, default is <see cref="DataContainer"/>, but you can use "gpx", "csv" and all other formats that can be opened in this site</param>
         /// <returns>The shared route in the requested format</returns>
         // GET api/Urls/abc?format=gpx
-        public async Task<IHttpActionResult> GetSiteUrl(string id, string format = "")
+        [HttpGet]
+        [Route("{id}")]
+        public async Task<IActionResult> GetSiteUrl(string id, string format = "")
         {
             var siteUrl = await _repository.GetUrlById(id);
             if (siteUrl == null)
@@ -53,23 +55,17 @@ namespace IsraelHiking.API.Controllers
             {
                 return Ok(siteUrl);
             }
-            var fileResponse = await GetUrlAsFile(id, format, siteUrl);
-            return ResponseMessage(fileResponse);
+            return await GetUrlAsFile(id, format, siteUrl);
         }
 
-        private async Task<HttpResponseMessage> GetUrlAsFile(string id, string format, SiteUrl siteUrl)
+        private async Task<IActionResult> GetUrlAsFile(string id, string format, SiteUrl siteUrl)
         {
             var bytes = await _dataContainerConverterService.ToAnyFormat(JsonConvert.DeserializeObject<DataContainer>(siteUrl.JsonData), format);
-            var result = new HttpResponseMessage(HttpStatusCode.OK)
+            var restuls = new FileContentResult(bytes, new MediaTypeHeaderValue($"application/{format}"))
             {
-                Content = new ByteArrayContent(bytes)
+                FileDownloadName = id + "." + format
             };
-            result.Content.Headers.ContentDisposition = new ContentDispositionHeaderValue("attachment")
-            {
-                FileName = id + "." + format
-            };
-            result.Content.Headers.ContentType = new MediaTypeHeaderValue("application/format");
-            return result;
+            return restuls;
         }
 
         /// <summary>
@@ -78,7 +74,8 @@ namespace IsraelHiking.API.Controllers
         /// <returns>The user's shared routes</returns>
         // GET api/Urls
         [Authorize]
-        public async Task<IHttpActionResult> GetSiteUrlForUser()
+        [HttpGet]
+        public async Task<IActionResult> GetSiteUrlForUser()
         {
             var siteUrls = await _repository.GetUrlsByUser(User.Identity.Name);
             return Ok(siteUrls);
@@ -90,7 +87,8 @@ namespace IsraelHiking.API.Controllers
         /// <param name="siteUrl">The shared route's data</param>
         /// <returns>Whether the operation succeeded or not</returns>
         // POST api/urls
-        public async Task<IHttpActionResult> PostSiteUrl(SiteUrl siteUrl)
+        [HttpPost]
+        public async Task<IActionResult> PostSiteUrl(SiteUrl siteUrl)
         {
             if (string.IsNullOrWhiteSpace(siteUrl.OsmUserId) == false && siteUrl.OsmUserId != User.Identity.Name)
             {
@@ -118,7 +116,9 @@ namespace IsraelHiking.API.Controllers
         /// <returns>Whether the operation succeeded or not</returns>
         // PUT api/urls/42
         [Authorize]
-        public async Task<IHttpActionResult> PutSiteUrl(string id, SiteUrl siteUrl)
+        [HttpPut]
+        [Route("{id}")]
+        public async Task<IActionResult> PutSiteUrl(string id, SiteUrl siteUrl)
         {
             var siteUrlFromDatabase = await _repository.GetUrlById(id);
             if (siteUrlFromDatabase == null)
@@ -142,7 +142,9 @@ namespace IsraelHiking.API.Controllers
         /// <param name="id"></param>
         /// <returns></returns>
         [Authorize]
-        public async Task<IHttpActionResult> DeleteSiteUrl(string id)
+        [HttpDelete]
+        [Route("{id}")]
+        public async Task<IActionResult> DeleteSiteUrl(string id)
         {
             var siteUrlFromDatabase = await _repository.GetUrlById(id);
             if (siteUrlFromDatabase == null)

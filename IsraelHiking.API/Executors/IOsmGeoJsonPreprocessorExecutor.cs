@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using NetTopologySuite.Features;
-using OsmSharp.Osm;
+using OsmSharp.Complete;
 
 namespace IsraelHiking.API.Executors
 {

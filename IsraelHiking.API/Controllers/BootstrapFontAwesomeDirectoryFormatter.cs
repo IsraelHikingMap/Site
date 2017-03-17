@@ -6,9 +6,9 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Owin;
-using Microsoft.Owin.FileSystems;
-using Microsoft.Owin.StaticFiles.DirectoryFormatters;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.Extensions.FileProviders;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -35,7 +35,7 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Generates an HTML view for a directory.
         /// </summary>
-        public async Task GenerateContentAsync(IOwinContext context, IEnumerable<IFileInfo> contents)
+        public async Task GenerateContentAsync(HttpContext context, IEnumerable<IFileInfo> contents)
         {
             if (context == null)
             {

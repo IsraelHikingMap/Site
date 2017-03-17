@@ -1,11 +1,11 @@
 ﻿/// <reference path="mapservicemockcreator.ts" />
-/// <reference path="../../../israelhiking.web/services/mapservice.ts" />
-/// <reference path="../../../israelhiking.Web/scripts/typings/angularjs/angular-mocks.d.ts" />
-/// <reference path="../../../israelhiking.web/scripts/typings/lodash/lodash.d.ts" />
-/// <reference path="../../../israelhiking.web/services/snappingservice.ts" />
-/// <reference path="../../../israelhiking.web/services/objectwithmap.ts" />
-/// <reference path="../../../israelhiking.Web/scripts/typings/toastr/toastr.d.ts" />
-/// <reference path="../../../israelhiking.Web/scripts/typings/geojson/geojson.d.ts" />
+/// <reference path="../../../israelhiking.web/wwwroot/services/mapservice.ts" />
+/// <reference path="../../../israelhiking.Web/wwwroot/scripts/typings/angularjs/angular-mocks.d.ts" />
+/// <reference path="../../../israelhiking.web/wwwroot/scripts/typings/lodash/lodash.d.ts" />
+/// <reference path="../../../israelhiking.web/wwwroot/services/snappingservice.ts" />
+/// <reference path="../../../israelhiking.web/wwwroot/services/objectwithmap.ts" />
+/// <reference path="../../../israelhiking.Web/wwwroot/scripts/typings/toastr/toastr.d.ts" />
+/// <reference path="../../../israelhiking.Web/wwwroot/scripts/typings/geojson/geojson.d.ts" />
 
 namespace IsraelHiking.Tests.Services {
     describe("Snapping Service", () => {

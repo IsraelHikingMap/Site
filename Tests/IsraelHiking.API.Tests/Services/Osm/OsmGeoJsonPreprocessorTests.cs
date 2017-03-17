@@ -4,12 +4,14 @@ using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
 using NSubstitute;
-using OsmSharp.Collections.Tags;
-using OsmSharp.Osm;
+using OsmSharp;
+using Microsoft.Extensions.Options;
+using OsmSharp.Tags;
+using Microsoft.Extensions.Logging;
+using OsmSharp.Complete;
 
 namespace IsraelHiking.API.Tests.Services.Osm
 {
@@ -69,11 +71,11 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var node2 = CreateNode(2);
             var node3 = CreateNode(3);
             var node4 = CreateNode(4);
-            var way1 = CompleteWay.Create(5);
-            way1.Nodes.AddRange(new[] { node1, node2 });
+            var way1 = new CompleteWay { Id = 5, Tags = new TagsCollection() };
+            way1.Nodes = new[] { node1, node2 };
             way1.Tags.Add("waterway", "stream");
-            var way2 = CompleteWay.Create(6);
-            way2.Nodes.AddRange(new[] { node3, node4 });
+            var way2 = new CompleteWay { Id = 6, Tags = new TagsCollection() };
+            way2.Nodes = new[] { node3, node4 };
             var osmElements = new List<ICompleteOsmGeo> { node1, node2, node3, node4, way1, way2 };
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
 
@@ -90,14 +92,14 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var node1 = CreateNode(1);
             var node2 = CreateNode(2);
             var node3 = CreateNode(3);
-            var way1 = CompleteWay.Create(4);
+            var way1 = new CompleteWay { Id = 4, Tags = new TagsCollection() };
             way1.Tags.Add("name", "name");
             way1.Tags.Add("place", "name");
-            way1.Nodes.AddRange(new[] { node2, node3 });
-            var way2 = CompleteWay.Create(5);
+            way1.Nodes = new[] { node2, node3 };
+            var way2 = new CompleteWay { Id = 5, Tags = new TagsCollection() };
             way2.Tags.Add("name", "name");
             way2.Tags.Add("place", "name");
-            way2.Nodes.AddRange(new[] { node1, node3 });
+            way2.Nodes = new[] { node1, node3 };
             var osmElements = new List<ICompleteOsmGeo> { node1, node2, node3, way1, way2 };
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
 
@@ -118,31 +120,33 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var node7 = CreateNode(7);
             var node8 = CreateNode(8);
             node8.Tags.Add("place", "any");
-            var way1 = CompleteWay.Create(9);
+            var way1 = new CompleteWay { Id = 9, Tags = new TagsCollection() };
             way1.Tags.Add("name", "name");
             way1.Tags.Add("place", "any");
-            way1.Nodes.AddRange(new[] { node2, node3 });
-            var way2 = CompleteWay.Create(10);
+            way1.Nodes = new[] { node2, node3 };
+            var way2 = new CompleteWay { Id = 10, Tags = new TagsCollection() };
             way2.Tags.Add("name", "name");
             way2.Tags.Add("place", "any");
-            way2.Nodes.AddRange(new[] { node1, node2 });
-            var way3 = CompleteWay.Create(11);
+            way2.Nodes = new[] { node1, node2 };
+            var way3 = new CompleteWay { Id = 11, Tags = new TagsCollection() };
             way3.Tags.Add("name", "name");
             way3.Tags.Add("place", "any");
-            way3.Nodes.AddRange(new[] { node3, node4, node1 });
-            var way4 = CompleteWay.Create(12);
+            way3.Nodes = new[] { node3, node4, node1 };
+            var way4 = new CompleteWay { Id = 12, Tags = new TagsCollection() };
             way4.Tags.Add("name", "name");
             way4.Tags.Add("place", "any");
-            way4.Nodes.AddRange(new[] { node5, node6 });
-            var way5 = CompleteWay.Create(13);
+            way4.Nodes = new[] { node5, node6 };
+            var way5 = new CompleteWay { Id = 13, Tags = new TagsCollection() };
             way5.Tags.Add("name", "name");
             way5.Tags.Add("place", "any");
-            way5.Nodes.AddRange(new[] { node7, node6 });
-            var relations = CompleteRelation.Create(16);
+            way5.Nodes = new[] { node7, node6 };
+            var relations = new CompleteRelation { Id = 16, Tags = new TagsCollection() };
             relations.Tags.Add("name", "name");
             relations.Tags.Add("place", "any");
-            relations.Members.Add(new CompleteRelationMember { Member = way4 });
-            relations.Members.Add(new CompleteRelationMember { Member = way5 });
+            relations.Members = new[] {
+                new CompleteRelationMember { Member = way4 },
+                new CompleteRelationMember { Member = way5 }
+            };
             var osmElements = new List<ICompleteOsmGeo> { node1, node2, node3, node4, node5, node6, node7, node8, way1, way2, way3, way4, relations };
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
 
@@ -165,11 +169,11 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var node4 = CreateNode(4, 1, 0);
             var node5 = CreateNode(5, 0.5, 0.5);
             var node6 = CreateNode(6, 0.6, 0.6);
-            var way1 = CompleteWay.Create(7);
-            way1.Nodes.AddRange(new[] { node1, node2, node3, node4, node1 });
+            var way1 = new CompleteWay { Id = 7, Tags = new TagsCollection() };
+            way1.Nodes = new[] { node1, node2, node3, node4, node1 };
             way1.Tags.Add("name", container);
-            var way2 = CompleteWay.Create(7);
-            way2.Nodes.AddRange(new[] { node5, node6 });
+            var way2 = new CompleteWay { Id = 8, Tags = new TagsCollection() };
+            way2.Nodes = new[] { node5, node6 };
             way2.Tags.Add("name", line);
             var osmElements1 = new List<ICompleteOsmGeo> { way1 };
             var osmElements2 = new List<ICompleteOsmGeo> { way2 };
@@ -192,8 +196,8 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var node4 = CreateNode(4, 1, 0);
             var node5 = CreateNode(5, 0.5, 0.6);
             node5.Tags.Add("place", "any");
-            var way1 = CompleteWay.Create(6);
-            way1.Nodes.AddRange(new[] { node1, node2, node3, node4, node1 });
+            var way1 = new CompleteWay { Id = 6, Tags = new TagsCollection() };
+            way1.Nodes = new[] { node1, node2, node3, node4, node1 };
             way1.Tags.Add("name", "name");
             var osmElements = new List<ICompleteOsmGeo> { node5, way1 };
 
@@ -215,12 +219,12 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var node4 = CreateNode(4, 3, 3);
             var node5 = CreateNode(5, 4, 4);
             var node6 = CreateNode(6, 5, 5);
-            var way1 = CompleteWay.Create(7);
-            var way2 = CompleteWay.Create(8);
-            var way3 = CompleteWay.Create(9);
-            way1.Nodes.AddRange(new[] { node1, node2, node3 });
-            way2.Nodes.AddRange(new[] { node5, node4, node3 });
-            way3.Nodes.AddRange(new[] { node5, node6 });
+            var way1 = new CompleteWay { Id = 7, Tags = new TagsCollection() };
+            var way2 = new CompleteWay { Id = 8, Tags = new TagsCollection() };
+            var way3 = new CompleteWay { Id = 9, Tags = new TagsCollection() };
+            way1.Nodes = new[] { node1, node2, node3 };
+            way2.Nodes = new[] { node5, node4, node3 };
+            way3.Nodes = new[] { node5, node6 };
             way1.Tags.Add("name", "name");
             way2.Tags.Add("name", "name");
             way2.Tags.Add("oneway", "true");
@@ -231,8 +235,8 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(1, results[results.Keys.First()].Count);
-            Assert.AreEqual(node6.Coordinate.Latitude, results[results.Keys.First()].First().Geometry.Coordinates.First().Y);
-            Assert.AreEqual(node6.Coordinate.Longitude, results[results.Keys.First()].First().Geometry.Coordinates.First().X);
+            Assert.AreEqual(node6.Latitude, results[results.Keys.First()].First().Geometry.Coordinates.First().Y);
+            Assert.AreEqual(node6.Longitude, results[results.Keys.First()].First().Geometry.Coordinates.First().X);
         }
     }
 }

@@ -1,5 +1,4 @@
 ﻿using System.Linq;
-using System.Web.Http.Results;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
@@ -8,6 +7,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -29,7 +29,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetRouting_HikingBadFromPoint_ShouldReturnInvalidModelState()
         {
-            var results = _controller.GetRouting("from", "1,1", RoutingType.HIKE).Result as InvalidModelStateResult;
+            var results = _controller.GetRouting("from", "1,1", RoutingType.HIKE).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetRouting_BikeBadToPoint_ShouldReturnInvalidModelState()
         {
-            var results = _controller.GetRouting("1,1", "to", RoutingType.BIKE).Result as InvalidModelStateResult;
+            var results = _controller.GetRouting("1,1", "to", RoutingType.BIKE).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -45,8 +45,8 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetRouting_None_ShouldReturnLineStringWithTwoPoints()
         {
-            var results = _controller.GetRouting("1,1", "2,2", RoutingType.NONE).Result as OkNegotiatedContentResult<FeatureCollection>;
-            var content = results.Content;
+            var results = _controller.GetRouting("1,1", "2,2", RoutingType.NONE).Result as OkObjectResult;
+            var content = results.Value as FeatureCollection;
             
             Assert.AreEqual(1, content.Features.Count);
             var lineString = content.Features.First().Geometry as LineString;
@@ -69,8 +69,8 @@ namespace IsraelHiking.API.Tests.Controllers
                     new Coordinate(2,2)
                 }));
 
-            var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkNegotiatedContentResult<FeatureCollection>;
-            var content = results.Content;
+            var results = _controller.GetRouting("1,1", "2,2", RoutingType.FOUR_WHEEL_DRIVE).Result as OkObjectResult;
+            var content = results.Value as FeatureCollection;
 
             Assert.AreEqual(1, content.Features.Count);
             var lineString = content.Features.First().Geometry as LineString;

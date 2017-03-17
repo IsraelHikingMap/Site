@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.DataAccessInterfaces;
-using OsmSharp.Osm;
-using OsmSharp.Osm.PBF.Streams;
-using OsmSharp.Osm.Streams.Complete;
+using OsmSharp.Complete;
+using OsmSharp.Streams;
+using OsmSharp.Streams.Complete;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.FileProviders;
 
 namespace IsraelHiking.DataAccess.OpenStreetMap
 {

@@ -3,18 +3,18 @@ using IsraelHiking.DataAccessInterfaces;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web.Http;
-using System.Web.Http.Description;
 using GeoAPI.Geometries;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Controllers
 {
     /// <summary>
     /// This controller allows routing between two points
     /// </summary>
-    public class RoutingController : ApiController
+    [Route("api/[controller]")]
+    public class RoutingController : Controller
     {
         private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
@@ -39,10 +39,8 @@ namespace IsraelHiking.API.Controllers
         /// <param name="type">The type of routing: "Hike", "Bike", "4WD", "None"</param>
         /// <returns>The calculated route</returns>
         //GET /api/routing?from=31.8239,35.0375&to=31.8213,35.0965&type=hike
-        [ResponseType(typeof(FeatureCollection))]
         [HttpGet]
-        
-        public async Task<IHttpActionResult> GetRouting(string from, string to, string type)
+        public async Task<IActionResult> GetRouting(string from, string to, string type)
         {
             LineString lineString;
             var profile = ConvertProfile(type);
@@ -73,9 +71,11 @@ namespace IsraelHiking.API.Controllers
                     coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
                 }
             }
-            var table = new AttributesTable();
-            table.AddAttribute("Name", "Routing from " + from + " to " + to + " profile type: " + profile);
-            table.AddAttribute("Creator", "IsraelHikingMap");
+            var table = new AttributesTable
+            {
+                { "Name", "Routing from " + from + " to " + to + " profile type: " + profile },
+                { "Creator", "IsraelHikingMap" }
+            };
             var feature = new Feature(lineString, table);
             return Ok(new FeatureCollection(new Collection<IFeature> { feature }));
         }

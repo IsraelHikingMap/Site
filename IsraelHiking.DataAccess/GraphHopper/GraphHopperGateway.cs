@@ -6,6 +6,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess.GraphHopper
 {

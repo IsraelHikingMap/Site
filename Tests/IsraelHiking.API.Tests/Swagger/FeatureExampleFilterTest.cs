@@ -1,7 +1,7 @@
 ﻿using IsraelHiking.API.Swagger;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
-using Swashbuckle.Swagger;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace IsraelHiking.API.Tests.Swagger
 {
@@ -14,9 +14,9 @@ namespace IsraelHiking.API.Tests.Swagger
             var filter = new FeatureExampleFilter();
 
             var schema = new Schema();
-            filter.Apply(schema, null, typeof(int));
+            filter.Apply(schema, null);
 
-            Assert.AreEqual(null, schema.example);
+            Assert.AreEqual(null, schema.Example);
         }
 
         [TestMethod]
@@ -25,9 +25,9 @@ namespace IsraelHiking.API.Tests.Swagger
             var filter = new FeatureExampleFilter();
 
             var schema = new Schema();
-            filter.Apply(schema, null, typeof(Feature));
+            filter.Apply(schema, null);
 
-            Assert.AreNotEqual(null, schema.example);
+            Assert.AreNotEqual(null, schema.Example);
         }
     }
 }

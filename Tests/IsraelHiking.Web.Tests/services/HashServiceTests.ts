@@ -1,5 +1,5 @@
-﻿/// <reference path="../../../IsraelHiking.web/scripts/typings/angular-local-storage/angular-local-storage.d.ts" />
-/// <reference path="../../../IsraelHiking.web/services/hashservice.ts" />
+﻿/// <reference path="../../../IsraelHiking.web/wwwroot/scripts/typings/angular-local-storage/angular-local-storage.d.ts" />
+/// <reference path="../../../IsraelHiking.web/wwwroot/services/hashservice.ts" />
 
 namespace IsraelHiking.Tests.Services {
     describe("Hash Service", () => {

@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Owin;
-using Microsoft.Owin.FileSystems;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.FileProviders;
+using System.IO;
+using System.Text;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -34,36 +34,30 @@ namespace IsraelHiking.API.Tests.Controllers
 
         [TestMethod]
         [ExpectedException(typeof(AggregateException))]
-        public void GenerateContentAsync_ContentIsNull_ShouldThrow()
+        public void GenerateContentAsync_ContentsAreNull_ShouldThrow()
         {
-            _formatter.GenerateContentAsync(Substitute.For<IOwinContext>(), null).Wait();
+            _formatter.GenerateContentAsync(Substitute.For<HttpContext>(), null).Wait();
         }
 
         [TestMethod]
         public void GenerateContentAsync_HeadRequest_ShouldReturnNothing()
         {
-            var context = Substitute.For<IOwinContext>();
-            var response = Substitute.For<IOwinResponse>();
-            context.Response.Returns(response);
-            var request = Substitute.For<IOwinRequest>();
-            request.Method = "HEAD";
-            context.Request.Returns(request);
+            var context = new DefaultHttpContext();
+            var stream = new MemoryStream();
+            context.Response.Body = stream;
+            context.Request.Method = "HEAD";
 
             _formatter.GenerateContentAsync(context, new IFileInfo[0]).Wait();
 
-            response.DidNotReceive().WriteAsync(Arg.Any<byte[]>());
+            Assert.AreEqual(0, stream.ToArray().Length);
         }
         
         [TestMethod]
         public void GenerateContentAsync_ForDeeperPath_ShouldReturnFiles()
         {
-            var context = Substitute.For<IOwinContext>();
-            var response = Substitute.For<IOwinResponse>();
-            context.Response.Returns(response);
-            var request = Substitute.For<IOwinRequest>();
-            context.Request.Returns(request);
-
-            
+            var context = new DefaultHttpContext();
+            var stream = new MemoryStream();
+            context.Response.Body = stream;
             var fileNames = new[] {"zipfile.zip", "image.png", "xml.xml", "text.txt"};
             var content = new List<IFileInfo>();
             _fileSystemHelper.IsHidden(Arg.Any<string>()).Returns(false);
@@ -81,18 +75,17 @@ namespace IsraelHiking.API.Tests.Controllers
             content.Add(folder);
 
             _formatter.GenerateContentAsync(context, content).Wait();
-
-            response.Received().WriteAsync(Arg.Is<string>(html =>
-                    html.Contains("fa-file-zip") &&
-                    html.Contains("fa-file-code") &&
-                    html.Contains("fa-file-image") &&
-                    html.Contains("fa-file-text") &&
-                    html.Contains("fa-folder-open") &&
-                    html.Contains("Gb") &&
-                    html.Contains("Mb") &&
-                    html.Contains("Kb") &&
-                    html.Contains(" b")
-            ));
+            var html = Encoding.UTF8.GetString(stream.ToArray());
+            
+            Assert.IsTrue(html.Contains("fa-file-zip"));
+            Assert.IsTrue(html.Contains("fa-file-code"));
+            Assert.IsTrue(html.Contains("fa-file-image"));
+            Assert.IsTrue(html.Contains("fa-file-text"));
+            Assert.IsTrue(html.Contains("fa-folder-open"));
+            Assert.IsTrue(html.Contains("Gb"));
+            Assert.IsTrue(html.Contains("Mb"));
+            Assert.IsTrue(html.Contains("Kb"));
+            Assert.IsTrue(html.Contains(" b"));
         }
     }
 }

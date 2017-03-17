@@ -1,22 +1,23 @@
 ﻿using System.Linq;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Owin.Security;
-using Microsoft.Owin.Security.Infrastructure;
+using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
+using System;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace IsraelHiking.Web
 {
-    public class OsmAccessTokenProvider : AuthenticationTokenProvider
+    public class OsmAccessTokenValidator : ISecurityTokenValidator
     {
         private readonly ILogger _logger;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
-        public OsmAccessTokenProvider(IHttpGatewayFactory httpGatewayFactory, 
-            LruCache<string, TokenAndSecret> cache, 
+        public OsmAccessTokenValidator(IHttpGatewayFactory httpGatewayFactory,
+            LruCache<string, TokenAndSecret> cache,
             ILogger logger)
         {
             _httpGatewayFactory = httpGatewayFactory;
@@ -24,28 +25,38 @@ namespace IsraelHiking.Web
             _logger = logger;
         }
 
-        public override async Task ReceiveAsync(AuthenticationTokenReceiveContext context)
+        public bool CanValidateToken => true;
+
+        public int MaximumTokenSizeInBytes { get; set; }
+
+        public bool CanReadToken(string securityToken)
         {
-            var token = context.Token.Split(';').First().Trim('"');
-            var tokenSecret = context.Token.Split(';').Last().Trim('"');
+            return securityToken.Contains(";");
+        }
+
+        public ClaimsPrincipal ValidateToken(string securityToken, TokenValidationParameters validationParameters, out SecurityToken validatedToken)
+        {
+            var token = securityToken.Split(';').First().Trim('"');
+            var tokenSecret = securityToken.Split(';').Last().Trim('"');
             var tokenAndSecret = new TokenAndSecret(token, tokenSecret);
             var userId = _cache.ReverseGet(tokenAndSecret);
             if (string.IsNullOrEmpty(userId))
             {
                 var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
-                userId = await osmGateway.GetUserId();
+                userId = osmGateway.GetUserId().Result;
                 _logger.LogInformation("User " + userId + " had just logged in");
                 _cache.Add(userId, tokenAndSecret);
             }
+            validatedToken = new JwtSecurityToken();
             if (string.IsNullOrWhiteSpace(userId))
             {
-                return;
+                throw new ArgumentException("Invalid user id", nameof(securityToken));
             }
-            var identity = new ClaimsIdentity("Osm");
+            ClaimsIdentity identity = new ClaimsIdentity("Osm");
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
             identity.AddClaim(new Claim(ClaimTypes.Name, userId));
 
-            context.SetTicket(new AuthenticationTicket(identity, new AuthenticationProperties()));
+            return new ClaimsPrincipal(identity);
         }
     }
 }

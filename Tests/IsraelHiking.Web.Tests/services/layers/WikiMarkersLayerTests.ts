@@ -1,7 +1,7 @@
 ﻿/// <reference path="../mapservicemockcreator.ts" />
-/// <reference path="../../../../IsraelHiking.web/services/objectwithmap.ts" />
-/// <reference path="../../../../IsraelHiking.web/services/iconsservice.ts" />
-/// <reference path="../../../../IsraelHiking.web/services/layers/WikiMarkersLayer.ts" />
+/// <reference path="../../../../IsraelHiking.web/wwwroot/services/objectwithmap.ts" />
+/// <reference path="../../../../IsraelHiking.web/wwwroot/services/iconsservice.ts" />
+/// <reference path="../../../../IsraelHiking.web/wwwroot/services/layers/WikiMarkersLayer.ts" />
 
 namespace IsraelHiking.Tests.Services.Layers {
     describe("Wiki layer Service", () => {

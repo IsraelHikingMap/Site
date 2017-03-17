@@ -1,13 +1,12 @@
 ﻿using System.IO;
 using System.Linq;
-using System.Reflection;
-using System.Runtime.Remoting.Metadata;
 using System.Xml.Linq;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccess.GPSBabel;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.DataAccess.Tests.GpsBabel
 {
@@ -23,7 +22,7 @@ namespace IsraelHiking.DataAccess.Tests.GpsBabel
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             var options = new ConfigurationData
             {
-                BinariesFolder = Path.GetDirectoryName(Assembly.GetAssembly(typeof(GpsBabelGatewayTests)).Location) ?? string.Empty
+                BinariesFolder = Directory.GetCurrentDirectory()
             };
             optionsProvider.Value.Returns(options);
             _gpsBabelGateway = new GpsBabelGateway(logger, new ProcessHelper(logger), optionsProvider);

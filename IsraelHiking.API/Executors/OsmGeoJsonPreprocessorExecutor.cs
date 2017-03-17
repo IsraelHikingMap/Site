@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
-using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using OsmSharp.Collections.Tags;
-using OsmSharp.Osm;
+using Microsoft.Extensions.Logging;
+using OsmSharp.Tags;
+using OsmSharp.Complete;
+using OsmSharp;
+using IsraelHiking.Common;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Executors
 {
@@ -258,23 +260,23 @@ namespace IsraelHiking.API.Executors
                     {
                         if (wayToMerge.Tags.ContainsKey("oneway") && wayToMerge.Tags["oneway"] == "true")
                         {
-                            wayToMergeTo.Nodes.Reverse();
+                            wayToMergeTo.Nodes = wayToMergeTo.Nodes.Reverse().ToArray();
                         }
                         else
                         {
-                            wayToMerge.Nodes.Reverse();
+                            wayToMerge.Nodes = wayToMerge.Nodes.Reverse().ToArray();
                         }
                     }
-                    var nodes = wayToMerge.Nodes;
+                    var nodes = wayToMerge.Nodes.ToList();
                     if (nodes.Last().Id == wayToMergeTo.Nodes.First().Id)
                     {
                         nodes.Remove(nodes.Last());
-                        wayToMergeTo.Nodes.InsertRange(0, nodes);
+                        wayToMergeTo.Nodes = nodes.Concat(wayToMergeTo.Nodes).ToArray();
                     }
                     else if (nodes.First().Id == wayToMergeTo.Nodes.Last().Id)
                     {
                         nodes.Remove(nodes.First());
-                        wayToMergeTo.Nodes.AddRange(nodes);
+                        wayToMergeTo.Nodes = wayToMergeTo.Nodes.Concat(nodes).ToArray();
                     }
 
                     MergeTags(wayToMerge, wayToMergeTo);

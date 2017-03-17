@@ -8,18 +8,20 @@ using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Gpx
 {
-    internal static class SerializarionExtensions
+    public static class SerializarionExtensions
     {
         public static byte[] ToBytes(this FeatureCollection featureCollection)
         {
             using (var outputStream = new MemoryStream())
             {
-                var writer = new StreamWriter(outputStream);
-                var jsonWriter = new JsonTextWriter(writer);
-                var serializer = new GeoJsonSerializer();
-                serializer.Serialize(jsonWriter, featureCollection);
-                jsonWriter.Flush();
-                return outputStream.ToArray();
+                // HM TODO: fix this:
+                return new byte[0];
+                //var writer = new StreamWriter(outputStream);
+                //var jsonWriter = new JsonTextWriter(writer);
+                //var serializer = new GeoJsonSerializer();
+                //serializer.Serialize(jsonWriter, featureCollection);
+                //jsonWriter.Flush();
+                //return outputStream.ToArray();
             }
         }
 
@@ -27,12 +29,14 @@ namespace IsraelHiking.API.Gpx
         {
             using (var stream = new MemoryStream(featureCollectionContent))
             {
-                var serializer = new GeoJsonSerializer();
-                using (var streamReader = new StreamReader(stream))
-                using (var jsonTextReader = new JsonTextReader(streamReader))
-                {
-                    return serializer.Deserialize<FeatureCollection>(jsonTextReader);
-                }
+                // HM TODO: fix this:
+                return new FeatureCollection();
+                //var serializer = new GeoJsonSerializer();
+                //using (var streamReader = new StreamReader(stream))
+                //using (var jsonTextReader = new JsonTextReader(streamReader))
+                //{
+                //    return serializer.Deserialize<FeatureCollection>(jsonTextReader);
+                //}
             }
         }
 

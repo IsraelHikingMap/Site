@@ -45,10 +45,10 @@ namespace IsraelHiking.Services {
             this.loading = false;
 
             $http.get(Common.Urls.osmConfiguration).then((response: { data: any }) => {
-                this.baseUrl = response.data.BaseAddress;
+                this.baseUrl = response.data.baseAddress;
                 this.oauth = osmAuth({
-                    oauth_consumer_key: response.data.ConsumerKey,
-                    oauth_secret: response.data.ConsumerSecret,
+                    oauth_consumer_key: response.data.consumerKey,
+                    oauth_secret: response.data.consumerSecret,
                     auto: true, // show a login form if the user is not authenticated and you try to do a call
                     landing: "controllers/oauth-close-window.html",
                     url: this.baseUrl

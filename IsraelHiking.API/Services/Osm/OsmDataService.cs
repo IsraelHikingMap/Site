@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using IsraelHiking.API.Executors;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.FileProviders;
 
 namespace IsraelHiking.API.Services.Osm
 {
@@ -89,7 +91,7 @@ namespace IsraelHiking.API.Services.Osm
                 {
                     await FetchOsmFile(osmFilePath);
                 }
-                if (_fileProvider.GetFileInfo(osmFilePath).Exists() == false)
+                if (_fileProvider.GetFileInfo(osmFilePath).Exists == false)
                 {
                     _logger.LogError(osmFilePath + " File is missing. Fatal error - exiting.");
                     return;
@@ -115,7 +117,7 @@ namespace IsraelHiking.API.Services.Osm
             var address = "http://download.geofabrik.de/asia/" + PBF_FILE_NAME;
             var length = await _remoteFileSizeFetcherGateway.GetFileSize(address);
             var fileInfo = _fileProvider.GetFileInfo(osmFilePath);
-            if (!fileInfo.Exists() || fileInfo.Length != length)
+            if (!fileInfo.Exists || fileInfo.Length != length)
             {
                 var response = await _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).GetFileContent(address);
                 _fileSystemHelper.WriteAllBytes(osmFilePath, response.Content);

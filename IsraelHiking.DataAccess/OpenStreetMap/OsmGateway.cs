@@ -4,18 +4,22 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Formatting;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using OAuth;
-using OsmSharp.Collections.Tags;
-using OsmSharp.Osm;
-using OsmSharp.Osm.Streams.Complete;
-using OsmSharp.Osm.Xml.Streams;
-using OsmSharp.Osm.Xml.v0_6;
+using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Logging;
+using OsmSharp;
+using OsmSharp.API;
+using OsmSharp.Changesets;
+using OsmSharp.Tags;
+using OsmSharp.Streams;
+using OsmSharp.Streams.Complete;
+using OsmSharp.Complete;
+using System.Xml.Serialization;
 
 namespace IsraelHiking.DataAccess.OpenStreetMap
 {
@@ -23,7 +27,6 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
     {
         private readonly TokenAndSecret _tokenAndSecret;
         private readonly ConfigurationData _options;
-        private readonly MediaTypeFormatter _xmlMediaTypeFormatter;
 
         private readonly string _baseAddressWithoutProtocol;
         private readonly string _userDetailsAddress;
@@ -39,7 +42,6 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         {
             _tokenAndSecret = tokenAndSecret;
             _options = options.Value;
-            _xmlMediaTypeFormatter = new XmlMediaTypeFormatter {UseXmlSerializer = true};
 
             var osmApiBaseAddress = _options.OsmConfiguraion.BaseAddress.Replace("https", "http") + "/api/0.6/";
             _baseAddressWithoutProtocol = _options.OsmConfiguraion.BaseAddress.Replace("http://", "").Replace("https://", "");
@@ -86,8 +88,9 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 {
                     return string.Empty;
                 }
-                var detailsResponse = await response.Content.ReadAsAsync<osm>(new List<MediaTypeFormatter> {_xmlMediaTypeFormatter});
-                return detailsResponse?.user?.id.ToString() ?? string.Empty;
+                var streamContent = await response.Content.ReadAsStreamAsync();
+                var detailsResponse = FromContent(streamContent);
+                return detailsResponse?.User?.Id.ToString() ?? string.Empty;
             }
         }
 
@@ -96,21 +99,21 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             using (var client = new HttpClient())
             {
                 UpdateHeaders(client, _createChangesetAddress, "PUT");
-                var changeSet = new osm
+                var changeSet = new Osm
                 {
-                    changeset = new[]
+                    Changesets = new[]
                     {
-                        new changeset
+                        new Changeset
                         {
-                            tag = new[]
+                            Tags = new TagsCollection
                             {
-                                new tag {k = "created_by", v = "IsraelHiking.osm.org.il"},
-                                new tag {k = "comment", v = comment}
+                                new Tag {Key = "created_by", Value = "IsraelHiking.osm.org.il"},
+                                new Tag {Key = "comment", Value = comment}
                             }
                         }
                     }
                 };
-                var response = await client.PutAsync(_createChangesetAddress, new ObjectContent(typeof(osm), changeSet, _xmlMediaTypeFormatter));
+                var response = await client.PutAsync(_createChangesetAddress, ToContent(changeSet));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     return string.Empty;
@@ -124,23 +127,12 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             using (var client = new HttpClient())
             {
                 UpdateHeaders(client, _createNodeAddress, "PUT");
-                var newNode = new osm
+                node.ChangeSetId = long.Parse(changesetId);
+                var newNode = new Osm
                 {
-                    node = new[]
-                    {
-                        new node
-                        {
-                            changeset = long.Parse(changesetId),
-                            changesetSpecified = true,
-                            lat = node.Latitude ?? 0.0,
-                            latSpecified = true,
-                            lon = node.Longitude?? 0.0,
-                            lonSpecified = true,
-                            tag = ConvertTags(node.Tags)
-                        }
-                    }
+                    Nodes = new[] { node }
                 };
-                var response = await client.PutAsync(_createNodeAddress, new ObjectContent(typeof(osm), newNode, _xmlMediaTypeFormatter));
+                var response = await client.PutAsync(_createNodeAddress, ToContent(newNode));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     return string.Empty;
@@ -154,20 +146,12 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             using (var client = new HttpClient())
             {
                 UpdateHeaders(client, _createWayAddress, "PUT");
-                var newWay = new osm
+                way.ChangeSetId = long.Parse(changesetId);
+                var newWay = new Osm
                 {
-                    way = new[]
-                    {
-                        new way
-                        {
-                            changeset = long.Parse(changesetId),
-                            changesetSpecified = true,
-                            nd = way.Nodes.Select(n => new nd {@ref = n, refSpecified = true}).ToArray(),
-                            tag = ConvertTags(way.Tags)
-                        }
-                    }
+                    Ways = new[] { way }
                 };
-                var response = await client.PutAsync(_createWayAddress, new ObjectContent(typeof(osm), newWay, _xmlMediaTypeFormatter));
+                var response = await client.PutAsync(_createWayAddress, ToContent(newWay));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     return string.Empty;
@@ -182,24 +166,12 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             {
                 var address = _wayAddress.Replace("#id", way.Id.ToString());
                 UpdateHeaders(client, address, "PUT");
-                var updatedWay = new osm
+                way.ChangeSetId = long.Parse(changesetId);
+                var updatedWay = new Osm
                 {
-                    way = new[]
-                    {
-                        new way
-                        {
-                            changeset = long.Parse(changesetId),
-                            changesetSpecified = true,
-                            nd = way.Nodes.Select(n => new nd {@ref = n, refSpecified = true}).ToArray(),
-                            tag = ConvertTags(way.Tags),
-                            versionSpecified = way.Version.HasValue,
-                            version = way.Version ?? 0,
-                            idSpecified = way.Id.HasValue,
-                            id = way.Id ?? 0
-                        }
-                    }
+                    Ways = new[] { way }
                 };
-                var response = await client.PutAsync(address, new ObjectContent(typeof(osm), updatedWay, _xmlMediaTypeFormatter));
+                var response = await client.PutAsync(address, ToContent(updatedWay));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     var message = await response.Content.ReadAsStringAsync();
@@ -267,11 +239,18 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             }
         }
 
-        private tag[] ConvertTags(TagsCollectionBase tags)
+        private StreamContent ToContent(Osm osm)
         {
-            return (tags ?? new TagsCollection()).ToStringStringDictionary()
-                .Select(kvp => new tag {k = kvp.Key, v = kvp.Value})
-                .ToArray();
+            var serializer = new XmlSerializer(typeof(Osm));
+            var memoryStream = new MemoryStream();
+            serializer.Serialize(memoryStream, osm);
+            return new StreamContent(memoryStream);
+        }
+
+        private Osm FromContent(Stream stream)
+        {
+            var serializer = new XmlSerializer(typeof(Osm));
+            return serializer.Deserialize(stream) as Osm;
         }
     }
 }

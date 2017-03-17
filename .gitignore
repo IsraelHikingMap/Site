@@ -193,8 +193,9 @@ ModelManifest.xml
 /.vs/config
 *.sqlite
 !/IsraelHiking.Web/*.ts
-/IsraelHiking.Web/**/*.js
-/IsraelHiking.Web/**/*.map
-!/IsraelHiking.Web/scripts/*.js
+/IsraelHiking.Web/wwwroot/**/*.js
+/IsraelHiking.Web/wwwroot/**/*.map
+!/IsraelHiking.Web/wwwroot/scripts/*.js
 /Tests/IsraelHiking.Web.Tests/**/*.js
-/IsraelHiking.Web/translations/*.po
+/Tests/IsraelHiking.Web.Tests/**/*.map
+/IsraelHiking.Web/wwwroot/translations/*.po
