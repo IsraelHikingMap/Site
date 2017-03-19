@@ -97,7 +97,7 @@ namespace IsraelHiking.API.Executors
                 counter++;
                 if (counter % 5000 == 0)
                 {
-                    _logger.LogInformation($"Finished processing {counter} features");
+                    _logger.LogInformation($"Finished processing {counter} names of {geoJsonNamesDictionary.Values.Count}");
                 }
             }
             _logger.LogInformation("Finished GeoJson preprocessing");
