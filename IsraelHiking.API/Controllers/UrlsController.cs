@@ -8,6 +8,7 @@ using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Net.Http.Headers;
+using System.Collections.Generic;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -75,6 +76,7 @@ namespace IsraelHiking.API.Controllers
         // GET api/Urls
         [Authorize]
         [HttpGet]
+        [ProducesResponseType(typeof(IEnumerable<SiteUrl>), 200)]
         public async Task<IActionResult> GetSiteUrlForUser()
         {
             var siteUrls = await _repository.GetUrlsByUser(User.Identity.Name);
@@ -88,6 +90,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>Whether the operation succeeded or not</returns>
         // POST api/urls
         [HttpPost]
+        [ProducesResponseType(typeof(SiteUrl), 200)]
         public async Task<IActionResult> PostSiteUrl(SiteUrl siteUrl)
         {
             if (string.IsNullOrWhiteSpace(siteUrl.OsmUserId) == false && siteUrl.OsmUserId != User.Identity.Name)
@@ -118,6 +121,7 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         [HttpPut]
         [Route("{id}")]
+        [ProducesResponseType(typeof(SiteUrl), 200)]
         public async Task<IActionResult> PutSiteUrl(string id, SiteUrl siteUrl)
         {
             var siteUrlFromDatabase = await _repository.GetUrlById(id);

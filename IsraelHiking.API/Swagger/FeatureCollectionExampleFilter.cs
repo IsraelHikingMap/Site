@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.Swagger;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Swagger
 {
@@ -24,20 +25,20 @@ namespace IsraelHiking.API.Swagger
             {
                 return;
             }
-            //var writer = new GeoJsonWriter();
-            //var exampleFeatureCollectionString = writer.Write(
-            //    new FeatureCollection(new Collection<IFeature>
-            //    {
-            //        new Feature(new LineString(new[]
-            //            {
-            //                new Coordinate(1, 2),
-            //                new Coordinate(3, 4),
-            //            }),
-            //            new AttributesTable())
-            //    }));
-            //var jsonObject = JsonConvert.DeserializeObject<JObject>(exampleFeatureCollectionString);
-            //model.Example = jsonObject;
-            //model.Default = jsonObject;
+            var writer = new GeoJsonWriter();
+            var exampleFeatureCollectionString = writer.Write(
+                new FeatureCollection(new Collection<IFeature>
+                {
+                    new Feature(new LineString(new[]
+                        {
+                            new Coordinate(1, 2),
+                            new Coordinate(3, 4),
+                        }),
+                        new AttributesTable())
+                }));
+            var jsonObject = JsonConvert.DeserializeObject<JObject>(exampleFeatureCollectionString);
+            model.Example = jsonObject;
+            model.Default = jsonObject;
         }
     }
 }
