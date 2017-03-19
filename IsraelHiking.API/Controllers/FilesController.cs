@@ -5,9 +5,10 @@ using GeoAPI.Geometries;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using IsraelHiking.API.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -78,6 +79,7 @@ namespace IsraelHiking.API.Controllers
         [HttpPost]
         [Route("open")]
         [ProducesResponseType(typeof(DataContainer), 200)]
+        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
         public async Task<IActionResult> PostOpenFile(IFormFile file)
         {
             if (file == null)

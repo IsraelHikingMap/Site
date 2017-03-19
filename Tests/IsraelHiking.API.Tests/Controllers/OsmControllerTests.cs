@@ -55,12 +55,11 @@ namespace IsraelHiking.API.Tests.Controllers
             return url;
         }
 
-        private IFormFile[] SetupUploadFile()
+        private IFormFile SetupUploadFile()
         {
             var file = Substitute.For<IFormFile>();
             file.FileName.Returns("SomeFile.gpx");
-            //file.When(f => f.CopyToAsync(Arg.Any<MemoryStream>())).Do(x => (x[0] as MemoryStream).Write(Encoding.ASCII.GetBytes(GPX_DATA), 0, Encoding.ASCII.GetBytes(GPX_DATA).Length));
-            return new[] { file };
+            return file;
 
         }
 
@@ -129,7 +128,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(new IFormFile[0],  string.Empty).Result as BadRequestObjectResult;
+            var results = _controller.PostGpsTrace(null,  string.Empty).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -140,7 +139,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = SetupGpxUrl(new gpxType(), new List<LineString>());
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(new IFormFile[0], url).Result as BadRequestObjectResult;
+            var results = _controller.PostGpsTrace(null, url).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -151,7 +150,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = SetupGpxUrl(new gpxType { trk = new[] { new trkType() } }, new List<LineString>());
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(new IFormFile[0], url).Result as BadRequestObjectResult;
+            var results = _controller.PostGpsTrace(null, url).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -191,7 +190,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 }
             };
             var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
-            var files = SetupUploadFile();
+            var file = SetupUploadFile();
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
             _addibleGpxLinesFinderService.GetLines(Arg.Any<List<ILineString>>()).Returns(
@@ -202,7 +201,7 @@ namespace IsraelHiking.API.Tests.Controllers
             );
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(files).Result as OkObjectResult;
+            var results = _controller.PostGpsTrace(file).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;
@@ -231,7 +230,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = SetupGpxUrl(gpx);
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(new IFormFile[0], url).Result as OkObjectResult;
+            var results = _controller.PostGpsTrace(null, url).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;
@@ -260,7 +259,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = SetupGpxUrl(gpx);
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(new IFormFile[0], url).Result as OkObjectResult;
+            var results = _controller.PostGpsTrace(null, url).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;
@@ -272,12 +271,12 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostUploadGpsTrace_UploadFile_ShouldSendItToOsmGateway()
         {
-            var files = SetupUploadFile();
+            var file = SetupUploadFile();
             var gateway = Substitute.For<IOsmGateway>();
             _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(gateway);
             SetupIdentity();
 
-            _controller.PostUploadGpsTrace(files).Wait();
+            _controller.PostUploadGpsTrace(file).Wait();
 
             gateway.Received(1).UploadFile(Arg.Any<string>(), Arg.Any<MemoryStream>());
         }

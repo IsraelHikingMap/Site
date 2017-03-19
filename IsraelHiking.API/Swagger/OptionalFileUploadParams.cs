@@ -16,13 +16,16 @@ namespace IsraelHiking.API.Swagger
             {
                 operation.Parameters = new List<IParameter>();
             }
-            operation.Parameters.Add(new BodyParameter
+            operation.Parameters.Clear();
+            operation.Parameters.Add(new NonBodyParameter
             {
-                Name = "file",
+                Name = "file", // must match parameter name from controller method
                 In = "formData",
+                Description = "Upload file.",
                 Required = false,
-                // type file?
+                Type = "file"
             });
+            operation.Consumes.Add("application/form-data");
         }
     }
 }
