@@ -17,6 +17,8 @@ using Microsoft.AspNetCore.Http;
 using GeoAPI.CoordinateSystems.Transformations;
 using Microsoft.Extensions.Options;
 using NetTopologySuite.IO;
+using IsraelHiking.API.Swagger;
+using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -113,6 +115,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(FeatureCollection), 200)]
+        [SwaggerOperationFilter(typeof(OptionalFileUploadParams))]
         public async Task<IActionResult> PostGpsTrace([FromBody]IFormFile file, [FromQuery]string url = "")
         {
             var fileFetcherGatewayResponse = await GetFile(url, file);
@@ -146,6 +149,7 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         [Route("trace")]
         [HttpPost]
+        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
         public async Task<IActionResult> PostUploadGpsTrace(IFormFile file)
         {
             var response = await GetFile(string.Empty, file);
