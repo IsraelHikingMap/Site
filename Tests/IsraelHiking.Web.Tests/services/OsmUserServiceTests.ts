@@ -103,7 +103,7 @@ namespace IsraelHiking.Tests.Services {
         });
 
         it("Should login and get data", () => {
-            $httpBackend.whenGET(url => url.indexOf(Common.Urls.urls) !== -1).respond(200, [{ Title: "some share" } as Common.SiteUrl]);
+            $httpBackend.whenGET(url => url.indexOf(Common.Urls.urls) !== -1).respond(200, [{ title: "some share" } as Common.SiteUrl]);
             oauth.authenticated = () => { return true; },
             oauth.xhr = (addressObject, callback: Function) => {
                 if (addressObject.path.indexOf("details") !== -1) {
@@ -122,7 +122,7 @@ namespace IsraelHiking.Tests.Services {
         });
 
         it("Should login and get data even if gpx files fail", () => {
-            $httpBackend.whenGET(url => url.indexOf(Common.Urls.urls) !== -1).respond(200, [{ Title: "some share" } as Common.SiteUrl]);
+            $httpBackend.whenGET(url => url.indexOf(Common.Urls.urls) !== -1).respond(200, [{ title: "some share" } as Common.SiteUrl]);
             oauth.authenticated = () => { return true; },
                 oauth.xhr = (addressObject, callback: Function) => {
                     if (addressObject.path.indexOf("details") !== -1) {
@@ -149,18 +149,18 @@ namespace IsraelHiking.Tests.Services {
         });
 
         it("Should update site url", () => {
-            let siteUrl = { Id: "42" } as Common.SiteUrl;
-            $httpBackend.expectPUT(Common.Urls.urls + siteUrl.Id).respond({status: 200});
+            let siteUrl = { id: "42" } as Common.SiteUrl;
+            $httpBackend.expectPUT(Common.Urls.urls + siteUrl.id).respond({status: 200});
             osmUserService.updateSiteUrl(siteUrl);
 
             expect($httpBackend.flush).not.toThrow();
         });
 
         it("Should delete site url", () => {
-            let siteUrl = { Id: "42" } as Common.SiteUrl;
+            let siteUrl = { id: "42" } as Common.SiteUrl;
             osmUserService.shares = [siteUrl];
             
-            $httpBackend.expectDELETE(Common.Urls.urls + siteUrl.Id).respond({ status: 200 });
+            $httpBackend.expectDELETE(Common.Urls.urls + siteUrl.id).respond({ status: 200 });
             osmUserService.deleteSiteUrl(siteUrl);
 
             expect($httpBackend.flush).not.toThrow();
@@ -182,10 +182,10 @@ namespace IsraelHiking.Tests.Services {
         });
 
         it("Should get image for site url", () => {
-            let siteUrl = { Id: "42" } as Common.SiteUrl;
+            let siteUrl = { id: "42" } as Common.SiteUrl;
             let imageUrl = osmUserService.getImageFromSiteUrlId(siteUrl);
 
-            expect(imageUrl).toContain(siteUrl.Id);
+            expect(imageUrl).toContain(siteUrl.id);
         });
 
         it("Should return full address of osm edit location", () => {
@@ -207,13 +207,13 @@ namespace IsraelHiking.Tests.Services {
         });
 
         it("Should return full address of shared route", () => {
-            let siteUrl = { Id: "12345" } as Common.SiteUrl;
+            let siteUrl = { id: "12345" } as Common.SiteUrl;
             
             let address = osmUserService.getUrlFromSiteUrlId(siteUrl);
 
             expect(address).toContain("/#!/");
             expect(address).toContain(Common.Urls.baseAddress);
-            expect(address).toContain(siteUrl.Id);
+            expect(address).toContain(siteUrl.id);
         });
     });
 }

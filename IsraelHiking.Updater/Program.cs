@@ -1,10 +1,14 @@
-﻿using System;
-using System.Threading.Tasks;
-using IsraelHiking.API;
+﻿using IsraelHiking.API;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.DataAccess;
-using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Practices.Unity;
+using Microsoft.Extensions.CommandLineUtils;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
+using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.Updater
 {
@@ -22,38 +26,65 @@ namespace IsraelHiking.Updater
 
         private static OsmDataServiceOperations GetOperationsFromAgruments(string[] args)
         {
-            var options = new CommandLineOptions();
-            if (!CommandLine.Parser.Default.ParseArguments(args, options))
+            CommandLineApplication commandLineApplication = new CommandLineApplication(throwOnUnexpectedArg: false);
+            CommandOption download = commandLineApplication.Option(
+              "-d | --download", "Download OSM file from geofabrik or uses a local one.",
+              CommandOptionType.NoValue);
+            CommandOption graphHopper = commandLineApplication.Option(
+              "-g | --graphhopper", "Update graphhopper routing data.",
+              CommandOptionType.NoValue);
+            CommandOption elasticSearch = commandLineApplication.Option(
+              "-e | -es | --elasticsearch", "Update elastic search data.",
+              CommandOptionType.NoValue);
+            commandLineApplication.HelpOption("-? | -h | --help");
+            var operations = OsmDataServiceOperations.None;
+            commandLineApplication.OnExecute(() =>
             {
-                return OsmDataServiceOperations.None;
-            }
-            var operations = OsmDataServiceOperations.All;
-            if (options.DontGetOsmFile)
-            {
-                operations &= ~OsmDataServiceOperations.GetOsmFile;
-            }
-            if (options.DontUpdateElasticSearch)
-            {
-                operations &= ~OsmDataServiceOperations.UpdateElasticSearch;
-            }
-            if (options.DontUpdateGraphHopper)
-            {
-                operations &= ~OsmDataServiceOperations.UpdateGraphHopper;
-            }
+                if (download.HasValue())
+                {
+                    operations |= OsmDataServiceOperations.GetOsmFile;
+                }
+                if (elasticSearch.HasValue())
+                {
+                    operations |= OsmDataServiceOperations.UpdateElasticSearch;
+                }
+                if (graphHopper.HasValue())
+                {
+                    operations |= OsmDataServiceOperations.UpdateGraphHopper;
+                }
+                if (download.HasValue() == false && elasticSearch.HasValue() == false && graphHopper.HasValue() == false)
+                {
+                    // default for empty commandline is to do all.
+                    operations = OsmDataServiceOperations.All;
+                }
+                return 0;
+            });
+            commandLineApplication.Execute(args);
             return operations;
         }
 
         private static async Task Run(OsmDataServiceOperations operations)
         {
-            var logger = new ConsoleLogger();
+            ILogger logger = null;
             try
             {
-                var container = new UnityContainer();
-                UnityRegisterDataAccess.RegisterUnityTypes(container, logger);
-                UnityRegisterApi.RegisterUnityTypes(container);
-                var osmDataService = container.Resolve<IOsmDataService>();
-                var fileSystemHelper = container.Resolve<IFileSystemHelper>();
-                var directory = fileSystemHelper.GetCurrentDirectory();
+                var location = System.Reflection.Assembly.GetEntryAssembly().Location;
+                var directory = Path.GetDirectoryName(location);
+                var fileProvider = new PhysicalFileProvider(directory);
+                ILoggerFactory loggerFactory = new LoggerFactory().AddConsole(LogLevel.Debug);
+                var config = new ConfigurationBuilder().Build();
+                var container = new ServiceCollection()
+                    .AddLogging()
+                    .AddIHMDataAccess()
+                    .AddIHMApi()
+                    .AddSingleton((provider) => loggerFactory.CreateLogger("Updater"))
+                    .AddSingleton<IFileProvider, PhysicalFileProvider>((serviceProvider) => fileProvider)
+                    .AddSingleton((serviceProvider) => fileProvider)
+                    .AddOptions()
+                    .BuildServiceProvider();
+                var osmDataService = container.GetRequiredService<IOsmDataService>();
+                logger = container.GetRequiredService<ILogger>();
+                
                 await osmDataService.Initialize(directory);
                 await osmDataService.UpdateData(operations);
             }

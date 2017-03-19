@@ -2,9 +2,9 @@
 using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx;
-using IsraelHiking.API.Gpx.GpxTypes;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters
 {

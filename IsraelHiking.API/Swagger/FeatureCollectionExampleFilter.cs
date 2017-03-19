@@ -16,6 +16,10 @@ namespace IsraelHiking.API.Swagger
     {
         public void Apply(Schema model, SchemaFilterContext context)
         {
+            if (context == null)
+            {
+                return;
+            }
             if (context.SystemType != typeof(FeatureCollection))
             {
                 return;

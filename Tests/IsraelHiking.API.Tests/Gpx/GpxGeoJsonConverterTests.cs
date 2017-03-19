@@ -1,8 +1,8 @@
 ﻿using System.Linq;
 using IsraelHiking.API.Converters;
-using IsraelHiking.API.Gpx.GpxTypes;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Tests.Gpx
 {

@@ -313,11 +313,11 @@ namespace IsraelHiking.Services.Layers {
             if (this.hashService.siteUrl) {
                 this.$http.get(Common.Urls.urls + this.hashService.siteUrl)
                     .success((siteUrl: Common.SiteUrl) => {
-                        let data = JSON.parse(siteUrl.JsonData) as Common.DataContainer;
+                        let data = JSON.parse(siteUrl.jsonData) as Common.DataContainer;
                         this.setJsonData(data);
                         this.addOverlaysFromHash(data.overlays);
                         this.hashService.clear();
-                        this.toastr.info(siteUrl.Description, siteUrl.Title);
+                        this.toastr.info(siteUrl.description, siteUrl.title);
                         deferred.resolve();
                     }).error(() => {
                         let data = this.hashService.getDataContainer();

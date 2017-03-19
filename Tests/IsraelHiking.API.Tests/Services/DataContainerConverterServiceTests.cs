@@ -8,7 +8,6 @@ using ICSharpCode.SharpZipLib.GZip;
 using ICSharpCode.SharpZipLib.Zip;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
-using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -16,6 +15,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Tests.Services
 {

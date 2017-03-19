@@ -123,7 +123,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostOpenFile_NoFile_ShouldReturnBadRequest()
         {
-            var results = _controller.PostOpenFile(new IFormFile[0]).Result as BadRequestResult;
+            var results = _controller.PostOpenFile(null).Result as BadRequestResult;
 
             Assert.IsNotNull(results);
         }
@@ -135,7 +135,7 @@ namespace IsraelHiking.API.Tests.Controllers
             file.FileName.Returns("somefile.gpx");
             file.When(f => f.CopyToAsync(Arg.Any<MemoryStream>())).Do(x => (x[0] as MemoryStream).Write(Encoding.ASCII.GetBytes(GPX_DATA), 0, Encoding.ASCII.GetBytes(GPX_DATA).Length));
 
-            var results = _controller.PostOpenFile(new[] { file }).Result as OkObjectResult;
+            var results = _controller.PostOpenFile(file).Result as OkObjectResult;
             Assert.IsNotNull(results);
             var dataContainer = results.Value as DataContainer;
 

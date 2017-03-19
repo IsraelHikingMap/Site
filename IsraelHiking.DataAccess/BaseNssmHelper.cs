@@ -1,16 +1,20 @@
 ﻿using System;
 using System.IO;
-using System.Linq;
-//using System.ServiceProcess;
 using System.Threading.Tasks;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess
 {
-    /* HM TODO: bring this back
     public abstract class BaseNssmHelper : INssmHelper
     {
+        private enum ServiceStatus
+        {
+            DoesNotExist,
+            Running,
+            Stopped,
+        };
+
         private const string NSSM_EXE = "nssm.exe";
 
         protected ILogger Logger { get; }
@@ -39,8 +43,7 @@ namespace IsraelHiking.DataAccess
                     Logger.LogError("NSSM file is missing at: " + _nssm);
                 }
                 WorkingDirectory = Path.Combine(serverPath, RelativePath);
-                var serviceController = GetService();
-                if (serviceController != null && serviceController.Status == ServiceControllerStatus.Running)
+                if (GetServiceStatus() == ServiceStatus.Running)
                 {
                     return;
                 }
@@ -68,8 +71,7 @@ namespace IsraelHiking.DataAccess
             ProcessHelper.Start(_nssm, $"set {Name} Description \"{Description}\"", WorkingDirectory);
             Start();
             Task.Delay(new TimeSpan(0, 0, 0, 3)).Wait();
-            var serviceController = GetService();
-            if (serviceController == null || serviceController.Status != ServiceControllerStatus.Running)
+            if (GetServiceStatus() != ServiceStatus.Running)
             {
                 Logger.LogError($"Unable to add {Name} service to windows...");
             }
@@ -85,7 +87,7 @@ namespace IsraelHiking.DataAccess
             ProcessHelper.Start(_nssm, $"stop {Name}", WorkingDirectory);
             ProcessHelper.Start(_nssm, $"remove {Name} confirm", WorkingDirectory);
             Task.Delay(new TimeSpan(0, 0, 0, 3)).Wait();
-            if (GetService() != null)
+            if (GetServiceStatus() != ServiceStatus.DoesNotExist)
             {
                 Logger.LogError($"Unable to remove {Name} service to windows...");
             }
@@ -95,13 +97,18 @@ namespace IsraelHiking.DataAccess
             }
         }
 
-        private ServiceController GetService()
+        private ServiceStatus GetServiceStatus()
         {
-            return ServiceController.GetServices().FirstOrDefault(s => s.DisplayName == Name.Replace("\"", string.Empty));
+            ProcessHelper.Start(_nssm, $"status {Name}", WorkingDirectory);
+            switch (ProcessHelper.StandardOutput)
+            {
+                case "SERVICE_RUNNING":
+                    return ServiceStatus.Running;
+                case "SERVICE_STOPPED":
+                    return ServiceStatus.Stopped;
+                default:
+                    return ServiceStatus.DoesNotExist;
+            }
         }
-
-
-
     }
-    */
 }

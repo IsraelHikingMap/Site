@@ -6,7 +6,7 @@ namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IOsmRepository
     {
-        Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(string osmFilePath);
-        Task<List<CompleteWay>> GetAllHighways(string osmFilePath);
+        Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(string osmFileRelativePath);
+        Task<List<CompleteWay>> GetAllHighways(string osmFileRelativePath);
     }
 }

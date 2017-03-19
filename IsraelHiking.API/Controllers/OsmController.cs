@@ -5,7 +5,6 @@ using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx;
-using IsraelHiking.API.Gpx.GpxTypes;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
@@ -17,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using GeoAPI.CoordinateSystems.Transformations;
 using Microsoft.Extensions.Options;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Controllers
 {

@@ -128,13 +128,13 @@
                     }
                 }
                 var siteUrl = {
-                    Title: title,
-                    Description: description,
-                    JsonData: JSON.stringify(dataToSave),
-                    OsmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
+                    title: title,
+                    description: description,
+                    jsonData: JSON.stringify(dataToSave),
+                    osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
                 } as Common.SiteUrl;
                 $http.post(Common.Urls.urls, siteUrl).success((siteUrlResponse: Common.SiteUrl) => {
-                    $scope.siteUrlId = siteUrlResponse.Id;
+                    $scope.siteUrlId = siteUrlResponse.id;
                     $scope.shareAddress = osmUserService.getUrlFromSiteUrlId(siteUrlResponse);
                     $scope.imageUrl = osmUserService.getImageFromSiteUrlId(siteUrlResponse);
                     let escaped = ($window as any).encodeURIComponent($scope.shareAddress);

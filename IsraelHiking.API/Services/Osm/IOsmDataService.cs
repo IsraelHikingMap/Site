@@ -36,7 +36,6 @@ namespace IsraelHiking.API.Services.Osm
         /// <summary>
         /// Initializes the service.
         /// </summary>
-        /// <param name="serverPath">Bin folder where all dlls are.</param>
         Task Initialize(string serverPath);
         /// <summary>
         /// Gets and updates the OSM data in a local repositories

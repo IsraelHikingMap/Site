@@ -2,8 +2,8 @@
 using System.Linq;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
-using IsraelHiking.API.Gpx.GpxTypes;
 using System.Xml;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters
 {

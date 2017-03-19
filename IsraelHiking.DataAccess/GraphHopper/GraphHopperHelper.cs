@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.DataAccess.GraphHopper
 {
-    /* HM TODO: bring this back
     public class GraphHopperHelper : BaseNssmHelper, IGraphHopperHelper
     {
         private const string GH_NEW_CACHE_FOLDER = "israel-and-palestine-latest.osm-gh-new";
@@ -22,7 +21,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
 
         public GraphHopperHelper(ILogger logger, IProcessHelper processHelper) : base(logger, processHelper) { }
 
-        public Task UpdateData(string osmFilePath)
+        public Task UpdateData(string osmFileFullPath)
         {
             return Task.Run(() =>
             {
@@ -33,7 +32,7 @@ namespace IsraelHiking.DataAccess.GraphHopper
 
                 Logger.LogInformation("Creating graph hopper cache based on latest pbf file");
                 ProcessHelper.Start("cmd",
-                    $"/c java -cp \"*\" com.graphhopper.tools.Import config=config-example.properties datareader.file={osmFilePath} graph.location={GH_NEW_CACHE_FOLDER} > UpdateCache.log",
+                    $"/c java -cp \"*\" com.graphhopper.tools.Import config=config-example.properties datareader.file={osmFileFullPath} graph.location={GH_NEW_CACHE_FOLDER} > UpdateCache.log",
                     WorkingDirectory, 30*60*1000);
 
                 Stop();
@@ -76,5 +75,4 @@ namespace IsraelHiking.DataAccess.GraphHopper
             }
         }
     }
-    */
 }

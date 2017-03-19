@@ -77,16 +77,16 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A <see cref="DataContainer"/> after conversion of the file uploaded</returns>
         [HttpPost]
         [Route("open")]
-        public async Task<IActionResult> PostOpenFile(ICollection<IFormFile> files)
+        public async Task<IActionResult> PostOpenFile(IFormFile file)
         {
-            if (files.Count == 0)
+            if (file == null)
             {
                 return BadRequest();
             }
             using (var memoryStream = new MemoryStream())
             {
-                var fileName = files.First().FileName;
-                await files.First().CopyToAsync(memoryStream);
+                var fileName = file.FileName;
+                await file.CopyToAsync(memoryStream);
                 var dataContainer = await _dataContainerConverterService.ToDataContainer(memoryStream.ToArray(), fileName);
                 return Ok(dataContainer);
             }

@@ -1,6 +1,6 @@
 ﻿using System.Linq;
 using IsraelHiking.API.Gpx;
-using IsraelHiking.API.Gpx.GpxTypes;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters.ConverterFlows
 {

@@ -7,6 +7,7 @@ namespace IsraelHiking.DataAccess
     public class ProcessHelper : IProcessHelper
     {
         private readonly ILogger _logger;
+        public string StandardOutput { get; private set; }
 
         public ProcessHelper(ILogger logger)
         {
@@ -30,9 +31,20 @@ namespace IsraelHiking.DataAccess
                     Arguments = cmdArguments,
                     WorkingDirectory = workingDirectory,
                     CreateNoWindow = true,
+                    UseShellExecute = false,
+                    RedirectStandardOutput = true,
                 };
+                StandardOutput = string.Empty;
                 process.Start();
+                StandardOutput = process.StandardOutput.ReadToEnd();
+
                 process.WaitForExit(timeOutInMilliseconds);
+
+                while (!process.StandardOutput.EndOfStream)
+                {
+                    StandardOutput += process.StandardOutput.ReadLine();
+                }
+                StandardOutput = StandardOutput.Replace("\0", string.Empty).Trim();
                 if (process.ExitCode == 0)
                 {
                     _logger.LogDebug($"Process {fileName} finished succesfully");

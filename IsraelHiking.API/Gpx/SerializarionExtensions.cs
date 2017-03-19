@@ -1,10 +1,10 @@
 ﻿using System.IO;
 using System.Linq;
 using System.Xml.Serialization;
-using IsraelHiking.API.Gpx.GpxTypes;
 using NetTopologySuite.Features;
-using NetTopologySuite.IO;
+//using NetTopologySuite.IO;
 using Newtonsoft.Json;
+
 
 namespace IsraelHiking.API.Gpx
 {
@@ -14,14 +14,12 @@ namespace IsraelHiking.API.Gpx
         {
             using (var outputStream = new MemoryStream())
             {
-                // HM TODO: fix this:
-                return new byte[0];
-                //var writer = new StreamWriter(outputStream);
-                //var jsonWriter = new JsonTextWriter(writer);
-                //var serializer = new GeoJsonSerializer();
-                //serializer.Serialize(jsonWriter, featureCollection);
-                //jsonWriter.Flush();
-                //return outputStream.ToArray();
+                var writer = new StreamWriter(outputStream);
+                var jsonWriter = new JsonTextWriter(writer);
+                var serializer = GeoJsonSerializer.Create();
+                serializer.Serialize(jsonWriter, featureCollection);
+                jsonWriter.Flush();
+                return outputStream.ToArray();
             }
         }
 
@@ -29,14 +27,12 @@ namespace IsraelHiking.API.Gpx
         {
             using (var stream = new MemoryStream(featureCollectionContent))
             {
-                // HM TODO: fix this:
-                return new FeatureCollection();
-                //var serializer = new GeoJsonSerializer();
-                //using (var streamReader = new StreamReader(stream))
-                //using (var jsonTextReader = new JsonTextReader(streamReader))
-                //{
-                //    return serializer.Deserialize<FeatureCollection>(jsonTextReader);
-                //}
+                var serializer = GeoJsonSerializer.Create();
+                using (var streamReader = new StreamReader(stream))
+                using (var jsonTextReader = new JsonTextReader(streamReader))
+                {
+                    return serializer.Deserialize<FeatureCollection>(jsonTextReader);
+                }
             }
         }
 
