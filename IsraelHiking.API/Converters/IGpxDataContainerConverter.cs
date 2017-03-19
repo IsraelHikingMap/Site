@@ -1,5 +1,5 @@
-﻿using IsraelHiking.API.Gpx.GpxTypes;
-using IsraelHiking.Common;
+﻿using IsraelHiking.Common;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters
 {

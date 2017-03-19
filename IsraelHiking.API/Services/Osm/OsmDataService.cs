@@ -61,18 +61,17 @@ namespace IsraelHiking.API.Services.Osm
             _elasticSearchHelper = elasticSearchHelper;
             _osmRepository = osmRepository;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
-            _logger = logger;
-            
+            _logger = logger;   
         }
 
         /// <inheritdoc />
         public async Task Initialize(string serverPath)
         {
-            _logger.LogInformation("Initializing OSM data service with server path: " + serverPath);
             _serverPath = serverPath;
-            await _graphHopperHelper.Initialize(serverPath);
-            await _elasticSearchHelper.Initialize(serverPath);
-            _logger.LogInformation("Finished initializing OSM data service with server path: " + serverPath);
+            _logger.LogInformation("Initializing OSM data service with server path: " + _serverPath);
+            await _graphHopperHelper.Initialize(_serverPath);
+            await _elasticSearchHelper.Initialize(_serverPath);
+            _logger.LogInformation("Finished initializing OSM data service with server path: " + _serverPath);
         }
 
         /// <inheritdoc />
@@ -86,23 +85,23 @@ namespace IsraelHiking.API.Services.Osm
                     return;
                 }
                 _logger.LogInformation("Updating OSM data");
-                var osmFilePath = Path.Combine(_serverPath, PBF_FILE_NAME);
+                var osmFileFullPath = Path.Combine(_serverPath, PBF_FILE_NAME);
                 if ((operations & OsmDataServiceOperations.GetOsmFile) != 0)
                 {
-                    await FetchOsmFile(osmFilePath);
+                    await FetchOsmFile(osmFileFullPath);
                 }
-                if (_fileProvider.GetFileInfo(osmFilePath).Exists == false)
+                if (_fileProvider.GetFileInfo(PBF_FILE_NAME).Exists == false)
                 {
-                    _logger.LogError(osmFilePath + " File is missing. Fatal error - exiting.");
+                    _logger.LogError(osmFileFullPath + " File is missing. Fatal error - exiting.");
                     return;
                 }
                 if ((operations & OsmDataServiceOperations.UpdateElasticSearch) != 0)
                 {
-                    await UpdateElasticSearchFromFile(osmFilePath);
+                    await UpdateElasticSearchFromFile(PBF_FILE_NAME);
                 }
                 if ((operations & OsmDataServiceOperations.UpdateGraphHopper) != 0)
                 {
-                    await _graphHopperHelper.UpdateData(osmFilePath);
+                    await _graphHopperHelper.UpdateData(osmFileFullPath);
                 }
                 _logger.LogInformation("Finished Updating OSM data");
             }
@@ -112,28 +111,30 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
-        private async Task FetchOsmFile(string osmFilePath)
+        private async Task FetchOsmFile(string osmFullFilePath)
         {
             var address = "http://download.geofabrik.de/asia/" + PBF_FILE_NAME;
             var length = await _remoteFileSizeFetcherGateway.GetFileSize(address);
-            var fileInfo = _fileProvider.GetFileInfo(osmFilePath);
+            var fileInfo = _fileProvider.GetFileInfo(PBF_FILE_NAME);
             if (!fileInfo.Exists || fileInfo.Length != length)
             {
+                _logger.LogInformation("Downloading OSM database file");
                 var response = await _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).GetFileContent(address);
-                _fileSystemHelper.WriteAllBytes(osmFilePath, response.Content);
+                _fileSystemHelper.WriteAllBytes(osmFullFilePath, response.Content);
+                _logger.LogInformation("Finished downloading OSM database file");
             }
             else
             {
-                _logger.LogInformation("No need to download file, existing file size is the same as the server");
+                _logger.LogInformation("No need to download OSM database file, existing file size is the same as the server");
             }
         }
 
-        private async Task UpdateElasticSearchFromFile(string osmFilePath)
+        private async Task UpdateElasticSearchFromFile(string osmFileRelativePath)
         {
             _logger.LogInformation("Updating Elastic Search OSM data");
-            var osmNamesDictionary = await _osmRepository.GetElementsWithName(osmFilePath);
+            var osmNamesDictionary = await _osmRepository.GetElementsWithName(osmFileRelativePath);
             var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-            var osmHighways = await _osmRepository.GetAllHighways(osmFilePath);
+            var osmHighways = await _osmRepository.GetAllHighways(osmFileRelativePath);
             var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
             _elasticSearchGateway.Initialize(deleteIndex: true);
             UpdateElesticSearchNamesDataUsingPaging(geoJsonNamesDictionary);

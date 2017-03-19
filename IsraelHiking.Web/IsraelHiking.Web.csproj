@@ -46,8 +46,10 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.1" />
     <PackageReference Include="NEST" Version="5.2.0" />
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre3" />
+    <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-pre4" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJson" Version="1.15.0-pre3" />
     <PackageReference Include="OAuth.DotNetCore" Version="1.0.4" />
-    <PackageReference Include="OsmSharp" Version="6.0.0-alpha" />
+    <PackageReference Include="OsmSharp" Version="6.0.0-alpha2" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="1.0.0" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0-rc3" />
@@ -57,6 +59,12 @@
     <ProjectReference Include="..\IsraelHiking.Common\IsraelHiking.Common.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
+    <ProjectReference Include="..\IsraelHiking.Updater\IsraelHiking.Updater.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

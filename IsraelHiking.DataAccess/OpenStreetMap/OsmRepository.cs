@@ -23,13 +23,13 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _fileProvider = fileProvider;
         }
 
-        public Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(string osmFilePath)
+        public Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(string osmFileRelativePath)
         {
             return Task.Run(() =>
             {
-                using (var stream = _fileProvider.GetFileInfo(osmFilePath).CreateReadStream())
+                using (var stream = _fileProvider.GetFileInfo(osmFileRelativePath).CreateReadStream())
                 {
-                    _logger.LogInformation($"Reading {osmFilePath} to memory - extracting only elements with name.");
+                    _logger.LogInformation($"Reading {osmFileRelativePath} to memory - extracting only elements with name.");
                     var source = new PBFOsmStreamSource(stream);
                     var completeSource = new OsmSimpleCompleteStreamSource(source);
                     var namesDictionary = completeSource
@@ -42,13 +42,13 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             });
         }
 
-        public Task<List<CompleteWay>> GetAllHighways(string osmFilePath)
+        public Task<List<CompleteWay>> GetAllHighways(string osmFileRelativePath)
         {
             return Task.Run(() =>
             {
-                using (var stream = _fileProvider.GetFileInfo(osmFilePath).CreateReadStream())
+                using (var stream = _fileProvider.GetFileInfo(osmFileRelativePath).CreateReadStream())
                 {
-                    _logger.LogInformation($"Reading {osmFilePath} to memory - extracting only highways.");
+                    _logger.LogInformation($"Reading {osmFileRelativePath} to memory - extracting only highways.");
                     var source = new PBFOsmStreamSource(stream);
                     var completeSource = new OsmSimpleCompleteStreamSource(source);
                     var higways = completeSource

@@ -2,11 +2,11 @@
     type RoutingType = "Hike" | "Bike" | "4WD" | "None";
 
     export interface SiteUrl {
-        Id: string;
-        Title: string;
-        Description: string;
-        JsonData: string;
-        OsmUserId: string;
+        id: string;
+        title: string;
+        description: string;
+        jsonData: string;
+        osmUserId: string;
     }
 
     export interface LayerData {

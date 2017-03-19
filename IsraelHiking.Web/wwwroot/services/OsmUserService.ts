@@ -140,21 +140,21 @@ namespace IsraelHiking.Services {
         }
 
         public updateSiteUrl = (siteUrl: Common.SiteUrl): angular.IPromise<{}> => {
-            return this.$http.put(Common.Urls.urls + siteUrl.Id, siteUrl);
+            return this.$http.put(Common.Urls.urls + siteUrl.id, siteUrl);
         }
 
         public deleteSiteUrl = (siteUrl: Common.SiteUrl): angular.IPromise<void> => {
-            return this.$http.delete(Common.Urls.urls + siteUrl.Id).then(() => {
-                _.remove(this.shares, s => s.Id === siteUrl.Id);
+            return this.$http.delete(Common.Urls.urls + siteUrl.id).then(() => {
+                _.remove(this.shares, s => s.id === siteUrl.id);
             });
         }
 
         public getImageFromSiteUrlId = (siteUrl: Common.SiteUrl) => {
-            return Common.Urls.images + siteUrl.Id;
+            return Common.Urls.images + siteUrl.id;
         }
 
         public getUrlFromSiteUrlId = (siteUrl: Common.SiteUrl) => {
-            return Common.Urls.baseAddress + this.getSiteUrlPostfix(siteUrl.Id);
+            return Common.Urls.baseAddress + this.getSiteUrlPostfix(siteUrl.id);
         }
 
         public getMissingParts(trace: ITrace): angular.IHttpPromise<{}> {

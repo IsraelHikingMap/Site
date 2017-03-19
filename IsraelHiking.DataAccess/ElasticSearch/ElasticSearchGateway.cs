@@ -7,9 +7,45 @@ using IsraelHiking.DataAccessInterfaces;
 using Nest;
 using Feature = NetTopologySuite.Features.Feature;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.IO.Converters;
+using Newtonsoft.Json;
+using Elasticsearch.Net;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
 {
+    public class GeoJsonSerializer : JsonNetSerializer
+    {
+        public GeoJsonSerializer(IConnectionSettingsValues settings) : base(settings)
+        {
+            OverwriteDefaultSerializers((s, cvs) =>
+            {
+                s.Converters.Add(new CoordinateConverter());
+                s.Converters.Add(new GeometryConverter());
+                s.Converters.Add(new FeatureCollectionConverter());
+                s.Converters.Add(new FeatureConverter());
+                s.Converters.Add(new AttributesTableConverter());
+                s.Converters.Add(new ICRSObjectConverter());
+                s.Converters.Add(new GeometryArrayConverter());
+                s.Converters.Add(new EnvelopeConverter());
+            });
+        }
+
+        public GeoJsonSerializer(IConnectionSettingsValues settings, JsonConverter statefulConverter) : base(settings, statefulConverter)
+        {
+            OverwriteDefaultSerializers((s, cvs) =>
+            {
+                s.Converters.Add(new CoordinateConverter());
+                s.Converters.Add(new GeometryConverter());
+                s.Converters.Add(new FeatureCollectionConverter());
+                s.Converters.Add(new FeatureConverter());
+                s.Converters.Add(new AttributesTableConverter());
+                s.Converters.Add(new ICRSObjectConverter());
+                s.Converters.Add(new GeometryArrayConverter());
+                s.Converters.Add(new EnvelopeConverter());
+            });
+        }
+    }
+
     public class ElasticSearchGateway : IElasticSearchGateway
     {
         private const string OSM_NAMES_INDEX = "osm_names";
@@ -26,8 +62,11 @@ namespace IsraelHiking.DataAccess.ElasticSearch
         public void Initialize(string uri = "http://localhost:9200/", bool deleteIndex = false)
         {
             _logger.LogInformation("Initialing elastic search with uri: " + uri);
+            var pool = new SingleNodeConnectionPool(new Uri(uri));
             var connectionString = new ConnectionSettings(
-                new Uri(uri))
+                pool,
+                new HttpConnection(),
+                new SerializerFactory(s => new GeoJsonSerializer(s)))
                 .DefaultIndex(OSM_NAMES_INDEX)
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
