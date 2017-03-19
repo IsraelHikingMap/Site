@@ -2,6 +2,7 @@
 using GeoAPI.Geometries;
 using IsraelHiking.API;
 using IsraelHiking.API.Controllers;
+using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccess.Database;
@@ -62,9 +63,13 @@ namespace IsraelHiking.Web
 
             services.AddTransient<IMathTransform, ItmWgs84MathTransfrom>((serviceProvider) => new ItmWgs84MathTransfrom(false));
             services.AddSingleton<IGeometryFactory, GeometryFactory>((serviceProvider) => new GeometryFactory(new PrecisionModel(100000000)));
+            services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "Israel Hiking API", Version = "v1" });
+                c.SchemaFilter<FeatureExampleFilter>();
+                c.SchemaFilter<FeatureCollectionExampleFilter>();
+                c.OperationFilter<AssignOAuthSecurityRequirements>();
             });
             services.AddEntityFrameworkSqlite().AddDbContext<IsraelHikingDbContext>();
             services.AddDirectoryBrowser();

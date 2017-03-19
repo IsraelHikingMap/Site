@@ -4,6 +4,7 @@ using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Swashbuckle.AspNetCore.Swagger;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Swagger
 {
@@ -14,22 +15,25 @@ namespace IsraelHiking.API.Swagger
     {
         public void Apply(Schema model, SchemaFilterContext context)
         {
+            if (context == null)
+            {
+                return;
+            }
             if (context.SystemType != typeof(Feature))
             {
                 return;
             }
-            // HM TODO: fix this
-            //var writer = new GeoJsonWriter();
-            //var exampleFeatureString = writer.Write(
-            //    new Feature(new LineString(new[]
-            //        {
-            //            new Coordinate(1, 2),
-            //            new Coordinate(3, 4),
-            //        }),
-            //        new AttributesTable())
-            //);
-            //model.Example = JsonConvert.DeserializeObject(exampleFeatureString);
-            //model.Default = JsonConvert.DeserializeObject(exampleFeatureString);
+            var writer = new GeoJsonWriter();
+            var exampleFeatureString = writer.Write(
+                new Feature(new LineString(new[]
+                    {
+                        new Coordinate(1, 2),
+                        new Coordinate(3, 4),
+                    }),
+                    new AttributesTable())
+            );
+            model.Example = JsonConvert.DeserializeObject(exampleFeatureString);
+            model.Default = JsonConvert.DeserializeObject(exampleFeatureString);
         }
     }
 }

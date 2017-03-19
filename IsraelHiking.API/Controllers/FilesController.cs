@@ -77,6 +77,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A <see cref="DataContainer"/> after conversion of the file uploaded</returns>
         [HttpPost]
         [Route("open")]
+        [ProducesResponseType(typeof(DataContainer), 200)]
         public async Task<IActionResult> PostOpenFile(IFormFile file)
         {
             if (file == null)

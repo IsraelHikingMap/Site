@@ -25,7 +25,7 @@ namespace IsraelHiking.API.Tests.Swagger
             var filter = new FeatureExampleFilter();
 
             var schema = new Schema();
-            filter.Apply(schema, null);
+            filter.Apply(schema, new Swashbuckle.AspNetCore.SwaggerGen.SchemaFilterContext(typeof(Feature), null, null));
 
             Assert.AreNotEqual(null, schema.Example);
         }

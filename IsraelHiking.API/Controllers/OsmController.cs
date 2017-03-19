@@ -112,9 +112,10 @@ namespace IsraelHiking.API.Controllers
         /// <param name="url">The url to fetch the file from - optional, use file upload if not provided</param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IActionResult> PostGpsTrace([FromBody]ICollection<IFormFile> files, [FromQuery]string url = "")
+        [ProducesResponseType(typeof(FeatureCollection), 200)]
+        public async Task<IActionResult> PostGpsTrace([FromBody]IFormFile file, [FromQuery]string url = "")
         {
-            var fileFetcherGatewayResponse = await GetFile(url, files);
+            var fileFetcherGatewayResponse = await GetFile(url, file);
             if (fileFetcherGatewayResponse == null)
             {
                 return BadRequest("Url is not provided or the file is empty... " + url);
@@ -145,32 +146,32 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         [Route("trace")]
         [HttpPost]
-        public async Task<IActionResult> PostUploadGpsTrace(ICollection<IFormFile> files)
+        public async Task<IActionResult> PostUploadGpsTrace(IFormFile file)
         {
-            var response = await GetFile(string.Empty, files);
+            var response = await GetFile(string.Empty, file);
             var gateway = _httpGatewayFactory.CreateOsmGateway(_cache.Get(User.Identity.Name));
             await gateway.UploadFile(response.FileName, new MemoryStream(response.Content));
             return Ok();
         }
 
-        private async Task<RemoteFileFetcherGatewayResponse> GetFile(string url, ICollection<IFormFile> files)
+        private async Task<RemoteFileFetcherGatewayResponse> GetFile(string url, IFormFile file)
         {
             if (string.IsNullOrEmpty(url) == false)
             {
                 var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(_cache.Get(User.Identity.Name));
                 return await fetcher.GetFileContent(url);
             }
-            if (files == null || !files.Any())
+            if (file == null)
             {
                 return null;
             }
             using (var memeoryStream = new MemoryStream())
             {
-                await files.First().CopyToAsync(memeoryStream);
+                await file.CopyToAsync(memeoryStream);
                 return new RemoteFileFetcherGatewayResponse
                 {
                     Content = memeoryStream.ToArray(),
-                    FileName = files.First().FileName
+                    FileName = file.FileName
                 };
             }
         }

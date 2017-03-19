@@ -2,9 +2,8 @@
 using System.Linq;
 using System.Xml.Serialization;
 using NetTopologySuite.Features;
-//using NetTopologySuite.IO;
 using Newtonsoft.Json;
-
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Gpx
 {

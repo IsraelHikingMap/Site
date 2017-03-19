@@ -22,12 +22,10 @@ namespace IsraelHiking.DataAccess
         private readonly IFileProvider _fileProvider;
         private readonly ConcurrentDictionary<Coordinate, short[,]> _elevationData;
         private readonly ConcurrentDictionary<Coordinate, Task> _initializationTaskPerLatLng;
-        private readonly ConfigurationData _options;
 
-        public ElevationDataStorage(ILogger logger, IOptions<ConfigurationData> options, IFileProvider fileProvider)
+        public ElevationDataStorage(ILogger logger, IFileProvider fileProvider)
         {
             _logger = logger;
-            _options = options.Value;
             _fileProvider = fileProvider;
             _elevationData = new ConcurrentDictionary<Coordinate, short[,]>();
             _initializationTaskPerLatLng = new ConcurrentDictionary<Coordinate, Task>();
@@ -38,7 +36,7 @@ namespace IsraelHiking.DataAccess
             if (_fileProvider.GetDirectoryContents(ELEVATION_CACHE).Any() == false)
             {
                 _logger.LogError($"!!! The folder: {ELEVATION_CACHE} does not exists, please change the BinariesFolder key in the configuration file !!!");
-                return Task.Run(() => { throw new Exception(_fileProvider.GetFileInfo(ELEVATION_CACHE).PhysicalPath); });
+                return Task.CompletedTask;
             }
             var hgtZipFiles = _fileProvider.GetDirectoryContents(ELEVATION_CACHE);
             _logger.LogDebug("Found " + hgtZipFiles.Count() + " files in: " + _fileProvider.GetFileInfo(ELEVATION_CACHE).PhysicalPath);

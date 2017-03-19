@@ -40,6 +40,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>The calculated route</returns>
         //GET /api/routing?from=31.8239,35.0375&to=31.8213,35.0965&type=hike
         [HttpGet]
+        [ProducesResponseType(typeof(FeatureCollection), 200)]
         public async Task<IActionResult> GetRouting(string from, string to, string type)
         {
             LineString lineString;
