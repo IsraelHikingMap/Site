@@ -13,9 +13,9 @@ using Elasticsearch.Net;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
 {
-    public class GeoJsonSerializer : JsonNetSerializer
+    public class GeoJsonNetSerializer : JsonNetSerializer
     {
-        public GeoJsonSerializer(IConnectionSettingsValues settings) : base(settings)
+        public GeoJsonNetSerializer(IConnectionSettingsValues settings) : base(settings)
         {
             OverwriteDefaultSerializers((s, cvs) =>
             {
@@ -30,7 +30,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             });
         }
 
-        public GeoJsonSerializer(IConnectionSettingsValues settings, JsonConverter statefulConverter) : base(settings, statefulConverter)
+        public GeoJsonNetSerializer(IConnectionSettingsValues settings, JsonConverter statefulConverter) : base(settings, statefulConverter)
         {
             OverwriteDefaultSerializers((s, cvs) =>
             {
@@ -66,7 +66,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             var connectionString = new ConnectionSettings(
                 pool,
                 new HttpConnection(),
-                new SerializerFactory(s => new GeoJsonSerializer(s)))
+                new SerializerFactory(s => new GeoJsonNetSerializer(s)))
                 .DefaultIndex(OSM_NAMES_INDEX)
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
