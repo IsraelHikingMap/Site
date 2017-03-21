@@ -62,6 +62,9 @@
     <ProjectReference Include="..\IsraelHiking.Updater\IsraelHiking.Updater.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Content Update="appsettings.Production.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
