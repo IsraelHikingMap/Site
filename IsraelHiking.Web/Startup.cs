@@ -102,12 +102,16 @@ namespace IsraelHiking.Web
             app.UseMvc();
             app.UseDefaultFiles();
             app.UseStaticFiles();
-            app.UseDirectoryBrowser(new DirectoryBrowserOptions()
+            var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
+            foreach (var directory in configurationData.ListingDictionary)
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @"bin")),
-                RequestPath = new PathString("/bin"),
-                Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices.GetRequiredService<IFileSystemHelper>())
-            });
+                app.UseDirectoryBrowser(new DirectoryBrowserOptions()
+                {
+                    FileProvider = new PhysicalFileProvider(directory.Value),
+                    RequestPath = new PathString("/" + directory.Key),
+                    Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices.GetRequiredService<IFileSystemHelper>())
+                });
+            }
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
