@@ -105,6 +105,12 @@ namespace IsraelHiking.Web
             var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
             foreach (var directory in configurationData.ListingDictionary)
             {
+                app.UseFileServer(new FileServerOptions
+                {
+                    FileProvider = new PhysicalFileProvider(directory.Value),
+                    RequestPath = new PathString("/" + directory.Key),
+                    EnableDirectoryBrowsing = true,
+                });
                 app.UseDirectoryBrowser(new DirectoryBrowserOptions()
                 {
                     FileProvider = new PhysicalFileProvider(directory.Value),
