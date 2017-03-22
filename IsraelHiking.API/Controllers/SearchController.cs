@@ -58,7 +58,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="feature">The feature to convert</param>
         /// <returns>The converted feature</returns>
         [HttpPost]
-        public async Task<DataContainer> PostConvertSearchResults(Feature feature)
+        public async Task<DataContainer> PostConvertSearchResults([FromBody]Feature feature)
         {
             var name = "israelHiking";
             if (feature.Attributes.GetNames().Contains("name"))

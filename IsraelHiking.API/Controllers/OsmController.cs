@@ -102,7 +102,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [Authorize]
         [HttpPut]
-        public async Task PutGpsTraceIntoOsm(Feature feature)
+        public async Task PutGpsTraceIntoOsm([FromBody]Feature feature)
         {
             var tags = feature.Attributes.GetNames().ToDictionary(n => n, n => feature.Attributes[n].ToString());
             await _osmLineAdderService.Add(feature.Geometry as LineString, tags, _cache.Get(User.Identity.Name));
