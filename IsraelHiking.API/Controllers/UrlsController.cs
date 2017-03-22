@@ -91,7 +91,7 @@ namespace IsraelHiking.API.Controllers
         // POST api/urls
         [HttpPost]
         [ProducesResponseType(typeof(SiteUrl), 200)]
-        public async Task<IActionResult> PostSiteUrl(SiteUrl siteUrl)
+        public async Task<IActionResult> PostSiteUrl([FromBody]SiteUrl siteUrl)
         {
             if (string.IsNullOrWhiteSpace(siteUrl.OsmUserId) == false && siteUrl.OsmUserId != User.Identity.Name)
             {
@@ -122,7 +122,7 @@ namespace IsraelHiking.API.Controllers
         [HttpPut]
         [Route("{id}")]
         [ProducesResponseType(typeof(SiteUrl), 200)]
-        public async Task<IActionResult> PutSiteUrl(string id, SiteUrl siteUrl)
+        public async Task<IActionResult> PutSiteUrl(string id, [FromBody]SiteUrl siteUrl)
         {
             var siteUrlFromDatabase = await _repository.GetUrlById(id);
             if (siteUrlFromDatabase == null)
