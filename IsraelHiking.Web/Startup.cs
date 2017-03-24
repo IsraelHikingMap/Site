@@ -11,6 +11,7 @@ using IsraelTransverseMercator;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
@@ -25,9 +26,112 @@ using NetTopologySuite.IO.Converters;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
+using System.Text.RegularExpressions;
 
 namespace IsraelHiking.Web
 {
+    // HM TODO: workaround untill issue iw resolved:
+    // https://github.com/aspnet/BasicMiddleware/issues/220
+
+    public class RewriteWithQueryRule : IRule
+    {
+        private readonly TimeSpan _regexTimeout = TimeSpan.FromSeconds(1);
+        public Regex InitialMatch { get; }
+        public string Replacement { get; }
+        public bool StopProcessing { get; }
+        public RewriteWithQueryRule(string regex, string replacement, bool stopProcessing)
+        {
+            if (string.IsNullOrEmpty(regex))
+            {
+                throw new ArgumentException(nameof(regex));
+            }
+
+            if (string.IsNullOrEmpty(replacement))
+            {
+                throw new ArgumentException(nameof(replacement));
+            }
+
+            InitialMatch = new Regex(regex, RegexOptions.Compiled | RegexOptions.CultureInvariant, _regexTimeout);
+            Replacement = replacement;
+            StopProcessing = stopProcessing;
+        }
+
+        public virtual void ApplyRule(RewriteContext context)
+        {
+            var pathWithQuery = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
+            Match initMatchResults;
+            if (pathWithQuery == PathString.Empty)
+            {
+                initMatchResults = InitialMatch.Match(pathWithQuery.ToString());
+            }
+            else
+            {
+                initMatchResults = InitialMatch.Match(pathWithQuery.ToString().Substring(1));
+            }
+            if (initMatchResults.Success)
+            {
+                var result = initMatchResults.Result(Replacement);
+                var request = context.HttpContext.Request;
+
+                if (StopProcessing)
+                {
+                    context.Result = RuleResult.SkipRemainingRules;
+                }
+
+                if (string.IsNullOrEmpty(result))
+                {
+                    result = "/";
+                }
+
+                if (result.IndexOf("://", StringComparison.Ordinal) >= 0)
+                {
+                    string scheme;
+                    HostString host;
+                    PathString pathString;
+                    QueryString query;
+                    FragmentString fragment;
+                    UriHelper.FromAbsolute(result, out scheme, out host, out pathString, out query, out fragment);
+
+                    request.Scheme = scheme;
+                    request.Host = host;
+                    request.Path = pathString;
+                    request.QueryString = query.Add(request.QueryString);
+                }
+                else
+                {
+                    var split = result.IndexOf('?');
+                    if (split >= 0)
+                    {
+                        var newPath = result.Substring(0, split);
+                        if (newPath[0] == '/')
+                        {
+                            request.Path = PathString.FromUriComponent(newPath);
+                        }
+                        else
+                        {
+                            request.Path = PathString.FromUriComponent('/' + newPath);
+                        }
+                        request.QueryString = request.QueryString.Add(
+                            QueryString.FromUriComponent(
+                                result.Substring(split)));
+                    }
+                    else
+                    {
+                        if (result[0] == '/')
+                        {
+                            request.Path = PathString.FromUriComponent(result);
+                        }
+                        else
+                        {
+                            request.Path = PathString.FromUriComponent('/' + result);
+                        }
+                    }
+                }
+
+                //context.Logger?.RewriteSummary(result);
+            }
+        }
+    }
 
     public class Startup
     {
@@ -87,8 +191,10 @@ namespace IsraelHiking.Web
             loggerFactory.AddConsole();
             loggerFactory.AddFile("Logs/IsraelHiking-{Date}.log");
 
-            var rewriteOptions = new RewriteOptions()
-                .AddRewrite(".*escaped_fragment_=/%3Fs=(.*)", "api/opengraph/$1", skipRemainingRules: false);
+            var rewriteOptions = new RewriteOptions();
+            rewriteOptions.Rules.Add(new RewriteWithQueryRule(".*_escaped_fragment_=%2F%3Fs%3D(.*)", "api/opengraph/$1", false));
+            //.AddRewrite(".*escaped_fragment_=/%3Fs=(.*)", "api/opengraph/$1", skipRemainingRules: false)
+            //.AddRewrite(".*_escaped_fragment_=%2F%3Fs%3D(.*)", "api/opengraph/$1", skipRemainingRules: false)
 
             if (env.IsDevelopment())
             {
@@ -96,7 +202,7 @@ namespace IsraelHiking.Web
             }
             else
             {
-                rewriteOptions.AddRedirectToHttps();
+                //rewriteOptions.AddRedirectToHttps();
             }
             app.UseRewriter(rewriteOptions);
 
@@ -104,6 +210,16 @@ namespace IsraelHiking.Web
             jwtBearerOptions.SecurityTokenValidators.Clear();
             jwtBearerOptions.SecurityTokenValidators.Add(app.ApplicationServices.GetRequiredService<ISecurityTokenValidator>());
             app.UseJwtBearerAuthentication(jwtBearerOptions);
+
+            app.Use(async (context, next) =>
+            {
+                await next();
+                if (context.Response.StatusCode == 404)
+                {
+                    context.Request.Path = "/resourceNotFound.html";
+                    await next();
+                }
+            });
 
             app.UseMvc();
             app.UseDefaultFiles();
