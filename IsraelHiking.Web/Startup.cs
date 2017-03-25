@@ -218,6 +218,8 @@ namespace IsraelHiking.Web
                 {
                     context.Request.Path = "/resourceNotFound.html";
                     await next();
+                    // return 404 error code instead of 200.
+                    context.Response.StatusCode = 404;
                 }
             });
 
