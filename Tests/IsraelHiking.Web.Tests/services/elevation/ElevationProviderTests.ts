@@ -26,7 +26,7 @@ namespace IsraelHiking.Tests.Services.Elevation {
         });
 
         it("Should update height data", () => {
-            var latlngzs = [<Common.LatLngZ>{ lat: 0, lng: 0, z: 0 }];
+            var latlngzs = [{ lat: 0, lng: 0, z: 0 } as Common.LatLngZ];
             $httpBackend.whenGET(ADDRESS).respond([1]);
 
             elevationProvider.updateHeights(latlngzs);
@@ -36,7 +36,7 @@ namespace IsraelHiking.Tests.Services.Elevation {
         });
 
         it("Should not call provider bacause all coordinates has elevation", () => {
-            var latlngzs = [<Common.LatLngZ>{ lat: 0, lng: 0, z: 1 }];
+            var latlngzs = [{ lat: 0, lng: 0, z: 1 } as Common.LatLngZ];
 
             elevationProvider.updateHeights(latlngzs);
 

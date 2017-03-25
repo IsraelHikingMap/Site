@@ -1,10 +1,8 @@
 ﻿namespace IsraelHiking.Services {
-    export class HashService {
+    export class HashService extends ObjectWithMap {
         public static MARKERS = "markers";
         public static MAP_LOCATION_CHANGED = "mapLocationChanged";
 
-        private static ZOOM_KEY = "Zoom";
-        private static LATLNG_KEY = "LatLng";
         private static ARRAY_DELIMITER = ";";
         private static SPILT_REGEXP = /[:;]+/;
         private static MARKER_SPECIAL_CHARACTERS_REGEXP = /[:;,]+/;
@@ -20,8 +18,6 @@
         private dataContainer: Common.DataContainer;
         private changingAddress: boolean;
 
-        public latlng: L.LatLng;
-        public zoom: number;
         public searchTerm: string;
         public externalUrl: string;
         public siteUrl: string;
@@ -30,12 +26,13 @@
         constructor($location: angular.ILocationService,
             $window: angular.IWindowService,
             $rootScope: angular.IScope,
-            localStorageService: angular.local.storage.ILocalStorageService) {
+            localStorageService: angular.local.storage.ILocalStorageService,
+            mapService: MapService) {
+            super(mapService);
             this.$location = $location;
             this.$rootScope = $rootScope;
             this.localStorageService = localStorageService;
-            this.latlng = this.localStorageService.get<L.LatLng>(HashService.LATLNG_KEY) || new L.LatLng(31.773, 35.12);
-            this.zoom = this.localStorageService.get<number>(HashService.ZOOM_KEY) || 13;
+
             this.dataContainer = { routes: [] } as Common.DataContainer;
             this.searchTerm = "";
             this.changingAddress = false;
@@ -53,7 +50,13 @@
                     $window.location.reload();
                     return;
                 }
-                this.$rootScope.$broadcast(HashService.MAP_LOCATION_CHANGED, latLngZ);
+
+                this.map.setZoom(latLngZ.z);
+                this.map.panTo(latLngZ);
+            });
+
+            this.map.on("moveend", () => {
+                this.updateUrl();
             });
         }
 
@@ -62,9 +65,9 @@
         }
 
         private updateUrl = () => {
-            var path = "/" + this.zoom +
-                "/" + this.latlng.lat.toFixed(HashService.PERSICION) +
-                "/" + this.latlng.lng.toFixed(HashService.PERSICION);
+            var path = "/" + this.map.getZoom() +
+                "/" + this.map.getCenter().lat.toFixed(HashService.PERSICION) +
+                "/" + this.map.getCenter().lng.toFixed(HashService.PERSICION);
             this.changingAddress = this.$location.path() !== path;
             this.$location.path(path).replace();
             if (!this.$rootScope.$$phase) {
@@ -79,15 +82,6 @@
                 this.$location.search({}).replace();
             }
 
-        }
-
-        public updateLocation = (latlng: L.LatLng, zoom: number) => {
-            this.latlng.lat = latlng.lat;
-            this.latlng.lng = latlng.lng;
-            this.zoom = zoom;
-            this.localStorageService.set(HashService.LATLNG_KEY, this.latlng);
-            this.localStorageService.set(HashService.ZOOM_KEY, this.zoom);
-            this.updateUrl();
         }
 
         private stringToRoute = (data: string, name: string): Common.RouteData => {
@@ -210,9 +204,8 @@
             this.download = search.download ? true : false;
             let latLngZ = this.parsePathToGeoLocation();
             if (latLngZ != null) {
-                this.zoom = latLngZ.z;
-                this.latlng.lat = latLngZ.lat;
-                this.latlng.lng = latLngZ.lng;
+                this.map.setZoom(latLngZ.z);
+                this.map.panTo(latLngZ);
             }
             this.dataContainer = this.urlStringToDataContainer(search);
         }

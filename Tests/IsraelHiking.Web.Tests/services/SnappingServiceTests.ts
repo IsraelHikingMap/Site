@@ -11,10 +11,8 @@ namespace IsraelHiking.Tests.Services {
     describe("Snapping Service", () => {
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
-        var mapService: IsraelHiking.Services.MapService;
-        //var toastr: Toastr;
         var snappingService: IsraelHiking.Services.SnappingService;
-        var mapDiv: JQuery;
+        var mapServiceMock: MapServiceMockCreator;
 
         beforeEach(() => {
             angular.mock.module("toastr");
@@ -24,30 +22,28 @@ namespace IsraelHiking.Tests.Services {
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
-                mapDiv = MapServiceMockCreator.createMapDiv(_$document_);
+                mapServiceMock = new MapServiceMockCreator(_$document_, _localStorageService_);
                 _toastr_.error = (): any => { };
-                mapService = new IsraelHiking.Services.MapService();
                 $httpBackend.whenGET(url => url.indexOf(Common.Urls.translations) !== -1).respond(404, {}); // ignore resources get request
-                snappingService = new IsraelHiking.Services.SnappingService($http, new IsraelHiking.Services.ResourcesService(null, _localStorageService_, _gettextCatalog_), mapService, _toastr_);
+                snappingService = new IsraelHiking.Services.SnappingService($http, new IsraelHiking.Services.ResourcesService(null, _localStorageService_, _gettextCatalog_), mapServiceMock.mapService, _toastr_);
                 snappingService.enable(true);
             });
         });
 
         afterEach(() => {
-            mapDiv.remove();
-            mapDiv = null;
+            mapServiceMock.destructor();
         });
 
         it("Should clear snappings layer when disabled", () => {
             snappingService.enable(false);
-            mapService.map.setZoom(14); // this fires moveend
+            mapServiceMock.mapService.map.setZoom(14); // this fires moveend
 
             expect(snappingService.snappings.getLayers().length).toBe(0);
             expect(snappingService.isEnabled()).toBe(false);
         });
 
         it("Should clear snappings layer when zoom is less than 14", () => {
-            mapService.map.setZoom(12); // this fires moveend
+            mapServiceMock.mapService.map.setZoom(12); // this fires moveend
 
             expect(snappingService.snappings.getLayers().length).toBe(0);
         });
@@ -64,7 +60,7 @@ namespace IsraelHiking.Tests.Services {
             ];
             $httpBackend.whenGET(() => true).respond(features);
 
-            mapService.map.setZoom(14);
+            mapServiceMock.mapService.map.setZoom(14);
             $httpBackend.flush();
 
             expect(snappingService.snappings.getLayers().length).toBe(1);
@@ -82,7 +78,7 @@ namespace IsraelHiking.Tests.Services {
             ];
             $httpBackend.whenGET(() => true).respond(features);
 
-            mapService.map.setZoom(14);
+            mapServiceMock.mapService.map.setZoom(14);
             $httpBackend.flush();
 
             expect(snappingService.snappings.getLayers().length).toBe(1);
@@ -93,7 +89,7 @@ namespace IsraelHiking.Tests.Services {
             expect(snappingService.snappings.getLayers().length).toBe(1);
             $httpBackend.whenGET(() => true).respond(500, {});
 
-            mapService.map.setZoom(14);
+            mapServiceMock.mapService.map.setZoom(14);
             $httpBackend.flush();
 
             expect(snappingService.snappings.getLayers().length).toBe(0);
@@ -114,7 +110,6 @@ namespace IsraelHiking.Tests.Services {
 
             let snap = snappingService.snapTo(L.latLng(1, 1.0001));
 
-            expect(snap.latlng.lat).toBeGreaterThan(1.0);
             expect(snap.latlng.lng).toBeGreaterThan(1.0);
         });
 

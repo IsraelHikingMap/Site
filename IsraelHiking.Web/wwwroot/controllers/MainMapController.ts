@@ -31,9 +31,6 @@ namespace IsraelHiking.Controllers {
             toastr: Toastr) {
             super(mapService);
 
-            this.map = mapService.map;
-            this.map.setZoom(hashService.zoom);
-            this.map.panTo(hashService.latlng);
             this.$compile = $compile;
             this.$location = $location;
             this.$window = $window;
@@ -55,15 +52,6 @@ namespace IsraelHiking.Controllers {
             $scope.isRouteStatisticsVisible = (): boolean => {
                 return routeStatisticsService.isVisible;
             }
-
-            this.map.on("moveend", () => {
-                hashService.updateLocation(this.map.getCenter(), this.map.getZoom());
-            });
-
-            $scope.$on(Services.HashService.MAP_LOCATION_CHANGED, (e, latLngZ: Common.LatLngZ) => {
-                this.map.setZoom(latLngZ.z);
-                this.map.panTo(latLngZ);
-            });
         }
 
         private createControls = ($scope: IRootScope) => {

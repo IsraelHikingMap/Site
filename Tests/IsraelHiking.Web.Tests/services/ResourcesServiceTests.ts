@@ -2,7 +2,7 @@
 
 namespace IsraelHiking.Tests.Services {
     describe("Resources Service", () => {
-        var resourcesSerivice: IsraelHiking.Services.ResourcesService;
+        var resourcesService: IsraelHiking.Services.ResourcesService;
         var $httpBackend: angular.IHttpBackendService;
         var $sce: angular.ISCEService
         var localStorageService: angular.local.storage.ILocalStorageService;
@@ -21,38 +21,38 @@ namespace IsraelHiking.Tests.Services {
                 localStorageService.get = () => null;
                 $httpBackend.whenGET(url => url.indexOf(Common.Urls.translations) !== -1).respond(200, {});
                 
-                resourcesSerivice = new IsraelHiking.Services.ResourcesService($sce, localStorageService, gettextCatalog);
+                resourcesService = new IsraelHiking.Services.ResourcesService($sce, localStorageService, gettextCatalog);
             });
         });
 
         it("Should initialize from local storage with english", () => {
-            localStorageService.get = () => resourcesSerivice.availableLanguages[1];
+            localStorageService.get = () => resourcesService.availableLanguages[1];
 
-            resourcesSerivice = new IsraelHiking.Services.ResourcesService($sce, localStorageService, gettextCatalog);
+            resourcesService = new IsraelHiking.Services.ResourcesService($sce, localStorageService, gettextCatalog);
 
-            expect(resourcesSerivice.currentLanguage.code).toBe(resourcesSerivice.availableLanguages[1].code);
-            expect(resourcesSerivice.route).toBe("Route");
+            expect(resourcesService.currentLanguage.code).toBe(resourcesService.availableLanguages[1].code);
+            expect(resourcesService.route).toBe("Route");
         });
 
         it("Should initialize from local storage with hebrew", () => {
-            localStorageService.get = () => resourcesSerivice.availableLanguages[0];
+            localStorageService.get = () => resourcesService.availableLanguages[0];
 
-            resourcesSerivice = new IsraelHiking.Services.ResourcesService($sce, localStorageService, gettextCatalog);
+            resourcesService = new IsraelHiking.Services.ResourcesService($sce, localStorageService, gettextCatalog);
 
-            expect(resourcesSerivice.currentLanguage.code).toBe(resourcesSerivice.availableLanguages[0].code);
-            expect(resourcesSerivice.route).toBe("מסלול");
+            expect(resourcesService.currentLanguage.code).toBe(resourcesService.availableLanguages[0].code);
+            expect(resourcesService.route).toBe("מסלול");
         });
 
         it("Should faciliate language change to english", (done) => {
-            resourcesSerivice.setLanguage(resourcesSerivice.availableLanguages[1]).then(() => {
-                expect(resourcesSerivice.currentLanguage.code).toBe(resourcesSerivice.availableLanguages[1].code);    
+            resourcesService.setLanguage(resourcesService.availableLanguages[1]).then(() => {
+                expect(resourcesService.currentLanguage.code).toBe(resourcesService.availableLanguages[1].code);    
             }).finally(done);
             $httpBackend.flush();
         });
 
         it("Should faciliate language change to hebrew", (done) => {
-            resourcesSerivice.setLanguage(resourcesSerivice.availableLanguages[0]).then(() => {
-                expect(resourcesSerivice.currentLanguage.code).toBe(resourcesSerivice.availableLanguages[0].code);
+            resourcesService.setLanguage(resourcesService.availableLanguages[0]).then(() => {
+                expect(resourcesService.currentLanguage.code).toBe(resourcesService.availableLanguages[0].code);
             }).finally(done);
             $httpBackend.flush();
 

@@ -16,17 +16,24 @@
 
     export class WikiMarkersLayer extends ObjectWithMap implements L.ILayer {
         private $http: angular.IHttpService;
+        private resourcesService: ResourcesService;
         private markers: L.LayerGroup<L.Marker>;
         private wikiMarkerIcon: L.Icon;
         private enabled: boolean;
 
         constructor($http: angular.IHttpService,
-            mapService: MapService) {
+            $rootScope: angular.IRootScopeService,
+            mapService: MapService,
+            resourcesService: ResourcesService) {
             super(mapService);
             this.$http = $http;
+            this.resourcesService = resourcesService;
             this.markers = L.layerGroup([] as L.Marker[]);
             this.enabled = false;
             this.wikiMarkerIcon = IconsService.createWikipediaIcon();
+            $rootScope.$watch(() => resourcesService.currentLanguage, () => {
+                this.updateMarkers();
+            });
             this.map.on("moveend", () => {
                 this.updateMarkers();
             });
@@ -49,12 +56,13 @@
                 return;
             }
             let centerString = this.map.getCenter().lat + "|" + this.map.getCenter().lng;
-            let url = `https://he.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=500&callback=JSON_CALLBACK`;
+            let lang = this.resourcesService.currentLanguage.code.split("-")[0];
+            let url = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=500&callback=JSON_CALLBACK`;
             this.$http.jsonp(url).success((response: IWikiResponse) => {
                 this.markers.clearLayers();
                 for (let page of response.query.geosearch) {
                     let marker = L.marker(L.latLng(page.lat, page.lon), { clickable: true, draggable: false, icon: this.wikiMarkerIcon, title: page.title} as L.MarkerOptions);
-                    let pageAddress = `https://he.wikipedia.org/?curid=${page.pageid}`;
+                    let pageAddress = `https://${lang}.wikipedia.org/?curid=${page.pageid}`;
                     marker.bindPopup(`<a href="${pageAddress}" target="_blank" dir="rtl">${page.title}</a>`);
                     this.markers.addLayer(marker);
                 }

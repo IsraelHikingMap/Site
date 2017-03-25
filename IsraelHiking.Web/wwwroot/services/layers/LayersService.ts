@@ -107,7 +107,7 @@ namespace IsraelHiking.Services.Layers {
                 maxZoom: LayersService.MAX_NATIVE_ZOOM
             } as ILayer);
             hikingTrailsOverlay.isEditable = false;
-            this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: new WikiMarkersLayer($http, mapService) as L.ILayer } as IOverlay);
+            this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: new WikiMarkersLayer($http, $rootScope, mapService, resourcesService) as L.ILayer } as IOverlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
             this.changeLanguage();

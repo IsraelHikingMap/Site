@@ -42,9 +42,9 @@
     }
   ],
   "CodeCoverageIncludes": [
-    "*\\IsraelHiking.web\\services\\elevation\\*.*",
-    "*\\IsraelHiking.web\\services\\parsers\\*.*",
-    "*\\IsraelHiking.web\\services\\routers\\*.*",
-    "*\\IsraelHiking.web\\services\\*.*"
+    "*\\IsraelHiking.web\\wwwroot\\services\\elevation\\*.*",
+    "*\\IsraelHiking.web\\wwwroot\\services\\parsers\\*.*",
+    "*\\IsraelHiking.web\\wwwroot\\services\\routers\\*.*",
+    "*\\IsraelHiking.web\\wwwroot\\services\\*.*"
   ]
 }

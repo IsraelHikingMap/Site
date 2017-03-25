@@ -5,34 +5,33 @@
 
 namespace IsraelHiking.Tests.Services.Layers {
     describe("Wiki layer Service", () => {
-        const ADDRESS = `https://he.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=0|0&gslimit=500&callback=JSON_CALLBACK`;
+        const ADDRESS = `https://en.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=0|0&gslimit=500&callback=JSON_CALLBACK`;
         var $http: angular.IHttpService;
         var $httpBackend: angular.IHttpBackendService;
-        var mapDiv: JQuery;
-        var mapService: IsraelHiking.Services.MapService;
         var wikiLayer: IsraelHiking.Services.Layers.WikiMarkersLayer;
+        var mapServiceMock: MapServiceMockCreator;
 
         beforeEach(() => {
             angular.mock.module("toastr");
-            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$document_: angular.IDocumentService) => { // 
+            angular.mock.module("LocalStorageModule");
+            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$document_: angular.IDocumentService, _$rootScope_: angular.IRootScopeService, _localStorageService_: angular.local.storage.ILocalStorageService) => {
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;
-                mapDiv = MapServiceMockCreator.createMapDiv(_$document_);
-                mapService = new IsraelHiking.Services.MapService();
-                wikiLayer = new IsraelHiking.Services.Layers.WikiMarkersLayer($http, mapService);
+                mapServiceMock = new MapServiceMockCreator(_$document_, _localStorageService_);
+                let resourceSerivce = { currentLanguage: { code: "en-US" } as IsraelHiking.Services.ILanguage } as any;
+                wikiLayer = new IsraelHiking.Services.Layers.WikiMarkersLayer($http, _$rootScope_, mapServiceMock.mapService, resourceSerivce as IsraelHiking.Services.ResourcesService);
             });
         });
 
         afterEach(() => {
-            mapDiv.remove();
-            mapDiv = null;
+            mapServiceMock.destructor();
         });
 
         it("Should run on add when adding to map", () => {
             spyOn(wikiLayer, "onAdd");
 
-            mapService.map.addLayer(wikiLayer);
+            mapServiceMock.mapService.map.addLayer(wikiLayer);
 
             expect(wikiLayer.onAdd).toHaveBeenCalled();
         });
@@ -40,15 +39,15 @@ namespace IsraelHiking.Tests.Services.Layers {
         it("Should run on remove when removing from map", () => {
             spyOn(wikiLayer, "onRemove");
 
-            mapService.map.addLayer(wikiLayer);
-            mapService.map.removeLayer(wikiLayer);
+            mapServiceMock.mapService.map.addLayer(wikiLayer);
+            mapServiceMock.mapService.map.removeLayer(wikiLayer);
 
             expect(wikiLayer.onRemove).toHaveBeenCalled();
         });
 
         it("Should be disabled when not added to map", () => {
-            mapService.map.addLayer(wikiLayer);
-            mapService.map.removeLayer(wikiLayer);
+            mapServiceMock.mapService.map.addLayer(wikiLayer);
+            mapServiceMock.mapService.map.removeLayer(wikiLayer);
 
             $httpBackend.verifyNoOutstandingRequest();
             expect(0).toBe(0);
@@ -69,10 +68,10 @@ namespace IsraelHiking.Tests.Services.Layers {
                 } as IsraelHiking.Services.Layers.IWikiQuery 
                 
             } as IsraelHiking.Services.Layers.IWikiResponse);
-            mapService.map.panTo(L.latLng(0, 0));
+            mapServiceMock.mapService.map.panTo(L.latLng(0, 0));
 
-            mapService.map.addLayer(wikiLayer);
-            mapService.map.setZoom(15);
+            mapServiceMock.mapService.map.addLayer(wikiLayer);
+            mapServiceMock.mapService.map.setZoom(15);
 
             $httpBackend.flush();
 

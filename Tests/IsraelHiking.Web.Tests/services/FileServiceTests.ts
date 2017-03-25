@@ -34,6 +34,17 @@ namespace IsraelHiking.Tests.Services {
         });
         
         it("Should open from file", () => {
+            $httpBackend.whenGET(Common.Urls.files + "?url=someurl").respond(btoa("bytes"));
+            let wasCalled = false;
+
+            var promise = fileService.openFromUrl("someurl");
+            promise.then(() => { wasCalled = true; })
+            $httpBackend.flush();
+
+            expect(wasCalled).toBe(true);
+        });
+
+        it("Should open from url", () => {
             spyOn(upload, "upload");
 
             fileService.openFromFile(new Blob([""]) as File);
