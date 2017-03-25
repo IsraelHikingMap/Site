@@ -17,7 +17,7 @@
     export class WikiMarkersLayer extends ObjectWithMap implements L.ILayer {
         private $http: angular.IHttpService;
         private resourcesService: ResourcesService;
-        private markers: L.LayerGroup<L.Marker>;
+        private markers: L.MarkerClusterGroup;
         private wikiMarkerIcon: L.Icon;
         private enabled: boolean;
 
@@ -28,7 +28,7 @@
             super(mapService);
             this.$http = $http;
             this.resourcesService = resourcesService;
-            this.markers = L.layerGroup([] as L.Marker[]);
+            this.markers = new L.MarkerClusterGroup();
             this.enabled = false;
             this.wikiMarkerIcon = IconsService.createWikipediaIcon();
             $rootScope.$watch(() => resourcesService.currentLanguage, () => {

@@ -1,6 +1,6 @@
 ﻿/// <reference path="../../scripts/typings/jasmine/jasmine.d.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/scripts/typings/angularjs/angular.d.ts" />
-/// <reference path="../../../../IsraelHiking.web/wwwroot/scripts/typings/leaflet/leaflet.d.ts" />
+/// <reference path="../../../../IsraelHiking.web/wwwroot/scripts/typings/leaflet/leaflet-0.7.d.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/scripts/typings/angularjs/angular-mocks.d.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/scripts/typings/toastr/toastr.d.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/services/elevation/ielevationprovider.ts" />

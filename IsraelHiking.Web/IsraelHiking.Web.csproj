@@ -21,15 +21,6 @@
     <None Remove="wwwroot\Bin\**" />
     <None Remove="wwwroot\lib\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Content Remove="wwwroot/bootstraper.ts" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="wwwroot\bootstrapper.ts" />
-    <Content Include="wwwroot\index.html" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5-pre3" />
     <PackageReference Include="IsraelTransverseMercator" Version="2.2.2-pre1" />
