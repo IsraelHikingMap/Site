@@ -67,12 +67,12 @@
     <script src="scripts/jquery.js"></script>
     <script src="scripts/angular.js"></script>
 </head>
-<body ng-controller="mainMapController" ng-class="{flip: resources.direction == 'rtl'}" dir="{{resources.direction}}">
+<body ng-controller="mainMapController" ng-class="{flip: resources.direction == 'rtl'}" dir="{{resources.direction}}" ng-cloak>
 <div id="wrapper" ng-class="{toggled: getIsSidebarVisible()}" class="full-page">
     <div id="sidebar-wrapper">
         <div class="container-fluid" dir="{{resources.direction}}">
             <div class="sidebar-close" ng-show="getIsSidebarVisible()">
-                <span class="cursor-pointer" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
+                <span class="cursor-pointer" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg fa-close"></i></span>
             </div>
             <div ng-switch on="sidebarService.viewName">
                 <div ng-switch-when="layers">

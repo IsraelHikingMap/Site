@@ -26,9 +26,10 @@
 #sidebar-wrapper {
     line-height: 24px;
     overflow-x: hidden;
-    color: #999999;
+    color: black !important;
     direction: ltr;
     overflow-y: scroll;
+    background: #dddddd !important;
 }
 
     #sidebar-wrapper .divider {
@@ -39,8 +40,8 @@
 
     #sidebar-wrapper .row:hover {
         text-decoration: none;
-        color: #ddd;
-        background: rgba(255,255,255,0.3);
+        color: black;
+        background: #bbb;
     }
 
 #wrapper.toggled #page-content-wrapper {
