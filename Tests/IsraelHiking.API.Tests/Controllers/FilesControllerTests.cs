@@ -15,6 +15,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
+using GeoAPI.Geometries;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -42,6 +43,7 @@ namespace IsraelHiking.API.Tests.Controllers
                     <trkpt lat='31.84205' lon='34.965344'><ele>161</ele></trkpt>
                     <trkpt lat='31.842161' lon='34.965611'><ele>161</ele></trkpt>
                     <trkpt lat='31.842175' lon='34.965707'><ele>161</ele></trkpt>
+                    <trkpt lat='31.842176' lon='34.965708'></trkpt>
                 </trkseg>
             </trk>
             </gpx>";
@@ -129,11 +131,12 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void PostOpenFile_GpxFile_ShouldReturnDataContainer()
+        public void PostOpenFile_GpxFile_ShouldReturnDataContainerAndUpdateElevation()
         {
             var file = Substitute.For<IFormFile>();
             file.FileName.Returns("somefile.gpx");
             file.When(f => f.CopyToAsync(Arg.Any<MemoryStream>())).Do(x => (x[0] as MemoryStream).Write(Encoding.ASCII.GetBytes(GPX_DATA), 0, Encoding.ASCII.GetBytes(GPX_DATA).Length));
+            _elevationDataStorage.GetElevation(Arg.Any<Coordinate>()).Returns(1);
 
             var results = _controller.PostOpenFile(file).Result as OkObjectResult;
             Assert.IsNotNull(results);
@@ -141,8 +144,9 @@ namespace IsraelHiking.API.Tests.Controllers
 
             Assert.AreEqual(1, dataContainer.routes.Count);
             Assert.AreEqual(1, dataContainer.routes.First().segments.Count);
-            Assert.AreEqual(5, dataContainer.routes.First().segments.First().latlngzs.Count);
+            Assert.AreEqual(6, dataContainer.routes.First().segments.First().latlngzs.Count);
             Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
+            Assert.IsTrue(dataContainer.routes.SelectMany(r => r.segments.SelectMany(s => s.latlngzs)).All(l => l.z != 0));
         }
     }
 }

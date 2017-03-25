@@ -51,11 +51,7 @@ namespace IsraelHiking.API.Controllers
         {
             var fetcher = _httpGatewayFactory.CreateRemoteFileFetcherGateway(_cache.Get(User.Identity.Name));
             var response = await fetcher.GetFileContent(url);
-            var dataContainer = await _dataContainerConverterService.ToDataContainer(response.Content, response.FileName);
-            foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
-            {
-                latLngZ.z = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLngZ));
-            }
+            var dataContainer = await ConvertToDataContainer(response.Content, response.FileName);
             return dataContainer;
         }
 
@@ -90,9 +86,19 @@ namespace IsraelHiking.API.Controllers
             {
                 var fileName = file.FileName;
                 await file.CopyToAsync(memoryStream);
-                var dataContainer = await _dataContainerConverterService.ToDataContainer(memoryStream.ToArray(), fileName);
+                var dataContainer = await ConvertToDataContainer(memoryStream.ToArray(), fileName);
                 return Ok(dataContainer);
             }
+        }
+
+        private async Task<DataContainer> ConvertToDataContainer(byte[] data, string fileName)
+        {
+            var dataContainer = await _dataContainerConverterService.ToDataContainer(data, fileName);
+            foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
+            {
+                latLngZ.z = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLngZ));
+            }
+            return dataContainer;
         }
     }
 }
