@@ -1,19 +1,19 @@
 ﻿<div class="leaflet-bar" ng-hide="isShowingSaveAs">
-    <a class="cursor-pointer" ng-click="toggleSaveAs($event)" uib-tooltip="{{resources.saveAs}}" tooltip-placement="right" tooltip-is-open="isOpen && !isShowingSaveAs" tooltip-append-to-body="true"><i class="fa fa-files-o fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleSaveAs($event)" uib-tooltip="{{resources.saveAs}}" tooltip-placement="right" tooltip-is-open="isOpen && !isShowingSaveAs" tooltip-append-to-body="true" analytics-on="click" analytics-category="Save as" analytics-event="Save as open"><i class="fa fa-files-o fa-lg"></i></a>
 </div>
 
 <div class="leaflet-bar" ng-show="isShowingSaveAs">
-    <div class="ltr save-as-dropdown dropdown" uib-dropdown is-open="isFromatsDropdownOpen">
-        <button class="btn btn-default btn-block dropdown-toggle" type="button" uib-dropdown-toggle ng-click="$event.stopPropagation()">
+    <div class="save-as-dropdown dropdown" uib-dropdown is-open="isFromatsDropdownOpen">
+        <button class="btn btn-default btn-block dropdown-toggle" type="button" uib-dropdown-toggle ng-click="$event.stopPropagation()" dir="ltr">
             <i class="fa fa-chevron-down pull-right"></i>
             {{selectedFormat.label}}
         </button>
-        <ul class="dropdown-menu dropdown-list" uib-dropdown-menu disable-map-movement>
-            <li ng-repeat="format in formats" class="dropdown-item cursor-pointer" ng-click="selectFormat(format, $event)">
+        <ul class="dropdown-menu dropdown-list" uib-dropdown-menu disable-map-movement dir="ltr">
+            <li ng-repeat="format in formats" class="dropdown-item cursor-pointer" ng-click="saveAs(format, $event)" analytics-on="click" analytics-category="Save as" analytics-event="Save as {{format.outputFormat}}">
                 {{format.label}}
             </li>
         </ul>
     </div>
 
-    <a class="cursor-pointer save-as-button" ng-click="saveAs(selectedFormat, $event)"  analytics-on="click" analytics-event="Save as"><i class="fa fa-files-o fa-lg"></i></a>
+    <a class="cursor-pointer save-as-button" ng-click="toggleSaveAs($event)" analytics-on="click" analytics-category="Save as" analytics-event="Save as close"><i class="fa fa-files-o fa-lg"></i></a>
 </div>

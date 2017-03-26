@@ -17,12 +17,12 @@
         saveAs(format: IFormatViewModel, e: Event): void;
         print(e: Event): void;
         ignoreClick(e: Event): void;
-        selectFormat(format: IFormatViewModel, e: Event): void;
     }
 
     export class FileController extends BaseMapController {
 
         layersService: Services.Layers.LayersService;
+        toastr: Toastr;
 
         constructor($scope: IFileScope,
             $window: angular.IWindowService,
@@ -33,6 +33,7 @@
             toastr: Toastr) {
             super(mapService);
             this.layersService = layersService;
+            this.toastr = toastr;
 
             $scope.isShowingSaveAs = false;
             $scope.isFromatsDropdownOpen = false;
@@ -78,15 +79,10 @@
 
             $scope.save = (e: Event) => {
                 let data = this.getData();
-                if (data.routes.length === 0) {
-                    toastr.warning($scope.resources.unableToSaveAnEmptyRoute);
+                if (!this.isDataSaveable(data, $scope)) {
                     return;
                 }
-                if (_.every(data.routes, r => r.segments.length === 0 && r.markers.length === 0)) {
-                    toastr.warning($scope.resources.unableToSaveAnEmptyRoute);
-                    return;
-                }
-                fileService.saveToFile(this.getName(data)+ ".gpx", "gpx", data)
+                fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data)
                     .then(() => { }, () => {
                         toastr.error($scope.resources.unableToSaveToFile);
                     });
@@ -99,17 +95,23 @@
             };
 
             $scope.saveAs = (format: IFormatViewModel, e: Event) => {
+                $scope.selectedFormat = format;
+                $scope.isFromatsDropdownOpen = false;
                 let outputFormat = format.outputFormat;
                 let data = this.getData();
                 if (outputFormat === "all_gpx_single_track") {
                     outputFormat = "gpx_single_track";
                     data = layersService.getData();
                 }
+                if (!this.isDataSaveable(data, $scope)) {
+                    return;
+                }
                 let name = this.getName(data);
                 fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data)
                     .then(() => { }, () => {
                         toastr.error($scope.resources.unableToSaveToFile);
                     });
+                
                 $scope.isShowingSaveAs = false;
                 this.suppressEvents(e);
             }
@@ -118,19 +120,13 @@
                 angular.element($document[0].querySelectorAll(".leaflet-bar")).each((i, a) => {
                     angular.element(a).addClass("no-print");
                 });
-                
+
                 $window.print();
                 this.suppressEvents(e);
-            } 
+            }
 
             $scope.ignoreClick = (e: Event) => {
                 e.stopPropagation();
-            }
-
-            $scope.selectFormat = (format: IFormatViewModel, e: Event) => {
-                $scope.selectedFormat = format;
-                $scope.isFromatsDropdownOpen = false;
-                this.suppressEvents(e);
             }
 
             angular.element($window).bind("keydown", (e: JQueryEventObject) => {
@@ -142,7 +138,7 @@
                     case "o":
                         // this doesn't work on firefox due to security reasons. it does work in chrome and IE though. 
                         angular.element("#openFile").click();
-                    break;
+                        break;
                     case "s":
                         $scope.save(e);
                         break;
@@ -173,6 +169,19 @@
                 name = data.routes[0].name;
             }
             return name;
+        }
+
+        private isDataSaveable(data: Common.DataContainer, $scope: IFileScope): boolean
+        {
+            if (data.routes.length === 0) {
+                this.toastr.warning($scope.resources.unableToSaveAnEmptyRoute);
+                return false;
+            }
+            if (_.every(data.routes, r => r.segments.length === 0 && r.markers.length === 0)) {
+                this.toastr.warning($scope.resources.unableToSaveAnEmptyRoute);
+                return false;
+            }
+            return true;
         }
     }
 } 
