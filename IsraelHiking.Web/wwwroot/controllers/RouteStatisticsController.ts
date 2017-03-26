@@ -21,6 +21,7 @@
         private kmMarkersGroup: L.LayerGroup<L.Marker>;
         private $compile: angular.ICompileService;
         private routeDataChangedEventHandler: (data: {}) => void;
+        private polylineHoverEventHandler: (data: L.LatLng) => void;
 
         constructor($scope: IRouteStatisticsScope,
             $window: angular.IWindowService,
@@ -39,6 +40,7 @@
             this.map.addLayer(this.hoverChartMarker);
             this.map.addLayer(this.kmMarkersGroup);
             this.routeDataChangedEventHandler = ({}) => this.onRouteDataChanged($scope);
+            this.polylineHoverEventHandler = (latlng: L.LatLng) => this.onPolylineHover($scope, latlng);
 
             $scope.isKmMarkersOn = false;
             $scope.onMouseOver = (rowIndex: number) => {
@@ -98,18 +100,26 @@
 
         private routeChanged = ($scope: IRouteStatisticsScope, layersService: Services.Layers.LayersService) => {
             if (this.routeLayer) {
-                this.routeLayer.eventHelper.removeListener(this.routeDataChangedEventHandler);
+                this.routeLayer.dataChangedEvent.removeListener(this.routeDataChangedEventHandler);
+                this.routeLayer.polylineHoverEvent.removeListener(this.polylineHoverEventHandler);
             }
             this.routeLayer = layersService.getSelectedRoute();
             this.onRouteDataChanged($scope);
             if (this.routeLayer) {
-                this.routeLayer.eventHelper.addListener(this.routeDataChangedEventHandler);
+                this.routeLayer.dataChangedEvent.addListener(this.routeDataChangedEventHandler);
+                this.routeLayer.polylineHoverEvent.addListener(this.polylineHoverEventHandler);
             }
         }
 
         private onRouteDataChanged = ($scope: IRouteStatisticsScope) => {
             this.updateKmMarkers($scope.isKmMarkersOn);
             this.updateChart($scope);
+        }
+
+        private onPolylineHover = ($scope: IRouteStatisticsScope, latlng: L.LatLng) => {
+            // HM TODO: finish this with chart wrapper?
+            //console.log(latlng);
+            //$scope.chart.setSelection([{ row: 0, column: 1 }]);
         }
 
         private createKmMarker = (latlng: L.LatLng, markerNumber: number): L.Marker => {
@@ -243,7 +253,10 @@
                 legend: "none",
                 curveType: "function",
                 intervals: { style: "area" },
-                tooltip: { isHtml: true },
+                tooltip: {
+                    isHtml: true,
+                    trigger: 'selection'
+                },
                 chartArea: {
                     left: 100,
                     top: 10,

@@ -48,7 +48,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         public routerService: Routers.RouterService;
         public elevationProvider: Elevation.IElevationProvider;
         public route: IRoute;
-        public eventHelper: Common.EventHelper<{}>;
+        public dataChangedEvent: Common.EventHelper<{}>;
+        public polylineHoverEvent: Common.EventHelper<L.LatLng>;
 
         private currentState: RouteStateBase;
         private undoHandler: UndoHandler<Common.RouteData>;
@@ -75,7 +76,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.undoHandler = new UndoHandler<Common.RouteData>();
             this.undoHandler.addDataToUndoStack(this.getData());
             this.currentState = new RouteStateReadOnly(this);
-            this.eventHelper = new Common.EventHelper<{}>();
+            this.dataChangedEvent = new Common.EventHelper<{}>();
+            this.polylineHoverEvent = new Common.EventHelper<L.LatLng>();
         }
 
         public onAdd(map: L.Map): void {
@@ -234,7 +236,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         public dataChanged = () => {
             var data = this.getData();
             this.undoHandler.addDataToUndoStack(data);
-            this.eventHelper.raiseEvent({});
+            this.dataChangedEvent.raiseEvent({});
         }
 
         public clear = () => {
