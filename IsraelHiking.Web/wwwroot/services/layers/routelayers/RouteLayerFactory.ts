@@ -70,7 +70,7 @@
                 route);
         }
 
-        public createRoute(name: string): IRoute {
+        public createRoute(name: string, color: string = ""): IRoute {
             let isRoutingPerPoint = this.localStorageService.get(RouteLayerFactory.IS_ROUTING_PER_POINT_KEY);
             if (isRoutingPerPoint == null) {
                 isRoutingPerPoint = true;
@@ -82,7 +82,7 @@
                     isRoutingPerPoint: isRoutingPerPoint,
                     isVisible: true,
                     pathOptions: {
-                        color: RouteLayerFactory.COLORS[this.nextColorIndex].value,
+                        color: color || RouteLayerFactory.COLORS[this.nextColorIndex].value,
                         className: "",
                         opacity: this.localStorageService.get(RouteLayerFactory.ROUTE_OPACITY) as number || 0.5,
                         weight: 4
@@ -96,7 +96,7 @@
         }
 
         public createRouteFromData(routeData: Common.RouteData): IRoute {
-            let route = this.createRoute(routeData.name);
+            let route = this.createRoute(routeData.name, routeData.color);
             route.segments = routeData.segments as IRouteSegment[] || [];
             route.markers = routeData.markers as IMarkerWithData[] || [];
             return route;
