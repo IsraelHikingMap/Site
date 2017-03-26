@@ -19,6 +19,7 @@
     { "Path": "IsraelHiking.Web\\wwwroot\\scripts\\ng-file-upload.js" },
     { "Path": "IsraelHiking.Web\\wwwroot\\scripts\\angular-file-saver.bundle.js" },
     { "Path": "IsraelHiking.Web\\wwwroot\\scripts\\xml2json.min.js" },
+    { "Path": "IsraelHiking.Web\\wwwroot\\scripts\\leaflet.markercluster-src.js" },
     { "Path": "IsraelHiking.Web\\wwwroot\\common\\", "Includes": ["*.ts"]},
     { "Path": "IsraelHiking.Web\\wwwroot\\services\\mapService.ts"},
     { "Path": "IsraelHiking.Web\\wwwroot\\services\\ObjectWithMap.ts"},
