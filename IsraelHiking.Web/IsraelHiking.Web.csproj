@@ -37,8 +37,8 @@
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.1" />
     <PackageReference Include="NEST" Version="5.2.0" />
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre3" />
-    <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-pre4" />
-    <PackageReference Include="NetTopologySuite.IO.GeoJson" Version="1.15.0-pre3" />
+    <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-IHM" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJson" Version="1.15.0-IHM" />
     <PackageReference Include="OAuth.DotNetCore" Version="1.0.4" />
     <PackageReference Include="OsmSharp" Version="6.0.0-alpha2" />
     <PackageReference Include="Serilog.Extensions.Logging.File" Version="1.0.0" />

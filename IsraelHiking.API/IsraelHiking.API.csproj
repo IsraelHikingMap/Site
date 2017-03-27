@@ -10,8 +10,8 @@
     <PackageReference Include="Microsoft.AspNetCore.Mvc" Version="1.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="1.1.1" />
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre3" />
-    <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-pre4" />
-    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="1.15.0-pre3" />
+    <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-IHM" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJson" Version="1.15.0-IHM" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0-rc3" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
