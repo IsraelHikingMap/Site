@@ -73,25 +73,25 @@ namespace IsraelHiking.API.Executors
 
         private int GetClosingLoopIndex(ILineString gpxLine, int currentIndex, double closestPointTolerance)
         {
-            int indexOfLinePrefix = currentIndex - 1;
+            int indexOfFarEnoughLinePrefix = currentIndex - 1;
             var currentCoordinatePoint = new Point(gpxLine.Coordinates[currentIndex]);
-            while (indexOfLinePrefix >= 0)
+            while (indexOfFarEnoughLinePrefix >= 0)
             {
-                var prefixPoint = new Point(gpxLine.Coordinates[indexOfLinePrefix]);
+                var prefixPoint = new Point(gpxLine.Coordinates[indexOfFarEnoughLinePrefix]);
                 if (currentCoordinatePoint.Distance(prefixPoint) > closestPointTolerance)
                 {
                     break;
                 }
-                indexOfLinePrefix--;
+                indexOfFarEnoughLinePrefix--;
             }
-            if (indexOfLinePrefix < 0)
+            if (indexOfFarEnoughLinePrefix < 0)
             {
                 return -1;
             }
-            var distance = indexOfLinePrefix > 0
-                    ? currentCoordinatePoint.Distance(new LineString(gpxLine.Coordinates.Take(indexOfLinePrefix + 1).ToArray()))
-                    : currentCoordinatePoint.Distance(new Point(gpxLine.Coordinates[indexOfLinePrefix]));
-            return distance < closestPointTolerance ? indexOfLinePrefix + 1 : -1;
+            var distance = indexOfFarEnoughLinePrefix > 0
+                    ? currentCoordinatePoint.Distance(new LineString(gpxLine.Coordinates.Take(indexOfFarEnoughLinePrefix + 1).ToArray()))
+                    : currentCoordinatePoint.Distance(new Point(gpxLine.Coordinates[indexOfFarEnoughLinePrefix]));
+            return distance < closestPointTolerance ? indexOfFarEnoughLinePrefix + 1 : -1;
         }
 
         private void AddLineString(ICollection<ILineString> gpxSplit, Coordinate[] coordinates)

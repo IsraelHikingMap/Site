@@ -60,12 +60,14 @@ namespace IsraelHiking.API.Services
 
             var linesToReturn = await FindMissingLines(gpxItmLines);
             linesToReturn = SplitSelfLoopsAndRemoveDuplication(linesToReturn);
-            linesToReturn = SimplifyLines(linesToReturn);
+            linesToReturn = SimplifyLines(linesToReturn); // why?
             linesToReturn = await ProlongLinesEndAccordingToOriginalGpx(linesToReturn, gpxItmLines);
             linesToReturn = await ProlongLinesStartAccordingToOriginalGpx(linesToReturn, gpxItmLines);
             linesToReturn = MergeBackLines(linesToReturn); // after adding parts, possible merge options
+            // simply in between junctions - no need for AdjustIntersections
             linesToReturn = SimplifyLines(linesToReturn); // need to simplify to remove sharp corners
             linesToReturn = AdjustIntersections(linesToReturn); // intersections may have moved after simplification
+
 
             _logger.LogInformation($"Looking for unmapped routes finished, found {linesToReturn.Count} routes.");
             return linesToReturn;
@@ -224,6 +226,7 @@ namespace IsraelHiking.API.Services
             {
                 var prolongedLine = linesToProlong[lineIndex];
                 var currentCoordinate = prolongedLine.Coordinates.Last();
+                // can we improve this by keeping reference to the position in the orignal line? 
                 UpdateIndexes(currentCoordinate, gpxItmLines, ref currentLineIndex, ref currentPositionIndex);
                 var originalCoordinates = gpxItmLines[currentLineIndex].Coordinates.Skip(currentPositionIndex).ToArray();
 

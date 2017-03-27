@@ -211,18 +211,6 @@ namespace IsraelHiking.Web
             jwtBearerOptions.SecurityTokenValidators.Add(app.ApplicationServices.GetRequiredService<ISecurityTokenValidator>());
             app.UseJwtBearerAuthentication(jwtBearerOptions);
 
-            app.Use(async (context, next) =>
-            {
-                await next();
-                if (context.Response.StatusCode == 404)
-                {
-                    context.Request.Path = "/resourceNotFound.html";
-                    await next();
-                    // return 404 error code instead of 200.
-                    context.Response.StatusCode = 404;
-                }
-            });
-
             app.UseMvc();
             app.UseDefaultFiles();
             app.UseStaticFiles();
@@ -246,6 +234,15 @@ namespace IsraelHiking.Web
             app.UseSwaggerUI(c =>
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking API V1");
+            });
+
+            app.Run(context =>
+            {
+                context.Response.StatusCode = 404;
+                context.Response.ContentType = "text/html";
+                var file = env.WebRootFileProvider.GetFileInfo("/resourceNotFound.html");
+                context.Response.ContentLength = file.Length;
+                return context.Response.SendFileAsync(file);
             });
             InitializeServices(app.ApplicationServices);
         }
