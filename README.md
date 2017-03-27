@@ -47,9 +47,20 @@ The architecture is based on layers
 
 # Setting up this project
 In order to be able to build this site you'll need some tools:
+//
 * Download and install the [LTS version of Node.js](https://nodejs.org/en/) for Windows.
   * Notice and save the node.js installation directory. It is usually ```C:\Program Files\nodejs\```
-* Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later.
+//
+* Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later. Select:
+  * ASP.NET and web development
+  * .NET cross-platform development
+* If you don't have any other preference, choose "General" development settings
+* Temporary step for using local versions of OsmSharp and NetTopologySuite
+  * Open the '''TempLocalNugets''' directory under the Site reposotory location
+  * View -> Other Windows... -> Package Manager Console
+  * For each of the files in '''TempLocalNugets'''
+    * Shift-Right-Click -> Copy as path
+    * At the PM> promprt in the bottom pane type '''Package-Install''' followed by '''Space''', '''Ctrl-V''' and '''Enter'''
 * From Visual Studio's _Tools &rarr; Options..._
   * Go to _Projects and Solutions &rarr; External Web Tools_.
   * Add the above node.js installation directory as a new directory.
