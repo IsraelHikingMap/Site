@@ -153,6 +153,7 @@ namespace IsraelHiking.Web
                 options.SerializerSettings.Converters.Add(new GeometryArrayConverter());
                 options.SerializerSettings.Converters.Add(new EnvelopeConverter());
             });
+            services.AddCors();
             services.AddOptions();
             var config = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
@@ -205,6 +206,10 @@ namespace IsraelHiking.Web
                 //rewriteOptions.AddRedirectToHttps();
             }
             app.UseRewriter(rewriteOptions);
+
+            app.UseCors(builder => {
+                builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials();
+            });
 
             var jwtBearerOptions = new JwtBearerOptions();
             jwtBearerOptions.SecurityTokenValidators.Clear();
