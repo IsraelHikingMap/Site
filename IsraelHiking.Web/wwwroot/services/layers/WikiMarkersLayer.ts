@@ -1,4 +1,19 @@
 ﻿namespace IsraelHiking.Services.Layers {
+    export interface IGeoSearchWikiPage {
+        lat: number;
+        lon: number;
+        pageid: number;
+        title: string;
+    }
+
+    export interface IGeoSearchWikiQuery {
+        geosearch: IGeoSearchWikiPage[];
+    }
+
+    export interface IGeoSearchWikiResponse {
+        query: IGeoSearchWikiQuery;
+    }
+
     export interface IWikiPage {
         coordinates: {
             lat: number;
@@ -75,18 +90,28 @@
             let textAlign = "text-left";
             if (this.resourcesService.currentLanguage.rtl) {
                 dir = 'dir="rtl"';
-                textAlign = "text-right";    
+                textAlign = "text-right";
             }
-            let url = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&prop=coordinates&generator=geosearch&ggsradius=10000&ggscoord=${centerString}&ggslimit=500&callback=JSON_CALLBACK`;
-            this.$http.jsonp(url).success((response: IWikiResponse) => {
-                this.markers.clearLayers();
-                for (let pageKey in response.query.pages) {
-                    let currentPage = response.query.pages[pageKey];
-                    if (!currentPage.coordinates || currentPage.coordinates.length < 1) {
-                        continue;
+            let url = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000&callback=JSON_CALLBACK`;
+            this.$http.jsonp(url).success((response: IGeoSearchWikiResponse) => {
+                // Sync lists
+                this.markers.eachLayer(l => {
+                    if (l instanceof L.Marker) {
+                        let markerWithTitle = l as RouteLayers.IMarkerWithTitle;
+                        let geoSearchPage = _.find(response.query.geosearch, g => g.pageid.toString() === markerWithTitle.title);
+                        if (geoSearchPage == null) {
+                            this.markers.removeLayer(l);
+                        } else {
+                            response.query.geosearch.splice(response.query.geosearch.indexOf(geoSearchPage), 1);
+                        }
                     }
-                    let coordinates = currentPage.coordinates[0];
-                    let marker = L.marker(L.latLng(coordinates.lat, coordinates.lon), { clickable: true, draggable: false, icon: this.wikiMarkerIcon, title: currentPage.title } as L.MarkerOptions);
+                });
+
+                for (let currentPage of response.query.geosearch) {
+
+
+                    let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { clickable: true, draggable: false, icon: this.wikiMarkerIcon, title: currentPage.title } as L.MarkerOptions) as RouteLayers.IMarkerWithTitle;
+                    marker.title = currentPage.pageid.toString();
 
                     let pageAddress = `https://${lang}.wikipedia.org/?curid=${currentPage.pageid}`;
                     let header = `<h4 ${dir} class="text-center"><a href="${pageAddress}" target="_blank">${currentPage.title}</a></h4>`;
@@ -96,7 +121,7 @@
                         var popup = marker.getPopup();
                         var detailsUrl = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&pageids=${currentPage.pageid}&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1&callback=JSON_CALLBACK`;
                         this.$http.jsonp(detailsUrl).success((detailsResponse: IWikiResponse) => {
-                            let currentDetailedPage = detailsResponse.query.pages[pageKey];
+                            let currentDetailedPage = detailsResponse.query.pages[currentPage.pageid];
                             let imageHtml = "";
                             if (currentDetailedPage.thumbnail) {
                                 imageHtml = `<img src="${currentDetailedPage.thumbnail.source}" class="img-responsive" style="max-width:100% !important" />`;
