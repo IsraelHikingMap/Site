@@ -31,6 +31,8 @@
     export interface RouteData {
         name: string;
         color?: string;
+        opacity?: number;
+        weight?: number;
         markers: MarkerData[];
         segments: RouteSegmentData[];
     }

@@ -155,6 +155,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             return {
                 name: this.route.properties.name,
                 color: this.route.properties.pathOptions.color,
+                opacity: this.route.properties.pathOptions.opacity,
+                weight: this.route.properties.pathOptions.weight,
                 markers: markersData,
                 segments: segmentsData
             } as Common.RouteData;
