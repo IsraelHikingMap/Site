@@ -129,6 +129,9 @@
                 angular.element($document[0].querySelectorAll(".leaflet-bar")).each((i, a) => {
                     angular.element(a).addClass("no-print");
                 });
+                angular.element($document[0].querySelectorAll(".tooltip")).each((i, a) => {
+                    angular.element(a).addClass("no-print");
+                });
 
                 $window.print();
                 this.suppressEvents(e);
