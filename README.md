@@ -47,20 +47,22 @@ The architecture is based on layers
 
 # Setting up this project
 In order to be able to build this site you'll need some tools:
-//
-* Download and install the [LTS version of Node.js](https://nodejs.org/en/) for Windows.
+
+* ___[The need for this installation is still TBD]___ Download and install the [LTS version of Node.js](https://nodejs.org/en/) for Windows.
   * Notice and save the node.js installation directory. It is usually ```C:\Program Files\nodejs\```
-//
 * Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
 * If you don't have any other preference, choose "General" development settings
 * Temporary step for using local versions of OsmSharp and NetTopologySuite
-  * Open the '''TempLocalNugets''' directory under the Site reposotory location
-  * View -> Other Windows... -> Package Manager Console
-  * For each of the files in '''TempLocalNugets'''
-    * Shift-Right-Click -> Copy as path
-    * At the PM> promprt in the bottom pane type '''Package-Install''' followed by '''Space''', '''Ctrl-V''' and '''Enter'''
+  * Open the ```TempLocalNugets``` directory under the Site reposotory location
+  * View &rarr; Other Windows... &rarr; Package Manager Console
+  * For each of the files in ```TempLocalNugets```
+    * Shift-Right-Click &rarr; Copy as path
+    * At the bottom pane type ```Install-Package``` followed by ```Ctrl-V``` and ```Enter```. For example:
+      ```
+      PM> Install-Package "C:\GitHub\IsraelHikingMap\Site\TempLocalNugets\NetTopologySuite.IO.1.15.0-IHM.nupkg"
+      ```
 * From Visual Studio's _Tools &rarr; Options..._
   * Go to _Projects and Solutions &rarr; External Web Tools_.
   * Add the above node.js installation directory as a new directory.
@@ -78,7 +80,16 @@ In order to be able to build this site you'll need some tools:
 In order to be able to make the server work a few prerequisits are needed:
 * Windows machine with IIS enabled and a site.
 * Install Java Runtime Environment.
-* As administrator run IsraelHiking.Updater.exe - this will create a services to run Graph Hopper and Elastic Search so it will always be up.
+* As administrator, create a task to run the Graph Hopper and Elastic Search services and update them.
+  * Open Windows' Task Scheduler using "run as Administrator"
+  * Create task 
+  * Add an action
+  
+      <img width="340" alt="Create Task screenshot" src="https://cloud.githubusercontent.com/assets/1304610/24397580/581fecb8-13af-11e7-9388-e3741fcc52bd.png">
+
+      where "Start in" is the full pathname of the ```IsraelHiking.Updater\bin\Debug\netcoreapp1.1``` directory
+  * Add a "On a schedule" trigger to run once a day or at the frequency of the map updates.
+  * Add a "At startup" trigger.
 * Add a task to windows scheduler as administrator to run the updater as administrator once a day or so to update the routing and search.
 
 ###IsraelHiking.Updater.exe
