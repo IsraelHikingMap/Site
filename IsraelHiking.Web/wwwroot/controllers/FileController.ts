@@ -67,6 +67,15 @@
 
             $scope.selectedFormat = $scope.formats[0];
 
+            $scope.$watch(() => $scope.isFromatsDropdownOpen, () => {
+                if ($scope.isFromatsDropdownOpen) {
+                    this.map.scrollWheelZoom.disable();
+                    L.DomEvent.disableClickPropagation(angular.element(".save-as-dropdown .dropdown-list")[0]);
+                } else {
+                    this.map.scrollWheelZoom.enable();
+                }
+            });
+
             $scope.open = (file: File) => {
                 if (!file)
                     return;
