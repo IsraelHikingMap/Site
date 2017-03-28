@@ -74,7 +74,7 @@
     <div id="sidebar-wrapper">
         <div class="container-fluid" dir="{{resources.direction}}">
             <div class="sidebar-close" ng-show="getIsSidebarVisible()">
-                <span class="cursor-pointer" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg fa-close"></i></span>
+                <span class="cursor-pointer" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg" ng-class="{'fa-close': getIsSidebarVisible()}"></i></span>
             </div>
             <div ng-switch on="sidebarService.viewName">
                 <div ng-switch-when="layers">
@@ -88,7 +88,7 @@
     </div>
     <div id="page-content-wrapper" class="full-page">
         <div id="map"></div>
-        <div draggable-resizable directions="['top', 'left', 'bottom', 'right']" drag-selector="'.route-statistics-header'" ng-show="isRouteStatisticsVisible()" ng-class="{'route-statistics-popup' : isRouteStatisticsVisible()}">
+        <div draggable-resizable directions="['top', 'left', 'bottom', 'right']" drag-selector="'.route-statistics-header'" ng-show="isRouteStatisticsVisible()" ng-class="{'route-statistics-popup': isRouteStatisticsVisible()}">
             <div route-statistics-popup></div>
         </div>
     </div>
