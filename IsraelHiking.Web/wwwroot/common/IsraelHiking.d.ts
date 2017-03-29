@@ -48,4 +48,9 @@
     export interface LatLngZ extends L.LatLng {
         z: number;
     }
+
+    export interface IMarkerWithTitle extends L.Marker {
+        title: string;
+    }
+
 }

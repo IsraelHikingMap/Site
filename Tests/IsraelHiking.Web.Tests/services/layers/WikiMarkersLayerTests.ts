@@ -56,29 +56,19 @@ namespace IsraelHiking.Tests.Services.Layers {
         });
 
         it("Should get wiki markers when zoom is above 12 on map move in hebrew", () => {
-            const ADDRESS = "https://he.wikipedia.org/w/api.php?format=json&action=query&prop=coordinates&generator=geosearch&ggsradius=10000&ggscoord=0|0&ggslimit=500&callback=JSON_CALLBACK";
+            const ADDRESS = "https://he.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=0|0&gslimit=1000&callback=JSON_CALLBACK";
             $httpBackend.whenJSONP(ADDRESS).respond({
                 query: {
-                    pages: [
+                    geosearch: [
                         {
                             pageid: 1,
                             title: "title",
-                            coordinates: [{
-                                lat: 0,
-                                lon: 0,
-                            }],
-                            extract: "extract",
-                            thumbnail: {
-                                height: 1,
-                                original: "original",
-                                source: "source",
-                                width: 1
-                            }
-                        } as IsraelHiking.Services.Layers.IWikiPage
-                    ] as IsraelHiking.Services.Layers.IWikiPage[]
-                } as IsraelHiking.Services.Layers.IWikiQuery 
-                
-            } as IsraelHiking.Services.Layers.IWikiResponse);
+                            lat: 0,
+                            lon: 0,
+                        } as IsraelHiking.Services.Layers.IGeoSearchWikiPage
+                    ] as IsraelHiking.Services.Layers.IGeoSearchWikiPage[]
+                } as IsraelHiking.Services.Layers.IGeoSearchWikiQuery
+            } as IsraelHiking.Services.Layers.IGeoSearchWikiResponse);
             mapServiceMock.mapService.map.panTo(L.latLng(0, 0));
 
             mapServiceMock.mapService.map.addLayer(wikiLayer);
@@ -93,10 +83,33 @@ namespace IsraelHiking.Tests.Services.Layers {
         it("Should get wiki markers when zoom is above 12 on map move in english and get details when clicked", () => {
             fakeResourceService.currentLanguage.code = "en-US";
             fakeResourceService.currentLanguage.trl = false;
-            var response = {
+            const ADDRESS = "https://en.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=0|0&gslimit=1000&callback=JSON_CALLBACK";
+            $httpBackend.whenJSONP(ADDRESS).respond({
                 query: {
-                    pages: [
+                    geosearch: [
                         {
+                            pageid: 1,
+                            title: "title",
+                            lat: 0,
+                            lon: 0,
+                        } as IsraelHiking.Services.Layers.IGeoSearchWikiPage
+                    ] as IsraelHiking.Services.Layers.IGeoSearchWikiPage[]
+                } as IsraelHiking.Services.Layers.IGeoSearchWikiQuery
+            } as IsraelHiking.Services.Layers.IGeoSearchWikiResponse);
+            mapServiceMock.mapService.map.panTo(L.latLng(0, 0));
+
+            mapServiceMock.mapService.map.addLayer(wikiLayer);
+            mapServiceMock.mapService.map.setZoom(15);
+
+            $httpBackend.flush();
+            $httpBackend.expectJSONP(ADDRESS);
+            $httpBackend.resetExpectations();
+
+            const DETAILSADDRESS = "https://en.wikipedia.org/w/api.php?format=json&action=query&pageids=1&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1&callback=JSON_CALLBACK";
+            $httpBackend.whenJSONP(DETAILSADDRESS).respond({
+                query: {
+                    pages: {
+                        1: {
                             pageid: 1,
                             title: "title",
                             coordinates: [{
@@ -111,28 +124,13 @@ namespace IsraelHiking.Tests.Services.Layers {
                                 width: 5
                             }
                         } as IsraelHiking.Services.Layers.IWikiPage
-                    ] as IsraelHiking.Services.Layers.IWikiPage[]
+                    } as Map<string, IsraelHiking.Services.Layers.IWikiPage>
                 } as IsraelHiking.Services.Layers.IWikiQuery
-            } as IsraelHiking.Services.Layers.IWikiResponse;
-            const ADDRESS = "https://en.wikipedia.org/w/api.php?format=json&action=query&prop=coordinates&generator=geosearch&ggsradius=10000&ggscoord=0|0&ggslimit=500&callback=JSON_CALLBACK";
-            $httpBackend.whenJSONP(ADDRESS).respond(response);
-            mapServiceMock.mapService.map.panTo(L.latLng(0, 0));
-
-            mapServiceMock.mapService.map.addLayer(wikiLayer);
-            mapServiceMock.mapService.map.setZoom(15);
-
-            $httpBackend.flush();
-            $httpBackend.expectJSONP(ADDRESS);
-            $httpBackend.resetExpectations();
-
-            const DETAILSADDRESS = "https://en.wikipedia.org/w/api.php?format=json&action=query&pageids=1&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1&callback=JSON_CALLBACK";
-            $httpBackend.whenJSONP(DETAILSADDRESS).respond(response);
+            } as IsraelHiking.Services.Layers.IWikiResponse);
             mapServiceMock.mapService.map.eachLayer((l) => {
-                if (l instanceof L.MarkerClusterGroup)
-                {
+                if (l instanceof L.MarkerClusterGroup) {
                     l.eachLayer(m => {
-                        if (m instanceof L.Marker)
-                        {
+                        if (m instanceof L.Marker) {
                             m.fire("popupopen");
                         }
                     });

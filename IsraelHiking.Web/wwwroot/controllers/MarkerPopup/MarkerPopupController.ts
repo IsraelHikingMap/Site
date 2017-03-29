@@ -13,7 +13,7 @@
         isSaveTooltipOpen: boolean;
         isRemoveTooltipOpen: boolean; 
         wikiCoordinatesString: string;
-        marker: Services.Layers.RouteLayers.IMarkerWithTitle;
+        marker: Common.IMarkerWithTitle;
         updateWikiCoordinates(title: string): void;
     }
 

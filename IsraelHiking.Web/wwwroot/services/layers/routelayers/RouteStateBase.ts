@@ -32,7 +32,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.context.setState(new RouteStateEditPoi(this.context));
         }
 
-        protected createPoiMarker = (markerData: Common.MarkerData, isEditable: boolean): IMarkerWithTitle => {
+        protected createPoiMarker = (markerData: Common.MarkerData, isEditable: boolean): Common.IMarkerWithTitle => {
             let pathOptions = this.context.route.properties.pathOptions;
             let marker = L.marker(markerData.latlng,
             {
@@ -41,7 +41,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 riseOnHover: true,
                 icon: IconsService.createMarkerIconWithColorAndType(pathOptions.color, markerData.type),
                 opacity: pathOptions.opacity
-            } as L.MarkerOptions) as IMarkerWithTitle;
+            } as L.MarkerOptions) as Common.IMarkerWithTitle;
             marker.title = markerData.title || "";
             let colorName = this.context.getColorName();
             marker.bindLabel(this.context.getHtmlTitle(marker.title), { noHide: true, className: `marker-label fg-${colorName}` } as L.LabelOptions);

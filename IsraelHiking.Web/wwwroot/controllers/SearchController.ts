@@ -115,7 +115,7 @@
                 $scope.toggleVisibility(e);
                 this.featureGroup.clearLayers();
                 this.map.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
-                var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false}) as Services.Layers.RouteLayers.IMarkerWithTitle;
+                var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false }) as Common.IMarkerWithTitle;
                 marker.title = searchResults.name || searchResults.address;
                 let newScope = $scope.$new() as ISearchResultsMarkerPopupScope;
                 newScope.marker = marker;
@@ -235,9 +235,9 @@
                         let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
                         this.featureGroup.addLayer(polyLine);
                     }
-                    var markerFrom = L.marker($scope.fromContext.selectedSearchResults.latlng, { icon: Services.IconsService.createStartIcon(), draggable: false }) as Services.Layers.RouteLayers.IMarkerWithTitle;
+                    var markerFrom = L.marker($scope.fromContext.selectedSearchResults.latlng, { icon: Services.IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
                     markerFrom.title = $scope.fromContext.selectedSearchResults.name || $scope.fromContext.selectedSearchResults.address;
-                    var markerTo = L.marker($scope.toContext.selectedSearchResults.latlng, { icon: Services.IconsService.createEndIcon(), draggable: false }) as Services.Layers.RouteLayers.IMarkerWithTitle;
+                    var markerTo = L.marker($scope.toContext.selectedSearchResults.latlng, { icon: Services.IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;
                     markerTo.title = $scope.toContext.selectedSearchResults.name || $scope.toContext.selectedSearchResults.address;
 
                     let convertToRoute = () => {

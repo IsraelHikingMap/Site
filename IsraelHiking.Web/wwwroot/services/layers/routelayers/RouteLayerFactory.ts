@@ -101,7 +101,7 @@
 
         public createRouteFromData(routeData: Common.RouteData): IRoute {
             let pathOptions = { color: routeData.color, opacity: routeData.opacity, weight: routeData.weight } as L.PathOptions;
-            let route = this.createRoute(routeData.name, pathOptions);
+            let route = this.createRouteImplementation(routeData.name, pathOptions);
             route.segments = routeData.segments as IRouteSegment[] || [];
             route.markers = routeData.markers as IMarkerWithData[] || [];
             return route;

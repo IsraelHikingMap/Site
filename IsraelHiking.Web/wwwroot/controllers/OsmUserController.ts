@@ -150,7 +150,7 @@
                         }
                     }
                     let bounds = L.latLngBounds(dataContainer.southWest, dataContainer.northEast);
-                    let mainMarker = L.marker(bounds.getCenter(), { icon: Services.IconsService.createTraceMarkerIcon(), draggable: false }) as Services.Layers.RouteLayers.IMarkerWithTitle; // marker to allow remove of this layer.
+                    let mainMarker = L.marker(bounds.getCenter(), { icon: Services.IconsService.createTraceMarkerIcon(), draggable: false }) as Common.IMarkerWithTitle; // marker to allow remove of this layer.
                     mainMarker.title = trace.fileName;
                     let newScope = $scope.$new() as ISearchResultsMarkerPopupScope;
                     newScope.marker = mainMarker;
@@ -275,7 +275,7 @@
                 this.osmTraceLayer.addLayer(polyline);
                 let marker = L.marker(latLngs[0], { draggable: false, clickable: true, icon: Services.IconsService.createMissingPartMarkerIcon() } as L.MarkerOptions);
                 let newScope = $scope.$new() as MarkerPopup.IMissingPartMarkerPopupScope;
-                newScope.marker = marker as Services.Layers.RouteLayers.IMarkerWithTitle;
+                newScope.marker = marker as Common.IMarkerWithTitle;
                 newScope.feature = feature;
                 newScope.remove = () => {
                     marker.closePopup();

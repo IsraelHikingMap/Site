@@ -5,12 +5,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         polyline: L.Polyline;
     }
 
-    export interface IMarkerWithTitle extends L.Marker {
-        title: string;
-    }
-
     export interface IMarkerWithData extends Common.MarkerData {
-        marker: IMarkerWithTitle;
+        marker: Common.IMarkerWithTitle;
     }
 
     export interface IRouteProperties {

@@ -48,7 +48,7 @@
             this.setRouteMarkerEvents(marker);
             marker.addTo(this.context.map);
             let newScope = this.context.$rootScope.$new() as Controllers.MarkerPopup.IRemovableMarkerScope;
-            newScope.marker = marker as IMarkerWithTitle;
+            newScope.marker = marker as Common.IMarkerWithTitle;
 
             newScope.remove = () => {
                 let segment = _.find(this.context.route.segments, segmentToFind => marker === segmentToFind.routePointMarker);
@@ -310,7 +310,7 @@
             chain.then(() => this.context.dataChanged());
         }
 
-        protected createPoiMarkerWithEvents(markerData: Common.MarkerData): IMarkerWithTitle {
+        protected createPoiMarkerWithEvents(markerData: Common.MarkerData): Common.IMarkerWithTitle {
             let marker = this.createPoiMarker(markerData, true);
             var newScope = this.context.$rootScope.$new() as Controllers.MarkerPopup.IPoiMarkerPopupScope;
             newScope.marker = marker;

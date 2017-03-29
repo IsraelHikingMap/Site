@@ -97,7 +97,7 @@
                 // Sync lists
                 this.markers.eachLayer(l => {
                     if (l instanceof L.Marker) {
-                        let markerWithTitle = l as RouteLayers.IMarkerWithTitle;
+                        let markerWithTitle = l as Common.IMarkerWithTitle;
                         let geoSearchPage = _.find(response.query.geosearch, g => g.pageid.toString() === markerWithTitle.title);
                         if (geoSearchPage == null) {
                             this.markers.removeLayer(l);
@@ -109,8 +109,7 @@
 
                 for (let currentPage of response.query.geosearch) {
 
-
-                    let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { clickable: true, draggable: false, icon: this.wikiMarkerIcon, title: currentPage.title } as L.MarkerOptions) as RouteLayers.IMarkerWithTitle;
+                    let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { clickable: true, draggable: false, icon: this.wikiMarkerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
                     marker.title = currentPage.pageid.toString();
 
                     let pageAddress = `https://${lang}.wikipedia.org/?curid=${currentPage.pageid}`;
