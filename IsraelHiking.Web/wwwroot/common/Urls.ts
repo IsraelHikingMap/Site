@@ -11,6 +11,7 @@
         public static openFile = Urls.apiBase + "files/open";
         public static search = Urls.apiBase + "search/";
         public static images = Urls.apiBase + "images/";
+        public static colors = Urls.images + "colors/";
         public static translations = Urls.baseAddress + "/translations/";
         public static overpass = window.location.protocol + "//overpass-api.de/api/interpreter";
         public static osm = Urls.apiBase + "osm/";

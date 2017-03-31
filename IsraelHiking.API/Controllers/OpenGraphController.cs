@@ -13,7 +13,7 @@ namespace IsraelHiking.API.Controllers
     public class OpenGraphController : Controller
     {
         private readonly ILogger _logger;
-        private readonly IIsraelHikingRepository _repository;
+        private IIsraelHikingRepository _repository;
 
         /// <summary>
         /// Controller's constructor
@@ -87,6 +87,16 @@ namespace IsraelHiking.API.Controllers
                 </body>
                 </html>
             ";
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing && _repository != null)
+            {
+                _repository.Dispose();
+                _repository = null;
+            }
+            base.Dispose(disposing);
         }
     }
 }

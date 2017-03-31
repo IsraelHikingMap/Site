@@ -302,22 +302,24 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             featureGroup.clearLayers();
         }
 
-        public getHtmlTitle(title: string): string {
+        public getHtmlTitle(title: string, color: string = ""): string {
             let lines = title.split("\n");
             var htmlTitleArray = "";
+            var container = angular.element("<div>");
             for (let line of lines) {
                 if (!line) {
                     continue;
                 }
                 // start with hebrew or not, ignoring non alphabetical characters.
                 let direction = (line.match(/^[^a-zA-Z]*[\u0591-\u05F4]/)) ? "rtl" : "ltr";
-                htmlTitleArray += `<div dir="${direction}">${line}</div>`;
+                var htmlLine = angular.element("<div>").attr("dir", direction).append(line);
+                if (color)
+                {
+                    htmlLine.css("color", color);
+                }
+                container.append(htmlLine);
             }
-            return htmlTitleArray;
-        }
-
-        public getColorName(): string {
-            return _.find(RouteLayerFactory.COLORS, colorToFind => colorToFind.value === this.getRouteProperties().pathOptions.color).key;
+            return container.wrap("<div></div>").html();
         }
     }
 }

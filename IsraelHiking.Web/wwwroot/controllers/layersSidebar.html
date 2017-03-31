@@ -53,12 +53,12 @@
 <div ng-repeat="route in routes">
     <div class="row cursor-pointer" ng-click="selectRoute(route, $event)">
         <div class="col-xs-2">
-            <span ng-class="'fg-' + getRouteColorName(route)">
+            <span ng-style="{'color': getRouteColor(route)}">
                 <i class="fa fa-lg" ng-class="{'fa-pencil': isRouteSelected(route), 'fa-eye': isRouteVisisble(route) && !isRouteSelected(route), 'fa-eye-slash': !isRouteVisisble(route) }"></i>
             </span>
         </div>
         <div class="col-xs-7">
-            <span ng-class="'fg-' + getRouteColorName(route)">{{getRouteName(route)}}</span>
+            <span ng-style="{'color': getRouteColor(route)}">{{getRouteName(route)}}</span>
         </div>
         <div class="col-xs-3">
             <span class="pull-right" ng-class="{flip: resources.direction == 'rtl'}" ng-click="editRoute(getRouteName(route), $event)" uib-tooltip="{{resources.routeProperties}}" tooltip-placement="{{resources.start}}" analytics-on="click" analytics-category="Route" analytics-event="Edit route"><i class="fa fa-lg fa-wrench"></i></span>

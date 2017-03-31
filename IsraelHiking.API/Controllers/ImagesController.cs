@@ -5,6 +5,8 @@ using IsraelHiking.DataAccessInterfaces;
 using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
+using System.Collections.Generic;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -14,19 +16,22 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class ImagesController : Controller
     {
-        private readonly IIsraelHikingRepository _israelHikingRepository;
-        private readonly IImageCreationService _imageCreationService;
+        private IIsraelHikingRepository _israelHikingRepository;
+        private IImageCreationService _imageCreationService;
+        private readonly ConfigurationData _options;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="israelHikingRepository"></param>
         /// <param name="imageCreationService"></param>
-        public ImagesController(IIsraelHikingRepository israelHikingRepository, 
-            IImageCreationService imageCreationService)
+        public ImagesController(IIsraelHikingRepository israelHikingRepository,
+            IImageCreationService imageCreationService,
+            IOptions<ConfigurationData> options)
         {
             _israelHikingRepository = israelHikingRepository;
             _imageCreationService = imageCreationService;
+            _options = options.Value;
         }
 
         /// <summary>
@@ -45,6 +50,32 @@ namespace IsraelHiking.API.Controllers
             }
             var imageData = await _imageCreationService.Create(JsonConvert.DeserializeObject<DataContainer>(url.JsonData));
             return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
+        }
+
+        [HttpGet]
+        [Route("colors")]
+        public List<string> GetColors()
+        {
+            return _options.Colors;
+        }
+
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_israelHikingRepository != null)
+                {
+                    _israelHikingRepository.Dispose();
+                    _israelHikingRepository = null;
+                }
+                if (_imageCreationService != null)
+                {
+                    _imageCreationService.Dispose();
+                    _imageCreationService = null;
+                }
+            }
+            base.Dispose(disposing);
         }
     }
 }

@@ -161,7 +161,7 @@
         }
 
         private updateChart = ($scope: IRouteStatisticsScope) => {
-            $scope.chart.data.rows.splice(0, $scope.chart.data.rows.length);
+            $scope.chart.data.rows.splice(0);
             if (this.routeLayer == null) {
                 return;
             }

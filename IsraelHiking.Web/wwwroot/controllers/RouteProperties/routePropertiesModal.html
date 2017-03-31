@@ -29,9 +29,9 @@
                     </div>
                     <div class="col-md-6">
                         <div class="form-group">
-                            <label class="control-label col-md-6">{{resources.color}} <button type="button" class="btn btn-default" ng-class="'bg-' + getColorName(routeProperties.pathOptions.color)"></button></label>
+                            <label class="control-label col-md-6">{{resources.color}} <button type="button" class="btn btn-default" ng-style="{'background-color': routeProperties.pathOptions.color}"></button></label>
                             <div class="col-md-6">
-                                <button type="button" class="btn btn-default col-xs-3" ng-class="'bg-' + currentColor.key" ng-repeat="currentColor in colors" ng-click="routeProperties.pathOptions.color = currentColor.value"></button>
+                                <button type="button" class="btn btn-default col-xs-3" ng-style="{'background-color': currentColor}" ng-repeat="currentColor in colors" ng-click="routeProperties.pathOptions.color = currentColor"></button>
                             </div>
                         </div>
                     </div>

@@ -4,19 +4,20 @@
         public static ROUTING_TYPE = "routing-type";
         public static ROUTE_OPACITY = "routeOpacity";
 
-        public static COLORS = [
-            { key: "blue", value: "#0000FF" },
-            { key: "red", value: "#FF0000" },
-            { key: "orange", value: "#FF6600" },
-            { key: "pink", value: "#FF00DD" },
-            { key: "green", value: "#008000" },
-            { key: "purple", value: "#B700FF" },
-            { key: "turquize", value: "#00B0A4" },
-            { key: "yellow", value: "#FFFF00" },
-            { key: "brown", value: "#9C3E00" },
-            { key: "cyan", value: "#00FFFF" },
-            { key: "gray", value: "#7F8282" },
-            { key: "dark", value: "#101010" }
+        // default values - in case the response from server takes too long.
+        public static COLORS: string[] = [
+            "#0000FF",
+            "#FF0000",
+            "#FF6600",
+            "#FF00DD",
+            "#008000",
+            "#B700FF",
+            "#00B0A4",
+            "#FFFF00",
+            "#9C3E00",
+            "#00FFFF",
+            "#7F8282",
+            "#101010"
         ];
 
         private $q: angular.IQService;
@@ -34,6 +35,7 @@
             $compile: angular.ICompileService,
             $rootScope: angular.IRootScopeService,
             $timeout: angular.ITimeoutService,
+            $http: angular.IHttpService,
             localStorageService: angular.local.storage.ILocalStorageService,
             mapService: MapService,
             routerService: Routers.RouterService,
@@ -48,6 +50,9 @@
             this.routerService = routerService;
             this.snappingService = snappingService;
             this.elevationProvider = elevationProvider;
+            $http.get(Common.Urls.colors).success((colors: string[]) => {
+                RouteLayerFactory.COLORS.splice(0, RouteLayerFactory.COLORS.length, ...colors);
+            });
         }
 
         public createRouteLayerFromData = (routeData: Common.RouteData, reRoute: boolean): RouteLayer => {
@@ -82,7 +87,7 @@
                     isRoutingPerPoint: isRoutingPerPoint,
                     isVisible: true,
                     pathOptions: {
-                        color: pathOptions.color || RouteLayerFactory.COLORS[this.nextColorIndex].value,
+                        color: pathOptions.color || RouteLayerFactory.COLORS[this.nextColorIndex],
                         className: "",
                         opacity: pathOptions.opacity || this.localStorageService.get(RouteLayerFactory.ROUTE_OPACITY) as number || 0.5,
                         weight: pathOptions.weight || 4

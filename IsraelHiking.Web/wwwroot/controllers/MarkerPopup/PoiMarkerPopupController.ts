@@ -62,7 +62,8 @@
                 let routeMarker = _.find($scope.routeLayer.route.markers, markerToFind => markerToFind.marker === $scope.marker);
                 routeMarker.title = newTitle;
                 routeMarker.type = markerType;
-                $scope.marker.updateLabelContent($scope.routeLayer.getHtmlTitle(newTitle));
+                let color = $scope.routeLayer.getRouteProperties().pathOptions.color;
+                $scope.marker.updateLabelContent($scope.routeLayer.getHtmlTitle(newTitle, color));
                 $scope.marker.title = newTitle;
                 if (!newTitle) {
                     $scope.marker.hideLabel();

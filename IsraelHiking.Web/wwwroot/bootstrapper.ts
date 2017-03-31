@@ -46,10 +46,11 @@
         ($http: angular.IHttpService, resourcesService: Services.ResourcesService, mapService: Services.MapService, toastr: Toastr) =>
             new Services.SnappingService($http, resourcesService, mapService, toastr)]);
     app.service(Strings.Services.routeLayerFactory,
-        [Strings.Angular.q, Strings.Angular.compile, Strings.Angular.rootScope, Strings.Angular.timeout, Strings.Services.localStorageService,
+        [Strings.Angular.q, Strings.Angular.compile, Strings.Angular.rootScope, Strings.Angular.timeout, Strings.Angular.http, Strings.Services.localStorageService,
             Strings.Services.mapService, Strings.Services.routerService, Strings.Services.snappingService, Strings.Services.elevationProvider,
-            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, $timeout: angular.ITimeoutService, localStorageService: angular.local.storage.ILocalStorageService, mapService: Services.MapService, routerService: Services.Routers.RouterService, snappingService: Services.SnappingService, elevationProvider: Services.Elevation.IElevationProvider) =>
-                new Services.Layers.RouteLayers.RouteLayerFactory($q, $compile, $rootScope, $timeout, localStorageService, mapService, routerService, snappingService, elevationProvider)]);
+            ($q: angular.IQService, $compile: angular.ICompileService, $rootScope: angular.IRootScopeService, $timeout: angular.ITimeoutService, $http: angular.IHttpService, localStorageService: angular.local.storage.ILocalStorageService,
+                mapService: Services.MapService, routerService: Services.Routers.RouterService, snappingService: Services.SnappingService, elevationProvider: Services.Elevation.IElevationProvider) =>
+                new Services.Layers.RouteLayers.RouteLayerFactory($q, $compile, $rootScope, $timeout, $http, localStorageService, mapService, routerService, snappingService, elevationProvider)]);
     app.service(Strings.Services.hashService, [Strings.Angular.location, Strings.Angular.window, Strings.Angular.rootScope, Strings.Services.localStorageService, Strings.Services.mapService,
     ($location: angular.ILocationService, $window: angular.IWindowService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService, mapService: Services.MapService) =>
             new Services.HashService($location, $window, $rootScope, localStorageService, mapService)]);

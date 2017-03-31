@@ -1,11 +1,10 @@
 ﻿namespace IsraelHiking.Controllers.RouteProperties {
     export interface IRouteBaseScope extends IRootScope {
         routeProperties: Services.Layers.RouteLayers.IRouteProperties;
-        colors: { key: string, value: string }[];
+        colors: string[];
         isNew: boolean;
         isAdvanced: boolean;
         title: string;
-        getColorName(colorValue: string): string;
         saveRoute(e: Event);
     }
 
@@ -16,9 +15,6 @@
             super(mapService);
             $scope.colors = Services.Layers.RouteLayers.RouteLayerFactory.COLORS;
             $scope.isAdvanced = localStorageService.get(LayersController.SHOW_ADVANCED_KEY) ? true : false;
-            $scope.getColorName = (colorValue: string): string => {
-                return _.find(Services.Layers.RouteLayers.RouteLayerFactory.COLORS, c => c.value === colorValue).key;
-            }
         }
 
         protected updateLocalStorage($scope: IRouteBaseScope, localStorageService: angular.local.storage.ILocalStorageService) {

@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -21,7 +22,9 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _repository = Substitute.For<IIsraelHikingRepository>();
             _imageCreationService = Substitute.For<IImageCreationService>();
-            _controller = new ImagesController(_repository, _imageCreationService);
+            var options = Substitute.For<IOptions<ConfigurationData>>();
+            options.Value.Returns(new ConfigurationData());
+            _controller = new ImagesController(_repository, _imageCreationService, options);
         }
 
         [TestMethod]

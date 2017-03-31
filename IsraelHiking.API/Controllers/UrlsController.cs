@@ -175,7 +175,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
-            if (disposing)
+            if (disposing && _repository != null)
             {
                 _repository.Dispose();
                 _repository = null;

@@ -9,6 +9,7 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Tests.Services
 {
@@ -24,7 +25,9 @@ namespace IsraelHiking.API.Tests.Services
             _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
             var factory = Substitute.For<IHttpGatewayFactory>();
             factory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(_remoteFileFetcherGateway);
-            _imageCreationService = new ImageCreationService(factory, Substitute.For<ILogger>());
+            var options = Substitute.For<IOptions<ConfigurationData>>();
+            options.Value.Returns(new ConfigurationData());
+            _imageCreationService = new ImageCreationService(factory, options, Substitute.For<ILogger>());
             SetupRemoteFileFetcherWithBlankTile();
         }
 

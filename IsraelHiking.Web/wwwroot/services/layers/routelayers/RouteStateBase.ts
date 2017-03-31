@@ -43,8 +43,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                 opacity: pathOptions.opacity
             } as L.MarkerOptions) as Common.IMarkerWithTitle;
             marker.title = markerData.title || "";
-            let colorName = this.context.getColorName();
-            marker.bindLabel(this.context.getHtmlTitle(marker.title), { noHide: true, className: `marker-label fg-${colorName}` } as L.LabelOptions);
+            let color = this.context.getRouteProperties().pathOptions.color;
+            marker.bindLabel(this.context.getHtmlTitle(marker.title, color), { noHide: true, className: `marker-label` } as L.LabelOptions);
             marker.addTo(this.context.map);
             if (!marker.title) { // must be after adding to map...
                 marker.hideLabel();

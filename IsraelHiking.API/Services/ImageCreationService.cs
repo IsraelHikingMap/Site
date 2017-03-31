@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
 {
@@ -37,43 +38,26 @@ namespace IsraelHiking.API.Services
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly ILogger _logger;
 
-        private int _reoutePenIndex;
-        private readonly Pen _outLinerPen;
-        private readonly Pen[] _routePenArray;
-        private readonly Pen _startRoutePen;
-        private readonly Pen _endRoutePen;
-        private readonly Brush _circleFillBrush;
+        private Pen _outLinerPen;
+        private Pen _startRoutePen;
+        private Pen _endRoutePen;
+        private Brush _circleFillBrush;
+        private Color[] _routeColors;
 
         /// <summary>
         /// Contstructor, creates relevant colors and brushes
         /// </summary>
         /// <param name="httpGatewayFactory"></param>
         /// <param name="logger"></param>
-        public ImageCreationService(IHttpGatewayFactory httpGatewayFactory, ILogger logger)
+        public ImageCreationService(IHttpGatewayFactory httpGatewayFactory, IOptions<ConfigurationData> options, ILogger logger)
         {
-            _reoutePenIndex = 0;
             _remoteFileFetcherGateway = httpGatewayFactory.CreateRemoteFileFetcherGateway(null);
             _logger = logger;
             _outLinerPen = new Pen(Color.White, PEN_WIDTH + 8) { LineJoin = LineJoin.Bevel };
-            _routePenArray = new[]
-            {
-                new Pen(Color.Blue, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Red, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Orange, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Pink, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Green, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Purple, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Turquoise, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Yellow, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Brown, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Cyan, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.Gray, PEN_WIDTH) {LineJoin = LineJoin.Bevel},
-                new Pen(Color.FromArgb(255, 16, 16, 16), PEN_WIDTH) {LineJoin = LineJoin.Bevel}
-            };
-
-            _circleFillBrush = Brushes.White;
+            _circleFillBrush = Brushes.White.Clone() as Brush;
             _startRoutePen = new Pen(Color.Green, 7);
             _endRoutePen = new Pen(Color.Red, 7);
+            _routeColors = options.Value.Colors.Select(v => ColorTranslator.FromHtml(v)).ToArray();
         }
 
         ///<inheritdoc />
@@ -86,11 +70,7 @@ namespace IsraelHiking.API.Services
                 allLocations = new[] { dataContainer.northEast, dataContainer.southWest };
             }
             var backgroundImage = await GetBackGroundImage(GetAddressTemplate(dataContainer), allLocations);
-            var points = dataContainer.routes
-                    .Select(r => r.segments.SelectMany(s => s.latlngzs)
-                                .Select(l => ConvertLatLngZToPoint(l, backgroundImage))
-                                .ToArray());
-            DrawRouteOnImage(backgroundImage.Image, points);
+            DrawRoutesOnImage(backgroundImage, dataContainer);
             var resizedForFacebook = new Bitmap(backgroundImage.Image, new Size(600, 315));
             var imageStream = new MemoryStream();
             resizedForFacebook.Save(imageStream, ImageFormat.Png);
@@ -181,20 +161,28 @@ namespace IsraelHiking.API.Services
             return address;
         }
 
-        private void DrawRouteOnImage(Image image, IEnumerable<PointF[]> pointsByRoute)
+        private void DrawRoutesOnImage(BackgroundImage backgroundImage, DataContainer dataContainer)
         {
-            using (var graphics = Graphics.FromImage(image))
+            using (var graphics = Graphics.FromImage(backgroundImage.Image))
             {
+                var routeColorIndex = 0;
                 // HM TODO: add markers?
-                foreach (var points in pointsByRoute)
+                foreach (var route in dataContainer.routes)
                 {
+                    var points = route.segments.SelectMany(s => s.latlngzs).Select(l => ConvertLatLngZToPoint(l, backgroundImage)).ToArray();
                     if (!points.Any())
                     {
                         continue;
                     }
+                    var lineColor = _routeColors[routeColorIndex++];
+                    routeColorIndex = routeColorIndex % _routeColors.Length;
+                    if (!string.IsNullOrEmpty(route.color))
+                    {
+                        lineColor = ColorTranslator.FromHtml(route.color);
+                    }
                     graphics.DrawLines(_outLinerPen, points);
-                    graphics.DrawLines(_routePenArray[_reoutePenIndex++], points);
-                    _reoutePenIndex = _reoutePenIndex % _routePenArray.Length;
+                    var linePen = new Pen(lineColor, PEN_WIDTH) { LineJoin = LineJoin.Bevel };
+                    graphics.DrawLines(linePen, points);
                     graphics.FillEllipse(_circleFillBrush, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
                     graphics.DrawEllipse(_startRoutePen, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
                     graphics.FillEllipse(_circleFillBrush, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
@@ -248,6 +236,30 @@ namespace IsraelHiking.API.Services
             if (bottomRight.Y - topLeft.Y + 1 < NUMBER_OF_TILES_FOR_IMAGE_Y)
             {
                 topLeft.Y--;
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_circleFillBrush != null)
+            {
+                _circleFillBrush.Dispose();
+                _circleFillBrush = null;
+            }
+            if (_endRoutePen != null)
+            {
+                _endRoutePen.Dispose();
+                _endRoutePen = null;
+            }
+            if (_outLinerPen != null)
+            {
+                _outLinerPen.Dispose();
+                _outLinerPen = null;
+            }
+            if (_startRoutePen != null)
+            {
+                _startRoutePen.Dispose();
+                _startRoutePen = null;
             }
         }
     }

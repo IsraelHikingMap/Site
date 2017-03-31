@@ -18,7 +18,7 @@
         toggleAdvanced(e: Event): void;
         toggleShow(e: Event): void;
         isVisisble(): boolean;
-        getRouteColorName(route: Services.Layers.RouteLayers.RouteLayer): void;
+        getRouteColor(route: Services.Layers.RouteLayers.RouteLayer): string;
         getRouteName(route: Services.Layers.RouteLayers.RouteLayer): void;
         isRouteVisisble(route: Services.Layers.RouteLayers.RouteLayer): boolean;
         isRouteSelected(route: Services.Layers.RouteLayers.RouteLayer): boolean;
@@ -126,8 +126,8 @@
                 return sidebarService.viewName === "layers";
             }
 
-            $scope.getRouteColorName = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
-                return routeLayer.getColorName();
+            $scope.getRouteColor = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
+                return routeLayer.getRouteProperties().pathOptions.color;
             }
 
             $scope.getRouteName = (routeLayer: Services.Layers.RouteLayers.RouteLayer) => {
