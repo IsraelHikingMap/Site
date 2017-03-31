@@ -55,7 +55,7 @@ namespace IsraelHiking.Controllers {
         }
 
         private createControls = ($scope: IRootScope) => {
-            this.createContorl($scope, "zoom-control");
+            this.createContorl($scope, "zoom-control", "topleft", true);
 
             L.control.locate({
                 compile: this.$compile,
@@ -78,7 +78,7 @@ namespace IsraelHiking.Controllers {
             this.createContorl($scope, "layers-control");
             this.createContorl($scope, "file-control");
             this.createContorl($scope, "save-as-control");
-            this.createContorl($scope, "edit-osm-control");
+            this.createContorl($scope, "edit-osm-control", "topleft", true);
             this.createContorl($scope, "info-control");
             this.createContorl($scope, "osm-user-control", "topright");
             this.createContorl($scope, "search-control", "topright");
@@ -95,14 +95,19 @@ namespace IsraelHiking.Controllers {
          * @param directiveHtmlName - the dricetive html string
          * @param position - the position to place the control: topleft/topright/bottomleft/bottomright
          */
-        private createContorl($scope: angular.IRootScopeService, directiveHtmlName: string, position: L.PositionString = "topleft") {
+        private createContorl($scope: angular.IRootScopeService, directiveHtmlName: string, position: L.PositionString = "topleft", hiddenOnMoblie = false) {
             var control = L.Control.extend({
                 options: {
                     position: position
                 } as L.ControlOptions,
                 onAdd: (): HTMLElement => {
-                    var controlDiv = angular.element("<div>")
-                        .addClass(directiveHtmlName + "-container")
+                    let classString = directiveHtmlName + "-container";
+                    if (hiddenOnMoblie)
+                    {
+                        classString += " hidden-xs";
+                    }
+                    let controlDiv = angular.element("<div>")
+                        .addClass(classString)
                         .append(this.$compile(`<${directiveHtmlName}></${directiveHtmlName}>`)($scope.$new()));
                     return controlDiv[0];
                 },

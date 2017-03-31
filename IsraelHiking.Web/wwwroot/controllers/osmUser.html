@@ -4,7 +4,7 @@
         <div class="pull-right">
             <div class="osm-user-display cursor-pointer" ng-click="login($event)" analytics-on="click" analytics-event="OSM login">
                 <span class="pull-right"><i class="fa fa-frown-o fa-lg"></i></span>
-                <span class="pull-right">{{resources.unknownUser}}</span>
+                <span class="pull-right hidden-xs">{{resources.unknownUser}}</span>
             </div>
         </div>
         <a class="cursor-pointer control-icon-last" uib-popover="{{resources.osmLoginExplenation}}" popover-placement="bottom" popover-append-to-body="true"><i class="fa fa-question"></i></a>
@@ -16,8 +16,9 @@
         <a class="control-icon-first" ng-click="userService.logout()" analytics-on="click" analytics-event="OSM logout"><i class="fa fa-sign-out"></i></a>
         <div class="pull-right">
             <div class="osm-user-display">
-                <img class="pull-right" ng-src="{{userService.imageUrl}}" alt="" width="16" height="16" />
-                <span class="pull-right">{{userService.displayName}}</span>
+                <img ng-show="userService.imageUrl" class="pull-right" ng-src="{{userService.imageUrl}}" alt="" width="16" height="16" />
+                <span class="pull-right" ng-hide="userService.imageUrl"><i class="fa fa-user fa-lg"></i></span>
+                <span class="pull-right hidden-xs">{{userService.displayName}}</span>
             </div>
         </div>
         <a class="cursor-pointer control-icon-last" ng-click="openUserDetails($event)" analytics-on="click" analytics-event="OSM user details open"><i class="fa fa-wrench"></i></a>
