@@ -6,6 +6,7 @@ using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using System;
 
 namespace IsraelHiking.API.Services
 {
@@ -159,7 +160,7 @@ namespace IsraelHiking.API.Services
             {
                 return FlowFormats.KML_BABEL_FORMAT;
             }
-            return fileNameOrFormat.ToLower().Split('.').LastOrDefault() ?? string.Empty;
+            throw new Exception("Unsupported file format: " + fileNameOrFormat);
         }
     }
 }
