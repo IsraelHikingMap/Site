@@ -35,7 +35,7 @@
     overflow-y: scroll;
     background: #dddddd !important;
     width: 0;
-    z-index: 1100;
+    z-index: 1010;
     -webkit-transition: all 0.5s ease;
     -moz-transition: all 0.5s ease;
     -o-transition: all 0.5s ease;
@@ -67,7 +67,7 @@
 }
 
 .leaflet-left {
-    z-index: 1110;
+    z-index: 1020;
 }
 
 @media(min-width:768px) {
