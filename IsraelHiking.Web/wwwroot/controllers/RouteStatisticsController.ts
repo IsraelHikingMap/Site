@@ -11,6 +11,7 @@
         toShortNumber(number: number): string;
         onMouseOver(rowIndex: number, colIndex: number): void;
         onMouseOut(): void;
+        onChartReady(chartWrapper: any): void
         hide($event: Event): void;
     }
 
@@ -22,6 +23,7 @@
         private $compile: angular.ICompileService;
         private routeDataChangedEventHandler: (data: {}) => void;
         private polylineHoverEventHandler: (data: L.LatLng) => void;
+        private chartWrapper: any;
 
         constructor($scope: IRouteStatisticsScope,
             $window: angular.IWindowService,
@@ -95,7 +97,9 @@
                 $scope.chart.options.hAxis.title = $scope.resources.distanceInKm;
             },true);
 
-            
+            $scope.onChartReady = (chartWrapper: any) => {
+                this.chartWrapper = chartWrapper;
+            }
         }
 
         private routeChanged = ($scope: IRouteStatisticsScope, layersService: Services.Layers.LayersService) => {
@@ -117,9 +121,24 @@
         }
 
         private onPolylineHover = ($scope: IRouteStatisticsScope, latlng: L.LatLng) => {
-            // HM TODO: finish this with chart wrapper?
-            //console.log(latlng);
-            //$scope.chart.setSelection([{ row: 0, column: 1 }]);
+            // HM: this is not working well since the chart does not have the full line but just points.
+            // A solution might be to add interpolated points to the chart...?
+            if (!this.chartWrapper)
+            {
+                return;
+            }
+            let rows = $scope.chart.data.rows as google.visualization.DataObjectRow[];
+            let percision = 4;
+            let hoverRounded = L.latLng(parseFloat(latlng.lat.toFixed(percision)), parseFloat(latlng.lng.toFixed(percision)));
+            for (let rowIndex = 0; rowIndex < rows.length; rowIndex++)
+            {
+                let currentLatLng = L.latLng(parseFloat(rows[rowIndex].c[2].v.toFixed(percision)), parseFloat(rows[rowIndex].c[3].v.toFixed(percision)));
+                if (currentLatLng.equals(hoverRounded))
+                {
+                    this.chartWrapper.getChart().setSelection([{ row: rowIndex, column: 1 }]);
+                    break;
+                }
+            }
         }
 
         private createKmMarker = (latlng: L.LatLng, markerNumber: number): L.Marker => {

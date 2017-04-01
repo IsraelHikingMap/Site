@@ -113,7 +113,7 @@
                     marker.title = currentPage.pageid.toString();
 
                     let pageAddress = `https://${lang}.wikipedia.org/?curid=${currentPage.pageid}`;
-                    let header = `<h4 ${dir} class="text-center"><a href="${pageAddress}" target="_blank">${currentPage.title}</a></h4>`;
+                    let header = `<h4 ${dir} class="${textAlign}"><a href="${pageAddress}" target="_blank">${currentPage.title}</a></h4>`;
                     marker.bindPopup(header);
                     marker.on("popupopen", () => {
                         this.popupOpen = true;
@@ -123,11 +123,11 @@
                             let currentDetailedPage = detailsResponse.query.pages[currentPage.pageid];
                             let imageHtml = "";
                             if (currentDetailedPage.thumbnail) {
-                                imageHtml = `<img src="${currentDetailedPage.thumbnail.source}" class="img-responsive" style="max-width:100% !important" />`;
+                                imageHtml = `<img src="${currentDetailedPage.thumbnail.source}" />`;
                             }
+                            header = `<h4 ${dir} class="${textAlign}">${imageHtml} <a href="${pageAddress}" target="_blank">${currentPage.title}</a></h4>`;
                             var content = header + `<div class="row">` +
-                                `  <div class="col-xs-9 ${textAlign}" ${dir}>${currentDetailedPage.extract || ""}</div>` +
-                                `  <div class="col-xs-3">${imageHtml}</div>` +
+                                `  <div class="col-xs-12 ${textAlign}" ${dir}>${currentDetailedPage.extract || ""}</div>` +
                                 `</div>`;
                             popup.setContent(content);
                             popup.update();
