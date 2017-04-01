@@ -218,7 +218,17 @@ namespace IsraelHiking.Web
 
             app.UseMvc();
             app.UseDefaultFiles();
-            app.UseStaticFiles();
+            app.UseStaticFiles(new StaticFileOptions()
+            {
+                OnPrepareResponse = (context) =>
+                {
+                    var headers = context.Context.Response.GetTypedHeaders();
+                    headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+                    {
+                        MaxAge = TimeSpan.FromSeconds(3600),
+                    };
+                }
+            });
             var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
             foreach (var directory in configurationData.ListingDictionary)
             {
