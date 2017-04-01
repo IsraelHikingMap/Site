@@ -20,6 +20,7 @@ using OsmSharp.Streams;
 using OsmSharp.Streams.Complete;
 using OsmSharp.Complete;
 using System.Xml.Serialization;
+using OsmSharp.IO.Xml;
 
 namespace IsraelHiking.DataAccess.OpenStreetMap
 {
@@ -113,7 +114,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                         }
                     }
                 };
-                var response = await client.PutAsync(_createChangesetAddress, ToContent(changeSet));
+                var response = await client.PutAsync(_createChangesetAddress, new StringContent(changeSet.SerializeToXml()));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     var message = await response.Content.ReadAsStringAsync();
@@ -133,7 +134,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 {
                     Nodes = new[] { node }
                 };
-                var response = await client.PutAsync(_createNodeAddress, ToContent(newNode));
+                var response = await client.PutAsync(_createNodeAddress, new StringContent(newNode.SerializeToXml()));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     return string.Empty;
@@ -152,7 +153,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 {
                     Ways = new[] { way }
                 };
-                var response = await client.PutAsync(_createWayAddress, ToContent(newWay));
+                var response = await client.PutAsync(_createWayAddress, new StringContent(newWay.SerializeToXml()));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     return string.Empty;
@@ -172,7 +173,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 {
                     Ways = new[] { way }
                 };
-                var response = await client.PutAsync(address, ToContent(updatedWay));
+                var response = await client.PutAsync(address, new StringContent(updatedWay.SerializeToXml()));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     var message = await response.Content.ReadAsStringAsync();
@@ -238,14 +239,6 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                     throw new Exception("Unable to upload the file: " + fileName);
                 }
             }
-        }
-
-        private HttpContent ToContent(Osm osm)
-        {
-            var serializer = new XmlSerializer(typeof(Osm));
-            var memoryStream = new MemoryStream();
-            serializer.Serialize(memoryStream, osm);
-            return new StringContent(Encoding.UTF8.GetString(memoryStream.ToArray()));
         }
 
         private Osm FromContent(Stream stream)
