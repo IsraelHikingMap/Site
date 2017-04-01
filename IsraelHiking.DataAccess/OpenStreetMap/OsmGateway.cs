@@ -116,7 +116,8 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 var response = await client.PutAsync(_createChangesetAddress, ToContent(changeSet));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    return string.Empty;
+                    var message = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Unable to create changeset: {message}");
                 }
                 return await response.Content.ReadAsStringAsync();
             }
@@ -239,12 +240,12 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             }
         }
 
-        private StreamContent ToContent(Osm osm)
+        private HttpContent ToContent(Osm osm)
         {
             var serializer = new XmlSerializer(typeof(Osm));
             var memoryStream = new MemoryStream();
             serializer.Serialize(memoryStream, osm);
-            return new StreamContent(memoryStream);
+            return new StringContent(Encoding.UTF8.GetString(memoryStream.ToArray()));
         }
 
         private Osm FromContent(Stream stream)

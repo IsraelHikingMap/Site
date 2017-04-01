@@ -19,13 +19,15 @@ namespace IsraelHiking.DataAccess.Tests.OpenStreetMap
         [TestInitialize]
         public void TestInitialize()
         {
-            var options = new ConfigurationData();
-            options.OsmConfiguraion.Returns(new OsmConfiguraionData
+            var options = new ConfigurationData()
             {
-                BaseAddress = "http://api06.dev.openstreetmap.org",
-                ConsumerKey = "uR7K7PcxOyFG2FnTdTuEqAmlq6hTWPDmF4xknWxQ",
-                ConsumerSecret = "hd8WnRpQQtzS04HeFMLUHN2JQtPWzQLOmA6OeE9l"
-            });
+                OsmConfiguraion = new OsmConfiguraionData
+                {
+                    BaseAddress = "http://api06.dev.openstreetmap.org",
+                    ConsumerKey = "uR7K7PcxOyFG2FnTdTuEqAmlq6hTWPDmF4xknWxQ",
+                    ConsumerSecret = "hd8WnRpQQtzS04HeFMLUHN2JQtPWzQLOmA6OeE9l"
+                }
+            };
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
             _gateway = new OsmGateway(new TokenAndSecret("IwrfBMSqyuq3haudBUgfrjflXnvhAcbTvqVBa47l", "eBY4iWlGNMrvERH56vp0jjU8RsVhsroQIns5MQGz"), optionsProvider, new TraceLogger());
@@ -46,7 +48,9 @@ namespace IsraelHiking.DataAccess.Tests.OpenStreetMap
         {
             var id = _gateway.CreateChangeset("").Result;
 
-            Assert.AreNotEqual(-1, id);
+            Assert.AreNotEqual(string.Empty, id);
+
+            _gateway.CloseChangeset(id).Wait();
         }
 
         [TestMethod]
