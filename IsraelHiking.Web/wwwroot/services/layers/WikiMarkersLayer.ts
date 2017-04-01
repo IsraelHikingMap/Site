@@ -44,7 +44,6 @@
         private markers: L.MarkerClusterGroup;
         private wikiMarkerIcon: L.Icon;
         private enabled: boolean;
-        private popupOpen: boolean;
 
         constructor($http: angular.IHttpService,
             $rootScope: angular.IRootScopeService,
@@ -55,16 +54,12 @@
             this.resourcesService = resourcesService;
             this.markers = new L.MarkerClusterGroup();
             this.enabled = false;
-            this.popupOpen = false;
             this.wikiMarkerIcon = IconsService.createWikipediaIcon();
             $rootScope.$watch(() => resourcesService.currentLanguage, () => {
-                this.popupOpen = false;
                 this.updateMarkers();
             });
             this.map.on("moveend", () => {
-                if (!this.popupOpen) {
-                    this.updateMarkers();
-                }
+                this.updateMarkers();
             });
         }
 
@@ -89,7 +84,7 @@
             let dir = "";
             let textAlign = "text-left";
             if (this.resourcesService.currentLanguage.rtl) {
-                dir = 'dir="rtl"';
+                dir = "rtl";
                 textAlign = "text-right";
             }
             let url = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000&callback=JSON_CALLBACK`;
@@ -113,27 +108,42 @@
                     marker.title = currentPage.pageid.toString();
 
                     let pageAddress = `https://${lang}.wikipedia.org/?curid=${currentPage.pageid}`;
-                    let header = `<h4 ${dir} class="${textAlign}"><a href="${pageAddress}" target="_blank">${currentPage.title}</a></h4>`;
-                    marker.bindPopup(header);
+                    let header = angular.element("<h4>")
+                        .addClass(textAlign)
+                        .css("margin-top", 0)
+                        .attr("dir", dir).append(angular.element("<a>")
+                            .attr("target", "_blank")
+                            .attr("href", pageAddress)
+                            .append(currentPage.title)
+                        );
+                    marker.bindPopup(header.wrap("<div></div>").html());
                     marker.on("popupopen", () => {
-                        this.popupOpen = true;
-                        var popup = marker.getPopup();
-                        var detailsUrl = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&pageids=${currentPage.pageid}&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1&callback=JSON_CALLBACK`;
+                        let popup = marker.getPopup();
+                        let detailsUrl = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&pageids=${currentPage.pageid}&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1&callback=JSON_CALLBACK`;
                         this.$http.jsonp(detailsUrl).success((detailsResponse: IWikiResponse) => {
                             let currentDetailedPage = detailsResponse.query.pages[currentPage.pageid];
-                            let imageHtml = "";
+                            let columnsClass = "col-xs-12";
                             if (currentDetailedPage.thumbnail) {
-                                imageHtml = `<img src="${currentDetailedPage.thumbnail.source}" />`;
+                                columnsClass = "col-xs-8";
+                                currentDetailedPage.thumbnail.source = currentDetailedPage.thumbnail.source.replace(/\/\d\dpx/g, "/128px")
                             }
-                            header = `<h4 ${dir} class="${textAlign}">${imageHtml} <a href="${pageAddress}" target="_blank">${currentPage.title}</a></h4>`;
-                            var content = header + `<div class="row">` +
-                                `  <div class="col-xs-12 ${textAlign}" ${dir}>${currentDetailedPage.extract || ""}</div>` +
-                                `</div>`;
-                            popup.setContent(content);
+                            let container = angular.element("<div>").addClass("row").addClass("no-gutters").append(
+                                angular.element("<div>").addClass(columnsClass).append(header).append(
+                                    angular.element("<div>").addClass(textAlign).attr("dir", dir).append(currentDetailedPage.extract)
+                                )
+                            );
+                            if (currentDetailedPage.thumbnail)
+                            {
+                                let imageConainer = angular.element("<div>").addClass("col-xs-4").append(
+                                    angular.element("<img>").attr("src", currentDetailedPage.thumbnail.source).attr("width", "100%")
+                                );
+                                container.append(imageConainer);
+                            }
+                            let htmlString = container.wrap("<div></div>").parent().html();
+                            popup.setContent(htmlString);
                             popup.update();
                         });
                     });
-                    marker.on("popupclose", () => { this.popupOpen = false; });
                     this.markers.addLayer(marker);
                 }
             });
