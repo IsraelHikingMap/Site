@@ -85,6 +85,7 @@ namespace IsraelHiking.Controllers {
             this.createContorl($scope, "drawing-control", "topright");
             this.createContorl($scope, "share-control", "topright");
             this.createContorl($scope, "language-control", "topright");
+            this.createContorl($scope, "route-statistics-control", "bottomright");
 
             L.control.scale({ imperial: false } as L.ScaleOptions).addTo(this.map);
         }

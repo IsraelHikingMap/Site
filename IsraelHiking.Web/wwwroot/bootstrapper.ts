@@ -135,6 +135,10 @@
         controller: Controllers.LanguageController,
         templateUrl: "controllers/language.html"
     } as angular.IDirective));
+    app.directive(Strings.Directives.routeStatisticsControl, () => ({
+        controller: Controllers.RouteStatisticsController,
+        templateUrl: "controllers/routeStatistics.html"
+    } as angular.IDirective));
     app.directive(Strings.Directives.infoSidebar, () => ({
         controller: Controllers.InfoController,
         templateUrl: "controllers/infoSidebar.html"
@@ -149,7 +153,7 @@
             new Directives.DraggableResizableDirective($document, $timeout, $window)]);
     app.directive(Strings.Directives.routeStatisticsPopup, () => ({
         controller: Controllers.RouteStatisticsController,
-        templateUrl: "controllers/routeStatistics.html"
+        templateUrl: "controllers/routeStatisticsPopup.html"
     } as angular.IDirective));
 
     app.run([Strings.Angular.rootScope, Strings.Services.resourcesService, Strings.Services.googleChartApiPromise, Strings.Services.dragAndDropService,

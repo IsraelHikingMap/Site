@@ -1,19 +1,12 @@
-﻿<div class="route-statistics-close">
-    <span class="cursor-pointer" aria-label="Close" ng-mousedown="hide($event)"><i aria-hidden="true" class="fa fa-lg fa-close fa-inverse"></i></span>
-</div>
-<div>
-    <div class="route-statistics-header row">
-        <div class="col-md-12">
-            <h5>
-                <span class="route-statistics-header-title">{{resources.routeStatistics}}:</span>
-                {{resources.length}}: {{toShortNumber(length)}} {{getUnits(length)}},
-                {{resources.gain}}: {{toShortNumber(gain)}} {{getUnits(gain)}},
-                {{resources.loss}}: <span dir="ltr">{{toShortNumber(loss)}}</span> {{getUnits(loss)}}
-            </h5>
-        </div>
+﻿<div class="control-container leaflet-bar">
+    <a class="cursor-pointer control-icon-first" ng-click="toggle($event)" uib-tooltip="{{resources.routeStatistics}}" tooltip-placement="left" analytics-on="click" analytics-event="Route statistics toggle"><i class="fa fa-area-chart fa-lg"></i></a>
+    <div class="pull-right" uib-tooltip="{{resources.length}}" tooltip-placement="top">
+        <span class="control-container-item"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>
     </div>
-    <div google-chart chart="chart" class="route-statistics-chart" agc-on-mouseover="onMouseOver(row, col)" agc-on-mouseout="onMouseOut()" agc-on-ready="onChartReady(chartWrapper)"></div>
-    <div class="route-statistics-footer">
-        <a class="btn btn-default btn-xs" ng-click="toggleKmMarker($event)" ng-class="{active: isKmMarkersOn}" analytics-on="click" analytics-event="Toggle KM markers"><i class="fa fa-map-marker"></i></a> {{resources.kmPoi}}
+    <div class="pull-right" uib-tooltip="{{resources.gain}}" tooltip-placement="top">
+        <span class="control-container-item"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} {{getUnits(gain)}}</span>
+    </div>
+    <div class="pull-right" uib-tooltip="{{resources.loss}}" tooltip-placement="top">
+        <span class="control-container-item"><i class="fa icon-arrow-down"></i> <span dir="ltr">{{toShortNumber(loss)}}</span> {{getUnits(loss)}}</span>
     </div>
 </div>

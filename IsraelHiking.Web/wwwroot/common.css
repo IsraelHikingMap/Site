@@ -42,6 +42,25 @@ body {
     font-size: 0.75em !important;
 }
 
+.control-container {
+    display: table;
+}
+
+.leaflet-touch .control-container-item {
+    height: 30px;
+}
+
+.control-container-item {
+    display: table-cell;
+    vertical-align: middle;
+    height: 26px;
+    background: white;
+    border-right: 1px solid #ccc;
+    border-left: 1px solid #ccc;
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
 .control-icon-first {
     float: right;
     border-top-left-radius: 0 !important;

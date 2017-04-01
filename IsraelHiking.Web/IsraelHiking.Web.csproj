@@ -21,6 +21,14 @@
     <None Remove="wwwroot\Bin\**" />
     <None Remove="wwwroot\lib\**" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="wwwroot\controllers\routeStatistics.html" />
+    <Content Include="wwwroot\controllers\routeStatisticsModal.css" />
+    <Content Include="wwwroot\controllers\routeStatisticsModal.html" />
+    <Content Include="wwwroot\controllers\routeStatisticsPopup.css" />
+    <Content Include="wwwroot\controllers\routeStatisticsPopup.html" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5-pre3" />
     <PackageReference Include="IsraelTransverseMercator" Version="2.2.2-pre1" />

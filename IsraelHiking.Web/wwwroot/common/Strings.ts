@@ -72,6 +72,7 @@
         export const zoomControl = "zoomControl";
         export const languageControl = "languageControl";
         export const osmUserControl = "osmUserControl";
+        export const routeStatisticsControl = "routeStatisticsControl";
         export const infoSidebar = "infoSidebar";
         export const layersSidebar = "layersSidebar";
         export const draggableResizable = "draggableResizable";

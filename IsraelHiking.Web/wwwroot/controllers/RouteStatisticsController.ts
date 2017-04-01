@@ -12,7 +12,9 @@
         onMouseOver(rowIndex: number, colIndex: number): void;
         onMouseOut(): void;
         onChartReady(chartWrapper: any): void
-        hide($event: Event): void;
+        toggle(e: Event): void;
+        isOpen(): boolean;
+
     }
 
     export class RouteStatisticsController extends BaseMapController {
@@ -67,11 +69,6 @@
                 this.updateKmMarkers($scope.isKmMarkersOn);
             }
 
-            $scope.hide = ($event: Event) => {
-                this.suppressEvents($event);
-                routeStatisticsService.hide();
-            }
-
             $scope.getUnits = (number: number): string => {
                 return Math.abs(number) > 1000 ? $scope.resources.kmUnit : $scope.resources.meterUnit;
             };
@@ -99,6 +96,15 @@
 
             $scope.onChartReady = (chartWrapper: any) => {
                 this.chartWrapper = chartWrapper;
+            }
+
+            $scope.toggle = (e: Event) => {
+                this.suppressEvents(e);
+                routeStatisticsService.toggle();
+            }
+
+            $scope.isOpen = () => {
+                return routeStatisticsService.isVisible;
             }
         }
 

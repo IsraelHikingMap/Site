@@ -3,19 +3,15 @@
         public isVisible: boolean;
 
         constructor() {
-            this.hide();
+            this.isVisible = false;
         }
 
         public toggle = () => {
             if (this.isVisible) {
-                this.hide();
+                this.isVisible = false;
                 return;
             }
             this.isVisible = true;
-        }
-
-        public hide = () => {
-            this.isVisible = false;
         }
     }
 }

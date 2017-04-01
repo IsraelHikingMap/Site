@@ -2,26 +2,20 @@
     z-index: 8;
 }
 
-.search-dropdown-container {
-    display: table;
-}
-
-.leaflet-touch .search-input {
-    height: 30px;
-}
-
 .search-input {
     width: 200px;
-    height: 26px;
-    padding-left: 12px;
-    padding-right: 12px;
+    float: right;
+    border-radius: 0;
     outline: none;
     border: none;
-    border-right: 1px solid #ccc;
-    border-left: 1px solid #ccc;
-    float: right;
-    background-color: white;
-    border-radius: 0;
+}
+
+.search-control-container .control-container-item span {
+    height: 26px;
+}
+
+.leaflet-touch .search-control-container .control-container-item span {
+    height: 30px;
 }
 
 .search-input-directional {

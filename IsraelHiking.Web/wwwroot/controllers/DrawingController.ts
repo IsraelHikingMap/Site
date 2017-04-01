@@ -8,26 +8,21 @@
         getRoutingType(): Common.RoutingType;
         undo(e: Event): void;
         isUndoDisbaled(): boolean;
-        toggleStatistics(e: Event): void;
-        isStatisticsOpen(): boolean;
     }
 
     export class DrawingController extends BaseMapController {
         private localStorageService: angular.local.storage.ILocalStorageService;
         private layersService: Services.Layers.LayersService;
-        private routeStatisticsService: Services.RouteStatisticsService;
         private static ESCAPE_KEYCODE = 27;
 
         constructor($scope: IDrawingScope,
             $window: angular.IWindowService,
             localStorageService: angular.local.storage.ILocalStorageService,
             mapService: Services.MapService,
-            layersService: Services.Layers.LayersService,
-            routeStatisticsService: Services.RouteStatisticsService) {
+            layersService: Services.Layers.LayersService) {
             super(mapService);
             this.localStorageService = localStorageService;
             this.layersService = layersService;
-            this.routeStatisticsService = routeStatisticsService;
 
             $scope.editMode = Services.Layers.EditModeString.none;
 
@@ -36,15 +31,6 @@
                     $scope.editMode = (this.layersService.getSelectedRoute() != null) ? this.layersService.getSelectedRoute().getEditMode() : Services.Layers.EditModeString.none;
                 }
             });
-
-            $scope.toggleStatistics = (e: Event) => {
-                this.suppressEvents(e);
-                this.routeStatisticsService.toggle();
-            }
-
-            $scope.isStatisticsOpen = () => {
-                return this.routeStatisticsService.isVisible;
-            }
 
             $scope.clear = (e: Event) => {
                 this.suppressEvents(e);
