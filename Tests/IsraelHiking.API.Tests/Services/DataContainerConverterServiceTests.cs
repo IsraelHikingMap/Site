@@ -16,6 +16,7 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using NetTopologySuite.IO;
+using System;
 
 namespace IsraelHiking.API.Tests.Services
 {
@@ -253,13 +254,12 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
-        public void ConvertCustomToDataContainer_ShouldConvertToDataContainer()
+        [ExpectedException(typeof(AggregateException))]
+        public void ConvertCustomToDataContainer_ShouldNotConvertToDataContainerDueToSecurityReasons()
         {
             _gpsBabelGateway.ConvertFileFromat(_randomBytes, "kuku", Arg.Any<string>()).Returns(_simpleGpx.ToBytes());
 
             var dataContainer = _converterService.ToDataContainer(_randomBytes, "kuku").Result;
-
-            Assert.AreEqual(1, dataContainer.routes.Count);
         }
 
         [TestMethod]

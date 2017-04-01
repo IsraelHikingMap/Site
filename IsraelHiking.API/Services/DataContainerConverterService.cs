@@ -138,6 +138,7 @@ namespace IsraelHiking.API.Services
 
         private string GetGpsBabelFormat(string fileNameOrFormat, byte[] content = null)
         {
+            fileNameOrFormat = fileNameOrFormat.ToLower();
             if (fileNameOrFormat.EndsWith("twl"))
             {
                 return FlowFormats.TWL_BABEL_FORMAT;
@@ -159,6 +160,22 @@ namespace IsraelHiking.API.Services
             if (fileNameOrFormat.EndsWith("kml"))
             {
                 return FlowFormats.KML_BABEL_FORMAT;
+            }
+            if (fileNameOrFormat.EndsWith("kmz"))
+            {
+                return FlowFormats.KMZ;
+            }
+            if (fileNameOrFormat.EndsWith("csv"))
+            {
+                return FlowFormats.CSV_BABEL_FORMAT;
+            }
+            if (fileNameOrFormat.EndsWith("geojson"))
+            {
+                return FlowFormats.GEOJSON;
+            }
+            if (fileNameOrFormat == FlowFormats.GPX_SINGLE_TRACK)
+            {
+                return fileNameOrFormat;
             }
             throw new Exception("Unsupported file format: " + fileNameOrFormat);
         }
