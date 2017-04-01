@@ -2,7 +2,7 @@
     position: fixed;
     z-index: 99;
     width: 0;
-    background: #000;
+    background: #dddddd;
     -webkit-transition: all 0.5s ease;
     -moz-transition: all 0.5s ease;
     -o-transition: all 0.5s ease;
@@ -10,12 +10,12 @@
 }
 
 #wrapper.toggled .info-header {
-    width: 215px;
+    width: 225px;
 }
     
 @media (min-width:768px) {
     #wrapper.toggled .info-header {
-        width: 360px;
+        width: 345px;
     } 
 }
 
@@ -24,7 +24,7 @@
 }
 
     .info-header a.active {
-        color: #ddd;
+        color: black;
     }
 
 .info-container {
@@ -37,11 +37,11 @@
 }
 
 .legend-section {
-    border-bottom: 1px solid #ddd;
+    border-bottom: 1px solid black;
 }
 
 .legend-item {
-    border: 1px solid #ddd;
+    border: 1px solid black;
     margin-bottom: 10px;
     width: 201px;
 }
@@ -82,7 +82,7 @@
 
 
 .legend-section-header a {
-    color: #999999;
+    color: black;
 }
 
     .legend-section-header a:hover {

@@ -13,43 +13,61 @@
 
 .sidebar-close {
     position: fixed;
-    left: 215px;
+    left: 240px;
     top: 0;
     z-index: 100;
 }
 
 .flip .sidebar-close {
-    left: 5px;
+    left: 50px;
 }
 
 /* added direction to fix issue with scroll bar and legend maps */
 #sidebar-wrapper {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
     line-height: 24px;
     overflow-x: hidden;
     color: black;
     direction: ltr;
     overflow-y: scroll;
     background: #dddddd !important;
+    width: 0;
+    z-index: 1100;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
 }
 
     #sidebar-wrapper .divider {
-        border-color: #999999;
+        border-color: black;
         margin-top: 5px;
         margin-bottom: 5px;
     }
 
+    #sidebar-wrapper tr {
+        border-bottom: solid black;
+    }
     #sidebar-wrapper .row:hover {
         text-decoration: none;
         color: black;
         background: #bbb;
     }
 
-#wrapper.toggled #page-content-wrapper {
-    position: relative;
-}
-
 .flip #wrapper.toggled #page-content-wrapper {
     margin-right: 0 !important;
+}
+
+#wrapper.toggled #sidebar-wrapper {
+    width: 280px;
+    padding-left: 45px;
+}
+
+.leaflet-left {
+    z-index: 1110;
 }
 
 @media(min-width:768px) {
@@ -57,28 +75,7 @@
         left: 360px;
     }
 
-    #wrapper {
-        padding-left: 0;
-    }
-
-        #wrapper.toggled {
-            padding-left: 400px;
-        }
-
-    #sidebar-wrapper {
-        width: 0;
-    }
-
     #wrapper.toggled #sidebar-wrapper {
         width: 400px;
-    }
-
-    #page-content-wrapper {
-        padding: 20px;
-        position: relative;
-    }
-
-    #wrapper.toggled #page-content-wrapper {
-        margin-right: -400px;
     }
 }
