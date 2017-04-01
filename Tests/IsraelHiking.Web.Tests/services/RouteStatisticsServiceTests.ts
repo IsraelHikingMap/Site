@@ -27,13 +27,6 @@ namespace IsraelHiking.Tests.Services {
 
         it("Should hide when toggled and then hide", () => {
             routeStatisticsSerivice.toggle();
-            routeStatisticsSerivice.hide();
-
-            expect(routeStatisticsSerivice.isVisible).toBe(false);
-        });
-
-        it("Should stay hidden when hide", () => {
-            routeStatisticsSerivice.hide();
 
             expect(routeStatisticsSerivice.isVisible).toBe(false);
         });
