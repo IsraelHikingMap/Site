@@ -39,6 +39,7 @@
         private $compile: angular.ICompileService;
         private modalInstnace: angular.ui.bootstrap.IModalServiceInstance;
         private osmTraceLayer: L.LayerGroup<any>;
+        private fitBoundsService: Services.FitBoundService;
 
         constructor($scope: IOsmUserScope,
             $window: angular.IWindowService,
@@ -50,10 +51,12 @@
             osmUserService: Services.OsmUserService,
             fileService: Services.FileService,
             layersService: Services.Layers.LayersService,
+            fitBoundsService: Services.FitBoundService,
             toastr: Toastr) {
             super(mapService);
 
             this.$compile = $compile;
+            this.fitBoundsService = fitBoundsService;
             this.initializeRanks($scope);
             this.osmTraceLayer = L.layerGroup([]);
             this.map.addLayer(this.osmTraceLayer);
@@ -163,7 +166,7 @@
                     }
                     mainMarker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
                     this.osmTraceLayer.addLayer(mainMarker);
-                    this.map.fitBounds(bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
+                    this.fitBoundsService.fitBounds(bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
                 });
             }
 
@@ -292,7 +295,7 @@
                 this.osmTraceLayer.addLayer(marker);
             }
 
-            this.map.fitBounds(geoJsonLayer.getBounds());
+            this.fitBoundsService.fitBounds(geoJsonLayer.getBounds());
         }
     }
 

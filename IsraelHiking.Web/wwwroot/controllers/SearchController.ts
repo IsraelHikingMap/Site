@@ -59,6 +59,7 @@
             elevationProvider: Services.Elevation.ElevationProvider,
             localSearchResultsProvider: Services.Search.LocalSearchResultsProvider,
             routerService: Services.Routers.RouterService,
+            fitBoundsService: Services.FitBoundService,
             toastr: Toastr) {
             super(mapService);
             this.requestsQueue = [];
@@ -114,7 +115,7 @@
             $scope.moveToResults = (searchResults: Services.Search.ISearchResults, e: Event) => {
                 $scope.toggleVisibility(e);
                 this.featureGroup.clearLayers();
-                this.map.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
+                fitBoundsService.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
                 var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false }) as Common.IMarkerWithTitle;
                 marker.title = searchResults.name || searchResults.address;
                 let newScope = $scope.$new() as ISearchResultsMarkerPopupScope;
@@ -274,7 +275,7 @@
                     this.featureGroup.addLayer(markerFrom);
                     this.featureGroup.addLayer(markerTo);
 
-                    this.map.fitBounds(this.featureGroup.getBounds());
+                    fitBoundsService.fitBounds(this.featureGroup.getBounds());
 
                     $timeout(() => {
                         markerTo.openPopup();

@@ -55,7 +55,7 @@
     <link rel="stylesheet" href="content/MarkerCluster.css" />
     <link rel="stylesheet" href="content/MarkerCluster.Default.css" />
     <link rel="stylesheet" href="index.css" />
-    <link rel="stylesheet" href="controllers/info.css"/>
+    <link rel="stylesheet" href="controllers/info.css" />
     <link rel="stylesheet" href="controllers/fileSaveAs.css" />
     <link rel="stylesheet" href="controllers/MarkerPopup/markerPopup.css" />
     <link rel="stylesheet" href="controllers/MarkerPopup/missingPartMarker.css" />
@@ -69,122 +69,123 @@
     <script src="scripts/angular.js"></script>
 </head>
 <body ng-controller="mainMapController" ng-class="{flip: resources.direction == 'rtl'}" dir="{{resources.direction}}">
-<div id="wrapper" ng-class="{toggled: getIsSidebarVisible()}" class="full-page">
-    <div id="sidebar-wrapper">
-        <div class="container-fluid" dir="{{resources.direction}}">
-            <div class="sidebar-close" ng-show="getIsSidebarVisible()">
-                <span class="cursor-pointer" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg" ng-class="{'fa-close': getIsSidebarVisible()}"></i></span>
-            </div>
-            <div ng-switch on="sidebarService.viewName">
-                <div ng-switch-when="layers">
-                    <div layers-sidebar></div>
+    <div id="wrapper" ng-class="{toggled: getIsSidebarVisible()}" class="full-page">
+        <div id="sidebar-wrapper">
+            <div class="container-fluid" dir="{{resources.direction}}">
+                <div class="sidebar-close" ng-show="getIsSidebarVisible()">
+                    <span class="cursor-pointer" aria-label="Close" ng-click="closeSidebar()"><i aria-hidden="true" class="fa fa-lg" ng-class="{'fa-close': getIsSidebarVisible()}"></i></span>
                 </div>
-                <div ng-switch-when="info">
-                    <div info-sidebar></div>
+                <div ng-switch on="sidebarService.viewName">
+                    <div ng-switch-when="layers">
+                        <div layers-sidebar></div>
+                    </div>
+                    <div ng-switch-when="info">
+                        <div info-sidebar></div>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div id="page-content-wrapper" class="full-page">
-        <div id="map"></div>
-        <div draggable-resizable directions="['top', 'left', 'bottom', 'right']" drag-selector="'.route-statistics-header'" ng-show="isRouteStatisticsVisible()" ng-class="{'route-statistics-popup': isRouteStatisticsVisible()}">
-            <div route-statistics-popup></div>
+        <div id="page-content-wrapper" class="full-page">
+            <div id="map"></div>
+            <div draggable-resizable directions="['top', 'left', 'bottom', 'right']" drag-selector="'.route-statistics-header'" ng-show="isRouteStatisticsVisible()" ng-class="{'route-statistics-popup': isRouteStatisticsVisible()}">
+                <div route-statistics-popup></div>
+            </div>
         </div>
     </div>
-</div>
 
-<!-- third party libraries-->
-<script src="scripts/angular-animate.js"></script>
-<script src="scripts/leaflet-src.js"></script>
-<script src="//maps.google.com/maps/api/js?v=3"></script>
-<script src="scripts/leaflet-google.js"></script>
-<script src="scripts/ng-file-upload.js"></script>
-<script src="scripts/lodash.js"></script>
-<script src="scripts/angular-local-storage.js"></script>
-<script src="scripts/leaflet-google.js"></script>
-<script src="scripts/L.Control.Locate.js"></script>
-<script src="scripts/google-analytics.js"></script>
-<script src="scripts/ng-google-chart.js"></script>
-<script src="scripts/angular-toastr.tpls.js"></script>
-<script src="scripts/loading-bar.js"></script>
-<script src="scripts/angular-file-saver.bundle.js"></script>
-<script src="scripts/leaflet.label.js"></script>
-<script src="scripts/ui-bootstrap-tpls.js"></script>
-<script src="scripts/bootstrap-slider.js"></script>
-<script src="scripts/slider.js"></script>
-<script src="scripts/angular-gettext.js"></script>
-<script src="scripts/osmauth.min.js"></script>
-<script src="scripts/xml2json.min.js"></script>
-<script src="scripts/angular-clipboard.js"></script>
-<script src="scripts/angulartics-ga.js"></script>
-<script src="scripts/angulartics.js"></script>
-<script src="scripts/leaflet.markercluster-src.js"></script>
-<!-- Load common -->
-<script src="common/EventHelper.js"></script>
-<script src="common/Strings.js"></script>
-<script src="common/Urls.js"></script>
-<!-- Load services -->
-<script src="services/ObjectWithMap.js"></script>
-<script src="services/layers/IDrawingLayer.js"></script>
-<script src="services/layers/routelayers/HoverHandler.js"></script>
-<script src="services/layers/routelayers/RouteLayer.js"></script>
-<script src="services/layers/routelayers/RouteLayerFactory.js"></script>
-<script src="services/layers/routelayers/RouteStateBase.js"></script>
-<script src="services/layers/routelayers/RouteStateEdit.js"></script>
-<script src="services/layers/routelayers/RouteStateEditPoi.js"></script>
-<script src="services/layers/routelayers/RouteStateEditRoute.js"></script>
-<script src="services/layers/routelayers/RouteStateHidden.js"></script>
-<script src="services/layers/routelayers/RouteStateReadOnly.js"></script>
-<script src="services/layers/routelayers/UndoHandler.js"></script>
-<script src="services/layers/WikiMarkersLayer.js"></script>
-<script src="services/layers/LayersService.js"></script>
-<script src="services/parsers/GeoJsonParser.js"></script>
-<script src="services/routers/NoneRouter.js"></script>
-<script src="services/routers/RouterService.js"></script>
-<script src="services/search/LocalSearchResultsProvider.js"></script>
-<script src="services/elevation/ElevationProvider.js"></script>
-<script src="services/elevation/MicrosoftElevationProvider.js"></script>
-<script src="services/AuthorizationInterceptorService.js"></script>
-<script src="services/FileService.js"></script>
-<script src="services/HashService.js"></script>
-<script src="services/IconsService.js"></script>
-<script src="services/MapService.js"></script>
-<script src="services/SidebarService.js"></script>
-<script src="services/SnappingService.js"></script>
-<script src="services/OsmUserService.js"></script>
-<script src="services/RouteStatisticsService.js"></script>
-<script src="services/DragAndDropService.js"></script>
-<script src="services/ResourcesService.js"></script>
-<!-- Load controllers -->
-<script src="controllers/BaseMapController.js"></script>
-<script src="controllers/DrawingController.js"></script>
-<script src="controllers/EditOSMController.js"></script>
-<script src="controllers/FileController.js"></script>
-<script src="controllers/InfoController.js"></script>
-<script src="controllers/LanguageController.js"></script>
-<script src="controllers/LayersController.js"></script>
-<script src="controllers/MarkerPopup/MarkerPopupController.js"></script>
-<script src="controllers/MarkerPopup/PoiMarkerPopupController.js"></script>
-<script src="controllers/MarkerPopup/MissingPartMarkerPopupController.js"></script>
-<script src="controllers/OsmUserController.js"></script>
-<script src="controllers/MainMapController.js"></script>
-<script src="controllers/RouteStatisticsController.js"></script>
-<script src="controllers/SearchController.js"></script>
-<script src="controllers/ShareController.js"></script>
-<script src="controllers/RouteProperties/RouteBaseController.js"></script>
-<script src="controllers/RouteProperties/RouteAddController.js"></script>
-<script src="controllers/RouteProperties/RouteUpdateContoller.js"></script>
-<script src="controllers/LayerProperties/LayerBaseController.js"></script>
-<script src="controllers/LayerProperties/BaseLayerAddController.js"></script>
-<script src="controllers/LayerProperties/BaseLayerEditController.js"></script>
-<script src="controllers/LayerProperties/OverlayAddController.js"></script>
-<script src="controllers/LayerProperties/OverlayEditController.js"></script>
-<script src="controllers/ZoomController.js"></script>
-<!-- Load directives -->
-<script src="directives/DraggableResizableDirective.js"></script>
-<script src="directives/SyncFocusWithDirective.js"></script>
-<script src="directives/DisableMapMovementDirective.js"></script>
-<!-- Start application -->
-<script src="bootstrapper.js"></script>
+    <!-- third party libraries-->
+    <script src="scripts/angular-animate.js"></script>
+    <script src="scripts/leaflet-src.js"></script>
+    <script src="//maps.google.com/maps/api/js?v=3"></script>
+    <script src="scripts/leaflet-google.js"></script>
+    <script src="scripts/ng-file-upload.js"></script>
+    <script src="scripts/lodash.js"></script>
+    <script src="scripts/angular-local-storage.js"></script>
+    <script src="scripts/leaflet-google.js"></script>
+    <script src="scripts/L.Control.Locate.js"></script>
+    <script src="scripts/google-analytics.js"></script>
+    <script src="scripts/ng-google-chart.js"></script>
+    <script src="scripts/angular-toastr.tpls.js"></script>
+    <script src="scripts/loading-bar.js"></script>
+    <script src="scripts/angular-file-saver.bundle.js"></script>
+    <script src="scripts/leaflet.label.js"></script>
+    <script src="scripts/ui-bootstrap-tpls.js"></script>
+    <script src="scripts/bootstrap-slider.js"></script>
+    <script src="scripts/slider.js"></script>
+    <script src="scripts/angular-gettext.js"></script>
+    <script src="scripts/osmauth.min.js"></script>
+    <script src="scripts/xml2json.min.js"></script>
+    <script src="scripts/angular-clipboard.js"></script>
+    <script src="scripts/angulartics-ga.js"></script>
+    <script src="scripts/angulartics.js"></script>
+    <script src="scripts/leaflet.markercluster-src.js"></script>
+    <!-- Load common -->
+    <script src="common/EventHelper.js"></script>
+    <script src="common/Strings.js"></script>
+    <script src="common/Urls.js"></script>
+    <!-- Load services -->
+    <script src="services/ObjectWithMap.js"></script>
+    <script src="services/layers/IDrawingLayer.js"></script>
+    <script src="services/layers/routelayers/HoverHandler.js"></script>
+    <script src="services/layers/routelayers/RouteLayer.js"></script>
+    <script src="services/layers/routelayers/RouteLayerFactory.js"></script>
+    <script src="services/layers/routelayers/RouteStateBase.js"></script>
+    <script src="services/layers/routelayers/RouteStateEdit.js"></script>
+    <script src="services/layers/routelayers/RouteStateEditPoi.js"></script>
+    <script src="services/layers/routelayers/RouteStateEditRoute.js"></script>
+    <script src="services/layers/routelayers/RouteStateHidden.js"></script>
+    <script src="services/layers/routelayers/RouteStateReadOnly.js"></script>
+    <script src="services/layers/routelayers/UndoHandler.js"></script>
+    <script src="services/layers/WikiMarkersLayer.js"></script>
+    <script src="services/layers/LayersService.js"></script>
+    <script src="services/parsers/GeoJsonParser.js"></script>
+    <script src="services/routers/NoneRouter.js"></script>
+    <script src="services/routers/RouterService.js"></script>
+    <script src="services/search/LocalSearchResultsProvider.js"></script>
+    <script src="services/elevation/ElevationProvider.js"></script>
+    <script src="services/elevation/MicrosoftElevationProvider.js"></script>
+    <script src="services/AuthorizationInterceptorService.js"></script>
+    <script src="services/FileService.js"></script>
+    <script src="services/HashService.js"></script>
+    <script src="services/IconsService.js"></script>
+    <script src="services/MapService.js"></script>
+    <script src="services/SidebarService.js"></script>
+    <script src="services/SnappingService.js"></script>
+    <script src="services/OsmUserService.js"></script>
+    <script src="services/RouteStatisticsService.js"></script>
+    <script src="services/DragAndDropService.js"></script>
+    <script src="services/ResourcesService.js"></script>
+    <script src="services/FitBoundsService.js"></script>
+    <!-- Load controllers -->
+    <script src="controllers/BaseMapController.js"></script>
+    <script src="controllers/DrawingController.js"></script>
+    <script src="controllers/EditOSMController.js"></script>
+    <script src="controllers/FileController.js"></script>
+    <script src="controllers/InfoController.js"></script>
+    <script src="controllers/LanguageController.js"></script>
+    <script src="controllers/LayersController.js"></script>
+    <script src="controllers/MarkerPopup/MarkerPopupController.js"></script>
+    <script src="controllers/MarkerPopup/PoiMarkerPopupController.js"></script>
+    <script src="controllers/MarkerPopup/MissingPartMarkerPopupController.js"></script>
+    <script src="controllers/OsmUserController.js"></script>
+    <script src="controllers/MainMapController.js"></script>
+    <script src="controllers/RouteStatisticsController.js"></script>
+    <script src="controllers/SearchController.js"></script>
+    <script src="controllers/ShareController.js"></script>
+    <script src="controllers/RouteProperties/RouteBaseController.js"></script>
+    <script src="controllers/RouteProperties/RouteAddController.js"></script>
+    <script src="controllers/RouteProperties/RouteUpdateContoller.js"></script>
+    <script src="controllers/LayerProperties/LayerBaseController.js"></script>
+    <script src="controllers/LayerProperties/BaseLayerAddController.js"></script>
+    <script src="controllers/LayerProperties/BaseLayerEditController.js"></script>
+    <script src="controllers/LayerProperties/OverlayAddController.js"></script>
+    <script src="controllers/LayerProperties/OverlayEditController.js"></script>
+    <script src="controllers/ZoomController.js"></script>
+    <!-- Load directives -->
+    <script src="directives/DraggableResizableDirective.js"></script>
+    <script src="directives/SyncFocusWithDirective.js"></script>
+    <script src="directives/DisableMapMovementDirective.js"></script>
+    <!-- Start application -->
+    <script src="bootstrapper.js"></script>
 </body>
 </html>

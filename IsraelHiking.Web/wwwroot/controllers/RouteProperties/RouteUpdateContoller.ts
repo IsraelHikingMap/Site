@@ -17,6 +17,7 @@
             mapService: Services.MapService,
             layersService: Services.Layers.LayersService,
             fileService: Services.FileService,
+            fitBoundsService: Services.FitBoundService,
             toastr: Toastr) {
             super($scope, localStorageService, mapService);
             let routeLayer = layersService.getRouteByName($scope.name);
@@ -62,7 +63,11 @@
                 if (!$scope.routeProperties.isVisible) {
                     toastr.warning($scope.resources.routeIsHidden);
                 }
-                routeLayer.center();
+                let bounds = routeLayer.getBounds();
+                if (bounds != null)
+                {
+                    fitBoundsService.fitBounds(bounds);
+                }
                 this.suppressEvents(e);
             }
 

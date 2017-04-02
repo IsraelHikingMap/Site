@@ -28,6 +28,7 @@
     <Content Include="wwwroot\controllers\routeStatisticsModal.html" />
     <Content Include="wwwroot\controllers\routeStatisticsPopup.css" />
     <Content Include="wwwroot\controllers\routeStatisticsPopup.html" />
+    <Content Include="wwwroot\services\FitBoundsService.ts" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5-pre3" />

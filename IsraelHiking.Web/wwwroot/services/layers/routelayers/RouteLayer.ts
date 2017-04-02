@@ -290,16 +290,17 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.currentState.reRoute();
         }
 
-        public center = (): void => {
+        public getBounds = (): L.LatLngBounds => {
             if (this.route.segments.length === 0) {
-                return;
+                return null;
             }
             let featureGroup = L.featureGroup([]);
             for (let segment of this.route.segments) {
                 featureGroup.addLayer(L.polyline(segment.latlngzs));
             }
-            this.map.fitBounds(featureGroup.getBounds());
+            let bounds = featureGroup.getBounds();
             featureGroup.clearLayers();
+            return bounds;
         }
 
         public getHtmlTitle(title: string, color: string = ""): string {

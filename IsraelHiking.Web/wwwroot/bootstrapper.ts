@@ -17,6 +17,9 @@
     app.service(Strings.Services.mapService, [Strings.Services.localStorageService, (localStorageService: angular.local.storage.ILocalStorageService) => new Services.MapService(localStorageService)]);
     app.service(Strings.Services.geoJsonParser, [() => new Services.Parsers.GeoJsonParser()]);
     app.service(Strings.Services.sidebarService, [() => new Services.SidebarService()]);
+    app.service(Strings.Services.fitBoundsService, [Strings.Services.mapService, Strings.Services.sidebarService,
+        (mapService: Services.MapService, sideBarService: Services.SidebarService) =>
+            new Services.FitBoundService(mapService, sideBarService)]);
     app.service(Strings.Services.authorizationInterceptorService, [Strings.Angular.q, Strings.Angular.injector, Strings.Services.localStorageService,
         ($q: angular.IQService, $injector: angular.auto.IInjectorService, localStorageService: angular.local.storage.ILocalStorageService) =>
             new Services.AuthorizationInterceptorService($q, $injector, localStorageService)]);
@@ -54,8 +57,8 @@
     app.service(Strings.Services.hashService, [Strings.Angular.location, Strings.Angular.window, Strings.Angular.rootScope, Strings.Services.localStorageService, Strings.Services.mapService,
     ($location: angular.ILocationService, $window: angular.IWindowService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService, mapService: Services.MapService) =>
             new Services.HashService($location, $window, $rootScope, localStorageService, mapService)]);
-    app.service(Strings.Services.layersService, [Strings.Angular.http, Strings.Angular.q, Strings.Angular.rootScope, Strings.Services.mapService,
-        Strings.Services.localStorageService, Strings.Services.routeLayerFactory, Strings.Services.hashService, Strings.Services.fileService, Strings.Services.resourcesService, Strings.Services.toastr,
+    app.service(Strings.Services.layersService, [Strings.Angular.http, Strings.Angular.q, Strings.Angular.rootScope, Strings.Services.mapService, Strings.Services.localStorageService, 
+        Strings.Services.routeLayerFactory, Strings.Services.hashService, Strings.Services.fileService, Strings.Services.resourcesService, Strings.Services.toastr,
         ($http: angular.IHttpService, $q: angular.IQService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService,
             routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService, fileService: Services.FileService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
             new Services.Layers.LayersService($http, $q, $rootScope, mapService, localStorageService, routeLayerFactory, hashService, fileService, resourcesService, toastr)]);

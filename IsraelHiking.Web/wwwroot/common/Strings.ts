@@ -43,6 +43,7 @@
         export const elevationProvider = "elevationProvider";
         export const fileSaver = "FileSaver";
         export const sidebarService = "sidebarService";
+        export const fitBoundsService = "fitBoundsService";
         export const routeStatisticsService = "routeStatisticsService";
         export const dragAndDropService = "dragAndDropService";
         export const resourcesService = "resourcesService";
