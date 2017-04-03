@@ -232,18 +232,16 @@ namespace IsraelHiking.Web
             var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
             foreach (var directory in configurationData.ListingDictionary)
             {
-                app.UseFileServer(new FileServerOptions
+                var fileServerOptions = new FileServerOptions
                 {
                     FileProvider = new PhysicalFileProvider(directory.Value),
                     RequestPath = new PathString("/" + directory.Key),
                     EnableDirectoryBrowsing = true,
-                });
-                app.UseDirectoryBrowser(new DirectoryBrowserOptions()
-                {
-                    FileProvider = new PhysicalFileProvider(directory.Value),
-                    RequestPath = new PathString("/" + directory.Key),
-                    Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices.GetRequiredService<IFileSystemHelper>())
-                });
+                };
+                fileServerOptions.DirectoryBrowserOptions.FileProvider = new PhysicalFileProvider(directory.Value);
+                fileServerOptions.DirectoryBrowserOptions.RequestPath = new PathString("/" + directory.Key);
+                fileServerOptions.DirectoryBrowserOptions.Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices.GetRequiredService<IFileSystemHelper>());
+                app.UseFileServer(fileServerOptions);
             }
             app.UseSwagger();
             app.UseSwaggerUI(c =>
