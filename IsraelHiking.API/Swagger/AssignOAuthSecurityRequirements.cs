@@ -12,8 +12,6 @@ namespace IsraelHiking.API.Swagger
     /// <summary>
     /// Adds the authentication icon for calls that require authentication
     /// </summary>
-
-    // HM TODO: bring this back
     public class AssignOAuthSecurityRequirements : IOperationFilter
     {
         /// <summary>
