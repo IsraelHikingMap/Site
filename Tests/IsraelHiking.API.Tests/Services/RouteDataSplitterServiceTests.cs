@@ -5,7 +5,6 @@ using IsraelHiking.API.Converters;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;

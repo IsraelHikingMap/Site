@@ -9,6 +9,11 @@ namespace IsraelHiking.API.Swagger
     /// </summary>
     public class RequiredFileUploadParams : IOperationFilter
     {
+        /// <summary>
+        /// Applys the required file upload button to the schema
+        /// </summary>
+        /// <param name="operation"></param>
+        /// <param name="context"></param>
         public void Apply(Operation operation, OperationFilterContext context)
         {
             if (operation.Parameters == null)

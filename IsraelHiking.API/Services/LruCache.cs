@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
@@ -12,7 +11,7 @@ namespace IsraelHiking.API.Services
     /// </summary>
     /// <typeparam name="TKey">Key's type</typeparam>
     /// <typeparam name="TValue">Value's type</typeparam>
-    public class LruCache<TKey, TValue>
+    public class LruCache<TKey, TValue> where TKey: class
     {
         private readonly ConfigurationData _options;
         private readonly ConcurrentDictionary<TKey, CacheItem> _dictionary = new ConcurrentDictionary<TKey, CacheItem>();
@@ -62,7 +61,7 @@ namespace IsraelHiking.API.Services
         /// <returns>The item</returns>
         public TValue Get(TKey key)
         {
-            if (_dictionary.ContainsKey(key))
+            if (key != null && _dictionary.ContainsKey(key))
             {
                 _dictionary[key].LastUsed = DateTime.Now;
                 return _dictionary[key].Value;

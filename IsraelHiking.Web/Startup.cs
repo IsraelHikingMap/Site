@@ -162,11 +162,11 @@ namespace IsraelHiking.Web
             services.Configure<ConfigurationData>(config);
 
             services.AddSingleton((serviceProvider) => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
+            var binariesFolder = "";
             services.AddTransient<IFileProvider, PhysicalFileProvider>((serviceProvider) =>
             {
-                var binariesFolder = serviceProvider.GetService<IOptions<ConfigurationData>>().Value.BinariesFolder;
-                var path = Path.Combine(Directory.GetCurrentDirectory(), binariesFolder);
-                return new PhysicalFileProvider(path);
+                binariesFolder = GetBinariesFolder(serviceProvider);
+                return new PhysicalFileProvider(binariesFolder);
             });
 
             services.AddIHMDataAccess();
@@ -181,6 +181,7 @@ namespace IsraelHiking.Web
                 c.SchemaFilter<FeatureExampleFilter>();
                 c.SchemaFilter<FeatureCollectionExampleFilter>();
                 c.OperationFilter<AssignOAuthSecurityRequirements>();
+                c.IncludeXmlComments(Path.Combine(binariesFolder, "israelhiking.API.xml"));
             });
             services.AddEntityFrameworkSqlite().AddDbContext<IsraelHikingDbContext>();
             services.AddDirectoryBrowser();
@@ -260,12 +261,18 @@ namespace IsraelHiking.Web
             InitializeServices(app.ApplicationServices);
         }
 
-        private void InitializeServices(IServiceProvider container)
+        private void InitializeServices(IServiceProvider serviceProvider)
         {
-            var logger = container.GetRequiredService<ILogger>();
+            var logger = serviceProvider.GetRequiredService<ILogger>();
             logger.LogInformation("Initializing Elevation data and Elastic Search Service");
-            container.GetRequiredService<IElasticSearchGateway>().Initialize();
-            container.GetRequiredService<IElevationDataStorage>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading elevation data from files."));
+            serviceProvider.GetRequiredService<IElasticSearchGateway>().Initialize();
+            serviceProvider.GetRequiredService<IElevationDataStorage>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading elevation data from files."));
+        }
+
+        private string GetBinariesFolder(IServiceProvider serviceProvider)
+        {
+            var binariesFolder = serviceProvider.GetService<IOptions<ConfigurationData>>().Value.BinariesFolder;
+            return Path.Combine(Directory.GetCurrentDirectory(), binariesFolder);
         }
     }
 }

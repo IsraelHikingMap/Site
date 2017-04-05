@@ -9,6 +9,9 @@ using OsmSharp.Tags;
 
 namespace IsraelHiking.API.Converters
 {
+    /// <summary>
+    /// Convers osm data objects to geojson and back
+    /// </summary>
     public class OsmGeoJsonConverter : IOsmGeoJsonConverter
     {
         private const string OUTER = "outer";
@@ -16,6 +19,11 @@ namespace IsraelHiking.API.Converters
         private const string TYPE = "type";
         private const string MULTIPOLYGON = "multipolygon";
 
+        /// <summary>
+        /// Converts a <see cref="ICompleteOsmGeo"/> to <see cref="Feature"/>
+        /// </summary>
+        /// <param name="completeOsmGeo"></param>
+        /// <returns></returns>
         public Feature ToGeoJson(ICompleteOsmGeo completeOsmGeo)
         {
             if (completeOsmGeo.Tags.Count == 0)
@@ -130,9 +138,9 @@ namespace IsraelHiking.API.Converters
 
         private Feature ConvertToMultipolygon(CompleteRelation relation)
         {
-            var outerWays = GetAllWaysByRole(relation).Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
+            var outerWays = GetAllWaysGroupedByRole(relation).Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
             var outerPolygons = GetGeometriesFromWays(outerWays).OfType<IPolygon>().ToList();
-            var innerWays = GetAllWaysByRole(relation).Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
+            var innerWays = GetAllWaysGroupedByRole(relation).Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
             var innerPolygons = GetGeometriesFromWays(innerWays).OfType<IPolygon>().ToList();
             MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
             var multiPolygon = new MultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
@@ -152,12 +160,17 @@ namespace IsraelHiking.API.Converters
             outerPolygons = newOuterPolygons;
         }
 
+        /// <summary>
+        /// A static method that gets all the ways from a relation recursivly
+        /// </summary>
+        /// <param name="relation"></param>
+        /// <returns></returns>
         public static List<CompleteWay> GetAllWays(CompleteRelation relation)
         {
-            return GetAllWaysByRole(relation).SelectMany(kvp => kvp.Value).ToList();
+            return GetAllWaysGroupedByRole(relation).SelectMany(kvp => kvp.Value).ToList();
         }
 
-        private static Dictionary<string, List<CompleteWay>> GetAllWaysByRole(CompleteRelation relation)
+        private static Dictionary<string, List<CompleteWay>> GetAllWaysGroupedByRole(CompleteRelation relation)
         {
             var dicionary = relation.Members.GroupBy(m => m.Role ?? string.Empty)
                 .ToDictionary(g => g.Key, g => g.Select(k => k.Member)
@@ -169,7 +182,7 @@ namespace IsraelHiking.API.Converters
             var subRelations = relation.Members.Select(m => m.Member).OfType<CompleteRelation>();
             foreach (var subRelation in subRelations)
             {
-                var subRelationDictionary = GetAllWaysByRole(subRelation);
+                var subRelationDictionary = GetAllWaysGroupedByRole(subRelation);
                 foreach (var key in subRelationDictionary.Keys)
                 {
                     if (dicionary.ContainsKey(key))

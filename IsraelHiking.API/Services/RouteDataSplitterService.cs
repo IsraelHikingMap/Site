@@ -10,11 +10,17 @@ using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
 {
+    ///<inheritdoc/>
     public class RouteDataSplitterService : IRouteDataSplitterService
     {
         private readonly IMathTransform _itmWgs84MathTransform;
         private readonly ConfigurationData _options;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="itmWgs84MathTransform"></param>
+        /// <param name="options"></param>
         public RouteDataSplitterService(IMathTransform itmWgs84MathTransform, 
             IOptions<ConfigurationData> options)
         {
@@ -22,6 +28,7 @@ namespace IsraelHiking.API.Services
             _options = options.Value;
         }
 
+        ///<inheritdoc/>
         public RouteData Split(RouteData routeData, string routingType)
         {
             var allRoutePoints = routeData.segments.SelectMany(s => s.latlngzs).ToList();

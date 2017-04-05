@@ -1,7 +1,4 @@
-﻿using System.IO;
-using System.Reflection;
-using IsraelHiking.DataAccess.GraphHopper;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IsraelHiking.DataAccess.Tests.GraphHopper
 {

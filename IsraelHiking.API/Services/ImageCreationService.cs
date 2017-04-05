@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -45,9 +44,10 @@ namespace IsraelHiking.API.Services
         private Color[] _routeColors;
 
         /// <summary>
-        /// Contstructor, creates relevant colors and brushes
+        /// Contstructor, creates relevant colors and brushes accoridng to configuration
         /// </summary>
         /// <param name="httpGatewayFactory"></param>
+        /// <param name="options"></param>
         /// <param name="logger"></param>
         public ImageCreationService(IHttpGatewayFactory httpGatewayFactory, IOptions<ConfigurationData> options, ILogger logger)
         {
@@ -239,8 +239,25 @@ namespace IsraelHiking.API.Services
             }
         }
 
+        /// <summary>
+        /// Main dispose method
+        /// </summary>
         public void Dispose()
         {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose method, following the dispose pattern
+        /// </summary>
+        /// <param name="disposing"></param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!disposing)
+            {
+                return;
+            }
             if (_circleFillBrush != null)
             {
                 _circleFillBrush.Dispose();

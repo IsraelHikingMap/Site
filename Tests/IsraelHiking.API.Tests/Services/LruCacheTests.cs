@@ -1,7 +1,6 @@
 ﻿using System.Threading.Tasks;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Extensions.Options;

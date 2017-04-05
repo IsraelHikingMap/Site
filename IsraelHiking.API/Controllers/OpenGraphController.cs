@@ -89,6 +89,10 @@ namespace IsraelHiking.API.Controllers
             ";
         }
 
+        /// <summary>
+        /// Dispose method, follows dispoase pattern
+        /// </summary>
+        /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
             if (disposing && _repository != null)

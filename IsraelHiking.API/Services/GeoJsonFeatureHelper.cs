@@ -1,16 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
 {
-    public class PropertiesData
+    internal class PropertiesData
     {
         public string Key { get; }
         public string Value { get; }
@@ -28,12 +26,17 @@ namespace IsraelHiking.API.Services
         }
     }
 
+    ///<inheritdoc/>
     public class GeoJsonFeatureHelper : IGeoJsonFeatureHelper
     {
         private readonly List<PropertiesData> _relations;
         private readonly List<PropertiesData> _ways; 
         private readonly List<PropertiesData> _nodes;
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="optionsProvider"></param>
         public GeoJsonFeatureHelper(IOptions<ConfigurationData> optionsProvider)
         {
             var options = optionsProvider.Value;
@@ -89,7 +92,19 @@ namespace IsraelHiking.API.Services
             };
         }
 
-        public PropertiesData FindPropertiesData(Feature feature)
+        ///<inheritdoc/>
+        public string GetIcon(Feature feature)
+        {
+            return FindPropertiesData(feature)?.Icon ?? string.Empty;
+        }
+
+        ///<inheritdoc/>
+        public double? GetSearchFactor(Feature feature)
+        {
+            return FindPropertiesData(feature)?.SearchFactor;
+        }
+
+        private PropertiesData FindPropertiesData(Feature feature)
         {
             PropertiesData data = null;
             if (feature.Geometry is MultiPolygon || feature.Geometry is MultiLineString)

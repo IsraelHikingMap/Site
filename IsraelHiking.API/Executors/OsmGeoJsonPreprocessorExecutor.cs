@@ -110,9 +110,8 @@ namespace IsraelHiking.API.Executors
             foreach (var feature in features)
             {
                 AddAddressField(feature, containers);
-                var propertiesExtraData = _geoJsonFeatureHelper.FindPropertiesData(feature);
-                feature.Attributes.AddAttribute(SEARCH_FACTOR, propertiesExtraData?.SearchFactor ?? _options.SearchFactor);
-                feature.Attributes.AddAttribute(ICON, propertiesExtraData?.Icon ?? string.Empty);
+                feature.Attributes.AddAttribute(SEARCH_FACTOR, _geoJsonFeatureHelper.GetSearchFactor(feature) ?? _options.SearchFactor);
+                feature.Attributes.AddAttribute(ICON, _geoJsonFeatureHelper.GetIcon(feature));
             }
         }
 

@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using ICSharpCode.SharpZipLib.Core;
 using ICSharpCode.SharpZipLib.Zip;
-using IsraelHiking.Common;
 using NetTopologySuite.Triangulate.QuadEdge;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
 using System.Linq;
 

@@ -1,5 +1,4 @@
-﻿using System;
-using Swashbuckle.AspNetCore.Swagger;
+﻿using Swashbuckle.AspNetCore.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc.Authorization;
@@ -15,11 +14,10 @@ namespace IsraelHiking.API.Swagger
     public class AssignOAuthSecurityRequirements : IOperationFilter
     {
         /// <summary>
-        /// Adds authentication using token
+        /// Adds authentication using token by adding header field
         /// </summary>
         /// <param name="operation"></param>
-        /// <param name="schemaRegistry"></param>
-        /// <param name="apiDescription"></param>    
+        /// <param name="context"></param>
         public void Apply(Operation operation, OperationFilterContext context)
         {
             var filterPipeline = context.ApiDescription.ActionDescriptor.FilterDescriptors;

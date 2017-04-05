@@ -7,8 +7,16 @@ using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Gpx
 {
+    /// <summary>
+    /// This is a helper class to facilitate easier serializations
+    /// </summary>
     public static class SerializarionExtensions
     {
+        /// <summary>
+        /// Convers <see cref="FeatureCollection"/> to <see cref="byte"/> array
+        /// </summary>
+        /// <param name="featureCollection">The <see cref="FeatureCollection"/></param>
+        /// <returns>The <see cref="byte"/> array</returns>
         public static byte[] ToBytes(this FeatureCollection featureCollection)
         {
             using (var outputStream = new MemoryStream())
@@ -22,6 +30,11 @@ namespace IsraelHiking.API.Gpx
             }
         }
 
+        /// <summary>
+        /// Converts <see cref="byte"/> array to <see cref="FeatureCollection"/>
+        /// </summary>
+        /// <param name="featureCollectionContent">The <see cref="byte"/> array</param>
+        /// <returns>The <see cref="FeatureCollection"/></returns>
         public static FeatureCollection ToFeatureCollection(this byte[] featureCollectionContent)
         {
             using (var stream = new MemoryStream(featureCollectionContent))
@@ -35,6 +48,11 @@ namespace IsraelHiking.API.Gpx
             }
         }
 
+        /// <summary>
+        /// Converts <see cref="byte"/> array to <see cref="gpxType"/>
+        /// </summary>
+        /// <param name="gpxContent">The <see cref="byte"/> array</param>
+        /// <returns>The <see cref="gpxType"/></returns>
         public static gpxType ToGpx(this byte[] gpxContent)
         {
             using (var stream = new MemoryStream(gpxContent))
@@ -44,6 +62,11 @@ namespace IsraelHiking.API.Gpx
             }
         }
 
+        /// <summary>
+        /// Converts <see cref="gpxType"/> to <see cref="byte"/> array
+        /// </summary>
+        /// <param name="gpx">The <see cref="gpxType"/></param>
+        /// <returns>The <see cref="byte"/> array</returns>
         public static byte[] ToBytes(this gpxType gpx)
         {
             using (var outputStream = new MemoryStream())
@@ -54,6 +77,11 @@ namespace IsraelHiking.API.Gpx
             }
         }
 
+        /// <summary>
+        /// Updates the bounds of a <see cref="gpxType"/> object according to internal data
+        /// </summary>
+        /// <param name="gpx">The <see cref="gpxType"/></param>
+        /// <returns>An updated <see cref="gpxType"/></returns>
         public static gpxType UpdateBounds(this gpxType gpx)
         {
             if (gpx.metadata?.bounds != null &&

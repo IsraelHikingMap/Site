@@ -15,6 +15,11 @@ namespace IsraelHiking.API.Swagger
     /// </summary>
     public class FeatureCollectionExampleFilter : ISchemaFilter
     {
+        /// <summary>
+        /// Applys the example of a <see cref="FeatureCollection"/> to the schema
+        /// </summary>
+        /// <param name="model"></param>
+        /// <param name="context"></param>
         public void Apply(Schema model, SchemaFilterContext context)
         {
             if (context == null)

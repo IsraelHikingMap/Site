@@ -7,8 +7,16 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace IsraelHiking.API
 {
+    /// <summary>
+    /// This class registers all the services related to the API layer
+    /// </summary>
     public static class RegisterApi
     {
+        /// <summary>
+        /// Registers all the API layer services
+        /// </summary>
+        /// <param name="services">The <see cref="IServiceCollection"/> to use for registration</param>
+        /// <returns></returns>
         public static IServiceCollection AddIHMApi(this IServiceCollection services)
         {
             services.AddTransient<IGpxGeoJsonConverter, GpxGeoJsonConverter>();

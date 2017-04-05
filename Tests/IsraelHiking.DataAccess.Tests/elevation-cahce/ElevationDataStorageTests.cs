@@ -1,11 +1,7 @@
 ﻿using System.IO;
-using System.Reflection;
 using GeoAPI.Geometries;
-using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
-using Microsoft.Extensions.Options;
 using Microsoft.Extensions.FileProviders;
 
 namespace IsraelHiking.DataAccess.Tests

@@ -25,6 +25,7 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="israelHikingRepository"></param>
         /// <param name="imageCreationService"></param>
+        /// <param name="options"></param>
         public ImagesController(IIsraelHikingRepository israelHikingRepository,
             IImageCreationService imageCreationService,
             IOptions<ConfigurationData> options)
@@ -52,6 +53,10 @@ namespace IsraelHiking.API.Controllers
             return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
         }
 
+        /// <summary>
+        /// Get available route colors defined in the configurations
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         [Route("colors")]
         public List<string> GetColors()
@@ -59,7 +64,10 @@ namespace IsraelHiking.API.Controllers
             return _options.Colors;
         }
 
-
+        /// <summary>
+        /// Dispose method, following dispose pattern
+        /// </summary>
+        /// <param name="disposing"></param>
         protected override void Dispose(bool disposing)
         {
             if (disposing)

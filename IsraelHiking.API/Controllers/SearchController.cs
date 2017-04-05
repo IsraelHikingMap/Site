@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Gets a geo location by search term
         /// </summary>
-        /// <param name="id">A string to search for</param>
+        /// <param name="term">A string to search for</param>
         /// <param name="language">The language to search in</param>
         /// <returns></returns>
         // GET api/search/abc&language=en

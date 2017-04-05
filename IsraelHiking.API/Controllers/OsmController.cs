@@ -111,12 +111,13 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Finds unmapped parts of a given route
         /// </summary>
-        /// <param name="url">The url to fetch the file from - optional, use file upload if not provided</param>
+        /// <param name="file">The file to use for finding</param>
+        /// <param name="url">The url to fetch a file from - optional, use file uploaded if not provided</param>
         /// <returns></returns>
         [HttpPost]
         [ProducesResponseType(typeof(FeatureCollection), 200)]
         [SwaggerOperationFilter(typeof(OptionalFileUploadParams))]
-        public async Task<IActionResult> PostGpsTrace([FromBody]IFormFile file, [FromQuery]string url = "")
+        public async Task<IActionResult> PostGpsTrace([FromQuery]string url = "", [FromForm]IFormFile file = null)
         {
             var fileFetcherGatewayResponse = await GetFile(url, file);
             if (fileFetcherGatewayResponse == null)

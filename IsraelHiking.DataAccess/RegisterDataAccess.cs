@@ -1,5 +1,4 @@
-﻿using IsraelHiking.Common;
-using IsraelHiking.DataAccess.Database;
+﻿using IsraelHiking.DataAccess.Database;
 using IsraelHiking.DataAccess.ElasticSearch;
 using IsraelHiking.DataAccess.GPSBabel;
 using IsraelHiking.DataAccess.GraphHopper;

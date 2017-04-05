@@ -3,6 +3,9 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Services.Osm
 {
+    /// <summary>
+    /// Operations used for command line
+    /// </summary>
     [Flags]
     public enum OsmDataServiceOperations
     {
