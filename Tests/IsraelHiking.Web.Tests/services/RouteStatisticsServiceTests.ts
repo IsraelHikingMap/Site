@@ -24,11 +24,5 @@ namespace IsraelHiking.Tests.Services {
 
             expect(routeStatisticsSerivice.isVisible).toBe(false);
         });
-
-        it("Should hide when toggled and then hide", () => {
-            routeStatisticsSerivice.toggle();
-
-            expect(routeStatisticsSerivice.isVisible).toBe(false);
-        });
     });
 }

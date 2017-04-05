@@ -21,15 +21,6 @@
     <None Remove="wwwroot\Bin\**" />
     <None Remove="wwwroot\lib\**" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="wwwroot\controllers\routeStatistics.html" />
-    <Content Include="wwwroot\controllers\routeStatisticsModal.css" />
-    <Content Include="wwwroot\controllers\routeStatisticsModal.html" />
-    <Content Include="wwwroot\controllers\routeStatisticsPopup.css" />
-    <Content Include="wwwroot\controllers\routeStatisticsPopup.html" />
-    <Content Include="wwwroot\services\FitBoundsService.ts" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5-pre3" />
     <PackageReference Include="IsraelTransverseMercator" Version="2.2.2-pre1" />
@@ -60,14 +51,6 @@
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
     <ProjectReference Include="..\IsraelHiking.Updater\IsraelHiking.Updater.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Update="appsettings.Production.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Update="appsettings.json">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>
