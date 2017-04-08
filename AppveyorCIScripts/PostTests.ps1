@@ -41,11 +41,11 @@ $OpenCoverCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover.xml"
 $ChutzpahJUnitFile = "$($env:APPVEYOR_BUILD_FOLDER)\chutzpah-junit.xml"
 $ChutzpahCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-chutzpah.json"
 
-Set-Location -Path "C:\Users\$($User)\.nuget\packages\"
+Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
 # Locate Chutzpah
 
-$Chutzpah = get-childitem chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
+$Chutzpah = get-childitem "C:\Users\$($User)\.nuget\packages\" chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
 
 # Run tests using Chutzpah and export results as JUnit format and chutzpah coveragejson for coverage
 
@@ -78,10 +78,10 @@ foreach ($testsuite in $testsuites.testsuites.testsuite) {
 
 # Locate Files
 
-$OpenCover = get-ChildItem OpenCover.Console.exe -recurse | select-object -first 1 | select -expand FullName
+$OpenCover = get-ChildItem "C:\Users\$($User)\.nuget\packages\" OpenCover.Console.exe -recurse | select-object -first 1 | select -expand FullName
 $VsTest = get-childitem "C:\Program Files (x86)\Microsoft Visual Studio\2017\" vstest.console.exe -recurse | Select-Object -first 1 | select -expand FullName
-$DATests = get-ChildItem "$($env:APPVEYOR_BUILD_FOLDER)\Tests\" "IsraelHiking.DataAccess.Tests.dll" -recurse | Select-Object -first 1 | select -expand FullName
-$APITests = get-ChildItem "$($env:APPVEYOR_BUILD_FOLDER)\Tests\" "IsraelHiking.API.Tests.dll" -recurse | Select-Object -first 1 | select -expand FullName
+$DATests = get-ChildItem IsraelHiking.DataAccess.Tests.dll -recurse | Select-Object -first 1 | select -expand FullName
+$APITests = get-ChildItem IsraelHiking.API.Tests.dll -recurse | Select-Object -first 1 | select -expand FullName
 
 # Run OpenCover
 
@@ -93,7 +93,7 @@ Invoke-Expression $OpenCoverCmd
 
 # Locate coveralls
 
-$CoverAlls = get-childitem csmacnz.Coveralls.exe -recurse | select-object -first 1 | select -expand FullName
+$CoverAlls = get-childitem "C:\Users\$($User)\.nuget\packages\" csmacnz.Coveralls.exe -recurse | select-object -first 1 | select -expand FullName
 
 # Run coveralls
 
