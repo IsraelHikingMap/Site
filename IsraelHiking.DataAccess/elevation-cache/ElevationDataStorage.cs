@@ -46,7 +46,7 @@ namespace IsraelHiking.DataAccess
 
                 _initializationTaskPerLatLng[key] = Task.Run(() =>
                 {
-                    _logger.LogDebug("Reading file " + hgtZipFile);
+                    _logger.LogDebug("Reading file " + hgtZipFile.Name);
                     var byteArray = GetByteArrayFromZip(hgtZipFile);
                     int samples = (short) (Math.Sqrt(byteArray.Length/2.0) + 0.5);
                     var elevationArray = new short[samples, samples];
@@ -56,7 +56,7 @@ namespace IsraelHiking.DataAccess
                         elevationArray[(byteIndex/2)/samples, (byteIndex/2)%samples] = currentElevation;
                     }
                     _elevationData[key] = elevationArray;
-                    _logger.LogDebug("Finished reading file " + hgtZipFile);
+                    _logger.LogDebug("Finished reading file " + hgtZipFile.Name);
                 });
             }
 

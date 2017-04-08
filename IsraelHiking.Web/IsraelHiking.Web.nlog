@@ -1,0 +1,33 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      autoReload="true"
+      internalLogLevel="Warn"
+      internalLogFile="Logs\internal-nlog.log">
+
+  <extensions>
+    <add assembly="NLog.Web.AspNetCore"/>
+  </extensions>
+  
+  <targets>
+    <!-- write logs to file -->
+    <target xsi:type="File" name="all" fileName="Logs\all-${shortdate}.log"
+            layout="${longdate} |${pad:padding=3:inner=${event-properties:item=EventId.Id}}|${pad:padding=-5:inner=${level:uppercase=true}}| ${pad:padding=30:fixedLength=True:alignmentOnTruncation=right:inner=${logger}} | ${message} ${exception}" />
+
+    <!-- another file log, only site logs  -->
+    <target xsi:type="File" name="site" fileName="Logs\site-${shortdate}.log"
+            layout="${longdate} |${pad:padding=3:inner=${event-properties:item=EventId.Id}}|${pad:padding=-5:inner=${level:uppercase=true}}| ${logger} | ${message} ${exception}" />
+
+    <!-- write to the void aka just remove -->
+    <target xsi:type="Null" name="blackhole" />
+  </targets>
+
+  <rules>
+    <!--All error logs, including from Microsoft, change to Trace for debug-->
+    <logger name="*" minlevel="Error" writeTo="all" />
+
+    <!--Skip Microsoft logs and so log only site logs-->
+    <logger name="Microsoft.*" minlevel="Trace" writeTo="blackhole" final="true" />
+    <logger name="*" minlevel="Trace" writeTo="site" />
+  </rules>
+</nlog>

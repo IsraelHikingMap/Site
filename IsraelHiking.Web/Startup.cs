@@ -23,6 +23,8 @@ using Microsoft.IdentityModel.Tokens;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NetTopologySuite.IO.Converters;
+using NLog.Extensions.Logging;
+using NLog.Web;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
@@ -190,8 +192,8 @@ namespace IsraelHiking.Web
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
-            loggerFactory.AddFile("Logs/IsraelHiking-{Date}.log");
+            env.ConfigureNLog("IsraelHiking.Web.nlog");
+            loggerFactory.AddNLog();
 
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.Rules.Add(new RewriteWithQueryRule(".*_escaped_fragment_=%2F%3Fs%3D(.*)", "api/opengraph/$1", false));

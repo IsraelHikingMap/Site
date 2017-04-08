@@ -97,10 +97,12 @@ This utility is used to download and update the OSM data for the search and rout
 This utility also setups the services needed for the machine.
 The following flags can be used when running from commnad line:
 
-```-d```: don't download latest OSM pbf file from geofabrik
+```-d | --download```: download latest OSM pbf file from geofabrik
 
-```-g```: don't update graphhopper data
+```-g | --graphhopper```: update graphhopper data
 
-```-e```: don't update elastic search data
+```-e | -es | --elasticsearch```: update elastic search data
 
-```-h```: for the help menu
+```-? | -h | --help```: for the help menu
+
+When no flags are given all the above will be executed.

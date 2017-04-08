@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
+      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      autoReload="true"
+      internalLogLevel="Warn"
+      internalLogFile="Logs\internal-nlog.log">
+
+  <!-- Load the ASP.NET Core plugin -->
+  <extensions>
+    <add assembly="NLog.Web.AspNetCore"/>
+  </extensions>
+  
+  <targets>
+    <!-- write logs to file -->
+    <target xsi:type="File" name="all" fileName="Logs\updater-${shortdate}.log"
+            layout="${longdate} |${pad:padding=-5:inner=${level:uppercase=true}}| ${message} ${exception}" />
+    <!-- write logs to console -->
+    <target xsi:type="ColoredConsole" name="console" useDefaultRowHighlightingRules="false"
+            layout="${longdate} |${pad:padding=-5:inner=${level:uppercase=true}}| ${message} ${exception}">
+      <highlight-word foregroundColor="Red" ignoreCase="false" text="ERROR" wholeWords="true"/>
+      <highlight-word foregroundColor="Yellow" ignoreCase="false" text="WARN" wholeWords="true"/>
+    </target>
+  </targets>
+  
+  <rules>
+    <logger name="*" minlevel="Trace" writeTo="console" />
+    <logger name="*" minlevel="Trace" writeTo="all" />
+  </rules>
+</nlog>

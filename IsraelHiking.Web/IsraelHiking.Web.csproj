@@ -21,6 +21,18 @@
     <None Remove="wwwroot\Bin\**" />
     <None Remove="wwwroot\lib\**" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="IsraelHiking.Web.nlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Update="appsettings.Production.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5-pre3" />
     <PackageReference Include="IsraelTransverseMercator" Version="2.2.2-pre1" />
@@ -39,9 +51,9 @@
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre3" />
     <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-IHM" />
     <PackageReference Include="NetTopologySuite.IO.GeoJson" Version="1.15.0-IHM" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.3.1" />
     <PackageReference Include="OAuth.DotNetCore" Version="1.0.4" />
     <PackageReference Include="OsmSharp" Version="6.0.0-alpha2" />
-    <PackageReference Include="Serilog.Extensions.Logging.File" Version="1.0.0" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0-rc3" />
   </ItemGroup>
@@ -52,5 +64,4 @@
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
     <ProjectReference Include="..\IsraelHiking.Updater\IsraelHiking.Updater.csproj" />
   </ItemGroup>
-
 </Project>
