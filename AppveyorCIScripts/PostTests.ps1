@@ -1,13 +1,13 @@
 ﻿$OpenCoverLogger = "/logger:Appveyor"
-$breakPoints =  Get-PSBreakpoint
-if ($breakPoints)
+$BreakPoints =  Get-PSBreakpoint
+$User = "appveyor"
+if ($BreakPoints)
 {
 	# set a breakpoint anywhere in the file to run this locally...
 	$OpenCoverLogger = ""
+	$User = "harel"
 }
-$OpenCoverCoverageFile = "coverage-opencover.xml"
-$ChutzpahJUnitFile = "chutzpah-junit.xml"
-$ChutzpahCoverageFile = "coverage-chutzpah.json"
+
 # for debug, in case it is not ran from appveyor CI system:
 if (!$env:APPVEYOR_BUILD_FOLDER) {
 	$scriptPath = split-path -parent $MyInvocation.MyCommand.Definition
@@ -37,15 +37,19 @@ if (!$env:APPVEYOR_JOB_ID)
 	$env:APPVEYOR_JOB_ID = "JobID"
 }
 
-Set-Location -Path "C:\Users\appveyor\.nuget\packages\"
+$OpenCoverCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover.xml"
+$ChutzpahJUnitFile = "$($env:APPVEYOR_BUILD_FOLDER)\chutzpah-junit.xml"
+$ChutzpahCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-chutzpah.json"
+
+Set-Location -Path "C:\Users\$($User)\.nuget\packages\"
 
 # Locate Chutzpah
 
-$ChutzpahDir = get-childitem chutzpah.console.exe -recurse | select-object -first 1 | select -expand Directory
+$Chutzpah = get-childitem chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
 
 # Run tests using Chutzpah and export results as JUnit format and chutzpah coveragejson for coverage
 
-$ChutzpahCmd = "$($ChutzpahDir)\chutzpah.console.exe $($env:APPVEYOR_BUILD_FOLDER)\chutzpah.json /junit $ChutzpahJUnitFile /coverage /coveragejson $ChutzpahCoverageFile"
+$ChutzpahCmd = "$($Chutzpah) $($env:APPVEYOR_BUILD_FOLDER)\chutzpah.json /junit $ChutzpahJUnitFile /coverage /coveragejson $ChutzpahCoverageFile"
 Write-Host $ChutzpahCmd
 Invoke-Expression $ChutzpahCmd
 
@@ -72,23 +76,28 @@ foreach ($testsuite in $testsuites.testsuites.testsuite) {
     }
 }
 
-# Locate OpenCover
+# Locate Files
 
-$OpenCoverDir = get-childitem OpenCover.Console.exe -recurse | select-object -first 1 | select -expand Directory
+$OpenCover = get-ChildItem OpenCover.Console.exe -recurse | select-object -first 1 | select -expand FullName
+$VsTest = get-childitem "C:\Program Files (x86)\Microsoft Visual Studio\2017\" vstest.console.exe -recurse | Select-Object -first 1 | select -expand FullName
+$DATests = get-ChildItem "$($env:APPVEYOR_BUILD_FOLDER)\Tests\" "IsraelHiking.DataAccess.Tests.dll" -recurse | Select-Object -first 1 | select -expand FullName
+$APITests = get-ChildItem "$($env:APPVEYOR_BUILD_FOLDER)\Tests\" "IsraelHiking.API.Tests.dll" -recurse | Select-Object -first 1 | select -expand FullName
 
 # Run OpenCover
 
-$OpenCoverCmd = "$($OpenCoverDir)\OpenCover.Console.exe -register:user -target:`"C:\Program Files (x86)\Microsoft Visual Studio 14.0\Common7\IDE\CommonExtensions\Microsoft\TestWindow\vstest.console.exe`" -targetargs:`"$OpenCoverLogger $($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.API.Tests\bin\Debug\IsraelHiking.API.Tests.dll $($env:APPVEYOR_BUILD_FOLDER)\Tests\IsraelHiking.DataAccess.Tests\bin\Debug\IsraelHiking.DataAccess.Tests.dll`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverCoverageFile"
+
+
+$OpenCoverCmd = "$($OpenCover) -register:user -target:`"$($VsTest)`" -targetargs:`"$OpenCoverLogger $DATests $APITests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverCoverageFile"
 Write-Host $OpenCoverCmd
 Invoke-Expression $OpenCoverCmd
 
 # Locate coveralls
 
-$CoverAllsDir = get-childitem csmacnz.Coveralls.exe -recurse | select-object -first 1 | select -expand Directory
+$CoverAlls = get-childitem csmacnz.Coveralls.exe -recurse | select-object -first 1 | select -expand FullName
 
 # Run coveralls
 
-$CoverAllsCmd = "$($CoverAllsDir)\csmacnz.Coveralls.exe --multiple -i `"opencover=$OpenCoverCoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
+$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverCoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
 Write-Host $CoverAllsCmd
 Invoke-Expression $CoverAllsCmd
 
