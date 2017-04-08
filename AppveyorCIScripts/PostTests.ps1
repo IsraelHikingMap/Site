@@ -37,7 +37,7 @@ if (!$env:APPVEYOR_JOB_ID)
 	$env:APPVEYOR_JOB_ID = "JobID"
 }
 
-Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
+Set-Location -Path "C:\Users\appveyor\.nuget\packages\"
 
 # Locate Chutzpah
 

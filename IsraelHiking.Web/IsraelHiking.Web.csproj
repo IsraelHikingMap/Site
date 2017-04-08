@@ -34,6 +34,8 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Chutzpah" Version="4.3.4" />
+    <PackageReference Include="coveralls.net" Version="0.8.0-unstable0013" />
     <PackageReference Include="GeoAPI" Version="1.7.5-pre3" />
     <PackageReference Include="IsraelTransverseMercator" Version="2.2.2-pre1" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.0.0" />
@@ -53,6 +55,7 @@
     <PackageReference Include="NetTopologySuite.IO.GeoJson" Version="1.15.0-IHM" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.3.1" />
     <PackageReference Include="OAuth.DotNetCore" Version="1.0.4" />
+    <PackageReference Include="OpenCover" Version="4.6.519" />
     <PackageReference Include="OsmSharp" Version="6.0.0-alpha2" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0-rc3" />
