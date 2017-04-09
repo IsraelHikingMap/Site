@@ -48,8 +48,6 @@ The architecture is based on layers
 # Setting up this project
 In order to be able to build this site you'll need some tools:
 
-* ___[The need for this installation is still TBD]___ Download and install the [LTS version of Node.js](https://nodejs.org/en/) for Windows.
-  * Notice and save the node.js installation directory. It is usually ```C:\Program Files\nodejs\```
 * Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
@@ -59,22 +57,18 @@ In order to be able to build this site you'll need some tools:
   * View &rarr; Other Windows... &rarr; Package Manager Console
   * For each of the files in ```TempLocalNugets```
     * Shift-Right-Click &rarr; Copy as path
-    * At the bottom pane type ```Install-Package``` followed by ```Ctrl-V``` and ```Enter```. For example:
+    * Go back to VS package manager console (At the bottom pane) and type ```Install-Package``` followed by ```Ctrl-V``` and ```Enter```. For example:
       ```
       PM> Install-Package "C:\GitHub\IsraelHikingMap\Site\TempLocalNugets\NetTopologySuite.IO.1.15.0-IHM.nupkg"
       ```
-* From Visual Studio's _Tools &rarr; Options..._
-  * Go to _Projects and Solutions &rarr; External Web Tools_.
-  * Add the above node.js installation directory as a new directory.
-  * Using the up arrow, move the node.js installation directory up to the second place in the list - just after ```.\node_modules\.bin```.
-  * Click _OK_ to close the dialog.
-  * Exit Visual Studio and re-open it.
 * From Visual Studio's _Tools &rarr; Extensions and Updates..._ 
   * Go to _Online_
   * Search for the following and install them: 
     * Web Essentials 2017
     * Chutzpah Test Adapter for the test explorer
     * Chutzpah Test Runner Contet Menu Extension
+  * Restart Visual Studio to complete the installation
+* Open IsraelHiking.sln and compile and run using F5 - Note that it will take time to download all the packages so be patience
 
 # Setup the server
 In order to be able to make the server work a few prerequisits are needed:
