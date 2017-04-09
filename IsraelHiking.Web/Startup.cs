@@ -29,6 +29,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.StaticFiles;
 
 namespace IsraelHiking.Web
 {
@@ -210,7 +211,8 @@ namespace IsraelHiking.Web
             }
             app.UseRewriter(rewriteOptions);
 
-            app.UseCors(builder => {
+            app.UseCors(builder =>
+            {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials();
             });
 
@@ -220,32 +222,7 @@ namespace IsraelHiking.Web
             app.UseJwtBearerAuthentication(jwtBearerOptions);
 
             app.UseMvc();
-            app.UseDefaultFiles();
-            app.UseStaticFiles(new StaticFileOptions()
-            {
-                OnPrepareResponse = (context) =>
-                {
-                    var headers = context.Context.Response.GetTypedHeaders();
-                    headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
-                    {
-                        MaxAge = TimeSpan.FromSeconds(3600),
-                    };
-                }
-            });
-            var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
-            foreach (var directory in configurationData.ListingDictionary)
-            {
-                var fileServerOptions = new FileServerOptions
-                {
-                    FileProvider = new PhysicalFileProvider(directory.Value),
-                    RequestPath = new PathString("/" + directory.Key),
-                    EnableDirectoryBrowsing = true,
-                };
-                fileServerOptions.DirectoryBrowserOptions.FileProvider = new PhysicalFileProvider(directory.Value);
-                fileServerOptions.DirectoryBrowserOptions.RequestPath = new PathString("/" + directory.Key);
-                fileServerOptions.DirectoryBrowserOptions.Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices.GetRequiredService<IFileSystemHelper>());
-                app.UseFileServer(fileServerOptions);
-            }
+            SetupStaticFiles(app);
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {
@@ -261,6 +238,38 @@ namespace IsraelHiking.Web
                 return context.Response.SendFileAsync(file);
             });
             InitializeServices(app.ApplicationServices);
+        }
+
+        private static void SetupStaticFiles(IApplicationBuilder app)
+        {
+            app.UseDefaultFiles();
+            var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
+            var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
+            fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
+            foreach (var directory in configurationData.ListingDictionary)
+            {
+                var fileServerOptions = new FileServerOptions
+                {
+                    FileProvider = new PhysicalFileProvider(directory.Value),
+                    RequestPath = new PathString("/" + directory.Key),
+                    EnableDirectoryBrowsing = true,
+                };
+                fileServerOptions.DirectoryBrowserOptions.FileProvider = new PhysicalFileProvider(directory.Value);
+                fileServerOptions.DirectoryBrowserOptions.RequestPath = new PathString("/" + directory.Key);
+                fileServerOptions.DirectoryBrowserOptions.Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices.GetRequiredService<IFileSystemHelper>());
+                fileServerOptions.StaticFileOptions.ContentTypeProvider = fileExtensionContentTypeProvider;
+                fileServerOptions.StaticFileOptions.OnPrepareResponse = context =>
+                {
+                    var headers = context.Context.Response.GetTypedHeaders();
+                    headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
+                    {
+                        MaxAge = TimeSpan.FromSeconds(3600),
+                    };
+                };
+                app.UseFileServer(fileServerOptions);
+            }
+
+            app.UseStaticFiles();
         }
 
         private void InitializeServices(IServiceProvider serviceProvider)
