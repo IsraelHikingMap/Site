@@ -111,7 +111,7 @@ namespace IsraelHiking.API.Controllers
                         <td><i class='fa fa-lg fa-folder-open'></i></td>
                         <td><a href='{HtmlEncode(subdir.Name)}/'>{HtmlEncode(subdir.Name)}/</a></td>
                         <td></td>
-                        <td>{HtmlEncode(subdir.LastModified.ToString("dd/MM/yyyy HH:mm"))}</td>
+                        <td>{HtmlEncode(subdir.LastModified.LocalDateTime.ToString("dd/MM/yyyy HH:mm"))}</td>
                     </tr>
                     ");
             }
@@ -122,7 +122,7 @@ namespace IsraelHiking.API.Controllers
                     <td><i class='fa fa-lg {GetFontAwesomeIcon(file.Name)}'></i></td>
                     <td><a href='{HtmlEncode(file.Name)}'>{HtmlEncode(file.Name)}</a></td>
                     <td>{GetLengthString(file.Length)}</td>
-                    <td>{HtmlEncode(file.LastModified.ToString("dd/MM/yyyy HH:mm"))}</td>
+                    <td>{HtmlEncode(file.LastModified.LocalDateTime.ToString("dd/MM/yyyy HH:mm"))}</td>
                   </tr>
                 ");
             }
