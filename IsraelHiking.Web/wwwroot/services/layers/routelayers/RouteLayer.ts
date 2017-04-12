@@ -23,18 +23,6 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         properties: IRouteProperties;
     }
 
-    export interface IRouteStatisticsPoint extends L.Point {
-        latlng: L.LatLng;
-        slope: number;
-    }
-
-    export interface IRouteStatistics {
-        points: IRouteStatisticsPoint[];
-        length: number; // [meters]
-        gain: number; // [meters] - adding only when going up hill.
-        loss: number; // [meters] - adding only when going downhill - should be negative number.
-    }
-
     export class RouteLayer extends ObjectWithMap implements IDrawingLayer {
         public $q: angular.IQService;
         public $rootScope: angular.IRootScopeService;
@@ -191,45 +179,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             return latlngz;
         }
 
-        public getStatistics = (): IRouteStatistics => {
-            var routeStatistics = {
-                points: [] as IRouteStatisticsPoint[],
-                length: 0,
-                gain: 0,
-                loss: 0
-            } as IRouteStatistics;
-            if (this.route.segments.length <= 0) {
-                return routeStatistics;
-            }
-            let previousPoint = this.route.segments[0].latlngzs[0];
-            for (let segment of this.route.segments) {
-                for (let latlngz of segment.latlngzs) {
-                    let distance = previousPoint.distanceTo(latlngz);
-                    if (distance < 1) {
-                        continue;
-                    }
-                    routeStatistics.length += distance;
-                    let point = L.point((routeStatistics.length / 1000), latlngz.z) as IRouteStatisticsPoint;
-                    point.latlng = latlngz;
-                    point.slope = distance === 0 ? 0 : (latlngz.z - previousPoint.z) * 100 / distance;
-                    routeStatistics.points.push(point);
-                    previousPoint = latlngz;
-                }
-            }
-            let simplified = L.LineUtil.simplify(routeStatistics.points, 1);
-            let previousSimplifiedPoint = simplified[0];
-            for (let point of simplified) {
-                routeStatistics.gain += ((point.y - previousSimplifiedPoint.y) > 0 && point.y !== 0 && previousSimplifiedPoint.y !== 0) ?
-                    (point.y - previousSimplifiedPoint.y) :
-                    0;
-                routeStatistics.loss += ((point.y - previousSimplifiedPoint.y) < 0 && point.y !== 0 && previousSimplifiedPoint.y !== 0) ?
-                    (point.y - previousSimplifiedPoint.y) :
-                    0;
-                previousSimplifiedPoint = point;
-            }
-
-            return routeStatistics;
-        }
+        
 
         public dataChanged = () => {
             var data = this.getData();

@@ -16,6 +16,9 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             polyline.on("mouseover", (e: L.LeafletMouseEvent) => {
                 this.context.polylineHoverEvent.raiseEvent(e.latlng);
             });
+            polyline.on("mouseout", () => {
+                this.context.polylineHoverEvent.raiseEvent(null);
+            });
             this.readOnlyLayers.addLayer(polyline);
         }
 
