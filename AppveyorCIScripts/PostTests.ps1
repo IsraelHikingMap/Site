@@ -1,11 +1,9 @@
 ﻿$BreakPoints =  Get-PSBreakpoint
 $User = "appveyor"
-$logger = " --logger:Appveyor"
 if ($BreakPoints)
 {
 	# set a breakpoint anywhere in the file to run this locally...
 	$User = "harel"
-	$logger = ""
 }
 
 # for debug, in case it is not ran from appveyor CI system:
@@ -37,8 +35,6 @@ if (!$env:APPVEYOR_JOB_ID)
 	$env:APPVEYOR_JOB_ID = "JobID"
 }
 
-$OpenCoverDACoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover-dataaccess.xml"
-$OpenCoverAPICoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover-api.xml"
 $ChutzpahJUnitFile = "$($env:APPVEYOR_BUILD_FOLDER)\chutzpah-junit.xml"
 $ChutzpahCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-chutzpah.json"
 
@@ -89,16 +85,27 @@ $dotnet = get-childitem "C:\Program Files\dotnet\" dotnet.exe -recurse | Select-
 $DATests = get-ChildItem IsraelHiking.DataAccess.Tests.csproj -recurse | Select-Object -first 1 | select -expand FullName
 $APITests = get-ChildItem IsraelHiking.API.Tests.csproj -recurse | Select-Object -first 1 | select -expand FullName
 
+$OpenCoverDACoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover-dataaccess.xml"
+$OpenCoverAPICoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover-api.xml"
+$OpenCoverDAResultsFile = "$($env:APPVEYOR_BUILD_FOLDER)\results-dataaccess.trx"
+$OpenCoverAPIResultsFile = "$($env:APPVEYOR_BUILD_FOLDER)\results-api.trx"
+
+
 # Run OpenCover
 
-$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test /p:DebugType=full $DATests $logger`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverDACoverageFile"
+
+$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test --logger:trx;LogFileName=$OpenCoverDAResultsFile /p:DebugType=full $DATests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverDACoverageFile"
 Write-Host $OpenCoverCmd
 Invoke-Expression $OpenCoverCmd
 
-$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test /p:DebugType=full $APITests $logger`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverAPICoverageFile"
+$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test --logger:trx;LogFileName=$OpenCoverAPIResultsFile /p:DebugType=full $APITests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverAPICoverageFile"
 Write-Host $OpenCoverCmd
 Invoke-Expression $OpenCoverCmd
 
+# Upload test resutls
+$wc = New-Object 'System.Net.WebClient'
+$wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $OpenCoverAPIResultsFile)
+$wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $OpenCoverDAResultsFile)
 
 # Locate coveralls
 
