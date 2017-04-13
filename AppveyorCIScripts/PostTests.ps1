@@ -1,9 +1,11 @@
 ﻿$BreakPoints =  Get-PSBreakpoint
 $User = "appveyor"
+$logger = " --logger:Appveyor"
 if ($BreakPoints)
 {
 	# set a breakpoint anywhere in the file to run this locally...
 	$User = "harel"
+	$logger = ""
 }
 
 # for debug, in case it is not ran from appveyor CI system:
@@ -42,37 +44,43 @@ $ChutzpahCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-chutzpah.json"
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
+$jsFiles = get-childitem IsraelHiking.Web\wwwroot *.js -recurse | select -expand FullName
+Write-Host $jsFiles
+
+$tsFiles = get-childitem IsraelHiking.Web\wwwroot *.ts -recurse | select -expand FullName
+Write-Host $tsFiles
+
 # Locate Chutzpah
 
-$Chutzpah = get-childitem "C:\Users\$($User)\.nuget\packages\" chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
-
-# Run tests using Chutzpah and export results as JUnit format and chutzpah coveragejson for coverage
-
-$ChutzpahCmd = "$($Chutzpah) $($env:APPVEYOR_BUILD_FOLDER)\chutzpah.json /junit $ChutzpahJUnitFile /coverage /coveragejson $ChutzpahCoverageFile"
-Write-Host $ChutzpahCmd
-Invoke-Expression $ChutzpahCmd
-
-# Upload results to AppVeyor one by one
-$testsuites = [xml](get-content $ChutzpahJUnitFile)
-
-$anyFailures = $FALSE
-foreach ($testsuite in $testsuites.testsuites.testsuite) {
-    write-host " $($testsuite.name)"
-    foreach ($testcase in $testsuite.testcase){
-        $failed = $testcase.failure
-        $time = $testsuite.time
-        if ($testcase.time) { $time = $testcase.time }
-        if ($failed) {
-            write-host "Failed   $($testcase.name) $($testcase.failure.message)"
-            Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $time
-            $anyFailures = $TRUE
-        }
-        else {
-            write-host "Passed   $($testcase.name)"
-            Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $time
-        }
-    }
-}
+##$Chutzpah = get-childitem "C:\Users\$($User)\.nuget\packages\" chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
+##
+### Run tests using Chutzpah and export results as JUnit format and chutzpah coveragejson for coverage
+##
+##$ChutzpahCmd = "$($Chutzpah) $($env:APPVEYOR_BUILD_FOLDER)\chutzpah.json /junit $ChutzpahJUnitFile /coverage /coveragejson $ChutzpahCoverageFile"
+##Write-Host $ChutzpahCmd
+##Invoke-Expression $ChutzpahCmd
+##
+### Upload results to AppVeyor one by one
+##$testsuites = [xml](get-content $ChutzpahJUnitFile)
+##
+##$anyFailures = $FALSE
+##foreach ($testsuite in $testsuites.testsuites.testsuite) {
+##    write-host " $($testsuite.name)"
+##    foreach ($testcase in $testsuite.testcase){
+##        $failed = $testcase.failure
+##        $time = $testsuite.time
+##        if ($testcase.time) { $time = $testcase.time }
+##        if ($failed) {
+##            write-host "Failed   $($testcase.name) $($testcase.failure.message)"
+##            Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $time
+##            $anyFailures = $TRUE
+##        }
+##        else {
+##            write-host "Passed   $($testcase.name)"
+##            Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $time
+##        }
+##    }
+##}
 
 # Locate Files
 
@@ -83,11 +91,11 @@ $APITests = get-ChildItem IsraelHiking.API.Tests.csproj -recurse | Select-Object
 
 # Run OpenCover
 
-$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test /p:DebugType=full $DATests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverDACoverageFile"
+$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test /p:DebugType=full $DATests $logger`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverDACoverageFile"
 Write-Host $OpenCoverCmd
 Invoke-Expression $OpenCoverCmd
 
-$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test /p:DebugType=full $APITests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverAPICoverageFile"
+$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test /p:DebugType=full $APITests $logger`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverAPICoverageFile"
 Write-Host $OpenCoverCmd
 Invoke-Expression $OpenCoverCmd
 
@@ -98,7 +106,8 @@ $CoverAlls = get-childitem "C:\Users\$($User)\.nuget\packages\" csmacnz.Coverall
 
 # Run coveralls
 
-$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
+#$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
+$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
 Write-Host $CoverAllsCmd
 Invoke-Expression $CoverAllsCmd
 
