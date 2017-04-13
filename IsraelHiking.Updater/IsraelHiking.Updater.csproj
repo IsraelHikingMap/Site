@@ -3,11 +3,13 @@
   <PropertyGroup>
     <OutputType>winexe</OutputType>
     <TargetFramework>netcoreapp1.1</TargetFramework>
+    <DebugType>full</DebugType>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <ApplicationIcon>favicon.ico</ApplicationIcon>
     <OutputTypeEx>winexe</OutputTypeEx>
     <OutputType>Exe</OutputType>
     <StartupObject />
+    
   </PropertyGroup>
 
   <ItemGroup>

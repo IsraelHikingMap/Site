@@ -1,10 +1,8 @@
-﻿$OpenCoverLogger = "/logger:Appveyor"
-$BreakPoints =  Get-PSBreakpoint
+﻿$BreakPoints =  Get-PSBreakpoint
 $User = "appveyor"
 if ($BreakPoints)
 {
 	# set a breakpoint anywhere in the file to run this locally...
-	$OpenCoverLogger = ""
 	$User = "harel"
 }
 
@@ -37,7 +35,8 @@ if (!$env:APPVEYOR_JOB_ID)
 	$env:APPVEYOR_JOB_ID = "JobID"
 }
 
-$OpenCoverCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover.xml"
+$OpenCoverDACoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover-dataaccess.xml"
+$OpenCoverAPICoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover-api.xml"
 $ChutzpahJUnitFile = "$($env:APPVEYOR_BUILD_FOLDER)\chutzpah-junit.xml"
 $ChutzpahCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-chutzpah.json"
 
@@ -72,24 +71,26 @@ foreach ($testsuite in $testsuites.testsuites.testsuite) {
             write-host "Passed   $($testcase.name)"
             Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $time
         }
-
     }
 }
 
 # Locate Files
 
 $OpenCover = get-ChildItem "C:\Users\$($User)\.nuget\packages\" OpenCover.Console.exe -recurse | select-object -first 1 | select -expand FullName
-$VsTest = get-childitem "C:\Program Files (x86)\Microsoft Visual Studio\2017\" vstest.console.exe -recurse | Select-Object -first 1 | select -expand FullName
-$DATests = get-ChildItem IsraelHiking.DataAccess.Tests.dll -recurse | Select-Object -first 1 | select -expand FullName
-$APITests = get-ChildItem IsraelHiking.API.Tests.dll -recurse | Select-Object -first 1 | select -expand FullName
+$dotnet = get-childitem "C:\Program Files\dotnet\" dotnet.exe -recurse | Select-Object -first 1 | select -expand FullName
+$DATests = get-ChildItem IsraelHiking.DataAccess.Tests.csproj -recurse | Select-Object -first 1 | select -expand FullName
+$APITests = get-ChildItem IsraelHiking.API.Tests.csproj -recurse | Select-Object -first 1 | select -expand FullName
 
 # Run OpenCover
 
-
-
-$OpenCoverCmd = "$($OpenCover) -register:user -target:`"$($VsTest)`" -targetargs:`"$OpenCoverLogger $DATests $APITests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverCoverageFile"
+$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test /p:DebugType=full $DATests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverDACoverageFile"
 Write-Host $OpenCoverCmd
 Invoke-Expression $OpenCoverCmd
+
+$OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test /p:DebugType=full $APITests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverAPICoverageFile"
+Write-Host $OpenCoverCmd
+Invoke-Expression $OpenCoverCmd
+
 
 # Locate coveralls
 
@@ -97,7 +98,7 @@ $CoverAlls = get-childitem "C:\Users\$($User)\.nuget\packages\" csmacnz.Coverall
 
 # Run coveralls
 
-$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverCoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
+$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
 Write-Host $CoverAllsCmd
 Invoke-Expression $CoverAllsCmd
 
