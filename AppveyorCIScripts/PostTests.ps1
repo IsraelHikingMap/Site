@@ -118,8 +118,7 @@ $CoverAlls = get-childitem "C:\Users\$($User)\.nuget\packages\" csmacnz.Coverall
 
 # Run coveralls
 
-#$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
-$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
+$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
 Write-Host $CoverAllsCmd
 Invoke-Expression $CoverAllsCmd
 
