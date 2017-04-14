@@ -41,13 +41,12 @@ Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 # Compile Typescript files
 
 $tsc = get-childitem "C:\Program Files (x86)\" tsc.exe -recurse | select-object -last 1 | select -expand FullName
-$tscCmd = "`"$($tsc) -p IsraelHiking.Web`""
-Write-Host $tscCmd
-Invoke-Expression $tscCmd
 
-$tscCmd = "`"$($tsc) -p Tests\IsraelHiking.Web.Tests`""
-Write-Host $tscCmd
-Invoke-Expression $tscCmd
+Write-Host $tsc "-p IsraelHiking.Web"
+& $tsc -p IsraelHiking.Web
+
+Write-Host $tsc "-p Tests\IsraelHiking.Web.Tests"
+& $tsc -p Tests\IsraelHiking.Web.Tests
 
 # Locate Chutzpah
 
