@@ -40,12 +40,12 @@ Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
 # Compile Typescript files
 
-$tsc = get-childitem "C:\Program Files (x86)\" tsc.exe -recurse | select-object -first 1 | select -expand FullName
-$tscCmd = "`"$($tsc)`" -p IsraelHiking.Web"
+$tsc = get-childitem "C:\Program Files (x86)\" tsc.exe -recurse | select-object -last 1 | select -expand FullName
+$tscCmd = "`"$($tsc) -p IsraelHiking.Web`""
 Write-Host $tscCmd
 Invoke-Expression $tscCmd
 
-$tscCmd = "`"$($tsc)`" -p Tests\IsraelHiking.Web.Tests"
+$tscCmd = "`"$($tsc) -p Tests\IsraelHiking.Web.Tests`""
 Write-Host $tscCmd
 Invoke-Expression $tscCmd
 
