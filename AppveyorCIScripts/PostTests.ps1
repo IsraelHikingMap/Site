@@ -35,48 +35,54 @@ if (!$env:APPVEYOR_JOB_ID)
 	$env:APPVEYOR_JOB_ID = "JobID"
 }
 
-$ChutzpahJUnitFile = "$($env:APPVEYOR_BUILD_FOLDER)\chutzpah-junit.xml"
-$ChutzpahCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-chutzpah.json"
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
-$jsFiles = get-childitem IsraelHiking.Web\wwwroot *.js -recurse | select -expand FullName
-Write-Host $jsFiles
+# Compile Typescript files
 
-$tsFiles = get-childitem IsraelHiking.Web\wwwroot *.ts -recurse | select -expand FullName
-Write-Host $tsFiles
+$tsc = get-childitem "C:\Program Files (x86)\" tsc.exe -recurse | select-object -first 1 | select -expand FullName
+$tscCmd = "$($tsc) -p IsraelHiking.Web"
+Write-Host $tscCmd
+Invoke-Expression $tscCmd
+
+$tscCmd = "$($tsc) -p Tests\IsraelHiking.Web.Tests"
+Write-Host $tscCmd
+Invoke-Expression $tscCmd
 
 # Locate Chutzpah
 
-##$Chutzpah = get-childitem "C:\Users\$($User)\.nuget\packages\" chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
-##
-### Run tests using Chutzpah and export results as JUnit format and chutzpah coveragejson for coverage
-##
-##$ChutzpahCmd = "$($Chutzpah) $($env:APPVEYOR_BUILD_FOLDER)\chutzpah.json /junit $ChutzpahJUnitFile /coverage /coveragejson $ChutzpahCoverageFile"
-##Write-Host $ChutzpahCmd
-##Invoke-Expression $ChutzpahCmd
-##
-### Upload results to AppVeyor one by one
-##$testsuites = [xml](get-content $ChutzpahJUnitFile)
-##
-##$anyFailures = $FALSE
-##foreach ($testsuite in $testsuites.testsuites.testsuite) {
-##    write-host " $($testsuite.name)"
-##    foreach ($testcase in $testsuite.testcase){
-##        $failed = $testcase.failure
-##        $time = $testsuite.time
-##        if ($testcase.time) { $time = $testcase.time }
-##        if ($failed) {
-##            write-host "Failed   $($testcase.name) $($testcase.failure.message)"
-##            Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $time
-##            $anyFailures = $TRUE
-##        }
-##        else {
-##            write-host "Passed   $($testcase.name)"
-##            Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $time
-##        }
-##    }
-##}
+$ChutzpahJUnitFile = "$($env:APPVEYOR_BUILD_FOLDER)\chutzpah-junit.xml"
+$ChutzpahCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-chutzpah.json"
+
+$Chutzpah = get-childitem "C:\Users\$($User)\.nuget\packages\" chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
+
+# Run tests using Chutzpah and export results as JUnit format and chutzpah coveragejson for coverage
+
+$ChutzpahCmd = "$($Chutzpah) $($env:APPVEYOR_BUILD_FOLDER)\chutzpah.json /junit $ChutzpahJUnitFile /coverage /coveragejson $ChutzpahCoverageFile"
+Write-Host $ChutzpahCmd
+Invoke-Expression $ChutzpahCmd
+
+# Upload results to AppVeyor one by one
+$testsuites = [xml](get-content $ChutzpahJUnitFile)
+
+$anyFailures = $FALSE
+foreach ($testsuite in $testsuites.testsuites.testsuite) {
+    write-host " $($testsuite.name)"
+    foreach ($testcase in $testsuite.testcase){
+        $failed = $testcase.failure
+        $time = $testsuite.time
+        if ($testcase.time) { $time = $testcase.time }
+        if ($failed) {
+            write-host "Failed   $($testcase.name) $($testcase.failure.message)"
+            Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $time
+            $anyFailures = $TRUE
+        }
+        else {
+            write-host "Passed   $($testcase.name)"
+            Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $time
+        }
+    }
+}
 
 # Locate Files
 
