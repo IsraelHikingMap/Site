@@ -121,6 +121,9 @@ $CoverAlls = get-childitem "C:\Users\$($User)\.nuget\packages\" csmacnz.Coverall
 $CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
 Write-Host $CoverAllsCmd
 Invoke-Expression $CoverAllsCmd
+# Running the same command twice as a workaround
+Invoke-Expression $CoverAllsCmd
+
 
 if ($anyFailures -eq $TRUE){
     write-host "Failing build as there are broken tests"
