@@ -32,8 +32,8 @@
                         lat: $scope.latLng.lat,
                         lon: $scope.latLng.lng
                     }
-                } as angular.IRequestShortcutConfig).success((northEast: INorthEast) => {
-                    $scope.itmCoordinates = northEast;
+                } as angular.IRequestShortcutConfig).then((northEast: { data: INorthEast }) => {
+                    $scope.itmCoordinates = northEast.data;
                 });
                 elevationProvider.updateHeights([$scope.latLng]);
             });

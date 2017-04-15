@@ -1,5 +1,5 @@
-﻿/// <reference path="../../../../IsraelHiking.web/wwwroot/scripts/typings/angular-gettext/angular-gettext.d.ts" />
-/// <reference path="../../../../IsraelHiking.web/wwwroot/services/ResourcesService.ts" />
+﻿/// <reference path="../../../../IsraelHiking.web/wwwroot/services/ResourcesService.ts" />
+/// <reference path="../../../../IsraelHiking.web/wwwroot/services/elevation/ielevationprovider.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/services/elevation/elevationprovider.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/common/urls.ts" />
 

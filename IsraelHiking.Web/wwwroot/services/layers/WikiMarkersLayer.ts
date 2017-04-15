@@ -88,21 +88,21 @@
                 textAlign = "text-right";
             }
             let url = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000&callback=JSON_CALLBACK`;
-            this.$http.jsonp(url).success((response: IGeoSearchWikiResponse) => {
+            this.$http.jsonp(url).then((response: { data: IGeoSearchWikiResponse }) => {
                 // Sync lists
                 this.markers.eachLayer(l => {
                     if (l instanceof L.Marker) {
                         let markerWithTitle = l as Common.IMarkerWithTitle;
-                        let geoSearchPage = _.find(response.query.geosearch, g => g.pageid.toString() === markerWithTitle.title);
+                        let geoSearchPage = _.find(response.data.query.geosearch, g => g.pageid.toString() === markerWithTitle.title);
                         if (geoSearchPage == null) {
                             this.markers.removeLayer(l);
                         } else {
-                            response.query.geosearch.splice(response.query.geosearch.indexOf(geoSearchPage), 1);
+                            response.data.query.geosearch.splice(response.data.query.geosearch.indexOf(geoSearchPage), 1);
                         }
                     }
                 });
 
-                for (let currentPage of response.query.geosearch) {
+                for (let currentPage of response.data.query.geosearch) {
 
                     let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { clickable: true, draggable: false, icon: this.wikiMarkerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
                     marker.title = currentPage.pageid.toString();
@@ -120,8 +120,8 @@
                     marker.on("popupopen", () => {
                         let popup = marker.getPopup();
                         let detailsUrl = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&pageids=${currentPage.pageid}&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1&callback=JSON_CALLBACK`;
-                        this.$http.jsonp(detailsUrl).success((detailsResponse: IWikiResponse) => {
-                            let currentDetailedPage = detailsResponse.query.pages[currentPage.pageid];
+                        this.$http.jsonp(detailsUrl).then((detailsResponse: { data: IWikiResponse }) => {
+                            let currentDetailedPage = detailsResponse.data.query.pages[currentPage.pageid];
                             let columnsClass = "col-xs-12";
                             if (currentDetailedPage.thumbnail) {
                                 columnsClass = "col-xs-8";

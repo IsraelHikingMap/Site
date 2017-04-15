@@ -28,14 +28,15 @@
             var params = isHebrew ? {} : { language: "en" };
             this.$http.get(Common.Urls.search + searchTerm, {
                 params: params
-            }).success((response: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>) => {
+            }).then((response: { data: GeoJSON.FeatureCollection<GeoJSON.GeometryObject> }) => {
                 let results = [] as ISearchResults[];
-                for (let feature of response.features) {
+                for (let feature of response.data.features) {
+                    let properties = feature.properties as any;
                     let singleResult = {
                         name: this.getName(feature, isHebrew),
                         latlngsArray: [],
-                        icon: feature.properties.icon,
-                        address: isHebrew ? feature.properties.address : feature.properties["address:en"],
+                        icon: properties.icon,
+                        address: isHebrew ? properties.address : feature.properties["address:en"],
                         feature: feature
                 } as ISearchResults;
                     try {
@@ -72,8 +73,8 @@
                                     }
                                 }
                         }
-                        if (feature.properties.lat && feature.properties.lng) {
-                            singleResult.latlng = L.latLng(feature.properties.lat, feature.properties.lng);
+                        if (properties.lat && properties.lng) {
+                            singleResult.latlng = L.latLng(properties.lat, properties.lng);
                         }
                         let geo = L.geoJson(feature);
                         singleResult.bounds = geo.getBounds();
@@ -86,7 +87,7 @@
                     }
                 }
                 deferred.resolve(results);
-            }).error((err) => {
+            }, (err) => {
                 deferred.reject(err);
             });
 
@@ -94,9 +95,10 @@
         }
 
         private getName(feature: GeoJSON.Feature<GeoJSON.GeometryObject>, isHebrew: boolean): string {
+            let properties = feature.properties as any;
             let name = isHebrew
-                ? feature.properties.name || feature.properties["name:he"]
-                : feature.properties["name:en"] || feature.properties.name;
+                ? properties.name || feature.properties["name:he"]
+                : feature.properties["name:en"] || properties.name;
             if (name) {
                 return name;
             }

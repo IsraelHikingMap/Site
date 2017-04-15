@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../IsraelHiking.web/wwwroot/scripts/typings/ng-file-upload/ng-file-upload.d.ts" />
-/// <reference path="../../../IsraelHiking.web/wwwroot/common/Strings.ts" />
+﻿/// <reference path="../../../IsraelHiking.web/wwwroot/common/Strings.ts" />
 /// <reference path="../../../IsraelHiking.web/wwwroot/services/fileservice.ts" />
 
 namespace IsraelHiking.Tests.Services {

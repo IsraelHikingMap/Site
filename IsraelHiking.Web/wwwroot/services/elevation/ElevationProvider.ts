@@ -25,14 +25,15 @@
             if (filteredArray.length === 0) {
                 return;
             }
-            return this.$http.get(Common.Urls.elevation, { params: { points: points.join("|") } } as angular.IRequestShortcutConfig)
-                .success((data: number[]) => {
+            let promise = this.$http.get(Common.Urls.elevation, { params: { points: points.join("|") } } as angular.IRequestShortcutConfig);
+            promise.then((response: { data: number[] }) => {
                     for (let index = 0; index < filteredArray.length; index++) {
-                        filteredArray[index].z = data[index];
+                        filteredArray[index].z = response.data[index];
                     }
-                }).error(() => {
+                }, () => {
                     this.toastr.error(this.resourcesService.unableToGetElevationData);
                 });
+            return promise;
         }
     }
 }

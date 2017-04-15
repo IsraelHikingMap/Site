@@ -1,4 +1,8 @@
 ﻿declare var osmAuth: Function;
+declare class X2JS {
+    xml2json: Function;
+    parseXmlString: Function;
+}
 
 namespace IsraelHiking.Services {
 
@@ -22,7 +26,7 @@ namespace IsraelHiking.Services {
         public static AUTHORIZATION_DATA_KEY = "OSMAuthorizationToken";
 
         private oauth;
-        private x2Js: IX2JS;
+        private x2Js: X2JS;
         private $q: angular.IQService;
         private $http: angular.IHttpService;
         private localStorageService: angular.local.storage.ILocalStorageService;

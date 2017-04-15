@@ -79,9 +79,9 @@
             $scope.open = (file: File) => {
                 if (!file)
                     return;
-                fileService.openFromFile(file).success((dataContainer: Common.DataContainer) => {
-                    layersService.setJsonData(dataContainer);
-                }).error(() => {
+                fileService.openFromFile(file).then((dataContainer: { data: Common.DataContainer }) => {
+                    layersService.setJsonData(dataContainer.data);
+                }, () => {
                     toastr.error($scope.resources.unableToLoadFromFile);
                 });
             }

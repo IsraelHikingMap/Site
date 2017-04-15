@@ -136,11 +136,12 @@
                 return "success";
             }
 
-            $scope.showTrace = (trace: Services.ITrace): angular.IPromise<{}> => {
+            $scope.showTrace = (trace: Services.ITrace): angular.IHttpPromise<Common.DataContainer> => {
                 this.modalInstnace.close();
-                return fileService.openFromUrl(trace.dataUrl).success((dataContainer) => {
+                let promise = fileService.openFromUrl(trace.dataUrl);
+                promise.then((resposnse) => {
                     this.osmTraceLayer.clearLayers();
-                    for (let route of dataContainer.routes) {
+                    for (let route of resposnse.data.routes) {
                         for (let segment of route.segments) {
                             let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
                             this.osmTraceLayer.addLayer(polyLine);
@@ -152,7 +153,7 @@
                             this.osmTraceLayer.addLayer(marker);
                         }
                     }
-                    let bounds = L.latLngBounds(dataContainer.southWest, dataContainer.northEast);
+                    let bounds = L.latLngBounds(resposnse.data.southWest, resposnse.data.northEast);
                     let mainMarker = L.marker(bounds.getCenter(), { icon: Services.IconsService.createTraceMarkerIcon(), draggable: false }) as Common.IMarkerWithTitle; // marker to allow remove of this layer.
                     mainMarker.title = trace.fileName;
                     let newScope = $scope.$new() as ISearchResultsMarkerPopupScope;
@@ -161,19 +162,20 @@
                         this.osmTraceLayer.clearLayers();
                     }
                     newScope.convertToRoute = () => {
-                        layersService.setJsonData(dataContainer);
+                        layersService.setJsonData(resposnse.data);
                         this.osmTraceLayer.clearLayers();
                     }
                     mainMarker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
                     this.osmTraceLayer.addLayer(mainMarker);
                     this.fitBoundsService.fitBounds(bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
                 });
+                return promise;
             }
 
             $scope.editTrace = (trace: Services.ITrace) => {
                 this.modalInstnace.close();
-                fileService.openFromUrl(trace.dataUrl).success((dataContainer) => {
-                    layersService.setJsonData(dataContainer);
+                fileService.openFromUrl(trace.dataUrl).then((response) => {
+                    layersService.setJsonData(response.data);
                 });
             }
 

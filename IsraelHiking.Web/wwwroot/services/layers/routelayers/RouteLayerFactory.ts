@@ -50,8 +50,8 @@
             this.routerService = routerService;
             this.snappingService = snappingService;
             this.elevationProvider = elevationProvider;
-            $http.get(Common.Urls.colors).success((colors: string[]) => {
-                RouteLayerFactory.COLORS.splice(0, RouteLayerFactory.COLORS.length, ...colors);
+            $http.get(Common.Urls.colors).then((colors: { data: string[] }) => {
+                RouteLayerFactory.COLORS.splice(0, RouteLayerFactory.COLORS.length, ...colors.data);
             });
         }
 

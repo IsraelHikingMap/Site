@@ -59,14 +59,14 @@
                     northEast: bounds.getNorthEast().lat + "," + bounds.getNorthEast().lng,
                     southWest: bounds.getSouthWest().lat + "," + bounds.getSouthWest().lng
                 }
-            }).success((features: GeoJSON.Feature<GeoJSON.GeometryObject>[]) => {
+            }).then((features: { data: GeoJSON.Feature<GeoJSON.GeometryObject>[] }) => {
                 let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.boundsString === boundsString);
                 if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                     this.requestsQueue.splice(0, this.requestsQueue.length - 1);
                     return;
                 }
                 this.snappings.clearLayers();
-                for (let feature of features) {
+                for (let feature of features.data) {
                     switch (feature.geometry.type) {
                     case Strings.GeoJson.lineString:
                         var lineString = feature.geometry as GeoJSON.LineString;
@@ -81,7 +81,7 @@
                 }
 
                 this.requestsQueue.splice(0);
-            }).error(() => {
+            }, () => {
                 this.toastr.warning(this.resourcesService.unableToGetDataForSnapping);
                 this.snappings.clearLayers();
             });

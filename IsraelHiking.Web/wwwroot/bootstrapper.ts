@@ -33,9 +33,6 @@
     app.service(Strings.Services.localSearchResultsProvider, [Strings.Angular.http, Strings.Angular.q,
         ($http: angular.IHttpService, $q: angular.IQService) =>
             new Services.Search.LocalSearchResultsProvider($http, $q)]);
-    app.service(Strings.Services.microsoftElevationProvider, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.toastr,
-        ($http: angular.IHttpService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
-            new Services.Elevation.MicrosoftElevationProvider($http, resourcesService, toastr)]);
     app.service(Strings.Services.elevationProvider, [Strings.Angular.http, Strings.Services.resourcesService, Strings.Services.toastr,
         ($http: angular.IHttpService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
             new Services.Elevation.ElevationProvider($http, resourcesService, toastr)]);

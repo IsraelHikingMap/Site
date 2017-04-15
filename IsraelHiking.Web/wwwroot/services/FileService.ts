@@ -18,11 +18,12 @@
             this.fileSaver = fileSaver;
         }
 
-        public saveToFile = (fileName: string, format:string, dataContainer: Common.DataContainer): angular.IPromise<{}> => {
-            return this.$http.post(Common.Urls.files + "?format=" + format, dataContainer)
-                .success((responseData) => {
-                    this.saveBytesResponseToFile(responseData, fileName);
-                });
+        public saveToFile = (fileName: string, format: string, dataContainer: Common.DataContainer): angular.IHttpPromise<{}> => {
+            let promise = this.$http.post(Common.Urls.files + "?format=" + format, dataContainer);
+            promise.then((responseData: { data: any }) => {
+                this.saveBytesResponseToFile(responseData.data, fileName);
+            });
+            return promise;
         }
 
         public openFromFile = (file: File): angular.IHttpPromise<Common.DataContainer> => {

@@ -27,9 +27,9 @@
                 if (files && files.length > 0) {
                     $timeout(() => {
                         for (let file of files) {
-                            fileService.openFromFile(file).success((dataContainer: Common.DataContainer) => {
-                                layersService.setJsonData(dataContainer);
-                            }).error(() => {
+                            fileService.openFromFile(file).then((dataContainer) => {
+                                layersService.setJsonData(dataContainer.data);
+                            }, () => {
                                 toastr.error(resourcesService.unableToLoadFromFile + `: ${file.name}`);
                             });
                         }
@@ -39,9 +39,9 @@
 
                 let url = transferData.getData("text");
                 if (url) {
-                    fileService.openFromUrl(url).success((dataContainer: Common.DataContainer) => {
-                        layersService.setJsonData(dataContainer);
-                    }).error(() => {
+                    fileService.openFromUrl(url).then((dataContainer) => {
+                        layersService.setJsonData(dataContainer.data);
+                    }, () => {
                         toastr.error(resourcesService.unableToLoadFromUrl + `: ${url}`);
                     });
                 }

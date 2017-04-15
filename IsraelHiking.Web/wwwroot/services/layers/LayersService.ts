@@ -312,14 +312,14 @@ namespace IsraelHiking.Services.Layers {
             this.initializationPromise = deferred.promise;
             if (this.hashService.siteUrl) {
                 this.$http.get(Common.Urls.urls + this.hashService.siteUrl)
-                    .success((siteUrl: Common.SiteUrl) => {
-                        let data = JSON.parse(siteUrl.jsonData) as Common.DataContainer;
+                    .then((response: { data: Common.SiteUrl }) => {
+                        let data = JSON.parse(response.data.jsonData) as Common.DataContainer;
                         this.setJsonData(data);
                         this.addOverlaysFromHash(data.overlays);
                         this.hashService.clear();
-                        this.toastr.info(siteUrl.description, siteUrl.title);
+                        this.toastr.info(response.data.description, response.data.title);
                         deferred.resolve();
-                    }).error(() => {
+                    }, () => {
                         let data = this.hashService.getDataContainer();
                         this.setData(data, true);
                         this.addBaseLayerFromHash(data.baseLayer);
@@ -332,9 +332,9 @@ namespace IsraelHiking.Services.Layers {
             }
             if (this.hashService.externalUrl) {
                 this.fileService.openFromUrl(this.hashService.externalUrl)
-                    .success((dataContainer: Common.DataContainer) => {
-                        dataContainer.baseLayer = this.hashService.getDataContainer().baseLayer;
-                        this.setJsonData(dataContainer);
+                    .then((response: { data: Common.DataContainer }) => {
+                        response.data.baseLayer = this.hashService.getDataContainer().baseLayer;
+                        this.setJsonData(response.data);
                         deferred.resolve();
                     });
             } else {

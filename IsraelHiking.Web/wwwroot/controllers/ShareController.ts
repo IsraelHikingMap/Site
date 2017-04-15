@@ -133,15 +133,15 @@
                     jsonData: JSON.stringify(dataToSave),
                     osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
                 } as Common.SiteUrl;
-                $http.post(Common.Urls.urls, siteUrl).success((siteUrlResponse: Common.SiteUrl) => {
-                    $scope.siteUrlId = siteUrlResponse.id;
-                    $scope.shareAddress = osmUserService.getUrlFromSiteUrlId(siteUrlResponse);
-                    $scope.imageUrl = osmUserService.getImageFromSiteUrlId(siteUrlResponse);
+                $http.post(Common.Urls.urls, siteUrl).then((siteUrlResponse: { data: Common.SiteUrl }) => {
+                    $scope.siteUrlId = siteUrlResponse.data.id;
+                    $scope.shareAddress = osmUserService.getUrlFromSiteUrlId(siteUrlResponse.data);
+                    $scope.imageUrl = osmUserService.getImageFromSiteUrlId(siteUrlResponse.data);
                     let escaped = ($window as any).encodeURIComponent($scope.shareAddress);
                     $scope.whatappShareAddress = `whatsapp://send?text=${escaped}`;
                     $scope.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
                     $scope.embedText = this.getEmbedText($scope);
-                }).error(() => {
+                }, () => {
                     toastr.error($scope.resources.unableToGenerateUrl);
                 }).finally(() => {
                     $scope.isLoading = false;

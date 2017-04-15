@@ -39,7 +39,6 @@
         export const layersService = "layersService";
         export const snappingService = "snappingService";
         export const fileService = "fileService";
-        export const microsoftElevationProvider = "microsoftElevationProvider";
         export const elevationProvider = "elevationProvider";
         export const fileSaver = "FileSaver";
         export const sidebarService = "sidebarService";

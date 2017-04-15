@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../israelhiking.web/wwwroot/scripts/typings/x2js/xml2json.d.ts" />
-/// <reference path="../../../israelhiking.web/wwwroot/services/OsmUserService.ts" />
+﻿/// <reference path="../../../israelhiking.web/wwwroot/services/OsmUserService.ts" />
 
 namespace IsraelHiking.Tests.Services {
     describe("OSM User Service", () => {

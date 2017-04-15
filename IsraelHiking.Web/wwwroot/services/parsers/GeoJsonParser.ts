@@ -19,36 +19,37 @@
             let leaftletGeoJson = L.geoJson(geoJson, {
                 onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
                     let routeData = null;
+                    let name = (feature.properties as any).name;
                     switch (feature.geometry.type) {
                         case Strings.GeoJson.point:
                             var point = feature.geometry as GeoJSON.Point;
-                            var marker = this.createMarker(point.coordinates, feature.properties.name);
+                            var marker = this.createMarker(point.coordinates, name);
                             markers.push(marker);
                             break;
                         case Strings.GeoJson.multiPoint:
                             var points = feature.geometry as GeoJSON.MultiPoint;
                             for (let pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
-                                let marker = this.createMarker(points.coordinates[pointIndex], feature.properties.name);
+                                let marker = this.createMarker(points.coordinates[pointIndex], name);
                                 markers.push(marker);
                             }
                             break;
                         case Strings.GeoJson.lineString:
                             var lineString = feature.geometry as GeoJSON.LineString;
-                            routeData = this.positionsToData(lineString.coordinates, feature.properties.name);
+                            routeData = this.positionsToData(lineString.coordinates, name);
                             break;
                         case Strings.GeoJson.multiLineString:
                             var multiLineString = feature.geometry as GeoJSON.MultiLineString;
-                            routeData = this.coordinatesArrayToData(multiLineString.coordinates, feature.properties.name);
+                            routeData = this.coordinatesArrayToData(multiLineString.coordinates, name);
                             break;
                         case Strings.GeoJson.polygon:
                             var polygone = feature.geometry as GeoJSON.Polygon;
-                            routeData = this.coordinatesArrayToData(polygone.coordinates, feature.properties.name);
+                            routeData = this.coordinatesArrayToData(polygone.coordinates, name);
                             break;
                         case Strings.GeoJson.multiPolygon:
                             var multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
-                            routeData = ({ name: feature.properties.name || "", segments: [] } as Common.RouteData);
+                            routeData = ({ name: name || "", segments: [] } as Common.RouteData);
                             for (let polygoneCoordinates of multiPolygone.coordinates) {
-                                let route = this.coordinatesArrayToData(polygoneCoordinates, feature.properties.name);
+                                let route = this.coordinatesArrayToData(polygoneCoordinates, name);
                                 routeData.segments = routeData.segments.concat(route.segments);
                             }
                             break;

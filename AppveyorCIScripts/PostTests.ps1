@@ -40,7 +40,7 @@ Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
 # Compile Typescript files
 
-$tsc = get-childitem "C:\Program Files (x86)\" tsc.exe -recurse | select-object -last 1 | select -expand FullName
+$tsc = get-childitem "C:\Users\$($User)\.nuget\packages\" tsc.exe -recurse | select-object -last 1 | select -expand FullName
 
 Write-Host $tsc "-p IsraelHiking.Web"
 & $tsc -p IsraelHiking.Web

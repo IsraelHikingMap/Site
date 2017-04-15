@@ -1,11 +1,7 @@
 ﻿/// <reference path="mapservicemockcreator.ts" />
 /// <reference path="../../../israelhiking.web/wwwroot/services/mapservice.ts" />
-/// <reference path="../../../israelhiking.Web/wwwroot/scripts/typings/angularjs/angular-mocks.d.ts" />
-/// <reference path="../../../israelhiking.web/wwwroot/scripts/typings/lodash/lodash.d.ts" />
 /// <reference path="../../../israelhiking.web/wwwroot/services/snappingservice.ts" />
 /// <reference path="../../../israelhiking.web/wwwroot/services/objectwithmap.ts" />
-/// <reference path="../../../israelhiking.Web/wwwroot/scripts/typings/toastr/toastr.d.ts" />
-/// <reference path="../../../israelhiking.Web/wwwroot/scripts/typings/geojson/geojson.d.ts" />
 
 namespace IsraelHiking.Tests.Services {
     describe("Snapping Service", () => {
@@ -18,7 +14,7 @@ namespace IsraelHiking.Tests.Services {
             angular.mock.module("toastr");
             angular.mock.module("LocalStorageModule");
             angular.mock.module("gettext");
-            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$document_: angular.IDocumentService, _localStorageService_: angular.local.storage.ILocalStorageService, _gettextCatalog_: angular.gettext.gettextCatalog, _toastr_:  Toastr) => {
+            angular.mock.inject((_$http_: angular.IHttpService, _$httpBackend_: angular.IHttpBackendService, _$document_: angular.IDocumentService, _localStorageService_: angular.local.storage.ILocalStorageService, _gettextCatalog_: angular.gettext.gettextCatalog, _toastr_: Toastr) => {
                 // The injector unwraps the underscores (_) from around the parameter names when matching
                 $http = _$http_;
                 $httpBackend = _$httpBackend_;

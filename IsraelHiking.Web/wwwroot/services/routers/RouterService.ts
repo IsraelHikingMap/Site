@@ -24,11 +24,11 @@
             var address = Common.Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng + "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
             var deferred = this.$q.defer();
             this.$http.get(address, { timeout: 4500 } as angular.IRequestShortcutConfig)
-                .success((geojson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>) => {
+                .then((geojson: { data: GeoJSON.FeatureCollection<GeoJSON.GeometryObject> }) => {
                     var failed = false;
                     let data = null;
                     try {
-                        data = this.geojsonParser.toDataContainer(geojson);
+                        data = this.geojsonParser.toDataContainer(geojson.data);
                     } catch (err) {
                         failed = true;
                     }
@@ -40,7 +40,7 @@
                     } else {
                         deferred.resolve(data.routes[0].segments);
                     }
-                }).error(() => {
+                }, () => {
                     this.toastr.error(this.resourcesService.routingFailed + ` ${latlngStart} => ${latlngEnd}`);
                     this.noneRouter.getRoute(latlngStart, latlngEnd).then((data) => {
                         deferred.resolve(data);

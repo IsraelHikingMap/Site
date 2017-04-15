@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../../IsraelHiking.web/wwwroot/scripts/typings/geojson/geojson.d.ts" />
-/// <reference path="../../../../IsraelHiking.web/wwwroot/common/israelhiking.d.ts" />
+﻿/// <reference path="../../../../IsraelHiking.web/wwwroot/common/israelhiking.d.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/services/parsers/geojsonparser.ts" />
 
 namespace IsraelHiking.Tests.Services.Parsers {

@@ -59,6 +59,7 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.1.0" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.1" />
+    <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="2.2.2" />
     <PackageReference Include="NEST" Version="5.2.0" />
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre3" />
     <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-IHM" />

@@ -1,5 +1,4 @@
-﻿/// <reference path="../../../../israelhiking.web/wwwroot/scripts/typings/leaflet-markercluster/leaflet-markercluster.d.ts" />
-/// <reference path="../mapservicemockcreator.ts" />
+﻿/// <reference path="../mapservicemockcreator.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/services/objectwithmap.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/services/iconsservice.ts" />
 /// <reference path="../../../../IsraelHiking.web/wwwroot/services/layers/WikiMarkersLayer.ts" />
