@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.0
+VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.Web", "IsraelHiking.Web\IsraelHiking.Web.csproj", "{69BFA742-B354-4493-8C9B-794C8CD14214}"
 EndProject
@@ -30,7 +30,16 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IsraelHiking.Updater", "Isr
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.Web.Tests", "Tests\IsraelHiking.Web.Tests\IsraelHiking.Web.Tests.csproj", "{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}"
 EndProject
-Project("{F5034706-568F-408A-B7B3-4D38C6DB8A32}") = "AppveyorCIScripts", "AppveyorCIScripts\AppveyorCIScripts.pssproj", "{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "build", "build", "{3585675D-C9A0-4E48-A11D-4B9E789A0B0A}"
+	ProjectSection(SolutionItems) = preProject
+		build\BuildTypescript.ps1 = build\BuildTypescript.ps1
+		build\PostBuildTests.ps1 = build\PostBuildTests.ps1
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{3E9EFE32-6A08-4960-AD00-83AC5FEAB259}"
+	ProjectSection(SolutionItems) = preProject
+		docs\faq.md = docs\faq.md
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -150,18 +159,6 @@ Global
 		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Release|x64.Build.0 = Release|Any CPU
 		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Release|x86.ActiveCfg = Release|Any CPU
 		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Release|x86.Build.0 = Release|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|x64.Build.0 = Debug|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Debug|x86.Build.0 = Debug|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x64.ActiveCfg = Release|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x64.Build.0 = Release|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x86.ActiveCfg = Release|Any CPU
-		{6CAFC0C6-A428-4D30-A9F9-700E829FEA51}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -170,5 +167,7 @@ Global
 		{8CDCB151-DBAF-4E19-804E-C0FB26A2B12B} = {F72D33D1-176B-4BC5-851A-F71C1ABA74D9}
 		{32A771F8-7A45-4359-9E22-B3CF5155C9A8} = {F72D33D1-176B-4BC5-851A-F71C1ABA74D9}
 		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38} = {F72D33D1-176B-4BC5-851A-F71C1ABA74D9}
+		{3585675D-C9A0-4E48-A11D-4B9E789A0B0A} = {F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}
+		{3E9EFE32-6A08-4960-AD00-83AC5FEAB259} = {F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}
 	EndGlobalSection
 EndGlobal

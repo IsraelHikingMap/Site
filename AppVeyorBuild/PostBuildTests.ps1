@@ -1,16 +1,9 @@
-﻿$BreakPoints =  Get-PSBreakpoint
-$User = "appveyor"
-if ($BreakPoints)
-{
-	# set a breakpoint anywhere in the file to run this locally...
-	$User = "harel"
-}
-
-# for debug, in case it is not ran from appveyor CI system:
+﻿# for debug, in case it is not ran from appveyor CI system:
 if (!$env:APPVEYOR_BUILD_FOLDER) {
 	$scriptPath = split-path -parent $MyInvocation.MyCommand.Definition
 	$env:APPVEYOR_BUILD_FOLDER = (get-item $scriptPath).parent.FullName
 }
+
 if (!$env:COVERALLS_REPO_TOKEN) {
 	$env:COVERALLS_REPO_TOKEN = "w3WvP9CEZ5M23oBONNsalxIgEzOmBwo9f"
 }
@@ -35,25 +28,14 @@ if (!$env:APPVEYOR_JOB_ID)
 	$env:APPVEYOR_JOB_ID = "JobID"
 }
 
-
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
-
-# Compile Typescript files
-
-$tsc = get-childitem "C:\Users\$($User)\.nuget\packages\" tsc.exe -recurse | select-object -last 1 | select -expand FullName
-
-Write-Host $tsc "-p IsraelHiking.Web"
-& $tsc -p IsraelHiking.Web
-
-Write-Host $tsc "-p Tests\IsraelHiking.Web.Tests"
-& $tsc -p Tests\IsraelHiking.Web.Tests
 
 # Locate Chutzpah
 
 $ChutzpahJUnitFile = "$($env:APPVEYOR_BUILD_FOLDER)\chutzpah-junit.xml"
 $ChutzpahCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-chutzpah.json"
 
-$Chutzpah = get-childitem "C:\Users\$($User)\.nuget\packages\" chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
+$Chutzpah = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
 
 # Run tests using Chutzpah and export results as JUnit format and chutzpah coveragejson for coverage
 
@@ -85,7 +67,7 @@ foreach ($testsuite in $testsuites.testsuites.testsuite) {
 
 # Locate Files
 
-$OpenCover = get-ChildItem "C:\Users\$($User)\.nuget\packages\" OpenCover.Console.exe -recurse | select-object -first 1 | select -expand FullName
+$OpenCover = get-ChildItem "C:\Users\$($env:UserName)\.nuget\packages\" OpenCover.Console.exe -recurse | select-object -first 1 | select -expand FullName
 $dotnet = get-childitem "C:\Program Files\dotnet\" dotnet.exe -recurse | Select-Object -first 1 | select -expand FullName
 $DATests = get-ChildItem IsraelHiking.DataAccess.Tests.csproj -recurse | Select-Object -first 1 | select -expand FullName
 $APITests = get-ChildItem IsraelHiking.API.Tests.csproj -recurse | Select-Object -first 1 | select -expand FullName
@@ -114,7 +96,7 @@ $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_J
 
 # Locate coveralls
 
-$CoverAlls = get-childitem "C:\Users\$($User)\.nuget\packages\" csmacnz.Coveralls.exe -recurse | select-object -first 1 | select -expand FullName
+$CoverAlls = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" csmacnz.Coveralls.exe -recurse | select-object -first 1 | select -expand FullName
 
 # Run coveralls
 
