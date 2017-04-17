@@ -101,6 +101,9 @@
             } as ISnappingResponse;
 
             options.layers.eachLayer((polyline) => {
+                if (!(polyline instanceof L.Polyline)) {
+                    return;
+                }
                 var latlngs = polyline.getLatLngs();
                 if (latlngs.length <= 1) {
                     return;

@@ -68,15 +68,29 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             for (let marker of this.context.route.markers) {
                 this.readOnlyLayers.addLayer(this.createPoiMarker(marker, false));
             }
+            this.context.map.on("mousemove", this.onMouseMove);
         }
 
         public clear() {
+            this.context.map.off("mousemove", this.onMouseMove);
             this.readOnlyLayers.clearLayers();
             this.context.map.removeLayer(this.readOnlyLayers);
         }
 
         public getEditMode(): EditMode {
             return EditModeString.none;
+        }
+
+        private onMouseMove = (e: L.LeafletMouseEvent): void => {
+            let response = this.context.snappingService.snapTo(e.latlng, {
+                sensitivity: 10,
+                layers: this.readOnlyLayers
+            } as ISnappingOptions);
+            if (response.polyline == null) {
+                this.context.polylineHoverEvent.raiseEvent(null);
+            } else {
+                this.context.polylineHoverEvent.raiseEvent(response.latlng);
+            }
         }
     }
 }

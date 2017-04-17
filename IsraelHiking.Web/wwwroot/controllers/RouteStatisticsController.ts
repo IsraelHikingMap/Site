@@ -266,12 +266,24 @@
 
         private showChartHover(point: Services.IRouteStatisticsPoint) {
             this.hideChartHover();
-            // HM TODO: better syling? support shrinking? handle left most hover, increase width for english
             let offsetX = this.layoutInterface.getXLocation(point.x);
             let tooltip = this.getChartTooltip(point);
-            tooltip.css({ position: "absolute", left: (offsetX + 20) + "px", top: (this.chartSvg.height() / 3) + "px", width: "130px", height: "80px" })
-            let chartContainer = angular.element(".route-statistics-chart");
-            chartContainer.append(tooltip);
+            let tooltipCss = {
+                position: "absolute",
+                width: "140px",
+                height: "70px",
+                top: "5px"
+            } as any;
+            if (offsetX < this.chartSvg.width() / 2) {
+                tooltipCss.left = (offsetX + 20) + "px";
+            } else {
+                tooltipCss.left = (offsetX - 30 - 140) + "px";
+            }
+            tooltip.css(tooltipCss);
+            if (this.chartSvg.height() > 80) {
+                let chartContainer = angular.element(".route-statistics-chart");
+                chartContainer.append(tooltip);
+            }
             this.hoverLine.setAttribute("x", offsetX);
             this.chartSvg[0].appendChild(this.hoverLine);
         }
@@ -339,6 +351,7 @@
                 legend: "none",
                 curveType: "function",
                 intervals: { style: "area" },
+                enableInteractivity: false,
                 tooltip: {
                     trigger: "none"
                 },
