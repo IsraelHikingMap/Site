@@ -13,12 +13,6 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             routePathOptions.dashArray = "30 10";
             routePathOptions.className = "segment-readonly-indicator";
             let polyline = L.polyline(latlngzs, routePathOptions);
-            polyline.on("mouseover", (e: L.LeafletMouseEvent) => {
-                this.context.polylineHoverEvent.raiseEvent(e.latlng);
-            });
-            polyline.on("mouseout", () => {
-                this.context.polylineHoverEvent.raiseEvent(null);
-            });
             this.readOnlyLayers.addLayer(polyline);
         }
 
