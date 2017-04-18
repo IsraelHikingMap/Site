@@ -31,7 +31,7 @@
         <br />
         <div class="row">
             <div class="col-md-12 col-xs-12">
-                <a ng-href="{{getDownloadUrl(app, mapType, zoom)}}" class="btn btn-success btn-block" analytics-on="click" analytics-category="Download" analytics-event="Download offline map"><i class="fa fa-download fa-lg"></i> {{resources.startDownload}}</a>
+                <a ng-href="{{getDownloadUrl(app, mapType, zoom)}}" class="btn btn-success btn-block" analytics-on="click" analytics-category="Download" analytics-event="Download offline map {{app}} {{mapType}} {{zoom}}"><i class="fa fa-download fa-lg"></i> {{resources.startDownload}}</a>
             </div>
         </div>
         <h4>{{resources.installationInstructions}}</h4>

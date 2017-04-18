@@ -1,5 +1,5 @@
 ﻿<div class="leaflet-bar" ng-hide="isShowingSaveAs">
-    <a class="cursor-pointer" ng-click="toggleSaveAs($event)" uib-tooltip="{{resources.saveAs}}" tooltip-placement="right" tooltip-append-to-body="true" analytics-on="click" analytics-category="Save as" analytics-event="Save as open"><i class="fa icon-save-as fa-lg"></i></a>
+    <a class="cursor-pointer" ng-click="toggleSaveAs($event)" uib-tooltip="{{resources.saveAs}}" tooltip-placement="right" tooltip-append-to-body="true" analytics-on="click" analytics-category="Files" analytics-event="Save as open"><i class="fa icon-save-as fa-lg"></i></a>
 </div>
 
 <div class="leaflet-bar" ng-show="isShowingSaveAs">
@@ -9,11 +9,11 @@
             {{selectedFormat.label}}
         </button>
         <ul class="dropdown-menu dropdown-list" uib-dropdown-menu disable-map-movement dir="ltr">
-            <li ng-repeat="format in formats" class="dropdown-item cursor-pointer" ng-click="saveAs(format, $event)" analytics-on="click" analytics-category="Save as" analytics-event="Save as {{format.outputFormat}}">
+            <li ng-repeat="format in formats" class="dropdown-item cursor-pointer" ng-click="saveAs(format, $event)" analytics-on="click" analytics-category="Files" analytics-event="Save as {{format.outputFormat}}">
                 {{format.label}}
             </li>
         </ul>
     </div>
 
-    <a class="cursor-pointer save-as-button" ng-click="toggleSaveAs($event)" analytics-on="click" analytics-category="Save as" analytics-event="Save as close"><i class="fa icon-save-as fa-lg"></i></a>
+    <a class="cursor-pointer save-as-button" ng-click="toggleSaveAs($event)" analytics-on="click" analytics-category="Files" analytics-event="Save as close"><i class="fa icon-save-as fa-lg"></i></a>
 </div>

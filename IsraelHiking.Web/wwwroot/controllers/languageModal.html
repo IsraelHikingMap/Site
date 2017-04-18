@@ -7,12 +7,12 @@
         <div class="modal-body">
             <div class="row" ng-repeat="language in resources.availableLanguages">
                 <div class="col-xs-12">
-                    <span class="cursor-pointer" ng-click="setSelectredLanguage(language)"><span class="fa fa-lg" ng-class="{'fa-check-circle': selectedLanguage.code == language.code, 'fa-circle-o': selectedLanguage.code != language.code}"></span> {{language.label}}</span>
+                    <span class="cursor-pointer" ng-click="setSelectredLanguage(language)" analytics-on="click" analytics-category="Language" analytics-event="Select language {{language.code}}"><span class="fa fa-lg" ng-class="{'fa-check-circle': selectedLanguage.code == language.code, 'fa-circle-o': selectedLanguage.code != language.code}"></span> {{language.label}}</span>
                 </div>
             </div>
         </div>
         <div class="modal-footer">
-            <button type="submit" class="btn btn-success">{{resources.save}}</button>
+            <button type="submit" class="btn btn-success" analytics-on="click" analytics-category="Language" analytics-event="Save language {{language.code}}">{{resources.save}}</button>
         </div>
     </form>
 </div>

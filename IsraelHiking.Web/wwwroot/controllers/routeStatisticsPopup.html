@@ -9,6 +9,6 @@
     </div>
     <div google-chart chart="chart" class="route-statistics-chart" agc-on-ready="onChartReady(chartWrapper)"></div>
     <div class="route-statistics-footer">
-        <a class="btn btn-default btn-xs" ng-click="toggleKmMarker($event)" ng-class="{active: isKmMarkersOn}" analytics-on="click" analytics-event="Toggle KM markers"><i class="fa fa-map-marker"></i></a> {{resources.kmPoi}}
+        <a class="btn btn-default btn-xs" ng-click="toggleKmMarker($event)" ng-class="{active: isKmMarkersOn}" analytics-on="click" analytics-category="Route statistics" analytics-event="Toggle KM markers"><i class="fa fa-map-marker"></i></a> {{resources.kmPoi}}
     </div>
 </div>
