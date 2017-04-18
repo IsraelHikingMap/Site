@@ -27,6 +27,10 @@
     width: 100%;
 }
 
+    .route-statistics-chart svg * {
+        pointer-events: none;
+    }
+
 .chart-tooltip {
     color: black;
     text-align: left;
