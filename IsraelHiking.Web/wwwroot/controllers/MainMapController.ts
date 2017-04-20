@@ -87,7 +87,7 @@ namespace IsraelHiking.Controllers {
             this.createContorl($scope, "language-control", "topright");
             this.createContorl($scope, "route-statistics-control", "bottomright");
 
-            L.control.scale({ imperial: false } as L.ScaleOptions).addTo(this.map);
+            L.control.scale({ imperial: false } as L.Control.ScaleOptions).addTo(this.map);
         }
 
         /**
@@ -96,7 +96,7 @@ namespace IsraelHiking.Controllers {
          * @param directiveHtmlName - the dricetive html string
          * @param position - the position to place the control: topleft/topright/bottomleft/bottomright
          */
-        private createContorl($scope: angular.IRootScopeService, directiveHtmlName: string, position: L.PositionString = "topleft", hiddenOnMoblie = false) {
+        private createContorl($scope: angular.IRootScopeService, directiveHtmlName: string, position: L.ControlPosition = "topleft", hiddenOnMoblie = false) {
             var control = L.Control.extend({
                 options: {
                     position: position
@@ -113,7 +113,7 @@ namespace IsraelHiking.Controllers {
                     return controlDiv[0];
                 },
                 onRemove: () => { }
-            } as L.ClassExtendOptions);
+            } as L.ControlOptions);
             new control().addTo(this.map);
         }
     }

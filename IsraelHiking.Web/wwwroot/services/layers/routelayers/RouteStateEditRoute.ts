@@ -6,7 +6,7 @@
             this.hoverHandler.setRouteHover(true);
         }
 
-        protected addPoint(e: L.LeafletMouseEvent): void {
+        protected addPoint(e: L.MouseEvent): void {
             let snappingResponse = this.context.snappingService.snapTo(e.latlng);
             this.addPointToRoute(snappingResponse.latlng, this.context.route.properties.currentRoutingType).then(() => {
                 this.context.dataChanged();

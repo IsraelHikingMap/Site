@@ -38,17 +38,14 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             {
                 draggable: isEditable,
                 clickable: isEditable,
+                keyboard: false,
                 riseOnHover: true,
                 icon: IconsService.createMarkerIconWithColorAndType(pathOptions.color, markerData.type),
                 opacity: pathOptions.opacity
             } as L.MarkerOptions) as Common.IMarkerWithTitle;
-            marker.title = markerData.title || "";
             let color = this.context.getRouteProperties().pathOptions.color;
-            marker.bindLabel(this.context.getHtmlTitle(marker.title, color), { noHide: true, className: `marker-label` } as L.LabelOptions);
+            Services.MapService.setMarkerTitle(marker, markerData.title, color);
             marker.addTo(this.context.map);
-            if (!marker.title) { // must be after adding to map...
-                marker.hideLabel();
-            }
             return marker;
         }
     }

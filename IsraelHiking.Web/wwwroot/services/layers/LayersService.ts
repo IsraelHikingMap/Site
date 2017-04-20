@@ -4,7 +4,7 @@
 
 namespace IsraelHiking.Services.Layers {
     export interface ILayer extends Common.LayerData {
-        layer: L.ILayer;
+        layer: L.Layer;
         isEditable: boolean;
     }
 
@@ -107,7 +107,7 @@ namespace IsraelHiking.Services.Layers {
                 maxZoom: LayersService.MAX_NATIVE_ZOOM
             } as ILayer);
             hikingTrailsOverlay.isEditable = false;
-            this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: new WikiMarkersLayer($http, $rootScope, mapService, resourcesService) as L.ILayer } as IOverlay);
+            this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: new WikiMarkersLayer($http, $rootScope, mapService, resourcesService) as L.Layer } as IOverlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
             this.changeLanguage();
@@ -234,7 +234,7 @@ namespace IsraelHiking.Services.Layers {
                 this.selectedBaseLayer.selected = false;
             }
             var newSelectedLayer = _.find(this.baseLayers, (layer) => layer.key === baseLayer.key);
-            this.map.addLayer(newSelectedLayer.layer, true);
+            this.map.addLayer(newSelectedLayer.layer);
             newSelectedLayer.selected = true;
             this.selectedBaseLayer = newSelectedLayer;
 

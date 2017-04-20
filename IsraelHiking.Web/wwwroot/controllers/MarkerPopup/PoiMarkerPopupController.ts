@@ -63,13 +63,7 @@
                 routeMarker.title = newTitle;
                 routeMarker.type = markerType;
                 let color = $scope.routeLayer.getRouteProperties().pathOptions.color;
-                $scope.marker.updateLabelContent($scope.routeLayer.getHtmlTitle(newTitle, color));
-                $scope.marker.title = newTitle;
-                if (!newTitle) {
-                    $scope.marker.hideLabel();
-                } else {
-                    $scope.marker.showLabel();
-                }
+                Services.MapService.setMarkerTitle($scope.marker, newTitle, color);
                 $scope.routeLayer.dataChanged();
                 $scope.marker.closePopup();
             }

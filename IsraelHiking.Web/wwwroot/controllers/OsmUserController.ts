@@ -38,7 +38,7 @@
 
         private $compile: angular.ICompileService;
         private modalInstnace: angular.ui.bootstrap.IModalServiceInstance;
-        private osmTraceLayer: L.LayerGroup<any>;
+        private osmTraceLayer: L.LayerGroup;
         private fitBoundsService: Services.FitBoundService;
 
         constructor($scope: IOsmUserScope,
@@ -148,8 +148,8 @@
                         }
                         for (let markerData of route.markers) {
                             let icon = Services.IconsService.createPoiDefaultMarkerIcon(this.getPathOprtions().color);
-                            let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, riseOnHover: true, icon: icon, opacity: this.getPathOprtions().opacity } as L.MarkerOptions);
-                            marker.bindLabel(markerData.title, { noHide: true, className: "marker-label" } as L.LabelOptions);
+                            let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, keyboard: false, riseOnHover: true, icon: icon, opacity: this.getPathOprtions().opacity } as L.MarkerOptions) as Common.IMarkerWithTitle;
+                            Services.MapService.setMarkerTitle(marker, markerData.title);
                             this.osmTraceLayer.addLayer(marker);
                         }
                     }
@@ -167,7 +167,7 @@
                     }
                     mainMarker.bindPopup($compile("<div search-results-marker-popup></div>")(newScope)[0], { className: "marker-popup" } as L.PopupOptions);
                     this.osmTraceLayer.addLayer(mainMarker);
-                    this.fitBoundsService.fitBounds(bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
+                    this.fitBoundsService.fitBounds(bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.FitBoundsOptions);
                 });
                 return promise;
             }
@@ -271,14 +271,14 @@
         }
 
         private addMissingPartsToMap = ($scope: IOsmUserScope, geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
-            var geoJsonLayer = L.geoJson(geoJson);
+            var geoJsonLayer = L.geoJSON(geoJson);
             for (let feature of geoJson.features) {
                 let lineString = feature.geometry as GeoJSON.LineString;
                 let latLngs = Services.Parsers.GeoJsonParser.createLatlngArray(lineString.coordinates);
                 let unselectedPathOptions = { color: "red", weight: 3, opacity: 1 } as L.PathOptions;
                 let polyline = L.polyline(latLngs, unselectedPathOptions);
                 this.osmTraceLayer.addLayer(polyline);
-                let marker = L.marker(latLngs[0], { draggable: false, clickable: true, icon: Services.IconsService.createMissingPartMarkerIcon() } as L.MarkerOptions);
+                let marker = L.marker(latLngs[0], { draggable: false, clickable: true, keyboard: false, icon: Services.IconsService.createMissingPartMarkerIcon() } as L.MarkerOptions);
                 let newScope = $scope.$new() as MarkerPopup.IMissingPartMarkerPopupScope;
                 newScope.marker = marker as Common.IMarkerWithTitle;
                 newScope.feature = feature;

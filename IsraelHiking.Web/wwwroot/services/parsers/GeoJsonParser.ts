@@ -16,7 +16,7 @@
             let data = {
                 routes: [] as Common.RouteData[]
             } as Common.DataContainer;
-            let leaftletGeoJson = L.geoJson(geoJson, {
+            let leaftletGeoJson = L.geoJSON(geoJson, {
                 onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
                     let routeData = null;
                     let name = (feature.properties as any).name;

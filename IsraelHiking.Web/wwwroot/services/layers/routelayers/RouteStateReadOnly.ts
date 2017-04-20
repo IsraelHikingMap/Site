@@ -1,6 +1,6 @@
 namespace IsraelHiking.Services.Layers.RouteLayers {
     export class RouteStateReadOnly extends RouteStateBase {
-        private readOnlyLayers: L.LayerGroup<L.ILayer>;
+        private readOnlyLayers: L.LayerGroup;
 
         constructor(context: RouteLayer) {
             super(context);
@@ -26,6 +26,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                     opacity: pathOptions.opacity,
                     draggable: false,
                     clickable: false,
+                    keyboard: false, 
                     icon: IconsService.createRoundIcon("green")
                 }));
             this.readOnlyLayers.addLayer(L.marker(endLatLng,
@@ -33,6 +34,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
                     opacity: pathOptions.opacity,
                     draggable: false,
                     clickable: false,
+                    keyboard: false,
                     icon: IconsService.createRoundIcon("red")
                 }));
         }
@@ -75,7 +77,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             return EditModeString.none;
         }
 
-        private onMouseMove = (e: L.LeafletMouseEvent): void => {
+        private onMouseMove = (e: L.MouseEvent): void => {
             let response = this.context.snappingService.snapTo(e.latlng, {
                 sensitivity: 10,
                 layers: this.readOnlyLayers

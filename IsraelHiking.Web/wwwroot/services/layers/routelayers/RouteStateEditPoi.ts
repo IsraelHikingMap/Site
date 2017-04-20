@@ -6,7 +6,7 @@
             this.hoverHandler.setRouteHover(false);
         }
 
-        protected addPoint(e: L.LeafletMouseEvent) {
+        protected addPoint(e: L.MouseEvent) {
             let marker = this.createPoiMarkerWithEvents({ latlng: e.latlng, title: "" } as Common.MarkerData);
             this.context.route.markers.push({
                 latlng: e.latlng,

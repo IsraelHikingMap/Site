@@ -76,7 +76,7 @@
                         if (properties.lat && properties.lng) {
                             singleResult.latlng = L.latLng(properties.lat, properties.lng);
                         }
-                        let geo = L.geoJson(feature);
+                        let geo = L.geoJSON(feature);
                         singleResult.bounds = geo.getBounds();
                         singleResult.displayName = singleResult.name + (singleResult.address ? `, ${singleResult.address}` : "");
                         results.push(singleResult);

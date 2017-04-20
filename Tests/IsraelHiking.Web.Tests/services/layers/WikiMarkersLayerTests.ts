@@ -127,7 +127,7 @@ namespace IsraelHiking.Tests.Services.Layers {
                 } as IsraelHiking.Services.Layers.IWikiQuery
             } as IsraelHiking.Services.Layers.IWikiResponse);
             mapServiceMock.mapService.map.eachLayer((l) => {
-                if (l instanceof L.MarkerClusterGroup) {
+                if (l instanceof L.LayerGroup) {
                     l.eachLayer(m => {
                         if (m instanceof L.Marker) {
                             m.fire("popupopen");

@@ -23,7 +23,7 @@
         private resourcesService: Services.ResourcesService;
         private routeLayer: Services.Layers.RouteLayers.RouteLayer;
         private hoverChartMarker: L.Marker;
-        private kmMarkersGroup: L.LayerGroup<L.Marker>;
+        private kmMarkersGroup: L.LayerGroup;
         private $compile: angular.ICompileService;
         private routeDataChangedEventHandler: (data: {}) => void;
         private polylineHoverEventHandler: (data: L.LatLng) => void;
@@ -51,7 +51,7 @@
             this.kmMarkersGroup = L.layerGroup([] as L.Marker[]);
             this.$compile = $compile;
             this.initializeChart($scope);
-            this.hoverChartMarker = L.marker(mapService.map.getCenter(), { opacity: 0.0 } as L.MarkerOptions);
+            this.hoverChartMarker = L.marker(mapService.map.getCenter(), { opacity: 0.0, draggable: false, clickable: false, keyboard: false } as L.MarkerOptions);
             this.map.addLayer(this.hoverChartMarker);
             this.map.addLayer(this.kmMarkersGroup);
             this.routeDataChangedEventHandler = ({}) => this.onRouteDataChanged($scope);
@@ -195,6 +195,7 @@
             return L.marker(latlng, {
                 clickable: false,
                 draggable: false,
+                keyboard: false,
                 icon: Services.IconsService.createKmMarkerIcon(markerNumber)
             } as L.MarkerOptions);
         }

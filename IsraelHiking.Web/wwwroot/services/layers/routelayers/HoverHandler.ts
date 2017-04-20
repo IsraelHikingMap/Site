@@ -16,7 +16,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         constructor(context: RouteLayer, middleMarker: L.Marker) {
             this.context = context;
             let pathOptions = this.context.route.properties.pathOptions;
-            this.hoverMarker = L.marker(this.context.map.getCenter(), { clickable: false, opacity: pathOptions.opacity } as L.MarkerOptions);
+            this.hoverMarker = L.marker(this.context.map.getCenter(), { clickable: false, keyboard: false, opacity: pathOptions.opacity } as L.MarkerOptions);
             this.middleMarker = middleMarker;
             this.hoverPolyline = L.polyline([]);
             this.setState(HoverHandler.NONE);
@@ -54,7 +54,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             }
         }
 
-        public onMouseMove = (e: L.LeafletMouseEvent): void => {
+        public onMouseMove = (e: L.MouseEvent): void => {
             if (this.hoverState === HoverHandler.ON_MARKER ||
                 this.hoverState === HoverHandler.DRAGGING) {
                 return;

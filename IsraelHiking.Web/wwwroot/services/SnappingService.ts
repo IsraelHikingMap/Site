@@ -1,7 +1,7 @@
 ﻿namespace IsraelHiking.Services {
 
     export interface ISnappingOptions {
-        layers: L.LayerGroup<L.Polyline>;
+        layers: L.LayerGroup;
         sensitivity: number;
     }
 
@@ -16,7 +16,7 @@
     }
 
     export class SnappingService extends ObjectWithMap {
-        public snappings: L.LayerGroup<L.ILayer>;
+        public snappings: L.LayerGroup;
         private $http: angular.IHttpService;
         private resourcesService: ResourcesService;
         private toastr: Toastr;

@@ -10,7 +10,7 @@
             this.initialize();
         }
 
-        protected abstract addPoint(e: L.LeafletMouseEvent): void;
+        protected abstract addPoint(e: L.MouseEvent): void;
 
         public initialize() {
             this.context.map.on("click", this.addPoint, this);
@@ -44,7 +44,7 @@
 
         private createRouteMarker = (latlng: L.LatLng): L.Marker => {
             let pathOptions = this.context.route.properties.pathOptions;
-            let marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createRouteMarkerIcon(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
+            let marker = L.marker(latlng, { draggable: true, clickable: true, keyboard: false, riseOnHover: true, icon: IconsService.createRouteMarkerIcon(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
             this.setRouteMarkerEvents(marker);
             marker.addTo(this.context.map);
             let newScope = this.context.$rootScope.$new() as Controllers.MarkerPopup.IRemovableMarkerScope;
@@ -258,7 +258,7 @@
         }
 
         private createMiddleMarker = (): L.Marker => {
-            var middleMarker = L.marker(this.context.map.getCenter(), { clickable: true, draggable: true, icon: IconsService.createRoundIcon(this.context.route.properties.pathOptions.color), opacity: 0.0 } as L.MarkerOptions);
+            var middleMarker = L.marker(this.context.map.getCenter(), { clickable: true, draggable: true, keyboard: false, icon: IconsService.createRoundIcon(this.context.route.properties.pathOptions.color), opacity: 0.0 } as L.MarkerOptions);
             middleMarker.on("click", () => {
                 this.middleMarkerClick(middleMarker);
             });

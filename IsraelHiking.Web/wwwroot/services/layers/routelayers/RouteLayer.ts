@@ -23,7 +23,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
         properties: IRouteProperties;
     }
 
-    export class RouteLayer extends ObjectWithMap implements IDrawingLayer {
+    export class RouteLayer extends L.Layer implements IDrawingLayer {
         public $q: angular.IQService;
         public $rootScope: angular.IRootScopeService;
         public $compile: angular.ICompileService;
@@ -37,6 +37,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
 
         private currentState: RouteStateBase;
         private undoHandler: UndoHandler<Common.RouteData>;
+        public map: L.Map;
 
         constructor($q: angular.IQService,
             $rootScope: angular.IRootScopeService,
@@ -47,8 +48,8 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             routerService: Routers.RouterService,
             elevationProvider: Elevation.IElevationProvider,
             route: IRoute) {
-            super(mapService);
-
+            super();
+            this.map = mapService.map;
             this.$q = $q;
             this.$rootScope = $rootScope;
             this.$compile = $compile;
@@ -64,14 +65,16 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.polylineHoverEvent = new Common.EventHelper<L.LatLng>();
         }
 
-        public onAdd(map: L.Map): void {
+        public onAdd(map: L.Map): this {
             this.route.properties.isVisible = true;
             this.currentState.setReadOnlyState();
+            return this;
         }
 
-        public onRemove(map: L.Map): void {
+        public onRemove(map: L.Map): this {
             this.currentState.setHiddenState();
             this.route.properties.isVisible = false;
+            return this;
         }
 
         public clearCurrentState() {
@@ -251,26 +254,6 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             let bounds = featureGroup.getBounds();
             featureGroup.clearLayers();
             return bounds;
-        }
-
-        public getHtmlTitle(title: string, color: string = ""): string {
-            let lines = title.split("\n");
-            var htmlTitleArray = "";
-            var container = angular.element("<div>");
-            for (let line of lines) {
-                if (!line) {
-                    continue;
-                }
-                // start with hebrew or not, ignoring non alphabetical characters.
-                let direction = (line.match(/^[^a-zA-Z]*[\u0591-\u05F4]/)) ? "rtl" : "ltr";
-                var htmlLine = angular.element("<div>").attr("dir", direction).append(line);
-                if (color)
-                {
-                    htmlLine.css("color", color);
-                }
-                container.append(htmlLine);
-            }
-            return container.wrap("<div></div>").html();
         }
     }
 }

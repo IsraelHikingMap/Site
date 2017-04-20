@@ -4,7 +4,7 @@
   "private": true,
   "devDependencies": {
     "@types/jasmine": "*",
-    "@types/lodash": "ts2.1",
+    "@types/lodash": "*",
     "@types/ng-file-upload": "*",
     "@types/toastr": "*",
     "@types/google.visualization": "*",
@@ -12,8 +12,7 @@
     "@types/angular-local-storage": "*",
     "@types/angular-gettext": "*",
     "@types/angular-mocks": "*",
-    "@types/leaflet": "0.7.30",
-    "@types/leaflet-label": "*",
-    "@types/leaflet-markercluster": "0.4.32"
+    "@types/leaflet": "*",
+    "@types/leaflet-markercluster": "*"
   }
 }

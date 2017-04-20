@@ -38,21 +38,23 @@
         query: IWikiQuery;
     }
 
-    export class WikiMarkersLayer extends ObjectWithMap implements L.ILayer {
+    export class WikiMarkersLayer extends L.Layer {
         private $http: angular.IHttpService;
         private resourcesService: ResourcesService;
         private markers: L.MarkerClusterGroup;
-        private wikiMarkerIcon: L.Icon;
+        private wikiMarkerIcon: L.DivIcon;
         private enabled: boolean;
+        private map: L.Map;
 
         constructor($http: angular.IHttpService,
             $rootScope: angular.IRootScopeService,
             mapService: MapService,
             resourcesService: ResourcesService) {
-            super(mapService);
+            super();
+            this.map = mapService.map;
             this.$http = $http;
             this.resourcesService = resourcesService;
-            this.markers = new L.MarkerClusterGroup();
+            this.markers = L.markerClusterGroup();
             this.enabled = false;
             this.wikiMarkerIcon = IconsService.createWikipediaIcon();
             $rootScope.$watch(() => resourcesService.currentLanguage, () => {
@@ -63,15 +65,17 @@
             });
         }
 
-        public onAdd(map: L.Map): void {
+        public onAdd(map: L.Map): this {
             this.enabled = true;
             this.updateMarkers();
             map.addLayer(this.markers);
+            return this;
         }
 
-        public onRemove(map: L.Map): void {
+        public onRemove(map: L.Map): this {
             map.removeLayer(this.markers);
             this.enabled = false;
+            return this;
         }
 
         private updateMarkers = (): void => {
@@ -104,7 +108,7 @@
 
                 for (let currentPage of response.data.query.geosearch) {
 
-                    let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { clickable: true, draggable: false, icon: this.wikiMarkerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
+                    let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { draggable: false, clickable: true, keyboard: false, icon: this.wikiMarkerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
                     marker.title = currentPage.pageid.toString();
 
                     let pageAddress = `https://${lang}.wikipedia.org/?curid=${currentPage.pageid}`;

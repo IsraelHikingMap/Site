@@ -42,7 +42,7 @@
         private static DOWN_KEY = 40;
 
         private requestsQueue: ISearchRequestQueueItem[];
-        private featureGroup: L.FeatureGroup<L.ILayer>;
+        private featureGroup: L.FeatureGroup;
         private elevationProvider: Services.Elevation.ElevationProvider;
         private localSearchResultsProvider: Services.Search.LocalSearchResultsProvider;
         private layersService: Services.Layers.LayersService;
@@ -115,8 +115,8 @@
             $scope.moveToResults = (searchResults: Services.Search.ISearchResults, e: Event) => {
                 $scope.toggleVisibility(e);
                 this.featureGroup.clearLayers();
-                fitBoundsService.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.Map.FitBoundsOptions);
-                var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false }) as Common.IMarkerWithTitle;
+                fitBoundsService.fitBounds(searchResults.bounds, { maxZoom: Services.Layers.LayersService.MAX_NATIVE_ZOOM } as L.FitBoundsOptions);
+                var marker = L.marker(searchResults.latlng, { icon: Services.IconsService.createSearchMarkerIcon(), draggable: false, keyboard: false }) as Common.IMarkerWithTitle;
                 marker.title = searchResults.name || searchResults.address;
                 let newScope = $scope.$new() as ISearchResultsMarkerPopupScope;
                 newScope.marker = marker;
@@ -236,9 +236,9 @@
                         let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
                         this.featureGroup.addLayer(polyLine);
                     }
-                    var markerFrom = L.marker($scope.fromContext.selectedSearchResults.latlng, { icon: Services.IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
+                    var markerFrom = L.marker($scope.fromContext.selectedSearchResults.latlng, { icon: Services.IconsService.createStartIcon(), draggable: false, keyboard: false }) as Common.IMarkerWithTitle;
                     markerFrom.title = $scope.fromContext.selectedSearchResults.name || $scope.fromContext.selectedSearchResults.address;
-                    var markerTo = L.marker($scope.toContext.selectedSearchResults.latlng, { icon: Services.IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;
+                    var markerTo = L.marker($scope.toContext.selectedSearchResults.latlng, { icon: Services.IconsService.createEndIcon(), draggable: false, keyboard: false }) as Common.IMarkerWithTitle;
                     markerTo.title = $scope.toContext.selectedSearchResults.name || $scope.toContext.selectedSearchResults.address;
 
                     let convertToRoute = () => {

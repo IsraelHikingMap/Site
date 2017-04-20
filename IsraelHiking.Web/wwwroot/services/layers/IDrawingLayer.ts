@@ -7,7 +7,7 @@
         export const route: EditMode = "Route";
     }
 
-    export interface IDrawingLayer extends L.ILayer {
+    export interface IDrawingLayer extends L.Layer {
         clear(): void;
         getEditMode(): EditMode;
         undo(): void;
