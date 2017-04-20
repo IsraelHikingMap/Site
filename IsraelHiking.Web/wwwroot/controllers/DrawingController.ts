@@ -1,6 +1,6 @@
 ﻿namespace IsraelHiking.Controllers {
     export interface IDrawingScope extends angular.IScope {
-        
+
         clear(e: Event): void;
         setEditMode(editMode: string, e: Event): void;
         editMode: Services.Layers.EditMode;
@@ -8,6 +8,7 @@
         getRoutingType(): Common.RoutingType;
         undo(e: Event): void;
         isUndoDisbaled(): boolean;
+        getRouteColor(editMode: Services.Layers.EditMode): string;
     }
 
     export class DrawingController extends BaseMapController {
@@ -96,6 +97,15 @@
                 return layer != null ? layer.isUndoDisbaled() : true;
             };
 
+            $scope.getRouteColor = (editMode: Services.Layers.EditMode): string => {
+                if (this.layersService.getSelectedRoute() == null) {
+                    return "black";
+                }
+                if ($scope.editMode != editMode) {
+                    return "black";
+                }
+                return this.layersService.getSelectedRoute().route.properties.pathOptions.color;
+            }
 
             angular.element($window).bind("keydown", (e: JQueryEventObject) => {
                 if (this.layersService.getSelectedRoute() == null) {

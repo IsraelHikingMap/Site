@@ -50,9 +50,7 @@
                     $window.location.reload();
                     return;
                 }
-
-                this.map.setZoom(latLngZ.z);
-                this.map.panTo(latLngZ);
+                this.map.setView(latLngZ, latLngZ.z);
             });
 
             this.map.on("moveend", () => {
