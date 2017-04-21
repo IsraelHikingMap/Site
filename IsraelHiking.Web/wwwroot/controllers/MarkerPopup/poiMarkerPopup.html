@@ -1,4 +1,4 @@
-﻿<div class="marker-popup">
+﻿<div class="marker-popup" dir="{{resources.direction}}">
     <form ng-submit="save(title, markerType)">
         <div class="form-group">
             <textarea rows="2" class="form-control" type="text" dir="{{getDirection(title)}}" ng-model="title" ng-change="updateWikiCoordinates(title)"></textarea>

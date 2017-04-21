@@ -1,4 +1,4 @@
-﻿<div class="marker-popup">
+﻿<div class="marker-popup" dir="{{resources.direction}}">
     <h4 ng-class="{'text-right': hasHebrewCharacters(title)}" class="chrome-wordwrap-fix">{{title}}</h4>
     <div class="form-group">
         <a class="btn btn-success cursor-pointer input-group-addon" ng-click="convertToRoute()" uib-tooltip="{{resources.convertToRoute}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isSaveTooltipOpen" analytics-on="click" analytics-category="Search" analytics-event="Convert search to route"><i class="fa fa-plus"></i></a>
