@@ -110,6 +110,7 @@ namespace IsraelHiking.Controllers {
                     let controlDiv = angular.element("<div>")
                         .addClass(classString)
                         .append(this.$compile(`<${directiveHtmlName}></${directiveHtmlName}>`)($scope.$new()));
+                    L.DomEvent.disableClickPropagation(controlDiv[0]);
                     return controlDiv[0];
                 },
                 onRemove: () => { }

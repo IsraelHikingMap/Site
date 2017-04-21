@@ -21,7 +21,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             this.hoverPolyline = L.polyline([]);
             this.setState(HoverHandler.NONE);
             this.routeHover = true;
-            this.setMarkerIcon();
+            this.updateAccordingToRoueProperties();
         }
 
         public getState = (): string => {
@@ -85,19 +85,21 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
 
         public setRouteHover(routeHover: boolean): void {
             this.routeHover = routeHover;
-            let style = this.routeHover === false
-                ? { opacity: 0 } as L.PolylineOptions
-                : angular.extend({ dashArray: "10, 10" }, this.context.route.properties.pathOptions) as L.PolylineOptions;
-            this.hoverPolyline.setStyle(style);
-            this.setMarkerIcon();
+            this.updateAccordingToRoueProperties();
         }
 
-        private setMarkerIcon(): void {
+        public updateAccordingToRoueProperties() {
             let pathOptions = this.context.route.properties.pathOptions;
+            this.hoverMarker.setOpacity(pathOptions.opacity);
             let markerIcon = this.routeHover === false
                 ? IconsService.createPoiHoverMarkerIcon(pathOptions.color)
                 : IconsService.createRouteMarkerIcon(pathOptions.color);
             this.hoverMarker.setIcon(markerIcon);
+            this.middleMarker.setIcon(IconsService.createRoundIcon(pathOptions.color));
+            let style = this.routeHover === false
+                ? { opacity: 0 } as L.PolylineOptions
+                : angular.extend({ dashArray: "10, 10" }, this.context.route.properties.pathOptions) as L.PolylineOptions;
+            this.hoverPolyline.setStyle(style);
         }
     }
 }

@@ -26,6 +26,7 @@
                 this.context.map.addLayer(marker.marker);
             }
             this.updateStartAndEndMarkersIcons();
+            this.hoverHandler.updateAccordingToRoueProperties();
         }
 
         public clear() {

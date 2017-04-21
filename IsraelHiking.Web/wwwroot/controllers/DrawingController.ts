@@ -97,11 +97,8 @@
                 return layer != null ? layer.isUndoDisbaled() : true;
             };
 
-            $scope.getRouteColor = (editMode: Services.Layers.EditMode): string => {
+            $scope.getRouteColor = (): string => {
                 if (this.layersService.getSelectedRoute() == null) {
-                    return "black";
-                }
-                if ($scope.editMode != editMode) {
                     return "black";
                 }
                 return this.layersService.getSelectedRoute().route.properties.pathOptions.color;
