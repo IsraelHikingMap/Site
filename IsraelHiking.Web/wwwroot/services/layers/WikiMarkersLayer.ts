@@ -40,6 +40,7 @@
 
     export class WikiMarkersLayer extends L.Layer {
         private $http: angular.IHttpService;
+        private $sce: angular.ISCEService;
         private resourcesService: ResourcesService;
         private markers: L.MarkerClusterGroup;
         private wikiMarkerIcon: L.DivIcon;
@@ -48,11 +49,13 @@
 
         constructor($http: angular.IHttpService,
             $rootScope: angular.IRootScopeService,
+            $sce: angular.ISCEService,
             mapService: MapService,
             resourcesService: ResourcesService) {
             super();
             this.map = mapService.map;
             this.$http = $http;
+            this.$sce = $sce;
             this.resourcesService = resourcesService;
             this.markers = L.markerClusterGroup();
             this.enabled = false;
@@ -92,7 +95,7 @@
                 textAlign = "text-right";
             }
             let url = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000&callback=JSON_CALLBACK`;
-            this.$http.jsonp(url).then((response: { data: IGeoSearchWikiResponse }) => {
+            this.$http.jsonp(this.$sce.trustAsResourceUrl(url)).then((response: { data: IGeoSearchWikiResponse }) => {
                 // Sync lists
                 this.markers.eachLayer(l => {
                     if (l instanceof L.Marker) {
@@ -124,7 +127,7 @@
                     marker.on("popupopen", () => {
                         let popup = marker.getPopup();
                         let detailsUrl = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&pageids=${currentPage.pageid}&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1&callback=JSON_CALLBACK`;
-                        this.$http.jsonp(detailsUrl).then((detailsResponse: { data: IWikiResponse }) => {
+                        this.$http.jsonp(this.$sce.trustAsResourceUrl(detailsUrl)).then((detailsResponse: { data: IWikiResponse }) => {
                             let currentDetailedPage = detailsResponse.data.query.pages[currentPage.pageid];
                             let columnsClass = "col-xs-12";
                             if (currentDetailedPage.thumbnail) {

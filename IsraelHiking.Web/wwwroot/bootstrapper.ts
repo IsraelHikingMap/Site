@@ -54,11 +54,11 @@
     app.service(Strings.Services.hashService, [Strings.Angular.location, Strings.Angular.window, Strings.Angular.rootScope, Strings.Services.localStorageService, Strings.Services.mapService,
     ($location: angular.ILocationService, $window: angular.IWindowService, $rootScope: angular.IRootScopeService, localStorageService: angular.local.storage.ILocalStorageService, mapService: Services.MapService) =>
             new Services.HashService($location, $window, $rootScope, localStorageService, mapService)]);
-    app.service(Strings.Services.layersService, [Strings.Angular.http, Strings.Angular.q, Strings.Angular.rootScope, Strings.Services.mapService, Strings.Services.localStorageService, 
+    app.service(Strings.Services.layersService, [Strings.Angular.http, Strings.Angular.q, Strings.Angular.rootScope, Strings.Angular.sce, Strings.Services.mapService, Strings.Services.localStorageService, 
         Strings.Services.routeLayerFactory, Strings.Services.hashService, Strings.Services.fileService, Strings.Services.resourcesService, Strings.Services.toastr,
-        ($http: angular.IHttpService, $q: angular.IQService, $rootScope: angular.IRootScopeService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService,
+        ($http: angular.IHttpService, $q: angular.IQService, $rootScope: angular.IRootScopeService, $sce: angular.ISCEService, mapService: Services.MapService, localStorageService: angular.local.storage.ILocalStorageService,
             routeLayerFactory: Services.Layers.RouteLayers.RouteLayerFactory, hashService: Services.HashService, fileService: Services.FileService, resourcesService: Services.ResourcesService, toastr: Toastr) =>
-            new Services.Layers.LayersService($http, $q, $rootScope, mapService, localStorageService, routeLayerFactory, hashService, fileService, resourcesService, toastr)]);
+            new Services.Layers.LayersService($http, $q, $rootScope, $sce, mapService, localStorageService, routeLayerFactory, hashService, fileService, resourcesService, toastr)]);
     app.service(Strings.Services.dragAndDropService, [Strings.Angular.timeout, Strings.Services.resourcesService, Strings.Services.mapService, Strings.Services.fileService, Strings.Services.layersService, Strings.Services.toastr,
         ($timeout: angular.ITimeoutService, resourcesService: Services.ResourcesService, mapservice: Services.MapService, fileService: Services.FileService, layersService: Services.Layers.LayersService, toastr: Toastr) =>
             new Services.DragAndDropService($timeout, resourcesService, mapservice, fileService, layersService, toastr)

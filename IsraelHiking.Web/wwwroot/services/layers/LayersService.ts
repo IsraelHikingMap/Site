@@ -1,8 +1,4 @@
-﻿declare module L {
-    export class Google { new(); }
-}
-
-namespace IsraelHiking.Services.Layers {
+﻿namespace IsraelHiking.Services.Layers {
     export interface ILayer extends Common.LayerData {
         layer: L.Layer;
         isEditable: boolean;
@@ -59,6 +55,7 @@ namespace IsraelHiking.Services.Layers {
         constructor($http: angular.IHttpService,
             $q: angular.IQService,
             $rootScope: angular.IRootScopeService,
+            $sce: angular.ISCEService,
             mapService: MapService,
             localStorageService: angular.local.storage.ILocalStorageService,
             routeLayerFactory: Layers.RouteLayers.RouteLayerFactory,
@@ -95,7 +92,8 @@ namespace IsraelHiking.Services.Layers {
                 isEditable: false
             } as ILayer, LayersService.MTB_ATTRIBUTION);
             try {
-                this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: new L.Google() as any, selected: false, address: "", isEditable: false } as IBaseLayer);
+                var googleLayer = L.gridLayer.googleMutant({ type: "satellite" } as L.gridLayer.GoogleMutantOptions) as any;
+                this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: googleLayer, selected: false, address: "", isEditable: false } as IBaseLayer);
             } catch (e) {
                 console.error("Unable to create the google earch layer... ");
             }
@@ -107,7 +105,7 @@ namespace IsraelHiking.Services.Layers {
                 maxZoom: LayersService.MAX_NATIVE_ZOOM
             } as ILayer);
             hikingTrailsOverlay.isEditable = false;
-            this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: new WikiMarkersLayer($http, $rootScope, mapService, resourcesService) as L.Layer } as IOverlay);
+            this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: new WikiMarkersLayer($http, $rootScope, $sce, mapService, resourcesService) as L.Layer } as IOverlay);
             this.addLayersFromLocalStorage();
             this.addDataFromHash();
             this.changeLanguage();

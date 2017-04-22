@@ -21,6 +21,8 @@
     "@types/angular-local-storage": "*",
     "@types/angular-gettext": "*",
     "@types/leaflet": "*",
-    "@types/leaflet-markercluster": "*"
+    "@types/leaflet-markercluster": "*",
+    "@types/leaflet.locatecontrol": "*",
+    "@types/leaflet.gridlayer.googlemutant": "*"
   }
 }

@@ -24,6 +24,7 @@
     "leaflet": "*",
     "leaflet.locatecontrol": "*",
     "leaflet.markercluster": "*",
+    "Leaflet.GridLayer.GoogleMutant": "*",
     "x2js": "*"
   },
   "overrides": {

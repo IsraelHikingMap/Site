@@ -1,10 +1,4 @@
-﻿declare namespace L {
-    export namespace control {
-        export function locate(options: any): L.Control;
-    }
-}
-
-namespace IsraelHiking.Controllers {
+﻿namespace IsraelHiking.Controllers {
     export interface IMainMapScope extends IRootScope {
         sidebarService: Services.SidebarService;
         getIsSidebarVisible(): boolean;
@@ -73,7 +67,7 @@ namespace IsraelHiking.Controllers {
                         }, 3000);
                     }
                 }
-            }).addTo(this.map);
+            } as L.LocateOptions).addTo(this.map);
 
             this.createContorl($scope, "layers-control");
             this.createContorl($scope, "file-control");
