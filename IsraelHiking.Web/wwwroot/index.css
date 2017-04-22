@@ -15,7 +15,6 @@
     position: fixed;
     left: 240px;
     top: 0;
-    z-index: 100;
 }
 
 .flip .sidebar-close {

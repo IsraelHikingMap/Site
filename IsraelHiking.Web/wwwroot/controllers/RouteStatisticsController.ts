@@ -267,6 +267,10 @@
 
         private showChartHover(point: Services.IRouteStatisticsPoint) {
             this.hideChartHover();
+            if (!point)
+            {
+                return;
+            }
             let offsetX = this.layoutInterface.getXLocation(point.x);
             let tooltip = this.getChartTooltip(point);
             let tooltipCss = {

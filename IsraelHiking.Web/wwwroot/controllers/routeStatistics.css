@@ -51,12 +51,15 @@
     position: absolute;
     right: 5px;
     top: 0;
-    z-index: 100;
 }
 
 .flip .route-statistics-close {
     right: auto;
     left: 5px;
+}
+
+.route-statistics-popup {
+    z-index: 800;
 }
 
 /* Extra Small Devices, Phones */
