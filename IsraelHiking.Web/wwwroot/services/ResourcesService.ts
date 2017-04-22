@@ -731,7 +731,7 @@ namespace IsraelHiking.Services {
                     this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
 
                     this.currentLanguage = language;
-                });
+                }, () => { console.error("Unable to fetch language file: " + language.code) });
         }
     }
 }

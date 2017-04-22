@@ -63,7 +63,7 @@ namespace IsraelHiking.Services {
                 if (this.isLoggedIn()) {
                     this.refreshDetails();
                 }
-            });
+            }, () => { console.error("Unable to get OSM configuration") });
 
             this.x2Js = new X2JS();
             this.traces = [];
@@ -138,7 +138,7 @@ namespace IsraelHiking.Services {
                 });
                 sharesPromise = this.$http.get(Common.Urls.urls).then((response: { data: Common.SiteUrl[] }) => {
                     this.shares = response.data;
-                });
+                }, () => { console.error("Unable to get user shares.")});
             });
             return this.$q.all([deferred.promise, this.$q.when(sharesPromise)]).finally(() => this.loading = false);
         }

@@ -94,7 +94,7 @@
                 dir = "rtl";
                 textAlign = "text-right";
             }
-            let url = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000&callback=JSON_CALLBACK`;
+            let url = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000`;
             this.$http.jsonp(this.$sce.trustAsResourceUrl(url)).then((response: { data: IGeoSearchWikiResponse }) => {
                 // Sync lists
                 this.markers.eachLayer(l => {
@@ -126,7 +126,7 @@
                     marker.bindPopup(header.wrap("<div></div>").html());
                     marker.on("popupopen", () => {
                         let popup = marker.getPopup();
-                        let detailsUrl = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&pageids=${currentPage.pageid}&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1&callback=JSON_CALLBACK`;
+                        let detailsUrl = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&pageids=${currentPage.pageid}&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1`;
                         this.$http.jsonp(this.$sce.trustAsResourceUrl(detailsUrl)).then((detailsResponse: { data: IWikiResponse }) => {
                             let currentDetailedPage = detailsResponse.data.query.pages[currentPage.pageid];
                             let columnsClass = "col-xs-12";
