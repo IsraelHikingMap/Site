@@ -140,7 +140,9 @@ namespace IsraelHiking.Services {
                     this.shares = response.data;
                 }, () => { console.error("Unable to get user shares.")});
             });
-            return this.$q.all([deferred.promise, this.$q.when(sharesPromise)]).finally(() => this.loading = false);
+            let allPromises = this.$q.all([deferred.promise, this.$q.when(sharesPromise)]);
+            allPromises.then(() => { }, () => { console.log("OSM User refresh details failed.")}).finally(() => this.loading = false);
+            return allPromises;
         }
 
         public updateSiteUrl = (siteUrl: Common.SiteUrl): angular.IPromise<{}> => {
