@@ -184,8 +184,8 @@
                 $scope.offroadRequest.backgroundServeUrl = Common.Urls.images + $scope.siteUrlId;
 
                 for (let segment of route.segments) {
-                    for (let latlngz of segment.latlngzs) {
-                        $scope.offroadRequest.path.push({ altitude: latlngz.z, latitude: latlngz.lat, longitude: latlngz.lng });
+                    for (let latlng of segment.latlngs) {
+                        $scope.offroadRequest.path.push({ altitude: latlng.alt, latitude: latlng.lat, longitude: latlng.lng });
                     }
                 }
                 let index = 0;

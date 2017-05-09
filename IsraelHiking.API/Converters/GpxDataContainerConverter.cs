@@ -32,7 +32,7 @@ namespace IsraelHiking.API.Converters
         public gpxType ToGpx(DataContainer container)
         {
             var containerRoutes = container.routes ?? new List<RouteData>();
-            var nonEmptyRoutes = containerRoutes.Where(r => r.segments.SelectMany(s => s.latlngzs).Any());
+            var nonEmptyRoutes = containerRoutes.Where(r => r.segments.SelectMany(s => s.latlngs).Any());
             return new gpxType
             {
                 wpt = containerRoutes.SelectMany(r => r.markers).Select(ToWptType).ToArray(),
@@ -81,8 +81,8 @@ namespace IsraelHiking.API.Converters
                 {
                     new RouteSegmentData
                     {
-                        latlngzs = route.rtept.Select(ToLatLngZ).ToList(),
-                        routePoint = ToLatLngZ(route.rtept.Last())
+                        latlngs = route.rtept.Select(ToLatLng).ToList(),
+                        routePoint = ToLatLng(route.rtept.Last())
                     }
                 }
             }).ToList();
@@ -96,8 +96,8 @@ namespace IsraelHiking.API.Converters
                 name = t.name,
                 segments = t.trkseg.Where(seg => seg?.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
                 {
-                    latlngzs = seg.trkpt.Select(ToLatLngZ).ToList(),
-                    routePoint = ToLatLngZ(seg.trkpt.Last()),
+                    latlngs = seg.trkpt.Select(ToLatLng).ToList(),
+                    routePoint = ToLatLng(seg.trkpt.Last()),
                     routingType = RoutingTypeConverter.FromXml(seg.extensions)
                 }).ToList(),
             });
@@ -106,26 +106,26 @@ namespace IsraelHiking.API.Converters
 
         private void UpdateBoundingBox(DataContainer container, boundsType bounds)
         {
-            container.northEast = new LatLngZ 
+            container.northEast = new LatLng 
             {
                 lat = (double)bounds.maxlat,
                 lng = (double)bounds.maxlon
             };
 
-            container.southWest = new LatLngZ
+            container.southWest = new LatLng
             {
                 lat = (double)bounds.minlat,
                 lng = (double)bounds.minlon
             };
         }
 
-        private LatLngZ ToLatLngZ(wptType point)
+        private LatLng ToLatLng(wptType point)
         {
-            return new LatLngZ
+            return new LatLng
             {
                 lat = (double)point.lat,
                 lng = (double)point.lon,
-                z = (double)point.ele
+                alt = (double)point.ele
             };
         }
 
@@ -133,7 +133,7 @@ namespace IsraelHiking.API.Converters
         {
             return new MarkerData
             {
-                latlng = ToLatLngZ(point),
+                latlng = ToLatLng(point),
                 title = point.name,
                 type = point.type
             };
@@ -150,13 +150,13 @@ namespace IsraelHiking.API.Converters
             };
         }
 
-        private wptType ToWptType(LatLngZ latLngZ)
+        private wptType ToWptType(LatLng latLng)
         {
             return new wptType
             {
-                lat = (decimal)latLngZ.lat,
-                lon = (decimal)latLngZ.lng,
-                ele = (decimal)latLngZ.z,
+                lat = (decimal)latLng.lat,
+                lon = (decimal)latLng.lng,
+                ele = (decimal)latLng.alt,
                 eleSpecified = true
             };
         }
@@ -165,7 +165,7 @@ namespace IsraelHiking.API.Converters
         {
             return new trksegType
             {
-                trkpt = segmentData.latlngzs.Select(ToWptType).ToArray(),
+                trkpt = segmentData.latlngs.Select(ToWptType).ToArray(),
                 extensions = new extensionsType { Any = new[] { RoutingTypeConverter.ToXml(segmentData.routingType) } }
             };
         }

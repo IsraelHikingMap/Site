@@ -94,9 +94,9 @@ namespace IsraelHiking.API.Controllers
         private async Task<DataContainer> ConvertToDataContainer(byte[] data, string fileName)
         {
             var dataContainer = await _dataContainerConverterService.ToDataContainer(data, fileName);
-            foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
+            foreach (var latLng in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngs)))
             {
-                latLngZ.z = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLngZ));
+                latLng.alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLng));
             }
             return dataContainer;
         }

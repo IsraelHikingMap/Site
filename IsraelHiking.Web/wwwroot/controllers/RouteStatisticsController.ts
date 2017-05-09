@@ -114,7 +114,7 @@
                 this.chartSvg.mousemove((e) => {
                     let point = this.onChartHoverOrClick(e);
                     if (point != null) {
-                        this.hoverChartMarker.setLatLng(point.latlngz);
+                        this.hoverChartMarker.setLatLng(point.latlng);
                         this.hoverChartMarker.setOpacity(1.0);
                     }
                 });
@@ -218,14 +218,14 @@
             this.kmMarkersGroup.addLayer(this.createKmMarker(start, markerNumber));
             let previousPoint = start;
             for (let segment of routeData.segments) {
-                for (let latlngz of segment.latlngzs) {
-                    length += previousPoint.distanceTo(latlngz);
-                    previousPoint = latlngz;
+                for (let latlng of segment.latlngs) {
+                    length += previousPoint.distanceTo(latlng);
+                    previousPoint = latlng;
                     if (length < (markerNumber + 1) * 1000) {
                         continue;
                     }
                     markerNumber++;
-                    this.kmMarkersGroup.addLayer(this.createKmMarker(latlngz, markerNumber));
+                    this.kmMarkersGroup.addLayer(this.createKmMarker(latlng, markerNumber));
                 }
             }
         }
@@ -240,8 +240,8 @@
                 $scope.chart.data.rows.push({
                     c: [{ v: point.x } as google.visualization.DataObjectCell,
                         { v: point.y } as google.visualization.DataObjectCell,
-                        { v: point.latlngz.lat } as google.visualization.DataObjectCell,
-                        { v: point.latlngz.lng } as google.visualization.DataObjectCell,
+                        { v: point.latlng.lat } as google.visualization.DataObjectCell,
+                        { v: point.latlng.lng } as google.visualization.DataObjectCell,
                         { v: point.y } as google.visualization.DataObjectCell,
                         { v: 0 } as google.visualization.DataObjectCell
                     ]

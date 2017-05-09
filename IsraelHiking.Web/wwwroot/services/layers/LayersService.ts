@@ -352,15 +352,15 @@
 
         public setJsonData = (data: Common.DataContainer) => {
             if (data.routes) {
+                console.log(data.routes);
                 for (let route of data.routes) {
                     for (let segment of route.segments) {
-                        let latlngzs = [] as Common.LatLngZ[];
-                        for (let latlngz of segment.latlngzs) {
-                            var fullLatLngZ = L.latLng(latlngz.lat, latlngz.lng) as Common.LatLngZ;
-                            fullLatLngZ.z = latlngz.z;
-                            latlngzs.push(fullLatLngZ);
+                        let latlngs = [] as L.LatLng[];
+                        for (let latlng of segment.latlngs) {
+                            var fullLatLng = L.latLng(latlng.lat, latlng.lng, latlng.alt || 0);
+                            latlngs.push(fullLatLng);
                         }
-                        segment.latlngzs = latlngzs;
+                        segment.latlngs = latlngs;
                         segment.routePoint = L.latLng(segment.routePoint.lat, segment.routePoint.lng);
                     }
                     if (route.markers) {

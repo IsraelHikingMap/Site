@@ -61,7 +61,7 @@ namespace IsraelHiking.API.Tests.Controllers
                             segments =
                                 new List<RouteSegmentData>
                                 {
-                                    new RouteSegmentData {latlngzs = new List<LatLngZ> {new LatLngZ()}}
+                                    new RouteSegmentData {latlngs = new List<LatLng> {new LatLng()}}
                                 }
                         }
                     }

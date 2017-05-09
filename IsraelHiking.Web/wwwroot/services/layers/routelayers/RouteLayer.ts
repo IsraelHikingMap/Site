@@ -127,7 +127,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             for (let segment of this.route.segments) {
                 segmentsData.push({
                     routePoint: segment.routePoint,
-                    latlngzs: angular.copy(segment.latlngzs),
+                    latlngs: angular.copy(segment.latlngs),
                     routingType: segment.routingType
                 } as Common.RouteSegmentData);
             }
@@ -176,14 +176,6 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             }
         }
 
-        public getLatLngZFromLatLng = (latlng: L.LatLng): Common.LatLngZ => {
-            var latlngz = latlng as Common.LatLngZ;
-            latlngz.z = 0;
-            return latlngz;
-        }
-
-        
-
         public dataChanged = () => {
             var data = this.getData();
             this.undoHandler.addDataToUndoStack(data);
@@ -213,12 +205,12 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             for (let segmentIndex = 0; segmentIndex < data.segments.length - 1; segmentIndex++) {
                 var currentSegment = data.segments[segmentIndex];
                 var nextSegment = data.segments[segmentIndex + 1];
-                currentSegment.latlngzs = nextSegment.latlngzs.reverse();
+                currentSegment.latlngs = nextSegment.latlngs.reverse();
                 currentSegment.routingType = nextSegment.routingType;
             }
             var lastSegment = data.segments[data.segments.length - 1];
-            var lastPoint = lastSegment.latlngzs[0]; // this is becuase we already reversed that segment's points
-            lastSegment.latlngzs = [lastPoint, lastPoint];
+            var lastPoint = lastSegment.latlngs[0]; // this is becuase we already reversed that segment's points
+            lastSegment.latlngs = [lastPoint, lastPoint];
             data.segments.reverse();
             this.setData(data);
             this.dataChanged();
@@ -249,7 +241,7 @@ namespace IsraelHiking.Services.Layers.RouteLayers {
             }
             let featureGroup = L.featureGroup([]);
             for (let segment of this.route.segments) {
-                featureGroup.addLayer(L.polyline(segment.latlngzs));
+                featureGroup.addLayer(L.polyline(segment.latlngs));
             }
             let bounds = featureGroup.getBounds();
             featureGroup.clearLayers();

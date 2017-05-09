@@ -31,7 +31,7 @@ namespace IsraelHiking.API.Services
         ///<inheritdoc/>
         public RouteData Split(RouteData routeData, string routingType)
         {
-            var allRoutePoints = routeData.segments.SelectMany(s => s.latlngzs).ToList();
+            var allRoutePoints = routeData.segments.SelectMany(s => s.latlngs).ToList();
             var coordinates = ToWgs84Coordinates(allRoutePoints);
             int maximumPoints = Math.Max(3, Math.Min((int)(new LineString(coordinates).Length / _options.MinimalSegmentLength), _options.MaxSegmentsNumber));
             var currentTolerance = _options.MinimalSplitSimplificationTolerace;
@@ -47,7 +47,7 @@ namespace IsraelHiking.API.Services
                 segments = new List<RouteSegmentData> { new RouteSegmentData
                     {
                         routePoint = allRoutePoints.First(),
-                        latlngzs = new List<LatLngZ> { allRoutePoints.First(), allRoutePoints.First() }
+                        latlngs = new List<LatLng> { allRoutePoints.First(), allRoutePoints.First() }
                     } },
                 name = routeData.name
             };
@@ -57,12 +57,12 @@ namespace IsraelHiking.API.Services
                 var currentIndex = coordinates.ToList().IndexOf(simplifiedCoordinates[index]);
                 coordinates = coordinates.Skip(currentIndex).ToArray();
 
-                var latLngz = allRoutePoints.Take(currentIndex + 1).ToList();
+                var latLngs = allRoutePoints.Take(currentIndex + 1).ToList();
                 allRoutePoints = allRoutePoints.Skip(currentIndex).ToList();
                 manipulatedRouteData.segments.Add(new RouteSegmentData
                 {
-                    latlngzs = latLngz,
-                    routePoint = latLngz.Last(),
+                    latlngs = latLngs,
+                    routePoint = latLngs.Last(),
                     routingType = routingType
                 });
             }

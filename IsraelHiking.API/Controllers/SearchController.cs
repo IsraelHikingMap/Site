@@ -67,9 +67,9 @@ namespace IsraelHiking.API.Controllers
             }
             var featureCollection = new FeatureCollection(new Collection<IFeature> {feature});
             var dataContainer = await _dataContainerConverterService.ToDataContainer(featureCollection.ToBytes(), name + ".geojson");
-            foreach (var latLngZ in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngzs)))
+            foreach (var latLng in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngs)))
             {
-                latLngZ.z = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLngZ));
+                latLng.alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLng));
             }
             return dataContainer;
         }

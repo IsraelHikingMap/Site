@@ -7,7 +7,7 @@
     export interface IRemovableMarkerScope extends IRootScope {
         title: string;
         remove(): void;
-        latLng: Common.LatLngZ;
+        latLng: L.LatLng;
         elevation: number;
         itmCoordinates: INorthEast;
         isSaveTooltipOpen: boolean;
@@ -26,7 +26,8 @@
             $scope.isSaveTooltipOpen = false;
 
             $scope.marker.on("popupopen", () => {
-                $scope.latLng = angular.extend({z: 0}, $scope.marker.getLatLng()) as Common.LatLngZ;
+                $scope.latLng = $scope.marker.getLatLng();
+                $scope.latLng.alt = 0;
                 $http.get(Common.Urls.itmGrid, {
                     params: {
                         lat: $scope.latLng.lat,

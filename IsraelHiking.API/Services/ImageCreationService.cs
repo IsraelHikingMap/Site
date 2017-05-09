@@ -64,7 +64,7 @@ namespace IsraelHiking.API.Services
         public async Task<byte[]> Create(DataContainer dataContainer)
         {
             _logger.LogDebug("Creating image for thumbnail started.");
-            var allLocations = dataContainer.routes.SelectMany(r => r.segments).SelectMany(s => s.latlngzs.OfType<LatLng>()).ToArray();
+            var allLocations = dataContainer.routes.SelectMany(r => r.segments).SelectMany(s => s.latlngs).ToArray();
             if (!allLocations.Any())
             {
                 allLocations = new[] { dataContainer.northEast, dataContainer.southWest };
@@ -169,7 +169,7 @@ namespace IsraelHiking.API.Services
                 // HM TODO: add markers?
                 foreach (var route in dataContainer.routes)
                 {
-                    var points = route.segments.SelectMany(s => s.latlngzs).Select(l => ConvertLatLngZToPoint(l, backgroundImage)).ToArray();
+                    var points = route.segments.SelectMany(s => s.latlngs).Select(l => ConvertLatLngToPoint(l, backgroundImage)).ToArray();
                     if (!points.Any())
                     {
                         continue;
@@ -211,7 +211,7 @@ namespace IsraelHiking.API.Services
             return fileResponse.Content.Any() ? Image.FromStream(new MemoryStream(fileResponse.Content), true) : new Bitmap(TILE_SIZE, TILE_SIZE);
         }
 
-        private PointF ConvertLatLngZToPoint(LatLngZ latLng, BackgroundImage backgroundImage)
+        private PointF ConvertLatLngToPoint(LatLng latLng, BackgroundImage backgroundImage)
         {
             var x = (float)((GetXTile(latLng.lng, backgroundImage.N) - backgroundImage.TopLeft.X) * TARGET_TILE_SIZE_X / backgroundImage.Tiles.X);
             var y = (float)((GetYTile(latLng.lat, backgroundImage.N) - backgroundImage.TopLeft.Y) * TARGET_TILE_SIZE_Y / backgroundImage.Tiles.Y);

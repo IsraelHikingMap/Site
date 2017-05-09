@@ -328,13 +328,13 @@ namespace IsraelHiking.API.Tests.Services
                 {
                     new RouteSegmentData
                     {
-                        latlngzs = new List<LatLngZ>
+                        latlngs = new List<LatLng>
                         {
-                            new LatLngZ {lat = 1, lng = 1},
-                            new LatLngZ {lat = 2, lng = 2},
-                            new LatLngZ {lat = 3, lng = 3},
-                            new LatLngZ {lat = 4, lng = 4},
-                            new LatLngZ {lat = 1, lng = 1},
+                            new LatLng {lat = 1, lng = 1},
+                            new LatLng {lat = 2, lng = 2},
+                            new LatLng {lat = 3, lng = 3},
+                            new LatLng {lat = 4, lng = 4},
+                            new LatLng {lat = 1, lng = 1},
                         }
                     }
                 }
@@ -354,10 +354,10 @@ namespace IsraelHiking.API.Tests.Services
                 {
                     new RouteSegmentData
                     {
-                        latlngzs = new List<LatLngZ>
+                        latlngs = new List<LatLng>
                         {
-                            new LatLngZ {lat = 1, lng = 1},
-                            new LatLngZ {lat = 2, lng = 2}
+                            new LatLng {lat = 1, lng = 1},
+                            new LatLng {lat = 2, lng = 2}
                         }
                     }
                 }

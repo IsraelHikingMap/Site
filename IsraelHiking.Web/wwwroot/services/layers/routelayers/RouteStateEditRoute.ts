@@ -15,13 +15,13 @@
         }
 
         private addPointToRoute = (latlng: L.LatLng, routingType: string): angular.IPromise<{}> => {
-            this.context.route.segments.push(this.createRouteSegment(latlng, [this.context.getLatLngZFromLatLng(latlng), this.context.getLatLngZFromLatLng(latlng)], routingType));
+            this.context.route.segments.push(this.createRouteSegment(latlng, [latlng, latlng], routingType));
             this.updateStartAndEndMarkersIcons();
             if (this.context.route.segments.length > 1) {
                 let endPointSegmentIndex = this.context.route.segments.length - 1;
                 return this.runRouting(endPointSegmentIndex - 1, endPointSegmentIndex);
             } else if (this.context.route.segments.length === 1) {
-                return this.context.elevationProvider.updateHeights(this.context.route.segments[0].latlngzs);
+                return this.context.elevationProvider.updateHeights(this.context.route.segments[0].latlngs);
             }
             var deferred = this.context.$q.defer<{}>();
             deferred.resolve();

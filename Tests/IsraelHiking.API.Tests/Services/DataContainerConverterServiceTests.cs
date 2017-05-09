@@ -84,18 +84,18 @@ namespace IsraelHiking.API.Tests.Services
                         {
                             new RouteSegmentData
                             {
-                                latlngzs = new List<LatLngZ>
+                                latlngs = new List<LatLng>
                                 {
-                                    new LatLngZ {lat = 1, lng = 2},
-                                    new LatLngZ {lat = 3, lng = 4}
+                                    new LatLng {lat = 1, lng = 2},
+                                    new LatLng {lat = 3, lng = 4}
                                 }
                             },
                             new RouteSegmentData
                             {
-                                latlngzs = new List<LatLngZ>
+                                latlngs = new List<LatLng>
                                 {
-                                    new LatLngZ {lat = 5, lng = 6},
-                                    new LatLngZ {lat = 7, lng = 8}
+                                    new LatLng {lat = 5, lng = 6},
+                                    new LatLng {lat = 7, lng = 8}
                                 }
                             }
                         }

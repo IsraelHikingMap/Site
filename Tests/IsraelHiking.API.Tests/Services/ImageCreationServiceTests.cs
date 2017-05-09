@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Tests.Services
                     }));
         }
 
-        private DataContainer GetDataContainer(List<LatLngZ> latLngZs)
+        private DataContainer GetDataContainer(List<LatLng> latLngs)
         {
             return new DataContainer
             {
@@ -58,7 +58,7 @@ namespace IsraelHiking.API.Tests.Services
                         {
                             new RouteSegmentData
                             {
-                                latlngzs = latLngZs
+                                latlngs = latLngs
                             }
                         }
                     }
@@ -69,10 +69,10 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void Zoom16_RouteInSingleTile_ShouldResizeSingleTile4Times()
         {
-            var dataContainer = GetDataContainer(new List<LatLngZ>
+            var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLngZ {lat = 0.0001, lng = 0.0001},
-                new LatLngZ {lat = 0.0002, lng = 0.0002}
+                new LatLng {lat = 0.0001, lng = 0.0001},
+                new LatLng {lat = 0.0002, lng = 0.0002}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -84,10 +84,10 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void Zoom16_RouteInSingleTileTileIsMissing_ShouldUseEmptyBitmaps()
         {
-            var dataContainer = GetDataContainer(new List<LatLngZ>
+            var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLngZ {lat = 0.0001, lng = 0.0001},
-                new LatLngZ {lat = 0.0002, lng = 0.0002}
+                new LatLng {lat = 0.0001, lng = 0.0001},
+                new LatLng {lat = 0.0002, lng = 0.0002}
             });
             _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>())
                 .Returns(
@@ -106,10 +106,10 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void Zoom16_RouteInTwoHorizontalTile_ShouldResize4Tile2Times()
         {
-            var dataContainer = GetDataContainer(new List<LatLngZ>
+            var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLngZ {lat = 0.01, lng = 0.01},
-                new LatLngZ {lat = 0.01, lng = 0.015}
+                new LatLng {lat = 0.01, lng = 0.01},
+                new LatLng {lat = 0.01, lng = 0.015}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -121,10 +121,10 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void Zoom16_RouteInTwoVerticalTile_ShouldResize4Tile2Times()
         {
-            var dataContainer = GetDataContainer(new List<LatLngZ>
+            var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLngZ {lat = 0.01, lng = 0.01},
-                new LatLngZ {lat = 0.015, lng = 0.01}
+                new LatLng {lat = 0.01, lng = 0.01},
+                new LatLng {lat = 0.015, lng = 0.01}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -136,10 +136,10 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void Zoom13_RouteInSingleTile_ShouldMergeZoom15Tiles()
         {
-            var dataContainer = GetDataContainer(new List<LatLngZ>
+            var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLngZ {lat = 0.1, lng = 0.1},
-                new LatLngZ {lat = 0.15, lng = 0.15}
+                new LatLng {lat = 0.1, lng = 0.1},
+                new LatLng {lat = 0.15, lng = 0.15}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -151,10 +151,10 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void Zoom13_RouteIsNarrowHorizontalLine_ShouldMergeZoom15Tiles()
         {
-            var dataContainer = GetDataContainer(new List<LatLngZ>
+            var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLngZ {lat = 0.1, lng = 0.1},
-                new LatLngZ {lat = 0.1, lng = 0.15}
+                new LatLng {lat = 0.1, lng = 0.1},
+                new LatLng {lat = 0.1, lng = 0.15}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -166,10 +166,10 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void Zoom13_RouteIsNarrowVerticalLine_ShouldMergeZoom15Tiles()
         {
-            var dataContainer = GetDataContainer(new List<LatLngZ>
+            var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLngZ {lat = 0.1, lng = 0.1},
-                new LatLngZ {lat = 0.15, lng = 0.1}
+                new LatLng {lat = 0.1, lng = 0.1},
+                new LatLng {lat = 0.15, lng = 0.1}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
