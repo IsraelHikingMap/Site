@@ -11,7 +11,7 @@
         elevation: number;
         itmCoordinates: INorthEast;
         isSaveTooltipOpen: boolean;
-        isRemoveTooltipOpen: boolean; 
+        isRemoveTooltipOpen: boolean;
         wikiCoordinatesString: string;
         marker: Common.IMarkerWithTitle;
         updateWikiCoordinates(title: string): void;
@@ -36,12 +36,13 @@
                 } as angular.IRequestShortcutConfig).then((northEast: { data: INorthEast }) => {
                     $scope.itmCoordinates = northEast.data;
                 });
-                elevationProvider.updateHeights([$scope.latLng]);
+                let array = [$scope.latLng];
+                elevationProvider.updateHeights(array).then(() => $scope.latLng = array[0]);
             });
 
             $scope.marker.on("popupclose", () => {
                 // workaround to fix issue with tooltips remaining after close.
-                $scope.isRemoveTooltipOpen = false; 
+                $scope.isRemoveTooltipOpen = false;
                 $scope.isSaveTooltipOpen = false;
             });
         }
