@@ -43,7 +43,7 @@ namespace IsraelHiking.Tests.Services.Routers {
             ] } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
             routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
                 expect(data.length).toBe(2);
-                expect(data[1].latlngzs.length).toBe(3);
+                expect(data[1].latlngs.length).toBe(3);
             }).finally(done);
             $httpBackend.flush();
         });
@@ -52,7 +52,7 @@ namespace IsraelHiking.Tests.Services.Routers {
             $httpBackend.whenGET(ADDRESS).respond({});
             routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
                 expect(data.length).toBe(1);
-                expect(data[0].latlngzs.length).toBe(2);
+                expect(data[0].latlngs.length).toBe(2);
             }).finally(done);
             $httpBackend.flush();
         });
@@ -61,7 +61,7 @@ namespace IsraelHiking.Tests.Services.Routers {
             $httpBackend.whenGET(ADDRESS).respond(500, {});
             routeService.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
                 expect(data.length).toBe(1);
-                expect(data[0].latlngzs.length).toBe(2);
+                expect(data[0].latlngs.length).toBe(2);
             }).finally(done);
             $httpBackend.flush();
         });

@@ -233,7 +233,7 @@
                 routerService.getRoute($scope.fromContext.selectedSearchResults.latlng, $scope.toContext.selectedSearchResults.latlng, $scope.routingType).then((response: Common.RouteSegmentData[]) => {
                     this.featureGroup.clearLayers();
                     for (let segment of response) {
-                        let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
+                        let polyLine = L.polyline(segment.latlngs, this.getPathOprtions());
                         this.featureGroup.addLayer(polyLine);
                     }
                     var markerFrom = L.marker($scope.fromContext.selectedSearchResults.latlng, { icon: Services.IconsService.createStartIcon(), draggable: false, keyboard: false }) as Common.IMarkerWithTitle;
@@ -302,15 +302,6 @@
                 }
                 return false;
             });
-        }
-
-        private convertToLatLngZArray = (latlngs: L.LatLng[]): Common.LatLngZ[] => {
-            let latlngZ = [] as  Common.LatLngZ[];
-            for (let latlng of latlngs) {
-                latlngZ.push(angular.extend({ z: 0 }, latlng));
-            }
-            this.elevationProvider.updateHeights(latlngZ);
-            return latlngZ;
         }
 
         private internalSearch = ($scope: ISearchScope, searchContext: ISearchContext) => {

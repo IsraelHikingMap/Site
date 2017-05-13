@@ -24,7 +24,7 @@
 
     export interface RouteSegmentData {
         routePoint: L.LatLng;
-        latlngzs: LatLngZ[];
+        latlngs: L.LatLng[];
         routingType: RoutingType;
     }
 
@@ -43,10 +43,6 @@
         overlays: LayerData[];
         northEast: L.LatLng;
         southWest: L.LatLng;
-    }
-
-    export interface LatLngZ extends L.LatLng {
-        z: number;
     }
 
     export interface IMarkerWithTitle extends L.Marker {

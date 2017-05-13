@@ -12,27 +12,27 @@
             this.toastr = toastr;
         }
 
-        public updateHeights = (latlngzs: Common.LatLngZ[]): angular.IHttpPromise<{}> => {
-            var filteredArray = [] as Common.LatLngZ[];
+        public updateHeights = (latlngs: L.LatLng[]): angular.IHttpPromise<{}> => {
+            var filteredArray = [] as L.LatLng[];
             var points = [];
-            for (let latlngz of latlngzs) {
-                if (latlngz.z !== 0) {
+            for (let latlng of latlngs) {
+                if (latlng.alt) {
                     continue;
                 }
-                filteredArray.push(latlngz);
-                points.push(`${latlngz.lat.toFixed(4)},${latlngz.lng.toFixed(4)}`);
+                filteredArray.push(latlng);
+                points.push(`${latlng.lat.toFixed(4)},${latlng.lng.toFixed(4)}`);
             }
             if (filteredArray.length === 0) {
                 return;
             }
             let promise = this.$http.get(Common.Urls.elevation, { params: { points: points.join("|") } } as angular.IRequestShortcutConfig);
             promise.then((response: { data: number[] }) => {
-                    for (let index = 0; index < filteredArray.length; index++) {
-                        filteredArray[index].z = response.data[index];
-                    }
-                }, () => {
-                    this.toastr.error(this.resourcesService.unableToGetElevationData);
-                });
+                for (let index = 0; index < filteredArray.length; index++) {
+                    filteredArray[index].alt = response.data[index];
+                }
+            }, () => {
+                this.toastr.error(this.resourcesService.unableToGetElevationData);
+            });
             return promise;
         }
     }

@@ -26,30 +26,30 @@ namespace IsraelHiking.Tests.Services.Elevation {
         });
 
         it("Should update height data", () => {
-            var latlngzs = [{ lat: 0, lng: 0, z: 0 } as Common.LatLngZ];
+            var latlngs = [L.latLng(0, 0, 0)];
             $httpBackend.whenGET(ADDRESS).respond([1]);
 
-            elevationProvider.updateHeights(latlngzs);
+            elevationProvider.updateHeights(latlngs);
             $httpBackend.flush();
 
-            expect(latlngzs[0].z).toBe(1);
+            expect(latlngs[0].alt).toBe(1);
         });
 
         it("Should not call provider bacause all coordinates has elevation", () => {
-            var latlngzs = [{ lat: 0, lng: 0, z: 1 } as Common.LatLngZ];
+            var latlngs = [L.latLng(0, 0, 1)];
 
-            elevationProvider.updateHeights(latlngzs);
+            elevationProvider.updateHeights(latlngs);
 
-            expect(latlngzs[0].z).toBe(1);
+            expect(latlngs[0].alt).toBe(1);
             $httpBackend.verifyNoOutstandingExpectation();
         });
 
         it("Should raise toast when error occurs", () => {
-            var latlngzs = [<Common.LatLngZ>{ lat: 0, lng: 0, z: 0 }];
+            var latlngs = [L.latLng(0, 0, 0)];
             $httpBackend.whenGET(ADDRESS).respond(500, {});
             toastr.error = jasmine.createSpy("spy");
 
-            elevationProvider.updateHeights(latlngzs);
+            elevationProvider.updateHeights(latlngs);
             $httpBackend.flush();
 
             expect(toastr.error).toHaveBeenCalled();

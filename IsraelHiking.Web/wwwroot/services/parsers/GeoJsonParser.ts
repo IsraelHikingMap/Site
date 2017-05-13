@@ -79,35 +79,33 @@
             } as Common.MarkerData;
         }
 
-        public static createLatlng(coordinates: GeoJSON.Position): Common.LatLngZ {
-            let latlngz = new L.LatLng(coordinates[1], coordinates[0]) as Common.LatLngZ;
-            latlngz.z = coordinates[2] || 0;
-            return latlngz;
+        public static createLatlng(coordinates: GeoJSON.Position): L.LatLng {
+            return new L.LatLng(coordinates[1], coordinates[0], coordinates[2] || 0);
         }
 
-        public static createLatlngArray(coordinates: GeoJSON.Position[]): Common.LatLngZ[] {
-            let latlngzs = [] as Common.LatLngZ[];
+        public static createLatlngArray(coordinates: GeoJSON.Position[]): L.LatLng[] {
+            let latlngs = [] as L.LatLng[];
             for (let pointCoordinates of coordinates) {
-                latlngzs.push(GeoJsonParser.createLatlng(pointCoordinates));
+                latlngs.push(GeoJsonParser.createLatlng(pointCoordinates));
             }
-            return latlngzs;
+            return latlngs;
         }
 
         private positionsToData(positions: GeoJSON.Position[], name: string): Common.RouteData {
 
             var routeData = { segments: [], markers: [], name: name || "" } as Common.RouteData;
-            var latlngzs = GeoJsonParser.createLatlngArray(positions);
-            if (latlngzs.length < 2) {
+            var latlngs = GeoJsonParser.createLatlngArray(positions);
+            if (latlngs.length < 2) {
                 return routeData;
             }
             routeData.segments.push({
-                routePoint: latlngzs[0],
-                latlngzs: [latlngzs[0], latlngzs[0]],
+                routePoint: latlngs[0],
+                latlngs: [latlngs[0], latlngs[0]],
                 routingType: "Hike"
             } as Common.RouteSegmentData);
             routeData.segments.push({
-                routePoint: latlngzs[latlngzs.length - 1],
-                latlngzs: latlngzs,
+                routePoint: latlngs[latlngs.length - 1],
+                latlngs: latlngs,
                 routingType: "Hike"
             } as Common.RouteSegmentData);
             return routeData;
@@ -122,16 +120,16 @@
                 if (routeData.segments.length === 0) {
                     let latLng = GeoJsonParser.createLatlng(lineCoordinates[0]);
                     routeData.segments.push({
-                        latlngzs: [latLng, latLng],
+                        latlngs: [latLng, latLng],
                         routePoint: latLng,
                         routingType: "Hike"
                     } as Common.RouteSegmentData);
                 }
-                let latlngzs = GeoJsonParser.createLatlngArray(lineCoordinates);
-                if (latlngzs.length >= 2) {
+                let latlngs = GeoJsonParser.createLatlngArray(lineCoordinates);
+                if (latlngs.length >= 2) {
                     routeData.segments.push({
-                        latlngzs: latlngzs,
-                        routePoint: latlngzs[0],
+                        latlngs: latlngs,
+                        routePoint: latlngs[0],
                         routingType: "Hike"
                     } as Common.RouteSegmentData);
                 }
@@ -169,8 +167,8 @@
 
                 for (let segment of routeData.segments) {
                     let lineStringCoordinates = [] as GeoJSON.Position[];
-                    for (let latlngz of segment.latlngzs) {
-                        lineStringCoordinates.push([latlngz.lng, latlngz.lat, latlngz.z] as GeoJSON.Position);
+                    for (let latlng of segment.latlngs) {
+                        lineStringCoordinates.push([latlng.lng, latlng.lat, latlng.alt || 0] as GeoJSON.Position);
                     }
                     multiLineStringCoordinates.push(lineStringCoordinates);
                 }

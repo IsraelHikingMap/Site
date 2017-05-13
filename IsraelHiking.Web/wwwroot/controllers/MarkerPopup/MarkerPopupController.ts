@@ -7,11 +7,11 @@
     export interface IRemovableMarkerScope extends IRootScope {
         title: string;
         remove(): void;
-        latLng: Common.LatLngZ;
+        latLng: L.LatLng;
         elevation: number;
         itmCoordinates: INorthEast;
         isSaveTooltipOpen: boolean;
-        isRemoveTooltipOpen: boolean; 
+        isRemoveTooltipOpen: boolean;
         wikiCoordinatesString: string;
         marker: Common.IMarkerWithTitle;
         updateWikiCoordinates(title: string): void;
@@ -26,7 +26,8 @@
             $scope.isSaveTooltipOpen = false;
 
             $scope.marker.on("popupopen", () => {
-                $scope.latLng = angular.extend({z: 0}, $scope.marker.getLatLng()) as Common.LatLngZ;
+                $scope.latLng = $scope.marker.getLatLng();
+                $scope.latLng.alt = 0;
                 $http.get(Common.Urls.itmGrid, {
                     params: {
                         lat: $scope.latLng.lat,
@@ -35,12 +36,13 @@
                 } as angular.IRequestShortcutConfig).then((northEast: { data: INorthEast }) => {
                     $scope.itmCoordinates = northEast.data;
                 });
-                elevationProvider.updateHeights([$scope.latLng]);
+                let array = [$scope.latLng];
+                elevationProvider.updateHeights(array).then(() => $scope.latLng = array[0]);
             });
 
             $scope.marker.on("popupclose", () => {
                 // workaround to fix issue with tooltips remaining after close.
-                $scope.isRemoveTooltipOpen = false; 
+                $scope.isRemoveTooltipOpen = false;
                 $scope.isSaveTooltipOpen = false;
             });
         }

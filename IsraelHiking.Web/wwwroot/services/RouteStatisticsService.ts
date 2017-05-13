@@ -1,7 +1,7 @@
 ﻿namespace IsraelHiking.Services {
 
     export interface IRouteStatisticsPoint extends L.Point {
-        latlngz: Common.LatLngZ;
+        latlng: L.LatLng;
         slope: number;
     }
 
@@ -38,24 +38,24 @@
                 return routeStatistics;
             }
 
-            let previousPoint = route.segments[0].latlngzs[0];
-            let point = L.point(0, previousPoint.z) as IRouteStatisticsPoint;
-            point.latlngz = previousPoint;
+            let previousPoint = route.segments[0].latlngs[0];
+            let point = L.point(0, previousPoint.alt) as IRouteStatisticsPoint;
+            point.latlng = previousPoint;
             point.slope = 0;
             routeStatistics.points.push(point);
 
             for (let segment of route.segments) {
-                for (let latlngz of segment.latlngzs) {
-                    let distance = previousPoint.distanceTo(latlngz);
+                for (let latlng of segment.latlngs) {
+                    let distance = previousPoint.distanceTo(latlng);
                     if (distance < 1) {
                         continue;
                     }
                     routeStatistics.length += distance;
-                    let point = L.point((routeStatistics.length / 1000), latlngz.z) as IRouteStatisticsPoint;
-                    point.latlngz = latlngz;
-                    point.slope = distance === 0 ? 0 : (latlngz.z - previousPoint.z) * 100 / distance;
+                    let point = L.point((routeStatistics.length / 1000), latlng.alt || 0) as IRouteStatisticsPoint;
+                    point.latlng = latlng;
+                    point.slope = distance === 0 ? 0 : (latlng.alt - previousPoint.alt) * 100 / distance;
                     routeStatistics.points.push(point);
-                    previousPoint = latlngz;
+                    previousPoint = latlng;
                 }
             }
             let simplified = L.LineUtil.simplify(routeStatistics.points, 1);
@@ -88,7 +88,7 @@
                 let distance = x - previousPoint.x;
                 point.slope = distance === 0 ? 0 : (point.y - previousPoint.y) * 100 / (distance * 1000);
                 let ratio = distance / (currentPoint.x - previousPoint.x)
-                point.latlngz = this.getLatlngInterpolatedValue(previousPoint.latlngz, currentPoint.latlngz, ratio, point.y);
+                point.latlng = this.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio, point.y);
                 return point;
             }
             return previousPoint;
@@ -98,10 +98,8 @@
             return (point2.y - point1.y) / (point2.x - point1.x) * (x - point1.x) + point1.y;
         }
 
-        private getLatlngInterpolatedValue(latlng1: L.LatLng, latlng2: L.LatLng, ratio: number, z: number): Common.LatLngZ {
-            let returnValue = L.latLng((latlng2.lat - latlng1.lat) * ratio + latlng1.lat, (latlng2.lng - latlng1.lng) * ratio + latlng1.lng) as Common.LatLngZ;
-            returnValue.z = z;
-            return returnValue;
+        private getLatlngInterpolatedValue(latlng1: L.LatLng, latlng2: L.LatLng, ratio: number, alt: number): L.LatLng {
+            return L.latLng((latlng2.lat - latlng1.lat) * ratio + latlng1.lat, (latlng2.lng - latlng1.lng) * ratio + latlng1.lng, alt);
         }
 
         private isOnSegment(latlng1: L.LatLng, latlng2: L.LatLng, latlng: L.LatLng): boolean {
@@ -148,11 +146,11 @@
             }
             let previousPoint = statistics.points[0];
             for (let currentPoint of statistics.points) {
-                if (this.isOnSegment(previousPoint.latlngz, currentPoint.latlngz, latLng) == false) {
+                if (this.isOnSegment(previousPoint.latlng, currentPoint.latlng, latLng) == false) {
                     previousPoint = currentPoint;
                     continue;
                 }
-                return previousPoint.x + previousPoint.latlngz.distanceTo(latLng) / 1000;
+                return previousPoint.x + previousPoint.latlng.distanceTo(latLng) / 1000;
             }
             return 0;
         }

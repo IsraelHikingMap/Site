@@ -44,13 +44,13 @@
                     this.changingAddress = false;
                     return;
                 }
-                let latLngZ = this.parsePathToGeoLocation();
-                if (latLngZ == null) {
+                let latLng = this.parsePathToGeoLocation();
+                if (latLng == null) {
                     $window.location.href = this.$location.absUrl();
                     $window.location.reload();
                     return;
                 }
-                this.map.setView(latLngZ, latLngZ.z);
+                this.map.setView(latLng, latLng.alt);
             });
 
             this.map.on("moveend", () => {
@@ -117,7 +117,7 @@
                 var pointStrings = splitted[pointIndex].split(HashService.DATA_DELIMITER);
                 if (pointStrings.length === 3) {
                     array.push({
-                        latlngzs: [],
+                        latlngs: [],
                         routePoint: L.latLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])),
                         routingType: this.convertCharacterToRoutingType(pointStrings[0])
                     } as Common.RouteSegmentData);
@@ -200,25 +200,23 @@
             this.externalUrl = search.url || "";
             this.siteUrl = search.s || "";
             this.download = search.download ? true : false;
-            let latLngZ = this.parsePathToGeoLocation();
-            if (latLngZ != null) {
-                this.map.setZoom(latLngZ.z);
-                this.map.panTo(latLngZ);
+            let latLng = this.parsePathToGeoLocation();
+            if (latLng != null) {
+                this.map.setZoom(latLng.alt);
+                this.map.panTo(latLng);
             }
             this.dataContainer = this.urlStringToDataContainer(search);
         }
 
-        private parsePathToGeoLocation(): Common.LatLngZ {
+        private parsePathToGeoLocation(): L.LatLng {
             var path = this.$location.path();
             var splittedpath = path.split("/");
             if (splittedpath.length !== 4) {
                 return null;
             }
-            return {
-                z: parseInt(splittedpath[splittedpath.length - 3]),
-                lat: parseFloat(splittedpath[splittedpath.length - 2]),
-                lng: parseFloat(splittedpath[splittedpath.length - 1])
-            } as Common.LatLngZ;
+            return L.latLng(parseFloat(splittedpath[splittedpath.length - 2]),
+                parseFloat(splittedpath[splittedpath.length - 1]),
+                parseInt(splittedpath[splittedpath.length - 3]));
         }
     }
 } 

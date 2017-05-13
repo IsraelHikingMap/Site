@@ -7,6 +7,7 @@ namespace IsraelHiking.Common
     {
         public double lat { get; set; }
         public double lng { get; set; }
+        public double? alt { get; set; }
 
         public bool Equals(LatLng other)
         {
@@ -31,16 +32,13 @@ namespace IsraelHiking.Common
             }
         }
 
-        public LatLng()
-        {
-            lat = 0;
-            lng = 0;
-        }
+        public LatLng() : this(0,0) { }
 
-        public LatLng(double latitude, double longitude)
+        public LatLng(double latitude, double longitude, double? altitude = null)
         {
             lat = latitude;
             lng = longitude;
+            alt = altitude;
         }
 
         public LatLng(string latlngString) : this()

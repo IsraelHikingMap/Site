@@ -149,7 +149,7 @@ namespace IsraelHiking.Tests.Services.Parsers {
                         ],
                         segments: [
                             {
-                                latlngzs: [L.latLng(1, 1) as Common.LatLngZ],
+                                latlngs: [L.latLng(1, 1)],
                                 routePoint: L.latLng(1, 1),
                                 routingType: "Hike"
                             } as Common.RouteSegmentData

@@ -43,7 +43,7 @@ namespace IsraelHiking.API.Tests.Gpx
                         markers = new List<MarkerData> { new MarkerData { latlng = new LatLng { lat = 1, lng = 2 } } },
                         segments = new List<RouteSegmentData>
                         {
-                            new RouteSegmentData {latlngzs = new List<LatLngZ> {new LatLngZ {lat = 3, lng = 4, z = 5}}}
+                            new RouteSegmentData {latlngs = new List<LatLng> {new LatLng {lat = 3, lng = 4, alt = 5}}}
                         }
                     }
                 }
@@ -150,10 +150,10 @@ namespace IsraelHiking.API.Tests.Gpx
                         segments = new List<RouteSegmentData>
                         {
                             new RouteSegmentData {
-                                latlngzs = new List<LatLngZ>
+                                latlngs = new List<LatLng>
                                 {
-                                    new LatLngZ {lat = 3, lng = 4, z = 5},
-                                    new LatLngZ {lat = 6, lng = 7, z = 8}
+                                    new LatLng {lat = 3, lng = 4, alt = 5},
+                                    new LatLng {lat = 6, lng = 7, alt = 8}
                                 },
                                 routePoint = new LatLng { lat = 6, lng = 7}
                             }
@@ -164,10 +164,10 @@ namespace IsraelHiking.API.Tests.Gpx
                         name = "name2",
                         segments = new List<RouteSegmentData>
                         {
-                            new RouteSegmentData {latlngzs = new List<LatLngZ>
+                            new RouteSegmentData {latlngs = new List<LatLng>
                             {
-                                new LatLngZ {lat = 13, lng = 14, z = 15},
-                                new LatLngZ {lat = 16, lng = 17, z = 18}
+                                new LatLng {lat = 13, lng = 14, alt = 15},
+                                new LatLng {lat = 16, lng = 17, alt = 18}
                             }}
                         }
                     }
@@ -179,7 +179,7 @@ namespace IsraelHiking.API.Tests.Gpx
 
             Assert.AreEqual(dataContainer.routes.Count, newDataContainer.routes.Count);
             Assert.AreEqual(dataContainer.routes.First().name, newDataContainer.routes.First().name);
-            CollectionAssert.AreEqual(dataContainer.routes.First().segments.First().latlngzs, newDataContainer.routes.First().segments.First().latlngzs);
+            CollectionAssert.AreEqual(dataContainer.routes.First().segments.First().latlngs, newDataContainer.routes.First().segments.First().latlngs);
             Assert.AreEqual(dataContainer.routes.First().markers.First().latlng, newDataContainer.routes.First().markers.First().latlng);
             Assert.AreEqual(dataContainer.routes.Last().name, newDataContainer.routes.Last().name);
         }

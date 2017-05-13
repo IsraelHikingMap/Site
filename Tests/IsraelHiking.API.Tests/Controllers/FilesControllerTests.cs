@@ -108,7 +108,7 @@ namespace IsraelHiking.API.Tests.Controllers
                         },
                         segments = new List<RouteSegmentData>
                         {
-                            new RouteSegmentData {latlngzs = new List<LatLngZ> {new LatLngZ()}}
+                            new RouteSegmentData {latlngs = new List<LatLng> {new LatLng()}}
                         }
                     }
                 }
@@ -144,9 +144,9 @@ namespace IsraelHiking.API.Tests.Controllers
 
             Assert.AreEqual(1, dataContainer.routes.Count);
             Assert.AreEqual(1, dataContainer.routes.First().segments.Count);
-            Assert.AreEqual(6, dataContainer.routes.First().segments.First().latlngzs.Count);
+            Assert.AreEqual(6, dataContainer.routes.First().segments.First().latlngs.Count);
             Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
-            Assert.IsTrue(dataContainer.routes.SelectMany(r => r.segments.SelectMany(s => s.latlngzs)).All(l => l.z != 0));
+            Assert.IsTrue(dataContainer.routes.SelectMany(r => r.segments.SelectMany(s => s.latlngs)).All(l => l.alt != 0));
         }
     }
 }

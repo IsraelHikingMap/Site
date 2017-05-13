@@ -143,7 +143,7 @@
                     this.osmTraceLayer.clearLayers();
                     for (let route of resposnse.data.routes) {
                         for (let segment of route.segments) {
-                            let polyLine = L.polyline(segment.latlngzs, this.getPathOprtions());
+                            let polyLine = L.polyline(segment.latlngs, this.getPathOprtions());
                             this.osmTraceLayer.addLayer(polyLine);
                         }
                         for (let markerData of route.markers) {
