@@ -1,0 +1,77 @@
+﻿/*height: 250px;*/
+.route-statistics-popup {
+    background: #000000;
+    background: rgba(0,0,0,0.3);
+    position: absolute;
+    overflow: hidden;
+    color: white;
+    padding-left: 10px;
+    padding-right: 10px;
+    top: 66%;
+    left: 15%;
+    right: 15%;
+    bottom: 70px;
+}
+
+.route-statistics-header {
+    cursor: move;
+}
+
+.route-statistics-header-title {
+    font-size: large;
+}
+
+.route-statistics-chart {
+    position: absolute;
+    top: 50px;
+    bottom: 5px;
+    width: 100%;
+}
+
+    .route-statistics-chart svg * {
+        pointer-events: none;
+    }
+
+.chart-tooltip {
+    color: black;
+    text-align: left;
+    margin: 5px;
+}
+
+.tooltip-inner a {
+    color: #79bdf7;
+}
+
+.route-statistics-footer {
+    bottom: 10px;
+    left: 5px;
+    position: absolute;
+}
+
+.route-statistics-popup {
+    z-index: 800;
+}
+
+/* Extra Small Devices, Phones */
+@media only screen and (min-width : 480px) {
+    .route-statistics-popup {
+        left: 10%;
+        right: 10%;
+    }
+}
+
+/* Small Devices, Tablets */
+@media only screen and (min-width : 768px) {
+    .route-statistics-popup {
+        left: 6%;
+        right: 6%
+    }
+}
+
+/* Medium Devices, Desktops */
+@media only screen and (min-width : 992px) {
+    .route-statistics-popup {
+        left: 4%;
+        right: 4%
+    }
+}

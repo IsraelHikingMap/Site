@@ -1,0 +1,34 @@
+﻿<div class="marker-popup" [dir]="resources.direction">
+    <md-input-container fxFill>
+        <textarea mdInput rows="2" type="text" [dir]="getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates(title)" placeholder="{{resources.title}}" fxFill></textarea>
+    </md-input-container>
+    <div [hidden]="!showIcons">
+        <div *ngFor="let group of iconsGroups">
+            <div fxLayout="row" fxFill>
+                <div *ngFor="let icon of group.icons" (click)="setMerkerType(icon)" class="cursor-pointer text-center" fxFlex="{{100/iconsGroups.length}}" angulartics2On="click" angularticsCategory="Icons" angularticsEvent="Select {{icon}}">
+                    <i class="fa icon-{{icon}} fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div fxLayout="row">
+        <div fxFlex="25">
+            <button md-button type="button" (click)="save(title, markerType)" mdTooltip="{{resources.save}}" mdTooltipPosition="above"><i class="fa icon-check"></i></button>
+        </div>
+        <div fxFlex="25">
+            <button md-button type="button" (click)="remove()" mdTooltip="{{resources.deletePoi}}" mdTooltipPosition="above"><i class="fa icon-trash"></i></button>
+        </div>
+        <div fxFlex="25">
+            <button md-button type="button" (click)="hideCoordinates = !hideCoordinates" mdTooltip="{{resources.showCoordinates}}" mdTooltipPosition="above"><i class="fa icon-globe"></i></button>
+        </div>
+        <div fxFlex>
+            <button md-button type="button" (click)="showIcons = !showIcons" mdTooltip="{{resources.selectIcon}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsEvent="Toggle select icon"><i class="fa icon-{{markerType}}"></i></button>
+        </div>
+    </div>
+    <div [hidden]="hideCoordinates">
+        <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates" [wikiCoordinatesString]="wikiCoordinatesString"></coordinates>
+        <p class="chrome-wordwrap-fix {{'text-' + resources.start}}">
+            <span [innerHtml]="resources.coordinatesForWikipedia"></span> <span dir="ltr">{{wikiCoordinatesString}}</span>
+        </p>
+    </div>
+</div>

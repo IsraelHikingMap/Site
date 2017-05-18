@@ -1,0 +1,104 @@
+﻿<div [dir]="resources.direction">
+    <div fxLayout="row" fxLayoutAlign="none none" class="row-hover">
+        <div fxFlex="15">
+            <md-slide-toggle [(ngModel)]="isAdvanced" class="cursor-pointer"></md-slide-toggle>
+        </div>
+        <div fxFlex="75">
+            <span (click)="isAdvanced = !isAdvanced" class="cursor-pointer" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle advanced button"><i class="fa icon-gear"></i> {{resources.toggleAdvancedSettings}}</span>
+        </div>
+        <div fxFlex>
+            <div fxLayout="column" fxFill>
+                <span fxFill fxLayoutAlign="end start" class="cursor-pointer" (click)="closeSidebar()"><i class="fa fa-lg icon-close"></i></span>
+            </div>
+        </div>
+    </div>
+    <div *ngFor="let baseLayer of baseLayers">
+        <div class="cursor-pointer row-hover" fxLayout="row" fxLayoutAlign="none none" (click)="selectBaseLayer(baseLayer, $event)">
+            <div fxFlex="15">
+                <span><i class="fa fa-lg" [ngClass]="{'icon-eye': baseLayer.selected, 'icon-eye-slash': !baseLayer.selected}"></i></span>
+            </div>
+            <div fxFlex="75">
+                <span>{{resources.translate(baseLayer.key)}}</span>
+            </div>
+            <div fxFlex [hidden]="!isAdvanced || !baseLayer.isEditable">
+                <div fxLayout="column" fxFill>
+                    <span fxFill fxLayoutAlign="end start" (click)="editBaseLayer(baseLayer, $event)" mdTooltip="{{resources.baseLayerProperties}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Edit base layer"><i class="fa fa-lg icon-wrench"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div [hidden]="!isAdvanced">
+        <div fxLayout="row" class="cursor-pointer row-hover" (click)="addBaseLayer($event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Add base layer">
+            <div fxFlex="15"></div>
+            <div fxFlex="75">
+                <span>{{resources.addBaseLayer}}</span>
+            </div>
+            <div fxFlex>
+                <div fxLayout="column" fxFill>
+                    <span fxFill fxLayoutAlign="end start"><i class="fa icon-plus" mdTooltip="{{resources.addBaseLayer}}" mdTooltipPosition="before"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="divider" />
+
+    <div *ngFor="let overlay of overlays">
+        <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleVisibility(overlay, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle overlay visiblity {{overlay.key}}">
+            <div fxFlex="15">
+                <span><i class="fa fa-lg" [ngClass]="{'icon-eye': overlay.visible, 'icon-eye-slash': !overlay.visible}"></i></span>
+            </div>
+            <div fxFlex="75">
+                <span>{{resources.translate(overlay.key)}}</span>
+            </div>
+            <div fxFlex [hidden]="!isAdvanced || !overlay.isEditable">
+                <div fxLayout="column" fxFill>
+                    <span fxFill fxLayoutAlign="end start" (click)="editOverlay(overlay, $event)" mdTooltip="{{resources.overlayProperties}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Edit overlay"><i class="fa fa-lg icon-wrench"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div [hidden]="!isAdvanced">
+        <div fxLayout="row" class="cursor-pointer row-hover" (click)="addOverlay($event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Add overlay">
+            <div fxFlex="15"></div>
+            <div fxFlex="75">
+                <span>{{resources.addOverlay}}</span>
+            </div>
+            <div fxFlex>
+                <div fxLayout="column" fxFill>
+                    <span fxFill fxLayoutAlign="end start" mdTooltip="{{resources.addOverlay}}" mdTooltipPosition="before"><i class="fa icon-plus"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <hr class="divider" />
+
+    <div *ngFor="let route of routes">
+        <div fxLayout="row" class="cursor-pointer row-hover" (click)="selectRoute(route, $event)">
+            <div fxFlex="15">
+                <span [ngStyle]="{'color': getRouteColor(route)}">
+                    <i class="fa fa-lg" [ngClass]="{'icon-pencil': isRouteSelected(route), 'icon-eye': isRouteVisisble(route) && !isRouteSelected(route), 'icon-eye-slash': !isRouteVisisble(route) }"></i>
+                </span>
+            </div>
+            <div fxFlex="75">
+                <span [ngStyle]="{'color': getRouteColor(route)}">{{getRouteName(route)}}</span>
+            </div>
+            <div fxFlex>
+                <div fxLayout="column" fxFill>
+                    <span fxFill fxLayoutAlign="end start" (click)="editRoute(getRouteName(route), $event)" mdTooltip="{{resources.routeProperties}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Edit route"><i class="fa fa-lg icon-wrench"></i></span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div fxLayout="row" class="cursor-pointer row-hover" (click)="addRoute($event)" [hidden]="!isAdvanced" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Add route">
+        <div fxFlex="15"></div>
+        <div fxFlex="75">
+            <span>{{resources.addRoute}}</span>
+        </div>
+        <div fxFlex>
+            <div fxLayout="column" fxFill>
+                <span fxFill fxLayoutAlign="end start" mdTooltip="{{resources.addRoute}}" mdTooltipPosition="before"><i class="fa icon-plus"></i></span>
+            </div>
+        </div>
+    </div>
+</div>

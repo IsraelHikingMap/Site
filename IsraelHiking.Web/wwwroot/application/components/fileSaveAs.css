@@ -1,0 +1,40 @@
+﻿/* Extra Small Devices, Phones */
+[hidden] {
+    display: none !important;
+}
+
+.save-as-dropdown {
+    float: right;
+    height: 26px;
+    background: white;
+    width: 200px;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 4px !important;
+    border-bottom-right-radius: 4px !important;
+    border-bottom-left-radius: 0 !important;
+    border: none;
+    padding: 0 10px;
+    border-left: 1px solid #ccc;
+}
+
+.leaflet-touch .save-as-dropdown {
+    height: 30px;
+}
+
+    .save-as-control-container .leaflet-bar {
+        display: table;
+    }
+
+.save-as-button {
+    float: right;
+    border-top-left-radius: 4px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-bottom-left-radius: 4px !important;
+}
+
+@media only screen and (min-width : 768px) {
+    .save-as-dropdown {
+        width: 250px;
+    }
+}

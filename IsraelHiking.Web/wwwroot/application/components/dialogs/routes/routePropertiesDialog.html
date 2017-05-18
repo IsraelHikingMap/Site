@@ -1,0 +1,61 @@
+﻿<div [dir]="resources.direction">
+    <div md-dialog-title>
+        <div fxLayout="row">
+            <div fxFlex="90">
+                <h4>{{title}}</h4>
+            </div>
+            <div fxFlex>
+                <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
+            </div>
+        </div>
+    </div>
+    <div md-dialog-content>
+        <md-input-container hintLabel="{{resources.layerNamePlaceHolder}}" fxFill>
+            <input mdInput type="text" [(ngModel)]="routeProperties.name" placeholder="{{resources.name}}" required="" fxFill/>
+        </md-input-container>
+        <br />
+        <div fxLayout="column" fxLayoutAlign="space-between stretch">
+            <div fxLayout="row" fxLayoutAlign="none none">
+                <label>{{resources.color}}</label>
+                <button md-button type="button" [ngStyle]="{'background-color': pathOptions.color}"></button>
+            </div>
+            <br />
+            <div fxLayout="row" fxLayoutAlign="space-between stretch" fxLayoutWrap>
+                <div *ngFor="let currentColor of colors">
+                    <button md-button type="button" [ngStyle]="{'background-color': currentColor}" (click)="pathOptions.color = currentColor"><i class="fa icon-circle-o"></i></button>
+                </div>
+            </div>
+        </div>
+        <div fxLayout="column" fxLayoutAlign="space-between stretch" [hidden]="!isAdvanced">
+            <md-input-container>
+                <input mdInput type="number" min="1" max="10" [(ngModel)]="pathOptions.weight" placeholder="{{resources.widthInPixels}}" fxFill />
+            </md-input-container>
+            <div>
+                <label [style.opacity]="pathOptions.opacity">{{resources.opacity}}</label>
+                <md-slider [(ngModel)]="pathOptions.opacity" min="0.1" max="1.0" step="0.1" thumbLabel></md-slider>
+            </div>
+        </div>
+    </div>
+    <div md-dialog-actions>
+        <div fxLayout="row" fxFill>
+            <div fxFlex="16">
+                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="saveRouteToFile($event)" mdTooltip="{{resources.saveRouteToFile}}" mdTooltipPosition="below" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Save route to file"><i class="fa fa-lg icon-save"></i></button>
+            </div>
+            <div fxFlex="16">
+                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="isReversed = !isReversed" mdTooltip="{{resources.reverseRoute}}" mdTooltipPosition="below" [ngClass]="{'active': isReversed }" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Reverse route"><i class="fa fa-lg icon-arrows-h"></i></button>
+            </div>
+            <div fxFlex="16">
+                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="moveToRoute($event)" mdTooltip="{{resources.moveToRoute}}" mdTooltipPosition="below" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Move to route"><i class="fa fa-lg icon-crosshairs"></i></button>
+            </div>
+            <div fxFlex="16">
+                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" class="btn btn-default" mdTooltip="{{resources.toggleRoutingPerSegment}}" mdTooltipPosition="below" [ngClass]="{'active': routeProperties.isRoutingPerPoint}" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Toggle route per point"><i class="fa" [ngClass]="{ 'icon-routing-local': routeProperties.isRoutingPerPoint, 'icon-routing-global': !routeProperties.isRoutingPerPoint}"></i></button>
+            </div>
+            <div fxFlex="16">
+                <button md-dialog-close type="button" md-button [hidden]="isNew" (click)="deleteRoute($event)" class="btn btn-danger" mdTooltip="{{resources.deleteRoute}}" mdTooltipPosition="below" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Delete route"><i class="fa fa-lg icon-trash"></i></button>
+            </div>
+            <div fxFlex>
+                <button md-dialog-close type="button" md-button (click)="saveRoute($event)"  mdTooltip="{{resources.save}}" mdTooltipPosition="below"><i class="fa icon-check"></i></button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,204 @@
+﻿<div [dir]="resources.direction">
+    <md-tab-group [(selectedIndex)]="selectedTabIndex" [dynamicHeight]="'true'">
+        <md-tab label="{{resources.about}}" (click)="setState('about')" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info about select">
+            <div>
+                <p><span [innerHtml]="resources.infoSubheader"></span></p>
+                <h4>{{resources.infoHelpfulLinks}}</h4>
+                <div fxLayout="row" class="bottom-border">
+                    <div fxFlex="15"><i class="fa icon-facebook" fxFill></i></div>
+                    <div fxFlex [innerHtml]="resources.infoFacebookLink"></div>
+                </div>
+                <div fxLayout="row" class="bottom-border">
+                    <div fxFlex="15"><i class="fa icon-github" fxFill></i></div>
+                    <div fxFlex [innerHtml]="resources.infoGithubLink"></div>
+                </div>
+                <div fxLayout="row" class="bottom-border">
+                    <div fxFlex="15"><i class="fa icon-wikipedia-w" fxFill></i></div>
+                    <div fxFlex [innerHtml]="resources.infoOsmWikiLink"></div>
+                </div>
+                <div fxLayout="row" class="bottom-border">
+                    <div fxFlex="15"><i class="fa icon-download" fxFill></i></div>
+                    <div fxFlex><a class="cursor-pointer" (click)="openDownloadDialogs()" angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download open">{{resources.infoDownloadMapForOfflineUse}}</a></div>
+                </div>
+                <p>
+                    <i>
+                        {{resources.infoFooterThanks}}<br />
+                        {{resources.infoFooterAuthors}}<br />
+                    </i>
+                </p>
+            </div>
+        </md-tab>
+        <md-tab label="{{resources.legend}}" [disabled]="legendSections.length === 0" (click)="setState('legend')" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info legend select">
+            <div *ngFor="let section of legendSections" id="{{section.id}}">
+                <div class="legend-section">
+                    <div class="legend-section-header">
+                        <a class="cursor-pointer" (click)="toggleSectionVisibility(section)" scrollTo scrollTargetSelector="#{{section.id}}" scrollableElementSelector="#sidebar-wrapper"><h4><i class="fa" [ngClass]="{'icon-plus': !isSectionVisible(section), 'icon-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
+                    </div>
+                    <div [hidden]="!isSectionVisible(section)">
+                        <div *ngFor="let item of section.items" class="legend-item" [ngClass]="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
+                            <div class="legend-item-map" id="{{item.id}}"></div>
+                            <span class="legend-item-text">{{item.title}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </md-tab>
+        <md-tab label="{{resources.help}}" (click)="setState('help')" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info help select">
+            <h4>{{resources.helpSubheader}}</h4>
+            <p [innerHtml]="resources.helpYoutubeLink"></p>
+            <div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-info"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpInfo}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-crosshairs"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpLocation}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-folder-open"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpOpen}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-save"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpSave}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-print"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpPrint}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-files-o"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.saveAs}}</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-pencil"></i></button>
+                    </div>
+                    <div class="col-sm-10">{{resources.helpPencil}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-remove"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpClear}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-map-marker"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpMapMarker}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-hike"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.hikeRouting}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-bike"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.bikeRouting}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-four-by-four"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.fourWheelDriveRouting}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-none"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.straightLines}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-area-chart"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.routeStatistics}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-undo"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpUndo}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-search"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.search}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-share-alt"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpShare}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-map-editing"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpEditOsm}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-language"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpLanguage}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFill [ngStyle]="{'text-align': center}">{{resources.helpLayersSubHeader}}</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-gear"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpGear}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-eye-slash"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpEyeSlash}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-wrench"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpWrench}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-routing-local"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpRoutePerSegment}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-trash"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpTrash}}.</div>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-arrows-h"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpReverse}}.</div>
+                    <div fxFlex="10">
+                        <button md-button fxFill><i class="fa fa-lg icon-check"></i></button>
+                    </div>
+                    <div fxFlex="40">{{resources.helpCheck}}.</div>
+                </div>
+                <br />
+                <ul>
+                    <li>
+                        {{resources.helpDragDrop}}
+                    </li>
+                    <li>
+                        {{resources.helpLinksExplenation}} <br />
+                        <div dir="ltr" class="text-left">
+                            http://israelhiking.osm.org.il/#/?url=some-file-from-other-site&amp;baselayer=base-layer-name-or-address-optional <br />
+                            http://israelhiking.osm.org.il/#/?q=search-term
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </md-tab>
+    </md-tab-group>
+</div>
+
+
+

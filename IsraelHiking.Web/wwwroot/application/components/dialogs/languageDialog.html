@@ -1,0 +1,14 @@
+﻿<div [dir]="resources.direction">
+    <div md-dialog-title>{{resources.language}}</div>
+    <div md-dialog-content>
+        <md-radio-group [(ngModel)]="selectedLanguageCode">
+            <div *ngFor="let language of resources.availableLanguages">
+                <md-radio-button [value]="language.code" angulartics2On="click" angularticsCategory="Language" angularticsEvent="Select language {{language.code}}">{{language.label}}</md-radio-button>
+            </div>
+        </md-radio-group>
+    </div>
+    <div md-dialog-actions>
+        <button md-dialog-close md-button (click)="saveLanguage()" angulartics2On="click" angularticsCategory="Language" angularticsEvent="Save language {{selectedLanguageCode}}">{{resources.save}}</button>
+        <button md-dialog-close md-button>{{resources.close}}</button>
+    </div>
+</div>

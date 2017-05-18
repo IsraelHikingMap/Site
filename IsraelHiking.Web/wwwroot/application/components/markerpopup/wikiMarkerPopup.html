@@ -1,0 +1,11 @@
+﻿<div class="marker-popup" [dir]="resources.direction">
+    <a href="{{address}}" target="_blank"><h4 [ngClass]="{'text-right': resources.hasHebrewCharacters(title)}" class="chrome-wordwrap-fix">{{title}}</h4></a>
+    <div fxLayout="row">
+        <div fxFlex="{{flexPresentage}}">
+            <p>{{extract}}</p>
+        </div>
+        <div [hidden]="!thumbnail" fxFlex="33">
+            <img [src]="thumbnail" fxFill/>
+        </div>
+    </div>
+</div>

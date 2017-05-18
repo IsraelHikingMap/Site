@@ -1,0 +1,36 @@
+﻿<div [dir]="resources.direction">
+    <div md-dialog-title>
+        <div fxLayout="row">
+            <div fxFlex="90">
+                <h4>{{title}}</h4>
+            </div>
+            <div fxFlex>
+                <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
+            </div>
+        </div>
+    </div>
+    <div md-dialog-content>
+        <div fxLayout="row">
+            <md-input-container hintLabel="{{resources.layerNamePlaceHolder}}" fxFill>
+                <input mdInput type="text" [(ngModel)]="key" name="key" placeholder="{{resources.name}}" required="" fxFill/>
+            </md-input-container>
+        </div>
+        <div fxLayout="row">
+            <md-input-container hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill>
+                <input mdInput type="text" [(ngModel)]="address" name="address" placeholder="{{resources.address}}" required="" fxFill/>
+            </md-input-container>
+        </div>
+        <div fxLayout="row">
+            <md-input-container>
+                <input mdInput type="text" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" fxFlex="50"/>
+            </md-input-container>
+            <md-input-container>
+                <input mdInput type="text" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" fxFlex="50"/>
+            </md-input-container>
+        </div>
+    </div>
+    <div md-dialog-actions>
+        <button md-dialog-close type="button" md-button (click)="saveLayer(key, address, minZoom, maxZoom, $event)" mdTooltip="{{resources.save}}" mdTooltipPosition="below"><i class="fa icon-check"></i></button>
+        <button md-dialog-close type="button" md-button [hidden]="isNew" (click)="removeLayer($event)" mdTooltip="{{resources.deleteLayer}}" mdTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
+    </div>
+</div>

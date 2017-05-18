@@ -1,0 +1,17 @@
+﻿<div class="marker-popup" [dir]="resources.direction">
+    <h4 [ngClass]="{'text-right': resources.hasHebrewCharacters(title)}" class="chrome-wordwrap-fix">{{title}}</h4>
+    <div fxLayout="row">
+        <div fxFlex="33">
+            <a md-button (click)="convertToRoute()" mdTooltip="{{resources.convertToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Convert search to route"><i class="fa icon-plus"></i></a>
+        </div>
+        <div fxFlex="33">
+            <a md-button (click)="remove()" mdTooltip="{{resources.removeSearchResults}}" mdTooltipPosition="above"><i class="fa icon-trash"></i></a>
+        </div>
+        <div fxFlex>
+            <a md-button (click)="hideCoordinates = !hideCoordinates" mdTooltip="{{resources.showCoordinates}}" mdTooltipPosition="above"><i class="fa icon-globe"></i></a>
+        </div>
+        <div [hidden]="hideCoordinates">
+            <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates" [wikiCoordinatesString]="wikiCoordinatesString"></coordinates>
+        </div>
+    </div>
+</div>

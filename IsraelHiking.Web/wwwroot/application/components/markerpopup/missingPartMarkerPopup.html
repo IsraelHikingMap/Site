@@ -1,0 +1,65 @@
+﻿<div class="marker-popup" [dir]="resources.direction">
+    <div fxLayout="row">
+        <div fxFlex="25">
+            <a md-button fxFill (click)="setHighwayType('footway')" [ngClass]="{'active' : getHighwayType() == 'footway' }" mdTooltip="{{resources.legendFootPath}}" mdTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></a>
+        </div>
+        <div fxFlex="25">
+            <a md-button fxFill (click)="setHighwayType('cycleway')" [ngClass]="{'active' : getHighwayType() == 'cycleway' }" mdTooltip="{{resources.legendBicyclePath}}" mdTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></a>
+        </div>
+        <div fxFlex="25">
+            <a md-button fxFill (click)="setHighwayType('path')" [ngClass]="{'active' : getHighwayType() == 'path' }" mdTooltip="{{resources.legendPath}}" mdTooltipPosition="below"><i class="fa icon-bike fa-lg"></i><i class="fa icon-hike fa-lg"></i></a>
+        </div>
+        <div fxFlex>
+            <a md-button fxFill (click)="setHighwayType('track')" [ngClass]="{'active' : getHighwayType() == 'track' }" mdTooltip="{{resources.dirtRoad}}" mdTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></a>
+        </div>
+    </div>
+    <div fxLayout="row">
+        <div fxFlex="14">
+            <a md-button class="symbol-button" (click)="setColor('none')" [ngClass]="{'active' : getColor() == 'none' }" mdTooltip="{{resources.nonMarkedTrail}}" mdTooltipPosition="below"></a>
+        </div>
+        <div fxFlex="14">
+            <a md-button class="symbol-button" (click)="setColor('red')" [ngClass]="{'active' : getColor() == 'red' }" mdTooltip="{{resources.legendRedMarkedTrail}}" mdTooltipPosition="below">
+                <span class="middle-line bg-red"></span>
+            </a>
+        </div>
+        <div fxFlex="14">
+            <a md-button class="symbol-button" (click)="setColor('blue')" [ngClass]="{'active' : getColor() == 'blue' }" mdTooltip="{{resources.legendBlueMarkedTrail}}" mdTooltipPosition="below">
+                <span class="middle-line bg-blue"></span>
+            </a>
+        </div>
+        <div fxFlex="14">
+            <a md-button class="symbol-button" (click)="setColor('green')" [ngClass]="{'active' : getColor() == 'green' }" mdTooltip="{{resources.legendGreenMarkedTrail}}" mdTooltipPosition="below">
+                <span class="middle-line bg-green"></span>
+            </a>
+        </div>
+        <div fxFlex="14">
+            <a md-button class="symbol-button" (click)="setColor('black')" [ngClass]="{'active' : getColor() == 'black' }" mdTooltip="{{resources.legendBlackMarkedTrail}}" mdTooltipPosition="below">
+                <span class="middle-line bg-black"></span>
+            </a>
+        </div>
+        <div fxFlex="14">
+            <a md-button class="symbol-button" (click)="setColor('orange')" [ngClass]="{'active' : getColor() == 'orange' }" mdTooltip="{{resources.legendOrangeRegionalTrail}}" mdTooltipPosition="below">
+                <span class="middle-line bg-orange"></span>
+            </a>
+        </div>
+        <div fxFlex>
+            <a md-button class="symbol-button" (click)="setColor('purple')" [ngClass]="{'active' : getColor() == 'purple' }" mdTooltip="{{resources.legendPurpleRegionalTrail}}" mdTooltipPosition="below">
+                <span class="middle-line bg-purple"></span>
+            </a>
+        </div>
+    </div>
+    <div fxLayout="row">
+        <div fxFlex="33">
+            <a md-button (click)="addMissingPartToOsm()" mdTooltip="{{resources.addThisRouteToOsm}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Add missing part to OSM"><i class="fa icon-plus"></i></a>
+        </div>
+        <div fxFlex="33">
+            <a md-button (click)="remove()" mdTooltip="{{resources.deleteRoute}}" mdTooltipPosition="above"><i class="fa icon-trash"></i></a>
+        </div>
+        <div fxFlex>
+            <a md-button (click)="hideCoordinates = !hideCoordinates" mdTooltip="{{resources.showCoordinates}}" mdTooltipPosition="above"><i class="fa icon-globe"></i></a>
+        </div>
+    </div>
+    <div [hidden]="hideCoordinates">
+        <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates" [wikiCoordinatesString]="wikiCoordinatesString"></coordinates>
+    </div>
+</div>
