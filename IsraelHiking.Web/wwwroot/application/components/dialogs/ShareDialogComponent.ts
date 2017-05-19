@@ -132,7 +132,7 @@ export class ShareDialogComponent extends BaseMapComponent {
             this.siteUrlId = data.id;
             this.shareAddress = this.osmUserService.getUrlFromSiteUrlId(data);
             this.imageUrl = this.osmUserService.getImageFromSiteUrlId(data);
-            let escaped = encodeURIComponent(this.shareAddress); // HM TODO: Need TO check window.??
+            let escaped = encodeURIComponent(this.shareAddress);
             this.whatappShareAddress = `whatsapp://send?text=${escaped}`;
             this.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
             this.embedText = this.getEmbedText();

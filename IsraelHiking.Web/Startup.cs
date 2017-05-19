@@ -33,8 +33,8 @@ using Microsoft.AspNetCore.StaticFiles;
 
 namespace IsraelHiking.Web
 {
-    // HM TODO: workaround untill issue iw resolved:
-    // https://github.com/aspnet/BasicMiddleware/issues/220
+    // HM TODO: workaround until issue is resolved:
+    // https://github.com/aspnet/BasicMiddleware/issues/194
 
     public class RewriteWithQueryRule : IRule
     {

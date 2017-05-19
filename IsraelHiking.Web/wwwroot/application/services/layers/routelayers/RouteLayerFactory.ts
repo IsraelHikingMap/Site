@@ -1,6 +1,6 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
-import { LocalStorage, SessionStorage } from "angular2-localstorage";
+import { LocalStorage } from "angular2-localstorage";
 import { MapService } from "../../MapService";
 import { RouterService } from "../../routers/RouterService";
 import { SnappingService } from "../../SnappingService";

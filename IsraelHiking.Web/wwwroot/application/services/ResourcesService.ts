@@ -2,7 +2,7 @@
 import { Injectable } from "@angular/core";
 import { Http, Response, Headers, RequestOptions } from "@angular/http";
 import { Subject } from "rxjs/Subject";
-import { LocalStorage, SessionStorage } from "angular2-localstorage";
+import { LocalStorage } from "angular2-localstorage";
 import { GetTextCatalogService } from "./GetTextCatalogService";
 import { Urls } from "../common/Urls";
 

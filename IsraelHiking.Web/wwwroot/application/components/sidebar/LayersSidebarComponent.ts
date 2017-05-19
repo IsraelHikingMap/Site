@@ -1,6 +1,6 @@
 ﻿import { Component, ViewEncapsulation } from "@angular/core";
 import { MdDialog } from "@angular/material";
-import { LocalStorage, SessionStorage } from "angular2-localstorage";
+import { LocalStorageService } from "angular2-localstorage";
 import { MapService } from "../../services/MapService";
 import { FileService } from "../../services/FileService";
 import { SidebarService } from "../../services/SidebarService";
@@ -22,23 +22,29 @@ import { RouteEditDialogComponent } from "../dialogs/routes/RouteEditDialogCompo
     encapsulation: ViewEncapsulation.None
 })
 export class LayersSidebarComponent extends BaseMapComponent {
+    public static readonly IS_ADVANCED_KEY = "isAdvanced";
+
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public routes: IRouteLayer[];
-    // HM TODO: fix binding.
-    @LocalStorage()
-    public isAdvanced: boolean = true;
+    public isAdvanced: boolean;
 
     constructor(resources: ResourcesService,
         private dialog: MdDialog,
         private mapService: MapService,
         private layersService: LayersService,
         private fileService: FileService,
-        private sidebarService: SidebarService) {
+        private sidebarService: SidebarService,
+        private localStorageService: LocalStorageService) {
         super(resources);
         this.baseLayers = layersService.baseLayers;
         this.overlays = layersService.overlays;
         this.routes = layersService.routes;
+        this.isAdvanced = this.localStorageService.get(LayersSidebarComponent.IS_ADVANCED_KEY) || false;
+    }
+
+    public setIsAdvanced() {
+        this.localStorageService.set(LayersSidebarComponent.IS_ADVANCED_KEY, this.isAdvanced);
     }
 
     public closeSidebar() {

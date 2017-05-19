@@ -8,7 +8,7 @@ import { RouterModule, Routes } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MaterialModule, MdDialogModule, MdButtonModule, MdInputModule, MdSliderModule, MdSnackBarModule, MdAutocompleteModule } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
-import { WebStorageModule, SessionStorageService } from "angular2-localstorage";
+import { WebStorageModule, SessionStorageService, LocalStorageService } from "angular2-localstorage";
 import { ClipboardModule } from "ngx-clipboard";
 import { Angulartics2Module, Angulartics2GoogleAnalytics } from "angulartics2";
 /// css
@@ -130,6 +130,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
         WikiMarkerPopupComponent,
     ],
     providers: [SessionStorageService,
+        LocalStorageService,
         AuthorizationService,
         GetTextCatalogService,
         MapService,

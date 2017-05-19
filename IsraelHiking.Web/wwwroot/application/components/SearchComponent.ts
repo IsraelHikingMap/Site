@@ -1,4 +1,4 @@
-﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, HostListener } from "@angular/core";
+﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, HostListener, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Http } from "@angular/http";
 import { ENTER, UP_ARROW, DOWN_ARROW } from "@angular/material";
@@ -32,7 +32,9 @@ interface ISearchRequestQueueItem {
 
 @Component({
     selector: "search",
-    templateUrl: "application/components/search.html"
+    templateUrl: "application/components/search.html",
+    styleUrls: ["application/components/search.css"],
+    encapsulation: ViewEncapsulation.None,
 })
 export class SearchComponent extends BaseMapComponent {
 

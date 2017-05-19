@@ -1,7 +1,7 @@
 ﻿<div [dir]="resources.direction">
     <div fxLayout="row" fxLayoutAlign="none none" class="row-hover">
         <div fxFlex="15">
-            <md-slide-toggle [(ngModel)]="isAdvanced" class="cursor-pointer"></md-slide-toggle>
+            <md-slide-toggle [(ngModel)]="isAdvanced" (change)="setIsAdvanced()" class="cursor-pointer"></md-slide-toggle>
         </div>
         <div fxFlex="75">
             <span (click)="isAdvanced = !isAdvanced" class="cursor-pointer" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle advanced button"><i class="fa icon-gear"></i> {{resources.toggleAdvancedSettings}}</span>
