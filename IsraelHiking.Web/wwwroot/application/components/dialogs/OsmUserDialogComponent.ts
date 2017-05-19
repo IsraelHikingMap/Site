@@ -73,16 +73,14 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             searchTerm: "",
             selectedTabIndex: 0
         };
-
-        this.searchTerm.setValue(this.state.searchTerm);
-        this.filteredSiteUrls = this.userService.siteUrls;
-        this.filteredTraces = this.userService.traces;
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.state.searchTerm = searchTerm;
             this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
             this.filteredSiteUrls = this.userService.siteUrls.filter((s) => this.findInObject(s, searchTerm));
             this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInObject(t, searchTerm)), ["date"], ["dec"]);
         });
+        this.searchTerm.setValue(this.state.searchTerm);
+        
 
         this.languageChangeSubsription = this.resources.languageChanged.subscribe(this.initializeRanks);
         this.userService.refreshDetails();
@@ -164,6 +162,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 this.layersService.setJsonData(data);
                 this.osmTraceLayer.clearLayers();
             }
+            this.applicationRef.attachView(componentRef.hostView);
             mainMarker.bindPopup(markerPopupDiv);
             this.osmTraceLayer.addLayer(mainMarker);
             this.fitBoundsService.fitBounds(bounds, { maxZoom: LayersService.MAX_NATIVE_ZOOM } as L.FitBoundsOptions);
@@ -243,8 +242,6 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             let polyline = L.polyline(latLngs, unselectedPathOptions);
             this.osmTraceLayer.addLayer(polyline);
             let marker = L.marker(latLngs[0], { draggable: false, clickable: true, keyboard: false, icon: IconsService.createMissingPartMarkerIcon() } as L.MarkerOptions) as Common.IMarkerWithTitle;
-
-            // HM TODO: see how this looks
             let markerPopupDiv = L.DomUtil.create("div");
             let factory = this.componentFactoryResolver.resolveComponentFactory(MissingPartMarkerPopupComponent);
             let componentRef = factory.create(this.injector, null, markerPopupDiv);
@@ -258,6 +255,8 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 this.osmTraceLayer.removeLayer(marker);
             }
             componentRef.instance.setFeature(feature);
+            this.applicationRef.attachView(componentRef.hostView);
+
             marker.bindPopup(markerPopupDiv);
             marker.on("popupopen", () => { polyline.setStyle({ color: "DarkRed", weight: 5, opacity: 1 } as L.PathOptions); });
             marker.on("popupclose", () => { polyline.setStyle(unselectedPathOptions); });

@@ -1,9 +1,6 @@
 ﻿.symbol-button {
-    height: 30px;
-    width: 30px;
-    display:inline-block;
-    position:relative;
-    background-color:white;
+    padding: 10px;
+    border: 1px solid black;
 }
 
 .middle-line {

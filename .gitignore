@@ -195,7 +195,7 @@ ModelManifest.xml
 !/IsraelHiking.Web/*.ts
 /IsraelHiking.Web/wwwroot/**/*.js
 /IsraelHiking.Web/wwwroot/**/*.map
-!/IsraelHiking.Web/wwwroot/scripts/*.js
+!/IsraelHiking.Web/wwwroot/external/*.js
 /Tests/IsraelHiking.Web.Tests/**/*.js
 /Tests/IsraelHiking.Web.Tests/**/*.map
 /IsraelHiking.Web/wwwroot/translations/*.po
