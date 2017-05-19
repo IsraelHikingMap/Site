@@ -13,6 +13,6 @@
     "@types/angular-gettext": "*",
     "@types/angular-mocks": "*",
     "@types/leaflet": "*",
-    "@types/leaflet-markercluster": "*"
+    "@types/leaflet.markercluster": "*"
   }
 }
