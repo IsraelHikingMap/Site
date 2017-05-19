@@ -1,12 +1,10 @@
 ﻿// link to translations: https://translate.zanata.org/iteration/view/IsraelHiking/Main
 import { Injectable } from "@angular/core";
-import { LocalStorage, SessionStorage } from "angular2-localstorage";
-import { Urls } from "../common/Urls";
 import { Http, Response, Headers, RequestOptions } from "@angular/http";
 import { Subject } from "rxjs/Subject";
+import { LocalStorage, SessionStorage } from "angular2-localstorage";
 import { GetTextCatalogService } from "./GetTextCatalogService";
-import "rxjs/add/operator/toPromise";
-
+import { Urls } from "../common/Urls";
 
 export type LanguageCode = "en-US" | "he"
 

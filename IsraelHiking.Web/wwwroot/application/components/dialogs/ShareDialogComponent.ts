@@ -75,7 +75,6 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.height = 300;
         this.size = this.resources.small;
         this.isLoading = false;
-        // HM TODO: where to put this?
         this.embedText = this.getEmbedText();
         this.offroadRequest = {} as IOffroadPostRequest;
         this.offroadRequest.userMail = this.storedUserEmail;

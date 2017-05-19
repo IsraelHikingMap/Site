@@ -1,5 +1,6 @@
-﻿import { Component, ElementRef, ViewEncapsulation } from "@angular/core";
+﻿import { Component, ElementRef, ViewEncapsulation, OnInit, OnDestroy, HostListener } from "@angular/core";
 import { Subscription } from "rxjs/Subscription";
+import { Observable } from "rxjs/Rx";
 import { ResourcesService } from "../services/ResourcesService";
 import { MapService } from "../services/MapService";
 import { LayersService } from "../services/layers/LayersService";
@@ -7,7 +8,7 @@ import { IRouteLayer } from "../services/layers/routelayers/IRouteLayer";
 import { RouteStatisticsService, IRouteStatisticsPoint, IRouteStatistics } from "../services/RouteStatisticsService";
 import { IconsService } from "../services/IconsService"
 import { BaseMapComponent } from "./BaseMapComponent";
-import { Observable } from "rxjs/Rx";
+
 import * as _ from "lodash";
 import * as $ from "jquery";
 
@@ -20,7 +21,7 @@ import * as $ from "jquery";
     ],
     encapsulation: ViewEncapsulation.None,
 })
-export class RouteStatisticsChartComponent extends BaseMapComponent {
+export class RouteStatisticsChartComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
     public isKmMarkersOn: boolean;
 
@@ -29,7 +30,8 @@ export class RouteStatisticsChartComponent extends BaseMapComponent {
     private kmMarkersGroup: L.LayerGroup;
     private hoverLine: Element;
     private statistics: IRouteStatistics;
-    private subscriptions: Subscription[];
+    private routeLayerSubscriptions: Subscription[];
+    private componentSubscriptions: Subscription[];
     /// chart:
     private chartWrapper: google.visualization.ChartWrapper;
     private chartSvg: JQuery;
@@ -46,7 +48,8 @@ export class RouteStatisticsChartComponent extends BaseMapComponent {
         this.statistics = null;
         this.chartWrapper = null;
         this.chartSvg = null;
-        this.subscriptions = [];
+        this.routeLayerSubscriptions = [];
+        this.componentSubscriptions = [];
         this.kmMarkersGroup = L.layerGroup([] as L.Marker[]);
         this.initializeChart();
         this.hoverChartMarker = L.marker(mapService.map.getCenter(), { opacity: 0.0, draggable: false, clickable: false, keyboard: false } as L.MarkerOptions);
@@ -54,22 +57,37 @@ export class RouteStatisticsChartComponent extends BaseMapComponent {
         this.mapService.map.addLayer(this.kmMarkersGroup);
 
         this.isKmMarkersOn = false;
-
         this.routeChanged();
+    }
 
-        this.layersService.routeChanged.subscribe(() => {
+    public ngOnInit() 
+    {
+        this.componentSubscriptions.push(this.layersService.routeChanged.subscribe(() => {
             this.routeChanged();
-        });
-
-
-        // HM TODO: make sure resize works
-        //this.$on("angular-resizable.resizing", () => {
-        //    window.dispatchEvent(new Event("resize"));
-        //});
-
-        this.resources.languageChanged.subscribe(() => {
+        }));
+        this.componentSubscriptions.push(this.routeStatisticsService.visibilityChanged.subscribe(() => {
+            if (this.routeStatisticsService.isVisible) {
+                setTimeout(() => this.onResize(), 300);
+            }
+        }));
+        this.componentSubscriptions.push(this.resources.languageChanged.subscribe(() => {
             this.initOptions();
-        });
+        }));
+        this.onResize();
+    }
+
+    public ngOnDestroy() {
+        for (let subscription of this.componentSubscriptions) {
+            subscription.unsubscribe();
+        }
+        for (let subscription of this.routeLayerSubscriptions) {
+            subscription.unsubscribe();
+        }
+    }
+
+    @HostListener("window:resize", ["$event"])
+    public onWindowResize(event: Event) {
+        this.onResize();
     }
 
     public toggleKmMarker($event: Event) {
@@ -97,18 +115,18 @@ export class RouteStatisticsChartComponent extends BaseMapComponent {
     }
 
     public isOpen() {
-        return this.routeStatisticsService.isVisible;
+        return this.routeStatisticsService.isVisible();
     }
 
     private routeChanged() {
-        for (let subscription of this.subscriptions) {
+        for (let subscription of this.routeLayerSubscriptions) {
             subscription.unsubscribe();
         }
         this.routeLayer = this.layersService.getSelectedRoute();
         this.onRouteDataChanged();
         if (this.routeLayer) {
-            this.subscriptions.push(this.routeLayer.dataChanged.subscribe(this.onRouteDataChanged));
-            this.subscriptions.push(this.routeLayer.polylineHovered.subscribe((latlng: L.LatLng) => this.onPolylineHover(latlng)));
+            this.routeLayerSubscriptions.push(this.routeLayer.dataChanged.subscribe(this.onRouteDataChanged));
+            this.routeLayerSubscriptions.push(this.routeLayer.polylineHovered.subscribe((latlng: L.LatLng) => this.onPolylineHover(latlng)));
         }
     }
 
@@ -358,6 +376,10 @@ export class RouteStatisticsChartComponent extends BaseMapComponent {
     }
 
     public onResize() {
+        if (this.chartWrapper == null)
+        {
+            return;
+        }
         this.chartWrapper.draw();
         this.afterChartUpdate();
     }

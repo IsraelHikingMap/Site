@@ -7,7 +7,7 @@
     color: white;
     padding-left: 10px;
     padding-right: 10px;
-    top: 66%;
+    top: 55%;
     left: 15%;
     right: 15%;
     bottom: 70px;
@@ -15,10 +15,7 @@
 
 .route-statistics-header {
     cursor: move;
-}
-
-.route-statistics-header-title {
-    font-size: large;
+    margin-top: 10px;
 }
 
 .route-statistics-chart {
@@ -40,12 +37,6 @@
 
 .tooltip-inner a {
     color: #79bdf7;
-}
-
-.route-statistics-footer {
-    bottom: 10px;
-    left: 5px;
-    position: absolute;
 }
 
 .route-statistics-popup {

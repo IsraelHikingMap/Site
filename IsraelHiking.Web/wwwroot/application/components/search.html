@@ -4,9 +4,9 @@
 <div [hidden]="!isVisible">
     <div class="leaflet-bar" fxLayout="row">
         <a class="cursor-pointer control-icon-last" (click)="toggleDirectional($event)" mdTooltip="{{resources.directionalSearch}}" mdTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !isDirectional, 'icon-minus': isDirectional}"></i></a>
-        <md-input-container> <!--class="pull-right"-->
+        <!-- HM TODO: add relevant css -->
+        <md-input-container>
             <input type="text" mdInput [formControl]="searchFrom" [mdAutocomplete]="autoFrom" [style.background]="'white'" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="getDirection(fromContext.searchTerm)">
-            <!--[ngModel]="fromContext.searchTerm" (ngModelChange)="search(fromContext)"-->
         </md-input-container>
         <md-autocomplete positionY="below" #autoFrom="mdAutocomplete" [displayWith]="displayResults">
             <md-option *ngFor="let result of fromContext.searchResults" [value]="result" [dir]="getDirection(result.name)" class="{{getTextAlignment(result.name)}}">

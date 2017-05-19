@@ -1,4 +1,5 @@
-﻿import * as Common from "../common/IsraelHiking";
+﻿import { Subject } from "rxjs/Subject";
+import * as Common from "../common/IsraelHiking";
 
 export interface IRouteStatisticsPoint extends L.Point {
     latlng: L.LatLng;
@@ -13,18 +14,22 @@ export interface IRouteStatistics {
 }
 
 export class RouteStatisticsService {
-    public isVisible: boolean;
+    private visible: boolean;
+    public visibilityChanged: Subject<any>
 
     constructor() {
-        this.isVisible = false;
+        this.visibilityChanged = new Subject<{}>();
+        this.visible = false;
     }
 
+    public isVisible(): boolean {
+        return this.visible;
+    }
+
+
     public toggle = () => {
-        if (this.isVisible) {
-            this.isVisible = false;
-            return;
-        }
-        this.isVisible = true;
+        this.visible = !this.visible;
+        this.visibilityChanged.next();
     }
 
     public getStatistics = (route: Common.RouteData): IRouteStatistics => {

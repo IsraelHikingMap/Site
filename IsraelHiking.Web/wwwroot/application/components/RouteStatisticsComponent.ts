@@ -45,7 +45,7 @@ export class RouteStatisticsComponent extends BaseMapComponent {
     }
 
     public isVisible(): boolean {
-        return this.routeStatisticsService.isVisible;
+        return this.routeStatisticsService.isVisible();
     }
 
     private routeChanged()

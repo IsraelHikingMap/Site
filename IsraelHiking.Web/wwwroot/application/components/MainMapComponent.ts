@@ -65,7 +65,6 @@ export class MainMapComponent extends BaseMapComponent {
             keepCurrentZoomLevel: true,
             follow: true,
             createButtonCallback: (contianer: HTMLElement, options: any) => {
-                console.log("createButtonCallback");
                 let componentFactory = this.componentFactoryResolver.resolveComponentFactory(LocationButtonComponent);
                 let componentRef = componentFactory.create(this.injector, [], contianer);
                 this.applicationRef.attachView(componentRef.hostView);

@@ -74,6 +74,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             selectedTabIndex: 0
         };
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
+            searchTerm = searchTerm.trim();
             this.state.searchTerm = searchTerm;
             this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
             this.filteredSiteUrls = this.userService.siteUrls.filter((s) => this.findInObject(s, searchTerm));

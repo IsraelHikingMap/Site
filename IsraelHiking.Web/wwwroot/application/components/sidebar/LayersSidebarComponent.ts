@@ -25,6 +25,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public routes: IRouteLayer[];
+    // HM TODO: fix binding.
     @LocalStorage()
     public isAdvanced: boolean = true;
 

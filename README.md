@@ -53,11 +53,11 @@ In order to be able to build this site you'll need some tools:
   * .NET cross-platform development
 * If you don't have any other preference, choose "General" development settings
 * Temporary step for using local versions of OsmSharp and NetTopologySuite
-  * Open the ```TempLocalNugets``` directory under the Site reposotory location
+  * Open the `TempLocalNugets` directory under the Site reposotory location
   * View &rarr; Other Windows... &rarr; Package Manager Console
-  * For each of the files in ```TempLocalNugets```
+  * For each of the files in `TempLocalNugets`
     * Shift-Right-Click &rarr; Copy as path
-    * Go back to VS package manager console (At the bottom pane) and type ```Install-Package``` followed by ```Ctrl-V``` and ```Enter```. For example:
+    * Go back to VS package manager console (At the bottom pane) and type `Install-Package` followed by `Ctrl-V` and `Enter`. For example:
       ```
       PM> Install-Package "C:\GitHub\IsraelHikingMap\Site\TempLocalNugets\NetTopologySuite.IO.1.15.0-IHM.nupkg"
       ```
@@ -69,6 +69,12 @@ In order to be able to build this site you'll need some tools:
     * Chutzpah Test Runner Contet Menu Extension
   * Restart Visual Studio to complete the installation
 * Open IsraelHiking.sln and compile and run using F5 - Note that it will take time to download all the packages so be patience
+* In Package Manager Console
+  * Select IsraelHiking.DataAccess from the Default project dropdown.
+  * ```
+      PM> Update-Database
+      ```
+  * This should create a israelHiking.sqlite file in the binaries folder of .Web project.
 
 # Setup the server
 In order to be able to make the server work a few prerequisits are needed:
@@ -81,7 +87,7 @@ In order to be able to make the server work a few prerequisits are needed:
   
       <img width="340" alt="Create Task screenshot" src="https://cloud.githubusercontent.com/assets/1304610/24397580/581fecb8-13af-11e7-9388-e3741fcc52bd.png">
 
-      where "Start in" is the full pathname of the ```IsraelHiking.Updater\bin\Debug\netcoreapp1.1``` directory
+      where "Start in" is the full pathname of the `sraelHiking.Updater\bin\Debug\netcoreapp1.1` directory
   * Add a "On a schedule" trigger to run once a day or at the frequency of the map updates.
   * Add a "At startup" trigger.
 * Add a task to windows scheduler as administrator to run the updater as administrator once a day or so to update the routing and search.
@@ -91,12 +97,12 @@ This utility is used to download and update the OSM data for the search and rout
 This utility also setups the services needed for the machine.
 The following flags can be used when running from commnad line:
 
-```-d | --download```: download latest OSM pbf file from geofabrik
+`-d | --download`: download latest OSM pbf file from geofabrik
 
-```-g | --graphhopper```: update graphhopper data
+`-g | --graphhopper`: update graphhopper data
 
-```-e | -es | --elasticsearch```: update elastic search data
+`-e | -es | --elasticsearch`: update elastic search data
 
-```-? | -h | --help```: for the help menu
+`-? | -h | --help`: for the help menu
 
 When no flags are given all the above will be executed.

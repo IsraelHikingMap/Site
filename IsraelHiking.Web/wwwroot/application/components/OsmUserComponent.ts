@@ -30,8 +30,6 @@ export class OsmUserComponent extends BaseMapComponent {
     public openUserDetails(e: Event) {
         this.suppressEvents(e);
         this.userService.refreshDetails();
-
-        // HM TODO: scroll to previous location
         this.dialog.open(OsmUserDialogComponent, { width: "768px" });
     }
 }

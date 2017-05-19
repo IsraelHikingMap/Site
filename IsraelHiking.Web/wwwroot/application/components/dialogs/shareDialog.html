@@ -12,8 +12,8 @@
     <div md-dialog-content>
         <div [hidden]="shareAddress">
             <div fxLayout="row">
-                <md-input-container hintLabel="{{resources.titlePlaceHolder}}">
-                    <input mdInput type="text" [(ngModel)]="title" placeholder="{{resources.title}}" fxFill/>
+                <md-input-container fxFill hintLabel="{{resources.titlePlaceHolder}}">
+                    <input mdInput fxFill type="text" [(ngModel)]="title" placeholder="{{resources.title}}" />
                 </md-input-container>
             </div>
             <div fxLayout="row">
