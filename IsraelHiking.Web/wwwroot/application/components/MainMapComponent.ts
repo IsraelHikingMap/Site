@@ -9,6 +9,7 @@ import { HashService } from "../services/HashService";
 import { ToastService } from "../services/ToastService";
 import { BaseMapComponent } from "./BaseMapComponent";
 import { ZoomComponent } from "./ZoomComponent";
+import { LocationButtonComponent } from "./LocationButtonComponent";
 import { LayersComponent } from "./LayersComponent";
 import { FileComponent } from "./FileComponent";
 import { FileSaveAsComponent } from "./FileSaveAsComponent";
@@ -63,11 +64,16 @@ export class MainMapComponent extends BaseMapComponent {
             icon: "fa fa-lg icon-crosshairs",
             keepCurrentZoomLevel: true,
             follow: true,
-            //createButtonCallback: (linkElement: HTMLElement, title: string) => {
-            //    // HM TODO: finish this
-            //    linkElement.dataset["mdTooltip"] = "{{resources.showMeWhereIAm}}";
-            //    linkElement.dataset["mdTooltipPosition"] = "right";
-            //},
+            createButtonCallback: (contianer: HTMLElement, options: any) => {
+                console.log("createButtonCallback");
+                let componentFactory = this.componentFactoryResolver.resolveComponentFactory(LocationButtonComponent);
+                let componentRef = componentFactory.create(this.injector, [], contianer);
+                this.applicationRef.attachView(componentRef.hostView);
+                return {
+                    link: componentRef.instance.elemnt.nativeElement,
+                    icon: componentRef.instance.elemnt.nativeElement.querySelector("i"),
+                }
+            },
             onLocationError: () => {
                 if (window.location.protocol === "https") {
                     this.toastService.warning(this.resources.unableToFindYourLocation);

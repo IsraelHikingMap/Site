@@ -43,6 +43,7 @@ import { ScrollToDirective } from "./directives/ScrollToDirective";
 import { SidebarComponent } from "./components/sidebar/SidebarComponent";
 import { MainMapComponent } from "./components/MainMapComponent";
 import { ZoomComponent } from "./components/ZoomComponent";
+import { LocationButtonComponent } from "./components/LocationButtonComponent";
 import { LayersComponent } from "./components/LayersComponent";
 import { LayersSidebarComponent } from "./components/sidebar/LayersSidebarComponent";
 import { BaseLayerAddDialogComponent } from "./components/dialogs/layers/BaseLayerAddDialogComponent";
@@ -97,6 +98,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
         Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
     ],
     entryComponents: [ZoomComponent,
+        LocationButtonComponent,
         LayersComponent,
         LayersSidebarComponent,
         BaseLayerAddDialogComponent,
@@ -153,6 +155,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
         RouteStatisticsChartComponent,
         LayersSidebarComponent,
         ZoomComponent,
+        LocationButtonComponent,
         LayersComponent,
         BaseLayerAddDialogComponent,
         BaseLayerEditDialogComponent,
