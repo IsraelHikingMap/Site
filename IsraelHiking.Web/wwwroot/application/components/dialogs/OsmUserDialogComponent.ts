@@ -49,7 +49,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public searchTerm: FormControl;
 
     private osmTraceLayer: L.LayerGroup;
-    private languageChangeSubsription: Subscription;
+    private languageChangeSubscription: Subscription;
 
     constructor(resources: ResourcesService,
         private injector: Injector,
@@ -84,7 +84,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.searchTerm.setValue(this.state.searchTerm);
         
 
-        this.languageChangeSubsription = this.resources.languageChanged.subscribe(this.initializeRanks);
+        this.languageChangeSubscription = this.resources.languageChanged.subscribe(this.initializeRanks);
         this.userService.refreshDetails();
     }
 
@@ -102,7 +102,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     }
 
     public ngOnDestroy() {
-        this.languageChangeSubsription.unsubscribe();
+        this.languageChangeSubscription.unsubscribe();
     }
 
     public getRank() {
