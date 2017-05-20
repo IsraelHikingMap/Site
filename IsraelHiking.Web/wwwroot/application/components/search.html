@@ -19,7 +19,7 @@
     </div>
     <br [hidden]="!isDirectional"/>
     <div fxLayout="row" [hidden]="!isDirectional">
-        <div class="pull-left leaflet-bar search-routing-directional">
+        <div class="pull-left leaflet-bar">
             <a class="cursor-pointer pull-left" (click)="setRouting('Hike', $event)" [ngClass]="{'leaflet-active' : routingType == 'Hike' }" mdTooltip="{{resources.hikeRouting}}" mdTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></a>
             <a class="cursor-pointer pull-left" (click)="setRouting('Bike', $event)" [ngClass]="{'leaflet-active' : routingType == 'Bike' }" mdTooltip="{{resources.bikeRouting}}" mdTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></a>
             <a class="cursor-pointer pull-left" (click)="setRouting('4WD', $event)" [ngClass]="{'leaflet-active' : routingType == '4WD' }" mdTooltip="{{resources.fourWheelDriveRouting}}" mdTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></a>

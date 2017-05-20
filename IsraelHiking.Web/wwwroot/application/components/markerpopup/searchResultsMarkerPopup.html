@@ -10,8 +10,8 @@
         <div fxFlex>
             <button md-button (click)="hideCoordinates = !hideCoordinates" mdTooltip="{{resources.showCoordinates}}" mdTooltipPosition="above"><i class="fa icon-globe"></i></button>
         </div>
-        <div [hidden]="hideCoordinates">
-            <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates" [wikiCoordinatesString]="wikiCoordinatesString"></coordinates>
-        </div>
+    </div>
+    <div [hidden]="hideCoordinates">
+        <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates" [wikiCoordinatesString]="wikiCoordinatesString"></coordinates>
     </div>
 </div>
