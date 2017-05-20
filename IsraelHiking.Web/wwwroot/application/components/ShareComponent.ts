@@ -6,7 +6,8 @@ import { ShareDialogComponent } from "./dialogs/ShareDialogComponent";
 
 @Component({
     selector: "share",
-    templateUrl: "application/components/share.html"
+    moduleId: module.id,
+    templateUrl: "share.html"
 })
 export class ShareComponent extends BaseMapComponent {
 

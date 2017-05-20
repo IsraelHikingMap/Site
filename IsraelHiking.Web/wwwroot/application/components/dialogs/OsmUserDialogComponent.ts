@@ -34,8 +34,9 @@ interface IOsmUserDialogState {
 
 @Component({
     selector: "osm-user-dialog",
-    templateUrl: "application/components/dialogs/osmUserDialog.html",
-    styleUrls: ["application/components/dialogs/osmUserDialog.css"]
+    moduleId: module.id,
+    templateUrl: "osmUserDialog.html",
+    styleUrls: ["osmUserDialog.css"]
 })
 export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
     private static OSM_USER_DIALOG_STATE_KEY = "OsmUserDialogState";

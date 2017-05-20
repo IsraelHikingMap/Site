@@ -5,7 +5,8 @@ import { ResourcesService } from "../services/ResourcesService";
 
 @Component({
     selector: "zoom-control",
-    templateUrl: "application/components/zoom.html"
+    moduleId: module.id,
+    templateUrl: "zoom.html"
 })
 
 export class ZoomComponent extends BaseMapComponent {

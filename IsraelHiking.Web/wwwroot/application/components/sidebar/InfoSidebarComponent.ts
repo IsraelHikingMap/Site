@@ -29,8 +29,9 @@ export interface ILegendSection {
 
 @Component({
     selector: "info-sidebar",
-    templateUrl: "application/components/sidebar/infoSidebar.html",
-    styleUrls: ["application/components/sidebar/infoSidebar.css"],
+    moduleId: module.id,
+    templateUrl: "infoSidebar.html",
+    styleUrls: ["infoSidebar.css"],
 })
 export class InfoSidebarComponent extends BaseMapComponent {
     public state: InfoState;

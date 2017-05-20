@@ -6,7 +6,8 @@ import { BaseMarkerPopupComponent } from "./BaseMarkerPopupComponent";
 
 @Component({
     selector: "route-marker-popup",
-    templateUrl: "application/components/markerpopup/routeMarkerPopup.html"
+    moduleId: module.id,
+    templateUrl: "routeMarkerPopup.html"
 })
 export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
     constructor(resources: ResourcesService, http: Http,

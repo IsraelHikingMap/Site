@@ -7,7 +7,8 @@ import { BaseMapComponent } from "./BaseMapComponent";
 
 @Component({
     selector: "edit-osm",
-    templateUrl: "application/components/editOSM.html"
+    moduleId: module.id,
+    templateUrl: "editOSM.html"
 })
 export class EditOSMComponent extends BaseMapComponent {
 

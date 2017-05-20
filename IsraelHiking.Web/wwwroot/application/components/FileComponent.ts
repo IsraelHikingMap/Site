@@ -11,7 +11,8 @@ import * as $ from "jquery";
 
 @Component({
     selector: "file",
-    templateUrl: "application/components/file.html"
+    moduleId: module.id,
+    templateUrl: "file.html"
 })
 export class FileComponent extends BaseMapComponent {
 

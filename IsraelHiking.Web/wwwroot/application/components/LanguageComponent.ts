@@ -6,7 +6,8 @@ import { LanguageDialogComponent } from "./dialogs/LanguageDialogComponent";
 
 @Component({
     selector: "language",
-    templateUrl: "application/components/language.html"
+    moduleId: module.id,
+    templateUrl: "language.html"
 })
 export class LanguageComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,

@@ -13,7 +13,8 @@ import * as Common from "../../../common/IsraelHiking";
 
 @Component({
     selector: "route-edit-dialog",
-    templateUrl: "application/components/dialogs/routes/routePropertiesDialog.html"
+    moduleId: module.id,
+    templateUrl: "routePropertiesDialog.html"
 })
 export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     private routeLayer: IRouteLayer;

@@ -8,7 +8,8 @@ import { OsmUserDialogComponent } from "./dialogs/OsmUserDialogComponent";
 
 @Component({
     selector: "osm-user",
-    templateUrl: "application/components/osmuser.html"
+    moduleId: module.id,
+    templateUrl: "osmuser.html"
 })
 export class OsmUserComponent extends BaseMapComponent {
 

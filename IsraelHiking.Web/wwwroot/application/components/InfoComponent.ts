@@ -8,7 +8,8 @@ import { DownloadDialogComponent } from "./dialogs/DownloadDialogComponent";
 
 @Component({
     selector: "info",
-    templateUrl: "application/components/info.html"
+    moduleId: module.id,
+    templateUrl: "info.html"
 })
 export class InfoComponent extends BaseMapComponent {
 

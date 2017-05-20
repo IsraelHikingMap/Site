@@ -6,7 +6,8 @@ import { BaseMapComponent } from "./BaseMapComponent";
 
 @Component({
     selector: "route-statistics",
-    templateUrl: "application/components/routeStatistics.html",
+    moduleId: module.id,
+    templateUrl: "routeStatistics.html",
     encapsulation: ViewEncapsulation.None
 })
 export class RouteStatisticsComponent extends BaseMapComponent {

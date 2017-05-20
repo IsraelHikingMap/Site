@@ -8,8 +8,9 @@ import { BaseMarkerPopupComponent } from "./BaseMarkerPopupComponent";
 
 @Component({
     selector: "missing-part-marker-popup",
-    templateUrl: "application/components/markerpopup/missingPartMarkerPopup.html",
-    styleUrls: ["application/components/markerpopup/missingPartMarkerPopup.css"]
+    moduleId: module.id,
+    templateUrl: "missingPartMarkerPopup.html",
+    styleUrls: ["missingPartMarkerPopup.css"]
 })
 export class MissingPartMarkerPopupComponent extends BaseMarkerPopupComponent {
     private feature: GeoJSON.Feature<GeoJSON.LineString>;

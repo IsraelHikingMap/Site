@@ -32,8 +32,9 @@ interface ISearchRequestQueueItem {
 
 @Component({
     selector: "search",
-    templateUrl: "application/components/search.html",
-    styleUrls: ["application/components/search.css"],
+    moduleId: module.id,
+    templateUrl: "search.html",
+    styleUrls: ["search.css"],
     encapsulation: ViewEncapsulation.None,
 })
 export class SearchComponent extends BaseMapComponent {

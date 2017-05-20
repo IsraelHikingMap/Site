@@ -8,7 +8,8 @@ type MapType = "IHM" | "MTB";
 
 @Component({
     selector: "download-dialog",
-    templateUrl: "application/components/dialogs/downloadDialog.html"
+    moduleId: module.id,
+    templateUrl: "downloadDialog.html"
 })
 export class DownloadDialogComponent extends BaseMapComponent {
     public app: ApplicationType;

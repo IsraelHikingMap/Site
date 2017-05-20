@@ -14,10 +14,12 @@ import * as $ from "jquery";
 
 @Component({
     selector: "route-statistics-chart",
-    templateUrl: "application/components/routeStatisticsChart.html",
+    moduleId: module.id,
+    templateUrl: "routeStatisticsChart.html",
+    // HM TODO: does draggableResizable needs to be here?
     styleUrls: [
-        "application/components/routeStatisticsChart.css",
-        "application/directives/draggableResizable.css",
+        "routeStatisticsChart.css",
+        "../directives/draggableResizable.css",
     ],
     encapsulation: ViewEncapsulation.None,
 })

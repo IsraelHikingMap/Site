@@ -16,8 +16,9 @@ export interface IFormatViewModel {
 
 @Component({
     selector: "file-save-as",
-    templateUrl: "application/components/fileSaveAs.html",
-    styleUrls: ["application/components/fileSaveAs.css"],
+    moduleId: module.id,
+    templateUrl: "fileSaveAs.html",
+    styleUrls: ["fileSaveAs.css"],
     encapsulation: ViewEncapsulation.None,
 })
 export class FileSaveAsComponent extends BaseMapComponent {

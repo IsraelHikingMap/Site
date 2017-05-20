@@ -29,7 +29,8 @@ export interface IWikiResponse {
 
 @Component({
     selector: "wiki-marker-popup",
-    templateUrl: "application/components/markerpopup/wikiMarkerPopup.html"
+    moduleId: module.id,
+    templateUrl: "wikiMarkerPopup.html"
 })
 export class WikiMarkerPopupComponent extends BaseMapComponent {
     public title: string;

@@ -5,7 +5,8 @@ import { ResourcesService } from "../services/ResourcesService";
 
 @Component({
     selector: "layers",
-    templateUrl: "application/components/layers.html"
+    moduleId: module.id,
+    templateUrl: "layers.html"
 })
 export class LayersComponent extends BaseMapComponent {
     constructor(private sidebarService: SidebarService, resources: ResourcesService) {

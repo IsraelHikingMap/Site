@@ -17,8 +17,9 @@ import { RouteEditDialogComponent } from "../dialogs/routes/RouteEditDialogCompo
 
 @Component({
     selector: "layers-sidebar",
-    templateUrl: "application/components/sidebar/layersSidebar.html",
-    styleUrls: ["application/components/sidebar/layersSidebar.css"],
+    moduleId: module.id,
+    templateUrl: "layersSidebar.html",
+    styleUrls: ["layersSidebar.css"],
     encapsulation: ViewEncapsulation.None
 })
 export class LayersSidebarComponent extends BaseMapComponent {

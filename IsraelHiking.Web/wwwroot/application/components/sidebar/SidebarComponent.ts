@@ -5,8 +5,9 @@ import { MapService } from "../../services/MapService";
 
 @Component({
     selector: "sidebar",
-    templateUrl: "application/components/sidebar/sidebar.html",
-    styleUrls: ["application/components/sidebar/sidebar.css"]
+    moduleId: module.id,
+    templateUrl: "sidebar.html",
+    styleUrls: ["sidebar.css"]
 })
 
 export class SidebarComponent {

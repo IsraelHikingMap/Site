@@ -8,7 +8,8 @@ import * as Common from "../../../common/IsraelHiking";
 
 @Component({
     selector: "overlay-add-dialog",
-    templateUrl: "application/components/dialogs/layers/layerPropertiesDialog.html"
+    moduleId: module.id,
+    templateUrl: "layerPropertiesDialog.html"
 })
 export class OverlayAddDialogComponent extends LayerBaseDialogComponent {
     constructor(resources: ResourcesService,

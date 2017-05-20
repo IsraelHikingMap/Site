@@ -10,7 +10,8 @@ import * as Common from "../../../common/IsraelHiking";
 
 @Component({
     selector: "route-add-dialog",
-    templateUrl: "application/components/dialogs/routes/routePropertiesDialog.html"
+    moduleId: module.id,
+    templateUrl: "routePropertiesDialog.html"
 })
 export class RouteAddDialogComponent extends RouteBaseDialogComponent {
     constructor(resources: ResourcesService,

@@ -5,7 +5,8 @@ import { BaseMapComponent } from "../BaseMapComponent";
 
 @Component({
     selector: "language-dialog",
-    templateUrl: "application/components/dialogs/languageDialog.html"
+    moduleId: module.id,
+    templateUrl: "languageDialog.html"
 })
 export class LanguageDialogComponent extends BaseMapComponent {
     public selectedLanguageCode: LanguageCode;

@@ -12,7 +12,8 @@ import * as Common from "../common/IsraelHiking";
 
 @Component({
     selector: "drawing",
-    templateUrl: "application/components/drawing.html"
+    moduleId: module.id,
+    templateUrl: "drawing.html"
 })
 export class DrawingComponent extends BaseMapComponent {
 

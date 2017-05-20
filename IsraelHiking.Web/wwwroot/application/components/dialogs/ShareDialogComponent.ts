@@ -39,7 +39,8 @@ export interface IIOffroadMarker {
 
 @Component({
     selector: "share-dialog",
-    templateUrl: "application/components/dialogs/shareDialog.html"
+    moduleId: module.id,
+    templateUrl: "shareDialog.html"
 })
 export class ShareDialogComponent extends BaseMapComponent {
     public title: string;

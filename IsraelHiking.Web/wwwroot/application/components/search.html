@@ -17,16 +17,16 @@
         </div>
         <a class="cursor-pointer control-icon-first" (click)="toggleVisibility($event)"><i class="fa icon-search fa-lg"></i></a>
     </div>
-    <br />
-    <div fxLayout="row">
-        <div [hidden]="!isDirectional" class="pull-left leaflet-bar search-routing-directional">
+    <br [hidden]="!isDirectional"/>
+    <div fxLayout="row" [hidden]="!isDirectional">
+        <div class="pull-left leaflet-bar search-routing-directional">
             <a class="cursor-pointer pull-left" (click)="setRouting('Hike', $event)" [ngClass]="{'leaflet-active' : routingType == 'Hike' }" mdTooltip="{{resources.hikeRouting}}" mdTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></a>
             <a class="cursor-pointer pull-left" (click)="setRouting('Bike', $event)" [ngClass]="{'leaflet-active' : routingType == 'Bike' }" mdTooltip="{{resources.bikeRouting}}" mdTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></a>
             <a class="cursor-pointer pull-left" (click)="setRouting('4WD', $event)" [ngClass]="{'leaflet-active' : routingType == '4WD' }" mdTooltip="{{resources.fourWheelDriveRouting}}" mdTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></a>
             <a class="cursor-pointer pull-left" (click)="setRouting('None', $event)" [ngClass]="{'leaflet-active' : routingType == 'None' }" mdTooltip="{{resources.straightLines}}" mdTooltipPosition="below"><i class="fa icon-none fa-lg"></i></a>
         </div>
     </div>
-    <br />
+    <br [hidden]="!isDirectional"/>
     <div [hidden]="!isDirectional" class="leaflet-bar" fxLayout="row">
         <a class="cursor-pointer control-icon-last" (click)="searchRoute($event)"><i class="fa icon-arrow-left fa-lg"></i></a>
         <div [dir]="resources.direction">

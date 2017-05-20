@@ -34,7 +34,7 @@ export class GoogleChartDirective implements OnChanges, OnInit, DoCheck {
 
     public ngOnInit() {
         google.load("visualization", "1.0", { "packages": ["corechart"], callback: () => { this.onLoadCallback(); } });
-        // this doesn"t work for some reason... :-/
+        // HM TODO: this doesn"t work for some reason... :-/ try and make this work?
         //google.charts.load("current", { packages: ["corechart"] });
         //google.charts.setOnLoadCallback(() => { this.onLoadCallback(); });
     }

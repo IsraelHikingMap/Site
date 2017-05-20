@@ -6,7 +6,8 @@ import * as Common from "../../common/IsraelHiking";
 
 @Component({
     selector: "coordinates",
-    templateUrl: "application/components/markerpopup/coordinatesMarkerPopup.html"
+    moduleId: module.id,
+    templateUrl: "coordinatesMarkerPopup.html"
 })
 export class CoordinatesMarkerPopupComponent
 {
