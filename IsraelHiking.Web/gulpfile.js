@@ -108,7 +108,7 @@ gulp.task("compile_translations", function () {
 gulp.task("bundle", function () {
     var builder = new Builder(paths.webroot, paths.webroot + "systemjs.config.js");
     // HM TODO: make this work
-    builder.bundle("application/*", "../../DeployJs/application.js")
+    builder.buildStatic("application/**/*.js", "../../DeployJs/application.js") //{ minify: true }
         .then(function () {
             console.log("Build application complete");
         })
@@ -116,14 +116,14 @@ gulp.task("bundle", function () {
             console.log("Build application error");
             console.log(err);
         });
-    builder.bundle("external/*", "../../DeployJs/external.js", { minify: true} )
-        .then(function () {
-            console.log("Build external complete");
-        })
-        .catch(function (err) {
-            console.log("Build external error");
-            console.log(err);
-        });
+    //builder.bundle("external/*", "../../DeployJs/external.js", { minify: true} )
+    //    .then(function () {
+    //        console.log("Build external complete");
+    //    })
+    //    .catch(function (err) {
+    //        console.log("Build external error");
+    //        console.log(err);
+    //    });
 });
 
 gulp.task("default", ["build"]);

@@ -1,0 +1,134 @@
+﻿<div [dir]="resources.direction">
+    <div md-dialog-title>
+        <div fxLayout="row">
+            <div fxFlex="90">
+                <h4>{{resources.shareYourWork}}</h4>
+            </div>
+            <div fxFlex>
+                <button type="button" md-button md-dialog-close fxFill><i class="fa icon-close"></i></button>
+            </div>
+        </div>
+    </div>
+    <div md-dialog-content>
+        <div [hidden]="shareAddress">
+            <div fxLayout="row">
+                <md-input-container fxFill hintLabel="{{resources.titlePlaceHolder}}">
+                    <input mdInput fxFill type="text" [(ngModel)]="title" placeholder="{{resources.title}}" />
+                </md-input-container>
+            </div>
+            <div fxLayout="row">
+                <md-input-container fxFill hintLabel="{{resources.descriptionPlaceHolder}}">
+                    <textarea mdInput rows="2" type="text" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
+                </md-input-container>
+            </div>
+            <div fxLayout="row">
+                <button md-button (click)="generateUrl(title, description)" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share create">{{resources.generateUrlToShareWithYourFriends}}</button>
+            </div>
+        </div>
+        <div [hidden]="!shareAddress">
+            <div fxLayout="row">
+                <div fxFlex="33">
+                    <img [src]="imageUrl" fxFill />
+                </div>
+                <div fxFlex="67">
+                    <div fxLayout="row">
+                        <div fxFlex="75">
+                            <h4>{{title}} - {{description}}</h4>
+                        </div>
+                        <div fxFlex>
+                            <div fxLayout="column" fxLayoutAlign="space-between stretch">
+                                <a md-button href="{{facebookShareAddress}}" target="_blank" class="chrome-wordwrap-fix" mdTooltip="{{resources.shareWithFacebook}}" mdTooltipPosition="{{resources.start}}" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share facebook"><i class="fa icon-facebook"></i></a>
+                                <div fxHide fxShow.sm fxShow.xs>
+                                    <a md-button href="{{whatappShareAddress}}" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share whatapp"><i class="fa icon-whatsapp"></i></a>
+                                </div>
+                                <a md-button (click)="showOffroadForm = 'true'" [ngClass]="{active: showOffroadForm}" mdTooltip="{{resources.shareWithOffroad}}" mdTooltipPosition="{{resources.start}}"><i class="fa icon-off-road"></i></a>
+                            </div>
+                        </div>
+                    </div>
+                    <div fxLayout="row">
+                        <div fxFlex="75">
+                            <a href="{{shareAddress}}" target="_blank" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share test address">{{shareAddress}}</a>
+                        </div>
+                        <div fxFlex>
+                            <a md-button [ngxClipboard]="shareAddress" mdTooltip="{{resources.copyUrl}}" mdTooltipPosition="{{resources.start}}" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share copy to clipboard"><i class="fa icon-clipboard"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <hr />
+            <div [hidden]="!showOffroadForm">
+                <div fxLayout="row">
+                    <md-input-container fxFill hintLabel="{{resources.userEmailMutedOffroad}}">
+                        <input mdInput type="text" [(ngModel)]="offroadRequest.userMail" placeholder="{{resources.userEmail}}"/>
+                    </md-input-container>
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="66">
+                        <div fxLayout="row">
+                            <div fxFlex="25">
+                                <label>{{resources.activity}}</label>
+                            </div>
+                            <div fxFlex>
+                                <div fxLayout="row">
+                                    <div fxFlex="33">
+                                        <a md-button (click)="offroadRequest.activityType = 'Walking'" [ngClass]="{active: offroadRequest.activityType == 'Walking'}" fxFill><i class="fa icon-hike fa-lg"></i></a>
+                                    </div>
+                                    <div fxFlex="33">
+                                        <a md-button (click)="offroadRequest.activityType = 'Cycling'" [ngClass]="{active: offroadRequest.activityType == 'Cycling'}" fxFill><i class="fa icon-bike fa-lg"></i></a>
+                                    </div>
+                                    <div fxFlex>
+                                        <a md-button (click)="offroadRequest.activityType = 'OffRoading'" [ngClass]="{active: offroadRequest.activityType == 'OffRoading'}" fxFill><i class="fa icon-four-by-four fa-lg"></i></a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div fxFlex>
+                        <md-select placeholder="{{resources.difficulty}}" fxFill [(ngModel)]="offroadRequest.difficultyLevel">
+                            <md-option value="1">{{resources.easy}}</md-option>
+                            <md-option value="3">{{resources.moderate}}</md-option>
+                            <md-option value="5">{{resources.hard}}</md-option>
+                        </md-select>
+                    </div>
+                    
+                </div>
+                <div fxLayout="row">
+                    <div fxFlex="50">
+                        <a md-button (click)="sendToOffroad()" fxFill><i class="fa icon-send fa-lg"></i> {{resources.send}}</a>
+                    </div>
+                </div>
+                <hr />
+            </div>
+            <div fxLayout="row">
+                <div fxFlex="25">
+                    <div fxLayout="column" fxFill>
+                        <md-select [(ngModel)]="size" (change)="setSize(size)" placeholder="{{resources.embedSize}}" fxFill>
+                            <md-option [value]="resources.small">{{resources.small}}</md-option>
+                            <md-option [value]="resources.medium">{{resources.medium}}</md-option>
+                            <md-option [value]="resources.large">{{resources.large}}</md-option>
+                            <md-option [value]="resources.custom">{{resources.custom}}</md-option>
+                        </md-select>
+                        <div [hidden]="size != resources.custom">
+                            <md-input-container>
+                                <input mdInput type="number" [(ngModel)]="width" (change)="updateEmbedText(width, height)" placeholder="{{resources.width}}" fxFill />
+                            </md-input-container>
+                            <md-input-container>
+                                <input mdInput type="number" [(ngModel)]="height" (change)="updateEmbedText(width, height)" placeholder="{{resources.height}}" fxFill />
+                            </md-input-container>
+                        </div>
+                    </div>
+                </div>
+                <div fxFlex>
+                    <md-input-container fxFill>
+                        <label>{{resources.HTML}}</label>
+                        <textarea mdInput rows="5" fxFill [(ngModel)]="embedText" dir="ltr"></textarea>
+                    </md-input-container>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div md-dialog-actions>
+        <button md-button md-dialog-close>{{resources.close}}</button>
+        <button md-dialog-close md-button [hidden]="!shareAddress" (click)="clearShareAddress()" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share clear">{{resources.clear}}</button>
+    </div>
+</div>
