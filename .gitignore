@@ -193,7 +193,7 @@ ModelManifest.xml
 /IsraelHiking.Web/bower_components
 /.vs/config
 *.sqlite
-/IsraelHiking.Web/wwwroot/*.*
+/IsraelHiking.Web/wwwroot/**/*.*
 /Tests/IsraelHiking.Web.Tests/**/*.js
 /Tests/IsraelHiking.Web.Tests/**/*.map
 /IsraelHiking.Web/wwwroot/translations/*.po

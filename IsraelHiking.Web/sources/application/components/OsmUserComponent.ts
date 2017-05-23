@@ -29,7 +29,6 @@ export class OsmUserComponent extends BaseMapComponent {
 
     public openUserDetails(e: Event) {
         this.suppressEvents(e);
-        this.userService.refreshDetails();
         this.dialog.open(OsmUserDialogComponent, { width: "768px" });
     }
 }

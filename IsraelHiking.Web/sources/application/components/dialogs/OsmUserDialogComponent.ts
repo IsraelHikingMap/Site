@@ -74,12 +74,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             selectedTabIndex: 0
         };
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
-            searchTerm = searchTerm.trim();
-            this.state.searchTerm = searchTerm;
-            this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
-            this.filteredSiteUrls = this.userService.siteUrls.filter((s) => this.findInObject(s, searchTerm));
-            this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInObject(t, searchTerm)), ["date"], ["dec"]);
-            // HM TODO: re-filter when list updates.
+            this.updateFilteredLists(searchTerm);
         });
         this.searchTerm.setValue(this.state.searchTerm);
 
@@ -88,6 +83,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     }
 
     public ngOnInit() {
+        this.userService.refreshDetails().then(() => { this.updateFilteredLists(this.searchTerm.value) });
         let dialogElement = $(".dialog-content-for-scroll");
         dialogElement.delay(700)
             .animate({
@@ -207,6 +203,15 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         }, () => {
             this.toastService.error(this.resources.unableToUploadFile);
         });
+    }
+
+    private updateFilteredLists(searchTerm: string)
+    {
+        searchTerm = searchTerm.trim();
+        this.state.searchTerm = searchTerm;
+        this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
+        this.filteredSiteUrls = this.userService.siteUrls.filter((s) => this.findInObject(s, searchTerm));
+        this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInObject(t, searchTerm)), ["date"], ["dec"]);
     }
 
     private getPathOprtions = (): L.PathOptions => {

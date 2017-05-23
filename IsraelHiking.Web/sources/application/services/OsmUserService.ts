@@ -145,7 +145,7 @@ export class OsmUserService {
         });
         let allPromises = Promise.all([promise, sharesPromise]);
         allPromises.then(() => { this.loading = false }, () => {
-            console.log("OSM User refresh details failed.");
+            console.error("OSM User refresh details failed.");
             this.loading = false
         });
         return allPromises;
