@@ -2,7 +2,7 @@
 import { FormControl } from "@angular/forms";
 import { Response } from "@angular/http";
 import { MdDialogRef } from "@angular/material";
-import { SessionStorageService } from "angular2-localstorage";
+import { SessionStorageService } from "ngx-store";
 import { ResourcesService } from "../../services/ResourcesService";
 import { MapService } from "../../services/MapService";
 import { FileService } from "../../services/FileService";

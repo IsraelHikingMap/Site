@@ -1,6 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { RequestOptionsArgs, Headers } from "@angular/http";
-import { LocalStorage } from "angular2-localstorage";
+import { LocalStorage } from "ngx-store";
 
 @Injectable()
 export class AuthorizationService {

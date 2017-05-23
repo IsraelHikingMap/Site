@@ -1,6 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
-import { LocalStorage } from "angular2-localstorage";
+import { LocalStorage } from "ngx-store";
 import { MapService } from "../MapService";
 import { HashService } from "../HashService";
 import { FileService } from "../FileService";

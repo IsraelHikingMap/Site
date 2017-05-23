@@ -1,6 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http, Response, RequestOptionsArgs, Headers } from "@angular/http";
-import { LocalStorage } from "angular2-localstorage";
+import { LocalStorage } from "ngx-store";
 import { AuthorizationService } from "./AuthorizationService";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";

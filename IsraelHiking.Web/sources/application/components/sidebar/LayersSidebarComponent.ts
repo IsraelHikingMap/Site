@@ -1,6 +1,6 @@
 ﻿import { Component, ViewEncapsulation } from "@angular/core";
 import { MdDialog } from "@angular/material";
-import { LocalStorageService } from "angular2-localstorage";
+import { LocalStorageService } from "ngx-store";
 import { MapService } from "../../services/MapService";
 import { FileService } from "../../services/FileService";
 import { SidebarService } from "../../services/SidebarService";

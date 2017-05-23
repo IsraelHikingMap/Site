@@ -1,5 +1,5 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
-import { LocalStorage } from "angular2-localstorage";
+import { LocalStorage } from "ngx-store";
 import * as Common from "../common/IsraelHiking";
 import "leaflet";
 

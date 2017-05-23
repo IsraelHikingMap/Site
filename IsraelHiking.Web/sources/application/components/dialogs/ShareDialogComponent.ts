@@ -1,6 +1,6 @@
 ﻿import { Component } from "@angular/core";
 import { Http } from "@angular/http";
-import { LocalStorage } from "angular2-localstorage";
+import { LocalStorage } from "ngx-store";
 import { ResourcesService } from "../../services/ResourcesService";
 import { MapService } from "../../services/MapService";
 import { OsmUserService } from "../../services/OsmUserService";
