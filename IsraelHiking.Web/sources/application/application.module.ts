@@ -32,6 +32,7 @@ import { ElevationProvider } from "./services/ElevationProvider";
 import { SearchResultsProvider } from "./services/SearchResultsProvider";
 import { GeoJsonParser } from "./services/GeoJsonParser";
 import { WikiMarkersLayer } from "./services/layers/WikiMarkersLayer";
+import { DragAndDropService } from "./services/DragAndDropService";
 /// directives
 import { GoogleChartDirective } from "./directives/GoogleChartDirective";
 import { DraggableResizableDirective } from "./directives/DraggableResizableDirective";
@@ -146,7 +147,8 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
         ElevationProvider,
         SearchResultsProvider,
         GeoJsonParser,
-        WikiMarkersLayer
+        WikiMarkersLayer,
+        DragAndDropService,
     ],
     declarations: [MainMapComponent,
         SidebarComponent,

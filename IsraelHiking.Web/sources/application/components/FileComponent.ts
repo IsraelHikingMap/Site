@@ -82,7 +82,7 @@ export class FileComponent extends BaseMapComponent {
         $(".leaflet-bar").each((i, a) => {
             $(a).addClass("no-print");
         });
-        $(".tooltip").each((i, a) => {
+        $(".mat-tooltip").each((i, a) => {
             $(a).addClass("no-print");
         });
         window.print();

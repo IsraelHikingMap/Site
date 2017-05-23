@@ -7,6 +7,7 @@ import { SidebarService } from "../services/SidebarService";
 import { RouteStatisticsService } from "../services/RouteStatisticsService";
 import { HashService } from "../services/HashService";
 import { ToastService } from "../services/ToastService";
+import { DragAndDropService } from "../services/DragAndDropService";
 import { BaseMapComponent } from "./BaseMapComponent";
 import { ZoomComponent } from "./ZoomComponent";
 import { LocationButtonComponent } from "./LocationButtonComponent";
@@ -42,6 +43,7 @@ export class MainMapComponent extends BaseMapComponent {
         private toastService: ToastService,
         // needed for initialization
         hashService: HashService,
+        dragAndDropService: DragAndDropService,
         angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
         angulartics2: Angulartics2
     ) {

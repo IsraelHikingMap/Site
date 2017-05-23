@@ -15,7 +15,6 @@ import * as $ from "jquery";
 @Component({
     selector: "route-statistics-chart",
     templateUrl: "./routeStatisticsChart.html",
-    // HM TODO: does draggableResizable needs to be here?
     styleUrls: [
         "./routeStatisticsChart.css",
         "../directives/draggableResizable.css",
