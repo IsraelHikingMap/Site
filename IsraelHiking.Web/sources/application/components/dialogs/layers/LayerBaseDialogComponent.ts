@@ -37,5 +37,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
         }
         this.suppressEvents(e);
     }
+
     protected abstract internalSave(layerData: Common.LayerData): string;
+
+    public removeLayer(e: Event) { } // should be derived if needed.
 }

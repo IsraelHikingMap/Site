@@ -24,6 +24,9 @@ import * as $ from "jquery";
 export class RouteStatisticsChartComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
     public isKmMarkersOn: boolean;
+    public options: google.visualization.AreaChartOptions;
+    public chartData: google.visualization.DataObject;
+    public view: string[];
 
     private routeLayer: IRouteLayer;
     private hoverChartMarker: L.Marker;
@@ -35,9 +38,9 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
     /// chart:
     private chartWrapper: google.visualization.ChartWrapper;
     private chartSvg: JQuery;
-    private options: google.visualization.AreaChartOptions;
-    private chartData: google.visualization.DataObject;
-    private view: string[];
+    
+    
+    
 
     constructor(resources: ResourcesService,
         private layersService: LayersService,

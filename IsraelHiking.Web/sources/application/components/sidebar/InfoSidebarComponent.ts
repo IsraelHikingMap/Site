@@ -36,6 +36,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     public state: InfoState;
     public legendSections: ILegendSection[];
     public visibleSectionId: string;
+    public selectedTabIndex: number;
 
     constructor(resources: ResourcesService,
         private dialog: MdDialog,
@@ -45,16 +46,16 @@ export class InfoSidebarComponent extends BaseMapComponent {
         super(resources);
 
         this.visibleSectionId = null;
+        this.selectedTabIndex = 0;
         this.initalizeLegendSections();
         this.state = "about";
 
         this.resources.languageChanged.subscribe(() => {
             this.initalizeLegendSections();
         });
-
     }
 
-    public openOfflineModal = () => {
+    public openDownloadDialog = () => {
         this.dialog.open(DownloadDialogComponent, { width: "600px" });
     }
 

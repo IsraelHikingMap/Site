@@ -34,15 +34,15 @@
         <h5 class="text-center">{{resources.detailsLevel}} ({{resources.upToZoom}})</h5>
         <div fxLayout="row">
             <div fxFlex="50">
-                <a md-button (click)="zoom = 15" [ngClass]="{active: zoom == '15'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download zoom 15">15 [750Mb]</a>
+                <a md-button (click)="zoom = 15" [ngClass]="{active: zoom === 15}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download zoom 15">15 [750Mb]</a>
             </div>
             <div fxFlex>
-                <a md-button (click)="zoom = 16" [ngClass]="{active: zoom == '16'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download zoom 16">16 [2.2Gb]</a>
+                <a md-button (click)="zoom = 16" [ngClass]="{active: zoom === 16}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download zoom 16">16 [2.2Gb]</a>
             </div>
         </div>
         <br />
         <div fxLayout="row">
-            <a md-button [href]="getDownloadUrl(app, mapType, zoom)" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download offline map {{app}} {{mapType}} {{zoom}}"><i class="fa icon-download fa-lg"></i> {{resources.startDownload}}</a>
+            <a md-button [href]="getDownloadUrl()" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download offline map {{app}} {{mapType}} {{zoom}}"><i class="fa icon-download fa-lg"></i> {{resources.startDownload}}</a>
         </div>
         <h4>{{resources.installationInstructions}}</h4>
         <p>{{resources.offlineMapBenifits}}</p>

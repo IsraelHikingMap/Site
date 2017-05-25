@@ -17,7 +17,6 @@ import * as Common from "../../../common/IsraelHiking";
 })
 export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     private routeLayer: IRouteLayer;
-    public isReversed: boolean;
 
     constructor(resources: ResourcesService,
         mapService: MapService,

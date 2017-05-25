@@ -22,7 +22,7 @@
                 </md-input-container>
             </div>
             <div fxLayout="row">
-                <button md-raised-button color="primary" (click)="generateUrl(title, description)" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share create">{{resources.generateUrlToShareWithYourFriends}}</button>
+                <button md-raised-button color="primary" (click)="generateUrl()" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share create">{{resources.generateUrlToShareWithYourFriends}}</button>
             </div>
         </div>
         <div [hidden]="!shareAddress">
@@ -41,7 +41,7 @@
                                 <div fxHide fxShow.sm fxShow.xs>
                                     <a md-button href="{{whatappShareAddress}}" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share whatapp"><i class="fa icon-whatsapp"></i></a>
                                 </div>
-                                <a md-button (click)="showOffroadForm = 'true'" [ngClass]="{active: showOffroadForm}" mdTooltip="{{resources.shareWithOffroad}}" mdTooltipPosition="{{resources.start}}"><i class="fa icon-off-road"></i></a>
+                                <a md-button (click)="showOffroadForm = true" [ngClass]="{active: showOffroadForm}" mdTooltip="{{resources.shareWithOffroad}}" mdTooltipPosition="{{resources.start}}"><i class="fa icon-off-road"></i></a>
                             </div>
                         </div>
                     </div>
@@ -120,7 +120,7 @@
                 </div>
                 <div fxFlex>
                     <md-input-container fxFill>
-                        <label>{{resources.HTML}}</label>
+                        <label>{{resources.html}}</label>
                         <textarea mdInput rows="5" fxFill [(ngModel)]="embedText" dir="ltr"></textarea>
                     </md-input-container>
                 </div>

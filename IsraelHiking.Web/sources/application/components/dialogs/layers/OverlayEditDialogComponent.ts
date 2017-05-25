@@ -30,7 +30,7 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
         this.address = this.layer.address;
     }
 
-    public removeLayer = (e: Event) => {
+    public removeLayer(e: Event) {
         this.layersService.removeOverlay(this.layer);
         this.suppressEvents(e);
     }

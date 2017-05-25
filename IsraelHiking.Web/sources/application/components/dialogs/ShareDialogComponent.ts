@@ -43,6 +43,7 @@ export interface IIOffroadMarker {
 })
 export class ShareDialogComponent extends BaseMapComponent {
     public title: string;
+    public description: string;
     public imageUrl: string;
     public shareAddress: string;
     public whatappShareAddress: string;
@@ -54,6 +55,7 @@ export class ShareDialogComponent extends BaseMapComponent {
     public isLoading: boolean;
     public siteUrlId: string;
     public offroadRequest: IOffroadPostRequest;
+    public showOffroadForm: boolean;
 
     @LocalStorage()
     public storedUserEmail: string = "";
@@ -71,10 +73,12 @@ export class ShareDialogComponent extends BaseMapComponent {
 
         this.osmUserService = osmUserService;
         this.title = "";
+        this.description = "";
         this.width = 400;
         this.height = 300;
         this.size = this.resources.small;
         this.isLoading = false;
+        this.showOffroadForm = false;
         this.embedText = this.getEmbedText();
         this.offroadRequest = {} as IOffroadPostRequest;
         this.offroadRequest.userMail = this.storedUserEmail;
@@ -110,10 +114,10 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.embedText = this.getEmbedText();
     }
 
-    public generateUrl = (title: string, description: string) => {
+    public generateUrl = () => {
         this.isLoading = true;
-        this.offroadRequest.title = title;
-        this.offroadRequest.description = description;
+        this.offroadRequest.title = this.title;
+        this.offroadRequest.description = this.description;
         var dataToSave = this.layersService.getData();
         for (let routeIndex = dataToSave.routes.length - 1; routeIndex >= 0; routeIndex--) {
             let route = dataToSave.routes[routeIndex];
@@ -122,8 +126,8 @@ export class ShareDialogComponent extends BaseMapComponent {
             }
         }
         var siteUrl = {
-            title: title,
-            description: description,
+            title: this.title,
+            description: this.description,
             jsonData: JSON.stringify(dataToSave),
             osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
         } as Common.SiteUrl;

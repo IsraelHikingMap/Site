@@ -44,6 +44,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public filteredSiteUrls: Common.SiteUrl[];
     public filteredTraces: ITrace[];
     public state: IOsmUserDialogState;
+    public file: File;
 
     public searchTerm: FormControl;
 
@@ -52,16 +53,16 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
 
     constructor(resources: ResourcesService,
         private injector: Injector,
+        private sessionStorageService: SessionStorageService,
+        private mdDialogRef: MdDialogRef<OsmUserDialogComponent>,
         private componentFactoryResolver: ComponentFactoryResolver,
         private applicationRef: ApplicationRef,
         private mapService: MapService,
-        private userService: OsmUserService,
         private fileService: FileService,
         private layersService: LayersService,
         private fitBoundsService: FitBoundsService,
         private toastService: ToastService,
-        private sessionStorageService: SessionStorageService,
-        private mdDialogRef: MdDialogRef<OsmUserDialogComponent>,
+        public userService: OsmUserService,
     ) {
         super(resources);
         this.initializeRanks();

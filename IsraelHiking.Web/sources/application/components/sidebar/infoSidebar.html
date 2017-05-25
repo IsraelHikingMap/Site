@@ -18,7 +18,7 @@
                 </div>
                 <div fxLayout="row" class="bottom-border">
                     <div fxFlex="15"><i class="fa icon-download" fxFill></i></div>
-                    <div fxFlex><a class="cursor-pointer" (click)="openDownloadDialogs()" angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download open">{{resources.infoDownloadMapForOfflineUse}}</a></div>
+                    <div fxFlex><a class="cursor-pointer" (click)="openDownloadDialog()" angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download open">{{resources.infoDownloadMapForOfflineUse}}</a></div>
                 </div>
                 <p>
                     <i>
@@ -144,7 +144,7 @@
                     <div fxFlex="40">{{resources.helpLanguage}}.</div>
                 </div>
                 <div fxLayout="row">
-                    <div fxFill [ngStyle]="{'text-align': center}">{{resources.helpLayersSubHeader}}</div>
+                    <div fxFill class="text-center">{{resources.helpLayersSubHeader}}</div>
                 </div>
                 <div fxLayout="row">
                     <div fxFlex="10">

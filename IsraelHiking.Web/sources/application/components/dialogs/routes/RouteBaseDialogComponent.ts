@@ -14,6 +14,7 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public isNew: boolean;
     public isAdvanced: boolean;
     public title: string;
+    public isReversed: boolean;
 
     constructor(resources: ResourcesService,
         protected mapService: MapService,
@@ -49,4 +50,8 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     protected isRouteNameAlreadyInUse(): boolean {
         return this.layersService.isNameAvailable(this.routeProperties.name) === false;
     }
+
+    public saveRouteToFile(e: Event) { }
+    public moveToRoute = (e: Event) => { }
+    public deleteRoute(e: Event) { }
 }
