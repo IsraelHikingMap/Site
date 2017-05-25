@@ -77,9 +77,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             this.updateFilteredLists(searchTerm);
         });
         this.searchTerm.setValue(this.state.searchTerm);
-
         this.languageChangeSubscription = this.resources.languageChanged.subscribe(this.initializeRanks);
-        this.userService.refreshDetails();
     }
 
     public ngOnInit() {
@@ -199,7 +197,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         }
         this.fileService.upload(Urls.osmUploadTrace, file).then(() => {
             this.toastService.success(this.resources.fileUploadedSuccefullyItWillTakeTime);
-            this.userService.refreshDetails();
+            this.userService.refreshDetails().then(() => { this.updateFilteredLists(this.searchTerm.value) });
         }, () => {
             this.toastService.error(this.resources.unableToUploadFile);
         });

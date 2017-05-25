@@ -22,11 +22,11 @@
                 </md-input-container>
             </div>
             <div fxLayout="row">
-                <button md-button (click)="generateUrl(title, description)" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share create">{{resources.generateUrlToShareWithYourFriends}}</button>
+                <button md-raised-button color="primary" (click)="generateUrl(title, description)" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share create">{{resources.generateUrlToShareWithYourFriends}}</button>
             </div>
         </div>
         <div [hidden]="!shareAddress">
-            <div fxLayout="row">
+            <div fxLayout="row" fxLayoutAlign="space-around none">
                 <div fxFlex="33">
                     <img [src]="imageUrl" fxFill />
                 </div>
@@ -128,7 +128,6 @@
         </div>
     </div>
     <div md-dialog-actions>
-        <button md-button md-dialog-close>{{resources.close}}</button>
-        <button md-dialog-close md-button [hidden]="!shareAddress" (click)="clearShareAddress()" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share clear">{{resources.clear}}</button>
+        <button md-dialog-close md-button color="warn" [hidden]="!shareAddress" (click)="clearShareAddress()" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share clear">{{resources.clear}}</button>
     </div>
 </div>

@@ -21,6 +21,10 @@ body {
     overflow: hidden;
 }
 
+.marker-popup {
+    min-width: 250px;
+}
+
 .leaflet-left {
     z-index: 1020 !important;
 }
@@ -31,10 +35,6 @@ body {
 
 .cdk-overlay-container {
     z-index: 1500 !important;
-}
-
-.tooltip-inner {
-    min-width: 150px;
 }
 
 .cursor-pointer {

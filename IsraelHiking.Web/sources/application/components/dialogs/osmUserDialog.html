@@ -2,7 +2,7 @@
     <div md-dialog-title>
         <div fxLayout="row">
             <div fxFlex="90">
-                <div fxLayout="row">
+                <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                     <div fxFlex="16">
                         <img [src]="userService.imageUrl" alt="" fxFill />
                     </div>
@@ -32,19 +32,19 @@
                 <div fxLayout="row">
                     <div fxFlex>
                         <label fxFlex>
-                            <button fxFill md-button tye="button" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Upload OSM trace"><i class="fa icon-folder-open fa-lg"></i> {{resources.uploadFileToOsm}}</button>
+                            <button fxFill md-raised-button color="primary" type="button" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Upload OSM trace"><i class="fa icon-folder-open fa-lg"></i> {{resources.uploadFileToOsm}}</button>
                             <input type="file" (change)="uploadToOsm(file)" [(ngModel)]="file" [style.display]="'none'" />
                         </label>
                     </div>
                 </div>
                 <br />
                 <div *ngFor="let trace of filteredTraces">
-                    <div fxLayout="row">
+                    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                         <div fxFlex="33">
                             <img [src]="trace.imageUrl" alt="" fxFill />
                         </div>
                         <div fxFlex>
-                            <div fxLayout="row">
+                            <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                                 <div fxFlex="75">
                                     <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.fileName}}</a><br />
                                     {{trace.description}}<br />
@@ -72,12 +72,12 @@
             </md-tab>
             <md-tab label="{{resources.myShares}}">
                 <div *ngFor="let siteUrl of filteredSiteUrls">
-                    <div fxLayout="row">
+                    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                         <div fxFlex="33">
                             <img [src]="userService.getImageFromSiteUrlId(siteUrl)" fxFill />
                         </div>
                         <div fxFlex>
-                            <div fxLayout="row">
+                            <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                                 <div fxFlex="75">
                                     <div [hidden]="editMode">
                                         <h4>{{siteUrl.title}} - {{siteUrl.description}}</h4>
@@ -98,7 +98,7 @@
                                     </div>
                                 </div>
                             </div>
-                            <div fxLayout="row">
+                            <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                                 <div fxFlex="75">
                                     <a href="{{userService.getUrlFromSiteUrlId(siteUrl)}}" target="_blank">{{userService.getUrlFromSiteUrlId(siteUrl)}}</a><br />
                                     {{resources.views}}: {{siteUrl.viewsCount}}<br />
