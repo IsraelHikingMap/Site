@@ -17,7 +17,7 @@
         </div>
         <div fxLayout="row">
             <md-input-container hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill>
-                <input mdInput type="text" [(ngModel)]="address" name="address" placeholder="{{resources.address}}" required="" fxFill/>
+                <input mdInput type="text" [(ngModel)]="address" name="address" placeholder="{{resources.address}}" required="" fxFill [dir]="'ltr'"/>
             </md-input-container>
         </div>
         <div fxLayout="row">
@@ -30,7 +30,7 @@
         </div>
     </div>
     <div md-dialog-actions>
-        <button md-dialog-close type="button" md-button (click)="saveLayer(key, address, minZoom, maxZoom, $event)" mdTooltip="{{resources.save}}" mdTooltipPosition="below"><i class="fa icon-check"></i></button>
-        <button md-dialog-close type="button" md-button [hidden]="isNew" (click)="removeLayer($event)" mdTooltip="{{resources.deleteLayer}}" mdTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
+        <button md-dialog-close type="button" md-button (click)="saveLayer(key, address, minZoom, maxZoom, $event)" mdTooltip="{{resources.save}}" mdTooltipPosition="above"><i class="fa icon-check"></i></button>
+        <button md-dialog-close type="button" md-button [hidden]="isNew" (click)="removeLayer($event)" mdTooltip="{{resources.deleteLayer}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
     </div>
 </div>

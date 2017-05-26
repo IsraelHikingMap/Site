@@ -8,8 +8,7 @@ import { RouterModule, Routes } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MaterialModule, MdDialogModule, MdButtonModule, MdInputModule, MdSliderModule, MdSnackBarModule, MdAutocompleteModule } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
-import { SessionStorageService, LocalStorageService } from "ngx-store";
-// HM TODO: check this: WebStorageModule
+import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
 import { ClipboardModule } from "ngx-clipboard";
 import { Angulartics2Module, Angulartics2GoogleAnalytics } from "angulartics2";
 /// services
@@ -77,7 +76,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
     imports: [
         CommonModule,
         BrowserModule,
-        //WebStorageModule,
+        WebStorageModule,
         HttpModule,
         JsonpModule,
         BrowserAnimationsModule,

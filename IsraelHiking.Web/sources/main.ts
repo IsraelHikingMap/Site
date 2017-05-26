@@ -1,7 +1,11 @@
-import { enableProdMode } from '@angular/core';
-import { platformBrowserDynamic } from '@angular/platform-browser-dynamic';
-import { ApplicationModule } from './application/application.module';
-import { environment } from './environments/environment';
+import { enableProdMode } from "@angular/core";
+import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
+import { WEBSTORAGE_CONFIG } from "ngx-store";
+import { ApplicationModule } from "./application/application.module";
+import { environment } from "./environments/environment";
+
+WEBSTORAGE_CONFIG.prefix = "IHM.";
+
 if (environment.production) {
   enableProdMode();
 }
