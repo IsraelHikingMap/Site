@@ -26,7 +26,7 @@ import "leaflet";
 import "leaflet.locatecontrol";
 
 @Component({
-    template: "",
+    template: `<ng-progress [ngStyle]="{'z-index':1500}"></ng-progress>`,
     selector: "main-map",
     providers: [Location, { provide: LocationStrategy, useClass: PathLocationStrategy }],
 })
