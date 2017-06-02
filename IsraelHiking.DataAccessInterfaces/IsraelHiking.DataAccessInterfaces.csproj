@@ -8,7 +8,7 @@
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5-pre3" />
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre3" />
-    <PackageReference Include="OsmSharp" Version="6.0.0-alpha2" />
+    <PackageReference Include="OsmSharp" Version="6.1.0-pre1" />
   </ItemGroup>
 
   <ItemGroup>
