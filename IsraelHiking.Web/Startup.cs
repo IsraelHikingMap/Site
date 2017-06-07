@@ -268,7 +268,14 @@ namespace IsraelHiking.Web
                 };
                 app.UseFileServer(fileServerOptions);
             }
-
+            // serve https certificate folder
+            app.UseStaticFiles(new StaticFileOptions
+            {
+                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @".well-known")),
+                RequestPath = new PathString("/.well-known"),
+                ServeUnknownFileTypes = true // serve extensionless file
+            });
+            // wwwroot
             app.UseStaticFiles();
         }
 
