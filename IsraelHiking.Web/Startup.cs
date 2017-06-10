@@ -30,6 +30,7 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.StaticFiles;
+using Microsoft.AspNetCore.Http.Features;
 
 namespace IsraelHiking.Web
 {
@@ -163,7 +164,6 @@ namespace IsraelHiking.Web
                 .AddJsonFile("appsettings.{env.EnvironmentName}.json", optional: true)
                 .Build();
             services.Configure<ConfigurationData>(config);
-
             services.AddSingleton((serviceProvider) => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
             var binariesFolder = "";
             services.AddTransient<IFileProvider, PhysicalFileProvider>((serviceProvider) =>
@@ -269,12 +269,16 @@ namespace IsraelHiking.Web
                 app.UseFileServer(fileServerOptions);
             }
             // serve https certificate folder
-            app.UseStaticFiles(new StaticFileOptions
+            var wellKnownFolder = Path.Combine(Directory.GetCurrentDirectory(), @".well-known");
+            if (Directory.Exists(wellKnownFolder))
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), @".well-known")),
-                RequestPath = new PathString("/.well-known"),
-                ServeUnknownFileTypes = true // serve extensionless file
-            });
+                app.UseStaticFiles(new StaticFileOptions
+                {
+                    FileProvider = new PhysicalFileProvider(wellKnownFolder),
+                    RequestPath = new PathString("/.well-known"),
+                    ServeUnknownFileTypes = true // serve extensionless file
+                });
+            }
             // wwwroot
             app.UseStaticFiles();
         }

@@ -7,9 +7,9 @@ namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IElasticSearchGateway
     {
-        void Initialize(string uri = "http://localhost:9200/", bool deleteIndex = false);
+        void Initialize(string uri = "http://localhost:9200/");
         Task<List<Feature>> Search(string searchTerm, string fieldName);
-        Task UpdateNamesData(List<Feature> features);
+        Task UpdateDataZeroDownTime(List<Feature> names, List<Feature> highways);
         Task UpdateHighwaysData(List<Feature> features);
         Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest);
     }

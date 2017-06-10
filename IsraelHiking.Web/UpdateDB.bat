@@ -1,5 +1,4 @@
-@REM Update the Site DB's as an administrator
+@REM Updates the site's OSM database uing http post request.
 @REM Usage UpdateDB <updated osm.pbf file>
 
-COPY "%~1" "%~dp0\israel-and-palestine-latest.osm.pbf"
-runas /savecred /user:administrator "cmd /c cd \"%~dp0 \" & dotnet.exe IsraelHiking.Updater.dll -g -e > IsraelHiking.Updater.log 2>&1 "
+curl -F "file=@localfile;filename=israel-and-palestine-latest.osm.pbf" localhost:8080/api/update

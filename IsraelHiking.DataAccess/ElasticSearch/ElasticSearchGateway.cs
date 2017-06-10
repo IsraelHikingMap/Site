@@ -48,8 +48,15 @@ namespace IsraelHiking.DataAccess.ElasticSearch
 
     public class ElasticSearchGateway : IElasticSearchGateway
     {
-        private const string OSM_NAMES_INDEX = "osm_names";
-        private const string OSM_HIGHWAYS_INDEX = "osm_highways";
+        private const int PAGE_SIZE = 10000;
+
+        private const string OSM_NAMES_INDEX1 = "osm_names1";
+        private const string OSM_NAMES_INDEX2 = "osm_names2";
+        private const string OSM_HIGHWAYS_INDEX1 = "osm_highways1";
+        private const string OSM_HIGHWAYS_INDEX2 = "osm_highways2";
+        private const string OSM_NAMES_ALIAS = "osm_names";
+        private const string OSM_HIGHWAYS_ALIAS = "osm_highways";
+
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
         private IElasticClient _elasticClient;
@@ -59,7 +66,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             _logger = logger;
         }
 
-        public void Initialize(string uri = "http://localhost:9200/", bool deleteIndex = false)
+        public void Initialize(string uri = "http://localhost:9200/")
         {
             _logger.LogInformation("Initialing elastic search with uri: " + uri);
             var pool = new SingleNodeConnectionPool(new Uri(uri));
@@ -67,50 +74,83 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 pool,
                 new HttpConnection(),
                 new SerializerFactory(s => new GeoJsonNetSerializer(s)))
-                .DefaultIndex(OSM_NAMES_INDEX)
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
-            if (deleteIndex && _elasticClient.IndexExists(OSM_NAMES_INDEX).Exists)
+            if (_elasticClient.IndexExists(OSM_NAMES_INDEX1).Exists == false && 
+                _elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists == false)
             {
-                _elasticClient.DeleteIndex(OSM_NAMES_INDEX);
+                _elasticClient.CreateIndex(OSM_NAMES_INDEX1);
+                _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_NAMES_ALIAS).Index(OSM_NAMES_INDEX1)));
             }
-            if (deleteIndex && _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX).Exists)
+            if (_elasticClient.IndexExists(OSM_NAMES_INDEX1).Exists == true &&
+                _elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists == true)
             {
-                _elasticClient.DeleteIndex(OSM_HIGHWAYS_INDEX);
+                _elasticClient.DeleteIndex(OSM_NAMES_INDEX2);
             }
-            _elasticClient.CreateIndex(OSM_HIGHWAYS_INDEX,
-                    c => c.Mappings(
-                        ms => ms.Map<Feature>(m =>
-                            m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
-                                .Tree(GeoTree.Geohash)
-                                .TreeLevels(10)
-                                .DistanceErrorPercentage(0.2))))));
+            if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists == false &&
+                _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists == false)
+            {
+                CreateHighwaysIndex(OSM_HIGHWAYS_INDEX1);
+                _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_HIGHWAYS_ALIAS).Index(OSM_HIGHWAYS_INDEX1)));
+            }
+            if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists == true &&
+                _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists == true)
+            {
+                _elasticClient.DeleteIndex(OSM_HIGHWAYS_INDEX2);
+            }
             _logger.LogInformation("Finished initialing elastic search with uri: " + uri);
         }
 
-        public Task UpdateNamesData(List<Feature> features)
+        public async Task UpdateDataZeroDownTime(List<Feature> names, List<Feature> highways)
         {
-            return UpdateData(features, OSM_NAMES_INDEX);
+            // init
+            var currentNameIndex = OSM_NAMES_INDEX1;
+            var currentHighwayIndex = OSM_HIGHWAYS_INDEX1;
+            var newNameIndex = OSM_NAMES_INDEX2;
+            var newHighwayIndex = OSM_HIGHWAYS_INDEX2;
+            if (_elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists)
+            {
+                currentNameIndex = OSM_NAMES_INDEX2;
+                currentHighwayIndex = OSM_HIGHWAYS_INDEX2;
+                newNameIndex = OSM_NAMES_INDEX1;
+                newHighwayIndex = OSM_HIGHWAYS_INDEX1;
+            }
+            // create new indexes
+            CreateHighwaysIndex(newHighwayIndex);
+            _elasticClient.CreateIndex(newNameIndex);
+            // update data
+            await UpdateUsingPaging(names, newNameIndex);
+            await UpdateUsingPaging(highways, newHighwayIndex);
+            // change alias
+            await _elasticClient.AliasAsync(a => a
+                .Remove(i => i.Alias(OSM_NAMES_ALIAS).Index(currentNameIndex))
+                .Remove(i => i.Alias(OSM_HIGHWAYS_ALIAS).Index(currentHighwayIndex))
+                .Add(i => i.Alias(OSM_NAMES_ALIAS).Index(newNameIndex))
+                .Add(i => i.Alias(OSM_HIGHWAYS_ALIAS).Index(newHighwayIndex))
+                );
+            // delete old indexes
+            await _elasticClient.DeleteIndexAsync(currentNameIndex);
+            await _elasticClient.DeleteIndexAsync(currentHighwayIndex);
         }
 
         public Task UpdateHighwaysData(List<Feature> features)
         {
-            return UpdateData(features, OSM_HIGHWAYS_INDEX);
+            return UpdateData(features, OSM_HIGHWAYS_ALIAS);
         }
 
-        public async Task UpdateData(List<Feature> features, string index)
+        public async Task UpdateData(List<Feature> features, string alias)
         {
             var result = await _elasticClient.BulkAsync(bulk =>
             {
                 foreach (var feature in features)
                 {
-                    bulk.Index<Feature>(i => i.Index(index).Document(feature).Id(GetId(feature)));
+                    bulk.Index<Feature>(i => i.Index(alias).Document(feature).Id(GetId(feature)));
                 }
                 return bulk;
             });
             if (result.IsValid == false)
             {
-                result.ItemsWithErrors.ToList().ForEach(i => _logger.LogError("Inserting " + i.Id + " falied with error: " + i.Error.Reason + " caused by: " + i.Error.CausedBy.Reason));
+                result.ItemsWithErrors.ToList().ForEach(i => _logger.LogError($"Inserting {i.Id} falied with error: {i.Error?.Reason ?? string.Empty} caused by: {i.Error?.CausedBy?.Reason ?? string.Empty}"));
             }
         }
 
@@ -122,7 +162,8 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             }
             var field = "properties." + fieldName;
             var response = await _elasticClient.SearchAsync<Feature>(
-                s => s.Size(NUMBER_OF_RESULTS)
+                s => s.Index(OSM_NAMES_ALIAS)
+                    .Size(NUMBER_OF_RESULTS)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
                     .Query(
@@ -158,7 +199,8 @@ namespace IsraelHiking.DataAccess.ElasticSearch
         public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)
         {
             var response = await _elasticClient.SearchAsync<Feature>(
-                s => s.Index(OSM_HIGHWAYS_INDEX).Size(5000).Query(
+                s => s.Index(OSM_HIGHWAYS_ALIAS)
+                    .Size(5000).Query(
                     q => q.GeoShapeEnvelope(
                         e => e.Coordinates(new List<GeoCoordinate>
                             {
@@ -170,6 +212,38 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 )
             );
             return response.Documents.ToList();
+        }
+
+        private void CreateHighwaysIndex(string highwaysIndexName)
+        {
+            _elasticClient.CreateIndexAsync(highwaysIndexName,
+                    c => c.Mappings(
+                        ms => ms.Map<Feature>(m =>
+                            m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
+                                .Tree(GeoTree.Geohash)
+                                .TreeLevels(10)
+                                .DistanceErrorPercentage(0.2))))));
+        }
+
+        private async Task UpdateUsingPaging(List<Feature> features, string alias)
+        {
+            _logger.LogInformation($"Starting indexing {features.Count} records");
+            var smallCahceList = new List<Feature>(PAGE_SIZE);
+            int total = 0;
+            foreach (var feature in features)
+            {
+                smallCahceList.Add(feature);
+                if (smallCahceList.Count < PAGE_SIZE)
+                {
+                    continue;
+                }
+                total += smallCahceList.Count;
+                await UpdateData(smallCahceList, alias);
+                _logger.LogInformation($"Indexed {total} records of {features.Count}");
+                smallCahceList.Clear();
+            }
+            await UpdateData(smallCahceList, alias);
+            _logger.LogInformation($"Finished indexing {features.Count} records");
         }
     }
 }

@@ -76,6 +76,5 @@
     <ProjectReference Include="..\IsraelHiking.Common\IsraelHiking.Common.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
-    <ProjectReference Include="..\IsraelHiking.Updater\IsraelHiking.Updater.csproj" />
   </ItemGroup>
 </Project>

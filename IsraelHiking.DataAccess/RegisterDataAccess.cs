@@ -21,8 +21,6 @@ namespace IsraelHiking.DataAccess
             services.AddTransient<IGraphHopperGateway, GraphHopperGateway>();
             services.AddSingleton<IElasticSearchGateway, ElasticSearchGateway>();
             services.AddSingleton<IElevationDataStorage, ElevationDataStorage>();
-            services.AddTransient<IGraphHopperHelper, GraphHopperHelper>();
-            services.AddTransient<INssmHelper, ElasticSearchHelper>();
             services.AddTransient<IOsmRepository, OsmRepository>();
             services.AddTransient<IOsmGateway, OsmGateway>();
             return services;

@@ -13,6 +13,7 @@ using OsmSharp.Complete;
 
 namespace IsraelHiking.API.Tests.Services.Osm
 {
+    /*
     [TestClass]
     public class OsmDataServiceTests
     {
@@ -137,4 +138,6 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _graphHopperHelper.Received(1).UpdateData(Arg.Any<string>());
         }
     }
+
+    */
 }

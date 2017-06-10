@@ -43,7 +43,6 @@ The architecture is based on layers
 * Executers - basic logical building blocks 
 * DataAccessInterfaces - a slim layer to decouple business logic from data access
 * DataAccess - database, file system and network request are processed in this layer
-* Updater will be discussed below.  
 
 # Setting up this project
 In order to be able to build this site you'll need some tools:
@@ -68,35 +67,26 @@ In order to be able to build this site you'll need some tools:
     * Chutzpah Test Adapter for the test explorer
     * Chutzpah Test Runner Contet Menu Extension
   * Restart Visual Studio to complete the installation
-* Open IsraelHiking.sln and compile and run using F5 - Note that it will take time to download all the packages so be patience
+* Open IsraelHiking.sln and compile using F6 - Note that it will take time to download all the packages so be patience
+* When compilation is complete go to compilation folder: `IsraelHiking.Web\bin\Debug\netcoreapp1.1`
+  * Go To `ElasticSearch` folder and run `ElasticSearch.cmd`
+  * Go To `GraphHopper` folder and run `GraphHopper.cmd`
+* Go back to visual studio and press F5 to start the server.
+* Surf to `localhost:<port>/swagger/` and you should be presented with the API of the site
+  * Expand the POST under Update
+  * Select the relevant osm.pbf file and click try it out!
+  * An error will be returned after a while but this is due to timeout, the update of the database will be running for about 20 minutes
+  * Once completed (can be seen in the logs under `IsraelHiking.Web\Logs\Site-<date>`) the server is ready!
 
 # Setup the server
 In order to be able to make the server work a few prerequisits are needed:
 * Windows machine with IIS enabled and a site.
 * Install Java Runtime Environment.
-* As administrator, create a task to run the Graph Hopper and Elastic Search services and update them.
-  * Open Windows' Task Scheduler using "run as Administrator"
+* Add `curl` to path.
+* `ElasticSearch.cmd` and `GraphHopper.cmd` should be processes that run when the server machine starts and never die - use a watchdog or windows service to make sure they do.
+* Create a task to update Graph Hopper and Elastic Search:
+  * Open Windows' Task Scheduler
   * Create task 
-  * Add an action
-  
-      <img width="340" alt="Create Task screenshot" src="https://cloud.githubusercontent.com/assets/1304610/24397580/581fecb8-13af-11e7-9388-e3741fcc52bd.png">
-
-      where "Start in" is the full pathname of the ```IsraelHiking.Updater\bin\Debug\netcoreapp1.1``` directory
+  * Add an action to run `UpdateDB.bat` after you download a new osm.pbf file.
   * Add a "On a schedule" trigger to run once a day or at the frequency of the map updates.
   * Add a "At startup" trigger.
-* Add a task to windows scheduler as administrator to run the updater as administrator once a day or so to update the routing and search.
-
-###IsraelHiking.Updater.exe
-This utility is used to download and update the OSM data for the search and routing.
-This utility also setups the services needed for the machine.
-The following flags can be used when running from commnad line:
-
-```-d | --download```: download latest OSM pbf file from geofabrik
-
-```-g | --graphhopper```: update graphhopper data
-
-```-e | -es | --elasticsearch```: update elastic search data
-
-```-? | -h | --help```: for the help menu
-
-When no flags are given all the above will be executed.

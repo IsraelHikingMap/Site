@@ -1,4 +1,7 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using IsraelHiking.DataAccess.GraphHopper;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.IO;
 
 namespace IsraelHiking.DataAccess.Tests.GraphHopper
 {
@@ -10,8 +13,11 @@ namespace IsraelHiking.DataAccess.Tests.GraphHopper
         public void Initialize_ShouldAddService()
         {
             var logger = new TraceLogger();
-            //GraphHopperHelper init = new GraphHopperHelper(logger, new ProcessHelper(logger));
-            //init.Initialize(Path.GetDirectoryName(Assembly.GetAssembly(typeof(GraphHopperHelperTests)).Location));
+            var physical = new PhysicalFileProvider(@"D:\Github\IsraelHikingMap\Site\IsraelHiking.Web\bin\Debug\netcoreapp1.1");
+            var gateway = new GraphHopperGateway(logger, physical);
+            var memoryStream = new MemoryStream();
+            physical.GetFileInfo("israel-and-palestine-latest.osm.pbf").CreateReadStream().CopyTo(memoryStream);
+            gateway.Rebuild(memoryStream, "israel-and-palestine-latest.osm.pbf").Wait();
         }
     }
 }

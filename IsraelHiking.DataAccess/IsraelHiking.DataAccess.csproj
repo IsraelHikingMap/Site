@@ -71,7 +71,6 @@
     <None Remove="GraphHopper\Graphhopper Java Update.bat" />
     <None Remove="GraphHopper\graphhopper-tools-0.8-SNAPSHOT.jar" />
     <None Remove="GraphHopper\graphhopper-web-0.8-SNAPSHOT-with-dep.jar" />
-    <None Remove="nssm.exe" />
   </ItemGroup>
 
   <ItemGroup>
@@ -258,21 +257,6 @@
     <Content Include="GPSBabel\Qt5Core.dll">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="GraphHopper\config-example.properties">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GraphHopper\Graphhopper Java Update.bat">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GraphHopper\graphhopper-tools-0.8-SNAPSHOT.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GraphHopper\graphhopper-web-0.8-SNAPSHOT-with-dep.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="nssm.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -293,6 +277,21 @@
   <ItemGroup>
     <ProjectReference Include="..\IsraelHiking.Common\IsraelHiking.Common.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="ElasticSearch\ElasticSearch.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GraphHopper\graphhopper-web-0.10-SNAPSHOT-with-dep.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GraphHopper\GraphHopper.cmd">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="GraphHopper\israel-hiking-config.properties">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>

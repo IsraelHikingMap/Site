@@ -1,8 +1,0 @@
-{
-  "profiles": {
-    "IsraelHiking.Updater": {
-      "commandName": "Project",
-      "commandLineArgs": "-es"
-    }
-  }
-}

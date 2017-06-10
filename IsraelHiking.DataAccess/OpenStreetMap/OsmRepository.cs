@@ -7,6 +7,7 @@ using OsmSharp.Streams;
 using OsmSharp.Streams.Complete;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.FileProviders;
+using System.IO;
 
 namespace IsraelHiking.DataAccess.OpenStreetMap
 {
@@ -23,41 +24,35 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _fileProvider = fileProvider;
         }
 
-        public Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(string osmFileRelativePath)
+        public Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(Stream osmFileStream)
         {
             return Task.Run(() =>
             {
-                using (var stream = _fileProvider.GetFileInfo(osmFileRelativePath).CreateReadStream())
-                {
-                    _logger.LogInformation($"Reading {osmFileRelativePath} to memory - extracting only elements with name.");
-                    var source = new PBFOsmStreamSource(stream);
-                    var completeSource = new OsmSimpleCompleteStreamSource(source);
-                    var namesDictionary = completeSource
-                        .Where(o => string.IsNullOrWhiteSpace(GetName(o)) == false)
-                        .GroupBy(GetName)
-                        .ToDictionary(g => g.Key, g => g.ToList());
-                    _logger.LogInformation("Finished grouping data by name.");
-                    return namesDictionary;
-                }
+                _logger.LogInformation($"Extracting elements with name from OSM stream.");
+                var source = new PBFOsmStreamSource(osmFileStream);
+                var completeSource = new OsmSimpleCompleteStreamSource(source);
+                var namesDictionary = completeSource
+                    .Where(o => string.IsNullOrWhiteSpace(GetName(o)) == false)
+                    .GroupBy(GetName)
+                    .ToDictionary(g => g.Key, g => g.ToList());
+                _logger.LogInformation("Finished grouping data by name.");
+                return namesDictionary;
             });
         }
 
-        public Task<List<CompleteWay>> GetAllHighways(string osmFileRelativePath)
+        public Task<List<CompleteWay>> GetAllHighways(Stream osmFileStream)
         {
             return Task.Run(() =>
             {
-                using (var stream = _fileProvider.GetFileInfo(osmFileRelativePath).CreateReadStream())
-                {
-                    _logger.LogInformation($"Reading {osmFileRelativePath} to memory - extracting only highways.");
-                    var source = new PBFOsmStreamSource(stream);
-                    var completeSource = new OsmSimpleCompleteStreamSource(source);
-                    var higways = completeSource
-                        .OfType<CompleteWay>()
-                        .Where(o => o.Tags.ContainsKey("highway"))
-                        .ToList();
-                    _logger.LogInformation("Finished getting highways. " + higways.Count);
-                    return higways;
-                }
+                _logger.LogInformation($"Extracting highways from OSM stream.");
+                var source = new PBFOsmStreamSource(osmFileStream);
+                var completeSource = new OsmSimpleCompleteStreamSource(source);
+                var higways = completeSource
+                    .OfType<CompleteWay>()
+                    .Where(o => o.Tags.ContainsKey("highway"))
+                    .ToList();
+                _logger.LogInformation("Finished getting highways. " + higways.Count);
+                return higways;
             });
         }
 

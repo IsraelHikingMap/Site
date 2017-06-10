@@ -79,7 +79,7 @@ namespace IsraelHiking.API.Executors
                 var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(g.Geometry);
                 if (!isValidOp.IsValid)
                 {
-                    _logger.LogDebug($"https://www.openstreetmap.org/{(g.Geometry.GeometryType == "Polygon" ? "way" : "relation")}/{g.Attributes["osm_id"]} {isValidOp.ValidationError.Message}({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                    _logger.LogError($"https://www.openstreetmap.org/{(g.Geometry.GeometryType == "Polygon" ? "way" : "relation")}/{g.Attributes["osm_id"]} {isValidOp.ValidationError.Message}({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                 }
             });
             
@@ -161,7 +161,7 @@ namespace IsraelHiking.API.Executors
                     var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(f.Geometry);
                     if (!isValidOp.IsValid)
                     {
-                        _logger.LogDebug($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osm_id"]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                        _logger.LogError($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osm_id"]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                     }
                     invalidFeature = f;
                     return false;
