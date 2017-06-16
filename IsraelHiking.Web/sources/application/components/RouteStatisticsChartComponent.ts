@@ -8,7 +8,6 @@ import { IRouteLayer } from "../services/layers/routelayers/IRouteLayer";
 import { RouteStatisticsService, IRouteStatisticsPoint, IRouteStatistics } from "../services/RouteStatisticsService";
 import { IconsService } from "../services/IconsService"
 import { BaseMapComponent } from "./BaseMapComponent";
-
 import * as _ from "lodash";
 import * as $ from "jquery";
 
@@ -38,9 +37,6 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
     /// chart:
     private chartWrapper: google.visualization.ChartWrapper;
     private chartSvg: JQuery;
-    
-    
-    
 
     constructor(resources: ResourcesService,
         private layersService: LayersService,
@@ -389,17 +385,19 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
 
     public afterChartUpdate() {
         this.chartSvg = $(".route-statistics-chart svg");
-        this.chartSvg.mousemove((e: JQueryMouseEventObject) => {
+        this.chartSvg.mousemove((e: JQueryMouseEventObject): false => {
             let point = this.onChartHoverOrClick(e);
             if (point != null) {
                 this.hoverChartMarker.setLatLng(point.latlng);
                 this.hoverChartMarker.setOpacity(1.0);
             }
+            return false;
         });
-        this.chartSvg.click((e: JQueryMouseEventObject) => {
+        this.chartSvg.click((e: JQueryMouseEventObject): false => {
             // mainly for mobile devices
             this.onChartHoverOrClick(e);
             setTimeout(() => { this.hideChartHover() }, 2000);
+            return false;
         });
 
         $(".route-statistics-body").mouseleave((e) => {

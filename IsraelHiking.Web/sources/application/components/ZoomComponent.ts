@@ -7,9 +7,8 @@ import { ResourcesService } from "../services/ResourcesService";
     selector: "zoom-control",
     templateUrl: "./zoom.html"
 })
-
 export class ZoomComponent extends BaseMapComponent {
-    constructor(public resources: ResourcesService,
+    constructor(resources: ResourcesService,
         private mapService: MapService) {
         super(resources);
     }

@@ -2,6 +2,7 @@
 import { SidebarService } from "../../services/SidebarService";
 import { ResourcesService } from "../../services/ResourcesService";
 import { MapService } from "../../services/MapService";
+import { BaseMapComponent } from "../BaseMapComponent";
 
 @Component({
     selector: "sidebar",
@@ -9,10 +10,11 @@ import { MapService } from "../../services/MapService";
     styleUrls: ["./sidebar.css"]
 })
 
-export class SidebarComponent {
-    constructor(public resources: ResourcesService,
+export class SidebarComponent extends BaseMapComponent {
+    constructor(resources: ResourcesService,
         private sidebarService: SidebarService,
         private mapService: MapService) {
+        super(resources);
     }
 
     public getIsSidebarVisible() {

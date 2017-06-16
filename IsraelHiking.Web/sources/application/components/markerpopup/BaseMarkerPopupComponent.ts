@@ -2,6 +2,7 @@
 import { ResourcesService } from "../../services/ResourcesService";
 import { ElevationProvider } from "../../services/ElevationProvider";
 import { Urls } from "../../common/Urls";
+import { BaseMapComponent } from "../BaseMapComponent";
 import * as Common from "../../common/IsraelHiking";
 
 export interface INorthEast {
@@ -9,7 +10,7 @@ export interface INorthEast {
     east: number;
 }
 
-export abstract class BaseMarkerPopupComponent {
+export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     protected marker: Common.IMarkerWithTitle;
     public title: string;
     public latLng: L.LatLng;
@@ -19,9 +20,10 @@ export abstract class BaseMarkerPopupComponent {
 
     public remove: () => void;
 
-    constructor(public resources: ResourcesService,
+    constructor(resources: ResourcesService,
         protected http: Http,
         protected elevationProvider: ElevationProvider) {
+        super(resources);
         this.hideCoordinates = true;
         this.latLng = L.latLng(0, 0, 0);
         this.itmCoordinates = { north: 0, east: 0 };

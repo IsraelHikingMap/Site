@@ -1,6 +1,7 @@
 ﻿import { Component, Input } from "@angular/core";
 import { ResourcesService } from "../../services/ResourcesService";
 import { INorthEast } from "./BaseMarkerPopupComponent";
+import { BaseMapComponent } from "../BaseMapComponent";
 import * as Common from "../../common/IsraelHiking";
 
 
@@ -8,7 +9,7 @@ import * as Common from "../../common/IsraelHiking";
     selector: "coordinates",
     templateUrl: "./coordinatesMarkerPopup.html"
 })
-export class CoordinatesMarkerPopupComponent
+export class CoordinatesMarkerPopupComponent extends BaseMapComponent
 {
     @Input()
     public latLng: L.LatLng;
@@ -17,5 +18,7 @@ export class CoordinatesMarkerPopupComponent
     @Input()
     public wikiCoordinatesString: string;
 
-    constructor(public resources: ResourcesService) { }
+    constructor(resources: ResourcesService) {
+        super(resources);
+    }
 }

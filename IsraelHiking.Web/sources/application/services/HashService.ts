@@ -204,7 +204,7 @@ export class HashService {
     private parsePathToGeoLocation(): L.LatLng {
         var path = this.location.path(true);
         var splittedpath = path.split("/");
-        if (splittedpath.length !== 5) {
+        if (splittedpath.length !== 4) {
             return null;
         }
         return L.latLng(

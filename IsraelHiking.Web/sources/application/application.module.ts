@@ -12,7 +12,7 @@ import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
 import { ClipboardModule } from "ngx-clipboard";
 import { Angulartics2Module, Angulartics2GoogleAnalytics } from "angulartics2";
-import { NgProgressModule, NgProgressCustomBrowserXhr } from "ngx-progressbar";
+import { NgProgressModule, NgProgressBrowserXhr } from "ngx-progressbar";
 /// services
 import { GetTextCatalogService } from "./services/GetTextCatalogService";
 import { AuthorizationService } from "./services/AuthorizationService";
@@ -132,7 +132,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
     providers: [SessionStorageService,
         LocalStorageService,
         AuthorizationService,
-        { provide: BrowserXhr, useClass: NgProgressCustomBrowserXhr },
+        { provide: BrowserXhr, useClass: NgProgressBrowserXhr },
         GetTextCatalogService,
         MapService,
         ResourcesService,

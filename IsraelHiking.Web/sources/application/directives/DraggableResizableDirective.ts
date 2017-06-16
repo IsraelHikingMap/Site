@@ -138,8 +138,6 @@ export class DraggableResizableDirective implements OnInit {
         // Disable highlighting while dragging
         if (event.stopPropagation) event.stopPropagation();
         if (event.preventDefault) event.preventDefault();
-        event.cancelBubble = true;
-        event.returnValue = false;
 
         //$scope.$emit("angular-resizable.resizeStart", createResizeEventArgs());
     };

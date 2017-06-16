@@ -6,9 +6,7 @@ import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 import * as X2JS from "x2js";
 import * as _ from "lodash";
-import { osmAuth } from "osm-auth";
-declare var require: Function;
-var osmAuth = require('osm-auth') as Function;
+import osmAuth = require("osm-auth");
 
 //declare var osmAuth: Function;
 
