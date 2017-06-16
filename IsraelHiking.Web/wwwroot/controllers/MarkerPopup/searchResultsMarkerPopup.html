@@ -1,9 +1,0 @@
-﻿<div class="marker-popup" dir="{{resources.direction}}">
-    <h4 ng-class="{'text-right': hasHebrewCharacters(title)}" class="chrome-wordwrap-fix">{{title}}</h4>
-    <div class="form-group">
-        <a class="btn btn-success cursor-pointer input-group-addon" ng-click="convertToRoute()" uib-tooltip="{{resources.convertToRoute}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isSaveTooltipOpen" analytics-on="click" analytics-category="Search" analytics-event="Convert search to route"><i class="fa fa-plus"></i></a>
-        <a class="btn btn-danger cursor-pointer input-group-addon" ng-click="remove()" uib-tooltip="{{resources.removeSearchResults}}" tooltip-placement="top" tooltip-append-to-body="true" tooltip-is-open="isRemoveTooltipOpen"><i class="fa fa-trash"></i></a>
-        <a class="btn btn-warning cursor-pointer input-group-addon" ng-click="showCoordinates = !showCoordinates" uib-tooltip="{{resources.showCoordinates}}" tooltip-placement="top" tooltip-append-to-body="true"><i class="fa fa-globe"></i></a>
-    </div>
-    <div ng-include="'controllers/MarkerPopup/coordinatesMarkerPopup.html'"></div>
-</div>

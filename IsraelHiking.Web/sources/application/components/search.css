@@ -1,0 +1,11 @@
+﻿.search-input-container .mat-input-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 200px;
+}
+
+@media only screen and (min-width : 768px) {
+    .search-input-container .mat-input-wrapper {
+        width: 250px;
+    }
+}

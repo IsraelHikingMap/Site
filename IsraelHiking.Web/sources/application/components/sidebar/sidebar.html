@@ -1,0 +1,10 @@
+﻿<div id="sidebar-wrapper" [ngClass]="{toggled: getIsSidebarVisible()}">
+    <div [ngSwitch]="getViewName()">
+        <div *ngSwitchCase="'layers'">
+            <layers-sidebar></layers-sidebar>
+        </div>
+        <div *ngSwitchCase="'info'">
+            <info-sidebar></info-sidebar>
+        </div>
+    </div>
+</div>

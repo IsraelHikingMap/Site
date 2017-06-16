@@ -1,0 +1,173 @@
+﻿html {
+    height: 100%;
+}
+
+body {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    margin: 0;
+    font-family: Roboto, sans-serif;
+}
+
+#map {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    left: 0;
+    overflow: hidden;
+}
+
+.marker-popup {
+    min-width: 250px;
+}
+
+.leaflet-left {
+    z-index: 1020 !important;
+}
+
+.active {
+    outline: 2px solid orange !important;
+}
+
+.cdk-overlay-container {
+    z-index: 1500 !important;
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}
+
+.stack-icon-top {
+    top: -2px;
+    font-size: 0.75em !important;
+}
+
+.control-container {
+    display: table;
+}
+
+.leaflet-touch .control-container-item {
+    height: 30px;
+}
+
+.control-container-item {
+    display: table-cell;
+    vertical-align: middle;
+    height: 26px;
+    background: white !important;
+    border-right: 1px solid #ccc !important;
+    border-left: 1px solid #ccc !important;
+}
+
+.control-container-item.gutters {
+    padding-left: 12px;
+    padding-right: 12px;
+}
+
+.control-icon-first {
+    float: right;
+    border-top-left-radius: 0 !important;
+    border-top-right-radius: 4px !important;
+    border-bottom-right-radius: 4px !important;
+    border-bottom-left-radius: 0 !important;
+    border-bottom: 0 !important;
+}
+
+.control-icon-last {
+    float: right;
+    border-top-left-radius: 4px !important;
+    border-top-right-radius: 0 !important;
+    border-bottom-right-radius: 0 !important;
+    border-bottom-left-radius: 4px !important;
+    border-bottom: 0 !important;
+}
+
+.chrome-wordwrap-fix {
+    word-wrap: break-word;
+}
+
+.text-right {
+    text-align: right !important;
+}
+
+.text-center {
+    text-align: center !important;
+}
+
+.text-left {
+    text-align: left !important;
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+
+@media (max-width:767px) {
+    .hidden-xs {
+        display: none !important
+    }
+}
+
+@media (min-width:768px) and (max-width:991px) {
+    .hidden-sm {
+        display: none !important
+    }
+}
+
+/* Segment loading indicator */
+.loading-segment-indicator {
+    -webkit-animation: dash .4s linear infinite;
+    animation: dash .4s linear infinite;
+}
+
+.segment-readonly-indicator {
+    -webkit-animation: dash-long 1.0s linear infinite;
+    animation: dash-long 1.0s linear infinite;
+}
+
+@-webkit-keyframes dash {
+    from {
+        stroke-dashoffset: 20;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes dash {
+    from {
+        stroke-dashoffset: 20;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@-webkit-keyframes dash-long {
+    from {
+        stroke-dashoffset: 40;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes dash-long {
+    from {
+        stroke-dashoffset: 40;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+/* Segment loading indicator end */

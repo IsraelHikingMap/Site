@@ -1,0 +1,48 @@
+{
+  "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+  "project": {
+    "name": "israel-hiking"
+  },
+  "apps": [
+    {
+      "root": "sources",
+      "outDir": "wwwroot",
+      "assets": [
+        "content",
+        "translations",
+        "resourceNotFound.html",
+        "oauthCloseWindow.html"
+      ],
+      "index": "index.html",
+      "main": "main.ts",
+      "polyfills": "polyfills.ts",
+      "prefix": "app",
+      "styles": [
+        "common.css",
+        "./fonts/icons.css",
+        "../node_modules/font-awesome/css/font-awesome.css",
+        "../node_modules/leaflet/dist/leaflet.css",
+        "../node_modules/leaflet.markercluster/dist/MarkerCluster.css",
+        "../node_modules/leaflet.markercluster/dist/MarkerCluster.Default.css",
+        "../node_modules/@angular/material/prebuilt-themes/deeppurple-amber.css"
+      ],
+      "scripts": [
+        "google-analytics.js"
+      ],
+      "environmentSource": "environments/environment.ts",
+      "environments": {
+        "dev": "environments/environment.ts",
+        "prod": "environments/environment.prod.ts"
+      }
+    }
+  ],
+  "lint": [
+    {
+      "project": "tsconfig.json"
+    }
+  ],
+  "defaults": {
+    "styleExt": "css",
+    "component": {}
+  }
+}

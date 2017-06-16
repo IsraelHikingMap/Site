@@ -1,0 +1,11 @@
+﻿.divider {
+    border-color: black;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.row-hover:hover {
+    text-decoration: none;
+    color: black;
+    background: #bbb;
+}

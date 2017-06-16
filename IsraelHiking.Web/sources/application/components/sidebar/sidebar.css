@@ -1,0 +1,34 @@
+﻿/* added direction to fix issue with scroll bar and legend maps */
+/*overflow-y: scroll;*/
+#sidebar-wrapper {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    line-height: 24px;
+    overflow-x: hidden;
+    color: black;
+    direction: ltr;
+    background: #dddddd !important;
+    width: 0;
+    z-index: 1010;
+    -webkit-transition: all 0.5s ease;
+    -moz-transition: all 0.5s ease;
+    -o-transition: all 0.5s ease;
+    transition: all 0.5s ease;
+}
+
+    #sidebar-wrapper.toggled {
+        width: 280px;
+        padding-left: 45px;
+    }
+
+.bottom-border {
+    border-bottom: solid black;
+}
+
+@media(min-width:768px) {
+    #sidebar-wrapper.toggled {
+        width: 400px;
+    }
+}

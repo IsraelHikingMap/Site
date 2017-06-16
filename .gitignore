@@ -77,6 +77,7 @@ ipch/
 
 # TFS 2012 Local Workspace
 $tf/
+.vs
 
 # Guidance Automation Toolkit
 *.gpState
@@ -192,10 +193,7 @@ ModelManifest.xml
 /IsraelHiking.Web/bower_components
 /.vs/config
 *.sqlite
-!/IsraelHiking.Web/*.ts
-/IsraelHiking.Web/wwwroot/**/*.js
-/IsraelHiking.Web/wwwroot/**/*.map
-!/IsraelHiking.Web/wwwroot/scripts/*.js
+/IsraelHiking.Web/wwwroot/**/*.*
 /Tests/IsraelHiking.Web.Tests/**/*.js
 /Tests/IsraelHiking.Web.Tests/**/*.map
 /IsraelHiking.Web/wwwroot/translations/*.po

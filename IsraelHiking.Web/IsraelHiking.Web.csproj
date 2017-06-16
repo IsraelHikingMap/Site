@@ -24,7 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Remove="bower.json" />
     <Content Remove="package.json" />
     <Content Remove="tsconfig.json" />
   </ItemGroup>
@@ -40,7 +39,6 @@
     <Content Include="UpdateDB.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <None Include="bower.json" />
     <None Include="package.json" />
     <None Include="tsconfig.json" />
     <Content Update="appsettings.json">

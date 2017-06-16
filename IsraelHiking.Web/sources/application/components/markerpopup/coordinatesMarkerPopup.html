@@ -1,0 +1,7 @@
+﻿<div class="{{'text-' + resources.start}}">
+    <p>
+        {{resources.latitudeAbbreviation}} {{latLng.lat | number: '1.0-6' }}°, {{resources.longitudeAbbreviation}} {{latLng.lng | number:'1.0-6'}}°<br />
+        {{resources.eastAbbreviation}} {{itmCoordinates.east}} {{resources.meterUnit}}, {{resources.northAbbreviation}} {{itmCoordinates.north}} {{resources.meterUnit}}<br />
+        {{resources.elevation}} <span dir="ltr">{{latLng.alt | number: '1.0-0' }}</span> {{resources.meterUnit}}
+    </p>
+</div>

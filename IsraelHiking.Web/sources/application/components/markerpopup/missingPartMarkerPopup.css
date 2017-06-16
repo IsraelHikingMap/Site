@@ -1,0 +1,39 @@
+﻿.symbol-button {
+    padding: 10px;
+    border: 1px solid black;
+}
+
+.middle-line {
+    width:100%;
+    display:inline-block;
+    position:absolute;
+    top: 0;
+    height: 100%;
+    left: 33%;
+    right: 33%;
+    width: 34%;
+}
+
+.bg-blue {
+    background-color: #0000FF !important;
+}
+
+.bg-red {
+    background-color: #FF0000 !important;
+}
+
+.bg-orange {
+    background-color: #FF6600 !important;
+}
+
+.bg-green {
+    background-color: #008000 !important;
+}
+
+.bg-purple {
+    background-color: #B700FF !important;
+}
+
+.bg-black {
+    background-color: #000000 !important;
+}

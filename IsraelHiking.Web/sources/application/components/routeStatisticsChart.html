@@ -1,0 +1,16 @@
+﻿<div [hidden]="!isOpen()" class="route-statistics-popup" [dir]="resources.direction" draggable-resizable [directions]="['top', 'left', 'bottom', 'right']" [dragSelector]="'.route-statistics-header'" (onResize)="onResize()">
+    <div fxLayout="row">
+        <div fxFlex="10">
+            <button md-button fxFill (click)="toggleKmMarker($event)" [ngClass]="{active: isKmMarkersOn}" angulartics2On="click" angularticsCategory="Route statistics" angularticsEvent="Toggle KM markers"><i class="fa icon-map-marker"></i> {{resources.kmPoi}}</button>
+        </div>
+        <div fxFlex="80" class="route-statistics-header">
+            <h3 class="text-center" fxFill>{{resources.routeStatistics}}</h3>
+        </div>
+        <div fxFlex>
+            <button md-button fxFill type="button" (mousedown)="close($event)"><i class="fa fa-lg icon-close fa-inverse"></i></button>
+        </div>
+    </div>
+    <div class="route-statistics-body" id="lineChartContiner">
+        <div google-chart id="lineChart" [chartData]="chartData" [chartType]="'LineChart'" [chartOptions]="options" [chartView]="view" class="route-statistics-chart" (onWrapperReady)="onChartReady($event)" (afterUpdate)="afterChartUpdate()"></div>
+    </div>
+</div>
