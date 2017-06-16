@@ -61,10 +61,15 @@ namespace IsraelHiking.API.Controllers
         [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
         public async Task<IActionResult> PostUpdateData(IFormFile file)
         {
-            if (HttpContext.Connection.LocalIpAddress != HttpContext.Connection.RemoteIpAddress &&
-                IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress) == false)
+            if (HttpContext.Connection.LocalIpAddress.Equals(HttpContext.Connection.RemoteIpAddress) == false &&
+                IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress) == false &&
+                HttpContext.Connection.RemoteIpAddress.Equals(IPAddress.Parse("10.10.10.10")) == false)
             {
-                return BadRequest("This operation can't be done from a remote client, please run this from the server.");
+                return BadRequest($"This operation can't be done from a remote client, please run this from the server: \n {HttpContext.Connection.LocalIpAddress}, {HttpContext.Connection.RemoteIpAddress}, {IPAddress.Parse("10.10.10.10")}");
+            }
+            if (file == null)
+            {
+                return BadRequest("No file was provided");
             }
             _logger.LogInformation("Updating Elastic Search and graphhopper OSM data");
             var memoryStream = new MemoryStream();

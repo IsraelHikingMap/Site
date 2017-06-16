@@ -89,12 +89,7 @@ namespace IsraelHiking.Web
 
                 if (result.IndexOf("://", StringComparison.Ordinal) >= 0)
                 {
-                    string scheme;
-                    HostString host;
-                    PathString pathString;
-                    QueryString query;
-                    FragmentString fragment;
-                    UriHelper.FromAbsolute(result, out scheme, out host, out pathString, out query, out fragment);
+                    UriHelper.FromAbsolute(result, out string scheme, out HostString host, out PathString pathString, out QueryString query, out FragmentString fragment);
 
                     request.Scheme = scheme;
                     request.Host = host;

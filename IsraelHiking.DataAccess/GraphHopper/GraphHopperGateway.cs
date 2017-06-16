@@ -67,16 +67,15 @@ namespace IsraelHiking.DataAccess.GraphHopper
         public async Task Rebuild(MemoryStream osmFileStream, string osmFileName)
         {
             _logger.LogInformation($"Starting creating graph hopper cache based on latest pbf file: {osmFileName}");
-            //using (var httpClient = new HttpClient())
-            //{
-            //    httpClient.Timeout = TimeSpan.FromMinutes(30);
-            //    var requestAddress = $"{BASE_ADDRESS}rebuild";
-            //    ByteArrayContent bytes = new ByteArrayContent(osmFileStream.ToArray());
-            //    MultipartFormDataContent multiContent = new MultipartFormDataContent();
-            //    multiContent.Add(bytes, "file", osmFileName);
-            //    await httpClient.PostAsync(requestAddress, multiContent);
-            //}
-            await Task.CompletedTask;
+            using (var httpClient = new HttpClient())
+            {
+                httpClient.Timeout = TimeSpan.FromMinutes(30);
+                var requestAddress = $"{BASE_ADDRESS}rebuild";
+                ByteArrayContent bytes = new ByteArrayContent(osmFileStream.ToArray());
+                MultipartFormDataContent multiContent = new MultipartFormDataContent();
+                multiContent.Add(bytes, "file", osmFileName);
+                await httpClient.PostAsync(requestAddress, multiContent);
+            }
             _logger.LogInformation($"Finished creating graph hopper cache based on latest pbf file: {osmFileName}");
         }
     }

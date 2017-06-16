@@ -49,8 +49,7 @@ namespace IsraelHiking.API.Services
             while (_dictionary.Keys.Count > _options.MaxCacheSize)
             {
                 var pair = _dictionary.OrderBy(v => v.Value.LastUsed).First();
-                CacheItem cacheItem;
-                _dictionary.TryRemove(pair.Key, out cacheItem);
+                _dictionary.TryRemove(pair.Key, out CacheItem cacheItem);
             }
         }
 

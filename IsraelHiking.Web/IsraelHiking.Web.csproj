@@ -30,7 +30,14 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="UpdateDB.bat" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Include="IsraelHiking.Web.nlog">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="UpdateDB.bat">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <None Include="bower.json" />
