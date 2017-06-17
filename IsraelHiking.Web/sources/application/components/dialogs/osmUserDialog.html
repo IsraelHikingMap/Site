@@ -1,8 +1,8 @@
 ﻿<div [dir]="resources.direction">
     <div md-dialog-title>
         <div fxLayout="row">
-            <div fxFlex="90">
-                <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
+            <div fxFlex="90" class="text-medium">
+                <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="15px">
                     <div fxFlex="16">
                         <img [src]="userService.imageUrl" alt="" fxFill />
                     </div>
@@ -12,8 +12,8 @@
                     </div>
                     <div fxFlex>
                         <div fxLayout="column">
-                            <h5>{{userService.changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</h5>
                             <md-progress-bar [color]="getProgessbarType()" [mode]="'determinate'" [value]="getRankPercentage()"></md-progress-bar>
+                            <span>{{userService.changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
                             <md-input-container hintLabel="{{resources.searchPlaceHolder}}">
                                 <input mdInput type="text" [formControl]="searchTerm" placeholder="{{resources.search}}" />
                             </md-input-container>
@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div fxFlex>
-                <button type="button" md-button md-dialog-close><i class="fa icon-close"></i></button>
+                <button type="button" md-button md-dialog-close fxFill><i class="fa icon-close"></i></button>
             </div>
         </div>
     </div>

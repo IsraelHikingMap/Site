@@ -1,4 +1,8 @@
-﻿/* Css loader animation */
+﻿.text-medium {
+    font-size: medium;
+}
+
+/* Css loader animation */
 .cssload-loader {
     position: relative;
     width: 31px;
