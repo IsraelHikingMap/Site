@@ -41,7 +41,6 @@ export class FileComponent extends BaseMapComponent {
         if (!this.isDataSaveable(data)) {
             return;
         }
-        console.log(data);
         this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data)
             .then(() => { }, () => {
                 this.toastService.error(this.resources.unableToSaveToFile);
