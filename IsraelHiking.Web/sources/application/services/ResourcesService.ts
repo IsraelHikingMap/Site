@@ -1,6 +1,7 @@
 ﻿// link to translations: https://translate.zanata.org/iteration/view/IsraelHiking/Main
 import { Injectable } from "@angular/core";
 import { Http, Response, Headers, RequestOptions } from "@angular/http";
+import { LayoutDirection } from "@angular/material";
 import { Subject } from "rxjs/Subject";
 import { LocalStorage } from "ngx-store";
 import { GetTextCatalogService } from "./GetTextCatalogService";
@@ -22,7 +23,7 @@ export class ResourcesService {
     public availableLanguages: ILanguage[];
     public languageChanged: Subject<any>;
 
-    public direction: string;
+    public direction: LayoutDirection;
     public start: string;
     public end: string;
     // All the text in the app //

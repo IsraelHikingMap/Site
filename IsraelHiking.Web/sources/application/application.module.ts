@@ -13,6 +13,7 @@ import { SessionStorageService, LocalStorageService, WebStorageModule } from "ng
 import { ClipboardModule } from "ngx-clipboard";
 import { Angulartics2Module, Angulartics2GoogleAnalytics } from "angulartics2";
 import { NgProgressModule, NgProgressBrowserXhr } from "ngx-progressbar";
+import { ScrollToModule } from "ng2-scroll-to";
 /// services
 import { GetTextCatalogService } from "./services/GetTextCatalogService";
 import { AuthorizationService } from "./services/AuthorizationService";
@@ -37,7 +38,6 @@ import { DragAndDropService } from "./services/DragAndDropService";
 /// directives
 import { GoogleChartDirective } from "./directives/GoogleChartDirective";
 import { DraggableResizableDirective } from "./directives/DraggableResizableDirective";
-import { ScrollToDirective } from "./directives/ScrollToDirective";
 /// components
 import { SidebarComponent } from "./components/sidebar/SidebarComponent";
 import { MainMapComponent } from "./components/MainMapComponent";
@@ -96,6 +96,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
         RouterModule.forRoot([]),
         Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
         NgProgressModule,
+        ScrollToModule,
     ],
     entryComponents: [ZoomComponent,
         LocationButtonComponent,
@@ -189,7 +190,6 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
         WikiMarkerPopupComponent,
         GoogleChartDirective,
         DraggableResizableDirective,
-        ScrollToDirective,
     ],
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })
