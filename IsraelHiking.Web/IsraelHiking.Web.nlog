@@ -11,7 +11,7 @@
   
   <targets>
     <!-- write logs to file -->
-    <target xsi:type="File" name="all" fileName="Logs\all-${shortdate}.log"
+    <target xsi:type="File" name="error" fileName="Logs\errors-${shortdate}.log"
             layout="${longdate} |${pad:padding=3:inner=${event-properties:item=EventId.Id}}|${pad:padding=-5:inner=${level:uppercase=true}}| ${pad:padding=30:fixedLength=True:alignmentOnTruncation=right:inner=${logger}} | ${message} ${exception}" />
 
     <!-- another file log, only site logs  -->
@@ -24,7 +24,7 @@
 
   <rules>
     <!--All error logs, including from Microsoft, change to Trace for debug-->
-    <logger name="*" minlevel="Error" writeTo="all" />
+    <logger name="*" minlevel="Error" writeTo="error" />
 
     <!--Skip Microsoft logs and so log only site logs-->
     <logger name="Microsoft.*" minlevel="Trace" writeTo="blackhole" final="true" />

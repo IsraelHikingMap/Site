@@ -25,7 +25,7 @@ export class ElevationProvider {
             points.push(`${latlng.lat.toFixed(4)},${latlng.lng.toFixed(4)}`);
         }
         if (relevantIndexes.length === 0) {
-            return;
+            return new Promise((resolve) => { resolve(latlngs); });
         }
         return new Promise((resolve, reject) => {
             this.http.get(Urls.elevation, { params: { points: points.join("|") } }).toPromise().then((response) => {

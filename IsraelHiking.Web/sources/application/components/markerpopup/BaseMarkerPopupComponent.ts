@@ -37,20 +37,32 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     protected setMarkerInternal = (marker: Common.IMarkerWithTitle) => {
         this.marker = marker;
         this.title = this.marker.title;
-        this.marker.on("popupopen", () => {
-            this.latLng = { ...this.marker.getLatLng(), alt: 0 } as L.LatLng;
-            this.http.get(Urls.itmGrid, {
-                params: {
-                    lat: this.latLng.lat,
-                    lon: this.latLng.lng
-                }
-            }).toPromise().then((northEast) => {
-                this.itmCoordinates = northEast.json();
-            });
-            var array = [this.latLng];
-            this.elevationProvider.updateHeights(array).then(() => {
-                this.latLng = array[0];
-            });
+        this.latLng = this.marker.getLatLng();
+        this.updateItmCoordinates();
+        this.updateHeights();
+
+        this.marker.on("dragend", () => {
+            this.latLng = this.marker.getLatLng();
+            this.updateItmCoordinates();
+            this.updateHeights();
+        });
+    }
+
+    private updateItmCoordinates = () => {
+        this.http.get(Urls.itmGrid, {
+            params: {
+                lat: this.latLng.lat,
+                lon: this.latLng.lng
+            }
+        }).toPromise().then((northEast) => {
+            this.itmCoordinates = northEast.json();
+        });
+    }
+
+    private updateHeights = () => {
+        var array = [this.latLng];
+        this.elevationProvider.updateHeights(array).then(() => {
+            this.latLng = array[0];
         });
     }
 } 

@@ -16,8 +16,7 @@
         <br />
         <div fxLayout="column" fxLayoutAlign="space-between stretch">
             <div fxLayout="row" fxLayoutAlign="none none">
-                <label>{{resources.color}}</label>
-                <button md-button type="button" [ngStyle]="{'background-color': pathOptions.color}"></button>
+                <label [ngStyle]="{'color': pathOptions.color}">{{resources.color}}</label>
             </div>
             <br />
             <div fxLayout="row" fxLayoutAlign="space-between stretch" fxLayoutWrap>
@@ -39,22 +38,22 @@
     <div md-dialog-actions>
         <div fxLayout="row" fxFill>
             <div fxFlex="16">
-                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="saveRouteToFile($event)" mdTooltip="{{resources.saveRouteToFile}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Save route to file"><i class="fa fa-lg icon-save"></i></button>
+                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="saveRouteToFile($event)" mdTooltip="{{resources.saveRouteToFile}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Save route to file" fxFill><i class="fa fa-lg icon-save"></i></button>
             </div>
             <div fxFlex="16">
-                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="isReversed = !isReversed" mdTooltip="{{resources.reverseRoute}}" mdTooltipPosition="above" [ngClass]="{'active': isReversed }" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Reverse route"><i class="fa fa-lg icon-arrows-h"></i></button>
+                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="isReversed = !isReversed" mdTooltip="{{resources.reverseRoute}}" mdTooltipPosition="above" [ngClass]="{'active': isReversed }" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Reverse route" fxFill><i class="fa fa-lg icon-arrows-h"></i></button>
             </div>
             <div fxFlex="16">
-                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="moveToRoute($event)" mdTooltip="{{resources.moveToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Move to route"><i class="fa fa-lg icon-crosshairs"></i></button>
+                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="moveToRoute($event)" mdTooltip="{{resources.moveToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Move to route" fxFill><i class="fa fa-lg icon-crosshairs"></i></button>
             </div>
             <div fxFlex="16">
-                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" class="btn btn-default" mdTooltip="{{resources.toggleRoutingPerSegment}}" mdTooltipPosition="above" [ngClass]="{'active': routeProperties.isRoutingPerPoint}" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Toggle route per point"><i class="fa" [ngClass]="{ 'icon-routing-local': routeProperties.isRoutingPerPoint, 'icon-routing-global': !routeProperties.isRoutingPerPoint}"></i></button>
+                <button type="button" md-button [hidden]="isNew || !isAdvanced" (click)="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" class="btn btn-default" mdTooltip="{{resources.toggleRoutingPerSegment}}" mdTooltipPosition="above" [ngClass]="{'active': routeProperties.isRoutingPerPoint}" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Toggle route per point" fxFill><i class="fa" [ngClass]="{ 'icon-routing-local': routeProperties.isRoutingPerPoint, 'icon-routing-global': !routeProperties.isRoutingPerPoint}"></i></button>
             </div>
             <div fxFlex="16">
-                <button md-dialog-close type="button" md-button [hidden]="isNew" (click)="deleteRoute($event)" class="btn btn-danger" mdTooltip="{{resources.deleteRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Delete route"><i class="fa fa-lg icon-trash"></i></button>
+                <button md-dialog-close type="button" md-button [hidden]="isNew" (click)="deleteRoute($event)" class="btn btn-danger" mdTooltip="{{resources.deleteRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Delete route" fxFill><i class="fa fa-lg icon-trash"></i></button>
             </div>
             <div fxFlex>
-                <button md-dialog-close type="button" md-button (click)="saveRoute($event)"  mdTooltip="{{resources.save}}" mdTooltipPosition="above"><i class="fa icon-check"></i></button>
+                <button md-dialog-close type="button" md-button (click)="saveRoute($event)"  mdTooltip="{{resources.save}}" mdTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
             </div>
         </div>
     </div>
