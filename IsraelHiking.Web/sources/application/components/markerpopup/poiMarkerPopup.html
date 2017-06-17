@@ -1,6 +1,6 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
     <md-input-container fxFill>
-        <textarea mdInput rows="2" type="text" [dir]="getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates(title)" placeholder="{{resources.title}}" fxFill></textarea>
+        <textarea mdInput rows="2" type="text" [dir]="getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates()" placeholder="{{resources.title}}" fxFill></textarea>
     </md-input-container>
     <div [hidden]="!showIcons">
         <div *ngFor="let group of iconsGroups">
@@ -26,7 +26,7 @@
         </div>
     </div>
     <div [hidden]="hideCoordinates">
-        <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates" [wikiCoordinatesString]="wikiCoordinatesString"></coordinates>
+        <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates"></coordinates>
         <p class="chrome-wordwrap-fix {{'text-' + resources.start}}">
             <span [innerHtml]="resources.coordinatesForWikipedia"></span> <span dir="ltr">{{wikiCoordinatesString}}</span>
         </p>

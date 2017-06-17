@@ -30,9 +30,9 @@ export abstract class RouteStateEdit extends RouteStateBase {
             segment.routePointMarker = this.createRouteMarker(segment.routePoint);
             this.context.mapService.map.addLayer(segment.polyline);
         }
-        for (let marker of this.context.route.markers) {
-            marker.marker = this.createPoiMarkerWithEvents(marker);
-            this.context.mapService.map.addLayer(marker.marker);
+        for (let routeMarkerWithData of this.context.route.markers) {
+            routeMarkerWithData.marker = this.createPoiMarker(routeMarkerWithData, true);
+            this.addComponentToMarker(routeMarkerWithData.marker);
         }
         this.updateStartAndEndMarkersIcons();
         this.hoverHandler.updateAccordingToRoueProperties();
@@ -319,13 +319,12 @@ export abstract class RouteStateEdit extends RouteStateBase {
         chain.then(() => this.context.raiseDataChanged());
     }
 
-    protected createPoiMarkerWithEvents(markerData: Common.MarkerData): Common.IMarkerWithTitle {
-        let marker = this.createPoiMarker(markerData, true);
+    protected addComponentToMarker(marker: Common.IMarkerWithTitle): void {
         let factory = this.context.componentFactoryResolver.resolveComponentFactory(PoiMarkerPopupComponent);
         let containerDiv = L.DomUtil.create("div");
         let poiMarkerPopupComponentRef = factory.create(this.context.injector, [], containerDiv);
         this.context.applicationRef.attachView(poiMarkerPopupComponentRef.hostView);
-        poiMarkerPopupComponentRef.instance.setMarker(marker as Common.IMarkerWithTitle);
+        poiMarkerPopupComponentRef.instance.setMarker(marker);
         poiMarkerPopupComponentRef.instance.setRouteLayer(this.context);
         poiMarkerPopupComponentRef.instance.remove = () => {
             let routeMarker = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
@@ -334,7 +333,6 @@ export abstract class RouteStateEdit extends RouteStateBase {
         }
         this.setPoiMarkerEvents(marker);
         marker.bindPopup(containerDiv);
-        return marker;
     }
 
     private setPoiMarkerEvents(marker: L.Marker) {
@@ -361,9 +359,8 @@ export abstract class RouteStateEdit extends RouteStateBase {
     }
 
     private removePoi = (poi: IMarkerWithData) => {
-        let poiToRemove = _.find(this.context.route.markers, markerToFind => markerToFind === poi);
-        this.context.route.markers.splice(this.context.route.markers.indexOf(poiToRemove), 1);
-        this.destoryMarker(poiToRemove.marker);
+        this.context.route.markers.splice(this.context.route.markers.indexOf(poi), 1);
+        this.destoryMarker(poi.marker);
         this.context.raiseDataChanged();
     }
 }

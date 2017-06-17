@@ -15,8 +15,6 @@ export class CoordinatesMarkerPopupComponent extends BaseMapComponent
     public latLng: L.LatLng;
     @Input()
     public itmCoordinates = null as INorthEast;
-    @Input()
-    public wikiCoordinatesString: string;
 
     constructor(resources: ResourcesService) {
         super(resources);

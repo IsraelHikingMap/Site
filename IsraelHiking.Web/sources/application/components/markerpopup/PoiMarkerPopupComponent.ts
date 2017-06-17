@@ -21,6 +21,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private routeLayer: IRouteLayer;
     public showIcons: boolean;
     public markerType: string;
+    public wikiCoordinatesString: string;
     public iconsGroups: IIconsGroup[];
 
     constructor(resources: ResourcesService,
@@ -30,19 +31,14 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         super(resources, http, elevationProvider);
 
         this.showIcons = false;
+        this.wikiCoordinatesString = "";
         this.iconsGroups = [];
-        this.iconsGroups.push({
-            icons: ["car", "bike", "hike", "four-by-four"]
-        });
-        this.iconsGroups.push({
-            icons: ["arrow-left", "arrow-right", "tint", "star"]
-        });
-        this.iconsGroups.push({
-            icons: ["bed", "binoculars", "fire", "flag"]
-        });
-        this.iconsGroups.push({
-            icons: ["coffee", "cutlery", "shopping-cart", "tree"]
-        });
+        let numberOfIconsPerRow = 4;
+        for (let iconTypeIndex = 0; iconTypeIndex < IconsService.getAvailableIconTypes().length / numberOfIconsPerRow; iconTypeIndex++) {
+            this.iconsGroups.push({
+                icons: IconsService.getAvailableIconTypes().splice(iconTypeIndex * numberOfIconsPerRow, numberOfIconsPerRow)
+            });
+        }
     }
 
     public setMerkerType = (markerType: string): void => {
@@ -71,21 +67,22 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         return "ltr";
     }
 
-    public updateWikiCoordinates(title: string) {
-        this.wikiCoordinatesString = this.getWikiCoordString(this.latLng, title);
+    public updateWikiCoordinates() {
+        this.wikiCoordinatesString = this.getWikiCoordString(this.latLng, this.title);
     };
 
     public setRouteLayer(routeLayer: IRouteLayer) {
         this.routeLayer = routeLayer;
+        let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker);
+        this.markerType = routeMarker.type;
+        this.updateWikiCoordinates();
     }
 
     public setMarker(marker: Common.IMarkerWithTitle) {
         this.setMarkerInternal(marker);
-        this.marker.on("popupopen", () => {
-            let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker);
-            this.latLng = routeMarker.latlng;
-            this.markerType = routeMarker.type || "star";
-            this.wikiCoordinatesString = this.getWikiCoordString(this.latLng, this.marker.title);
+
+        this.marker.on("dragend", () => {
+            this.updateWikiCoordinates();
         });
 
         this.marker.on("popupclose", () => {

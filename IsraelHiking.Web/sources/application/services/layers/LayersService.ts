@@ -4,6 +4,7 @@ import { LocalStorage } from "ngx-store";
 import { MapService } from "../MapService";
 import { HashService } from "../HashService";
 import { FileService } from "../FileService";
+import { IconsService } from "../IconsService";
 import { RouteLayerFactory } from "./routelayers/RouteLayerFactory";
 import { WikiMarkersLayer } from "./WikiMarkersLayer";
 import { IRouteLayer, IRoute } from "./routelayers/IRouteLayer";
@@ -370,7 +371,9 @@ export class LayersService {
                 if (route.markers) {
                     for (let marker of route.markers) {
                         marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng);
-                        marker.type = marker.type || "star";
+                        if (!_.find(IconsService.getAvailableIconTypes(), m => m === marker.type)) {
+                            marker.type = IconsService.getAvailableIconTypes()[0];
+                        }
                     }
                 }
             }

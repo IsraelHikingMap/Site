@@ -15,7 +15,6 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     public title: string;
     public latLng: L.LatLng;
     public itmCoordinates: INorthEast;
-    public wikiCoordinatesString: string;
     public hideCoordinates: boolean;
 
     public remove: () => void;
@@ -27,7 +26,6 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
         this.hideCoordinates = true;
         this.latLng = L.latLng(0, 0, 0);
         this.itmCoordinates = { north: 0, east: 0 };
-        this.wikiCoordinatesString = "";
     }
 
     public setMarker(marker: Common.IMarkerWithTitle) {

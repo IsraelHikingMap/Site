@@ -46,6 +46,14 @@
     "<i class='fa icon-wikipedia-w fa-stack-1x stack-icon-top' style='color:black;'></i>" +
     "</span>";
 
+    public static getAvailableIconTypes() : string[]
+    {
+        return ["star", "arrow-left", "arrow-right", "tint",
+            "car", "bike", "hike", "four-by-four",
+            "bed", "binoculars", "fire", "flag",
+            "coffee", "cutlery", "shopping-cart", "tree"];
+    }
+
     public static createRoundIcon(color: string): L.DivIcon {
         return L.divIcon({
             html: IconsService.ROUND_MARKER_HTML.replace("{{color}}", color),
@@ -64,11 +72,11 @@
     }
 
     public static createPoiDefaultMarkerIcon(color: string): L.DivIcon {
-        return IconsService.createMarkerIconWithColorAndType(color, "star");
+        return IconsService.createMarkerIconWithColorAndType(color, IconsService.getAvailableIconTypes()[0]);
     }
 
     public static createMarkerIconWithColorAndType(color: string, type: string): L.DivIcon {
-        let html = IconsService.COLOR_AND_TYPE_MARKER_HTML.replace("{{color}}", color).replace("{{type}}", type || "star");
+        let html = IconsService.COLOR_AND_TYPE_MARKER_HTML.replace("{{color}}", color).replace("{{type}}", type || IconsService.getAvailableIconTypes()[0]);
         return L.divIcon(IconsService.getDefaultMarkerOptions(html));
     }
 
