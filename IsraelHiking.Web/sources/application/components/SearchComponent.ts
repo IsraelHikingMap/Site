@@ -269,24 +269,25 @@ export class SearchComponent extends BaseMapComponent {
             componentRef.instance.convertToRoute = convertToRoute;
             this.applicationRef.attachView(componentRef.hostView);
             markerFrom.bindPopup(markerPopupFromDiv);
+            this.featureGroup.addLayer(markerFrom);
 
             let markerPopupToDiv = L.DomUtil.create("div");
             componentRef = componentFactory.create(this.injector, [], markerPopupToDiv);
-            componentRef.instance.setMarker(markerFrom);
+            componentRef.instance.setMarker(markerTo);
             componentRef.instance.remove = () => {
                 this.featureGroup.clearLayers();
             }
             componentRef.instance.convertToRoute = convertToRoute;
             this.applicationRef.attachView(componentRef.hostView);
-            markerFrom.bindPopup(markerPopupToDiv);
-            this.featureGroup.addLayer(markerFrom);
+            markerTo.bindPopup(markerPopupToDiv);
             this.featureGroup.addLayer(markerTo);
 
             this.fitBoundsService.fitBounds(this.featureGroup.getBounds());
 
             setTimeout(() => {
+                console.log("opening popup");
                 markerTo.openPopup();
-            }, 300);
+            }, 500);
         });
     }
 
