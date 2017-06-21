@@ -9,26 +9,41 @@
     overflow-x: hidden;
     color: black;
     direction: ltr;
+    padding-left: 55px;
+    padding-right: 20px;
     background: #dddddd !important;
-    width: 0;
     z-index: 1010;
     -webkit-transition: all 0.5s ease;
     -moz-transition: all 0.5s ease;
     -o-transition: all 0.5s ease;
     transition: all 0.5s ease;
+    transform: translateX(-100%);
 }
 
+    #sidebar-wrapper:not(.toggled) {
+        width: 295px;
+    }
+
     #sidebar-wrapper.toggled {
-        width: 280px;
-        padding-left: 45px;
+        transform: translateX(0);
+    }
+
+    #sidebar-wrapper /deep/ .row-hover {
+        padding: 0 10px;
+    }
+
+    #sidebar-wrapper /deep/ .drag-handle-right span {
+        border-color: #6d6d6d;
+        border-width: 0 1px;
+        width: 4px;
     }
 
 .bottom-border {
     border-bottom: solid black;
 }
 
-@media(min-width:768px) {
-    #sidebar-wrapper.toggled {
+/*@media(min-width:768px) {
+    #sidebar-wrapper {
         width: 400px;
     }
-}
+}*/
