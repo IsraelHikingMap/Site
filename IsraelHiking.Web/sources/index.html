@@ -42,11 +42,24 @@
     <link rel="manifest" href="/content/favicons/manifest.json">
     <link rel="mask-icon" href="/content/favicons/safari-pinned-tab.svg" color="#0a42bb">
     <link rel="shortcut icon" href="/content/favicons/favicon.ico" type="image/x-icon">
+    <style>
+        .preloader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
+    <div class="preloader">
+        <img src="/content/logo.png" />
+        <div>Loading site...</div>
+    </div>
     <sidebar></sidebar>
     <div id="map" dir="ltr">
-        <main-map>Loading Site...</main-map>
+        <main-map></main-map>
     </div>
     <route-statistics-chart></route-statistics-chart>
     <script src="//maps.google.com/maps/api/js?v=3"></script>
