@@ -1,4 +1,4 @@
-/* added direction to fix issue with scroll bar and legend maps */
+﻿/* added direction to fix issue with scroll bar and legend maps */
 #sidebar-wrapper {
     position: fixed;
     top: 0;
@@ -36,4 +36,8 @@
         border-color: #6d6d6d;
         border-width: 0 1px;
         width: 4px;
+<<<<<<< HEAD
     }
+=======
+    }
+>>>>>>> 1. Change the transition of the sidebar.
