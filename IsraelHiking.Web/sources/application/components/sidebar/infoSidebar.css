@@ -1,4 +1,8 @@
-﻿.help-button {
+﻿.bottom-border {
+    border-bottom: solid black;
+}
+
+.help-button {
     width: 28px;
     height: 28px;
 }

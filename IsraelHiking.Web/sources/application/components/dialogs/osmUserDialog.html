@@ -32,7 +32,7 @@
                 <div fxLayout="row">
                     <div fxFlex>
                         <label fxFlex>
-                            <button fxFill md-raised-button color="primary" type="button" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Upload OSM trace"><i class="fa icon-folder-open fa-lg"></i> {{resources.uploadFileToOsm}}</button>
+                            <a fxFill md-raised-button color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Upload OSM trace"><i class="fa icon-folder-open fa-lg"></i> {{resources.uploadFileToOsm}}</a>
                             <input type="file" (change)="uploadToOsm(file)" [(ngModel)]="file" [style.display]="'none'" />
                         </label>
                     </div>
