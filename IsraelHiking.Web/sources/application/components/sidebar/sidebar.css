@@ -29,19 +29,11 @@
         transform: translateX(0);
     }
 
-    #sidebar-wrapper /deep/ .row-hover {
-        padding: 0 10px;
-    }
-
     #sidebar-wrapper /deep/ .drag-handle-right span {
         border-color: #6d6d6d;
         border-width: 0 1px;
         width: 4px;
     }
-
-.bottom-border {
-    border-bottom: solid black;
-}
 
 /*@media(min-width:768px) {
     #sidebar-wrapper {

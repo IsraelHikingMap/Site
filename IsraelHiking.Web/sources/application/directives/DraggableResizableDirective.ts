@@ -45,7 +45,9 @@ export class DraggableResizableDirective implements OnInit {
     }
 
     public ngOnInit() {
-        this.jqueryElement.on(mouseDownEventString, this.dragSelector, this.moveMouseDown);
+        if (this.dragSelector) {
+            this.jqueryElement.on(mouseDownEventString, this.dragSelector, this.moveMouseDown);
+        }
         for (let direction of this.directions) {
             let grabber = $("<div/>");
             grabber.addClass(`drag-handle-${direction}`);

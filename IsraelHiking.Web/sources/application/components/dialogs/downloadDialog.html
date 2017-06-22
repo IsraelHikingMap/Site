@@ -5,8 +5,11 @@
                 <h3>{{resources.infoDownloadMapForOfflineUse}}</h3>
             </div>
             <div fxFlex>
-                <a href="{{getGooglePlayStoreAddress(app)}}" target="_blank"><img src="/content/images/google-play-badge.png" class="img-responsive" alt="" /></a>
+                <a href="{{getGooglePlayStoreAddress(app)}}" target="_blank" tabindex="-1"><img src="/content/google-play-badge.png" class="img-responsive" alt="" fxFill tabindex="-1"/></a>
             </div>
+        </div>
+        <div>
+            <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
         </div>
     </div>
     <div md-dialog-content>
@@ -42,7 +45,7 @@
         </div>
         <br />
         <div fxLayout="row">
-            <a md-button [href]="getDownloadUrl()" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download offline map {{app}} {{mapType}} {{zoom}}"><i class="fa icon-download fa-lg"></i> {{resources.startDownload}}</a>
+            <a md-raised-button color="primary" [href]="getDownloadUrl()" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download offline map {{app}} {{mapType}} {{zoom}}"><i class="fa icon-download fa-lg"></i> {{resources.startDownload}}</a>
         </div>
         <h4>{{resources.installationInstructions}}</h4>
         <p>{{resources.offlineMapBenifits}}</p>
