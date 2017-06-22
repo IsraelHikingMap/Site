@@ -1,29 +1,27 @@
 ﻿<div [dir]="resources.direction">
     <div md-dialog-title>
-        <div fxLayout="row">
-            <div fxFlex="90" class="text-medium">
-                <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="15px">
-                    <div fxFlex="16">
-                        <img [src]="userService.imageUrl" alt="" fxFill />
-                    </div>
-                    <div fxFlex="34">
-                        <h3>{{userService.displayName}}</h3>
-                        {{getRank().name}}
-                    </div>
-                    <div fxFlex>
-                        <div fxLayout="column">
-                            <md-progress-bar [color]="getProgessbarType()" [mode]="'determinate'" [value]="getRankPercentage()"></md-progress-bar>
-                            <span>{{userService.changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
-                            <md-input-container hintLabel="{{resources.searchPlaceHolder}}">
-                                <input mdInput type="text" [formControl]="searchTerm" placeholder="{{resources.search}}" />
-                            </md-input-container>
-                        </div>
+        <div class="text-medium">
+            <div fxLayout="row" fxLayoutAlign="space-around center" fxLayoutGap="15px">
+                <div fxFlex="16">
+                    <img [src]="userService.imageUrl" alt="" fxFill />
+                </div>
+                <div fxFlex="34">
+                    <h3>{{userService.displayName}}</h3>
+                    {{getRank().name}}
+                </div>
+                <div fxFlex>
+                    <div fxLayout="column">
+                        <md-progress-bar [color]="getProgessbarType()" [mode]="'determinate'" [value]="getRankPercentage()"></md-progress-bar>
+                        <span>{{userService.changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
+                        <md-input-container hintLabel="{{resources.searchPlaceHolder}}">
+                            <input mdInput type="text" [formControl]="searchTerm" placeholder="{{resources.search}}" />
+                        </md-input-container>
                     </div>
                 </div>
             </div>
-            <div fxFlex>
-                <button type="button" md-button md-dialog-close fxFill><i class="fa icon-close"></i></button>
-            </div>
+        </div>
+        <div>
+            <button type="button" md-button md-dialog-close fxFill><i class="fa icon-close"></i></button>
         </div>
     </div>
     <div md-dialog-content class="dialog-content-for-scroll">
@@ -39,11 +37,11 @@
                 </div>
                 <br />
                 <div *ngFor="let trace of filteredTraces">
-                    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
-                        <div fxFlex="33">
+                    <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
+                        <div fxFlex="100" fxFlex.gt-md="33">
                             <img [src]="trace.imageUrl" alt="" fxFill />
                         </div>
-                        <div fxFlex>
+                        <div fxFlex="100" fxFlex.gt-md="67" class="margin-right-10">
                             <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                                 <div fxFlex="75">
                                     <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.fileName}}</a><br />
@@ -72,11 +70,11 @@
             </md-tab>
             <md-tab label="{{resources.myShares}}">
                 <div *ngFor="let siteUrl of filteredSiteUrls">
-                    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
-                        <div fxFlex="33">
+                    <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
+                        <div fxFlex="100" fxFlex.gt-md="33">
                             <img [src]="userService.getImageFromSiteUrlId(siteUrl)" fxFill />
                         </div>
-                        <div fxFlex>
+                        <div fxFlex="100" fxFlex.gt-md="67" class="margin-right-10">
                             <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                                 <div fxFlex="75">
                                     <div [hidden]="editMode">
