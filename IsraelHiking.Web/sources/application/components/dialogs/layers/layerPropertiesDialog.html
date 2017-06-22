@@ -1,35 +1,34 @@
 ﻿<div [dir]="resources.direction">
     <div md-dialog-title>
-        <div fxLayout="row">
-            <div fxFlex="90">
-                <h4>{{title}}</h4>
-            </div>
-            <div fxFlex>
-                <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
-            </div>
+        <div>
+            {{title}}
+        </div>
+        <div>
+            <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
         </div>
     </div>
     <div md-dialog-content>
         <div fxLayout="row">
             <md-input-container hintLabel="{{resources.layerNamePlaceHolder}}" fxFill>
-                <input mdInput type="text" [(ngModel)]="key" name="key" placeholder="{{resources.name}}" required="" fxFill/>
+                <input mdInput type="text" [(ngModel)]="key" name="key" placeholder="{{resources.name}}" required="" fxFill />
             </md-input-container>
         </div>
         <div fxLayout="row">
             <md-input-container hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill>
-                <input mdInput type="text" [(ngModel)]="address" name="address" placeholder="{{resources.address}}" required="" fxFill [dir]="'ltr'"/>
+                <input mdInput type="text" [(ngModel)]="address" name="address" placeholder="{{resources.address}}" required="" fxFill [dir]="'ltr'" />
             </md-input-container>
         </div>
-        <div fxLayout="row">
-            <md-input-container>
-                <input mdInput type="text" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" fxFlex="50"/>
+        <div class="input-wrapper-spacer"></div>
+        <div fxLayout="row" fxFlexs>
+            <md-input-container fxFlex="30">
+                <input mdInput type="text" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" />
             </md-input-container>
-            <md-input-container>
-                <input mdInput type="text" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" fxFlex="50"/>
+            <md-input-container fxFlex="30" class="margin-right-10">
+                <input mdInput type="text" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" />
             </md-input-container>
         </div>
     </div>
-    <div md-dialog-actions>
+    <div md-dialog-actions fxLayoutAlign="end">
         <button md-dialog-close type="button" md-button (click)="saveLayer(key, address, minZoom, maxZoom, $event)" mdTooltip="{{resources.save}}" mdTooltipPosition="above"><i class="fa icon-check"></i></button>
         <button md-dialog-close type="button" md-button [hidden]="isNew" (click)="removeLayer($event)" mdTooltip="{{resources.deleteLayer}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
     </div>

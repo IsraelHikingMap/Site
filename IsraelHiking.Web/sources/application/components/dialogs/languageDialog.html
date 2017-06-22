@@ -1,12 +1,10 @@
 ﻿<div [dir]="resources.direction">
     <div md-dialog-title>
-        <div fxLayout="row">
-            <div fxFlex="90">
-                <h4>{{resources.language}}</h4>
-            </div>
-            <div fxFlex>
-                <button type="button" md-button md-dialog-close fxFill><i class="fa icon-close"></i></button>
-            </div>
+        <div>
+            {{resources.language}}
+        </div>
+        <div>
+            <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
         </div>
     </div>
     <div md-dialog-content>

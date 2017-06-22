@@ -1,0 +1,16 @@
+﻿[md-dialog-title] {
+    display: flex !important;
+    justify-content: space-between;
+    align-items: center;
+}
+
+    [md-dialog-title] [md-dialog-close] {
+        min-width: 0;
+        min-height: 0;
+        line-height: initial;
+        padding: 5px;
+    }
+
+        [md-dialog-title] [md-dialog-close] i {
+            display: block;
+        }
