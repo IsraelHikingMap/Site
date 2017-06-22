@@ -1,12 +1,10 @@
 ﻿<div [dir]="resources.direction">
     <div md-dialog-title>
-        <div fxLayout="row">
-            <div fxFlex="90">
-                <h4>{{resources.shareYourWork}}</h4>
-            </div>
-            <div fxFlex>
-                <button type="button" md-button md-dialog-close fxFill><i class="fa icon-close"></i></button>
-            </div>
+        <div>
+            {{title}}
+        </div>
+        <div>
+            <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
         </div>
     </div>
     <div md-dialog-content>
@@ -21,16 +19,17 @@
                     <textarea mdInput rows="2" type="text" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
                 </md-input-container>
             </div>
+            <div class="input-wrapper-spacer"></div>
             <div fxLayout="row">
                 <button md-raised-button color="primary" (click)="generateUrl()" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share create">{{resources.generateUrlToShareWithYourFriends}}</button>
             </div>
         </div>
         <div [hidden]="!shareAddress">
-            <div fxLayout="row" fxLayoutAlign="space-around none">
-                <div fxFlex="33">
+            <div [fxLayout]="direction" fxLayout.xs="column" fxLayout.md="row" fxLayoutAlign="space-around none">
+                <div fxFlex="100" fxFlex.gt-md="33">
                     <img [src]="imageUrl" fxFill />
                 </div>
-                <div fxFlex="67">
+                <div fxFlex="100" fxFlex.gt-md="67" class="margin-right-10">
                     <div fxLayout="row">
                         <div fxFlex="75">
                             <h4>{{title}} - {{description}}</h4>
@@ -62,6 +61,7 @@
                         <input mdInput type="text" [(ngModel)]="offroadRequest.userMail" placeholder="{{resources.userEmail}}"/>
                     </md-input-container>
                 </div>
+                <div class="input-wrapper-spacer"></div>
                 <div fxLayout="row">
                     <div fxFlex="66">
                         <div fxLayout="row">
@@ -70,13 +70,13 @@
                             </div>
                             <div fxFlex>
                                 <div fxLayout="row">
-                                    <div fxFlex="33">
+                                    <div fxFlex="20">
                                         <a md-button (click)="offroadRequest.activityType = 'Walking'" [ngClass]="{active: offroadRequest.activityType == 'Walking'}" fxFill><i class="fa icon-hike fa-lg"></i></a>
                                     </div>
-                                    <div fxFlex="33">
+                                    <div fxFlex="20">
                                         <a md-button (click)="offroadRequest.activityType = 'Cycling'" [ngClass]="{active: offroadRequest.activityType == 'Cycling'}" fxFill><i class="fa icon-bike fa-lg"></i></a>
                                     </div>
-                                    <div fxFlex>
+                                    <div fxFlex="20">
                                         <a md-button (click)="offroadRequest.activityType = 'OffRoading'" [ngClass]="{active: offroadRequest.activityType == 'OffRoading'}" fxFill><i class="fa icon-four-by-four fa-lg"></i></a>
                                     </div>
                                 </div>
@@ -90,19 +90,21 @@
                             <md-option value="5">{{resources.hard}}</md-option>
                         </md-select>
                     </div>
-                    
                 </div>
+                <div class="input-wrapper-spacer"></div>
                 <div fxLayout="row">
                     <div fxFlex="50">
-                        <a md-button (click)="sendToOffroad()" fxFill><i class="fa icon-send fa-lg"></i> {{resources.send}}</a>
+                        <a md-button (click)="sendToOffroad()" fxFill color="primary" md-raised-button><i class="fa icon-send fa-lg"></i> {{resources.send}}</a>
                     </div>
                 </div>
                 <hr />
             </div>
-            <div fxLayout="row">
+            <div class="input-wrapper-spacer"></div>
+            <div fxLayout.xs="column" fxLayout.md="row" fxLayoutAlign="space-between">
                 <div fxFlex="25">
                     <div fxLayout="column" fxFill>
-                        <md-select [(ngModel)]="size" (change)="setSize(size)" placeholder="{{resources.embedSize}}" fxFill>
+                        <label>{{resources.embedSize}}</label>
+                        <md-select [(ngModel)]="size" (change)="setSize(size)" fxFill>
                             <md-option [value]="resources.small">{{resources.small}}</md-option>
                             <md-option [value]="resources.medium">{{resources.medium}}</md-option>
                             <md-option [value]="resources.large">{{resources.large}}</md-option>
@@ -118,11 +120,9 @@
                         </div>
                     </div>
                 </div>
-                <div fxFlex>
-                    <md-input-container fxFill>
-                        <label>{{resources.html}}</label>
-                        <textarea mdInput rows="5" fxFill [(ngModel)]="embedText" dir="ltr"></textarea>
-                    </md-input-container>
+                <div fxFlex="50" [dir]="'ltr'">
+                    <label>{{resources.html}}</label>
+                    <textarea mdInput rows="5" fxFill [(ngModel)]="embedText" dir="ltr"></textarea>
                 </div>
             </div>
         </div>

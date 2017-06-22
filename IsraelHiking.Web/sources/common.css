@@ -21,6 +21,11 @@ body {
     overflow: hidden;
 }
 
+.input-wrapper-spacer {
+    height: 0;
+    margin-bottom: 1rem;
+}
+
 .marker-popup {
     min-width: 250px;
 }
@@ -101,6 +106,12 @@ body {
 .text-left {
     text-align: left !important;
 }
+
+/*#region margins*/
+.margin-right-10 {
+    margin-right: 10px;
+}
+/*#endregion*/
 
 @media print {
     .no-print {

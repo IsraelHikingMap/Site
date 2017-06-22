@@ -4,8 +4,12 @@
     margin-bottom: 5px;
 }
 
-.row-hover:hover {
-    text-decoration: none;
-    color: black;
-    background: #bbb;
+.row-hover {
+    transition: background .2s ease;
 }
+
+    .row-hover:hover {
+        text-decoration: none;
+        color: black;
+        background: #bbb;
+    }
