@@ -49,7 +49,7 @@
                             <a href="{{shareAddress}}" target="_blank" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share test address">{{shareAddress}}</a>
                         </div>
                         <div fxFlex>
-                            <a md-button [ngxClipboard]="shareAddress" mdTooltip="{{resources.copyUrl}}" mdTooltipPosition="{{resources.start}}" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share copy to clipboard"><i class="fa icon-clipboard"></i></a>
+                            <a md-button ngxClipboard [cbContent]="shareAddress" mdTooltip="{{resources.copyUrl}}" mdTooltipPosition="{{resources.start}}" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share copy to clipboard"><i class="fa icon-clipboard"></i></a>
                         </div>
                     </div>
                 </div>
