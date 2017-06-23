@@ -249,13 +249,14 @@ export class LayersService {
         overlayFromArray.visible = !overlayFromArray.visible;
         if (overlayFromArray.visible) {
             this.mapService.map.addLayer(overlay.layer);
-            if (this.activeOverlayKeys.indexOf(overlay.key) === -1) {
+            if (_.find(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key) == null) {
                 this.activeOverlayKeys.push(overlay.key);
             }
         } else {
             this.mapService.map.removeLayer(overlay.layer);
-            if (this.activeOverlayKeys.indexOf(overlay.key) > -1) {
-                this.activeOverlayKeys.splice(this.activeOverlayKeys.indexOf(overlay.key), 1);
+            if (_.find(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key) != null) {
+                _.remove(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key);
+                this.activeOverlayKeys = this.activeOverlayKeys;
             }
         }
     }
@@ -305,7 +306,6 @@ export class LayersService {
     }
 
     private addDataFromHash = () => {
-        //let deferred = this.$q.defer();
         let localResolve: (value?: any | PromiseLike<any>) => void = null;
         let localReject: (value?: any | PromiseLike<any>) => void = null;
         this.initializationPromise = new Promise((resolve, reject) => {
@@ -496,10 +496,15 @@ export class LayersService {
             if (this.isNameAvailable(routeData.name) === false) {
                 routeData.name = this.createRouteName();
             }
-            let routeLayer = this.routeLayerFactory.createRouteLayerFromData(routeData, reroute);
+            let routeLayer = this.routeLayerFactory.createRouteLayerFromData(routeData);
             this.routes.push(routeLayer);
-            this.mapService.map.addLayer(routeLayer as RouteLayer);
+            this.mapService.map.addLayer(routeLayer as RouteLayer);    
             this.selectRoute(routeLayer);
+
+            if (reroute) {
+                routeLayer.setEditRouteState();
+                routeLayer.reRoute();
+            }
         }
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {

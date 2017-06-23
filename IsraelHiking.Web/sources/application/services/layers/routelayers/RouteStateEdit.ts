@@ -209,9 +209,10 @@ export abstract class RouteStateEdit extends RouteStateBase {
                 // need to connect the non-routed segment in case it isn't
                 latlngs = [startSegmentEndPoint].concat(latlngs);
             }
-            this.context.route.segments[endIndex].latlngs = latlngs;
-            this.context.route.segments[endIndex].polyline.setLatLngs(this.context.route.segments[endIndex].latlngs);
-            this.context.elevationProvider.updateHeights(this.context.route.segments[endIndex].latlngs);
+            let endSegmentRoute = this.context.route.segments[endIndex];
+            endSegmentRoute.latlngs = latlngs;
+            endSegmentRoute.polyline.setLatLngs(this.context.route.segments[endIndex].latlngs);
+            this.context.elevationProvider.updateHeights(endSegmentRoute.latlngs);
         });
 
         return promise;
@@ -312,7 +313,7 @@ export abstract class RouteStateEdit extends RouteStateBase {
     }
 
     public reRoute = (): void => {
-        var chain = Promise.resolve({})
+        var chain = Promise.resolve({});
         for (let segmentIndex = 1; segmentIndex < this.context.route.segments.length; segmentIndex++) {
             chain = chain.then(() => this.runRouting(segmentIndex - 1, segmentIndex));
         }
