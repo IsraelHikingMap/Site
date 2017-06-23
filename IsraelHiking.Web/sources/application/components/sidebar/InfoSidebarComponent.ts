@@ -9,7 +9,7 @@ import { DownloadDialogComponent } from "../dialogs/DownloadDialogComponent";
 import * as _ from "lodash";
 import * as $ from "jquery";
 
-type InfoState = "legend" | "help" | "about";
+type InfoState = "legend" | "about";
 type LegendItemType = "POI" | "Way";
 
 export interface ILegendItem {
