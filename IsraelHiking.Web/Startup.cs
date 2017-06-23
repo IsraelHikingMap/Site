@@ -253,14 +253,6 @@ namespace IsraelHiking.Web
                 fileServerOptions.DirectoryBrowserOptions.RequestPath = new PathString("/" + directory.Key);
                 fileServerOptions.DirectoryBrowserOptions.Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices.GetRequiredService<IFileSystemHelper>());
                 fileServerOptions.StaticFileOptions.ContentTypeProvider = fileExtensionContentTypeProvider;
-                fileServerOptions.StaticFileOptions.OnPrepareResponse = context =>
-                {
-                    var headers = context.Context.Response.GetTypedHeaders();
-                    headers.CacheControl = new Microsoft.Net.Http.Headers.CacheControlHeaderValue()
-                    {
-                        MaxAge = TimeSpan.FromSeconds(3600),
-                    };
-                };
                 app.UseFileServer(fileServerOptions);
             }
             // serve https certificate folder
