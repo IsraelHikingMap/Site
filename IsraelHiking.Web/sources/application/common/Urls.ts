@@ -7,12 +7,12 @@
     public static routing = Urls.apiBase + "routing";
     public static itmGrid = Urls.apiBase + "itmGrid";
     public static files = Urls.apiBase + "files";
+    public static fileFormats = Urls.files + "/formats";
     public static openFile = Urls.apiBase + "files/open";
     public static search = Urls.apiBase + "search/";
     public static images = Urls.apiBase + "images/";
     public static colors = Urls.images + "colors/";
     public static translations = Urls.baseAddress + "/translations/";
-    public static overpass = window.location.protocol + "//overpass-api.de/api/interpreter";
     public static osm = Urls.apiBase + "osm/";
     public static osmConfiguration = Urls.osm + "configuration";
     public static osmUploadTrace = Urls.osm + "trace";

@@ -195,15 +195,16 @@ export abstract class RouteStateEdit extends RouteStateBase {
     protected runRouting = (startIndex: number, endIndex: number): Promise<any> => {
         var startSegment = this.context.route.segments[startIndex];
         var endSegment = this.context.route.segments[endIndex];
-        var polyline = this.createLoadingSegmentIndicatorPolyline([startSegment.routePoint, endSegment.routePoint]);
+        var loadingPolyline = this.createLoadingSegmentIndicatorPolyline([startSegment.routePoint, endSegment.routePoint]);
         var startLatLng = startSegment.routePoint;
         var startSegmentEndPoint = startSegment.latlngs[startSegment.latlngs.length - 1];
         if (endSegment.routingType === "None") {
             startLatLng = startSegmentEndPoint;
         }
+        endSegment.polyline.setLatLngs([]);
         var promise = this.context.routerService.getRoute(startLatLng, endSegment.routePoint, endSegment.routingType);
         promise.then((data) => {
-            this.context.mapService.map.removeLayer(polyline);
+            this.context.mapService.map.removeLayer(loadingPolyline);
             var latlngs = data[data.length - 1].latlngs;
             if (startSegment.routingType === "None" && !startSegmentEndPoint.equals(latlngs[0])) {
                 // need to connect the non-routed segment in case it isn't
@@ -214,7 +215,6 @@ export abstract class RouteStateEdit extends RouteStateBase {
             endSegmentRoute.polyline.setLatLngs(this.context.route.segments[endIndex].latlngs);
             this.context.elevationProvider.updateHeights(endSegmentRoute.latlngs);
         });
-
         return promise;
     }
 

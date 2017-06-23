@@ -6,10 +6,34 @@ import "rxjs/add/operator/toPromise";
 import * as Common from "../common/IsraelHiking";
 import { saveAs } from "file-saver";
 
+export interface IFormatViewModel {
+    label: string,
+    outputFormat: string,
+    extension: string,
+}
+
 @Injectable()
 export class FileService {
+    public formats: IFormatViewModel[];
+
     constructor(private http: Http,
         private authorizationService: AuthorizationService) {
+        this.formats = [];
+        this.http.get(Urls.fileFormats).toPromise().then((response) => {
+            this.formats.splice(0);
+            for (let format of response.json()) {
+                this.formats.push(format);
+            }
+            this.formats.push({
+                label: "All routes to a single Track GPX",
+                extension: "gpx",
+                outputFormat: "all_gpx_single_track"
+            } as IFormatViewModel);
+
+            for (let format of this.formats) {
+                format.label += ` (.${format.extension})`;
+            }
+        });
     }
 
     public saveToFile = (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<{}> => {
@@ -78,7 +102,6 @@ export class FileService {
         }
         var byteArray = new Uint8Array(byteNumbers);
         var blobToSave = new Blob([byteArray], { type: "application/octet-stream" });
-        //let saveAs = require('file-saver');
         saveAs(blobToSave, fileName);
     }
 }

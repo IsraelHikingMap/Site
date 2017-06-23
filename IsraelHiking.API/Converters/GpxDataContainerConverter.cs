@@ -156,8 +156,8 @@ namespace IsraelHiking.API.Converters
             {
                 lat = (decimal)latLng.lat,
                 lon = (decimal)latLng.lng,
-                ele = (decimal)latLng.alt,
-                eleSpecified = true
+                ele = (decimal)(latLng.alt ?? 0),
+                eleSpecified = latLng.alt.HasValue
             };
         }
 

@@ -4,7 +4,7 @@ export class NoneRouter {
     constructor() { }
 
     public getRoute(latlngStart: L.LatLng, latlngEnd: L.LatLng): Promise<Common.RouteSegmentData[]> {
-        return new Promise<Common.RouteSegmentData[]>(() => {
+        return new Promise<Common.RouteSegmentData[]>((resolve) => {
             var emptyReturn = [] as Common.RouteSegmentData[];
             latlngStart.alt = 0;
             latlngEnd.alt = 0;
@@ -13,7 +13,7 @@ export class NoneRouter {
                 latlngs: [latlngStart, latlngEnd],
                 routingType: "None"
             } as Common.RouteSegmentData);
-            return emptyReturn;
+            resolve(emptyReturn);
         });
         
     }
