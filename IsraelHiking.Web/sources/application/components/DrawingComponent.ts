@@ -27,9 +27,7 @@ export class DrawingComponent extends BaseMapComponent {
         this.editMode = EditModeString.none;
 
         this.layersService.routeChanged.subscribe(() => {
-            if (this.editMode === EditModeString.route) {
-                this.editMode = (this.layersService.getSelectedRoute() != null) ? this.layersService.getSelectedRoute().getEditMode() : EditModeString.none;
-            }
+            this.editMode = (this.layersService.getSelectedRoute() != null) ? this.layersService.getSelectedRoute().getEditMode() : EditModeString.none;
         });
     }
 

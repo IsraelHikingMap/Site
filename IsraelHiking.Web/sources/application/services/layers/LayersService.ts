@@ -501,9 +501,11 @@ export class LayersService {
             this.mapService.map.addLayer(routeLayer as RouteLayer);    
             this.selectRoute(routeLayer);
 
-            if (reroute) {
+            if (reroute && dataContainer.routes.length > 0 && dataContainer.routes[0].segments.length > 0) {
+                // HM TODO: remove this interface?
                 routeLayer.setEditRouteState();
                 routeLayer.reRoute();
+                this.routeChanged.next();
             }
         }
 
