@@ -1,5 +1,4 @@
 ﻿/* added direction to fix issue with scroll bar and legend maps */
-/*overflow-y: scroll;*/
 #sidebar-wrapper {
     position: fixed;
     top: 0;
@@ -18,7 +17,6 @@
     -o-transition: all 0.5s ease;
     transition: all 0.5s ease;
     transform: translateX(-100%);
-    max-width: 400px;
 }
 
     #sidebar-wrapper:not(.toggled) {
@@ -34,9 +32,3 @@
         border-width: 0 1px;
         width: 4px;
     }
-
-/*@media(min-width:768px) {
-    #sidebar-wrapper {
-        width: 400px;
-    }
-}*/

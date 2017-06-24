@@ -27,7 +27,6 @@ export class DraggableResizableDirective implements OnInit {
     private initialLeft: number;
     private initialRight: number;
 
-
     @Input()
     public dragSelector: string;
     @Input()
@@ -90,11 +89,11 @@ export class DraggableResizableDirective implements OnInit {
         let offsetX = clientX - this.initialClientX;
         let offsetY = clientY - this.initialClientY;
 
-        let newTop = this.getTop(this.initialTop + offsetY);
-        this.jqueryElement[0].style.top = newTop + "px";
-        this.jqueryElement[0].style.left = (this.initialLeft + offsetX) + "px";
-        this.jqueryElement[0].style.right = (this.initialRight - offsetX) + "px";
-        this.jqueryElement[0].style.bottom = (this.initialBottom - offsetY) + "px";
+        let style = this.jqueryElement[0].style;
+        style.top = this.getTop(this.initialTop + offsetY) + "px";
+        style.left = (this.initialLeft + offsetX) + "px";
+        style.right = (this.initialRight - offsetX) + "px";
+        style.bottom = (this.initialBottom - offsetY) + "px";
     }
 
     private getTop(newTop: number): number {
@@ -140,26 +139,25 @@ export class DraggableResizableDirective implements OnInit {
         // Disable highlighting while dragging
         if (event.stopPropagation) event.stopPropagation();
         if (event.preventDefault) event.preventDefault();
-
-        //$scope.$emit("angular-resizable.resizeStart", createResizeEventArgs());
     };
 
     private resizeMouseMove = (event: JQueryEventObject) => {
         let offset = this.isHorizontal(this.dragDirection)
             ? this.getBaseMouseMoveEvent(event).clientX - this.initialClientX
             : this.getBaseMouseMoveEvent(event).clientY - this.initialClientY;
+        let style = this.jqueryElement[0].style;
         switch (this.dragDirection) {
             case "top":
-                this.jqueryElement[0].style.top = this.getTop(this.initialTop + offset) + "px";
+                style.top = this.getTop(this.initialTop + offset) + "px";
                 break;
             case "left":
-                this.jqueryElement[0].style.left = (this.initialLeft + offset) + "px";
+                style.left = (this.initialLeft + offset) + "px";
                 break;
             case "bottom":
-                this.jqueryElement[0].style.bottom = (this.initialBottom - offset) + "px";
+                style.bottom = (this.initialBottom - offset) + "px";
                 break;
             case "right":
-                this.jqueryElement[0].style.right = (this.initialRight - offset) + "px";
+                style.right = (this.initialRight - offset) + "px";
                 break;
 
         }
@@ -167,7 +165,6 @@ export class DraggableResizableDirective implements OnInit {
     };
 
     private resizeMouseUp = () => {
-        //$scope.$emit("angular-resizable.resizeEnd", createResizeEventArgs());
         $(document).off(mouseUpEventString, this.resizeMouseUp);
         $(document).off(mouseMoveEventString, this.resizeMouseMove);
         this.jqueryElement.removeClass("no-transition");
@@ -179,8 +176,7 @@ export class DraggableResizableDirective implements OnInit {
             setTimeout(() => {
                 this.toCall();
                 this.toCall = undefined;
-            },
-                100);
+            }, 100);
         } else {
             this.toCall = functionToThrottle;
         }
