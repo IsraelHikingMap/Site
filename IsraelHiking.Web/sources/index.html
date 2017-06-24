@@ -59,17 +59,14 @@
         var baseLayers = localStorage.getItem("ls.BaseLayers");
         if (baseLayers) {
             localStorage.setItem("ngx_storedBaseLayers", baseLayers);
+            localStorage.setItem("ls.backup_BaseLayers", baseLayers);
             localStorage.removeItem("ls.BaseLayers");
         }
         var overlays = localStorage.getItem("ls.Overlays");
         if (overlays) {
             localStorage.setItem("ngx_storedOverlays", overlays);
+            localStorage.setItem("ls.backup_Overlays", overlays);
             localStorage.removeItem("ls.Overlays");
-        }
-        var token = localStorage.getItem("ls.OSMAuthorizationToken");
-        if (token) {
-            localStorage.setItem("ngx_token", token.replace('\"', ""));
-            localStorage.removeItem("ls.OSMAuthorizationToken");
         }
     </script>
     <div class="preloader">
