@@ -126,16 +126,20 @@ export class LayersService {
         if (layer != null) {
             return layer; // layer exists
         }
+        layer = this.addNewBaseLayer(layerData, attribution, position);
+        this.storedBaseLayers.push(layerData);
+        this.storedBaseLayers = this.unique(this.storedBaseLayers);
+        return layer;
+    }
 
-        layer = { ...layerData } as IBaseLayer;
+    private addNewBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
+        let layer = { ...layerData } as IBaseLayer;
         layer.layer = L.tileLayer(layerData.address, this.createOptionsFromLayerData(layerData, attribution));
         if (position != undefined) {
             this.baseLayers.splice(position, 0, layer);
         } else {
             this.baseLayers.push(layer);
         }
-        this.storedBaseLayers.push(layerData);
-        this.storedBaseLayers = this.unique(this.storedBaseLayers);
         return layer;
     }
 
@@ -144,14 +148,19 @@ export class LayersService {
         if (overlay != null) {
             return overlay; // overlay exists
         }
-        overlay = { ...layerData } as IOverlay;
+        overlay = this.addNewOverlay(layerData);
+        this.storedOverlays.push(layerData);
+        this.storedOverlays = this.unique(this.storedOverlays);
+        return overlay;
+    }
+
+    private addNewOverlay = (layerData: Common.LayerData): IOverlay => {
+        let overlay = { ...layerData } as IOverlay;
         overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData));
         overlay.visible = false;
         overlay.isEditable = true;
         (overlay.layer as L.TileLayer).setZIndex(this.overlayZIndex++);
         this.overlays.push(overlay);
-        this.storedOverlays.push(layerData);
-        this.storedOverlays = this.unique(this.storedOverlays);
         return overlay;
     }
 
@@ -295,13 +304,21 @@ export class LayersService {
         for (let baseLayerIndex = 0; baseLayerIndex < this.storedBaseLayers.length; baseLayerIndex++) {
             let baseLayer = this.storedBaseLayers[baseLayerIndex] as ILayer;
             baseLayer.isEditable = true;
-            this.addBaseLayer(baseLayer);
+            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() === baseLayer.key.toLocaleLowerCase());
+            if (layer != null) {
+                continue; // layer exists
+            }
+            this.addNewBaseLayer(baseLayer);
         }
 
         for (let overlayIndex = 0; overlayIndex < this.storedOverlays.length; overlayIndex++) {
             let overlayData = this.storedOverlays[overlayIndex] as ILayer;
             overlayData.isEditable = true;
-            this.addOverlay(overlayData);
+            var overlay = _.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() === overlayData.key.toLocaleLowerCase());
+            if (overlay != null) {
+                continue; // overlay exists
+            }
+            this.addNewOverlay(overlayData);
         }
     }
 

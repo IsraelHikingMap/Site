@@ -53,6 +53,25 @@
     </style>
 </head>
 <body>
+    <script>
+        // This is a temporary script and should be removed after 31/08/2017.
+        // It migrates the local storage data.
+        var baseLayers = localStorage.getItem("ls.BaseLayers");
+        if (baseLayers) {
+            localStorage.setItem("ngx_storedBaseLayers", baseLayers);
+            localStorage.removeItem("ls.BaseLayers");
+        }
+        var overlays = localStorage.getItem("ls.Overlays");
+        if (overlays) {
+            localStorage.setItem("ngx_storedOverlays", overlays);
+            localStorage.removeItem("ls.Overlays");
+        }
+        var token = localStorage.getItem("ls.OSMAuthorizationToken");
+        if (token) {
+            localStorage.setItem("ngx_token", token.replace('\"', ""));
+            localStorage.removeItem("ls.OSMAuthorizationToken");
+        }
+    </script>
     <div class="preloader">
         <img src="/content/logo.png" />
         <div>Loading site...</div>
