@@ -1,4 +1,4 @@
-﻿/* added direction to fix issue with scroll bar and legend maps */
+/* added direction to fix issue with scroll bar and legend maps */
 #sidebar-wrapper {
     position: fixed;
     top: 0;
@@ -17,10 +17,15 @@
     -o-transition: all 0.5s ease;
     transition: all 0.5s ease;
     transform: translateX(-100%);
+    max-width: 400px;
 }
 
     #sidebar-wrapper:not(.toggled) {
         width: 295px;
+    }
+
+    #sidebar-wrapper.toggled {
+        transform: translateX(0);
     }
 
     #sidebar-wrapper.toggled {

@@ -108,8 +108,14 @@ body {
 }
 
 /*#region margins*/
-.margin-right-10 {
+.margin-10 {
+    margin-left: 10px;
+    margin-right: 0;
+}
+
+[dir=rtl] .margin-10 {
     margin-right: 10px;
+    margin-left: 0;
 }
 /*#endregion*/
 
