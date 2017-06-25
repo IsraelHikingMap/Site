@@ -3,10 +3,12 @@
     /// <summary>
     /// List of constants that are used for GPSBabel mostly
     /// </summary>
-    internal static class FlowFormats
+    public static class FlowFormats
     {
         public const string GEOJSON = "geojson";
         public const string GPX = "gpx";
+        public const string KML = "kml";
+        public const string TWL = "twl";
         public const string KMZ = "kmz";
         public const string GPX_BABEL_FORMAT = "gpx,gpxver=1.1";
         public const string GPX_BABEL_FORMAT_VERSION_1 = "gpx,gpxver=1.0";
@@ -14,6 +16,7 @@
         public const string TWL_BABEL_FORMAT = "naviguide";
         public const string CSV_BABEL_FORMAT = "csv";
         public const string GPX_SINGLE_TRACK = "gpx_single_track";
+        public const string GPX_ROUTE = "gpx_route";
         public const string GPX_GZ = "gpx.gz";
         public const string GPX_BZ2 = "gpx.bz2";
     }

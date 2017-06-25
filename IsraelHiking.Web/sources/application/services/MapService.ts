@@ -1,4 +1,4 @@
-﻿import { Injectable, Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+﻿import { Injectable } from "@angular/core";
 import { LocalStorage } from "ngx-store";
 import * as Common from "../common/IsraelHiking";
 import "leaflet";
@@ -12,9 +12,7 @@ export class MapService {
     @LocalStorage()
     private zoom: number = 13;
 
-    constructor(private injector: Injector,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private applicationRef: ApplicationRef) {
+    constructor() {
         this.map = L.map("map", {
             center: this.center,
             zoom: this.zoom,

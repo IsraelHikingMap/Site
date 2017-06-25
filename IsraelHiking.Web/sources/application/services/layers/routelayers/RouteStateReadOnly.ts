@@ -24,8 +24,6 @@ export class RouteStateReadOnly extends RouteStateBase {
 
     private createStartAndEndMarkers() {
         let startLatLng = this.context.route.segments[0].latlngs[0];
-        let lastSegmentLatLngs = this.context.route.segments[this.context.route.segments.length - 1].latlngs;
-        let endLatLng = lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
         let pathOptions = this.context.route.properties.pathOptions;
         this.readOnlyLayers.addLayer(L.marker(startLatLng,
             {
@@ -35,6 +33,8 @@ export class RouteStateReadOnly extends RouteStateBase {
                 keyboard: false,
                 icon: IconsService.createRoundIcon("green")
             }));
+        let lastSegmentLatLngs = this.context.route.segments[this.context.route.segments.length - 1].latlngs;
+        let endLatLng = lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
         this.readOnlyLayers.addLayer(L.marker(endLatLng,
             {
                 opacity: pathOptions.opacity,

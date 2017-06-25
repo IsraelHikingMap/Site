@@ -126,16 +126,20 @@ export class LayersService {
         if (layer != null) {
             return layer; // layer exists
         }
+        layer = this.addNewBaseLayer(layerData, attribution, position);
+        this.storedBaseLayers.push(layerData);
+        this.storedBaseLayers = this.unique(this.storedBaseLayers);
+        return layer;
+    }
 
-        layer = { ...layerData } as IBaseLayer;
+    private addNewBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
+        let layer = { ...layerData } as IBaseLayer;
         layer.layer = L.tileLayer(layerData.address, this.createOptionsFromLayerData(layerData, attribution));
         if (position != undefined) {
             this.baseLayers.splice(position, 0, layer);
         } else {
             this.baseLayers.push(layer);
         }
-        this.storedBaseLayers.push(layerData);
-        this.storedBaseLayers = this.unique(this.storedBaseLayers);
         return layer;
     }
 
@@ -144,14 +148,19 @@ export class LayersService {
         if (overlay != null) {
             return overlay; // overlay exists
         }
-        overlay = { ...layerData } as IOverlay;
+        overlay = this.addNewOverlay(layerData);
+        this.storedOverlays.push(layerData);
+        this.storedOverlays = this.unique(this.storedOverlays);
+        return overlay;
+    }
+
+    private addNewOverlay = (layerData: Common.LayerData): IOverlay => {
+        let overlay = { ...layerData } as IOverlay;
         overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData));
         overlay.visible = false;
         overlay.isEditable = true;
         (overlay.layer as L.TileLayer).setZIndex(this.overlayZIndex++);
         this.overlays.push(overlay);
-        this.storedOverlays.push(layerData);
-        this.storedOverlays = this.unique(this.storedOverlays);
         return overlay;
     }
 
@@ -249,13 +258,14 @@ export class LayersService {
         overlayFromArray.visible = !overlayFromArray.visible;
         if (overlayFromArray.visible) {
             this.mapService.map.addLayer(overlay.layer);
-            if (this.activeOverlayKeys.indexOf(overlay.key) === -1) {
+            if (_.find(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key) == null) {
                 this.activeOverlayKeys.push(overlay.key);
             }
         } else {
             this.mapService.map.removeLayer(overlay.layer);
-            if (this.activeOverlayKeys.indexOf(overlay.key) > -1) {
-                this.activeOverlayKeys.splice(this.activeOverlayKeys.indexOf(overlay.key), 1);
+            if (_.find(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key) != null) {
+                _.remove(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key);
+                this.activeOverlayKeys = this.activeOverlayKeys;
             }
         }
     }
@@ -294,18 +304,25 @@ export class LayersService {
         for (let baseLayerIndex = 0; baseLayerIndex < this.storedBaseLayers.length; baseLayerIndex++) {
             let baseLayer = this.storedBaseLayers[baseLayerIndex] as ILayer;
             baseLayer.isEditable = true;
-            this.addBaseLayer(baseLayer);
+            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() === baseLayer.key.toLocaleLowerCase());
+            if (layer != null) {
+                continue; // layer exists
+            }
+            this.addNewBaseLayer(baseLayer);
         }
 
         for (let overlayIndex = 0; overlayIndex < this.storedOverlays.length; overlayIndex++) {
             let overlayData = this.storedOverlays[overlayIndex] as ILayer;
             overlayData.isEditable = true;
-            this.addOverlay(overlayData);
+            var overlay = _.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() === overlayData.key.toLocaleLowerCase());
+            if (overlay != null) {
+                continue; // overlay exists
+            }
+            this.addNewOverlay(overlayData);
         }
     }
 
     private addDataFromHash = () => {
-        //let deferred = this.$q.defer();
         let localResolve: (value?: any | PromiseLike<any>) => void = null;
         let localReject: (value?: any | PromiseLike<any>) => void = null;
         this.initializationPromise = new Promise((resolve, reject) => {
@@ -496,10 +513,17 @@ export class LayersService {
             if (this.isNameAvailable(routeData.name) === false) {
                 routeData.name = this.createRouteName();
             }
-            let routeLayer = this.routeLayerFactory.createRouteLayerFromData(routeData, reroute);
+            let routeLayer = this.routeLayerFactory.createRouteLayerFromData(routeData);
             this.routes.push(routeLayer);
-            this.mapService.map.addLayer(routeLayer as RouteLayer);
+            this.mapService.map.addLayer(routeLayer as RouteLayer);    
             this.selectRoute(routeLayer);
+
+            if (reroute && dataContainer.routes.length > 0 && dataContainer.routes[0].segments.length > 0) {
+                // HM TODO: remove this interface?
+                routeLayer.setEditRouteState();
+                routeLayer.reRoute();
+                this.routeChanged.next();
+            }
         }
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {

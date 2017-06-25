@@ -8,7 +8,7 @@ export class ToastService {
 
     constructor(private resources: ResourcesService,
         private snackbar: MdSnackBar) {
-        this.duration = 2000;
+        this.duration = 6000;
     }
 
     public error(message: string, title?: string) {

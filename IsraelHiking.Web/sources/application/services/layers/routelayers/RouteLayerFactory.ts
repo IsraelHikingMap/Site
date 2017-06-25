@@ -51,12 +51,8 @@ export class RouteLayerFactory {
         });
     }
 
-    public createRouteLayerFromData = (routeData: Common.RouteData, reRoute: boolean): IRouteLayer => {
-        let routeLayer = this.createRouteLayer(this.createRouteFromData(routeData));
-        if (reRoute) {
-            routeLayer.reRoute();
-        }
-        return routeLayer;
+    public createRouteLayerFromData = (routeData: Common.RouteData): IRouteLayer => {
+        return this.createRouteLayer(this.createRouteFromData(routeData));
     }
 
     public createRouteLayer = (route: IRoute): RouteLayer => {

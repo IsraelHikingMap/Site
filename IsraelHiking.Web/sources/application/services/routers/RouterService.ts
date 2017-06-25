@@ -42,7 +42,8 @@ export class RouterService {
                         resolve(data.routes[0].segments);
                     }
                 }, () => {
-                    this.toastService.error(this.resourcesService.routingFailed + ` ${latlngStart} => ${latlngEnd}`);
+                    let coordinatesString = ` (${latlngStart.lat.toFixed(3)}°, ${latlngStart.lng.toFixed(3)}°) - (${latlngEnd.lat.toFixed(3)}°, ${latlngEnd.lng.toFixed(3)}°)`
+                    this.toastService.error(this.resourcesService.routingFailed + coordinatesString);
                     this.noneRouter.getRoute(latlngStart, latlngEnd).then((data) => {
                         resolve(data);
                     });

@@ -34,9 +34,6 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         route: IRoute) {
         super();
         this.map = mapService.map;
-        this.snappingService = snappingService;
-        this.routerService = routerService;
-        this.elevationProvider = elevationProvider;
         this.route = route;
         this.undoHandler = new UndoHandler<Common.RouteData>();
         this.undoHandler.addDataToUndoStack(this.getData());

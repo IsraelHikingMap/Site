@@ -45,6 +45,7 @@ namespace IsraelHiking.API.Services
                 new GeoJsonGpxConverterFlow(gpxGeoJsonConverter),
                 new GpxGeoJsonConverterFlow(gpxGeoJsonConverter),
                 new GpxToSingleTrackGpxConverterFlow(),
+                new GpxToRouteGpxConverterFlow(),
                 new KmzToKmlConverterFlow(),
                 new GpxGzToGpxConverterFlow(),
                 new GpxVersion1ToGpxVersion11ConverterFlow(_gpsBabelGateway),
@@ -174,6 +175,10 @@ namespace IsraelHiking.API.Services
                 return FlowFormats.GEOJSON;
             }
             if (fileNameOrFormat == FlowFormats.GPX_SINGLE_TRACK)
+            {
+                return fileNameOrFormat;
+            }
+            if (fileNameOrFormat == FlowFormats.GPX_ROUTE)
             {
                 return fileNameOrFormat;
             }

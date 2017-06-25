@@ -8,6 +8,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
+using IsraelTransverseMercator;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -25,7 +26,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var elevationDataStorage = Substitute.For<IElevationDataStorage>();
 
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _controller = new SearchController(_elasticSearchGateway, _dataContainerConverterService, elevationDataStorage);
+            _controller = new SearchController(_elasticSearchGateway, _dataContainerConverterService, elevationDataStorage, new ItmWgs84MathTransfrom(false));
         }
 
         [TestMethod]
@@ -71,6 +72,24 @@ namespace IsraelHiking.API.Tests.Controllers
             var results = _controller.PostConvertSearchResults(feature).Result;
 
             Assert.AreEqual(1, results.routes.Count);
+        }
+
+        [TestMethod]
+        public void GetSearchResultsForLatLonCoordinates_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("  11.1°  , +12.2° ").Result;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+        }
+
+        [TestMethod]
+        public void GetSearchResultsForItmCoordinates_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("100000 100000").Result;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
         }
     }
 }

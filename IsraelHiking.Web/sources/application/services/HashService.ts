@@ -19,6 +19,8 @@ export class HashService {
     private static BASE_LAYER = "baselayer";
     private static URL = "url";
     private static DOWNLOAD = "download";
+    private static SITE_SHARE = "s";
+    private static SEARCH_QUERY = "q";
 
     private dataContainer: Common.DataContainer;
     private changingAddress: boolean;
@@ -55,7 +57,7 @@ export class HashService {
     }
 
     public getDataContainer = (): Common.DataContainer => {
-        return { ...this.dataContainer }; // copy
+        return this.dataContainer;
     }
 
     private updateUrl = () => {
@@ -69,7 +71,7 @@ export class HashService {
     public clear = () => {
         // HM TODO: fix this - should remove all query parameters
         if (this.siteUrl) {
-            this.location.replaceState(this.location.path(true), `s=${this.siteUrl}`);
+            this.location.replaceState(this.location.path(true), `${HashService.SITE_SHARE}=${this.siteUrl}`);
         } else {
             this.location.replaceState(this.location.path(true));
         }
@@ -106,12 +108,13 @@ export class HashService {
     private stringToRouteSegments = (data: string): Common.RouteSegmentData[] => {
         var splitted = data.split(HashService.SPILT_REGEXP);
         var array = [] as Common.RouteSegmentData[];
-        for (let pointIndex = 0; pointIndex < splitted.length; pointIndex++) {
-            var pointStrings = splitted[pointIndex].split(HashService.DATA_DELIMITER);
+        for (let pointString of splitted) {
+            var pointStrings = pointString.split(HashService.DATA_DELIMITER);
             if (pointStrings.length === 3) {
+                let latLng = L.latLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2]), 0);
                 array.push({
-                    latlngs: [],
-                    routePoint: L.latLng(parseFloat(pointStrings[1]), parseFloat(pointStrings[2])),
+                    latlngs: [latLng, latLng],
+                    routePoint: latLng,
                     routingType: this.convertCharacterToRoutingType(pointStrings[0])
                 } as Common.RouteSegmentData);
             }
@@ -147,32 +150,36 @@ export class HashService {
         } as Common.LayerData;
     }
 
-    private urlStringToDataContainer(searchObject: any): Common.DataContainer {
+    private urlStringToDataContainer(urlSearchParams: URLSearchParams): Common.DataContainer {
         let data = {
             routes: []
         } as Common.DataContainer;
         let markers = [] as Common.MarkerData[];
-        for (let parameter in searchObject) {
-            if (searchObject.hasOwnProperty(parameter)) {
-                if (parameter.toLocaleLowerCase() === HashService.URL) {
-                    continue;
-                }
-                if (parameter === HashService.MARKERS) {
-                    markers = this.stringArrayToMarkers(searchObject[parameter].split(HashService.SPILT_REGEXP) || []);
-                    continue;
-                }
-                if (parameter === HashService.BASE_LAYER) {
-                    data.baseLayer = this.stringToBaseLayer(searchObject[parameter] || "");
-                }
-                if (parameter === "s") {
-                    continue;
-                }
-                if (parameter === HashService.DOWNLOAD) {
-                    continue;
-                }
-                data.routes.push(this.stringToRoute(searchObject[parameter], parameter.split("_").join(" ")));
+        urlSearchParams.paramsMap.forEach((value, key) => {
+            if (key.startsWith("#!/")) {
+                return;
             }
-        }
+            if (key.toLocaleLowerCase() === HashService.URL) {
+                return;
+            }
+            if (key.toLocaleLowerCase() === HashService.SITE_SHARE) {
+                return;
+            }
+            if (key.toLocaleLowerCase() === HashService.SEARCH_QUERY) {
+                return;
+            }
+            if (key.toLocaleLowerCase() === HashService.DOWNLOAD) {
+                return;
+            }
+            if (key === HashService.MARKERS) {
+                markers = this.stringArrayToMarkers(urlSearchParams.get(key).split(HashService.SPILT_REGEXP) || []);
+                return;
+            }
+            if (key === HashService.BASE_LAYER) {
+                data.baseLayer = this.stringToBaseLayer(urlSearchParams.get(key) || "");
+            }
+            data.routes.push(this.stringToRoute(urlSearchParams.get(key), key.split("_").join(" ")));
+        });
         if (markers.length > 0) {
             if (data.routes.length === 0) {
                 let name = markers.length === 1 ? markers[0].title || HashService.MARKERS : HashService.MARKERS;
@@ -189,16 +196,15 @@ export class HashService {
 
     private addDataFromUrl() {
         let searchParams = new URLSearchParams(window.location.hash.replace("#!/?", ""));
-        let params = searchParams.paramsMap;
-        this.searchTerm = params["q"] || "";
-        this.externalUrl = params["url"] || "";
-        this.siteUrl = params["s"] || "";
-        this.download = params.has("download") ? true : false;
+        this.searchTerm = searchParams.get(HashService.SEARCH_QUERY) || "";
+        this.externalUrl = searchParams.get(HashService.URL) || "";
+        this.siteUrl = searchParams.get(HashService.SITE_SHARE) || "";
+        this.download = searchParams.has(HashService.DOWNLOAD) ? true : false;
         let latLng = this.parsePathToGeoLocation();
         if (latLng != null) {
             this.mapService.map.setView(latLng, latLng.alt);
         }
-        this.dataContainer = this.urlStringToDataContainer(params);
+        this.dataContainer = this.urlStringToDataContainer(searchParams);
     }
 
     private parsePathToGeoLocation(): L.LatLng {

@@ -26,6 +26,7 @@
   <ItemGroup>
     <Content Remove="package.json" />
     <Content Remove="tsconfig.json" />
+    <Content Remove="tslint.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -41,6 +42,7 @@
     </Content>
     <None Include="package.json" />
     <None Include="tsconfig.json" />
+    <None Include="tslint.json" />
     <Content Update="appsettings.json">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
