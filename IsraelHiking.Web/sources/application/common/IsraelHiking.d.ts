@@ -6,6 +6,7 @@ export interface SiteUrl {
     description: string;
     jsonData: string;
     osmUserId: string;
+    viewsCount: number;
 }
 
 export interface LayerData {
