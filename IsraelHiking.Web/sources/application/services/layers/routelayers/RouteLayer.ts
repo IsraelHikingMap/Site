@@ -189,7 +189,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         this.raiseDataChanged();
     }
 
-    public reRoute = (): void => {
+    private reRoute = (): void => {
         if (this.route.segments.length === 0) {
             return;
         }
