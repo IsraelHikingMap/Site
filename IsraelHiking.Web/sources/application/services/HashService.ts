@@ -92,7 +92,7 @@ export class HashService {
 
     private addDataFromUrl() {
         let searchParams = new URLSearchParams(window.location.hash.replace("#!/?", ""));
-        this.searchTerm = searchParams.get(HashService.SEARCH_QUERY) || "";
+        this.searchTerm = decodeURIComponent(searchParams.get(HashService.SEARCH_QUERY) || "");
         this.externalUrl = searchParams.get(HashService.URL) || "";
         this.siteUrl = searchParams.get(HashService.SITE_SHARE) || "";
         this.download = searchParams.has(HashService.DOWNLOAD) ? true : false;
