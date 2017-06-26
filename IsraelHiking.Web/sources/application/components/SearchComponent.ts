@@ -188,17 +188,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
     };
 
-    public getDirection = (words: string) => {
-        if (!words) {
-            return this.resources.direction;
-        }
-        return this.resources.hasHebrewCharacters(words) ? "rtl" : "ltr";
-    }
-
-    public getTextAlignment = (words: string) => {
-        return `text-${this.getDirection(words) === "rtl" ? "right" : "left"}`;
-    }
-
     public setRouting = (routingType: Common.RoutingType, e: Event) => {
         this.routingType = routingType;
         this.suppressEvents(e);

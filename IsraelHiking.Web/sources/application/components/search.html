@@ -6,10 +6,10 @@
         <a class="cursor-pointer control-icon-last" (click)="toggleDirectional($event)" mdTooltip="{{resources.directionalSearch}}" mdTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !isDirectional, 'icon-minus': isDirectional}"></i></a>
         <div [dir]="resources.direction">
             <md-input-container class="search-input-container">
-                <input type="text" mdInput #searchFromInput [formControl]="searchFrom" [mdAutocomplete]="autoFrom" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="getDirection(fromContext.searchTerm)">
+                <input type="text" mdInput #searchFromInput [formControl]="searchFrom" [mdAutocomplete]="autoFrom" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)">
             </md-input-container>
             <md-autocomplete positionY="below" #autoFrom="mdAutocomplete" [displayWith]="displayResults">
-                <md-option *ngFor="let result of fromContext.searchResults" [value]="result" [dir]="getDirection(result.name)" class="{{getTextAlignment(result.name)}}">
+                <md-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
                     <img [src]="result.icon" height="16" width="16" [hidden]="!result.icon" alt="" />
                     {{result.displayName}}
                 </md-option>
@@ -31,10 +31,10 @@
         <a class="cursor-pointer control-icon-last" (click)="searchRoute($event)"><i class="fa icon-arrow-left fa-lg"></i></a>
         <div [dir]="resources.direction">
             <md-input-container class="pull-right search-input-container">
-                <input type="text" mdInput #searchToInput [formControl]="searchTo" [mdAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="getDirection(toContext.searchTerm)">
+                <input type="text" mdInput #searchToInput [formControl]="searchTo" [mdAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(toContext.searchTerm)">
             </md-input-container>
             <md-autocomplete positionY="below" #autoTo="mdAutocomplete" [displayWith]="displayResults">
-                <md-option *ngFor="let result of toContext.searchResults" [value]="result" [dir]="getDirection(result.name)" class="{{getTextAlignment(result.name)}}">
+                <md-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
                     <img [src]="result.icon" height="16" width="16" [hidden]="!result.icon" alt="" />
                     {{result.displayName}}
                 </md-option>

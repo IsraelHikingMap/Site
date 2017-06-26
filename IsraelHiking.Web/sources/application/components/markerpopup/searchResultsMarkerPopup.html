@@ -1,5 +1,5 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
-    <h2 [ngClass]="{'text-right': resources.hasHebrewCharacters(title)}" class="chrome-wordwrap-fix">{{title}}</h2>
+    <h2 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h2>
     <div fxLayout="row">
         <div fxFlex="33">
             <button md-button (click)="convertToRoute()" mdTooltip="{{resources.convertToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Convert search to route"><i class="fa icon-plus"></i></button>

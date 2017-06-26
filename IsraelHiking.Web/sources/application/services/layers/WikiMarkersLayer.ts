@@ -32,16 +32,16 @@ export class WikiMarkersLayer extends L.Layer {
 
     constructor(private jsonp: Jsonp,
         private mapService: MapService,
-        private resourcesService: ResourcesService,
+        private resources: ResourcesService,
         private injector: Injector,
         private componentFactoryResolver: ComponentFactoryResolver,
         private applicationRef: ApplicationRef) {
         super();
-        this.resourcesService = resourcesService;
+        this.resources = resources;
         this.markers = L.markerClusterGroup();
         this.enabled = false;
         this.wikiMarkerIcon = IconsService.createWikipediaIcon();
-        resourcesService.languageChanged.subscribe(() => {
+        resources.languageChanged.subscribe(() => {
             this.markers.clearLayers();
             this.updateMarkers();
         });
@@ -69,14 +69,8 @@ export class WikiMarkersLayer extends L.Layer {
             return;
         }
         let centerString = this.mapService.map.getCenter().lat + "|" + this.mapService.map.getCenter().lng;
-        let lang = this.resourcesService.currentLanguage.code.split("-")[0];
-        let dir = "";
-        let textAlign = "text-left";
-        if (this.resourcesService.currentLanguage.rtl) {
-            dir = "rtl";
-            textAlign = "text-right";
-        }
-        let url = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000&callback=JSONP_CALLBACK`;
+        let language = this.resources.currentLanguage.code.split("-")[0];
+        let url = `https://${language}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000&callback=JSONP_CALLBACK`;
         this.jsonp.get(url).toPromise().then((response) => {
             // Sync lists
             let data = response.json() as IGeoSearchWikiResponse;
@@ -97,7 +91,7 @@ export class WikiMarkersLayer extends L.Layer {
                 let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { draggable: false, clickable: true, keyboard: false, icon: this.wikiMarkerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
                 marker.title = currentPage.pageid.toString();
                 let markerPopupContainer = L.DomUtil.create("div");
-                let pageAddress = `https://${lang}.wikipedia.org/?curid=${currentPage.pageid}`;
+                let pageAddress = `https://${language}.wikipedia.org/?curid=${currentPage.pageid}`;
                 let factory = this.componentFactoryResolver.resolveComponentFactory(WikiMarkerPopupComponent);
                 let componentRef = factory.create(this.injector, null, markerPopupContainer);
                 componentRef.instance.address = pageAddress;

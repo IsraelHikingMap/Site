@@ -1,5 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { LocalStorage } from "ngx-store";
+import { ResourcesService } from "./ResourcesService";
 import * as Common from "../common/IsraelHiking";
 import "leaflet";
 
@@ -12,7 +13,7 @@ export class MapService {
     @LocalStorage()
     private zoom: number = 13;
 
-    constructor() {
+    constructor(private resources: ResourcesService) {
         this.map = L.map("map", {
             center: this.center,
             zoom: this.zoom,
@@ -37,13 +38,9 @@ export class MapService {
         for (let line of title.split("\n")) {
             let lineDiv = L.DomUtil.create("div", "", controlDiv);
             lineDiv.style.color = color;
-            lineDiv.dir = this.getDirection(line);
+            lineDiv.dir = this.resources.getDirection(line);
             lineDiv.innerHTML = line;
         }
         marker.bindTooltip(controlDiv, { permanent: true, direction: "bottom" } as L.TooltipOptions);
-    }
-
-    public getDirection(line: string) {
-        return (line.match(/^[^a-zA-Z]*[\u0591-\u05F4]/)) ? "rtl" : "ltr";
     }
 }
