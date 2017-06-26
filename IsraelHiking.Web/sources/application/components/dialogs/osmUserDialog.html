@@ -105,7 +105,7 @@
                                 <div fxFlex>
                                     <div fxLayout="column" fxLayoutAlign="space-between stretch">
                                         <button md-button ngxClipboard [cbContent]="userService.getUrlFromSiteUrlId(siteUrl)" mdTooltip="{{resources.copyUrl}}" mdTooltipPosition="{{resources.start}}"><i class="fa icon-clipboard"></i></button>
-                                        <button md-button (click)="editMode = false; userService.deleteSiteUrl(siteUrl)" mdTooltip="{{resources.delete}}" mdTooltipPosition="{{resources.start}}"><i class="fa icon-trash"></i></button>
+                                        <button md-button (click)="editMode = false; deleteSiteUrl(siteUrl)" mdTooltip="{{resources.delete}}" mdTooltipPosition="{{resources.start}}"><i class="fa icon-trash"></i></button>
                                     </div>
                                 </div>
                             </div>

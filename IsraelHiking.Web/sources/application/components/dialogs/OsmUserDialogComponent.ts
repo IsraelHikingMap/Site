@@ -313,4 +313,10 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public setSelectedTab() {
         this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
     }
+
+    public deleteSiteUrl(siteUrl: Common.SiteUrl) {
+        this.userService.deleteSiteUrl(siteUrl).then(() => {
+            this.updateFilteredLists(this.searchTerm.value);
+        });
+    }
 }
