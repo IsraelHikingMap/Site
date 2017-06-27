@@ -278,16 +278,16 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             return true;
         }
         let lowerSearchTerm = searchTerm.toLowerCase();
-        if (siteUrl.description.toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((siteUrl.description || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
-        if (siteUrl.title.toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((siteUrl.title || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
-        if (siteUrl.id.toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((siteUrl.id || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
-        if (siteUrl.viewsCount.toString().toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((siteUrl.viewsCount || 0).toString().toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
         return false;
@@ -298,13 +298,13 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             return true;
         }
         let lowerSearchTerm = searchTerm.toLowerCase();
-        if (trace.description.toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((trace.description || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
-        if (trace.fileName.toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((trace.fileName || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
-        if (trace.id.toString().toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((trace.id || 0).toString().toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
         return false;
