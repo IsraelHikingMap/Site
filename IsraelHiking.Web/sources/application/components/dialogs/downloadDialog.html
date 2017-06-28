@@ -1,18 +1,16 @@
 ﻿<div [dir]="resources.direction">
     <div md-dialog-title>
-        <div fxLayout="row">
-            <div fxFlex="66">
-                <h3>{{resources.infoDownloadMapForOfflineUse}}</h3>
-            </div>
-            <div fxFlex>
-                <a href="{{getGooglePlayStoreAddress(app)}}" target="_blank" tabindex="-1"><img src="/content/google-play-badge.png" class="img-responsive" alt="" fxFill tabindex="-1"/></a>
-            </div>
+        <div>
+            {{resources.infoDownloadMapForOfflineUse}}
         </div>
         <div>
             <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
         </div>
     </div>
     <div md-dialog-content>
+        <div class="text-center">
+            <a class="download-app-link" href="{{getGooglePlayStoreAddress(app)}}" target="_blank" tabindex="-1"><img src="/content/google-play-badge.png" class="img-responsive" alt="" fxFill tabindex="-1"/></a>
+        </div>
         <h5 class="text-center">{{resources.application}}</h5>
         <div fxLayout="row">
             <div fxFlex="33">
