@@ -287,9 +287,6 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         if ((siteUrl.id || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
-        if ((siteUrl.viewsCount || 0).toString().toLowerCase().indexOf(lowerSearchTerm) !== -1) {
-            return true;
-        }
         return false;
     }
 
