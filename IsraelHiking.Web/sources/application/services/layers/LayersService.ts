@@ -340,9 +340,7 @@ export class LayersService {
                     this.toastService.info(siteUrl.description, siteUrl.title);
                     localResolve();
                 }, () => {
-                    let data = this.hashService.getDataContainer();
-                    this.setData(data, true);
-                    this.addBaseLayerFromHash(data.baseLayer);
+                    this.setData({ routes: [] } as Common.DataContainer);
                     this.hashService.siteUrl = "";
                     this.hashService.clear();
                     this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
@@ -354,14 +352,13 @@ export class LayersService {
             this.fileService.openFromUrl(this.hashService.externalUrl)
                 .then((response) => {
                     let data = response.json() as Common.DataContainer;
-                    data.baseLayer = this.hashService.getDataContainer().baseLayer;
+                    data.baseLayer = this.hashService.getBaseLayer();
                     this.setJsonData(data);
                     localResolve();
                 }, () => localReject());
         } else {
-            let data = this.hashService.getDataContainer();
-            this.setData(data, true);
-            this.addBaseLayerFromHash(data.baseLayer);
+            this.setData({ routes: [] } as Common.DataContainer);
+            this.addBaseLayerFromHash(this.hashService.getBaseLayer());
             localResolve();
         }
         this.hashService.clear();
@@ -395,7 +392,7 @@ export class LayersService {
                 }
             }
         }
-        this.setData(data, false);
+        this.setData(data);
         this.addBaseLayerFromHash(data.baseLayer);
     }
 
@@ -501,7 +498,7 @@ export class LayersService {
         return container;
     }
 
-    private setData = (dataContainer: Common.DataContainer, reroute: boolean) => {
+    private setData = (dataContainer: Common.DataContainer) => {
         if (dataContainer.routes.length === 0) {
             dataContainer.routes.push({
                 name: this.createRouteName(),
@@ -517,13 +514,6 @@ export class LayersService {
             this.routes.push(routeLayer);
             this.mapService.map.addLayer(routeLayer as RouteLayer);    
             this.selectRoute(routeLayer);
-
-            if (reroute && dataContainer.routes.length > 0 && dataContainer.routes[0].segments.length > 0) {
-                // HM TODO: remove this interface?
-                routeLayer.setEditRouteState();
-                routeLayer.reRoute();
-                this.routeChanged.next();
-            }
         }
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {

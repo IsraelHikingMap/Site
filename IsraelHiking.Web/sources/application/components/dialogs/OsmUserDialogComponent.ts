@@ -209,8 +209,8 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         searchTerm = searchTerm.trim();
         this.state.searchTerm = searchTerm;
         this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
-        this.filteredSiteUrls = this.userService.siteUrls.filter((s) => this.findInObject(s, searchTerm));
-        this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInObject(t, searchTerm)), ["date"], ["dec"]);
+        this.filteredSiteUrls = this.userService.siteUrls.filter((s) => this.findInSiteUrl(s, searchTerm));
+        this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInTrace(t, searchTerm)), ["date"], ["desc"]);
     }
 
     private getPathOprtions = (): L.PathOptions => {
@@ -272,15 +272,51 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.fitBoundsService.fitBounds(geoJsonLayer.getBounds());
     }
 
-    private findInObject(object: Object, searchTerm: string) {
+    private findInSiteUrl(siteUrl: Common.SiteUrl, searchTerm: string) {
         if (!searchTerm)
         {
             return true;
         }
-        return JSON.stringify(object).toLowerCase().indexOf(searchTerm.toLowerCase()) !== -1;
+        let lowerSearchTerm = searchTerm.toLowerCase();
+        if ((siteUrl.description || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+            return true;
+        }
+        if ((siteUrl.title || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+            return true;
+        }
+        if ((siteUrl.id || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+            return true;
+        }
+        if ((siteUrl.viewsCount || 0).toString().toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+            return true;
+        }
+        return false;
+    }
+
+    private findInTrace(trace: ITrace, searchTerm: string) {
+        if (!searchTerm) {
+            return true;
+        }
+        let lowerSearchTerm = searchTerm.toLowerCase();
+        if ((trace.description || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+            return true;
+        }
+        if ((trace.fileName || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+            return true;
+        }
+        if ((trace.id || 0).toString().toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+            return true;
+        }
+        return false;
     }
 
     public setSelectedTab() {
         this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
+    }
+
+    public deleteSiteUrl(siteUrl: Common.SiteUrl) {
+        this.userService.deleteSiteUrl(siteUrl).then(() => {
+            this.updateFilteredLists(this.searchTerm.value);
+        });
     }
 }

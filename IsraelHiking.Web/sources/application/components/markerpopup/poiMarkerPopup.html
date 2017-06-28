@@ -1,6 +1,6 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
     <md-input-container fxFill>
-        <textarea mdInput rows="2" type="text" [dir]="getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates()" placeholder="{{resources.title}}" fxFill></textarea>
+        <textarea mdInput rows="2" type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates()" placeholder="{{resources.title}}" fxFill></textarea>
     </md-input-container>
     <div [hidden]="!showIcons">
         <div *ngFor="let group of iconsGroups">

@@ -57,16 +57,6 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.marker.closePopup();
     }
 
-    public getDirection(title: string) {
-        if (!title) {
-            return this.resources.direction;
-        }
-        if (title.match(/^[\u0590-\u05FF]/) != null) {
-            return "rtl";
-        }
-        return "ltr";
-    }
-
     public updateWikiCoordinates() {
         this.wikiCoordinatesString = this.getWikiCoordString(this.latLng, this.title);
     };

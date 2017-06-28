@@ -744,6 +744,17 @@ export class ResourcesService {
     }
 
     public hasHebrewCharacters(title: string): boolean {
-        return title.match(/[\u0590-\u05FF]/) != null;
+        return title.match(/^[^a-zA-Z]*[\u0591-\u05F4]/) != null;
+    }
+
+    public getDirection = (words: string): LayoutDirection => {
+        if (!words) {
+            return this.direction;
+        }
+        return this.hasHebrewCharacters(words) ? "rtl" : "ltr";
+    }
+
+    public getTextAlignment = (words: string) => {
+        return `text-${this.getDirection(words) === "rtl" ? "right" : "left"}`;
     }
 }

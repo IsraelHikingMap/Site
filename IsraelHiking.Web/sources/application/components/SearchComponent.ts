@@ -1,4 +1,4 @@
-﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, HostListener, ViewEncapsulation } from "@angular/core";
+﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, HostListener, ViewEncapsulation, AfterViewInit, ViewChildren } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Http } from "@angular/http";
 import { ENTER, UP_ARROW, DOWN_ARROW } from "@angular/material";
@@ -22,8 +22,6 @@ export interface ISearchContext {
     searchTerm: string;
     searchResults: ISearchResults[];
     selectedSearchResults: ISearchResults;
-    highlightedSearchResults: ISearchResults;
-    hasFocus: boolean;
 }
 
 interface ISearchRequestQueueItem {
@@ -36,7 +34,7 @@ interface ISearchRequestQueueItem {
     styleUrls: ["./search.css"],
     encapsulation: ViewEncapsulation.None,
 })
-export class SearchComponent extends BaseMapComponent {
+export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     public isVisible: boolean;
     public isDirectional: boolean;
@@ -47,6 +45,9 @@ export class SearchComponent extends BaseMapComponent {
     public searchTo: FormControl;
     private requestsQueue: ISearchRequestQueueItem[];
     private featureGroup: L.FeatureGroup;
+
+    @ViewChildren("searchFromInput") searchFromInput;
+    @ViewChildren("searchToInput") searchToInput;
 
     constructor(resources: ResourcesService,
         private http: Http,
@@ -72,11 +73,23 @@ export class SearchComponent extends BaseMapComponent {
         this.isVisible = false;
         this.isDirectional = false;
         this.routingType = "Hike";
-        this.searchFrom = new FormControl();
+        this.fromContext = {
+            searchTerm: hashService.searchTerm || "",
+            searchResults: [],
+            selectedSearchResults: null,
+        } as ISearchContext;
+        this.toContext = {
+            searchTerm: "",
+            searchResults: [],
+            selectedSearchResults: null,
+        } as ISearchContext;
+        this.isVisible = this.fromContext.searchTerm ? true : false;
+        this.searchFrom = new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResults);
         this.searchTo = new FormControl();
         this.searchFrom.valueChanges.subscribe((x) => {
             if (typeof x === "string") {
                 this.fromContext.searchTerm = x;
+                this.fromContext.selectedSearchResults = null;
                 this.search(this.fromContext);
             }
             else {
@@ -86,41 +99,32 @@ export class SearchComponent extends BaseMapComponent {
         this.searchTo.valueChanges.subscribe((x) => {
             if (typeof x === "string") {
                 this.toContext.searchTerm = x;
+                this.toContext.selectedSearchResults = null;
                 this.search(this.toContext);
             }
             else {
                 this.selectResults(this.toContext, x);
             }
         });
-        this.fromContext = {
-            searchTerm: "",
-            searchResults: [],
-            selectedSearchResults: null,
-            highlightedSearchResults: null
-        } as ISearchContext;
-        this.toContext = {
-            searchTerm: "",
-            searchResults: [],
-            selectedSearchResults: null,
-            highlightedSearchResults: null
-        } as ISearchContext;
-        this.fromContext.searchTerm = hashService.searchTerm;
-        this.isVisible = this.fromContext.searchTerm ? true : false;
-        this.setFocus();
+
         if (this.isVisible) {
             this.search(this.fromContext);
         }
     }
 
+    public ngAfterViewInit() {
+        if (this.isVisible) {
+            this.searchFromInput.first.nativeElement.focus();
+        }
+    }
+
     public toggleVisibility = (e: Event) => {
         this.isVisible = !this.isVisible;
-        this.setFocus();
         this.suppressEvents(e);
     }
 
     public toggleDirectional = (e: Event) => {
         this.isDirectional = !this.isDirectional;
-        this.setFocus();
         this.suppressEvents(e);
     }
 
@@ -177,45 +181,12 @@ export class SearchComponent extends BaseMapComponent {
         this.suppressEvents(e);
     }
 
-    public changeFocus = (searchContext: ISearchContext, e: Event) => {
-        searchContext.hasFocus = true;
-        if (searchContext === this.fromContext) {
-            this.toContext.hasFocus = false;
-        } else {
-            this.fromContext.hasFocus = false;
-        }
-        if (e.currentTarget != null) {
-            // HM TODO: focus
-            //angular.element(e.currentTarget).focus();
-        }
-        this.suppressEvents(e);
-    }
-
     private selectResults = (searchContext: ISearchContext, searchResult: ISearchResults) => { //, e: Event
         searchContext.selectedSearchResults = searchResult;
-        searchContext.highlightedSearchResults = searchResult;
         if (!this.isDirectional) {
             this.moveToResults(searchResult, new Event("click"));//e);
         }
-        this.setFocus();
     };
-
-    public getDirection = (words: string) => {
-        if (!words) {
-            return this.resources.direction;
-        }
-        return this.resources.hasHebrewCharacters(words) ? "rtl" : "ltr";
-    }
-
-    public getTextAlignment = (words: string) => {
-        return `text-${this.getDirection(words) === "rtl" ? "right" : "left"}`;
-    }
-
-    public removeSelectedResults = (searchContext: ISearchContext, e: Event) => {
-        searchContext.selectedSearchResults = null;
-        this.setFocus();
-        this.suppressEvents(e);
-    }
 
     public setRouting = (routingType: Common.RoutingType, e: Event) => {
         this.routingType = routingType;
@@ -333,25 +304,5 @@ export class SearchComponent extends BaseMapComponent {
 
     private getPathOprtions = (): L.PathOptions => {
         return { opacity: 1, color: "Blue", weight: 3 } as L.PathOptions;
-    }
-
-    private setFocus = () => {
-        this.fromContext.hasFocus = false;
-        this.toContext.hasFocus = false;
-        if (this.isVisible === false) {
-            return;
-        }
-        if (!this.isDirectional) {
-            this.fromContext.hasFocus = true;
-        } else {
-            if (this.fromContext.selectedSearchResults) {
-                this.toContext.hasFocus = true;
-            } else {
-                this.fromContext.hasFocus = true;
-            }
-            if (this.toContext.selectedSearchResults) {
-                this.toContext.hasFocus = false;
-            }
-        }
     }
 }

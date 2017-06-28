@@ -54,7 +54,6 @@ export interface IRouteLayer {
     setState(routeState: IRouteState): void;
     setRoutingType(routingType: Common.RoutingType): void;
     setRouteProperties(properties: IRouteProperties): void;
-    reRoute(): void;
     reverse(): void;
     undo(): void;
     isUndoDisbaled(): boolean;
