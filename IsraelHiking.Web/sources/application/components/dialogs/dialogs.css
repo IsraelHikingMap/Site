@@ -1,7 +1,7 @@
 ﻿[md-dialog-title] {
     display: flex !important;
     justify-content: space-between;
-    align-items: center;
+    align-items: top;
 }
 
     [md-dialog-title] [md-dialog-close] {
@@ -14,3 +14,20 @@
         [md-dialog-title] [md-dialog-close] i {
             display: block;
         }
+
+@media (max-width:767px) {
+    md-dialog-container {
+        margin: 0 auto;
+    }
+
+        md-dialog-container .mat-button {
+            white-space: normal;
+        }
+}
+
+/*download dialog*/
+.download-app-link {
+    display: block;
+    width: 200px;
+    margin: 0 auto;
+}
