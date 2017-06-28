@@ -34,6 +34,7 @@
     "lodash": "^4.17.4",
     "ng2-scroll-to": "^1.0.7",
     "ngx-clipboard": "^8.0.2",
+    "ngx-pagination": "^3.0.1",
     "ngx-progressbar": "^2.0.0",
     "ngx-store": "^0.6.1",
     "osm-auth": "^1.0.1",

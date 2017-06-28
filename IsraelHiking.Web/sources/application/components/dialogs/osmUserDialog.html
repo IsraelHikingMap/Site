@@ -36,7 +36,7 @@
                     </div>
                 </div>
                 <br />
-                <div *ngFor="let trace of filteredTraces">
+                <div *ngFor="let trace of filteredTraces | paginate: { itemsPerPage: 5, currentPage: state.tracesPage, id: 'tracesPaging' }">
                     <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                         <div fxFlex="100" fxFlex.gt-md="33">
                             <img [src]="trace.imageUrl" alt="" fxFill />
@@ -69,7 +69,7 @@
                 <p [hidden]="userService.traces.length != 0 || userService.loading">{{resources.noTraces}}</p>
             </md-tab>
             <md-tab label="{{resources.myShares}}">
-                <div *ngFor="let siteUrl of filteredSiteUrls">
+                <div *ngFor="let siteUrl of filteredSiteUrls | paginate: { itemsPerPage: 5, currentPage: state.sharesPage, id: 'sharesPaging' }">
                     <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                         <div fxFlex="100" fxFlex.gt-md="33">
                             <img [src]="userService.getImageFromSiteUrlId(siteUrl)" fxFill />
@@ -123,6 +123,11 @@
         </md-tab-group>
     </div>
     <div md-dialog-actions>
-        <button md-dialog-close md-button>{{resources.close}}</button>
+        <div [hidden]="state.selectedTabIndex != 0">
+            <pagination-controls (pageChange)="state.tracesPage = $event" previousLabel="" nextLabel="" id="tracesPaging"></pagination-controls>
+        </div>
+        <div [hidden]="state.selectedTabIndex != 1">
+            <pagination-controls (pageChange)="state.sharesPage = $event" previousLabel="" nextLabel="" id="sharesPaging"></pagination-controls>
+        </div>
     </div>
 </div>

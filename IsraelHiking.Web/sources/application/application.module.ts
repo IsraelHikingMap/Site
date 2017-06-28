@@ -13,6 +13,7 @@ import { SessionStorageService, LocalStorageService, WebStorageModule } from "ng
 import { ClipboardModule } from "ngx-clipboard";
 import { Angulartics2Module, Angulartics2GoogleAnalytics } from "angulartics2";
 import { NgProgressModule, NgProgressBrowserXhr } from "ngx-progressbar";
+import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "ng2-scroll-to";
 /// services
 import { GetTextCatalogService } from "./services/GetTextCatalogService";
@@ -96,6 +97,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
         RouterModule.forRoot([]),
         Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
         NgProgressModule,
+        NgxPaginationModule,
         ScrollToModule,
     ],
     entryComponents: [ZoomComponent,

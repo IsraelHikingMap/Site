@@ -30,6 +30,8 @@ interface IOsmUserDialogState {
     selectedTabIndex: number;
     searchTerm: string;
     scrollPosition: number;
+    sharesPage: number;
+    tracesPage: number;
 }
 
 @Component({
@@ -72,7 +74,9 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.state = this.sessionStorageService.get(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY) || {
             scrollPosition: 0,
             searchTerm: "",
-            selectedTabIndex: 0
+            selectedTabIndex: 0,
+            sharesPage: 1,
+            tracesPage: 1
         };
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
