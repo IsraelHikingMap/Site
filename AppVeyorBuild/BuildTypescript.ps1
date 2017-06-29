@@ -28,7 +28,7 @@ foreach ($project in $webProjects)
 	npm install
 
 	Write-Host "ng build - to build using angular-cli"
-	ng build
+	ng build --no-progress
 	
 	if($LastExitCode -ne 0) 
 	{ 
