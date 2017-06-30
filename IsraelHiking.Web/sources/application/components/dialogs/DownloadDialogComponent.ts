@@ -1,5 +1,7 @@
 ﻿import { Component } from "@angular/core";
 import { MdDialog } from "@angular/material";
+import { DomSanitizer } from "@angular/platform-browser";
+
 import { BaseMapComponent } from "../BaseMapComponent";
 import { ResourcesService } from "../../services/ResourcesService";
 
@@ -16,7 +18,8 @@ export class DownloadDialogComponent extends BaseMapComponent {
     public mapType: MapType;
     public zoom: number;
 
-    constructor(resources: ResourcesService) {
+    constructor(resources: ResourcesService,
+        private sanitizer: DomSanitizer) {
         super(resources);
 
         this.app = 'Locus';
@@ -54,7 +57,8 @@ export class DownloadDialogComponent extends BaseMapComponent {
             fileName += "16";
         }
         fileName += extension;
-        return `${protocol}israelhiking.osm.org.il${this.resources.currentLanguage.tilesFolder}/${filesFolder}/${fileName}`;
+        let href = `${protocol}israelhiking.osm.org.il${this.resources.currentLanguage.tilesFolder}/${filesFolder}/${fileName}`;
+        return this.sanitizer.bypassSecurityTrustUrl(href);
     }
 
     public getMobileInstallationInstructions = (app: ApplicationType) => {
