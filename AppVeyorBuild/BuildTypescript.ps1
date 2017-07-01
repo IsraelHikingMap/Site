@@ -7,32 +7,25 @@ if (!$env:APPVEYOR_BUILD_FOLDER) {
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
-# Restore all packages
+# Restore all nuget packages
 
 Write-Host "dotnet restore - to restore NuGet packages for build"
 
 dotnet restore
 
-# Locate executables
+# Restore all npm packages
 
-$webProjects = @("IsraelHiking.Web") #, "Tests\IsraelHiking.Web.Tests")
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
+Write-Host "npm install - to restore npm packages for typescript build" 
+npm install
 
-# Compile TypeScript files
+# Compile TypeScript files using angular-cli
 
-foreach ($project in $webProjects) 
-{
-	$path = Join-Path $env:APPVEYOR_BUILD_FOLDER $project
-
-	Set-Location -Path $path
-    Write-Host "npm install - to restore npm packages for typescript build" 
-	npm install
-
-	Write-Host "ng build - to build using angular-cli"
-	ng build --no-progress
+Write-Host "ng build - to build using angular-cli"
+ng build --no-progress
 	
-	if($LastExitCode -ne 0) 
-	{ 
-		$host.SetShouldExit($LastExitCode)
-		Write-Host "Compilation of $($project) failed"
-	}
+if($LastExitCode -ne 0) 
+{ 
+	Write-Host "Compilation of $($project) failed"
+	$host.SetShouldExit($LastExitCode)
 }
