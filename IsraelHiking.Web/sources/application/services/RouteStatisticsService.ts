@@ -26,7 +26,6 @@ export class RouteStatisticsService {
         return this.visible;
     }
 
-
     public toggle = () => {
         this.visible = !this.visible;
         this.visibilityChanged.next();
