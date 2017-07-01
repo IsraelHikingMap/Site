@@ -1,5 +1,5 @@
-﻿import { TestBed, async, inject, flushMicrotasks, fakeAsync, tick } from "@angular/core/testing";
-import { HttpModule, Http, Response, ResponseOptions, XHRBackend, ResponseType } from "@angular/http";
+﻿import { TestBed, async, inject, flushMicrotasks, fakeAsync } from "@angular/core/testing";
+import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { SnappingService, ISnappingOptions } from "./SnappingService";
 import { MapService } from "./MapService";

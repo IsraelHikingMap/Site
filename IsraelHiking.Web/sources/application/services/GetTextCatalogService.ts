@@ -5,7 +5,9 @@ import "rxjs/add/operator/toPromise";
 @Injectable()
 export class GetTextCatalogService {
 
-    constructor(private http: Http) { };
+    constructor(private http: Http) {
+        this.strings = {};
+    };
 
     private strings: {};
     private baseLanguage: string;

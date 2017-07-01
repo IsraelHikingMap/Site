@@ -14,7 +14,6 @@ export class MapService {
     private zoom: number = 13;
 
     constructor(private resources: ResourcesService) {
-        console.log(localStorage);
         this.map = L.map("map", {
             center: this.center,
             zoom: this.zoom,

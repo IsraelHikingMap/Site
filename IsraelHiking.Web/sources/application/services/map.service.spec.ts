@@ -35,7 +35,6 @@ describe("MapService", () => {
 
     it("should initialize leafelt map", () => {
         for (let prop in localStorage) {
-            console.log(prop);
             delete localStorage[prop];
         }
         mapMock.destructor();

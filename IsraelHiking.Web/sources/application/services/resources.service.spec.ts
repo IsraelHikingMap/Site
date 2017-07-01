@@ -8,7 +8,7 @@ export class GetTextCatalogMockCreator {
 
     public constructor() {
         this.getTextCatalogService = new GetTextCatalogService(null);
-        spyOn(this.getTextCatalogService, "loadRemote").and.returnValue(new Promise(() => { }));
+        spyOn(this.getTextCatalogService, "loadRemote").and.returnValue(new Promise((resolve) => { resolve() }));
     }
 }
 
