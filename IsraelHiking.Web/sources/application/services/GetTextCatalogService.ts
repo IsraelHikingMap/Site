@@ -20,7 +20,7 @@ export class GetTextCatalogService {
 
     public getString(string: string, scope?: any, context?: string): string
     {
-        return this.strings[string] as string;
+        return this.strings[string] as string || "";
     }
 
     public loadRemote(url: string): Promise<Response>
