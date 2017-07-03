@@ -51,9 +51,13 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         // GET api/search/abc&language=en
         [HttpGet]
-        [Route("{term}")]
-        public async Task<FeatureCollection> GetSearchResults(string term, string language = null)
+        [Route("{term}/{northing?}")]
+        public async Task<FeatureCollection> GetSearchResults(string term, string northing = null, string language = null)
         {
+            if (northing != null)
+            {
+                term = term + "/" + northing;
+            }
             var coordinatesFeature = GetCoordinates(term);
             if (coordinatesFeature != null)
             {
@@ -88,19 +92,108 @@ namespace IsraelHiking.API.Controllers
 
         private Coordinate GetCoordinates(string term)
         {
-            var latLonRegEx = new Regex(@"[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)°?(?:\s*[,|]\s*)[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)°?");
+            var lonLatRegEx = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+[EW])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+[NS])\s*$");
+            var lonLatMatch = lonLatRegEx.Match(term);
+            if (lonLatMatch.Success)
+            {
+                // Allow transposed lat and lon
+                return GetCoordinates(lonLatMatch.Groups[2].Value + " " + lonLatMatch.Groups[1].Value);
+            }
+
+            var degMinSecRegEx = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+)([NS])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+)([EW])\s*$");
+            var degMinSecMatch = degMinSecRegEx.Match(term);
+            if (degMinSecMatch.Success)
+            {
+                var lat = GetDecimalDegrees(degMinSecMatch.Groups[1].Value);
+                var lon = GetDecimalDegrees(degMinSecMatch.Groups[3].Value);
+                if (lat <= 90 && lon <= 180)
+                {
+                    if (degMinSecMatch.Groups[2].Value == "S")
+                    {
+                        lat = - lat;
+                    }
+                    if (degMinSecMatch.Groups[4].Value == "W")
+                    {
+                        lon = - lon;
+                    }
+                    return new Coordinate(lon, lat);
+                }
+                return null;
+            }
+
+            var latLonRegEx = new Regex(@"^\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*[,/\s]?\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*$");
             var latLonMatch = latLonRegEx.Match(term);
             if (latLonMatch.Success)
             {
-                return new Coordinate(double.Parse(latLonMatch.Groups[4].Value), double.Parse(latLonMatch.Groups[1].Value));
+                var lat = double.Parse(latLonMatch.Groups[1].Value);
+                var lon = double.Parse(latLonMatch.Groups[2].Value);
+                if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180)
+                {
+                    return new Coordinate(double.Parse(latLonMatch.Groups[2].Value), double.Parse(latLonMatch.Groups[1].Value));
+                }
             }
-            var itmRegEx = new Regex(@"(\d{6})(?:\s*,?\s*)(\d{6})");
+
+            var itmRegEx = new Regex(@"^\s*(\d{6})(?:\s*[,/]?\s*)(\d{6,7})\s*$");
             var itmMatch = itmRegEx.Match(term);
             if (itmMatch.Success)
             {
-                return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
+                var easting = int.Parse(itmMatch.Groups[1].Value);
+                var northing = int.Parse(itmMatch.Groups[2].Value);
+		if (northing < 1350000)
+		{
+		    if (northing < 350000)
+		    {
+			return GetCoordinates((easting+50000) + "," + (northing + 500000));
+		    } 
+		    else if (northing > 850000)
+		    {
+			return GetCoordinates((easting+50000) + "," + (northing - 500000));
+		    }
+		    else if (easting >= 100000 && easting <= 300000)
+		    {
+			return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
+		    }
+		}
             }
             return null;
+        }
+
+        private double GetDecimalDegrees(string term)
+        {
+            var decDegRegEx = new Regex(@"^\s*(\d{1,3}(?:\.\d+)?)°?\s*$");
+            var decDegMatch = decDegRegEx.Match(term);
+            if (decDegMatch.Success)
+            {
+                return double.Parse(decDegMatch.Groups[1].Value);
+            }
+
+            var degMinRegEx = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2}(?:\.\d+)?)['\u2032']?\s*$");
+            var degMinMatch = degMinRegEx.Match(term);
+            if (degMinMatch.Success)
+            {
+                var deg = double.Parse(degMinMatch.Groups[1].Value);
+                var min = double.Parse(degMinMatch.Groups[2].Value);
+                if (min < 60)
+                {
+                    return min / 60.0 + deg;
+                }
+                return double.NaN;
+            }
+
+            var degMinSecRegEx = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2})(?:['\u2032\s]\s*)(\d{1,2}(?:\.\d+)?)[""\u2033]?\s*$");
+            var degMinSecMatch = degMinSecRegEx.Match(term);
+            if (degMinSecMatch.Success)
+            {
+                var deg = double.Parse(degMinSecMatch.Groups[1].Value);
+                var min = double.Parse(degMinSecMatch.Groups[2].Value);
+                var sec = double.Parse(degMinSecMatch.Groups[3].Value);
+                if (min < 60 && sec < 60)
+                {
+                    return (sec / 60.0 + min) / 60.0 + deg;
+                }
+            }
+
+            return double.NaN;
         }
 
         private Feature GetFeatureFromCoordinates(string name, Coordinate coordinates)

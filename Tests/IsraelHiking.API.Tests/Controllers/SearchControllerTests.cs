@@ -77,19 +77,102 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetSearchResultsForLatLonCoordinates_ShouldReturnRelevantObject()
         {
-            var results = _controller.GetSearchResults("  11.1°  , +12.2° ").Result;
+            var results = _controller.GetSearchResults("  -11°  , +12.2 ").Result;
 
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("  11°N 12.2 E ").Result;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("  11°6'S / 12 12 W ").Result;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("  11°6'36\"W ,12 12\u2032 4.5\u2033 N ").Result;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("-90.000/+180 ").Result;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            var faulted = _controller.GetSearchResults("+90.0001,-180 ").IsFaulted;
+            Assert.AreEqual(faulted, true);
+
+            faulted = _controller.GetSearchResults("-90.0001 +180 ").IsFaulted;
+            Assert.AreEqual(faulted, true);
+
+            faulted = _controller.GetSearchResults("+90 -180.0001 ").IsFaulted;
+            Assert.AreEqual(faulted, true);
+
+            faulted = _controller.GetSearchResults("-90 +180.0001 ").IsFaulted;
+            Assert.AreEqual(faulted, true);
         }
 
         [TestMethod]
         public void GetSearchResultsForItmCoordinates_ShouldReturnRelevantObject()
         {
-            var results = _controller.GetSearchResults("100000 100000").Result;
-
+            // delimiters
+            var results = _controller.GetSearchResults("200000 600000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("200000,600000").Result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("200000/600000").Result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("200000600000").Result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            // ICS ranges
+            results = _controller.GetSearchResults("120000 900000").Result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("120000,200000").Result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("120000 1349999").Result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("1200001100000").Result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            // easting baundaries
+            results = _controller.GetSearchResults("100000 600000").Result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            results = _controller.GetSearchResults("300000 600000").Result;
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+
+            // Out of bounds
+            var faulted = _controller.GetSearchResults("300001,600000").IsFaulted;
+            Assert.AreEqual(faulted, true);
+
+             faulted = _controller.GetSearchResults("99999,600000").IsFaulted;
+            Assert.AreEqual(faulted, true);
+
+            faulted = _controller.GetSearchResults("300001,100000").IsFaulted;
+            Assert.AreEqual(faulted, true);
+
+            faulted = _controller.GetSearchResults("200000,1350000").IsFaulted;
+            Assert.AreEqual(faulted, true);
         }
     }
 }
