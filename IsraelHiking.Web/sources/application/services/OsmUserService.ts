@@ -6,7 +6,6 @@ import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 import * as X2JS from "x2js";
 import * as _ from "lodash";
-import osmAuth = require("osm-auth");
 
 export interface ITrace {
     fileName: string;
@@ -39,7 +38,7 @@ export class OsmUserService {
         this.http.get(Urls.osmConfiguration).toPromise().then((response) => {
             let data = response.json();
             this.baseUrl = data.baseAddress;
-            this.oauth = new osmAuth({
+            this.oauth = this.authorizationService.createOSMAuth({
                 oauth_consumer_key: data.consumerKey,
                 oauth_secret: data.consumerSecret,
                 auto: true, // show a login form if the user is not authenticated and you try to do a call
