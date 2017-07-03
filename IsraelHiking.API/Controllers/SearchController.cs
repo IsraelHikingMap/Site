@@ -97,7 +97,7 @@ namespace IsraelHiking.API.Controllers
             if (lonLatMatch.Success)
             {
                 // Allow transposed lat and lon
-                return GetCoordinates(lonLatMatch.Groups[2].Value + " " + lonLatMatch.Groups[1].Value);
+                term = lonLatMatch.Groups[2].Value + " " + lonLatMatch.Groups[1].Value;
             }
 
             var degMinSecRegEx = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+)([NS])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+)([EW])\s*$");
@@ -143,13 +143,15 @@ namespace IsraelHiking.API.Controllers
 		{
 		    if (northing < 350000)
 		    {
-			return GetCoordinates((easting+50000) + "," + (northing + 500000));
+			easting = easting + 50000;
+			northing = northing + 500000;
 		    } 
 		    else if (northing > 850000)
 		    {
-			return GetCoordinates((easting+50000) + "," + (northing - 500000));
+			easting = easting + 50000;
+			northing = northing - 500000;
 		    }
-		    else if (easting >= 100000 && easting <= 300000)
+		    if (easting >= 100000 && easting <= 300000)
 		    {
 			return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
 		    }
