@@ -139,23 +139,23 @@ namespace IsraelHiking.API.Controllers
             {
                 var easting = int.Parse(itmMatch.Groups[1].Value);
                 var northing = int.Parse(itmMatch.Groups[2].Value);
-		if (northing < 1350000)
-		{
-		    if (northing < 350000)
-		    {
-			easting = easting + 50000;
-			northing = northing + 500000;
-		    } 
-		    else if (northing > 850000)
-		    {
-			easting = easting + 50000;
-			northing = northing - 500000;
-		    }
-		    if (easting >= 100000 && easting <= 300000)
-		    {
-			return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
-		    }
-		}
+                if (northing < 1350000)
+                {
+                    if (northing < 350000)
+                    {
+                        easting = easting + 50000;
+                        northing = northing + 500000;
+                    }
+                    else if (northing > 850000)
+                    {
+                        easting = easting + 50000;
+                        northing = northing - 500000;
+                    }
+                    if (easting >= 100000 && easting <= 300000)
+                    {
+                        return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
+                    }
+                }
             }
             return null;
         }
