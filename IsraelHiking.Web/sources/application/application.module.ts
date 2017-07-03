@@ -136,6 +136,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
         LocalStorageService,
         AuthorizationService,
         { provide: BrowserXhr, useClass: NgProgressBrowserXhr },
+        { provide: "Window", useValue: window },
         GetTextCatalogService,
         MapService,
         ResourcesService,

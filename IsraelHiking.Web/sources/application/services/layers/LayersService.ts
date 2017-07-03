@@ -336,13 +336,11 @@ export class LayersService {
                     let data = JSON.parse(siteUrl.jsonData) as Common.DataContainer;
                     this.setJsonData(data);
                     this.addOverlaysFromHash(data.overlays);
-                    this.hashService.clear();
                     this.toastService.info(siteUrl.description, siteUrl.title);
                     localResolve();
                 }, () => {
                     this.setData({ routes: [] } as Common.DataContainer);
                     this.hashService.siteUrl = "";
-                    this.hashService.clear();
                     this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
                     localResolve();
                 });
@@ -361,7 +359,6 @@ export class LayersService {
             this.addBaseLayerFromHash(this.hashService.getBaseLayer());
             localResolve();
         }
-        this.hashService.clear();
         for (let overlayKey of this.activeOverlayKeys) {
             let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
             if (overlay && overlay.visible === false) {
