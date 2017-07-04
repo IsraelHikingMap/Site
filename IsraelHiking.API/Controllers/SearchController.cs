@@ -24,6 +24,13 @@ namespace IsraelHiking.API.Controllers
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IMathTransform _itmWgs84MathTransform;
+        private readonly Regex _decimalLatLonRegex;
+        private readonly Regex _LonBeforeLatRegex;
+        private readonly Regex _dmsLatLonRegex;
+        private readonly Regex _degMinSecRegex;
+        private readonly Regex _decDegRegex;
+        private readonly Regex _degMinRegex;
+        private readonly Regex _itmRegex;
 
         /// <summary>
         /// Controller's constructor
@@ -41,6 +48,13 @@ namespace IsraelHiking.API.Controllers
             _dataContainerConverterService = dataContainerConverterService;
             _elevationDataStorage = elevationDataStorage;
             _itmWgs84MathTransform = itmWgs84MathTransform;
+            _decimalLatLonRegex = new Regex(@"^\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*[,/\s]?\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*$");
+            _LonBeforeLatRegex = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+[EW])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+[NS])\s*$");
+            _dmsLatLonRegex = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+)([NS])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+)([EW])\s*$");
+            _degMinSecRegex = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2})(?:['\u2032\s]\s*)(\d{1,2}(?:\.\d+)?)[""\u2033]?\s*$");
+            _decDegRegex = new Regex(@"^\s*(\d{1,3}(?:\.\d+)?)°?\s*$");
+            _degMinRegex = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2}(?:\.\d+)?)['\u2032']?\s*$");
+            _itmRegex = new Regex(@"^\s*(\d{6})(?:\s*[,/]?\s*)(\d{6,7})\s*$");
         }
 
         /// <summary>
@@ -92,16 +106,14 @@ namespace IsraelHiking.API.Controllers
 
         private Coordinate GetCoordinates(string term)
         {
-            var lonLatRegEx = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+[EW])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+[NS])\s*$");
-            var lonLatMatch = lonLatRegEx.Match(term);
+            var lonLatMatch = _LonBeforeLatRegex.Match(term);
             if (lonLatMatch.Success)
             {
                 // Allow transposed lat and lon
                 term = lonLatMatch.Groups[2].Value + " " + lonLatMatch.Groups[1].Value;
             }
 
-            var degMinSecRegEx = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+)([NS])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+)([EW])\s*$");
-            var degMinSecMatch = degMinSecRegEx.Match(term);
+            var degMinSecMatch = _dmsLatLonRegex.Match(term);
             if (degMinSecMatch.Success)
             {
                 var lat = GetDecimalDegrees(degMinSecMatch.Groups[1].Value);
@@ -121,8 +133,7 @@ namespace IsraelHiking.API.Controllers
                 return null;
             }
 
-            var latLonRegEx = new Regex(@"^\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*[,/\s]?\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*$");
-            var latLonMatch = latLonRegEx.Match(term);
+            var latLonMatch = _decimalLatLonRegex.Match(term);
             if (latLonMatch.Success)
             {
                 var lat = double.Parse(latLonMatch.Groups[1].Value);
@@ -133,8 +144,7 @@ namespace IsraelHiking.API.Controllers
                 }
             }
 
-            var itmRegEx = new Regex(@"^\s*(\d{6})(?:\s*[,/]?\s*)(\d{6,7})\s*$");
-            var itmMatch = itmRegEx.Match(term);
+            var itmMatch = _itmRegex.Match(term);
             if (itmMatch.Success)
             {
                 var easting = int.Parse(itmMatch.Groups[1].Value);
@@ -162,15 +172,13 @@ namespace IsraelHiking.API.Controllers
 
         private double GetDecimalDegrees(string term)
         {
-            var decDegRegEx = new Regex(@"^\s*(\d{1,3}(?:\.\d+)?)°?\s*$");
-            var decDegMatch = decDegRegEx.Match(term);
+            var decDegMatch = _decDegRegex.Match(term);
             if (decDegMatch.Success)
             {
                 return double.Parse(decDegMatch.Groups[1].Value);
             }
 
-            var degMinRegEx = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2}(?:\.\d+)?)['\u2032']?\s*$");
-            var degMinMatch = degMinRegEx.Match(term);
+            var degMinMatch = _degMinRegex.Match(term);
             if (degMinMatch.Success)
             {
                 var deg = double.Parse(degMinMatch.Groups[1].Value);
@@ -182,8 +190,7 @@ namespace IsraelHiking.API.Controllers
                 return double.NaN;
             }
 
-            var degMinSecRegEx = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2})(?:['\u2032\s]\s*)(\d{1,2}(?:\.\d+)?)[""\u2033]?\s*$");
-            var degMinSecMatch = degMinSecRegEx.Match(term);
+            var degMinSecMatch = _degMinSecRegex.Match(term);
             if (degMinSecMatch.Success)
             {
                 var deg = double.Parse(degMinSecMatch.Groups[1].Value);
