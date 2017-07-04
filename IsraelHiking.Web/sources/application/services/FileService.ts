@@ -47,23 +47,25 @@ export class FileService {
     public openFromFile(file: File): Promise<Common.DataContainer> {
         return new Promise((resolve, reject) => {
 
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        resolve(<Common.DataContainer>JSON.parse(xhr.response));
+            let request = this.authorizationService.createXMLHttpRequest();
+            request.onreadystatechange = () => {
+                if (request.readyState === 4) {
+                    if (request.status === 200) {
+                        resolve(<Common.DataContainer>JSON.parse(request.response));
+                        return;
                     } else {
-                        reject(xhr.response);
+                        reject(request.response);
+                        return;
                     }
                 }
             };
 
-            xhr.open('POST', Urls.openFile, true);
-            this.authorizationService.setXhrHeader(xhr);
+            request.open('POST', Urls.openFile, true);
+            this.authorizationService.setXhrHeader(request);
 
             let formData = new FormData();
             formData.append("file", file, file.name);
-            xhr.send(formData);
+            request.send(formData);
         });
     }
 

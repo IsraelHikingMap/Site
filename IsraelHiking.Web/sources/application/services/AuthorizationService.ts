@@ -30,4 +30,9 @@ export class AuthorizationService {
     public createOSMAuth(options: OSMAuth.OSMAuthOptions): OSMAuth.OSMAuthInstance {
         return new osmAuth(options);
     }
+
+    public createXMLHttpRequest(): XMLHttpRequest
+    {
+        return new XMLHttpRequest();
+    }
 }
