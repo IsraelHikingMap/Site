@@ -75,44 +75,83 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetSearchResultsForLatLonCoordinates_ShouldReturnRelevantObject()
+        public void GetSearchResultsForSimpleLatLonCoordinates_ShouldReturnRelevantObject()
         {
             var results = _controller.GetSearchResults("  -11°  , +12.2 ").Result;
 
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            results = _controller.GetSearchResults("  11°N 12.2 E ").Result;
-
-            Assert.IsNotNull(results);
-            Assert.AreEqual(1, results.Features.Count);
-
-            results = _controller.GetSearchResults("  11°6'S / 12 12 W ").Result;
-
-            Assert.IsNotNull(results);
-            Assert.AreEqual(1, results.Features.Count);
-
-            results = _controller.GetSearchResults("  11°6'36\"W ,12 12\u2032 4.5\u2033 N ").Result;
+        [TestMethod]
+        public void GetSearchResultsForNorthEastLatLonCoordinates_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("  11°N 12.2 E ").Result;
 
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            results = _controller.GetSearchResults("-90.000/+180 ").Result;
+        [TestMethod]
+        public void GetSearchResultsForSouthWestLatLonCoordinates_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("  11°6'S / 12 12 W ").Result;
 
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
+        [TestMethod]
+        public void GetSearchResultsForWestNorthWithMinutesLatLonCoordinates_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("  11°6'36\"W ,12 12\u2032 4.5\u2033 N ").Result;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+        }
+
+        [TestMethod]
+        public void GetSearchResultsForLatLonWithSlashCoordinates_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("-90.000/+180 ").Result;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(1, results.Features.Count);
+        }
+
+        [TestMethod]
+        public void GetSearchResultsForDecimalLatLonCoordinates_ShouldFail()
+        {
             var faulted = _controller.GetSearchResults("+90.0001,-180 ").IsFaulted;
-            Assert.AreEqual(faulted, true);
+            Assert.IsTrue(faulted);
+        }
 
-            faulted = _controller.GetSearchResults("-90.0001 +180 ").IsFaulted;
-            Assert.AreEqual(faulted, true);
+        [TestMethod]
+        public void GetSearchResultsForDecimalWithSpaceLatLonCoordinates_ShouldFail()
+        {
+            var faulted = _controller.GetSearchResults("-90.0001 +180 ").IsFaulted;
+            Assert.IsTrue(faulted);
+        }
 
-            faulted = _controller.GetSearchResults("+90 -180.0001 ").IsFaulted;
-            Assert.AreEqual(faulted, true);
+        [TestMethod]
+        public void GetSearchResultsForDecimalOnLonLatLonCoordinates_ShouldFail()
+        {
+            var faulted = _controller.GetSearchResults("+90 -180.0001 ").IsFaulted;
+            Assert.IsTrue(faulted);
+        }
 
-            faulted = _controller.GetSearchResults("-90 +180.0001 ").IsFaulted;
-            Assert.AreEqual(faulted, true);
+        [TestMethod]
+        public void GetSearchResultsForDecimalWithPlusMinusLatLonCoordinates_ShouldFail()
+        {
+            var faulted = _controller.GetSearchResults("-90 +180.0001 ").IsFaulted;
+            Assert.IsTrue(faulted);
+        }
+
+        [TestMethod]
+        public void GetSearchResultsForSingleNumber_ShouldFail()
+        {
+            var faulted = _controller.GetSearchResults("+32").IsFaulted;
+            Assert.IsTrue(faulted);
         }
 
         [TestMethod]
@@ -122,46 +161,80 @@ namespace IsraelHiking.API.Tests.Controllers
             var results = _controller.GetSearchResults("200000 600000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            results = _controller.GetSearchResults("200000,600000").Result;
+        [TestMethod]
+        public void GetSearchResultsForItmCoordinatesWithComa_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("200000,600000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            results = _controller.GetSearchResults("200000/600000").Result;
+        [TestMethod]
+        public void GetSearchResultsForItmCoordinatesWithSlash_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("200000/600000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            results = _controller.GetSearchResults("200000600000").Result;
+        [TestMethod]
+        public void GetSearchResultsForItmCoordinatesWithoutSpace_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("200000600000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            // ICS ranges
-            results = _controller.GetSearchResults("120000 900000").Result;
+        [TestMethod]
+        public void GetSearchResultsForIcsCoordinates_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("120000 900000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            results = _controller.GetSearchResults("120000,200000").Result;
+        [TestMethod]
+        public void GetSearchResultsForIcsCoordinatesWithComa_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("120000,200000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            results = _controller.GetSearchResults("120000 1349999").Result;
+        [TestMethod]
+        public void GetSearchResultsForIcsCoordinatesWithLargeNumber_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("120000 1349999").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            results = _controller.GetSearchResults("1200001100000").Result;
+        [TestMethod]
+        public void GetSearchResultsForIcsCoordinatesWithoutSpace_ShouldReturnRelevantObject()
+        {
+            var results = _controller.GetSearchResults("1200001100000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
+        [TestMethod]
+        public void GetSearchResultsForIcsCoordinatesOnEastingBundries_ShouldReturnRelevantObject()
+        {
             // easting baundaries
-            results = _controller.GetSearchResults("100000 600000").Result;
+            var results = _controller.GetSearchResults("100000 600000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
 
             results = _controller.GetSearchResults("300000 600000").Result;
             Assert.IsNotNull(results);
             Assert.AreEqual(1, results.Features.Count);
+        }
 
-            // Out of bounds
+        [TestMethod]
+        public void GetSearchResultsForOutOfBoundsItmCoordinates_ShouldFail()
+        {
             var faulted = _controller.GetSearchResults("300001,600000").IsFaulted;
             Assert.AreEqual(faulted, true);
 

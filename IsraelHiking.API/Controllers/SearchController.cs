@@ -11,6 +11,8 @@ using Microsoft.AspNetCore.Mvc;
 using System.Text.RegularExpressions;
 using GeoAPI.CoordinateSystems.Transformations;
 using NetTopologySuite.Geometries;
+using System.Collections.Generic;
+using System;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -24,13 +26,11 @@ namespace IsraelHiking.API.Controllers
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IMathTransform _itmWgs84MathTransform;
-        private readonly Regex _decimalLatLonRegex;
-        private readonly Regex _LonBeforeLatRegex;
-        private readonly Regex _dmsLatLonRegex;
+        private readonly List<Tuple<Regex, Func<Match, Coordinate>>> _coordinatesCheckList;
+        private readonly Regex _lonBeforeLatRegex;
         private readonly Regex _degMinSecRegex;
         private readonly Regex _decDegRegex;
         private readonly Regex _degMinRegex;
-        private readonly Regex _itmRegex;
 
         /// <summary>
         /// Controller's constructor
@@ -48,13 +48,21 @@ namespace IsraelHiking.API.Controllers
             _dataContainerConverterService = dataContainerConverterService;
             _elevationDataStorage = elevationDataStorage;
             _itmWgs84MathTransform = itmWgs84MathTransform;
-            _decimalLatLonRegex = new Regex(@"^\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*[,/\s]?\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*$");
-            _LonBeforeLatRegex = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+[EW])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+[NS])\s*$");
-            _dmsLatLonRegex = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+)([NS])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+)([EW])\s*$");
+
+            var itmRegex = new Regex(@"^\s*(\d{6})(?:\s*[,/]?\s*)(\d{6,7})\s*$");
+            var decimalLatLonRegex = new Regex(@"^\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*[,/\s]?\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*$");
+            var dmsLatLonRegex = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+)([NS])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+)([EW])\s*$");
+            _lonBeforeLatRegex = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+[EW])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+[NS])\s*$");
             _degMinSecRegex = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2})(?:['\u2032\s]\s*)(\d{1,2}(?:\.\d+)?)[""\u2033]?\s*$");
             _decDegRegex = new Regex(@"^\s*(\d{1,3}(?:\.\d+)?)°?\s*$");
             _degMinRegex = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2}(?:\.\d+)?)['\u2032']?\s*$");
-            _itmRegex = new Regex(@"^\s*(\d{6})(?:\s*[,/]?\s*)(\d{6,7})\s*$");
+
+            _coordinatesCheckList = new List<Tuple<Regex, Func<Match, Coordinate>>>
+            {
+                new Tuple<Regex, Func<Match, Coordinate>>(dmsLatLonRegex, GetDmsCoordinates),
+                new Tuple<Regex, Func<Match, Coordinate>>(decimalLatLonRegex, GetDecimalLatLogCoordinates),
+                new Tuple<Regex, Func<Match, Coordinate>>(itmRegex, GetItmCoordinates),
+            };
         }
 
         /// <summary>
@@ -66,12 +74,8 @@ namespace IsraelHiking.API.Controllers
         // GET api/search/abc&language=en
         [HttpGet]
         [Route("{term}/{northing?}")]
-        public async Task<FeatureCollection> GetSearchResults(string term, string northing = null, string language = null)
+        public async Task<FeatureCollection> GetSearchResults(string term, string language = null)
         {
-            if (northing != null)
-            {
-                term = term + "/" + northing;
-            }
             var coordinatesFeature = GetCoordinates(term);
             if (coordinatesFeature != null)
             {
@@ -106,65 +110,77 @@ namespace IsraelHiking.API.Controllers
 
         private Coordinate GetCoordinates(string term)
         {
-            var lonLatMatch = _LonBeforeLatRegex.Match(term);
+            var lonLatMatch = _lonBeforeLatRegex.Match(term);
             if (lonLatMatch.Success)
             {
                 // Allow transposed lat and lon
                 term = lonLatMatch.Groups[2].Value + " " + lonLatMatch.Groups[1].Value;
             }
-
-            var degMinSecMatch = _dmsLatLonRegex.Match(term);
-            if (degMinSecMatch.Success)
+            foreach (var tuple in _coordinatesCheckList)
             {
-                var lat = GetDecimalDegrees(degMinSecMatch.Groups[1].Value);
-                var lon = GetDecimalDegrees(degMinSecMatch.Groups[3].Value);
-                if (lat <= 90 && lon <= 180)
+                var match = tuple.Item1.Match(term);
+                if (!match.Success)
                 {
-                    if (degMinSecMatch.Groups[2].Value == "S")
-                    {
-                        lat = - lat;
-                    }
-                    if (degMinSecMatch.Groups[4].Value == "W")
-                    {
-                        lon = - lon;
-                    }
-                    return new Coordinate(lon, lat);
+                    continue;
                 }
-                return null;
-            }
-
-            var latLonMatch = _decimalLatLonRegex.Match(term);
-            if (latLonMatch.Success)
-            {
-                var lat = double.Parse(latLonMatch.Groups[1].Value);
-                var lon = double.Parse(latLonMatch.Groups[2].Value);
-                if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180)
+                var coordinates = tuple.Item2(match);
+                if (coordinates != null)
                 {
-                    return new Coordinate(double.Parse(latLonMatch.Groups[2].Value), double.Parse(latLonMatch.Groups[1].Value));
+                    return coordinates;
                 }
             }
+            return null;
+        }
 
-            var itmMatch = _itmRegex.Match(term);
-            if (itmMatch.Success)
+        private Coordinate GetDmsCoordinates(Match degMinSecMatch)
+        {
+            var lat = GetDecimalDegrees(degMinSecMatch.Groups[1].Value);
+            var lon = GetDecimalDegrees(degMinSecMatch.Groups[3].Value);
+            if (lat <= 90 && lon <= 180)
             {
-                var easting = int.Parse(itmMatch.Groups[1].Value);
-                var northing = int.Parse(itmMatch.Groups[2].Value);
-                if (northing < 1350000)
+                if (degMinSecMatch.Groups[2].Value == "S")
                 {
-                    if (northing < 350000)
-                    {
-                        easting = easting + 50000;
-                        northing = northing + 500000;
-                    }
-                    else if (northing > 850000)
-                    {
-                        easting = easting + 50000;
-                        northing = northing - 500000;
-                    }
-                    if (easting >= 100000 && easting <= 300000)
-                    {
-                        return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
-                    }
+                    lat = -lat;
+                }
+                if (degMinSecMatch.Groups[4].Value == "W")
+                {
+                    lon = -lon;
+                }
+                return new Coordinate(lon, lat);
+            }
+            return null;
+        }
+
+        private Coordinate GetDecimalLatLogCoordinates(Match latLonMatch)
+        {
+            var lat = double.Parse(latLonMatch.Groups[1].Value);
+            var lon = double.Parse(latLonMatch.Groups[2].Value);
+            if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180)
+            {
+                return new Coordinate(double.Parse(latLonMatch.Groups[2].Value), double.Parse(latLonMatch.Groups[1].Value));
+            }
+            return null;
+        }
+
+        private Coordinate GetItmCoordinates(Match itmMatch)
+        {
+            var easting = int.Parse(itmMatch.Groups[1].Value);
+            var northing = int.Parse(itmMatch.Groups[2].Value);
+            if (northing < 1350000)
+            {
+                if (northing < 350000)
+                {
+                    easting = easting + 50000;
+                    northing = northing + 500000;
+                }
+                else if (northing > 850000)
+                {
+                    easting = easting + 50000;
+                    northing = northing - 500000;
+                }
+                if (easting >= 100000 && easting <= 300000)
+                {
+                    return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
                 }
             }
             return null;
@@ -201,7 +217,6 @@ namespace IsraelHiking.API.Controllers
                     return (sec / 60.0 + min) / 60.0 + deg;
                 }
             }
-
             return double.NaN;
         }
 
