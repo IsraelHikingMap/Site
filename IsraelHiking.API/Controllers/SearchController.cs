@@ -8,11 +8,10 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
 using GeoAPI.CoordinateSystems.Transformations;
 using NetTopologySuite.Geometries;
 using System.Collections.Generic;
-using System;
+using IsraelHiking.API.Converters.CoordinatesParsers;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -26,11 +25,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IMathTransform _itmWgs84MathTransform;
-        private readonly List<Tuple<Regex, Func<Match, Coordinate>>> _coordinatesCheckList;
-        private readonly Regex _lonBeforeLatRegex;
-        private readonly Regex _degMinSecRegex;
-        private readonly Regex _decDegRegex;
-        private readonly Regex _degMinRegex;
+        private readonly List<ICoordinatesParser> _coordinatesParsers;
 
         /// <summary>
         /// Controller's constructor
@@ -49,19 +44,12 @@ namespace IsraelHiking.API.Controllers
             _elevationDataStorage = elevationDataStorage;
             _itmWgs84MathTransform = itmWgs84MathTransform;
 
-            var itmRegex = new Regex(@"^\s*(\d{6})(?:\s*[,/]?\s*)(\d{6,7})\s*$");
-            var decimalLatLonRegex = new Regex(@"^\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*[,/\s]?\s*([-+]?\d{1,3}(?:\.\d+)?)°?\s*$");
-            var dmsLatLonRegex = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+)([NS])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+)([EW])\s*$");
-            _lonBeforeLatRegex = new Regex(@"^\s*([\d\.°'""\u2032\u2033\s]+[EW])\s*[,/\s]?\s*([\d\.°'""\u2032\u2033\s]+[NS])\s*$");
-            _degMinSecRegex = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2})(?:['\u2032\s]\s*)(\d{1,2}(?:\.\d+)?)[""\u2033]?\s*$");
-            _decDegRegex = new Regex(@"^\s*(\d{1,3}(?:\.\d+)?)°?\s*$");
-            _degMinRegex = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2}(?:\.\d+)?)['\u2032']?\s*$");
-
-            _coordinatesCheckList = new List<Tuple<Regex, Func<Match, Coordinate>>>
+            _coordinatesParsers = new List<ICoordinatesParser>
             {
-                new Tuple<Regex, Func<Match, Coordinate>>(dmsLatLonRegex, GetDmsCoordinates),
-                new Tuple<Regex, Func<Match, Coordinate>>(decimalLatLonRegex, GetDecimalLatLogCoordinates),
-                new Tuple<Regex, Func<Match, Coordinate>>(itmRegex, GetItmCoordinates),
+                new ReverseDegreesMinutesSecondsLatLonParser(),
+                new DegreesMinutesSecondsLatLonParser(),
+                new DecimalLatLonParser(),
+                new UtmParser(_itmWgs84MathTransform)
             };
         }
 
@@ -76,10 +64,10 @@ namespace IsraelHiking.API.Controllers
         [Route("{term}/{northing?}")]
         public async Task<FeatureCollection> GetSearchResults(string term, string language = null)
         {
-            var coordinatesFeature = GetCoordinates(term);
-            if (coordinatesFeature != null)
+            var coordinates = GetCoordinates(term.Trim());
+            if (coordinates != null)
             {
-                return new FeatureCollection(new Collection<IFeature> { GetFeatureFromCoordinates(term, coordinatesFeature) });
+                return GetFeatureCollectionFromCoordinates(term, coordinates);
             }
             var fieldName = string.IsNullOrWhiteSpace(language) ? "name" : "name:" + language;
             var features = await _elasticSearchGateway.Search(term, fieldName);
@@ -110,20 +98,9 @@ namespace IsraelHiking.API.Controllers
 
         private Coordinate GetCoordinates(string term)
         {
-            var lonLatMatch = _lonBeforeLatRegex.Match(term);
-            if (lonLatMatch.Success)
+            foreach (var parser in _coordinatesParsers)
             {
-                // Allow transposed lat and lon
-                term = lonLatMatch.Groups[2].Value + " " + lonLatMatch.Groups[1].Value;
-            }
-            foreach (var tuple in _coordinatesCheckList)
-            {
-                var match = tuple.Item1.Match(term);
-                if (!match.Success)
-                {
-                    continue;
-                }
-                var coordinates = tuple.Item2(match);
+                var coordinates = parser.TryParse(term);
                 if (coordinates != null)
                 {
                     return coordinates;
@@ -132,97 +109,11 @@ namespace IsraelHiking.API.Controllers
             return null;
         }
 
-        private Coordinate GetDmsCoordinates(Match degMinSecMatch)
+        private FeatureCollection GetFeatureCollectionFromCoordinates(string name, Coordinate coordinates)
         {
-            var lat = GetDecimalDegrees(degMinSecMatch.Groups[1].Value);
-            var lon = GetDecimalDegrees(degMinSecMatch.Groups[3].Value);
-            if (lat <= 90 && lon <= 180)
-            {
-                if (degMinSecMatch.Groups[2].Value == "S")
-                {
-                    lat = -lat;
-                }
-                if (degMinSecMatch.Groups[4].Value == "W")
-                {
-                    lon = -lon;
-                }
-                return new Coordinate(lon, lat);
-            }
-            return null;
-        }
-
-        private Coordinate GetDecimalLatLogCoordinates(Match latLonMatch)
-        {
-            var lat = double.Parse(latLonMatch.Groups[1].Value);
-            var lon = double.Parse(latLonMatch.Groups[2].Value);
-            if (lat >= -90 && lat <= 90 && lon >= -180 && lon <= 180)
-            {
-                return new Coordinate(double.Parse(latLonMatch.Groups[2].Value), double.Parse(latLonMatch.Groups[1].Value));
-            }
-            return null;
-        }
-
-        private Coordinate GetItmCoordinates(Match itmMatch)
-        {
-            var easting = int.Parse(itmMatch.Groups[1].Value);
-            var northing = int.Parse(itmMatch.Groups[2].Value);
-            if (northing < 1350000)
-            {
-                if (northing < 350000)
-                {
-                    easting = easting + 50000;
-                    northing = northing + 500000;
-                }
-                else if (northing > 850000)
-                {
-                    easting = easting + 50000;
-                    northing = northing - 500000;
-                }
-                if (easting >= 100000 && easting <= 300000)
-                {
-                    return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
-                }
-            }
-            return null;
-        }
-
-        private double GetDecimalDegrees(string term)
-        {
-            var decDegMatch = _decDegRegex.Match(term);
-            if (decDegMatch.Success)
-            {
-                return double.Parse(decDegMatch.Groups[1].Value);
-            }
-
-            var degMinMatch = _degMinRegex.Match(term);
-            if (degMinMatch.Success)
-            {
-                var deg = double.Parse(degMinMatch.Groups[1].Value);
-                var min = double.Parse(degMinMatch.Groups[2].Value);
-                if (min < 60)
-                {
-                    return min / 60.0 + deg;
-                }
-                return double.NaN;
-            }
-
-            var degMinSecMatch = _degMinSecRegex.Match(term);
-            if (degMinSecMatch.Success)
-            {
-                var deg = double.Parse(degMinSecMatch.Groups[1].Value);
-                var min = double.Parse(degMinSecMatch.Groups[2].Value);
-                var sec = double.Parse(degMinSecMatch.Groups[3].Value);
-                if (min < 60 && sec < 60)
-                {
-                    return (sec / 60.0 + min) / 60.0 + deg;
-                }
-            }
-            return double.NaN;
-        }
-
-        private Feature GetFeatureFromCoordinates(string name, Coordinate coordinates)
-        {
-            return new Feature(new Point(coordinates), new AttributesTable { { "name", name } });
+            return new FeatureCollection(new Collection<IFeature> {
+                new Feature(new Point(coordinates), new AttributesTable { { "name", name } })
+            });
         }
     }
 }
