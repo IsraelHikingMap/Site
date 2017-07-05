@@ -5,10 +5,12 @@ import { GetTextCatalogMockCreator } from "./resources.service.spec";
 
 export class ToastServiceMockCreator {
     public toastService: ToastService;
+    public resourcesService: ResourcesService;
     constructor() {
         let snackBar = new MdSnackBar(null, null, null);
         spyOn(snackBar, "open").and.returnValue(null);
-        this.toastService = new ToastService(new ResourcesService(new GetTextCatalogMockCreator().getTextCatalogService), snackBar);
+        this.resourcesService = new ResourcesService(new GetTextCatalogMockCreator().getTextCatalogService);
+        this.toastService = new ToastService(this.resourcesService, snackBar);
     }
 }
 

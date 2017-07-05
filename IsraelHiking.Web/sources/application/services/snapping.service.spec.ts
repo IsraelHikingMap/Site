@@ -18,7 +18,7 @@ describe("SnappingService", () => {
         TestBed.configureTestingModule({
             imports: [HttpModule],
             providers: [
-                { provide: ResourcesService, useValue: mapServiceMock.resourcesService },
+                { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
                 { provide: XHRBackend, useClass: MockBackend },
                 { provide: MapService, useValue: mapServiceMock.mapService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },

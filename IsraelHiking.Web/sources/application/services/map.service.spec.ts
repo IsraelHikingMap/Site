@@ -7,14 +7,13 @@ import { GetTextCatalogMockCreator } from "./resources.service.spec";
 export class MapServiceMockCreator {
     private mapDiv: HTMLElement;
     public mapService: MapService;
-    public resourcesService: ResourcesService;
 
     public constructor() {
         this.mapDiv = L.DomUtil.create("div", "", document.body);
         this.mapDiv.id = "map";
         let mockCreator = new GetTextCatalogMockCreator();
-        this.resourcesService = new ResourcesService(mockCreator.getTextCatalogService);
-        this.mapService = new MapService(this.resourcesService);
+        let resourcesService = new ResourcesService(mockCreator.getTextCatalogService);
+        this.mapService = new MapService(resourcesService);
     }
 
     public destructor() {

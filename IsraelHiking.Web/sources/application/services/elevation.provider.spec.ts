@@ -5,17 +5,15 @@ import { ResourcesService } from "./ResourcesService";
 import { ElevationProvider } from "./ElevationProvider";
 import { ToastService } from "./ToastService";
 import { ToastServiceMockCreator } from "./toast.service.spec";
-import { GetTextCatalogMockCreator } from "./resources.service.spec";
 
 describe("ElevationProvider", () => {
 
     beforeEach(() => {
         let toastMockCreator = new ToastServiceMockCreator();
-        let getTextMockCreator = new GetTextCatalogMockCreator();
         TestBed.configureTestingModule({
             imports: [HttpModule],
             providers: [
-                { provide: ResourcesService, useValue: new ResourcesService(getTextMockCreator.getTextCatalogService) },
+                { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },
                 { provide: XHRBackend, useClass: MockBackend },
                 ElevationProvider,
