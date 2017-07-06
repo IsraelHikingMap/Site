@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace IsraelHiking.DataAccess.Database
 {
+    [ExcludeFromCodeCoverage]
     public class IsraelHikingDbContext : DbContext
     {
         public DbSet<SiteUrl> SiteUrls { get; set; }
