@@ -47,48 +47,34 @@ export class FileService {
     public openFromFile(file: File): Promise<Common.DataContainer> {
         return new Promise((resolve, reject) => {
 
+            this.upload(Urls.openFile, file).then((response) => {
+                resolve(<Common.DataContainer>JSON.parse(response));
+            }, (err) => {
+                reject(err);
+            });
+        });
+    }
+
+    public upload(url: string, file: File): Promise<any> {
+        return new Promise((resolve, reject) => {
+
             let request = this.authorizationService.createXMLHttpRequest();
             request.onreadystatechange = () => {
                 if (request.readyState === 4) {
                     if (request.status === 200) {
-                        resolve(<Common.DataContainer>JSON.parse(request.response));
-                        return;
+                        resolve(request.response);
                     } else {
                         reject(request.response);
-                        return;
                     }
                 }
             };
 
-            request.open('POST', Urls.openFile, true);
+            request.open("POST", url, true);
             this.authorizationService.setXhrHeader(request);
 
             let formData = new FormData();
             formData.append("file", file, file.name);
             request.send(formData);
-        });
-    }
-
-    public upload(url: string, file: File): Promise<Response> {
-        return new Promise((resolve, reject) => {
-
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        resolve(xhr.response);
-                    } else {
-                        reject(xhr.response);
-                    }
-                }
-            };
-
-            xhr.open('POST', Urls.openFile, true);
-            
-
-            let formData = new FormData();
-            formData.append("file", file, file.name);
-            xhr.send(formData);
         });
     }
 

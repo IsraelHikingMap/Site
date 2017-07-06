@@ -75,6 +75,8 @@ import { ShareComponent } from "./components/ShareComponent";
 import { ShareDialogComponent } from "./components/dialogs/ShareDialogComponent";
 import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPopupComponent";
 
+export function getWindow() { return window; }
+
 @NgModule({
     imports: [
         CommonModule,
@@ -136,7 +138,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPop
         LocalStorageService,
         AuthorizationService,
         { provide: BrowserXhr, useClass: NgProgressBrowserXhr },
-        { provide: "Window", useValue: window },
+        { provide: "Window", useFactory: getWindow },
         GetTextCatalogService,
         MapService,
         ResourcesService,

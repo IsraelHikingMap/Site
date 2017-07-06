@@ -15,6 +15,7 @@ export class HashService {
     private static SITE_SHARE = "s";
     private static SEARCH_QUERY = "q";
 
+    private window: Window;
     private baseLayer: Common.LayerData;
 
     public searchTerm: string;
@@ -23,11 +24,12 @@ export class HashService {
     public download: boolean;
 
     constructor(private router: Router,
-        @Inject("Window") private window: Window,
+        @Inject("Window") window: any, // bug in angular aot
         private mapService: MapService) {
 
         this.baseLayer = null;
         this.searchTerm = "";
+        this.window = window;
         this.addDataFromUrl();
         this.updateUrl();
 

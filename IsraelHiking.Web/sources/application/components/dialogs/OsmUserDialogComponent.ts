@@ -196,7 +196,8 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             });
     }
 
-    public uploadToOsm(file: File) {
+    public uploadToOsm(e: any) {
+        let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
         if (!file) {
             return;
         }
