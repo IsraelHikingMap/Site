@@ -107,6 +107,10 @@ body {
     text-align: left !important;
 }
 
+.img-responsive {
+    max-width: 100%;
+}
+
 /*#region margins*/
 .margin-10 {
     margin-left: 10px;
