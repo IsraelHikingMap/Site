@@ -44,46 +44,58 @@ The architecture is based on layers
 * DataAccessInterfaces - a slim layer to decouple business logic from data access
 * DataAccess - database, file system and network request are processed in this layer
 
-# Setting up this project
+# Setting Up the Project for Development
 In order to be able to build this site you'll need some tools:
 
 * Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
-* Install [node.js](https://nodejs.org/en/) for windows (6.10+)
+* Install [node.js](https://nodejs.org/en/) for windows (6.10+). Use the recommended 64-bit installer on modern Windows versions.
+* Open Visual Studio
 * Follow [these steps](http://stackoverflow.com/questions/43849585/update-node-version-in-visual-studio-2017) to update the version of node.js Visual Studio uses
-* If you don't have any other preference, choose "General" development settings
+* If asked, and you don't have any other preference, choose "General" development settings
+* In Visual Studio, _File &rarr; Open &rarr; Project/Solution..._ and choose the `IsraelHiking.sln` solution from the Site reposotory location.
 * Temporary step for using local versions of OsmSharp and NetTopologySuite
-  * Open the `TempLocalNugets` directory under the Site reposotory location
-  * View &rarr; Other Windows... &rarr; Package Manager Console
+  * In a separate window, open the `TempLocalNugets` directory under the Site reposotory location
+  * In Visual Studio, _View &rarr; Other Windows... &rarr; Package Manager Console_
   * For each of the files in `TempLocalNugets`
-    * Shift-Right-Click &rarr; Copy as path
+    * _Shift-Right-Click &rarr; Copy as path_
     * Go back to VS package manager console (At the bottom pane) and type `Install-Package` followed by `Ctrl-V` and `Enter`. For example:
       ```
       PM> Install-Package "C:\GitHub\IsraelHikingMap\Site\TempLocalNugets\NetTopologySuite.IO.1.15.0-IHM.nupkg"
       ```
 * From Visual Studio's _Tools &rarr; Extensions and Updates..._ 
   * Go to _Online_
-  * Search for the following and install them: 
+  * Search for the following and `Download` them: 
     * Web Essentials 2017
     * Chutzpah Test Adapter for the test explorer
-    * Chutzpah Test Runner Contet Menu Extension
-  * Restart Visual Studio to complete the installation
-* Open IsraelHiking.sln and compile using F6 - Note that it will take time to download all the packages so be patience
-* Change any character in packages.json file to trigger a download of all npm packages or go to the IsraelHiking.Web and run `npm install` from the command line - this will take a while as well.
-* Open command prompt and execute `npm install -g @angular/cli@latest`
-* `ng` commands should be avaliable from the command line.
-* go to IsraelHiking.Web folder and execute `ng build` which will fill the `wwwroot` folder 
-* In Package Manager Console
-  * Select IsraelHiking.DataAccess from the Default project dropdown.
-  * ```
-      PM> Update-Database
-      ```
-  * This should create a israelHiking.sqlite file in the binaries folder of IsraelHiking.Web project.
-  * When compilation is complete go to compilation folder: `IsraelHiking.Web\bin\Debug\netcoreapp1.1`
-  * Go To `ElasticSearch` folder and run `ElasticSearch.cmd`
-  * Go To `GraphHopper` folder and run `GraphHopper.cmd`
-* Go back to visual studio and press F5 to start the server.
+    * Chutzpah Test Runner Context Menu Extension
+  * Exit Visual Studio to complete the installation
+  * Find the `VSIX Installer` window and click _Modify_, wait for the installation to complete, and close it
+  * Open Visual Studio, wait for the installations to complete, and restart when asked
+* Open `IsraelHiking.sln`. You may use _File &rarr; Recent Projects and Solutions_
+* Compile using `Ctrl-Shift-B` - Note that it will take time to download all the packages so be patience
+* In Package Manager Console (at the bottom pane)
+  * Select IsraelHiking.DataAccess from the Default project dropdown
+  * Type the following commands at the `PM>` prompt. Most of the commands may take a while. Ignore all _WARN_ messsages.
+  ```
+  cd IsraelHiking.Web
+  npm install
+  npm install -g @angular/cli@latest
+  ng build --progress=false:
+  Update-Database
+  ```
+# Starting a debug session
+* Open Visual Studio
+* Open `IsraelHiking.sln`. You may use _File &rarr; Recent Projects and Solutions_
+* In Package Manager Console (at the bottom pane)
+  * Type the following commands at the `PM>` prompt to start the search and routing servers. Alternatively, you may set them as a servive
+  ```
+  cd IsraelHiking.Web\bin\Debug\netcoreapp1.1
+  Start-Process -WindowStyle Minimized ElasticSearch\ElasticSearch.cmd
+  Start-Process -WindowStyle Minimized GraphHopper\GraphHopper.cmd
+  ```
+* Press F5 to start the server. A browser window will be opened for you
 * Surf to `localhost:<port>/swagger/` and you should be presented with the API of the site
   * Expand the POST under Update
   * Select the relevant osm.pbf file and click try it out!
@@ -102,4 +114,3 @@ In order to be able to make the server work a few prerequisits are needed:
   * Add an action to run `UpdateDB.bat` after you download a new osm.pbf file.
   * Add a "On a schedule" trigger to run once a day or at the frequency of the map updates.
   * Add a "At startup" trigger.
-

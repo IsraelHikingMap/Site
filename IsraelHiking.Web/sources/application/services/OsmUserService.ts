@@ -6,15 +6,6 @@ import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 import * as X2JS from "x2js";
 import * as _ from "lodash";
-import osmAuth = require("osm-auth");
-
-//declare var osmAuth: Function;
-
-interface IOsmAuthService {
-    authenticated(): boolean;
-    xhr(options: Object, callback: Function): void;
-    logout(): void;
-}
 
 export interface ITrace {
     fileName: string;
@@ -28,7 +19,7 @@ export interface ITrace {
 
 @Injectable()
 export class OsmUserService {
-    private oauth: any;
+    private oauth: OSMAuth.OSMAuthInstance;
     private x2Js: X2JS;
     private baseUrl: string;
 
@@ -47,13 +38,13 @@ export class OsmUserService {
         this.http.get(Urls.osmConfiguration).toPromise().then((response) => {
             let data = response.json();
             this.baseUrl = data.baseAddress;
-            this.oauth = osmAuth({
+            this.oauth = this.authorizationService.createOSMAuth({
                 oauth_consumer_key: data.consumerKey,
                 oauth_secret: data.consumerSecret,
                 auto: true, // show a login form if the user is not authenticated and you try to do a call
                 landing: "oauthCloseWindow.html",
                 url: this.baseUrl
-            }) as IOsmAuthService;
+            });
             if (this.authorizationService.token == null) {
                 this.oauth.logout();
             }

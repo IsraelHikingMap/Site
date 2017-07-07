@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace IsraelHiking.DataAccess.Database
 {
+    [ExcludeFromCodeCoverage]
     public class IsraelHikingRepository : IIsraelHikingRepository
     {
         private IsraelHikingDbContext _dbContext;

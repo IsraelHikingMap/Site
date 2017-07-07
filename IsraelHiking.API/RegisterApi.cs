@@ -10,6 +10,7 @@ namespace IsraelHiking.API
     /// <summary>
     /// This class registers all the services related to the API layer
     /// </summary>
+    [ExcludeFromCodeCoverage]
     public static class RegisterApi
     {
         /// <summary>

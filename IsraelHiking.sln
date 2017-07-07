@@ -16,7 +16,6 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}"
 	ProjectSection(SolutionItems) = preProject
 		.gitignore = .gitignore
-		chutzpah.json = chutzpah.json
 		README.md = README.md
 	EndProjectSection
 EndProject
@@ -25,8 +24,6 @@ EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.API.Tests", "Tests\IsraelHiking.API.Tests\IsraelHiking.API.Tests.csproj", "{8CDCB151-DBAF-4E19-804E-C0FB26A2B12B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.DataAccess.Tests", "Tests\IsraelHiking.DataAccess.Tests\IsraelHiking.DataAccess.Tests.csproj", "{32A771F8-7A45-4359-9E22-B3CF5155C9A8}"
-EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.Web.Tests", "Tests\IsraelHiking.Web.Tests\IsraelHiking.Web.Tests.csproj", "{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppVeyorBuild", "AppVeyorBuild", "{3585675D-C9A0-4E48-A11D-4B9E789A0B0A}"
 	ProjectSection(SolutionItems) = preProject
@@ -133,18 +130,6 @@ Global
 		{32A771F8-7A45-4359-9E22-B3CF5155C9A8}.Release|x64.Build.0 = Release|Any CPU
 		{32A771F8-7A45-4359-9E22-B3CF5155C9A8}.Release|x86.ActiveCfg = Release|Any CPU
 		{32A771F8-7A45-4359-9E22-B3CF5155C9A8}.Release|x86.Build.0 = Release|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Debug|x64.Build.0 = Debug|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Debug|x86.Build.0 = Debug|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Release|Any CPU.Build.0 = Release|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Release|x64.ActiveCfg = Release|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Release|x64.Build.0 = Release|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Release|x86.ActiveCfg = Release|Any CPU
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,7 +137,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{8CDCB151-DBAF-4E19-804E-C0FB26A2B12B} = {F72D33D1-176B-4BC5-851A-F71C1ABA74D9}
 		{32A771F8-7A45-4359-9E22-B3CF5155C9A8} = {F72D33D1-176B-4BC5-851A-F71C1ABA74D9}
-		{ECE06985-15AF-4D3D-93D4-B9F053FC6F38} = {F72D33D1-176B-4BC5-851A-F71C1ABA74D9}
 		{3585675D-C9A0-4E48-A11D-4B9E789A0B0A} = {F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}
 		{3E9EFE32-6A08-4960-AD00-83AC5FEAB259} = {F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}
 	EndGlobalSection

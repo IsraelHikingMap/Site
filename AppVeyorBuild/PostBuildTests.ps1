@@ -30,41 +30,6 @@ if (!$env:APPVEYOR_JOB_ID)
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
-# Locate Chutzpah
-
-$ChutzpahJUnitFile = "$($env:APPVEYOR_BUILD_FOLDER)\chutzpah-junit.xml"
-$ChutzpahCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-chutzpah.json"
-
-$Chutzpah = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" chutzpah.console.exe -recurse | select-object -first 1 | select -expand FullName
-
-# Run tests using Chutzpah and export results as JUnit format and chutzpah coveragejson for coverage
-
-$ChutzpahCmd = "$($Chutzpah) $($env:APPVEYOR_BUILD_FOLDER)\chutzpah.json /junit $ChutzpahJUnitFile /coverage /coveragejson $ChutzpahCoverageFile"
-Write-Host $ChutzpahCmd
-Invoke-Expression $ChutzpahCmd
-
-# Upload results to AppVeyor one by one
-$testsuites = [xml](get-content $ChutzpahJUnitFile)
-
-$anyFailures = $FALSE
-foreach ($testsuite in $testsuites.testsuites.testsuite) {
-    write-host " $($testsuite.name)"
-    foreach ($testcase in $testsuite.testcase){
-        $failed = $testcase.failure
-        $time = $testsuite.time
-        if ($testcase.time) { $time = $testcase.time }
-        if ($failed) {
-            write-host "Failed   $($testcase.name) $($testcase.failure.message)"
-            Add-AppveyorTest $testcase.name -Outcome Failed -FileName $testsuite.name -ErrorMessage $testcase.failure.message -Duration $time
-            $anyFailures = $TRUE
-        }
-        else {
-            write-host "Passed   $($testcase.name)"
-            Add-AppveyorTest $testcase.name -Outcome Passed -FileName $testsuite.name -Duration $time
-        }
-    }
-}
-
 # Locate Files
 
 $OpenCover = get-ChildItem "C:\Users\$($env:UserName)\.nuget\packages\" OpenCover.Console.exe -recurse | select-object -first 1 | select -expand FullName
@@ -77,9 +42,7 @@ $OpenCoverAPICoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\coverage-opencover-ap
 $OpenCoverDAResultsFile = "$($env:APPVEYOR_BUILD_FOLDER)\results-dataaccess.trx"
 $OpenCoverAPIResultsFile = "$($env:APPVEYOR_BUILD_FOLDER)\results-api.trx"
 
-
 # Run OpenCover
-
 
 $OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -targetargs:`"test --logger:trx;LogFileName=$OpenCoverDAResultsFile /p:DebugType=full $DATests`" -filter:`"+[*]*API* +[*]*Database* +[*]*GPSBabel* -[*]*JsonResponse* -[*]*GpxTypes* -[*]*Tests*`" -excludebyattribute:`"*.ExcludeFromCodeCoverage*`" -output:$OpenCoverDACoverageFile"
 Write-Host $OpenCoverCmd
@@ -89,10 +52,26 @@ $OpenCoverCmd = "$($OpenCover) -oldstyle -register:user -target:`"$($dotnet)`" -
 Write-Host $OpenCoverCmd
 Invoke-Expression $OpenCoverCmd
 
+# Run tests using Karma and export results as JUnit and Lcov format
+
+Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
+Write-Host "ng test --no-progress --code-coverage"
+ng test --no-progress --code-coverage
+
+# Locate JUnit XML results file
+
+$JUnitFile = Get-ChildItem tests-chrome*.xml -recurse | select-object -first 1 | select -expand FullName
+
 # Upload test resutls
+
 $wc = New-Object 'System.Net.WebClient'
 $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $OpenCoverAPIResultsFile)
 $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $OpenCoverDAResultsFile)
+$wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $JUnitFile)
+
+# Locate Lcov coverage file
+
+$LcovCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web\coverage\lcov.info"
 
 # Locate coveralls
 
@@ -100,7 +79,9 @@ $CoverAlls = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" csmacnz.
 
 # Run coveralls
 
-$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;chutzpah=$ChutzpahCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
+Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
+
+$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;lcov=$LcovCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
 Write-Host $CoverAllsCmd
 Invoke-Expression $CoverAllsCmd
 

@@ -14,6 +14,7 @@ export namespace GeoJson {
 
 @Injectable()
 export class GeoJsonParser {
+    private static MARKERS = "markers";
 
     public parse(content: string): Common.DataContainer {
         let geojson = JSON.parse(content);
@@ -75,7 +76,7 @@ export class GeoJsonParser {
         } as L.GeoJSONOptions);
         if (markers.length > 0) {
             if (data.routes.length === 0) {
-                let name = markers.length === 1 ? markers[0].title || HashService.MARKERS : HashService.MARKERS;
+                let name = markers.length === 1 ? markers[0].title || GeoJsonParser.MARKERS : GeoJsonParser.MARKERS;
                 data.routes.push({ name: name, segments: [], markers: [] });
             }
             data.routes[0].markers = markers;

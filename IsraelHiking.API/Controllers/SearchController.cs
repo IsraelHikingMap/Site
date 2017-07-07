@@ -8,9 +8,10 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using Microsoft.AspNetCore.Mvc;
-using System.Text.RegularExpressions;
 using GeoAPI.CoordinateSystems.Transformations;
 using NetTopologySuite.Geometries;
+using System.Collections.Generic;
+using IsraelHiking.API.Converters.CoordinatesParsers;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -24,6 +25,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IMathTransform _itmWgs84MathTransform;
+        private readonly List<ICoordinatesParser> _coordinatesParsers;
 
         /// <summary>
         /// Controller's constructor
@@ -41,6 +43,14 @@ namespace IsraelHiking.API.Controllers
             _dataContainerConverterService = dataContainerConverterService;
             _elevationDataStorage = elevationDataStorage;
             _itmWgs84MathTransform = itmWgs84MathTransform;
+
+            _coordinatesParsers = new List<ICoordinatesParser>
+            {
+                new ReverseDegreesMinutesSecondsLatLonParser(),
+                new DegreesMinutesSecondsLatLonParser(),
+                new DecimalLatLonParser(),
+                new UtmParser(_itmWgs84MathTransform)
+            };
         }
 
         /// <summary>
@@ -51,13 +61,13 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         // GET api/search/abc&language=en
         [HttpGet]
-        [Route("{term}")]
+        [Route("{term}/{northing?}")]
         public async Task<FeatureCollection> GetSearchResults(string term, string language = null)
         {
-            var coordinatesFeature = GetCoordinates(term);
-            if (coordinatesFeature != null)
+            var coordinates = GetCoordinates(term.Trim());
+            if (coordinates != null)
             {
-                return new FeatureCollection(new Collection<IFeature> { GetFeatureFromCoordinates(term, coordinatesFeature) });
+                return GetFeatureCollectionFromCoordinates(term, coordinates);
             }
             var fieldName = string.IsNullOrWhiteSpace(language) ? "name" : "name:" + language;
             var features = await _elasticSearchGateway.Search(term, fieldName);
@@ -88,24 +98,22 @@ namespace IsraelHiking.API.Controllers
 
         private Coordinate GetCoordinates(string term)
         {
-            var latLonRegEx = new Regex(@"[-+]?([1-8]?\d(\.\d+)?|90(\.0+)?)°?(?:\s*[,|]\s*)[-+]?(180(\.0+)?|((1[0-7]\d)|([1-9]?\d))(\.\d+)?)°?");
-            var latLonMatch = latLonRegEx.Match(term);
-            if (latLonMatch.Success)
+            foreach (var parser in _coordinatesParsers)
             {
-                return new Coordinate(double.Parse(latLonMatch.Groups[4].Value), double.Parse(latLonMatch.Groups[1].Value));
-            }
-            var itmRegEx = new Regex(@"(\d{6})(?:\s*,?\s*)(\d{6})");
-            var itmMatch = itmRegEx.Match(term);
-            if (itmMatch.Success)
-            {
-                return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
+                var coordinates = parser.TryParse(term);
+                if (coordinates != null)
+                {
+                    return coordinates;
+                }
             }
             return null;
         }
 
-        private Feature GetFeatureFromCoordinates(string name, Coordinate coordinates)
+        private FeatureCollection GetFeatureCollectionFromCoordinates(string name, Coordinate coordinates)
         {
-            return new Feature(new Point(coordinates), new AttributesTable { { "name", name } });
+            return new FeatureCollection(new Collection<IFeature> {
+                new Feature(new Point(coordinates), new AttributesTable { { "name", name } })
+            });
         }
     }
 }

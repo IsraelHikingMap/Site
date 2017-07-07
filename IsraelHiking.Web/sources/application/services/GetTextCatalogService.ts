@@ -5,25 +5,27 @@ import "rxjs/add/operator/toPromise";
 @Injectable()
 export class GetTextCatalogService {
 
-    constructor(private http: Http) { };
+    constructor(private http: Http) {
+        this.strings = {};
+    };
 
-    strings: {};
-    baseLanguage: string;
+    private strings: {};
+    private baseLanguage: string;
 
-    setCurrentLanguage(lang: string): void {
+    public setCurrentLanguage(lang: string): void {
         this.baseLanguage = lang;
     }
 
-    getCurrentLanguage(): string {
+    public getCurrentLanguage(): string {
         return this.baseLanguage;
     }
 
-    getString(string: string, scope?: any, context?: string): string
+    public getString(string: string, scope?: any, context?: string): string
     {
-        return this.strings[string] as string;
+        return this.strings[string] as string || "";
     }
 
-    loadRemote(url: string): Promise<Response>
+    public loadRemote(url: string): Promise<Response>
     {
         let promise = this.http.get(url).toPromise();
         promise.then((res) => {

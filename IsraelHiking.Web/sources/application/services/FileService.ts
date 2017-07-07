@@ -47,46 +47,34 @@ export class FileService {
     public openFromFile(file: File): Promise<Common.DataContainer> {
         return new Promise((resolve, reject) => {
 
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        resolve(<Common.DataContainer>JSON.parse(xhr.response));
-                    } else {
-                        reject(xhr.response);
-                    }
-                }
-            };
-
-            xhr.open('POST', Urls.openFile, true);
-            this.authorizationService.setXhrHeader(xhr);
-
-            let formData = new FormData();
-            formData.append("file", file, file.name);
-            xhr.send(formData);
+            this.upload(Urls.openFile, file).then((response) => {
+                resolve(<Common.DataContainer>JSON.parse(response));
+            }, (err) => {
+                reject(err);
+            });
         });
     }
 
-    public upload(url: string, file: File): Promise<Response> {
+    public upload(url: string, file: File): Promise<any> {
         return new Promise((resolve, reject) => {
 
-            let xhr: XMLHttpRequest = new XMLHttpRequest();
-            xhr.onreadystatechange = () => {
-                if (xhr.readyState === 4) {
-                    if (xhr.status === 200) {
-                        resolve(xhr.response);
+            let request = this.authorizationService.createXMLHttpRequest();
+            request.onreadystatechange = () => {
+                if (request.readyState === 4) {
+                    if (request.status === 200) {
+                        resolve(request.response);
                     } else {
-                        reject(xhr.response);
+                        reject(request.response);
                     }
                 }
             };
 
-            xhr.open('POST', Urls.openFile, true);
-            
+            request.open("POST", url, true);
+            this.authorizationService.setXhrHeader(request);
 
             let formData = new FormData();
             formData.append("file", file, file.name);
-            xhr.send(formData);
+            request.send(formData);
         });
     }
 

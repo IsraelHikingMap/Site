@@ -82,11 +82,11 @@ export class SnappingService {
                         this.snappings.addLayer(L.polyline(polygonLatlngsArray, { opacity: 0 } as L.PolylineOptions));
                 }
             }
-
             this.requestsQueue.splice(0);
         }, () => {
             this.toastService.warning(this.resourcesService.unableToGetDataForSnapping);
             this.snappings.clearLayers();
+            
         });
     }
 

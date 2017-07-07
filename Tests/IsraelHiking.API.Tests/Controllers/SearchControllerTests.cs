@@ -75,21 +75,12 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetSearchResultsForLatLonCoordinates_ShouldReturnRelevantObject()
+        public void GetSearchResultsForSingleNumber_ShouldFail()
         {
-            var results = _controller.GetSearchResults("  11.1°  , +12.2° ").Result;
-
+            var results = _controller.GetSearchResults("+32, 35").Result;
             Assert.IsNotNull(results);
-            Assert.AreEqual(1, results.Features.Count);
         }
 
-        [TestMethod]
-        public void GetSearchResultsForItmCoordinates_ShouldReturnRelevantObject()
-        {
-            var results = _controller.GetSearchResults("100000 100000").Result;
-
-            Assert.IsNotNull(results);
-            Assert.AreEqual(1, results.Features.Count);
-        }
+        
     }
 }

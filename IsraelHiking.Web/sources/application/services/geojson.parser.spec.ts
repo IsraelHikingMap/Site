@@ -1,13 +1,12 @@
-﻿/// <reference path="../../../../IsraelHiking.web/wwwroot/common/israelhiking.d.ts" />
-/// <reference path="../../../../IsraelHiking.web/wwwroot/services/parsers/geojsonparser.ts" />
+﻿import { GeoJsonParser } from "./GeoJsonParser";
+import * as Common from "../common/IsraelHiking";
 
-namespace IsraelHiking.Tests.Services.Parsers {
-    describe("GeoJson Parser", () => {
+describe("GeoJsonParser", () => {
 
-        var geoJsonParser: IsraelHiking.Services.Parsers.GeoJsonParser;
+        var geoJsonParser: GeoJsonParser;
 
         beforeEach(() => {
-            geoJsonParser = new IsraelHiking.Services.Parsers.GeoJsonParser();
+            geoJsonParser = new GeoJsonParser();
         });
 
         it("Should parse geoJson point", () => {
@@ -163,4 +162,3 @@ namespace IsraelHiking.Tests.Services.Parsers {
             expect(geoJson.features[1].geometry.type).toBe("MultiLineString");
         });
     });
-}
