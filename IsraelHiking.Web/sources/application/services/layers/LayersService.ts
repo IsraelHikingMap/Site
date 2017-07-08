@@ -7,6 +7,7 @@ import { FileService } from "../FileService";
 import { IconsService } from "../IconsService";
 import { RouteLayerFactory } from "./routelayers/RouteLayerFactory";
 import { WikiMarkersLayer } from "./WikiMarkersLayer";
+import { NakebMarkerLayer } from "./nakeb-marker.layer";
 import { IRouteLayer, IRoute } from "./routelayers/IRouteLayer";
 import { RouteLayer} from "./routelayers/RouteLayer";
 import { ResourcesService } from "../ResourcesService";
@@ -79,6 +80,7 @@ export class LayersService {
         private fileService: FileService,
         private resourcesService: ResourcesService,
         private wikiMarkersLayer: WikiMarkersLayer,
+        private nakebMarkerLayer: NakebMarkerLayer,
         private toastService: ToastService,
         ) {
         this.selectedBaseLayer = null;
@@ -115,6 +117,7 @@ export class LayersService {
         } as ILayer);
         hikingTrailsOverlay.isEditable = false;
         this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: this.wikiMarkersLayer as L.Layer } as IOverlay);
+        this.overlays.push({ visible: false, isEditable: false, address: "", key: "Nakeb", layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
         this.addLayersFromLocalStorage();
         this.addDataFromHash();
         this.changeLanguage();

@@ -6,12 +6,12 @@ var path = require("path");
 var gettext = require("gulp-angular-gettext");
 
 var paths = {
-    webroot: "./wwwroot/"
+    webroot: "./sources/"
 };
 paths.traslations = paths.webroot + "translations/";
 
 gulp.task("extract_to_pot", function () {
-    return gulp.src(["**/*.html", "**/*.js", "!node_modules/**", "!obj/**", "!bin/**"])
+    return gulp.src([paths.webroot + "**/*.html", paths.webroot + "**/*.ts", "!node_modules/**", "!obj/**", "!bin/**"])
         .pipe(gettext.extract("IsraelHiking.pot", {}))
         .pipe(gulp.dest(paths.traslations));
 });

@@ -1,0 +1,15 @@
+﻿<div class="marker-popup" [dir]="'rtl'">
+    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="!thumbnail">
+        <img [src]="thumbnail" class="img-responsive" height="100"/>
+    </div>
+    <a href="{{address}}" target="_blank">
+        <h3 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h3>
+    </a>
+    <div class="text-right">
+        <p>
+            {{extract}} <br/>
+            אורך: {{length}} ק"מ<br />
+            {{attributes}}
+        <p>
+    </div>
+</div>

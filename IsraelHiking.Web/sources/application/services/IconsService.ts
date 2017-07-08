@@ -1,5 +1,6 @@
 ﻿export class IconsService {
     private static BACKGROUND = "<i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>";
+    private static POI_BACKGROUND = "<i class='fa icon-map-marker-rect fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>";
 
     private static KM_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
     IconsService.BACKGROUND +
@@ -42,8 +43,13 @@
     "</span>";
 
     private static WIKI_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
-    IconsService.BACKGROUND +
+    IconsService.POI_BACKGROUND +
     "<i class='fa icon-wikipedia-w fa-stack-1x stack-icon-top' style='color:black;'></i>" +
+    "</span>";
+
+    private static NAKEB_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
+    IconsService.POI_BACKGROUND +
+    "<i class='fa icon-nakeb fa-stack-1x stack-icon-top' style='color:black;'></i>" +
     "</span>";
 
     public static getAvailableIconTypes() : string[]
@@ -107,6 +113,10 @@
 
     public static createWikipediaIcon(): L.DivIcon {
         return L.divIcon(IconsService.getDefaultMarkerOptions(IconsService.WIKI_MARKER_HTML));
+    }
+
+    public static createNakebIcon(): L.DivIcon {
+        return L.divIcon(IconsService.getDefaultMarkerOptions(IconsService.NAKEB_MARKER_HTML));
     }
 
     private static getDefaultMarkerOptions(html: string) {

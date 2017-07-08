@@ -3,6 +3,7 @@ import { Jsonp } from "@angular/http";
 import { MapService } from "../MapService";
 import { ResourcesService } from "../ResourcesService";
 import { IconsService } from "../IconsService";
+import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
 import { WikiMarkerPopupComponent } from "../../components/markerpopup/WikiMarkerPopupComponent";
 import "rxjs/add/operator/toPromise"
 import * as Common from "../../common/IsraelHiking";
@@ -25,70 +26,46 @@ export interface IGeoSearchWikiResponse {
 }
 
 @Injectable()
-export class WikiMarkersLayer extends L.Layer {
-    private markers: L.MarkerClusterGroup;
-    private wikiMarkerIcon: L.DivIcon;
-    private enabled: boolean;
+export class WikiMarkersLayer extends BasePoiMarkerLayer {
 
-    constructor(private jsonp: Jsonp,
-        private mapService: MapService,
+    constructor(mapService: MapService,
+        private jsonp: Jsonp,
         private resources: ResourcesService,
         private injector: Injector,
         private componentFactoryResolver: ComponentFactoryResolver,
         private applicationRef: ApplicationRef) {
-        super();
-        this.resources = resources;
-        this.markers = L.markerClusterGroup();
-        this.enabled = false;
-        this.wikiMarkerIcon = IconsService.createWikipediaIcon();
+        super(mapService);
+        this.minimalZoom = 13;
+        this.markerIcon = IconsService.createWikipediaIcon();
         resources.languageChanged.subscribe(() => {
             this.markers.clearLayers();
             this.updateMarkers();
         });
-        this.mapService.map.on("moveend", () => {
-            this.updateMarkers();
-        });
     }
 
-    public onAdd(map: L.Map): this {
-        this.enabled = true;
-        this.updateMarkers();
-        map.addLayer(this.markers);
-        return this;
+    protected getIconString() {
+        return "fa icon-wikipedia-w";
     }
 
-    public onRemove(map: L.Map): this {
-        map.removeLayer(this.markers);
-        this.enabled = false;
-        return this;
-    }
-
-    private updateMarkers = (): void => {
-        if (this.mapService.map.getZoom() < 13 || this.enabled === false) {
-            this.markers.clearLayers();
-            return;
-        }
+    protected updateMarkersInternal(): void {
         let centerString = this.mapService.map.getCenter().lat + "|" + this.mapService.map.getCenter().lng;
         let language = this.resources.currentLanguage.code.split("-")[0];
         let url = `https://${language}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000&callback=JSONP_CALLBACK`;
         this.jsonp.get(url).toPromise().then((response) => {
             // Sync lists
             let data = response.json() as IGeoSearchWikiResponse;
-            this.markers.eachLayer(l => {
-                if (l instanceof L.Marker) {
-                    let markerWithTitle = l as Common.IMarkerWithTitle;
-                    let geoSearchPage = _.find(data.query.geosearch, g => g.pageid.toString() === markerWithTitle.title);
-                    if (geoSearchPage == null) {
-                        this.markers.removeLayer(l);
-                    } else {
-                        data.query.geosearch.splice(data.query.geosearch.indexOf(geoSearchPage), 1);
-                    }
+            this.markers.eachLayer(existingMarker => {
+                let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
+                let geoSearchPage = _.find(data.query.geosearch, g => g.pageid.toString() === markerWithTitle.title);
+                if (geoSearchPage == null) {
+                    this.markers.removeLayer(existingMarker);
+                } else {
+                    data.query.geosearch.splice(data.query.geosearch.indexOf(geoSearchPage), 1);
                 }
             });
 
             for (let currentPage of data.query.geosearch) {
-
-                let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { draggable: false, clickable: true, keyboard: false, icon: this.wikiMarkerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
+                let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { draggable: false, clickable: true, keyboard: false, icon: this.markerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
                 marker.title = currentPage.pageid.toString();
                 let markerPopupContainer = L.DomUtil.create("div");
                 let pageAddress = `https://${language}.wikipedia.org/?curid=${currentPage.pageid}`;
@@ -98,14 +75,19 @@ export class WikiMarkersLayer extends L.Layer {
                 componentRef.instance.title = currentPage.title;
                 componentRef.instance.pageId = currentPage.pageid;
                 componentRef.instance.setMarker(marker);
-                this.applicationRef.attachView(componentRef.hostView);
                 marker.bindPopup(markerPopupContainer);
+                marker.on("popupopen", () => {
+                    this.applicationRef.attachView(componentRef.hostView);
+                });
+                marker.on("popupclose", () => {
+                    this.applicationRef.detachView(componentRef.hostView);
+                });
                 this.markers.addLayer(marker);
             }
         });
     }
 
     public getAttribution(): string {
-        return "<a href='//creativecommons.org/licenses/by-sa/3.0/'>© Wikipadia CCA-SA</a>";
+        return `<a href="//creativecommons.org/licenses/by-sa/3.0/">© Wikipadia CCA-SA</a>`;
     }
 }

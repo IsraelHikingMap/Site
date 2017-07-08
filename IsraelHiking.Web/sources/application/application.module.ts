@@ -35,6 +35,7 @@ import { ElevationProvider } from "./services/ElevationProvider";
 import { SearchResultsProvider } from "./services/SearchResultsProvider";
 import { GeoJsonParser } from "./services/GeoJsonParser";
 import { WikiMarkersLayer } from "./services/layers/WikiMarkersLayer";
+import { NakebMarkerLayer } from "./services/layers/nakeb-marker.layer";
 import { DragAndDropService } from "./services/DragAndDropService";
 /// directives
 import { GoogleChartDirective } from "./directives/GoogleChartDirective";
@@ -74,6 +75,7 @@ import { DownloadDialogComponent } from "./components/dialogs/DownloadDialogComp
 import { ShareComponent } from "./components/ShareComponent";
 import { ShareDialogComponent } from "./components/dialogs/ShareDialogComponent";
 import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPopupComponent";
+import { NakebMarkerPopupComponent } from "./components/markerpopup/nakeb-marker-popup.component";
 
 export function getWindow() { return window; }
 
@@ -133,6 +135,7 @@ export function getWindow() { return window; }
         ShareComponent,
         ShareDialogComponent,
         WikiMarkerPopupComponent,
+        NakebMarkerPopupComponent,
     ],
     providers: [SessionStorageService,
         LocalStorageService,
@@ -157,6 +160,7 @@ export function getWindow() { return window; }
         SearchResultsProvider,
         GeoJsonParser,
         WikiMarkersLayer,
+        NakebMarkerLayer,
         DragAndDropService,
     ],
     declarations: [MainMapComponent,
@@ -193,6 +197,7 @@ export function getWindow() { return window; }
         ShareComponent,
         ShareDialogComponent,
         WikiMarkerPopupComponent,
+        NakebMarkerPopupComponent,
         GoogleChartDirective,
         DraggableResizableDirective,
     ],

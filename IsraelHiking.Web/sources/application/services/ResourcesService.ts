@@ -172,6 +172,7 @@ export class ResourcesService {
     public addThisRouteToOsm: string;
     public uploadFileToOsm: string;
     public selectIcon: string;
+    public nakeb: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -547,6 +548,7 @@ export class ResourcesService {
                 this.addThisRouteToOsm = this.gettextCatalog.getString("Add This Route to OSM");
                 this.uploadFileToOsm = this.gettextCatalog.getString("Upload a trace");
                 this.selectIcon = this.gettextCatalog.getString("Select Icon");
+                this.nakeb = this.gettextCatalog.getString("Nakeb");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
