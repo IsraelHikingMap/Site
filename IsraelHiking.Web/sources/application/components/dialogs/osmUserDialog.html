@@ -40,7 +40,7 @@
         <md-tab-group [(selectedIndex)]="state.selectedTabIndex" [dynamicHeight]="'true'" (selectChange)="setSelectedTab()">
             <md-tab label="{{resources.myTraces}}">
                 <br />
-                <div *ngFor="let trace of filteredTraces" class="trace">
+                <div *ngFor="let trace of filteredTraces | paginate: { itemsPerPage: 5, currentPage: state.tracesPage, id: 'tracesPaging' }" class="trace">
                     <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row">
                         <div fxFlex="20" class="trace-image">
                             <img [src]="trace.imageUrl" alt="" fxFill />
