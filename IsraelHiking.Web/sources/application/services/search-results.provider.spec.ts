@@ -1,8 +1,8 @@
 ﻿import { TestBed, async, inject } from "@angular/core/testing";
-import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
+import { HttpModule, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 
-import { SearchResultsProvider, ISearchResults } from "./SearchResultsProvider";
+import { SearchResultsProvider, ISearchResults } from "./search-results.provider";
 
 describe("SearchResultsProvider", () => {
     beforeEach(() => {

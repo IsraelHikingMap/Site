@@ -1,10 +1,10 @@
 ﻿import { TestBed, async, inject, flushMicrotasks, fakeAsync } from "@angular/core/testing";
 import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
-import { SnappingService, ISnappingOptions } from "./SnappingService";
-import { MapService } from "./MapService";
-import { ResourcesService } from "./ResourcesService";
-import { ToastService } from "./ToastService";
+import { SnappingService, ISnappingOptions } from "./snapping.service";
+import { MapService } from "./map.service";
+import { ResourcesService } from "./resources.service";
+import { ToastService } from "./toast.service";
 import { MapServiceMockCreator } from "./map.service.spec";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 

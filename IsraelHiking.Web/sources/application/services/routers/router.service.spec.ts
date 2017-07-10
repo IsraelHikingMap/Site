@@ -1,10 +1,10 @@
 ﻿import { TestBed, async, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
-import { RouterService } from "./RouterService";
-import { ResourcesService } from "../ResourcesService";
-import { ToastService } from "../ToastService";
-import { GeoJsonParser } from "../GeoJsonParser";
+import { RouterService } from "./router.service";
+import { ResourcesService } from "../resources.service";
+import { ToastService } from "../toast.service";
+import { GeoJsonParser } from "../geojson.parser";
 import { ToastServiceMockCreator } from "../toast.service.spec";
 
 describe("RouterService", () => {

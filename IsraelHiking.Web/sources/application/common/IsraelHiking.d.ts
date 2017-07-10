@@ -1,4 +1,4 @@
-﻿type RoutingType = "Hike" | "Bike" | "4WD" | "None";
+﻿export type RoutingType = "Hike" | "Bike" | "4WD" | "None";
 
 export interface SiteUrl {
     id: string;

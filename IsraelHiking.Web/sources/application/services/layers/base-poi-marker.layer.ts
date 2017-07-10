@@ -1,4 +1,4 @@
-﻿import { MapService } from "../MapService";
+﻿import { MapService } from "../map.service";
 
 export abstract class BasePoiMarkerLayer extends L.Layer {
     private enabled: boolean;

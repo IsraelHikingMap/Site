@@ -1,9 +1,9 @@
 ﻿import { TestBed, async, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
-import { ResourcesService } from "./ResourcesService";
-import { ElevationProvider } from "./ElevationProvider";
-import { ToastService } from "./ToastService";
+import { ResourcesService } from "./resources.service";
+import { ElevationProvider } from "./elevation.provider";
+import { ToastService } from "./toast.service";
 import { ToastServiceMockCreator } from "./toast.service.spec";
 
 describe("ElevationProvider", () => {

@@ -1,7 +1,7 @@
 ﻿import { Component } from "@angular/core";
 import { Http } from "@angular/http";
-import { ResourcesService } from "../../services/ResourcesService";
-import { BaseMapComponent } from "../BaseMapComponent";
+import { ResourcesService } from "../../services/resources.service";
+import { BaseMapComponent } from "../base-map.component";
 
 export interface NakebItem {
     start: { lat: string, lng: string };

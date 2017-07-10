@@ -1,9 +1,9 @@
 ﻿import { HttpModule, Http, Response, ResponseOptions, XHRBackend, RequestMethod } from "@angular/http";
-import { TestBed, async, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
+import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import * as X2JS from "x2js";
-import { OsmUserService, ITrace } from "./OsmUserService";
-import { AuthorizationService } from "./AuthorizationService";
+import { OsmUserService, ITrace } from "./osm-user.service";
+import { AuthorizationService } from "./authorization.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -47,7 +47,7 @@ describe("OSM User Service", () => {
                     provide: OsmUserService,
                     useFactory: fakeAsync((http, authorizationService: AuthorizationService, mockBackend: MockBackend) => {
                         mockBackend.connections.subscribe((connection: MockConnection) => {
-                            if (connection.request.url.indexOf(Urls.osmConfiguration) == -1) {
+                            if (connection.request.url.indexOf(Urls.osmConfiguration) === -1) {
                                 return;
                             }
                             connection.mockRespond(new Response(new ResponseOptions({
@@ -119,7 +119,7 @@ describe("OSM User Service", () => {
                 }
             }
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.urls) == -1) {
+            if (connection.request.url.indexOf(Urls.urls) === -1) {
                 return;
             }
             connection.mockRespond(new Response(new ResponseOptions({
@@ -148,7 +148,7 @@ describe("OSM User Service", () => {
                 }
             }
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.urls) == -1) {
+            if (connection.request.url.indexOf(Urls.urls) === -1) {
                 return;
             }
             connection.mockRespond(new Response(new ResponseOptions({
@@ -177,7 +177,7 @@ describe("OSM User Service", () => {
     it("Should update site url", inject([OsmUserService, XHRBackend], fakeAsync((osmUserService: OsmUserService, mockBackend: MockBackend) => {
         let siteUrl = { id: "42" } as Common.SiteUrl;
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.urls + siteUrl.id) == -1 || connection.request.method != RequestMethod.Put) {
+            if (connection.request.url.indexOf(Urls.urls + siteUrl.id) === -1 || connection.request.method !== RequestMethod.Put) {
                 fail();
             }
         });
@@ -191,7 +191,7 @@ describe("OSM User Service", () => {
         osmUserService.siteUrls = [siteUrl];
 
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.urls + siteUrl.id) == -1 || connection.request.method != RequestMethod.Delete) {
+            if (connection.request.url.indexOf(Urls.urls + siteUrl.id) === -1 || connection.request.method !== RequestMethod.Delete) {
                 fail();
             }
             connection.mockRespond(new Response(new ResponseOptions()));
@@ -207,7 +207,7 @@ describe("OSM User Service", () => {
     it("Should get missing parts", inject([OsmUserService, XHRBackend], fakeAsync((osmUserService: OsmUserService, mockBackend: MockBackend) => {
 
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.osm) == -1 || connection.request.method != RequestMethod.Post) {
+            if (connection.request.url.indexOf(Urls.osm) === -1 || connection.request.method !== RequestMethod.Post) {
                 fail();
             }
         });
@@ -219,7 +219,7 @@ describe("OSM User Service", () => {
     it("Should add missing parts", inject([OsmUserService, XHRBackend], fakeAsync((osmUserService: OsmUserService, mockBackend: MockBackend) => {
 
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.osm) == -1 || connection.request.method != RequestMethod.Put) {
+            if (connection.request.url.indexOf(Urls.osm) === -1 || connection.request.method !== RequestMethod.Put) {
                 fail();
             }
         });

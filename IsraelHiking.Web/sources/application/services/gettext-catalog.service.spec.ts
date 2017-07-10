@@ -1,7 +1,7 @@
 ﻿import { TestBed, async, inject } from "@angular/core/testing";
-import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
+import { HttpModule, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { MockBackend } from "@angular/http/testing";
-import { GetTextCatalogService } from "./GetTextCatalogService";
+import { GetTextCatalogService } from "./gettext-catalog.service";
 
 describe("GetTextCatalogService", () => {
 
@@ -10,7 +10,7 @@ describe("GetTextCatalogService", () => {
             imports: [HttpModule],
             providers: [
                 GetTextCatalogService,
-                { provide: XHRBackend, useClass: MockBackend },
+                { provide: XHRBackend, useClass: MockBackend }
             ]
         });
     });

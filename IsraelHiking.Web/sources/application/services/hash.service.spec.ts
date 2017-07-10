@@ -2,8 +2,8 @@
 import { RouterTestingModule } from "@angular/router/testing";
 import { Subject } from "rxjs/Subject";
 import { Router, NavigationEnd } from "@angular/router";
-import { HashService } from "./HashService";
-import { MapService } from "./MapService";
+import { HashService } from "./hash.service";
+import { MapService } from "./map.service";
 import { MapServiceMockCreator } from "./map.service.spec";
 
 describe("HashService", () => {

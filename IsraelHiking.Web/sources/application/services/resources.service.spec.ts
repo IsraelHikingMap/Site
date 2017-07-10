@@ -1,7 +1,7 @@
 ﻿import { TestBed, async, inject } from "@angular/core/testing";
 import { MockBackend } from "@angular/http/testing";
-import { ResourcesService } from "./ResourcesService";
-import { GetTextCatalogService } from "./GetTextCatalogService";
+import { ResourcesService } from "./resources.service";
+import { GetTextCatalogService } from "./gettext-catalog.service";
 
 export class GetTextCatalogMockCreator {
     public getTextCatalogService: GetTextCatalogService;

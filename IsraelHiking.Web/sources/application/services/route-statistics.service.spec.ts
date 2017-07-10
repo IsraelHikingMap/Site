@@ -1,4 +1,4 @@
-﻿import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "./RouteStatisticsService";
+﻿import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "./route-statistics.service";
 import * as Common from "../common/IsraelHiking";
 
 describe("RouteStatisticsService", () => {
@@ -42,7 +42,7 @@ describe("RouteStatisticsService", () => {
                 },
                 {
                     latlngs: [L.latLng(2, 2, 2), L.latLng(1, 1, 1)]
-                },
+                }
             ]
         } as Common.RouteData;
 
@@ -82,7 +82,7 @@ describe("RouteStatisticsService", () => {
                     x: 3,
                     y: 3,
                     latlng: L.latLng(3, 3)
-                } as IRouteStatisticsPoint,
+                } as IRouteStatisticsPoint
             ]
         } as IRouteStatistics, 2.5);
 
@@ -115,7 +115,7 @@ describe("RouteStatisticsService", () => {
                 {
                     x: 3,
                     latlng: L.latLng(3, 3)
-                },
+                }
             ]
         } as IRouteStatistics, L.latLng(0.5, 0.6));
 
@@ -140,7 +140,7 @@ describe("RouteStatisticsService", () => {
                 {
                     x: 3,
                     latlng: L.latLng(0.0003, 0.0003)
-                },
+                }
             ]
         } as IRouteStatistics, L.latLng(0.00005, 0.00005));
 

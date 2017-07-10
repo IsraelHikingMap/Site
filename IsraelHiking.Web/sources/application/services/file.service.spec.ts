@@ -3,8 +3,8 @@ import { TestBed, async, inject, fakeAsync, flushMicrotasks } from "@angular/cor
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import * as FileSaverFunctions from "file-saver";
 
-import { FileService, IFormatViewModel } from "./FileService";
-import { AuthorizationService } from "./AuthorizationService";
+import { FileService, IFormatViewModel } from "./file.service";
+import { AuthorizationService } from "./authorization.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 

@@ -1,6 +1,6 @@
 ﻿import { MdSnackBar } from "@angular/material";
-import { ToastService } from "./ToastService";
-import { ResourcesService } from "./ResourcesService";
+import { ToastService } from "./toast.service";
+import { ResourcesService } from "./resources.service";
 import { GetTextCatalogMockCreator } from "./resources.service.spec";
 
 export class ToastServiceMockCreator {

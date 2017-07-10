@@ -1,4 +1,4 @@
-﻿import { SidebarService } from "./SidebarService";
+﻿import { SidebarService } from "./sidebar.service";
 
 describe("SidebarService", () => {
     var service: SidebarService;

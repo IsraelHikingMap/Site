@@ -5,7 +5,7 @@ import { CommonModule } from "@angular/common";
 import { BrowserModule } from "@angular/platform-browser"
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpModule, JsonpModule } from "@angular/http";
-import { RouterModule, Routes } from "@angular/router";
+import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import { MaterialModule, MdDialogModule, MdButtonModule, MdInputModule, MdSliderModule, MdSnackBarModule, MdAutocompleteModule } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
@@ -16,65 +16,65 @@ import { NgProgressModule, NgProgressBrowserXhr } from "ngx-progressbar";
 import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "ng2-scroll-to";
 /// services
-import { GetTextCatalogService } from "./services/GetTextCatalogService";
-import { AuthorizationService } from "./services/AuthorizationService";
-import { MapService } from "./services/MapService";
-import { ResourcesService } from "./services/ResourcesService";
-import { FileService } from "./services/FileService";
-import { SidebarService } from "./services/SidebarService";
-import { HashService } from "./services/HashService";
-import { LayersService } from "./services/layers/LayersService";
-import { RouteLayerFactory } from "./services/layers/routelayers/RouteLayerFactory";
-import { RouterService } from "./services/routers/RouterService";
-import { SnappingService } from "./services/SnappingService";
-import { FitBoundsService } from "./services/FitBoundsService";
-import { RouteStatisticsService } from "./services/RouteStatisticsService";
-import { OsmUserService } from "./services/OsmUserService";
-import { ToastService } from "./services/ToastService";
-import { ElevationProvider } from "./services/ElevationProvider";
-import { SearchResultsProvider } from "./services/SearchResultsProvider";
-import { GeoJsonParser } from "./services/GeoJsonParser";
-import { WikiMarkersLayer } from "./services/layers/WikiMarkersLayer";
-import { NakebMarkerLayer } from "./services/layers/nakeb-marker.layer";
-import { DragAndDropService } from "./services/DragAndDropService";
+import { GetTextCatalogService } from "./services/gettext-catalog.service";
+import { AuthorizationService } from "./services/authorization.service";
+import { MapService } from "./services/map.service";
+import { ResourcesService } from "./services/resources.service";
+import { FileService } from "./services/file.service";
+import { SidebarService } from "./services/sidebar.service";
+import { HashService } from "./services/hash.service";
+import { LayersService } from "./services/layers/layers.service";
+import { RouteLayerFactory } from "./services/layers/routelayers/route-layer.factory";
+import { RouterService } from "./services/routers/router.service";
+import { SnappingService } from "./services/snapping.service";
+import { FitBoundsService } from "./services/fit-bounds.service";
+import { RouteStatisticsService } from "./services/route-statistics.service";
+import { OsmUserService } from "./services/osm-user.service";
+import { ToastService } from "./services/toast.service";
+import { ElevationProvider } from "./services/elevation.provider";
+import { SearchResultsProvider } from "./services/search-results.provider";
+import { GeoJsonParser } from "./services/geojson.parser";
+import { WikiMarkersLayer } from "./services/layers/wiki-markers.layer";
+import { NakebMarkerLayer } from "./services/layers/nakeb-markers.layer";
+import { DragAndDropService } from "./services/drag-and-drop.service";
 /// directives
-import { GoogleChartDirective } from "./directives/GoogleChartDirective";
-import { DraggableResizableDirective } from "./directives/DraggableResizableDirective";
+import { GoogleChartDirective } from "./directives/google-chart.directive";
+import { DraggableResizableDirective } from "./directives/draggable-resizable.directive";
 /// components
-import { SidebarComponent } from "./components/sidebar/SidebarComponent";
-import { MainMapComponent } from "./components/MainMapComponent";
-import { ZoomComponent } from "./components/ZoomComponent";
-import { LocationButtonComponent } from "./components/LocationButtonComponent";
-import { LayersComponent } from "./components/LayersComponent";
-import { LayersSidebarComponent } from "./components/sidebar/LayersSidebarComponent";
-import { BaseLayerAddDialogComponent } from "./components/dialogs/layers/BaseLayerAddDialogComponent";
-import { BaseLayerEditDialogComponent } from "./components/dialogs/layers/BaseLayerEditDialogComponent";
-import { OverlayAddDialogComponent } from "./components/dialogs/layers/OverlayAddDialogComponent";
-import { OverlayEditDialogComponent } from "./components/dialogs/layers/OverlayEditDialogComponent";
-import { RouteAddDialogComponent } from "./components/dialogs/routes/RouteAddDialogComponent";
-import { RouteEditDialogComponent } from "./components/dialogs/routes/RouteEditDialogComponent";
-import { RouteStatisticsComponent } from "./components/RouteStatisticsComponent";
-import { RouteStatisticsChartComponent } from "./components/RouteStatisticsChartComponent";
-import { FileComponent } from "./components/FileComponent";
-import { FileSaveAsComponent } from "./components/FileSaveAsComponent";
-import { EditOSMComponent } from "./components/EditOSMComponent";
-import { OsmUserComponent } from "./components/OsmUserComponent";
-import { OsmUserDialogComponent } from "./components/dialogs/OsmUserDialogComponent";
-import { LanguageComponent } from "./components/LanguageComponent";
-import { LanguageDialogComponent } from "./components/dialogs/LanguageDialogComponent";
-import { DrawingComponent } from "./components/DrawingComponent";
-import { RouteMarkerPopupComponent } from "./components/markerpopup/RouteMarkerPopupComponent";
-import { PoiMarkerPopupComponent } from "./components/markerpopup/PoiMarkerPopupComponent";
-import { CoordinatesMarkerPopupComponent } from "./components/markerpopup/CoordinatesMarkerPopupComponent";
-import { SearchResultsMarkerPopupComponent } from "./components/markerpopup/SearchResultsMarkerPopupComponent";
-import { MissingPartMarkerPopupComponent } from "./components/markerpopup/MissingPartMarkerPopupComponent";
-import { SearchComponent } from "./components/SearchComponent";
-import { InfoComponent } from "./components/InfoComponent";
-import { InfoSidebarComponent } from "./components/sidebar/InfoSidebarComponent";
-import { DownloadDialogComponent } from "./components/dialogs/DownloadDialogComponent";
-import { ShareComponent } from "./components/ShareComponent";
-import { ShareDialogComponent } from "./components/dialogs/ShareDialogComponent";
-import { WikiMarkerPopupComponent } from "./components/markerpopup/WikiMarkerPopupComponent";
+import { SidebarComponent } from "./components/sidebar/sidebar.component";
+import { MainMapComponent } from "./components/main-map.component";
+import { ZoomComponent } from "./components/zoom.component";
+import { LocationButtonComponent } from "./components/location-button.component";
+import { LayersComponent } from "./components/layers.component";
+import { LayersSidebarComponent } from "./components/sidebar/layers-sidebar.component";
+import { BaseLayerAddDialogComponent } from "./components/dialogs/layers/base-layer-add-dialog.component";
+import { BaseLayerEditDialogComponent } from "./components/dialogs/layers/base-layer-edit-dialog.component";
+import { OverlayAddDialogComponent } from "./components/dialogs/layers/overlay-add-dialog.component";
+import { OverlayEditDialogComponent } from "./components/dialogs/layers/overlay-edit-dialog-component";
+import { RouteAddDialogComponent } from "./components/dialogs/routes/route-add-dialog.component";
+import { RouteEditDialogComponent } from "./components/dialogs/routes/route-edit-dialog.component";
+import { RouteStatisticsComponent } from "./components/route-statistics.component";
+import { RouteStatisticsChartComponent } from "./components/route-statistics-chart.component";
+import { FileComponent } from "./components/file.component";
+import { FileSaveAsComponent } from "./components/file-save-as.component";
+import { EditOSMComponent } from "./components/edit-osm.component";
+import { OsmUserComponent } from "./components/osm-user.component";
+import { OsmUserDialogComponent } from "./components/dialogs/osm-user-dialog.component";
+import { LanguageComponent } from "./components/language.component";
+import { LanguageDialogComponent } from "./components/dialogs/language-dialog.component";
+import { DrawingComponent } from "./components/drawing.component";
+import { RouteMarkerPopupComponent } from "./components/markerpopup/route-marker-popup.component";
+import { PoiMarkerPopupComponent } from "./components/markerpopup/poi-marker-popup.component";
+import { CoordinatesMarkerPopupComponent } from "./components/markerpopup/coordinates-marker-popup.component";
+import { SearchResultsMarkerPopupComponent } from "./components/markerpopup/search-results-marker-popup.component";
+import { MissingPartMarkerPopupComponent } from "./components/markerpopup/missing-part-marker-popup.component";
+import { SearchComponent } from "./components/search.component";
+import { InfoComponent } from "./components/info.component";
+import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
+import { DownloadDialogComponent } from "./components/dialogs/download-dialog.component";
+import { ShareComponent } from "./components/share.component";
+import { ShareDialogComponent } from "./components/dialogs/share-dialog.component";
+import { WikiMarkerPopupComponent } from "./components/markerpopup/wiki-marker-popup.component";
 import { NakebMarkerPopupComponent } from "./components/markerpopup/nakeb-marker-popup.component";
 
 export function getWindow() { return window; }
@@ -102,7 +102,7 @@ export function getWindow() { return window; }
         Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
         NgProgressModule,
         NgxPaginationModule,
-        ScrollToModule,
+        ScrollToModule
     ],
     entryComponents: [ZoomComponent,
         LocationButtonComponent,
@@ -135,7 +135,7 @@ export function getWindow() { return window; }
         ShareComponent,
         ShareDialogComponent,
         WikiMarkerPopupComponent,
-        NakebMarkerPopupComponent,
+        NakebMarkerPopupComponent
     ],
     providers: [SessionStorageService,
         LocalStorageService,
@@ -161,7 +161,7 @@ export function getWindow() { return window; }
         GeoJsonParser,
         WikiMarkersLayer,
         NakebMarkerLayer,
-        DragAndDropService,
+        DragAndDropService
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
@@ -199,7 +199,7 @@ export function getWindow() { return window; }
         WikiMarkerPopupComponent,
         NakebMarkerPopupComponent,
         GoogleChartDirective,
-        DraggableResizableDirective,
+        DraggableResizableDirective
     ],
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })
