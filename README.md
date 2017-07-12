@@ -11,7 +11,7 @@ The technology stack of this site is base on the following frameworks:
 * [Angular](https://angular.io/)
 * [Angular-Material](https://material.angular.io/)
 * [Leaflet](http://leafletjs.com/)
-* [Jasmine](http://jasmine.github.io/) + [Chutzpah](https://chutzpah.codeplex.com/) + [PhantomJS](http://phantomjs.org/) - for unit testing.
+* [Jasmine](http://jasmine.github.io/) + [Karma](https://karma-runner.github.io/) - for unit testing.
 * [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/)
 * [NSubstitute](http://nsubstitute.github.io/)
 * [Sqlite](https://www.sqlite.org/)
@@ -23,13 +23,13 @@ The technology stack of this site is base on the following frameworks:
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:
-* Application - where all the is, top most folder.
+* application - where all the is, top most folder.
   * common - used to store data types that are common to the entire app.
   * content - used for images, mainly favicon.
   * components - this layer handles the UI calls and bindings along with the relevant css and html files.
   * directives - folder for all the directives.
   * services - this layer hold the lower level data handling.
-    * layers - where the layers logic is - POI, route, wiki, layersService, etc...
+    * layers - where the layers logic is - POI, route, wiki, nakeb, relevant services, etc...
     * routers - handles the routing - currently there are 4 routers - hike, bike, fourbyfour and none.
 * fonts - icomoon generated font for icons instead of images.
 * Environments - used for angular-cli to define production and dev variables.
@@ -101,6 +101,8 @@ In order to be able to build this site you'll need some tools:
   * Select the relevant osm.pbf file and click try it out!
   * An error will be returned after a while but this is due to timeout, the update of the database will be running for about 20 minutes
   * Once completed (can be seen in the logs under `IsraelHiking.Web\Logs\Site-<date>`) the server is ready!
+* Changes in UI can be made continuously by using `ng build -w` in `IsraelHiking.Web` folder - do not run it thorugh package manager as visual studio gets stuck
+* To run UI tests use `ng test` in `IsraelHiking.Web` folder
 
 # Setup the server
 In order to be able to make the server work a few prerequisits are needed:
