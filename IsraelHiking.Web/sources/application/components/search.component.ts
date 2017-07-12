@@ -1,11 +1,11 @@
 ﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, HostListener, ViewEncapsulation, AfterViewInit, ViewChildren } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Http } from "@angular/http";
-import { ENTER, UP_ARROW, DOWN_ARROW } from "@angular/material";
 import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
 import { HashService } from "../services/hash.service";
 import { LayersService } from "../services/layers/layers.service";
+import { DataContainerService } from "../services/data-container.service";
 import { ElevationProvider } from "../services/elevation.provider";
 import { RouterService } from "../services/routers/router.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
@@ -53,7 +53,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         private http: Http,
         private mapService: MapService,
         private hashService: HashService,
-        private layersService: LayersService,
+        private dataContainerService: DataContainerService,
         private elevationProvider: ElevationProvider,
         private searchResultsProvider: SearchResultsProvider,
         private routerService: RouterService,
@@ -67,9 +67,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.requestsQueue = [];
         this.featureGroup = L.featureGroup();
         this.mapService.map.addLayer(this.featureGroup);
-        this.elevationProvider = elevationProvider;
-        this.layersService = layersService;
-        this.searchResultsProvider = searchResultsProvider;
         this.isVisible = false;
         this.isDirectional = false;
         this.routingType = "Hike";
@@ -161,7 +158,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                     data.routes[0].markers = data.routes[0].markers || [];
                     data.routes[0].markers.push({ latlng: searchResults.latlng, title: marker.title, type: "" });
                 }
-                this.layersService.setJsonData({
+                this.dataContainerService.setData({
                     routes: data.routes
                 } as Common.DataContainer);
                 this.featureGroup.clearLayers();
@@ -215,7 +212,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             markerTo.title = this.toContext.selectedSearchResults.name || this.toContext.selectedSearchResults.address;
 
             let convertToRoute = () => {
-                this.layersService.setJsonData({
+                this.dataContainerService.setData({
                     routes: [
                         {
                             name: markerFrom.title + "-" + markerTo.title,

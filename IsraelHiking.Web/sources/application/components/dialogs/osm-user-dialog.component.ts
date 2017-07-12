@@ -10,6 +10,7 @@ import { OsmUserService, ITrace } from "../../services/osm-user.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import { ToastService } from "../../services/toast.service";
 import { IconsService } from "../../services/icons.service";
+import { DataContainerService } from "../../services/data-container.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { GeoJsonParser } from "../../services/geojson.parser";
 import { BaseMapComponent } from "../base-map.component";
@@ -61,6 +62,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         private applicationRef: ApplicationRef,
         private mapService: MapService,
         private fileService: FileService,
+        private dataContainerService: DataContainerService,
         private layersService: LayersService,
         private fitBoundsService: FitBoundsService,
         private toastService: ToastService,
@@ -159,7 +161,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 this.osmTraceLayer.clearLayers();
             }
             componentRef.instance.convertToRoute = () => {
-                this.layersService.setJsonData(data);
+                this.dataContainerService.setData(data);
                 this.osmTraceLayer.clearLayers();
             }
             this.applicationRef.attachView(componentRef.hostView);
@@ -172,7 +174,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
 
     public editTrace(trace: ITrace) {
         this.fileService.openFromUrl(trace.dataUrl).then((response) => {
-            this.layersService.setJsonData(response.json());
+            this.dataContainerService.setData(response.json());
         });
     }
 

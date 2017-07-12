@@ -4,6 +4,7 @@ import { MapService } from "../../services/map.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers/layers.service";
+import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 import * as _ from "lodash";
@@ -41,7 +42,8 @@ export class InfoSidebarComponent extends BaseMapComponent {
         private dialog: MdDialog,
         private sidebarService: SidebarService,
         private mapService: MapService,
-        private layersService: LayersService) {
+        private layersService: LayersService,
+        private dataContainerService: DataContainerService) {
         super(resources);
 
         this.visibleSectionId = null;
@@ -1080,7 +1082,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         ];
         // End Of Legend content definition //
 
-        this.layersService.initializationPromise.then(() => {
+        this.dataContainerService.initializationPromise.then(() => {
             if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP) {
                 this.removeMtbUnwantedLegend();
             } else if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP) {

@@ -21,7 +21,7 @@ export class MapService {
             zoomControl: false,
             keyboard: false,
         } as L.MapOptions);
-
+        
         this.map.on("moveend", () => {
             this.center = this.map.getCenter();
             this.zoom = this.map.getZoom();

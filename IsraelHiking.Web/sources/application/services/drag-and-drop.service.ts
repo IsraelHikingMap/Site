@@ -3,7 +3,7 @@ import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { MapService } from "./map.service";
 import { ToastService } from "./toast.service";
-import { LayersService } from "./layers/layers.service";
+import { DataContainerService } from "./data-container.service";
 import * as $ from "jquery";
 
 @Injectable()
@@ -12,7 +12,7 @@ export class DragAndDropService  {
     constructor(private resourcesService: ResourcesService,
         private mapService: MapService,
         private fileService: FileService,
-        private layersService: LayersService,
+        private dataContainerService: DataContainerService,
         private toastService: ToastService) {
 
         var dropbox = $(this.mapService.map.getContainer());
@@ -33,7 +33,7 @@ export class DragAndDropService  {
                 setTimeout(() => {
                     for (let file of files) {
                         fileService.openFromFile(file).then((dataContainer) => {
-                            layersService.setJsonData(dataContainer);
+                            dataContainerService.setData(dataContainer);
                         }, () => {
                             toastService.error(resourcesService.unableToLoadFromFile + `: ${file.name}`);
                         });
@@ -45,7 +45,7 @@ export class DragAndDropService  {
             let url = transferData.getData("text");
             if (url) {
                 fileService.openFromUrl(url).then((dataContainer) => {
-                    layersService.setJsonData(dataContainer.json());
+                    dataContainerService.setData(dataContainer.json());
                 }, () => {
                     toastService.error(resourcesService.unableToLoadFromUrl + `: ${url}`);
                 });

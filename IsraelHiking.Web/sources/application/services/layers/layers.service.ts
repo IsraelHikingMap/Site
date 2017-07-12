@@ -2,18 +2,10 @@
 import { Http } from "@angular/http";
 import { LocalStorage } from "ngx-store";
 import { MapService } from "../map.service";
-import { HashService } from "../hash.service";
-import { FileService } from "../file.service";
-import { IconsService } from "../icons.service";
-import { RouteLayerFactory } from "./routelayers/route-layer.factory";
 import { WikiMarkersLayer } from "./wiki-markers.layer";
 import { NakebMarkerLayer } from "./nakeb-markers.layer";
-import { IRouteLayer, IRoute } from "./routelayers/iroute.layer";
-import { RouteLayer} from "./routelayers/route.layer";
 import { ResourcesService } from "../resources.service";
-import { ToastService } from "../toast.service";
 import { Urls } from "../../common/Urls";
-import { Subject } from "rxjs/Subject";
 import * as _ from "lodash";
 import * as Common from "../../common/IsraelHiking";
 import "leaflet.gridlayer.googlemutant";
@@ -29,11 +21,6 @@ export interface IBaseLayer extends ILayer {
 
 export interface IOverlay extends ILayer {
     visible: boolean;
-}
-
-export interface IRouteViewOptions {
-    pathOptions: L.PathOptions;
-    isVisible: boolean;
 }
 
 @Injectable()
@@ -67,29 +54,28 @@ export class LayersService {
 
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
-    public routes: IRouteLayer[];
-    public routeChanged: Subject<any>;
     public selectedBaseLayer: IBaseLayer;
-    public selectedRoute: IRouteLayer;
-    public initializationPromise: Promise<{}>;
 
     constructor(private http: Http,
         private mapService: MapService,
-        private routeLayerFactory: RouteLayerFactory,
-        private hashService: HashService,
-        private fileService: FileService,
         private resourcesService: ResourcesService,
         private wikiMarkersLayer: WikiMarkersLayer,
-        private nakebMarkerLayer: NakebMarkerLayer,
-        private toastService: ToastService) {
+        private nakebMarkerLayer: NakebMarkerLayer) {
         this.selectedBaseLayer = null;
-        this.selectedRoute = null;
         this.baseLayers = [];
         this.overlays = [];
-        this.routes = [];
         this.overlayZIndex = 10;
-        this.routeChanged = new Subject<any>();
-        // default layers:
+        this.initializeDefaultBaseLayers();
+
+        // Default initialization - must be before toggling overlays from storage
+        this.selectedBaseLayer = this.baseLayers[0];
+        this.mapService.map.addLayer(this.selectedBaseLayer.layer);
+
+        this.addLayersFromLocalStorage();
+        this.resourcesService.languageChanged.asObservable().subscribe(() => this.changeLanguage());
+    }
+
+    private initializeDefaultBaseLayers() {
         this.addBaseLayer({
             key: LayersService.ISRAEL_HIKING_MAP,
             address: this.resourcesService.currentLanguage.tilesFolder + Urls.DEFAULT_TILES_ADDRESS,
@@ -115,14 +101,13 @@ export class LayersService {
             maxZoom: LayersService.MAX_NATIVE_ZOOM
         } as ILayer);
         hikingTrailsOverlay.isEditable = false;
+
         this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: this.wikiMarkersLayer as L.Layer } as IOverlay);
         this.overlays.push({ visible: false, isEditable: false, address: "", key: "Nakeb", layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
-        this.addLayersFromLocalStorage();
-        this.addDataFromHash();
+        
         this.changeLanguage();
-        this.resourcesService.languageChanged.asObservable().subscribe(() => this.changeLanguage());
     }
-
+    
     public addBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
         var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() === layerData.key.toLocaleLowerCase());
         if (layer != null) {
@@ -158,10 +143,10 @@ export class LayersService {
 
     private addNewOverlay = (layerData: Common.LayerData): IOverlay => {
         let overlay = { ...layerData } as IOverlay;
-        overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData));
+        overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData))
+            .setZIndex(this.overlayZIndex++);
         overlay.visible = false;
         overlay.isEditable = true;
-        (overlay.layer as L.TileLayer).setZIndex(this.overlayZIndex++);
         this.overlays.push(overlay);
         return overlay;
     }
@@ -189,18 +174,6 @@ export class LayersService {
         return "";
     }
 
-    public addRoute = (route: IRoute) => {
-        let routeLayer = this.routeLayerFactory.createRouteLayer(route);
-        this.routes.push(routeLayer);
-        this.mapService.map.addLayer(routeLayer);
-        this.selectRoute(routeLayer);
-    }
-
-    public isNameAvailable = (name: string) => {
-        var route = this.getRouteByName(name);
-        return route == null && name != null && name !== "";
-    }
-
     public removeBaseLayer = (baseLayer: IBaseLayer) => {
         _.remove(this.storedBaseLayers, (layerData) => layerData.key === baseLayer.key);
         this.storedBaseLayers = this.unique(this.storedBaseLayers);
@@ -225,18 +198,6 @@ export class LayersService {
             this.toggleOverlay(overlay);
         }
         _.remove(this.overlays, (overlayToRemove) => overlayToRemove.key === overlay.key);
-    }
-
-    public removeRoute = (routeName: string) => {
-        let routeLayer = this.getRouteByName(routeName);
-        if (routeLayer == null) {
-            return;
-        }
-        if (this.selectedRoute === routeLayer) {
-            this.selectRoute(null);
-        }
-        this.mapService.map.removeLayer(routeLayer as RouteLayer);
-        this.routes.splice(this.routes.indexOf(routeLayer), 1);
     }
 
     public selectBaseLayer = (baseLayer: IBaseLayer) => {
@@ -272,36 +233,6 @@ export class LayersService {
         }
     }
 
-    public changeRouteState = (routeLayer: IRouteLayer) => {
-        if (routeLayer === this.selectedRoute && routeLayer.route.properties.isVisible) {
-            this.selectRoute(null);
-            this.mapService.map.removeLayer(routeLayer as RouteLayer);
-            return;
-        }
-        if (routeLayer.route.properties.isVisible === false) {
-            this.mapService.map.addLayer(routeLayer as RouteLayer);
-        }
-        this.selectRoute(routeLayer);
-    }
-
-    private selectRoute = (routeLayer: IRouteLayer) => {
-        if (this.selectedRoute) {
-            this.selectedRoute.setReadOnlyState();
-        }
-        this.selectedRoute = routeLayer;
-        this.routeChanged.next();
-    }
-
-    public createRouteName = () => {
-        var index = 1;
-        var routeName = `${this.resourcesService.route} ${index}`;
-        while (_.some(this.routes, (routeLayer) => routeLayer.route.properties.name === routeName)) {
-            index++;
-            routeName = `${this.resourcesService.route} ${index}`;
-        }
-        return routeName;
-    }
-
     private addLayersFromLocalStorage = () => {
         for (let baseLayerIndex = 0; baseLayerIndex < this.storedBaseLayers.length; baseLayerIndex++) {
             let baseLayer = this.storedBaseLayers[baseLayerIndex] as ILayer;
@@ -312,7 +243,7 @@ export class LayersService {
             }
             this.addNewBaseLayer(baseLayer);
         }
-
+        
         for (let overlayIndex = 0; overlayIndex < this.storedOverlays.length; overlayIndex++) {
             let overlayData = this.storedOverlays[overlayIndex] as ILayer;
             overlayData.isEditable = true;
@@ -322,45 +253,7 @@ export class LayersService {
             }
             this.addNewOverlay(overlayData);
         }
-    }
 
-    private addDataFromHash = () => {
-        let localResolve: (value?: any | PromiseLike<any>) => void = null;
-        let localReject: (value?: any | PromiseLike<any>) => void = null;
-        this.initializationPromise = new Promise((resolve, reject) => {
-            localResolve = resolve;
-            localReject = reject;
-        });
-        if (this.hashService.siteUrl) {
-            this.http.get(Urls.urls + this.hashService.siteUrl).toPromise()
-                .then((response) => {
-                    let siteUrl = response.json() as Common.SiteUrl
-                    let data = JSON.parse(siteUrl.jsonData) as Common.DataContainer;
-                    this.setJsonData(data);
-                    this.addOverlaysFromHash(data.overlays);
-                    this.toastService.info(siteUrl.description, siteUrl.title);
-                    localResolve();
-                }, () => {
-                    this.setData({ routes: [] } as Common.DataContainer);
-                    this.hashService.siteUrl = "";
-                    this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
-                    localResolve();
-                });
-            return;
-        }
-        if (this.hashService.externalUrl) {
-            this.fileService.openFromUrl(this.hashService.externalUrl)
-                .then((response) => {
-                    let data = response.json() as Common.DataContainer;
-                    data.baseLayer = this.hashService.getBaseLayer();
-                    this.setJsonData(data);
-                    localResolve();
-                }, () => localReject());
-        } else {
-            this.setData({ routes: [] } as Common.DataContainer);
-            this.addBaseLayerFromHash(this.hashService.getBaseLayer());
-            localResolve();
-        }
         for (let overlayKey of this.activeOverlayKeys) {
             let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
             if (overlay && overlay.visible === false) {
@@ -369,41 +262,7 @@ export class LayersService {
         }
     }
 
-    public setJsonData = (data: Common.DataContainer) => {
-        if (data.routes) {
-            for (let route of data.routes) {
-                for (let segment of route.segments) {
-                    let latlngs = [] as L.LatLng[];
-                    for (let latlng of segment.latlngs) {
-                        var fullLatLng = L.latLng(latlng.lat, latlng.lng, latlng.alt);
-                        latlngs.push(fullLatLng);
-                    }
-                    segment.latlngs = latlngs;
-                    segment.routePoint = L.latLng(segment.routePoint.lat, segment.routePoint.lng);
-                }
-                if (route.markers) {
-                    for (let marker of route.markers) {
-                        marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng);
-                        if (!_.find(IconsService.getAvailableIconTypes(), m => m === marker.type)) {
-                            marker.type = IconsService.getAvailableIconTypes()[0];
-                        }
-                    }
-                }
-            }
-        }
-        this.setData(data);
-        this.addBaseLayerFromHash(data.baseLayer);
-    }
-
-    public getSelectedRoute = (): IRouteLayer => {
-        return this.selectedRoute;
-    }
-
-    public getRouteByName = (routeName: string): IRouteLayer => {
-        return _.find(this.routes, (routeLayerToFind) => routeLayerToFind.route.properties.name === routeName);
-    }
-
-    private addBaseLayerFromHash = (layerData: Common.LayerData) => {
+    public addExternalBaseLayer = (layerData: Common.LayerData) => {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
             let baseLayerToActivate = _.find(this.baseLayers, baseToFind => baseToFind.key === this.selectedBaseLayerKey);
             if (baseLayerToActivate) {
@@ -446,7 +305,10 @@ export class LayersService {
         this.selectBaseLayer(newLayer);
     }
 
-    private addOverlaysFromHash = (overlays: Common.LayerData[]) => {
+    public addExternalOverlays = (overlays: Common.LayerData[]) => {
+        if (!overlays || overlays.length === 0) {
+            return;
+        }
         for (let overlayIndex = 0; overlayIndex < overlays.length; overlayIndex++) {
             let overlay = this.addOverlay(overlays[overlayIndex]);
             if (overlay.visible === false) {
@@ -475,49 +337,18 @@ export class LayersService {
         } as L.TileLayerOptions;
     }
 
-    public getData = () => {
+    public getData = (): Common.DataContainer => {
         var container = {
-            routes: [],
             baseLayer: null,
-            overlays: [],
-            northEast: this.mapService.map.getBounds().getNorthEast(),
-            southWest: this.mapService.map.getBounds().getSouthWest()
+            overlays: []
         } as Common.DataContainer;
 
-        for (let route of this.routes) {
-            if (route.route.properties.isVisible) {
-                container.routes.push(route.getData());
-            }
-        }
         container.baseLayer = this.extractDataFromLayer(this.selectedBaseLayer);
         var visibaleOverlays = this.overlays.filter(overlay => overlay.visible);
         for (let overlayIndex = 0; overlayIndex < visibaleOverlays.length; overlayIndex++) {
             container.overlays.push(this.extractDataFromLayer(visibaleOverlays[overlayIndex]));
         }
         return container;
-    }
-
-    private setData = (dataContainer: Common.DataContainer) => {
-        if (dataContainer.routes.length === 0) {
-            dataContainer.routes.push({
-                name: this.createRouteName(),
-                markers: [],
-                segments: []
-            } as Common.RouteData);
-        }
-        for (let routeData of dataContainer.routes) {
-            if (this.isNameAvailable(routeData.name) === false) {
-                routeData.name = this.createRouteName();
-            }
-            let routeLayer = this.routeLayerFactory.createRouteLayerFromData(routeData);
-            this.routes.push(routeLayer);
-            this.mapService.map.addLayer(routeLayer as RouteLayer);    
-            this.selectRoute(routeLayer);
-        }
-
-        if (dataContainer.northEast != null && dataContainer.southWest != null) {
-            this.mapService.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));
-        }
     }
 
     private extractDataFromLayer = (layer: ILayer): Common.LayerData => {

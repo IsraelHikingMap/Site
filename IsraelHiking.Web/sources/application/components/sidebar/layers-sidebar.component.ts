@@ -5,6 +5,7 @@ import { MapService } from "../../services/map.service";
 import { FileService } from "../../services/file.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { LayersService, IBaseLayer, IOverlay } from "../../services/layers/layers.service";
+import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { IRouteLayer } from "../../services/layers/routelayers/iroute.layer";
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
@@ -33,13 +34,14 @@ export class LayersSidebarComponent extends BaseMapComponent {
         private dialog: MdDialog,
         private mapService: MapService,
         private layersService: LayersService,
+        private routesService: RoutesService,
         private fileService: FileService,
         private sidebarService: SidebarService,
         private localStorageService: LocalStorageService) {
         super(resources);
         this.baseLayers = layersService.baseLayers;
         this.overlays = layersService.overlays;
-        this.routes = layersService.routes;
+        this.routes = routesService.routes;
         this.isAdvanced = this.localStorageService.get(LayersSidebarComponent.IS_ADVANCED_KEY) || false;
     }
 
@@ -97,7 +99,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public selectRoute (routeLayer: IRouteLayer, e: Event) {
-        this.layersService.changeRouteState(routeLayer);
+        this.routesService.changeRouteState(routeLayer);
         this.suppressEvents(e);
     }
 
@@ -123,6 +125,6 @@ export class LayersSidebarComponent extends BaseMapComponent {
     }
 
     public isRouteSelected(routeLayer: IRouteLayer) {
-        return this.layersService.getSelectedRoute() === routeLayer;
+        return this.routesService.selectedRoute === routeLayer;
     }
 } 

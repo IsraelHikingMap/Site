@@ -5,7 +5,7 @@ import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
 import { SidebarService } from "../services/sidebar.service";
 import { RouteStatisticsService } from "../services/route-statistics.service";
-import { HashService } from "../services/hash.service";
+import { DataContainerService } from "../services/data-container.service";
 import { ToastService } from "../services/toast.service";
 import { DragAndDropService } from "../services/drag-and-drop.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -42,7 +42,7 @@ export class MainMapComponent extends BaseMapComponent {
         private applicationRef: ApplicationRef,
         private toastService: ToastService,
         // needed for initialization
-        hashService: HashService,
+        dataConatnerService: DataContainerService,
         dragAndDropService: DragAndDropService,
         angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
         angulartics2: Angulartics2

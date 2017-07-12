@@ -2,7 +2,7 @@
 import { ESCAPE } from "@angular/material";
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
-import { LayersService } from "../services/layers/layers.service";
+import { RoutesService } from "../services/layers/routelayers/routes.service";
 import { EditMode } from "../services/layers/routelayers/iroute-state";
 import { EditModeString } from "../services/layers/routelayers/iroute.layer";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
@@ -20,26 +20,26 @@ export class DrawingComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         private mapService: MapService,
-        private layersService: LayersService,
+        private routesService: RoutesService,
         private routeLayerFactory: RouteLayerFactory) {
         super(resources);
 
         this.editMode = EditModeString.none;
 
-        this.layersService.routeChanged.subscribe(() => {
-            this.editMode = (this.layersService.getSelectedRoute() != null) ? this.layersService.getSelectedRoute().getEditMode() : EditModeString.none;
+        this.routesService.routeChanged.subscribe(() => {
+            this.editMode = (this.routesService.selectedRoute != null) ? this.routesService.selectedRoute.getEditMode() : EditModeString.none;
         });
     }
 
     @HostListener("window:keydown", ["$event"])
     public onDrawingShortcutKeys($event: KeyboardEvent) {
-        if (this.layersService.getSelectedRoute() == null) {
+        if (this.routesService.selectedRoute == null) {
             return;
-        }
+        }   
         if ($event.ctrlKey && String.fromCharCode($event.which).toLowerCase() === "z") {
             this.undo($event);
         } else if ($event.keyCode === ESCAPE) {
-            let layer = this.layersService.getSelectedRoute();
+            let layer = this.routesService.selectedRoute;
             if (layer != null) {
                 layer.setReadOnlyState();
             }
@@ -51,7 +51,7 @@ export class DrawingComponent extends BaseMapComponent {
 
     public clear(e: Event) {
         this.suppressEvents(e);
-        let layer = this.layersService.getSelectedRoute();
+        let layer = this.routesService.selectedRoute;
         if (layer != null) {
             layer.clear();
         }
@@ -59,7 +59,7 @@ export class DrawingComponent extends BaseMapComponent {
 
     public setEditMode(editMode: EditMode, e: Event) {
         this.suppressEvents(e);
-        let selectedRoute = this.layersService.getSelectedRoute();
+        let selectedRoute = this.routesService.selectedRoute;
         if (this.editMode === editMode) {
             if (selectedRoute != null) {
                 selectedRoute.setReadOnlyState();
@@ -86,37 +86,37 @@ export class DrawingComponent extends BaseMapComponent {
 
     public setRouting(routingType: Common.RoutingType, e: Event) {
         this.suppressEvents(e);
-        if (this.layersService.getSelectedRoute() == null) {
+        if (this.routesService.selectedRoute == null) {
             return;
         }
         this.routeLayerFactory.routingType = routingType;
-        this.layersService.getSelectedRoute().setRoutingType(routingType);
+        this.routesService.selectedRoute.setRoutingType(routingType);
     };
 
     public undo = (e: Event) => {
         this.suppressEvents(e);
-        let layer = this.layersService.getSelectedRoute();
+        let layer = this.routesService.selectedRoute;
         if (layer != null) {
             layer.undo();
         }
     };
 
     public getRoutingType = (): Common.RoutingType => {
-        if (this.layersService.getSelectedRoute() == null) {
+        if (this.routesService.selectedRoute == null) {
             return "None";
         }
-        return this.layersService.getSelectedRoute().route.properties.currentRoutingType;
+        return this.routesService.selectedRoute.route.properties.currentRoutingType;
     };
 
     public isUndoDisbaled = (): boolean => {
-        let layer = this.layersService.getSelectedRoute();
+        let layer = this.routesService.selectedRoute;
         return layer != null ? layer.isUndoDisbaled() : true;
     };
 
     public getRouteColor = (): string => {
-        if (this.layersService.getSelectedRoute() == null) {
+        if (this.routesService.selectedRoute == null) {
             return "black";
         }
-        return this.layersService.getSelectedRoute().route.properties.pathOptions.color;
+        return this.routesService.selectedRoute.route.properties.pathOptions.color;
     }
 }

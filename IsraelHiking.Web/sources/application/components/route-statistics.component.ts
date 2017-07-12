@@ -1,6 +1,6 @@
 ﻿import { Component, ViewEncapsulation, OnInit, OnDestroy } from "@angular/core";
 import { Subscription } from "rxjs/Subscription";
-import { LayersService } from "../services/layers/layers.service";
+import { RoutesService } from "../services/layers/routelayers/routes.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService } from "../services/route-statistics.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -19,7 +19,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     private routeDataChangedSubscription: Subscription;
 
     constructor(resources: ResourcesService,
-        private layersService: LayersService,
+        private routesService: RoutesService,
         private routeStatisticsService: RouteStatisticsService) {
         super(resources);
 
@@ -32,7 +32,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public ngOnInit() {
-        this.routeChangedSubscription = this.layersService.routeChanged.subscribe(() => {
+        this.routeChangedSubscription = this.routesService.routeChanged.subscribe(() => {
             this.routeChanged();
         });
         this.routeChanged();
@@ -69,7 +69,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.routeDataChangedSubscription) {
             this.routeDataChangedSubscription.unsubscribe();
         }
-        let routeLayer = this.layersService.getSelectedRoute();
+        let routeLayer = this.routesService.selectedRoute;
         if (!routeLayer) {
             return;
         }
@@ -78,7 +78,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private onRouteDataChanged() {
-        let statistics = this.routeStatisticsService.getStatistics(this.layersService.getSelectedRoute().getData());
+        let statistics = this.routeStatisticsService.getStatistics(this.routesService.selectedRoute.getData());
         this.length = statistics.length;
         this.gain = statistics.gain;
         this.loss = statistics.loss;

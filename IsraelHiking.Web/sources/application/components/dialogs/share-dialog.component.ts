@@ -5,7 +5,8 @@ import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { ToastService } from "../../services/toast.service";
-import { LayersService } from "../../services/layers/layers.service";
+import { RoutesService } from "../../services/layers/routelayers/routes.service";
+import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
 import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
@@ -65,7 +66,8 @@ export class ShareDialogComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
         private http: Http,
         private mapService: MapService,
-        private layersService: LayersService,
+        private routesService: RoutesService,
+        private dataContainerService: DataContainerService,
         private osmUserService: OsmUserService,
         private toastService: ToastService,
     ) {
@@ -84,8 +86,8 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.offroadRequest.userMail = this.storedUserEmail;
         this.offroadRequest.activityType = "OffRoading";
         this.offroadRequest.difficultyLevel = "3";
-        if (this.layersService.getSelectedRoute() != null) {
-            let route = layersService.getSelectedRoute().getData();
+        if (this.routesService.selectedRoute != null) {
+            let route = routesService.selectedRoute.getData();
             this.title = route.name;
             if (route.segments.length > 0) {
                 switch (route.segments[route.segments.length - 1].routingType) {
@@ -118,7 +120,7 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.isLoading = true;
         this.offroadRequest.title = this.title;
         this.offroadRequest.description = this.description;
-        var dataToSave = this.layersService.getData();
+        var dataToSave = this.dataContainerService.getData();
         for (let routeIndex = dataToSave.routes.length - 1; routeIndex >= 0; routeIndex--) {
             let route = dataToSave.routes[routeIndex];
             if (route.segments.length === 0 && route.markers.length === 0) {
@@ -167,11 +169,11 @@ export class ShareDialogComponent extends BaseMapComponent {
 
     public sendToOffroad = () => {
         this.storedUserEmail = this.offroadRequest.userMail;
-        if (this.layersService.getSelectedRoute() == null) {
+        if (this.routesService.selectedRoute == null) {
             this.toastService.warning(this.resources.pleaseSelectARoute);
             return;
         }
-        let route = this.layersService.getSelectedRoute().getData();
+        let route = this.routesService.selectedRoute.getData();
         if (route.segments.length === 0) {
             this.toastService.warning(this.resources.pleaseAddPointsToRoute);
             return;

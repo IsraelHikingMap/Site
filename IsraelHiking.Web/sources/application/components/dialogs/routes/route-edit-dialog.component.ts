@@ -4,7 +4,7 @@ import { MapService } from "../../../services/map.service";
 import { FileService } from "../../../services/file.service";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { ToastService } from "../../../services/toast.service";
-import { LayersService } from "../../../services/layers/layers.service";
+import { RoutesService } from "../../../services/layers/routelayers/routes.service";
 import { IRouteLayer } from "../../../services/layers/routelayers/iroute.layer";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
@@ -19,13 +19,13 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
 
     constructor(resources: ResourcesService,
         mapService: MapService,
-        layersService: LayersService,
+        routesService: RoutesService,
         routeLayerFactory: RouteLayerFactory,
         toastService: ToastService,
         private fileService: FileService,
         private fitBoundsService: FitBoundsService
     ) {
-        super(resources, mapService, layersService, routeLayerFactory, toastService);
+        super(resources, mapService, routesService, routeLayerFactory, toastService);
 
         this.isNew = false;
         this.isReversed = false;
@@ -33,14 +33,14 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     public setRouteLayer(name: string): void {
-        this.routeLayer = this.layersService.getRouteByName(name);
+        this.routeLayer = this.routesService.getRouteByName(name);
         this.routeProperties = { ...this.routeLayer.route.properties };
         this.pathOptions = { ...this.routeProperties.pathOptions };
     }
 
     protected isRouteNameAlreadyInUse() {
         return this.routeProperties.name !== this.routeLayer.route.properties.name &&
-            this.layersService.isNameAvailable(this.routeProperties.name) === false;
+            this.routesService.isNameAvailable(this.routeProperties.name) === false;
     }
 
     public saveRoute(e: Event): boolean {
@@ -48,7 +48,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
             return false;
         }
         if (this.routeProperties.isVisible !== this.routeLayer.route.properties.isVisible) {
-            this.layersService.changeRouteState(this.routeLayer);
+            this.routesService.changeRouteState(this.routeLayer);
         }
         if (this.isReversed) {
             this.routeLayer.reverse();
@@ -58,7 +58,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     public deleteRoute(e: Event) {
-        this.layersService.removeRoute(this.routeLayer.route.properties.name);
+        this.routesService.removeRoute(this.routeLayer.route.properties.name);
         this.suppressEvents(e);
     }
 

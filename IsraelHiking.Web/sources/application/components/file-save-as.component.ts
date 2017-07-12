@@ -1,6 +1,6 @@
 ﻿import { Component, ViewEncapsulation } from "@angular/core";
 import { MapService } from "../services/map.service";
-import { LayersService } from "../services/layers/layers.service";
+import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
 import { FileService, IFormatViewModel } from "../services/file.service";
 import { ToastService } from "../services/toast.service";
@@ -23,7 +23,7 @@ export class FileSaveAsComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         private mapService: MapService,
-        private layersService: LayersService,
+        private dataContainerService: DataContainerService,
         private fileService: FileService,
         private toastService: ToastService) {
         super(resources);
@@ -34,7 +34,6 @@ export class FileSaveAsComponent extends BaseMapComponent {
         this.selectedFormat = this.formats[0];  
     }
 
-
     public toggleSaveAs(e: Event) {
         this.isOpen = !this.isOpen;
         this.suppressEvents(e);
@@ -44,10 +43,10 @@ export class FileSaveAsComponent extends BaseMapComponent {
         this.selectedFormat = format;
         this.isFromatsDropdownOpen = false;
         let outputFormat = format.outputFormat;
-        let data = this.getData();
+        let data = this.dataContainerService.getDataForFileExport();
         if (outputFormat === "all_gpx_single_track") {
             outputFormat = "gpx_single_track";
-            data = this.layersService.getData();
+            data = this.dataContainerService.getData();
         }
         if (!this.isDataSaveable(data)) {
             return;
@@ -60,15 +59,6 @@ export class FileSaveAsComponent extends BaseMapComponent {
 
         this.isOpen = false;
         this.suppressEvents(e);
-    }
-
-    private getData(): Common.DataContainer {
-        if (this.layersService.getSelectedRoute() == null) {
-            return this.layersService.getData();
-        }
-        return {
-            routes: [this.layersService.getSelectedRoute().getData()]
-        } as Common.DataContainer;
     }
 
     private getName(data: Common.DataContainer): string {

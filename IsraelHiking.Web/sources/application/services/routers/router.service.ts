@@ -11,7 +11,7 @@ import "rxjs/add/operator/toPromise";
 
 @Injectable()
 export class RouterService {
-    private noneRouter: NoneRouter
+    private noneRouter: NoneRouter;
 
     constructor(private http: Http,
         private resourcesService: ResourcesService,
@@ -42,7 +42,7 @@ export class RouterService {
                         resolve(data.routes[0].segments);
                     }
                 }, () => {
-                    let coordinatesString = ` (${latlngStart.lat.toFixed(3)}°, ${latlngStart.lng.toFixed(3)}°) - (${latlngEnd.lat.toFixed(3)}°, ${latlngEnd.lng.toFixed(3)}°)`
+                    let coordinatesString = ` (${latlngStart.lat.toFixed(3)}°, ${latlngStart.lng.toFixed(3)}°) - (${latlngEnd.lat.toFixed(3)}°, ${latlngEnd.lng.toFixed(3)}°)`;
                     this.toastService.error(this.resourcesService.routingFailed + coordinatesString);
                     this.noneRouter.getRoute(latlngStart, latlngEnd).then((data) => {
                         resolve(data);

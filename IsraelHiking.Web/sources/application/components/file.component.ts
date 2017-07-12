@@ -1,6 +1,6 @@
 ﻿import { Component, HostListener } from "@angular/core";
 import { MapService } from "../services/map.service";
-import { LayersService } from "../services/layers/layers.service";
+import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
 import { FileService } from "../services/file.service";
 import { ToastService } from "../services/toast.service";
@@ -17,7 +17,7 @@ export class FileComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         private mapService: MapService,
-        private layersService: LayersService,
+        private dataContainerService: DataContainerService,
         private fileService: FileService,
         private toastService: ToastService,
         ) {
@@ -30,14 +30,14 @@ export class FileComponent extends BaseMapComponent {
             return;
         }
         this.fileService.openFromFile(file).then((dataContainer: Common.DataContainer) => {
-            this.layersService.setJsonData(dataContainer);
+            this.dataContainerService.setData(dataContainer);
         }, () => {
             this.toastService.error(this.resources.unableToLoadFromFile);
         });
     }
 
     public save(e: Event) {
-        let data = this.getData();
+        let data = this.dataContainerService.getDataForFileExport();
         if (!this.isDataSaveable(data)) {
             return;
         }
@@ -46,15 +46,6 @@ export class FileComponent extends BaseMapComponent {
                 this.toastService.error(this.resources.unableToSaveToFile);
             });
         this.suppressEvents(e);
-    }
-
-    private getData(): Common.DataContainer {
-        if (this.layersService.getSelectedRoute() == null) {
-            return this.layersService.getData();
-        }
-        return {
-            routes: [this.layersService.getSelectedRoute().getData()]
-        } as Common.DataContainer;
     }
 
     private getName(data: Common.DataContainer): string {

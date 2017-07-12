@@ -2,7 +2,7 @@
 import { Subscription } from "rxjs/Subscription";
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
-import { LayersService } from "../services/layers/layers.service";
+import { RoutesService } from "../services/layers/routelayers/routes.service";
 import { IRouteLayer } from "../services/layers/routelayers/iroute.layer";
 import { RouteStatisticsService, IRouteStatisticsPoint, IRouteStatistics } from "../services/route-statistics.service";
 import { IconsService } from "../services/icons.service"
@@ -38,7 +38,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
     private chartSvg: JQuery;
 
     constructor(resources: ResourcesService,
-        private layersService: LayersService,
+        private routesService: RoutesService,
         private mapService: MapService,
         private routeStatisticsService: RouteStatisticsService) {
         super(resources);
@@ -60,7 +60,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
 
     public ngOnInit() 
     {
-        this.componentSubscriptions.push(this.layersService.routeChanged.subscribe(() => {
+        this.componentSubscriptions.push(this.routesService.routeChanged.subscribe(() => {
             this.routeChanged();
         }));
         this.componentSubscriptions.push(this.routeStatisticsService.visibilityChanged.subscribe(() => {
@@ -96,7 +96,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
 
     public onChartReady = (chartWrapper: google.visualization.ChartWrapper) => {
         this.chartWrapper = chartWrapper;
-        let container = $("#" + chartWrapper.getContainerId());
+        let container = $(`#${chartWrapper.getContainerId()}`);
         this.hoverLine = container[0].getElementsByTagName("rect")[0].cloneNode(true) as Element;
         this.hoverLine.setAttribute("y", "10");
         this.hoverLine.setAttribute("z", "100");
@@ -120,7 +120,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
         for (let subscription of this.routeLayerSubscriptions) {
             subscription.unsubscribe();
         }
-        this.routeLayer = this.layersService.getSelectedRoute();
+        this.routeLayer = this.routesService.selectedRoute;
         this.onRouteDataChanged();
         if (this.routeLayer) {
             this.routeLayerSubscriptions.push(this.routeLayer.dataChanged.subscribe(this.onRouteDataChanged));
