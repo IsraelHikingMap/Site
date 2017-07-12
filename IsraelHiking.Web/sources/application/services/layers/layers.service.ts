@@ -46,7 +46,7 @@ export class LayersService {
 
     private static MAX_ZOOM = 20;
     private static HIKING_TRAILS = "Hiking Trails";
-    private static ATTRIBUTION = "<a href='http://openstreetmap.org' target='_blank'>OpenStreetMap</a> data under <a href='http://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
+    private static ATTRIBUTION = "Tiles © <a href='https://IsraelHiking.osm.org.il' target='_blank'>Israel Hiking</a>, <a href='https://creativecommons.org/licenses/by-nc-sa/3.0/' target='_blank'>CC BY-SA-NC 3.0</a>. Data by <a href='https://openstreetmap.org' target='_blank'>OpenStreetMap</a> under <a href='https://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
     private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION + "Map style courtesy of <a href='http://mtbmap.no'>MTBmap.no.</a> ";
     private static BASE_LAYERS_KEY = "BaseLayers";
     private static OVERLAYS_KEY = "Overlays";
@@ -105,7 +105,7 @@ export class LayersService {
             var googleLayer = L.gridLayer.googleMutant({ type: "satellite" } as L.gridLayer.GoogleMutantOptions) as any;
             this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: googleLayer, selected: false, address: "", isEditable: false } as IBaseLayer);
         } catch (e) {
-            console.error("Unable to create the google earch layer... ");
+            console.error("Unable to create the google earth layer... ");
         }
 
         let hikingTrailsOverlay = this.addOverlay({
