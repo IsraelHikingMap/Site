@@ -131,20 +131,20 @@ export class LayersService {
         return layer;
     }
 
-    public addOverlay = (layerData: Common.LayerData): IOverlay => {
+    public addOverlay = (layerData: Common.LayerData, attribution?: string): IOverlay => {
         var overlay = _.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() === layerData.key.toLocaleLowerCase());
         if (overlay != null) {
             return overlay; // overlay exists
         }
-        overlay = this.addNewOverlay(layerData);
+        overlay = this.addNewOverlay(layerData, attribution);
         this.storedOverlays.push(layerData);
         this.storedOverlays = this.unique(this.storedOverlays);
         return overlay;
     }
 
-    private addNewOverlay = (layerData: Common.LayerData): IOverlay => {
+    private addNewOverlay = (layerData: Common.LayerData, attribution?: string): IOverlay => {
         let overlay = { ...layerData } as IOverlay;
-        overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData))
+        overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData, attribution))
             .setZIndex(this.overlayZIndex++);
         overlay.visible = false;
         overlay.isEditable = true;
