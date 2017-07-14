@@ -1,11 +1,13 @@
-﻿import { ResourcesService } from "../../../services/resources.service";
+﻿import { AfterViewInit } from "@angular/core";
+
+import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers/layers.service";
 import { BaseMapComponent } from "../../base-map.component";
 import * as Common from "../../../common/IsraelHiking";
 
-export abstract class LayerBaseDialogComponent extends BaseMapComponent {
+export abstract class LayerBaseDialogComponent extends BaseMapComponent implements AfterViewInit {
     public title: string;
     public key: string;
     public address: string;
@@ -13,7 +15,10 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public maxZoom: number;
     public isNew: boolean;
 
-    constructor(resources: ResourcesService,
+    private mapPreview: L.Map;
+    private tileLayer: L.TileLayer;
+    
+    protected constructor(resources: ResourcesService,
         protected mapService: MapService,
         protected layersService: LayersService,
         protected toastService: ToastService
@@ -21,15 +26,39 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
         super(resources);
         this.minZoom = LayersService.MIN_ZOOM;
         this.maxZoom = LayersService.MAX_NATIVE_ZOOM;
+        this.key = "";
+        this.address = "";
+
+        this.tileLayer = null;
     }
-    public saveLayer = (key: string, address: string, minZoom: number, maxZoom: number, e: Event) => {
-        var decodedAddress = decodeURI(address).replace("{zoom}", "{z}");
+
+    ngAfterViewInit(): void {
+        this.mapPreview = L.map("mapPreview",
+            {
+                center: this.mapService.map.getCenter(),
+                zoomControl: false,
+                minZoom: this.minZoom,
+                maxZoom: this.maxZoom,
+                zoom: (this.maxZoom + this.minZoom) / 2
+            });
+        this.tileLayer = L.tileLayer(this.getTilesAddress());
+        this.mapPreview.addLayer(this.tileLayer);
+    }
+
+    public addressChanged(address: string) {
+        this.address = address;
+        this.mapPreview.removeLayer(this.tileLayer);
+        this.tileLayer = L.tileLayer(this.getTilesAddress());
+        this.mapPreview.addLayer(this.tileLayer);
+    }
+
+    public saveLayer = (e: Event) => {
         var layerData = {
-            key: key,
-            address: decodedAddress,
+            key: this.key,
+            address: this.getTilesAddress(),
             isEditable: true,
-            minZoom: minZoom,
-            maxZoom: maxZoom
+            minZoom: this.minZoom,
+            maxZoom: this.maxZoom
         } as Common.LayerData;
         var message = this.internalSave(layerData);
         if (message !== "") {
@@ -41,4 +70,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     protected abstract internalSave(layerData: Common.LayerData): string;
 
     public removeLayer(e: Event) { } // should be derived if needed.
+
+    private getTilesAddress() {
+        return decodeURI(this.address).replace("{zoom}", "{z}");
+    }
 }

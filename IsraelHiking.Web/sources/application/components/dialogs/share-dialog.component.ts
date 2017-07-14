@@ -1,5 +1,7 @@
 ﻿import { Component } from "@angular/core";
 import { Http } from "@angular/http";
+import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
+
 import { LocalStorage } from "ngx-store";
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
@@ -47,7 +49,7 @@ export class ShareDialogComponent extends BaseMapComponent {
     public description: string;
     public imageUrl: string;
     public shareAddress: string;
-    public whatappShareAddress: string;
+    public whatappShareAddress: SafeUrl;
     public facebookShareAddress: string;
     public width: number;
     public height: number;
@@ -61,10 +63,9 @@ export class ShareDialogComponent extends BaseMapComponent {
     @LocalStorage()
     public storedUserEmail: string = "";
 
-    private static USER_EMAIL_KEY = "offroadUserEmail";
-
     constructor(resources: ResourcesService,
         private http: Http,
+        private sanitizer: DomSanitizer,
         private mapService: MapService,
         private routesService: RoutesService,
         private dataContainerService: DataContainerService,
@@ -105,7 +106,7 @@ export class ShareDialogComponent extends BaseMapComponent {
 
     public clearShareAddress = () => {
         this.shareAddress = "";
-        this.whatappShareAddress = "";
+        this.whatappShareAddress = null;
         this.facebookShareAddress = "";
         this.siteUrlId = "";
     }
@@ -139,7 +140,7 @@ export class ShareDialogComponent extends BaseMapComponent {
             this.shareAddress = this.osmUserService.getUrlFromSiteUrlId(data);
             this.imageUrl = this.osmUserService.getImageFromSiteUrlId(data);
             let escaped = encodeURIComponent(this.shareAddress);
-            this.whatappShareAddress = `whatsapp://send?text=${escaped}`;
+            this.whatappShareAddress = this.sanitizer.bypassSecurityTrustUrl(`whatsapp://send?text=${escaped}`);
             this.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
             this.embedText = this.getEmbedText();
             this.isLoading = false;

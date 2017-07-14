@@ -15,21 +15,24 @@
         </div>
         <div fxLayout="row">
             <md-input-container hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill>
-                <input mdInput type="text" [(ngModel)]="address" name="address" placeholder="{{resources.address}}" required="" fxFill [dir]="'ltr'" />
+                <input mdInput type="text" [ngModel]="address" (ngModelChange)="addressChanged($event)" name="address" placeholder="{{resources.address}}" required="" fxFill [dir]="'ltr'" />
             </md-input-container>
         </div>
         <div class="input-wrapper-spacer"></div>
         <div fxLayout="row" fxFlexs>
-            <md-input-container fxFlex="30">
-                <input mdInput type="text" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" />
+            <md-input-container fxFlex>
+                <input mdInput type="number" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" />
             </md-input-container>
-            <md-input-container fxFlex="30" class="margin-10">
-                <input mdInput type="text" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" />
+            <md-input-container fxFlex class="margin-10">
+                <input mdInput type="number" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" />
             </md-input-container>
+        </div>
+        <div fxLayout="row">
+            <div id="mapPreview" [style.height]="'100px'" [style.width]="'100%'" fxfill></div>
         </div>
     </div>
     <div md-dialog-actions fxLayoutAlign="end">
-        <button md-dialog-close type="button" md-button (click)="saveLayer(key, address, minZoom, maxZoom, $event)" mdTooltip="{{resources.save}}" mdTooltipPosition="above"><i class="fa icon-check"></i></button>
+        <button md-dialog-close type="button" md-button (click)="saveLayer($event)" mdTooltip="{{resources.save}}" mdTooltipPosition="above"><i class="fa icon-check"></i></button>
         <button md-dialog-close type="button" md-button [hidden]="isNew" (click)="removeLayer($event)" mdTooltip="{{resources.deleteLayer}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
     </div>
 </div>
