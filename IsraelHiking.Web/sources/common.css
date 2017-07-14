@@ -68,10 +68,11 @@ body {
     border-left: 1px solid #ccc !important;
 }
 
-.control-container-item.gutters {
-    padding-left: 12px;
-    padding-right: 12px;
-}
+    .control-container-item.gutters {
+        padding-left: 12px;
+        padding-right: 12px;
+        white-space: nowrap
+    }
 
 .control-icon-first {
     float: right;
