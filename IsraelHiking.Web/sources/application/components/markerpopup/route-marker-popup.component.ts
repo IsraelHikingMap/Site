@@ -13,8 +13,8 @@ import * as Common from "../../common/IsraelHiking";
     templateUrl: "./route-marker-popup.component.html"
 })
 export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
-    private canMerge: boolean;
-    private isMiddle: boolean;
+    public canMerge: boolean;
+    public isMiddle: boolean;
     private routeSegment: IRouteSegment;
     private routesService: RoutesService;
     

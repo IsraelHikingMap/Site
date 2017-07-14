@@ -157,7 +157,7 @@ export class RoutesService {
         
         this.setData([routePostFix]);
         this.selectedRoute.setEditRouteState();
-        this.routeChanged.next();
+        this.selectedRoute.raiseDataChanged();
     }
 
     /**
@@ -206,5 +206,6 @@ export class RoutesService {
             this.selectedRoute.route.segments.push(...closestRoute.route.segments);
         }
         this.selectedRoute.setEditRouteState();
+        this.selectedRoute.raiseDataChanged();
     }
 }
