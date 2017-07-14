@@ -28,7 +28,6 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         super(resources, mapService, routesService, routeLayerFactory, toastService);
 
         this.isNew = false;
-        this.isReversed = false;
         this.title = this.resources.routeProperties;
     }
 
@@ -49,9 +48,6 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         }
         if (this.routeProperties.isVisible !== this.routeLayer.route.properties.isVisible) {
             this.routesService.changeRouteState(this.routeLayer);
-        }
-        if (this.isReversed) {
-            this.routeLayer.reverse();
         }
         this.routeLayer.setRouteProperties(this.routeProperties);
         return true;

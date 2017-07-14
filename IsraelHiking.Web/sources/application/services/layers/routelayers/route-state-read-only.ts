@@ -32,8 +32,7 @@ export class RouteStateReadOnly extends RouteStateBase {
                 keyboard: false,
                 icon: IconsService.createRoundIcon("green")
             }));
-        let lastSegmentLatLngs = this.context.route.segments[this.context.route.segments.length - 1].latlngs;
-        let endLatLng = lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
+        let endLatLng = this.context.getLastLatLng();
         this.readOnlyLayers.addLayer(L.marker(endLatLng,
             {
                 opacity: pathOptions.opacity,

@@ -78,7 +78,7 @@ export class HoverHandler {
         snapToResponse = this.context.snappingService.snapTo(e.latlng);
         this.hoverMarker.setLatLng(snapToResponse.latlng);
         var hoverStartPoint = this.context.route.segments.length > 0
-            ? this.context.route.segments[this.context.route.segments.length - 1].routePoint
+            ? this.context.getLastSegment().routePoint
             : snapToResponse.latlng;
         this.hoverPolyline.setLatLngs([hoverStartPoint, snapToResponse.latlng]);
     }

@@ -1,6 +1,5 @@
 ﻿import { RouteStateBase } from "./route-state-base";
-import { IRouteLayer, EditModeString, IRouteSegment, IMarkerWithData } from "./iroute.layer";
-import { EditMode } from "./iroute-state";
+import { IRouteLayer, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { HoverHandler } from "./hover-handler";
 import { IconsService } from "../../icons.service";
 import { RouteMarkerPopupComponent } from "../../../components/markerpopup/route-marker-popup.component";
@@ -74,7 +73,7 @@ export abstract class RouteStateEdit extends RouteStateBase {
         if (this.context.route.segments.length <= 0) {
             return;
         }
-        this.context.route.segments[this.context.route.segments.length - 1].routePointMarker.setIcon(IconsService.createEndIcon());
+        this.context.getLastSegment().routePointMarker.setIcon(IconsService.createEndIcon());
         this.context.route.segments[0].routePointMarker.setIcon(IconsService.createStartIcon());
         for (let routeSegmentIndex = 1; routeSegmentIndex < this.context.route.segments.length - 1; routeSegmentIndex++) {
             this.context.route.segments[routeSegmentIndex].routePointMarker.setIcon(IconsService.createRouteMarkerIcon(this.context.route.properties.pathOptions.color));

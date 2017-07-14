@@ -171,6 +171,8 @@ export class ResourcesService {
     public uploadFileToOsm: string;
     public selectIcon: string;
     public nakeb: string;
+    public split: string;
+    public merge: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -547,6 +549,8 @@ export class ResourcesService {
                 this.uploadFileToOsm = this.gettextCatalog.getString("Upload a trace");
                 this.selectIcon = this.gettextCatalog.getString("Select Icon");
                 this.nakeb = this.gettextCatalog.getString("Nakeb");
+                this.split = this.gettextCatalog.getString("Split");
+                this.merge = this.gettextCatalog.getString("Merge");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

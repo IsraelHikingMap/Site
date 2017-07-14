@@ -64,6 +64,9 @@ export interface IRouteLayer {
     getData(): Common.RouteData;
     getBounds(): L.LatLngBounds;
 
+    getLastSegment(): IRouteSegment;
+    getLastLatLng(): L.LatLng;
+    
     setHiddenState(): void;
     setReadOnlyState(): void;
     setEditRouteState(): void;

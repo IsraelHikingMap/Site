@@ -1,10 +1,17 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
     <div fxLayour="row">
-        <div fxFlex="50">
+        <div fxFlex>
             <button md-button (click)="remove()" mdTooltip="{{resources.deletePoi}}" mdTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>
         </div>
         <div fxFlex>
             <button md-button (click)="hideCoordinates = !hideCoordinates" mdTooltip="{{resources.showCoordinates}}" mdTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
+        </div>
+        <div fxFlex [hidden]="isMiddle">
+            <button md-button (click)="reverse()" mdTooltip="{{resources.reverseRoute}}" mdTooltipPosition="above" fxFill><i class="fa icon-arrows-h"></i></button>
+        </div>
+        <div fxFlex>
+            <button md-button [hidden]="!isMiddle" (click)="split()" mdTooltip="{{resources.split}}" mdTooltipPosition="above" fxFill><i class="fa icon-cut"></i></button>
+            <button md-button [hidden]="isMiddle" [disabled]="!canMerge" (click)="merge()" mdTooltip="{{resources.merge}}" mdTooltipPosition="above" fxFill><i class="fa icon-plus"></i></button>
         </div>
     </div>
     <div [hidden]="hideCoordinates">

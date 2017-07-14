@@ -209,6 +209,15 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         return bounds;
     }
 
+    getLastSegment(): IRouteSegment {
+        return this.route.segments[this.route.segments.length - 1];
+    }
+
+    getLastLatLng(): L.LatLng {
+        let lastSegmentLatLngs = this.getLastSegment().latlngs;
+        return lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
+    }
+
     public setHiddenState(): void {
         this.clearCurrentState();
         this.setState(new RouteStateHidden(this));
