@@ -29,7 +29,6 @@ export class RouteStateReadOnly extends RouteStateBase {
                 opacity: pathOptions.opacity,
                 draggable: false,
                 clickable: false,
-                keyboard: false,
                 icon: IconsService.createRoundIcon("green")
             }));
         let endLatLng = this.context.getLastLatLng();
@@ -38,7 +37,6 @@ export class RouteStateReadOnly extends RouteStateBase {
                 opacity: pathOptions.opacity,
                 draggable: false,
                 clickable: false,
-                keyboard: false,
                 icon: IconsService.createRoundIcon("red")
             }));
     }

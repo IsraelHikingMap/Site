@@ -50,7 +50,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
         this.componentSubscriptions = [];
         this.kmMarkersGroup = L.layerGroup([] as L.Marker[]);
         this.initializeChart();
-        this.hoverChartMarker = L.marker(mapService.map.getCenter(), { opacity: 0.0, draggable: false, clickable: false, keyboard: false } as L.MarkerOptions);
+        this.hoverChartMarker = L.marker(mapService.map.getCenter(), { opacity: 0.0, draggable: false, clickable: false } as L.MarkerOptions);
         this.mapService.map.addLayer(this.hoverChartMarker);
         this.mapService.map.addLayer(this.kmMarkersGroup);
 
@@ -169,7 +169,6 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
         return L.marker(latlng, {
             clickable: false,
             draggable: false,
-            keyboard: false,
             icon: IconsService.createKmMarkerIcon(markerNumber)
         } as L.MarkerOptions);
     }

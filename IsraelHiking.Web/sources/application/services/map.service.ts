@@ -19,7 +19,6 @@ export class MapService {
             zoom: this.zoom,
             doubleClickZoom: false,
             zoomControl: false,
-            keyboard: false,
         } as L.MapOptions);
         
         this.map.on("moveend", () => {

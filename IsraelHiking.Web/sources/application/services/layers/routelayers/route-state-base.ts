@@ -22,7 +22,6 @@ export abstract class RouteStateBase implements IRouteState {
             {
                 draggable: isEditable,
                 clickable: isEditable,
-                keyboard: false,
                 riseOnHover: true,
                 icon: IconsService.createMarkerIconWithColorAndType(pathOptions.color, markerData.type),
                 opacity: pathOptions.opacity

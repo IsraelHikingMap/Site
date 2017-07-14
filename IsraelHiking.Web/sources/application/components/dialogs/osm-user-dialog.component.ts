@@ -143,7 +143,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 }
                 for (let markerData of route.markers) {
                     let icon = IconsService.createPoiDefaultMarkerIcon(this.getPathOprtions().color);
-                    let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, keyboard: false, riseOnHover: true, icon: icon, opacity: this.getPathOprtions().opacity } as L.MarkerOptions) as Common.IMarkerWithTitle;
+                    let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, riseOnHover: true, icon: icon, opacity: this.getPathOprtions().opacity } as L.MarkerOptions) as Common.IMarkerWithTitle;
                     this.mapService.setMarkerTitle(marker, markerData.title);
                     this.osmTraceLayer.addLayer(marker);
                 }
@@ -253,7 +253,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             let unselectedPathOptions = { color: "red", weight: 3, opacity: 1 } as L.PathOptions;
             let polyline = L.polyline(latLngs, unselectedPathOptions);
             this.osmTraceLayer.addLayer(polyline);
-            let marker = L.marker(latLngs[0], { draggable: false, clickable: true, keyboard: false, icon: IconsService.createMissingPartMarkerIcon() } as L.MarkerOptions) as Common.IMarkerWithTitle;
+            let marker = L.marker(latLngs[0], { draggable: false, clickable: true, icon: IconsService.createMissingPartMarkerIcon() } as L.MarkerOptions) as Common.IMarkerWithTitle;
             let markerPopupDiv = L.DomUtil.create("div");
             let factory = this.componentFactoryResolver.resolveComponentFactory(MissingPartMarkerPopupComponent);
             let componentRef = factory.create(this.injector, null, markerPopupDiv);

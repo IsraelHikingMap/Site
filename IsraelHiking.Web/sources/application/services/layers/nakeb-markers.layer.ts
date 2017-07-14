@@ -1,7 +1,6 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
 import { MapService } from "../map.service";
-import { ResourcesService } from "../resources.service";
 import { IconsService } from "../icons.service";
 import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
 import { NakebMarkerPopupComponent, NakebItem } from "../../components/markerpopup/nakeb-marker-popup.component";
@@ -38,7 +37,6 @@ export class NakebMarkerLayer extends BasePoiMarkerLayer {
                     {
                         draggable: false,
                         clickable: true,
-                        keyboard: false,
                         icon: this.markerIcon,
                         title: item.title
                     } as L.MarkerOptions) as Common.IMarkerWithTitle;

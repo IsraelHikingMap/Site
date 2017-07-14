@@ -65,7 +65,7 @@ export class WikiMarkersLayer extends BasePoiMarkerLayer {
             });
 
             for (let currentPage of data.query.geosearch) {
-                let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { draggable: false, clickable: true, keyboard: false, icon: this.markerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
+                let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { draggable: false, clickable: true, icon: this.markerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
                 marker.title = currentPage.pageid.toString();
                 let markerPopupContainer = L.DomUtil.create("div");
                 let pageAddress = `https://${language}.wikipedia.org/?curid=${currentPage.pageid}`;

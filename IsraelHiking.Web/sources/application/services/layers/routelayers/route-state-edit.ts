@@ -53,7 +53,7 @@ export abstract class RouteStateEdit extends RouteStateBase {
 
     private createRouteMarker = (latlng: L.LatLng): L.Marker => {
         let pathOptions = this.context.route.properties.pathOptions;
-        let marker = L.marker(latlng, { draggable: true, clickable: true, keyboard: false, riseOnHover: true, icon: IconsService.createRouteMarkerIcon(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
+        let marker = L.marker(latlng, { draggable: true, clickable: true, riseOnHover: true, icon: IconsService.createRouteMarkerIcon(pathOptions.color), opacity: pathOptions.opacity } as L.MarkerOptions);
         this.setRouteMarkerEvents(marker);
         marker.addTo(this.context.mapService.map);
         let factory = this.context.componentFactoryResolver.resolveComponentFactory(RouteMarkerPopupComponent);
@@ -267,7 +267,7 @@ export abstract class RouteStateEdit extends RouteStateBase {
     }
 
     private createMiddleMarker = (): L.Marker => {
-        var middleMarker = L.marker(this.context.mapService.map.getCenter(), { clickable: true, draggable: true, keyboard: false, icon: IconsService.createRoundIcon(this.context.route.properties.pathOptions.color), opacity: 0.0 } as L.MarkerOptions);
+        var middleMarker = L.marker(this.context.mapService.map.getCenter(), { clickable: true, draggable: true, icon: IconsService.createRoundIcon(this.context.route.properties.pathOptions.color), opacity: 0.0 } as L.MarkerOptions);
         middleMarker.on("click", () => {
             this.middleMarkerClick(middleMarker);
         });

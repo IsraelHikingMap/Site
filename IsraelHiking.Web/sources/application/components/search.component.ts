@@ -141,7 +141,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.toggleVisibility(e);
         this.featureGroup.clearLayers();
         this.fitBoundsService.fitBounds(searchResults.bounds, { maxZoom: LayersService.MAX_NATIVE_ZOOM } as L.FitBoundsOptions);
-        var marker = L.marker(searchResults.latlng, { icon: IconsService.createSearchMarkerIcon(), draggable: false, keyboard: false }) as Common.IMarkerWithTitle;
+        var marker = L.marker(searchResults.latlng, { icon: IconsService.createSearchMarkerIcon(), draggable: false }) as Common.IMarkerWithTitle;
         marker.title = searchResults.name || searchResults.address;
         let markerPopupDiv = L.DomUtil.create("div");
         let componentFactory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
@@ -206,9 +206,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 let polyLine = L.polyline(segment.latlngs, this.getPathOprtions());
                 this.featureGroup.addLayer(polyLine);
             }
-            var markerFrom = L.marker(this.fromContext.selectedSearchResults.latlng, { icon: IconsService.createStartIcon(), draggable: false, keyboard: false }) as Common.IMarkerWithTitle;
+            var markerFrom = L.marker(this.fromContext.selectedSearchResults.latlng, { icon: IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
             markerFrom.title = this.fromContext.selectedSearchResults.name || this.fromContext.selectedSearchResults.address;
-            var markerTo = L.marker(this.toContext.selectedSearchResults.latlng, { icon: IconsService.createEndIcon(), draggable: false, keyboard: false }) as Common.IMarkerWithTitle;
+            var markerTo = L.marker(this.toContext.selectedSearchResults.latlng, { icon: IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;
             markerTo.title = this.toContext.selectedSearchResults.name || this.toContext.selectedSearchResults.address;
 
             let convertToRoute = () => {

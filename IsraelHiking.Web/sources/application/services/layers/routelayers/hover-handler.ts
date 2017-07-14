@@ -16,7 +16,7 @@ export class HoverHandler {
     constructor(private context: IRouteLayer, private middleMarker: L.Marker) {
         this.context = context;
         let pathOptions = this.context.route.properties.pathOptions;
-        this.hoverMarker = L.marker(this.context.mapService.map.getCenter(), { clickable: false, keyboard: false, opacity: pathOptions.opacity } as L.MarkerOptions);
+        this.hoverMarker = L.marker(this.context.mapService.map.getCenter(), { clickable: false, opacity: pathOptions.opacity } as L.MarkerOptions);
         this.middleMarker = middleMarker;
         this.hoverPolyline = L.polyline([]);
         this.setState(HoverHandler.NONE);
