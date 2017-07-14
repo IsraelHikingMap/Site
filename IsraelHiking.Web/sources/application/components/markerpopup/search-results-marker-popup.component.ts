@@ -11,7 +11,7 @@ import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent {
     constructor(resources: ResourcesService, http: Http,
         elevationProvider: ElevationProvider) {
-        super(resources, http, elevationProvider)
+        super(resources, http, elevationProvider);
     }
 
     public convertToRoute: () => void;
