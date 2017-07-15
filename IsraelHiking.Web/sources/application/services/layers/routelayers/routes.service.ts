@@ -37,6 +37,7 @@ export class RoutesService {
         let routeLayer = this.routeLayerFactory.createRouteLayer(route);
         this.routes.push(routeLayer);
         this.mapService.map.addLayer(routeLayer);
+        routeLayer.setEditRouteState();
         this.selectRoute(routeLayer);
     }
 
