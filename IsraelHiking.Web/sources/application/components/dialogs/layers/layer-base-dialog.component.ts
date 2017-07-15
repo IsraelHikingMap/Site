@@ -39,7 +39,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
                 zoomControl: false,
                 minZoom: this.minZoom,
                 maxZoom: this.maxZoom,
-                zoom: (this.maxZoom + this.minZoom) / 2
+                zoom: (parseInt(this.maxZoom as any) + parseInt(this.minZoom as any)) / 2
             });
         this.tileLayer = L.tileLayer(this.getTilesAddress());
         this.mapPreview.addLayer(this.tileLayer);
@@ -57,8 +57,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
             key: this.key,
             address: this.getTilesAddress(),
             isEditable: true,
-            minZoom: this.minZoom,
-            maxZoom: this.maxZoom
+            minZoom: parseInt(this.minZoom as any), // fix issue with variable saved as string...
+            maxZoom: parseInt(this.maxZoom as any)
         } as Common.LayerData;
         var message = this.internalSave(layerData);
         if (message !== "") {
