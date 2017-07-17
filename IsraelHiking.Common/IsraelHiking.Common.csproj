@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5-pre3" />
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre3" />
+    <PackageReference Include="Newtonsoft.Json" Version="10.0.1" />
   </ItemGroup>
 
 </Project>

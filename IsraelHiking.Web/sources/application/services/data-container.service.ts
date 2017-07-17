@@ -9,10 +9,11 @@ import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { HashService } from "./hash.service";
 import { ResourcesService } from "./resources.service";
+import { Deferred } from "../common/deferred";
 
 @Injectable()
 export class DataContainerService {
-    public initializationPromise: Promise<{}>;
+    public initializationFinished: Promise<any>;
 
     constructor(private http: Http,
         private layersService: LayersService,
@@ -23,7 +24,13 @@ export class DataContainerService {
         private resourcesService: ResourcesService,
         private toastService: ToastService) {
 
-        this.addDataFromHash();
+        let deferred = new Deferred<any>();
+        this.initializationFinished = deferred.promise;
+        this.layersService.initializationFinished.then(
+            () => this.addDataFromHash(deferred),
+            () => this.addDataFromHash(deferred)
+        );
+        
     }
 
     public setData(dataContainer: Common.DataContainer) {
@@ -49,7 +56,7 @@ export class DataContainerService {
         return container;
     }
 
-    public getDataForFileExport(): Common.DataContainer{
+    public getDataForFileExport(): Common.DataContainer {
         if (this.routesService.selectedRoute == null) {
             return this.getData();
         }
@@ -58,13 +65,7 @@ export class DataContainerService {
         } as Common.DataContainer;
     }
 
-    private addDataFromHash = () => {
-        let localResolve: (value?: any | PromiseLike<any>) => void = null;
-        let localReject: (value?: any | PromiseLike<any>) => void = null;
-        this.initializationPromise = new Promise((resolve, reject) => {
-            localResolve = resolve;
-            localReject = reject;
-        });
+    private addDataFromHash = (deferred: Deferred<any>) => {
         if (this.hashService.siteUrl) {
             this.http.get(Urls.urls + this.hashService.siteUrl).toPromise()
                 .then((response) => {
@@ -72,11 +73,11 @@ export class DataContainerService {
                     let data = JSON.parse(siteUrl.jsonData) as Common.DataContainer;
                     this.setInitialData(data);
                     this.toastService.info(siteUrl.description, siteUrl.title);
-                    localResolve();
+                    deferred.resolve();
                 }, () => {
                     this.hashService.siteUrl = "";
                     this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
-                    localResolve();
+                    deferred.resolve();
                 });
             return;
         }
@@ -86,13 +87,13 @@ export class DataContainerService {
                     let data = response.json() as Common.DataContainer;
                     data.baseLayer = this.hashService.getBaseLayer();
                     this.setInitialData(data);
-                    localResolve();
+                    deferred.resolve();
                 }, () => {
-                    localReject();
+                    deferred.reject();
                 });
         } else {
             this.layersService.addExternalBaseLayer(this.hashService.getBaseLayer());
-            localResolve();
+            deferred.resolve();
         }
     }
 

@@ -185,7 +185,7 @@ namespace IsraelHiking.API.Tests.Services
             {
                 northEast = new LatLng { lat = 0.1, lng = 0.1 },
                 southWest = new LatLng { lat = 0.15, lng = 0.15 },
-                baseLayer = new LayerData { address = "/Tiles/{z}/{x}/{y}.png"},
+                baseLayer = new LayerData { Address = "/Tiles/{z}/{x}/{y}.png"},
                 routes = new List<RouteData> {  new RouteData() }
             };
 

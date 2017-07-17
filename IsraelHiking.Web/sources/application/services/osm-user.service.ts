@@ -1,10 +1,13 @@
 ﻿import { Injectable } from "@angular/core";
-import { Http, Response, } from "@angular/http";
+import { Http, Response } from "@angular/http";
+import { Subject } from "rxjs/Subject";
+import * as X2JS from "x2js";
+import * as _ from "lodash";
+
 import { AuthorizationService } from "./authorization.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
-import * as X2JS from "x2js";
-import * as _ from "lodash";
+import { Deferred } from "../common/deferred";
 
 export interface ITrace {
     fileName: string;
@@ -16,45 +19,74 @@ export interface ITrace {
     date: Date;
 }
 
+interface IUserLayer extends Common.LayerData {
+    isOverlay: boolean;
+}
+
+interface IUserLayers {
+    layers: IUserLayer[];
+}
+
 @Injectable()
 export class OsmUserService {
+
     private oauth: OSMAuth.OSMAuthInstance;
     private x2Js: X2JS;
     private baseUrl: string;
+
+    public tracesChanged: Subject<any>;
+    public siteUrlsChanged: Subject<any>;
+    public userLayersChanged: Subject<any>;
+    public initializationFinished: Promise<any>;
 
     public displayName: string;
     public imageUrl: string;
     public changeSets: number;
     public traces: ITrace[];
     public siteUrls: Common.SiteUrl[];
+    public baseLayers: Common.LayerData[];
+    public overlays: Common.LayerData[];
     public userId: string;
-    public loading: boolean;
 
     constructor(private http: Http,
         private authorizationService: AuthorizationService) {
-        this.loading = false;
-
-        this.http.get(Urls.osmConfiguration).toPromise().then((response) => {
-            let data = response.json();
-            this.baseUrl = data.baseAddress;
-            this.oauth = this.authorizationService.createOSMAuth({
-                oauth_consumer_key: data.consumerKey,
-                oauth_secret: data.consumerSecret,
-                auto: true, // show a login form if the user is not authenticated and you try to do a call
-                landing: "oauth-close-window.html",
-                url: this.baseUrl
-            } as OSMAuth.OSMAuthOptions);
-            if (this.authorizationService.token == null) {
-                this.oauth.logout();
-            }
-            if (this.isLoggedIn()) {
-                this.refreshDetails();
-            }
-        }, () => { console.error("Unable to get OSM configuration") });
-
         this.x2Js = new X2JS();
         this.traces = [];
         this.siteUrls = [];
+        this.baseLayers = [];
+        this.overlays = [];
+        this.tracesChanged = new Subject();
+        this.siteUrlsChanged = new Subject();
+        this.userLayersChanged = new Subject();
+        let deferred = new Deferred<any>();
+        this.initializationFinished = deferred.promise;
+        this.initialize(deferred);
+    }
+
+    private initialize(deferred: Deferred<any>): void {
+        this.http.get(Urls.osmConfiguration).toPromise().then((response) => {
+                let data = response.json();
+                this.baseUrl = data.baseAddress;
+                this.oauth = this.authorizationService.createOSMAuth({
+                    oauth_consumer_key: data.consumerKey,
+                    oauth_secret: data.consumerSecret,
+                    auto: true, // show a login form if the user is not authenticated and you try to do a call
+                    landing: "oauth-close-window.html",
+                    url: this.baseUrl
+                } as OSMAuth.OSMAuthOptions);
+                if (this.authorizationService.token == null) {
+                    this.oauth.logout();
+                    deferred.resolve();
+                }
+                if (this.isLoggedIn()) {
+                    this.getUserDetails(deferred);
+                } else {
+                    deferred.resolve();
+                }
+            }, () => {
+                console.error("Unable to get OSM configuration");
+                deferred.resolve();
+            });
     }
 
     public logout = () => {
@@ -66,41 +98,57 @@ export class OsmUserService {
         return this.oauth && this.oauth.authenticated() && this.authorizationService.token != null;
     }
 
-    public login = (): Promise<{}> => {
-        return this.refreshDetails();
+    public login = (): Promise<any> => {
+        let deferred = new Deferred<any>();
+        this.getUserDetails(deferred);
+        return deferred.promise;
     }
 
     public getSiteUrlPostfix(id: string) {
         return `/#!/?s=${id}`;
     }
 
-    public refreshDetails = (): Promise<{}> => {
-        this.loading = true;
-        var sharesPromise = Promise.resolve<Response>(null);
-        let promise = new Promise((resolve, reject) => {
+    public refreshDetails = (): Promise<any> => {
+        let getTracesPromise = this.getTraces();
+        let getSiteUtlsPromise = this.getSiteUrls();
+        return Promise.all([getTracesPromise, getSiteUtlsPromise]);
+
+    }
+
+    private getUserDetails(deferred: Deferred<any>) {
+        this.oauth.xhr({
+            method: "GET",
+            path: "/api/0.6/user/details"
+        }, (detailsError: any, details: XMLDocument) => {
+            if (detailsError) {
+                deferred.reject(detailsError);
+                return;
+            }
+            let authToken = localStorage.getItem(`${this.baseUrl}oauth_token`); // using native storage since it is saved with ohauth
+            let authTokenSecret = localStorage.getItem(`${this.baseUrl}oauth_token_secret`);
+            this.authorizationService.token = authToken + ";" + authTokenSecret;
+            let detailJson = this.x2Js.xml2js(details.documentElement.outerHTML) as any;
+            this.displayName = detailJson.osm.user._display_name;
+            if (detailJson.osm.user.img && detailJson.osm.user.img._href) {
+                this.imageUrl = detailJson.osm.user.img._href;
+            }
+            this.changeSets = detailJson.osm.user.changesets._count;
+            this.userId = detailJson.osm.user._id;
+
+            let refreshDetailsPromise = this.refreshDetails();
+            let userLayersPromise = this.getUserLayers();
+            
+            Promise.all([userLayersPromise, refreshDetailsPromise]).then(() => deferred.resolve(), () => deferred.reject());
+        });
+    }
+
+    private getTraces = () => {
+        return new Promise((resolve, reject) => {
             this.oauth.xhr({
                 method: "GET",
-                path: "/api/0.6/user/details"
-            }, (detailsError: any, details: XMLDocument) => {
-                if (detailsError) {
-                    this.loading = false;
-                    reject(detailsError);
-                    return;
-                }
-                let authToken = localStorage.getItem(`${this.baseUrl}oauth_token`); // using native storage since it is saved with ohauth
-                let authTokenSecret = localStorage.getItem(`${this.baseUrl}oauth_token_secret`);
-                this.authorizationService.token = authToken + ";" + authTokenSecret;
-                let detailJson = this.x2Js.xml2js(details.documentElement.outerHTML) as any;
-                this.displayName = detailJson.osm.user._display_name;
-                if (detailJson.osm.user.img && detailJson.osm.user.img._href) {
-                    this.imageUrl = detailJson.osm.user.img._href;
-                }
-                this.changeSets = detailJson.osm.user.changesets._count;
-                this.userId = detailJson.osm.user._id;
-                this.oauth.xhr({
-                    method: "GET",
-                    path: "/api/0.6/user/gpx_files"
-                }, (tracesError: any, traces: XMLDocument) => {
+                path: "/api/0.6/user/gpx_files"
+            },
+                (tracesError: any, traces: XMLDocument) => {
                     if (tracesError) {
                         reject(tracesError);
                         return;
@@ -122,21 +170,23 @@ export class OsmUserService {
                             date: new Date(traceJson._timestamp)
                         });
                     }
+                    this.tracesChanged.next();
                     resolve();
-                    });
-                sharesPromise = this.http.get(Urls.urls, this.authorizationService.getHeader()).toPromise();
-                sharesPromise.then((response) => {
-                    this.siteUrls.splice(0);
-                    this.siteUrls.push(...response.json() as Common.SiteUrl[]);
-                }, () => { console.error("Unable to get user shares.") });
-            });
+                });
         });
-        let allPromises = Promise.all([promise, sharesPromise]);
-        allPromises.then(() => { this.loading = false }, () => {
-            console.error("OSM User refresh details failed.");
-            this.loading = false;
+    }
+
+    private getSiteUrls = (): Promise<any> => {
+        let promise = this.http.get(Urls.urls, this.authorizationService.getHeader()).toPromise();
+        promise.then(response => {
+            let siteUrls = response.json() as Common.SiteUrl[];
+            this.siteUrls.splice(0);
+            this.siteUrls.push(...siteUrls);
+            this.siteUrlsChanged.next();
+        }, () => {
+             console.error("Unable to get user shares.");
         });
-        return allPromises;
+        return promise;
     }
 
     public createSiteUrl = (siteUrl: Common.SiteUrl): Promise<Response> => {
@@ -171,6 +221,44 @@ export class OsmUserService {
         return this.http.put(Urls.osm, feature, this.authorizationService.getHeader()).toPromise();
     }
 
+    private getUserLayers = (): Promise<any> => {
+        let promise = this.http.get(Urls.userLayers, this.authorizationService.getHeader()).toPromise();
+        promise.then(response => {
+            let data = response.json() as IUserLayers;
+            this.baseLayers.splice(0);
+            this.overlays.splice(0);
+            if (data == null || data.layers == null) {
+                this.userLayersChanged.next();
+                return;
+            }
+            for (let layer of data.layers) {
+                if (layer.isOverlay) {
+                    this.overlays.push(layer);
+                } else {
+                    this.baseLayers.push(layer);
+                }
+            }
+            this.userLayersChanged.next();
+        }, (error) => {
+            console.error(error);
+        });
+        return promise;
+    }
+
+    public updateUserLayers = (baseLayersToStore: Common.LayerData[], overlaysToStore: Common.LayerData[]): Promise<any> => {
+        if (!this.isLoggedIn()) {
+            return Promise.resolve();
+        }
+        
+        let layers = [...baseLayersToStore];
+        for (let overlayToStore of overlaysToStore) {
+            (overlayToStore as IUserLayer).isOverlay = true;
+            layers.push(overlayToStore);
+        }
+        
+        return this.http.post(Urls.userLayers + this.userId, { layers: layers, } as IUserLayers, this.authorizationService.getHeader()).toPromise();
+    }
+    
     public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, center: L.LatLng): string {
         let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
         return `${this.baseUrl}/edit#${background}&map=${zoom}/${center.lat}/${center.lng}`;

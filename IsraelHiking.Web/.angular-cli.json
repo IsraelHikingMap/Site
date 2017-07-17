@@ -10,8 +10,8 @@
       "assets": [
         "content",
         "translations",
-        "resourceNotFound.html",
-        "oauthCloseWindow.html"
+        "resource-not-found.html",
+        "oauth-close-window.html"
       ],
       "index": "index.html",
       "main": "main.ts",

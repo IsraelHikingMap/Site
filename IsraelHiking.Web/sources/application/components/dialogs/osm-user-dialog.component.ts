@@ -48,11 +48,14 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public filteredTraces: ITrace[];
     public state: IOsmUserDialogState;
     public file: File;
-
+    public loadingTraces: boolean;
+    public loadingSiteUrls: boolean;
     public searchTerm: FormControl;
 
     private osmTraceLayer: L.LayerGroup;
     private languageChangeSubscription: Subscription;
+    private tracesChangedSubscription: Subscription;
+    private siteUrlChangedSubscription: Subscription;
 
     constructor(resources: ResourcesService,
         private injector: Injector,
@@ -69,6 +72,8 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         public userService: OsmUserService,
     ) {
         super(resources);
+        this.loadingTraces = false;
+        this.loadingSiteUrls = false;
         this.initializeRanks();
         this.osmTraceLayer = L.layerGroup([]);
         this.mapService.map.addLayer(this.osmTraceLayer);
@@ -85,10 +90,20 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         });
         this.searchTerm.setValue(this.state.searchTerm);
         this.languageChangeSubscription = this.resources.languageChanged.subscribe(this.initializeRanks);
+        this.tracesChangedSubscription = this.userService.tracesChanged.subscribe(() => {
+            this.updateFilteredLists(this.searchTerm.value);
+            this.loadingTraces = false;
+        });
+        this.siteUrlChangedSubscription = this.userService.siteUrlsChanged.subscribe(() => {
+            this.updateFilteredLists(this.searchTerm.value);
+            this.loadingSiteUrls = false;
+        });
     }
 
     public ngOnInit() {
-        this.userService.refreshDetails().then(() => { this.updateFilteredLists(this.searchTerm.value) });
+        this.loadingTraces = true;
+        this.loadingSiteUrls = true;
+        this.userService.refreshDetails();
         let dialogElement = $(".dialog-content-for-scroll");
         dialogElement.delay(700)
             .animate({
@@ -103,6 +118,8 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
 
     public ngOnDestroy() {
         this.languageChangeSubscription.unsubscribe();
+        this.tracesChangedSubscription.unsubscribe();
+        this.siteUrlChangedSubscription.unsubscribe();
     }
 
     public getRank() {
@@ -205,7 +222,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         }
         this.fileService.upload(Urls.osmUploadTrace, file).then(() => {
             this.toastService.success(this.resources.fileUploadedSuccefullyItWillTakeTime);
-            this.userService.refreshDetails().then(() => { this.updateFilteredLists(this.searchTerm.value) });
+            this.userService.refreshDetails();
         }, () => {
             this.toastService.error(this.resources.unableToUploadFile);
         });

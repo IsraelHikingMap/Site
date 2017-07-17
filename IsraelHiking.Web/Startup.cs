@@ -228,7 +228,7 @@ namespace IsraelHiking.Web
             {
                 context.Response.StatusCode = 404;
                 context.Response.ContentType = "text/html";
-                var file = env.WebRootFileProvider.GetFileInfo("/resourceNotFound.html");
+                var file = env.WebRootFileProvider.GetFileInfo("/resource-not-found.html");
                 context.Response.ContentLength = file.Length;
                 return context.Response.SendFileAsync(file);
             });

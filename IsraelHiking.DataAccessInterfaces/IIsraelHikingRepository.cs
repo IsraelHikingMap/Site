@@ -12,5 +12,8 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<List<SiteUrl>> GetUrlsByUser(string osmUserId);
         Task Delete(SiteUrl siteUrl);
         Task Update(object obj);
+
+        Task<UserLayers> GetUserLayers(string osmUserId);
+        Task UpdateUserLayers(string osmUserId, UserLayers newUserLayers);
     }
 }

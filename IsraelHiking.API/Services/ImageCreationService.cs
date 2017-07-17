@@ -151,9 +151,10 @@ namespace IsraelHiking.API.Services
 
         private static string GetAddressTemplate(DataContainer dataContainer)
         {
-            var address = string.IsNullOrWhiteSpace(dataContainer.baseLayer.address)
+            var address = string.IsNullOrWhiteSpace(dataContainer.baseLayer.Address)
                 ? "https://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png"
-                : dataContainer.baseLayer.address;
+                : dataContainer.baseLayer.Address;
+            address = address.Trim().ToLower();
             if (address.StartsWith("http") == false && address.StartsWith("www") == false)
             {
                 address = "https://israelhiking.osm.org.il" + address;

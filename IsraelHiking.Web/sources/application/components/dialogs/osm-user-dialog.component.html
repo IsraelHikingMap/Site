@@ -62,12 +62,12 @@
                         </div>
                     </div>
                 </div>
-                <div class="cssload-loader" [hidden]="!userService.loading">
+                <div class="cssload-loader" [hidden]="!loadingTraces">
                     <div class="cssload-inner cssload-one"></div>
                     <div class="cssload-inner cssload-two"></div>
                     <div class="cssload-inner cssload-three"></div>
                 </div>
-                <p [hidden]="userService.traces.length != 0 || userService.loading">{{resources.noTraces}}</p>
+                <p [hidden]="userService.traces.length != 0 || loadingTraces">{{resources.noTraces}}</p>
             </md-tab>
             <md-tab label="{{resources.myShares}}">
                 <div *ngFor="let siteUrl of filteredSiteUrls | paginate: { itemsPerPage: 5, currentPage: state.sharesPage, id: 'sharesPaging' }">
@@ -114,12 +114,12 @@
                     </div>
                     <br />
                 </div>
-                <div class="cssload-loader" [hidden]="!userService.loading">
+                <div class="cssload-loader" [hidden]="!loadingSiteUrls">
                     <div class="cssload-inner cssload-one"></div>
                     <div class="cssload-inner cssload-two"></div>
                     <div class="cssload-inner cssload-three"></div>
                 </div>
-                <p [hidden]="userService.siteUrls.length != 0 || userService.loading">{{resources.noShares}}</p>
+                <p [hidden]="userService.siteUrls.length != 0 || loadingSiteUrls">{{resources.noShares}}</p>
             </md-tab>
         </md-tab-group>
     </div>

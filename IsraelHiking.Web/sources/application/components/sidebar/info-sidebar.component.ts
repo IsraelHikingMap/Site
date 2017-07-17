@@ -1082,7 +1082,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
         ];
         // End Of Legend content definition //
 
-        this.dataContainerService.initializationPromise.then(() => {
+        this.dataContainerService.initializationFinished.then(() => {
             if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP) {
                 this.removeMtbUnwantedLegend();
             } else if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP) {

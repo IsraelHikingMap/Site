@@ -2,14 +2,16 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using IsraelHiking.DataAccess.Database;
 
 namespace IsraelHiking.DataAccess.Migrations
 {
     [DbContext(typeof(IsraelHikingDbContext))]
-    partial class IsraelHikingDbContextModelSnapshot : ModelSnapshot
+    [Migration("20170717191300_UserLayers")]
+    partial class UserLayers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("ProductVersion", "1.1.2");

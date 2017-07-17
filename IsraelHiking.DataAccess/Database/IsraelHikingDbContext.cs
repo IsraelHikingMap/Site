@@ -7,7 +7,8 @@ namespace IsraelHiking.DataAccess.Database
     public class IsraelHikingDbContext : DbContext
     {
         public DbSet<SiteUrl> SiteUrls { get; set; }
-
+        public DbSet<UserLayers> UsersLayers { get; set; }
+        
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseSqlite("Filename=./IsraelHiking.sqlite");

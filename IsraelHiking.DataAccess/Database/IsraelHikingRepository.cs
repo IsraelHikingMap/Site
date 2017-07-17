@@ -31,7 +31,7 @@ namespace IsraelHiking.DataAccess.Database
             return await _dbContext.SiteUrls.Where(s => s.OsmUserId == osmUserId)
                 .OrderByDescending(s => s.LastViewed)
                 .ToListAsync()
-                .ConfigureAwait(false); ;
+                .ConfigureAwait(false);
         }
 
         public Task Delete(SiteUrl siteUrl)
@@ -49,6 +49,30 @@ namespace IsraelHiking.DataAccess.Database
         public async Task Update(object obj)
         {
             _dbContext.Entry(obj).State = EntityState.Modified;
+            await _dbContext.SaveChangesAsync().ConfigureAwait(false);
+        }
+
+        public Task<UserLayers> GetUserLayers(string osmUserId)
+        {
+            return _dbContext.UsersLayers.Include(ul => ul.Layers).FirstOrDefaultAsync(ul => ul.OsmUserId == osmUserId);
+        }
+
+        public async Task UpdateUserLayers(string osmUserId, UserLayers newUserLayers)
+        {
+            var oldUserLayers = await GetUserLayers(osmUserId);
+            if (oldUserLayers != null)
+            {
+                _dbContext.UsersLayers.Remove(oldUserLayers);
+            }
+            newUserLayers.Id = 0;
+            newUserLayers.OsmUserId = osmUserId;
+            foreach (var newUserLayer in newUserLayers.Layers)
+            {
+                newUserLayer.Id = 0;
+                newUserLayer.Address = newUserLayer.Address.Trim();
+                newUserLayer.Key = newUserLayer.Key.Trim();
+            }
+            _dbContext.UsersLayers.Add(newUserLayers);
             await _dbContext.SaveChangesAsync().ConfigureAwait(false);
         }
 

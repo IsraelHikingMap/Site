@@ -1,14 +1,18 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
 import { LocalStorage } from "ngx-store";
+import * as _ from "lodash";
+import "leaflet.gridlayer.googlemutant";
+
 import { MapService } from "../map.service";
 import { WikiMarkersLayer } from "./wiki-markers.layer";
 import { NakebMarkerLayer } from "./nakeb-markers.layer";
 import { ResourcesService } from "../resources.service";
+import { OsmUserService } from "../osm-user.service";
 import { Urls } from "../../common/Urls";
-import * as _ from "lodash";
+import { Deferred } from "../../common/deferred";
 import * as Common from "../../common/IsraelHiking";
-import "leaflet.gridlayer.googlemutant";
+
 
 export interface ILayer extends Common.LayerData {
     layer: L.Layer;
@@ -33,6 +37,8 @@ export class LayersService {
 
     private static MAX_ZOOM = 20;
     private static HIKING_TRAILS = "Hiking Trails";
+    private static NAKEB = "Nakeb";
+    private static WIKIPEDIA = "Wikipedia";
     private static ATTRIBUTION = "Tiles © <a href='https://IsraelHiking.osm.org.il' target='_blank'>Israel Hiking</a>, <a href='https://creativecommons.org/licenses/by-nc-sa/3.0/' target='_blank'>CC BY-NC-SA 3.0</a>. Data by <a href='https://openstreetmap.org' target='_blank'>OpenStreetMap</a> under <a href='https://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
     private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION + "Map style courtesy of <a href='http://mtbmap.no'>MTBmap.no.</a> ";
     private static TRAILS_ATTRIBUTION = "Trail " + LayersService.ATTRIBUTION;
@@ -56,10 +62,12 @@ export class LayersService {
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public selectedBaseLayer: IBaseLayer;
+    public initializationFinished: Promise<any>;
 
     constructor(private http: Http,
         private mapService: MapService,
         private resourcesService: ResourcesService,
+        private osmUserService: OsmUserService,
         private wikiMarkersLayer: WikiMarkersLayer,
         private nakebMarkerLayer: NakebMarkerLayer) {
         this.selectedBaseLayer = null;
@@ -67,23 +75,22 @@ export class LayersService {
         this.overlays = [];
         this.overlayZIndex = 10;
         this.initializeDefaultBaseLayers();
-
-        // Default initialization - must be before toggling overlays from storage
-        this.selectedBaseLayer = this.baseLayers[0];
-        this.mapService.map.addLayer(this.selectedBaseLayer.layer);
-
-        this.addLayersFromLocalStorage();
-        this.resourcesService.languageChanged.asObservable().subscribe(() => this.changeLanguage());
+        let deferred = new Deferred<any>();
+        this.initializationFinished = deferred.promise;
+        this.osmUserService.initializationFinished.then(
+            () => this.onOsmUserServiceInitializationFinished(deferred),
+            () => this.onOsmUserServiceInitializationFinished(deferred)
+        );
     }
 
     private initializeDefaultBaseLayers() {
-        this.addBaseLayer({
+        this.addNewBaseLayer({
             key: LayersService.ISRAEL_HIKING_MAP,
             address: this.resourcesService.currentLanguage.tilesFolder + Urls.DEFAULT_TILES_ADDRESS,
             isEditable: false
         } as ILayer, LayersService.ATTRIBUTION);
 
-        this.addBaseLayer({
+        this.addNewBaseLayer({
             key: LayersService.ISRAEL_MTB_MAP,
             address: this.resourcesService.currentLanguage.tilesFolder + Urls.MTB_TILES_ADDRESS,
             isEditable: false
@@ -92,10 +99,10 @@ export class LayersService {
             var googleLayer = L.gridLayer.googleMutant({ type: "satellite" } as L.gridLayer.GoogleMutantOptions) as any;
             this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: googleLayer, selected: false, address: "", isEditable: false } as IBaseLayer);
         } catch (e) {
-            console.error("Unable to create the google earth layer... ");
+            console.error("Unable to create the google earth layer...");
         }
 
-        let hikingTrailsOverlay = this.addOverlay({
+        let hikingTrailsOverlay = this.addNewOverlay({
             key: LayersService.HIKING_TRAILS,
             address: Urls.OVERLAY_TILES_ADDRESS,
             minZoom: LayersService.MIN_ZOOM,
@@ -103,21 +110,45 @@ export class LayersService {
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
         hikingTrailsOverlay.isEditable = false;
 
-        this.overlays.push({ visible: false, isEditable: false, address: "", key: "Wikipedia", layer: this.wikiMarkersLayer as L.Layer } as IOverlay);
-        this.overlays.push({ visible: false, isEditable: false, address: "", key: "Nakeb", layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
-        
-        this.changeLanguage();
+        this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.WIKIPEDIA, layer: this.wikiMarkersLayer as L.Layer } as IOverlay);
+        this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.NAKEB, layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
+
+        this.selectedBaseLayer = this.baseLayers[0];
+        this.mapService.map.addLayer(this.selectedBaseLayer.layer);
     }
-    
+
     public addBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
-        var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() === layerData.key.toLocaleLowerCase());
+        var layer = _.find(this.baseLayers, (layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
         if (layer != null) {
             return layer; // layer exists
         }
         layer = this.addNewBaseLayer(layerData, attribution, position);
-        this.storedBaseLayers.push(layerData);
-        this.storedBaseLayers = this.unique(this.storedBaseLayers);
+        this.storeLayers();
         return layer;
+    }
+
+    private storeLayers() {
+        let baseLayersToStore = [] as Common.LayerData[];
+        for (let baseLayer of this.baseLayers) {
+            if (baseLayer.key === LayersService.ISRAEL_HIKING_MAP ||
+                baseLayer.key === LayersService.ISRAEL_MTB_MAP ||
+                baseLayer.key === LayersService.GOOGLE_EARTH) {
+                continue;
+            }
+            baseLayersToStore.push(this.extractDataFromLayer(baseLayer));
+        }
+
+        let overlaysToStore = [] as Common.LayerData[];
+        for (let overlay of this.overlays) {
+            if (overlay.key === LayersService.HIKING_TRAILS ||
+                overlay.key === LayersService.WIKIPEDIA ||
+                overlay.key === LayersService.NAKEB) {
+                continue;
+            }
+            overlaysToStore.push(this.extractDataFromLayer(overlay));
+        }
+
+        this.osmUserService.updateUserLayers(baseLayersToStore, overlaysToStore);
     }
 
     private addNewBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
@@ -132,13 +163,12 @@ export class LayersService {
     }
 
     public addOverlay = (layerData: Common.LayerData, attribution?: string): IOverlay => {
-        var overlay = _.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() === layerData.key.toLocaleLowerCase());
+        var overlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
         if (overlay != null) {
             return overlay; // overlay exists
         }
         overlay = this.addNewOverlay(layerData, attribution);
-        this.storedOverlays.push(layerData);
-        this.storedOverlays = this.unique(this.storedOverlays);
+        this.storeLayers();
         return overlay;
     }
 
@@ -154,30 +184,35 @@ export class LayersService {
 
     public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: Common.LayerData): string => {
         if (oldLayer.key !== newLayer.key &&
-            _.find(this.baseLayers, bl => bl.key.toLocaleLowerCase() === newLayer.key.toLocaleLowerCase()) != null) {
+            _.find(this.baseLayers, bl => this.compareKeys(bl.key, newLayer.key)) != null) {
             return `The name: '${newLayer.key}' is already in use.`;
         }
         let position = this.baseLayers.indexOf(_.find(this.baseLayers, bl => bl.key === oldLayer.key));
-        this.removeBaseLayer(oldLayer);
-        var layer = this.addBaseLayer(newLayer, null, position);
+        this.removeBaseLayerNoStore(oldLayer);
+        var layer = this.addNewBaseLayer(newLayer, null, position);
         this.selectBaseLayer(layer);
+        this.storeLayers();
         return "";
     }
 
     public updateOverlay = (oldLayer: IOverlay, newLayer: Common.LayerData) => {
         if (oldLayer.key !== newLayer.key &&
-            _.find(this.overlays, o => o.key.toLocaleLowerCase() === newLayer.key.toLocaleLowerCase()) != null) {
+            _.find(this.overlays, o => this.compareKeys(o.key, newLayer.key)) != null) {
             return `The name: '${newLayer.key}' is already in use.`;
         }
-        this.removeOverlay(oldLayer);
-        var overlay = this.addOverlay(newLayer);
+        this.removeOverlayNoStore(oldLayer);
+        var overlay = this.addNewOverlay(newLayer);
         this.toggleOverlay(overlay);
+        this.storeLayers();
         return "";
     }
 
     public removeBaseLayer = (baseLayer: IBaseLayer) => {
-        _.remove(this.storedBaseLayers, (layerData) => layerData.key === baseLayer.key);
-        this.storedBaseLayers = this.unique(this.storedBaseLayers);
+        this.removeBaseLayerNoStore(baseLayer);
+        this.storeLayers();
+    }
+
+    private removeBaseLayerNoStore = (baseLayer: IBaseLayer) => {
         if (this.selectedBaseLayer.key !== baseLayer.key) {
             _.remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
             return;
@@ -191,10 +226,13 @@ export class LayersService {
             this.selectedBaseLayer = null;
         }
     }
-
+    
     public removeOverlay = (overlay: IOverlay) => {
-        _.remove(this.storedOverlays, (layerData) => layerData.key === overlay.key);
-        this.storedOverlays = this.unique(this.storedOverlays);
+        this.removeOverlayNoStore(overlay);
+        this.storeLayers();
+    }
+
+    private removeOverlayNoStore = (overlay: IOverlay) => {
         if (overlay.visible) {
             this.toggleOverlay(overlay);
         }
@@ -234,48 +272,60 @@ export class LayersService {
         }
     }
 
-    private addLayersFromLocalStorage = () => {
-        for (let baseLayerIndex = 0; baseLayerIndex < this.storedBaseLayers.length; baseLayerIndex++) {
-            let baseLayer = this.storedBaseLayers[baseLayerIndex] as ILayer;
-            baseLayer.isEditable = true;
-            var layer = _.find(this.baseLayers, (layerToFind) => layerToFind.key.toLocaleLowerCase() === baseLayer.key.toLocaleLowerCase());
+    private onUserLayersChanged = () => {
+        for (let baseLayer of this.unique(this.osmUserService.baseLayers.concat(this.storedBaseLayers))) {
+            (baseLayer as ILayer).isEditable = true;
+            var layer = _.find(this.baseLayers, (layerToFind) => this.compareKeys(layerToFind.key, baseLayer.key));
             if (layer != null) {
                 continue; // layer exists
             }
             this.addNewBaseLayer(baseLayer);
         }
-        
-        for (let overlayIndex = 0; overlayIndex < this.storedOverlays.length; overlayIndex++) {
-            let overlayData = this.storedOverlays[overlayIndex] as ILayer;
-            overlayData.isEditable = true;
-            var overlay = _.find(this.overlays, (overlayToFind) => overlayToFind.key.toLocaleLowerCase() === overlayData.key.toLocaleLowerCase());
+
+        for (let overlayData of this.unique(this.osmUserService.overlays.concat(this.storedOverlays))) {
+            (overlayData as ILayer).isEditable = true;
+            var overlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, overlayData.key));
             if (overlay != null) {
                 continue; // overlay exists
             }
             this.addNewOverlay(overlayData);
         }
+        this.storeLayers();
+    }
 
+    private onOsmUserServiceInitializationFinished = (deferred: Deferred<any>) => {
+        this.onUserLayersChanged();
+        
+        let baseLayerToActivate = _.find(this.baseLayers, baseToFind => baseToFind.key === this.selectedBaseLayerKey);
+        if (baseLayerToActivate) {
+            this.selectBaseLayer(baseLayerToActivate);
+        } else {
+            this.selectBaseLayer(this.baseLayers[0]);
+        }
+        
         for (let overlayKey of this.activeOverlayKeys) {
             let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
             if (overlay && overlay.visible === false) {
                 this.toggleOverlay(overlay);
             }
         }
+        
+        // must be after using local storage values.
+        this.onLanguageChange();
+        
+        this.resourcesService.languageChanged.subscribe(this.onLanguageChange);
+        this.osmUserService.userLayersChanged.subscribe(this.onUserLayersChanged);
+        
+        deferred.resolve();
     }
-
+    
     public addExternalBaseLayer = (layerData: Common.LayerData) => {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
-            let baseLayerToActivate = _.find(this.baseLayers, baseToFind => baseToFind.key === this.selectedBaseLayerKey);
-            if (baseLayerToActivate) {
-                this.selectBaseLayer(baseLayerToActivate);
-            } else {
-                this.selectBaseLayer(this.baseLayers[0]);
-            }
             return;
         }
         var baseLayer = _.find(this.baseLayers, (baseLayerToFind) =>
             baseLayerToFind.address.toLocaleLowerCase() === layerData.address.toLocaleLowerCase() ||
-            baseLayerToFind.key.toLocaleLowerCase() === layerData.key.toLocaleLowerCase());
+            this.compareKeys(baseLayerToFind.key, layerData.key));
         if (baseLayer != null) {
             this.selectBaseLayer(baseLayer);
             return;
@@ -321,10 +371,10 @@ export class LayersService {
     private unique(layers: Common.LayerData[]): Common.LayerData[] {
         var layersMap = {};
         return layers.reverse().filter((layer) => {
-            if (layersMap[layer.key.toLowerCase()]) {
+            if (layersMap[layer.key.trim().toLowerCase()]) {
                 return false;
             }
-            layersMap[layer.key.toLowerCase()] = true;
+            layersMap[layer.key.trim().toLowerCase()] = true;
             return true;
         });
     }
@@ -361,7 +411,7 @@ export class LayersService {
         } as Common.LayerData;
     }
 
-    private changeLanguage() {
+    private onLanguageChange() {
         let ihmLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_HIKING_MAP);
         this.replaceBaseLayerAddress(ihmLayer,
             this.resourcesService.currentLanguage.tilesFolder + Urls.DEFAULT_TILES_ADDRESS,
@@ -380,10 +430,14 @@ export class LayersService {
         layer.layer = null;
         layer.address = newAddress;
         layer.selected = false;
-        let newLayer = this.addBaseLayer(layer, attribution, position);
+        let newLayer = this.addNewBaseLayer(layer, attribution, position);
         if (this.selectedBaseLayer != null && this.selectedBaseLayer.key === layer.key) {
             this.selectedBaseLayer = null;
             this.selectBaseLayer(newLayer);
         }
+    }
+
+    private compareKeys(key1: string, key2: string): boolean {
+        return key1.trim().toLowerCase() === key2.trim().toLowerCase();
     }
 }

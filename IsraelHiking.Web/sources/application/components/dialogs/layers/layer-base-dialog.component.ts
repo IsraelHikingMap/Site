@@ -46,7 +46,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     }
 
     public addressChanged(address: string) {
-        this.address = address;
+        this.address = address.trim();
         this.mapPreview.removeLayer(this.tileLayer);
         this.tileLayer = L.tileLayer(this.getTilesAddress());
         this.mapPreview.addLayer(this.tileLayer);
@@ -72,6 +72,6 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public removeLayer(e: Event) { } // should be derived if needed.
 
     private getTilesAddress() {
-        return decodeURI(this.address).replace("{zoom}", "{z}");
+        return decodeURI(this.address).replace("{zoom}", "{z}").trim();
     }
 }
