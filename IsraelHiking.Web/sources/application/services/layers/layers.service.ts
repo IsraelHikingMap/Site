@@ -138,6 +138,8 @@ export class LayersService {
             baseLayersToStore.push(this.extractDataFromLayer(baseLayer));
         }
 
+        this.storedBaseLayers = baseLayersToStore;
+        
         let overlaysToStore = [] as Common.LayerData[];
         for (let overlay of this.overlays) {
             if (overlay.key === LayersService.HIKING_TRAILS ||
@@ -148,6 +150,8 @@ export class LayersService {
             overlaysToStore.push(this.extractDataFromLayer(overlay));
         }
 
+        this.storedOverlays = overlaysToStore;
+        
         this.osmUserService.updateUserLayers(baseLayersToStore, overlaysToStore);
     }
 
