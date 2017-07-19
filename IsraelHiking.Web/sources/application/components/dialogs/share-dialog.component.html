@@ -36,9 +36,9 @@
                         </div>
                         <div fxFlex>
                             <div fxLayout="column" fxLayoutAlign="space-between stretch">
-                                <a md-button href="{{facebookShareAddress}}" target="_blank" class="chrome-wordwrap-fix" mdTooltip="{{resources.shareWithFacebook}}" mdTooltipPosition="{{resources.start}}" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share facebook"><i class="fa icon-facebook"></i></a>
+                                <a md-button [href]="facebookShareAddress" [target]="'_blank'" class="chrome-wordwrap-fix" mdTooltip="{{resources.shareWithFacebook}}" mdTooltipPosition="{{resources.start}}" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share facebook"><i class="fa icon-facebook"></i></a>
                                 <div fxHide fxShow.sm fxShow.xs>
-                                    <a md-button href="{{whatappShareAddress}}" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share whatapp"><i class="fa icon-whatsapp"></i></a>
+                                    <a md-button [href]="whatappShareAddress" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share whatapp"><i class="fa icon-whatsapp"></i></a>
                                 </div>
                                 <a md-button (click)="showOffroadForm = true" [ngClass]="{active: showOffroadForm}" mdTooltip="{{resources.shareWithOffroad}}" mdTooltipPosition="{{resources.start}}"><i class="fa icon-off-road"></i></a>
                             </div>
@@ -46,7 +46,7 @@
                     </div>
                     <div fxLayout="row">
                         <div fxFlex="75">
-                            <a href="{{shareAddress}}" target="_blank" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share test address">{{shareAddress}}</a>
+                            <a [href]="shareAddress" [target]="'_blank'" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share test address">{{shareAddress}}</a>
                         </div>
                         <div fxFlex>
                             <a md-button ngxClipboard [cbContent]="shareAddress" mdTooltip="{{resources.copyUrl}}" mdTooltipPosition="{{resources.start}}" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share copy to clipboard"><i class="fa icon-clipboard"></i></a>
