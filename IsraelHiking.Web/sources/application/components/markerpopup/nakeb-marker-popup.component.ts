@@ -1,10 +1,14 @@
 ﻿import { Component } from "@angular/core";
 import { Http } from "@angular/http";
+import * as _ from "lodash";
 
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
-import { IconsService } from "../../services/icons.service";
 import { BaseMapComponent } from "../base-map.component";
+import { RoutesService } from "../../services/layers/routelayers/routes.service";
+import { ElevationProvider } from "../../services/elevation.provider";
+import * as Common from "../../common/IsraelHiking";
+
 
 
 export interface NakebItemExtended extends NakebItem {
@@ -36,24 +40,29 @@ export class NakebMarkerPopupComponent extends BaseMapComponent {
     public attributes: string;
     public pageId: number;
 
+    private routeData: Common.RouteData;
     private marker: L.Marker;
-    private readOnlyLayer: L.LayerGroup;
 
     constructor(resources: ResourcesService,
         private mapService: MapService,
+        private routesService: RoutesService,
+        private elevationProvider: ElevationProvider,
         private http: Http) {
         super(resources);
 
-        this.readOnlyLayer = L.layerGroup([]);
-        this.title = "";
+        this.routeData = null;
         this.address = "";
     }
 
+    // Should be defined by the main nakeb layer to faciliatate for single route
+    public selectRoute = (routeData: Common.RouteData) => { };
+    public clearSelectedRoute = () => {};
+    
     public setMarker(marker: L.Marker) {
         this.marker = marker;
         this.marker.on("popupopen", () => {
-            this.mapService.map.addLayer(this.readOnlyLayer);
-            if (this.title !== "") {
+            if (this.routeData != null) {
+                this.selectRoute(this.routeData);
                 return;
             }
             let popup = this.marker.getPopup();
@@ -68,30 +77,38 @@ export class NakebMarkerPopupComponent extends BaseMapComponent {
                 this.attributes = nakebItem.attributes.join(", ");
                 popup.update();
 
-                this.createReadOnlyLayer(nakebItem);
+                this.routeData = this.getRouteData(nakebItem);
+                this.selectRoute(this.routeData);
+                
             });
-        });
-        marker.on("popupclose", () => {
-            this.mapService.map.removeLayer(this.readOnlyLayer);
         });
     }
 
-    private createReadOnlyLayer(item: NakebItemExtended) {
+    public convertToRoute() {
+        this.routesService.setData([this.routeData]);
+        this.clearSelectedRoute();
+    }
+    
+    private getRouteData(item: NakebItemExtended): Common.RouteData {
+        let routeData = {
+            segments: [],
+            markers: [],
+            name: item.title,
+        } as Common.RouteData;
         let latLngs = [] as L.LatLng[];
         for (let latLng of item.latlngs) {
             latLngs.push(L.latLng(latLng.lat, latLng.lng));
         }
-        let polyLine = L.polyline(latLngs, { opacity: 1, color: "Blue", weight: 3 } as L.PathOptions);
-        this.readOnlyLayer.addLayer(polyLine);
+        this.elevationProvider.updateHeights(latLngs);
+        routeData.segments.push({ latlngs: [latLngs[0], latLngs[0]], routePoint: latLngs[0] } as Common.RouteSegmentData);
+        routeData.segments.push({ latlngs: latLngs, routePoint: _.last(latLngs) } as Common.RouteSegmentData);
+
         for (let nakebMarker of item.markers) {
-            let marker = L.marker(L.latLng(nakebMarker.latlng.lat, nakebMarker.latlng.lng),
-                {
-                    draggable: false,
-                    clickable: false,
-                    icon: IconsService.createPoiDefaultMarkerIcon("blue")
-                } as L.MarkerOptions);
-            marker.bindTooltip(nakebMarker.title, { permanent: true, direction: "bottom" } as L.TooltipOptions);
-            this.readOnlyLayer.addLayer(marker);
+            routeData.markers.push({
+                title: nakebMarker.title,
+                latlng: L.latLng(nakebMarker.latlng.lat, nakebMarker.latlng.lng)
+            } as Common.MarkerData);
         }
+        return routeData;
     }
 }

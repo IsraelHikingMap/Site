@@ -1,15 +1,23 @@
 ﻿<div class="marker-popup" [dir]="'rtl'">
     <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="!thumbnail">
-        <img [src]="thumbnail" class="img-responsive" height="100"/>
+        <img [src]="thumbnail" class="img-responsive" height="100" />
     </div>
     <a href="{{address}}" target="_blank">
         <h3 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h3>
     </a>
     <div class="text-right">
         <p>
-            {{extract}} <br/>
+            {{extract}} <br />
             אורך: {{length}} ק"מ<br />
             {{attributes}}
         <p>
+    </div>
+    <div fxLayout="row">
+        <div fxFlex>
+            <button mdButton md-button fxFill (click)="convertToRoute()" mdTooltip="{{resources.convertToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Nakeb" angularticsEvent="Convert nakeb to route"><i class="fa icon-plus"></i></button>
+        </div>
+        <div fxFlex>
+            <button mdButton md-button fxFill (click)="clearSelectedRoute()" mdTooltip="{{resources.clear}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Nakeb" angularticsEvent="Clear selected route"><i class="fa icon-eye-slash"></i></button>
+        </div>
     </div>
 </div>

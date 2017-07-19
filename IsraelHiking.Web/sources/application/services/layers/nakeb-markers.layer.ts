@@ -10,7 +10,8 @@ import * as _ from "lodash";
 @Injectable()
 export class NakebMarkerLayer extends BasePoiMarkerLayer {
     private cachedMarkers: Common.IMarkerWithTitle[];
-
+    private readOnlyLayer: L.LayerGroup;
+    
     constructor(mapService: MapService,
         private http: Http,
         private injector: Injector,
@@ -18,9 +19,17 @@ export class NakebMarkerLayer extends BasePoiMarkerLayer {
         private applicationRef: ApplicationRef) {
         super(mapService);
         this.cachedMarkers = [];
-        this.minimalZoom = 11;
+        this.minimalZoom = 9;
         this.markerIcon = IconsService.createNakebIcon();
+        this.readOnlyLayer = L.layerGroup([]);
+        this.mapService.map.addLayer(this.readOnlyLayer);
         this.fetchMarkers();
+    }
+
+    public onRemove(map: L.Map): this {
+        super.onRemove(map);
+        this.readOnlyLayer.clearLayers();
+        return this;
     }
 
     protected getIconString() {
@@ -45,6 +54,8 @@ export class NakebMarkerLayer extends BasePoiMarkerLayer {
                 let factory = this.componentFactoryResolver.resolveComponentFactory(NakebMarkerPopupComponent);
                 let componentRef = factory.create(this.injector, null, markerPopupContainer);
                 componentRef.instance.pageId = item.id;
+                componentRef.instance.selectRoute = (item) => this.createReadOnlyLayer(item);
+                componentRef.instance.clearSelectedRoute = () => this.readOnlyLayer.clearLayers();
                 componentRef.instance.setMarker(marker);
                 marker.bindPopup(markerPopupContainer);
                 marker.on("popupopen", () => {
@@ -76,5 +87,43 @@ export class NakebMarkerLayer extends BasePoiMarkerLayer {
             }
             this.markers.addLayer(marker);
         }
+    }
+
+    private createReadOnlyLayer(routeData: Common.RouteData) {
+        this.readOnlyLayer.clearLayers();
+        let latLngs = _.last(routeData.segments).latlngs;
+        let polyLine = L.polyline(latLngs,
+            {
+                opacity: 1,
+                color: "Blue",
+                weight: 3,
+                dashArray: "30 10",
+                className: "segment-readonly-indicator"
+            } as L.PathOptions);
+        this.readOnlyLayer.addLayer(polyLine);
+        for (let markerData of routeData.markers) {
+            let marker = L.marker(markerData.latlng,
+                {
+                    draggable: false,
+                    clickable: false,
+                    icon: IconsService.createPoiDefaultMarkerIcon("blue")
+                } as L.MarkerOptions);
+            marker.bindTooltip(markerData.title, { permanent: true, direction: "bottom" } as L.TooltipOptions);
+            this.readOnlyLayer.addLayer(marker);
+        }
+        this.readOnlyLayer.addLayer(L.marker(latLngs[0],
+            {
+                opacity: 1,
+                draggable: false,
+                clickable: false,
+                icon: IconsService.createRoundIcon("green")
+            }));
+        this.readOnlyLayer.addLayer(L.marker(latLngs[latLngs.length - 1],
+            {
+                opacity: 1,
+                draggable: false,
+                clickable: false,
+                icon: IconsService.createRoundIcon("red")
+            }));
     }
 }
