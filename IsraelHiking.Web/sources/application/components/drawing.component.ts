@@ -108,14 +108,18 @@ export class DrawingComponent extends BaseMapComponent {
         return this.routesService.selectedRoute.route.properties.currentRoutingType;
     };
 
-    public isUndoDisbaled = (): boolean => {
+    public isUndoDisabled = (): boolean => {
         let layer = this.routesService.selectedRoute;
         return layer != null ? layer.isUndoDisbaled() : true;
     };
 
+    public isEditDisabled = (): boolean => {
+        return this.routesService.selectedRoute == null;
+    }
+    
     public getRouteColor = (): string => {
         if (this.routesService.selectedRoute == null) {
-            return "black";
+            return "";
         }
         return this.routesService.selectedRoute.route.properties.pathOptions.color;
     }
