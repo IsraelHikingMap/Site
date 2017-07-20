@@ -86,23 +86,7 @@ In order to be able to build this site you'll need some tools:
   Update-Database
   ```
 # Starting a debug session
-* Open Visual Studio
-* Open `IsraelHiking.sln`. You may use _File &rarr; Recent Projects and Solutions_
-* In Package Manager Console (at the bottom pane)
-  * Type the following commands at the `PM>` prompt to start the search and routing servers. Alternatively, you may set them as a servive
-  ```
-  cd IsraelHiking.Web\bin\Debug\netcoreapp1.1
-  Start-Process -WindowStyle Minimized ElasticSearch\ElasticSearch.cmd
-  Start-Process -WindowStyle Minimized GraphHopper\GraphHopper.cmd
-  ```
-* Press F5 to start the server. A browser window will be opened for you
-* Surf to `localhost:<port>/swagger/` and you should be presented with the API of the site
-  * Expand the POST under Update
-  * Select the relevant osm.pbf file and click try it out!
-  * An error will be returned after a while but this is due to timeout, the update of the database will be running for about 20 minutes
-  * Once completed (can be seen in the logs under `IsraelHiking.Web\Logs\Site-<date>`) the server is ready!
-* Changes in UI can be made continuously by using `ng build -w` in `IsraelHiking.Web` folder - do not run it thorugh package manager as visual studio gets stuck
-* To run UI tests use `ng test` in `IsraelHiking.Web` folder
+[See the relevant page in our wiki](https://github.com/IsraelHikingMap/Site/wiki/Debug-Environment-Setup)
 
 # Setup the server
 In order to be able to make the server work a few prerequisits are needed:
