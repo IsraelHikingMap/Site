@@ -97,7 +97,7 @@ export class NakebMarkerPopupComponent extends BaseMapComponent {
         } as Common.RouteData;
         let latLngs = [] as L.LatLng[];
         for (let latLng of item.latlngs) {
-            latLngs.push(L.latLng(latLng.lat, latLng.lng));
+            latLngs.push(L.latLng(latLng.lat, latLng.lng, latLng.alt || 0));
         }
         this.elevationProvider.updateHeights(latLngs);
         routeData.segments.push({ latlngs: [latLngs[0], latLngs[0]], routePoint: latLngs[0] } as Common.RouteSegmentData);
