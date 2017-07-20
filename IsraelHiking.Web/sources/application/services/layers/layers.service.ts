@@ -113,8 +113,7 @@ export class LayersService {
         this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.WIKIPEDIA, layer: this.wikiMarkersLayer as L.Layer } as IOverlay);
         this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.NAKEB, layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
 
-        this.selectedBaseLayer = this.baseLayers[0];
-        this.mapService.map.addLayer(this.selectedBaseLayer.layer);
+        this.selectBaseLayerAccordingToStorage(false);
     }
 
     public addBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
@@ -297,15 +296,25 @@ export class LayersService {
         this.storeLayers();
     }
 
-    private onOsmUserServiceInitializationFinished = (deferred: Deferred<any>) => {
-        this.onUserLayersChanged();
-        
+    private selectBaseLayerAccordingToStorage = (updateLocalStorage: boolean) => {
         let baseLayerToActivate = _.find(this.baseLayers, baseToFind => baseToFind.key === this.selectedBaseLayerKey);
         if (baseLayerToActivate) {
             this.selectBaseLayer(baseLayerToActivate);
         } else {
-            this.selectBaseLayer(this.baseLayers[0]);
+            if (updateLocalStorage) {
+                this.selectBaseLayer(this.baseLayers[0]);
+            } else {
+                this.selectedBaseLayer = this.baseLayers[0];
+                this.baseLayers[0].selected = true;
+                this.mapService.map.addLayer(this.selectedBaseLayer.layer);
+            }
         }
+    }
+    
+    private onOsmUserServiceInitializationFinished = (deferred: Deferred<any>) => {
+        this.onUserLayersChanged();
+
+        this.selectBaseLayerAccordingToStorage(true);
         
         for (let overlayKey of this.activeOverlayKeys) {
             let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
@@ -415,7 +424,7 @@ export class LayersService {
         } as Common.LayerData;
     }
 
-    private onLanguageChange() {
+    private onLanguageChange = () => {
         let ihmLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_HIKING_MAP);
         this.replaceBaseLayerAddress(ihmLayer,
             this.resourcesService.currentLanguage.tilesFolder + Urls.DEFAULT_TILES_ADDRESS,
@@ -426,7 +435,7 @@ export class LayersService {
             LayersService.MTB_ATTRIBUTION, 1);
     }
 
-    private replaceBaseLayerAddress(layer: IBaseLayer, newAddress: string, attribution: string, position: number) {
+    private replaceBaseLayerAddress = (layer: IBaseLayer, newAddress: string, attribution: string, position: number) => {
         _.remove(this.baseLayers, (layerToRemove) => layer.key === layerToRemove.key);
         if (this.selectedBaseLayer != null && this.selectedBaseLayer.key === layer.key) {
             this.mapService.map.removeLayer(layer.layer);

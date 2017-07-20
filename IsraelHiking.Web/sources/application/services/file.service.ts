@@ -48,7 +48,7 @@ export class FileService {
         return new Promise((resolve, reject) => {
 
             this.upload(Urls.openFile, file).then((response) => {
-                resolve(<Common.DataContainer>JSON.parse(response));
+                resolve(JSON.parse(response) as Common.DataContainer);
             }, (err) => {
                 reject(err);
             });
