@@ -117,6 +117,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     public toggleVisibility = (e: Event) => {
         this.isVisible = !this.isVisible;
+        if (this.isVisible) {
+            // allow DOM make the input visible
+            setTimeout(() => this.searchFromInput.first.nativeElement.focus(), 100);
+        }
         this.suppressEvents(e);
     }
 
