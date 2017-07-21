@@ -2,6 +2,7 @@
 import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import * as X2JS from "x2js";
+
 import { OsmUserService, ITrace } from "./osm-user.service";
 import { AuthorizationService } from "./authorization.service";
 import { Urls } from "../common/Urls";
@@ -131,7 +132,6 @@ describe("OSM User Service", () => {
         flushMicrotasks();
 
         expect(osmUserService.isLoggedIn()).toBeTruthy();
-        expect(osmUserService.loading).toBeFalsy();
         expect(osmUserService.siteUrls.length).toBe(1);
         expect(osmUserService.traces.length).toBe(1);
     })));
@@ -155,13 +155,14 @@ describe("OSM User Service", () => {
                 body: JSON.stringify([{ title: "some share" } as Common.SiteUrl])
             })));
         });
-        osmUserService.login();
+        osmUserService.login().then(() => {
+            fail();
+        }, () => {
+            expect(osmUserService.isLoggedIn()).toBe(true);
+            expect(osmUserService.siteUrls.length).toBe(1);
+            expect(osmUserService.traces.length).toBe(0);
+        });
         flushMicrotasks();
-
-        expect(osmUserService.isLoggedIn()).toBe(true);
-        expect(osmUserService.loading).toBe(false);
-        expect(osmUserService.siteUrls.length).toBe(1);
-        expect(osmUserService.traces.length).toBe(0);
     })));
 
 

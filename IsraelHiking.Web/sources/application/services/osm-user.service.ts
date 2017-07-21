@@ -112,7 +112,6 @@ export class OsmUserService {
         let getTracesPromise = this.getTraces();
         let getSiteUtlsPromise = this.getSiteUrls();
         return Promise.all([getTracesPromise, getSiteUtlsPromise]);
-
     }
 
     private getUserDetails(deferred: Deferred<any>) {
