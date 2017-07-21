@@ -28,7 +28,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppVeyorBuild", "AppVeyorBuild", "{3585675D-C9A0-4E48-A11D-4B9E789A0B0A}"
 	ProjectSection(SolutionItems) = preProject
 		AppVeyorBuild\BuildTypescript.ps1 = AppVeyorBuild\BuildTypescript.ps1
-		AppVeyorBuild\PackArtifacts.ps1 = AppVeyorBuild\PackArtifacts.ps1
+		AppVeyorBuild\PostBuildPackArtifacts.ps1 = AppVeyorBuild\PostBuildPackArtifacts.ps1
 		AppVeyorBuild\PostBuildTests.ps1 = AppVeyorBuild\PostBuildTests.ps1
 	EndProjectSection
 EndProject
