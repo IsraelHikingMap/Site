@@ -63,12 +63,21 @@ ng test --no-progress --code-coverage
 $JUnitFile = Get-ChildItem tests-chrome*.xml -recurse | select-object -first 1 | select -expand FullName
 
 # Upload test resutls
+$anyFailures = $FLASE
 
 $wc = New-Object 'System.Net.WebClient'
 $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $OpenCoverAPIResultsFile)
+if ($LastExitCode) {
+	$anyFailures = $TRUE
+}
 $wc.UploadFile("https://ci.appveyor.com/api/testresults/mstest/$($env:APPVEYOR_JOB_ID)", $OpenCoverDAResultsFile)
+if ($LastExitCode) {
+	$anyFailures = $TRUE
+}
 $wc.UploadFile("https://ci.appveyor.com/api/testresults/junit/$($env:APPVEYOR_JOB_ID)", $JUnitFile)
-
+if ($LastExitCode) {
+	$anyFailures = $TRUE
+}
 # Locate Lcov coverage file
 
 $LcovCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web\coverage\lcov.info"
@@ -84,6 +93,9 @@ Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 $CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;lcov=$LcovCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
 Write-Host $CoverAllsCmd
 Invoke-Expression $CoverAllsCmd
+if ($LastExitCode) {
+	$anyFailures = $TRUE
+}
 
 
 if ($anyFailures -eq $TRUE){
