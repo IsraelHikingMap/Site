@@ -22,7 +22,7 @@ npm install
 # Compile TypeScript files using angular-cli
 
 Write-Host "ng build - to build using angular-cli"
-ng build --no-progress
+ng build --no-progress --prod
 	
 if($LastExitCode -ne 0) 
 { 
