@@ -49,7 +49,7 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(UserLayers), 200)]
         public async Task<IActionResult> PostUserLayers(string osmUserId, [FromBody] UserLayers userLayers)
         {
-            if (osmUserId != User.Identity.Name)
+            if (string.IsNullOrWhiteSpace(osmUserId) || osmUserId != User.Identity.Name)
             {
                 return Unauthorized();
             }

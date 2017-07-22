@@ -65,10 +65,10 @@ namespace IsraelHiking.API.Tests.Controllers
 
         private void SetupIdentity(string osmUserId = "42")
         {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new [] {
                     new Claim(ClaimTypes.Name, osmUserId)
             }));
-            _controller.ControllerContext = new ControllerContext()
+            _controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext { User = user }
             };
@@ -128,7 +128,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(string.Empty, null).Result as BadRequestObjectResult;
+            var results = _controller.PostGpsTrace(string.Empty).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -139,7 +139,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = SetupGpxUrl(new gpxType(), new List<LineString>());
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(url, null).Result as BadRequestObjectResult;
+            var results = _controller.PostGpsTrace(url).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -150,7 +150,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = SetupGpxUrl(new gpxType { trk = new[] { new trkType() } }, new List<LineString>());
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(url, null).Result as BadRequestObjectResult;
+            var results = _controller.PostGpsTrace(url).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
@@ -230,7 +230,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = SetupGpxUrl(gpx);
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(url, null).Result as OkObjectResult;
+            var results = _controller.PostGpsTrace(url).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;
@@ -259,7 +259,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var url = SetupGpxUrl(gpx);
             SetupIdentity();
 
-            var results = _controller.PostGpsTrace(url, null).Result as OkObjectResult;
+            var results = _controller.PostGpsTrace(url).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
             var featureCollection = results.Value as FeatureCollection;
