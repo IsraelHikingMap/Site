@@ -29,12 +29,6 @@
         pointer-events: none;
     }
 
-.chart-tooltip {
-    color: black;
-    text-align: left;
-    margin: 5px;
-}
-
 .tooltip-inner a {
     color: #79bdf7;
 }

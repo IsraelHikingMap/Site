@@ -1,6 +1,6 @@
 ﻿import { Component, ViewEncapsulation } from "@angular/core";
 import { MdDialog } from "@angular/material";
-import { LocalStorageService } from "ngx-store";
+import { LocalStorage } from "ngx-store";
 import { MapService } from "../../services/map.service";
 import { FileService } from "../../services/file.service";
 import { SidebarService } from "../../services/sidebar.service";
@@ -28,7 +28,8 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public routes: IRouteLayer[];
-    public isAdvanced: boolean;
+    @LocalStorage()
+    public isAdvanced: boolean = false;
 
     constructor(resources: ResourcesService,
         private dialog: MdDialog,
@@ -36,17 +37,11 @@ export class LayersSidebarComponent extends BaseMapComponent {
         private layersService: LayersService,
         private routesService: RoutesService,
         private fileService: FileService,
-        private sidebarService: SidebarService,
-        private localStorageService: LocalStorageService) {
+        private sidebarService: SidebarService) {
         super(resources);
         this.baseLayers = layersService.baseLayers;
         this.overlays = layersService.overlays;
         this.routes = routesService.routes;
-        this.isAdvanced = this.localStorageService.get(LayersSidebarComponent.IS_ADVANCED_KEY) || false;
-    }
-
-    public setIsAdvanced() {
-        this.localStorageService.set(LayersSidebarComponent.IS_ADVANCED_KEY, this.isAdvanced);
     }
 
     public closeSidebar() {

@@ -1,8 +1,11 @@
-﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, OnInit, OnDestroy } from "@angular/core";
+﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, OnInit, OnDestroy, ViewChild, ElementRef } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Response } from "@angular/http";
 import { MdDialogRef } from "@angular/material";
-import { SessionStorageService } from "ngx-store";
+import { SharedStorageService } from "ngx-store";
+import { Subscription } from "rxjs/Subscription";
+import * as _ from "lodash";
+
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
 import { FileService } from "../../services/file.service";
@@ -17,10 +20,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { SearchResultsMarkerPopupComponent } from "../markerpopup/search-results-marker-popup.component";
 import { MissingPartMarkerPopupComponent } from "../markerpopup/missing-part-marker-popup.component";
 import { Urls } from "../../common/Urls";
-import { Subscription } from "rxjs/Subscription";
-import * as _ from "lodash";
 import * as Common from "../../common/IsraelHiking";
-import * as $ from "jquery";
 
 interface IRank {
     name: string;
@@ -57,9 +57,11 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     private tracesChangedSubscription: Subscription;
     private siteUrlChangedSubscription: Subscription;
 
+    @ViewChild("dialogContentForScroll") dialogContent: ElementRef;
+    
     constructor(resources: ResourcesService,
         private injector: Injector,
-        private sessionStorageService: SessionStorageService,
+        private sharedStorageService: SharedStorageService,
         private mdDialogRef: MdDialogRef<OsmUserDialogComponent>,
         private componentFactoryResolver: ComponentFactoryResolver,
         private applicationRef: ApplicationRef,
@@ -78,7 +80,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.osmTraceLayer = L.layerGroup([]);
         this.mapService.map.addLayer(this.osmTraceLayer);
         this.searchTerm = new FormControl();
-        this.state = this.sessionStorageService.get(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY) || {
+        this.state = this.sharedStorageService.get(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY) || {
             scrollPosition: 0,
             searchTerm: "",
             selectedTabIndex: 0,
@@ -104,16 +106,12 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.loadingTraces = true;
         this.loadingSiteUrls = true;
         this.userService.refreshDetails();
-        let dialogElement = $(".dialog-content-for-scroll");
-        dialogElement.delay(700)
-            .animate({
-                scrollTop: this.state.scrollPosition
-            },
-            "slow");
-        dialogElement.on("scroll", () => {
-            this.state.scrollPosition = dialogElement.scrollTop();
-            this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
-        });
+        let dialogElement = this.dialogContent.nativeElement as HTMLElement;
+        setTimeout(() => dialogElement.scrollTop = this.state.scrollPosition, 700);
+        dialogElement.onscroll = () => {
+            this.state.scrollPosition = dialogElement.scrollTop;
+            this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
+        }
     }
 
     public ngOnDestroy() {
@@ -232,7 +230,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     {
         searchTerm = searchTerm.trim();
         this.state.searchTerm = searchTerm;
-        this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
+        this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
         this.filteredSiteUrls = this.userService.siteUrls.filter((s) => this.findInSiteUrl(s, searchTerm));
         this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInTrace(t, searchTerm)), ["date"], ["desc"]);
     }
@@ -332,7 +330,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     }
 
     public setSelectedTab() {
-        this.sessionStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
+        this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
     }
 
     public deleteSiteUrl(siteUrl: Common.SiteUrl) {

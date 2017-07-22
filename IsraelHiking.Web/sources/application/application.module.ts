@@ -14,7 +14,7 @@ import { ClipboardModule } from "ngx-clipboard";
 import { Angulartics2Module, Angulartics2GoogleAnalytics } from "angulartics2";
 import { NgProgressModule, NgProgressBrowserXhr } from "ngx-progressbar";
 import { NgxPaginationModule } from "ngx-pagination";
-import { ScrollToModule } from "ng2-scroll-to";
+import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 /// services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -57,6 +57,7 @@ import { RouteAddDialogComponent } from "./components/dialogs/routes/route-add-d
 import { RouteEditDialogComponent } from "./components/dialogs/routes/route-edit-dialog.component";
 import { RouteStatisticsComponent } from "./components/route-statistics.component";
 import { RouteStatisticsChartComponent } from "./components/route-statistics-chart.component";
+import { RouteStatisticsChartTooltipComponent } from "./components/route-statistics-chart-tooltip.component";
 import { FileComponent } from "./components/file.component";
 import { FileSaveAsComponent } from "./components/file-save-as.component";
 import { EditOSMComponent } from "./components/edit-osm.component";
@@ -104,7 +105,7 @@ export function getWindow() { return window; }
         Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
         NgProgressModule,
         NgxPaginationModule,
-        ScrollToModule
+        ScrollToModule.forRoot()
     ],
     entryComponents: [ZoomComponent,
         LocationButtonComponent,
@@ -117,6 +118,7 @@ export function getWindow() { return window; }
         RouteAddDialogComponent,
         RouteEditDialogComponent,
         RouteStatisticsComponent,
+        RouteStatisticsChartTooltipComponent,
         FileComponent,
         FileSaveAsComponent,
         EditOSMComponent,
@@ -181,6 +183,7 @@ export function getWindow() { return window; }
         RouteAddDialogComponent,
         RouteEditDialogComponent,
         RouteStatisticsComponent,
+        RouteStatisticsChartTooltipComponent,
         FileComponent,
         FileSaveAsComponent,
         EditOSMComponent,

@@ -125,7 +125,8 @@ body {
 /*#endregion*/
 
 @media print {
-    .no-print {
+    .mat-tooltip, 
+    .leaflet-bar {
         display: none !important;
     }
 }

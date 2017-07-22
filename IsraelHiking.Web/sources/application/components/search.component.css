@@ -4,6 +4,22 @@
     width: 200px;
 }
 
+.search-input-container .mat-input-underline {
+    bottom: 0.1em !important;
+}
+
+.search-input-container .mat-input-infix {
+    padding: 0 !important;
+    border: 0 !important;
+}
+
+.search-input-container input {
+    padding: 0 10px;
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+}
+
 @media only screen and (min-width : 768px) {
     .search-input-container .mat-input-wrapper {
         width: 250px;

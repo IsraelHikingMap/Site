@@ -1,0 +1,12 @@
+﻿.chart-tooltip {
+    color: black;
+    position: absolute;
+    width: 140px;
+    height: 70px;
+    background-color: white;
+    font-size: small;
+}
+
+    .chart-tooltip p {
+        padding: 0 10px;
+    }

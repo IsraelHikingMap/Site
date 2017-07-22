@@ -1,4 +1,4 @@
-﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, HostListener, ViewEncapsulation, AfterViewInit, ViewChildren } from "@angular/core";
+﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ElementRef } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Http } from "@angular/http";
 import { MapService } from "../services/map.service";
@@ -46,8 +46,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     private requestsQueue: ISearchRequestQueueItem[];
     private featureGroup: L.FeatureGroup;
 
-    @ViewChildren("searchFromInput") searchFromInput;
-    @ViewChildren("searchToInput") searchToInput;
+    @ViewChild("searchFromInput") searchFromInput: ElementRef;
 
     constructor(resources: ResourcesService,
         private http: Http,
@@ -111,7 +110,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     public ngAfterViewInit() {
         if (this.isVisible) {
-            this.searchFromInput.first.nativeElement.focus();
+            this.searchFromInput.nativeElement.focus();
         }
     }
 
@@ -119,7 +118,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.isVisible = !this.isVisible;
         if (this.isVisible) {
             // allow DOM make the input visible
-            setTimeout(() => this.searchFromInput.first.nativeElement.focus(), 100);
+            setTimeout(() => this.searchFromInput.nativeElement.focus(), 100);
         }
         this.suppressEvents(e);
     }

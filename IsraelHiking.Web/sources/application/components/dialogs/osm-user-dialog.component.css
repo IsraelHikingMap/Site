@@ -74,6 +74,7 @@
         min-width: 0;
     }
 }
+
 /* Css loader animation */
 .cssload-loader {
     position: relative;
@@ -103,38 +104,38 @@
     -moz-border-radius: 50%;
 }
 
-    .cssload-inner.cssload-one {
-        left: 0%;
-        top: 0%;
-        animation: cssload-rotate-one 2.35s linear infinite;
-        -o-animation: cssload-rotate-one 2.35s linear infinite;
-        -ms-animation: cssload-rotate-one 2.35s linear infinite;
-        -webkit-animation: cssload-rotate-one 2.35s linear infinite;
-        -moz-animation: cssload-rotate-one 2.35s linear infinite;
-        border-bottom: 3px solid rgb(255,0,0);
-    }
+.cssload-inner.cssload-one {
+    left: 0%;
+    top: 0%;
+    animation: cssload-rotate-one 2.35s linear infinite;
+    -o-animation: cssload-rotate-one 2.35s linear infinite;
+    -ms-animation: cssload-rotate-one 2.35s linear infinite;
+    -webkit-animation: cssload-rotate-one 2.35s linear infinite;
+    -moz-animation: cssload-rotate-one 2.35s linear infinite;
+    border-bottom: 3px solid rgb(255,0,0);
+}
 
-    .cssload-inner.cssload-two {
-        right: 0%;
-        top: 0%;
-        animation: cssload-rotate-two 2.35s linear infinite;
-        -o-animation: cssload-rotate-two 2.35s linear infinite;
-        -ms-animation: cssload-rotate-two 2.35s linear infinite;
-        -webkit-animation: cssload-rotate-two 2.35s linear infinite;
-        -moz-animation: cssload-rotate-two 2.35s linear infinite;
-        border-right: 3px solid rgb(0,255,0);
-    }
+.cssload-inner.cssload-two {
+    right: 0%;
+    top: 0%;
+    animation: cssload-rotate-two 2.35s linear infinite;
+    -o-animation: cssload-rotate-two 2.35s linear infinite;
+    -ms-animation: cssload-rotate-two 2.35s linear infinite;
+    -webkit-animation: cssload-rotate-two 2.35s linear infinite;
+    -moz-animation: cssload-rotate-two 2.35s linear infinite;
+    border-right: 3px solid rgb(0,255,0);
+}
 
-    .cssload-inner.cssload-three {
-        right: 0%;
-        bottom: 0%;
-        animation: cssload-rotate-three 2.35s linear infinite;
-        -o-animation: cssload-rotate-three 2.35s linear infinite;
-        -ms-animation: cssload-rotate-three 2.35s linear infinite;
-        -webkit-animation: cssload-rotate-three 2.35s linear infinite;
-        -moz-animation: cssload-rotate-three 2.35s linear infinite;
-        border-top: 3px solid rgb(0,0,255);
-    }
+.cssload-inner.cssload-three {
+    right: 0%;
+    bottom: 0%;
+    animation: cssload-rotate-three 2.35s linear infinite;
+    -o-animation: cssload-rotate-three 2.35s linear infinite;
+    -ms-animation: cssload-rotate-three 2.35s linear infinite;
+    -webkit-animation: cssload-rotate-three 2.35s linear infinite;
+    -moz-animation: cssload-rotate-three 2.35s linear infinite;
+    border-top: 3px solid rgb(0,0,255);
+}
 
 
 @keyframes cssload-rotate-one {

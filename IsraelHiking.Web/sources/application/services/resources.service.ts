@@ -1,6 +1,6 @@
 ﻿// link to translations: https://translate.zanata.org/iteration/view/IsraelHiking/Main
 import { Injectable } from "@angular/core";
-import { LayoutDirection } from "@angular/material";
+import { Direction } from "@angular/cdk";
 import { Subject } from "rxjs/Subject";
 import { LocalStorage } from "ngx-store";
 import { GetTextCatalogService } from "./gettext-catalog.service";
@@ -21,7 +21,7 @@ export class ResourcesService {
     public availableLanguages: ILanguage[];
     public languageChanged: Subject<any>;
 
-    public direction: LayoutDirection;
+    public direction: Direction;
     public start: string;
     public end: string;
     // All the text in the app //
@@ -751,7 +751,7 @@ export class ResourcesService {
         return title.match(/^[^a-zA-Z]*[\u0591-\u05F4]/) != null;
     }
 
-    public getDirection = (words: string): LayoutDirection => {
+    public getDirection = (words: string): Direction => {
         if (!words) {
             return this.direction;
         }

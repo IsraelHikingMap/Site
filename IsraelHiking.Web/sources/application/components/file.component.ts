@@ -1,4 +1,4 @@
-﻿import { Component, HostListener } from "@angular/core";
+﻿import { Component, HostListener, ViewChild, ElementRef } from "@angular/core";
 import { MapService } from "../services/map.service";
 import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
@@ -7,7 +7,6 @@ import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
 import * as _ from "lodash";
 import * as Common from "../common/IsraelHiking";
-import * as $ from "jquery";
 
 @Component({
     selector: "file",
@@ -15,6 +14,8 @@ import * as $ from "jquery";
 })
 export class FileComponent extends BaseMapComponent {
 
+    @ViewChild("openFile") openFileElement: ElementRef;
+    
     constructor(resources: ResourcesService,
         private mapService: MapService,
         private dataContainerService: DataContainerService,
@@ -69,12 +70,6 @@ export class FileComponent extends BaseMapComponent {
     }
 
     public print(e: Event) {
-        $(".leaflet-bar").each((i, a) => {
-            $(a).addClass("no-print");
-        });
-        $(".mat-tooltip").each((i, a) => {
-            $(a).addClass("no-print");
-        });
         window.print();
         this.suppressEvents(e);
     }
@@ -86,8 +81,8 @@ export class FileComponent extends BaseMapComponent {
         }
         switch (String.fromCharCode($event.which).toLowerCase()) {
             case "o":
-                // this doesn't work on firefox due to security reasons. it does work in chrome and IE though. 
-                $("#openFile").click();
+                // this doesn't work on firefox due to security reasons. it does work in chrome and IE though.
+                this.openFileElement.nativeElement.click();
                 break;
             case "s":
                 this.save($event);

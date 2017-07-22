@@ -10,7 +10,8 @@
             <button md-button fxFill type="button" (mousedown)="close($event)"><i class="fa fa-lg icon-close fa-inverse"></i></button>
         </div>
     </div>
-    <div class="route-statistics-body" id="lineChartContiner">
+    <div #lineChartContiner id="lineChartContiner">
         <div google-chart id="lineChart" [chartData]="chartData" [chartType]="'LineChart'" [chartOptions]="options" [chartView]="view" class="route-statistics-chart" (onWrapperReady)="onChartReady($event)" (afterUpdate)="afterChartUpdate()"></div>
+        <route-statistics-chart-tooltip #tooltip id="tooltip"></route-statistics-chart-tooltip>
     </div>
 </div>

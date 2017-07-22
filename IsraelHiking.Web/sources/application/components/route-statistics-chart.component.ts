@@ -1,5 +1,7 @@
-﻿import { Component, ViewEncapsulation, OnInit, OnDestroy, HostListener } from "@angular/core";
+﻿import { Component, ViewEncapsulation, OnInit, OnDestroy, HostListener, ViewChild, ElementRef, ComponentFactoryResolver, Injector, ApplicationRef } from "@angular/core";
 import { Subscription } from "rxjs/Subscription";
+import * as _ from "lodash";
+
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
 import { RoutesService } from "../services/layers/routelayers/routes.service";
@@ -7,8 +9,7 @@ import { IRouteLayer } from "../services/layers/routelayers/iroute.layer";
 import { RouteStatisticsService, IRouteStatisticsPoint, IRouteStatistics } from "../services/route-statistics.service";
 import { IconsService } from "../services/icons.service"
 import { BaseMapComponent } from "./base-map.component";
-import * as _ from "lodash";
-import * as $ from "jquery";
+import { RouteStatisticsChartTooltipComponent } from "./route-statistics-chart-tooltip.component";
 
 @Component({
     selector: "route-statistics-chart",
@@ -35,12 +36,18 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
     private componentSubscriptions: Subscription[];
     /// chart:
     private chartWrapper: google.visualization.ChartWrapper;
-    private chartSvg: JQuery;
-
+    private chartSvg: HTMLElement;
+    
+    @ViewChild("lineChartContiner") lineChartContiner: ElementRef;
+    @ViewChild("tooltip") tooltip: RouteStatisticsChartTooltipComponent;
+    
     constructor(resources: ResourcesService,
         private routesService: RoutesService,
         private mapService: MapService,
-        private routeStatisticsService: RouteStatisticsService) {
+        private routeStatisticsService: RouteStatisticsService,
+        private componentFactoryResolver: ComponentFactoryResolver,
+        private injector: Injector,
+        private applicationRef: ApplicationRef) {
         super(resources);
         this.routeLayer = null;
         this.statistics = null;
@@ -53,7 +60,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
         this.hoverChartMarker = L.marker(mapService.map.getCenter(), { opacity: 0.0, draggable: false, clickable: false } as L.MarkerOptions);
         this.mapService.map.addLayer(this.hoverChartMarker);
         this.mapService.map.addLayer(this.kmMarkersGroup);
-
+        
         this.isKmMarkersOn = false;
         this.routeChanged();
     }
@@ -82,7 +89,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
             subscription.unsubscribe();
         }
     }
-
+    
     @HostListener("window:resize", ["$event"])
     public onWindowResize(event: Event) {
         this.onResize();
@@ -96,8 +103,8 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
 
     public onChartReady = (chartWrapper: google.visualization.ChartWrapper) => {
         this.chartWrapper = chartWrapper;
-        let container = $(`#${chartWrapper.getContainerId()}`);
-        this.hoverLine = container[0].getElementsByTagName("rect")[0].cloneNode(true) as Element;
+        let container = this.lineChartContiner.nativeElement.querySelector(`#${this.chartWrapper.getContainerId()}`);
+        this.hoverLine = container.getElementsByTagName("rect")[0].cloneNode(true) as Element;
         this.hoverLine.setAttribute("y", "10");
         this.hoverLine.setAttribute("z", "100");
         this.hoverLine.setAttribute("width", "1");
@@ -150,7 +157,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
         this.showChartHover(point);
     }
 
-    private onChartHoverOrClick(e: JQueryMouseEventObject): IRouteStatisticsPoint {
+    private onChartHoverOrClick(e: MouseEvent): IRouteStatisticsPoint {
         if (!this.statistics) {
             return null;
         }
@@ -234,45 +241,31 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
             return;
         }
         let offsetX = this.chartWrapper.getChart().getChartLayoutInterface().getXLocation(point.x);
-        let tooltip = this.getChartTooltip(point);
-        let tooltipCss = {
-            position: "absolute",
-            width: "140px",
-            height: "70px",
-            top: "5px"
-        } as any;
-        if (offsetX < this.chartSvg.width() / 2) {
-            tooltipCss.left = (offsetX + 20) + "px";
-        } else {
-            tooltipCss.left = (offsetX - 30 - 140) + "px";
-        }
-        tooltip.css(tooltipCss);
-        if (this.chartSvg.height() > 80) {
-            let chartContainer = $(".route-statistics-chart");
-            chartContainer.append(tooltip);
+        let style = window.getComputedStyle(this.chartSvg);
+        let height = parseInt(style.getPropertyValue("height"));
+        if (height > 80) {
+            this.tooltip.point = point;
+            this.tooltip.hidden = false;
+            if (offsetX < parseInt(style.getPropertyValue("width")) / 2) {
+                this.tooltip.setPosition(offsetX + 30);
+            } else {
+                this.tooltip.setPosition(offsetX - 10 - 140);
+            }
         }
         this.hoverLine.setAttribute("x", offsetX);
-        this.hoverLine.setAttribute("height", this.chartSvg.height().toString());
-        this.chartSvg.append(this.hoverLine);
+        this.hoverLine.setAttribute("height", height.toString());
+        this.chartSvg.appendChild(this.hoverLine);
     }
 
     private hideChartHover() {
-        $(".google-visualization-tooltip").remove();
-        $(".google-visualization-vertical-line").remove();
-    }
-
-    private getChartTooltip(point: IRouteStatisticsPoint): JQuery {
-        return $(`<div class="google-visualization-tooltip chart-tooltip">
-                        <ul class="google-visualization-tooltip-item-list">
-                            <li class="google-visualization-tooltip-item">
-                                <p class="text-${this.resources.start}" dir="${this.resources.direction}" style="color:black">
-                                    ${this.resources.distance}: ${point.x.toFixed(2)} ${this.resources.kmUnit}<br/>
-                                    ${this.resources.height}: ${point.y.toFixed(0)} ${this.resources.meterUnit}<br/>
-                                    ${this.resources.slope}: <span dir="ltr">${point.slope.toFixed(0)}%</span>
-                                </p>
-                            </li>
-                        </ul>
-                    </div>`);
+        this.tooltip.hidden = true;
+        if (this.chartSvg == null) {
+            return;
+        }
+        let listToRemove = this.chartSvg.querySelectorAll(".google-visualization-vertical-line");
+        for (let i = 0; i < listToRemove.length; i++) {
+            listToRemove[i].parentElement.removeChild(listToRemove[i]);
+        }
     }
 
     private initializeChart() {
@@ -382,25 +375,24 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
     }
 
     public afterChartUpdate() {
-        this.chartSvg = $(".route-statistics-chart svg");
-        this.chartSvg.mousemove((e: JQueryMouseEventObject): false => {
-            let point = this.onChartHoverOrClick(e);
+        this.chartSvg = this.lineChartContiner.nativeElement.querySelector("svg");
+        this.chartSvg.onmousemove = (e: MouseEvent) => {
+            let point = this.onChartHoverOrClick(e as any);
             if (point != null) {
                 this.hoverChartMarker.setLatLng(point.latlng);
                 this.hoverChartMarker.setOpacity(1.0);
             }
             return false;
-        });
-        this.chartSvg.click((e: JQueryMouseEventObject): false => {
-            // mainly for mobile devices
-            this.onChartHoverOrClick(e);
+        };
+        this.chartSvg.onclick = (e: MouseEvent) => {
+            this.onChartHoverOrClick(e as any);
             setTimeout(() => { this.hideChartHover() }, 2000);
             return false;
-        });
-
-        $(".route-statistics-body").mouseleave(() => {
+        };
+        let nativeLineChart = this.lineChartContiner.nativeElement as HTMLElement;
+        nativeLineChart.onmouseleave = () => {
             this.hideChartHover();
             this.hoverChartMarker.setOpacity(0.0);
-        });
+        };
     }
 }

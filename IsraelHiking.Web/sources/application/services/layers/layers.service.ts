@@ -263,12 +263,12 @@ export class LayersService {
         overlayFromArray.visible = !overlayFromArray.visible;
         if (overlayFromArray.visible) {
             this.mapService.map.addLayer(overlay.layer);
-            if (_.find(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key) == null) {
+            if (this.activeOverlayKeys.indexOf(overlay.key) === -1) {
                 this.activeOverlayKeys.push(overlay.key);
             }
         } else {
             this.mapService.map.removeLayer(overlay.layer);
-            if (_.find(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key) != null) {
+            if (this.activeOverlayKeys.indexOf(overlay.key) !== -1) {
                 _.remove(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key);
                 this.activeOverlayKeys = this.activeOverlayKeys;
             }

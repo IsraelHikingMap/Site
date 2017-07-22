@@ -111,7 +111,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private initalizeLegendSections() {
-        let id = 0;
+        let id = 1;
         this.legendSections = [
             {
                 title: this.resources.legendMarkedTrails,

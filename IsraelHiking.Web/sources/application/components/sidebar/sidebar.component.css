@@ -6,6 +6,7 @@
     left: 0;
     line-height: 24px;
     overflow-x: hidden;
+    overflow-y: auto;
     color: black;
     direction: ltr;
     padding-left: 55px;

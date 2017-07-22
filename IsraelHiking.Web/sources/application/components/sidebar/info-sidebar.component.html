@@ -31,7 +31,7 @@
             <div *ngFor="let section of legendSections" id="{{section.id}}">
                 <div class="legend-section">
                     <div class="legend-section-header">
-                        <a class="cursor-pointer" (click)="toggleSectionVisibility(section)" scrollTo scrollTargetSelector="#{{section.id}}" scrollableElementSelector="#sidebar-wrapper"><h4><i class="fa" [ngClass]="{'icon-plus': !isSectionVisible(section), 'icon-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
+                        <a class="cursor-pointer" (click)="toggleSectionVisibility(section)" [ngx-scroll-to]="section.id"><h4><i class="fa" [ngClass]="{'icon-plus': !isSectionVisible(section), 'icon-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
                     </div>
                     <div [hidden]="!isSectionVisible(section)">
                         <div *ngFor="let item of section.items" class="legend-item" [ngClass]="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">

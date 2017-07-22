@@ -1,5 +1,4 @@
-﻿import { Directive, ElementRef, Input, Output, OnInit, EventEmitter } from "@angular/core";
-import * as $ from "jquery";
+﻿import { Directive, ElementRef, Input, Output, OnInit, EventEmitter, Renderer2 } from "@angular/core";
 
 export interface IResizeEventArgs {
     width: number | boolean;
@@ -34,62 +33,62 @@ export class DraggableResizableDirective implements OnInit {
     @Output()
     public onResize = new EventEmitter<IResizeEventArgs>();
 
-    private jqueryElement: JQuery;
     private toCall: Function;
-    constructor(element: ElementRef) {
-        this.jqueryElement = $(element.nativeElement);
 
-        this.jqueryElement.addClass("resizable");
-        this.style = window.getComputedStyle(this.jqueryElement[0]);
+    private unlistenFunctionArray: Function[];
+    
+    constructor(private element: ElementRef,
+        private renderer: Renderer2) {
+        this.renderer.addClass(element.nativeElement, "resizable");
+        this.style = window.getComputedStyle(this.element.nativeElement);
+        this.unlistenFunctionArray = [];
     }
 
     public ngOnInit() {
         if (this.dragSelector) {
-            this.jqueryElement.on(mouseDownEventString, this.dragSelector, this.moveMouseDown);
+            var moveSlector = this.element.nativeElement.querySelector(this.dragSelector);
+            mouseDownEventString.split(" ").forEach(eventString => moveSlector.addEventListener(eventString, this.moveMouseDown));
         }
         for (let direction of this.directions) {
-            let grabber = $("<div/>");
-            grabber.addClass(`drag-handle-${direction}`);
-            grabber.append($("<span/>"));
-            this.jqueryElement.append(grabber);
-            grabber.on("dragstart", () => false);
-            grabber.on(mouseDownEventString, e => { this.resizeMouseDown(e, direction); });
+            let grabber = L.DomUtil.create("div", `drag-handle-${direction}`, this.element.nativeElement);
+            L.DomUtil.create("span", "", grabber);
+            grabber.addEventListener("dragstart", () => false);
+            mouseDownEventString.split(" ").forEach((eventString) => grabber.addEventListener(eventString, (e) => { this.resizeMouseDown(e, direction); }));
         }
     }
 
-    private initialize = (event: JQueryEventObject) => {
-        this.initialClientX = this.getBaseMouseDownEvent(event).clientX;
-        this.initialClientY = this.getBaseMouseDownEvent(event).clientY;
+    private initialize = (event: Event) => {
+        this.initialClientX = this.getClientX(event);
+        this.initialClientY = this.getClientY(event);
         this.initialTop = parseInt(this.style.getPropertyValue("top"));
         this.initialBottom = parseInt(this.style.getPropertyValue("bottom"));
         this.initialLeft = parseInt(this.style.getPropertyValue("left"));
         this.initialRight = parseInt(this.style.getPropertyValue("right"));
     }
 
-    private getBaseMouseMoveEvent(event: JQueryEventObject): Touch | JQueryEventObject {
-        return (event.type.toLowerCase() === "mousemove")
-            ? event
-            : (event.originalEvent as TouchEvent).touches[0];
+    private getClientX(event: Event): number {
+        return (event instanceof MouseEvent)
+            ? event.clientX
+            : (event as TouchEvent).touches[0].clientX;
     }
 
-    private getBaseMouseDownEvent(event: JQueryEventObject): Touch | JQueryEventObject {
-        return (event.type.toLowerCase() === "mousedown")
-            ? event
-            : (event.originalEvent as TouchEvent).touches[0];
+    private getClientY(event: Event): number {
+        return (event instanceof MouseEvent)
+            ? event.clientY
+            : (event as TouchEvent).touches[0].clientY;
     }
 
     private isHorizontal(dragDirection: Direction) {
         return dragDirection === "left" || dragDirection === "right";
     }
 
-    private moveMouseMove = (event: JQueryEventObject) => {
-
-        let clientX = this.getBaseMouseMoveEvent(event).clientX;
-        let clientY = this.getBaseMouseMoveEvent(event).clientY;
+    private moveMouseMove = (event: Event) => {
+        let clientX = this.getClientX(event);
+        let clientY = this.getClientY(event);
         let offsetX = clientX - this.initialClientX;
         let offsetY = clientY - this.initialClientY;
 
-        let style = this.jqueryElement[0].style;
+        let style = this.element.nativeElement.style;
         style.top = this.getTop(this.initialTop + offsetY) + "px";
         style.left = (this.initialLeft + offsetX) + "px";
         style.right = (this.initialRight - offsetX) + "px";
@@ -101,16 +100,22 @@ export class DraggableResizableDirective implements OnInit {
     }
 
     private moveMouseUp = () => {
-        $(document).off(mouseMoveEventString, this.moveMouseMove);
-        $(document).off(mouseUpEventString, this.moveMouseUp);
+        this.unlistenFunctionArray.forEach(unlistenFunction => unlistenFunction());
+        this.unlistenFunctionArray.splice(0);
     }
 
-    private moveMouseDown = (event: JQueryEventObject) => {
+    private moveMouseDown = (event: MouseEvent) => {
         // Prevent default dragging of selected content
         event.preventDefault();
         this.initialize(event);
-        $(document).on(mouseMoveEventString, this.moveMouseMove);
-        $(document).on(mouseUpEventString, this.moveMouseUp);
+        mouseMoveEventString.split(" ").forEach(eventString => {
+            let unlistenFunction = this.renderer.listen("document", eventString, this.moveMouseMove);
+            this.unlistenFunctionArray.push(unlistenFunction);
+        });
+        mouseUpEventString.split(" ").forEach(eventString => {
+            let unlistenFunction = this.renderer.listen("document", eventString, this.moveMouseUp);
+            this.unlistenFunctionArray.push(unlistenFunction);
+        });
     }
 
     // resizable events
@@ -119,33 +124,39 @@ export class DraggableResizableDirective implements OnInit {
         eventArgs.width = false;
         eventArgs.height = false;
         if (this.isHorizontal(this.dragDirection)) {
-            eventArgs.width = parseInt(this.jqueryElement[0].style.width);
+            eventArgs.width = parseInt(this.element.nativeElement.style.width);
         } else {
-            eventArgs.height = parseInt(this.jqueryElement[0].style.height);
+            eventArgs.height = parseInt(this.element.nativeElement.style.height);
         }
-        eventArgs.id = this.jqueryElement[0].id;
+        eventArgs.id = this.element.nativeElement.id;
         return eventArgs;
     }
 
-    private resizeMouseDown = (event: JQueryEventObject, direction: Direction) => {
+    private resizeMouseDown = (event: Event, direction: Direction) => {
         this.dragDirection = direction;
         this.initialize(event);
         //prevent transition while dragging
-        this.jqueryElement.addClass("no-transition");
-
-        $(document).on(mouseUpEventString, this.resizeMouseUp);
-        $(document).on(mouseMoveEventString, this.resizeMouseMove);
+        this.renderer.addClass(this.element.nativeElement, "no-transition");
+        
+        mouseMoveEventString.split(" ").forEach(eventString => {
+            let unlistenFunction = this.renderer.listen("document", eventString, this.resizeMouseMove);
+            this.unlistenFunctionArray.push(unlistenFunction);
+        });
+        mouseUpEventString.split(" ").forEach(eventString => {
+            let unlistenFunction = this.renderer.listen("document", eventString, this.resizeMouseUp);
+            this.unlistenFunctionArray.push(unlistenFunction);
+        });
 
         // Disable highlighting while dragging
         if (event.stopPropagation) event.stopPropagation();
         if (event.preventDefault) event.preventDefault();
     };
 
-    private resizeMouseMove = (event: JQueryEventObject) => {
+    private resizeMouseMove = (event: Event) => {
         let offset = this.isHorizontal(this.dragDirection)
-            ? this.getBaseMouseMoveEvent(event).clientX - this.initialClientX
-            : this.getBaseMouseMoveEvent(event).clientY - this.initialClientY;
-        let style = this.jqueryElement[0].style;
+            ? this.getClientX(event) - this.initialClientX
+            : this.getClientY(event) - this.initialClientY;
+        let style = this.element.nativeElement.style;
         switch (this.dragDirection) {
             case "top":
                 style.top = this.getTop(this.initialTop + offset) + "px";
@@ -165,9 +176,9 @@ export class DraggableResizableDirective implements OnInit {
     };
 
     private resizeMouseUp = () => {
-        $(document).off(mouseUpEventString, this.resizeMouseUp);
-        $(document).off(mouseMoveEventString, this.resizeMouseMove);
-        this.jqueryElement.removeClass("no-transition");
+        this.unlistenFunctionArray.forEach(unlistenFunction => unlistenFunction());
+        this.unlistenFunctionArray.splice(0);
+        this.renderer.removeClass(this.element.nativeElement, "no-transition");
     };
 
     private throttle = (functionToThrottle: Function) => {
