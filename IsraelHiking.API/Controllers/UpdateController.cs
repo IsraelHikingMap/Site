@@ -3,7 +3,6 @@ using IsraelHiking.API.Swagger;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using System.IO;
@@ -21,7 +20,6 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly ILogger _logger;
         private readonly IGraphHopperGateway _graphHopperGateway;
-        private readonly IFileProvider _fileProvider;
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
@@ -36,14 +34,12 @@ namespace IsraelHiking.API.Controllers
         /// <param name="osmRepository"></param>
         /// <param name="logger"></param>
         public UpdateController(IGraphHopperGateway graphHopperGateway,
-            IFileProvider fileProvider,
             IElasticSearchGateway elasticSearchGateway,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
             ILogger logger)
         {
             _graphHopperGateway = graphHopperGateway;
-            _fileProvider = fileProvider;
             _elasticSearchGateway = elasticSearchGateway;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
