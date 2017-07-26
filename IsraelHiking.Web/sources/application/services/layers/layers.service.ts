@@ -136,8 +136,6 @@ export class LayersService {
             }
             baseLayersToStore.push(this.extractDataFromLayer(baseLayer));
         }
-
-        this.storedBaseLayers = baseLayersToStore;
         
         let overlaysToStore = [] as Common.LayerData[];
         for (let overlay of this.overlays) {
@@ -148,8 +146,13 @@ export class LayersService {
             }
             overlaysToStore.push(this.extractDataFromLayer(overlay));
         }
-
-        this.storedOverlays = overlaysToStore;
+        if (this.osmUserService.isLoggedIn()) {
+            this.storedBaseLayers = [];
+            this.storedOverlays = [];
+        } else {
+            this.storedBaseLayers = baseLayersToStore;
+            this.storedOverlays = overlaysToStore;
+        }
         
         this.osmUserService.updateUserLayers(baseLayersToStore, overlaysToStore);
     }
