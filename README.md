@@ -82,7 +82,7 @@ In order to be able to build this site you'll need some tools:
   cd IsraelHiking.Web
   npm install
   npm install -g @angular/cli@latest
-  ng build --progress=false:
+  ng build --progress=false
   Update-Database
   ```
 # Starting a debug session
