@@ -80,8 +80,8 @@ In order to be able to build this site you'll need some tools:
   * Type the following commands at the `PM>` prompt. Most of the commands may take a while. Ignore all _WARN_ messsages.
   ```
   cd IsraelHiking.Web
-  npm install
-  npm install -g @angular/cli@latest
+  npm install --loglevel error
+  npm install -g @angular/cli@latest --loglevel error
   ng build --progress=false
   Update-Database
   ```
