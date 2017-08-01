@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Tests.Gpx
         {
             gpxType gpx = new gpxType
             {
-                wpt = new[] { new wptType { lat = 1, lon = 2, ele = 3, eleSpecified = true, name = "point" } }
+                wpt = new[] { new wptType { lat = 1, lon = 2, ele = 3, eleSpecified = true } }
             };
 
             var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);

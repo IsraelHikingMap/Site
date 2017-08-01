@@ -91,9 +91,10 @@ export class NakebMarkerPopupComponent extends BaseMapComponent {
     
     private getRouteData(item: NakebItemExtended): Common.RouteData {
         let routeData = {
+            name: item.title,
+            description: item.prolog,
             segments: [],
             markers: [],
-            name: item.title,
         } as Common.RouteData;
         let latLngs = [] as L.LatLng[];
         for (let latLng of item.latlngs) {

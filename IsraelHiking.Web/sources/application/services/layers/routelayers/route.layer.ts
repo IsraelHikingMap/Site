@@ -102,6 +102,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         }
         return {
             name: this.route.properties.name,
+            description: this.route.properties.description,
             color: this.route.properties.pathOptions.color,
             opacity: this.route.properties.pathOptions.opacity,
             weight: this.route.properties.pathOptions.weight,

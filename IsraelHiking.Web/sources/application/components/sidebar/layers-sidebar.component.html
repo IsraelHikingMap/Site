@@ -81,7 +81,7 @@
                     <i class="fa fa-lg" [ngClass]="{'icon-pencil': isRouteSelected(route), 'icon-eye': isRouteVisisble(route) && !isRouteSelected(route), 'icon-eye-slash': !isRouteVisisble(route) }"></i>
                 </span>
             </div>
-            <div fxFlex="75">
+            <div fxFlex="75" mdTooltip="{{getRouteDescription(route)}}" mdTooltipPosition="below">
                 <span [ngStyle]="{'color': getRouteColor(route)}">{{getRouteName(route)}}</span>
             </div>
             <div fxFlex>

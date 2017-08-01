@@ -30,6 +30,7 @@ export interface RouteSegmentData {
 
 export interface RouteData {
     name: string;
+    description: string;
     color?: string;
     opacity?: number;
     weight?: number;

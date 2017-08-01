@@ -40,6 +40,7 @@ namespace IsraelHiking.API.Converters
                 trk = nonEmptyRoutes.Select(r => new trkType
                 {
                     name = r.name,
+                    desc = r.description,
                     trkseg = r.segments.Select(ToTrksegType).ToArray()
                 }).ToArray()
             }.UpdateBounds();
@@ -77,6 +78,7 @@ namespace IsraelHiking.API.Converters
             var routesData = routes.Where(r => r.rtept != null && r.rtept.Any()).Select(route => new RouteData
             {
                 name = route.name,
+                description = route.desc,
                 segments = new List<RouteSegmentData>
                 {
                     new RouteSegmentData
@@ -94,6 +96,7 @@ namespace IsraelHiking.API.Converters
             var tracks = trks.Where(t => t.trkseg != null && t.trkseg.Any()).Select(t => new RouteData
             {
                 name = t.name,
+                description = t.desc,
                 segments = t.trkseg.Where(seg => seg?.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
                 {
                     latlngs = seg.trkpt.Select(ToLatLng).ToList(),

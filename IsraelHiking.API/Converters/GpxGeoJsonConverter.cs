@@ -12,6 +12,7 @@ namespace IsraelHiking.API.Converters
     public class GpxGeoJsonConverter : IGpxGeoJsonConverter
     {
         private const string NAME = "name";
+        private const string DESCRIPTIOM = "description";
         private const string CREATOR = "Creator";
 
         ///<inheritdoc />
@@ -19,23 +20,23 @@ namespace IsraelHiking.API.Converters
         {
             var collection = new FeatureCollection();
             var points = gpx.wpt ?? new wptType[0];
-            var pointsFeatures = points.Select(point => new Feature(new Point(CreateGeoPosition(point)), CreateNameProperties(point.name)));
+            var pointsFeatures = points.Select(point => new Feature(new Point(CreateGeoPosition(point)), CreateProperties(point.name, point.desc)));
             pointsFeatures.ToList().ForEach(f => collection.Features.Add(f));
 
             var routes = gpx.rte ?? new rteType[0];
-            var routesFeatures = routes.Select(route => new Feature(new LineString(route.rtept.Select(CreateGeoPosition).ToArray()), CreateNameProperties(route.name)));
+            var routesFeatures = routes.Select(route => new Feature(new LineString(route.rtept.Select(CreateGeoPosition).ToArray()), CreateProperties(route.name, route.desc)));
             routesFeatures.ToList().ForEach(f => collection.Features.Add(f));
 
             foreach (var track in gpx.trk ?? new trkType[0])
             {
                 if (track.trkseg.Length == 1)
                 {
-                    var lineStringFeature = new Feature(new LineString(track.trkseg[0].trkpt.Select(CreateGeoPosition).ToArray()), CreateNameProperties(track.name));
+                    var lineStringFeature = new Feature(new LineString(track.trkseg[0].trkpt.Select(CreateGeoPosition).ToArray()), CreateProperties(track.name, track.desc));
                     collection.Features.Add(lineStringFeature);
                     continue;
                 }
                 var lineStringList = track.trkseg.Select(segment => new LineString(segment.trkpt.Select(CreateGeoPosition).ToArray()) as ILineString).ToArray();
-                var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.name, gpx.creator));
+                var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.name, gpx.creator, track.desc));
                 collection.Features.Add(feature);
             }
             return collection;
@@ -74,17 +75,17 @@ namespace IsraelHiking.API.Converters
         {
             var point = (Point)pointFeature.Geometry;
             var position = point.Coordinate;
-            return CreateWayPoint(position, GetFeatureName(pointFeature));
+            return CreateWayPoint(position, GetFeatureName(pointFeature), GetFeatureDescription(pointFeature));
         }
 
         private wptType[] CreateWayPointsFromMultiPoint(IFeature pointFeature)
         {
             var multiPoint = (MultiPoint)pointFeature.Geometry;
             var positions = multiPoint.Coordinates;
-            return positions.Select(p => CreateWayPoint(p, GetFeatureName(pointFeature))).ToArray();
+            return positions.Select(p => CreateWayPoint(p, GetFeatureName(pointFeature), GetFeatureDescription(pointFeature))).ToArray();
         }
 
-        private wptType CreateWayPoint(Coordinate position, string name)
+        private wptType CreateWayPoint(Coordinate position, string name, string description)
         {
             return new wptType
             {
@@ -92,7 +93,8 @@ namespace IsraelHiking.API.Converters
                 lat = (decimal)position.Y,
                 ele = (decimal)(double.IsNaN(position.Z) ? 0 : position.Z),
                 eleSpecified = double.IsNaN(position.Z),
-                name = name
+                name = name,
+                desc = description
             };
         }
 
@@ -103,7 +105,8 @@ namespace IsraelHiking.API.Converters
             return new rteType
             {
                 name = GetFeatureName(lineStringFeature),
-                rtept = lineString?.Coordinates.Select(p => CreateWayPoint(p, null)).ToArray()
+                desc = GetFeatureDescription(lineStringFeature),
+                rtept = lineString?.Coordinates.Select(p => CreateWayPoint(p, null, null)).ToArray()
 
             };
         }
@@ -114,7 +117,8 @@ namespace IsraelHiking.API.Converters
             return new rteType
             {
                 name = GetFeatureName(lineStringFeature),
-                rtept = polygon?.Coordinates.Select(p => CreateWayPoint(p, null)).ToArray()
+                desc = GetFeatureDescription(lineStringFeature),
+                rtept = polygon?.Coordinates.Select(p => CreateWayPoint(p, null, null)).ToArray()
             };
         }
 
@@ -126,13 +130,14 @@ namespace IsraelHiking.API.Converters
                 return new trkType[0];
             }
             var name = GetFeatureName(multiLineStringFeature);
+            var description = GetFeatureDescription(multiLineStringFeature);
             var tracks = new List<trkType>();
-            var currentTrack = new trkType { name = name, trkseg = new trksegType[0]};
+            var currentTrack = new trkType { name = name, desc = description, trkseg = new trksegType[0]};
             foreach (var lineString in multiLineString.Geometries.OfType<ILineString>().Where(ls => ls.Coordinates.Any()))
             {
                 var currentSegment = new trksegType
                 {
-                    trkpt = lineString.Coordinates.Select(p => CreateWayPoint(p, null)).ToArray()
+                    trkpt = lineString.Coordinates.Select(p => CreateWayPoint(p, null, null)).ToArray()
                 };
                 if (currentTrack.trkseg.Length == 0)
                 {
@@ -151,7 +156,7 @@ namespace IsraelHiking.API.Converters
                 {
                     // need to start a new track.
                     tracks.Add(currentTrack);
-                    currentTrack = new trkType {name = name, trkseg = new[] {currentSegment}};
+                    currentTrack = new trkType {name = name, desc = description, trkseg = new[] {currentSegment}};
                 }
             }
             tracks.Add(currentTrack);
@@ -161,7 +166,6 @@ namespace IsraelHiking.API.Converters
         private rteType[] CreateRoutesFromMultiPolygon(IFeature multiPolygonFeature)
         {
             var multiPolygon = multiPolygonFeature.Geometry as MultiPolygon;
-            var name = GetFeatureName(multiPolygonFeature);
             if (multiPolygon == null)
             {
                 return new rteType[0];
@@ -169,30 +173,37 @@ namespace IsraelHiking.API.Converters
             return multiPolygon.Geometries.OfType<Polygon>().Select(
                 p => new rteType
                 {
-                    rtept = p.Coordinates.Select(c => CreateWayPoint(c, null)).ToArray(),
-                    name = name
+                    rtept = p.Coordinates.Select(c => CreateWayPoint(c, null, null)).ToArray(),
+                    name = GetFeatureName(multiPolygonFeature),
+                    desc = GetFeatureDescription(multiPolygonFeature)
                 }).ToArray();
         }
 
-        private IAttributesTable CreateNameProperties(string name)
+        private IAttributesTable CreateProperties(string name, string description)
         {
             var table = new AttributesTable
             {
-                { NAME, name }
+                { NAME, name },
+                { DESCRIPTIOM, description }
             };
             return table;
         }
 
-        private IAttributesTable CreateMultiLineProperties(string name, string creator)
+        private IAttributesTable CreateMultiLineProperties(string name, string creator, string description)
         {
-            var table = CreateNameProperties(name);
+            var table = CreateProperties(name, description);
             table.AddAttribute(CREATOR, creator);
             return table;
         }
 
         private string GetFeatureName(IFeature feature)
         {
-            return feature.Attributes.GetNames().Contains(NAME) ? feature.Attributes[NAME].ToString() : string.Empty;
+            return feature.Attributes.GetNames().Contains(NAME) ? feature.Attributes[NAME]?.ToString() : string.Empty;
+        }
+
+        private string GetFeatureDescription(IFeature feature)
+        {
+            return feature.Attributes.GetNames().Contains(DESCRIPTIOM) ? feature.Attributes[DESCRIPTIOM]?.ToString() : string.Empty;
         }
     }
 }

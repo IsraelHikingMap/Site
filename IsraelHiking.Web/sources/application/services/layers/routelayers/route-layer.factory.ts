@@ -66,10 +66,11 @@ export class RouteLayerFactory {
             route);
     }
 
-    private createRouteImplementation(name: string, pathOptions: L.PathOptions): IRoute {
+    private createRouteImplementation(name: string, description: string, pathOptions: L.PathOptions): IRoute {
         let route = {
             properties: {
                 name: name,
+                description: description,
                 currentRoutingType: this.routingType,
                 isRoutingPerPoint: this.isRoutingPerPoint,
                 isVisible: true,
@@ -88,12 +89,12 @@ export class RouteLayerFactory {
     }
 
     public createRoute(name: string): IRoute {
-        return this.createRouteImplementation(name, { color: "", opacity: null, weight: null } as L.PathOptions)
+        return this.createRouteImplementation(name, "", { color: "", opacity: null, weight: null } as L.PathOptions)
     }
 
     public createRouteFromData(routeData: Common.RouteData): IRoute {
         let pathOptions = { color: routeData.color, opacity: routeData.opacity, weight: routeData.weight } as L.PathOptions;
-        let route = this.createRouteImplementation(routeData.name, pathOptions);
+        let route = this.createRouteImplementation(routeData.name, routeData.description, pathOptions);
         route.segments = routeData.segments as IRouteSegment[] || [];
         route.markers = routeData.markers as IMarkerWithData[] || [];
         return route;

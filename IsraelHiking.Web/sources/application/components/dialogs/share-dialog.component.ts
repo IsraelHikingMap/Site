@@ -90,6 +90,7 @@ export class ShareDialogComponent extends BaseMapComponent {
         if (this.routesService.selectedRoute != null) {
             let route = routesService.selectedRoute.getData();
             this.title = route.name;
+            this.description = route.description;
             if (route.segments.length > 0) {
                 switch (route.segments[route.segments.length - 1].routingType) {
                     case "Hike":

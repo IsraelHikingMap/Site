@@ -115,6 +115,10 @@ export class LayersSidebarComponent extends BaseMapComponent {
         return routeLayer.route.properties.name;
     }
 
+    public getRouteDescription = (routeLayer: IRouteLayer) => {
+        return routeLayer.route.properties.description;
+    }
+
     public isRouteVisisble(routeLayer: IRouteLayer) {
         return routeLayer.route.properties.isVisible;
     }

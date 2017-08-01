@@ -1,5 +1,4 @@
 ﻿import { Injectable } from "@angular/core";
-import { HashService } from "./hash.service";
 import * as Common from "../common/IsraelHiking";
 
 
@@ -35,36 +34,37 @@ export class GeoJsonParser {
             onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
                 let routeData = null;
                 let name = (feature.properties as any).name;
+                let description = (feature.properties as any).description;
                 switch (feature.geometry.type) {
                     case GeoJson.point:
-                        var point = feature.geometry as GeoJSON.Point;
-                        var marker = this.createMarker(point.coordinates, name);
+                        let point = feature.geometry as GeoJSON.Point;
+                        let marker = this.createMarker(point.coordinates, name);
                         markers.push(marker);
                         break;
                     case GeoJson.multiPoint:
-                        var points = feature.geometry as GeoJSON.MultiPoint;
+                        let points = feature.geometry as GeoJSON.MultiPoint;
                         for (let pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
                             let marker = this.createMarker(points.coordinates[pointIndex], name);
                             markers.push(marker);
                         }
                         break;
                     case GeoJson.lineString:
-                        var lineString = feature.geometry as GeoJSON.LineString;
-                        routeData = this.positionsToData(lineString.coordinates, name);
+                        let lineString = feature.geometry as GeoJSON.LineString;
+                        routeData = this.positionsToData(lineString.coordinates, name, description);
                         break;
                     case GeoJson.multiLineString:
-                        var multiLineString = feature.geometry as GeoJSON.MultiLineString;
-                        routeData = this.coordinatesArrayToData(multiLineString.coordinates, name);
+                        let multiLineString = feature.geometry as GeoJSON.MultiLineString;
+                        routeData = this.coordinatesArrayToData(multiLineString.coordinates, name, description);
                         break;
                     case GeoJson.polygon:
-                        var polygone = feature.geometry as GeoJSON.Polygon;
-                        routeData = this.coordinatesArrayToData(polygone.coordinates, name);
+                        let polygone = feature.geometry as GeoJSON.Polygon;
+                        routeData = this.coordinatesArrayToData(polygone.coordinates, name, description);
                         break;
                     case GeoJson.multiPolygon:
-                        var multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
-                        routeData = ({ name: name || "", segments: [] } as Common.RouteData);
+                        let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
+                        routeData = ({ name: name || "", description: description || "", segments: [] } as Common.RouteData);
                         for (let polygoneCoordinates of multiPolygone.coordinates) {
-                            let route = this.coordinatesArrayToData(polygoneCoordinates, name);
+                            let route = this.coordinatesArrayToData(polygoneCoordinates, name, description);
                             routeData.segments = routeData.segments.concat(route.segments);
                         }
                         break;
@@ -77,7 +77,7 @@ export class GeoJsonParser {
         if (markers.length > 0) {
             if (data.routes.length === 0) {
                 let name = markers.length === 1 ? markers[0].title || GeoJsonParser.MARKERS : GeoJsonParser.MARKERS;
-                data.routes.push({ name: name, segments: [], markers: [] });
+                data.routes.push({ name: name, description: "", segments: [], markers: [] });
             }
             data.routes[0].markers = markers;
         }
@@ -106,10 +106,10 @@ export class GeoJsonParser {
         return latlngs;
     }
 
-    private positionsToData(positions: GeoJSON.Position[], name: string): Common.RouteData {
+    private positionsToData(positions: GeoJSON.Position[], name: string, description: string): Common.RouteData {
 
-        var routeData = { segments: [], markers: [], name: name || "" } as Common.RouteData;
-        var latlngs = GeoJsonParser.createLatlngArray(positions);
+        let routeData = { name: name || "", description: description || "", segments: [], markers: [] } as Common.RouteData;
+        let latlngs = GeoJsonParser.createLatlngArray(positions);
         if (latlngs.length < 2) {
             return routeData;
         }
@@ -126,8 +126,8 @@ export class GeoJsonParser {
         return routeData;
     }
 
-    private coordinatesArrayToData(coordinates: GeoJSON.Position[][], name: string): Common.RouteData {
-        let routeData = { name: name || "", segments: [], markers: [] } as Common.RouteData;
+    private coordinatesArrayToData(coordinates: GeoJSON.Position[][], name: string, description: string): Common.RouteData {
+        let routeData = { name: name || "", description: description || "", segments: [], markers: [] } as Common.RouteData;
         for (let lineCoordinates of coordinates) {
             if (lineCoordinates.length <= 0) {
                 continue;
@@ -192,6 +192,7 @@ export class GeoJsonParser {
                     type: "Feature",
                     properties: {
                         name: routeData.name,
+                        description: routeData.description,
                         creator: "IsraelHikingMap"
                     },
                     geometry: {

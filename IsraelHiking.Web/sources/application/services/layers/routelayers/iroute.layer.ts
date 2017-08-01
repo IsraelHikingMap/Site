@@ -25,6 +25,7 @@ export interface IMarkerWithData extends Common.MarkerData {
 
 export interface IRouteProperties {
     name: string;
+    description: string;
     pathOptions: L.PathOptions;
     currentRoutingType: Common.RoutingType;
     isRoutingPerPoint: boolean;
