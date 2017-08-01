@@ -166,7 +166,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             let bounds = L.latLngBounds(data.southWest, data.northEast);
             // marker to allow remove of this layer:
             let mainMarker = L.marker(bounds.getCenter(), { icon: IconsService.createTraceMarkerIcon(), draggable: false }) as Common.IMarkerWithTitle;
-            mainMarker.title = trace.fileName;
+            mainMarker.title = trace.name;
 
             let markerPopupDiv = L.DomUtil.create("div");
             let factory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
@@ -186,11 +186,19 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         });
         return promise;
     }
-
+    
     public editTrace(trace: ITrace) {
-        this.fileService.openFromUrl(trace.dataUrl).then((response) => {
-            this.dataContainerService.setData(response.json());
-        });
+        trace.isInEditMode = true;
+    }
+
+    public updateTrace(trace: ITrace) {
+        trace.isInEditMode = false;
+        this.userService.updateOsmTrace(trace);
+    }
+
+    public deleteTrace(trace: ITrace) {
+        trace.isInEditMode = false;
+        this.userService.deleteOsmTrace(trace);
     }
 
     public editInOsm(trace: ITrace) {
@@ -218,7 +226,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         if (!file) {
             return;
         }
-        this.fileService.upload(Urls.osmUploadTrace, file).then(() => {
+        this.fileService.upload(Urls.osmTrace, file).then(() => {
             this.toastService.success(this.resources.fileUploadedSuccefullyItWillTakeTime);
             this.userService.refreshDetails();
         }, () => {
@@ -320,7 +328,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         if ((trace.description || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
-        if ((trace.fileName || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((trace.name || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
         if ((trace.id || 0).toString().toLowerCase().indexOf(lowerSearchTerm) !== -1) {
@@ -334,8 +342,6 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     }
 
     public deleteSiteUrl(siteUrl: Common.SiteUrl) {
-        this.userService.deleteSiteUrl(siteUrl).then(() => {
-            this.updateFilteredLists(this.searchTerm.value);
-        });
+        this.userService.deleteSiteUrl(siteUrl);
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -7,6 +8,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using OAuth;
@@ -29,6 +31,20 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         private readonly TokenAndSecret _tokenAndSecret;
         private readonly ConfigurationData _options;
 
+
+        // :tags is removed since there's a bug in OSM:
+        // https://github.com/openstreetmap/openstreetmap-website/issues/1600
+        // This entire string should be removed when the following PR is merged:
+        // https://github.com/OsmSharp/core/pull/34
+        private const string GPX_FILE =
+            @"<osm version='0.6' generator='OpenStreetMap server' copyright='OpenStreetMap and contributors' attribution='http://www.openstreetmap.org/copyright' license='http://opendatacommons.org/licenses/odbl/1-0/'>
+                <gpx_file id=':id' name=':name' lat=':lat' lon=':lon' visibility=':visibility'>
+                    <description>:description</description>
+                    
+                </gpx_file>
+            </osm>";
+
+
         private readonly string _baseAddressWithoutProtocol;
         private readonly string _userDetailsAddress;
         private readonly string _createChangesetAddress;
@@ -37,6 +53,8 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         private readonly string _createWayAddress;
         private readonly string _wayAddress;
         private readonly string _completeWayAddress;
+        private readonly string _traceAddress;
+        private readonly string _getTracesAddress;
         private readonly string _createTraceAddress;
 
         public OsmGateway(TokenAndSecret tokenAndSecret, IOptions<ConfigurationData> options, ILogger logger) : base(logger)
@@ -48,11 +66,13 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _baseAddressWithoutProtocol = _options.OsmConfiguraion.BaseAddress.Replace("http://", "").Replace("https://", "");
             _userDetailsAddress = osmApiBaseAddress + "user/details";
             _createChangesetAddress = osmApiBaseAddress + "changeset/create";
-            _closeChangesetAddress = osmApiBaseAddress + "changeset/#id/close";
+            _closeChangesetAddress = osmApiBaseAddress + "changeset/:id/close";
             _createNodeAddress = osmApiBaseAddress + "node/create";
             _createWayAddress = osmApiBaseAddress + "way/create";
-            _wayAddress = osmApiBaseAddress + "way/#id";
+            _wayAddress = osmApiBaseAddress + "way/:id";
             _completeWayAddress = _wayAddress + "/full";
+            _traceAddress = osmApiBaseAddress + "gpx/:id";
+            _getTracesAddress = osmApiBaseAddress + "user/gpx_files";
             _createTraceAddress = osmApiBaseAddress + "gpx/create";
         }
 
@@ -166,7 +186,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         {
             using (var client = new HttpClient())
             {
-                var address = _wayAddress.Replace("#id", way.Id.ToString());
+                var address = _wayAddress.Replace(":id", way.Id.ToString());
                 UpdateHeaders(client, address, "PUT");
                 way.ChangeSetId = long.Parse(changesetId);
                 var updatedWay = new Osm
@@ -186,7 +206,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         {
             using (var client = new HttpClient())
             {
-                var address = _completeWayAddress.Replace("#id", wayId);
+                var address = _completeWayAddress.Replace(":id", wayId);
                 var response = await client.GetAsync(address);
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
@@ -202,7 +222,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         {
             using (var client = new HttpClient())
             {
-                var address = _closeChangesetAddress.Replace("#id", changesetId);
+                var address = _closeChangesetAddress.Replace(":id", changesetId);
                 UpdateHeaders(client, address, "PUT");
                 var response = await client.PutAsync(address, new StringContent(string.Empty));
                 if (response.StatusCode != HttpStatusCode.OK)
@@ -213,7 +233,36 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             }
         }
 
-        public async Task UploadFile(string fileName, MemoryStream fileStream)
+        public async Task<List<OsmTrace>> GetTraces()
+        {
+            using (var client = new HttpClient())
+            {
+                UpdateHeaders(client, _getTracesAddress);
+                var response = await client.GetAsync(_getTracesAddress);
+                var stream = await response.Content.ReadAsStreamAsync();
+                // HM TODO: change this to be part of Osm class
+                var document = XDocument.Load(stream);
+                return document.Descendants().Where(n => n.Name.LocalName == "gpx_file").Select(file =>
+                {
+                    var trace = new OsmTrace();
+                    trace.Id = file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "id").Value;
+                    trace.LatLng = new LatLng
+                    {
+                        lat = double.Parse(file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "lat")?.Value ?? "0"),
+                        lng = double.Parse(file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "lon")?.Value ?? "0")
+                    };
+                    trace.Description = file.Elements().FirstOrDefault(n => n.Name.LocalName.ToLower() == "description").Value;
+                    trace.Visibility = file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "visibility").Value;
+                    trace.Name = file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "name").Value;
+                    trace.UserName = file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "user").Value;
+                    trace.Date = DateTime.Parse(file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "timestamp").Value);
+                    trace.Tags = file.Elements().Where(e => e.Name.LocalName.ToLower() == "tag").Select(e => e.Value).ToList();
+                    return trace;
+                }).ToList();
+            }
+        }
+
+        public async Task CreateTrace(string fileName, MemoryStream fileStream)
         {
             using (var client = new HttpClient())
             {
@@ -236,7 +285,43 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 var response = await client.PostAsync(_createTraceAddress, multipartFormDataContent);
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    throw new Exception("Unable to upload the file: " + fileName);
+                    throw new Exception($"Unable to upload the file: {fileName}");
+                }
+            }
+        }
+
+        public async Task UpdateTrace(OsmTrace trace)
+        {
+            using (var client = new HttpClient())
+            {
+                var traceAddress = _traceAddress.Replace(":id", trace.Id);
+                UpdateHeaders(client, traceAddress, "PUT");
+
+                var osmRequest = GPX_FILE.Replace(":id", trace.Id)
+                    .Replace(":name", trace.Name)
+                    .Replace(":description", trace.Description)
+                    .Replace(":visibility", trace.Visibility)
+                    .Replace(":lat", trace.LatLng.lat.ToString(CultureInfo.InvariantCulture))
+                    .Replace(":lon", trace.LatLng.lng.ToString(CultureInfo.InvariantCulture))
+                    .Replace(":tags", string.Join("\n", trace.Tags.Select(t => $"<tag>{t}</tag>")));
+                var response = await client.PutAsync(traceAddress, new StringContent(osmRequest));
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new Exception("Unable to update OSM trace");
+                }
+            }
+        }
+
+        public async Task DeleteTrace(string traceId)
+        {
+            using (var client = new HttpClient())
+            {
+                var traceAddress = _traceAddress.Replace(":id", traceId);
+                UpdateHeaders(client, traceAddress, "DELETE");
+                var response = await client.DeleteAsync(traceAddress);
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    throw new Exception($"Unable to delete OSM trace with ID: {traceId}");
                 }
             }
         }

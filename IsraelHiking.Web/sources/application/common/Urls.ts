@@ -15,7 +15,7 @@
     public static translations = Urls.baseAddress + "/translations/";
     public static osm = Urls.apiBase + "osm/";
     public static osmConfiguration = Urls.osm + "configuration";
-    public static osmUploadTrace = Urls.osm + "trace";
+    public static osmTrace = Urls.osm + "trace/";
     public static userLayers = Urls.apiBase + "userLayers/";
     
     public static DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";

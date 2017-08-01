@@ -9,14 +9,20 @@ import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 import { Deferred } from "../common/deferred";
 
+export type Visibility = "private" | "public";
+
 export interface ITrace {
-    fileName: string;
+    name: string;
     description: string;
     url: string;
     imageUrl: string;
     dataUrl: string;
     id: string;
     date: Date;
+    tags: string[];
+    tagsString: string;
+    visibility: Visibility;
+    isInEditMode: boolean;
 }
 
 interface IUserLayer extends Common.LayerData {
@@ -141,38 +147,41 @@ export class OsmUserService {
         });
     }
 
-    private getTraces = () => {
-        return new Promise((resolve, reject) => {
-            this.oauth.xhr({
-                method: "GET",
-                path: "/api/0.6/user/gpx_files"
-            },
-                (tracesError: any, traces: XMLDocument) => {
-                    if (tracesError) {
-                        reject(tracesError);
-                        return;
-                    }
-                    let tracesJson = this.x2Js.xml2js(traces.documentElement.outerHTML) as any;
-                    this.traces.splice(0);
-                    let files = [].concat(tracesJson.osm.gpx_file || []);
-                    for (let traceJson of files) {
-                        let id = traceJson._id;
-                        let url = `${this.baseUrl}/user/${traceJson._user}/traces/${id}`;
-                        let dataUrl = `${this.baseUrl}/api/0.6/gpx/${id}/data`;
-                        this.traces.push({
-                            fileName: traceJson._name,
-                            description: traceJson.description,
-                            url: url,
-                            imageUrl: url + "/picture",
-                            dataUrl: dataUrl,
-                            id: id,
-                            date: new Date(traceJson._timestamp)
-                        });
-                    }
-                    this.tracesChanged.next();
-                    resolve();
-                });
+    private getTraces = (): Promise<any> => {
+        let promise = this.http.get(Urls.osmTrace, this.authorizationService.getHeader()).toPromise();
+        promise.then((response) => {
+            this.traces.splice(0);
+            let files = [].concat(response.json() || []);
+            for (let traceJson of files) {
+                let url = `${this.baseUrl}/user/${traceJson.userName}/traces/${traceJson.id}`;
+                let dataUrl = `${this.baseUrl}/api/0.6/gpx/${traceJson.id}/data`;
+                traceJson.url = url;
+                traceJson.tagsString = traceJson.tags && traceJson.tags.length > 0 ? traceJson.tags.join(", ") : "";
+                traceJson.imageUrl = url + "/picture";
+                traceJson.dataUrl = dataUrl;
+                traceJson.date = new Date(traceJson.date);
+                traceJson.isInEditMode = false;
+                this.traces.push(traceJson);
+            }
+            this.tracesChanged.next();
+        }, () => {
+            console.error("Unable to get user's traces.");
         });
+        return promise;
+    }
+
+    public updateOsmTrace = (trace: ITrace): Promise<any> => {
+        trace.tags = trace.tagsString.split(",").map(t => t.trim());
+        return this.http.put(Urls.osmTrace + trace.id, trace, this.authorizationService.getHeader()).toPromise();
+    }
+
+    public deleteOsmTrace = (trace: ITrace): Promise<any> => {
+        let promise = this.http.delete(Urls.osmTrace + trace.id, this.authorizationService.getHeader()).toPromise();
+        promise.then(() => {
+            _.remove(this.traces, traceToFind => traceToFind.id === trace.id);
+            this.tracesChanged.next();
+        });
+        return promise;
     }
 
     private getSiteUrls = (): Promise<any> => {
@@ -183,11 +192,11 @@ export class OsmUserService {
             this.siteUrls.push(...siteUrls);
             this.siteUrlsChanged.next();
         }, () => {
-             console.error("Unable to get user shares.");
+             console.error("Unable to get user's shares.");
         });
         return promise;
     }
-
+    
     public createSiteUrl = (siteUrl: Common.SiteUrl): Promise<Response> => {
         return this.http.post(Urls.urls, siteUrl, this.authorizationService.getHeader()).toPromise();
     }
@@ -200,6 +209,7 @@ export class OsmUserService {
         let promise = this.http.delete(Urls.urls + siteUrl.id, this.authorizationService.getHeader()).toPromise();
         promise.then(() => {
             _.remove(this.siteUrls, s => s.id === siteUrl.id);
+            this.siteUrlsChanged.next();
         });
         return promise;
     }

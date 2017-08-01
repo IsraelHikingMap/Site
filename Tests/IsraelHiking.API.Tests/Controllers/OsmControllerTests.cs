@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
@@ -17,7 +16,6 @@ using NSubstitute;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -53,25 +51,6 @@ namespace IsraelHiking.API.Tests.Controllers
                 }.AsEnumerable()
             );
             return url;
-        }
-
-        private IFormFile SetupUploadFile()
-        {
-            var file = Substitute.For<IFormFile>();
-            file.FileName.Returns("SomeFile.gpx");
-            return file;
-
-        }
-
-        private void SetupIdentity(string osmUserId = "42")
-        {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new [] {
-                    new Claim(ClaimTypes.Name, osmUserId)
-            }));
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
         }
 
         [TestInitialize]
@@ -116,7 +95,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PutGpsTraceIntoOsm_ShouldDoIt()
         {
             var feature = new Feature(new LineString(new Coordinate[0]), new AttributesTable());
-            SetupIdentity();
+            _controller.SetupIdentity();
 
             _controller.PutGpsTraceIntoOsm(feature).Wait();
 
@@ -126,7 +105,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostGpsTrace_NoFileOrUrlProvided_ShouldReturnBadRequestResult()
         {
-            SetupIdentity();
+            _controller.SetupIdentity();
 
             var results = _controller.PostGpsTrace(string.Empty).Result as BadRequestObjectResult;
 
@@ -137,7 +116,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostGpsTrace_UrlProvidedForEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
         {
             var url = SetupGpxUrl(new gpxType(), new List<LineString>());
-            SetupIdentity();
+            _controller.SetupIdentity();
 
             var results = _controller.PostGpsTrace(url).Result as BadRequestObjectResult;
 
@@ -148,7 +127,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostGpsTrace_UrlProvidedForSemiEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
         {
             var url = SetupGpxUrl(new gpxType { trk = new[] { new trkType() } }, new List<LineString>());
-            SetupIdentity();
+            _controller.SetupIdentity();
 
             var results = _controller.PostGpsTrace(url).Result as BadRequestObjectResult;
 
@@ -190,7 +169,8 @@ namespace IsraelHiking.API.Tests.Controllers
                 }
             };
             var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
-            var file = SetupUploadFile();
+            var file = Substitute.For<IFormFile>();
+            file.FileName.Returns("SomeFile.gpx");
             _dataContainerConverterService.Convert(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
             _httpGatewayFactory.CreateRemoteFileFetcherGateway(Arg.Any<TokenAndSecret>()).Returns(fetcher);
             _addibleGpxLinesFinderService.GetLines(Arg.Any<List<ILineString>>()).Returns(
@@ -199,7 +179,7 @@ namespace IsraelHiking.API.Tests.Controllers
                     new LineString(new[] {new Coordinate(0, 0), new Coordinate(1, 1)})
                 }.AsEnumerable()
             );
-            SetupIdentity();
+            _controller.SetupIdentity();
 
             var results = _controller.PostGpsTrace(null, file).Result as OkObjectResult;
 
@@ -228,7 +208,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 }
             };
             var url = SetupGpxUrl(gpx);
-            SetupIdentity();
+            _controller.SetupIdentity();
 
             var results = _controller.PostGpsTrace(url).Result as OkObjectResult;
 
@@ -257,7 +237,7 @@ namespace IsraelHiking.API.Tests.Controllers
                 }
             };
             var url = SetupGpxUrl(gpx);
-            SetupIdentity();
+            _controller.SetupIdentity();
 
             var results = _controller.PostGpsTrace(url).Result as OkObjectResult;
 
@@ -266,19 +246,6 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(featureCollection);
             Assert.AreEqual(1, featureCollection.Features.Count);
             Assert.IsTrue(featureCollection.Features.First().Attributes.GetValues().Contains("track"));
-        }
-
-        [TestMethod]
-        public void PostUploadGpsTrace_UploadFile_ShouldSendItToOsmGateway()
-        {
-            var file = SetupUploadFile();
-            var gateway = Substitute.For<IOsmGateway>();
-            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(gateway);
-            SetupIdentity();
-
-            _controller.PostUploadGpsTrace(file).Wait();
-
-            gateway.Received(1).UploadFile(Arg.Any<string>(), Arg.Any<MemoryStream>());
         }
     }
 }

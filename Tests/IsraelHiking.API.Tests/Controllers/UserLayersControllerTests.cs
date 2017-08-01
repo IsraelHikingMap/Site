@@ -1,9 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Security.Claims;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -28,24 +26,13 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _controller.Dispose();
         }
-        
-        private void SetupIdentity(string osmUserId = "42")
-        {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new [] {
-                new Claim(ClaimTypes.Name, osmUserId)
-            }));
-            _controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
-        }
 
         [TestMethod]
         public void GetLayers_ShouldGetThem()
         {
             var userLayers = new UserLayers {Layers = new List<UserLayerData> {new UserLayerData()}};
             var osmUser = "osmUser";
-            SetupIdentity(osmUser);
+            _controller.SetupIdentity(osmUser);
             _israelHikingRepository.GetUserLayers(osmUser).Returns(userLayers);
             
             var result = _controller.GetUserLayers().Result as OkObjectResult;
@@ -67,7 +54,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostUserLayers_UnauthorizedUser_ShouldReturnUnauthorized()
         {
-            SetupIdentity("123");
+            _controller.SetupIdentity("123");
             var results = _controller.PostUserLayers("456", null).Result;
 
             Assert.IsNotNull(results as UnauthorizedResult);
@@ -77,7 +64,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostUserLayers_AuthorizedUser_ShouldUpdateUserLayers()
         {
             var osmUserId = "osmUserId";
-            SetupIdentity(osmUserId);
+            _controller.SetupIdentity(osmUserId);
 
             var results = _controller.PostUserLayers(osmUserId, new UserLayers()).Result;
 

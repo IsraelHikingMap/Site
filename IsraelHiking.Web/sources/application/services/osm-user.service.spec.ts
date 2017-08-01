@@ -69,45 +69,9 @@ describe("OSM User Service", () => {
     });
 
     it("Should not refresh details on construction when not logged in", inject([OsmUserService], (osmUserService: OsmUserService) => {
-
-        //$httpBackend.whenGET(url => url.indexOf(Common.Urls.osmConfiguration) !== -1).respond(200,
-        //    {
-        //        data: {
-        //            BaseAddress: "osm.base.address",
-        //            ConsumerKey: "ConsumerKey",
-        //            ConsumerSecret: "ConsumerSecret"
-        //        }
-        //    });
-        //$httpBackend.flush();
         expect(osmUserService.isLoggedIn()).toBeFalsy();
     }));
 
-    /*
-
-    it("Should return error on construction when logged in", () => {
-
-        localStorageService.get = () => "AUTHORIZATION_DATA_KEY";
-        $httpBackend.whenGET(url => url.indexOf(Common.Urls.osmConfiguration) !== -1).respond(200,
-            {
-                data: {
-                    BaseAddress: "osm.base.address",
-                    ConsumerKey: "ConsumerKey",
-                    ConsumerSecret: "ConsumerSecret"
-                }
-            });
-        oauth.authenticated = () => { return true; };
-        oauth.xhr = (addressObject, callback: Function) => {
-            callback("error");
-        };
-
-        osmUserService = new IsraelHiking.Services.OsmUserService($q, $http, localStorageService);
-        $httpBackend.flush();
-        osmUserService.login();
-
-        expect(osmUserService.isLoggedIn()).toBe(true);
-        expect(osmUserService.loading).toBe(false);
-    });
-    */
     it("Should login and get data", inject([OsmUserService, XHRBackend], fakeAsync((osmUserService: OsmUserService, mockBackend: MockBackend) => {
 
         oauth.authenticated = () => { return true; },
@@ -115,17 +79,20 @@ describe("OSM User Service", () => {
                 if (addressObject.path.indexOf("details") !== -1) {
                     callback(null, userDetailsResponse);
                 }
-                if (addressObject.path.indexOf("gpx_files") !== -1) {
-                    callback(null, gpxFilesResponse);
-                }
             }
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.urls) === -1) {
+            if (connection.request.url.indexOf(Urls.urls) !== -1) {
+                connection.mockRespond(new Response(new ResponseOptions({
+                    body: JSON.stringify([{ title: "some share" } as Common.SiteUrl])
+                })));
                 return;
             }
-            connection.mockRespond(new Response(new ResponseOptions({
-                body: JSON.stringify([{ title: "some share" } as Common.SiteUrl])
-            })));
+            if (connection.request.url.indexOf(Urls.osmTrace) !== -1) {
+                connection.mockRespond(new Response(new ResponseOptions({
+                    body: JSON.stringify([{ id: "id", name: "name" } as ITrace])
+                })));
+                return;
+            }
         });
 
         osmUserService.login();
@@ -136,33 +103,32 @@ describe("OSM User Service", () => {
         expect(osmUserService.traces.length).toBe(1);
     })));
     
-    it("Should login and get data even if gpx files fail", inject([OsmUserService, XHRBackend], fakeAsync((osmUserService: OsmUserService, mockBackend: MockBackend) => {
+    it("Should login even if requests for data fails", inject([OsmUserService, XHRBackend], fakeAsync((osmUserService: OsmUserService, mockBackend: MockBackend) => {
 
         oauth.authenticated = () => { return true; },
             oauth.xhr = (addressObject, callback: Function) => {
                 if (addressObject.path.indexOf("details") !== -1) {
                     callback(null, userDetailsResponse);
                 }
-                if (addressObject.path.indexOf("gpx_files") !== -1) {
-                    callback("error");
-                }
             }
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.urls) === -1) {
+            if (connection.request.url.indexOf(Urls.osmTrace) !== -1) {
+                connection.mockError(new Error("Error!"));
                 return;
             }
-            connection.mockRespond(new Response(new ResponseOptions({
-                body: JSON.stringify([{ title: "some share" } as Common.SiteUrl])
-            })));
+            if (connection.request.url.indexOf(Urls.urls) !== -1) {
+                connection.mockError(new Error("Error!"));
+                return;
+            }
         });
         osmUserService.login().then(() => {
             fail();
         }, () => {
+            flushMicrotasks();
             expect(osmUserService.isLoggedIn()).toBe(true);
-            expect(osmUserService.siteUrls.length).toBe(1);
-            expect(osmUserService.traces.length).toBe(0);
+            expect(osmUserService.siteUrls.length).toBe(0);
+            expect(osmUserService.traces.length).toBe(0);    
         });
-        flushMicrotasks();
     })));
 
 

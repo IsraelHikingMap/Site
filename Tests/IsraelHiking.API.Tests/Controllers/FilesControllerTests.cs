@@ -14,7 +14,6 @@ using IsraelHiking.API.Services;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System.Security.Claims;
 using GeoAPI.Geometries;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -48,17 +47,6 @@ namespace IsraelHiking.API.Tests.Controllers
             </trk>
             </gpx>";
 
-        private void SetupIdentity(string osmUserId = "42")
-        {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                    new Claim(ClaimTypes.Name, osmUserId)
-            }));
-            _controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
-        }
-
         [TestInitialize]
         public void TestInitialize()
         {
@@ -81,7 +69,7 @@ namespace IsraelHiking.API.Tests.Controllers
             byte[] bytes = Encoding.ASCII.GetBytes(GPX_DATA);
             _remoteFileFetcherGateway.GetFileContent(url).Returns(new RemoteFileFetcherGatewayResponse { Content = bytes, FileName = "file.KML" });
             _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Is<string>(x => x.Contains("kml")), Arg.Is<string>(x => x.Contains("gpx"))).Returns(bytes);
-            SetupIdentity();
+            _controller.SetupIdentity();
 
             var dataContainer = _controller.GetRemoteFile(url).Result;
 

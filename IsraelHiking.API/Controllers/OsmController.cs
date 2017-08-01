@@ -133,8 +133,7 @@ namespace IsraelHiking.API.Controllers
                 return BadRequest("File does not contain any traces...");
             }
             var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
-            var attributesTable = new AttributesTable();
-            attributesTable.Add("highway", highwayType);
+            var attributesTable = new AttributesTable {{"highway", highwayType}};
             if (string.IsNullOrEmpty(url) == false)
             {
                 attributesTable.Add("source", url);
@@ -143,21 +142,6 @@ namespace IsraelHiking.API.Controllers
             return Ok(new FeatureCollection(new Collection<IFeature>(features)));
         }
 
-        /// <summary>
-        /// Allows upload of traces to OSM
-        /// </summary>
-        /// <returns></returns>
-        [Authorize]
-        [Route("trace")]
-        [HttpPost]
-        [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
-        public async Task<IActionResult> PostUploadGpsTrace(IFormFile file)
-        {
-            var response = await GetFile(string.Empty, file);
-            var gateway = _httpGatewayFactory.CreateOsmGateway(_cache.Get(User.Identity.Name));
-            await gateway.UploadFile(response.FileName, new MemoryStream(response.Content));
-            return Ok();
-        }
 
         private async Task<RemoteFileFetcherGatewayResponse> GetFile(string url, IFormFile file)
         {
@@ -170,12 +154,12 @@ namespace IsraelHiking.API.Controllers
             {
                 return null;
             }
-            using (var memeoryStream = new MemoryStream())
+            using (var memoryStream = new MemoryStream())
             {
-                await file.CopyToAsync(memeoryStream);
+                await file.CopyToAsync(memoryStream);
                 return new RemoteFileFetcherGatewayResponse
                 {
-                    Content = memeoryStream.ToArray(),
+                    Content = memoryStream.ToArray(),
                     FileName = file.FileName
                 };
             }

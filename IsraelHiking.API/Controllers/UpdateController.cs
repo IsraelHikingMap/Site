@@ -28,7 +28,6 @@ namespace IsraelHiking.API.Controllers
         /// Controller's constructor
         /// </summary>
         /// <param name="graphHopperGateway"></param>
-        /// <param name="fileProvider"></param>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>

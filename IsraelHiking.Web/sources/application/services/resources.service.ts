@@ -173,6 +173,10 @@ export class ResourcesService {
     public nakeb: string;
     public split: string;
     public merge: string;
+    public public: string;
+    public private: string;
+    public tags: string;
+    public noTags: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -551,6 +555,10 @@ export class ResourcesService {
                 this.nakeb = this.gettextCatalog.getString("Nakeb");
                 this.split = this.gettextCatalog.getString("Split");
                 this.merge = this.gettextCatalog.getString("Merge");
+                this.public = this.gettextCatalog.getString("Public");
+                this.private = this.gettextCatalog.getString("Private");
+                this.tags = this.gettextCatalog.getString("Tags");
+                this.noTags = this.gettextCatalog.getString("No Tags");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

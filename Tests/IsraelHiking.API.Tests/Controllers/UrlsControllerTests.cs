@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
@@ -9,7 +8,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Http;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -19,17 +17,6 @@ namespace IsraelHiking.API.Tests.Controllers
         private UrlsController _controller;
         private IIsraelHikingRepository _israelHikingRepository;
         private IDataContainerConverterService _containerConverterService;
-
-        private void SetupIdentity(string osmUserId = "42")
-        {
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new Claim[] {
-                    new Claim(ClaimTypes.Name, osmUserId)
-            }));
-            _controller.ControllerContext = new ControllerContext()
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
-        }
 
         [TestInitialize]
         public void TestInitialize()
@@ -82,7 +69,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var id = "someId";
             var list = new List<SiteUrl> { new SiteUrl { OsmUserId = id } };
-            SetupIdentity(id);
+            _controller.SetupIdentity(id);
             _israelHikingRepository.GetUrlsByUser(id).Returns(list);
 
             var results = _controller.GetSiteUrlForUser().Result as OkObjectResult;
@@ -95,7 +82,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostSiteUrl_IncorrectUser_ShouldReturnBadRequest()
         {
             var url = new SiteUrl { OsmUserId = "1" };
-            SetupIdentity("2");
+            _controller.SetupIdentity("2");
 
             var results = _controller.PostSiteUrl(url).Result as BadRequestObjectResult;
 
@@ -136,7 +123,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
             _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
-            SetupIdentity("1");
+            _controller.SetupIdentity("1");
 
             var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as BadRequestObjectResult;
 
@@ -149,7 +136,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var siteUrl = new SiteUrl { Id = "1", OsmUserId = "1" };
             _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
-            SetupIdentity(siteUrl.OsmUserId);
+            _controller.SetupIdentity(siteUrl.OsmUserId);
 
             var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as OkObjectResult;
 
@@ -163,7 +150,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
             _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
-            SetupIdentity(siteUrl.OsmUserId);
+            _controller.SetupIdentity(siteUrl.OsmUserId);
 
             _controller.DeleteSiteUrl(siteUrl.Id).Wait();
 
