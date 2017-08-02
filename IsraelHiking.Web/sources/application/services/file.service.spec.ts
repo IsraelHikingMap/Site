@@ -1,5 +1,5 @@
-﻿import { HttpModule, Http, Response, ResponseOptions, XHRBackend, RequestMethod } from "@angular/http";
-import { TestBed, async, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
+﻿import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
+import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import * as FileSaverFunctions from "file-saver";
 
@@ -20,7 +20,7 @@ describe("FileService", () => {
                     provide: FileService,
                     useFactory: fakeAsync((http, authorizationService: AuthorizationService, mockBackend: MockBackend) => {
                         mockBackend.connections.subscribe((connection: MockConnection) => {
-                            if (connection.request.url.indexOf(Urls.fileFormats) == -1) {
+                            if (connection.request.url.indexOf(Urls.fileFormats) === -1) {
                                 return;
                             }
                             connection.mockRespond(new Response(new ResponseOptions({
@@ -46,7 +46,7 @@ describe("FileService", () => {
     it("Should save to file", inject([FileService, XHRBackend], fakeAsync((fileService: FileService, mockBackend: MockBackend) => {
         spyOn(FileSaverFunctions, "saveAs");
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.files + "?format=format") == -1) {
+            if (connection.request.url.indexOf(Urls.files + "?format=format") === -1) {
                 return;
             }
             connection.mockRespond(new Response(new ResponseOptions({
@@ -64,7 +64,7 @@ describe("FileService", () => {
     it("Should open from file", inject([FileService, XHRBackend], fakeAsync((fileService: FileService, mockBackend: MockBackend) => {
         spyOn(FileSaverFunctions, "saveAs");
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.files + "?url=someurl") == -1) {
+            if (connection.request.url.indexOf(Urls.files + "?url=someurl") === -1) {
                 return;
             }
             connection.mockRespond(new Response(new ResponseOptions({
@@ -74,7 +74,7 @@ describe("FileService", () => {
         let wasCalled = false;
 
         var promise = fileService.openFromUrl("someurl");
-        promise.then(() => { wasCalled = true; })
+        promise.then(() => { wasCalled = true; });
         flushMicrotasks();
 
         expect(wasCalled).toBeTruthy();
@@ -92,7 +92,7 @@ describe("FileService", () => {
         };
         spyOn(authorizationService, "createXMLHttpRequest").and.returnValue(request);
         var wasCalled = false;
-        fileService.openFromFile(new Blob([""]) as File).then((res) => {
+        fileService.openFromFile(new Blob([""]) as File).then(() => {
             wasCalled = true;
         }, () => {
             fail();
@@ -115,7 +115,7 @@ describe("FileService", () => {
         };
         spyOn(authorizationService, "createXMLHttpRequest").and.returnValue(request);
         var wasCalled = false;
-        fileService.openFromFile(new Blob([""]) as File).then((res) => {
+        fileService.openFromFile(new Blob([""]) as File).then(() => {
             fail();
         }, () => {
             wasCalled = true;

@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+﻿import { Injectable, Inject } from "@angular/core";
 import { Http, Response } from "@angular/http";
 import { AuthorizationService } from "./authorization.service";
 import { Urls } from "../common/Urls";
@@ -15,7 +15,7 @@ export interface IFormatViewModel {
 @Injectable()
 export class FileService {
     public formats: IFormatViewModel[];
-
+    
     constructor(private http: Http,
         private authorizationService: AuthorizationService) {
         this.formats = [];
@@ -90,6 +90,55 @@ export class FileService {
         }
         var byteArray = new Uint8Array(byteNumbers);
         var blobToSave = new Blob([byteArray], { type: "application/octet-stream" });
-        saveAs(blobToSave, fileName);
+        //saveAs(blobToSave, fileName);
+        this.saveAsWorkAround(blobToSave, fileName);
+    }
+
+    /**
+     * This is an ugly workaround suggested here:
+     * https://github.com/eligrey/FileSaver.js/issues/330
+     * @param blob
+     * @param fileName
+     */
+    private saveAsWorkAround(blob: Blob, fileName: string) {
+        if (L.Browser.mobile) {
+            let reader = new FileReader();
+            reader.onload = () => {
+                // If chrome android
+                if (L.Browser.chrome) {
+                    let save = document.createElement("a");
+
+                    save.href = reader.result;
+                    save.download = fileName;
+
+                    document.body.appendChild(save);
+                    save.click();
+                    document.body.removeChild(save);
+                    window.URL.revokeObjectURL(save.href);
+                }
+                // If iPhone etc
+                else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
+                    let url = window.URL.createObjectURL(blob);
+                    window.location.href = url;
+                }
+                else {
+                    // Any other browser
+                    saveAs(blob, fileName);
+                }
+            };
+
+            reader.readAsDataURL(blob);
+        }
+        else {
+            //Desktop if safari
+            if (L.Browser.safari) {
+                let url = window.URL.createObjectURL(blob);
+                window.location.href = url;
+            }
+            else {
+                // If normal browser use package Filesaver.js
+                saveAs(blob, fileName);
+            }
+        }
     }
 }
