@@ -14,9 +14,12 @@
             </md-input-container>
         </div>
         <div fxLayout="row">
-            <md-input-container hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill>
-                <input mdInput type="text" [ngModel]="address" (ngModelChange)="addressChanged($event)" name="address" placeholder="{{resources.address}}" required="" fxFill [dir]="'ltr'" />
+            <md-input-container hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill [dir]="'ltr'">
+                <input mdInput type="text" [ngModel]="address" (ngModelChange)="addressChanged($event)" name="address" placeholder="{{resources.address}}" required="" fxFill />
             </md-input-container>
+        </div>
+        <div fxLayout="row">
+            <a [ngStyle]="{'font-size': 'small' }" href="https://qms.nextgis.com/" target="_blank">{{resources.moreMapAddresses}}</a>
         </div>
         <div class="input-wrapper-spacer"></div>
         <div fxLayout="row" fxFlexs>
