@@ -11,7 +11,9 @@
         <md-input-container hintLabel="{{resources.layerNamePlaceHolder}}" fxFill>
             <input mdInput type="text" [(ngModel)]="routeProperties.name" placeholder="{{resources.name}}" required="" fxFill/>
         </md-input-container>
-        <div class="input-wrapper-spacer"></div>
+        <md-input-container fxFill>
+            <textarea mdInput rows="2" type="text" [dir]="resources.getDirection(routeProperties.description)" [(ngModel)]="routeProperties.description" placeholder="{{resources.description}}" fxFill></textarea>
+        </md-input-container>
         <div fxLayout="column" fxLayoutAlign="space-between stretch">
             <div fxLayout="row" fxLayoutAlign="none none">
                 <label [ngStyle]="{'color': pathOptions.color}">{{resources.color}}</label>
@@ -23,9 +25,7 @@
                 </div>
             </div>
         </div>
-        <md-input-container fxFill>
-            <textarea mdInput rows="2" type="text" [dir]="resources.getDirection(routeProperties.description)" [(ngModel)]="routeProperties.description" placeholder="{{resources.description}}" fxFill></textarea>
-        </md-input-container>
+        <div class="input-wrapper-spacer"></div>
         <div fxLayout="column" fxLayoutAlign="space-between stretch" [hidden]="!isAdvanced">
             <md-input-container>
                 <input mdInput type="number" min="1" max="10" [(ngModel)]="pathOptions.weight" placeholder="{{resources.widthInPixels}}" fxFill />
