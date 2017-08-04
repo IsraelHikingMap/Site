@@ -56,4 +56,58 @@ describe("HoverHandler", () => {
         context.mapService.map.eachLayer(() => layersNumber++);
         expect(layersNumber).toBe(3); // including svg layer for marker icon
     });
+
+    it("Should not change state when dragging", () => {
+        hoverHandler.setState(HoverHandler.DRAGGING);
+
+        hoverHandler.onMouseMove(null);
+        
+        expect(hoverHandler.getState()).toBe(HoverHandler.DRAGGING);
+    });
+
+    it("Should transition to add point state when using hover for point", () => {
+        hoverHandler.setState(HoverHandler.NONE);
+        hoverHandler.setRouteHover(false);
+        
+        hoverHandler.onMouseMove({ latlng: L.latLng([0,0]) } as L.MouseEvent);
+
+        expect(hoverHandler.getState()).toBe(HoverHandler.ADD_POINT);
+    });
+
+    it("Should transition to on polyline state when using hover for route on route", () => {
+        hoverHandler.setState(HoverHandler.NONE);
+        hoverHandler.setRouteHover(true);
+        context.snapToRoute = () => {
+            return {
+                polyline: L.polyline([]),
+                latlng: L.latLng([0,0])
+            };
+        }
+        
+        hoverHandler.onMouseMove({ latlng: L.latLng([0, 0]) } as L.MouseEvent);
+
+        expect(hoverHandler.getState()).toBe(HoverHandler.ON_POLYLINE);
+    });
+
+    it("Should transition to add point state when using hover for route not on route", () => {
+        hoverHandler.setState(HoverHandler.NONE);
+        hoverHandler.setRouteHover(true);
+        context.snapToRoute = () => {
+            return {
+                polyline: null
+            };
+        };
+        context.snappingService = {
+            snapTo: () => {
+                return {
+                    latlng: L.latLng([0, 0])
+                }
+            }
+        };
+        context.route.segments = [];
+        
+        hoverHandler.onMouseMove({ latlng: L.latLng([0, 0]) } as L.MouseEvent);
+
+        expect(hoverHandler.getState()).toBe(HoverHandler.ADD_POINT);
+    });
 });
