@@ -21,6 +21,12 @@ export class MapServiceMockCreator {
         L.DomUtil.remove(this.mapDiv);
         this.mapDiv = null;
     }
+
+    public getNumberOfLayers(): number {
+        let layersNumber = 0;
+        this.mapService.map.eachLayer(() => layersNumber++);
+        return layersNumber;
+    }
 }
 
 describe("MapService", () => {

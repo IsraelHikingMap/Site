@@ -99,12 +99,9 @@ describe("NakebMarkerLayer", () => {
             let nakebLayer = new NakebMarkerLayer(mapService, http, injector, componentFactoryResolver, applicationRef);
             flushMicrotasks();
             mapServiceMock.mapService.map.addLayer(nakebLayer);
-            let numberOflayersBefore = 0;
-            mapServiceMock.mapService.map.eachLayer(() => numberOflayersBefore++);
+            let numberOflayersBefore = mapServiceMock.getNumberOfLayers();
             mapServiceMock.mapService.map.setView(L.latLng(32, 35), 15);
 
-            let numberOflayersAfter = 0;
-            mapServiceMock.mapService.map.eachLayer(() => numberOflayersAfter++);
-            expect(numberOflayersAfter).toBeGreaterThan(numberOflayersBefore);
+            expect(mapServiceMock.getNumberOfLayers()).toBeGreaterThan(numberOflayersBefore);
         })));
 });

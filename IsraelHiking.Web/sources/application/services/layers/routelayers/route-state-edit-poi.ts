@@ -1,10 +1,10 @@
-﻿import { RouteStateEdit } from "./route-state-edit";
+﻿import { RouteStateEditBase } from "./route-state-edit-base";
 import { IconsService } from "../../icons.service";
 import { IRouteLayer, EditModeString } from "./iroute.layer";
 import { EditMode } from "./iroute-state";
 import * as Common from "../../../common/IsraelHiking";
 
-export class RouteStateEditPoi extends RouteStateEdit {
+export class RouteStateEditPoi extends RouteStateEditBase {
     constructor(context: IRouteLayer) {
         super(context);
         this.hoverHandler.setRouteHover(false);

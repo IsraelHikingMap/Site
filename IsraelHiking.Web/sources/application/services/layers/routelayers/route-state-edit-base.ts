@@ -7,7 +7,7 @@ import { PoiMarkerPopupComponent } from "../../../components/markerpopup/poi-mar
 import * as Common from "../../../common/IsraelHiking";
 import * as _ from "lodash";
 
-export abstract class RouteStateEdit extends RouteStateBase {
+export abstract class RouteStateEditBase extends RouteStateBase {
     protected hoverHandler: HoverHandler;
     private selectedRouteSegmentIndex: number;
 

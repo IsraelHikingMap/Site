@@ -1,9 +1,9 @@
 ﻿import { EditMode } from "./iroute-state";
-import { RouteStateEdit } from "./route-state-edit";
+import { RouteStateEditBase } from "./route-state-edit-base";
 import { IRouteLayer, EditModeString } from "./iroute.layer";
 import { HoverHandler } from "./hover-handler";
 
-export class RouteStateEditRoute extends RouteStateEdit {
+export class RouteStateEditRoute extends RouteStateEditBase {
     constructor(context: IRouteLayer) {
         super(context);
         this.hoverHandler.setRouteHover(true);
