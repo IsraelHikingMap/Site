@@ -1,5 +1,7 @@
-import { ApplicationRef } from "@angular/core";
-import { SnappingService } from "../../snapping.service";
+import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+import { Subject } from "rxjs/Subject";
+
+import { SnappingService, ISnappingResponse, ISnappingOptions } from "../../snapping.service";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { ElevationProvider } from "../../elevation.provider";
@@ -10,9 +12,6 @@ import { RouteStateHidden } from "./route-state-hidden";
 import { RouteStateEditPoi } from "./route-state-edit-poi";
 import { RouteStateEditRoute } from "./route-state-edit-route";
 import { UndoHandler } from "./undo-handler";
-import { ISnappingResponse, ISnappingOptions } from "../../snapping.service"
-import { Subject } from "rxjs/Subject";
-import { Injector, ComponentFactoryResolver } from "@angular/core";
 import * as Common from "../../../common/IsraelHiking";
 
 export class RouteLayer extends L.Layer implements IRouteLayer {
@@ -54,11 +53,8 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         return this;
     }
 
-    public clearCurrentState() {
+    private setState(state: IRouteState) {
         this.currentState.clear();
-    }
-
-    public setState(state: IRouteState) {
         this.currentState = state;
     }
 
@@ -220,22 +216,18 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     }
 
     public setHiddenState(): void {
-        this.clearCurrentState();
         this.setState(new RouteStateHidden(this));
     }
 
     public setReadOnlyState(): void {
-        this.clearCurrentState();
         this.setState(new RouteStateReadOnly(this));
     }
 
     public setEditRouteState(): void {
-        this.clearCurrentState();
         this.setState(new RouteStateEditRoute(this));
     }
 
     public setEditPoiState(): void {
-        this.clearCurrentState();
         this.setState(new RouteStateEditPoi(this));
     }
 }

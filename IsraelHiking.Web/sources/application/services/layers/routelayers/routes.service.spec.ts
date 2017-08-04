@@ -35,6 +35,6 @@ describe("RoutesService", () => {
         routesService.addRoute(null);
 
         expect(mockRouteLayer.setEditRouteState).toHaveBeenCalled();
-        expect(mapServiceMock.getNumberOfLayers()).toBe(2);
+        expect(routesService.routes.length).toBe(2);
     });
 });

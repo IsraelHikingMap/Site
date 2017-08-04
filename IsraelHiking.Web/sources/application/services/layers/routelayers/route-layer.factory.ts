@@ -89,7 +89,7 @@ export class RouteLayerFactory {
     }
 
     public createRoute(name: string): IRoute {
-        return this.createRouteImplementation(name, "", { color: "", opacity: null, weight: null } as L.PathOptions)
+        return this.createRouteImplementation(name, "", { color: "", opacity: null, weight: null } as L.PathOptions);
     }
 
     public createRouteFromData(routeData: Common.RouteData): IRoute {

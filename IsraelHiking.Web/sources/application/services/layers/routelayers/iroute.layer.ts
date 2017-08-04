@@ -1,6 +1,6 @@
 ﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Subject } from "rxjs/Subject";
-import { IRouteState, EditMode } from "./iroute-state";
+import { EditMode } from "./iroute-state";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { SnappingService } from "../../snapping.service";
@@ -51,8 +51,6 @@ export interface IRouteLayer {
     dataChanged: Subject<any>;
     polylineHovered: Subject<L.LatLng>;
 
-    clearCurrentState(): void;
-    setState(routeState: IRouteState): void;
     setRoutingType(routingType: Common.RoutingType): void;
     setRouteProperties(properties: IRouteProperties): void;
     reverse(): void;
