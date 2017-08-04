@@ -53,11 +53,6 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         return this;
     }
 
-    private setState(state: IRouteState) {
-        this.currentState.clear();
-        this.currentState = state;
-    }
-
     public getEditMode(): EditMode {
         return this.currentState.getEditMode();
     }
@@ -151,6 +146,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     public undo = () => {
         this.undoHandler.pop();
         this.setData(this.undoHandler.top());
+        this.dataChanged.next();
     }
 
     public isUndoDisbaled = (): boolean => {
@@ -216,18 +212,22 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     }
 
     public setHiddenState(): void {
-        this.setState(new RouteStateHidden(this));
+        this.currentState.clear(); // initialize happens in new state constructor
+        this.currentState = new RouteStateHidden(this);
     }
 
     public setReadOnlyState(): void {
-        this.setState(new RouteStateReadOnly(this));
+        this.currentState.clear(); // initialize happens in new state constructor
+        this.currentState = new RouteStateReadOnly(this);
     }
 
     public setEditRouteState(): void {
-        this.setState(new RouteStateEditRoute(this));
+        this.currentState.clear(); // initialize happens in new state constructor
+        this.currentState = new RouteStateEditRoute(this);
     }
 
     public setEditPoiState(): void {
-        this.setState(new RouteStateEditPoi(this));
+        this.currentState.clear(); // initialize happens in new state constructor
+        this.currentState = new RouteStateEditPoi(this);
     }
 }

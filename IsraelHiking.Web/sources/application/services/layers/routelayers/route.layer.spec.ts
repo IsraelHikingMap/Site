@@ -1,5 +1,6 @@
 ﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
-import { TestBed, inject } from "@angular/core/testing";
+import { TestBed } from "@angular/core/testing";
+import { MaterialModule } from "@angular/material";
 
 import { RouteLayer } from "./route.layer";
 import { MapServiceMockCreator } from "../../map.service.spec";
@@ -9,6 +10,7 @@ import { RouterService } from "../../routers/router.service";
 import { ElevationProvider } from "../../elevation.provider";
 import { IRoute, IRouteProperties, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { RouteData, MarkerData, RouteSegmentData } from "../../../common/IsraelHiking";
+import { ResourcesService } from "../../resources.service";
 
 describe("RouteLayer", () => {
     var routeLayer: RouteLayer;
@@ -20,7 +22,9 @@ describe("RouteLayer", () => {
 
     beforeEach(() => {
         mapServiceMock = new MapServiceMockCreator();
-        snappingService = {};
+        snappingService = {
+            enable: () => { }
+        };
         routerService = {};
         route = {
             segments: [],
@@ -29,14 +33,34 @@ describe("RouteLayer", () => {
                 pathOptions: {}
             }
         } as IRoute;
+        let componentRefMock = {
+            instance: {
+                setMarker: () => { }
+            }
+        };
+        let factory = {
+            create: () => { return componentRefMock }
+        };
+        var applicationRefMock = {
+            attachView: () => { }
+        };
+        var componentFactoryResolverMock = {
+            resolveComponentFactory: () => { return factory }
+        };
+        
         TestBed.configureTestingModule({
+            imports: [
+                MaterialModule
+            ],
             providers: [
                 ApplicationRef,
                 Injector,
-                ComponentFactoryResolver
-            ]
+                { provide: ResourcesService, useValue: mapServiceMock.resourcesService },
+                { provide: ComponentFactoryResolver, useValue: componentFactoryResolverMock },
+                { provide: ApplicationRef, useValue: applicationRefMock }
+            ],
         });
-
+        
         routeLayer = new RouteLayer(mapServiceMock.mapService,
             snappingService,
             routerService,
@@ -58,7 +82,7 @@ describe("RouteLayer", () => {
 
     it("Can be added to the map", () => {
         mapServiceMock.mapService.map.addLayer(routeLayer);
-        
+
         expect(mapServiceMock.getNumberOfLayers()).toBeGreaterThan(0);
     });
 
@@ -79,7 +103,7 @@ describe("RouteLayer", () => {
         snappingService.snapTo = () => { };
         routeLayer.route.segments.push({ polyline: L.polyline([]) } as IRouteSegment);
         spyOn(snappingService, "snapTo");
-        
+
         routeLayer.snapToRoute(L.latLng([0, 0]));
 
         expect(snappingService.snapTo).toHaveBeenCalled();
@@ -88,7 +112,7 @@ describe("RouteLayer", () => {
     it("Should convert internal data to simple object", () => {
         routeLayer.route.properties.name = "name";
         routeLayer.route.segments.push({ latlngs: [], polyline: L.polyline([]) } as IRouteSegment);
-        routeLayer.route.markers.push({title: "title", latlng: L.latLng([0, 0]) } as IMarkerWithData);
+        routeLayer.route.markers.push({ title: "title", latlng: L.latLng([0, 0]) } as IMarkerWithData);
 
         let data = routeLayer.getData();
 
@@ -101,8 +125,8 @@ describe("RouteLayer", () => {
         let data = {
             name: "name",
             description: "description",
-            markers: [{latlng: L.latLng([0, 0])} as MarkerData],
-            segments: [{ latlngs: [L.latLng([0, 0]), L.latLng([0, 0])]} as RouteSegmentData],
+            markers: [{ latlng: L.latLng([0, 0]) } as MarkerData],
+            segments: [{ latlngs: [L.latLng([0, 0]), L.latLng([0, 0])] } as RouteSegmentData],
             color: "blue, no yellow",
         } as RouteData;
 
@@ -121,5 +145,25 @@ describe("RouteLayer", () => {
 
         expect(routeLayer.route.segments.length).toBe(0);
         expect(routeLayer.route.markers.length).toBe(0);
+    });
+
+    it("Should raise event after undo", () => {
+        let received = false;
+        routeLayer.dataChanged.subscribe(() => {
+            received = true;
+        });
+
+        routeLayer.undo();
+
+        expect(received).toBeTruthy();
+    });
+
+    it("Should clear current state and initialize new state when changed", () => {
+        routeLayer.setHiddenState();
+        routeLayer.route.segments.push({ latlngs: [L.latLng([0, 0]), L.latLng([0, 0])], routePoint: L.latLng([0, 0]) } as IRouteSegment);
+        routeLayer.setEditRouteState();
+        routeLayer.setReadOnlyState();
+
+        expect(mapServiceMock.getNumberOfLayers()).toBeGreaterThan(0);
     });
 });
