@@ -41,11 +41,6 @@ export class RoutesService {
         this.selectRoute(routeLayer);
     }
 
-    public isNameAvailable = (name: string) => {
-        var route = this.getRouteByName(name);
-        return route == null && name != null && name !== "";
-    }
-
     public removeRoute = (routeName: string) => {
         let routeLayer = this.getRouteByName(routeName);
         if (routeLayer == null) {
@@ -58,6 +53,11 @@ export class RoutesService {
         this.routes.splice(this.routes.indexOf(routeLayer), 1);
     }
 
+    public isNameAvailable = (name: string) => {
+        var route = this.getRouteByName(name);
+        return route == null && name != null && name !== "";
+    }
+    
     public changeRouteState = (routeLayer: IRouteLayer) => {
         if (routeLayer === this.selectedRoute && routeLayer.route.properties.isVisible) {
             this.selectRoute(null);

@@ -99,7 +99,7 @@ export class DataContainerService {
 
     /**
      * This method assums it is being called when the application loads
-     * so there's only one route in the routes layer - and it needs to be removed if not other route is loaded.
+     * so there's only one route in the routes layer - and it needs to be removed if other route is loaded.
      * @param data
      */
     private setInitialData(data: Common.DataContainer) {
