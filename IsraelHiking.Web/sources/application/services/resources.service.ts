@@ -274,6 +274,8 @@ export class ResourcesService {
     public legendSecondary: string;
     public legendTertiary: string;
     public legendUnclassified: string;
+    public legendLowSpeedStreet: string;
+    public legendResidental: string;
     public legendBridge: string;
     public legendTunnel: string;
     public legendTransportation: string;
@@ -312,6 +314,7 @@ export class ResourcesService {
     public legendObservationTower: string;
     public legendAntenna: string;
     public legendPowerLine: string;
+    public legendPlayground: string;
     public legendBarriers: string;
     public legendGate: string;
     public legendClosedGate: string;
@@ -361,6 +364,7 @@ export class ResourcesService {
     public legendScrub: string;
     public legendSand: string;
     public legendWetland: string;
+    public legendDryRiverbed: string;
     public legendCemetary: string;
     public legendQuarry: string;
 
@@ -658,6 +662,8 @@ export class ResourcesService {
                 this.legendSecondary = this.gettextCatalog.getString("Secondary");
                 this.legendTertiary = this.gettextCatalog.getString("Tertiary");
                 this.legendUnclassified = this.gettextCatalog.getString("Unclassified");
+                this.legendLowSpeedStreet = this.gettextCatalog.getString("Low-Speed Street");
+                this.legendResidental = this.gettextCatalog.getString("Residental");
                 this.legendBridge = this.gettextCatalog.getString("Bridge");
                 this.legendTunnel = this.gettextCatalog.getString("Tunnel");
                 this.legendTransportation = this.gettextCatalog.getString("Transportation");
@@ -695,6 +701,7 @@ export class ResourcesService {
                 this.legendObservationTower = this.gettextCatalog.getString("Observation Tower");
                 this.legendAntenna = this.gettextCatalog.getString("Antenna");
                 this.legendPowerLine = this.gettextCatalog.getString("Power Line");
+                this.legendPlayground = this.gettextCatalog.getString("Playground");
                 this.legendBarriers = this.gettextCatalog.getString("Barriers");
                 this.legendGate = this.gettextCatalog.getString("Gate");
                 this.legendClosedGate = this.gettextCatalog.getString("Closed Gate");
@@ -744,13 +751,14 @@ export class ResourcesService {
                 this.legendScrub = this.gettextCatalog.getString("Scrub");
                 this.legendSand = this.gettextCatalog.getString("Sand");
                 this.legendWetland = this.gettextCatalog.getString("Wetland");
+                this.legendDryRiverbed = this.gettextCatalog.getString("Dry Riverbed");
                 this.legendCemetary = this.gettextCatalog.getString("Cemetary");
                 this.legendQuarry = this.gettextCatalog.getString("Quarry");
                 this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
 
                 this.currentLanguage = language;
                 this.languageChanged.next(this.currentLanguage);
-            }, () => { console.error("Unable to fetch language file: " + language.code) });
+            }, () => { console.error(`Unable to fetch language file: ${language.code}`) });
     }
 
     public translate(word: string): string {

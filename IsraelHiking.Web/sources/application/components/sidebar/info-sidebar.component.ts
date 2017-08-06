@@ -243,7 +243,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendEasyWithDirection,
-                        latlng: L.latLng(31.8394124, 34.925923),
+                        latlng: L.latLng(31.6208, 34.7377),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
@@ -367,7 +367,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendSteps,
-                        latlng: L.latLng(31.894805, 35.0051826),
+                        latlng: L.latLng(31.7684, 35.1661),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
@@ -423,6 +423,14 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         title: this.resources.legendWetland,
                         latlng: L.latLng(32.24501, 34.85836),
                         zoom: 13,
+                        id: "_" + id++,
+                        map: null,
+                        type: "POI"
+                    },
+                    {
+                        title: this.resources.legendDryRiverbed,
+                        latlng: L.latLng(30.3726, 34.8351),
+                        zoom: 15,
                         id: "_" + id++,
                         map: null,
                         type: "POI"
@@ -530,6 +538,22 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         type: "Way"
                     },
                     {
+                        title: this.resources.legendLowSpeedStreet,
+                        latlng: L.latLng(32.126961, 34.80634),
+                        zoom: 16,
+                        id: "_" + id++,
+                        map: null,
+                        type: "Way"
+                    },
+                    {
+                        title: this.resources.legendResidental,
+                        latlng: L.latLng(31.1980, 34.8364),
+                        zoom: 16,
+                        id: "_" + id++,
+                        map: null,
+                        type: "Way"
+                    },
+                    {
                         title: this.resources.legendBridge,
                         latlng: L.latLng(32.115785, 34.9408268),
                         zoom: 16,
@@ -607,8 +631,8 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendPeak,
-                        latlng: L.latLng(32.9010649, 35.402584),
-                        zoom: 13,
+                        latlng: L.latLng(30.5544, 34.6933),
+                        zoom: 14,
                         id: "_" + id++,
                         map: null,
                         type: "POI"
@@ -724,6 +748,14 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way"
+                    },
+                    {
+                        title: this.resources.legendPlayground,
+                        latlng: L.latLng(31.9028, 34.8233),
+                        zoom: 16,
+                        id: "_" + id++,
+                        map: null,
+                        type: "POI"
                     }
                 ]
             },
@@ -843,15 +875,15 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendAreaB,
-                        latlng: L.latLng(31.375623, 35.0551200),
-                        zoom: 16,
+                        latlng: L.latLng(31.3971, 35.0136),
+                        zoom: 15,
                         id: "_" + id++,
                         map: null,
                         type: "Way"
                     },
                     {
                         title: this.resources.legendInternationalBorder,
-                        latlng: L.latLng(33.282037, 35.6545830),
+                        latlng: L.latLng(33.1161, 35.5114),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
@@ -953,7 +985,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendConvenienceStore,
-                        latlng: L.latLng(32.094323, 34.7984970),
+                        latlng: L.latLng(32.4341, 34.9222),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
@@ -969,7 +1001,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendToilettes,
-                        latlng: L.latLng(32.097891, 34.8056316),
+                        latlng: L.latLng(31.0162, 34.7607),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
@@ -1071,8 +1103,8 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendConstructionSite,
-                        latlng: L.latLng(32.034755, 34.7461963),
-                        zoom: 16,
+                        latlng: L.latLng(30.9796, 34.9221),
+                        zoom: 15,
                         id: "_" + id++,
                         map: null,
                         type: "POI"
@@ -1106,6 +1138,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
         this.removeItemInSection(this.resources.legendTrails, this.resources.legendDifficult4WD);
         this.removeItemInSection(this.resources.legendTrails, this.resources.legendSteps);
+        this.removeItemInSection(this.resources.legendTrails, this.resources.legendBicyclePath);
 
         this.removeItemInSection(this.resources.legendWater, this.resources.legendSeasonalLake);
 
@@ -1138,7 +1171,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
         this.removeItemInSection(this.resources.legendBarriers, this.resources.legendStile);
         this.removeItemInSection(this.resources.legendBarriers, this.resources.legendLiftGate);
+        
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendBikePark);
+
+        this.removeItemInSection(this.resources.legendRoads, this.resources.legendLowSpeedStreet);
 
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendBikeShop);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendFirstAid);
