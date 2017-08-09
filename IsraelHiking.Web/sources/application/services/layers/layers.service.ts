@@ -397,8 +397,8 @@ export class LayersService {
 
     private createOptionsFromLayerData = (layerData: Common.LayerData, attribution?: string): L.TileLayerOptions => {
         return {
-            minZoom: layerData.minZoom || LayersService.MIN_ZOOM,
-            maxNativeZoom: layerData.maxZoom || LayersService.MAX_NATIVE_ZOOM,
+            minZoom: (layerData.minZoom == null) ? LayersService.MIN_ZOOM : layerData.minZoom,
+            maxNativeZoom: (layerData.maxZoom == null) ? LayersService.MAX_NATIVE_ZOOM : layerData.maxZoom,
             maxZoom: LayersService.MAX_ZOOM,
             attribution: attribution || LayersService.ATTRIBUTION
         } as L.TileLayerOptions;
