@@ -17,7 +17,7 @@ interface IIconsGroup {
     selector: "poi-marker-popup",
     templateUrl: "./poi-marker-popup.component.html"
 })
-export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
+export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private routeLayer: IRouteLayer;
     public showIcons: boolean;
     public markerType: string;

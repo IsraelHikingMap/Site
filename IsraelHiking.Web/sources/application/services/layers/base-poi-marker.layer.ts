@@ -4,7 +4,6 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
     private enabled: boolean;
     protected markers: L.MarkerClusterGroup;
     protected markerIcon: L.DivIcon;
-    protected minimalZoom: number;
 
     constructor(protected mapService: MapService) {
         super();
@@ -34,6 +33,7 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
 
     protected abstract getIconString(): string;
     protected abstract updateMarkersInternal(): void;
+    protected abstract getMinimalZoom(): number;
 
     public onAdd(map: L.Map): this {
         this.enabled = true;
@@ -49,7 +49,7 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
     }
 
     protected updateMarkers() {
-        if (this.mapService.map.getZoom() < this.minimalZoom || this.enabled === false) {
+        if (this.mapService.map.getZoom() < this.getMinimalZoom() || this.enabled === false) {
             this.markers.clearLayers();
             return;
         }

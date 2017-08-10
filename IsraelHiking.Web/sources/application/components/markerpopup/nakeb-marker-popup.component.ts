@@ -17,7 +17,7 @@ export interface NakebItemExtended extends NakebItem {
 }
 
 export interface NakebItem {
-    start: { lat: string, lng: string };
+    start: L.LatLng;
     length: number;
     picture: string;
     title: string;

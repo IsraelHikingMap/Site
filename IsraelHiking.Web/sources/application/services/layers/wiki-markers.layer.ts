@@ -35,7 +35,6 @@ export class WikiMarkersLayer extends BasePoiMarkerLayer {
         private componentFactoryResolver: ComponentFactoryResolver,
         private applicationRef: ApplicationRef) {
         super(mapService);
-        this.minimalZoom = 13;
         this.markerIcon = IconsService.createWikipediaIcon();
         resources.languageChanged.subscribe(() => {
             this.markers.clearLayers();
@@ -45,6 +44,10 @@ export class WikiMarkersLayer extends BasePoiMarkerLayer {
 
     protected getIconString() {
         return "fa icon-wikipedia-w";
+    }
+
+    protected getMinimalZoom(): number {
+         return 13;
     }
 
     protected updateMarkersInternal(): void {

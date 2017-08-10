@@ -1,11 +1,13 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
+import * as _ from "lodash";
+
 import { MapService } from "../map.service";
 import { IconsService } from "../icons.service";
 import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
 import { NakebMarkerPopupComponent, NakebItem } from "../../components/markerpopup/nakeb-marker-popup.component";
 import * as Common from "../../common/IsraelHiking";
-import * as _ from "lodash";
+
 
 @Injectable()
 export class NakebMarkerLayer extends BasePoiMarkerLayer {
@@ -19,7 +21,6 @@ export class NakebMarkerLayer extends BasePoiMarkerLayer {
         private applicationRef: ApplicationRef) {
         super(mapService);
         this.cachedMarkers = [];
-        this.minimalZoom = 9;
         this.markerIcon = IconsService.createNakebIcon();
         this.readOnlyLayer = L.layerGroup([]);
         this.mapService.map.addLayer(this.readOnlyLayer);
@@ -36,13 +37,17 @@ export class NakebMarkerLayer extends BasePoiMarkerLayer {
         return "fa icon-nakeb";
     }
 
+    protected getMinimalZoom(): number {
+        return 9;
+    }
+
     private fetchMarkers() {
         let url = "https://www.nakeb.co.il/api/hikes/all";
 
         this.http.get(url).toPromise().then((response) => {
             let data = response.json() as NakebItem[];
             for (let item of data) {
-                let marker = L.marker(L.latLng(parseFloat(item.start.lat), parseFloat(item.start.lng)),
+                let marker = L.marker(L.latLng(item.start.lat, item.start.lng),
                     {
                         draggable: false,
                         clickable: true,

@@ -3,7 +3,7 @@ import { IRouteLayer, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { HoverHandler } from "./hover-handler";
 import { IconsService } from "../../icons.service";
 import { RouteMarkerPopupComponent } from "../../../components/markerpopup/route-marker-popup.component";
-import { PoiMarkerPopupComponent } from "../../../components/markerpopup/poi-marker-popup.component";
+import { DrawingPoiMarkerPopupComponent } from "../../../components/markerpopup/drawing-poi-marker-popup.component";
 import * as Common from "../../../common/IsraelHiking";
 import * as _ from "lodash";
 
@@ -320,7 +320,7 @@ export abstract class RouteStateEditBase extends RouteStateBase {
     }
 
     protected addComponentToMarker(marker: Common.IMarkerWithTitle): void {
-        let factory = this.context.componentFactoryResolver.resolveComponentFactory(PoiMarkerPopupComponent);
+        let factory = this.context.componentFactoryResolver.resolveComponentFactory(DrawingPoiMarkerPopupComponent);
         let containerDiv = L.DomUtil.create("div");
         let poiMarkerPopupComponentRef = factory.create(this.context.injector, [], containerDiv);
         this.context.applicationRef.attachView(poiMarkerPopupComponentRef.hostView);

@@ -1,4 +1,6 @@
-﻿import { Http } from "@angular/http";
+﻿import { ApplicationRef, ViewRef } from "@angular/core";
+import { Http } from "@angular/http";
+
 import { ResourcesService } from "../../services/resources.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { Urls } from "../../common/Urls";
@@ -61,6 +63,15 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
         var array = [this.latLng];
         this.elevationProvider.updateHeights(array).then(() => {
             this.latLng = array[0];
+        });
+    }
+
+    public static angularBinding(marker: L.Marker, applicationRef: ApplicationRef, hostView: ViewRef) {
+        marker.on("popupopen", () => {
+            applicationRef.attachView(hostView);
+        });
+        marker.on("popupclose", () => {
+            applicationRef.detachView(hostView);
         });
     }
 } 
