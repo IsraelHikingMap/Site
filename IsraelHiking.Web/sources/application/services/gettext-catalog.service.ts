@@ -20,9 +20,9 @@ export class GetTextCatalogService {
         return this.baseLanguage;
     }
 
-    public getString(string: string, scope?: any, context?: string): string
+    public getString(word: string, scope?: any, context?: string): string
     {
-        return this.strings[string] as string || "";
+        return this.strings[word] as string || word || "";
     }
 
     public loadRemote(url: string): Promise<Response>
