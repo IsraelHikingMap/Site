@@ -1,13 +1,9 @@
-﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+﻿import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import { MaterialModule } from "@angular/material";
 
 import { RouteLayer } from "./route.layer";
 import { MapServiceMockCreator } from "../../map.service.spec";
-import { MapService } from "../../map.service";
-import { SnappingService } from "../../snapping.service";
-import { RouterService } from "../../routers/router.service";
-import { ElevationProvider } from "../../elevation.provider";
 import { IRoute, IRouteProperties, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { RouteData, MarkerData, RouteSegmentData } from "../../../common/IsraelHiking";
 import { ResourcesService } from "../../resources.service";
@@ -35,14 +31,12 @@ describe("RouteLayer", () => {
         } as IRoute;
         let componentRefMock = {
             instance: {
-                setMarker: () => { }
+                setMarker: () => { },
+                angularBinding: () => { }
             }
         };
         let factory = {
             create: () => { return componentRefMock }
-        };
-        var applicationRefMock = {
-            attachView: () => { }
         };
         var componentFactoryResolverMock = {
             resolveComponentFactory: () => { return factory }
@@ -53,11 +47,9 @@ describe("RouteLayer", () => {
                 MaterialModule
             ],
             providers: [
-                ApplicationRef,
                 Injector,
                 { provide: ResourcesService, useValue: mapServiceMock.resourcesService },
-                { provide: ComponentFactoryResolver, useValue: componentFactoryResolverMock },
-                { provide: ApplicationRef, useValue: applicationRefMock }
+                { provide: ComponentFactoryResolver, useValue: componentFactoryResolverMock }
             ],
         });
         
@@ -67,7 +59,6 @@ describe("RouteLayer", () => {
             elevationProvider,
             TestBed.get(Injector),
             TestBed.get(ComponentFactoryResolver),
-            TestBed.get(ApplicationRef),
             route);
     });
 

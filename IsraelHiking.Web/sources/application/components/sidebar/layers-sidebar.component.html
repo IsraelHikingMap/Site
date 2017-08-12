@@ -42,7 +42,31 @@
         </div>
     </div>
     <hr class="divider" />
-
+    <div fxLayout="row" class="cursor-pointer row-hover" (click)="togglePoisVisibility($event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle POIs visiblity">
+        <div fxFlex="15">
+            <span><i class="fa fa-lg" [ngClass]="{'icon-eye': isPoisVisible, 'icon-eye-slash': !isPoisVisible}"></i></span>
+        </div>
+        <div fxFlex="75">
+            <span>{{resources.legendPoi}}</span>
+        </div>
+        <div fxFlex [hidden]="!isAdvanced">
+            <div fxLayout="column" fxFill>
+                <span fxFill fxLayoutAlign="end start" (click)="togglePoisFilters($event)" mdTooltip="{{resources.filters}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle POI filters"><i class="fa" [ngClass]="{'icon-chevron-down': !isPoisFiltersVisible, 'icon-chevron-up': isPoisFiltersVisible}"></i></span>
+            </div>
+        </div>
+    </div>
+    <div [hidden]="!isAdvanced || !isPoisFiltersVisible" *ngFor="let filter of filters">
+        <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleFilter(filter, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle filter visiblity {{filter.type}}">
+            <div fxFlex="10"></div>
+            <div fxFlex="15">
+                <span><i class="fa" [ngClass]="{'icon-eye': filter.isSelected, 'icon-eye-slash': !filter.isSelected}"></i></span>
+            </div>
+            <div fxFlex="75">
+                <span>{{resources.translate(filter.type)}}</span>
+            </div>
+        </div>
+    </div>
+    <hr class="divider" />
     <div *ngFor="let overlay of overlays">
         <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleVisibility(overlay, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle overlay visiblity {{overlay.key}}">
             <div fxFlex="15">

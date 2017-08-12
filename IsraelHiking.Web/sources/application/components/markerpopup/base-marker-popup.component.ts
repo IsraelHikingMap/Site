@@ -23,6 +23,7 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         protected http: Http,
+        private applicationRef:ApplicationRef,
         protected elevationProvider: ElevationProvider) {
         super(resources);
         this.hideCoordinates = true;
@@ -66,12 +67,13 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
         });
     }
 
-    public static angularBinding(marker: L.Marker, applicationRef: ApplicationRef, hostView: ViewRef) {
-        marker.on("popupopen", () => {
-            applicationRef.attachView(hostView);
+    public angularBinding(hostView: ViewRef) {
+        this.marker.on("popupopen", () => {
+            this.applicationRef.attachView(hostView);
         });
-        marker.on("popupclose", () => {
-            applicationRef.detachView(hostView);
+        this.marker.on("popupclose", () => {
+            // to allow tooltip to close
+            setTimeout(() => this.applicationRef.detachView(hostView), 1000);
         });
     }
 } 

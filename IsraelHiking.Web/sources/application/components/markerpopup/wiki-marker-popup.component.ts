@@ -1,7 +1,9 @@
-﻿import { Component } from "@angular/core";
-import { Jsonp } from "@angular/http";
+﻿import { Component, ApplicationRef } from "@angular/core";
+import { Jsonp, Http } from "@angular/http";
 import { ResourcesService } from "../../services/resources.service";
-import { BaseMapComponent } from "../base-map.component";
+import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
+import { ElevationProvider } from "../../services/elevation.provider";
+import * as Common from "../../common/IsraelHiking";
 
 export interface IWikiPage {
     coordinates: {
@@ -31,27 +33,26 @@ export interface IWikiResponse {
     selector: "wiki-marker-popup",
     templateUrl: "./wiki-marker-popup.component.html"
 })
-export class WikiMarkerPopupComponent extends BaseMapComponent {
-    public title: string;
+export class WikiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public address: string;
     public pageId: number;
     public extract: string;
     public thumbnail: string;
     public flexPresentage: number;
 
-    private marker: L.Marker;
-
     constructor(resources: ResourcesService,
+        http: Http,
+        applicationRef: ApplicationRef,
+        elevationProvider: ElevationProvider,
         private jsonp: Jsonp) {
-        super(resources);
+        super(resources, http, applicationRef, elevationProvider);
 
         this.flexPresentage = 100;
         this.extract = "";
         this.thumbnail = "";
     }
 
-    public setMarker(marker: L.Marker) {
-        this.marker = marker;
+    public setMarker(marker: Common.IMarkerWithTitle) {
         this.marker.on("popupopen", () => {
             let popup = this.marker.getPopup();
             let lang = this.resources.currentLanguage.code.split("-")[0];

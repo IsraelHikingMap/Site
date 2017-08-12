@@ -1,4 +1,4 @@
-﻿import { Injectable, Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { Http } from "@angular/http";
 import * as _ from "lodash";
 
@@ -17,8 +17,7 @@ export class NakebMarkerLayer extends BasePoiMarkerLayer {
     constructor(mapService: MapService,
         private http: Http,
         private injector: Injector,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private applicationRef: ApplicationRef) {
+        private componentFactoryResolver: ComponentFactoryResolver) {
         super(mapService);
         this.cachedMarkers = [];
         this.markerIcon = IconsService.createNakebIcon();
@@ -62,13 +61,8 @@ export class NakebMarkerLayer extends BasePoiMarkerLayer {
                 componentRef.instance.selectRoute = (item) => this.createReadOnlyLayer(item);
                 componentRef.instance.clearSelectedRoute = () => this.readOnlyLayer.clearLayers();
                 componentRef.instance.setMarker(marker);
+                componentRef.instance.angularBinding(componentRef.hostView);
                 marker.bindPopup(markerPopupContainer);
-                marker.on("popupopen", () => {
-                        this.applicationRef.attachView(componentRef.hostView);
-                    });
-                marker.on("popupclose", () => {
-                        this.applicationRef.detachView(componentRef.hostView);
-                    });
                 this.cachedMarkers.push(marker);
             }
             this.updateMarkers();

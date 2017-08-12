@@ -8,6 +8,7 @@ import { LayersService, IBaseLayer, IOverlay } from "../../services/layers/layer
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { IRouteLayer } from "../../services/layers/routelayers/iroute.layer";
 import { ResourcesService } from "../../services/resources.service";
+import { PoiLayer, IFilter } from "../../services/layers/poi.layer";
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
 import { BaseLayerEditDialogComponent } from "../dialogs/layers/base-layer-edit-dialog.component";
@@ -23,11 +24,16 @@ import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.co
     encapsulation: ViewEncapsulation.None
 })
 export class LayersSidebarComponent extends BaseMapComponent {
-    public static readonly IS_ADVANCED_KEY = "isAdvanced";
-
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public routes: IRouteLayer[];
+    public filters: IFilter[];
+
+    @LocalStorage()
+    public isPoisVisible: boolean = false;
+
+    public isPoisFiltersVisible: boolean = false;
+
     @LocalStorage()
     public isAdvanced: boolean = false;
 
@@ -36,12 +42,18 @@ export class LayersSidebarComponent extends BaseMapComponent {
         private mapService: MapService,
         private layersService: LayersService,
         private routesService: RoutesService,
+        private poiLayer: PoiLayer,
         private fileService: FileService,
         private sidebarService: SidebarService) {
         super(resources);
         this.baseLayers = layersService.baseLayers;
         this.overlays = layersService.overlays;
         this.routes = routesService.routes;
+        this.filters = poiLayer.filters;
+
+        if (this.isPoisVisible) {
+            this.mapService.map.addLayer(this.poiLayer);
+        }
     }
 
     public closeSidebar() {
@@ -57,6 +69,26 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.suppressEvents(e);
         let dialogRef = this.dialog.open(BaseLayerEditDialogComponent);
         dialogRef.componentInstance.setBaseLayer(layer);
+    }
+
+    public togglePoisVisibility(e: Event) {
+        this.suppressEvents(e);
+        if (this.isPoisVisible) {
+            this.mapService.map.removeLayer(this.poiLayer);
+        } else {
+            this.mapService.map.addLayer(this.poiLayer);
+        }
+        this.isPoisVisible = !this.isPoisVisible;
+    }
+
+    public togglePoisFilters(e: Event) {
+        this.suppressEvents(e);
+        this.isPoisFiltersVisible = !this.isPoisFiltersVisible;
+    }
+
+    public toggleFilter(filter: IFilter, e: Event) {
+        this.suppressEvents(e);
+        this.poiLayer.toggleFilter(filter);
     }
 
     public addOverlay(e: Event) {

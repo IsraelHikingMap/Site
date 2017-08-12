@@ -1,4 +1,4 @@
-﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+﻿import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { MockBackend, MockConnection, } from "@angular/http/testing";
@@ -14,14 +14,12 @@ describe("NakebMarkerLayer", () => {
         mapServiceMock = new MapServiceMockCreator();
         let componentRefMock = {
             instance: {
-                setMarker: () => { }
+                setMarker: () => { },
+                angularBinding: () => { }
             }
         };
         let factory = {
             create: () => { return componentRefMock }
-        };
-        var applicationRefMock = {
-            attachView: () => { }
         };
         var componentFactoryResolver = {
             resolveComponentFactory: () => { return factory }
@@ -34,8 +32,7 @@ describe("NakebMarkerLayer", () => {
                 { provide: XHRBackend, useClass: MockBackend },
                 NakebMarkerLayer,
                 Injector,
-                { provide: ComponentFactoryResolver, useValue: componentFactoryResolver },
-                { provide: ApplicationRef, useValue: applicationRefMock }
+                { provide: ComponentFactoryResolver, useValue: componentFactoryResolver }
             ]
         });
         (mapServiceMock.mapService.map as any)._layersMaxZoom = 19; // workaround for markercluster issue - removing this line will make the tests freeze.
@@ -45,8 +42,8 @@ describe("NakebMarkerLayer", () => {
         mapServiceMock.destructor();
     });
 
-    it("Should fetch markers when initialized", inject([XHRBackend, Http, MapService, Injector, ComponentFactoryResolver, ApplicationRef],
-        fakeAsync((mockBackend: MockBackend, http: Http, mapService: MapService, injector: Injector, componentFactoryResolver: ComponentFactoryResolver, applicationRef: ApplicationRef) => {
+    it("Should fetch markers when initialized", inject([XHRBackend, Http, MapService, Injector, ComponentFactoryResolver],
+        fakeAsync((mockBackend: MockBackend, http: Http, mapService: MapService, injector: Injector, componentFactoryResolver: ComponentFactoryResolver) => {
             let wasCalled = false;
             mockBackend.connections.subscribe((connection: MockConnection) => {
                 wasCalled = true;
@@ -60,7 +57,7 @@ describe("NakebMarkerLayer", () => {
                 })));
             });
 
-            let nakebLayer = new NakebMarkerLayer(mapService, http, injector, componentFactoryResolver, applicationRef);
+            let nakebLayer = new NakebMarkerLayer(mapService, http, injector, componentFactoryResolver);
 
             flushMicrotasks();
             expect(nakebLayer).not.toBeNull();
@@ -84,8 +81,8 @@ describe("NakebMarkerLayer", () => {
         expect(nakebLayer.onRemove).toHaveBeenCalled();
     }));
 
-    it("Should update markers when moving map", inject([XHRBackend, Http, MapService, Injector, ComponentFactoryResolver, ApplicationRef],
-        fakeAsync((mockBackend: MockBackend, http: Http, mapService: MapService, injector: Injector, componentFactoryResolver: ComponentFactoryResolver, applicationRef: ApplicationRef) => {
+    it("Should update markers when moving map", inject([XHRBackend, Http, MapService, Injector, ComponentFactoryResolver],
+        fakeAsync((mockBackend: MockBackend, http: Http, mapService: MapService, injector: Injector, componentFactoryResolver: ComponentFactoryResolver) => {
             mockBackend.connections.subscribe((connection: MockConnection) => {
                 connection.mockRespond(new Response(new ResponseOptions({
                     body: JSON.stringify([
@@ -96,7 +93,7 @@ describe("NakebMarkerLayer", () => {
                     ])
                 })));
             });
-            let nakebLayer = new NakebMarkerLayer(mapService, http, injector, componentFactoryResolver, applicationRef);
+            let nakebLayer = new NakebMarkerLayer(mapService, http, injector, componentFactoryResolver);
             flushMicrotasks();
             mapServiceMock.mapService.map.addLayer(nakebLayer);
             let numberOflayersBefore = mapServiceMock.getNumberOfLayers();

@@ -1,4 +1,4 @@
-import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { Subject } from "rxjs/Subject";
 
 import { SnappingService, ISnappingResponse, ISnappingOptions } from "../../snapping.service";
@@ -29,7 +29,6 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         public elevationProvider: ElevationProvider,
         public injector: Injector,
         public componentFactoryResolver: ComponentFactoryResolver,
-        public applicationRef: ApplicationRef,
         route: IRoute) {
         super();
         this.map = mapService.map;

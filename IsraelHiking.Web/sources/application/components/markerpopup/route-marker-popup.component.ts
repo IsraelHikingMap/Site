@@ -1,4 +1,4 @@
-﻿import { Component, Injector } from "@angular/core";
+﻿import { Component, Injector, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
 import * as _ from "lodash";
 import { ResourcesService } from "../../services/resources.service";
@@ -20,9 +20,10 @@ export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
     
     constructor(resources: ResourcesService,
         http: Http,
-        private injector: Injector,
-        elevationProvider: ElevationProvider) {
-        super(resources, http, elevationProvider);
+        applicationRef: ApplicationRef,
+        elevationProvider: ElevationProvider,
+        private injector: Injector,) {
+        super(resources, http, applicationRef, elevationProvider);
         this.canMerge = false;
         this.isMiddle = false;
     }

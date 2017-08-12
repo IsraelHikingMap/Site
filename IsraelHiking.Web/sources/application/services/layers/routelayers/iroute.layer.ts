@@ -1,4 +1,4 @@
-﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+﻿import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { Subject } from "rxjs/Subject";
 import { EditMode } from "./iroute-state";
 import { MapService } from "../../map.service";
@@ -46,7 +46,6 @@ export interface IRouteLayer {
     elevationProvider: ElevationProvider;
     injector: Injector;
     componentFactoryResolver: ComponentFactoryResolver;
-    applicationRef: ApplicationRef;
 
     dataChanged: Subject<any>;
     polylineHovered: Subject<L.LatLng>;

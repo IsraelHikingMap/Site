@@ -1,6 +1,6 @@
-﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
-import { JsonpModule, Http, Response, ResponseOptions, JSONPBackend } from "@angular/http";
-import { TestBed, async, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
+﻿import { Injector, ComponentFactoryResolver } from "@angular/core";
+import { JsonpModule, Response, ResponseOptions, JSONPBackend } from "@angular/http";
+import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { MockBackend, MockConnection, } from "@angular/http/testing";
 import { WikiMarkersLayer, IGeoSearchWikiPage, IGeoSearchWikiQuery, IGeoSearchWikiResponse } from "./wiki-markers.layer";
 import { MapServiceMockCreator } from "../map.service.spec";
@@ -14,14 +14,12 @@ describe("WikiMarkerLayer", () => {
         mapServiceMock = new MapServiceMockCreator();
         let componentRefMock = {
             instance: {
-                setMarker: () => { }
+                setMarker: () => { },
+                angularBinding: () => {}
             }
         };
         let factory = {
             create: () => { return componentRefMock }
-        };
-        var applicationRefMock = {
-            attachView: () => { }
         };
         var componentFactoryResolver = {
             resolveComponentFactory: () => { return factory }
@@ -35,8 +33,7 @@ describe("WikiMarkerLayer", () => {
                 { provide: JSONPBackend, useClass: MockBackend },
                 WikiMarkersLayer,
                 Injector,
-                { provide: ComponentFactoryResolver, useValue: componentFactoryResolver },
-                { provide: ApplicationRef, useValue: applicationRefMock }
+                { provide: ComponentFactoryResolver, useValue: componentFactoryResolver }
             ]
         });
 

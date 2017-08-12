@@ -1,4 +1,4 @@
-﻿import { Injectable, Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { Http } from "@angular/http";
 import { LocalStorage } from "ngx-store";
 import { MapService } from "../../map.service";
@@ -44,8 +44,7 @@ export class RouteLayerFactory {
         private snappingService: SnappingService,
         private elevationProvider: ElevationProvider,
         private injector: Injector,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private applicationRef: ApplicationRef) {
+        private componentFactoryResolver: ComponentFactoryResolver) {
         http.get(Urls.colors).toPromise().then((colors) => {
             this.colors.splice(0, this.colors.length, ...colors.json());
         });
@@ -62,7 +61,6 @@ export class RouteLayerFactory {
             this.elevationProvider,
             this.injector,
             this.componentFactoryResolver,
-            this.applicationRef,
             route);
     }
 

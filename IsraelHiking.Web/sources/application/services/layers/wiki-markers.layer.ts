@@ -1,4 +1,4 @@
-﻿import { Injectable, Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { Jsonp } from "@angular/http";
 import { MapService } from "../map.service";
 import { ResourcesService } from "../resources.service";
@@ -32,8 +32,7 @@ export class WikiMarkersLayer extends BasePoiMarkerLayer {
         private jsonp: Jsonp,
         private resources: ResourcesService,
         private injector: Injector,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private applicationRef: ApplicationRef) {
+        private componentFactoryResolver: ComponentFactoryResolver) {
         super(mapService);
         this.markerIcon = IconsService.createWikipediaIcon();
         resources.languageChanged.subscribe(() => {
@@ -78,13 +77,8 @@ export class WikiMarkersLayer extends BasePoiMarkerLayer {
                 componentRef.instance.title = currentPage.title;
                 componentRef.instance.pageId = currentPage.pageid;
                 componentRef.instance.setMarker(marker);
+                componentRef.instance.angularBinding(componentRef.hostView);
                 marker.bindPopup(markerPopupContainer);
-                marker.on("popupopen", () => {
-                    this.applicationRef.attachView(componentRef.hostView);
-                });
-                marker.on("popupclose", () => {
-                    this.applicationRef.detachView(componentRef.hostView);
-                });
                 this.markers.addLayer(marker);
             }
         });

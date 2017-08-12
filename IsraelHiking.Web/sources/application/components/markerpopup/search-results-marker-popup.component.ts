@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+﻿import { Component, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
 import { ResourcesService } from "../../services/resources.service";
 import { ElevationProvider } from "../../services/elevation.provider";
@@ -9,9 +9,11 @@ import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
     templateUrl: "./search-results-marker-popup.component.html"
 })
 export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent {
-    constructor(resources: ResourcesService, http: Http,
+    constructor(resources: ResourcesService,
+        http: Http,
+        applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider) {
-        super(resources, http, elevationProvider);
+        super(resources, http, applicationRef, elevationProvider);
     }
 
     public convertToRoute: () => void;

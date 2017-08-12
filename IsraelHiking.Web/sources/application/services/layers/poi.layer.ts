@@ -1,4 +1,4 @@
-﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { Http } from "@angular/http";
 import * as _ from "lodash";
 
@@ -6,13 +6,13 @@ import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
 import { MapService } from "../map.service";
 import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
-import { DrawingPoiMarkerPopupComponent } from "../../components/markerpopup/drawing-poi-marker-popup.component";
+import { PoiMarkerPopupComponent } from "../../components/markerpopup/poi-marker-popup.component";
 
-export type Filter = "Camping" | "spring" | "viewpoint" | "ruins" | "nature-reserve";
+export type FilterType = "Campsite" | "Spring, Pond" | "Viewpoint" | "Ruins" | "nature-reserve";
 
 export interface PoiItem {
     id: string;
-    type: Filter;
+    type: FilterType;
     title: string;
     location: L.LatLng;
 }
@@ -26,29 +26,57 @@ export interface PoiItemExtended extends PoiItem {
     address: string;
 }
 
+export interface IFilter {
+    type: FilterType,
+    isSelected: boolean;
+}
+
+@Injectable()
 export class PoiLayer extends BasePoiMarkerLayer {
 
-    public fileters: Filter[];
-    public selectedFilters: Filter[];
+    public filters: IFilter[];
 
     constructor(mapService: MapService,
         private http: Http,
         private injector: Injector,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private applicationRef: ApplicationRef) {
+        private componentFactoryResolver: ComponentFactoryResolver) {
         super(mapService);
 
+        this.filters = [
+            {
+                type: "Campsite",
+                isSelected: true,
+            },
+            {
+                type: "Spring, Pond",
+                isSelected: true,
+            },
+            {
+                type: "Viewpoint",
+                isSelected: true,
+            },
+            {
+                type: "Ruins",
+                isSelected: true,
+            }
+        ];
+        this.updateMarkers();
     }
 
-    getIconString(): string {
+    protected getIconString(): string {
         return "fa icon-star";
     }
 
-    getMinimalZoom(): number {
+    protected getMinimalZoom(): number {
         return 9;
     }
 
-    updateMarkersInternal(): void {
+    public toggleFilter(filter: IFilter) {
+        filter.isSelected = !filter.isSelected;
+        this.updateMarkers();
+    }
+
+    protected updateMarkersInternal(): void {
         let northEast = this.mapService.map.getBounds().getNorthEast();
         let southWest = this.mapService.map.getBounds().getSouthWest();
         this.http.get(Urls.poi,
@@ -56,7 +84,7 @@ export class PoiLayer extends BasePoiMarkerLayer {
                 params: {
                     northEast: northEast.lat + "," + northEast.lng,
                     southWest: southWest.lat + "," + southWest.lng,
-                    filters: this.selectedFilters.join(",")
+                    filters: this.filters.filter(f => f.isSelected).map(f => f.type).join(",")
                 }
             }).toPromise().then((response) => {
             let pointsOfInterest = response.json() as PoiItem[];
@@ -74,20 +102,17 @@ export class PoiLayer extends BasePoiMarkerLayer {
                 let marker = L.marker(L.latLng(poi.location.lat, poi.location.lng), { draggable: false, clickable: true, icon: this.markerIcon, title: poi.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
                 marker.title = poi.id;
                 let markerPopupContainer = L.DomUtil.create("div");
-                let factory = this.componentFactoryResolver.resolveComponentFactory(DrawingPoiMarkerPopupComponent);
+                let factory = this.componentFactoryResolver.resolveComponentFactory(PoiMarkerPopupComponent);
                 let componentRef = factory.create(this.injector, null, markerPopupContainer);
                 componentRef.instance.title = poi.title;
-                //componentRef.instance.id = poi.id;
+                componentRef.instance.id = poi.id;
                 componentRef.instance.setMarker(marker);
+                componentRef.instance.angularBinding(componentRef.hostView);
                 marker.bindPopup(markerPopupContainer);
-                marker.on("popupopen", () => {
-                    this.applicationRef.attachView(componentRef.hostView);
-                });
-                marker.on("popupclose", () => {
-                    this.applicationRef.detachView(componentRef.hostView);
-                });
                 this.markers.addLayer(marker);
             }
+        }, () => {
+            console.log("no points...?");
         });
     }
 

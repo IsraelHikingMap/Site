@@ -1,4 +1,4 @@
-﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, OnInit, OnDestroy, ViewChild, ElementRef } from "@angular/core";
+﻿import { Component, Injector, ComponentFactoryResolver, OnInit, OnDestroy, ViewChild, ElementRef } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Response } from "@angular/http";
 import { MdDialogRef } from "@angular/material";
@@ -64,7 +64,6 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         private sharedStorageService: SharedStorageService,
         private mdDialogRef: MdDialogRef<OsmUserDialogComponent>,
         private componentFactoryResolver: ComponentFactoryResolver,
-        private applicationRef: ApplicationRef,
         private mapService: MapService,
         private fileService: FileService,
         private dataContainerService: DataContainerService,
@@ -179,7 +178,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 this.dataContainerService.setData(data);
                 this.osmTraceLayer.clearLayers();
             }
-            this.applicationRef.attachView(componentRef.hostView);
+            componentRef.instance.angularBinding(componentRef.hostView);
             mainMarker.bindPopup(markerPopupDiv);
             this.osmTraceLayer.addLayer(mainMarker);
             this.fitBoundsService.fitBounds(bounds, { maxZoom: LayersService.MAX_NATIVE_ZOOM } as L.FitBoundsOptions);
@@ -290,7 +289,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 this.osmTraceLayer.removeLayer(marker);
             }
             componentRef.instance.setFeature(feature);
-            this.applicationRef.attachView(componentRef.hostView);
+            componentRef.instance.angularBinding(componentRef.hostView);
 
             marker.bindPopup(markerPopupDiv);
             marker.on("popupopen", () => { polyline.setStyle({ color: "DarkRed", weight: 5, opacity: 1 } as L.PathOptions); });

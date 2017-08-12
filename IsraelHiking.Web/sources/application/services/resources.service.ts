@@ -178,6 +178,7 @@ export class ResourcesService {
     public tags: string;
     public noTags: string;
     public moreMapAddresses: string;
+    public filters: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -565,6 +566,7 @@ export class ResourcesService {
                 this.tags = this.gettextCatalog.getString("Tags");
                 this.noTags = this.gettextCatalog.getString("No Tags");
                 this.moreMapAddresses = this.gettextCatalog.getString("More map addresses can be found here, look for TMS");
+                this.filters = this.gettextCatalog.getString("Filters");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

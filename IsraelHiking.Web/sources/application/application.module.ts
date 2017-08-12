@@ -1,4 +1,4 @@
-/// angular
+// angular
 import { NgModule } from "@angular/core";
 import { BrowserXhr } from "@angular/http";
 import { CommonModule } from "@angular/common";
@@ -15,7 +15,7 @@ import { Angulartics2Module, Angulartics2GoogleAnalytics } from "angulartics2";
 import { NgProgressModule, NgProgressBrowserXhr } from "ngx-progressbar";
 import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
-/// services
+// services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
 import { MapService } from "./services/map.service";
@@ -38,11 +38,12 @@ import { SearchResultsProvider } from "./services/search-results.provider";
 import { GeoJsonParser } from "./services/geojson.parser";
 import { WikiMarkersLayer } from "./services/layers/wiki-markers.layer";
 import { NakebMarkerLayer } from "./services/layers/nakeb-markers.layer";
+import { PoiLayer } from "./services/layers/poi.layer";
 import { DragAndDropService } from "./services/drag-and-drop.service";
-/// directives
+// directives
 import { GoogleChartDirective } from "./directives/google-chart.directive";
 import { DraggableResizableDirective } from "./directives/draggable-resizable.directive";
-/// components
+// components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { MainMapComponent } from "./components/main-map.component";
 import { ZoomComponent } from "./components/zoom.component";
@@ -167,6 +168,7 @@ export function getWindow() { return window; }
         GeoJsonParser,
         WikiMarkersLayer,
         NakebMarkerLayer,
+        PoiLayer,
         DragAndDropService
     ],
     declarations: [MainMapComponent,

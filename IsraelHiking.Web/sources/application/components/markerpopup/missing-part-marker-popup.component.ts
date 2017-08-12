@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+﻿import { Component, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
 import { ResourcesService } from "../../services/resources.service";
 import { OsmUserService } from "../../services/osm-user.service";
@@ -16,10 +16,11 @@ export class MissingPartMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     constructor(resources: ResourcesService,
         http: Http,
+        applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider,
         private osmUserService: OsmUserService,
         private toastService: ToastService) {
-        super(resources, http, elevationProvider);
+        super(resources, http, applicationRef, elevationProvider);
     }
 
     public setFeature(feature: GeoJSON.Feature<GeoJSON.LineString>) {

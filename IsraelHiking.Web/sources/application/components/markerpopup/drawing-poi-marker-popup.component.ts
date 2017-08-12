@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+﻿import { Component, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -14,8 +14,8 @@ interface IIconsGroup {
 }
 
 @Component({
-    selector: "poi-marker-popup",
-    templateUrl: "./poi-marker-popup.component.html"
+    selector: "drawing-poi-marker-popup",
+    templateUrl: "./drawing-poi-marker-popup.component.html"
 })
 export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private routeLayer: IRouteLayer;
@@ -27,8 +27,9 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     constructor(resources: ResourcesService,
         http: Http,
         elevationProvider: ElevationProvider,
+        applicationRef: ApplicationRef,
         private mapService: MapService) {
-        super(resources, http, elevationProvider);
+        super(resources, http, applicationRef, elevationProvider);
 
         this.showIcons = false;
         this.wikiCoordinatesString = "";

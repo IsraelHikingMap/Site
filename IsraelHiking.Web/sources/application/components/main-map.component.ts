@@ -99,7 +99,7 @@ export class MainMapComponent extends BaseMapComponent {
         this.createContorl("language-control", LanguageComponent, "topright");
         this.createContorl("route-statistics-control", RouteStatisticsComponent, "bottomright");
 
-        L.control.scale({ imperial: false } as L.Control.ScaleOptions).addTo(this.mapService.map);
+        L.control.scale({ imperial: false, position: "bottomright" } as L.Control.ScaleOptions).addTo(this.mapService.map);
     }
 
     private createContorl<T>(directiveHtmlName: string, component: Type<T>, position: L.ControlPosition = "topleft", hiddenOnMoblie = false) {

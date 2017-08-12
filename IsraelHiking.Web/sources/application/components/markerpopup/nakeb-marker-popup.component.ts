@@ -1,10 +1,10 @@
-﻿import { Component } from "@angular/core";
+﻿import { Component, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
 import * as _ from "lodash";
 
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
-import { BaseMapComponent } from "../base-map.component";
+import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import * as Common from "../../common/IsraelHiking";
@@ -31,8 +31,7 @@ export interface NakebItem {
     selector: "nakeb-marker-popup",
     templateUrl: "./nakeb-marker-popup.component.html"
 })
-export class NakebMarkerPopupComponent extends BaseMapComponent {
-    public title: string;
+export class NakebMarkerPopupComponent extends BaseMarkerPopupComponent {
     public address: string;
     public extract: string;
     public thumbnail: string;
@@ -41,14 +40,14 @@ export class NakebMarkerPopupComponent extends BaseMapComponent {
     public pageId: number;
 
     private routeData: Common.RouteData;
-    private marker: L.Marker;
 
     constructor(resources: ResourcesService,
+        http: Http,
+        applicationRef: ApplicationRef,
+        elevationProvider: ElevationProvider,
         private mapService: MapService,
-        private routesService: RoutesService,
-        private elevationProvider: ElevationProvider,
-        private http: Http) {
-        super(resources);
+        private routesService: RoutesService) {
+        super(resources, http, applicationRef, elevationProvider);
 
         this.routeData = null;
         this.address = "";
@@ -58,7 +57,7 @@ export class NakebMarkerPopupComponent extends BaseMapComponent {
     public selectRoute = (routeData: Common.RouteData) => { };
     public clearSelectedRoute = () => {};
     
-    public setMarker(marker: L.Marker) {
+    public setMarker(marker: Common.IMarkerWithTitle) {
         this.marker = marker;
         this.marker.on("popupopen", () => {
             if (this.routeData != null) {

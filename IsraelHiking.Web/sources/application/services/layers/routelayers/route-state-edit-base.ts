@@ -59,12 +59,12 @@ export abstract class RouteStateEditBase extends RouteStateBase {
         let factory = this.context.componentFactoryResolver.resolveComponentFactory(RouteMarkerPopupComponent);
         let containerDiv = L.DomUtil.create("div");
         let routeMarkerPopupComponentRef = factory.create(this.context.injector, [], containerDiv);
-        this.context.applicationRef.attachView(routeMarkerPopupComponentRef.hostView);
         routeMarkerPopupComponentRef.instance.setMarker(marker as Common.IMarkerWithTitle);
         routeMarkerPopupComponentRef.instance.remove = () => {
             let segment = _.find(this.context.route.segments, segmentToFind => marker === segmentToFind.routePointMarker);
             this.removeRouteSegment(segment);
         }
+        routeMarkerPopupComponentRef.instance.angularBinding(routeMarkerPopupComponentRef.hostView);
         marker.bindPopup(containerDiv);
         return marker;
     }
@@ -323,7 +323,6 @@ export abstract class RouteStateEditBase extends RouteStateBase {
         let factory = this.context.componentFactoryResolver.resolveComponentFactory(DrawingPoiMarkerPopupComponent);
         let containerDiv = L.DomUtil.create("div");
         let poiMarkerPopupComponentRef = factory.create(this.context.injector, [], containerDiv);
-        this.context.applicationRef.attachView(poiMarkerPopupComponentRef.hostView);
         poiMarkerPopupComponentRef.instance.setMarker(marker);
         poiMarkerPopupComponentRef.instance.setRouteLayer(this.context);
         poiMarkerPopupComponentRef.instance.remove = () => {
@@ -332,6 +331,7 @@ export abstract class RouteStateEditBase extends RouteStateBase {
             this.removePoi(routeMarker);
         }
         this.setPoiMarkerEvents(marker);
+        poiMarkerPopupComponentRef.instance.angularBinding(poiMarkerPopupComponentRef.hostView);
         marker.bindPopup(containerDiv);
     }
 

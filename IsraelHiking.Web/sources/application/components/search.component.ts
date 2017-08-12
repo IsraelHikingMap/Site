@@ -1,4 +1,4 @@
-﻿import { Component, Injector, ComponentFactoryResolver, ApplicationRef, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ElementRef } from "@angular/core";
+﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ElementRef } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Http } from "@angular/http";
 import { MapService } from "../services/map.service";
@@ -59,7 +59,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         private fitBoundsService: FitBoundsService,
         private injector: Injector,
         private componentFactoryResolver: ComponentFactoryResolver,
-        private applicationRef: ApplicationRef,
         private toastService: ToastService,
     ) {
         super(resources);
@@ -153,7 +152,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         componentRef.instance.remove = () => {
             this.featureGroup.clearLayers();
         }
-        this.applicationRef.attachView(componentRef.hostView);
+        componentRef.instance.angularBinding(componentRef.hostView);
         componentRef.instance.convertToRoute = () => {
             this.http.post(Urls.search, searchResults.feature).toPromise().then((response) => {
                 let data = response.json() as Common.DataContainer;
@@ -232,31 +231,30 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
             let componentFactory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
             let markerPopupFromDiv = L.DomUtil.create("div");
-            let componentRef = componentFactory.create(this.injector, [], markerPopupFromDiv);
-            componentRef.instance.setMarker(markerFrom);
-            componentRef.instance.remove = () => {
+            let componentRefFrom = componentFactory.create(this.injector, [], markerPopupFromDiv);
+            componentRefFrom.instance.setMarker(markerFrom);
+            componentRefFrom.instance.remove = () => {
                 this.featureGroup.clearLayers();
             }
-            componentRef.instance.convertToRoute = convertToRoute;
-            this.applicationRef.attachView(componentRef.hostView);
+            componentRefFrom.instance.convertToRoute = convertToRoute;
+            componentRefFrom.instance.angularBinding(componentRefFrom.hostView);
             markerFrom.bindPopup(markerPopupFromDiv);
             this.featureGroup.addLayer(markerFrom);
 
             let markerPopupToDiv = L.DomUtil.create("div");
-            componentRef = componentFactory.create(this.injector, [], markerPopupToDiv);
-            componentRef.instance.setMarker(markerTo);
-            componentRef.instance.remove = () => {
+            let componentRefTo = componentFactory.create(this.injector, [], markerPopupToDiv);
+            componentRefTo.instance.setMarker(markerTo);
+            componentRefTo.instance.remove = () => {
                 this.featureGroup.clearLayers();
             }
-            componentRef.instance.convertToRoute = convertToRoute;
-            this.applicationRef.attachView(componentRef.hostView);
+            componentRefTo.instance.convertToRoute = convertToRoute;
+            componentRefTo.instance.angularBinding(componentRefTo.hostView);
             markerTo.bindPopup(markerPopupToDiv);
             this.featureGroup.addLayer(markerTo);
 
             this.fitBoundsService.fitBounds(this.featureGroup.getBounds());
 
             setTimeout(() => {
-                console.log("opening popup");
                 markerTo.openPopup();
             }, 500);
         });
