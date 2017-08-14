@@ -15,14 +15,16 @@ namespace IsraelHiking.API.Services
         public bool IsAnyValue { get; }
         public double SearchFactor { get; }
         public string Icon { get; }
+        public string PoiType { get; }
 
-        public PropertiesData(string key, string value, double searchFactor, string icon = "", bool isAnyValue = false)
+        public PropertiesData(string key, string value, double searchFactor, string icon = "", bool isAnyValue = false, string poiType = "none")
         {
             Key = key;
             Value = value;
             SearchFactor = searchFactor;
             IsAnyValue = isAnyValue;
             Icon = icon;
+            PoiType = poiType;
         }
     }
 
@@ -39,6 +41,7 @@ namespace IsraelHiking.API.Services
         /// <param name="optionsProvider"></param>
         public GeoJsonFeatureHelper(IOptions<ConfigurationData> optionsProvider)
         {
+            // HM TODO: change images to font icons.
             var options = optionsProvider.Value;
             _relations = new List<PropertiesData>
             {
@@ -49,7 +52,6 @@ namespace IsraelHiking.API.Services
                 new PropertiesData("route", "hiking", 1, "https://israelhiking.osm.org.il/content/images/hike.svg"),
                 new PropertiesData("route", "bicycle", 1, "https://israelhiking.osm.org.il/content/images/bike.svg"),
                 new PropertiesData("route", "mtb", 1, "https://israelhiking.osm.org.il/content/images/bike.svg"),
-                new PropertiesData("waterway", "waterfall", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/waterfall.png")
             };
 
             _ways = new List<PropertiesData>
@@ -58,10 +60,10 @@ namespace IsraelHiking.API.Services
                 new PropertiesData("waterway", "stream", 1),
                 new PropertiesData("waterway", "river", 1),
                 new PropertiesData("waterway", "wadi", 1),
-                new PropertiesData("boundary", "national_park", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
+                new PropertiesData("boundary", "national_park", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png", false, "other"),
                 new PropertiesData("boundary", "protected_area", 1),
-                new PropertiesData("leisure", "nature_reserve", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
-                new PropertiesData("historic", "archaeological_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_archaeological2.p.16.png"),
+                new PropertiesData("leisure", "nature_reserve", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png", false, "other"),
+                new PropertiesData("historic", "archaeological_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_archaeological2.p.16.png", false, "ruins"),
                 new PropertiesData("highway", "any", options.SearchFactor, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/sign.png", true)
             };
 
@@ -70,25 +72,26 @@ namespace IsraelHiking.API.Services
                 new PropertiesData("place", "any", 1, "http://www.sjjb.co.uk/mapicons/png/accommodation_youth_hostel.p.24.png", true),
                 new PropertiesData("landuse", "farmyard", 1),
                 new PropertiesData("natural", "peak", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/peak.png"),
-                new PropertiesData("natural", "spring", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/spring.png"),
+                new PropertiesData("natural", "spring", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/spring.png", false, "spring"),
                 new PropertiesData("natural", "tree", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/tree.png"),
-                new PropertiesData("natural", "cave_entrance", 1, "http://www.sjjb.co.uk/mapicons/png/poi_cave.glow.32.png"),
-                new PropertiesData("natural", "waterhole", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/water_hole.png"),
-                new PropertiesData("water", "pond", 1),
-                new PropertiesData("man_made", "water_well", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/well.png"),
-                new PropertiesData("man_made", "cistern", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/cistern.png"),
-                new PropertiesData("leisure", "picnic", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_picnic.n.16.png"),
-                new PropertiesData("leisure", "picnic_table", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_picnic.n.16.png"),
-                new PropertiesData("leisure", "nature_reserve", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png"),
-                new PropertiesData("tourism", "picnic_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_picnic.n.16.png"),
-                new PropertiesData("tourism", "camp_site", 1, "http://www.sjjb.co.uk/mapicons/png/accommodation_camping.n.16.png"),
-                new PropertiesData("tourism", "viewpoint", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/viewpoint.png"),
-                new PropertiesData("tourism", "attraction", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_attraction.p.16.png"),
-                new PropertiesData("historic", "ruins", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/ruins.png"),
-                new PropertiesData("historic", "archaeological_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_archaeological2.p.16.png"),
-                new PropertiesData("historic", "memorial", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_memorial.p.16.png"),
-                new PropertiesData("historic", "monument", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/monument.png"),
+                new PropertiesData("natural", "cave_entrance", 1, "http://www.sjjb.co.uk/mapicons/png/poi_cave.glow.32.png", false, "other"),
+                new PropertiesData("natural", "waterhole", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/water_hole.png", false, "spring"),
+                new PropertiesData("water", "pond", 1, "", false, "spring"),
+                new PropertiesData("man_made", "water_well", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/well.png", false, "ruins"),
+                new PropertiesData("man_made", "cistern", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/cistern.png", false, "ruins"),
+                new PropertiesData("leisure", "picnic", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_picnic.n.16.png", false, "other"),
+                new PropertiesData("leisure", "picnic_table", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_picnic.n.16.png", false, "other"),
+                new PropertiesData("leisure", "nature_reserve", 1, "http://www.sjjb.co.uk/mapicons/png/landuse_grass.n.16.png", false, "other"),
+                new PropertiesData("tourism", "picnic_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_picnic.n.16.png", false, "other"),
+                new PropertiesData("tourism", "camp_site", 1, "http://www.sjjb.co.uk/mapicons/png/accommodation_camping.n.16.png", false, "campsite"),
+                new PropertiesData("tourism", "viewpoint", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/viewpoint.png", false, "viewpoint"),
+                new PropertiesData("tourism", "attraction", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_attraction.p.16.png", false, "other"),
+                new PropertiesData("historic", "ruins", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/ruins.png", false, "ruins"),
+                new PropertiesData("historic", "archaeological_site", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_archaeological2.p.16.png", false, "ruins"),
+                new PropertiesData("historic", "memorial", 1, "http://www.sjjb.co.uk/mapicons/png/tourist_memorial.p.16.png", false, "ruins"),
+                new PropertiesData("historic", "monument", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/monument.png", false, "ruins"),
                 new PropertiesData("highway", "bus_stop", options.SearchFactor, "http://www.sjjb.co.uk/mapicons/png/transport_bus_stop2.p.16.png"),
+                new PropertiesData("waterway", "waterfall", 1, "https://raw.githubusercontent.com/IsraelHikingMap/Map/master/Icons/mtbmap/waterfall.png", false, "spring")
             };
         }
 
@@ -102,6 +105,12 @@ namespace IsraelHiking.API.Services
         public double? GetSearchFactor(Feature feature)
         {
             return FindPropertiesData(feature)?.SearchFactor;
+        }
+
+        ///<inheritdoc/>
+        public string GetPoiType(Feature feature)
+        {
+            return FindPropertiesData(feature)?.PoiType ?? "none";
         }
 
         private PropertiesData FindPropertiesData(Feature feature)

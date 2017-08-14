@@ -21,6 +21,7 @@ namespace IsraelHiking.API.Executors
         private const string ICON = "icon";
         private const string SEARCH_FACTOR = "search_factor";
         private const string GEOLOCATION = "geolocation";
+        private const string POI_TYPE = "poi_type";
 
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
@@ -113,6 +114,7 @@ namespace IsraelHiking.API.Executors
                 AddAddressField(feature, containers);
                 feature.Attributes.AddAttribute(SEARCH_FACTOR, _geoJsonFeatureHelper.GetSearchFactor(feature) ?? _options.SearchFactor);
                 feature.Attributes.AddAttribute(ICON, _geoJsonFeatureHelper.GetIcon(feature));
+                feature.Attributes.AddAttribute(POI_TYPE, _geoJsonFeatureHelper.GetPoiType(feature));
                 UpdateLocation(feature);
             }
         }

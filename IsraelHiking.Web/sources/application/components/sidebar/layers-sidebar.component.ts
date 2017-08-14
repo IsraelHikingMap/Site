@@ -64,6 +64,10 @@ export class LayersSidebarComponent extends BaseMapComponent {
         dialogRef.componentInstance.setBaseLayer(layer);
     }
 
+    public isPoisVisible(): boolean {
+        return this.layersService.isPoisVisible;
+    }
+
     public togglePoisVisibility(e: Event) {
         this.suppressEvents(e);
         if (this.layersService.isPoisVisible) {

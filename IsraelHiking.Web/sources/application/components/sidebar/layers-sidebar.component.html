@@ -44,7 +44,7 @@
     <hr class="divider" />
     <div fxLayout="row" class="cursor-pointer row-hover" (click)="togglePoisVisibility($event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle POIs visiblity">
         <div fxFlex="15">
-            <span><i class="fa fa-lg" [ngClass]="{'icon-eye': isPoisVisible, 'icon-eye-slash': !isPoisVisible}"></i></span>
+            <span><i class="fa fa-lg" [ngClass]="{'icon-eye': isPoisVisible(), 'icon-eye-slash': !isPoisVisible()}"></i></span>
         </div>
         <div fxFlex="75">
             <span>{{resources.legendPoi}}</span>

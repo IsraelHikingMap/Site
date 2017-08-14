@@ -20,5 +20,12 @@ namespace IsraelHiking.API.Services
         /// <param name="feature">The <see cref="Feature"/></param>
         /// <returns>A search factor, null if not found</returns>
         double? GetSearchFactor(Feature feature);
+
+        /// <summary>
+        /// Returns the POI type for a <see cref="Feature"/>
+        /// </summary>
+        /// <param name="feature">The <see cref="Feature"/></param>
+        /// <returns>A POI type string</returns>
+        string GetPoiType(Feature feature);
     }
 }
