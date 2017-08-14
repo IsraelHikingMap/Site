@@ -1,24 +1,35 @@
 ﻿<div class="marker-popup" [dir]="'rtl'">
+    <div fxLayout="row" [hidden]="thumbnail">
+        <div fxFlex="33">
+            <i class="fa icon-camera fa-5x"></i>
+        </div>
+        <div fxFlex>
+            <h1 [ngClass]="resources.getTextAlignment(resources.comingSoon)">{{resources.comingSoon}}</h1>
+        </div>
+    </div>
     <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="!thumbnail">
-        <img [src]="thumbnail" class="img-responsive" height="100" />
+        <img [src]="thumbnail" class="img-responsive" height="100"/>
     </div>
     <a href="{{address}}" target="_blank">
         <h3 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h3>
     </a>
-    <div fxLayout="row">
-        <div [hidden]="isEditMode()">
-            <p>{{description}}</p>
-        </div>
-        <div [hidden]="!isEditMode()">
-            <textarea rows="2" mdInput [(ngModel)]="description" fxFill></textarea>
-        </div>
+    <div fxLayout="row" [hidden]="!isEditMode()">
+        <md-input-container fxFill hintLabel="{{resources.descriptionPlaceHolder}}">
+            <textarea rows="4" mdInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
+        </md-input-container>
+    </div>
+    <div fxLayout="row" [hidden]="isEditMode()">
+        <p fxFill [ngClass]="resources.getTextAlignment(description || resources.emptyPoiDescription)"
+           [dir]="resources.getDirection(description || resources.emptyPoiDescription)">
+            {{description || resources.emptyPoiDescription}}
+        </p>
     </div>
     <div fxLayout="row">
         <div fxFlex [hidden]="isEditMode()">
-            <button mdButton md-button fxFill (click)="setEditMode()" mdTooltip="{{resources.edit}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Nakeb" angularticsEvent="Convert nakeb to route"><i class="fa icon-plus"></i></button>
+            <button mdButton md-button fxFill (click)="setEditMode()" mdTooltip="{{resources.edit}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Nakeb" angularticsEvent="Convert nakeb to route"><i class="fa icon-pencil"></i></button>
         </div>
         <div fxFlex [hidden]="!isEditMode()">
-            <button mdButton md-button fxFill (click)="save()" mdTooltip="{{resources.save}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Nakeb" angularticsEvent="Convert nakeb to route"><i class="fa icon-plus"></i></button>
+            <button mdButton md-button fxFill (click)="save()" mdTooltip="{{resources.save}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Nakeb" angularticsEvent="Convert nakeb to route"><i class="fa icon-check"></i></button>
         </div>
     </div>
 </div>

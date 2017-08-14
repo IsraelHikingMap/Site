@@ -179,6 +179,8 @@ export class ResourcesService {
     public noTags: string;
     public moreMapAddresses: string;
     public filters: string;
+    public emptyPoiDescription: string;
+    public comingSoon: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -567,6 +569,8 @@ export class ResourcesService {
                 this.noTags = this.gettextCatalog.getString("No Tags");
                 this.moreMapAddresses = this.gettextCatalog.getString("More map addresses can be found here, look for TMS");
                 this.filters = this.gettextCatalog.getString("Filters");
+                this.emptyPoiDescription = this.gettextCatalog.getString("You should add your decription here! Click the edit button below.");
+                this.comingSoon = this.gettextCatalog.getString("Coming soon!");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

@@ -48,4 +48,5 @@ export interface DataContainer {
 
 export interface IMarkerWithTitle extends L.Marker {
     title: string;
+    identifier: string;
 }

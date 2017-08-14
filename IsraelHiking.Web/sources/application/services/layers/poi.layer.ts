@@ -4,15 +4,14 @@ import * as _ from "lodash";
 
 import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
 import { MapService } from "../map.service";
+import { PoiMarkerPopupComponent } from "../../components/markerpopup/poi-marker-popup.component";
+import { IconsService } from "../icons.service";
 import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
-import { PoiMarkerPopupComponent } from "../../components/markerpopup/poi-marker-popup.component";
-
-export type FilterType = "Campsite" | "Spring, Pond" | "Viewpoint" | "Ruins" | "nature-reserve";
 
 export interface PoiItem {
     id: string;
-    type: FilterType;
+    type: string;
     title: string;
     location: L.LatLng;
 }
@@ -27,7 +26,7 @@ export interface PoiItemExtended extends PoiItem {
 }
 
 export interface IFilter {
-    type: FilterType,
+    type: string,
     isSelected: boolean;
 }
 
@@ -41,26 +40,19 @@ export class PoiLayer extends BasePoiMarkerLayer {
         private injector: Injector,
         private componentFactoryResolver: ComponentFactoryResolver) {
         super(mapService);
-
-        this.filters = [
-            {
-                type: "Campsite",
-                isSelected: true,
-            },
-            {
-                type: "Spring, Pond",
-                isSelected: true,
-            },
-            {
-                type: "Viewpoint",
-                isSelected: true,
-            },
-            {
-                type: "Ruins",
-                isSelected: true,
+        this.filters = [];
+        this.markerIcon = IconsService.createPoiIcon("icon-star", "orange");
+        this.http.get(Urls.poiFilters).toPromise().then((response) => {
+            // HM TODO: store filters state
+            let filtersArray = response.json() as string[];
+            for (let filter of filtersArray) {
+                this.filters.push({
+                    type: filter,
+                    isSelected: true
+                });
             }
-        ];
-        this.updateMarkers();
+            this.updateMarkers();
+        });
     }
 
     protected getIconString(): string {
@@ -87,36 +79,34 @@ export class PoiLayer extends BasePoiMarkerLayer {
                     filters: this.filters.filter(f => f.isSelected).map(f => f.type).join(",")
                 }
             }).toPromise().then((response) => {
-            let pointsOfInterest = response.json() as PoiItem[];
-            this.markers.eachLayer(existingMarker => {
-                let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
-                let geoSearchPage = _.find(pointsOfInterest, p => p.id === markerWithTitle.title);
-                if (geoSearchPage == null) {
-                    this.markers.removeLayer(existingMarker);
-                } else {
-                    pointsOfInterest.splice(pointsOfInterest.indexOf(geoSearchPage), 1);
+                let features = response.json() as GeoJSON.Feature<GeoJSON.GeometryObject>[];
+                this.markers.eachLayer(existingMarker => {
+                    let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
+                    let geoSearchPage = _.find(features, p => p.properties.osm_id === markerWithTitle.identifier);
+                    if (geoSearchPage == null) {
+                        this.markers.removeLayer(existingMarker);
+                    } else {
+                        features.splice(features.indexOf(geoSearchPage), 1);
+                    }
+                });
+
+                for (let feature of features) {
+                    let properties = feature.properties as any;
+                    // HM TODO: marker icons by type.
+                    let latLng = L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.altitude);
+                    let marker = L.marker(latLng, { draggable: false, clickable: true, icon: this.markerIcon, title: properties.name } as L.MarkerOptions) as Common.IMarkerWithTitle;
+                    marker.title = properties.name;
+                    marker.identifier = properties.osm_id;
+                    let markerPopupContainer = L.DomUtil.create("div");
+                    let factory = this.componentFactoryResolver.resolveComponentFactory(PoiMarkerPopupComponent);
+                    let componentRef = factory.create(this.injector, null, markerPopupContainer);
+                    componentRef.instance.setMarker(marker);
+                    componentRef.instance.angularBinding(componentRef.hostView);
+                    marker.bindPopup(markerPopupContainer);
+                    this.markers.addLayer(marker);
                 }
+            }, () => {
+                console.log("no points...?");
             });
-
-            for (let poi of pointsOfInterest) {
-                let marker = L.marker(L.latLng(poi.location.lat, poi.location.lng), { draggable: false, clickable: true, icon: this.markerIcon, title: poi.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
-                marker.title = poi.id;
-                let markerPopupContainer = L.DomUtil.create("div");
-                let factory = this.componentFactoryResolver.resolveComponentFactory(PoiMarkerPopupComponent);
-                let componentRef = factory.create(this.injector, null, markerPopupContainer);
-                componentRef.instance.title = poi.title;
-                componentRef.instance.id = poi.id;
-                componentRef.instance.setMarker(marker);
-                componentRef.instance.angularBinding(componentRef.hostView);
-                marker.bindPopup(markerPopupContainer);
-                this.markers.addLayer(marker);
-            }
-        }, () => {
-            console.log("no points...?");
-        });
     }
-
-
-
-
 }

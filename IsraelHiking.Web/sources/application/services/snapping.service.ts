@@ -6,7 +6,7 @@ import { ToastService } from "./toast.service";
 import { Urls } from "../common/Urls";
 import * as _ from "lodash";
 import "rxjs/add/operator/toPromise";
-import { GeoJson, GeoJsonParser } from "./geojson.parser";
+import { GeoJsonParser } from "./geojson.parser";
 
 export interface ISnappingOptions {
     layers: L.LayerGroup;
@@ -33,6 +33,7 @@ export class SnappingService {
         private resourcesService: ResourcesService,
         private mapService: MapService,
         private toastService: ToastService,
+        private geoJsonParser: GeoJsonParser,
     ) {
         this.resourcesService = resourcesService;
         this.snappings = L.layerGroup([]);
@@ -70,16 +71,9 @@ export class SnappingService {
             }
             this.snappings.clearLayers();
             for (let feature of response.json() as GeoJSON.Feature<GeoJSON.GeometryObject>[]) {
-                switch (feature.geometry.type) {
-                    case GeoJson.lineString:
-                        var lineString = feature.geometry as GeoJSON.LineString;
-                        var latlngsArray = GeoJsonParser.createLatlngArray(lineString.coordinates);
-                        this.snappings.addLayer(L.polyline(latlngsArray, { opacity: 0 } as L.PolylineOptions));
-                        break;
-                    case GeoJson.polygon:
-                        var polygon = feature.geometry as GeoJSON.Polygon;
-                        var polygonLatlngsArray = GeoJsonParser.createLatlngArray(polygon.coordinates[0]);
-                        this.snappings.addLayer(L.polyline(polygonLatlngsArray, { opacity: 0 } as L.PolylineOptions));
+                let latlngsArrays = this.geoJsonParser.toLatLngsArray(feature);
+                for (let latlngsArray of latlngsArrays) {
+                    this.snappings.addLayer(L.polyline(latlngsArray, { opacity: 0 } as L.PolylineOptions));    
                 }
             }
             this.requestsQueue.splice(0);

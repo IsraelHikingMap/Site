@@ -73,7 +73,11 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
         });
         this.marker.on("popupclose", () => {
             // to allow tooltip to close
-            setTimeout(() => this.applicationRef.detachView(hostView), 1000);
+            setTimeout(() => {
+                if (!this.marker.getPopup().isOpen()) {
+                    this.applicationRef.detachView(hostView);
+                }   
+            }, 1000);
         });
     }
 } 

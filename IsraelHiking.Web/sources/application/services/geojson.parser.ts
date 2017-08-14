@@ -1,8 +1,8 @@
 ﻿import { Injectable } from "@angular/core";
+
 import * as Common from "../common/IsraelHiking";
 
-
-export namespace GeoJson {
+namespace GeoJson {
     export const lineString = "LineString";
     export const multiLineString = "MultiLineString";
     export const polygon = "Polygon";
@@ -98,7 +98,7 @@ export class GeoJsonParser {
         return L.latLng(coordinates[1], coordinates[0], coordinates[2] || 0);
     }
 
-    public static createLatlngArray(coordinates: GeoJSON.Position[]): L.LatLng[] {
+    private createLatlngArray(coordinates: GeoJSON.Position[]): L.LatLng[] {
         let latlngs = [] as L.LatLng[];
         for (let pointCoordinates of coordinates) {
             latlngs.push(GeoJsonParser.createLatlng(pointCoordinates));
@@ -109,7 +109,7 @@ export class GeoJsonParser {
     private positionsToData(positions: GeoJSON.Position[], name: string, description: string): Common.RouteData {
 
         let routeData = { name: name || "", description: description || "", segments: [], markers: [] } as Common.RouteData;
-        let latlngs = GeoJsonParser.createLatlngArray(positions);
+        let latlngs = this.createLatlngArray(positions);
         if (latlngs.length < 2) {
             return routeData;
         }
@@ -140,7 +140,7 @@ export class GeoJsonParser {
                     routingType: "Hike"
                 } as Common.RouteSegmentData);
             }
-            let latlngs = GeoJsonParser.createLatlngArray(lineCoordinates);
+            let latlngs = this.createLatlngArray(lineCoordinates);
             if (latlngs.length >= 2) {
                 routeData.segments.push({
                     latlngs: latlngs,
@@ -204,5 +204,35 @@ export class GeoJsonParser {
             }
         }
         return geoJson;
+    }
+
+    public toLatLngsArray(feature: GeoJSON.Feature<GeoJSON.GeometryObject>): L.LatLng[][] {
+        let latlngsArray = [] as L.LatLng[][];
+        switch (feature.geometry.type) {
+        case GeoJson.lineString:
+            let lineString = feature.geometry as GeoJSON.LineString;
+            latlngsArray.push(this.createLatlngArray(lineString.coordinates));
+            break;
+        case GeoJson.multiLineString:
+            let multiLineString = feature.geometry as GeoJSON.MultiLineString;
+            for (let currentCoordinatesArray of multiLineString.coordinates) {
+                latlngsArray.push(this.createLatlngArray(currentCoordinatesArray));
+            }
+            break;
+        case GeoJson.polygon:
+            let polygone = feature.geometry as GeoJSON.Polygon;
+            for (let currentCoordinatesArray of polygone.coordinates) {
+                latlngsArray.push(this.createLatlngArray(currentCoordinatesArray));
+            }
+            break;
+        case GeoJson.multiPolygon:
+            let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
+            for (let currentPolygoneCoordinates of multiPolygone.coordinates) {
+                for (let currentCoordinatesArray of currentPolygoneCoordinates) {
+                    latlngsArray.push(this.createLatlngArray(currentCoordinatesArray));
+                }
+            }
+        }
+        return latlngsArray;
     }
 }

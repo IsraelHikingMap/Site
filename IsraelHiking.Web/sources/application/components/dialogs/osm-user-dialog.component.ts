@@ -70,6 +70,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         private layersService: LayersService,
         private fitBoundsService: FitBoundsService,
         private toastService: ToastService,
+        private geoJsonParser: GeoJsonParser,
         public userService: OsmUserService,
     ) {
         super(resources);
@@ -270,8 +271,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     private addMissingPartsToMap = (geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
         var geoJsonLayer = L.geoJSON(geoJson);
         for (let feature of geoJson.features) {
-            let lineString = feature.geometry as GeoJSON.LineString;
-            let latLngs = GeoJsonParser.createLatlngArray(lineString.coordinates);
+            let latLngs = this.geoJsonParser.toLatLngsArray(feature)[0];
             let unselectedPathOptions = { color: "red", weight: 3, opacity: 1 } as L.PathOptions;
             let polyline = L.polyline(latLngs, unselectedPathOptions);
             this.osmTraceLayer.addLayer(polyline);

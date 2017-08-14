@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.IO.Converters;
 using Newtonsoft.Json;
 using Elasticsearch.Net;
+using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
 {
@@ -79,11 +80,11 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             if (_elasticClient.IndexExists(OSM_NAMES_INDEX1).Exists == false && 
                 _elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists == false)
             {
-                _elasticClient.CreateIndex(OSM_NAMES_INDEX1);
+                CreateNamesIndex(OSM_NAMES_INDEX1);
                 _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_NAMES_ALIAS).Index(OSM_NAMES_INDEX1)));
             }
-            if (_elasticClient.IndexExists(OSM_NAMES_INDEX1).Exists == true &&
-                _elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists == true)
+            if (_elasticClient.IndexExists(OSM_NAMES_INDEX1).Exists &&
+                _elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists)
             {
                 _elasticClient.DeleteIndex(OSM_NAMES_INDEX2);
             }
@@ -93,8 +94,8 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 CreateHighwaysIndex(OSM_HIGHWAYS_INDEX1);
                 _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_HIGHWAYS_ALIAS).Index(OSM_HIGHWAYS_INDEX1)));
             }
-            if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists == true &&
-                _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists == true)
+            if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists &&
+                _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists)
             {
                 _elasticClient.DeleteIndex(OSM_HIGHWAYS_INDEX2);
             }
@@ -116,8 +117,8 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 newHighwayIndex = OSM_HIGHWAYS_INDEX1;
             }
             // create new indexes
-            CreateHighwaysIndex(newHighwayIndex);
-            _elasticClient.CreateIndex(newNameIndex);
+            await CreateNamesIndex(newNameIndex);
+            await CreateHighwaysIndex(newHighwayIndex);
             // update data
             await UpdateUsingPaging(names, newNameIndex);
             await UpdateUsingPaging(highways, newHighwayIndex);
@@ -214,15 +215,50 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             return response.Documents.ToList();
         }
 
-        private void CreateHighwaysIndex(string highwaysIndexName)
+        public async Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] filters)
         {
-            _elasticClient.CreateIndexAsync(highwaysIndexName,
-                    c => c.Mappings(
-                        ms => ms.Map<Feature>(m =>
-                            m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
-                                .Tree(GeoTree.Geohash)
-                                .TreeLevels(10)
-                                .DistanceErrorPercentage(0.2))))));
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Index(OSM_NAMES_ALIAS)
+                    .Size(10000).Query(
+                        q => q.GeoBoundingBox(
+                            b => b.BoundingBox(bb => 
+                                bb.TopLeft(new GeoCoordinate(northEast.Y, southWest.X))
+                                .BottomRight(new GeoCoordinate(southWest.Y, northEast.X))
+                                ).Field("properties.geolocation")
+                        )
+                    )
+            );
+            return response.Documents.ToList();
+        }
+
+        private Task CreateHighwaysIndex(string highwaysIndexName)
+        {
+            return _elasticClient.CreateIndexAsync(highwaysIndexName,
+                c => c.Mappings(
+                    ms => ms.Map<Feature>(m =>
+                        m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
+                            .Tree(GeoTree.Geohash)
+                            .TreeLevels(10)
+                            .DistanceErrorPercentage(0.2)))
+                    )
+                )
+            );
+        }
+
+        private Task CreateNamesIndex(string namesIndexName)
+        {
+            return _elasticClient.CreateIndexAsync(namesIndexName,
+                f => f.Mappings(ms => ms
+                    .Map<Feature>(m => m
+                        .Properties(ps => ps
+                            .Object<AttributesTable>(o => o
+                                .Name("properties")
+                                .Properties(p => p.GeoPoint(s => s.Name("geolocation")))
+                            )
+                        )
+                    )
+                )
+            );
         }
 
         private async Task UpdateUsingPaging(List<Feature> features, string alias)

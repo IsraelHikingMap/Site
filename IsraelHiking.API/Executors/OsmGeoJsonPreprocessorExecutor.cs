@@ -20,6 +20,7 @@ namespace IsraelHiking.API.Executors
         private const string PLACE = "place";
         private const string ICON = "icon";
         private const string SEARCH_FACTOR = "search_factor";
+        private const string GEOLOCATION = "geolocation";
 
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
@@ -112,6 +113,7 @@ namespace IsraelHiking.API.Executors
                 AddAddressField(feature, containers);
                 feature.Attributes.AddAttribute(SEARCH_FACTOR, _geoJsonFeatureHelper.GetSearchFactor(feature) ?? _options.SearchFactor);
                 feature.Attributes.AddAttribute(ICON, _geoJsonFeatureHelper.GetIcon(feature));
+                UpdateLocation(feature);
             }
         }
 
@@ -129,8 +131,11 @@ namespace IsraelHiking.API.Executors
                 {
                     continue;
                 }
-                feature.Attributes.AddAttribute("lat", placePoint.Geometry.Coordinate.Y);
-                feature.Attributes.AddAttribute("lng", placePoint.Geometry.Coordinate.X);
+                feature.Attributes.AddAttribute(GEOLOCATION, 
+                    new {
+                        lat = placePoint.Geometry.Coordinate.Y,
+                        lon = placePoint.Geometry.Coordinate.X,
+                    });
                 foreach (var placePointAttributeName in placePoint.Attributes.GetNames())
                 {
                     if (feature.Attributes.GetNames().Contains(placePointAttributeName) == false)
@@ -319,6 +324,27 @@ namespace IsraelHiking.API.Executors
         public List<Feature> Preprocess(List<CompleteWay> highways)
         {
             return highways.Select(_osmGeoJsonConverter.ToGeoJson).Where(h => h != null).ToList();
+        }
+
+        /// <summary>
+        /// This is a static function to update the geolocation of a feature for search capabilities
+        /// </summary>
+        /// <param name="feature"></param>
+        public static void UpdateLocation(Feature feature)
+        {
+            if (feature.Attributes.GetNames().FirstOrDefault(n => n == GEOLOCATION) != null)
+            {
+                return;
+            }
+            if (feature.Geometry.Coordinate == null)
+            {
+                return;
+            }
+            feature.Attributes.AddAttribute(GEOLOCATION, new
+            {
+                lat = feature.Geometry.Coordinate.Y,
+                lon = feature.Geometry.Coordinate.X
+            });
         }
     }
 }

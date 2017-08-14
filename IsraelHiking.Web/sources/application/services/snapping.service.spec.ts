@@ -1,5 +1,5 @@
-﻿import { TestBed, async, inject, flushMicrotasks, fakeAsync } from "@angular/core/testing";
-import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
+﻿import { TestBed, inject, flushMicrotasks, fakeAsync } from "@angular/core/testing";
+import { HttpModule, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import { SnappingService, ISnappingOptions } from "./snapping.service";
 import { MapService } from "./map.service";
@@ -7,9 +7,9 @@ import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { MapServiceMockCreator } from "./map.service.spec";
 import { ToastServiceMockCreator } from "./toast.service.spec";
+import { GeoJsonParser } from "./geojson.parser";
 
 describe("SnappingService", () => {
-    var snappingService: SnappingService;
     var mapServiceMock: MapServiceMockCreator;
 
     beforeEach(() => {
@@ -22,6 +22,7 @@ describe("SnappingService", () => {
                 { provide: XHRBackend, useClass: MockBackend },
                 { provide: MapService, useValue: mapServiceMock.mapService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },
+                GeoJsonParser,
                 SnappingService
             ]
         });
@@ -68,7 +69,7 @@ describe("SnappingService", () => {
 
         mapServiceMock.mapService.map.setView(L.latLng(0, 0), 14);
         flushMicrotasks();
-        
+
         expect(snappingService.snappings.getLayers().length).toBe(1);
     })));
 

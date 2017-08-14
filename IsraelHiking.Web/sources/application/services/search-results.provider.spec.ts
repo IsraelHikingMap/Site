@@ -3,6 +3,7 @@ import { HttpModule, Response, ResponseOptions, XHRBackend } from "@angular/http
 import { MockBackend, MockConnection } from "@angular/http/testing";
 
 import { SearchResultsProvider, ISearchResults } from "./search-results.provider";
+import { GeoJsonParser } from "./geojson.parser";
 
 describe("SearchResultsProvider", () => {
     beforeEach(() => {
@@ -10,6 +11,7 @@ describe("SearchResultsProvider", () => {
             imports: [HttpModule],
             providers: [
                 { provide: XHRBackend, useClass: MockBackend },
+                GeoJsonParser,
                 SearchResultsProvider
             ]
         });
@@ -26,7 +28,8 @@ describe("SearchResultsProvider", () => {
                 } as GeoJSON.Point,
                 properties: {
                     name: "point",
-                    "name:he": "nekuda"
+                    "name:he": "nekuda",
+                    geolocation: { lat: 1, lon: 2 },
                 }
             } as GeoJSON.Feature<GeoJSON.Point>,
             {
@@ -36,17 +39,19 @@ describe("SearchResultsProvider", () => {
                     coordinates: [[1, 2], [3, 4]]
                 } as GeoJSON.LineString,
                 properties: {
-                    name: "linestring"
+                    name: "linestring",
+                    geolocation: { lat: 1, lon: 2 },
                 }
             } as GeoJSON.Feature<GeoJSON.LineString>,
             {
                 type: "Feature",
                 geometry: {
                     type: "Polygon",
-                    coordinates: [[[1, 2], [3, 4], [1,2]]]
+                    coordinates: [[[1, 2], [3, 4], [1, 2]]]
                 } as GeoJSON.Polygon,
                 properties: {
-                    name: "polygon"
+                    name: "polygon",
+                    geolocation: { lat: 1, lon: 2 },
                 }
             } as GeoJSON.Feature<GeoJSON.Polygon>,
             {
@@ -57,7 +62,8 @@ describe("SearchResultsProvider", () => {
                 } as GeoJSON.MultiLineString,
                 properties: {
                     name: "multiline",
-                    "name:en": "multiline"
+                    "name:en": "multiline",
+                    geolocation: { lat: 1, lon: 2 }
                 }
             } as GeoJSON.Feature<GeoJSON.MultiLineString>,
             {
@@ -67,12 +73,14 @@ describe("SearchResultsProvider", () => {
                     coordinates: [[[[1, 2], [3, 4], [1, 2]]]]
                 } as GeoJSON.MultiPolygon,
                 properties: {
-                    "name:ar" : "multipolygon"
+                    "name:ar": "multipolygon",
+                    geolocation: { lat: 1, lon: 2 },
+                    altitude: 10
                 }
             } as GeoJSON.Feature<GeoJSON.MultiPolygon>
         ] as GeoJSON.Feature<GeoJSON.GeometryObject>[];
         let collection = { features: features } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
-        mockBackend.connections.subscribe((connection) => {
+        mockBackend.connections.subscribe((connection: MockConnection) => {
             connection.mockRespond(new Response(new ResponseOptions({
                 body: JSON.stringify(collection)
             })));
@@ -80,6 +88,6 @@ describe("SearchResultsProvider", () => {
 
         return provider.getResults("searchTerm", true).then((results: ISearchResults[]) => {
             expect(results.length).toBe(5);
-        })
+        });
     })));
 });

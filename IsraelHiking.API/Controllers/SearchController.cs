@@ -12,6 +12,7 @@ using GeoAPI.CoordinateSystems.Transformations;
 using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using IsraelHiking.API.Converters.CoordinatesParsers;
+using IsraelHiking.API.Executors;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -24,7 +25,6 @@ namespace IsraelHiking.API.Controllers
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
-        private readonly IMathTransform _itmWgs84MathTransform;
         private readonly List<ICoordinatesParser> _coordinatesParsers;
 
         /// <summary>
@@ -42,14 +42,13 @@ namespace IsraelHiking.API.Controllers
             _elasticSearchGateway = elasticSearchGateway;
             _dataContainerConverterService = dataContainerConverterService;
             _elevationDataStorage = elevationDataStorage;
-            _itmWgs84MathTransform = itmWgs84MathTransform;
 
             _coordinatesParsers = new List<ICoordinatesParser>
             {
                 new ReverseDegreesMinutesSecondsLatLonParser(),
                 new DegreesMinutesSecondsLatLonParser(),
                 new DecimalLatLonParser(),
-                new UtmParser(_itmWgs84MathTransform)
+                new UtmParser(itmWgs84MathTransform)
             };
         }
 
@@ -61,7 +60,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         // GET api/search/abc&language=en
         [HttpGet]
-        [Route("{term}/{northing?}")]
+        [Route("{term}")]
         public async Task<FeatureCollection> GetSearchResults(string term, string language = null)
         {
             var coordinates = GetCoordinates(term.Trim());
@@ -111,9 +110,9 @@ namespace IsraelHiking.API.Controllers
 
         private FeatureCollection GetFeatureCollectionFromCoordinates(string name, Coordinate coordinates)
         {
-            return new FeatureCollection(new Collection<IFeature> {
-                new Feature(new Point(coordinates), new AttributesTable { { "name", name } })
-            });
+            var feature = new Feature(new Point(coordinates), new AttributesTable {{"name", name}});
+            OsmGeoJsonPreprocessorExecutor.UpdateLocation(feature);
+            return new FeatureCollection(new Collection<IFeature> {feature});
         }
     }
 }

@@ -1,6 +1,9 @@
 ﻿import { Component, Injector, Type, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Location, LocationStrategy, PathLocationStrategy } from "@angular/common";
 import { Angulartics2GoogleAnalytics, Angulartics2 } from "angulartics2";
+import "leaflet";
+import "leaflet.locatecontrol";
+
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
 import { SidebarService } from "../services/sidebar.service";
@@ -22,8 +25,6 @@ import { DrawingComponent } from "./drawing.component";
 import { SearchComponent } from "./search.component";
 import { InfoComponent } from "./info.component";
 import { ShareComponent } from "./share.component";
-import "leaflet";
-import "leaflet.locatecontrol";
 
 @Component({
     template: `<ng-progress [ngStyle]="{'z-index':1500}"></ng-progress>`,

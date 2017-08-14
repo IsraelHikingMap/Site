@@ -29,9 +29,6 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public routes: IRouteLayer[];
     public filters: IFilter[];
 
-    @LocalStorage()
-    public isPoisVisible: boolean = false;
-
     public isPoisFiltersVisible: boolean = false;
 
     @LocalStorage()
@@ -50,10 +47,6 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.overlays = layersService.overlays;
         this.routes = routesService.routes;
         this.filters = poiLayer.filters;
-
-        if (this.isPoisVisible) {
-            this.mapService.map.addLayer(this.poiLayer);
-        }
     }
 
     public closeSidebar() {
@@ -73,12 +66,12 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public togglePoisVisibility(e: Event) {
         this.suppressEvents(e);
-        if (this.isPoisVisible) {
+        if (this.layersService.isPoisVisible) {
             this.mapService.map.removeLayer(this.poiLayer);
         } else {
             this.mapService.map.addLayer(this.poiLayer);
         }
-        this.isPoisVisible = !this.isPoisVisible;
+        this.layersService.isPoisVisible = !this.layersService.isPoisVisible;
     }
 
     public togglePoisFilters(e: Event) {

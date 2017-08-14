@@ -42,15 +42,10 @@
     "<i class='fa icon-{{type}} fa-stack-1x stack-icon-top' style='color:white;'></i>" +
     "</span>";
 
-    private static WIKI_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
-    IconsService.POI_BACKGROUND +
-    "<i class='fa icon-wikipedia-w fa-stack-1x stack-icon-top' style='color:black;'></i>" +
-    "</span>";
-
-    private static NAKEB_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
-    IconsService.POI_BACKGROUND +
-    "<i class='fa icon-nakeb fa-stack-1x stack-icon-top' style='color:black;'></i>" +
-    "</span>";
+    private static POI_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
+        IconsService.POI_BACKGROUND +
+        "<i class='fa {{icon}} fa-stack-1x stack-icon-top' style='color:{{color}};'></i>" +
+        "</span>";
 
     public static getAvailableIconTypes() : string[]
     {
@@ -112,11 +107,16 @@
     }
 
     public static createWikipediaIcon(): L.DivIcon {
-        return L.divIcon(IconsService.getDefaultMarkerOptions(IconsService.WIKI_MARKER_HTML));
+        return IconsService.createPoiIcon("icon-wikipedia-w", "black");
     }
 
     public static createNakebIcon(): L.DivIcon {
-        return L.divIcon(IconsService.getDefaultMarkerOptions(IconsService.NAKEB_MARKER_HTML));
+        return IconsService.createPoiIcon("icon-nakeb", "black");
+    }
+
+    public static createPoiIcon(icon: string, color: string): L.DivIcon {
+        let html = IconsService.POI_MARKER_HTML.replace("{{icon}}", icon).replace("{{color}}", color);
+        return L.divIcon(IconsService.getDefaultMarkerOptions(html));
     }
 
     private static getDefaultMarkerOptions(html: string) {

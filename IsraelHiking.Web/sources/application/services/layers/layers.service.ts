@@ -7,6 +7,7 @@ import "leaflet.gridlayer.googlemutant";
 import { MapService } from "../map.service";
 import { WikiMarkersLayer } from "./wiki-markers.layer";
 import { NakebMarkerLayer } from "./nakeb-markers.layer";
+import { PoiLayer } from "./poi.layer";
 import { ResourcesService } from "../resources.service";
 import { OsmUserService } from "../osm-user.service";
 import { Urls } from "../../common/Urls";
@@ -56,6 +57,8 @@ export class LayersService {
     private selectedBaseLayerKey: string = LayersService.ISRAEL_HIKING_MAP;
     @LocalStorage()
     private activeOverlayKeys: string[] = [];
+    @LocalStorage()
+    public isPoisVisible: boolean = false;
 
     private overlayZIndex: any;
 
@@ -69,12 +72,13 @@ export class LayersService {
         private resourcesService: ResourcesService,
         private osmUserService: OsmUserService,
         private wikiMarkersLayer: WikiMarkersLayer,
-        private nakebMarkerLayer: NakebMarkerLayer) {
+        private nakebMarkerLayer: NakebMarkerLayer,
+        private poiLayer: PoiLayer) {
         this.selectedBaseLayer = null;
         this.baseLayers = [];
         this.overlays = [];
         this.overlayZIndex = 10;
-        this.initializeDefaultBaseLayers();
+        this.initializeDefaultLayers();
         let deferred = new Deferred<any>();
         this.initializationFinished = deferred.promise;
         this.osmUserService.initializationFinished.then(
@@ -83,7 +87,7 @@ export class LayersService {
         );
     }
 
-    private initializeDefaultBaseLayers() {
+    private initializeDefaultLayers() {
         this.addNewBaseLayer({
             key: LayersService.ISRAEL_HIKING_MAP,
             address: this.resourcesService.currentLanguage.tilesFolder + Urls.DEFAULT_TILES_ADDRESS,
@@ -114,6 +118,10 @@ export class LayersService {
         this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.NAKEB, layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
 
         this.selectBaseLayerAccordingToStorage(false);
+
+        if (this.isPoisVisible) {
+            this.mapService.map.addLayer(this.poiLayer);
+        }
     }
 
     public addBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
