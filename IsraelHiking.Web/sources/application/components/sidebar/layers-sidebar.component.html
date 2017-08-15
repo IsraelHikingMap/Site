@@ -59,9 +59,12 @@
         <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleFilter(filter, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle filter visiblity {{filter.type}}">
             <div fxFlex="10"></div>
             <div fxFlex="15">
-                <span><i class="fa" [ngClass]="{'icon-eye': filter.isSelected, 'icon-eye-slash': !filter.isSelected}"></i></span>
+                <i class="fa" [ngClass]="{'icon-eye': filter.isSelected, 'icon-eye-slash': !filter.isSelected}"></i>
             </div>
-            <div fxFlex="75">
+            <div fxFlex="15">
+                <i class="fa" [ngClass]="filter.icon"></i>
+            </div>
+            <div fxFlex="60">
                 <span>{{resources.translate(filter.type)}}</span>
             </div>
         </div>

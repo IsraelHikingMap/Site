@@ -9,8 +9,6 @@ using Microsoft.Extensions.Logging;
 using OsmSharp.Tags;
 using OsmSharp.Complete;
 using OsmSharp;
-using IsraelHiking.Common;
-using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Executors
 {
@@ -19,14 +17,15 @@ namespace IsraelHiking.API.Executors
     {
         private const string PLACE = "place";
         private const string ICON = "icon";
-        private const string SEARCH_FACTOR = "search_factor";
+        private const string ICON_COLOR = "iconColor";
+        private const string SEARCH_FACTOR = "searchFactor";
         private const string GEOLOCATION = "geolocation";
-        private const string POI_TYPE = "poi_type";
+        private const string POI_CATEGORY = "poiCategory";
+        
 
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
         private readonly IGeoJsonFeatureHelper _geoJsonFeatureHelper;
-        private readonly ConfigurationData _options;
 
         private class TagKeyComparer : IEqualityComparer<Tag>
         {
@@ -47,16 +46,13 @@ namespace IsraelHiking.API.Executors
         /// <param name="logger"></param>
         /// <param name="osmGeoJsonConverter"></param>
         /// <param name="geoJsonFeatureHelper"></param>
-        /// <param name="options"></param>
         public OsmGeoJsonPreprocessorExecutor(ILogger logger,
             IOsmGeoJsonConverter osmGeoJsonConverter,
-            IGeoJsonFeatureHelper geoJsonFeatureHelper,
-            IOptions<ConfigurationData> options)
+            IGeoJsonFeatureHelper geoJsonFeatureHelper)
         {
             _logger = logger;
             _osmGeoJsonConverter = osmGeoJsonConverter;
             _geoJsonFeatureHelper = geoJsonFeatureHelper;
-            _options = options.Value;
         }
 
         /// <inheritdoc />
@@ -81,7 +77,7 @@ namespace IsraelHiking.API.Executors
                 var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(g.Geometry);
                 if (!isValidOp.IsValid)
                 {
-                    _logger.LogError($"https://www.openstreetmap.org/{(g.Geometry.GeometryType == "Polygon" ? "way" : "relation")}/{g.Attributes["osm_id"]} {isValidOp.ValidationError.Message}({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                    _logger.LogError($"{g.Attributes["externalUrl"]} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                 }
             });
             
@@ -112,9 +108,10 @@ namespace IsraelHiking.API.Executors
             foreach (var feature in features)
             {
                 AddAddressField(feature, containers);
-                feature.Attributes.AddAttribute(SEARCH_FACTOR, _geoJsonFeatureHelper.GetSearchFactor(feature) ?? _options.SearchFactor);
+                feature.Attributes.AddAttribute(SEARCH_FACTOR, _geoJsonFeatureHelper.GetSearchFactor(feature));
                 feature.Attributes.AddAttribute(ICON, _geoJsonFeatureHelper.GetIcon(feature));
-                feature.Attributes.AddAttribute(POI_TYPE, _geoJsonFeatureHelper.GetPoiType(feature));
+                feature.Attributes.AddAttribute(ICON_COLOR, _geoJsonFeatureHelper.GetIconColor(feature));
+                feature.Attributes.AddAttribute(POI_CATEGORY, _geoJsonFeatureHelper.GetPoiCategory(feature));
                 UpdateLocation(feature);
             }
         }
@@ -168,7 +165,7 @@ namespace IsraelHiking.API.Executors
                     var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(f.Geometry);
                     if (!isValidOp.IsValid)
                     {
-                        _logger.LogError($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osm_id"]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                        _logger.LogError($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osmId"]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                     }
                     invalidFeature = f;
                     return false;

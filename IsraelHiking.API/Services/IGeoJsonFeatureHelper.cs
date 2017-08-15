@@ -8,24 +8,31 @@ namespace IsraelHiking.API.Services
     public interface IGeoJsonFeatureHelper
     {
         /// <summary>
-        /// Get's the relevant icon for a <see cref="Feature"/>
+        /// Returns the relevant icon for a <see cref="Feature"/>
         /// </summary>
         /// <param name="feature">The <see cref="Feature"/></param>
-        /// <returns>A link to an image that holds the icon, empty if not found</returns>
+        /// <returns>a string of the icon to use icon-*, empty if not found</returns>
         string GetIcon(Feature feature);
+
+        /// <summary>
+        /// Returns the relevant icon's color for a <see cref="Feature"/>
+        /// </summary>
+        /// <param name="feature">The <see cref="Feature"/></param>
+        /// <returns>The icon's color - black by default</returns>
+        string GetIconColor(Feature feature);
 
         /// <summary>
         /// Returns the search factor for a <see cref="Feature"/>
         /// </summary>
         /// <param name="feature">The <see cref="Feature"/></param>
         /// <returns>A search factor, null if not found</returns>
-        double? GetSearchFactor(Feature feature);
+        double GetSearchFactor(Feature feature);
 
         /// <summary>
         /// Returns the POI type for a <see cref="Feature"/>
         /// </summary>
         /// <param name="feature">The <see cref="Feature"/></param>
         /// <returns>A POI type string</returns>
-        string GetPoiType(Feature feature);
+        string GetPoiCategory(Feature feature);
     }
 }

@@ -200,7 +200,7 @@ namespace IsraelHiking.API.Services.Osm
         {
             var itmCoordinates = feature.Geometry.Coordinates.Select(_itmWgs84MathTransform.Inverse().Transform).ToArray();
             var lineString = new LineString(itmCoordinates);
-            lineString.SetOsmId(feature.Attributes["osm_id"].ToString());
+            lineString.SetOsmId(feature.Attributes["osmId"].ToString());
             return lineString;
         }
 

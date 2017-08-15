@@ -185,7 +185,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                                         )
                                     )
                                 )
-                            ).Functions(fn => fn.FieldValueFactor(f => f.Field("properties.search_factor")))
+                            ).Functions(fn => fn.FieldValueFactor(f => f.Field("properties.searchFactor")))
                         )
                     )
             );
@@ -194,7 +194,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
 
         private string GetId(Feature feature)
         {
-            return feature.Geometry.GeometryType + "_" + feature.Attributes["osm_id"];
+            return feature.Geometry.GeometryType + "_" + feature.Attributes["osmId"];
         }
 
         public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)

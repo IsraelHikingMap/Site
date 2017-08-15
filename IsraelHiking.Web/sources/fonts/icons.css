@@ -1,10 +1,10 @@
 @font-face {
   font-family: 'IsraelHikingMap';
-  src:  url('IsraelHikingMap.eot?5kfafe');
-  src:  url('IsraelHikingMap.eot?5kfafe#iefix') format('embedded-opentype'),
-    url('IsraelHikingMap.ttf?5kfafe') format('truetype'),
-    url('IsraelHikingMap.woff?5kfafe') format('woff'),
-    url('IsraelHikingMap.svg?5kfafe#IsraelHikingMap') format('svg');
+  src:  url('IsraelHikingMap.eot?4r7c7o');
+  src:  url('IsraelHikingMap.eot?4r7c7o#iefix') format('embedded-opentype'),
+    url('IsraelHikingMap.ttf?4r7c7o') format('truetype'),
+    url('IsraelHikingMap.woff?4r7c7o') format('woff'),
+    url('IsraelHikingMap.svg?4r7c7o#IsraelHikingMap') format('svg');
   font-weight: normal;
   font-style: normal;
 }
@@ -24,6 +24,30 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+.icon-bus-stop:before {
+  content: "\e90d";
+}
+.icon-campsite:before {
+  content: "\e90e";
+}
+.icon-cave:before {
+  content: "\e90f";
+}
+.icon-nature-reserve:before {
+  content: "\e910";
+}
+.icon-peak:before {
+  content: "\e911";
+}
+.icon-picnic:before {
+  content: "\e912";
+}
+.icon-ruins:before {
+  content: "\e913";
+}
+.icon-viewpoint:before {
+  content: "\e914";
+}
 .icon-map-marker-rect:before {
   content: "\e90c";
 }

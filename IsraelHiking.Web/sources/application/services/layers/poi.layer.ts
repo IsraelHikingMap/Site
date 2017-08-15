@@ -28,6 +28,7 @@ export interface PoiItemExtended extends PoiItem {
 export interface IFilter {
     type: string,
     isSelected: boolean;
+    icon: string;
 }
 
 @Injectable()
@@ -48,11 +49,27 @@ export class PoiLayer extends BasePoiMarkerLayer {
             for (let filter of filtersArray) {
                 this.filters.push({
                     type: filter,
-                    isSelected: true
+                    isSelected: true,
+                    icon: this.getFilterIcon(filter)
                 });
             }
             this.updateMarkers();
         });
+    }
+
+    private getFilterIcon(filter: string): string {
+        switch (filter) {
+            case "campsite":
+                return "icon-campsite";
+            case "viewpoint":
+                return "icon-viewpoint";
+            case "spring":
+                return "icon-tint";
+            case "ruins":
+                return "icon-ruins";
+            default:
+                return "icon-star";
+        }
     }
 
     protected getIconString(): string {
@@ -82,7 +99,7 @@ export class PoiLayer extends BasePoiMarkerLayer {
                 let features = response.json() as GeoJSON.Feature<GeoJSON.GeometryObject>[];
                 this.markers.eachLayer(existingMarker => {
                     let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
-                    let geoSearchPage = _.find(features, p => p.properties.osm_id === markerWithTitle.identifier);
+                    let geoSearchPage = _.find(features, p => p.properties.osmId === markerWithTitle.identifier);
                     if (geoSearchPage == null) {
                         this.markers.removeLayer(existingMarker);
                     } else {
@@ -94,13 +111,14 @@ export class PoiLayer extends BasePoiMarkerLayer {
                     let properties = feature.properties as any;
                     // HM TODO: marker icons by type.
                     let latLng = L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.altitude);
-                    let marker = L.marker(latLng, { draggable: false, clickable: true, icon: this.markerIcon, title: properties.name } as L.MarkerOptions) as Common.IMarkerWithTitle;
+                    let marker = L.marker(latLng, { draggable: false, clickable: true, icon: IconsService.createPoiIcon(properties.icon, properties.iconColor), title: properties.name } as L.MarkerOptions) as Common.IMarkerWithTitle;
                     marker.title = properties.name;
-                    marker.identifier = properties.osm_id;
+                    marker.identifier = properties.osmId;
                     let markerPopupContainer = L.DomUtil.create("div");
                     let factory = this.componentFactoryResolver.resolveComponentFactory(PoiMarkerPopupComponent);
                     let componentRef = factory.create(this.injector, null, markerPopupContainer);
                     componentRef.instance.setMarker(marker);
+                    componentRef.instance.address = properties.externalUrl;
                     componentRef.instance.angularBinding(componentRef.hostView);
                     marker.bindPopup(markerPopupContainer);
                     this.markers.addLayer(marker);

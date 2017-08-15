@@ -5,13 +5,10 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp.Complete;
 using OsmSharp;
-using OsmSharp.Tags;
 
 namespace IsraelHiking.API.Converters
 {
-    /// <summary>
-    /// Convers osm data objects to geojson and back
-    /// </summary>
+    /// <inheritdoc />
     public class OsmGeoJsonConverter : IOsmGeoJsonConverter
     {
         private const string OUTER = "outer";
@@ -19,11 +16,7 @@ namespace IsraelHiking.API.Converters
         private const string TYPE = "type";
         private const string MULTIPOLYGON = "multipolygon";
 
-        /// <summary>
-        /// Converts a <see cref="ICompleteOsmGeo"/> to <see cref="Feature"/>
-        /// </summary>
-        /// <param name="completeOsmGeo"></param>
-        /// <returns></returns>
+        /// <inheritdoc />
         public Feature ToGeoJson(ICompleteOsmGeo completeOsmGeo)
         {
             if (completeOsmGeo.Tags.Count == 0)
@@ -34,15 +27,15 @@ namespace IsraelHiking.API.Converters
             {
                 case OsmGeoType.Node:
                     var node = completeOsmGeo as Node;
-                    return new Feature(new Point(ConvertNode(node)), ConvertTags(node.Tags, node.Id.Value));
+                    return new Feature(new Point(ConvertNode(node)), ConvertTags(node));
                 case OsmGeoType.Way:
                     var way = completeOsmGeo as CompleteWay;
-                    if (way == null || way.Nodes.Count() <= 1)
+                    if (way == null || way.Nodes.Length <= 1)
                     {
                         // can't convert a way with 1 coordinates to geojson.
                         return null;
                     }
-                    var properties = ConvertTags(way.Tags, way.Id);
+                    var properties = ConvertTags(way);
                     var geometry = GetGeometryFromNodes(way.Nodes);
                     return new Feature(geometry, properties);
                 case OsmGeoType.Relation:
@@ -52,10 +45,11 @@ namespace IsraelHiking.API.Converters
             }
         }
 
-        private IAttributesTable ConvertTags(TagsCollectionBase tags, long id)
+        private IAttributesTable ConvertTags(ICompleteOsmGeo osmObject)
         {
-            var properties = tags.ToDictionary(t => t.Key, t => t.Value);
-            properties.Add("osm_id", id.ToString());
+            var properties = osmObject.Tags.ToDictionary(t => t.Key, t => t.Value);
+            properties.Add("osmId", osmObject.Id.ToString());
+            properties.Add("externalUrl", $"https://www.openstreetmap.org/{osmObject.Type.ToString().ToLower()}/{osmObject.Id}");
             var table = new AttributesTable();
             foreach (var key in properties.Keys)
             {
@@ -66,7 +60,7 @@ namespace IsraelHiking.API.Converters
 
         private Coordinate ConvertNode(Node node)
         {
-            return new Coordinate(node.Longitude.Value, node.Latitude.Value);
+            return new Coordinate(node.Longitude ?? 0, node.Latitude ?? 0);
         }
 
         private List<IGeometry> GetGeometriesFromWays(IEnumerable<CompleteWay> ways)
@@ -122,7 +116,7 @@ namespace IsraelHiking.API.Converters
             if (nodes.Any())
             {
                 var multiPoint = new MultiPoint(nodes.Select(n => new Point(ConvertNode(n)) as IPoint).ToArray());
-                return new Feature(multiPoint, ConvertTags(relation.Tags, relation.Id));
+                return new Feature(multiPoint, ConvertTags(relation));
             }
 
             var geometries = GetGeometriesFromWays(GetAllWays(relation));
@@ -133,7 +127,7 @@ namespace IsraelHiking.API.Converters
             var jointLines = geometries.OfType<ILineString>().ToList();
             jointLines.AddRange(geometries.OfType<Polygon>().Select(p => new LineString(p.Coordinates) as ILineString));
             var multiLineString = new MultiLineString(jointLines.ToArray());
-            return new Feature(multiLineString, ConvertTags(relation.Tags, relation.Id));
+            return new Feature(multiLineString, ConvertTags(relation));
         }
 
         private Feature ConvertToMultipolygon(CompleteRelation relation)
@@ -144,7 +138,7 @@ namespace IsraelHiking.API.Converters
             var innerPolygons = GetGeometriesFromWays(innerWays).OfType<IPolygon>().ToList();
             MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
             var multiPolygon = new MultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
-            return new Feature(multiPolygon, ConvertTags(relation.Tags, relation.Id));
+            return new Feature(multiPolygon, ConvertTags(relation));
         }
 
         private void MergeInnerIntoOuterPolygon(ref List<IPolygon> outerPolygons, ref List<IPolygon> innerPolygons)

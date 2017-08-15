@@ -26,7 +26,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), new GeoJsonFeatureHelper(optionsProvider), optionsProvider);
+            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), new GeoJsonFeatureHelper(optionsProvider));
         }
 
         private Node CreateNode(int id)
@@ -196,9 +196,12 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var node4 = CreateNode(4, 1, 0);
             var node5 = CreateNode(5, 0.5, 0.6);
             node5.Tags.Add("place", "any");
-            var way1 = new CompleteWay { Id = 6, Tags = new TagsCollection() };
-            way1.Nodes = new[] { node1, node2, node3, node4, node1 };
-            way1.Tags.Add("name", "name");
+            var way1 = new CompleteWay
+            {
+                Id = 6,
+                Tags = new TagsCollection { {"name", "name" }},
+                Nodes = new[] {node1, node2, node3, node4, node1}
+            };
             var osmElements = new List<ICompleteOsmGeo> { node5, way1 };
 
             var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { "name", osmElements } };
@@ -206,8 +209,8 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var results = _preprocessorExecutor.Preprocess(dictionary);
 
             Assert.AreEqual(1, results[results.Keys.First()].Count);
-            Assert.AreEqual(0.5, results[results.Keys.First()].First().Attributes["lat"]);
-            Assert.AreEqual(0.6, results[results.Keys.First()].First().Attributes["lng"]);
+            dynamic geoLocation = results[results.Keys.First()].First().Attributes["geolocation"];
+            Assert.AreEqual("{ lat = 0.5, lon = 0.6 }", geoLocation.ToString());
         }
 
         [TestMethod]
