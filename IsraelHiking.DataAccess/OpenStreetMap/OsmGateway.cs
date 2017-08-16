@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -8,7 +7,6 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using OAuth;
@@ -30,20 +28,6 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
     {
         private readonly TokenAndSecret _tokenAndSecret;
         private readonly ConfigurationData _options;
-
-
-        // :tags is removed since there's a bug in OSM:
-        // https://github.com/openstreetmap/openstreetmap-website/issues/1600
-        // This entire string should be removed when the following PR is merged:
-        // https://github.com/OsmSharp/core/pull/34
-        private const string GPX_FILE =
-            @"<osm version='0.6' generator='OpenStreetMap server' copyright='OpenStreetMap and contributors' attribution='http://www.openstreetmap.org/copyright' license='http://opendatacommons.org/licenses/odbl/1-0/'>
-                <gpx_file id=':id' name=':name' lat=':lat' lon=':lon' visibility=':visibility'>
-                    <description>:description</description>
-                    
-                </gpx_file>
-            </osm>";
-
 
         private readonly string _baseAddressWithoutProtocol;
         private readonly string _userDetailsAddress;
@@ -240,24 +224,17 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 UpdateHeaders(client, _getTracesAddress);
                 var response = await client.GetAsync(_getTracesAddress);
                 var stream = await response.Content.ReadAsStreamAsync();
-                // HM TODO: change this to be part of Osm class
-                var document = XDocument.Load(stream);
-                return document.Descendants().Where(n => n.Name.LocalName == "gpx_file").Select(file =>
+                var osm = FromContent(stream);
+                return (osm.GpxFiles ?? new GpxFile[0]).Select(g => new OsmTrace
                 {
-                    var trace = new OsmTrace();
-                    trace.Id = file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "id").Value;
-                    trace.LatLng = new LatLng
-                    {
-                        lat = double.Parse(file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "lat")?.Value ?? "0"),
-                        lng = double.Parse(file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "lon")?.Value ?? "0")
-                    };
-                    trace.Description = file.Elements().FirstOrDefault(n => n.Name.LocalName.ToLower() == "description").Value;
-                    trace.Visibility = file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "visibility").Value;
-                    trace.Name = file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "name").Value;
-                    trace.UserName = file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "user").Value;
-                    trace.Date = DateTime.Parse(file.Attributes().FirstOrDefault(n => n.Name.LocalName.ToLower() == "timestamp").Value);
-                    trace.Tags = file.Elements().Where(e => e.Name.LocalName.ToLower() == "tag").Select(e => e.Value).ToList();
-                    return trace;
+                    Name = g.Name,
+                    LatLng = new LatLng(g.Lat ?? 0, g.Lon ?? 0),
+                    Tags = g.Tags.ToList(),
+                    Description = g.Description,
+                    Visibility = g.Visibility,
+                    Id = g.Id.ToString(),
+                    UserName = g.User,
+                    Date = g.TimeStamp
                 }).ToList();
             }
         }
@@ -297,14 +274,25 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 var traceAddress = _traceAddress.Replace(":id", trace.Id);
                 UpdateHeaders(client, traceAddress, "PUT");
 
-                var osmRequest = GPX_FILE.Replace(":id", trace.Id)
-                    .Replace(":name", trace.Name)
-                    .Replace(":description", trace.Description)
-                    .Replace(":visibility", trace.Visibility)
-                    .Replace(":lat", trace.LatLng.lat.ToString(CultureInfo.InvariantCulture))
-                    .Replace(":lon", trace.LatLng.lng.ToString(CultureInfo.InvariantCulture))
-                    .Replace(":tags", string.Join("\n", trace.Tags.Select(t => $"<tag>{t}</tag>")));
-                var response = await client.PutAsync(traceAddress, new StringContent(osmRequest));
+                var osmRequest = new Osm
+                {
+                    GpxFiles = new[]
+                    {
+                        new GpxFile
+                        {
+                            Name = trace.Name,
+                            Description = trace.Description,
+                            Visibility = trace.Visibility,
+                            Id = int.Parse(trace.Id),
+                            Lat = trace.LatLng.lat,
+                            Lon = trace.LatLng.lng,
+                            // Tags are removed since there's a bug in OSM:
+                            // https://github.com/openstreetmap/openstreetmap-website/issues/1600
+                            Tags = new string[0]
+                        }
+                    }
+                };
+                var response = await client.PutAsync(traceAddress, new StringContent(osmRequest.SerializeToXml()));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
                     throw new Exception("Unable to update OSM trace");
