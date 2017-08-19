@@ -65,11 +65,11 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         });
     }
 
-    public selectRoute = (routeData: Common.RouteData) => {
+    public selectRoute = (routeData: Common.RouteData): void => {
         console.log(routeData);
         throw new Error("This function must be assigned by containing layer!");
     };
-    public clearSelectedRoute = () => { throw new Error("This function must be assigned by containing layer!") };
+    public clearSelectedRoute = (): void => { throw new Error("This function must be assigned by containing layer!") };
 
     public isEditMode(): boolean {
         return this.editMode;

@@ -51,7 +51,7 @@
         </div>
         <div fxFlex [hidden]="!isAdvanced">
             <div fxLayout="column" fxFill>
-                <span fxFill fxLayoutAlign="end start" (click)="togglePoisCategories($event)" mdTooltip="{{resources.filters}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle POI categoris"><i class="fa" [ngClass]="{'icon-chevron-down': !isPoisCategorisVisible, 'icon-chevron-up': isPoiscategoriesVisible}"></i></span>
+                <span fxFill fxLayoutAlign="end start" (click)="togglePoisCategories($event)" mdTooltip="{{resources.filters}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle POI categoris"><i class="fa" [ngClass]="{'icon-chevron-down': !isPoisCategoriesVisible, 'icon-chevron-up': isPoisCategoriesVisible}"></i></span>
             </div>
         </div>
     </div>
