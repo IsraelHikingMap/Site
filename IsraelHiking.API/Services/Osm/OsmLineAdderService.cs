@@ -200,16 +200,20 @@ namespace IsraelHiking.API.Services.Osm
         {
             var itmCoordinates = feature.Geometry.Coordinates.Select(_itmWgs84MathTransform.Inverse().Transform).ToArray();
             var lineString = new LineString(itmCoordinates);
-            lineString.SetOsmId(feature.Attributes["osmId"].ToString());
+            lineString.SetOsmId(feature.Attributes[FeatureAttributes.ID].ToString());
             return lineString;
         }
 
         private async Task<string> AddWayToOsm(IEnumerable<string> nodeIds, Dictionary<string, string> tags, string chagesetId)
         {
-            var way = new Way { Id = 0, Nodes = nodeIds.Select(long.Parse).ToArray() };
-            way.Tags = new TagsCollection(tags)
+            var way = new Way
             {
-                {"note", "Added by IHM algorithm - fixing maybe needed"}
+                Id = 0,
+                Nodes = nodeIds.Select(long.Parse).ToArray(),
+                Tags = new TagsCollection(tags)
+                {
+                    {"note", "Added by IHM algorithm - fixing maybe needed"}
+                }
             };
             if (way.Tags.ContainsKey("source") == false)
             {

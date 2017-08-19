@@ -8,16 +8,6 @@ using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
 {
-    internal static class Categories
-    {
-        public const string OTHER = "other";
-        public const string VIEWPOINT = "viewpoint";
-        public const string CAMPSITE = "campsite";
-        public const string SPRING = "spring";
-        public const string RUINS = "ruins";
-        public const string NONE = "none";
-    }
-
     internal class IconColorCategory
     {
         public string Icon { get; set; }
@@ -28,7 +18,7 @@ namespace IsraelHiking.API.Services
         {
         }
 
-        public IconColorCategory(string icon) : this(icon, "none")
+        public IconColorCategory(string icon) : this(icon, Categories.NONE)
         {
         }
 
@@ -108,9 +98,9 @@ namespace IsraelHiking.API.Services
                 new PropertiesData("boundary", "national_park", 1, natureReserveIcon),
                 new PropertiesData("boundary", "protected_area", 1, natureReserveIcon),
                 new PropertiesData("leisure", "nature_reserve", 1, natureReserveIcon),
-                new PropertiesData("route", "hiking", 1, new IconColorCategory("icon-hike")),
-                new PropertiesData("route", "bicycle", 1, new IconColorCategory("icon-bike")),
-                new PropertiesData("route", "mtb", 1, new IconColorCategory("icon-bike")),
+                new PropertiesData("route", "hiking", 1, new IconColorCategory("icon-hike", Categories.OTHER)),
+                new PropertiesData("route", "bicycle", 1, new IconColorCategory("icon-bike", Categories.OTHER)),
+                new PropertiesData("route", "mtb", 1, new IconColorCategory("icon-bike", Categories.OTHER)),
             };
 
             _ways = new List<PropertiesData>
@@ -122,6 +112,7 @@ namespace IsraelHiking.API.Services
                 new PropertiesData("boundary", "national_park", 1, natureReserveIcon),
                 new PropertiesData("boundary", "protected_area", 1, natureReserveIcon),
                 new PropertiesData("leisure", "nature_reserve", 1, natureReserveIcon),
+                new PropertiesData("historic", "ruins", 1, ruinsIcon),
                 new PropertiesData("historic", "archaeological_site", 1, ruinsIcon),
                 new PropertiesData("highway", "any", _options.SearchFactor, new IconColorCategory("icon-map-signs"), true)
             };

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
+using IsraelHiking.Common;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Microsoft.Extensions.Logging;
@@ -16,12 +17,6 @@ namespace IsraelHiking.API.Executors
     public class OsmGeoJsonPreprocessorExecutor : IOsmGeoJsonPreprocessorExecutor
     {
         private const string PLACE = "place";
-        private const string ICON = "icon";
-        private const string ICON_COLOR = "iconColor";
-        private const string SEARCH_FACTOR = "searchFactor";
-        private const string GEOLOCATION = "geolocation";
-        private const string POI_CATEGORY = "poiCategory";
-        
 
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
@@ -108,10 +103,10 @@ namespace IsraelHiking.API.Executors
             foreach (var feature in features)
             {
                 AddAddressField(feature, containers);
-                feature.Attributes.AddAttribute(SEARCH_FACTOR, _geoJsonFeatureHelper.GetSearchFactor(feature));
-                feature.Attributes.AddAttribute(ICON, _geoJsonFeatureHelper.GetIcon(feature));
-                feature.Attributes.AddAttribute(ICON_COLOR, _geoJsonFeatureHelper.GetIconColor(feature));
-                feature.Attributes.AddAttribute(POI_CATEGORY, _geoJsonFeatureHelper.GetPoiCategory(feature));
+                feature.Attributes.AddAttribute(FeatureAttributes.SEARCH_FACTOR, _geoJsonFeatureHelper.GetSearchFactor(feature));
+                feature.Attributes.AddAttribute(FeatureAttributes.ICON, _geoJsonFeatureHelper.GetIcon(feature));
+                feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, _geoJsonFeatureHelper.GetIconColor(feature));
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, _geoJsonFeatureHelper.GetPoiCategory(feature));
                 UpdateLocation(feature);
             }
         }
@@ -130,10 +125,10 @@ namespace IsraelHiking.API.Executors
                 {
                     continue;
                 }
-                feature.Attributes.AddAttribute(GEOLOCATION, 
-                    new {
-                        lat = placePoint.Geometry.Coordinate.Y,
-                        lon = placePoint.Geometry.Coordinate.X,
+                feature.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, 
+                    new AttributesTable {
+                        { FeatureAttributes.LAT, placePoint.Geometry.Coordinate.Y },
+                        { FeatureAttributes.LON, placePoint.Geometry.Coordinate.X }
                     });
                 foreach (var placePointAttributeName in placePoint.Attributes.GetNames())
                 {
@@ -165,7 +160,7 @@ namespace IsraelHiking.API.Executors
                     var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(f.Geometry);
                     if (!isValidOp.IsValid)
                     {
-                        _logger.LogError($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes["osmId"]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                        _logger.LogError($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes[FeatureAttributes.ID]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                     }
                     invalidFeature = f;
                     return false;
@@ -331,7 +326,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="feature"></param>
         public static void UpdateLocation(Feature feature)
         {
-            if (feature.Attributes.GetNames().FirstOrDefault(n => n == GEOLOCATION) != null)
+            if (feature.Attributes.GetNames().FirstOrDefault(n => n == FeatureAttributes.GEOLOCATION) != null)
             {
                 return;
             }
@@ -339,10 +334,9 @@ namespace IsraelHiking.API.Executors
             {
                 return;
             }
-            feature.Attributes.AddAttribute(GEOLOCATION, new
-            {
-                lat = feature.Geometry.Coordinate.Y,
-                lon = feature.Geometry.Coordinate.X
+            feature.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, new AttributesTable {
+                { FeatureAttributes.LAT, feature.Geometry.Coordinate.Y },
+                { FeatureAttributes.LON, feature.Geometry.Coordinate.X }
             });
         }
     }

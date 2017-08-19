@@ -12,11 +12,11 @@
   <targets>
     <!-- write logs to file -->
     <target xsi:type="File" name="error" fileName="Logs\errors-${shortdate}.log"
-            layout="${longdate} |${pad:padding=3:inner=${event-properties:item=EventId.Id}}|${pad:padding=-5:inner=${level:uppercase=true}}| ${pad:padding=30:fixedLength=True:alignmentOnTruncation=right:inner=${logger}} | ${message} ${exception}" />
+            layout="${longdate} |${pad:padding=3:inner=${event-properties:item=EventId.Id}}|${pad:padding=-5:inner=${level:uppercase=true}}| ${pad:padding=30:fixedLength=True:alignmentOnTruncation=right:inner=${logger}} | ${message} ${exception:format=ToString,StackTrace}" />
 
     <!-- another file log, only site logs  -->
     <target xsi:type="File" name="site" fileName="Logs\site-${shortdate}.log"
-            layout="${longdate} |${pad:padding=3:inner=${event-properties:item=EventId.Id}}|${pad:padding=-5:inner=${level:uppercase=true}}| ${logger} | ${message} ${exception}" />
+            layout="${longdate} |${pad:padding=3:inner=${event-properties:item=EventId.Id}}|${pad:padding=-5:inner=${level:uppercase=true}}| ${logger} | ${message} ${exception:format=StackTrace}" />
 
     <!-- write to the void aka just remove -->
     <target xsi:type="Null" name="blackhole" />

@@ -22,6 +22,7 @@ export class HashService {
     public externalUrl: string;
     public siteUrl: string;
     public download: boolean;
+    private internalUpdate: boolean;
 
     constructor(private router: Router,
         @Inject("Window") window: any, // bug in angular aot
@@ -30,6 +31,7 @@ export class HashService {
         this.baseLayer = null;
         this.searchTerm = "";
         this.window = window;
+        this.internalUpdate = false;
         this.addDataFromUrl();
         this.updateUrl();
 
@@ -40,11 +42,15 @@ export class HashService {
                     this.window.location.reload();
                     return;
                 }
-                this.mapService.map.setView(latLng, latLng.alt);
+                if (this.internalUpdate === false) {
+                    this.mapService.map.setView(latLng, latLng.alt);
+                }
+                this.internalUpdate = false;
             }
         });
 
         this.mapService.map.on("moveend", () => {
+            this.internalUpdate = true;
             this.updateUrl();
         });
     }

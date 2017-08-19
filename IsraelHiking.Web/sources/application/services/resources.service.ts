@@ -207,6 +207,7 @@ export class ResourcesService {
     public fileUploadedSuccefullyItWillTakeTime: string;
     public unableToUploadFile: string;
     public unableToSaveAnEmptyRoute: string;
+    public closeWhileInEditMode: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -597,6 +598,7 @@ export class ResourcesService {
                 this.fileUploadedSuccefullyItWillTakeTime = this.gettextCatalog.getString("File uploaded successfully, It will take some time to add it to OSM database.");
                 this.unableToUploadFile = this.gettextCatalog.getString("Unable to upload the file...");
                 this.unableToSaveAnEmptyRoute = this.gettextCatalog.getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
+                this.closeWhileInEditMode = this.gettextCatalog.getString("Please note that you did not save your work before closing the popup...");
                 // Help
                 this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                 this.helpInfo = this.gettextCatalog.getString("This dialog");
@@ -784,5 +786,9 @@ export class ResourcesService {
 
     public getTextAlignment = (words: string) => {
         return `text-${this.getDirection(words) === "rtl" ? "right" : "left"}`;
+    }
+
+    public getCurrentLanguageCodeSimplified = () => {
+        return this.currentLanguage.code.split("-")[0];
     }
 }

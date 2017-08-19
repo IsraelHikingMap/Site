@@ -8,7 +8,7 @@ import { LayersService, IBaseLayer, IOverlay } from "../../services/layers/layer
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { IRouteLayer } from "../../services/layers/routelayers/iroute.layer";
 import { ResourcesService } from "../../services/resources.service";
-import { PoiLayer, IFilter } from "../../services/layers/poi.layer";
+import { PoiLayer, ICategory } from "../../services/layers/poi.layer";
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
 import { BaseLayerEditDialogComponent } from "../dialogs/layers/base-layer-edit-dialog.component";
@@ -27,9 +27,9 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public routes: IRouteLayer[];
-    public filters: IFilter[];
+    public categories: ICategory[];
 
-    public isPoisFiltersVisible: boolean = false;
+    public isPoisCategoriesVisible: boolean = false;
 
     @LocalStorage()
     public isAdvanced: boolean = false;
@@ -46,7 +46,7 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.baseLayers = layersService.baseLayers;
         this.overlays = layersService.overlays;
         this.routes = routesService.routes;
-        this.filters = poiLayer.filters;
+        this.categories = poiLayer.categories;
     }
 
     public closeSidebar() {
@@ -78,14 +78,14 @@ export class LayersSidebarComponent extends BaseMapComponent {
         this.layersService.isPoisVisible = !this.layersService.isPoisVisible;
     }
 
-    public togglePoisFilters(e: Event) {
+    public togglePoisCategories(e: Event) {
         this.suppressEvents(e);
-        this.isPoisFiltersVisible = !this.isPoisFiltersVisible;
+        this.isPoisCategoriesVisible = !this.isPoisCategoriesVisible;
     }
 
-    public toggleFilter(filter: IFilter, e: Event) {
+    public toggleCategory(category: ICategory, e: Event) {
         this.suppressEvents(e);
-        this.poiLayer.toggleFilter(filter);
+        this.poiLayer.toggleCategory(category);
     }
 
     public addOverlay(e: Event) {

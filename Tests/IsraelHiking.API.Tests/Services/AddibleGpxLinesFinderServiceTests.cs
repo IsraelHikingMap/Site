@@ -29,7 +29,7 @@ namespace IsraelHiking.API.Tests.Services
             var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(conveter.Transform).ToArray()), new AttributesTable())).ToList();
             foreach (var highway in highways)
             {
-                highway.Attributes.AddAttribute("osmId", "1");
+                highway.Attributes.AddAttribute(FeatureAttributes.ID, "1");
             }
             _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(highways);
         }

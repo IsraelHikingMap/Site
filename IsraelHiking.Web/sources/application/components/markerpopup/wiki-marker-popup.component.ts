@@ -55,7 +55,7 @@ export class WikiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public setMarker(marker: Common.IMarkerWithTitle) {
         this.marker.on("popupopen", () => {
             let popup = this.marker.getPopup();
-            let lang = this.resources.currentLanguage.code.split("-")[0];
+            let lang = this.resources.getCurrentLanguageCodeSimplified();
             let detailsUrl = `https://${lang}.wikipedia.org/w/api.php?format=json&action=query&pageids=${this.pageId}&prop=extracts|pageimages&explaintext=true&exintro=true&exsentences=1&callback=JSONP_CALLBACK`;
             this.jsonp.get(detailsUrl).toPromise().then((detailsResponse) => {
                 let detailsData = detailsResponse.json() as IWikiResponse;

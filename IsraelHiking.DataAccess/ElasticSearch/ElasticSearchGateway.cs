@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using NetTopologySuite.IO.Converters;
 using Newtonsoft.Json;
 using Elasticsearch.Net;
+using IsraelHiking.Common;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
@@ -51,6 +52,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
     {
         private const int PAGE_SIZE = 10000;
 
+        private const string PROPERTIES = "properties";
         private const string OSM_NAMES_INDEX1 = "osm_names1";
         private const string OSM_NAMES_INDEX2 = "osm_names2";
         private const string OSM_HIGHWAYS_INDEX1 = "osm_highways1";
@@ -161,7 +163,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             {
                 return new List<Feature>();
             }
-            var field = "properties." + fieldName;
+            var field = $"{PROPERTIES}.{fieldName}";
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_NAMES_ALIAS)
                     .Size(NUMBER_OF_RESULTS)
@@ -174,18 +176,18 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                                     dm => dm.Queries(
                                         dmq => dmq.MultiMatch(
                                             mm => mm.Query(searchTerm)
-                                                .Fields(f => f.Fields(field, "properties.name*", "properties._name"))
+                                                .Fields(f => f.Fields(field, $"{PROPERTIES}.name*", $"{PROPERTIES}._name"))
                                                 .Type(TextQueryType.BestFields)
                                                 .Fuzziness(Fuzziness.Auto)
                                         ),
                                         dmq => dmq.Match(
                                             m => m.Query(searchTerm)
                                                 .Boost(1.2)
-                                                .Field(new Field(field))
+                                                .Field(field)
                                         )
                                     )
                                 )
-                            ).Functions(fn => fn.FieldValueFactor(f => f.Field("properties.searchFactor")))
+                            ).Functions(fn => fn.FieldValueFactor(f => f.Field($"{PROPERTIES}.{FeatureAttributes.SEARCH_FACTOR}")))
                         )
                     )
             );
@@ -194,7 +196,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
 
         private string GetId(Feature feature)
         {
-            return feature.Geometry.GeometryType + "_" + feature.Attributes["osmId"];
+            return feature.Geometry.GeometryType + "_" + (feature.Attributes[FeatureAttributes.POI_SOURCE] ?? string.Empty) + feature.Attributes[FeatureAttributes.ID];
         }
 
         public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)
@@ -215,7 +217,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             return response.Documents.ToList();
         }
 
-        public async Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] filters)
+        public async Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories)
         {
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_NAMES_ALIAS)
@@ -224,11 +226,23 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                             b => b.BoundingBox(bb => 
                                 bb.TopLeft(new GeoCoordinate(northEast.Y, southWest.X))
                                 .BottomRight(new GeoCoordinate(southWest.Y, northEast.X))
-                                ).Field("properties.geolocation")
-                        )
+                                ).Field($"{PROPERTIES}.{FeatureAttributes.GEOLOCATION}")
+                        ) && q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories.Select(c => c.ToLower()).ToArray()))
                     )
             );
             return response.Documents.ToList();
+        }
+
+        public async Task<Feature> GetPointOfInterestById(string id, string source)
+        {
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Index(OSM_NAMES_ALIAS)
+                    .Size(1).Query(
+                        q => q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
+                             && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ID}").Value(id))
+                    )
+            );
+            return response.Documents.FirstOrDefault();
         }
 
         private Task CreateHighwaysIndex(string highwaysIndexName)
@@ -252,8 +266,8 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                     .Map<Feature>(m => m
                         .Properties(ps => ps
                             .Object<AttributesTable>(o => o
-                                .Name("properties")
-                                .Properties(p => p.GeoPoint(s => s.Name("geolocation")))
+                                .Name(PROPERTIES)
+                                .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.GEOLOCATION)))
                             )
                         )
                     )

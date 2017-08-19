@@ -51,7 +51,7 @@ export class WikiMarkersLayer extends BasePoiMarkerLayer {
 
     protected updateMarkersInternal(): void {
         let centerString = this.mapService.map.getCenter().lat + "|" + this.mapService.map.getCenter().lng;
-        let language = this.resources.currentLanguage.code.split("-")[0];
+        let language = this.resources.getCurrentLanguageCodeSimplified();
         let url = `https://${language}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord=${centerString}&gslimit=1000&callback=JSONP_CALLBACK`;
         this.jsonp.get(url).toPromise().then((response) => {
             // Sync lists

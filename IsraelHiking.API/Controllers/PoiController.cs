@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -23,7 +24,7 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="elevationDataStorage"></param>
-        public PoiController(IElasticSearchGateway elasticSearchGateway, 
+        public PoiController(IElasticSearchGateway elasticSearchGateway,
             IElevationDataStorage elevationDataStorage)
         {
             _elasticSearchGateway = elasticSearchGateway;
@@ -34,48 +35,89 @@ namespace IsraelHiking.API.Controllers
         /// Gets the available filters for POIs
         /// </summary>
         /// <returns></returns>
-        [Route("filters")]
+        [Route("categories")]
         [HttpGet]
-        public string[] GetFilters()
+        public string[] GetCategories()
         {
-            return new[]
-            {
-                "campsite",
-                "spring",
-                "viewpoint",
-                "ruins",
-                "other"
-            };
+            return Categories.All;
         }
+
         /// <summary>
         /// Get points of interest in a bounding box.
         /// </summary>
         /// <param name="northEast">North east bounding box corner</param>
         /// <param name="southWest">South west bounding box corner</param>
-        /// <param name="filters">The relevant filters to include</param>
+        /// <param name="categories">The relevant categories to include</param>
+        /// <param name="language">The required language</param>
         /// <returns>A list of GeoJSON features</returns>
         [Route("")]
         [HttpGet]
-        public async Task<List<Feature>> GetPointsOfInterest(string northEast, string southWest, string filters)
+        public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories, string language = "")
         {
-            var filtersArray = filters?.Split(',').Select(f => f.Trim()).ToArray() ?? GetFilters();
+            var categoriesArray = categories?.Split(',').Select(f => f.Trim()).ToArray() ?? GetCategories();
 
             var features = await _elasticSearchGateway.GetPointsOfInterest(
                 new Coordinate().FromLatLng(northEast),
-                new Coordinate().FromLatLng(southWest), 
-                filtersArray);
+                new Coordinate().FromLatLng(southWest),
+                categoriesArray);
 
-            foreach (var feature in features)
+            return await Task.WhenAll(features.Select(f => ConvertToPoiItem<PointOfInterest>(f, language)));
+        }
+
+        /// <summary>
+        /// Get a POI by id and source
+        /// </summary>
+        /// <param name="source">The source</param>
+        /// <param name="id">The ID</param>
+        /// <param name="language">The required language</param>
+        /// <returns></returns>
+        [Route("{source}/{id}")]
+        [HttpGet]
+        public async Task<IActionResult> GetPointOfInterest(string source, string id, string language = "")
+        {
+            var feature = await _elasticSearchGateway.GetPointOfInterestById(id, source);
+            if (feature == null)
             {
-                if (feature.Geometry.Coordinate == null)
-                {
-                    continue;
-                }
-                feature.Attributes.AddAttribute("altitude", 
-                    await _elevationDataStorage.GetElevation(feature.Geometry.Coordinate));
+                return NotFound();
             }
+            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
+            poiItem.FeatureCollection = new FeatureCollection(new Collection<IFeature> {feature});
+            poiItem.Url = feature.Attributes[FeatureAttributes.EXTERNAL_URL].ToString();
+            poiItem.Description = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language);
+            poiItem.Rating = null;
+            return Ok(poiItem);
+        }
 
-            return features;
+        private async Task<TPoiItem> ConvertToPoiItem<TPoiItem>(Feature feature, string language) where TPoiItem: PointOfInterest, new()
+        {
+            var poiItem = new TPoiItem();
+            var geoLocation = feature.Attributes[FeatureAttributes.GEOLOCATION] as AttributesTable;
+            if (geoLocation != null)
+            {
+                poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
+                var alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(poiItem.Location));
+                poiItem.Location.alt = alt;
+            }
+            poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();
+            poiItem.Title = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.NAME, language);
+            poiItem.Id = feature.Attributes[FeatureAttributes.ID].ToString();
+            poiItem.Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString();
+            poiItem.Icon = feature.Attributes[FeatureAttributes.ICON].ToString();
+            poiItem.IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString();
+            return poiItem;
+        }
+
+        private string GetAttributeByLanguage(IAttributesTable attributes, string key, string language)
+        {
+            if (attributes.GetNames().Contains(key + ":" + language))
+            {
+                return attributes[key + ":" + language].ToString();
+            }
+            if (attributes.GetNames().Contains(key))
+            {
+                return attributes[key].ToString();
+            }
+            return string.Empty;
         }
     }
 }

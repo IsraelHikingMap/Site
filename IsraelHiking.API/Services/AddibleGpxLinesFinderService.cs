@@ -199,7 +199,7 @@ namespace IsraelHiking.API.Services
                 X = gpxItmLine.Coordinates.Min(c => c.X) - tolerance
             });
             var highways = await _elasticSearchGateway.GetHighways(northEast, southWest);
-            return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.Attributes["osmId"].ToString())).ToList();
+            return highways.Select(highway => ToItmLineString(highway.Geometry.Coordinates, highway.Attributes[FeatureAttributes.ID].ToString())).ToList();
         }
 
         private ILineString ToItmLineString(IEnumerable<Coordinate> coordinates, string id)

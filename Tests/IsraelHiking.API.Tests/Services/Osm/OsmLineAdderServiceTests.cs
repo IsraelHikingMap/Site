@@ -53,8 +53,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
         private void SetupHighway(int wayId, Coordinate[] coordinates, IOsmGateway osmGateway)
         {
-            var table = new AttributesTable();
-            table.Add("osmId", wayId.ToString());
+            var table = new AttributesTable {{FeatureAttributes.ID, wayId.ToString()}};
 
             _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>
             {

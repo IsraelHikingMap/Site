@@ -51,21 +51,21 @@
         </div>
         <div fxFlex [hidden]="!isAdvanced">
             <div fxLayout="column" fxFill>
-                <span fxFill fxLayoutAlign="end start" (click)="togglePoisFilters($event)" mdTooltip="{{resources.filters}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle POI filters"><i class="fa" [ngClass]="{'icon-chevron-down': !isPoisFiltersVisible, 'icon-chevron-up': isPoisFiltersVisible}"></i></span>
+                <span fxFill fxLayoutAlign="end start" (click)="togglePoisCategories($event)" mdTooltip="{{resources.filters}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle POI categoris"><i class="fa" [ngClass]="{'icon-chevron-down': !isPoisCategorisVisible, 'icon-chevron-up': isPoiscategoriesVisible}"></i></span>
             </div>
         </div>
     </div>
-    <div [hidden]="!isAdvanced || !isPoisFiltersVisible" *ngFor="let filter of filters">
-        <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleFilter(filter, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle filter visiblity {{filter.type}}">
+    <div [hidden]="!isAdvanced || !isPoisCategoriesVisible" *ngFor="let category of categories">
+        <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategory(category, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle category visiblity {{category.type}}">
             <div fxFlex="10"></div>
             <div fxFlex="15">
-                <i class="fa" [ngClass]="{'icon-eye': filter.isSelected, 'icon-eye-slash': !filter.isSelected}"></i>
+                <i class="fa" [ngClass]="{'icon-eye': category.isSelected, 'icon-eye-slash': !category.isSelected}"></i>
             </div>
             <div fxFlex="15">
-                <i class="fa" [ngClass]="filter.icon"></i>
+                <i class="fa" [ngClass]="category.icon"></i>
             </div>
             <div fxFlex="60">
-                <span>{{resources.translate(filter.type)}}</span>
+                <span>{{resources.translate(category.type)}}</span>
             </div>
         </div>
     </div>

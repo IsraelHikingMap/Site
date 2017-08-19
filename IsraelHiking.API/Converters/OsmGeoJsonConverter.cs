@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp.Complete;
@@ -48,8 +49,9 @@ namespace IsraelHiking.API.Converters
         private IAttributesTable ConvertTags(ICompleteOsmGeo osmObject)
         {
             var properties = osmObject.Tags.ToDictionary(t => t.Key, t => t.Value);
-            properties.Add("osmId", osmObject.Id.ToString());
-            properties.Add("externalUrl", $"https://www.openstreetmap.org/{osmObject.Type.ToString().ToLower()}/{osmObject.Id}");
+            properties.Add(FeatureAttributes.ID, osmObject.Id.ToString());
+            properties.Add(FeatureAttributes.POI_SOURCE, FeatureAttributes.OSM);
+            properties.Add(FeatureAttributes.EXTERNAL_URL, $"https://www.openstreetmap.org/{osmObject.Type.ToString().ToLower()}/{osmObject.Id}");
             var table = new AttributesTable();
             foreach (var key in properties.Keys)
             {
