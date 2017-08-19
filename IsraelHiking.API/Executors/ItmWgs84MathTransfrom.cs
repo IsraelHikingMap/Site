@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
 using GeoAPI.CoordinateSystems;
 using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
-using ProjNet.Converters.WellKnownText;
 using ProjNet.CoordinateSystems;
 using ProjNet.CoordinateSystems.Transformations;
 
@@ -13,9 +11,9 @@ namespace IsraelHiking.API.Executors
     /// <inheritdoc />
     public class ItmWgs84MathTransfrom : IMathTransform
     {
-        private readonly ICoordinateTransformation _transform;
-        private readonly ICoordinateTransformation _inverseTransform;
-        private bool _isInverse;
+        private readonly IMathTransform _transform;
+        private readonly IMathTransform _inverseTransform;
+        private readonly bool _isInverse;
 
         /// <inheritdoc />
         public int DimSource { get; }
@@ -52,8 +50,8 @@ namespace IsraelHiking.API.Executors
                 new AxisInfo("East", AxisOrientationEnum.East), new AxisInfo("North", AxisOrientationEnum.North));
             
             var wgs84 = ProjectedCoordinateSystem.WGS84_UTM(36, true).GeographicCoordinateSystem;
-            _inverseTransform = coordinateTransformFactory.CreateFromCoordinateSystems(wgs84, itm);
-            _transform = coordinateTransformFactory.CreateFromCoordinateSystems(itm, wgs84);
+            _inverseTransform = coordinateTransformFactory.CreateFromCoordinateSystems(wgs84, itm).MathTransform;
+            _transform = coordinateTransformFactory.CreateFromCoordinateSystems(itm, wgs84).MathTransform;
             _isInverse = isInverse;
         }
 
@@ -91,40 +89,40 @@ namespace IsraelHiking.API.Executors
         public double[] Transform(double[] point)
         {
             return _isInverse
-                ? _inverseTransform.MathTransform.Transform(point)
-                : _transform.MathTransform.Transform(point);
+                ? _inverseTransform.Transform(point)
+                : _transform.Transform(point);
         }
 
         /// <inheritdoc />
         public ICoordinate Transform(ICoordinate coordinate)
         {
             return _isInverse
-                ? _inverseTransform.MathTransform.Transform(coordinate)
-                : _transform.MathTransform.Transform(coordinate);
+                ? _inverseTransform.Transform(coordinate)
+                : _transform.Transform(coordinate);
         }
 
         /// <inheritdoc />
         public Coordinate Transform(Coordinate coordinate)
         {
             return _isInverse
-                ? _inverseTransform.MathTransform.Transform(coordinate)
-                : _transform.MathTransform.Transform(coordinate);
+                ? _inverseTransform.Transform(coordinate)
+                : _transform.Transform(coordinate);
         }
 
         /// <inheritdoc />
         public IList<double[]> TransformList(IList<double[]> points)
         {
             return _isInverse
-                ? _inverseTransform.MathTransform.TransformList(points)
-                : _transform.MathTransform.TransformList(points);
+                ? _inverseTransform.TransformList(points)
+                : _transform.TransformList(points);
         }
 
         /// <inheritdoc />
         public IList<Coordinate> TransformList(IList<Coordinate> points)
         {
             return _isInverse
-                ? _inverseTransform.MathTransform.TransformList(points)
-                : _transform.MathTransform.TransformList(points);
+                ? _inverseTransform.TransformList(points)
+                : _transform.TransformList(points);
         }
 
         /// <inheritdoc />
@@ -137,8 +135,8 @@ namespace IsraelHiking.API.Executors
         public ICoordinateSequence Transform(ICoordinateSequence coordinateSequence)
         {
             return _isInverse
-                ? _inverseTransform.MathTransform.Transform(coordinateSequence)
-                : _transform.MathTransform.Transform(coordinateSequence);
+                ? _inverseTransform.Transform(coordinateSequence)
+                : _transform.Transform(coordinateSequence);
         }
     }
 }
