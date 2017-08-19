@@ -33,9 +33,8 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         private readonly string _userDetailsAddress;
         private readonly string _createChangesetAddress;
         private readonly string _closeChangesetAddress;
-        private readonly string _createNodeAddress;
-        private readonly string _createWayAddress;
-        private readonly string _wayAddress;
+        private readonly string _createElementAddress;
+        private readonly string _elementAddress;
         private readonly string _completeWayAddress;
         private readonly string _traceAddress;
         private readonly string _getTracesAddress;
@@ -51,10 +50,10 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _userDetailsAddress = osmApiBaseAddress + "user/details";
             _createChangesetAddress = osmApiBaseAddress + "changeset/create";
             _closeChangesetAddress = osmApiBaseAddress + "changeset/:id/close";
-            _createNodeAddress = osmApiBaseAddress + "node/create";
-            _createWayAddress = osmApiBaseAddress + "way/create";
-            _wayAddress = osmApiBaseAddress + "way/:id";
-            _completeWayAddress = _wayAddress + "/full";
+            _createElementAddress = osmApiBaseAddress + ":type/create";
+            _elementAddress = osmApiBaseAddress + ":type/:id";
+            
+            _completeWayAddress = osmApiBaseAddress + "way/:id/full";
             _traceAddress = osmApiBaseAddress + "gpx/:id";
             _getTracesAddress = osmApiBaseAddress + "user/gpx_files";
             _createTraceAddress = osmApiBaseAddress + "gpx/create";
@@ -128,61 +127,19 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             }
         }
 
-        public async Task<string> CreateNode(string changesetId, Node node)
+        public async Task<string> CreateElement(string changesetId, OsmGeo osmGeo)
         {
             using (var client = new HttpClient())
             {
-                UpdateHeaders(client, _createNodeAddress, "PUT");
-                node.ChangeSetId = long.Parse(changesetId);
-                var newNode = new Osm
-                {
-                    Nodes = new[] { node }
-                };
-                var response = await client.PutAsync(_createNodeAddress, new StringContent(newNode.SerializeToXml()));
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    return string.Empty;
-                }
-                return await response.Content.ReadAsStringAsync();
-            }
-        }
-
-        public async Task<string> CreateWay(string changesetId, Way way)
-        {
-            using (var client = new HttpClient())
-            {
-                UpdateHeaders(client, _createWayAddress, "PUT");
-                way.ChangeSetId = long.Parse(changesetId);
-                var newWay = new Osm
-                {
-                    Ways = new[] { way }
-                };
-                var response = await client.PutAsync(_createWayAddress, new StringContent(newWay.SerializeToXml()));
-                if (response.StatusCode != HttpStatusCode.OK)
-                {
-                    return string.Empty;
-                }
-                return await response.Content.ReadAsStringAsync();
-            }
-        }
-
-        public async Task UpdateWay(string changesetId, Way way)
-        {
-            using (var client = new HttpClient())
-            {
-                var address = _wayAddress.Replace(":id", way.Id.ToString());
+                var address = _createElementAddress.Replace(":type", osmGeo.Type.ToString());
                 UpdateHeaders(client, address, "PUT");
-                way.ChangeSetId = long.Parse(changesetId);
-                var updatedWay = new Osm
-                {
-                    Ways = new[] { way }
-                };
-                var response = await client.PutAsync(address, new StringContent(updatedWay.SerializeToXml()));
+                var osmRequest = GetOsmRequest(changesetId, osmGeo);
+                var response = await client.PutAsync(address, new StringContent(osmRequest.SerializeToXml()));
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    var message = await response.Content.ReadAsStringAsync();
-                    throw new Exception($"Unable to update way with id: {way.Id} {message}");
+                    return string.Empty;
                 }
+                return await response.Content.ReadAsStringAsync();
             }
         }
 
@@ -199,6 +156,74 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 var streamSource = new XmlOsmStreamSource(await response.Content.ReadAsStreamAsync());
                 var completeSource = new OsmSimpleCompleteStreamSource(streamSource);
                 return completeSource.OfType<CompleteWay>().FirstOrDefault();
+            }
+        }
+
+        public Task<Node> GetNode(string nodeId)
+        {
+            return GetElement<Node>(nodeId, "node");
+        }
+
+        public Task<Way> GetWay(string wayId)
+        {
+            return GetElement<Way>(wayId, "way");
+        }
+
+        public Task<Relation> GetRelation(string relationId)
+        {
+            return GetElement<Relation>(relationId, "relation");
+        }
+
+        private async Task<TOsmGeo> GetElement<TOsmGeo>(string id, string type) where TOsmGeo : OsmGeo
+        {
+            using (var client = new HttpClient())
+            {
+                var address = _elementAddress.Replace(":id", id).Replace(":type", type);
+                var response = await client.GetAsync(address);
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    return null;
+                }
+                var streamSource = new XmlOsmStreamSource(await response.Content.ReadAsStreamAsync());
+                return streamSource.OfType<TOsmGeo>().FirstOrDefault();
+            }
+        }
+
+        private Osm GetOsmRequest(string changesetId, OsmGeo osmGeo)
+        {
+            var osm = new Osm();
+            long changeSetId = long.Parse(changesetId);
+            switch (osmGeo.Type)
+            {
+                case OsmGeoType.Node:
+                    osm.Nodes = new[] { osmGeo as Node };
+                    osm.Nodes.First().ChangeSetId = changeSetId;
+                    break;
+                case OsmGeoType.Way:
+                    osm.Ways = new[] { osmGeo as Way };
+                    osm.Ways.First().ChangeSetId = changeSetId;
+                    break;
+                case OsmGeoType.Relation:
+                    osm.Relations = new[] { osmGeo as Relation };
+                    osm.Relations.First().ChangeSetId = changeSetId;
+                    break;
+            }
+            return osm;
+        }
+
+        public async Task UpdateElement(string changesetId, OsmGeo osmGeo)
+        {
+            using (var client = new HttpClient())
+            {
+                var address = _elementAddress.Replace(":id", osmGeo.Id.ToString()).Replace(":type", osmGeo.Type.ToString().ToLower());
+                UpdateHeaders(client, address, "PUT");
+                var osmRequest = GetOsmRequest(changesetId, osmGeo);
+                var response = await client.PutAsync(address, new StringContent(osmRequest.SerializeToXml()));
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Unable to update {osmGeo.Type} with id: {osmGeo.Id} {message}");
+                }
             }
         }
 

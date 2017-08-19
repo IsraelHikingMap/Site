@@ -46,7 +46,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var osmGateway = Substitute.For<IOsmGateway>();
             var nodeId = 10;
             osmGateway.CreateChangeset(Arg.Any<string>()).Returns(changesetId);
-            osmGateway.CreateNode(changesetId, Arg.Any<Node>()).Returns(x => Task.Run(() => (++nodeId).ToString()));
+            osmGateway.CreateElement(changesetId, Arg.Any<Node>()).Returns(x => Task.Run(() => (++nodeId).ToString()));
             _httpGatewayFactory.CreateOsmGateway(null).Returns(osmGateway);
             return osmGateway;
         }
@@ -81,8 +81,8 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             osmGateway.Received(1).CreateChangeset(Arg.Any<string>());
             osmGateway.Received(1).CloseChangeset(changesetId);
-            osmGateway.Received(2).CreateNode(changesetId, Arg.Any<Node>());
-            osmGateway.Received(1).CreateWay(changesetId, Arg.Any<Way>());
+            osmGateway.Received(2).CreateElement(changesetId, Arg.Any<Node>());
+            osmGateway.Received(1).CreateElement(changesetId, Arg.Any<Way>());
         }
 
         [TestMethod]
@@ -93,7 +93,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 2));
+            osmGateway.Received(1).CreateElement(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 2));
         }
 
         [TestMethod]
@@ -104,7 +104,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
             _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 2));
+            osmGateway.Received(1).CreateElement(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 2));
         }
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(0.1, 0.001)
             }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 4));
+            osmGateway.Received(1).CreateElement(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 4));
         }
 
         /// <summary>
@@ -148,7 +148,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(0.1, 0.01)
             }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 5));
+            osmGateway.Received(1).CreateElement(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 5));
         }
 
         /// <summary>
@@ -179,7 +179,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(1.0001, 1),
             }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 9));
+            osmGateway.Received(1).CreateElement(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 9));
         }
 
         /// <summary>
@@ -202,9 +202,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(0.5, 0),
             }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 2));
-            osmGateway.Received(2).CreateNode(Arg.Any<string>(), Arg.Any<Node>());
-            osmGateway.Received(1).UpdateWay(Arg.Any<string>(), Arg.Any<Way>());
+            osmGateway.Received(1).CreateElement(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 2));
+            osmGateway.Received(2).CreateElement(Arg.Any<string>(), Arg.Any<Node>());
+            osmGateway.Received(1).UpdateElement(Arg.Any<string>(), Arg.Any<Way>());
         }
 
         [TestMethod]
@@ -227,7 +227,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(34.7352248,30.8760586)
             }), new Dictionary<string, string>(), null).Wait();
 
-            osmGateway.Received(1).CreateWay(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 4));
+            osmGateway.Received(1).CreateElement(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 4));
         }
     }
 }

@@ -25,7 +25,7 @@ export class GeoJsonParser {
         return JSON.stringify(geoJson);
     }
 
-    public toDataContainer(geoJson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>): Common.DataContainer {
+    public toDataContainer(geoJson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>, language?: string): Common.DataContainer {
         let markers = [] as Common.MarkerData[];
         let data = {
             routes: [] as Common.RouteData[]
@@ -33,8 +33,8 @@ export class GeoJsonParser {
         let leaftletGeoJson = L.geoJSON(geoJson, {
             onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
                 let routeData = null;
-                let name = (feature.properties as any).name;
-                let description = (feature.properties as any).description;
+                let name = this.getPropertyValue(feature.properties, "name", language);
+                let description = this.getPropertyValue(feature.properties, "description", language);
                 switch (feature.geometry.type) {
                     case GeoJson.point:
                         let point = feature.geometry as GeoJSON.Point;
@@ -234,5 +234,13 @@ export class GeoJsonParser {
             }
         }
         return latlngsArray;
+    }
+
+    private getPropertyValue(properties: {}, key: string, language?: string): string {
+        let value = "";
+        if (language) {
+            value = properties[key + ":" + language];
+        }
+        return value || properties[key];
     }
 }

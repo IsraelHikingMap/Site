@@ -11,10 +11,12 @@ namespace IsraelHiking.DataAccessInterfaces
     {
         Task<string> GetUserId();
         Task<string> CreateChangeset(string comment);
-        Task<string> CreateNode(string changesetId, Node node);
-        Task<string> CreateWay(string changesetId, Way way);
-        Task UpdateWay(string changesetId, Way way);
+        Task<string> CreateElement(string changesetId, OsmGeo osmGeo);
+        Task<Node> GetNode(string nodeId);
+        Task<Way> GetWay(string wayId);
+        Task<Relation> GetRelation(string relationId);
         Task<CompleteWay> GetCompleteWay(string wayId);
+        Task UpdateElement(string changesetId, OsmGeo osmGeo);
         Task<List<OsmTrace>> GetTraces();
         Task CloseChangeset(string changesetId);
         Task CreateTrace(string fileName, MemoryStream fileStream);

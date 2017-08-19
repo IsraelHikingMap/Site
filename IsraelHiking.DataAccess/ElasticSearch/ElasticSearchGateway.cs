@@ -141,7 +141,12 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             return UpdateData(features, OSM_HIGHWAYS_ALIAS);
         }
 
-        public async Task UpdateData(List<Feature> features, string alias)
+        public Task UpdateNamesData(Feature feature)
+        {
+            return UpdateData(new List<Feature> {feature}, OSM_NAMES_ALIAS);
+        }
+
+        private async Task UpdateData(List<Feature> features, string alias)
         {
             var result = await _elasticClient.BulkAsync(bulk =>
             {

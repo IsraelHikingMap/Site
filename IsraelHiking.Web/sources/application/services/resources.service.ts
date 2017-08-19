@@ -178,9 +178,10 @@ export class ResourcesService {
     public tags: string;
     public noTags: string;
     public moreMapAddresses: string;
-    public filters: string;
+    public categories: string;
     public emptyPoiDescription: string;
     public comingSoon: string;
+    public itsYourTimeToShine: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -208,6 +209,7 @@ export class ResourcesService {
     public unableToUploadFile: string;
     public unableToSaveAnEmptyRoute: string;
     public closeWhileInEditMode: string;
+    public dataUpdatedSuccefully: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -569,9 +571,10 @@ export class ResourcesService {
                 this.tags = this.gettextCatalog.getString("Tags");
                 this.noTags = this.gettextCatalog.getString("No Tags");
                 this.moreMapAddresses = this.gettextCatalog.getString("More map addresses can be found here, look for TMS");
-                this.filters = this.gettextCatalog.getString("Filters");
-                this.emptyPoiDescription = this.gettextCatalog.getString("You should add your decription here! Click the edit button below.");
-                this.comingSoon = this.gettextCatalog.getString("Coming soon!");
+                this.categories = this.gettextCatalog.getString("Categories");
+                this.emptyPoiDescription = this.gettextCatalog.getString("You should add your description here! Click the edit button below.");
+                this.comingSoon = this.gettextCatalog.getString("Coming Soon!");
+                this.itsYourTimeToShine = this.gettextCatalog.getString("Its your time to shine!");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -599,6 +602,7 @@ export class ResourcesService {
                 this.unableToUploadFile = this.gettextCatalog.getString("Unable to upload the file...");
                 this.unableToSaveAnEmptyRoute = this.gettextCatalog.getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
                 this.closeWhileInEditMode = this.gettextCatalog.getString("Please note that you did not save your work before closing the popup...");
+                this.dataUpdatedSuccefully = this.gettextCatalog.getString("The data was updated successfully!");
                 // Help
                 this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                 this.helpInfo = this.gettextCatalog.getString("This dialog");
@@ -773,8 +777,8 @@ export class ResourcesService {
         return this.gettextCatalog.getString(word) || word;
     }
 
-    public hasHebrewCharacters(title: string): boolean {
-        return title.match(/^[^a-zA-Z]*[\u0591-\u05F4]/) != null;
+    public hasHebrewCharacters(words: string): boolean {
+        return words.match(/^[^a-zA-Z]*[\u0591-\u05F4]/) != null;
     }
 
     public getDirection = (words: string): Direction => {

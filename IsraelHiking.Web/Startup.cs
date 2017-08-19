@@ -140,6 +140,7 @@ namespace IsraelHiking.Web
             services.AddMvc(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
+                options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(PointOfInterestExtended)));
             }).AddJsonOptions(options =>
             {
                 options.SerializerSettings.Converters.Add(new CoordinateConverter());

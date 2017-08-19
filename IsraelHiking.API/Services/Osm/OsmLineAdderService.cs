@@ -70,7 +70,7 @@ namespace IsraelHiking.API.Services.Osm
                     if (closestCompleteWay == null)
                     {
                         // no close highways, adding a new node
-                        nodeIds.Add(await _osmGateway.CreateNode(changesetId, new Node { Id = 0, Latitude = coordinate.Y, Longitude = coordinate.X }));
+                        nodeIds.Add(await _osmGateway.CreateElement(changesetId, new Node { Id = 0, Latitude = coordinate.Y, Longitude = coordinate.X }));
                         continue;
                     }
                     var itmPoint = GetItmCoordinate(coordinate);
@@ -89,10 +89,10 @@ namespace IsraelHiking.API.Services.Osm
                         continue;
                     }
                     // need to add a new node to existing highway
-                    var newNodeId = await _osmGateway.CreateNode(changesetId, new Node { Id = 0, Latitude = coordinate.Y, Longitude = coordinate.X });
+                    var newNodeId = await _osmGateway.CreateElement(changesetId, new Node { Id = 0, Latitude = coordinate.Y, Longitude = coordinate.X });
                     nodeIds.Add(newNodeId);
                     var simpleWay = AddNewNodeToExistingWay(newNodeId, closestCompleteWay, closestItmHighway, indexOnWay, itmPoint);
-                    await _osmGateway.UpdateWay(changesetId, simpleWay);
+                    await _osmGateway.UpdateElement(changesetId, simpleWay);
                     waysToUpdateIds.Add(simpleWay.Id.ToString());
                 }
                 var newWayId = await AddWayToOsm(nodeIds, tags, changesetId);
@@ -141,8 +141,9 @@ namespace IsraelHiking.API.Services.Osm
             }
             // HM TODO: use the following instead.
             //var simpleWay = (Way)closestCompleteWay.ToSimple();
+            // waiting on the following issue to be resolved: https://github.com/OsmSharp/core/issues/28
 
-            var simpleWay = new Way { Tags = closestCompleteWay.Tags, Id = closestCompleteWay.Id, Version = closestCompleteWay.Version, Nodes = closestCompleteWay.Nodes.Select(n => n.Id.Value).ToArray() };
+            var simpleWay = new Way { Tags = closestCompleteWay.Tags, Id = closestCompleteWay.Id, Version = closestCompleteWay.Version, Nodes = closestCompleteWay.Nodes.Select(n => n.Id ?? 0).ToArray() };
             var updatedList = simpleWay.Nodes.ToList();
             updatedList.Insert(indexToInsert, long.Parse(nodeId));
             simpleWay.Nodes = updatedList.ToArray();
@@ -219,7 +220,7 @@ namespace IsraelHiking.API.Services.Osm
             {
                 way.Tags.Add("source", "GPS");
             }
-            return await _osmGateway.CreateWay(chagesetId, way);
+            return await _osmGateway.CreateElement(chagesetId, way);
         }
 
         private async Task AddWaysToElasticSearch(List<string> wayIds)

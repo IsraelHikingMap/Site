@@ -1,4 +1,4 @@
-﻿<div class="marker-popup" [dir]="'rtl'">
+﻿<div class="marker-popup" [dir]="resources.direction">
     <div fxLayout="row" [hidden]="thumbnail">
         <div fxFlex="33">
             <i class="fa icon-camera fa-5x"></i>
@@ -14,7 +14,7 @@
         <h3 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h3>
     </a>
     <div fxLayout="row" [hidden]="!isEditMode()">
-        <md-input-container fxFill hintLabel="{{resources.descriptionPlaceHolder}}">
+        <md-input-container fxFill hintLabel="{{resources.itsYourTimeToShine}}">
             <textarea rows="4" mdInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
         </md-input-container>
     </div>
@@ -25,11 +25,17 @@
         </p>
     </div>
     <div fxLayout="row">
-        <div fxFlex [hidden]="isEditMode()">
-            <button mdButton md-button fxFill (click)="setEditMode()" mdTooltip="{{resources.edit}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Nakeb" angularticsEvent="Convert nakeb to route"><i class="fa icon-pencil"></i></button>
+        <div fxFlex [hidden]="isEditMode() && showEditMode()">
+            <button mdButton md-button fxFill (click)="setEditMode()" mdTooltip="{{resources.edit}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Edit POI"><i class="fa icon-pencil"></i></button>
         </div>
         <div fxFlex [hidden]="!isEditMode()">
-            <button mdButton md-button fxFill (click)="save()" mdTooltip="{{resources.save}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Nakeb" angularticsEvent="Convert nakeb to route"><i class="fa icon-check"></i></button>
+            <button mdButton md-button fxFill (click)="save()" mdTooltip="{{resources.save}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Save POI"><i class="fa icon-check"></i></button>
+        </div>
+        <div fxFlex [hidden]="!canBeConvertedToRoute()">
+            <button mdButton md-button fxFill (click)="convertToRoute()" mdTooltip="{{resources.convertToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Convert POI to route"><i class="fa icon-plus"></i></button>
+        </div>
+        <div fxFlex [hidden]="!canBeConvertedToRoute()">
+            <button mdButton md-button fxFill (click)="clearSelectedRoute()" mdTooltip="{{resources.clear}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Clear selected route"><i class="fa icon-eye-slash"></i></button>
         </div>
     </div>
 </div>
