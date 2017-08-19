@@ -7,7 +7,6 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccess.Database;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelTransverseMercator;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -170,7 +169,6 @@ namespace IsraelHiking.Web
             services.AddIHMDataAccess();
             services.AddIHMApi();
 
-            services.AddTransient<IMathTransform, ItmWgs84MathTransfrom>((serviceProvider) => new ItmWgs84MathTransfrom(false));
             services.AddSingleton<IGeometryFactory, GeometryFactory>((serviceProvider) => new GeometryFactory(new PrecisionModel(100000000)));
             services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
             services.AddSwaggerGen(c =>

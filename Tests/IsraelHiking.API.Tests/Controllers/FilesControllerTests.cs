@@ -4,7 +4,6 @@ using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using System.Collections.Generic;
@@ -15,6 +14,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 
 namespace IsraelHiking.API.Tests.Controllers
 {

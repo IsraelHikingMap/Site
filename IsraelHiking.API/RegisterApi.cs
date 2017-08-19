@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Converters;
+﻿using GeoAPI.CoordinateSystems.Transformations;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
@@ -35,6 +36,7 @@ namespace IsraelHiking.API
             services.AddTransient<IOsmLineAdderService, OsmLineAdderService>();
             services.AddTransient<IGeoJsonFeatureHelper, GeoJsonFeatureHelper>();
             services.AddTransient<IPointsOfInterestAdapter, OsmPointsOfInterestAdapter>();
+            services.AddTransient<IMathTransform, ItmWgs84MathTransfrom>();
             return services;
         }
     }

@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -8,7 +9,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
-using IsraelTransverseMercator;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -26,7 +26,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var elevationDataStorage = Substitute.For<IElevationDataStorage>();
 
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _controller = new SearchController(_elasticSearchGateway, _dataContainerConverterService, elevationDataStorage, new ItmWgs84MathTransfrom(false));
+            _controller = new SearchController(_elasticSearchGateway, _dataContainerConverterService, elevationDataStorage, new ItmWgs84MathTransfrom());
         }
 
         [TestMethod]

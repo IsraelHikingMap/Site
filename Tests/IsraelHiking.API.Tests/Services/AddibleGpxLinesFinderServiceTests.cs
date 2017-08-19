@@ -5,7 +5,6 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using IsraelTransverseMercator;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;

@@ -1,5 +1,5 @@
 ﻿using IsraelHiking.API.Converters.CoordinatesParsers;
-using IsraelTransverseMercator;
+using IsraelHiking.API.Executors;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IsraelHiking.API.Tests.Converters.CoordinatesParsers
@@ -12,7 +12,7 @@ namespace IsraelHiking.API.Tests.Converters.CoordinatesParsers
         [TestInitialize]
         public void TestInitialize()
         {
-            _parser = new UtmParser(new ItmWgs84MathTransfrom(false));
+            _parser = new UtmParser(new ItmWgs84MathTransfrom());
         }
 
         [TestMethod]

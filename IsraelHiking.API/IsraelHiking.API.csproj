@@ -21,6 +21,7 @@
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre3" />
     <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-IHM" />
     <PackageReference Include="NetTopologySuite.IO.GeoJson" Version="1.15.0-IHM" />
+    <PackageReference Include="ProjNET4GeoAPI" Version="1.3.2-pre2" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
