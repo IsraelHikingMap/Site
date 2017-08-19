@@ -3,7 +3,6 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.API.Services.Poi;
-using IsraelHiking.API.Services.POI;
 using IsraelHiking.Common;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,7 +35,6 @@ namespace IsraelHiking.API
             services.AddTransient<IOsmLineAdderService, OsmLineAdderService>();
             services.AddTransient<IGeoJsonFeatureHelper, GeoJsonFeatureHelper>();
             services.AddTransient<IPointsOfInterestAdapter, OsmPointsOfInterestAdapter>();
-            services.AddSingleton<PointsOfInterestAdapterFactory>();
             return services;
         }
     }

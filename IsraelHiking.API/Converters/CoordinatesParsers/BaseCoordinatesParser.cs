@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using GeoAPI.Geometries;
+﻿using GeoAPI.Geometries;
 using System.Text.RegularExpressions;
 
 namespace IsraelHiking.API.Converters.CoordinatesParsers

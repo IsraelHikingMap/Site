@@ -1,7 +1,4 @@
 ﻿using GeoAPI.Geometries;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace IsraelHiking.API.Converters.CoordinatesParsers
 {

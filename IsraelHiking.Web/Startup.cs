@@ -30,7 +30,6 @@ using System;
 using System.IO;
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.AspNetCore.Http.Features;
 
 namespace IsraelHiking.Web
 {

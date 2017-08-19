@@ -1,17 +1,4 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using IsraelHiking.API.Executors;
-using IsraelHiking.API.Services.Osm;
-using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
-using NSubstitute;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.Logging;
-using OsmSharp.Complete;
-
-namespace IsraelHiking.API.Tests.Services.Osm
+﻿namespace IsraelHiking.API.Tests.Services.Osm
 {
     /*
     [TestClass]

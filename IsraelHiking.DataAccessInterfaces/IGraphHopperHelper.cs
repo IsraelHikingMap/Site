@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace IsraelHiking.DataAccessInterfaces
+﻿namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IGraphHopperHelper : INssmHelper
     {

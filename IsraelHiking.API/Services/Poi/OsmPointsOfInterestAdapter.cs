@@ -7,7 +7,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 
-namespace IsraelHiking.API.Services.POI
+namespace IsraelHiking.API.Services.Poi
 {
     public class OsmPointsOfInterestAdapter : IPointsOfInterestAdapter
     {

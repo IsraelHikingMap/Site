@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
 
-namespace IsraelHiking.API.Services.POI
+namespace IsraelHiking.API.Services.Poi
 {
     public interface IPointsOfInterestAdapter
     {
