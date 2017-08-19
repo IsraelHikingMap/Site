@@ -1,6 +1,6 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
     <div fxLayout="row" [hidden]="thumbnail">
-        <div fxFlex="33">
+        <div fxFlex="33" [ngClass]="resources.getTextAlignment(resources.comingSoon)">
             <i class="fa icon-camera fa-5x"></i>
         </div>
         <div fxFlex>
