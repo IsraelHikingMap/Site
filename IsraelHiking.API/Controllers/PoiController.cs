@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
-using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -16,19 +14,15 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class PoiController : Controller
     {
-        private readonly IElasticSearchGateway _elasticSearchGateway;
-        private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly Dictionary<string, IPointsOfInterestAdapter> _adapters;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="elasticSearchGateway"></param>
-        /// <param name="elevationDataStorage"></param>
-        public PoiController(IElasticSearchGateway elasticSearchGateway,
-            IElevationDataStorage elevationDataStorage)
+        /// <param name="adapters"></param>
+        public PoiController(IEnumerable<IPointsOfInterestAdapter> adapters)
         {
-            _elasticSearchGateway = elasticSearchGateway;
-            _elevationDataStorage = elevationDataStorage;
+            _adapters = adapters.ToDictionary(a => a.Source, a => a);
         }
 
         /// <summary>
@@ -55,13 +49,15 @@ namespace IsraelHiking.API.Controllers
         public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories, string language = "")
         {
             var categoriesArray = categories?.Split(',').Select(f => f.Trim()).ToArray() ?? GetCategories();
+            var northEastCoordinate = new Coordinate().FromLatLng(northEast);
+            var southWestCoordinate = new Coordinate().FromLatLng(southWest);
+            var poiList = new List<PointOfInterest>();
+            foreach (var adapter in _adapters.Values)
+            {
+                poiList.AddRange(await adapter.GetPointsOfInterest(northEastCoordinate, southWestCoordinate, categoriesArray, language));
+            }
 
-            var features = await _elasticSearchGateway.GetPointsOfInterest(
-                new Coordinate().FromLatLng(northEast),
-                new Coordinate().FromLatLng(southWest),
-                categoriesArray);
-
-            return await Task.WhenAll(features.Select(f => ConvertToPoiItem<PointOfInterest>(f, language)));
+            return poiList.ToArray();
         }
 
         /// <summary>
@@ -75,49 +71,17 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPointOfInterest(string source, string id, string language = "")
         {
-            var feature = await _elasticSearchGateway.GetPointOfInterestById(id, source);
-            if (feature == null)
+            if (_adapters.ContainsKey(source) == false)
+            {
+                return BadRequest($"{source} is not a know POIs source...");
+            }
+            var adapter = _adapters[source];
+            var poiItem = await adapter.GetPointOfInterestById(id, language);
+            if (poiItem == null)
             {
                 return NotFound();
             }
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
-            poiItem.FeatureCollection = new FeatureCollection(new Collection<IFeature> {feature});
-            poiItem.Url = feature.Attributes[FeatureAttributes.EXTERNAL_URL].ToString();
-            poiItem.Description = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language);
-            poiItem.Rating = null;
             return Ok(poiItem);
-        }
-
-        private async Task<TPoiItem> ConvertToPoiItem<TPoiItem>(Feature feature, string language) where TPoiItem: PointOfInterest, new()
-        {
-            var poiItem = new TPoiItem();
-            var geoLocation = feature.Attributes[FeatureAttributes.GEOLOCATION] as AttributesTable;
-            if (geoLocation != null)
-            {
-                poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
-                var alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(poiItem.Location));
-                poiItem.Location.alt = alt;
-            }
-            poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();
-            poiItem.Title = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.NAME, language);
-            poiItem.Id = feature.Attributes[FeatureAttributes.ID].ToString();
-            poiItem.Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString();
-            poiItem.Icon = feature.Attributes[FeatureAttributes.ICON].ToString();
-            poiItem.IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString();
-            return poiItem;
-        }
-
-        private string GetAttributeByLanguage(IAttributesTable attributes, string key, string language)
-        {
-            if (attributes.GetNames().Contains(key + ":" + language))
-            {
-                return attributes[key + ":" + language].ToString();
-            }
-            if (attributes.GetNames().Contains(key))
-            {
-                return attributes[key].ToString();
-            }
-            return string.Empty;
         }
     }
 }
