@@ -1,6 +1,4 @@
-﻿import * as _ from "lodash";
-
-import { MapService } from "../map.service";
+﻿import { MapService } from "../map.service";
 import { IconsService } from "../icons.service";
 import * as Common from "../../common/IsraelHiking";
 
@@ -70,7 +68,10 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
         if (routeData == null || routeData.segments.length === 0) {
             return;
         }
-        let latLngs = _.last(routeData.segments).latlngs;
+        let latLngs = [];
+        for (let segment of routeData.segments) {
+            latLngs = latLngs.concat(segment.latlngs);
+        }
         let polyLine = L.polyline(latLngs,
             {
                 opacity: 1,
