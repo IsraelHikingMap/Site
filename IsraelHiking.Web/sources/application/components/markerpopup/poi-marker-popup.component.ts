@@ -42,6 +42,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public thumbnail: string;
     public address: string;
     public source: string;
+    public rating: number;
     private editMode: boolean;
     private routeData: Common.RouteData;
     private extendedDataArrivedTimeStamp: Date;
@@ -70,7 +71,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         });
         this.marker.on("popupclose", () => {
             if (this.editMode) {
-                this.toastService.warning(this.resources.closeWhileInEditMode);    
+                this.toastService.warning(this.resources.closeWhileInEditMode);
             }
             this.editMode = false;
         });
@@ -107,6 +108,17 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         });
     }
 
+    public voteUp() {
+        this.rating++;
+        // HM TODO: send rating to server
+    }
+
+    public voteDown() {
+        this.rating--;
+        // HM TODO: send rating to server.
+        // HM TODO: allow only once.
+    }
+
     public convertToRoute() {
         this.routeData.description = this.description;
         this.routesService.setData([this.routeData]);
@@ -115,7 +127,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     private getPoiData() {
-        if (this.extendedDataArrivedTimeStamp != null && Date.now() - this.extendedDataArrivedTimeStamp.getTime() < PoiMarkerPopupComponent.THREE_HOURES) {
+        if (this.extendedDataArrivedTimeStamp != null &&
+            Date.now() - this.extendedDataArrivedTimeStamp.getTime() < PoiMarkerPopupComponent.THREE_HOURES) {
             this.selectRoute(this.routeData);
             return;
         }
@@ -123,15 +136,17 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             {
                 params: { language: this.resources.getCurrentLanguageCodeSimplified() }
             }).toPromise().then((response) => {
-                this.extendedDataArrivedTimeStamp = new Date();
-                let poiExtended = response.json() as IPointOfInterestExtended;
-                this.poiExtended = poiExtended;
-                this.description = poiExtended.description;
-                this.address = poiExtended.url;
-                this.thumbnail = poiExtended.imageUrl;
-                var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection, this.resources.getCurrentLanguageCodeSimplified());
-                this.routeData = container.routes[0];
-                this.selectRoute(this.routeData);
-            });
+            this.extendedDataArrivedTimeStamp = new Date();
+            let poiExtended = response.json() as IPointOfInterestExtended;
+            this.poiExtended = poiExtended;
+            this.description = poiExtended.description;
+            this.address = poiExtended.url;
+            this.thumbnail = poiExtended.imageUrl;
+            this.rating = poiExtended.rating || 0;
+            var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
+                this.resources.getCurrentLanguageCodeSimplified());
+            this.routeData = container.routes[0];
+            this.selectRoute(this.routeData);
+        });
     }
 }
