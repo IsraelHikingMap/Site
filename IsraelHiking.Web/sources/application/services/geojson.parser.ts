@@ -70,6 +70,7 @@ export class GeoJsonParser {
                         break;
                 }
                 if (routeData && routeData.segments.length > 0) {
+                    routeData.markers = routeData.markers || [];
                     data.routes.push(routeData);
                 }
             }

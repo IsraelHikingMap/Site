@@ -64,7 +64,7 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
         this.updateMarkersInternal();
     }
 
-    protected createReadOnlyLayer(routeData: Common.RouteData) {
+    protected createReadOnlyLayer = (routeData: Common.RouteData) => {
         this.readOnlyLayer.clearLayers();
         
         if (routeData == null || routeData.segments.length === 0) {
