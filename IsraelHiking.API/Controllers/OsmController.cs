@@ -133,10 +133,11 @@ namespace IsraelHiking.API.Controllers
                 return BadRequest("File does not contain any traces...");
             }
             var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
-            var attributesTable = new AttributesTable {{"highway", highwayType}};
+            var attributesTable = new AttributesTable();
+            attributesTable.AddAttribute("highway", highwayType);
             if (string.IsNullOrEmpty(url) == false)
             {
-                attributesTable.Add("source", url);
+                attributesTable.AddAttribute("source", url);
             }
             var features = manipulatedItmLines.Select(l => new Feature(ToWgs84LineString(l.Coordinates), attributesTable) as IFeature).ToList();
             return Ok(new FeatureCollection(new Collection<IFeature>(features)));

@@ -139,11 +139,8 @@ namespace IsraelHiking.API.Services.Osm
                     indexToInsert = indexOnWay + 1;
                 }
             }
-            // HM TODO: use the following instead.
-            //var simpleWay = (Way)closestCompleteWay.ToSimple();
-            // waiting on the following issue to be resolved: https://github.com/OsmSharp/core/issues/28
 
-            var simpleWay = new Way { Tags = closestCompleteWay.Tags, Id = closestCompleteWay.Id, Version = closestCompleteWay.Version, Nodes = closestCompleteWay.Nodes.Select(n => n.Id ?? 0).ToArray() };
+            var simpleWay = (Way)closestCompleteWay.ToSimple();
             var updatedList = simpleWay.Nodes.ToList();
             updatedList.Insert(indexToInsert, long.Parse(nodeId));
             simpleWay.Nodes = updatedList.ToArray();

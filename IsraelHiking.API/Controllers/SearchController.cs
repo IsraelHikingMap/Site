@@ -110,7 +110,9 @@ namespace IsraelHiking.API.Controllers
 
         private FeatureCollection GetFeatureCollectionFromCoordinates(string name, Coordinate coordinates)
         {
-            var feature = new Feature(new Point(coordinates), new AttributesTable {{"name", name}});
+            var table = new AttributesTable();
+            table.AddAttribute("name", name);
+            var feature = new Feature(new Point(coordinates), table);
             OsmGeoJsonPreprocessorExecutor.UpdateLocation(feature);
             return new FeatureCollection(new Collection<IFeature> {feature});
         }

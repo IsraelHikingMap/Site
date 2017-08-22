@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Converters
             var table = new AttributesTable();
             foreach (var key in properties.Keys)
             {
-                table.Add(key, properties[key]);
+                table.AddAttribute(key, properties[key]);
             }
             return table;
         }

@@ -55,15 +55,6 @@ In order to be able to build this site you'll need some tools:
 * Follow [these steps](http://stackoverflow.com/questions/43849585/update-node-version-in-visual-studio-2017) to update the version of node.js Visual Studio uses
 * If asked, and you don't have any other preference, choose "General" development settings
 * In Visual Studio, _File &rarr; Open &rarr; Project/Solution..._ and choose the `IsraelHiking.sln` solution from the Site reposotory location.
-* Temporary step for using local versions of OsmSharp and NetTopologySuite
-  * In a separate window, open the `TempLocalNugets` directory under the Site reposotory location
-  * In Visual Studio, _View &rarr; Other Windows... &rarr; Package Manager Console_
-  * For each of the files in `TempLocalNugets`
-    * _Shift-Right-Click &rarr; Copy as path_
-    * Go back to VS package manager console (At the bottom pane) and type `Install-Package` followed by `Ctrl-V` and `Enter`. For example:
-      ```
-      PM> Install-Package "C:\GitHub\IsraelHikingMap\Site\TempLocalNugets\NetTopologySuite.IO.1.15.0-IHM.nupkg"
-      ```
 * From Visual Studio's _Tools &rarr; Extensions and Updates..._ 
   * Go to _Online_
   * Search for the following and `Download` them: 
@@ -75,7 +66,7 @@ In order to be able to build this site you'll need some tools:
   * Open Visual Studio, wait for the installations to complete, and restart when asked
 * Open `IsraelHiking.sln`. You may use _File &rarr; Recent Projects and Solutions_
 * Compile using `Ctrl-Shift-B` - Note that it will take time to download all the packages so be patience
-* In Package Manager Console (at the bottom pane)
+* In Visual Studio, _View &rarr; Other Windows... &rarr; Package Manager Console_
   * Select IsraelHiking.DataAccess from the Default project dropdown
   * Type the following commands at the `PM>` prompt. Most of the commands may take a while. Ignore all _WARN_ messsages.
   ```

@@ -6,9 +6,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GeoAPI" Version="1.7.5-pre3" />
-    <PackageReference Include="NetTopologySuite" Version="1.15.0-pre3" />
-    <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
+    <PackageReference Include="GeoAPI" Version="1.7.5-pre4" />
+    <PackageReference Include="NetTopologySuite" Version="1.15.0-pre013" />
+    <PackageReference Include="Newtonsoft.Json" Version="9.0.1" />
   </ItemGroup>
 
 </Project>

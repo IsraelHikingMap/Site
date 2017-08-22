@@ -72,11 +72,9 @@ namespace IsraelHiking.API.Controllers
                     coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
                 }
             }
-            var table = new AttributesTable
-            {
-                { "Name", "Routing from " + from + " to " + to + " profile type: " + profile },
-                { "Creator", "IsraelHikingMap" }
-            };
+            var table = new AttributesTable();
+            table.AddAttribute("Name", "Routing from " + @from + " to " + to + " profile type: " + profile);
+            table.AddAttribute("Creator", "IsraelHikingMap");
             var feature = new Feature(lineString, table);
             return Ok(new FeatureCollection(new Collection<IFeature> { feature }));
         }
