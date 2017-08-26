@@ -3,14 +3,14 @@ import { IconsService } from "../icons.service";
 import * as Common from "../../common/IsraelHiking";
 
 export abstract class BasePoiMarkerLayer extends L.Layer {
-    private enabled: boolean;
+    protected visible: boolean;
     protected markers: L.MarkerClusterGroup;
     protected readOnlyLayer: L.LayerGroup;
     protected markerIcon: L.DivIcon;
 
     constructor(protected mapService: MapService) {
         super();
-        this.enabled = false;
+        this.visible = false;
         this.readOnlyLayer = L.layerGroup([]);
         this.mapService.map.addLayer(this.readOnlyLayer);
         this.markers = L.markerClusterGroup({
@@ -41,7 +41,7 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
     protected abstract getMinimalZoom(): number;
 
     public onAdd(map: L.Map): this {
-        this.enabled = true;
+        this.visible = true;
         this.updateMarkers();
         map.addLayer(this.markers);
         return this;
@@ -50,12 +50,16 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
     public onRemove(map: L.Map): this {
         map.removeLayer(this.markers);
         this.readOnlyLayer.clearLayers();
-        this.enabled = false;
+        this.visible = false;
         return this;
     }
 
+    public isVisible() {
+        return this.visible;
+    }
+
     protected updateMarkers() {
-        if (this.mapService.map.getZoom() < this.getMinimalZoom() || this.enabled === false) {
+        if (this.mapService.map.getZoom() < this.getMinimalZoom() || this.visible === false) {
             this.markers.clearLayers();
             return;
         }

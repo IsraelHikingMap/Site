@@ -1,6 +1,9 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
+using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -37,5 +40,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="language">The relevant language</param>
         /// <returns></returns>
         Task UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
+
+        Task<List<Feature>> GetPointsForIndexing(Stream memoryStream);
     }
 }

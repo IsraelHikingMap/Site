@@ -28,6 +28,7 @@ export interface IPointOfInterestExtended extends IPointOfInterest {
     description: string;
     rating: number;
     url: string;
+    isEditable: boolean;
     featureCollection: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 }
 
@@ -81,10 +82,24 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         console.log(routeData);
         throw new Error("This function must be assigned by containing layer!");
     };
-    public clearSelectedRoute = (): void => { throw new Error("This function must be assigned by containing layer!") };
+    public clearSelectedRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
 
-    public showEditMode(): boolean {
-        return this.osmUserService.isLoggedIn();
+    public getDescrition() {
+        let description = this.description;
+        if (description) {
+            return description;
+        }
+        if (!this.poiExtended || !this.poiExtended.isEditable) {
+            return "";
+        }
+        return this.resources.emptyPoiDescription;
+    }
+
+    public isHideEditMode(): boolean {
+        return !this.osmUserService.isLoggedIn() ||
+            !this.poiExtended ||
+            !this.poiExtended.isEditable ||
+            this.editMode;
     }
 
     public isEditMode(): boolean {

@@ -7,7 +7,6 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -35,11 +34,20 @@ namespace IsraelHiking.API.Controllers
         /// Gets the available filters for POIs
         /// </summary>
         /// <returns></returns>
-        [Route("categories")]
+        [Route("categories/{group}")]
         [HttpGet]
-        public string[] GetCategories()
+        [ProducesResponseType(typeof(string[]), 200)]
+        public IActionResult GetCategories(string group)
         {
-            return Categories.All;
+            switch (group)
+            {
+                case Categories.POINTS_OF_INTEREST:
+                    return Ok(Categories.Points);
+                case Categories.ROUTES:
+                    return Ok(Categories.Routes);
+                default:
+                    return BadRequest($"No categories for the provided group: {group}");
+            }
         }
 
         /// <summary>
@@ -55,7 +63,11 @@ namespace IsraelHiking.API.Controllers
         public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories,
             string language = "")
         {
-            var categoriesArray = categories?.Split(',').Select(f => f.Trim()).ToArray() ?? GetCategories();
+            if (string.IsNullOrWhiteSpace(categories))
+            {
+                return new PointOfInterest[0];
+            }
+            var categoriesArray = categories.Split(',').Select(f => f.Trim()).ToArray();
             var northEastCoordinate = new Coordinate().FromLatLng(northEast);
             var southWestCoordinate = new Coordinate().FromLatLng(southWest);
             var poiList = new List<PointOfInterest>();

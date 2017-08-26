@@ -184,6 +184,11 @@ export class ResourcesService {
     public itsYourTimeToShine: string;
     public worthIt: string;
     public notWorthIt: string;
+    public loading: string;
+    public natural: string;
+    public camping: string;
+    public other: string;
+
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -579,6 +584,10 @@ export class ResourcesService {
                 this.itsYourTimeToShine = this.gettextCatalog.getString("Its your time to shine!");
                 this.worthIt = this.gettextCatalog.getString("Worth it!");
                 this.notWorthIt = this.gettextCatalog.getString("Not worth it...");
+                this.loading = this.gettextCatalog.getString("Loading...");
+                this.natural = this.gettextCatalog.getString("Natural.");
+                this.camping = this.gettextCatalog.getString("Camping");
+                this.other = this.gettextCatalog.getString("Other");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

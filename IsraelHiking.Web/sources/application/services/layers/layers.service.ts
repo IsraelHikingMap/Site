@@ -7,12 +7,13 @@ import "leaflet.gridlayer.googlemutant";
 import { MapService } from "../map.service";
 import { WikiMarkersLayer } from "./wiki-markers.layer";
 import { NakebMarkerLayer } from "./nakeb-markers.layer";
-import { PoiLayer } from "./poi.layer";
 import { ResourcesService } from "../resources.service";
 import { OsmUserService } from "../osm-user.service";
+import { CategoriesLayerFactory } from "./categories-layers.factory";
 import { Urls } from "../../common/Urls";
 import { Deferred } from "../../common/deferred";
 import * as Common from "../../common/IsraelHiking";
+
 
 
 export interface ILayer extends Common.LayerData {
@@ -57,8 +58,6 @@ export class LayersService {
     private selectedBaseLayerKey: string = LayersService.ISRAEL_HIKING_MAP;
     @LocalStorage()
     private activeOverlayKeys: string[] = [];
-    @LocalStorage()
-    public isPoisVisible: boolean = false;
 
     private overlayZIndex: any;
 
@@ -73,7 +72,8 @@ export class LayersService {
         private osmUserService: OsmUserService,
         private wikiMarkersLayer: WikiMarkersLayer,
         private nakebMarkerLayer: NakebMarkerLayer,
-        private poiLayer: PoiLayer) {
+        categoriesLayersFactory: CategoriesLayerFactory
+    ) {
         this.selectedBaseLayer = null;
         this.baseLayers = [];
         this.overlays = [];
@@ -85,6 +85,13 @@ export class LayersService {
             () => this.onOsmUserServiceInitializationFinished(deferred),
             () => this.onOsmUserServiceInitializationFinished(deferred)
         );
+
+        for (let categoryType of categoriesLayersFactory.categoriesTypes) {
+            let layer = categoriesLayersFactory.get(categoryType);
+            if (layer.isVisible()) {
+                this.mapService.map.addLayer(layer);
+            }
+        }
     }
 
     private initializeDefaultLayers() {
@@ -118,10 +125,6 @@ export class LayersService {
         this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.NAKEB, layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
 
         this.selectBaseLayerAccordingToStorage(false);
-
-        if (this.isPoisVisible) {
-            this.mapService.map.addLayer(this.poiLayer);
-        }
     }
 
     public addBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {

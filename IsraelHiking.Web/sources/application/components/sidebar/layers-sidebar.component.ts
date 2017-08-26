@@ -8,7 +8,6 @@ import { LayersService, IBaseLayer, IOverlay } from "../../services/layers/layer
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { IRouteLayer } from "../../services/layers/routelayers/iroute.layer";
 import { ResourcesService } from "../../services/resources.service";
-import { PoiLayer, ICategory } from "../../services/layers/poi.layer";
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
 import { BaseLayerEditDialogComponent } from "../dialogs/layers/base-layer-edit-dialog.component";
@@ -16,6 +15,13 @@ import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.
 import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialog-component";
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
+import { ICategory, CategoriesType } from "../../services/layers/categories.layer";
+import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
+
+interface ICategoriesContainer {
+    categories: ICategory[];
+    isExpanded: boolean;
+}
 
 @Component({
     selector: "layers-sidebar",
@@ -27,9 +33,9 @@ export class LayersSidebarComponent extends BaseMapComponent {
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public routes: IRouteLayer[];
-    public categories: ICategory[];
+    public categoriesTypes: CategoriesType[];
 
-    public isPoisCategoriesVisible: boolean = false;
+    private categoriesMap: Map<CategoriesType, ICategoriesContainer>;
 
     @LocalStorage()
     public isAdvanced: boolean = false;
@@ -39,14 +45,21 @@ export class LayersSidebarComponent extends BaseMapComponent {
         private mapService: MapService,
         private layersService: LayersService,
         private routesService: RoutesService,
-        private poiLayer: PoiLayer,
+        private categoriesLayerFactory: CategoriesLayerFactory,
         private fileService: FileService,
         private sidebarService: SidebarService) {
         super(resources);
         this.baseLayers = layersService.baseLayers;
         this.overlays = layersService.overlays;
         this.routes = routesService.routes;
-        this.categories = poiLayer.categories;
+        this.categoriesTypes = this.categoriesLayerFactory.categoriesTypes;
+        this.categoriesMap = new Map<CategoriesType, ICategoriesContainer>();
+        for (let categoriesType of this.categoriesTypes) {
+            this.categoriesMap.set(categoriesType, {
+                categories: this.categoriesLayerFactory.get(categoriesType).categories,
+                isExpanded: false
+            });
+        }
     }
 
     public closeSidebar() {
@@ -64,28 +77,36 @@ export class LayersSidebarComponent extends BaseMapComponent {
         dialogRef.componentInstance.setBaseLayer(layer);
     }
 
-    public isPoisVisible(): boolean {
-        return this.layersService.isPoisVisible;
+    public isCategoriesLayerVisible(categoriesType: CategoriesType): boolean {
+        return this.categoriesLayerFactory.get(categoriesType).isVisible();
     }
 
-    public togglePoisVisibility(e: Event) {
+    public toggleCategoriesLayerVisibility(categoriesType: CategoriesType, e: Event) {
         this.suppressEvents(e);
-        if (this.layersService.isPoisVisible) {
-            this.mapService.map.removeLayer(this.poiLayer);
+        let layer = this.categoriesLayerFactory.get(categoriesType);
+        if (layer.isVisible()) {
+            this.mapService.map.removeLayer(layer);
         } else {
-            this.mapService.map.addLayer(this.poiLayer);
+            this.mapService.map.addLayer(layer);
         }
-        this.layersService.isPoisVisible = !this.layersService.isPoisVisible;
     }
 
-    public togglePoisCategories(e: Event) {
-        this.suppressEvents(e);
-        this.isPoisCategoriesVisible = !this.isPoisCategoriesVisible;
+    public getCategories(categoriesType: CategoriesType): ICategory[] {
+        return this.categoriesMap.get(categoriesType).categories;
     }
 
-    public toggleCategory(category: ICategory, e: Event) {
+    public isCategoriesVisible(categoriesType: CategoriesType) {
+        return this.categoriesMap.get(categoriesType).isExpanded;
+    }
+
+    public toggleCategories(categoriesType: CategoriesType, e: Event) {
         this.suppressEvents(e);
-        this.poiLayer.toggleCategory(category);
+        this.categoriesMap.get(categoriesType).isExpanded = ! this.categoriesMap.get(categoriesType).isExpanded;
+    }
+
+    public toggleCategory(categoriesType: CategoriesType, category: ICategory, e: Event) {
+        this.suppressEvents(e);
+        this.categoriesLayerFactory.get(categoriesType).toggleCategory(category);
     }
 
     public addOverlay(e: Event) {

@@ -38,7 +38,7 @@ import { SearchResultsProvider } from "./services/search-results.provider";
 import { GeoJsonParser } from "./services/geojson.parser";
 import { WikiMarkersLayer } from "./services/layers/wiki-markers.layer";
 import { NakebMarkerLayer } from "./services/layers/nakeb-markers.layer";
-import { PoiLayer } from "./services/layers/poi.layer";
+import { CategoriesLayerFactory } from "./services/layers/categories-layers.factory";
 import { DragAndDropService } from "./services/drag-and-drop.service";
 // directives
 import { GoogleChartDirective } from "./directives/google-chart.directive";
@@ -170,7 +170,7 @@ export function getWindow() { return window; }
         GeoJsonParser,
         WikiMarkersLayer,
         NakebMarkerLayer,
-        PoiLayer,
+        CategoriesLayerFactory,
         DragAndDropService
     ],
     declarations: [MainMapComponent,

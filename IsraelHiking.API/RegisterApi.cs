@@ -36,6 +36,7 @@ namespace IsraelHiking.API
             services.AddTransient<IOsmLineAdderService, OsmLineAdderService>();
             services.AddTransient<IGeoJsonFeatureHelper, GeoJsonFeatureHelper>();
             services.AddTransient<IPointsOfInterestAdapter, OsmPointsOfInterestAdapter>();
+            services.AddTransient<IPointsOfInterestAdapter, NakebAdapter>();
             services.AddTransient<IMathTransform, ItmWgs84MathTransfrom>();
             return services;
         }

@@ -23,6 +23,7 @@ namespace IsraelHiking.DataAccess
             services.AddSingleton<IElevationDataStorage, ElevationDataStorage>();
             services.AddTransient<IOsmRepository, OsmRepository>();
             services.AddTransient<IOsmGateway, OsmGateway>();
+            services.AddTransient<INakebGateway, NakebGateway>();
             return services;
         }
     }

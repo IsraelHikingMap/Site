@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
+using IsraelHiking.API.Services.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -31,7 +32,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _osmRepository = Substitute.For<IOsmRepository>();
             _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
             var logger = Substitute.For<ILogger>();
-            _updateController = new UpdateController(_graphHopperGateway, _elasticSearchGateway, _geoJsonPreprocessorExecutor, _osmRepository, logger);
+            _updateController = new UpdateController(_graphHopperGateway, _elasticSearchGateway, _geoJsonPreprocessorExecutor, _osmRepository, new List<IPointsOfInterestAdapter>(), logger);
         }
 
         private void SetupContext(IPAddress localIp, IPAddress remoteIp)

@@ -20,5 +20,6 @@ namespace IsraelHiking.Common
         public int? Rating  { get; set; }
         public string Url { get; set; }
         public string Description { get; set; }
+        public bool IsEditable { get; set; }
     }
 }

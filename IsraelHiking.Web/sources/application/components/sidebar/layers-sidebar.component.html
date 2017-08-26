@@ -42,30 +42,32 @@
         </div>
     </div>
     <hr class="divider" />
-    <div fxLayout="row" class="cursor-pointer row-hover" (click)="togglePoisVisibility($event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle POIs visiblity">
-        <div fxFlex="15">
-            <span><i class="fa fa-lg" [ngClass]="{'icon-eye': isPoisVisible(), 'icon-eye-slash': !isPoisVisible()}"></i></span>
-        </div>
-        <div fxFlex="75">
-            <span>{{resources.legendPoi}}</span>
-        </div>
-        <div fxFlex [hidden]="!isAdvanced">
-            <div fxLayout="column" fxFill>
-                <span fxFill fxLayoutAlign="end start" (click)="togglePoisCategories($event)" mdTooltip="{{resources.categories}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle POI categoris"><i class="fa" [ngClass]="{'icon-chevron-down': !isPoisCategoriesVisible, 'icon-chevron-up': isPoisCategoriesVisible}"></i></span>
-            </div>
-        </div>
-    </div>
-    <div [hidden]="!isAdvanced || !isPoisCategoriesVisible" *ngFor="let category of categories">
-        <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategory(category, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle category visiblity {{category.type}}">
-            <div fxFlex="10"></div>
+    <div *ngFor="let categoriesType of categoriesTypes">
+        <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategoriesLayerVisibility(categoriesType, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle visiblity of category layer {{categoriesType}}">
             <div fxFlex="15">
-                <i class="fa" [ngClass]="{'icon-eye': category.isSelected, 'icon-eye-slash': !category.isSelected}"></i>
+                <span><i class="fa fa-lg" [ngClass]="{'icon-eye': isCategoriesLayerVisible(categoriesType), 'icon-eye-slash': !isCategoriesLayerVisible(categoriesType)}"></i></span>
             </div>
-            <div fxFlex="15">
-                <i class="fa" [ngClass]="category.icon"></i>
+            <div fxFlex="75">
+                <span>{{resources.translate(categoriesType)}}</span>
             </div>
-            <div fxFlex="60">
-                <span>{{resources.translate(category.type)}}</span>
+            <div fxFlex [hidden]="!isAdvanced">
+                <div fxLayout="column" fxFill>
+                    <span fxFill fxLayoutAlign="end start" (click)="toggleCategories(categoriesType, $event)" mdTooltip="{{resources.categories}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle categoris {{categoriesType}}"><i class="fa" [ngClass]="{'icon-chevron-down': !isCategoriesVisible(categoriesType), 'icon-chevron-up': isCategoriesVisible(categoriesType)}"></i></span>
+                </div>
+            </div>
+        </div>
+        <div [hidden]="!isAdvanced || !isCategoriesVisible(categoriesType)" *ngFor="let category of getCategories(categoriesType)">
+            <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategory(categoriesType, category, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle category visiblity {{category.type}}">
+                <div fxFlex="10"></div>
+                <div fxFlex="15">
+                    <i class="fa" [ngClass]="{'icon-eye': category.isSelected, 'icon-eye-slash': !category.isSelected}"></i>
+                </div>
+                <div fxFlex="15">
+                    <i class="fa" [ngClass]="category.icon"></i>
+                </div>
+                <div fxFlex="60">
+                    <span>{{resources.translate(category.type)}}</span>
+                </div>
             </div>
         </div>
     </div>

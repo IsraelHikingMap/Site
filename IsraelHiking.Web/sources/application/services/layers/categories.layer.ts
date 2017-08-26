@@ -1,5 +1,6 @@
-﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
+﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
+import { LocalStorageService } from "ngx-store"
 import * as _ from "lodash";
 
 import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
@@ -17,23 +18,27 @@ export interface ICategory {
     icon: string;
 }
 
-@Injectable()
-export class PoiLayer extends BasePoiMarkerLayer {
+export type CategoriesType = "Points of Interests" | "Routes";
+
+export class CategoriesLayer extends BasePoiMarkerLayer {
 
     private requestsNumber: number;
-
     public categories: ICategory[];
 
     constructor(mapService: MapService,
         private http: Http,
         private injector: Injector,
         private componentFactoryResolver: ComponentFactoryResolver,
-        private resources: ResourcesService) {
+        private applicationRef: ApplicationRef,
+        private resources: ResourcesService,
+        private localStorageService: LocalStorageService,
+        private categoriesType: CategoriesType) {
         super(mapService);
         this.categories = [];
         this.requestsNumber = 0;
+        this.visible = this.localStorageService.get(this.categoriesType + "_visibility") || false;
         this.markerIcon = IconsService.createPoiIcon("icon-star", "orange");
-        this.http.get(Urls.poiCategories).toPromise().then((response) => {
+        this.http.get(Urls.poiCategories + categoriesType).toPromise().then((response) => {
             // HM TODO: store categories state
             let categoriesArray = response.json() as string[];
             for (let category of categoriesArray) {
@@ -51,16 +56,34 @@ export class PoiLayer extends BasePoiMarkerLayer {
         });
     }
 
+    onAdd(map: L.Map): this {
+        super.onAdd(map);
+        this.localStorageService.set(this.categoriesType + "_visibility", this.visible);
+        return this;
+    }
+
+    onRemove(map: L.Map): this {
+        super.onRemove(map);
+        this.localStorageService.set(this.categoriesType + "_visibility", this.visible);
+        return this;
+    }
+
     private getCategoryIcon(category: string): string {
         switch (category) {
-            case "Campsite":
-                return "icon-campsite";
+            case "Camping":
+                return "icon-picnic";
             case "Viewpoint":
                 return "icon-viewpoint";
-            case "Spring":
+            case "Water":
                 return "icon-tint";
-            case "Ruins":
+            case "Historic":
                 return "icon-ruins";
+            case "Natual":
+                return "icon-ruins";
+            case "Hiking":
+                return "icon-hike";
+            case "Bicycle":
+                return "icon-bike";
             default:
                 return "icon-star";
         }
@@ -80,6 +103,10 @@ export class PoiLayer extends BasePoiMarkerLayer {
     }
 
     protected updateMarkersInternal(): void {
+        if (this.categories.length === 0) {
+            // layer is not ready yet...
+            return;
+        }
         let northEast = this.mapService.map.getBounds().pad(0.2).getNorthEast();
         let southWest = this.mapService.map.getBounds().pad(0.2).getSouthWest();
         this.requestsNumber++;

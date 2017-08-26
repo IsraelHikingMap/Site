@@ -2,18 +2,28 @@
 {
     public static class Categories
     {
-        public const string OTHER = "Other";
         public const string VIEWPOINT = "Viewpoint";
-        public const string CAMPSITE = "Campsite";
-        public const string SPRING = "Spring";
-        public const string RUINS = "Ruins";
+        public const string CAMPING = "Camping";
+        public const string WATER = "Water";
+        public const string HISTORIC = "Historic";
+        public const string NATURAL = "Natural";
+        public const string OTHER = "Other";
+        public const string ROUTE_HIKE = "Hiking";
+        public const string ROUTE_BIKE = "Bicycle";
         public const string NONE = "None";
-        public static readonly string[] All = {
-            SPRING,
+        public const string POINTS_OF_INTEREST = "Points of Interests";
+        public const string ROUTES = "Routes";
+        public static readonly string[] Points = {
+            WATER,
             VIEWPOINT,
-            RUINS,
-            CAMPSITE,
+            HISTORIC,
+            CAMPING,
+            NATURAL,
             OTHER
+        };
+        public static readonly string[] Routes = {
+            ROUTE_HIKE,
+            ROUTE_BIKE
         };
     }
 
@@ -23,14 +33,20 @@
         public const string NAME = "name";
         public const string DESCRIPTION = "description";
         public const string POI_SOURCE = "poiSource";
-        public const string OSM = "OSM";
-        public const string EXTERNAL_URL = "externalUrl";
+        public const string POI_CATEGORY = "poiCategory";
+        public const string WEBSITE = "website";
         public const string SEARCH_FACTOR = "searchFactor";
         public const string GEOLOCATION = "geolocation";
         public const string LAT = "lat";
         public const string LON = "lon";
-        public const string POI_CATEGORY = "poiCategory";
         public const string ICON = "icon";
         public const string ICON_COLOR = "iconColor";
+        public const string IMAGE_URL = "image";
+    }
+
+    public static class Sources
+    {
+        public const string OSM = "OSM";
+        public const string NAKEB = "Nakeb";
     }
 }

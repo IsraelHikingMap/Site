@@ -69,13 +69,13 @@ namespace IsraelHiking.API.Services
             _options = optionsProvider.Value;
             var ruinsIcon = new IconColorCategory
             {
-                Category = Categories.RUINS,
+                Category = Categories.HISTORIC,
                 Color = "brown",
                 Icon = "icon-ruins"
             };
             var springIcon = new IconColorCategory
             {
-                Category = Categories.SPRING,
+                Category = Categories.WATER,
                 Color = "blue",
                 Icon = "icon-tint"
             };
@@ -89,7 +89,7 @@ namespace IsraelHiking.API.Services
             {
                 Icon = "icon-picnic",
                 Color = "brown",
-                Category = Categories.OTHER
+                Category = Categories.CAMPING
             };
             var placeIcon = new IconColorCategory("icon-home");
             _relations = new List<PropertiesData>
@@ -98,9 +98,9 @@ namespace IsraelHiking.API.Services
                 new PropertiesData("boundary", "national_park", 1, natureReserveIcon),
                 new PropertiesData("boundary", "protected_area", 1, natureReserveIcon),
                 new PropertiesData("leisure", "nature_reserve", 1, natureReserveIcon),
-                new PropertiesData("route", "hiking", 1, new IconColorCategory("icon-hike", Categories.OTHER)),
-                new PropertiesData("route", "bicycle", 1, new IconColorCategory("icon-bike", Categories.OTHER)),
-                new PropertiesData("route", "mtb", 1, new IconColorCategory("icon-bike", Categories.OTHER)),
+                new PropertiesData("route", "hiking", 1, new IconColorCategory("icon-hike", Categories.ROUTE_HIKE)),
+                new PropertiesData("route", "bicycle", 1, new IconColorCategory("icon-bike", Categories.ROUTE_BIKE)),
+                new PropertiesData("route", "mtb", 1, new IconColorCategory("icon-bike", Categories.ROUTE_BIKE)),
             };
 
             _ways = new List<PropertiesData>
@@ -124,16 +124,16 @@ namespace IsraelHiking.API.Services
                 new PropertiesData("natural", "peak", 1, new IconColorCategory("icon-peak")),
                 new PropertiesData("natural", "spring", 1, springIcon),
                 new PropertiesData("natural", "tree", 1, new IconColorCategory("icon-tree", Categories.NONE, "green")),
-                new PropertiesData("natural", "cave_entrance", 1, new IconColorCategory("icon-cave", Categories.OTHER)),
+                new PropertiesData("natural", "cave_entrance", 1, new IconColorCategory("icon-cave", Categories.NATURAL)),
                 new PropertiesData("natural", "waterhole", 1, springIcon),
                 new PropertiesData("water", "pond", 1, springIcon),
                 new PropertiesData("man_made", "water_well", 1, ruinsIcon),
-                new PropertiesData("man_made", "cistern", 1, ruinsIcon),
+                new PropertiesData("man_made", "cistern", 1, springIcon),
                 new PropertiesData("leisure", "nature_reserve", 1, natureReserveIcon),
                 new PropertiesData("leisure", "picnic", 1, iconPicnic),
                 new PropertiesData("leisure", "picnic_table", 1, iconPicnic),
                 new PropertiesData("tourism", "picnic_site", 1, iconPicnic),
-                new PropertiesData("tourism", "camp_site", 1, new IconColorCategory("icon-campsite", Categories.CAMPSITE)),
+                new PropertiesData("tourism", "camp_site", 1, new IconColorCategory("icon-campsite", Categories.CAMPING)),
                 new PropertiesData("tourism", "viewpoint", 1, new IconColorCategory("icon-viewpoint", Categories.VIEWPOINT)),
                 new PropertiesData("tourism", "attraction", 1, new IconColorCategory("icon-star", Categories.OTHER, "orange")),
                 new PropertiesData("historic", "ruins", 1, ruinsIcon),

@@ -21,22 +21,22 @@
                 </md-input-container>
             </div>
             <div fxLayout="row" [hidden]="isEditMode()">
-                <p fxFill [ngClass]="resources.getTextAlignment(description || resources.emptyPoiDescription)"
-                   [dir]="resources.getDirection(description || resources.emptyPoiDescription)">
-                    {{description || resources.emptyPoiDescription}}
+                <p fxFill [ngClass]="resources.getTextAlignment(getDescrition())"
+                   [dir]="resources.getDirection(getDescrition())">
+                    {{getDescrition()}}
                 </p>
             </div>
         </div>
         <div fxFlex>
             <div fxLayout="column">
                 <button md-button fxFill (click)="voteUp()" mdTooltip="{{resources.worthIt}}" mdTooltipPosition="before"><i class="fa-2x icon-thumbs-up" [style.color]="'green'"></i></button>
-                <h3 fxFill class="text-center"><span dir="ltr">{{rating}}</span></h3>
+                <h3 fxFill class="text-center"><span dir="ltr">{{rating || 0}}</span></h3>
                 <button md-button fxFill (click)="voteDown()" mdTooltip="{{resources.notWorthIt}}" mdTooltipPosition="before"><i class="fa-2x icon-thumbs-down" [style.color]="'red'"></i></button>
             </div>
         </div>
     </div>
     <div fxLayout="row">
-        <div fxFlex [hidden]="isEditMode() && showEditMode()">
+        <div fxFlex [hidden]="isHideEditMode()">
             <button md-button fxFill (click)="setEditMode()" mdTooltip="{{resources.edit}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Edit POI"><i class="fa icon-pencil"></i></button>
         </div>
         <div fxFlex [hidden]="!isEditMode()">

@@ -1,4 +1,5 @@
-﻿using IsraelHiking.API.Executors;
+﻿using System.Collections.Generic;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
@@ -9,6 +10,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
+using IsraelHiking.API.Services.Poi;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -23,6 +25,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
+        private readonly IEnumerable<IPointsOfInterestAdapter> _adapters;
 
         /// <summary>
         /// Controller's constructor
@@ -31,17 +34,20 @@ namespace IsraelHiking.API.Controllers
         /// <param name="elasticSearchGateway"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
+        /// <param name="adapters"></param>
         /// <param name="logger"></param>
         public UpdateController(IGraphHopperGateway graphHopperGateway,
             IElasticSearchGateway elasticSearchGateway,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
+            IEnumerable<IPointsOfInterestAdapter> adapters,
             ILogger logger)
         {
             _graphHopperGateway = graphHopperGateway;
             _elasticSearchGateway = elasticSearchGateway;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
+            _adapters = adapters;
             _logger = logger;
         }
 
@@ -72,11 +78,12 @@ namespace IsraelHiking.API.Controllers
             _logger.LogInformation("Copy uploaded data completed.");
             var elasticSearchTask = Task.Run(async () =>
             {
-                var osmNamesDictionary = await _osmRepository.GetElementsWithName(memoryStream);
-                var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
                 var osmHighways = await _osmRepository.GetAllHighways(memoryStream);
                 var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
-                await _elasticSearchGateway.UpdateDataZeroDownTime(geoJsonNamesDictionary.Values.SelectMany(v => v).ToList(), geoJsonHighways);
+
+                var fetchTask = _adapters.Select(a => a.GetPointsForIndexing(memoryStream)).ToArray();
+                var features = await Task.WhenAll(fetchTask);
+                await _elasticSearchGateway.UpdateDataZeroDownTime(features.SelectMany(v => v).ToList(), geoJsonHighways);
             });
             var graphHopperTask = _graphHopperGateway.Rebuild(memoryStream, file.FileName);
             await Task.WhenAll(elasticSearchTask, graphHopperTask);
