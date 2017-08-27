@@ -12,17 +12,20 @@
         </div>
     </div>
     <div fxLayout="row">
-        <div fxFlex="25">
-            <button md-button type="button" (click)="save(title, markerType)" mdTooltip="{{resources.save}}" mdTooltipPosition="above"><i class="fa icon-check"></i></button>
-        </div>
-        <div fxFlex="25">
-            <button md-button type="button" (click)="remove()" mdTooltip="{{resources.deletePoi}}" mdTooltipPosition="above"><i class="fa icon-trash"></i></button>
-        </div>
-        <div fxFlex="25">
-            <button md-button type="button" (click)="hideCoordinates = !hideCoordinates" mdTooltip="{{resources.showCoordinates}}" mdTooltipPosition="above"><i class="fa icon-globe"></i></button>
+        <div fxFlex>
+            <button md-button type="button" (click)="save(title, markerType)" mdTooltip="{{resources.save}}" mdTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
         </div>
         <div fxFlex>
-            <button md-button type="button" (click)="showIcons = !showIcons" mdTooltip="{{resources.selectIcon}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsEvent="Toggle select icon"><i class="fa icon-{{markerType}}"></i></button>
+            <button md-button type="button" (click)="remove()" mdTooltip="{{resources.deletePoi}}" mdTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>
+        </div>
+        <div fxFlex>
+            <button md-button type="button" (click)="hideCoordinates = !hideCoordinates" mdTooltip="{{resources.showCoordinates}}" mdTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
+        </div>
+        <div fxFlex>
+            <button md-button type="button" (click)="showIcons = !showIcons" mdTooltip="{{resources.selectIcon}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsEvent="Toggle select icon" fxFill><i class="fa icon-{{markerType}}"></i></button>
+        </div>
+        <div fxFlex [hidden]="!showOpenDialogButton()">
+            <button md-button type="button" (click)="openAddPointDialog($event)" mdTooltip="{{resources.addPoint}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
         </div>
     </div>
     <div [hidden]="hideCoordinates">

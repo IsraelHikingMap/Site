@@ -1,13 +1,19 @@
 ﻿import { Component, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
+import { MdDialog } from "@angular/material";
+import * as _ from "lodash";
+
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { MapService } from "../../services/map.service";
 import { IRouteLayer } from "../../services/layers/routelayers/iroute.layer";
 import { IconsService } from "../../services/icons.service";
+import { OsmUserService } from "../../services/osm-user.service";
+import { AddOsmPointDialogComponent } from "../dialogs/add-osm-point-dialog.component";
 import * as Common from "../../common/IsraelHiking";
-import * as _ from "lodash";
+
+
 
 interface IIconsGroup {
     icons: string[];
@@ -26,9 +32,11 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     constructor(resources: ResourcesService,
         http: Http,
+        private mdDialog: MdDialog,
         elevationProvider: ElevationProvider,
         applicationRef: ApplicationRef,
-        private mapService: MapService) {
+        private mapService: MapService,
+        private osmUserService: OsmUserService) {
         super(resources, http, applicationRef, elevationProvider);
 
         this.showIcons = false;
@@ -85,5 +93,22 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     private getWikiCoordString(latlng: L.LatLng, title: string): string {
         return `{{Coord|${latlng.lat.toFixed(4)}|${latlng.lng.toFixed(4)}|display=${title}|type:landmark}}`;
+    }
+
+    public showOpenDialogButton(): boolean {
+        return this.osmUserService.isLoggedIn();
+    }
+
+    public openAddPointDialog(e: Event) {
+        this.suppressEvents(e);
+        let compoent = this.mdDialog.open(AddOsmPointDialogComponent);
+        compoent.componentInstance.title = this.title;
+        for (let group of compoent.componentInstance.categoriesTypeGroups) {
+            let category = _.find(group.categories, iconToFind => iconToFind.icon === this.markerType);
+            if (category) {
+                compoent.componentInstance.selectCategory(category);
+            }    
+        }
+        
     }
 }

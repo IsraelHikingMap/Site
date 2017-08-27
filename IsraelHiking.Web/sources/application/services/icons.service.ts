@@ -51,7 +51,7 @@
     {
         return ["star", "arrow-left", "arrow-right", "tint",
             "car", "bike", "hike", "four-by-four",
-            "bed", "binoculars", "fire", "flag",
+            "bed", "viewpoint", "fire", "flag",
             "coffee", "cutlery", "shopping-cart", "tree"];
     }
 

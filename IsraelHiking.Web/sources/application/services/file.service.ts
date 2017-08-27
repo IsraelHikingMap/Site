@@ -15,7 +15,7 @@ export interface IFormatViewModel {
 @Injectable()
 export class FileService {
     public formats: IFormatViewModel[];
-    
+
     constructor(private http: Http,
         private authorizationService: AuthorizationService) {
         this.formats = [];
@@ -60,12 +60,13 @@ export class FileService {
 
             let request = this.authorizationService.createXMLHttpRequest();
             request.onreadystatechange = () => {
-                if (request.readyState === 4) {
-                    if (request.status === 200) {
-                        resolve(request.response);
-                    } else {
-                        reject(request.response);
-                    }
+                if (request.readyState !== 4) {
+                    return;
+                }
+                if (request.status === 200) {
+                    resolve(request.response);
+                } else {
+                    reject(request.response);
                 }
             };
 
@@ -80,6 +81,28 @@ export class FileService {
 
     public openFromUrl = (url: string): Promise<Response> => {
         return this.http.get(Urls.files + "?url=" + url, this.authorizationService.getHeader()).toPromise();
+    }
+
+    public uploadImage = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            let request = this.authorizationService.createXMLHttpRequest();
+            request.onreadystatechange = () => {
+                if (request.readyState !== 4) {
+                    return;
+                }
+                if (request.status === 200) {
+                    let res = JSON.parse(request.responseText);
+                    resolve(res.data.link);
+                } else {
+                    reject();
+                }
+            };
+            request.open("POST", "https://api.imgur.com/3/upload");
+            request.setRequestHeader("Authorization", "Client-ID 77c5b47036f4ca1");
+            let formData = new FormData();
+            formData.append("image", file, file.name);
+            request.send(formData);
+        });
     }
 
     private saveBytesResponseToFile = (data: any, fileName: string) => {

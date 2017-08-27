@@ -188,7 +188,8 @@ export class ResourcesService {
     public natural: string;
     public camping: string;
     public other: string;
-
+    public addPoint: string;
+    public spring: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -588,6 +589,8 @@ export class ResourcesService {
                 this.natural = this.gettextCatalog.getString("Natural.");
                 this.camping = this.gettextCatalog.getString("Camping");
                 this.other = this.gettextCatalog.getString("Other");
+                this.addPoint = this.gettextCatalog.getString("Upload Point");
+                this.spring = this.gettextCatalog.getString("Spring");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
