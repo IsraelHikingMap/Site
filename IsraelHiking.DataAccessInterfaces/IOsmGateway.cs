@@ -16,7 +16,9 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<Way> GetWay(string wayId);
         Task<Relation> GetRelation(string relationId);
         Task<CompleteWay> GetCompleteWay(string wayId);
+        Task<CompleteRelation> GetCompleteRelation(string relationId);
         Task UpdateElement(string changesetId, OsmGeo osmGeo);
+        Task UpdateElement(string changesetId, ICompleteOsmGeo osmGeo);
         Task<List<OsmTrace>> GetTraces();
         Task CloseChangeset(string changesetId);
         Task CreateTrace(string fileName, MemoryStream fileStream);

@@ -35,7 +35,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         private readonly string _closeChangesetAddress;
         private readonly string _createElementAddress;
         private readonly string _elementAddress;
-        private readonly string _completeWayAddress;
+        private readonly string _completeElementAddress;
         private readonly string _traceAddress;
         private readonly string _getTracesAddress;
         private readonly string _createTraceAddress;
@@ -53,7 +53,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _createElementAddress = osmApiBaseAddress + ":type/create";
             _elementAddress = osmApiBaseAddress + ":type/:id";
             
-            _completeWayAddress = osmApiBaseAddress + "way/:id/full";
+            _completeElementAddress = osmApiBaseAddress + ":type/:id/full";
             _traceAddress = osmApiBaseAddress + "gpx/:id";
             _getTracesAddress = osmApiBaseAddress + "user/gpx_files";
             _createTraceAddress = osmApiBaseAddress + "gpx/create";
@@ -143,11 +143,21 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             }
         }
 
-        public async Task<CompleteWay> GetCompleteWay(string wayId)
+        public Task<CompleteWay> GetCompleteWay(string wayId)
+        {
+            return GetCompleteElement<CompleteWay>(wayId, "way");
+        }
+
+        public Task<CompleteRelation> GetCompleteRelation(string relationId)
+        {
+            return GetCompleteElement<CompleteRelation>(relationId, "relation");
+        }
+
+        private async Task<TCompleteOsmGeo> GetCompleteElement<TCompleteOsmGeo>(string id, string type) where TCompleteOsmGeo:  class, ICompleteOsmGeo
         {
             using (var client = new HttpClient())
             {
-                var address = _completeWayAddress.Replace(":id", wayId);
+                var address = _completeElementAddress.Replace(":id", id).Replace(":type", type);
                 var response = await client.GetAsync(address);
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
@@ -155,7 +165,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 }
                 var streamSource = new XmlOsmStreamSource(await response.Content.ReadAsStreamAsync());
                 var completeSource = new OsmSimpleCompleteStreamSource(streamSource);
-                return completeSource.OfType<CompleteWay>().FirstOrDefault();
+                return completeSource.OfType<TCompleteOsmGeo>().FirstOrDefault();
             }
         }
 
@@ -209,6 +219,21 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                     break;
             }
             return osm;
+        }
+
+        public Task UpdateElement(string changesetId, ICompleteOsmGeo osmGeo)
+        {
+            switch (osmGeo.Type)
+            {
+                case OsmGeoType.Node:
+                    return UpdateElement(changesetId, osmGeo as OsmGeo);
+                case OsmGeoType.Way:
+                    return UpdateElement(changesetId, (osmGeo as CompleteWay).ToSimple());
+                case OsmGeoType.Relation:
+                    return UpdateElement(changesetId, (osmGeo as CompleteRelation).ToSimple());
+                default:
+                    throw new Exception($"Invalid OSM geometry type: {osmGeo.Type}");
+            }
         }
 
         public async Task UpdateElement(string changesetId, OsmGeo osmGeo)

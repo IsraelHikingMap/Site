@@ -19,6 +19,7 @@ namespace IsraelHiking.Common
         public double SimplificationTolerance { get; set; }
         public double ClosestPointTolerance { get; set; }
         public string BinariesFolder { get; set; }
+        public string DefaultLanguage { get; set; }
         public OsmConfiguraionData OsmConfiguraion { get; set; }
         public Dictionary<string, string> ListingDictionary { get; set; }
         public List<string> Colors { get; set; }
@@ -40,6 +41,7 @@ namespace IsraelHiking.Common
             RadialSimplificationAngle = 90; // degrees
             SearchFactor = 0.5; // number
             BinariesFolder = string.Empty;
+            DefaultLanguage = "he";
             OsmConfiguraion = new OsmConfiguraionData
             {
                 ConsumerKey = "H5Us9nv9eDyFpKbBTiURf7ZqfdBArNddv10n6R6U",

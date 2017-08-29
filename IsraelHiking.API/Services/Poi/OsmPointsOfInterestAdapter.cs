@@ -8,6 +8,7 @@ using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
@@ -25,6 +26,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
+        private readonly ConfigurationData _options;
 
         /// <summary>
         /// Adapter's constructor
@@ -34,16 +36,19 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="httpGatewayFactory"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
-        public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway, 
+        /// <param name="options"></param>
+        public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway,
             IElevationDataStorage elevationDataStorage,
-            IHttpGatewayFactory httpGatewayFactory, 
-            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
-            IOsmRepository osmRepository) : base(elevationDataStorage, elasticSearchGateway)
+            IHttpGatewayFactory httpGatewayFactory,
+            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
+            IOsmRepository osmRepository,
+            IOptions<ConfigurationData> options) : base(elevationDataStorage, elasticSearchGateway)
         {
             _elasticSearchGateway = elasticSearchGateway;
             _httpGatewayFactory = httpGatewayFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
+            _options = options.Value;
         }
         /// <inheritdoc />
         public string Source => Sources.OSM;
@@ -75,8 +80,6 @@ namespace IsraelHiking.API.Services.Poi
                 Longitude = pointOfInterest.Location.lng,
                 Tags = new TagsCollection
                 {
-                    {FeatureAttributes.NAME, pointOfInterest.Title},
-                    {FeatureAttributes.DESCRIPTION, pointOfInterest.Description },
                     {FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl},
                     {FeatureAttributes.WEBSITE, pointOfInterest.Url}
                 }
@@ -84,20 +87,12 @@ namespace IsraelHiking.API.Services.Poi
             SetTagByLanguage(node.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             UpdateTagsByIcon(node.Tags, pointOfInterest.Icon);
+            RemoveEmptyTags(node.Tags);
             var id = await osmGateway.CreateElement(changesetId, node);
             node.Id = long.Parse(id);
             await osmGateway.CloseChangeset(changesetId);
-            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(
-                new Dictionary<string, List<ICompleteOsmGeo>>
-                {
-                    {pointOfInterest.Title, new List<ICompleteOsmGeo> {node}}
-                });
-            var feature = features.Values.FirstOrDefault()?.FirstOrDefault();
-            if (feature == null)
-            {
-                return;
-            }
-            await _elasticSearchGateway.UpdateNamesData(feature);
+
+            await UpdateElasticSearch(node, pointOfInterest.Title);
         }
 
         /// <inheritdoc />
@@ -106,29 +101,35 @@ namespace IsraelHiking.API.Services.Poi
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
 
             var feature = await _elasticSearchGateway.GetPointOfInterestById(pointOfInterest.Id, Sources.OSM);
-            SetAtttibuteByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
-            feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl);
-            await _elasticSearchGateway.UpdateNamesData(feature);
-            var id = feature.Attributes[FeatureAttributes.ID].ToString();
-            OsmGeo osmGeo;
+            var id = pointOfInterest.Id;
+            ICompleteOsmGeo completeOsmGeo;
             if (feature.Geometry is Point)
             {
-                osmGeo = await osmGateway.GetNode(id);
+                completeOsmGeo = await osmGateway.GetNode(id);
             }
             else if (feature.Geometry is LineString || feature.Geometry is Polygon)
             {
-                osmGeo = await osmGateway.GetWay(id);
+                completeOsmGeo = await osmGateway.GetCompleteWay(id);
             }
             else
             {
-                osmGeo = await osmGateway.GetRelation(id);
+                completeOsmGeo = await osmGateway.GetCompleteRelation(id);
             }
-            SetTagByLanguage(osmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
-            SetTagByLanguage(osmGeo.Tags, FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl, language);
-
+            SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Description, language);
+            SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
+            completeOsmGeo.Tags[FeatureAttributes.IMAGE_URL] = pointOfInterest.ImageUrl;
+            completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url;
+            if (pointOfInterest.Icon != feature.Attributes[FeatureAttributes.ICON].ToString())
+            {
+                // HM TODO: tag to icon mapping needed.
+                UpdateTagsByIcon(completeOsmGeo.Tags, pointOfInterest.Icon);
+            }
+            RemoveEmptyTags(completeOsmGeo.Tags);
             var changesetId = await osmGateway.CreateChangeset("Update POI interface from IHM site.");
-            await osmGateway.UpdateElement(changesetId, osmGeo);
+            await osmGateway.UpdateElement(changesetId, completeOsmGeo);
             await osmGateway.CloseChangeset(changesetId);
+
+            await UpdateElasticSearch(completeOsmGeo, pointOfInterest.Title);
         }
 
         /// <inheritdoc />
@@ -139,38 +140,33 @@ namespace IsraelHiking.API.Services.Poi
             return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
         }
 
-        private Task UpdateElasticSearch()
+        private async Task UpdateElasticSearch(ICompleteOsmGeo osm, string name)
         {
-            // HM TODO: update feature from OSM
-            throw new NotImplementedException();
-        }
-
-        private void SetAtttibuteByLanguage(IAttributesTable attributes, string key, string value, string language)
-        {
-            language = GetLanguage(value, language);
-            var keyWithLanguage = key + ":" + language;
-            if (string.IsNullOrWhiteSpace(value) && attributes.GetNames().Contains(keyWithLanguage))
+            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(
+                new Dictionary<string, List<ICompleteOsmGeo>>
+                {
+                    {name, new List<ICompleteOsmGeo> {osm}}
+                });
+            var feature = features.Values.FirstOrDefault()?.FirstOrDefault();
+            if (feature != null)
             {
-                attributes.DeleteAttribute(keyWithLanguage);
-                return;
+                await _elasticSearchGateway.UpdateNamesData(feature);
             }
-            if (attributes.GetNames().Contains(keyWithLanguage))
-            {
-                attributes[keyWithLanguage] = value;
-                return;
-            }
-            attributes.AddAttribute(keyWithLanguage, value);
         }
 
         private void SetTagByLanguage(TagsCollectionBase tags, string key, string value, string language)
         {
             language = GetLanguage(value, language);
-            var keyWithLanguage = key + ":" + language;
-            if (string.IsNullOrWhiteSpace(value) && tags.ContainsKey(keyWithLanguage))
+            if (language == _options.DefaultLanguage)
             {
-                tags.RemoveKey(keyWithLanguage);
-                return;
+                if (tags.ContainsKey(key))
+                {
+                    tags[key] = value;
+                    return;
+                }
+                tags.Add(new Tag(key, value));
             }
+            var keyWithLanguage = key + ":" + language;
             if (tags.ContainsKey(keyWithLanguage))
             {
                 tags[keyWithLanguage] = value;
@@ -178,7 +174,6 @@ namespace IsraelHiking.API.Services.Poi
             }
             tags.Add(new Tag(keyWithLanguage, value));
         }
-
 
         private string GetLanguage(string value, string language)
         {
@@ -230,6 +225,18 @@ namespace IsraelHiking.API.Services.Poi
                 case "icon-peak":
                     tags.Add("natural", "peak");
                     break;
+            }
+        }
+
+        private void RemoveEmptyTags(TagsCollectionBase tags)
+        {
+            for (int i = tags.Count - 1; i >= 0; i--)
+            {
+                var currentTag = tags.ElementAt(i);
+                if (string.IsNullOrWhiteSpace(currentTag.Value))
+                {
+                    tags.RemoveKeyValue(currentTag);
+                }
             }
         }
     }

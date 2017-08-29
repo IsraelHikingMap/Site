@@ -153,9 +153,12 @@ namespace IsraelHiking.Web
             });
             services.AddCors();
             services.AddOptions();
+            
+            var configFileName = services.BuildServiceProvider().GetService<IHostingEnvironment>().IsDevelopment()
+                ? "appsettings.json"
+                : "appsettings.Production.json";
             var config = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile("appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddJsonFile(configFileName, optional: false, reloadOnChange: true)
                 .Build();
             services.Configure<ConfigurationData>(config);
             services.AddSingleton((serviceProvider) => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
