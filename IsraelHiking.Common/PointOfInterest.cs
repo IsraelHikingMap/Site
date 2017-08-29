@@ -17,7 +17,7 @@ namespace IsraelHiking.Common
     {
         public FeatureCollection FeatureCollection { get; set; }
         public string ImageUrl { get; set; }
-        public int? Rating  { get; set; }
+        public Rating Rating { get; set; }
         public string Url { get; set; }
         public string Description { get; set; }
         public bool IsEditable { get; set; }

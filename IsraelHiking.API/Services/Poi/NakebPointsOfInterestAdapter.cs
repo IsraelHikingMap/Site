@@ -13,7 +13,10 @@ using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services.Poi
 {
-    public class NakebAdapter : BasePoiAdapter, IPointsOfInterestAdapter
+    /// <summary>
+    /// Adapts from nakeb interface to business logic point of interest
+    /// </summary>
+    public class NakebPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestAdapter
     {
         /// <inheritdoc />
         public string Source => Sources.NAKEB;
@@ -21,9 +24,17 @@ namespace IsraelHiking.API.Services.Poi
         private readonly INakebGateway _nakebGateway;
         private readonly ILogger _logger;
 
-        public NakebAdapter(INakebGateway nakebGateway,
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="nakebGateway"></param>
+        /// <param name="elevationDataStorage"></param>
+        /// <param name="elasticSearchGateway"></param>
+        /// <param name="logger"></param>
+        public NakebPointsOfInterestAdapter(INakebGateway nakebGateway,
             IElevationDataStorage elevationDataStorage,
-            ILogger logger) : base(elevationDataStorage)
+            IElasticSearchGateway elasticSearchGateway,
+            ILogger logger) : base(elevationDataStorage, elasticSearchGateway)
         {
             _nakebGateway = nakebGateway;
             _logger = logger;
@@ -42,7 +53,7 @@ namespace IsraelHiking.API.Services.Poi
             var featureCollection = await _nakebGateway.GetById(int.Parse(id));
             var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, "he");
-            AddExtendedData(poiItem, mainFeature, language);
+            await AddExtendedData(poiItem, mainFeature, language);
             poiItem.FeatureCollection = featureCollection;
             poiItem.IsEditable = false;
             return poiItem;

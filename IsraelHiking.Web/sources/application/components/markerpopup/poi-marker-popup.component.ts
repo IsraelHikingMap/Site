@@ -9,7 +9,7 @@ import { ToastService } from "../../services/toast.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { FileService } from "../../services/file.service";
-import { IPointOfInterestExtended, PoiService } from "../../services/poi.service";
+import { IPointOfInterestExtended, PoiService, IRating, IRater } from "../../services/poi.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { GeoJsonParser } from "../../services/geojson.parser";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
@@ -110,14 +110,34 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public voteUp() {
-        this.rating++;
-        // HM TODO: send rating to server
+        this.vote(1);
     }
 
     public voteDown() {
-        this.rating--;
-        // HM TODO: send rating to server.
-        // HM TODO: allow only once.
+        this.vote(-1);
+    }
+
+    public canVote(): boolean {
+        if (this.osmUserService.isLoggedIn() === false) {
+            return false;
+        }
+        if (this.poiExtended == null) {
+            return false;
+        }
+        return this.poiExtended.rating.raters.filter(r => r.id === this.osmUserService.userId).length === 0;
+    }
+
+    private vote(value: number) {
+        if (this.canVote() === false) {
+            // HM TODO: toast?
+            return;
+        }
+        this.poiExtended.rating.raters.push({ id: this.osmUserService.userId, value: value } as IRater);
+        this.poiService.uploadRating(this.poiExtended.rating).then((response) => {
+            let rating = response.json() as IRating;
+            this.poiExtended.rating = rating;
+            this.rating = this.getRatingNumber(rating);
+        });
     }
 
     public convertToRoute() {
@@ -140,7 +160,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
                 this.description = poiExtended.description;
                 this.address = poiExtended.url;
                 this.thumbnail = poiExtended.imageUrl;
-                this.rating = poiExtended.rating || 0;
+                this.rating = this.getRatingNumber(poiExtended.rating);
                 var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
                     this.resources.getCurrentLanguageCodeSimplified());
                 this.routeData = container.routes[0];
@@ -185,6 +205,9 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             lastCategory.label = this.resources.other;
             compoent.componentInstance.selectCategory(lastCategory);
         }
+    }
 
+    private getRatingNumber(rating: IRating): number {
+        return _.sum(rating.raters.map(r => r.value));
     }
 }

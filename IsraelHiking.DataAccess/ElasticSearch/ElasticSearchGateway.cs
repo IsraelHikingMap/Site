@@ -12,6 +12,7 @@ using Newtonsoft.Json;
 using Elasticsearch.Net;
 using IsraelHiking.Common;
 using NetTopologySuite.Features;
+using OsmSharp;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
 {
@@ -59,6 +60,7 @@ namespace IsraelHiking.DataAccess.ElasticSearch
         private const string OSM_HIGHWAYS_INDEX2 = "osm_highways2";
         private const string OSM_NAMES_ALIAS = "osm_names";
         private const string OSM_HIGHWAYS_ALIAS = "osm_highways";
+        private const string RATINGS = "ratings";
 
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
@@ -100,6 +102,10 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                 _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists)
             {
                 _elasticClient.DeleteIndex(OSM_HIGHWAYS_INDEX2);
+            }
+            if (_elasticClient.IndexExists(RATINGS).Exists == false)
+            {
+                _elasticClient.CreateIndex(RATINGS);
             }
             _logger.LogInformation("Finished initialing elastic search with uri: " + uri);
         }
@@ -144,6 +150,11 @@ namespace IsraelHiking.DataAccess.ElasticSearch
         public Task UpdateNamesData(Feature feature)
         {
             return UpdateData(new List<Feature> {feature}, OSM_NAMES_ALIAS);
+        }
+
+        public Task UpdateRating(Rating rating)
+        {
+            return _elasticClient.IndexAsync(rating, r => r.Index(RATINGS).Id(GetId(rating)));
         }
 
         private async Task UpdateData(List<Feature> features, string alias)
@@ -199,11 +210,6 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             return response.Documents.ToList();
         }
 
-        private string GetId(Feature feature)
-        {
-            return feature.Geometry.GeometryType + "_" + (feature.Attributes[FeatureAttributes.POI_SOURCE] ?? string.Empty) + feature.Attributes[FeatureAttributes.ID];
-        }
-
         public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)
         {
             var response = await _elasticClient.SearchAsync<Feature>(
@@ -248,6 +254,21 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                     )
             );
             return response.Documents.FirstOrDefault();
+        }
+
+        public Task<Rating> GetRating(string id, string source)
+        {
+            return Task.Run(() =>
+            {
+                var response = _elasticClient.Get<Rating>(GetId(source, id), r => r.Index(RATINGS));
+                return response.Source ?? new Rating
+                {
+                    Id = id,
+                    Source = source,
+                    Raters = new List<Rater>()
+                };
+            });
+
         }
 
         private Task CreateHighwaysIndex(string highwaysIndexName)
@@ -299,6 +320,21 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             }
             await UpdateData(smallCahceList, alias);
             _logger.LogInformation($"Finished indexing {features.Count} records");
+        }
+
+        private string GetId(Feature feature)
+        {
+            return feature.Geometry.GeometryType + "_" + GetId(feature.Attributes[FeatureAttributes.POI_SOURCE]?.ToString() ?? string.Empty, feature.Attributes[FeatureAttributes.ID]?.ToString() ?? string.Empty);
+        }
+
+        private string GetId(Rating rating)
+        {
+            return GetId(rating.Source, rating.Id);
+        }
+
+        private string GetId(string source, string id)
+        {
+            return source + "_" + id;
         }
     }
 }

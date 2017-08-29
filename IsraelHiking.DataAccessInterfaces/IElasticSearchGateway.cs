@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccessInterfaces
@@ -15,5 +16,7 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest);
         Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories);
         Task<Feature> GetPointOfInterestById(string id, string source);
+        Task<Rating> GetRating(string id, string source);
+        Task UpdateRating(Rating rating);
     }
 }

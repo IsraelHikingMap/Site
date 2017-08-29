@@ -5,6 +5,18 @@ import { AuthorizationService } from "./authorization.service";
 import { Urls } from "../common/Urls";
 import { ResourcesService } from "./resources.service";
 
+export interface IRater {
+    id: string;
+    value: number;
+}
+
+export interface IRating {
+    id: string;
+    source: string;
+    raters: IRater[];
+    total: number;
+}
+
 export interface IPointOfInterest {
     id: string;
     category: string;
@@ -18,7 +30,7 @@ export interface IPointOfInterest {
 export interface IPointOfInterestExtended extends IPointOfInterest {
     imageUrl: string;
     description: string;
-    rating: number;
+    rating: IRating;
     url: string;
     isEditable: boolean;
     featureCollection: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
@@ -56,5 +68,9 @@ export class PoiService {
             language: this.resources.getCurrentLanguageCodeSimplified()
         };
         return this.http.post(Urls.poi, poiExtended, options).toPromise();
+    }
+
+    public uploadRating(rating: IRating): Promise<Response> {
+        return this.http.post(Urls.rating, rating, this.authorizationService.getHeader()).toPromise();
     }
 }

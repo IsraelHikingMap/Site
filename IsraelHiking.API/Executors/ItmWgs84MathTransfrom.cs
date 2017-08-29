@@ -24,8 +24,15 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public string XML { get; }
 
+        /// <summary>
+        /// Constructor
+        /// </summary>
         public ItmWgs84MathTransfrom() : this (false) { }
 
+        /// <summary>
+        /// protected constructor to build this object with inverse transform
+        /// </summary>
+        /// <param name="isInverse"></param>
         protected ItmWgs84MathTransfrom(bool isInverse)
         {
             var coordinateTransformFactory = new CoordinateTransformationFactory();

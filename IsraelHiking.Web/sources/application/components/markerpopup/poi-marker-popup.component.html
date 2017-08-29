@@ -39,9 +39,9 @@
         </div>
         <div fxFlex>
             <div fxLayout="column">
-                <button md-button fxFill (click)="voteUp()" mdTooltip="{{resources.worthIt}}" mdTooltipPosition="before"><i class="fa-2x icon-thumbs-up" [style.color]="'green'"></i></button>
+                <button md-button fxFill (click)="voteUp()" mdTooltip="{{resources.worthIt}}" mdTooltipPosition="before"><i class="fa-2x icon-thumbs-up" [style.color]="canVote() ? 'green' : 'grey'"></i></button>
                 <h3 fxFill class="text-center"><span dir="ltr">{{rating || 0}}</span></h3>
-                <button md-button fxFill (click)="voteDown()" mdTooltip="{{resources.notWorthIt}}" mdTooltipPosition="before"><i class="fa-2x icon-thumbs-down" [style.color]="'red'"></i></button>
+                <button md-button fxFill (click)="voteDown()" mdTooltip="{{resources.notWorthIt}}" mdTooltipPosition="before"><i class="fa-2x icon-thumbs-down" [style.color]="canVote() ? 'red' : 'grey'"></i></button>
             </div>
         </div>
     </div>

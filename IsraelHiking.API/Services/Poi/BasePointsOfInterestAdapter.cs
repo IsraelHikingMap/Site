@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
@@ -11,15 +8,33 @@ using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Services.Poi
 {
-    public class BasePoiAdapter
+    /// <summary>
+    /// Base class for points of interest adapter
+    /// </summary>
+    public abstract class BasePointsOfInterestAdapter
     {
         private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IElasticSearchGateway _elasticSearchGateway;
 
-        public BasePoiAdapter(IElevationDataStorage elevationDataStorage)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="elevationDataStorage"></param>
+        /// <param name="elasticSearchGateway"></param>
+        protected BasePointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
+            IElasticSearchGateway elasticSearchGateway)
         {
             _elevationDataStorage = elevationDataStorage;
+            _elasticSearchGateway = elasticSearchGateway;
         }
 
+        /// <summary>
+        /// Convers a feature to point of interest
+        /// </summary>
+        /// <typeparam name="TPoiItem">The point of interest object</typeparam>
+        /// <param name="feature">The featue to convert</param>
+        /// <param name="language">The user interface language</param>
+        /// <returns></returns>
         protected async Task<TPoiItem> ConvertToPoiItem<TPoiItem>(IFeature feature, string language) where TPoiItem : PointOfInterest, new()
         {
             var poiItem = new TPoiItem();
@@ -39,6 +54,13 @@ namespace IsraelHiking.API.Services.Poi
             return poiItem;
         }
 
+        /// <summary>
+        /// Get an attribute by language, this is relevant to OSM attributes convetion
+        /// </summary>
+        /// <param name="attributes">The attributes table</param>
+        /// <param name="key">The attribute name</param>
+        /// <param name="language">The user interface language</param>
+        /// <returns></returns>
         protected string GetAttributeByLanguage(IAttributesTable attributes, string key, string language)
         {
             if (attributes.GetNames().Contains(key + ":" + language))
@@ -52,12 +74,19 @@ namespace IsraelHiking.API.Services.Poi
             return string.Empty;
         }
 
-        protected void AddExtendedData(PointOfInterestExtended poiItem, IFeature feature, string language)
+        /// <summary>
+        /// Adds extended data to point of interest object
+        /// </summary>
+        /// <param name="poiItem">The object to add properties to</param>
+        /// <param name="feature">The feature for reference</param>
+        /// <param name="language">he user interface language</param>
+        /// <returns></returns>
+        protected async Task AddExtendedData(PointOfInterestExtended poiItem, IFeature feature, string language)
         {
             poiItem.FeatureCollection = new FeatureCollection(new Collection<IFeature> { feature });
             poiItem.Url = feature.Attributes[FeatureAttributes.WEBSITE].ToString();
             poiItem.Description = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language);
-            poiItem.Rating = null;
+            poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
             poiItem.IsEditable = true;
         }
     }

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -20,7 +19,7 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Points of interest adapter for OSM data
     /// </summary>
-    public class OsmPointsOfInterestAdapter : BasePoiAdapter, IPointsOfInterestAdapter
+    public class OsmPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestAdapter
     {
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
@@ -39,7 +38,7 @@ namespace IsraelHiking.API.Services.Poi
             IElevationDataStorage elevationDataStorage,
             IHttpGatewayFactory httpGatewayFactory, 
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
-            IOsmRepository osmRepository) : base(elevationDataStorage)
+            IOsmRepository osmRepository) : base(elevationDataStorage, elasticSearchGateway)
         {
             _elasticSearchGateway = elasticSearchGateway;
             _httpGatewayFactory = httpGatewayFactory;
@@ -61,7 +60,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM);
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
-            AddExtendedData(poiItem, feature, language);
+            await AddExtendedData(poiItem, feature, language);
             return poiItem;
         }
 

@@ -19,6 +19,7 @@
     public static userLayers = Urls.apiBase + "userLayers/";
     public static poi = Urls.apiBase + "poi/";
     public static poiCategories = Urls.poi + "categories/";
+    public static rating = Urls.apiBase + "rating/";
     
     public static DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
     public static MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
