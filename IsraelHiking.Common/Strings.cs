@@ -11,7 +11,7 @@
         public const string ROUTE_HIKE = "Hiking";
         public const string ROUTE_BIKE = "Bicycle";
         public const string NONE = "None";
-        public const string POINTS_OF_INTEREST = "Points of Interests";
+        public const string POINTS_OF_INTEREST = "Points of Interest";
         public const string ROUTES = "Routes";
         public static readonly string[] Points = {
             WATER,

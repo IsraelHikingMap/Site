@@ -1,17 +1,14 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
     <div fxLayout="row" [hidden]="thumbnail">
-        <div fxFlex="33" [ngClass]="resources.getTextAlignment(resources.clickToEdit)">
+        <div fxFlex [ngClass]="resources.getTextAlignment(resources.clickToEdit)">
             <label [hidden]="!isEditMode()">
-                <a md-button fxFill angulartics2On="click" angularticsCategory="POI" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i></a>
+                <a md-button [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
                 <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
             </label>
             <i [hidden]="isEditMode()" class="fa icon-camera fa-5x"></i>
         </div>
-        <div fxFlex [hidden]="isEditMode()" class="cursor-pointer">
+        <div fxFlex="66" [hidden]="isEditMode()" class="cursor-pointer">
             <h2 [ngClass]="resources.getTextAlignment(resources.clickToEdit)" (click)="setEditMode()">{{resources.clickToEdit}}</h2>
-        </div>
-        <div fxFlex [hidden]="!isEditMode()">
-            <h2 [ngClass]="resources.getTextAlignment(resources.clickToUpload)">{{resources.clickToUpload}}</h2>
         </div>
     </div>
     <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="!thumbnail">

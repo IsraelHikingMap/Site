@@ -1,4 +1,6 @@
-﻿import { MapService } from "../map.service";
+﻿import * as _ from "lodash";
+
+import { MapService } from "../map.service";
 import { IconsService } from "../icons.service";
 import * as Common from "../../common/IsraelHiking";
 
@@ -72,19 +74,36 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
         if (routeData == null || routeData.segments.length === 0) {
             return;
         }
-        let latLngs = [];
         for (let segment of routeData.segments) {
-            latLngs = latLngs.concat(segment.latlngs);
+            if (segment.latlngs.length < 2 ||
+                (segment.latlngs.length === 2 && segment.latlngs[0].equals(segment.latlngs[1]))) {
+                continue;
+            }
+            let polyLine = L.polyline(segment.latlngs,
+                {
+                    opacity: 1,
+                    color: "Blue",
+                    weight: 3,
+                    dashArray: "30 10",
+                    className: "segment-readonly-indicator"
+                } as L.PathOptions);
+            this.readOnlyLayer.addLayer(polyLine);
+            this.readOnlyLayer.addLayer(L.marker(segment.latlngs[0],
+                {
+                    opacity: 1,
+                    draggable: false,
+                    clickable: false,
+                    icon: IconsService.createRoundIcon("green")
+                }));
+            this.readOnlyLayer.addLayer(L.marker(_.last(segment.latlngs),
+                {
+                    opacity: 1,
+                    draggable: false,
+                    clickable: false,
+                    icon: IconsService.createRoundIcon("red")
+                }));
         }
-        let polyLine = L.polyline(latLngs,
-            {
-                opacity: 1,
-                color: "Blue",
-                weight: 3,
-                dashArray: "30 10",
-                className: "segment-readonly-indicator"
-            } as L.PathOptions);
-        this.readOnlyLayer.addLayer(polyLine);
+        
         for (let markerData of routeData.markers) {
             let marker = L.marker(markerData.latlng,
                 {
@@ -95,19 +114,5 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
             marker.bindTooltip(markerData.title, { permanent: true, direction: "bottom" } as L.TooltipOptions);
             this.readOnlyLayer.addLayer(marker);
         }
-        this.readOnlyLayer.addLayer(L.marker(latLngs[0],
-            {
-                opacity: 1,
-                draggable: false,
-                clickable: false,
-                icon: IconsService.createRoundIcon("green")
-            }));
-        this.readOnlyLayer.addLayer(L.marker(latLngs[latLngs.length - 1],
-            {
-                opacity: 1,
-                draggable: false,
-                clickable: false,
-                icon: IconsService.createRoundIcon("red")
-            }));
     }
 }

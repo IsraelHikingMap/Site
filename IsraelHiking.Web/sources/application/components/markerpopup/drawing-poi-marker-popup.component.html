@@ -25,7 +25,7 @@
             <button md-button type="button" (click)="showIcons = !showIcons" mdTooltip="{{resources.selectIcon}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsEvent="Toggle select icon" fxFill><i class="fa icon-{{markerType}}"></i></button>
         </div>
         <div fxFlex [hidden]="!showOpenDialogButton()">
-            <button md-button type="button" (click)="openAddPointDialog($event)" mdTooltip="{{resources.addPoint}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
+            <button md-button type="button" (click)="openAddPointDialog($event)" mdTooltip="{{resources.uploadPoint}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
         </div>
     </div>
     <div [hidden]="hideCoordinates">

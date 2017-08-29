@@ -19,7 +19,7 @@ export interface ICategory {
     icon: string;
 }
 
-export type CategoriesType = "Points of Interests" | "Routes";
+export type CategoriesType = "Points of Interest" | "Routes";
 
 export class CategoriesLayer extends BasePoiMarkerLayer {
 
@@ -80,8 +80,8 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                 return "icon-tint";
             case "Historic":
                 return "icon-ruins";
-            case "Natual":
-                return "icon-ruins";
+            case "Natural":
+                return "icon-cave";
             case "Hiking":
                 return "icon-hike";
             case "Bicycle":

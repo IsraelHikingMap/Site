@@ -188,13 +188,17 @@ export class ResourcesService {
     public natural: string;
     public camping: string;
     public other: string;
-    public addPoint: string;
+    public uploadPoint: string;
     public spring: string;
+    public historic: string;
     public website: string;
     public aLinkToAWebsite: string;
     public clickToUpload: string;
     public clickToEdit: string;
     public more: string;
+    public routes: string;
+    public hiking: string;
+    public bicycle: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -591,16 +595,20 @@ export class ResourcesService {
                 this.worthIt = this.gettextCatalog.getString("Worth it!");
                 this.notWorthIt = this.gettextCatalog.getString("Not worth it...");
                 this.loading = this.gettextCatalog.getString("Loading...");
-                this.natural = this.gettextCatalog.getString("Natural.");
+                this.natural = this.gettextCatalog.getString("Natural");
                 this.camping = this.gettextCatalog.getString("Camping");
                 this.other = this.gettextCatalog.getString("Other");
-                this.addPoint = this.gettextCatalog.getString("Upload Point");
+                this.uploadPoint = this.gettextCatalog.getString("Upload Point");
                 this.spring = this.gettextCatalog.getString("Spring");
+                this.historic = this.gettextCatalog.getString("Historic");
                 this.website = this.gettextCatalog.getString("Website");
                 this.aLinkToAWebsite = this.gettextCatalog.getString("A link to a website");
                 this.clickToUpload = this.gettextCatalog.getString("Click to Upload");;
                 this.clickToEdit = this.gettextCatalog.getString("Click to Edit");
                 this.more = this.gettextCatalog.getString("More...");
+                this.routes = this.gettextCatalog.getString("Routes");
+                this.hiking = this.gettextCatalog.getString("Hiking");
+                this.bicycle = this.gettextCatalog.getString("Bicycle");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

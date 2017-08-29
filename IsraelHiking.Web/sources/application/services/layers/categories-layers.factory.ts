@@ -21,7 +21,7 @@ export class CategoriesLayerFactory {
         private resources: ResourcesService,
         private localStorageService: LocalStorageService,
         private poiService: PoiService) {
-        this.categoriesTypes = ["Points of Interests", "Routes"];
+        this.categoriesTypes = ["Points of Interest", "Routes"];
         this.categoryLayers = new Map<CategoriesType, CategoriesLayer>();
         for (let category of this.categoriesTypes) {
             let layer = new CategoriesLayer(this.mapService,
