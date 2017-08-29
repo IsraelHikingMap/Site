@@ -190,6 +190,11 @@ export class ResourcesService {
     public other: string;
     public addPoint: string;
     public spring: string;
+    public website: string;
+    public aLinkToAWebsite: string;
+    public clickToUpload: string;
+    public clickToEdit: string;
+    public more: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -591,6 +596,11 @@ export class ResourcesService {
                 this.other = this.gettextCatalog.getString("Other");
                 this.addPoint = this.gettextCatalog.getString("Upload Point");
                 this.spring = this.gettextCatalog.getString("Spring");
+                this.website = this.gettextCatalog.getString("Website");
+                this.aLinkToAWebsite = this.gettextCatalog.getString("A link to a website");
+                this.clickToUpload = this.gettextCatalog.getString("Click to Upload");;
+                this.clickToEdit = this.gettextCatalog.getString("Click to Edit");
+                this.more = this.gettextCatalog.getString("More...");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

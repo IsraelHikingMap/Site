@@ -40,6 +40,7 @@ import { WikiMarkersLayer } from "./services/layers/wiki-markers.layer";
 import { NakebMarkerLayer } from "./services/layers/nakeb-markers.layer";
 import { CategoriesLayerFactory } from "./services/layers/categories-layers.factory";
 import { DragAndDropService } from "./services/drag-and-drop.service";
+import { PoiService } from "./services/poi.service";
 // directives
 import { GoogleChartDirective } from "./directives/google-chart.directive";
 import { DraggableResizableDirective } from "./directives/draggable-resizable.directive";
@@ -81,7 +82,7 @@ import { ShareComponent } from "./components/share.component";
 import { ShareDialogComponent } from "./components/dialogs/share-dialog.component";
 import { WikiMarkerPopupComponent } from "./components/markerpopup/wiki-marker-popup.component";
 import { NakebMarkerPopupComponent } from "./components/markerpopup/nakeb-marker-popup.component";
-import { AddOsmPointDialogComponent } from "./components/dialogs/add-osm-point-dialog.component";
+import { UpdatePointDialogComponent } from "./components/dialogs/update-point-dialog.component";
 
 export function getWindow() { return window; }
 
@@ -144,7 +145,7 @@ export function getWindow() { return window; }
         ShareDialogComponent,
         WikiMarkerPopupComponent,
         NakebMarkerPopupComponent,
-        AddOsmPointDialogComponent
+        UpdatePointDialogComponent
     ],
     providers: [SessionStorageService,
         LocalStorageService,
@@ -173,7 +174,8 @@ export function getWindow() { return window; }
         WikiMarkersLayer,
         NakebMarkerLayer,
         CategoriesLayerFactory,
-        DragAndDropService
+        DragAndDropService,
+        PoiService
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
@@ -214,7 +216,7 @@ export function getWindow() { return window; }
         NakebMarkerPopupComponent,
         GoogleChartDirective,
         DraggableResizableDirective,
-        AddOsmPointDialogComponent
+        UpdatePointDialogComponent
     ],
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })

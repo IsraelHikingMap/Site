@@ -107,23 +107,28 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Update a POI by id and source
         /// </summary>
-        /// <param name="source"></param>
-        /// <param name="id"></param>
         /// <param name="pointOfInterest"></param>
         /// <param name="language"></param>
         /// <returns></returns>
-        [Route("{source}/{id}")]
-        [HttpPut]
+        [Route("")]
+        [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UpdatePointOfInterest(string source, string id, [FromBody]PointOfInterestExtended pointOfInterest, string language = "")
+        public async Task<IActionResult> UploadPointOfInterest([FromBody]PointOfInterestExtended pointOfInterest, string language = "")
         {
-            if (_adapters.ContainsKey(source) == false)
+            if (_adapters.ContainsKey(pointOfInterest.Source) == false)
             {
-                return BadRequest($"{source} is not a know POIs source...");
+                return BadRequest($"{pointOfInterest.Source} is not a know POIs source...");
             }
-            var adapter = _adapters[source];
+            var adapter = _adapters[pointOfInterest.Source];
             var tokenAndSecret = _cache.Get(User.Identity.Name);
-            await adapter.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language);
+            if (string.IsNullOrWhiteSpace(pointOfInterest.Id))
+            {
+                await adapter.AddPointOfInterest(pointOfInterest, tokenAndSecret, language);
+            }
+            else
+            {
+                await adapter.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language);
+            }
             return Ok();
         }
     }

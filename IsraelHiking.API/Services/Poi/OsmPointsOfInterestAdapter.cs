@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -11,6 +12,7 @@ using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
+using OsmSharp.Complete;
 using OsmSharp.Tags;
 
 namespace IsraelHiking.API.Services.Poi
@@ -64,11 +66,49 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
+        public async Task AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        {
+            var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
+            var changesetId = await osmGateway.CreateChangeset("Add POI interface from IHM site.");
+            var node = new Node
+            {
+                Latitude = pointOfInterest.Location.lat,
+                Longitude = pointOfInterest.Location.lng,
+                Tags = new TagsCollection
+                {
+                    {FeatureAttributes.NAME, pointOfInterest.Title},
+                    {FeatureAttributes.DESCRIPTION, pointOfInterest.Description },
+                    {FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl},
+                    {FeatureAttributes.WEBSITE, pointOfInterest.Url}
+                }
+            };
+            SetTagByLanguage(node.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
+            SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
+            UpdateTagsByIcon(node.Tags, pointOfInterest.Icon);
+            var id = await osmGateway.CreateElement(changesetId, node);
+            node.Id = long.Parse(id);
+            await osmGateway.CloseChangeset(changesetId);
+            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(
+                new Dictionary<string, List<ICompleteOsmGeo>>
+                {
+                    {pointOfInterest.Title, new List<ICompleteOsmGeo> {node}}
+                });
+            var feature = features.Values.FirstOrDefault()?.FirstOrDefault();
+            if (feature == null)
+            {
+                return;
+            }
+            await _elasticSearchGateway.UpdateNamesData(feature);
+        }
+
+        /// <inheritdoc />
         public async Task UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
+
             var feature = await _elasticSearchGateway.GetPointOfInterestById(pointOfInterest.Id, Sources.OSM);
             SetAtttibuteByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
+            feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl);
             await _elasticSearchGateway.UpdateNamesData(feature);
             var id = feature.Attributes[FeatureAttributes.ID].ToString();
             OsmGeo osmGeo;
@@ -85,10 +125,25 @@ namespace IsraelHiking.API.Services.Poi
                 osmGeo = await osmGateway.GetRelation(id);
             }
             SetTagByLanguage(osmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
+            SetTagByLanguage(osmGeo.Tags, FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl, language);
 
             var changesetId = await osmGateway.CreateChangeset("Update POI interface from IHM site.");
             await osmGateway.UpdateElement(changesetId, osmGeo);
             await osmGateway.CloseChangeset(changesetId);
+        }
+
+        /// <inheritdoc />
+        public async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        {
+            var osmNamesDictionary = await _osmRepository.GetElementsWithName(memoryStream);
+            var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
+            return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
+        }
+
+        private Task UpdateElasticSearch()
+        {
+            // HM TODO: update feature from OSM
+            throw new NotImplementedException();
         }
 
         private void SetAtttibuteByLanguage(IAttributesTable attributes, string key, string value, string language)
@@ -145,11 +200,38 @@ namespace IsraelHiking.API.Services.Poi
             return Regex.Match(words, @"^[^a-zA-Z]*[\u0591-\u05F4]").Success;
         }
 
-        public async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        private void UpdateTagsByIcon(TagsCollectionBase tags, string icon)
         {
-            var osmNamesDictionary = await _osmRepository.GetElementsWithName(memoryStream);
-            var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-            return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
+            switch (icon)
+            {
+                case "icon-viewpoint":
+                    tags.Add("tourism", "viewpoint");
+                    break;
+                case "icon-tint":
+                    tags.Add("natural", "spring");
+                    break;
+                case "icon-ruins":
+                    tags.Add("historic", "ruins");
+                    break;
+                case "icon-picnic":
+                    tags.Add("tourism", "picnic_site");
+                    break;
+                case "icon-campsite":
+                    tags.Add("tourism", "camp_site");
+                    break;
+                case "icon-tree":
+                    tags.Add("natural", "tree");
+                    break;
+                case "icon-cave":
+                    tags.Add("natural", "cave_entrance");
+                    break;
+                case "icon-star":
+                    tags.Add("tourism", "attraction");
+                    break;
+                case "icon-peak":
+                    tags.Add("natural", "peak");
+                    break;
+            }
         }
     }
 }

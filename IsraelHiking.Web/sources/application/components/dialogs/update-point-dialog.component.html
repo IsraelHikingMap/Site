@@ -12,19 +12,19 @@
             <div fxFlex="33">
                 <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill/>
                 <label [hidden]="imageUrl">
-                    <a fxFill md-button angulartics2On="click" angularticsCategory="Add Point" angularticsEvent="Upload Image"><i class="fa icon-camera fa-5x"></i></a>
+                    <a fxFill md-button angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i></a>
                     <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
                 </label>
             </div>
             <div fxFlex>
                 <div fxlayout="row">
                     <md-input-container fxFill>
-                        <input mdInput type="text" [dir]="'rltr'" [(ngModel)]="imageUrl" fxFill />
+                        <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.title}}" fxFill/>
                     </md-input-container>
                 </div>
                 <div fxlayout="row">
-                    <md-input-container fxFill>
-                        <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.title}}" fxFill/>
+                    <md-input-container fxFill hintLabel="{{resources.aLinkToAWebsite}}">
+                        <input mdInput type="text" [dir]="'ltr'" [(ngModel)]="websiteUrl" placeholder="{{resources.website}}" fxFill />
                     </md-input-container>
                 </div>
             </div>
@@ -34,14 +34,14 @@
         </md-input-container>
         <div *ngFor="let group of categoriesTypeGroups">
             <div fxLayout="row" fxFill>
-                <button md-button *ngFor="let category of group.categories" (click)="selectCategory(category)" class="cursor-pointer text-center" [ngClass]="{active: selectedCategory === category}" fxFlex="{{100/categoriesTypeGroups.length}}" angulartics2On="click" angularticsCategory="Add Point" angularticsEvent="Select {{category.icon}}">
-                    <i [style.color]="category.color" class="fa icon-{{category.icon}} fa-lg"></i><br/>
+                <button md-button *ngFor="let category of group.categories" (click)="selectCategory(category)" class="cursor-pointer text-center" [ngClass]="{active: selectedCategory === category}" fxFlex="{{100/categoriesTypeGroups.length}}" angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Select {{category.icon}}">
+                    <i [style.color]="category.color" class="fa {{category.icon}} fa-lg"></i><br/>
                     {{category.label}}
                 </button>
             </div>
         </div>
         <div fxLayout="row">
-            <a md-raised-button color="primary" (click)="addPoint()" fxFill angulartics2On="click" angularticsCategory="Add Point" angularticsEvent="Add point to OSM"><i class="fa icon-cloud-upload fa-lg"></i> {{resources.addPoint}}</a>
+            <a md-raised-button color="primary" (click)="updatePoint()" fxFill angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{resources.addPoint}}</a>
         </div>
     </div>
 </div>

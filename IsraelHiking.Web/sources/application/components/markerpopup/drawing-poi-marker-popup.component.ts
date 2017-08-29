@@ -10,7 +10,7 @@ import { MapService } from "../../services/map.service";
 import { IRouteLayer } from "../../services/layers/routelayers/iroute.layer";
 import { IconsService } from "../../services/icons.service";
 import { OsmUserService } from "../../services/osm-user.service";
-import { AddOsmPointDialogComponent } from "../dialogs/add-osm-point-dialog.component";
+import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
 import * as Common from "../../common/IsraelHiking";
 
 
@@ -101,8 +101,10 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     public openAddPointDialog(e: Event) {
         this.suppressEvents(e);
-        let compoent = this.mdDialog.open(AddOsmPointDialogComponent);
+        let compoent = this.mdDialog.open(UpdatePointDialogComponent);
         compoent.componentInstance.title = this.title;
+        compoent.componentInstance.source = "OSM";
+        compoent.componentInstance.location = this.marker.getLatLng();
         for (let group of compoent.componentInstance.categoriesTypeGroups) {
             let category = _.find(group.categories, iconToFind => iconToFind.icon === this.markerType);
             if (category) {

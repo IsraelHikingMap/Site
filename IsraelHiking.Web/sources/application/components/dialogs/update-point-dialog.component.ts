@@ -1,9 +1,14 @@
 ﻿import { Component } from "@angular/core";
+import { Http } from "@angular/http";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
+import { PoiService, IPointOfInterestExtended } from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
+import { Urls } from "../../common/Urls";
+
+
 
 export interface ICategory {
     icon: string;
@@ -16,33 +21,39 @@ export interface ICategoriesGroup {
 }
 
 @Component({
-    selector: "add-osm-point-dialog",
-    templateUrl: "./add-osm-point-dialog.component.html"
+    selector: "update-point-dialog",
+    templateUrl: "./update-point-dialog.component.html"
 })
-export class AddOsmPointDialogComponent extends BaseMapComponent {
+export class UpdatePointDialogComponent extends BaseMapComponent {
     public categoriesTypeGroups: ICategoriesGroup[];
+    public source: string;
     public title: string;
     public description: string;
     public imageUrl: string;
+    public websiteUrl: string;
+    public identifier: string;
+    public location: L.LatLng;
     public selectedCategory: ICategory;
 
     constructor(resources: ResourcesService,
+        private http: Http,
         private fileService: FileService,
-        private toastService: ToastService) {
+        private toastService: ToastService,
+        private poiService: PoiService) {
         super(resources);
         this.categoriesTypeGroups = [
             {
                 categories: [
                     {
-                        icon: "viewpoint",
+                        icon: "icon-viewpoint",
                         color: "black",
                         label: this.resources.legendViewpoint
                     }, {
-                        icon: "tint",
+                        icon: "icon-tint",
                         color: "blue",
                         label: this.resources.spring
                     }, {
-                        icon: "ruins",
+                        icon: "icon-ruins",
                         color: "brown",
                         label: this.resources.legendRuins
                     }
@@ -51,17 +62,17 @@ export class AddOsmPointDialogComponent extends BaseMapComponent {
             {
                 categories: [
                     {
-                        icon: "picnic",
+                        icon: "icon-picnic",
                         color: "brown",
                         label: this.resources.legendPicnicArea
                     },
                     {
-                        icon: "campsite",
+                        icon: "icon-campsite",
                         color: "grey",
                         label: this.resources.legendCampsite
                     },
                     {
-                        icon: "tree",
+                        icon: "icon-tree",
                         color: "green",
                         label: this.resources.legendTree
                     }
@@ -70,17 +81,17 @@ export class AddOsmPointDialogComponent extends BaseMapComponent {
             {
                 categories: [
                     {
-                        icon: "cave",
+                        icon: "icon-cave",
                         color: "black",
                         label: this.resources.legendCave
                     },
                     {
-                        icon: "star",
+                        icon: "icon-star",
                         color: "orange",
                         label: this.resources.legendAttraction
                     },
                     {
-                        icon: "peak",
+                        icon: "icon-peak",
                         color: "black",
                         label: this.resources.legendPeak
                     }
@@ -106,7 +117,20 @@ export class AddOsmPointDialogComponent extends BaseMapComponent {
         });
     }
 
-    public addPoint() {
-        // HM TODO: send to server;
+    public updatePoint() {
+        let poiExtended = {
+            description: this.description,
+            icon: this.selectedCategory.icon,
+            iconColor: this.selectedCategory.color,
+            id: this.identifier,
+            imageUrl: this.imageUrl,
+            title: this.title,
+            url: this.websiteUrl,
+            source: this.source,
+            location: this.location
+        } as IPointOfInterestExtended;
+        this.poiService.uploadPoint(poiExtended).then(() => {
+            this.toastService.info(this.resources.dataUpdatedSuccefully);
+        });
     }
 }

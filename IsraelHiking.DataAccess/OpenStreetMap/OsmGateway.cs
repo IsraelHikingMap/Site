@@ -131,7 +131,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         {
             using (var client = new HttpClient())
             {
-                var address = _createElementAddress.Replace(":type", osmGeo.Type.ToString());
+                var address = _createElementAddress.Replace(":type", osmGeo.Type.ToString().ToLower());
                 UpdateHeaders(client, address, "PUT");
                 var osmRequest = GetOsmRequest(changesetId, osmGeo);
                 var response = await client.PutAsync(address, new StringContent(osmRequest.SerializeToXml()));

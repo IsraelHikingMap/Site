@@ -1,36 +1,20 @@
 ﻿import { Component, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
+import { MdDialog } from "@angular/material";
+import * as _ from "lodash";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { AuthorizationService } from "../../services/authorization.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { OsmUserService } from "../../services/osm-user.service";
+import { FileService } from "../../services/file.service";
+import { IPointOfInterestExtended, PoiService } from "../../services/poi.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { GeoJsonParser } from "../../services/geojson.parser";
-import { Urls } from "../../common/Urls";
+import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
 import * as Common from "../../common/IsraelHiking";
 
-
-export interface IPointOfInterest {
-    id: string;
-    category: string;
-    title: string;
-    location: L.LatLng;
-    source: string;
-    icon: string;
-    iconColor: string;
-}
-
-export interface IPointOfInterestExtended extends IPointOfInterest {
-    imageUrl: string;
-    description: string;
-    rating: number;
-    url: string;
-    isEditable: boolean;
-    featureCollection: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
-}
 
 @Component({
     selector: "poi-marker-popup",
@@ -52,12 +36,14 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     constructor(resources: ResourcesService,
         http: Http,
         applicationRef: ApplicationRef,
+        private mdDialog: MdDialog,
         elevationProvider: ElevationProvider,
         private geoJsonParser: GeoJsonParser,
         private toastService: ToastService,
-        private authorizationService: AuthorizationService,
         private routesService: RoutesService,
-        private osmUserService: OsmUserService) {
+        private osmUserService: OsmUserService,
+        private fileService: FileService,
+        private poiService: PoiService) {
         super(resources, http, applicationRef, elevationProvider);
         this.editMode = false;
         this.extendedDataArrivedTimeStamp = null;
@@ -117,8 +103,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public save() {
         this.editMode = false;
         this.poiExtended.description = this.description;
-        let address = Urls.poi + this.source + "/" + this.marker.identifier + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-        this.http.put(address, this.poiExtended, this.authorizationService.getHeader()).toPromise().then(() => {
+        this.poiExtended.imageUrl = this.thumbnail;
+        this.poiService.uploadPoint(this.poiExtended).then(() => {
             this.toastService.info(this.resources.dataUpdatedSuccefully);
         });
     }
@@ -147,21 +133,58 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.selectRoute(this.routeData);
             return;
         }
-        this.http.get(Urls.poi + this.source + "/" + this.marker.identifier,
-            {
-                params: { language: this.resources.getCurrentLanguageCodeSimplified() }
-            }).toPromise().then((response) => {
-            this.extendedDataArrivedTimeStamp = new Date();
-            let poiExtended = response.json() as IPointOfInterestExtended;
-            this.poiExtended = poiExtended;
-            this.description = poiExtended.description;
-            this.address = poiExtended.url;
-            this.thumbnail = poiExtended.imageUrl;
-            this.rating = poiExtended.rating || 0;
-            var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
-                this.resources.getCurrentLanguageCodeSimplified());
-            this.routeData = container.routes[0];
-            this.selectRoute(this.routeData);
+        this.poiService.getPoint(this.marker.identifier, this.source).then((response) => {
+                this.extendedDataArrivedTimeStamp = new Date();
+                let poiExtended = response.json() as IPointOfInterestExtended;
+                this.poiExtended = poiExtended;
+                this.description = poiExtended.description;
+                this.address = poiExtended.url;
+                this.thumbnail = poiExtended.imageUrl;
+                this.rating = poiExtended.rating || 0;
+                var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
+                    this.resources.getCurrentLanguageCodeSimplified());
+                this.routeData = container.routes[0];
+                this.selectRoute(this.routeData);
+            });
+    }
+
+    public uploadImage(e: any) {
+        let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
+        if (!file) {
+            return;
+        }
+        this.fileService.uploadImage(file).then((link: string) => {
+            this.thumbnail = link;
+        }, () => {
+            this.toastService.error(this.resources.unableToUploadFile);
         });
+    }
+
+    public openUpdatePointDialog(e: Event) {
+        this.suppressEvents(e);
+        let compoent = this.mdDialog.open(UpdatePointDialogComponent);
+        compoent.componentInstance.title = this.title;
+        compoent.componentInstance.description = this.description;
+        compoent.componentInstance.imageUrl = this.thumbnail;
+        compoent.componentInstance.websiteUrl = this.address;
+        compoent.componentInstance.location = this.marker.getLatLng();
+        compoent.componentInstance.source = this.poiExtended.source;
+        compoent.componentInstance.identifier = this.poiExtended.id;
+        let category = null;
+        for (let group of compoent.componentInstance.categoriesTypeGroups) {
+            category = _.find(group.categories, iconToFind => iconToFind.icon === this.poiExtended.icon);
+            if (category) {
+                compoent.componentInstance.selectCategory(category);
+                break;
+            }
+        }
+        if (!category) {
+            let lastGroup = _.last(compoent.componentInstance.categoriesTypeGroups);
+            let lastCategory = _.last(lastGroup.categories);
+            lastCategory.icon = this.poiExtended.icon;
+            lastCategory.label = this.resources.other;
+            compoent.componentInstance.selectCategory(lastCategory);
+        }
+
     }
 }

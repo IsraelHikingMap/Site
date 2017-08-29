@@ -5,9 +5,10 @@ import * as _ from "lodash";
 
 import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
 import { MapService } from "../map.service";
-import { PoiMarkerPopupComponent, IPointOfInterest } from "../../components/markerpopup/poi-marker-popup.component";
+import { PoiMarkerPopupComponent } from "../../components/markerpopup/poi-marker-popup.component";
 import { IconsService } from "../icons.service";
 import { ResourcesService } from "../resources.service";
+import { IPointOfInterest, PoiService } from "../poi.service";
 import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
 
@@ -32,6 +33,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         private applicationRef: ApplicationRef,
         private resources: ResourcesService,
         private localStorageService: LocalStorageService,
+        private poiService: PoiService,
         private categoriesType: CategoriesType) {
         super(mapService);
         this.categories = [];
@@ -110,15 +112,9 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         let northEast = this.mapService.map.getBounds().pad(0.2).getNorthEast();
         let southWest = this.mapService.map.getBounds().pad(0.2).getSouthWest();
         this.requestsNumber++;
-        this.http.get(Urls.poi,
-            {
-                params: {
-                    northEast: northEast.lat + "," + northEast.lng,
-                    southWest: southWest.lat + "," + southWest.lng,
-                    categories: this.categories.filter(f => f.isSelected).map(f => f.type).join(","),
-                    language: this.resources.getCurrentLanguageCodeSimplified(),
-                }
-            }).toPromise().then((response) => {
+        this.poiService
+            .getPoints(northEast, southWest, this.categories.filter(f => f.isSelected).map(f => f.type))
+            .then((response) => {
                 this.requestArrieved();
                 if (this.requestsNumber !== 0) {
                     return;
