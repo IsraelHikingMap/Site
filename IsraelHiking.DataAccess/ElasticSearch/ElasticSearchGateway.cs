@@ -12,7 +12,6 @@ using Newtonsoft.Json;
 using Elasticsearch.Net;
 using IsraelHiking.Common;
 using NetTopologySuite.Features;
-using OsmSharp;
 
 namespace IsraelHiking.DataAccess.ElasticSearch
 {
@@ -268,7 +267,6 @@ namespace IsraelHiking.DataAccess.ElasticSearch
                     Raters = new List<Rater>()
                 };
             });
-
         }
 
         private Task CreateHighwaysIndex(string highwaysIndexName)
