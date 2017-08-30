@@ -122,7 +122,8 @@ export class LayersService {
         hikingTrailsOverlay.isEditable = false;
 
         this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.WIKIPEDIA, layer: this.wikiMarkersLayer as L.Layer } as IOverlay);
-        this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.NAKEB, layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
+        // HM TODO: completely remove the class.
+        //this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.NAKEB, layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
 
         this.selectBaseLayerAccordingToStorage(false);
     }
