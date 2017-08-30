@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), new GeoJsonFeatureHelper(optionsProvider));
+            _preprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), new TagsHelper(optionsProvider));
         }
 
         private Node CreateNode(int id)

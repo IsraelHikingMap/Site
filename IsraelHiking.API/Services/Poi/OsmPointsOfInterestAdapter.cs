@@ -26,6 +26,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
+        private readonly ITagsHelper _tagsHelper;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -36,18 +37,21 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="httpGatewayFactory"></param>
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="osmRepository"></param>
+        /// <param name="tagsHelper"></param>
         /// <param name="options"></param>
         public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway,
             IElevationDataStorage elevationDataStorage,
             IHttpGatewayFactory httpGatewayFactory,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
+            ITagsHelper tagsHelper,
             IOptions<ConfigurationData> options) : base(elevationDataStorage, elasticSearchGateway)
         {
             _elasticSearchGateway = elasticSearchGateway;
             _httpGatewayFactory = httpGatewayFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
+            _tagsHelper = tagsHelper;
             _options = options.Value;
         }
         /// <inheritdoc />
@@ -86,7 +90,7 @@ namespace IsraelHiking.API.Services.Poi
             };
             SetTagByLanguage(node.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
-            UpdateTagsByIcon(node.Tags, pointOfInterest.Icon);
+            AddTagsByIcon(node.Tags, pointOfInterest.Icon);
             RemoveEmptyTags(node.Tags);
             var id = await osmGateway.CreateElement(changesetId, node);
             node.Id = long.Parse(id);
@@ -115,14 +119,15 @@ namespace IsraelHiking.API.Services.Poi
             {
                 completeOsmGeo = await osmGateway.GetCompleteRelation(id);
             }
-            SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Description, language);
+            SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             completeOsmGeo.Tags[FeatureAttributes.IMAGE_URL] = pointOfInterest.ImageUrl;
-            completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url;
-            if (pointOfInterest.Icon != feature.Attributes[FeatureAttributes.ICON].ToString())
+            completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url.StartsWith(Sources.OSM_ADDRESS) ? string.Empty : pointOfInterest.Url;
+            var oldIcon = feature.Attributes[FeatureAttributes.ICON].ToString();
+            if (pointOfInterest.Icon != oldIcon)
             {
-                // HM TODO: tag to icon mapping needed.
-                UpdateTagsByIcon(completeOsmGeo.Tags, pointOfInterest.Icon);
+                RemoveTagsByIcon(completeOsmGeo.Tags, oldIcon);
+                AddTagsByIcon(completeOsmGeo.Tags, pointOfInterest.Icon);
             }
             RemoveEmptyTags(completeOsmGeo.Tags);
             var changesetId = await osmGateway.CreateChangeset("Update POI interface from IHM site.");
@@ -162,17 +167,21 @@ namespace IsraelHiking.API.Services.Poi
                 if (tags.ContainsKey(key))
                 {
                     tags[key] = value;
-                    return;
                 }
-                tags.Add(new Tag(key, value));
+                else
+                {
+                    tags.Add(new Tag(key, value));
+                }
             }
             var keyWithLanguage = key + ":" + language;
             if (tags.ContainsKey(keyWithLanguage))
             {
                 tags[keyWithLanguage] = value;
-                return;
             }
-            tags.Add(new Tag(keyWithLanguage, value));
+            else
+            {
+                tags.Add(new Tag(keyWithLanguage, value));
+            }            
         }
 
         private string GetLanguage(string value, string language)
@@ -194,37 +203,32 @@ namespace IsraelHiking.API.Services.Poi
             return Regex.Match(words, @"^[^a-zA-Z]*[\u0591-\u05F4]").Success;
         }
 
-        private void UpdateTagsByIcon(TagsCollectionBase tags, string icon)
+        private void AddTagsByIcon(TagsCollectionBase tags, string icon)
         {
-            switch (icon)
+            var tagsList = _tagsHelper.FindTagsForIcon(icon);
+            if (tagsList.Any() == false)
             {
-                case "icon-viewpoint":
-                    tags.Add("tourism", "viewpoint");
-                    break;
-                case "icon-tint":
-                    tags.Add("natural", "spring");
-                    break;
-                case "icon-ruins":
-                    tags.Add("historic", "ruins");
-                    break;
-                case "icon-picnic":
-                    tags.Add("tourism", "picnic_site");
-                    break;
-                case "icon-campsite":
-                    tags.Add("tourism", "camp_site");
-                    break;
-                case "icon-tree":
-                    tags.Add("natural", "tree");
-                    break;
-                case "icon-cave":
-                    tags.Add("natural", "cave_entrance");
-                    break;
-                case "icon-star":
-                    tags.Add("tourism", "attraction");
-                    break;
-                case "icon-peak":
-                    tags.Add("natural", "peak");
-                    break;
+                return;
+            }
+            tags.Add(tagsList.First().Key, tagsList.First().Value);
+        }
+
+        private void RemoveTagsByIcon(TagsCollectionBase tags, string icon)
+        {
+            var tagsList = _tagsHelper.FindTagsForIcon(icon);
+            if (tagsList.Any() == false)
+            {
+                return;
+            }
+            foreach (var keyValuePair in tagsList)
+            {
+                var tag = tags.FirstOrDefault(t => t.Key == keyValuePair.Key && t.Value == keyValuePair.Value);
+                if (tag.Equals(default(Tag)) == false)
+                {
+                    tags.RemoveKeyValue(tag);
+                    // removing only one matching tag
+                    return;
+                }
             }
         }
 

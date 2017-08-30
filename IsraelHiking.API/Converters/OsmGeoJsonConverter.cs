@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Converters
             properties.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
             if (properties.ContainsKey(FeatureAttributes.WEBSITE) == false)
             {
-                properties.Add(FeatureAttributes.WEBSITE, $"https://www.openstreetmap.org/{osmObject.Type.ToString().ToLower()}/{osmObject.Id}");
+                properties.Add(FeatureAttributes.WEBSITE, $"{Sources.OSM_ADDRESS}{osmObject.Type.ToString().ToLower()}/{osmObject.Id}");
             }
             var table = new AttributesTable();
             foreach (var key in properties.Keys)

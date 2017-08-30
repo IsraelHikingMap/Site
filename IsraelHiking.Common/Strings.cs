@@ -47,6 +47,7 @@
     public static class Sources
     {
         public const string OSM = "OSM";
+        public const string OSM_ADDRESS = "https://www.openstreetmap.org/";
         public const string NAKEB = "Nakeb";
     }
 }

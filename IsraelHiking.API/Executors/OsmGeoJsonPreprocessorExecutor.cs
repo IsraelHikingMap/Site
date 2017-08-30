@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Executors
 
         private readonly ILogger _logger;
         private readonly IOsmGeoJsonConverter _osmGeoJsonConverter;
-        private readonly IGeoJsonFeatureHelper _geoJsonFeatureHelper;
+        private readonly ITagsHelper _tagsHelper;
 
         private class TagKeyComparer : IEqualityComparer<Tag>
         {
@@ -40,14 +40,14 @@ namespace IsraelHiking.API.Executors
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="osmGeoJsonConverter"></param>
-        /// <param name="geoJsonFeatureHelper"></param>
+        /// <param name="tagsHelper"></param>
         public OsmGeoJsonPreprocessorExecutor(ILogger logger,
             IOsmGeoJsonConverter osmGeoJsonConverter,
-            IGeoJsonFeatureHelper geoJsonFeatureHelper)
+            ITagsHelper tagsHelper)
         {
             _logger = logger;
             _osmGeoJsonConverter = osmGeoJsonConverter;
-            _geoJsonFeatureHelper = geoJsonFeatureHelper;
+            _tagsHelper = tagsHelper;
         }
 
         /// <inheritdoc />
@@ -103,10 +103,11 @@ namespace IsraelHiking.API.Executors
             foreach (var feature in features)
             {
                 AddAddressField(feature, containers);
-                feature.Attributes.AddAttribute(FeatureAttributes.SEARCH_FACTOR, _geoJsonFeatureHelper.GetSearchFactor(feature));
-                feature.Attributes.AddAttribute(FeatureAttributes.ICON, _geoJsonFeatureHelper.GetIcon(feature));
-                feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, _geoJsonFeatureHelper.GetIconColor(feature));
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, _geoJsonFeatureHelper.GetPoiCategory(feature));
+                (var searchFactor, var iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
+                feature.Attributes.AddAttribute(FeatureAttributes.SEARCH_FACTOR, searchFactor);
+                feature.Attributes.AddAttribute(FeatureAttributes.ICON, iconColorCategory.Icon);
+                feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, iconColorCategory.Color);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
                 UpdateLocation(feature);
             }
         }
