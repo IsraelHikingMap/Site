@@ -72,7 +72,7 @@ namespace IsraelHiking.API.Executors
                 var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(g.Geometry);
                 if (!isValidOp.IsValid)
                 {
-                    _logger.LogError($"{g.Attributes[FeatureAttributes.WEBSITE]} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                    _logger.LogError($"{g.Geometry.GeometryType} with ID: {g.Attributes[FeatureAttributes.ID]} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
                 }
             });
             

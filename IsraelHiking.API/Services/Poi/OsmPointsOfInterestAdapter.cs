@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
@@ -27,32 +24,20 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
         private readonly ITagsHelper _tagsHelper;
-        private readonly ConfigurationData _options;
 
-        /// <summary>
-        /// Adapter's constructor
-        /// </summary>
-        /// <param name="elasticSearchGateway"></param>
-        /// <param name="elevationDataStorage"></param>
-        /// <param name="httpGatewayFactory"></param>
-        /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-        /// <param name="osmRepository"></param>
-        /// <param name="tagsHelper"></param>
-        /// <param name="options"></param>
+        /// <inheritdoc />
         public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway,
             IElevationDataStorage elevationDataStorage,
             IHttpGatewayFactory httpGatewayFactory,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
-            ITagsHelper tagsHelper,
-            IOptions<ConfigurationData> options) : base(elevationDataStorage, elasticSearchGateway)
+            ITagsHelper tagsHelper) : base(elevationDataStorage, elasticSearchGateway)
         {
             _elasticSearchGateway = elasticSearchGateway;
             _httpGatewayFactory = httpGatewayFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
             _tagsHelper = tagsHelper;
-            _options = options.Value;
         }
         /// <inheritdoc />
         public string Source => Sources.OSM;
@@ -122,7 +107,7 @@ namespace IsraelHiking.API.Services.Poi
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             completeOsmGeo.Tags[FeatureAttributes.IMAGE_URL] = pointOfInterest.ImageUrl;
-            completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url.StartsWith(Sources.OSM_ADDRESS) ? string.Empty : pointOfInterest.Url;
+            completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url;
             var oldIcon = feature.Attributes[FeatureAttributes.ICON].ToString();
             if (pointOfInterest.Icon != oldIcon)
             {
@@ -142,7 +127,12 @@ namespace IsraelHiking.API.Services.Poi
         {
             var osmNamesDictionary = await _osmRepository.GetElementsWithName(memoryStream);
             var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-            return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
+            var features = geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
+            foreach (var feature in features)
+            {
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
+            }
+            return features;
         }
 
         private async Task UpdateElasticSearch(ICompleteOsmGeo osm, string name)
@@ -161,46 +151,25 @@ namespace IsraelHiking.API.Services.Poi
 
         private void SetTagByLanguage(TagsCollectionBase tags, string key, string value, string language)
         {
-            language = GetLanguage(value, language);
-            if (language == _options.DefaultLanguage)
-            {
-                if (tags.ContainsKey(key))
-                {
-                    tags[key] = value;
-                }
-                else
-                {
-                    tags.Add(new Tag(key, value));
-                }
-            }
             var keyWithLanguage = key + ":" + language;
+            var previousValue = string.Empty;
             if (tags.ContainsKey(keyWithLanguage))
             {
+                previousValue = tags[keyWithLanguage];
                 tags[keyWithLanguage] = value;
             }
             else
             {
                 tags.Add(new Tag(keyWithLanguage, value));
-            }            
-        }
-
-        private string GetLanguage(string value, string language)
-        {
-            if (string.IsNullOrWhiteSpace(value))
-            {
-                return language;
             }
-            language = "he";
-            if (HasHebrewCharacters(value) == false)
+            if (tags.ContainsKey(key) && tags[key] == previousValue)
             {
-                language = "en";
+                tags[key] = value;
             }
-            return language;
-        }
-
-        private bool HasHebrewCharacters(string words)
-        {
-            return Regex.Match(words, @"^[^a-zA-Z]*[\u0591-\u05F4]").Success;
+            else
+            {
+                tags.Add(new Tag(key, value));
+            }
         }
 
         private void AddTagsByIcon(TagsCollectionBase tags, string icon)

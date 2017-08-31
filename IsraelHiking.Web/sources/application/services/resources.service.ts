@@ -228,6 +228,8 @@ export class ResourcesService {
     public closeWhileInEditMode: string;
     public dataUpdatedSuccefully: string;
     public loginRequired: string;
+    public nameInLanguage: string;
+    public descriptionInLanguage: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -639,6 +641,8 @@ export class ResourcesService {
                 this.closeWhileInEditMode = this.gettextCatalog.getString("Please note that you did not save your work before closing the popup...");
                 this.dataUpdatedSuccefully = this.gettextCatalog.getString("The data was updated successfully!");
                 this.loginRequired = this.gettextCatalog.getString("You need to login to OSM first, please use the button in the upper right corner to login.");
+                this.nameInLanguage = this.gettextCatalog.getString("Name in {{translation language}}");
+                this.descriptionInLanguage = this.gettextCatalog.getString("Description in {{translation language}}");
                 // Help
                 this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                 this.helpInfo = this.gettextCatalog.getString("This dialog");

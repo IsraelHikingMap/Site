@@ -21,7 +21,7 @@
             </a>
             <div fxLayout="row" [hidden]="!isEditMode()">
                 <md-input-container fxFill hintLabel="{{resources.itsYourTimeToShine}}">
-                    <textarea rows="4" mdInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
+                    <textarea rows="4" mdInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
                 </md-input-container>
             </div>
             <div fxLayout="row" [hidden]="!isEditMode()">

@@ -17,7 +17,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IElasticSearchGateway _elasticSearchGateway;
 
         /// <summary>
-        /// 
+        /// Adapter's constructor
         /// </summary>
         /// <param name="elevationDataStorage"></param>
         /// <param name="elasticSearchGateway"></param>

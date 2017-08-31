@@ -8,29 +8,23 @@
         </div>
     </div>
     <div md-dialog-content>
-        <div fxLayout="row">
-            <div fxFlex="33">
-                <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill/>
-                <label [hidden]="imageUrl">
-                    <a fxFill md-button angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i></a>
+        <div fxLayout="row" fxLayout.xs="column">
+            <md-input-container fxFlex>
+                <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.nameInLanguage}}" fxFill />
+            </md-input-container>
+            <div fxFlex="50" fxFlex.xs="100">
+                <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill />
+                <label [hidden]="imageUrl" fxFill>
+                    <a md-button fxFill angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
                     <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
                 </label>
             </div>
-            <div fxFlex>
-                <div fxlayout="row">
-                    <md-input-container fxFill>
-                        <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.title}}" fxFill/>
-                    </md-input-container>
-                </div>
-                <div fxlayout="row">
-                    <md-input-container fxFill hintLabel="{{resources.aLinkToAWebsite}}">
-                        <input mdInput type="text" [dir]="'ltr'" [(ngModel)]="websiteUrl" placeholder="{{resources.website}}" fxFill />
-                    </md-input-container>
-                </div>
-            </div>
         </div>
+        <md-input-container fxFill hintLabel="{{resources.aLinkToAWebsite}}">
+            <input mdInput type="text" [dir]="'ltr'" [(ngModel)]="websiteUrl" placeholder="{{resources.website}}" fxFill />
+        </md-input-container>
         <md-input-container fxFill>
-            <textarea mdInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
+            <textarea mdInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
         </md-input-container>
         <div *ngFor="let group of categoriesTypeGroups">
             <div fxLayout="row" fxFill>

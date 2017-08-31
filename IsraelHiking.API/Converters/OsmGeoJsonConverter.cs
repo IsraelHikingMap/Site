@@ -50,11 +50,6 @@ namespace IsraelHiking.API.Converters
         {
             var properties = osmObject.Tags.ToDictionary(t => t.Key, t => t.Value);
             properties.Add(FeatureAttributes.ID, osmObject.Id.ToString());
-            properties.Add(FeatureAttributes.POI_SOURCE, Sources.OSM);
-            if (properties.ContainsKey(FeatureAttributes.WEBSITE) == false)
-            {
-                properties.Add(FeatureAttributes.WEBSITE, $"{Sources.OSM_ADDRESS}{osmObject.Type.ToString().ToLower()}/{osmObject.Id}");
-            }
             var table = new AttributesTable();
             foreach (var key in properties.Keys)
             {
