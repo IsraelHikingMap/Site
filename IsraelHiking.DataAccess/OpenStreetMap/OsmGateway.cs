@@ -336,9 +336,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                             Id = int.Parse(trace.Id),
                             Lat = trace.LatLng.lat,
                             Lon = trace.LatLng.lng,
-                            // Tags are removed since there's a bug in OSM:
-                            // https://github.com/openstreetmap/openstreetmap-website/issues/1600
-                            Tags = new string[0]
+                            Tags = trace.Tags.ToArray()
                         }
                     }
                 };
