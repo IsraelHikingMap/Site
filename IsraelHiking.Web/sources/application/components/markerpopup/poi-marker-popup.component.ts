@@ -71,12 +71,14 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public clearSelectedRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
 
     public getDescrition() {
-        let description = this.description;
-        if (description) {
-            return description;
+        if (this.description) {
+            return this.description;
         }
         if (!this.poiExtended || !this.poiExtended.isEditable) {
             return "";
+        }
+        if (this.osmUserService.isLoggedIn() === false) {
+            return this.resources.loginRequired;
         }
         return this.resources.emptyPoiDescription;
     }
@@ -93,6 +95,11 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public setEditMode() {
+        if (this.osmUserService.isLoggedIn() === false) {
+            this.osmUserService.login();
+            //this.toastService.info(this.resources.loginRequired);
+            return;
+        }
         this.editMode = true;
     }
 
@@ -129,7 +136,9 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     private vote(value: number) {
         if (this.canVote() === false) {
-            // HM TODO: toast?
+            if (this.osmUserService.isLoggedIn() === false) {
+                this.toastService.info(this.resources.loginRequired);
+            }
             return;
         }
         this.poiExtended.rating.raters.push({ id: this.osmUserService.userId, value: value } as IRater);

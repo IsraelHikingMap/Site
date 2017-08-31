@@ -227,6 +227,7 @@ export class ResourcesService {
     public unableToSaveAnEmptyRoute: string;
     public closeWhileInEditMode: string;
     public dataUpdatedSuccefully: string;
+    public loginRequired: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -637,6 +638,7 @@ export class ResourcesService {
                 this.unableToSaveAnEmptyRoute = this.gettextCatalog.getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
                 this.closeWhileInEditMode = this.gettextCatalog.getString("Please note that you did not save your work before closing the popup...");
                 this.dataUpdatedSuccefully = this.gettextCatalog.getString("The data was updated successfully!");
+                this.loginRequired = this.gettextCatalog.getString("You need to login to OSM first, please use the button in the upper right corner to login.");
                 // Help
                 this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
                 this.helpInfo = this.gettextCatalog.getString("This dialog");

@@ -59,12 +59,16 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
     }
 
     onAdd(map: L.Map): this {
+        if (_.every(this.categories, c => c.isSelected === false)) {
+            this.categories.forEach(c => c.isSelected = true);
+        }
         super.onAdd(map);
         this.localStorageService.set(this.categoriesType + "_visibility", this.visible);
         return this;
     }
 
     onRemove(map: L.Map): this {
+        this.categories.forEach(c => c.isSelected = false);
         super.onRemove(map);
         this.localStorageService.set(this.categoriesType + "_visibility", this.visible);
         return this;

@@ -1,6 +1,8 @@
 ﻿import { Component, ViewEncapsulation } from "@angular/core";
 import { MdDialog } from "@angular/material";
 import { LocalStorage } from "ngx-store";
+import * as _ from "lodash";
+
 import { MapService } from "../../services/map.service";
 import { FileService } from "../../services/file.service";
 import { SidebarService } from "../../services/sidebar.service";
@@ -106,7 +108,15 @@ export class LayersSidebarComponent extends BaseMapComponent {
 
     public toggleCategory(categoriesType: CategoriesType, category: ICategory, e: Event) {
         this.suppressEvents(e);
-        this.categoriesLayerFactory.get(categoriesType).toggleCategory(category);
+        let layer = this.categoriesLayerFactory.get(categoriesType);
+        layer.toggleCategory(category);
+        if (layer.isVisible() && _.every(layer.categories, c => c.isSelected === false)) {
+            this.mapService.map.removeLayer(layer);
+            return;
+        }
+        if (layer.isVisible() === false && _.some(layer.categories, c => c.isSelected)) {
+            this.mapService.map.addLayer(layer);
+        }
     }
 
     public addOverlay(e: Event) {
