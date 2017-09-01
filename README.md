@@ -59,8 +59,6 @@ In order to be able to build this site you'll need some tools:
   * Go to _Online_
   * Search for the following and `Download` them: 
     * Web Essentials 2017
-    * Chutzpah Test Adapter for the test explorer
-    * Chutzpah Test Runner Context Menu Extension
   * Exit Visual Studio to complete the installation
   * Find the `VSIX Installer` window and click _Modify_, wait for the installation to complete, and close it
   * Open Visual Studio, wait for the installations to complete, and restart when asked
