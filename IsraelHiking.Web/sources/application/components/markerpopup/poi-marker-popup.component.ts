@@ -10,6 +10,7 @@ import { RoutesService } from "../../services/layers/routelayers/routes.service"
 import { OsmUserService } from "../../services/osm-user.service";
 import { FileService } from "../../services/file.service";
 import { IPointOfInterestExtended, PoiService, IRating, IRater } from "../../services/poi.service";
+import { IconsService } from "../../services/icons.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { GeoJsonParser } from "../../services/geojson.parser";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
@@ -97,7 +98,6 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public setEditMode() {
         if (this.osmUserService.isLoggedIn() === false) {
             this.osmUserService.login();
-            //this.toastService.info(this.resources.loginRequired);
             return;
         }
         this.editMode = true;
@@ -214,6 +214,19 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             lastCategory.label = this.resources.other;
             compoent.componentInstance.selectCategory(lastCategory);
         }
+        compoent.afterClosed().subscribe((poiExtended: IPointOfInterestExtended) => {
+            if (!poiExtended) {
+                return;
+            }
+            this.poiExtended = poiExtended;
+            this.title = poiExtended.title;
+            this.description = poiExtended.description;
+            this.thumbnail = poiExtended.imageUrl;
+            this.address = poiExtended.url;
+            this.rating = this.getRatingNumber(poiExtended.rating);
+            this.marker.setIcon(IconsService.createPoiIcon(poiExtended.icon, poiExtended.iconColor));
+            this.editMode = false;
+        });
     }
 
     private getRatingNumber(rating: IRating): number {

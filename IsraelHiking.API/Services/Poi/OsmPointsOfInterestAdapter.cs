@@ -59,7 +59,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public async Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
             var changesetId = await osmGateway.CreateChangeset("Add POI interface from IHM site.");
@@ -82,10 +82,11 @@ namespace IsraelHiking.API.Services.Poi
             await osmGateway.CloseChangeset(changesetId);
 
             await UpdateElasticSearch(node, pointOfInterest.Title);
+            return await GetPointOfInterestById(id, language);
         }
 
         /// <inheritdoc />
-        public async Task UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public async Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
 
@@ -120,6 +121,7 @@ namespace IsraelHiking.API.Services.Poi
             await osmGateway.CloseChangeset(changesetId);
 
             await UpdateElasticSearch(completeOsmGeo, pointOfInterest.Title);
+            return await GetPointOfInterestById(id, language);
         }
 
         /// <inheritdoc />
@@ -145,6 +147,7 @@ namespace IsraelHiking.API.Services.Poi
             var feature = features.Values.FirstOrDefault()?.FirstOrDefault();
             if (feature != null)
             {
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
                 await _elasticSearchGateway.UpdateNamesData(feature);
             }
         }
@@ -166,7 +169,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 tags[key] = value;
             }
-            else
+            else if (tags.ContainsKey(key) == false)
             {
                 tags.Add(new Tag(key, value));
             }

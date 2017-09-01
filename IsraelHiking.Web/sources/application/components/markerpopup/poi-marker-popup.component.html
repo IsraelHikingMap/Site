@@ -16,9 +16,11 @@
     </div>
     <div fxLayout="row">
         <div fxFlex="80">
-            <a href="{{address}}" target="_blank">
+            
+            <a [hidden]="!address" href="{{address}}" target="_blank">
                 <h3 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h3>
             </a>
+            <h3 [hidden]="address" [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h3>
             <div fxLayout="row" [hidden]="!isEditMode()">
                 <md-input-container fxFill hintLabel="{{resources.itsYourTimeToShine}}">
                     <textarea rows="4" mdInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>

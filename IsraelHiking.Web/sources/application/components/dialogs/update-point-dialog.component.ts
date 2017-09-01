@@ -1,12 +1,12 @@
 ﻿import { Component } from "@angular/core";
 import { Http } from "@angular/http";
+import { MdDialogRef } from "@angular/material";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { PoiService, IPointOfInterestExtended } from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
-import { Urls } from "../../common/Urls";
 
 
 
@@ -36,6 +36,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public selectedCategory: ICategory;
 
     constructor(resources: ResourcesService,
+        public dialogRef: MdDialogRef<UpdatePointDialogComponent>,
         private http: Http,
         private fileService: FileService,
         private toastService: ToastService,
@@ -129,8 +130,11 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             source: this.source,
             location: this.location
         } as IPointOfInterestExtended;
-        this.poiService.uploadPoint(poiExtended).then(() => {
+        this.poiService.uploadPoint(poiExtended).then((response) => {
             this.toastService.info(this.resources.dataUpdatedSuccefully);
+            this.dialogRef.close(response.json());
+        }, () => {
+            this.dialogRef.close(null);
         });
     }
 }

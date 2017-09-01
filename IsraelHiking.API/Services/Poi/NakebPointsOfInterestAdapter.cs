@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
@@ -60,13 +59,13 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public Task AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             throw new Exception("Nakeb does not support adding.");
         }
 
         /// <inheritdoc />
-        public Task UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             throw new Exception("Nakeb does not support updating.");
         }

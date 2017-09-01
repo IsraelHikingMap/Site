@@ -123,13 +123,9 @@ namespace IsraelHiking.API.Controllers
             var tokenAndSecret = _cache.Get(User.Identity.Name);
             if (string.IsNullOrWhiteSpace(pointOfInterest.Id))
             {
-                await adapter.AddPointOfInterest(pointOfInterest, tokenAndSecret, language);
+                return Ok(await adapter.AddPointOfInterest(pointOfInterest, tokenAndSecret, language));
             }
-            else
-            {
-                await adapter.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language);
-            }
-            return Ok();
+            return Ok(await adapter.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language));
         }
     }
 }
