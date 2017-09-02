@@ -1,7 +1,7 @@
 ﻿import { Component, Injector, Type, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Location, LocationStrategy, PathLocationStrategy } from "@angular/common";
 import { Angulartics2GoogleAnalytics, Angulartics2 } from "angulartics2";
-import "leaflet";
+import * as L from "leaflet";
 import "leaflet.locatecontrol";
 
 import { ResourcesService } from "../services/resources.service";

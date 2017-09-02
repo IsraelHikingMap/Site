@@ -1,11 +1,13 @@
-﻿import { RouteStateBase } from "./route-state-base";
+﻿import * as L from "leaflet";
+import * as _ from "lodash";
+
+import { RouteStateBase } from "./route-state-base";
 import { IRouteLayer, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { HoverHandler } from "./hover-handler";
 import { IconsService } from "../../icons.service";
 import { RouteMarkerPopupComponent } from "../../../components/markerpopup/route-marker-popup.component";
 import { DrawingPoiMarkerPopupComponent } from "../../../components/markerpopup/drawing-poi-marker-popup.component";
 import * as Common from "../../../common/IsraelHiking";
-import * as _ from "lodash";
 
 export abstract class RouteStateEditBase extends RouteStateBase {
     protected hoverHandler: HoverHandler;
@@ -18,7 +20,7 @@ export abstract class RouteStateEditBase extends RouteStateBase {
         this.initialize();
     }
 
-    protected abstract addPoint(e: L.MouseEvent): void;
+    protected abstract addPoint(e: L.LeafletMouseEvent): void;
 
     public initialize() {
         this.context.mapService.map.on("click", this.addPoint, this);

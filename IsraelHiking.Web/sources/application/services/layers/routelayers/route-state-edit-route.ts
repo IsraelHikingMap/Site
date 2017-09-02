@@ -1,4 +1,6 @@
-﻿import { EditMode } from "./iroute-state";
+﻿import * as L from "leaflet";
+
+import { EditMode } from "./iroute-state";
 import { RouteStateEditBase } from "./route-state-edit-base";
 import { IRouteLayer, EditModeString } from "./iroute.layer";
 import { HoverHandler } from "./hover-handler";
@@ -9,7 +11,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         this.hoverHandler.setRouteHover(true);
     }
 
-    protected addPoint(e: L.MouseEvent): void {
+    protected addPoint(e: L.LeafletMouseEvent): void {
         let snappingResponse = this.context.snappingService.snapTo(e.latlng);
         this.addPointToRoute(snappingResponse.latlng, this.context.route.properties.currentRoutingType).then(() => {
             this.context.raiseDataChanged();

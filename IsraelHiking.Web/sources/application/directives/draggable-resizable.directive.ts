@@ -1,4 +1,5 @@
 ﻿import { Directive, ElementRef, Input, Output, OnInit, EventEmitter, Renderer2 } from "@angular/core";
+import * as L from "leaflet";
 
 export interface IResizeEventArgs {
     width: number | boolean;

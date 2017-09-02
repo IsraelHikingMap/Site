@@ -1,5 +1,6 @@
 ﻿import { ApplicationRef, ViewRef } from "@angular/core";
 import { Http } from "@angular/http";
+import * as L from "leaflet";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ElevationProvider } from "../../services/elevation.provider";

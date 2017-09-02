@@ -1,14 +1,15 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { Jsonp } from "@angular/http";
+import * as L from "leaflet";
+import * as _ from "lodash";
+import "leaflet.markercluster";
+
 import { MapService } from "../map.service";
 import { ResourcesService } from "../resources.service";
 import { IconsService } from "../icons.service";
 import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
 import { WikiMarkerPopupComponent } from "../../components/markerpopup/wiki-marker-popup.component";
-import "rxjs/add/operator/toPromise"
 import * as Common from "../../common/IsraelHiking";
-import * as _ from "lodash";
-import "leaflet.markercluster";
 
 export interface IGeoSearchWikiPage {
     lat: number;

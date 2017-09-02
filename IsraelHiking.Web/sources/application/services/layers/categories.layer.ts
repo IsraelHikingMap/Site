@@ -1,6 +1,7 @@
 ﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
 import { LocalStorageService } from "ngx-store"
+import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { BasePoiMarkerLayer } from "./base-poi-marker.layer";

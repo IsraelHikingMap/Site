@@ -1,5 +1,8 @@
 ﻿import { Component } from "@angular/core";
 import { MdDialog } from "@angular/material";
+import * as L from "leaflet";
+import * as _ from "lodash";
+
 import { MapService } from "../../services/map.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
@@ -7,7 +10,6 @@ import { LayersService } from "../../services/layers/layers.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
-import * as _ from "lodash";
 
 type InfoState = "legend" | "about";
 type LegendItemType = "POI" | "Way";

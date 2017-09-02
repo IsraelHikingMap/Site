@@ -1,4 +1,6 @@
-﻿export class IconsService {
+﻿import * as L from "leaflet";
+
+export class IconsService {
     private static BACKGROUND = "<i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>";
     private static POI_BACKGROUND = "<i class='fa icon-map-marker-rect fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>";
 

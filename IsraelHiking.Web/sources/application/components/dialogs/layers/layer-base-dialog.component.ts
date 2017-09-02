@@ -1,4 +1,5 @@
 ﻿import { AfterViewInit } from "@angular/core";
+import * as L from "leaflet";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";

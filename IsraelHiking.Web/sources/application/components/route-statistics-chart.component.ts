@@ -1,5 +1,6 @@
 ﻿import { Component, ViewEncapsulation, OnInit, OnDestroy, HostListener, ViewChild, ElementRef, ComponentFactoryResolver, Injector, ApplicationRef } from "@angular/core";
 import { Subscription } from "rxjs/Subscription";
+import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { ResourcesService } from "../services/resources.service";

@@ -1,9 +1,10 @@
 ﻿import { Injectable, Inject } from "@angular/core";
-import * as Common from "../common/IsraelHiking";
-import { MapService } from "./map.service";
 import { URLSearchParams } from "@angular/http";
 import { Router, NavigationEnd } from "@angular/router";
+import * as L from "leaflet";
 
+import { MapService } from "./map.service";
+import * as Common from "../common/IsraelHiking";
 
 @Injectable()
 export class HashService {

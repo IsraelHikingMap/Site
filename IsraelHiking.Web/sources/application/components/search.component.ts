@@ -1,6 +1,9 @@
 ﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ElementRef } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Http } from "@angular/http";
+import * as L from "leaflet";
+import * as _ from "lodash";
+
 import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
 import { HashService } from "../services/hash.service";
@@ -15,7 +18,6 @@ import { SearchResultsProvider, ISearchResults } from "../services/search-result
 import { BaseMapComponent } from "./base-map.component";
 import { SearchResultsMarkerPopupComponent } from "./markerpopup/search-results-marker-popup.component";
 import { Urls } from "../common/Urls";
-import * as _ from "lodash";
 import * as Common from "../common/IsraelHiking";
 
 export interface ISearchContext {

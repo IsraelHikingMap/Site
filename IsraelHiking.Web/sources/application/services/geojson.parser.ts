@@ -1,4 +1,5 @@
 ﻿import { Injectable } from "@angular/core";
+import * as L from "leaflet";
 
 import * as Common from "../common/IsraelHiking";
 

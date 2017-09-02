@@ -1,4 +1,5 @@
-﻿import * as _ from "lodash";
+﻿import * as L from "leaflet";
+import * as _ from "lodash";
 
 import { MapService } from "../map.service";
 import { IconsService } from "../icons.service";

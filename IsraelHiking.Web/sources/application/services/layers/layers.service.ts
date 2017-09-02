@@ -3,6 +3,7 @@ import { Http } from "@angular/http";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
 import "leaflet.gridlayer.googlemutant";
+import * as L from "leaflet";
 
 import { MapService } from "../map.service";
 import { WikiMarkersLayer } from "./wiki-markers.layer";

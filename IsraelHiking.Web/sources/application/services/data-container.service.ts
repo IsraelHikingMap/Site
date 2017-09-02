@@ -1,15 +1,18 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
+import * as L from "leaflet";
+
 import { LayersService } from "./layers/layers.service";
 import { RoutesService } from "./layers/routelayers/routes.service";
 import { MapService } from "./map.service";
-import * as Common from "../common/IsraelHiking";
-import { Urls } from "../common/Urls";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { HashService } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { Deferred } from "../common/deferred";
+import * as Common from "../common/IsraelHiking";
+import { Urls } from "../common/Urls";
+
 
 @Injectable()
 export class DataContainerService {

@@ -1,8 +1,10 @@
 ﻿import { Injectable } from "@angular/core";
 import { LocalStorage } from "ngx-store";
+import * as L from "leaflet";
+
 import { ResourcesService } from "./resources.service";
 import * as Common from "../common/IsraelHiking";
-import "leaflet";
+
 
 @Injectable()
 export class MapService {
@@ -27,7 +29,7 @@ export class MapService {
         });
     }
 
-    public setMarkerTitle(marker: Common.IMarkerWithTitle, title: string, color: string = ""): string {
+    public setMarkerTitle(marker: Common.IMarkerWithTitle, title: string, color: string = "") {
         marker.unbindTooltip();
         marker.title = title || "";
         if (!title) {

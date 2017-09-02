@@ -1,5 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http } from "@angular/http";
+import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { GeoJsonParser } from "../services/geojson.parser";

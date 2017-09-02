@@ -1,3 +1,5 @@
+import * as L from "leaflet";
+
 import { EditMode } from "./iroute-state";
 import { RouteStateBase } from "./route-state-base";
 import { IRouteLayer, EditModeString } from "./iroute.layer";
@@ -79,7 +81,7 @@ export class RouteStateReadOnly extends RouteStateBase {
         return EditModeString.none;
     }
 
-    private onMouseMove = (e: L.MouseEvent): void => {
+    private onMouseMove = (e: L.LeafletMouseEvent): void => {
         let response = this.context.snappingService.snapTo(e.latlng, {
             sensitivity: 10,
             layers: this.readOnlyLayers

@@ -1,4 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
+import * as L from "leaflet";
+
 import { MapService } from "./map.service";
 import { SidebarService } from "./sidebar.service";
 

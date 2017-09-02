@@ -1,12 +1,14 @@
-﻿import { Http } from "@angular/http";
-import { Injectable } from "@angular/core";
+﻿import { Injectable } from "@angular/core";
+import { Http } from "@angular/http";
+import * as L from "leaflet";
+import * as _ from "lodash";
+
 import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
-import { Urls } from "../common/Urls";
-import * as _ from "lodash";
-import "rxjs/add/operator/toPromise";
 import { GeoJsonParser } from "./geojson.parser";
+import { Urls } from "../common/Urls";
+
 
 export interface ISnappingOptions {
     layers: L.LayerGroup;

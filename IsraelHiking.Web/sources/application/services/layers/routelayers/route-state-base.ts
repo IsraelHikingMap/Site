@@ -1,3 +1,5 @@
+import * as L from "leaflet";
+
 import { IRouteState, EditMode } from "./iroute-state";
 import { IRouteLayer } from "./iroute.layer";
 import { IconsService } from "../../icons.service";

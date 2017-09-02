@@ -1,10 +1,11 @@
-﻿import { Injectable, Inject } from "@angular/core";
+﻿import { Injectable } from "@angular/core";
 import { Http, Response } from "@angular/http";
+import { saveAs } from "file-saver";
+import * as L from "leaflet";
+
 import { AuthorizationService } from "./authorization.service";
 import { Urls } from "../common/Urls";
-import "rxjs/add/operator/toPromise";
 import * as Common from "../common/IsraelHiking";
-import { saveAs } from "file-saver";
 
 export interface IFormatViewModel {
     label: string,

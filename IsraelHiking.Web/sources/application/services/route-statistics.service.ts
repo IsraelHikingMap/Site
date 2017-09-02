@@ -1,4 +1,6 @@
 ﻿import { Subject } from "rxjs/Subject";
+import * as L from "leaflet";
+
 import * as Common from "../common/IsraelHiking";
 
 export interface IRouteStatisticsPoint extends L.Point {

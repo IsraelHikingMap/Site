@@ -1,5 +1,6 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { Http } from "@angular/http";
+import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { MapService } from "../map.service";

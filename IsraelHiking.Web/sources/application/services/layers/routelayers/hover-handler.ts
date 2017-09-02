@@ -1,3 +1,5 @@
+import * as L from "leaflet";
+
 import { IconsService } from "../../icons.service";
 import { IRouteLayer } from "./iroute.layer";
 
@@ -54,7 +56,7 @@ export class HoverHandler {
         }
     }
 
-    public onMouseMove = (e: L.MouseEvent): void => {
+    public onMouseMove = (e: L.LeafletMouseEvent): void => {
         if (this.hoverState === HoverHandler.ON_MARKER ||
             this.hoverState === HoverHandler.DRAGGING) {
             return;

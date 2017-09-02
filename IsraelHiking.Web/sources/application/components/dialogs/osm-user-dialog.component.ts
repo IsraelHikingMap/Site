@@ -4,6 +4,7 @@ import { Response } from "@angular/http";
 import { MdDialogRef } from "@angular/material";
 import { SharedStorageService } from "ngx-store";
 import { Subscription } from "rxjs/Subscription";
+import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { ResourcesService } from "../../services/resources.service";
