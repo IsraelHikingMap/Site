@@ -4,7 +4,6 @@ using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters
 {

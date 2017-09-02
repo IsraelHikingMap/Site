@@ -1,13 +1,10 @@
 ﻿using System.Collections.Generic;
-using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
-using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -40,38 +37,6 @@ namespace IsraelHiking.API.Tests.Controllers
 
             Assert.IsNotNull(results);
             Assert.AreEqual(list.Count, results.Features.Count);
-        }
-
-        [TestMethod]
-        public void PostConvertSearchResults_JsonObject_ShouldConvertToDataContianer()
-        {
-
-            var feature = new Feature(new LineString(new[]
-            {
-                new Coordinate(1, 1),
-                new Coordinate(2, 2)
-            }), new AttributesTable());
-
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>())
-                .Returns(new DataContainer
-                {
-                    routes = new List<RouteData>
-                    {
-                        new RouteData
-                        {
-                            segments =
-                                new List<RouteSegmentData>
-                                {
-                                    new RouteSegmentData {latlngs = new List<LatLng> {new LatLng()}}
-                                }
-                        }
-                    }
-                });
-
-
-            var results = _controller.PostConvertSearchResults(feature).Result;
-
-            Assert.AreEqual(1, results.routes.Count);
         }
 
         [TestMethod]

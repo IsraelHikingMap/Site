@@ -16,7 +16,6 @@ using NSubstitute;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Tests.Controllers
 {

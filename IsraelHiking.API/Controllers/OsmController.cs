@@ -16,7 +16,6 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using GeoAPI.CoordinateSystems.Transformations;
 using Microsoft.Extensions.Options;
-using NetTopologySuite.IO;
 using IsraelHiking.API.Swagger;
 using Swashbuckle.AspNetCore.SwaggerGen;
 

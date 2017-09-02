@@ -15,7 +15,6 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
-using NetTopologySuite.IO;
 using System;
 using IsraelHiking.API.Converters.ConverterFlows;
 

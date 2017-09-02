@@ -2,7 +2,6 @@
 using IsraelHiking.API.Converters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
-using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Tests.Gpx
 {

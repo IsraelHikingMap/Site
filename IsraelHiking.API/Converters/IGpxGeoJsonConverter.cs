@@ -1,5 +1,4 @@
 using NetTopologySuite.Features;
-using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters
 {

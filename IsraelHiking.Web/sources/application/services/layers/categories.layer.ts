@@ -24,6 +24,9 @@ export type CategoriesType = "Points of Interest" | "Routes";
 
 export class CategoriesLayer extends BasePoiMarkerLayer {
 
+    private static readonly VISIBILITY_PREFIX = "_visibility";
+    private static readonly SELECTED_PREFIX = "_selected";
+
     private requestsNumber: number;
     public categories: ICategory[];
 
@@ -39,16 +42,18 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         super(mapService);
         this.categories = [];
         this.requestsNumber = 0;
-        this.visible = this.localStorageService.get(this.categoriesType + "_visibility") || false;
+        this.visible = this.localStorageService.get(this.categoriesType + CategoriesLayer.VISIBILITY_PREFIX) || false;
         this.markerIcon = IconsService.createPoiIcon("icon-star", "orange");
         this.http.get(Urls.poiCategories + categoriesType).toPromise().then((response) => {
-            // HM TODO: store categories state
             let categoriesArray = response.json() as string[];
-            for (let category of categoriesArray) {
+            for (let categoryType of categoriesArray) {
+                let selected = this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX) == null
+                    ? true
+                    : this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX);
                 this.categories.push({
-                    type: category,
-                    isSelected: true,
-                    icon: this.getCategoryIcon(category)
+                    type: categoryType,
+                    isSelected: selected,
+                    icon: this.getCategoryIcon(categoryType)
                 });
             }
             this.updateMarkers();
@@ -61,17 +66,17 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
 
     onAdd(map: L.Map): this {
         if (_.every(this.categories, c => c.isSelected === false)) {
-            this.categories.forEach(c => c.isSelected = true);
+            this.categories.forEach(c => this.changeCategorySelectedState(c, true));
         }
         super.onAdd(map);
-        this.localStorageService.set(this.categoriesType + "_visibility", this.visible);
+        this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_PREFIX, this.visible);
         return this;
     }
 
     onRemove(map: L.Map): this {
-        this.categories.forEach(c => c.isSelected = false);
+        this.categories.forEach(c => this.changeCategorySelectedState(c, false));
         super.onRemove(map);
-        this.localStorageService.set(this.categoriesType + "_visibility", this.visible);
+        this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_PREFIX, this.visible);
         return this;
     }
 
@@ -105,8 +110,14 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
     }
 
     public toggleCategory(category: ICategory) {
-        category.isSelected = !category.isSelected;
+        this.changeCategorySelectedState(category, !category.isSelected);
         this.updateMarkers();
+        this.readOnlyLayer.clearLayers();
+    }
+
+    private changeCategorySelectedState(category: ICategory, newState: boolean) {
+        this.localStorageService.set(category.type + CategoriesLayer.SELECTED_PREFIX, newState);
+        category.isSelected = newState;
     }
 
     protected updateMarkersInternal(): void {
