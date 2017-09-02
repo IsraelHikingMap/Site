@@ -821,14 +821,14 @@ export class ResourcesService {
         return words.match(/^[^a-zA-Z]*[\u0591-\u05F4]/) != null;
     }
 
-    public getDirection = (words: string): Direction => {
+    public getDirection = (words?: string): Direction => {
         if (!words) {
             return this.direction;
         }
         return this.hasHebrewCharacters(words) ? "rtl" : "ltr";
     }
 
-    public getTextAlignment = (words: string) => {
+    public getTextAlignment = (words?: string) => {
         return `text-${this.getDirection(words) === "rtl" ? "right" : "left"}`;
     }
 

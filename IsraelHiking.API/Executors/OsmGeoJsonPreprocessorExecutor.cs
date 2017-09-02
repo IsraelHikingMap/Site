@@ -108,6 +108,7 @@ namespace IsraelHiking.API.Executors
                 feature.Attributes.AddAttribute(FeatureAttributes.ICON, iconColorCategory.Icon);
                 feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, iconColorCategory.Color);
                 feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
                 UpdateLocation(feature);
             }
         }
@@ -317,7 +318,12 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public List<Feature> Preprocess(List<CompleteWay> highways)
         {
-            return highways.Select(_osmGeoJsonConverter.ToGeoJson).Where(h => h != null).ToList();
+            var highwayFeatures = highways.Select(_osmGeoJsonConverter.ToGeoJson).Where(h => h != null).ToList();
+            foreach (var highwayFeature in highwayFeatures)
+            {
+                highwayFeature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
+            }
+            return highwayFeatures;
         }
 
         /// <summary>

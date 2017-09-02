@@ -129,12 +129,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var osmNamesDictionary = await _osmRepository.GetElementsWithName(memoryStream);
             var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-            var features = geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
-            foreach (var feature in features)
-            {
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
-            }
-            return features;
+            return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
         }
 
         private async Task UpdateElasticSearch(ICompleteOsmGeo osm, string name)
@@ -147,7 +142,6 @@ namespace IsraelHiking.API.Services.Poi
             var feature = features.Values.FirstOrDefault()?.FirstOrDefault();
             if (feature != null)
             {
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
                 await _elasticSearchGateway.UpdateNamesData(feature);
             }
         }
