@@ -1,4 +1,6 @@
-﻿import { RoutesService } from "./routes.service";
+﻿import * as L from "leaflet";
+
+import { RoutesService } from "./routes.service";
 import { MapServiceMockCreator } from "../../map.service.spec";
 import { IRouteLayer, IRoute, IRouteSegment } from "./iroute.layer";
 

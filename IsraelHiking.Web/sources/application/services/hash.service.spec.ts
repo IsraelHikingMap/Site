@@ -1,7 +1,9 @@
-﻿import { TestBed, async, inject } from "@angular/core/testing";
+﻿import { Router, NavigationEnd } from "@angular/router";
+import { TestBed, inject } from "@angular/core/testing";
 import { RouterTestingModule } from "@angular/router/testing";
 import { Subject } from "rxjs/Subject";
-import { Router, NavigationEnd } from "@angular/router";
+import * as L from "leaflet";
+
 import { HashService } from "./hash.service";
 import { MapService } from "./map.service";
 import { MapServiceMockCreator } from "./map.service.spec";
@@ -29,7 +31,7 @@ describe("HashService", () => {
             providers: [
                 { provide: MapService, useValue: mapServiceMock.mapService },
                 { provide: Router, useValue: routerMock },
-                { provide: Window, useValue: windowMock },
+                { provide: Window, useValue: windowMock }
             ]
         });
     });

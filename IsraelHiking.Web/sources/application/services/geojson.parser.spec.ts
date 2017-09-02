@@ -1,4 +1,6 @@
-﻿import { GeoJsonParser } from "./geojson.parser";
+﻿import * as L from "leaflet";
+
+import { GeoJsonParser } from "./geojson.parser";
 import * as Common from "../common/IsraelHiking";
 
 describe("GeoJsonParser", () => {

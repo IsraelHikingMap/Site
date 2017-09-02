@@ -1,4 +1,6 @@
-﻿import { HoverHandler } from "./hover-handler";
+﻿import * as L from "leaflet";
+
+import { HoverHandler } from "./hover-handler";
 import { MapServiceMockCreator } from "../../map.service.spec";
 
 describe("HoverHandler", () => {
@@ -61,7 +63,7 @@ describe("HoverHandler", () => {
         hoverHandler.setState(HoverHandler.NONE);
         hoverHandler.setRouteHover(false);
         
-        hoverHandler.onMouseMove({ latlng: L.latLng([0,0]) } as L.MouseEvent);
+        hoverHandler.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
 
         expect(hoverHandler.getState()).toBe(HoverHandler.ADD_POINT);
     });
@@ -76,7 +78,7 @@ describe("HoverHandler", () => {
             };
         }
         
-        hoverHandler.onMouseMove({ latlng: L.latLng([0, 0]) } as L.MouseEvent);
+        hoverHandler.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
 
         expect(hoverHandler.getState()).toBe(HoverHandler.ON_POLYLINE);
     });
@@ -98,7 +100,7 @@ describe("HoverHandler", () => {
         };
         context.route.segments = [];
         
-        hoverHandler.onMouseMove({ latlng: L.latLng([0, 0]) } as L.MouseEvent);
+        hoverHandler.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
 
         expect(hoverHandler.getState()).toBe(HoverHandler.ADD_POINT);
     });

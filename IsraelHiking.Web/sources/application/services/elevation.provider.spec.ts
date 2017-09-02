@@ -1,6 +1,8 @@
-﻿import { TestBed, async, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
-import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
+﻿import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
+import { HttpModule, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
+import * as L from "leaflet";
+
 import { ResourcesService } from "./resources.service";
 import { ElevationProvider } from "./elevation.provider";
 import { ToastService } from "./toast.service";

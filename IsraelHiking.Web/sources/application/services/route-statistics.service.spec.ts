@@ -1,4 +1,6 @@
-﻿import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "./route-statistics.service";
+﻿import * as L from "leaflet";
+
+import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "./route-statistics.service";
 import * as Common from "../common/IsraelHiking";
 
 describe("RouteStatisticsService", () => {

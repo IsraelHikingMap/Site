@@ -1,7 +1,9 @@
 ﻿import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
-import { MockBackend, MockConnection, } from "@angular/http/testing";
+import { MockBackend, MockConnection } from "@angular/http/testing";
+import * as L from "leaflet";
+
 import { NakebMarkerLayer } from "./nakeb-markers.layer";
 import { MapServiceMockCreator } from "../map.service.spec";
 import { ResourcesService } from "../resources.service";

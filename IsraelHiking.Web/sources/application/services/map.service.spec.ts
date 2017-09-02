@@ -1,6 +1,7 @@
-﻿import { MapService } from "./map.service";
+﻿import * as L from "leaflet";
+
+import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
-import { GetTextCatalogService } from "./gettext-catalog.service";
 import * as Common from "../common/IsraelHiking";
 import { GetTextCatalogMockCreator } from "./resources.service.spec";
 

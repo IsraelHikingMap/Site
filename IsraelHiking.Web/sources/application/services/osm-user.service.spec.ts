@@ -1,6 +1,7 @@
 ﻿import { HttpModule, Http, Response, ResponseOptions, XHRBackend, RequestMethod } from "@angular/http";
 import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { MockBackend, MockConnection } from "@angular/http/testing";
+import * as L from "leaflet";
 import * as X2JS from "x2js";
 
 import { OsmUserService, ITrace } from "./osm-user.service";
@@ -20,16 +21,6 @@ describe("OSM User Service", () => {
         "    <changesets count='205'/>" +
         "    <traces count='15'/>" +
         "  </user>" +
-        "</osm>"
-    );
-    var gpxFilesResponse = x2Js.xml2dom(
-        "<?xml version='1.0' encoding='UTF-8'?>" +
-        "<osm version='0.6' generator='OpenStreetMap server' copyright='OpenStreetMap and contributors' attribution='http://www.openstreetmap.org/copyright' license='http://opendatacommons.org/licenses/odbl/1-0/'>" +
-        "  <gpx_file id='1' name='name.gpx' lat='0' lon='0' user='IHM Test' visibility='private' pending='false' timestamp='2016-11-12T15:22:27Z'>" +
-        "    <description>הגובה הגדולה</description>" +
-        "    <tag>הגולן</tag>" +
-        "    <tag>רמת</tag>" +
-        "  </gpx_file>" +
         "</osm>"
     );
 

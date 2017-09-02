@@ -2,6 +2,8 @@
 import { JsonpModule, Response, ResponseOptions, JSONPBackend } from "@angular/http";
 import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { MockBackend, MockConnection, } from "@angular/http/testing";
+import * as L from "leaflet";
+
 import { WikiMarkersLayer, IGeoSearchWikiPage, IGeoSearchWikiQuery, IGeoSearchWikiResponse } from "./wiki-markers.layer";
 import { MapServiceMockCreator } from "../map.service.spec";
 import { ResourcesService } from "../resources.service";
