@@ -54,9 +54,11 @@ export class NakebMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.address = "";
     }
 
-    // Should be defined by the main nakeb layer to faciliatate for single route
-    public selectRoute = (routeData: Common.RouteData) => { };
-    public clearSelectedRoute = () => {};
+    public selectRoute = (routeData: Common.RouteData): void => {
+        console.log(routeData);
+        throw new Error("This function must be assigned by containing layer!");
+    };
+    public clearSelectedRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
     
     public setMarker(marker: Common.IMarkerWithTitle) {
         this.marker = marker;

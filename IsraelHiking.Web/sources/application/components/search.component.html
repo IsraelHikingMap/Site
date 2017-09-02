@@ -10,7 +10,7 @@
             </md-input-container>
             <md-autocomplete positionY="below" #autoFrom="mdAutocomplete" [displayWith]="displayResults">
                 <md-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
-                    <i [hidden]="!result.icon" class="fa" [ngClass]="result.icon"></i>
+                    <i [hidden]="!result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
                     {{result.displayName}}
                 </md-option>
             </md-autocomplete>

@@ -4,19 +4,13 @@ import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { GeoJsonParser } from "../services/geojson.parser";
+import { IPointOfInterest } from "./poi.service";
 import { Urls } from "../common/Urls";
 
 
-export interface ISearchResults {
-    name: string;
-    address: string;
-    icon: string;
-    searchTerm: string;
-    latlng: L.LatLng;
-    latlngsArray: L.LatLng[][];
+export interface ISearchResults extends IPointOfInterest {
     bounds: L.LatLngBounds;
     displayName: string;
-    feature: GeoJSON.Feature<GeoJSON.GeometryObject>;
 }
 
 @Injectable()
@@ -38,16 +32,17 @@ export class SearchResultsProvider {
                     let properties = feature.properties as any;
                     try {
                         let singleResult = {
-                            name: this.getName(feature, isHebrew),
-                            latlngsArray: this.geoJsonParser.toLatLngsArray(feature),
+                            title: this.getName(feature, isHebrew),
                             icon: properties.icon,
-                            address: isHebrew ? properties.address : feature.properties["address:en"],
-                            latlng: L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.altitude),
-                            feature: feature
+                            iconColor: properties.iconColor,
+                            source: properties.poiSource,
+                            id: properties.identifier,
+                            location: L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.geolocation.alt),
                         } as ISearchResults;
                         let geo = L.geoJSON(feature);
                         singleResult.bounds = geo.getBounds();
-                        singleResult.displayName = singleResult.name + (singleResult.address ? `, ${singleResult.address}` : "");
+                        let address = isHebrew ? properties.address : feature.properties["address:en"];
+                        singleResult.displayName = singleResult.title + (address ? `, ${address}` : "");
                         results.push(singleResult);
                     }
                     catch (error) {

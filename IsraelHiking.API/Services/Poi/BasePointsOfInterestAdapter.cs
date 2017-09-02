@@ -87,6 +87,7 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Url = feature.Attributes.GetNames().Contains(FeatureAttributes.WEBSITE)
                 ? feature.Attributes[FeatureAttributes.WEBSITE].ToString()
                 : string.Empty;
+            poiItem.ImageUrl = feature.Attributes[FeatureAttributes.IMAGE_URL]?.ToString() ?? string.Empty;
             poiItem.Description = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language);
             poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
             poiItem.IsEditable = true;

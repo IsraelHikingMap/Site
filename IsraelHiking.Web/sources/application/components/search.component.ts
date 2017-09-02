@@ -17,7 +17,6 @@ import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider, ISearchResults } from "../services/search-results.provider";
 import { BaseMapComponent } from "./base-map.component";
 import { SearchResultsMarkerPopupComponent } from "./markerpopup/search-results-marker-popup.component";
-import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
 export interface ISearchContext {
@@ -145,40 +144,30 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.toggleVisibility(e);
         this.featureGroup.clearLayers();
         this.fitBoundsService.fitBounds(searchResults.bounds, { maxZoom: LayersService.MAX_NATIVE_ZOOM } as L.FitBoundsOptions);
-        var marker = L.marker(searchResults.latlng, { icon: IconsService.createSearchMarkerIcon(), draggable: false }) as Common.IMarkerWithTitle;
-        marker.title = searchResults.name || searchResults.address;
+        let divIcon = IconsService.createSearchMarkerIcon(searchResults.icon, searchResults.iconColor);
+        let marker = L.marker(searchResults.location, { icon: divIcon, draggable: false }) as Common.IMarkerWithTitle;
+        marker.title = searchResults.displayName;
+        marker.identifier = searchResults.id;
         let markerPopupDiv = L.DomUtil.create("div");
         let componentFactory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
         let componentRef = componentFactory.create(this.injector, [], markerPopupDiv);
         componentRef.instance.setMarker(marker);
+        componentRef.instance.setIdAndSource(searchResults.id, searchResults.source);
         componentRef.instance.remove = () => {
             this.featureGroup.clearLayers();
         }
         componentRef.instance.angularBinding(componentRef.hostView);
-        componentRef.instance.convertToRoute = () => {
-            this.http.post(Urls.search, searchResults.feature).toPromise().then((response) => {
-                let data = response.json() as Common.DataContainer;
-                if (data.routes.length > 0) {
-                    data.routes[0].markers = data.routes[0].markers || [];
-                    data.routes[0].markers.push({ latlng: searchResults.latlng, title: marker.title, type: "" });
-                }
-                this.dataContainerService.setData({
-                    routes: data.routes
-                } as Common.DataContainer);
-                this.featureGroup.clearLayers();
-            });
+        componentRef.instance.selectRoute = (routeData: Common.RouteData) => {
+            this.mapService.updateReadOnlyLayer(this.featureGroup, routeData);
+            this.featureGroup.addLayer(marker);
+            setTimeout(() => {
+                marker.openPopup();
+            }, 500);
+        }
+        componentRef.instance.clearSelectedRoute = () => {
+            this.featureGroup.clearLayers();
         }
         marker.bindPopup(markerPopupDiv);
-
-        this.featureGroup.addLayer(marker);
-        for (let line of searchResults.latlngsArray) {
-            let polyLine = L.polyline(line, this.getPathOprtions());
-            this.featureGroup.addLayer(polyLine);
-        }
-
-        setTimeout(() => {
-            marker.openPopup();
-        }, 300);
         this.suppressEvents(e);
     }
 
@@ -204,16 +193,16 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             this.toastService.warning(this.resources.pleaseSelectTo);
             return;
         }
-        this.routerService.getRoute(this.fromContext.selectedSearchResults.latlng, this.toContext.selectedSearchResults.latlng, this.routingType).then((response: Common.RouteSegmentData[]) => {
+        this.routerService.getRoute(this.fromContext.selectedSearchResults.location, this.toContext.selectedSearchResults.location, this.routingType).then((response: Common.RouteSegmentData[]) => {
             this.featureGroup.clearLayers();
             for (let segment of response) {
                 let polyLine = L.polyline(segment.latlngs, this.getPathOprtions());
                 this.featureGroup.addLayer(polyLine);
             }
-            var markerFrom = L.marker(this.fromContext.selectedSearchResults.latlng, { icon: IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
-            markerFrom.title = this.fromContext.selectedSearchResults.name || this.fromContext.selectedSearchResults.address;
-            var markerTo = L.marker(this.toContext.selectedSearchResults.latlng, { icon: IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;
-            markerTo.title = this.toContext.selectedSearchResults.name || this.toContext.selectedSearchResults.address;
+            var markerFrom = L.marker(this.fromContext.selectedSearchResults.location, { icon: IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
+            markerFrom.title = this.fromContext.selectedSearchResults.displayName;
+            var markerTo = L.marker(this.toContext.selectedSearchResults.location, { icon: IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;
+            markerTo.title = this.toContext.selectedSearchResults.displayName;
 
             let convertToRoute = () => {
                 this.dataContainerService.setData({

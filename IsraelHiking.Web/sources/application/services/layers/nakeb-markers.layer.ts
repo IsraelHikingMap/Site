@@ -50,7 +50,7 @@ export class NakebMarkerLayer extends BasePoiMarkerLayer {
                 let factory = this.componentFactoryResolver.resolveComponentFactory(NakebMarkerPopupComponent);
                 let componentRef = factory.create(this.injector, null, markerPopupContainer);
                 componentRef.instance.pageId = item.id;
-                componentRef.instance.selectRoute = (route) => this.createReadOnlyLayer(route);
+                componentRef.instance.selectRoute = (route) => this.mapService.updateReadOnlyLayer(this.readOnlyLayer, route);
                 componentRef.instance.clearSelectedRoute = () => this.readOnlyLayer.clearLayers();
                 componentRef.instance.setMarker(marker);
                 componentRef.instance.angularBinding(componentRef.hostView);

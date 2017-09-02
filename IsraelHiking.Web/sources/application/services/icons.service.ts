@@ -11,7 +11,7 @@ export class IconsService {
 
     private static SEARCH_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
     IconsService.BACKGROUND +
-    "<i class='fa icon-search fa-stack-1x stack-icon-top' style='color:black;'></i>" +
+    "<i class='fa {{icon}} fa-stack-1x stack-icon-top' style='color:{{color}};'></i>" +
     "</span>";
 
     private static START_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
@@ -88,8 +88,9 @@ export class IconsService {
         return L.divIcon(IconsService.getDefaultMarkerOptions(html));
     }
 
-    public static createSearchMarkerIcon(): L.DivIcon {
-        return L.divIcon(IconsService.getDefaultMarkerOptions(IconsService.SEARCH_MARKER_HTML));
+    public static createSearchMarkerIcon(icon?: string, color?: string): L.DivIcon {
+        let html = IconsService.SEARCH_MARKER_HTML.replace("{{icon}}", icon || "icon-search").replace("{{color}}", color || "black");
+        return L.divIcon(IconsService.getDefaultMarkerOptions(html));
     }
 
     public static createTraceMarkerIcon(): L.DivIcon {

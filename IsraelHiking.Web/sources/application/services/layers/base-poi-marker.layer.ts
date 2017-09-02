@@ -1,9 +1,6 @@
 ﻿import * as L from "leaflet";
-import * as _ from "lodash";
 
 import { MapService } from "../map.service";
-import { IconsService } from "../icons.service";
-import * as Common from "../../common/IsraelHiking";
 
 export abstract class BasePoiMarkerLayer extends L.Layer {
     protected visible: boolean;
@@ -67,53 +64,5 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
             return;
         }
         this.updateMarkersInternal();
-    }
-
-    protected createReadOnlyLayer = (routeData: Common.RouteData) => {
-        this.readOnlyLayer.clearLayers();
-        
-        if (routeData == null || routeData.segments.length === 0) {
-            return;
-        }
-        for (let segment of routeData.segments) {
-            if (segment.latlngs.length < 2 ||
-                (segment.latlngs.length === 2 && segment.latlngs[0].equals(segment.latlngs[1]))) {
-                continue;
-            }
-            let polyLine = L.polyline(segment.latlngs,
-                {
-                    opacity: 1,
-                    color: "Blue",
-                    weight: 3,
-                    dashArray: "30 10",
-                    className: "segment-readonly-indicator"
-                } as L.PathOptions);
-            this.readOnlyLayer.addLayer(polyLine);
-            this.readOnlyLayer.addLayer(L.marker(segment.latlngs[0],
-                {
-                    opacity: 1,
-                    draggable: false,
-                    clickable: false,
-                    icon: IconsService.createRoundIcon("green")
-                }));
-            this.readOnlyLayer.addLayer(L.marker(_.last(segment.latlngs),
-                {
-                    opacity: 1,
-                    draggable: false,
-                    clickable: false,
-                    icon: IconsService.createRoundIcon("red")
-                }));
-        }
-        
-        for (let markerData of routeData.markers) {
-            let marker = L.marker(markerData.latlng,
-                {
-                    draggable: false,
-                    clickable: false,
-                    icon: IconsService.createPoiDefaultMarkerIcon("blue")
-                } as L.MarkerOptions);
-            marker.bindTooltip(markerData.title, { permanent: true, direction: "bottom" } as L.TooltipOptions);
-            this.readOnlyLayer.addLayer(marker);
-        }
     }
 }

@@ -2,9 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
-using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
-using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using Microsoft.AspNetCore.Mvc;
@@ -71,28 +69,6 @@ namespace IsraelHiking.API.Controllers
             var fieldName = string.IsNullOrWhiteSpace(language) ? "name" : "name:" + language;
             var features = await _elasticSearchGateway.Search(term, fieldName);
             return new FeatureCollection(new Collection<IFeature>(features.OfType<IFeature>().ToList()));
-        }
-
-        /// <summary>
-        /// Converts a search results to <see cref="DataContainer"/>
-        /// </summary>
-        /// <param name="feature">The feature to convert</param>
-        /// <returns>The converted feature</returns>
-        [HttpPost]
-        public async Task<DataContainer> PostConvertSearchResults([FromBody]Feature feature)
-        {
-            var name = "israelHiking";
-            if (feature.Attributes.GetNames().Contains("name"))
-            {
-                name = feature.Attributes["name"].ToString();
-            }
-            var featureCollection = new FeatureCollection(new Collection<IFeature> { feature });
-            var dataContainer = await _dataContainerConverterService.ToDataContainer(featureCollection.ToBytes(), name + ".geojson");
-            foreach (var latLng in dataContainer.routes.SelectMany(routeData => routeData.segments.SelectMany(routeSegmentData => routeSegmentData.latlngs)))
-            {
-                latLng.alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(latLng));
-            }
-            return dataContainer;
         }
 
         private Coordinate GetCoordinates(string term)

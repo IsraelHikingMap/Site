@@ -140,14 +140,6 @@ namespace IsraelHiking.API.Services
             {
                 return (1, new IconColorCategory("icon-home"));
             }
-            if (attributesTable.GetNames().Any(k => k.Equals("highway", StringComparison.OrdinalIgnoreCase)))
-            {
-                var icon = attributesTable["highway"].ToString() == "bus_stop"
-                    ? new IconColorCategory("icon-bus-stop")
-                    : new IconColorCategory("icon-map-signs");
-                return (_options.SearchFactor, icon);
-            }
-
             var iconTags = _iconsToTags.Values.FirstOrDefault(i =>
                 i.Tags.FirstOrDefault(
                         t => attributesTable.Exists(t.Key) && attributesTable[t.Key].ToString() == t.Value)
@@ -155,6 +147,13 @@ namespace IsraelHiking.API.Services
             if (iconTags == null)
             {
                 return (_options.SearchFactor, new IconColorCategory());
+            }
+            if (attributesTable.GetNames().Any(k => k.Equals("highway", StringComparison.OrdinalIgnoreCase)))
+            {
+                var icon = attributesTable["highway"].ToString() == "bus_stop"
+                    ? new IconColorCategory("icon-bus-stop")
+                    : new IconColorCategory("icon-map-signs");
+                return (_options.SearchFactor, icon);
             }
             return (1, iconTags.IconColorCategory);
         }
