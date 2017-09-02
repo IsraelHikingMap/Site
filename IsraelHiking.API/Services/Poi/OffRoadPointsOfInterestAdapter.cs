@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
@@ -9,6 +9,7 @@ using IsraelHiking.DataAccess;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -38,10 +39,15 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
+        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
-            // Need to implement
-            throw new NotImplementedException();
+            var featureCollection = await _offRoadGateway.GetById(id);
+            var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);
+            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, "he");
+            await AddExtendedData(poiItem, mainFeature, language);
+            poiItem.FeatureCollection = featureCollection;
+            poiItem.IsEditable = false;
+            return poiItem;
         }
 
         /// <inheritdoc />
@@ -61,11 +67,10 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
         {
-            _logger.LogInformation("Getting data from Nakeb.");
+            _logger.LogInformation("Getting data from Off-road.");
             var features = await _offRoadGateway.GetAll();
-            _logger.LogInformation($"Got {features.Count} routes from Nakeb.");
+            _logger.LogInformation($"Got {features.Count} routes from Off-road.");
             return features;
-
         }
     }
 }

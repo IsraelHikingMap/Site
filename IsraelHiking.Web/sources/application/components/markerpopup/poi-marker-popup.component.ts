@@ -59,7 +59,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         });
         this.marker.on("popupclose", () => {
             if (this.editMode) {
-                this.toastService.warning(this.resources.closeWhileInEditMode);
+                this.toastService.info(this.resources.closeWhileInEditMode);
             }
             this.editMode = false;
         });

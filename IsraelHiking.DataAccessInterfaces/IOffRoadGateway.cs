@@ -7,5 +7,6 @@ namespace IsraelHiking.DataAccess
     public interface IOffRoadGateway
     {
         Task<List<Feature>> GetAll();
+        Task<FeatureCollection> GetById(string id);
     }
 }
