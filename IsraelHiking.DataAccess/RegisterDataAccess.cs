@@ -24,6 +24,7 @@ namespace IsraelHiking.DataAccess
             services.AddTransient<IOsmRepository, OsmRepository>();
             services.AddTransient<IOsmGateway, OsmGateway>();
             services.AddTransient<INakebGateway, NakebGateway>();
+            services.AddTransient<IOffRoadGateway, OffRoadGateway>();
             return services;
         }
     }

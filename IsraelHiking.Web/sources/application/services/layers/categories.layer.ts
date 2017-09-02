@@ -96,6 +96,8 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                 return "icon-hike";
             case "Bicycle":
                 return "icon-bike";
+            case "4x4":
+                return "icon-four-by-four";
             default:
                 return "icon-star";
         }

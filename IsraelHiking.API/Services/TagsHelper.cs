@@ -39,15 +39,28 @@ namespace IsraelHiking.API.Services
                 Color = "brown",
                 Icon = "icon-ruins"
             };
-            _iconsToTags[ruinsIcon.Icon] = new IconTags(ruinsIcon, new List<KeyValuePair<string, string>>
+            _iconsToTags[ruinsIcon.Icon] = new IconTags(ruinsIcon, CreateOne("historic", "ruins"));
+            var archaeologicalSiteIcon = new IconColorCategory
             {
-                new KeyValuePair<string, string>("historic", "ruins"),
-                new KeyValuePair<string, string>("historic", "archaeological_site"),
-                new KeyValuePair<string, string>("historic", "memorial"),
-                new KeyValuePair<string, string>("historic", "monument"),
-                new KeyValuePair<string, string>("man_made", "water_well")
-            });
-
+                Category = Categories.HISTORIC,
+                Color = "brown",
+                Icon = "icon-archaeological"
+            };
+            _iconsToTags[archaeologicalSiteIcon.Icon] = new IconTags(archaeologicalSiteIcon, CreateOne("historic", "archaeological_site"));
+            var memorialIcon = new IconColorCategory
+            {
+                Category = Categories.HISTORIC,
+                Color = "brown",
+                Icon = "icon-memorial"
+            };
+            _iconsToTags[memorialIcon.Icon] = new IconTags(memorialIcon, CreateOne("historic", "memorial"));
+            var monumentIcon = new IconColorCategory
+            {
+                Category = Categories.HISTORIC,
+                Color = "brown",
+                Icon = "icon-monument"
+            };
+            _iconsToTags[monumentIcon.Icon] = new IconTags(monumentIcon, CreateOne("historic", "monument"));
             var springIcon = new IconColorCategory
             {
                 Category = Categories.WATER,
@@ -57,11 +70,36 @@ namespace IsraelHiking.API.Services
             _iconsToTags[springIcon.Icon] = new IconTags(springIcon, new List<KeyValuePair<string, string>>
             {
                 new KeyValuePair<string, string>("natural", "spring"),
-                new KeyValuePair<string, string>("natural", "waterhole"),
                 new KeyValuePair<string, string>("water", "pond"),
-                new KeyValuePair<string, string>("man_made", "cistern"),
-                new KeyValuePair<string, string>("waterway", "waterfall"),
             });
+            var waterfallIcon = new IconColorCategory
+            {
+                Category = Categories.WATER,
+                Color = "blue",
+                Icon = "icon-waterfall"
+            };
+            _iconsToTags[waterfallIcon.Icon] = new IconTags(waterfallIcon, CreateOne("waterway", "waterfall"));
+            var waterHole = new IconColorCategory
+            {
+                Category = Categories.WATER,
+                Color = "blue",
+                Icon = "icon-waterhole"
+            };
+            _iconsToTags[waterHole.Icon] = new IconTags(waterHole, CreateOne("natural", "waterhole"));
+            var waterWell = new IconColorCategory
+            {
+                Category = Categories.WATER,
+                Color = "blue",
+                Icon = "icon-water-well"
+            };
+            _iconsToTags[waterWell.Icon] = new IconTags(waterWell, CreateOne("man_made", "water_well"));
+            var cistern = new IconColorCategory
+            {
+                Category = Categories.WATER,
+                Color = "blue",
+                Icon = "icon-cistern"
+            };
+            _iconsToTags[cistern.Icon] = new IconTags(cistern, CreateOne("man_made", "cistern"));
             var natureReserveIcon = new IconColorCategory
             {
                 Icon = "icon-nature-reserve",
@@ -71,9 +109,9 @@ namespace IsraelHiking.API.Services
             _iconsToTags[natureReserveIcon.Icon] = new IconTags(natureReserveIcon,
                 new List<KeyValuePair<string, string>>
                 {
-                    new KeyValuePair<string, string>("boundary", "national_park"),
-                    new KeyValuePair<string, string>("boundary", "protected_area"),
                     new KeyValuePair<string, string>("leisure", "nature_reserve"),
+                    new KeyValuePair<string, string>("boundary", "national_park"),
+                    new KeyValuePair<string, string>("boundary", "protected_area")
                 });
             var iconPicnic = new IconColorCategory
             {

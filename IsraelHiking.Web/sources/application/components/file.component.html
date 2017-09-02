@@ -3,6 +3,6 @@
         <a class="cursor-pointer" mdTooltip="{{resources.openAFile}}" mdTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsEvent="Open from file"><i class="fa icon-folder-open fa-lg"></i></a>
         <input type="file" name="file" id="openFile" #openFile (change)="open($event)" [style.display]="'none'" />
     </label>
-    <a class="cursor-pointer" (click)="save($event)" mdTooltip="{{resources.save}}" mdTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsEvent="Save to file"><i class="fa icon-save fa-lg"></i></a>
+    <a class="cursor-pointer" (click)="save($event)" mdTooltip="{{resources.save}}" mdTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsEvent="Save to file"><i class="fa icon-floppy-o fa-lg"></i></a>
     <a class="cursor-pointer hidden-xs" (click)="print($event)" mdTooltip="{{resources.print}}" mdTooltipPosition="right" angulartics2On="click" angularticsCategory="Print" angularticsEvent="Print map"><i class="fa icon-print fa-lg"></i></a>
 </div>

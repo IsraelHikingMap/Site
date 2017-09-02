@@ -10,6 +10,7 @@
         public const string OTHER = "Other";
         public const string ROUTE_HIKE = "Hiking";
         public const string ROUTE_BIKE = "Bicycle";
+        public const string ROUTE_4X4 = "4x4";
         public const string NONE = "None";
         public const string POINTS_OF_INTEREST = "Points of Interest";
         public const string ROUTES = "Routes";
@@ -23,7 +24,8 @@
         };
         public static readonly string[] Routes = {
             ROUTE_HIKE,
-            ROUTE_BIKE
+            ROUTE_BIKE,
+            ROUTE_4X4
         };
     }
 
@@ -49,5 +51,6 @@
         public const string OSM = "OSM";
         public const string OSM_ADDRESS = "https://www.openstreetmap.org/";
         public const string NAKEB = "Nakeb";
+        public const string OFFROAD = "Off-road";
     }
 }
