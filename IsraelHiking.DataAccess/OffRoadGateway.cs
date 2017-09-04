@@ -36,6 +36,12 @@ namespace IsraelHiking.DataAccess
         public double longitude { get; set; }
     }
 
+    internal class JsonUrlAndTitle
+    {
+        public string url { get; set; }
+        public string title { get; set; }
+    }
+
     internal class JsonOffroadTrack
     {
         public JsonLatLang start { get; set; }
@@ -52,6 +58,8 @@ namespace IsraelHiking.DataAccess
     {
         public string shortDescription { get; set; }
         public string trackLayerKey { get; set; }
+        public string externalUrl { get; set; }
+        public JsonUrlAndTitle[] galleryImages { get; set; }
     }
 
     internal class JsonOffroadTrackLyers
@@ -161,12 +169,11 @@ namespace IsraelHiking.DataAccess
                 var reponse = await client.GetAsync($"{OFFROAD_BASE_ADDRESS}/tracks/{id}");
                 var content = await reponse.Content.ReadAsStringAsync();
                 track = JsonConvert.DeserializeObject<JsonOffroadTrackExtended>(content);
-                // HM TODO: fill this
-                //attributes.AddAttribute(FeatureAttributes.IMAGE_URL, offroadItem.picture);
-                //attributes.AddAttribute(FeatureAttributes.WEBSITE, offroadItem.link);
             }
             var attributes = GetAttributes(track);
             attributes.AddAttribute(FeatureAttributes.DESCRIPTION, track.shortDescription ?? string.Empty);
+            attributes.AddAttribute(FeatureAttributes.IMAGE_URL, track.galleryImages?.FirstOrDefault()?.url ?? string.Empty);
+            attributes.AddAttribute(FeatureAttributes.WEBSITE, track.externalUrl);
             var trackLayerKey = track.trackLayerKey;
             using (var client = new HttpClient())
             {
