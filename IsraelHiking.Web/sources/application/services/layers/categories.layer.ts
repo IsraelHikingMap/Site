@@ -1,5 +1,4 @@
 ﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
-import { Http } from "@angular/http";
 import { LocalStorageService } from "ngx-store"
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -9,18 +8,8 @@ import { MapService } from "../map.service";
 import { PoiMarkerPopupComponent } from "../../components/markerpopup/poi-marker-popup.component";
 import { IconsService } from "../icons.service";
 import { ResourcesService } from "../resources.service";
-import { IPointOfInterest, PoiService } from "../poi.service";
-import { Urls } from "../../common/Urls";
+import { IPointOfInterest, PoiService, CategoriesType, ICategory } from "../poi.service";
 import * as Common from "../../common/IsraelHiking";
-
-
-export interface ICategory {
-    type: string,
-    isSelected: boolean;
-    icon: string;
-}
-
-export type CategoriesType = "Points of Interest" | "Routes";
 
 export class CategoriesLayer extends BasePoiMarkerLayer {
 
@@ -31,7 +20,6 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
     public categories: ICategory[];
 
     constructor(mapService: MapService,
-        private http: Http,
         private injector: Injector,
         private componentFactoryResolver: ComponentFactoryResolver,
         private applicationRef: ApplicationRef,
@@ -44,20 +32,23 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         this.requestsNumber = 0;
         this.visible = this.localStorageService.get(this.categoriesType + CategoriesLayer.VISIBILITY_PREFIX) || false;
         this.markerIcon = IconsService.createPoiIcon("icon-star", "orange");
-        this.http.get(Urls.poiCategories + categoriesType).toPromise().then((response) => {
-            let categoriesArray = response.json() as string[];
-            for (let categoryType of categoriesArray) {
-                let selected = this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX) == null
-                    ? true
-                    : this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX);
-                this.categories.push({
-                    type: categoryType,
-                    isSelected: selected,
-                    icon: this.getCategoryIcon(categoryType)
-                });
+        this.poiService.getCategories(this.categoriesType).then((response: {}) => {
+            for (let categoryType in response) {
+                if (response.hasOwnProperty(categoryType)) {
+                    let selected = this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX) == null
+                        ? true
+                        : this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX);
+                    this.categories.push({
+                        key: categoryType,
+                        isSelected: selected,
+                        label: this.resources.translate(categoryType),
+                        icon: response[categoryType][0].icon
+                    } as ICategory);
+                }
             }
             this.updateMarkers();
         });
+        
         this.resources.languageChanged.subscribe(() => {
             this.markers.clearLayers();
             this.updateMarkers();
@@ -80,29 +71,6 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         return this;
     }
 
-    private getCategoryIcon(category: string): string {
-        switch (category) {
-            case "Camping":
-                return "icon-picnic";
-            case "Viewpoint":
-                return "icon-viewpoint";
-            case "Water":
-                return "icon-tint";
-            case "Historic":
-                return "icon-ruins";
-            case "Natural":
-                return "icon-cave";
-            case "Hiking":
-                return "icon-hike";
-            case "Bicycle":
-                return "icon-bike";
-            case "4x4":
-                return "icon-four-by-four";
-            default:
-                return "icon-star";
-        }
-    }
-
     protected getIconString(): string {
         return "fa icon-star";
     }
@@ -118,7 +86,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
     }
 
     private changeCategorySelectedState(category: ICategory, newState: boolean) {
-        this.localStorageService.set(category.type + CategoriesLayer.SELECTED_PREFIX, newState);
+        this.localStorageService.set(category.key + CategoriesLayer.SELECTED_PREFIX, newState);
         category.isSelected = newState;
     }
 
@@ -131,7 +99,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         let southWest = this.mapService.map.getBounds().pad(0.2).getSouthWest();
         this.requestsNumber++;
         this.poiService
-            .getPoints(northEast, southWest, this.categories.filter(f => f.isSelected).map(f => f.type))
+            .getPoints(northEast, southWest, this.categories.filter(f => f.isSelected).map(f => f.key))
             .then((response) => {
                 this.requestArrieved();
                 if (this.requestsNumber !== 0) {

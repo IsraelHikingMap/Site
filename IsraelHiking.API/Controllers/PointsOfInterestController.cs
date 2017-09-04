@@ -16,38 +16,34 @@ namespace IsraelHiking.API.Controllers
     [Route("api/poi")]
     public class PointsOfInterestController : Controller
     {
-        private readonly LruCache<string, TokenAndSecret> _cache;
         private readonly Dictionary<string, IPointsOfInterestAdapter> _adapters;
+        private readonly ITagsHelper _tagsHelper;
+        private readonly LruCache<string, TokenAndSecret> _cache;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="adapters"></param>
         /// <param name="cache"></param>
-        public PointsOfInterestController(IEnumerable<IPointsOfInterestAdapter> adapters, LruCache<string, TokenAndSecret> cache)
+        public PointsOfInterestController(IEnumerable<IPointsOfInterestAdapter> adapters,
+            ITagsHelper tagsHelper,
+            LruCache<string, TokenAndSecret> cache)
         {
             _adapters = adapters.ToDictionary(a => a.Source, a => a);
             _cache = cache;
+            _tagsHelper = tagsHelper;
         }
 
         /// <summary>
-        /// Gets the available filters for POIs
+        /// Gets the available categories for the specified type
         /// </summary>
+        /// <param name="categoriesType">The categories' type</param>
         /// <returns></returns>
-        [Route("categories/{group}")]
+        [Route("categories/{categoriesType}")]
         [HttpGet]
-        [ProducesResponseType(typeof(string[]), 200)]
-        public IActionResult GetCategories(string group)
+        public Dictionary<string, IEnumerable<IconColorCategory>> GetCategoriesByGroup(string categoriesType)
         {
-            switch (group)
-            {
-                case Categories.POINTS_OF_INTEREST:
-                    return Ok(Categories.Points);
-                case Categories.ROUTES:
-                    return Ok(Categories.Routes);
-                default:
-                    return BadRequest($"No categories for the provided group: {group}");
-            }
+            return _tagsHelper.GetIconsPerCategoryByType(categoriesType);
         }
 
         /// <summary>
@@ -60,8 +56,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of GeoJSON features</returns>
         [Route("")]
         [HttpGet]
-        public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories,
-            string language = "")
+        public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories, string language = "")
         {
             if (string.IsNullOrWhiteSpace(categories))
             {

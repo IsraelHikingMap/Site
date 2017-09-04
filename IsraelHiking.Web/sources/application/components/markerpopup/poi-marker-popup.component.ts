@@ -1,6 +1,6 @@
 ﻿import { Component, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
-import { MdDialog } from "@angular/material";
+import { MdDialog, MdSelectChange } from "@angular/material";
 import * as _ from "lodash";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
@@ -107,6 +107,13 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         return this.routeData && this.routeData.segments.length > 0;
     }
 
+    public getIcon() {
+        if (this.poiExtended && this.poiExtended.isEditable === false) {
+            return this.poiExtended.icon;
+        }
+        return "icon-camera";
+    }
+
     public save() {
         this.editMode = false;
         this.poiExtended.description = this.description;
@@ -199,21 +206,16 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         compoent.componentInstance.location = this.marker.getLatLng();
         compoent.componentInstance.source = this.poiExtended.source;
         compoent.componentInstance.identifier = this.poiExtended.id;
-        let category = null;
-        for (let group of compoent.componentInstance.categoriesTypeGroups) {
-            category = _.find(group.categories, iconToFind => iconToFind.icon === this.poiExtended.icon);
-            if (category) {
-                compoent.componentInstance.selectCategory(category);
-                break;
+        compoent.componentInstance.initializationPromise.then(() => {
+            for (let category of compoent.componentInstance.categories) {
+                let icon = _.find(category.icons, iconToFind => iconToFind.icon === this.poiExtended.icon);
+                if (icon) {
+                    compoent.componentInstance.selectCategory({ value: category } as MdSelectChange);
+                    compoent.componentInstance.selectIcon(icon);
+                    break;
+                }
             }
-        }
-        if (!category) {
-            let lastGroup = _.last(compoent.componentInstance.categoriesTypeGroups);
-            let lastCategory = _.last(lastGroup.categories);
-            lastCategory.icon = this.poiExtended.icon;
-            lastCategory.label = this.resources.other;
-            compoent.componentInstance.selectCategory(lastCategory);
-        }
+        });
         compoent.afterClosed().subscribe((poiExtended: IPointOfInterestExtended) => {
             if (!poiExtended) {
                 return;

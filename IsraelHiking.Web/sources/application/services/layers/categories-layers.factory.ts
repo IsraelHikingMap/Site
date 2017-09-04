@@ -1,31 +1,25 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
-import { Http } from "@angular/http";
 import { LocalStorageService } from "ngx-store"
 
-import { CategoriesLayer, CategoriesType } from "./categories.layer";
+import { CategoriesLayer } from "./categories.layer";
 import { MapService } from "../map.service";
 import { ResourcesService } from "../resources.service";
-import {PoiService} from "../poi.service";
+import { PoiService, CategoriesType } from "../poi.service";
 
 @Injectable()
 export class CategoriesLayerFactory {
     private categoryLayers: Map<CategoriesType, CategoriesLayer>;
 
-    public categoriesTypes: CategoriesType[];
-
     constructor(private mapService: MapService,
-        private http: Http,
         private injector: Injector,
         private componentFactoryResolver: ComponentFactoryResolver,
         private applicationRef: ApplicationRef,
         private resources: ResourcesService,
         private localStorageService: LocalStorageService,
         private poiService: PoiService) {
-        this.categoriesTypes = ["Points of Interest", "Routes"];
         this.categoryLayers = new Map<CategoriesType, CategoriesLayer>();
-        for (let category of this.categoriesTypes) {
+        for (let category of this.poiService.getCategoriesTypes()) {
             let layer = new CategoriesLayer(this.mapService,
-                this.http,
                 this.injector,
                 this.componentFactoryResolver,
                 this.applicationRef,

@@ -22,5 +22,11 @@ namespace IsraelHiking.API.Services
         /// <param name="icon">The icon</param>
         /// <returns>A list of relevant tags</returns>
         List<KeyValuePair<string, string>> FindTagsForIcon(string icon);
+
+        /// <summary>
+        /// Returns all the icons grouped by their category for a specific categories' type
+        /// </summary>
+        /// <returns></returns>
+        Dictionary<string, IEnumerable<IconColorCategory>> GetIconsPerCategoryByType(string categoriesType);
     }
 }

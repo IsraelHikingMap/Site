@@ -1,6 +1,6 @@
 ﻿import { Component, ApplicationRef } from "@angular/core";
 import { Http } from "@angular/http";
-import { MdDialog } from "@angular/material";
+import { MdDialog, MdSelectChange } from "@angular/material";
 import * as _ from "lodash";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
@@ -105,12 +105,16 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         compoent.componentInstance.title = this.title;
         compoent.componentInstance.source = "OSM";
         compoent.componentInstance.location = this.marker.getLatLng();
-        for (let group of compoent.componentInstance.categoriesTypeGroups) {
-            let category = _.find(group.categories, iconToFind => iconToFind.icon === this.markerType);
-            if (category) {
-                compoent.componentInstance.selectCategory(category);
-            }    
-        }
-        
+        compoent.componentInstance.initializationPromise.then(() => {
+            for (let category of compoent.componentInstance.categories) {
+                let icon = _.find(category.icons, iconToFind => iconToFind.icon === this.markerType);
+                if (icon) {
+                    compoent.componentInstance.selectCategory({ value: category } as MdSelectChange);
+                    compoent.componentInstance.selectIcon(icon);
+                }
+            }
+        });
+
+
     }
 }

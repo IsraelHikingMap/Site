@@ -5,9 +5,9 @@
                 <a md-button [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
                 <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
             </label>
-            <i [hidden]="isEditMode()" class="fa icon-camera fa-5x"></i>
+            <i [hidden]="isEditMode()" class="fa {{getIcon()}} fa-5x"></i>
         </div>
-        <div fxFlex="66" [hidden]="isEditMode()" class="cursor-pointer">
+        <div fxFlex="66" [hidden]="isHideEditMode()" class="cursor-pointer">
             <h2 [ngClass]="resources.getTextAlignment()" (click)="setEditMode()">{{resources.clickToEdit}}</h2>
         </div>
     </div>

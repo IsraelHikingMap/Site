@@ -17,8 +17,8 @@ import { OverlayAddDialogComponent } from "../dialogs/layers/overlay-add-dialog.
 import { OverlayEditDialogComponent } from "../dialogs/layers/overlay-edit-dialog-component";
 import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
-import { ICategory, CategoriesType } from "../../services/layers/categories.layer";
 import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
+import { PoiService, CategoriesType, ICategory } from "../../services/poi.service";
 
 interface ICategoriesContainer {
     categories: ICategory[];
@@ -49,16 +49,18 @@ export class LayersSidebarComponent extends BaseMapComponent {
         private routesService: RoutesService,
         private categoriesLayerFactory: CategoriesLayerFactory,
         private fileService: FileService,
-        private sidebarService: SidebarService) {
+        private sidebarService: SidebarService,
+        private poiService: PoiService) {
         super(resources);
         this.baseLayers = layersService.baseLayers;
         this.overlays = layersService.overlays;
         this.routes = routesService.routes;
-        this.categoriesTypes = this.categoriesLayerFactory.categoriesTypes;
+        this.categoriesTypes = this.poiService.getCategoriesTypes();
         this.categoriesMap = new Map<CategoriesType, ICategoriesContainer>();
         for (let categoriesType of this.categoriesTypes) {
             this.categoriesMap.set(categoriesType, {
                 categories: this.categoriesLayerFactory.get(categoriesType).categories,
+                // HM TODO: store in local storage?
                 isExpanded: false
             });
         }

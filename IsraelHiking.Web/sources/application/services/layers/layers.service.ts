@@ -10,6 +10,7 @@ import { WikiMarkersLayer } from "./wiki-markers.layer";
 import { NakebMarkerLayer } from "./nakeb-markers.layer";
 import { ResourcesService } from "../resources.service";
 import { OsmUserService } from "../osm-user.service";
+import { PoiService } from "../poi.service";
 import { CategoriesLayerFactory } from "./categories-layers.factory";
 import { Urls } from "../../common/Urls";
 import { Deferred } from "../../common/deferred";
@@ -73,7 +74,8 @@ export class LayersService {
         private osmUserService: OsmUserService,
         private wikiMarkersLayer: WikiMarkersLayer,
         private nakebMarkerLayer: NakebMarkerLayer,
-        categoriesLayersFactory: CategoriesLayerFactory
+        categoriesLayersFactory: CategoriesLayerFactory,
+        poiService: PoiService,
     ) {
         this.selectedBaseLayer = null;
         this.baseLayers = [];
@@ -87,7 +89,7 @@ export class LayersService {
             () => this.onOsmUserServiceInitializationFinished(deferred)
         );
 
-        for (let categoryType of categoriesLayersFactory.categoriesTypes) {
+        for (let categoryType of poiService.getCategoriesTypes()) {
             let layer = categoriesLayersFactory.get(categoryType);
             if (layer.isVisible()) {
                 this.mapService.map.addLayer(layer);

@@ -1,23 +1,17 @@
 ﻿import { Component } from "@angular/core";
 import { Http } from "@angular/http";
-import { MdDialogRef } from "@angular/material";
+import { MdDialogRef, MdSelectChange } from "@angular/material";
+import * as _ from "lodash";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { PoiService, IPointOfInterestExtended } from "../../services/poi.service";
+import { PoiService, IPointOfInterestExtended, ICategory, IIconColorLabel } from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
 
-
-
-export interface ICategory {
-    icon: string;
-    color: string;
-    label: string;
-}
-
-export interface ICategoriesGroup {
-    categories: ICategory[];
+export interface ICategoryWithIcons extends ICategory {
+    icons: IIconColorLabel[];
+    selectedIcon: IIconColorLabel;
 }
 
 @Component({
@@ -25,7 +19,7 @@ export interface ICategoriesGroup {
     templateUrl: "./update-point-dialog.component.html"
 })
 export class UpdatePointDialogComponent extends BaseMapComponent {
-    public categoriesTypeGroups: ICategoriesGroup[];
+    public categories: ICategoryWithIcons[];
     public source: string;
     public title: string;
     public description: string;
@@ -33,7 +27,9 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public websiteUrl: string;
     public identifier: string;
     public location: L.LatLng;
-    public selectedCategory: ICategory;
+    public selectedCategory: ICategoryWithIcons;
+    public icons: IIconColorLabel[];
+    public initializationPromise: Promise<any>;
 
     constructor(resources: ResourcesService,
         public dialogRef: MdDialogRef<UpdatePointDialogComponent>,
@@ -42,68 +38,52 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         private toastService: ToastService,
         private poiService: PoiService) {
         super(resources);
-        this.categoriesTypeGroups = [
-            {
-                categories: [
-                    {
-                        icon: "icon-viewpoint",
-                        color: "black",
-                        label: this.resources.legendViewpoint
-                    }, {
-                        icon: "icon-tint",
-                        color: "blue",
-                        label: this.resources.spring
-                    }, {
-                        icon: "icon-ruins",
-                        color: "brown",
-                        label: this.resources.legendRuins
+        this.categories = [];
+        this.initializationPromise = new Promise((resolve, reject) => {
+            this.poiService.getCategories("Points of Interest").then((response) => {
+                for (let categoryType in response) {
+                    if (response.hasOwnProperty(categoryType)) {
+                        this.categories.push({
+                            key: categoryType,
+                            isSelected: false,
+                            label: this.resources.translate(categoryType),
+                            icon: response[categoryType][0].icon,
+                            color: response[categoryType][0].color,
+                            icons: response[categoryType].map(i => {
+                                return {
+                                    color: i.color,
+                                    icon: i.icon,
+                                    label: this.resources.translate(i.label)
+                                } as IIconColorLabel;
+                            })
+                        } as ICategoryWithIcons);
                     }
-                ]
-            },
-            {
-                categories: [
-                    {
-                        icon: "icon-picnic",
-                        color: "brown",
-                        label: this.resources.legendPicnicArea
-                    },
-                    {
-                        icon: "icon-campsite",
-                        color: "grey",
-                        label: this.resources.legendCampsite
-                    },
-                    {
-                        icon: "icon-tree",
-                        color: "green",
-                        label: this.resources.legendTree
-                    }
-                ]
-            },
-            {
-                categories: [
-                    {
-                        icon: "icon-cave",
-                        color: "black",
-                        label: this.resources.legendCave
-                    },
-                    {
-                        icon: "icon-star",
-                        color: "orange",
-                        label: this.resources.legendAttraction
-                    },
-                    {
-                        icon: "icon-peak",
-                        color: "black",
-                        label: this.resources.legendPeak
-                    }
-                ]
-            }
-        ];
-        this.selectedCategory = this.categoriesTypeGroups[0].categories[0];
+                }
+                this.selectedCategory = this.categories[0];
+                this.categories[0].selectedIcon = this.categories[0].icons[0];
+                resolve();
+            }, () => {
+                reject();
+            });
+        });
+
     }
 
-    public selectCategory(category: ICategory) {
-        this.selectedCategory = category;
+    public selectCategory(e: MdSelectChange) {
+        this.categories.forEach(c => c.isSelected = false);
+        this.selectedCategory = e.value;
+        this.selectedCategory.isSelected = true;
+        if (this.selectedCategory.selectedIcon == null) {
+            this.selectedCategory.selectedIcon = this.selectedCategory.icons[0];
+        }
+    }
+
+    private getCategory(categoryKey: string): ICategoryWithIcons {
+        return _.find(this.categories, categoryToFind => categoryToFind.key === categoryKey);
+    }
+
+    public selectIcon(icon: IIconColorLabel) {
+        this.selectedCategory.selectedIcon = icon;
     }
 
     public uploadImage(e: any) {
@@ -121,8 +101,8 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public updatePoint() {
         let poiExtended = {
             description: this.description,
-            icon: this.selectedCategory.icon,
-            iconColor: this.selectedCategory.color,
+            icon: this.selectedCategory.selectedIcon.icon,
+            iconColor: this.selectedCategory.selectedIcon.color,
             id: this.identifier,
             imageUrl: this.imageUrl,
             title: this.title,

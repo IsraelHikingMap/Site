@@ -57,7 +57,7 @@
             </div>
         </div>
         <div [hidden]="!isAdvanced || !isCategoriesVisible(categoriesType)" *ngFor="let category of getCategories(categoriesType)">
-            <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategory(categoriesType, category, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle category visiblity {{category.type}}">
+            <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategory(categoriesType, category, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle category visiblity {{category.key}}">
                 <div fxFlex="10"></div>
                 <div fxFlex="15">
                     <i class="fa" [ngClass]="{'icon-eye': category.isSelected, 'icon-eye-slash': !category.isSelected}"></i>
@@ -66,7 +66,7 @@
                     <i class="fa" [ngClass]="category.icon"></i>
                 </div>
                 <div fxFlex="60">
-                    <span>{{resources.translate(category.type)}}</span>
+                    <span>{{category.label}}</span>
                 </div>
             </div>
         </div>

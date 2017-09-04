@@ -26,13 +26,16 @@
         <md-input-container fxFill>
             <textarea mdInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
         </md-input-container>
-        <div *ngFor="let group of categoriesTypeGroups">
-            <div fxLayout="row" fxFill>
-                <button md-button *ngFor="let category of group.categories" (click)="selectCategory(category)" class="cursor-pointer text-center" [ngClass]="{active: selectedCategory === category}" fxFlex="{{100/categoriesTypeGroups.length}}" angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Select {{category.icon}}">
-                    <i [style.color]="category.color" class="fa {{category.icon}} fa-lg"></i><br/>
-                    {{category.label}}
-                </button>
-            </div>
+        <br/>
+        <md-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (change)="selectCategory($event)" fxFill>
+            <md-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{category.label}}</md-option>
+        </md-select>
+        <div fxLayout="row">
+            <button md-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
+                <i class="fa" [ngClass]="icon.icon" [style.color]="icon.color"></i>
+                <br/>
+                {{icon.label}}
+            </button>
         </div>
         <div fxLayout="row">
             <button md-raised-button color="primary" (click)="updatePoint()" fxFill angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{resources.uploadPoint}}</button>

@@ -66,7 +66,7 @@ namespace IsraelHiking.DataAccess
 
     public class OffRoadGateway : IOffRoadGateway
     {
-        private const string OFFROAD_BASE_ADDRESS = "https://brilliant-will-93906.appspot.com/_ah/api/myAdventureApi/v1/";
+        private const string OFFROAD_BASE_ADDRESS = "https://brilliant-will-93906.appspot.com/_ah/api/myAdventureApi/v1";
 
         public async Task<List<Feature>> GetAll()
         {
@@ -148,7 +148,7 @@ namespace IsraelHiking.DataAccess
                 case "6290631567605760":
                     return null;
                 default:
-                    return "icon-offroad";
+                    return "icon-off-road";
             }
             // return null for unsupported sources
         }
@@ -158,7 +158,7 @@ namespace IsraelHiking.DataAccess
             JsonOffroadTrackExtended track;
             using (var client = new HttpClient())
             {
-                var reponse = await client.GetAsync($"{OFFROAD_BASE_ADDRESS}/tarcks/{id}");
+                var reponse = await client.GetAsync($"{OFFROAD_BASE_ADDRESS}/tracks/{id}");
                 var content = await reponse.Content.ReadAsStringAsync();
                 track = JsonConvert.DeserializeObject<JsonOffroadTrackExtended>(content);
                 // HM TODO: fill this
@@ -180,7 +180,7 @@ namespace IsraelHiking.DataAccess
                     //return new FeatureCollection(new Collection<IFeature>(features));
                     throw new NotImplementedException("Off-road complex layers need implementation");
                 }
-                var coordinates = trackLayers.layers.First().path.Select(p => new Coordinate(p.longitude, p.longitude)).ToArray();
+                var coordinates = trackLayers.layers.First().path.Select(p => new Coordinate(p.longitude, p.latitude)).ToArray();
                 var lineString = new LineString(coordinates);
                 var features = new List<IFeature> { new Feature(lineString, attributes) };
                 return new FeatureCollection(new Collection<IFeature>(features));
