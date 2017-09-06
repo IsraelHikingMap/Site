@@ -14,6 +14,7 @@ import { IconsService } from "../../services/icons.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { GeoJsonParser } from "../../services/geojson.parser";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
+import { ImageDialogCompnent } from "../dialogs/image-dialog.component";
 import * as Common from "../../common/IsraelHiking";
 
 
@@ -233,5 +234,11 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     private getRatingNumber(rating: IRating): number {
         return _.sum(rating.raters.map(r => r.value));
+    }
+
+    public showImage() {
+        let dialog = this.mdDialog.open(ImageDialogCompnent);
+        dialog.componentInstance.title = this.title;
+        dialog.componentInstance.imageUrl = this.thumbnail;
     }
 }

@@ -1,0 +1,9 @@
+﻿.main-image {
+    height: 480px;
+}
+
+@media only screen and (max-height: 640px) {
+    .main-image {
+        height: 300px;
+    }
+}

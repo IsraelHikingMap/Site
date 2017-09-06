@@ -12,7 +12,7 @@
         </div>
     </div>
     <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="!thumbnail">
-        <img [src]="thumbnail" class="img-responsive" height="100"/>
+        <img [src]="thumbnail" class="img-responsive cursor-pointer" height="100" (click)="showImage()" />
     </div>
     <div fxLayout="row">
         <div fxFlex="80">

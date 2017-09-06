@@ -83,6 +83,7 @@ import { ShareDialogComponent } from "./components/dialogs/share-dialog.componen
 import { WikiMarkerPopupComponent } from "./components/markerpopup/wiki-marker-popup.component";
 import { NakebMarkerPopupComponent } from "./components/markerpopup/nakeb-marker-popup.component";
 import { UpdatePointDialogComponent } from "./components/dialogs/update-point-dialog.component";
+import { ImageDialogCompnent } from "./components/dialogs/image-dialog.component";
 
 export function getWindow() { return window; }
 
@@ -145,7 +146,8 @@ export function getWindow() { return window; }
         ShareDialogComponent,
         WikiMarkerPopupComponent,
         NakebMarkerPopupComponent,
-        UpdatePointDialogComponent
+        UpdatePointDialogComponent,
+        ImageDialogCompnent
     ],
     providers: [SessionStorageService,
         LocalStorageService,
@@ -216,7 +218,8 @@ export function getWindow() { return window; }
         NakebMarkerPopupComponent,
         GoogleChartDirective,
         DraggableResizableDirective,
-        UpdatePointDialogComponent
+        UpdatePointDialogComponent,
+        ImageDialogCompnent
     ],
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })
