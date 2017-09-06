@@ -173,7 +173,7 @@ namespace IsraelHiking.DataAccess
             var attributes = GetAttributes(track);
             attributes.AddAttribute(FeatureAttributes.DESCRIPTION, track.shortDescription ?? string.Empty);
             attributes.AddAttribute(FeatureAttributes.IMAGE_URL, track.galleryImages?.FirstOrDefault()?.url ?? string.Empty);
-            attributes.AddAttribute(FeatureAttributes.WEBSITE, track.externalUrl);
+            attributes.AddAttribute(FeatureAttributes.WEBSITE, track.externalUrl ?? string.Empty);
             var trackLayerKey = track.trackLayerKey;
             using (var client = new HttpClient())
             {
