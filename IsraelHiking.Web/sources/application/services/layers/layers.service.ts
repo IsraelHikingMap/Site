@@ -164,6 +164,7 @@ export class LayersService {
         let overlaysToStore = [] as Common.LayerData[];
         for (let overlay of this.overlays) {
             if (overlay.key === LayersService.HIKING_TRAILS ||
+                overlay.key === LayersService.BICYCLE_TRAILS ||
                 overlay.key === LayersService.WIKIPEDIA ||
                 overlay.key === LayersService.NAKEB) {
                 continue;
