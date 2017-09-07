@@ -4,6 +4,7 @@ var gulp = require("gulp");
 var filter = require("gulp-filter");
 var path = require("path");
 var gettext = require("gulp-angular-gettext");
+var jsonFormat = require("gulp-json-format");
 
 var paths = {
     webroot: "./sources/"
@@ -19,6 +20,7 @@ gulp.task("extract_to_pot", function () {
 gulp.task("compile_translations", function () {
     return gulp.src(paths.traslations + "*.po")
         .pipe(gettext.compile({ format: "json" }))
+        .pipe(jsonFormat(4))
         .pipe(gulp.dest(paths.traslations));
 });
 
