@@ -17,7 +17,7 @@ dotnet restore
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
 Write-Host "npm install - to restore npm packages for typescript build" 
-npm install
+npm install --loglevel error
 
 # Compile TypeScript files using angular-cli
 
