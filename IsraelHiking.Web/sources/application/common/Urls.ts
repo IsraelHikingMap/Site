@@ -24,4 +24,5 @@
     public static DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
     public static MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
     public static OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";
+    public static OVERLAY_MTB_ADDRESS = "/OverlayMTB/{z}/{x}/{y}.png";
 }

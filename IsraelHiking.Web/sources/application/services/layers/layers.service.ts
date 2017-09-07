@@ -41,10 +41,11 @@ export class LayersService {
 
     private static MAX_ZOOM = 20;
     private static HIKING_TRAILS = "Hiking Trails";
+    private static BICYCLE_TRAILS = "Bicycle Trails";
     private static NAKEB = "Nakeb";
     private static WIKIPEDIA = "Wikipedia";
     private static ATTRIBUTION = "Tiles © <a href='https://IsraelHiking.osm.org.il' target='_blank'>Israel Hiking</a>, <a href='https://creativecommons.org/licenses/by-nc-sa/3.0/' target='_blank'>CC BY-NC-SA 3.0</a>. Data by <a href='https://openstreetmap.org' target='_blank'>OpenStreetMap</a> under <a href='https://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
-    private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION + "Map style courtesy of <a href='http://mtbmap.no'>MTBmap.no.</a> ";
+    private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION;
     private static TRAILS_ATTRIBUTION = "Trail " + LayersService.ATTRIBUTION;
     private static BASE_LAYERS_KEY = "BaseLayers";
     private static OVERLAYS_KEY = "Overlays";
@@ -123,6 +124,14 @@ export class LayersService {
             maxZoom: LayersService.MAX_NATIVE_ZOOM
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
         hikingTrailsOverlay.isEditable = false;
+
+        let bicycleTrailsOverlay = this.addNewOverlay({
+            key: LayersService.BICYCLE_TRAILS,
+            address: Urls.OVERLAY_MTB_ADDRESS,
+            minZoom: LayersService.MIN_ZOOM,
+            maxZoom: LayersService.MAX_NATIVE_ZOOM
+        } as ILayer, LayersService.TRAILS_ATTRIBUTION);
+        bicycleTrailsOverlay.isEditable = false;
 
         this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.WIKIPEDIA, layer: this.wikiMarkersLayer as L.Layer } as IOverlay);
         // HM TODO: completely remove the class.
@@ -415,7 +424,7 @@ export class LayersService {
             minZoom: (layerData.minZoom == null) ? LayersService.MIN_ZOOM : layerData.minZoom,
             maxNativeZoom: (layerData.maxZoom == null) ? LayersService.MAX_NATIVE_ZOOM : layerData.maxZoom,
             maxZoom: LayersService.MAX_ZOOM,
-            attribution: attribution || LayersService.ATTRIBUTION
+            attribution: attribution
         } as L.TileLayerOptions;
     }
 
