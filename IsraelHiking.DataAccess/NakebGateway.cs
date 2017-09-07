@@ -53,10 +53,13 @@ namespace IsraelHiking.DataAccess
                 var content = await reponse.Content.ReadAsStringAsync();
                 var nakebItem = JsonConvert.DeserializeObject<JsonNakebItemExtended>(content);
                 var attributes = GetAttributes(nakebItem);
-                attributes.AddAttribute(FeatureAttributes.DESCRIPTION, nakebItem.prolog ?? string.Empty);
+                var description = nakebItem.prolog ?? string.Empty;
+                description += $"\n{string.Join(",", nakebItem.attributes)}\nאורך: {nakebItem.length} ק\"מ";
+                attributes.AddAttribute(FeatureAttributes.DESCRIPTION, description);
                 attributes.AddAttribute(FeatureAttributes.IMAGE_URL, nakebItem.picture);
                 attributes.AddAttribute(FeatureAttributes.WEBSITE, nakebItem.link);
-                var lineString = new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
+                var lineString =
+                    new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
                 var features = new List<IFeature> {new Feature(lineString, attributes)};
                 features.AddRange(nakebItem.markers.Select(ConvertToPointFeature).ToList());
                 return new FeatureCollection(new Collection<IFeature>(features));

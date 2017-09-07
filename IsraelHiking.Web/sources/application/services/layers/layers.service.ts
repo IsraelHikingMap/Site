@@ -2,8 +2,9 @@
 import { Http } from "@angular/http";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
-import "leaflet.gridlayer.googlemutant";
 import * as L from "leaflet";
+import "leaflet.gridlayer.googlemutant";
+
 
 import { MapService } from "../map.service";
 import { WikiMarkersLayer } from "./wiki-markers.layer";
@@ -15,8 +16,6 @@ import { CategoriesLayerFactory } from "./categories-layers.factory";
 import { Urls } from "../../common/Urls";
 import { Deferred } from "../../common/deferred";
 import * as Common from "../../common/IsraelHiking";
-
-
 
 export interface ILayer extends Common.LayerData {
     layer: L.Layer;
@@ -58,9 +57,10 @@ export class LayersService {
     @LocalStorage()
     private storedOverlays: Common.LayerData[] = [];
     @LocalStorage()
-    private selectedBaseLayerKey: string = LayersService.ISRAEL_HIKING_MAP;
-    @LocalStorage()
     private activeOverlayKeys: string[] = [];
+    @LocalStorage()
+    private selectedBaseLayerKey: string = LayersService.ISRAEL_HIKING_MAP;
+    
 
     private overlayZIndex: any;
 
@@ -296,8 +296,7 @@ export class LayersService {
         } else {
             this.mapService.map.removeLayer(overlay.layer);
             if (this.activeOverlayKeys.indexOf(overlay.key) !== -1) {
-                _.remove(this.activeOverlayKeys, (keyToFind) => keyToFind === overlay.key);
-                this.activeOverlayKeys = this.activeOverlayKeys;
+                this.activeOverlayKeys = this.activeOverlayKeys.filter((keyToFind) => keyToFind !== overlay.key);
             }
         }
     }

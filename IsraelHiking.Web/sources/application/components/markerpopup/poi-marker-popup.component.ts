@@ -1,4 +1,4 @@
-﻿import { Component, ApplicationRef } from "@angular/core";
+﻿import { Component, ApplicationRef, ViewEncapsulation } from "@angular/core";
 import { Http } from "@angular/http";
 import { MdDialog, MdSelectChange } from "@angular/material";
 import * as _ from "lodash";
@@ -20,7 +20,8 @@ import * as Common from "../../common/IsraelHiking";
 
 @Component({
     selector: "poi-marker-popup",
-    templateUrl: "./poi-marker-popup.component.html"
+    templateUrl: "./poi-marker-popup.component.html",
+    encapsulation: ViewEncapsulation.None
 })
 export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private static readonly THREE_HOURES = 3 * 60 * 60 * 1000;
@@ -34,6 +35,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private routeData: Common.RouteData;
     private extendedDataArrivedTimeStamp: Date;
     private poiExtended: IPointOfInterestExtended;
+    private isLoading: boolean;
 
     constructor(resources: ResourcesService,
         http: Http,
@@ -48,6 +50,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         private poiService: PoiService) {
         super(resources, http, applicationRef, elevationProvider);
         this.editMode = false;
+        this.isLoading = false;
         this.extendedDataArrivedTimeStamp = null;
     }
 
@@ -72,17 +75,17 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     };
     public clearSelectedRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
 
-    public getDescrition() {
+    public getDescrition(): string[] {
         if (this.description) {
-            return this.description;
+            return this.description.split("\n");
         }
         if (!this.poiExtended || !this.poiExtended.isEditable) {
-            return "";
+            return [""];
         }
         if (this.osmUserService.isLoggedIn() === false) {
-            return this.resources.loginRequired;
+            return [this.resources.loginRequired];
         }
-        return this.resources.emptyPoiDescription;
+        return [this.resources.emptyPoiDescription];
     }
 
     public isHideEditMode(): boolean {
@@ -170,19 +173,21 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.selectRoute(this.routeData);
             return;
         }
+        this.isLoading = true;
         this.poiService.getPoint(this.marker.identifier, this.source).then((response) => {
-                this.extendedDataArrivedTimeStamp = new Date();
-                let poiExtended = response.json() as IPointOfInterestExtended;
-                this.poiExtended = poiExtended;
-                this.description = poiExtended.description;
-                this.address = poiExtended.url;
-                this.thumbnail = poiExtended.imageUrl;
-                this.rating = this.getRatingNumber(poiExtended.rating);
-                var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
-                    this.resources.getCurrentLanguageCodeSimplified());
-                this.routeData = container.routes[0];
-                this.selectRoute(this.routeData);
-            });
+            this.extendedDataArrivedTimeStamp = new Date();
+            let poiExtended = response.json() as IPointOfInterestExtended;
+            this.poiExtended = poiExtended;
+            this.description = poiExtended.description;
+            this.address = poiExtended.url;
+            this.thumbnail = poiExtended.imageUrl;
+            this.rating = this.getRatingNumber(poiExtended.rating);
+            var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
+                this.resources.getCurrentLanguageCodeSimplified());
+            this.routeData = container.routes[0];
+            this.selectRoute(this.routeData);
+            this.isLoading = false;
+        });
     }
 
     public uploadImage(e: any) {

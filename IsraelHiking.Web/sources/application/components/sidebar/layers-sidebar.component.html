@@ -50,13 +50,13 @@
             <div fxFlex="75">
                 <span>{{resources.translate(categoriesType)}}</span>
             </div>
-            <div fxFlex [hidden]="!isAdvanced">
+            <div fxFlex>
                 <div fxLayout="column" fxFill>
                     <span fxFill fxLayoutAlign="end start" (click)="toggleCategories(categoriesType, $event)" mdTooltip="{{resources.categories}}" mdTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle categoris {{categoriesType}}"><i class="fa" [ngClass]="{'icon-chevron-down': !isCategoriesVisible(categoriesType), 'icon-chevron-up': isCategoriesVisible(categoriesType)}"></i></span>
                 </div>
             </div>
         </div>
-        <div [hidden]="!isAdvanced || !isCategoriesVisible(categoriesType)" *ngFor="let category of getCategories(categoriesType)">
+        <div [hidden]="!isCategoriesVisible(categoriesType)" *ngFor="let category of getCategories(categoriesType)">
             <div fxLayout="row" class="cursor-pointer row-hover" (click)="toggleCategory(categoriesType, category, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Toggle category visiblity {{category.key}}">
                 <div fxFlex="10"></div>
                 <div fxFlex="15">

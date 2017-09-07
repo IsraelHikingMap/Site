@@ -1,4 +1,4 @@
-﻿import { Component, Injector, ComponentFactoryResolver, OnInit, OnDestroy, ViewChild, ElementRef } from "@angular/core";
+﻿import { Component, Injector, ComponentFactoryResolver, OnInit, OnDestroy, ViewChild, ElementRef, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Response } from "@angular/http";
 import { MdDialogRef } from "@angular/material";
@@ -39,7 +39,8 @@ interface IOsmUserDialogState {
 @Component({
     selector: "osm-user-dialog",
     templateUrl: "./osm-user-dialog.component.html",
-    styleUrls: ["./osm-user-dialog.component.css"]
+    styleUrls: ["./osm-user-dialog.component.css"],
+    encapsulation: ViewEncapsulation.None
 })
 export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
     private static OSM_USER_DIALOG_STATE_KEY = "OsmUserDialogState";
