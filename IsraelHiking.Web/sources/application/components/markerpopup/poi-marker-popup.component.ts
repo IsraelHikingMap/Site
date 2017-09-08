@@ -31,11 +31,12 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public address: string;
     public source: string;
     public rating: number;
+    public isLoading: boolean;
     private editMode: boolean;
     private routeData: Common.RouteData;
     private extendedDataArrivedTimeStamp: Date;
     private poiExtended: IPointOfInterestExtended;
-    private isLoading: boolean;
+    
 
     constructor(resources: ResourcesService,
         http: Http,
