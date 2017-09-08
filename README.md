@@ -46,7 +46,7 @@ The architecture is based on layers
 
 # Setting Up the Project for Development
 In order to be able to build this site you'll need some tools:
-
+* Install [Java runtime](https://java.com/en/download/) - make sure to install 64bit version.
 * Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
