@@ -105,15 +105,11 @@ namespace IsraelHiking.API.Services
                 Icon = "icon-memorial",
                 Label = "Memorial"
             };
-            _iconsToTags[memorialIcon.Icon] = new IconTags(memorialIcon, CreateOne("historic", "memorial"));
-            var monumentIcon = new IconColorCategory
+            _iconsToTags[memorialIcon.Icon] = new IconTags(memorialIcon, new List<KeyValuePair<string, string>>
             {
-                Category = Categories.HISTORIC,
-                Color = "brown",
-                Icon = "icon-monument",
-                Label = "Monument"
-            };
-            _iconsToTags[monumentIcon.Icon] = new IconTags(monumentIcon, CreateOne("historic", "monument"));
+                new KeyValuePair<string, string>("historic", "memorial"),
+                new KeyValuePair<string, string>("historic", "monument"),
+            });
             // View Point //
             var viewpointIcon = new IconColorCategory("icon-viewpoint", Categories.VIEWPOINT, "black", "Viewpoint");
             _iconsToTags[viewpointIcon.Icon] = new IconTags(viewpointIcon, CreateOne("tourism", "viewpoint"));
