@@ -12,12 +12,15 @@
             <md-input-container fxFlex>
                 <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.nameInLanguage}}" fxFill />
             </md-input-container>
-            <div fxFlex="50" fxFlex.xs="100">
+            <div fxFlex="45" fxFlex.xs="90">
                 <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill />
                 <label [hidden]="imageUrl" fxFill>
                     <a md-button fxFill angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
                     <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
                 </label>
+            </div>
+            <div fxFlex="5" fxFlex.xs="10">
+                <button [hidden]="!imageUrl" md-button (click)="imageUrl=''"><i class="fa icon-trash"></i></button>
             </div>
         </div>
         <md-input-container fxFill hintLabel="{{resources.aLinkToAWebsite}}">

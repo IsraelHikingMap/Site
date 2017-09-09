@@ -5,7 +5,9 @@ using GeoAPI.Geometries;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Controllers
@@ -18,20 +20,26 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly Dictionary<string, IPointsOfInterestAdapter> _adapters;
         private readonly ITagsHelper _tagsHelper;
+        private readonly IWikipediaGateway _wikipediaGateway;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="adapters"></param>
+        /// <param name="wikipediaGateway"></param>
         /// <param name="cache"></param>
+        /// <param name="tagsHelper"></param>
         public PointsOfInterestController(IEnumerable<IPointsOfInterestAdapter> adapters,
             ITagsHelper tagsHelper,
+            IWikipediaGateway wikipediaGateway,
             LruCache<string, TokenAndSecret> cache)
         {
             _adapters = adapters.ToDictionary(a => a.Source, a => a);
-            _cache = cache;
+
             _tagsHelper = tagsHelper;
+            _cache = cache;
+            _wikipediaGateway = wikipediaGateway;
         }
 
         /// <summary>
@@ -56,7 +64,8 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of GeoJSON features</returns>
         [Route("")]
         [HttpGet]
-        public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories, string language = "")
+        public async Task<PointOfInterest[]> GetPointsOfInterest(string northEast, string southWest, string categories,
+            string language = "")
         {
             if (string.IsNullOrWhiteSpace(categories))
             {
@@ -108,7 +117,8 @@ namespace IsraelHiking.API.Controllers
         [Route("")]
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UploadPointOfInterest([FromBody]PointOfInterestExtended pointOfInterest, string language = "")
+        public async Task<IActionResult> UploadPointOfInterest([FromBody] PointOfInterestExtended pointOfInterest,
+            string language = "")
         {
             if (_adapters.ContainsKey(pointOfInterest.Source) == false)
             {
@@ -121,6 +131,25 @@ namespace IsraelHiking.API.Controllers
                 return Ok(await adapter.AddPointOfInterest(pointOfInterest, tokenAndSecret, language));
             }
             return Ok(await adapter.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language));
+        }
+
+        /// <summary>
+        /// Upload an image to wikimedia common
+        /// </summary>
+        /// <param name="file">The image file to upload</param>
+        /// <param name="title">The title to upload it with</param>
+        /// <param name="location">The location the image was taken</param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("image/")]
+        public async Task<IActionResult> UploadImage([FromForm] IFormFile file, [FromQuery] string title,
+            [FromQuery] string location)
+        {
+            var name = string.IsNullOrWhiteSpace(title) ? file.FileName : title;
+            var imageName =
+                await _wikipediaGateway.UploadImage(name, file.OpenReadStream(), new Coordinate().FromLatLng(location));
+            var url = await _wikipediaGateway.GetImageUrl(imageName);
+            return Ok(url);
         }
     }
 }

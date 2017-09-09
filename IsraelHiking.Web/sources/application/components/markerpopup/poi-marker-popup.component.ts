@@ -36,7 +36,6 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private routeData: Common.RouteData;
     private extendedDataArrivedTimeStamp: Date;
     private poiExtended: IPointOfInterestExtended;
-    
 
     constructor(resources: ResourcesService,
         http: Http,
@@ -196,8 +195,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         if (!file) {
             return;
         }
-        this.fileService.uploadImage(file).then((link: string) => {
-            this.thumbnail = link;
+        this.fileService.uploadImage(file, this.title, this.marker.getLatLng()).then((imageUrl: string) => {
+            this.thumbnail = imageUrl;
         }, () => {
             this.toastService.error(this.resources.unableToUploadFile);
         });

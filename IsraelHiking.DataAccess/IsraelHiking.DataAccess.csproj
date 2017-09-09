@@ -272,6 +272,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.5.1" />
     <PackageReference Include="GeoAPI" Version="1.7.5-pre4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.2" />

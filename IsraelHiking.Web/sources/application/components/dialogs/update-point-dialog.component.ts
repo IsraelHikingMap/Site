@@ -91,8 +91,8 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         if (!file) {
             return;
         }
-        this.fileService.uploadImage(file).then((link: string) => {
-            this.imageUrl = link;
+        this.fileService.uploadImage(file, this.title, this.location).then((imageUrl: string) => {
+            this.imageUrl = imageUrl;
         }, () => {
             this.toastService.error(this.resources.unableToUploadFile);
         });

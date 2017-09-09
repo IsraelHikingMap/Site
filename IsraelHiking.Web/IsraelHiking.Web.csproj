@@ -54,6 +54,7 @@
   <ItemGroup>
     <PackageReference Include="Chutzpah" Version="4.3.4" />
     <PackageReference Include="coveralls.net" Version="0.8.0-unstable0013" />
+    <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.5.1" />
     <PackageReference Include="GeoAPI" Version="1.7.5-pre4" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />
     <PackageReference Include="Microsoft.AspNetCore" Version="1.1.2" />

@@ -60,71 +60,52 @@ namespace IsraelHiking.Web
         public virtual void ApplyRule(RewriteContext context)
         {
             var pathWithQuery = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
-            Match initMatchResults;
-            if (pathWithQuery == PathString.Empty)
+            var initMatchResults = InitialMatch.Match(pathWithQuery == PathString.Empty 
+                ? pathWithQuery 
+                : pathWithQuery.Substring(1));
+            if (!initMatchResults.Success)
             {
-                initMatchResults = InitialMatch.Match(pathWithQuery.ToString());
+                return;
+            }
+            var result = initMatchResults.Result(Replacement);
+            var request = context.HttpContext.Request;
+
+            if (StopProcessing)
+            {
+                context.Result = RuleResult.SkipRemainingRules;
+            }
+
+            if (string.IsNullOrEmpty(result))
+            {
+                result = "/";
+            }
+
+            if (result.IndexOf("://", StringComparison.Ordinal) >= 0)
+            {
+                UriHelper.FromAbsolute(result, out var scheme, out var host, out var pathString, out var query, out FragmentString _);
+
+                request.Scheme = scheme;
+                request.Host = host;
+                request.Path = pathString;
+                request.QueryString = query.Add(request.QueryString);
             }
             else
             {
-                initMatchResults = InitialMatch.Match(pathWithQuery.ToString().Substring(1));
-            }
-            if (initMatchResults.Success)
-            {
-                var result = initMatchResults.Result(Replacement);
-                var request = context.HttpContext.Request;
-
-                if (StopProcessing)
+                var split = result.IndexOf('?');
+                if (split >= 0)
                 {
-                    context.Result = RuleResult.SkipRemainingRules;
-                }
-
-                if (string.IsNullOrEmpty(result))
-                {
-                    result = "/";
-                }
-
-                if (result.IndexOf("://", StringComparison.Ordinal) >= 0)
-                {
-                    UriHelper.FromAbsolute(result, out string scheme, out HostString host, out PathString pathString, out QueryString query, out FragmentString fragment);
-
-                    request.Scheme = scheme;
-                    request.Host = host;
-                    request.Path = pathString;
-                    request.QueryString = query.Add(request.QueryString);
+                    var newPath = result.Substring(0, split);
+                    request.Path = newPath[0] == '/' 
+                        ? PathString.FromUriComponent(newPath) 
+                        : PathString.FromUriComponent('/' + newPath);
+                    request.QueryString = request.QueryString.Add(QueryString.FromUriComponent(result.Substring(split)));
                 }
                 else
                 {
-                    var split = result.IndexOf('?');
-                    if (split >= 0)
-                    {
-                        var newPath = result.Substring(0, split);
-                        if (newPath[0] == '/')
-                        {
-                            request.Path = PathString.FromUriComponent(newPath);
-                        }
-                        else
-                        {
-                            request.Path = PathString.FromUriComponent('/' + newPath);
-                        }
-                        request.QueryString = request.QueryString.Add(
-                            QueryString.FromUriComponent(
-                                result.Substring(split)));
-                    }
-                    else
-                    {
-                        if (result[0] == '/')
-                        {
-                            request.Path = PathString.FromUriComponent(result);
-                        }
-                        else
-                        {
-                            request.Path = PathString.FromUriComponent('/' + result);
-                        }
-                    }
+                    request.Path = result[0] == '/' 
+                        ? PathString.FromUriComponent(result) 
+                        : PathString.FromUriComponent('/' + result);
                 }
-
-                //context.Logger?.RewriteSummary(result);
             }
         }
     }
@@ -160,7 +141,13 @@ namespace IsraelHiking.Web
                 .AddJsonFile(configFileName, optional: false, reloadOnChange: true)
                 .Build();
             services.Configure<ConfigurationData>(config);
-            services.AddSingleton((serviceProvider) => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
+            var nonPublicConfigurationFilePath = services.BuildServiceProvider().GetService<IOptions<ConfigurationData>>().Value.NonPublicConfigurationFilePath;
+            var nonPublicConfiguration = new ConfigurationBuilder()
+                .AddJsonFile(nonPublicConfigurationFilePath, optional: true, reloadOnChange: true)
+                .Build();
+            services.Configure<NonPublicConfigurationData>(nonPublicConfiguration);
+
+            services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
             var binariesFolder = "";
             services.AddTransient<IFileProvider, PhysicalFileProvider>((serviceProvider) =>
             {
@@ -193,8 +180,6 @@ namespace IsraelHiking.Web
 
             var rewriteOptions = new RewriteOptions();
             rewriteOptions.Rules.Add(new RewriteWithQueryRule(".*_escaped_fragment_=%2F%3Fs%3D(.*)", "api/opengraph/$1", false));
-            //.AddRewrite(".*escaped_fragment_=/%3Fs=(.*)", "api/opengraph/$1", skipRemainingRules: false)
-            //.AddRewrite(".*_escaped_fragment_=%2F%3Fs%3D(.*)", "api/opengraph/$1", skipRemainingRules: false)
 
             if (env.IsDevelopment())
             {
@@ -202,7 +187,7 @@ namespace IsraelHiking.Web
             }
             else
             {
-                //rewriteOptions.AddRedirectToHttps();
+                rewriteOptions.AddRedirectToHttps();
             }
             app.UseRewriter(rewriteOptions);
 
@@ -248,11 +233,15 @@ namespace IsraelHiking.Web
                     FileProvider = new PhysicalFileProvider(directory.Value),
                     RequestPath = new PathString("/" + directory.Key),
                     EnableDirectoryBrowsing = true,
+                    DirectoryBrowserOptions =
+                    {
+                        FileProvider = new PhysicalFileProvider(directory.Value),
+                        RequestPath = new PathString("/" + directory.Key),
+                        Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices
+                            .GetRequiredService<IFileSystemHelper>())
+                    },
+                    StaticFileOptions = {ContentTypeProvider = fileExtensionContentTypeProvider},
                 };
-                fileServerOptions.DirectoryBrowserOptions.FileProvider = new PhysicalFileProvider(directory.Value);
-                fileServerOptions.DirectoryBrowserOptions.RequestPath = new PathString("/" + directory.Key);
-                fileServerOptions.DirectoryBrowserOptions.Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices.GetRequiredService<IFileSystemHelper>());
-                fileServerOptions.StaticFileOptions.ContentTypeProvider = fileExtensionContentTypeProvider;
                 app.UseFileServer(fileServerOptions);
             }
             // serve https certificate folder
@@ -276,6 +265,7 @@ namespace IsraelHiking.Web
             logger.LogInformation("Initializing Elevation data and Elastic Search Service");
             serviceProvider.GetRequiredService<IElasticSearchGateway>().Initialize();
             serviceProvider.GetRequiredService<IElevationDataStorage>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading elevation data from files."));
+            serviceProvider.GetRequiredService<IWikipediaGateway>().Initialize().ContinueWith(task => logger.LogInformation("Finished loading wikipedia gateway."));
         }
 
         private string GetBinariesFolder(IServiceProvider serviceProvider)

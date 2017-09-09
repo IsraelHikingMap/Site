@@ -1,6 +1,7 @@
 ﻿import { Injectable } from "@angular/core";
 import { Http, Response } from "@angular/http";
 import { saveAs } from "file-saver";
+import { NgProgressService } from "ngx-progressbar";
 import * as L from "leaflet";
 
 import { AuthorizationService } from "./authorization.service";
@@ -18,7 +19,8 @@ export class FileService {
     public formats: IFormatViewModel[];
 
     constructor(private http: Http,
-        private authorizationService: AuthorizationService) {
+        private authorizationService: AuthorizationService,
+        private progressService: NgProgressService) {
         this.formats = [];
         this.http.get(Urls.fileFormats).toPromise().then((response) => {
             this.formats.splice(0);
@@ -65,8 +67,10 @@ export class FileService {
                     return;
                 }
                 if (request.status === 200) {
+                    this.progressService.done();
                     resolve(request.response);
                 } else {
+                    this.progressService.done();
                     reject(request.response);
                 }
             };
@@ -76,6 +80,7 @@ export class FileService {
 
             let formData = new FormData();
             formData.append("file", file, file.name);
+            this.progressService.start();
             request.send(formData);
         });
     }
@@ -84,26 +89,8 @@ export class FileService {
         return this.http.get(Urls.files + "?url=" + url, this.authorizationService.getHeader()).toPromise();
     }
 
-    public uploadImage = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            let request = this.authorizationService.createXMLHttpRequest();
-            request.onreadystatechange = () => {
-                if (request.readyState !== 4) {
-                    return;
-                }
-                if (request.status === 200) {
-                    let res = JSON.parse(request.responseText);
-                    resolve(res.data.link);
-                } else {
-                    reject();
-                }
-            };
-            request.open("POST", "https://api.imgur.com/3/upload");
-            request.setRequestHeader("Authorization", "Client-ID 77c5b47036f4ca1");
-            let formData = new FormData();
-            formData.append("image", file, file.name);
-            request.send(formData);
-        });
+    public uploadImage = (file: File, title: string, latlng: L.LatLng): Promise<string> => {
+        return this.upload(`${Urls.poiImage}/?title=${title}&location=${latlng.lat},${latlng.lng}`, file);
     }
 
     private saveBytesResponseToFile = (data: any, fileName: string) => {
