@@ -80,7 +80,7 @@ export class OsmUserService {
                     landing: "oauth-close-window.html",
                     url: this.baseUrl
                 } as OSMAuth.OSMAuthOptions);
-                if (this.authorizationService.token == null) {
+                if (this.authorizationService.osmToken == null) {
                     this.oauth.logout();
                     deferred.resolve();
                 }
@@ -97,11 +97,11 @@ export class OsmUserService {
 
     public logout = () => {
         this.oauth.logout();
-        this.authorizationService.token = null;
+        this.authorizationService.osmToken = null;
     }
 
     public isLoggedIn = (): boolean => {
-        return this.oauth && this.oauth.authenticated() && this.authorizationService.token != null;
+        return this.oauth && this.oauth.authenticated() && this.authorizationService.osmToken != null;
     }
 
     public login = (): Promise<any> => {
@@ -131,7 +131,7 @@ export class OsmUserService {
             }
             let authToken = localStorage.getItem(`${this.baseUrl}oauth_token`); // using native storage since it is saved with ohauth
             let authTokenSecret = localStorage.getItem(`${this.baseUrl}oauth_token_secret`);
-            this.authorizationService.token = authToken + ";" + authTokenSecret;
+            this.authorizationService.osmToken = authToken + ";" + authTokenSecret;
             let detailJson = this.x2Js.xml2js(details.documentElement.outerHTML) as any;
             this.displayName = detailJson.osm.user._display_name;
             if (detailJson.osm.user.img && detailJson.osm.user.img._href) {
