@@ -46,6 +46,10 @@ body {
     cursor: pointer;
 }
 
+.curson-zoom-in {
+    cursor: zoom-in;
+}
+
 .stack-icon-top {
     top: -2px;
     font-size: 0.75em !important;
