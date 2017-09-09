@@ -22,9 +22,9 @@
                     <div>{{userService.changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</div>
                 </div>
                 <div>
-                    <md-input-container hintLabel="{{resources.searchPlaceHolder}}">
+                    <md-form-field hintLabel="{{resources.searchPlaceHolder}}">
                         <input mdInput type="text" [formControl]="searchTerm" placeholder="{{resources.search}}" />
-                    </md-input-container>
+                    </md-form-field>
                 </div>
             </div>
         </div>
@@ -55,13 +55,13 @@
                                     {{trace.tagsString || resources.noTags}}
                                 </div>
                                 <div [hidden]="!trace.isInEditMode">
-                                    <md-input-container>
+                                    <md-form-field>
                                         <input mdInput type="text" [(ngModel)]="trace.description" placeholder="{{resources.description}}"/>
-                                    </md-input-container>
+                                    </md-form-field>
                                     <br/>
-                                    <md-input-container>
+                                    <md-form-field>
                                         <input mdInput type="text" [(ngModel)]="trace.tagsString" placeholder="{{resources.tags}}"/>
-                                    </md-input-container>
+                                    </md-form-field>
                                     <br />
                                     <md-select placeholder="{{resources.visibility}}" [(ngModel)]="trace.visibility">
                                         <md-option value="private">{{resources.private}}</md-option>
@@ -100,12 +100,12 @@
                                         <h4>{{siteUrl.title}} - {{siteUrl.description}}</h4>
                                     </div>
                                     <div [hidden]="!editMode">
-                                        <md-input-container>
+                                        <md-form-field>
                                             <input mdInput type="text" [(ngModel)]="siteUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
-                                        </md-input-container>
-                                        <md-input-container>
+                                        </md-form-field>
+                                        <md-form-field>
                                             <input mdInput type="text" [(ngModel)]="siteUrl.description" placeholder="{{resources.descriptionPlaceHolder}}" />
-                                        </md-input-container>
+                                        </md-form-field>
                                     </div>
                                 </div>
                                 <div fxFlex>

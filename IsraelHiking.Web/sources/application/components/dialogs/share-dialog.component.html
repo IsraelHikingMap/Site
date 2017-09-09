@@ -10,14 +10,14 @@
     <div md-dialog-content>
         <div [hidden]="shareAddress">
             <div fxLayout="row">
-                <md-input-container fxFill hintLabel="{{resources.titlePlaceHolder}}">
+                <md-form-field fxFill hintLabel="{{resources.titlePlaceHolder}}">
                     <input mdInput fxFill type="text" [(ngModel)]="title" placeholder="{{resources.title}}" />
-                </md-input-container>
+                </md-form-field>
             </div>
             <div fxLayout="row">
-                <md-input-container fxFill hintLabel="{{resources.descriptionPlaceHolder}}">
+                <md-form-field fxFill hintLabel="{{resources.descriptionPlaceHolder}}">
                     <textarea mdInput rows="2" type="text" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
-                </md-input-container>
+                </md-form-field>
             </div>
             <div class="input-wrapper-spacer"></div>
             <div fxLayout="row">
@@ -57,9 +57,9 @@
             <hr />
             <div [hidden]="!showOffroadForm">
                 <div fxLayout="row">
-                    <md-input-container fxFill hintLabel="{{resources.userEmailMutedOffroad}}">
+                    <md-form-field fxFill hintLabel="{{resources.userEmailMutedOffroad}}">
                         <input mdInput type="text" [(ngModel)]="offroadRequest.userMail" placeholder="{{resources.userEmail}}"/>
-                    </md-input-container>
+                    </md-form-field>
                 </div>
                 <div class="input-wrapper-spacer"></div>
                 <div fxLayout="row">
@@ -111,12 +111,12 @@
                             <md-option [value]="resources.custom">{{resources.custom}}</md-option>
                         </md-select>
                         <div [hidden]="size != resources.custom">
-                            <md-input-container>
+                            <md-form-field>
                                 <input mdInput type="number" [(ngModel)]="width" (change)="updateEmbedText(width, height)" placeholder="{{resources.width}}" fxFill />
-                            </md-input-container>
-                            <md-input-container>
+                            </md-form-field>
+                            <md-form-field>
                                 <input mdInput type="number" [(ngModel)]="height" (change)="updateEmbedText(width, height)" placeholder="{{resources.height}}" fxFill />
-                            </md-input-container>
+                            </md-form-field>
                         </div>
                     </div>
                 </div>

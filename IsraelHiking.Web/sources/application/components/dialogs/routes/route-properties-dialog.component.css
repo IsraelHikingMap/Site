@@ -1,3 +1,7 @@
 ﻿.center-image {
     margin: 0 auto;
 }
+
+.button-row .mat-button {
+    min-height: 32px !important;
+}

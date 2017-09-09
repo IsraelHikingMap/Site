@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+﻿import { Component, ViewEncapsulation } from "@angular/core";
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { FileService } from "../../../services/file.service";
@@ -12,7 +12,9 @@ import * as Common from "../../../common/IsraelHiking";
 
 @Component({
     selector: "route-edit-dialog",
-    templateUrl: "./route-properties-dialog.component.html"
+    templateUrl: "./route-properties-dialog.component.html",
+    styleUrls: ["./route-properties-dialog.component.css"],
+    encapsulation: ViewEncapsulation.None,
 })
 export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     private routeLayer: IRouteLayer;

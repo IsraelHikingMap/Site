@@ -19,6 +19,10 @@
     float: left;
 }
 
+.dialog-small {
+    max-width: 480px;
+}
+
 @media (max-width:767px) {
     md-dialog-container {
         margin: 0 auto;

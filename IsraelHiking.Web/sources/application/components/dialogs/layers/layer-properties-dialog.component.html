@@ -9,26 +9,26 @@
     </div>
     <div md-dialog-content>
         <div fxLayout="row">
-            <md-input-container hintLabel="{{resources.layerNamePlaceHolder}}" fxFill>
+            <md-form-field hintLabel="{{resources.layerNamePlaceHolder}}" fxFill>
                 <input mdInput type="text" [(ngModel)]="key" name="key" placeholder="{{resources.name}}" required="" fxFill />
-            </md-input-container>
+            </md-form-field>
         </div>
         <div fxLayout="row">
-            <md-input-container hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill [dir]="'ltr'">
+            <md-form-field hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill [dir]="'ltr'">
                 <input mdInput type="text" [ngModel]="address" (ngModelChange)="addressChanged($event)" name="address" placeholder="{{resources.address}}" required="" fxFill />
-            </md-input-container>
+            </md-form-field>
         </div>
         <div fxLayout="row">
             <a [ngStyle]="{'font-size': 'small' }" href="https://qms.nextgis.com/" target="_blank">{{resources.moreMapAddresses}}</a>
         </div>
         <div class="input-wrapper-spacer"></div>
         <div fxLayout="row" fxFlexs>
-            <md-input-container fxFlex>
+            <md-form-field fxFlex>
                 <input mdInput type="number" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" />
-            </md-input-container>
-            <md-input-container fxFlex class="margin-10">
+            </md-form-field>
+            <md-form-field fxFlex class="margin-10">
                 <input mdInput type="number" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" />
-            </md-input-container>
+            </md-form-field>
         </div>
         <div fxLayout="row">
             <div id="mapPreview" [style.height]="'100px'" [style.width]="'100%'" fxfill></div>

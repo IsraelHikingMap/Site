@@ -9,9 +9,9 @@
     </div>
     <div md-dialog-content>
         <div fxLayout="row" fxLayout.xs="column">
-            <md-input-container fxFlex>
+            <md-form-field fxFlex>
                 <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.nameInLanguage}}" fxFill />
-            </md-input-container>
+            </md-form-field>
             <div fxFlex="45" fxFlex.xs="90">
                 <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill />
                 <label [hidden]="imageUrl" fxFill>
@@ -23,12 +23,12 @@
                 <button [hidden]="!imageUrl" md-button (click)="imageUrl=''"><i class="fa icon-trash"></i></button>
             </div>
         </div>
-        <md-input-container fxFill hintLabel="{{resources.aLinkToAWebsite}}">
+        <md-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
             <input mdInput type="text" [dir]="'ltr'" [(ngModel)]="websiteUrl" placeholder="{{resources.website}}" fxFill />
-        </md-input-container>
-        <md-input-container fxFill>
+        </md-form-field>
+        <md-form-field fxFill>
             <textarea mdInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
-        </md-input-container>
+        </md-form-field>
         <br/>
         <md-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (change)="selectCategory($event)" fxFill>
             <md-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{category.label}}</md-option>

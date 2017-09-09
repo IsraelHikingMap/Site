@@ -1,6 +1,6 @@
 ﻿// link to translations: https://translate.zanata.org/iteration/view/IsraelHiking/Main
 import { Injectable } from "@angular/core";
-import { Direction } from "@angular/cdk";
+import { Direction } from "@angular/cdk/bidi";
 import { Subject } from "rxjs/Subject";
 import { LocalStorage } from "ngx-store";
 import { GetTextCatalogService } from "./gettext-catalog.service";

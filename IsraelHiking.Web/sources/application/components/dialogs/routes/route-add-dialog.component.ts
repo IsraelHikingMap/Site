@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+﻿import { Component, ViewEncapsulation } from "@angular/core";
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
@@ -8,7 +8,9 @@ import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 
 @Component({
     selector: "route-add-dialog",
-    templateUrl: "./route-properties-dialog.component.html"
+    templateUrl: "./route-properties-dialog.component.html",
+    styleUrls: ["./route-properties-dialog.component.css"],
+    encapsulation: ViewEncapsulation.None,
 })
 export class RouteAddDialogComponent extends RouteBaseDialogComponent {
     constructor(resources: ResourcesService,

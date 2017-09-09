@@ -5,9 +5,9 @@
     <div class="leaflet-bar" fxLayout="row">
         <a class="cursor-pointer control-icon-last" (click)="toggleDirectional($event)" mdTooltip="{{resources.directionalSearch}}" mdTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !isDirectional, 'icon-minus': isDirectional}"></i></a>
         <div [dir]="resources.direction">
-            <md-input-container class="search-input-container">
+            <md-form-field class="search-input-container">
                 <input type="text" mdInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [mdAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)">
-            </md-input-container>
+            </md-form-field>
             <md-autocomplete positionY="below" #autoFrom="mdAutocomplete" [displayWith]="displayResults">
                 <md-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
                     <i [hidden]="!result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
@@ -30,9 +30,9 @@
     <div class="leaflet-bar" [hidden]="!isDirectional" fxLayout="row">
         <a class="cursor-pointer control-icon-last" (click)="searchRoute($event)"><i class="fa icon-arrow-left fa-lg"></i></a>
         <div [dir]="resources.direction">
-            <md-input-container class="pull-right search-input-container">
+            <md-form-field class="pull-right search-input-container">
                 <input type="text" mdInput #searchToInput [formControl]="searchTo" [mdAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(toContext.searchTerm)">
-            </md-input-container>
+            </md-form-field>
             <md-autocomplete positionY="below" #autoTo="mdAutocomplete" [displayWith]="displayResults">
                 <md-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
                     <i [hidden]="!result.icon" class="fa" [ngClass]="result.icon"></i>

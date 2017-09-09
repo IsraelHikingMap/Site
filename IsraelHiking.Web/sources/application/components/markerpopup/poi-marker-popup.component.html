@@ -27,9 +27,9 @@
                 <div class="cssload-inner cssload-three"></div>
             </div>
             <div fxLayout="row" [hidden]="!isEditMode()">
-                <md-input-container fxFill hintLabel="{{resources.itsYourTimeToShine}}">
+                <md-form-field fxFill hintLabel="{{resources.itsYourTimeToShine}}">
                     <textarea rows="4" mdInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
-                </md-input-container>
+                </md-form-field>
             </div>
             <div fxLayout="row" [hidden]="!isEditMode()">
                 <a class="cursor-pointer" (click)="openUpdatePointDialog($event)">{{resources.more}}</a>
