@@ -64,6 +64,13 @@ In order to be able to build this site you'll need some tools:
   * Open Visual Studio, wait for the installations to complete, and restart when asked
 * Open `IsraelHiking.sln`. You may use _File &rarr; Recent Projects and Solutions_
 * Compile using `Ctrl-Shift-B` - Note that it will take time to download all the packages so be patience
+* Place a `nonPublic.json` at `D:\Dropbox\IsraelHikingGithub` (or change the `appsetting.json` nonPublic property to a file containineg the following json)
+```
+{
+	wikiMediaUserName: "your wikimedia user",
+	wikiMediaPassword: "your wikimedia password"
+}
+```
 * In Visual Studio, _View &rarr; Other Windows... &rarr; Package Manager Console_
   * Select IsraelHiking.DataAccess from the Default project dropdown
   * Type the following commands at the `PM>` prompt. Most of the commands may take a while. Ignore all _WARN_ messsages.

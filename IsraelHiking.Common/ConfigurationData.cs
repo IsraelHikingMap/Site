@@ -47,8 +47,8 @@ namespace IsraelHiking.Common
             NonPublicConfigurationFilePath = "someFile.json";
             OsmConfiguraion = new OsmConfiguraionData
             {
-                ConsumerKey = "H5Us9nv9eDyFpKbBTiURf7ZqfdBArNddv10n6R6U",
-                ConsumerSecret = "ccYaQUKLz26XEzbNd8uWoQ6HwbcnrUUp8milXnXG",
+                ConsumerKey = "E8p0RX0rnQPxDaj3IijgpMNeK8lRTyy6rlKxQ8IF",
+                ConsumerSecret = "Hro40NSObALdx8Dm7Xv1mKvxjwlGITqetXUBYUwv",
                 BaseAddress = "https://www.openstreetmap.org"
             };
             ListingDictionary = new Dictionary<string, string>();
