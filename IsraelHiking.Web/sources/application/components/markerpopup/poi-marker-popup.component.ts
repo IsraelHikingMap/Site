@@ -212,6 +212,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         compoent.componentInstance.location = this.marker.getLatLng();
         compoent.componentInstance.source = this.poiExtended.source;
         compoent.componentInstance.identifier = this.poiExtended.id;
+        compoent.componentInstance.elementType = this.geoJsonParser.getOsmElementType(this.poiExtended.featureCollection.features[0].geometry.type);
         compoent.componentInstance.initializationPromise.then(() => {
             for (let category of compoent.componentInstance.categories) {
                 let icon = _.find(category.icons, iconToFind => iconToFind.icon === this.poiExtended.icon);

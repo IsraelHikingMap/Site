@@ -29,6 +29,7 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
+        [Ignore]
         public void UploadFileTest()
         {
             var formFile = Substitute.For<IFormFile>();

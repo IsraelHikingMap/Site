@@ -245,4 +245,16 @@ export class GeoJsonParser {
         }
         return value || properties[key];
     }
+
+    public getOsmElementType(geometry: string) {
+        switch (geometry) {
+            case GeoJson.point:
+                return "node";
+            case GeoJson.lineString:
+            case GeoJson.polygon:
+                return "way";
+            default:
+                return "relation";
+        }
+    }
 }

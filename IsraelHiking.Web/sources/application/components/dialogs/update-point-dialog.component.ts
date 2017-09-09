@@ -8,6 +8,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { PoiService, IPointOfInterestExtended, ICategory, IIconColorLabel } from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
+import { OsmUserService } from "../../services/osm-user.service";
 
 export interface ICategoryWithIcons extends ICategory {
     icons: IIconColorLabel[];
@@ -26,6 +27,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public imageUrl: string;
     public websiteUrl: string;
     public identifier: string;
+    public elementType: string;
     public location: L.LatLng;
     public selectedCategory: ICategoryWithIcons;
     public icons: IIconColorLabel[];
@@ -36,28 +38,29 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         private http: Http,
         private fileService: FileService,
         private toastService: ToastService,
-        private poiService: PoiService) {
+        private poiService: PoiService,
+        private osmUserService: OsmUserService) {
         super(resources);
         this.categories = [];
         this.initializationPromise = new Promise((resolve, reject) => {
             this.poiService.getCategories("Points of Interest").then((response) => {
                 for (let categoryType in response) {
-                    if (response.hasOwnProperty(categoryType)) {
-                        this.categories.push({
-                            key: categoryType,
-                            isSelected: false,
-                            label: this.resources.translate(categoryType),
-                            icon: response[categoryType][0].icon,
-                            color: response[categoryType][0].color,
-                            icons: response[categoryType].map(i => {
-                                return {
-                                    color: i.color,
-                                    icon: i.icon,
-                                    label: this.resources.translate(i.label)
-                                } as IIconColorLabel;
-                            })
-                        } as ICategoryWithIcons);
-                    }
+                    if (!response.hasOwnProperty(categoryType))
+                        continue;
+                    this.categories.push({
+                        key: categoryType,
+                        isSelected: false,
+                        label: this.resources.translate(categoryType),
+                        icon: response[categoryType][0].icon,
+                        color: response[categoryType][0].color,
+                        icons: response[categoryType].map(i => {
+                            return {
+                                color: i.color,
+                                icon: i.icon,
+                                label: this.resources.translate(i.label)
+                            } as IIconColorLabel;
+                        })
+                    } as ICategoryWithIcons);
                 }
                 this.selectedCategory = this.categories[0];
                 this.categories[0].selectedIcon = this.categories[0].icons[0];
@@ -116,5 +119,9 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         }, () => {
             this.dialogRef.close(null);
         });
+    }
+
+    public getEditElementOsmAddress(): string {
+        return this.osmUserService.getEditElementOsmAddress("", this.elementType, this.identifier);
     }
 }

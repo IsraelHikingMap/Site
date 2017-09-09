@@ -278,6 +278,11 @@ export class OsmUserService {
         return `${this.baseUrl}/edit?gpx=${gpxId}#${background}`;
     }
 
+    public getEditElementOsmAddress(baseLayerAddress: string, elementType:string, id: string) {
+        let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
+        return `${this.baseUrl}/edit?${elementType}=${id}#${background}`;
+    }
+
     private getBackgroundStringForOsmAddress(baseLayerAddress: string): string {
         let background = "background=bing";
         if (baseLayerAddress !== "") {
