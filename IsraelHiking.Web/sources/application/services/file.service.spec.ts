@@ -1,6 +1,7 @@
 ﻿import { HttpModule, Http, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { MockBackend, MockConnection } from "@angular/http/testing";
+import { NgProgressService } from "ngx-progressbar";
 import * as FileSaverFunctions from "file-saver";
 
 import { FileService, IFormatViewModel } from "./file.service";
@@ -31,7 +32,11 @@ describe("FileService", () => {
                                 } as IFormatViewModel])
                             })));
                         });
-                        return new FileService(http, authorizationService);
+                        let progressService = {
+                            done: () => { },
+                            start: () => { }
+                        } as NgProgressService;
+                        return new FileService(http, authorizationService, progressService);
                     }),
                     deps: [Http, AuthorizationService, XHRBackend]
                 }
