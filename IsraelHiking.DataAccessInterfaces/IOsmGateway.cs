@@ -3,13 +3,14 @@ using System.IO;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using OsmSharp;
+using OsmSharp.API;
 using OsmSharp.Complete;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IOsmGateway: IRemoteFileFetcherGateway
     {
-        Task<string> GetUserId();
+        Task<User> GetUser();
         Task<string> CreateChangeset(string comment);
         Task<string> CreateElement(string changesetId, OsmGeo osmGeo);
         Task<Node> GetNode(string nodeId);

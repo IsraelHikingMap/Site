@@ -82,7 +82,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("OAuth", auth);
         }
 
-        public async Task<string> GetUserId()
+        public async Task<User> GetUser()
         {
             using (var client = new HttpClient())
             {
@@ -90,11 +90,11 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 var response = await client.GetAsync(_userDetailsAddress);
                 if (response.StatusCode != HttpStatusCode.OK)
                 {
-                    return string.Empty;
+                    return null;
                 }
                 var streamContent = await response.Content.ReadAsStreamAsync();
                 var detailsResponse = FromContent(streamContent);
-                return detailsResponse?.User?.Id.ToString() ?? string.Empty;
+                return detailsResponse?.User;
             }
         }
 

@@ -199,6 +199,12 @@ export class ResourcesService {
     public routes: string;
     public hiking: string;
     public bicycle: string;
+    public termsOfService: string;
+    public termsOfServiceElaborated: string;
+    public osmTermsOfService: string;
+    public wikimediaTermsOfService: string;
+    public iHaveReadAndAgree: string;
+    public submit: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -612,6 +618,12 @@ export class ResourcesService {
                 this.routes = this.gettextCatalog.getString("Routes");
                 this.hiking = this.gettextCatalog.getString("Hiking");
                 this.bicycle = this.gettextCatalog.getString("Bicycle");
+                this.termsOfService = this.gettextCatalog.getString("Terms of Service");
+                this.termsOfServiceElaborated = this.gettextCatalog.getString("Elaborated terms of service of this site, OSM and wikimedia");
+                this.osmTermsOfService = this.gettextCatalog.getString("OSM terms of service");
+                this.wikimediaTermsOfService = this.gettextCatalog.getString("Wikimedia terms of service");
+                this.iHaveReadAndAgree = this.gettextCatalog.getString("I have read and agree to the terms");
+                this.submit = this.gettextCatalog.getString("Submit");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

@@ -35,9 +35,9 @@ namespace IsraelHiking.DataAccess.Tests.OpenStreetMap
 
         [TestMethod]
         [Ignore]
-        public void GetUserId_ShouldGetIt()
+        public void GetUser_ShouldGetIt()
         {
-            var id = _gateway.GetUserId().Result;
+            var id = _gateway.GetUser().Result.Id;
 
             Assert.AreEqual("4611", id);
         }

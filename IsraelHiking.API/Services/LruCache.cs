@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Linq;
 using IsraelHiking.Common;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
@@ -13,6 +14,7 @@ namespace IsraelHiking.API.Services
     /// <typeparam name="TValue">Value's type</typeparam>
     public class LruCache<TKey, TValue> where TKey: class
     {
+        private readonly ILogger _logger;
         private readonly ConfigurationData _options;
         private readonly ConcurrentDictionary<TKey, CacheItem> _dictionary = new ConcurrentDictionary<TKey, CacheItem>();
 
@@ -20,9 +22,12 @@ namespace IsraelHiking.API.Services
         /// Constructor
         /// </summary>
         /// <param name="options"></param>
-        public LruCache(IOptions<ConfigurationData> options)
+        /// <param name="logger"></param>
+        public LruCache(IOptions<ConfigurationData> options, ILogger logger)
         {
+            _logger = logger;
             _options = options.Value;
+            _logger.LogInformation("Initializing LRU cache.");
         }
 
         private class CacheItem
@@ -48,8 +53,9 @@ namespace IsraelHiking.API.Services
             _dictionary[key] = new CacheItem(value);
             while (_dictionary.Keys.Count > _options.MaxCacheSize)
             {
+                _logger.LogInformation("LRU cache is full - removing least recently used item.");
                 var pair = _dictionary.OrderBy(v => v.Value.LastUsed).First();
-                _dictionary.TryRemove(pair.Key, out CacheItem cacheItem);
+                _dictionary.TryRemove(pair.Key, out var _);
             }
         }
 
@@ -60,12 +66,12 @@ namespace IsraelHiking.API.Services
         /// <returns>The item</returns>
         public TValue Get(TKey key)
         {
-            if (key != null && _dictionary.ContainsKey(key))
+            if (key == null || _dictionary.ContainsKey(key) == false)
             {
-                _dictionary[key].LastUsed = DateTime.Now;
-                return _dictionary[key].Value;
+                return default(TValue);
             }
-            return default(TValue);
+            _dictionary[key].LastUsed = DateTime.Now;
+            return _dictionary[key].Value;
         }
 
         /// <summary>

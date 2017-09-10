@@ -43,9 +43,9 @@ namespace IsraelHiking.Web
             if (string.IsNullOrEmpty(userId))
             {
                 var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
-                userId = osmGateway.GetUserId().Result;
+                var user = osmGateway.GetUser().Result;
                 _logger.LogInformation("User " + userId + " had just logged in");
-                _cache.Add(userId, tokenAndSecret);
+                _cache.Add(user.Id.ToString(), tokenAndSecret);
             }
             validatedToken = new JwtSecurityToken();
             if (string.IsNullOrWhiteSpace(userId))

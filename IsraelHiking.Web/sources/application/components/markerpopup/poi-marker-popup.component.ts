@@ -101,7 +101,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     public setEditMode() {
         if (this.osmUserService.isLoggedIn() === false) {
-            this.osmUserService.login();
+            this.toastService.info(this.resources.loginRequired);
             return;
         }
         this.editMode = true;

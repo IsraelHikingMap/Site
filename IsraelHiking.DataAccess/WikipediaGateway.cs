@@ -45,7 +45,7 @@ namespace IsraelHiking.DataAccess
         {
             _logger.LogInformation($"Upload an image to wikimedia common: {imageName}, Location: {location.Y}, {location.X}");
             var wikiFileName = "File:Israel_Hiking_Map_" + imageName.Replace(" ", "_");
-            var comment = CreateWikipediaComment(location);
+            var comment = CreateWikipediaComment(location, imageName);
             var results = await FilePage.UploadAsync(_site, contentStream, wikiFileName, comment, true);
             if (results.ResultCode != UploadResultCode.Success)
             {
@@ -59,11 +59,12 @@ namespace IsraelHiking.DataAccess
             return wikiFileName;
         }
 
-        private string CreateWikipediaComment(Coordinate location)
+        private string CreateWikipediaComment(Coordinate location, string imageName)
         {
             return "=={{int:filedesc}}==" + Environment.NewLine +
                    "{{Information" + Environment.NewLine +
                    $"|date={DateTime.Now:yyyy-MM-dd}" + Environment.NewLine +
+                   $"|description={imageName}" + Environment.NewLine +
                    "|source={{own}}" + Environment.NewLine +
                    "|author=[[User:IsraelHikingMap|IsraelHikingMap]]" + Environment.NewLine +
                    "|permission=" + Environment.NewLine +
