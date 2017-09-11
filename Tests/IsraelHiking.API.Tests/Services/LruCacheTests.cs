@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.Extensions.Options;
@@ -19,7 +20,7 @@ namespace IsraelHiking.API.Tests.Services
             _options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
-            _cache = new LruCache<string, string>(optionsProvider);
+            _cache = new LruCache<string, string>(optionsProvider, Substitute.For<ILogger>());
         }
 
         [TestMethod]

@@ -7,6 +7,7 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -25,7 +26,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var adapters = new List<IPointsOfInterestAdapter>();
             var tagHelper = Substitute.For<ITagsHelper>();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
-            _controller = new PointsOfInterestController(adapters, tagHelper, _wikipediaGateway, new LruCache<string, TokenAndSecret>(Substitute.For<IOptions<ConfigurationData>>()));
+            _controller = new PointsOfInterestController(adapters, tagHelper, _wikipediaGateway, new LruCache<string, TokenAndSecret>(Substitute.For<IOptions<ConfigurationData>>(), Substitute.For<ILogger>()));
         }
 
         [TestMethod]

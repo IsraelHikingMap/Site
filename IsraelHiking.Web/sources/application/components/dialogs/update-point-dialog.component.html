@@ -1,4 +1,4 @@
-﻿<div [dir]="resources.direction">
+﻿<div [dir]="resources.direction" class="dialog-small">
     <div md-dialog-title>
         <div>
             {{resources.uploadPoint}}
@@ -9,43 +9,49 @@
     </div>
     <div md-dialog-content>
         <div fxLayout="row" fxLayout.xs="column">
-            <md-form-field fxFlex>
-                <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.nameInLanguage}}" fxFill />
-            </md-form-field>
-            <div fxFlex="45" fxFlex.xs="90">
-                <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill />
-                <label [hidden]="imageUrl" fxFill>
-                    <a md-button fxFill angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
-                    <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
-                </label>
+            <div fxFlex>
+                <div fxLayout="column">
+                    <md-form-field fxFill>
+                        <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.nameInLanguage}}" fxFill required/>
+                    </md-form-field>
+                    <md-form-field fxFill>
+                        <textarea mdInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
+                    </md-form-field>
+                </div>
             </div>
-            <div fxFlex="5" fxFlex.xs="10">
-                <button [hidden]="!imageUrl" md-button (click)="imageUrl=''"><i class="fa icon-trash"></i></button>
+            <div fxFlex="50" fxFlex.xs="100">
+                <div fxLayout="column">
+                    <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill/>
+                    <label [hidden]="imageUrl" fxFill>
+                        <a md-button fxFill [disabled]="!title" angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
+                        <input type="file" (change)="uploadImage($event)" [style.display]="'none'"/>
+                    </label>
+                    <button [hidden]="!imageUrl" md-button (click)="imageUrl=''" fxFill><i class="fa icon-trash"></i></button>
+                </div>
             </div>
         </div>
         <md-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
             <input mdInput type="text" [dir]="'ltr'" [(ngModel)]="websiteUrl" placeholder="{{resources.website}}" fxFill />
         </md-form-field>
-        <md-form-field fxFill>
-            <textarea mdInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
-        </md-form-field>
-        <br/>
+        <br />
         <md-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (change)="selectCategory($event)" fxFill>
             <md-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{category.label}}</md-option>
         </md-select>
-        <div fxLayout="row">
+        <br />
+        <br />
+        <div fxLayout="row" fxLayoutWrap>
             <button md-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
                 <i class="fa" [ngClass]="icon.icon" [style.color]="icon.color"></i>
-                <br/>
+                <br />
                 {{icon.label}}
             </button>
         </div>
         <div fxLayout="row">
             <div fxFlex>
-                <button md-raised-button color="primary" (click)="updatePoint()" fxFill angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{resources.uploadPoint}}</button>    
+                <button md-raised-button color="primary" (click)="updatePoint()" fxFill angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{resources.uploadPoint}}</button>
             </div>
             <div fxFlex="10" fxShow fxHide.xs>
-                <a md-button [href]="getEditElementOsmAddress()" target="_blank" fxFill mdTooltip="{{resources.editThisMapUsingOsm}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit element in OSM"><i class="fa icon-map-editing fa-lg"></i></a>    
+                <a md-button [href]="getEditElementOsmAddress()" target="_blank" fxFill mdTooltip="{{resources.editThisMapUsingOsm}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit element in OSM"><i class="fa icon-map-editing fa-lg"></i></a>
             </div>
         </div>
     </div>

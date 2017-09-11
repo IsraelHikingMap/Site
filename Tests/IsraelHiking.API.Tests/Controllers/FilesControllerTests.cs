@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -59,7 +60,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
             _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransfrom(), optionsProvider));
-            _controller = new FilesController(_elevationDataStorage, factory, _dataContainerConverterService, new LruCache<string, TokenAndSecret>(optionsProvider));
+            _controller = new FilesController(_elevationDataStorage, factory, _dataContainerConverterService, new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>()));
         }
 
         [TestMethod]

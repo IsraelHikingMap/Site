@@ -16,6 +16,7 @@ using NSubstitute;
 using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -65,7 +66,7 @@ namespace IsraelHiking.API.Tests.Controllers
             optionsProvider.Value.Returns(_options);
             _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, new ItmWgs84MathTransfrom(), 
                 _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, optionsProvider, GeometryFactory.Default,
-                new LruCache<string, TokenAndSecret>(optionsProvider));
+                new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>()));
         }
 
         [TestMethod]

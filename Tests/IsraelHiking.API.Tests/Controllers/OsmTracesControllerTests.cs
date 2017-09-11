@@ -4,6 +4,7 @@ using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -23,7 +24,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
-            _controller = new OsmTracesController(_httpGatewayFactory, new LruCache<string, TokenAndSecret>(optionsProvider));   
+            _controller = new OsmTracesController(_httpGatewayFactory, new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>()));   
         }
         
         [TestMethod]
