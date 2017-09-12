@@ -3,7 +3,6 @@ import { Http } from "@angular/http";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
 import * as L from "leaflet";
-import "leaflet.gridlayer.googlemutant";
 
 
 import { MapService } from "../map.service";
@@ -34,7 +33,7 @@ export interface IOverlay extends ILayer {
 export class LayersService {
     public static ISRAEL_MTB_MAP = "Israel MTB Map";
     public static ISRAEL_HIKING_MAP = "Israel Hiking Map";
-    public static GOOGLE_EARTH = "Google Earth";
+    public static ESRI = "ESRI";
     public static MIN_ZOOM = 7;
     public static MAX_NATIVE_ZOOM = 16;
 
@@ -46,6 +45,8 @@ export class LayersService {
     private static ATTRIBUTION = "Tiles © <a href='https://IsraelHiking.osm.org.il' target='_blank'>Israel Hiking</a>, <a href='https://creativecommons.org/licenses/by-nc-sa/3.0/' target='_blank'>CC BY-NC-SA 3.0</a>. Data by <a href='https://openstreetmap.org' target='_blank'>OpenStreetMap</a> under <a href='https://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
     private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION;
     private static TRAILS_ATTRIBUTION = "Trail " + LayersService.ATTRIBUTION;
+    private static ESRI_ADDRESS = "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+    private static ESRI_ATTRIBUTION = "DigitalGlobe, GeoEye, i-cubed, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community";
     private static BASE_LAYERS_KEY = "BaseLayers";
     private static OVERLAYS_KEY = "Overlays";
     private static ACTIVE_BASELAYER_KEY = "ActiveBaseLayer";
@@ -110,12 +111,12 @@ export class LayersService {
             address: this.resourcesService.currentLanguage.tilesFolder + Urls.MTB_TILES_ADDRESS,
             isEditable: false
         } as ILayer, LayersService.MTB_ATTRIBUTION);
-        try {
-            var googleLayer = L.gridLayer.googleMutant({ type: "satellite" } as L.gridLayer.GoogleMutantOptions) as any;
-            this.baseLayers.push({ key: LayersService.GOOGLE_EARTH, layer: googleLayer, selected: false, address: "", isEditable: false } as IBaseLayer);
-        } catch (e) {
-            console.error("Unable to create the google earth layer...");
-        }
+
+        this.addNewBaseLayer({
+            key: LayersService.ESRI,
+            address: LayersService.ESRI_ADDRESS,
+            isEditable: false
+        } as ILayer, LayersService.ESRI_ATTRIBUTION);
 
         let hikingTrailsOverlay = this.addNewOverlay({
             key: LayersService.HIKING_TRAILS,
@@ -155,7 +156,7 @@ export class LayersService {
         for (let baseLayer of this.baseLayers) {
             if (baseLayer.key === LayersService.ISRAEL_HIKING_MAP ||
                 baseLayer.key === LayersService.ISRAEL_MTB_MAP ||
-                baseLayer.key === LayersService.GOOGLE_EARTH) {
+                baseLayer.key === LayersService.ESRI) {
                 continue;
             }
             baseLayersToStore.push(this.extractDataFromLayer(baseLayer));

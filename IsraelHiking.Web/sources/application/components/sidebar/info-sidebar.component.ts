@@ -1121,7 +1121,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                 this.removeMtbUnwantedLegend();
             } else if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP) {
                 this.removeIhmUnwantedLegend();
-            } else if (this.layersService.selectedBaseLayer.key === LayersService.GOOGLE_EARTH) {
+            } else if (this.layersService.selectedBaseLayer.key === LayersService.ESRI) {
                 this.legendSections = [];
             }
         });
