@@ -55,9 +55,9 @@ namespace IsraelHiking.DataAccess
                 var attributes = GetAttributes(nakebItem);
                 var description = nakebItem.prolog ?? string.Empty;
                 description += $"\n{string.Join(",", nakebItem.attributes)}\nאורך: {nakebItem.length} ק\"מ";
-                attributes.AddAttribute(FeatureAttributes.DESCRIPTION, description);
-                attributes.AddAttribute(FeatureAttributes.IMAGE_URL, nakebItem.picture);
-                attributes.AddAttribute(FeatureAttributes.WEBSITE, nakebItem.link);
+                attributes.Add(FeatureAttributes.DESCRIPTION, description);
+                attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.picture);
+                attributes.Add(FeatureAttributes.WEBSITE, nakebItem.link);
                 var lineString =
                     new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
                 var features = new List<IFeature> {new Feature(lineString, attributes)};
@@ -74,26 +74,31 @@ namespace IsraelHiking.DataAccess
 
         private AttributesTable GetAttributes(JsonNakebItem nakebItem)
         {
-            var attributes = new AttributesTable();
-            attributes.AddAttribute(FeatureAttributes.ID, nakebItem.id);
-            attributes.AddAttribute(FeatureAttributes.NAME, nakebItem.title);
-            attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.NAKEB);
-            var geoLocation = new AttributesTable();
-            geoLocation.AddAttribute(FeatureAttributes.LAT, nakebItem.start.lat);
-            geoLocation.AddAttribute(FeatureAttributes.LON, nakebItem.start.lng);
-            attributes.AddAttribute(FeatureAttributes.GEOLOCATION, geoLocation);
-            attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE);
-            attributes.AddAttribute(FeatureAttributes.ICON, "icon-nakeb");
-            attributes.AddAttribute(FeatureAttributes.ICON_COLOR, "black");
-            attributes.AddAttribute(FeatureAttributes.SEARCH_FACTOR, 1);
+            var geoLocation = new AttributesTable
+            {
+                {FeatureAttributes.LAT, nakebItem.start.lat},
+                {FeatureAttributes.LON, nakebItem.start.lng}
+            };
+            var attributes = new AttributesTable
+            {
+                {FeatureAttributes.ID, nakebItem.id},
+                {FeatureAttributes.NAME, nakebItem.title},
+                {FeatureAttributes.POI_SOURCE, Sources.NAKEB},
+                {FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE},
+                {FeatureAttributes.ICON, "icon-nakeb"},
+                {FeatureAttributes.ICON_COLOR, "black"},
+                {FeatureAttributes.SEARCH_FACTOR, 1},
+                {FeatureAttributes.GEOLOCATION, geoLocation}
+            };
+
+
             return attributes;
         }
 
         private IFeature ConvertToPointFeature(MarkerData markerData)
         {
             var point = new Point(new Coordinate().FromLatLng(markerData.latlng));
-            var attributes = new AttributesTable();
-            attributes.AddAttribute(FeatureAttributes.NAME, markerData.title);
+            var attributes = new AttributesTable {{FeatureAttributes.NAME, markerData.title}};
             return new Feature(point, attributes);
         }
     }

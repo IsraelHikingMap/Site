@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
-using Nest;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
@@ -109,18 +108,22 @@ namespace IsraelHiking.DataAccess
 
         private AttributesTable GetAttributes(JsonOffroadTrack offroadTrack)
         {
-            var attributes = new AttributesTable();
-            attributes.AddAttribute(FeatureAttributes.ID, offroadTrack.id);
-            attributes.AddAttribute(FeatureAttributes.NAME, offroadTrack.title);
-            attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OFFROAD);
-            var geoLocation = new AttributesTable();
-            geoLocation.AddAttribute(FeatureAttributes.LAT, offroadTrack.start.latitude);
-            geoLocation.AddAttribute(FeatureAttributes.LON, offroadTrack.start.longitude);
-            attributes.AddAttribute(FeatureAttributes.GEOLOCATION, geoLocation);
-            attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, GetCategory(offroadTrack.activityType));
-            attributes.AddAttribute(FeatureAttributes.ICON, GetIcon(offroadTrack.myAdventureUserId));
-            attributes.AddAttribute(FeatureAttributes.ICON_COLOR, "black");
-            attributes.AddAttribute(FeatureAttributes.SEARCH_FACTOR, 1);
+            var geoLocation = new AttributesTable
+            {
+                {FeatureAttributes.LAT, offroadTrack.start.latitude},
+                {FeatureAttributes.LON, offroadTrack.start.longitude}
+            };
+            var attributes = new AttributesTable
+            {
+                {FeatureAttributes.ID, offroadTrack.id},
+                {FeatureAttributes.NAME, offroadTrack.title},
+                {FeatureAttributes.POI_SOURCE, Sources.OFFROAD},
+                {FeatureAttributes.POI_CATEGORY, GetCategory(offroadTrack.activityType)},
+                {FeatureAttributes.ICON, GetIcon(offroadTrack.myAdventureUserId)},
+                {FeatureAttributes.ICON_COLOR, "black"},
+                {FeatureAttributes.SEARCH_FACTOR, 1},
+                {FeatureAttributes.GEOLOCATION, geoLocation}
+            };
             return attributes;
         }
 
@@ -171,9 +174,9 @@ namespace IsraelHiking.DataAccess
                 track = JsonConvert.DeserializeObject<JsonOffroadTrackExtended>(content);
             }
             var attributes = GetAttributes(track);
-            attributes.AddAttribute(FeatureAttributes.DESCRIPTION, track.shortDescription ?? string.Empty);
-            attributes.AddAttribute(FeatureAttributes.IMAGE_URL, track.galleryImages?.FirstOrDefault()?.url ?? string.Empty);
-            attributes.AddAttribute(FeatureAttributes.WEBSITE, track.externalUrl ?? string.Empty);
+            attributes.Add(FeatureAttributes.DESCRIPTION, track.shortDescription ?? string.Empty);
+            attributes.Add(FeatureAttributes.IMAGE_URL, track.galleryImages?.FirstOrDefault()?.url ?? string.Empty);
+            attributes.Add(FeatureAttributes.WEBSITE, track.externalUrl ?? string.Empty);
             var trackLayerKey = track.trackLayerKey;
             using (var client = new HttpClient())
             {

@@ -272,15 +272,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.5.1" />
+    <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.6.0-int3" />
     <PackageReference Include="GeoAPI" Version="1.7.5-pre4" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="1.1.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="1.1.2" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="1.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="1.1.2" />
     <PackageReference Include="NEST" Version="5.3.0" />
-    <PackageReference Include="NetTopologySuite" Version="1.15.0-pre013" />
-    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="1.15.0-pre013" />
+    <PackageReference Include="NetTopologySuite" Version="1.15.0-pre017" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="1.15.0-pre017" />
     <PackageReference Include="OAuth.DotNetCore" Version="1.0.4" />
     <PackageReference Include="OsmSharp" Version="6.0.0-pre04" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />

@@ -9,8 +9,9 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
-using WikiClientLibrary;
 using WikiClientLibrary.Client;
+using WikiClientLibrary.Pages;
+using WikiClientLibrary.Sites;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace IsraelHiking.DataAccess
@@ -21,7 +22,7 @@ namespace IsraelHiking.DataAccess
 
         private readonly ILogger _logger;
         private readonly NonPublicConfigurationData _options;
-        private Site _site;
+        private WikiSite _site;
 
         public WikipediaGateway(IOptions<NonPublicConfigurationData> options,
             ILogger logger)
@@ -37,7 +38,7 @@ namespace IsraelHiking.DataAccess
                 ClientUserAgent = "IsraelHikingMapSite/5.0",
                 Timeout = new TimeSpan(0, 5, 0) // allow large images upload
             };
-            _site = await Site.CreateAsync(wikiClient, new SiteOptions(BASE_API_ADDRESS));
+            _site = await WikiSite.CreateAsync(wikiClient, new SiteOptions(BASE_API_ADDRESS));
             await _site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
         }
 
