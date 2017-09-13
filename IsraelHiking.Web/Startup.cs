@@ -187,7 +187,7 @@ namespace IsraelHiking.Web
             }
             else
             {
-                //rewriteOptions.AddRedirectToHttps();
+                rewriteOptions.AddRedirectToHttps();
             }
             app.UseRewriter(rewriteOptions);
 
