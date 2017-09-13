@@ -4,10 +4,8 @@ import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
 import * as L from "leaflet";
 
-
 import { MapService } from "../map.service";
 import { WikiMarkersLayer } from "./wiki-markers.layer";
-import { NakebMarkerLayer } from "./nakeb-markers.layer";
 import { ResourcesService } from "../resources.service";
 import { OsmUserService } from "../osm-user.service";
 import { PoiService } from "../poi.service";
@@ -40,7 +38,6 @@ export class LayersService {
     private static MAX_ZOOM = 20;
     private static HIKING_TRAILS = "Hiking Trails";
     private static BICYCLE_TRAILS = "Bicycle Trails";
-    private static NAKEB = "Nakeb";
     private static WIKIPEDIA = "Wikipedia";
     private static ATTRIBUTION = "Tiles © <a href='https://IsraelHiking.osm.org.il' target='_blank'>Israel Hiking</a>, <a href='https://creativecommons.org/licenses/by-nc-sa/3.0/' target='_blank'>CC BY-NC-SA 3.0</a>. Data by <a href='https://openstreetmap.org' target='_blank'>OpenStreetMap</a> under <a href='https://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
     private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION;
@@ -75,7 +72,6 @@ export class LayersService {
         private resourcesService: ResourcesService,
         private osmUserService: OsmUserService,
         private wikiMarkersLayer: WikiMarkersLayer,
-        private nakebMarkerLayer: NakebMarkerLayer,
         categoriesLayersFactory: CategoriesLayerFactory,
         poiService: PoiService,
     ) {
@@ -135,9 +131,6 @@ export class LayersService {
         bicycleTrailsOverlay.isEditable = false;
 
         this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.WIKIPEDIA, layer: this.wikiMarkersLayer as L.Layer } as IOverlay);
-        // HM TODO: completely remove the class.
-        //this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.NAKEB, layer: this.nakebMarkerLayer as L.Layer } as IOverlay);
-
         this.selectBaseLayerAccordingToStorage(false);
     }
 
@@ -166,8 +159,7 @@ export class LayersService {
         for (let overlay of this.overlays) {
             if (overlay.key === LayersService.HIKING_TRAILS ||
                 overlay.key === LayersService.BICYCLE_TRAILS ||
-                overlay.key === LayersService.WIKIPEDIA ||
-                overlay.key === LayersService.NAKEB) {
+                overlay.key === LayersService.WIKIPEDIA) {
                 continue;
             }
             overlaysToStore.push(this.extractDataFromLayer(overlay));

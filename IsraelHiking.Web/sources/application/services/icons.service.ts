@@ -113,10 +113,6 @@ export class IconsService {
         return IconsService.createPoiIcon("icon-wikipedia-w", "black");
     }
 
-    public static createNakebIcon(): L.DivIcon {
-        return IconsService.createPoiIcon("icon-nakeb", "black");
-    }
-
     public static createPoiIcon(icon: string, color: string): L.DivIcon {
         let html = IconsService.POI_MARKER_HTML.replace("{{icon}}", icon).replace("{{color}}", color);
         return L.divIcon(IconsService.getDefaultMarkerOptions(html));

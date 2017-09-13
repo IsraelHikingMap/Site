@@ -37,7 +37,6 @@ import { ElevationProvider } from "./services/elevation.provider";
 import { SearchResultsProvider } from "./services/search-results.provider";
 import { GeoJsonParser } from "./services/geojson.parser";
 import { WikiMarkersLayer } from "./services/layers/wiki-markers.layer";
-import { NakebMarkerLayer } from "./services/layers/nakeb-markers.layer";
 import { CategoriesLayerFactory } from "./services/layers/categories-layers.factory";
 import { DragAndDropService } from "./services/drag-and-drop.service";
 import { PoiService } from "./services/poi.service";
@@ -81,7 +80,6 @@ import { DownloadDialogComponent } from "./components/dialogs/download-dialog.co
 import { ShareComponent } from "./components/share.component";
 import { ShareDialogComponent } from "./components/dialogs/share-dialog.component";
 import { WikiMarkerPopupComponent } from "./components/markerpopup/wiki-marker-popup.component";
-import { NakebMarkerPopupComponent } from "./components/markerpopup/nakeb-marker-popup.component";
 import { UpdatePointDialogComponent } from "./components/dialogs/update-point-dialog.component";
 import { ImageDialogCompnent } from "./components/dialogs/image-dialog.component";
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
@@ -146,7 +144,6 @@ export function getWindow() { return window; }
         ShareComponent,
         ShareDialogComponent,
         WikiMarkerPopupComponent,
-        NakebMarkerPopupComponent,
         UpdatePointDialogComponent,
         ImageDialogCompnent,
         TermsOfServiceDialogComponent
@@ -176,7 +173,6 @@ export function getWindow() { return window; }
         SearchResultsProvider,
         GeoJsonParser,
         WikiMarkersLayer,
-        NakebMarkerLayer,
         CategoriesLayerFactory,
         DragAndDropService,
         PoiService
@@ -217,7 +213,6 @@ export function getWindow() { return window; }
         ShareComponent,
         ShareDialogComponent,
         WikiMarkerPopupComponent,
-        NakebMarkerPopupComponent,
         GoogleChartDirective,
         DraggableResizableDirective,
         UpdatePointDialogComponent,

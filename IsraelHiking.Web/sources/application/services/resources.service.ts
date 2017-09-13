@@ -205,6 +205,7 @@ export class ResourcesService {
     public wikimediaTermsOfService: string;
     public iHaveReadAndAgree: string;
     public submit: string;
+    public esri: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -624,6 +625,7 @@ export class ResourcesService {
                 this.wikimediaTermsOfService = this.gettextCatalog.getString("Wikimedia terms of service");
                 this.iHaveReadAndAgree = this.gettextCatalog.getString("I have read and agree to the terms");
                 this.submit = this.gettextCatalog.getString("Submit");
+                this.esri = this.gettextCatalog.getString("ESRI");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
