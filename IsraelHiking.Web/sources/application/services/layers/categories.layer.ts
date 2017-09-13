@@ -36,7 +36,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             for (let categoryType in response) {
                 if (response.hasOwnProperty(categoryType)) {
                     let selected = this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX) == null
-                        ? true
+                        ? this.visible
                         : this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX);
                     this.categories.push({
                         key: categoryType,
