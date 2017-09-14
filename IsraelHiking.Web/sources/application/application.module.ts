@@ -85,6 +85,7 @@ import { ImageDialogCompnent } from "./components/dialogs/image-dialog.component
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
 
 export function getWindow() { return window; }
+export function getRoutesService(routesService: RoutesService) { return routesService; }
 
 @NgModule({
     imports: [
@@ -161,6 +162,11 @@ export function getWindow() { return window; }
         HashService,
         LayersService,
         RoutesService,
+        {
+            provide: "RoutesService",
+            useFactory: getRoutesService,
+            deps: [RoutesService]
+        },
         DataContainerService,
         RouteLayerFactory,
         RouterService,

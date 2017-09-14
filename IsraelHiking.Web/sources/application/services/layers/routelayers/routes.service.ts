@@ -8,11 +8,13 @@ import { MapService } from "../../map.service";
 import { RouteLayerFactory } from "./route-layer.factory";
 import { RouteLayer } from "./route.layer";
 import { ResourcesService } from "../../resources.service";
+import { IconsService } from "../../icons.service";
+import { IRoutesService } from "./iroutes.service";
 import * as Common from "../../../common/IsraelHiking";
-import {IconsService} from "../../icons.service";
+
 
 @Injectable()
-export class RoutesService {
+export class RoutesService implements IRoutesService {
     private static MERGE_THRESHOLD = 50; // meter.
     
     public routes: IRouteLayer[];

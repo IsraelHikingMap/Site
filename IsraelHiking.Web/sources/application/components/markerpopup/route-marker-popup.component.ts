@@ -1,12 +1,13 @@
-﻿import { Component, Injector, ApplicationRef } from "@angular/core";
+﻿import { Component, Injector, ApplicationRef, Inject } from "@angular/core";
 import { Http } from "@angular/http";
 import * as _ from "lodash";
 import { ResourcesService } from "../../services/resources.service";
-import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { IRouteSegment } from "../../services/layers/routelayers/iroute.layer";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
+import { IRoutesService } from "../../services/layers/routelayers/iroutes.service";
 import * as Common from "../../common/IsraelHiking";
+
 
 @Component({
     selector: "route-marker-popup",
@@ -16,20 +17,21 @@ export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
     public canMerge: boolean;
     public isMiddle: boolean;
     private routeSegment: IRouteSegment;
-    private routesService: RoutesService;
-    
+    private routesService: IRoutesService;
+
     constructor(resources: ResourcesService,
         http: Http,
         applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider,
-        private injector: Injector,) {
+        private injector: Injector,
+        @Inject("RoutesService") routesService: IRoutesService) {
         super(resources, http, applicationRef, elevationProvider);
         this.canMerge = false;
         this.isMiddle = false;
+        this.routesService = routesService;
     }
 
     public setMarker(marker: Common.IMarkerWithTitle) {
-        this.routesService = this.injector.get(RoutesService);
         this.setMarkerInternal(marker);
         marker.on("popupopen", () => {
             this.routeSegment = _.find(this.routesService.selectedRoute.route.segments, segmentToFind => this.marker === segmentToFind.routePointMarker);
