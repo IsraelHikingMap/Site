@@ -4,6 +4,7 @@
     top: 0;
     bottom: 0;
     left: 0;
+    min-width: 250px;
     line-height: 24px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -17,6 +18,8 @@
     -moz-transition: all 0.5s ease;
     -o-transition: all 0.5s ease;
     transition: all 0.5s ease;
+    -ms-transform: translateX(-100%);
+    -webkit-transform: translateX(-100%);
     transform: translateX(-100%);
     max-width: 400px;
 }
@@ -29,11 +32,7 @@
         transform: translateX(0);
     }
 
-    #sidebar-wrapper.toggled {
-        transform: translateX(0);
-    }
-
-    #sidebar-wrapper /deep/ .drag-handle-right span {
+    #sidebar-wrapper .drag-handle-right span {
         border-color: #6d6d6d;
         border-width: 0 1px;
         width: 4px;

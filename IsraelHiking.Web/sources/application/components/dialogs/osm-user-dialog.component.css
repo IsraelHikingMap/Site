@@ -1,8 +1,8 @@
-﻿/deep/ osm-user-dialog .mat-dialog-title {
+﻿[osm-user-dialog] .mat-dialog-title {
     margin-bottom: 0;
 }
 
-/deep/ osm-user-dialog .mat-dialog-content {
+[osm-user-dialog] .mat-dialog-content {
     max-height: 55vh;
 }
 
@@ -61,7 +61,7 @@
 }
 
 @media (max-width:600px) {
-    /deep/ osm-user-dialog .mat-dialog-content {
+    [osm-user-dialog] .mat-dialog-content {
         max-height: 35vh;
     }
 
