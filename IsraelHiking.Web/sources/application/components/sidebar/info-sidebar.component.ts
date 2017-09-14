@@ -681,7 +681,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendSynagogue,
-                        latlng: L.latLng(30.850875, 34.7822589),
+                        latlng: L.latLng(31.7766,35.2343),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
