@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26403.3
+VisualStudioVersion = 15.0.26730.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.Web", "IsraelHiking.Web\IsraelHiking.Web.csproj", "{69BFA742-B354-4493-8C9B-794C8CD14214}"
 EndProject
@@ -27,7 +27,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IsraelHiking.DataAccess.Tes
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AppVeyorBuild", "AppVeyorBuild", "{3585675D-C9A0-4E48-A11D-4B9E789A0B0A}"
 	ProjectSection(SolutionItems) = preProject
-		AppVeyorBuild\BuildTypescript.ps1 = AppVeyorBuild\BuildTypescript.ps1
 		AppVeyorBuild\PostBuildPackArtifacts.ps1 = AppVeyorBuild\PostBuildPackArtifacts.ps1
 		AppVeyorBuild\PostBuildTests.ps1 = AppVeyorBuild\PostBuildTests.ps1
 	EndProjectSection
@@ -140,5 +139,8 @@ Global
 		{32A771F8-7A45-4359-9E22-B3CF5155C9A8} = {F72D33D1-176B-4BC5-851A-F71C1ABA74D9}
 		{3585675D-C9A0-4E48-A11D-4B9E789A0B0A} = {F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}
 		{3E9EFE32-6A08-4960-AD00-83AC5FEAB259} = {F82C943F-37C1-45DF-A2CF-7EFFB9C0B467}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {82D60BA1-DDEE-4F6B-B842-56EF5620175E}
 	EndGlobalSection
 EndGlobal

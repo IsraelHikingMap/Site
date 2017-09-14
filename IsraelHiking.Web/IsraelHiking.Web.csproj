@@ -16,6 +16,7 @@
     <Content Remove="Logs\**" />
     <Content Remove="wwwroot\Bin\**" />
     <Content Remove="wwwroot\lib\**" />
+    <Content Remove="sources\**" />
     <EmbeddedResource Remove="Logs\**" />
     <EmbeddedResource Remove="wwwroot\Bin\**" />
     <EmbeddedResource Remove="wwwroot\lib\**" />
@@ -92,4 +93,27 @@
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
   </ItemGroup>
+
+  <Target Name="NodeInitialize">
+    <!-- Ensure Node.js is installed -->
+    <Exec Command="node --version" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+    </Exec>
+    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+
+    <Message Importance="high" Text="Installing all npm packages" />
+    <Exec Command="npm install" />
+  </Target>
+  
+  <Target Name="DebugRunNgBuild" BeforeTargets="Build" DependsOnTargets="NodeInitialize" Condition=" '$(Configuration)' == 'Debug'">
+    <Message Importance="high" Text="Starting Ng Build for development" />
+    <Exec Command="ng build --target=development --environment=dev" />
+    <Message Importance="high" Text="Ng Build for development ended" />
+  </Target>
+
+  <Target Name="ReleaseRunNgBuild" BeforeTargets="Build" DependsOnTargets="NodeInitialize" Condition=" '$(Configuration)' == 'Release'">
+    <Message Importance="high" Text="Starting Ng Build for production" />
+    <Exec Command="ng build --target=production --environment=prod" />
+    <Message Importance="high" Text="Ng Build for production ended" />
+  </Target>
 </Project>
