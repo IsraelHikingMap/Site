@@ -127,9 +127,11 @@ namespace IsraelHiking.API.Executors
                 {
                     continue;
                 }
-                var table = new AttributesTable();
-                table.AddAttribute(FeatureAttributes.LAT, placePoint.Geometry.Coordinate.Y);
-                table.AddAttribute(FeatureAttributes.LON, placePoint.Geometry.Coordinate.X);
+                var table = new AttributesTable
+                {
+                    {FeatureAttributes.LAT, placePoint.Geometry.Coordinate.Y},
+                    {FeatureAttributes.LON, placePoint.Geometry.Coordinate.X}
+                };
                 feature.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, table);
                 foreach (var placePointAttributeName in placePoint.Attributes.GetNames())
                 {
@@ -340,9 +342,11 @@ namespace IsraelHiking.API.Executors
             {
                 return;
             }
-            var table = new AttributesTable();
-            table.AddAttribute(FeatureAttributes.LAT, feature.Geometry.Coordinate.Y);
-            table.AddAttribute(FeatureAttributes.LON, feature.Geometry.Coordinate.X);
+            var table = new AttributesTable
+            {
+                {FeatureAttributes.LAT, feature.Geometry.Coordinate.Y},
+                {FeatureAttributes.LON, feature.Geometry.Coordinate.X}
+            };
             feature.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, table);
         }
     }

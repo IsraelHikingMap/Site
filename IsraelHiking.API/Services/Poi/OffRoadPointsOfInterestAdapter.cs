@@ -13,6 +13,9 @@ using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services.Poi
 {
+    /// <summary>
+    /// Adapts from off-road interface to business logic point of interest
+    /// </summary>
     public class OffRoadPointsOfInterestAdapter: BasePointsOfInterestAdapter, IPointsOfInterestAdapter
     {
         private readonly IOffRoadGateway _offRoadGateway;
