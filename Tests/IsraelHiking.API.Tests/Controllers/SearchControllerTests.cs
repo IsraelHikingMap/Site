@@ -23,7 +23,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var elevationDataStorage = Substitute.For<IElevationDataStorage>();
 
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _controller = new SearchController(_elasticSearchGateway, _dataContainerConverterService, elevationDataStorage, new ItmWgs84MathTransfrom());
+            _controller = new SearchController(_elasticSearchGateway, _dataContainerConverterService, elevationDataStorage, ItmWgs84MathTransfromFactory.Create());
         }
 
         [TestMethod]

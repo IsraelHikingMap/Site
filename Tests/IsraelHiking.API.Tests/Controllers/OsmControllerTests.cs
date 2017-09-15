@@ -64,7 +64,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _options = new ConfigurationData();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
-            _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, new ItmWgs84MathTransfrom(), 
+            _controller = new OsmController(_httpGatewayFactory, _dataContainerConverterService, ItmWgs84MathTransfromFactory.Create(), 
                 _elasticSearchGateway, _addibleGpxLinesFinderService, _osmLineAdderService, optionsProvider, GeometryFactory.Default,
                 new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>()));
         }

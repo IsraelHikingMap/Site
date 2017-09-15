@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
             
-            _service = new OsmLineAdderService(_elasticSearchGateway, new ItmWgs84MathTransfrom(), optionsProvider, geoJsonPreProcessor, _httpGatewayFactory);
+            _service = new OsmLineAdderService(_elasticSearchGateway, ItmWgs84MathTransfromFactory.Create(), optionsProvider, geoJsonPreProcessor, _httpGatewayFactory);
         }
 
         private IOsmGateway SetupOsmGateway(string changesetId)
