@@ -9,34 +9,42 @@
     </div>
     <div md-dialog-content>
         <div fxLayout="row" fxLayout.xs="column">
-            <div fxFlex>
-                <div fxLayout="column">
+            <div fxFlex="50" fxFlex.xs="100">
+                <div fxLayout="row">
                     <md-form-field fxFill>
-                        <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.nameInLanguage}}" fxFill required/>
+                        <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.nameInLanguage}}" fxFill required />
                     </md-form-field>
+                </div>
+                <div fxLayout="row">
                     <md-form-field fxFill>
                         <textarea mdInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
                     </md-form-field>
                 </div>
             </div>
             <div fxFlex="50" fxFlex.xs="100">
-                <div fxLayout="column">
-                    <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill/>
+                <div fxLayout="row">
+                    <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill />
                     <label [hidden]="imageUrl" fxFill>
                         <a md-button fxFill [disabled]="!title" angulartics2On="click" angularticsCategory="Update Point" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
-                        <input type="file" (change)="uploadImage($event)" [style.display]="'none'"/>
+                        <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
                     </label>
+                </div>
+                <div fxLayout="row">
                     <button [hidden]="!imageUrl" md-button (click)="imageUrl=''" fxFill><i class="fa icon-trash"></i></button>
                 </div>
             </div>
         </div>
-        <md-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
-            <input mdInput type="text" [dir]="'ltr'" [(ngModel)]="websiteUrl" placeholder="{{resources.website}}" fxFill />
-        </md-form-field>
+        <div fxLayout="row">
+            <md-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
+                <input mdInput type="text" [dir]="'ltr'" [(ngModel)]="websiteUrl" placeholder="{{resources.website}}" fxFill />
+            </md-form-field>
+        </div>
         <br />
-        <md-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (change)="selectCategory($event)" fxFill>
-            <md-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{category.label}}</md-option>
-        </md-select>
+        <div fxLayout="row">
+            <md-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (change)="selectCategory($event)" fxFill>
+                <md-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{category.label}}</md-option>
+            </md-select>
+        </div>
         <br />
         <br />
         <div fxLayout="row" fxLayoutWrap>
