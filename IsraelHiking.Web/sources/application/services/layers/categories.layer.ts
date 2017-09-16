@@ -108,11 +108,11 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                 let pointsOfInterest = response.json() as IPointOfInterest[];
                 this.markers.eachLayer(existingMarker => {
                     let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
-                    let geoSearchPage = _.find(pointsOfInterest, p => p.id === markerWithTitle.identifier);
-                    if (geoSearchPage == null) {
+                    let pointOfInterestMarker = _.find(pointsOfInterest, p => p.id === markerWithTitle.identifier);
+                    if (pointOfInterestMarker == null && markerWithTitle.isPopupOpen() === false) {
                         this.markers.removeLayer(existingMarker);
-                    } else {
-                        pointsOfInterest.splice(pointsOfInterest.indexOf(geoSearchPage), 1);
+                    } else if (pointOfInterestMarker != null) {
+                        pointsOfInterest.splice(pointsOfInterest.indexOf(pointOfInterestMarker), 1);
                     }
                 });
 
