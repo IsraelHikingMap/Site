@@ -53,6 +53,7 @@ export class WikiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public setMarker(marker: Common.IMarkerWithTitle) {
+        this.setMarkerInternal(marker);
         this.marker.on("popupopen", () => {
             let popup = this.marker.getPopup();
             let lang = this.resources.getCurrentLanguageCodeSimplified();
