@@ -59,7 +59,7 @@ export class WikiMarkersLayer extends BasePoiMarkerLayer {
             let data = response.json() as IGeoSearchWikiResponse;
             this.markers.eachLayer(existingMarker => {
                 let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
-                let geoSearchPage = _.find(data.query.geosearch, g => g.pageid.toString() === markerWithTitle.title);
+                let geoSearchPage = _.find(data.query.geosearch, g => g.pageid.toString() === markerWithTitle.identifier);
                 if (geoSearchPage == null) {
                     this.markers.removeLayer(existingMarker);
                 } else {
@@ -69,7 +69,8 @@ export class WikiMarkersLayer extends BasePoiMarkerLayer {
 
             for (let currentPage of data.query.geosearch) {
                 let marker = L.marker(L.latLng(currentPage.lat, currentPage.lon), { draggable: false, clickable: true, icon: this.markerIcon, title: currentPage.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
-                marker.title = currentPage.pageid.toString();
+                marker.title = currentPage.title;
+                marker.identifier = currentPage.pageid.toString();
                 let markerPopupContainer = L.DomUtil.create("div");
                 let pageAddress = `https://${language}.wikipedia.org/?curid=${currentPage.pageid}`;
                 let factory = this.componentFactoryResolver.resolveComponentFactory(WikiMarkerPopupComponent);
