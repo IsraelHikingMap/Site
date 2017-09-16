@@ -53,6 +53,11 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
             var feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM);
+            return await FeatureToExtendedPoi(feature, language);
+        }
+
+        private async Task<PointOfInterestExtended> FeatureToExtendedPoi(Feature feature, string language)
+        {
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
             await AddExtendedData(poiItem, feature, language);
             return poiItem;
@@ -81,8 +86,8 @@ namespace IsraelHiking.API.Services.Poi
             node.Id = long.Parse(id);
             await osmGateway.CloseChangeset(changesetId);
 
-            await UpdateElasticSearch(node, pointOfInterest.Title);
-            return await GetPointOfInterestById(id, language);
+            var feature = await UpdateElasticSearch(node, pointOfInterest.Title);
+            return await FeatureToExtendedPoi(feature, language);
         }
 
         /// <inheritdoc />
@@ -120,8 +125,8 @@ namespace IsraelHiking.API.Services.Poi
             await osmGateway.UpdateElement(changesetId, completeOsmGeo);
             await osmGateway.CloseChangeset(changesetId);
 
-            await UpdateElasticSearch(completeOsmGeo, pointOfInterest.Title);
-            return await GetPointOfInterestById(id, language);
+            var featureToReturn = await UpdateElasticSearch(completeOsmGeo, pointOfInterest.Title);
+            return await FeatureToExtendedPoi(featureToReturn, language);
         }
 
         /// <inheritdoc />
@@ -132,7 +137,7 @@ namespace IsraelHiking.API.Services.Poi
             return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
         }
 
-        private async Task UpdateElasticSearch(ICompleteOsmGeo osm, string name)
+        private async Task<Feature> UpdateElasticSearch(ICompleteOsmGeo osm, string name)
         {
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(
                 new Dictionary<string, List<ICompleteOsmGeo>>
@@ -144,6 +149,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 await _elasticSearchGateway.UpdateNamesData(feature);
             }
+            return feature;
         }
 
         private void SetTagByLanguage(TagsCollectionBase tags, string key, string value, string language)
