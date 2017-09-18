@@ -1,22 +1,28 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
-    <div fxLayout="row" [hidden]="thumbnail">
+    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="thumbnail || !sourceImageUrl">
+        <img [src]="sourceImageUrl" alt="" height="100"/>
+    </div>
+    <div fxLayout="row" [hidden]="thumbnail || sourceImageUrl">
         <div fxFlex [ngClass]="resources.getTextAlignment()">
             <label [hidden]="!isEditMode()">
                 <a md-button [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
-                <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
+                <input type="file" (change)="uploadImage($event)" [style.display]="'none'"/>
             </label>
-            <i [hidden]="isEditMode()" class="fa {{getIcon()}} fa-5x"></i>
+            <i [hidden]="isEditMode() || sourceImageUrl" class="fa {{getIcon()}} fa-5x"></i>
         </div>
         <div fxFlex="66" [hidden]="isHideEditMode()" class="cursor-pointer">
             <h2 [ngClass]="resources.getTextAlignment()" (click)="setEditMode()">{{resources.clickToEdit}}</h2>
         </div>
     </div>
     <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="!thumbnail">
-        <img [src]="thumbnail" class="img-responsive curson-zoom-in" height="100" (click)="showImage()" />
+        <img [src]="thumbnail" class="img-responsive curson-zoom-in" height="100" (click)="showImage()"/>
+        <div [hidden]="!sourceImageUrl">
+            <img [src]="sourceImageUrl" alt="" height="64"/>
+        </div>
     </div>
     <div fxLayout="row">
         <div fxFlex="80">
-            
+
             <a [hidden]="!address" href="{{address}}" target="_blank">
                 <h3 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h3>
             </a>
@@ -31,7 +37,7 @@
                     <textarea rows="4" mdInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
                 </md-form-field>
             </div>
-            <div fxLayout="row" [hidden]="!isEditMode()">
+            <div fxLayout="row" [hidden]="!isEditMode() || isRoute()">
                 <a class="cursor-pointer" (click)="openUpdatePointDialog($event)">{{resources.more}}</a>
             </div>
             <div fxLayout="row" [hidden]="isEditMode()" *ngFor="let descriptionLine of getDescrition()">
@@ -46,7 +52,8 @@
                 <button md-button fxFill (click)="voteUp()" mdTooltip="{{resources.worthIt}}" mdTooltipPosition="before"><i class="fa-2x icon-thumbs-up" [style.color]="canVote() ? 'green' : 'grey'"></i></button>
             </div>
             <div fxLayout="row">
-                <h3 fxFill class="text-center"><span dir="ltr">{{rating || 0}}</span></h3>
+                <h3 fxFill class="text-center"><span dir="ltr">{{rating || 0}}</span>
+                </h3>
             </div>
             <div fxLayout="row">
                 <button md-button fxFill (click)="voteDown()" mdTooltip="{{resources.notWorthIt}}" mdTooltipPosition="before"><i class="fa-2x icon-thumbs-down" [style.color]="canVote() ? 'red' : 'grey'"></i></button>
@@ -60,10 +67,13 @@
         <div fxFlex [hidden]="!isEditMode()">
             <button md-button fxFill (click)="save()" mdTooltip="{{resources.save}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Save POI"><i class="fa icon-check"></i></button>
         </div>
-        <div fxFlex [hidden]="!canBeConvertedToRoute()">
+        <div fxFlex [hidden]="!isRoute()">
             <button md-button fxFill (click)="convertToRoute()" mdTooltip="{{resources.convertToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Convert POI to route"><i class="fa icon-plus"></i></button>
         </div>
-        <div fxFlex [hidden]="!canBeConvertedToRoute()">
+        <div fxFlex [hidden]="isRoute()">
+            <button md-button fxFill (click)="addPointToRoute()" mdTooltip="{{resources.convertToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Convert POI to point"><i class="fa icon-plus"></i></button>
+        </div>
+        <div fxFlex [hidden]="!isRoute()">
             <button md-button fxFill (click)="clearSelectedRoute()" mdTooltip="{{resources.clear}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Clear selected route"><i class="fa icon-eye-slash"></i></button>
         </div>
     </div>

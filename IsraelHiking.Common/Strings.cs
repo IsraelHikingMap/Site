@@ -44,6 +44,7 @@
         public const string ICON = "icon";
         public const string ICON_COLOR = "iconColor";
         public const string IMAGE_URL = "image";
+        public const string SOURCE_IMAGE_URL = "sourceImageUrl";
     }
 
     public static class Sources

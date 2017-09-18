@@ -50,6 +50,7 @@ namespace IsraelHiking.API.Services.Poi
             await AddExtendedData(poiItem, mainFeature, language);
             poiItem.FeatureCollection = featureCollection;
             poiItem.IsEditable = false;
+            poiItem.IsRoute = true;
             return poiItem;
         }
 

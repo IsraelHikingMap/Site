@@ -15,7 +15,9 @@ import { ElevationProvider } from "../../services/elevation.provider";
 import { GeoJsonParser } from "../../services/geojson.parser";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
 import { ImageDialogCompnent } from "../dialogs/image-dialog.component";
+import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
 import * as Common from "../../common/IsraelHiking";
+
 
 
 @Component({
@@ -32,6 +34,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public source: string;
     public rating: number;
     public isLoading: boolean;
+    public sourceImageUrl: string;
     private editMode: boolean;
     private routeData: Common.RouteData;
     private extendedDataArrivedTimeStamp: Date;
@@ -107,7 +110,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.editMode = true;
     }
 
-    public canBeConvertedToRoute() {
+    public isRoute() {
         return this.routeData && this.routeData.segments.length > 0;
     }
 
@@ -167,6 +170,20 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.marker.closePopup();
     }
 
+    public addPointToRoute() {
+        if (this.routesService.selectedRoute == null) {
+            return;
+        }
+        // HM TODO: move edit mode state to route layer
+        this.routesService.selectedRoute.setHiddenState();
+        this.routesService.selectedRoute.route.markers.push({
+            latlng: this.latLng,
+            title: this.title || this.description,
+            type: this.getIcon().replace("icon-", "")
+        } as IMarkerWithData);
+        this.routesService.selectedRoute.setEditPoiState();
+    }
+
     private getPoiData() {
         if (this.extendedDataArrivedTimeStamp != null &&
             Date.now() - this.extendedDataArrivedTimeStamp.getTime() < PoiMarkerPopupComponent.THREE_HOURES) {
@@ -181,6 +198,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.description = poiExtended.description;
             this.address = poiExtended.url;
             this.thumbnail = poiExtended.imageUrl;
+            this.sourceImageUrl = poiExtended.sourceImageUrl;
             this.rating = this.getRatingNumber(poiExtended.rating);
             var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
                 this.resources.getCurrentLanguageCodeSimplified());

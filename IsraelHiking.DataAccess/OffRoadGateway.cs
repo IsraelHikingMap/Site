@@ -92,7 +92,11 @@ namespace IsraelHiking.DataAccess
                 var response = await client.PostAsync(address, null);
                 var stringContent = await response.Content.ReadAsStringAsync();
                 var jsonResponse = JsonConvert.DeserializeObject<JsonOffRoadResponse>(stringContent);
-                return jsonResponse.items.Select(ConvertToPointFeature).Where(f => f?.Attributes[FeatureAttributes.ICON] != null).ToList();
+                return jsonResponse.items
+                    .Where(i => i.track.myAdventureUserId != "6290631567605760")
+                    .Select(ConvertToPointFeature)
+                    .Where(f => f != null)
+                    .ToList();
             }
         }
 
@@ -113,13 +117,14 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.LAT, offroadTrack.start.latitude},
                 {FeatureAttributes.LON, offroadTrack.start.longitude}
             };
+            var category = GetCategory(offroadTrack.activityType);
             var attributes = new AttributesTable
             {
                 {FeatureAttributes.ID, offroadTrack.id},
                 {FeatureAttributes.NAME, offroadTrack.title},
                 {FeatureAttributes.POI_SOURCE, Sources.OFFROAD},
-                {FeatureAttributes.POI_CATEGORY, GetCategory(offroadTrack.activityType)},
-                {FeatureAttributes.ICON, GetIcon(offroadTrack.myAdventureUserId)},
+                {FeatureAttributes.POI_CATEGORY, category},
+                {FeatureAttributes.ICON, GetIconByCategory(category)},
                 {FeatureAttributes.ICON_COLOR, "black"},
                 {FeatureAttributes.SEARCH_FACTOR, 1},
                 {FeatureAttributes.GEOLOCATION, geoLocation}
@@ -142,6 +147,20 @@ namespace IsraelHiking.DataAccess
             }
         }
 
+        private string GetIconByCategory(string category)
+        {
+            switch (category)
+            {
+                case Categories.ROUTE_HIKE:
+                    return "icon-hike";
+                case Categories.ROUTE_BIKE:
+                    return "icon-bike";
+                default:
+                    return "icon-four-by-four";
+            }
+        }
+
+        // HM TODO: remove this as it is no longer needed?
         private string GetIcon(string myAdventureUserId)
         {
             switch (myAdventureUserId)
@@ -177,6 +196,8 @@ namespace IsraelHiking.DataAccess
             attributes.Add(FeatureAttributes.DESCRIPTION, track.shortDescription ?? string.Empty);
             attributes.Add(FeatureAttributes.IMAGE_URL, track.galleryImages?.FirstOrDefault()?.url ?? string.Empty);
             attributes.Add(FeatureAttributes.WEBSITE, track.externalUrl ?? string.Empty);
+            // HM TODO: get image.
+            //attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg");
             var trackLayerKey = track.trackLayerKey;
             using (var client = new HttpClient())
             {
@@ -185,9 +206,6 @@ namespace IsraelHiking.DataAccess
                 var trackLayers = JsonConvert.DeserializeObject<JsonOffroadTrackLyers>(content);
                 if (trackLayers.layers.Length > 1)
                 {
-                    // HM TODO: handle complex layers
-                    //features.AddRange(offroadItem.markers.Select(ConvertToPointFeature).ToList());
-                    //return new FeatureCollection(new Collection<IFeature>(features));
                     throw new NotImplementedException("Off-road complex layers need implementation");
                 }
                 var coordinates = trackLayers.layers.First().path.Select(p => new Coordinate(p.longitude, p.latitude)).ToArray();

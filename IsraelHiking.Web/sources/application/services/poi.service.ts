@@ -30,11 +30,14 @@ export interface IPointOfInterest {
 }
 
 export interface IPointOfInterestExtended extends IPointOfInterest {
+    isEditable: boolean;
+    isRoute: boolean;
     imageUrl: string;
     description: string;
-    rating: IRating;
     url: string;
-    isEditable: boolean;
+    sourceImageUrl: string;
+
+    rating: IRating;
     featureCollection: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 }
 
