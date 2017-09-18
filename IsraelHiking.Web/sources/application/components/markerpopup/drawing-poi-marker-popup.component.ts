@@ -1,6 +1,6 @@
-﻿import { Component, ApplicationRef } from "@angular/core";
+﻿import { Component, ApplicationRef, HostListener } from "@angular/core";
 import { Http } from "@angular/http";
-import { MdDialog, MdSelectChange } from "@angular/material";
+import { MdDialog, MdSelectChange, ENTER } from "@angular/material";
 import * as _ from "lodash";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
@@ -12,7 +12,6 @@ import { IconsService } from "../../services/icons.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
 import * as Common from "../../common/IsraelHiking";
-
 
 
 interface IIconsGroup {
@@ -115,7 +114,17 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
                 }
             }
         });
+    }
 
-
+    @HostListener("window:keydown", ["$event"])
+    public onEnterPress($event: KeyboardEvent) {
+        if ($event.shiftKey) {
+            return true;
+        }
+        if ($event.keyCode !== ENTER) {
+            return true;
+        }
+        this.save(this.title, this.markerType);
+        return false;
     }
 }
