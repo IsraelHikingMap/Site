@@ -21,9 +21,13 @@
     height: 30px;
 }
 
-    .save-as-control-container .leaflet-bar {
-        display: table;
-    }
+.save-as-control-container .leaflet-bar {
+    display: table;
+}
+
+.save-as-control-container .mat-select {
+    padding-top: 0 !important;
+}
 
 .save-as-button {
     float: right;

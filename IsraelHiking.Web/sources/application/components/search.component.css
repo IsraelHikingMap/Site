@@ -1,4 +1,8 @@
-﻿.search-input-container .mat-input-wrapper {
+﻿.search-input-container {
+    width: 200px;
+}
+
+.search-input-container .mat-input-wrapper {
     margin: 0 !important;
     padding: 0 !important;
     width: 200px;
@@ -18,10 +22,14 @@
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
+    margin-top: 0 !important;
 }
 
 @media only screen and (min-width : 768px) {
     .search-input-container .mat-input-wrapper {
+        width: 250px;
+    }
+    .search-input-container {
         width: 250px;
     }
 }
