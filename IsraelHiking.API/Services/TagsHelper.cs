@@ -204,9 +204,9 @@ namespace IsraelHiking.API.Services
                 i.Tags.FirstOrDefault(
                         t => attributesTable.Exists(t.Key) && attributesTable[t.Key].ToString() == t.Value)
                     .Equals(default(KeyValuePair<string, string>)) == false);
-            if (iconTags == null)
+            if (iconTags != null)
             {
-                return (_options.SearchFactor, new IconColorCategory());
+                return (1, iconTags.IconColorCategory);
             }
             if (attributesTable.GetNames().Any(k => k.Equals("highway", StringComparison.OrdinalIgnoreCase)))
             {
@@ -215,7 +215,7 @@ namespace IsraelHiking.API.Services
                     : new IconColorCategory("icon-map-signs");
                 return (_options.SearchFactor, icon);
             }
-            return (1, iconTags.IconColorCategory);
+            return (_options.SearchFactor, new IconColorCategory());
         }
 
         ///<inheritdoc/>
