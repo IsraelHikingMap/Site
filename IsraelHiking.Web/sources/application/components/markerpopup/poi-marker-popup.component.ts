@@ -176,10 +176,11 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         }
         // HM TODO: move edit mode state to route layer
         this.routesService.selectedRoute.setHiddenState();
+        var icon = this.poiExtended ? this.poiExtended.icon : "icon-star";
         this.routesService.selectedRoute.route.markers.push({
             latlng: this.latLng,
             title: this.title || this.description,
-            type: this.getIcon().replace("icon-", "")
+            type: icon.replace("icon-", "")
         } as IMarkerWithData);
         this.routesService.selectedRoute.setEditPoiState();
     }

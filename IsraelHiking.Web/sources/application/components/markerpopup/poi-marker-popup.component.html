@@ -71,7 +71,7 @@
             <button md-button fxFill (click)="convertToRoute()" mdTooltip="{{resources.convertToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Convert POI to route"><i class="fa icon-plus"></i></button>
         </div>
         <div fxFlex [hidden]="isRoute()">
-            <button md-button fxFill (click)="addPointToRoute()" mdTooltip="{{resources.convertToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Convert POI to point"><i class="fa icon-plus"></i></button>
+            <button md-button fxFill (click)="addPointToRoute()" mdTooltip="{{resources.addPointToRoute}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Convert POI to point"><i class="fa icon-plus"></i></button>
         </div>
         <div fxFlex [hidden]="!isRoute()">
             <button md-button fxFill (click)="clearSelectedRoute()" mdTooltip="{{resources.clear}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Clear selected route"><i class="fa icon-eye-slash"></i></button>

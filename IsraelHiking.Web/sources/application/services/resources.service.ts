@@ -105,6 +105,7 @@ export class ResourcesService {
     public elevation: string;
     public slope: string;
     public convertToRoute: string;
+    public addPointToRoute: string;
     public removeSearchResults: string;
     public israelMTBMap: string;
     public israelHikingMap: string;
@@ -525,6 +526,7 @@ export class ResourcesService {
                 this.elevation = this.gettextCatalog.getString("Elevation");
                 this.slope = this.gettextCatalog.getString("Slope");
                 this.convertToRoute = this.gettextCatalog.getString("Convert to Route");
+                this.addPointToRoute = this.gettextCatalog.getString("Add Point to Route");
                 this.removeSearchResults = this.gettextCatalog.getString("Remove Search Results");
                 this.israelMTBMap = this.gettextCatalog.getString("Israel MTB Map");
                 this.israelHikingMap = this.gettextCatalog.getString("Israel Hiking Map");

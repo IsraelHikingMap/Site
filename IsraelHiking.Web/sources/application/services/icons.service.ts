@@ -52,7 +52,7 @@ export class IconsService {
     public static getAvailableIconTypes() : string[]
     {
         return ["star", "arrow-left", "arrow-right", "tint",
-            "car", "bike", "hike", "four-by-four",
+            "automobile", "bike", "hike", "four-by-four",
             "bed", "viewpoint", "fire", "flag",
             "coffee", "cutlery", "shopping-cart", "tree"];
     }
