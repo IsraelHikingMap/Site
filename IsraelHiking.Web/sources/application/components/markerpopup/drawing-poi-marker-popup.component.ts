@@ -1,4 +1,4 @@
-﻿import { Component, ApplicationRef, HostListener } from "@angular/core";
+﻿import { Component, ApplicationRef, HostListener, ViewChild, ElementRef } from "@angular/core";
 import { Http } from "@angular/http";
 import { MdDialog, MdSelectChange, ENTER } from "@angular/material";
 import * as _ from "lodash";
@@ -28,6 +28,9 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public markerType: string;
     public wikiCoordinatesString: string;
     public iconsGroups: IIconsGroup[];
+    
+    @ViewChild("titleInput")
+    public titleInput: ElementRef;
 
     constructor(resources: ResourcesService,
         http: Http,
@@ -87,6 +90,12 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker);
             let color = this.routeLayer.route.properties.pathOptions.color;
             this.marker.setIcon(IconsService.createMarkerIconWithColorAndType(color, routeMarker.type));
+        });
+
+        this.marker.on("popupopen", () => {
+            if (this.titleInput.nativeElement) {
+                this.titleInput.nativeElement.focus();
+            }
         });
     }
 

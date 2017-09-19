@@ -47,7 +47,8 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     private requestsQueue: ISearchRequestQueueItem[];
     private featureGroup: L.FeatureGroup;
 
-    @ViewChild("searchFromInput") searchFromInput: ElementRef;
+    @ViewChild("searchFromInput")
+    public searchFromInput: ElementRef;
 
     constructor(resources: ResourcesService,
         private http: Http,
