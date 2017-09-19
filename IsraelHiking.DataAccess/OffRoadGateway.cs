@@ -58,6 +58,7 @@ namespace IsraelHiking.DataAccess
         public string shortDescription { get; set; }
         public string trackLayerKey { get; set; }
         public string externalUrl { get; set; }
+        public string trackIconResourceName { get; set; }
         public JsonUrlAndTitle[] galleryImages { get; set; }
     }
 
@@ -195,9 +196,14 @@ namespace IsraelHiking.DataAccess
             var attributes = GetAttributes(track);
             attributes.Add(FeatureAttributes.DESCRIPTION, track.shortDescription ?? string.Empty);
             attributes.Add(FeatureAttributes.IMAGE_URL, track.galleryImages?.FirstOrDefault()?.url ?? string.Empty);
-            attributes.Add(FeatureAttributes.WEBSITE, track.externalUrl ?? string.Empty);
-            // HM TODO: get image.
-            //attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg");
+            var externalUrl = track.externalUrl != null && track.externalUrl.Contains("internal.off-road.io") == false
+                ? track.externalUrl
+                : string.Empty;
+            attributes.Add(FeatureAttributes.WEBSITE, externalUrl);
+            var imageSourceUrl = string.IsNullOrWhiteSpace(track.trackIconResourceName)
+                ? string.Empty
+                : $"http://off-road.io/images/res/drawable-mdpi/{track.trackIconResourceName}.png";
+            attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, imageSourceUrl);
             var trackLayerKey = track.trackLayerKey;
             using (var client = new HttpClient())
             {

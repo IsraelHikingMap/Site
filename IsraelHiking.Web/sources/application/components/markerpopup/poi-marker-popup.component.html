@@ -76,5 +76,8 @@
         <div fxFlex [hidden]="!isRoute()">
             <button md-button fxFill (click)="clearSelectedRoute()" mdTooltip="{{resources.clear}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Clear selected route"><i class="fa icon-eye-slash"></i></button>
         </div>
+        <div fxFlex [hidden]="source !== 'Off-road'">
+            <a md-button [href]="getOffRoadUrl()" fxFill target="_blank" mdTooltip="{{resources.shareWithOffroad}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Open in off-road"><i class="fa icon-off-road"></i></a>
+        </div>
     </div>
 </div>

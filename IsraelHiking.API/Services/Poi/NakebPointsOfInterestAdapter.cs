@@ -55,6 +55,7 @@ namespace IsraelHiking.API.Services.Poi
             await AddExtendedData(poiItem, mainFeature, language);
             poiItem.FeatureCollection = featureCollection;
             poiItem.IsEditable = false;
+            poiItem.SourceImageUrl = "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg";
             return poiItem;
         }
 

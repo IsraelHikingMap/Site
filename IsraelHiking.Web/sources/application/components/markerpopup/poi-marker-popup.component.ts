@@ -266,4 +266,11 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         dialog.componentInstance.title = this.title;
         dialog.componentInstance.imageUrl = this.thumbnail;
     }
+
+    public getOffRoadUrl() {
+        if (!this.poiExtended) {
+            return "";
+        }
+        return `http://off-road.io/track/${this.poiExtended.id}`;
+    }
 }
