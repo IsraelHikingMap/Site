@@ -90,7 +90,9 @@ $CoverAlls = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" csmacnz.
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
-$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;lcov=$LcovCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$env:APPVEYOR_REPO_COMMIT_MESSAGE`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
+# Fix issue with " in commit message
+$CommitMessage = $env:APPVEYOR_REPO_COMMIT_MESSAGE -replace "`"", "'"
+$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;lcov=$LcovCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$CommitMessage`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
 Write-Host $CoverAllsCmd
 Invoke-Expression $CoverAllsCmd
 if ($LastExitCode) {
