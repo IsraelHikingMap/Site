@@ -83,6 +83,10 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns></returns>
         protected async Task AddExtendedData(PointOfInterestExtended poiItem, IFeature feature, string language)
         {
+            foreach (var coordinate in feature.Geometry.Coordinates)
+            {
+                coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
+            }
             poiItem.FeatureCollection = new FeatureCollection(new Collection<IFeature> { feature });
             poiItem.Url = feature.Attributes.GetNames().Contains(FeatureAttributes.WEBSITE)
                 ? feature.Attributes[FeatureAttributes.WEBSITE].ToString()
