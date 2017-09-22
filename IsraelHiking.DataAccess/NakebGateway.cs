@@ -85,7 +85,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.NAME, nakebItem.title},
                 {FeatureAttributes.POI_SOURCE, Sources.NAKEB},
                 {FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE},
-                {FeatureAttributes.ICON, "icon-nakeb"},
+                {FeatureAttributes.ICON, "icon-hike"},
                 {FeatureAttributes.ICON_COLOR, "black"},
                 {FeatureAttributes.SEARCH_FACTOR, 1},
                 {FeatureAttributes.GEOLOCATION, geoLocation}
