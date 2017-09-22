@@ -90,7 +90,7 @@ export class FileService {
     }
 
     public uploadImage = (file: File, title: string, latlng: L.LatLng): Promise<string> => {
-        return this.upload(`${Urls.poiImage}/?title=${title}&location=${latlng.lat},${latlng.lng}`, file);
+        return this.upload(`${Urls.poiImage}?title=${title}&location=${latlng.lat},${latlng.lng}`, file);
     }
 
     private saveBytesResponseToFile = (data: any, fileName: string) => {
