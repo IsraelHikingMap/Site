@@ -131,7 +131,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                         componentRef.instance.selectRoute = (route) => { this.mapService.updateReadOnlyLayer(this.readOnlyLayer, route) };
                         componentRef.instance.clearSelectedRoute = () => this.readOnlyLayer.clearLayers();
                         componentRef.instance.angularBinding(componentRef.hostView);
-                        marker.bindPopup(markerPopupContainer);
+                        marker.bindPopup(markerPopupContainer, { autoPan: false } as L.PopupOptions);
                         marker.openPopup();
                         marker.off("click", clickLambda);
                     };
