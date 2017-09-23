@@ -243,6 +243,12 @@ namespace IsraelHiking.API.Services
                 .Where(g => categories.Contains(g.Key))
                 .ToDictionary(g => g.Key, g => g.Select(i => i.IconColorCategory));
         }
+
+        ///<inheritdoc/>
+        public List<KeyValuePair<string, string>> GetAllTags()
+        {
+            return _iconsToTags.Values.SelectMany(v => v.Tags).ToList();
+        }
     }
 }
 ;

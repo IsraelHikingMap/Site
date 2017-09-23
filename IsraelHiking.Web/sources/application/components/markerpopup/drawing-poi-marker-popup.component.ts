@@ -60,6 +60,9 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     public save = (newTitle: string, markerType: string) => {
         let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker);
+        if (!routeMarker) {
+            return;
+        }
         routeMarker.title = newTitle;
         routeMarker.type = markerType;
         let color = this.routeLayer.route.properties.pathOptions.color;
@@ -114,9 +117,11 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         compoent.componentInstance.source = "OSM";
         compoent.componentInstance.elementType = "node";
         compoent.componentInstance.location = this.marker.getLatLng();
+        compoent.componentInstance.identifier = this.marker.identifier;
         compoent.componentInstance.initializationPromise.then(() => {
             for (let category of compoent.componentInstance.categories) {
-                let icon = _.find(category.icons, iconToFind => iconToFind.icon === this.markerType);
+                let markerIcon = `icon-${this.markerType}`;
+                let icon = _.find(category.icons, iconToFind => iconToFind.icon === markerIcon);
                 if (icon) {
                     compoent.componentInstance.selectCategory({ value: category } as MdSelectChange);
                     compoent.componentInstance.selectIcon(icon);

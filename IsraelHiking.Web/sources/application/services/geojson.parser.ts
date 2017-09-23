@@ -36,10 +36,11 @@ export class GeoJsonParser {
                 let routeData = null;
                 let name = this.getPropertyValue(feature.properties, "name", language);
                 let description = this.getPropertyValue(feature.properties, "description", language);
+                let icon = feature.properties["icon"];
                 switch (feature.geometry.type) {
                     case GeoJson.point:
                         let point = feature.geometry as GeoJSON.Point;
-                        let marker = this.createMarker(point.coordinates, name);
+                        let marker = this.createMarker(point.coordinates, name, icon);
                         markers.push(marker);
                         break;
                     case GeoJson.multiPoint:
@@ -88,11 +89,11 @@ export class GeoJsonParser {
         return data;
     }
 
-    private createMarker(coordinates: GeoJSON.Position, message?: string): Common.MarkerData {
+    private createMarker(coordinates: GeoJSON.Position, message?: string, icon?: string): Common.MarkerData {
         return {
             latlng: GeoJsonParser.createLatlng(coordinates),
             title: message,
-            type: ""
+            type: icon ? icon.replace("icon-", "") : ""
         } as Common.MarkerData;
     }
 
@@ -211,29 +212,33 @@ export class GeoJsonParser {
     public toLatLngsArray(feature: GeoJSON.Feature<GeoJSON.GeometryObject>): L.LatLng[][] {
         let latlngsArray = [] as L.LatLng[][];
         switch (feature.geometry.type) {
-        case GeoJson.lineString:
-            let lineString = feature.geometry as GeoJSON.LineString;
-            latlngsArray.push(this.createLatlngArray(lineString.coordinates));
-            break;
-        case GeoJson.multiLineString:
-            let multiLineString = feature.geometry as GeoJSON.MultiLineString;
-            for (let currentCoordinatesArray of multiLineString.coordinates) {
-                latlngsArray.push(this.createLatlngArray(currentCoordinatesArray));
-            }
-            break;
-        case GeoJson.polygon:
-            let polygone = feature.geometry as GeoJSON.Polygon;
-            for (let currentCoordinatesArray of polygone.coordinates) {
-                latlngsArray.push(this.createLatlngArray(currentCoordinatesArray));
-            }
-            break;
-        case GeoJson.multiPolygon:
-            let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
-            for (let currentPolygoneCoordinates of multiPolygone.coordinates) {
-                for (let currentCoordinatesArray of currentPolygoneCoordinates) {
+            case GeoJson.point:
+                let point = feature.geometry as GeoJSON.Point;
+                latlngsArray.push([GeoJsonParser.createLatlng(point.coordinates)]);
+                break;
+            case GeoJson.lineString:
+                let lineString = feature.geometry as GeoJSON.LineString;
+                latlngsArray.push(this.createLatlngArray(lineString.coordinates));
+                break;
+            case GeoJson.multiLineString:
+                let multiLineString = feature.geometry as GeoJSON.MultiLineString;
+                for (let currentCoordinatesArray of multiLineString.coordinates) {
                     latlngsArray.push(this.createLatlngArray(currentCoordinatesArray));
                 }
-            }
+                break;
+            case GeoJson.polygon:
+                let polygone = feature.geometry as GeoJSON.Polygon;
+                for (let currentCoordinatesArray of polygone.coordinates) {
+                    latlngsArray.push(this.createLatlngArray(currentCoordinatesArray));
+                }
+                break;
+            case GeoJson.multiPolygon:
+                let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
+                for (let currentPolygoneCoordinates of multiPolygone.coordinates) {
+                    for (let currentCoordinatesArray of currentPolygoneCoordinates) {
+                        latlngsArray.push(this.createLatlngArray(currentCoordinatesArray));
+                    }
+                }
         }
         return latlngsArray;
     }

@@ -82,9 +82,10 @@ export class RouteStateReadOnly extends RouteStateBase {
     }
 
     private onMouseMove = (e: L.LeafletMouseEvent): void => {
+        let polylines = this.readOnlyLayers.getLayers().filter(f => f instanceof L.Polyline);
         let response = this.context.snappingService.snapTo(e.latlng, {
             sensitivity: 10,
-            layers: this.readOnlyLayers
+            polylines: polylines
         } as ISnappingOptions);
         if (response.polyline == null) {
             this.context.polylineHovered.next(null);

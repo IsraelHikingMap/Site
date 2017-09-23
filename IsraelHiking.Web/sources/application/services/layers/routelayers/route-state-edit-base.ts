@@ -337,14 +337,31 @@ export abstract class RouteStateEditBase extends RouteStateBase {
         marker.bindPopup(containerDiv);
     }
 
-    private setPoiMarkerEvents(marker: L.Marker) {
+    private setPoiMarkerEvents(marker: Common.IMarkerWithTitle) {
         marker.on("dragstart", () => {
             marker.closePopup();
             this.hoverHandler.setState(HoverHandler.DRAGGING);
         });
+        marker.on("drag", () => {
+            let snappingResponse = this.context.snappingService.snapToPoint(marker.getLatLng());
+            marker.setLatLng(snappingResponse.latlng);
+        });
         marker.on("dragend", () => {
-            let markerInArray = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
+            let markerInArray = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker) as IMarkerWithData;
             markerInArray.latlng = marker.getLatLng();
+            let snappingPointResponse = this.context.snappingService.snapToPoint(markerInArray.latlng);
+            if (snappingPointResponse.markerData != null &&
+                !markerInArray.title &&
+                markerInArray.type === IconsService.getAvailableIconTypes()[0]) {
+                let color = this.context.route.properties.pathOptions.color;
+                markerInArray.title = snappingPointResponse.markerData.title;
+                markerInArray.type = snappingPointResponse.markerData.type;
+                marker.setIcon(IconsService.createMarkerIconWithColorAndType(color, snappingPointResponse.markerData.type));
+                marker.identifier = snappingPointResponse.markerData.id;
+                this.context.mapService.setMarkerTitle(marker, snappingPointResponse.markerData.title, color);
+                marker.unbindPopup();
+                this.addComponentToMarker(marker);
+            }
             this.context.raiseDataChanged();
             this.hoverHandler.setState(HoverHandler.NONE);
         });

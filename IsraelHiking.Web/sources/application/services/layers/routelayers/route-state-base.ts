@@ -20,15 +20,16 @@ export abstract class RouteStateBase implements IRouteState {
 
     protected createPoiMarker = (markerData: Common.MarkerData, isEditable: boolean): Common.IMarkerWithTitle => {
         let pathOptions = this.context.route.properties.pathOptions;
+        let color = this.context.route.properties.pathOptions.color;
         let marker = L.marker(markerData.latlng,
             {
                 draggable: isEditable,
                 clickable: isEditable,
                 riseOnHover: true,
-                icon: IconsService.createMarkerIconWithColorAndType(pathOptions.color, markerData.type),
+                icon: IconsService.createMarkerIconWithColorAndType(color, markerData.type),
                 opacity: pathOptions.opacity
             } as L.MarkerOptions) as Common.IMarkerWithTitle;
-        let color = this.context.route.properties.pathOptions.color;
+        marker.identifier = markerData.id;
         this.context.mapService.setMarkerTitle(marker, markerData.title, color);
         marker.addTo(this.context.mapService.map);
         return marker;

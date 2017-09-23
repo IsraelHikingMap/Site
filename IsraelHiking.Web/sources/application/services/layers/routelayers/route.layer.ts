@@ -70,7 +70,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         }
         return this.snappingService.snapTo(latlng, {
             sensitivity: 30,
-            layers: L.layerGroup(polylines)
+            polylines: polylines
         } as ISnappingOptions);
     }
 

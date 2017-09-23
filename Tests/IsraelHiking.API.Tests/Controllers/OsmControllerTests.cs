@@ -70,12 +70,13 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetHighway_ShouldGetSome()
+        public void GetSnappings_ShouldGetSome()
         {
             var list = new List<Feature> { new Feature(new LineString(new Coordinate[0]), new AttributesTable())};
             _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(list);
+            _elasticSearchGateway.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>()).Returns(new List<Feature>());
 
-            var results = _controller.GetHighways("0,0", "1,1").Result;
+            var results = _controller.GetSnappings("0,0", "1,1").Result;
 
             Assert.AreEqual(list.Count, results.Count);
         }

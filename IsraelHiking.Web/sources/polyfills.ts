@@ -46,7 +46,8 @@ import "core-js/es7/reflect";
 
 
 /** ALL Firefox browsers require the following to support `@angular/animation`. **/
-import "web-animations-js";
+//import "raf/polyfill"; // needed for safari for animation
+//import "web-animations-js";
 
 
 

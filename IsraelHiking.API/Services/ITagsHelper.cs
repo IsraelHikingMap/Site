@@ -28,5 +28,11 @@ namespace IsraelHiking.API.Services
         /// </summary>
         /// <returns></returns>
         Dictionary<string, IEnumerable<IconColorCategory>> GetIconsPerCategoryByType(string categoriesType);
+
+        /// <summary>
+        /// Gets all the tags that this helper is using.
+        /// </summary>
+        /// <returns></returns>
+        List<KeyValuePair<string, string>> GetAllTags();
     }
 }

@@ -2,7 +2,7 @@
 
 import { RouteStateEditBase } from "./route-state-edit-base";
 import { IconsService } from "../../icons.service";
-import { IRouteLayer, EditModeString } from "./iroute.layer";
+import { IRouteLayer, EditModeString, IMarkerWithData } from "./iroute.layer";
 import { EditMode } from "./iroute-state";
 import * as Common from "../../../common/IsraelHiking";
 
@@ -13,13 +13,20 @@ export class RouteStateEditPoi extends RouteStateEditBase {
     }
 
     protected addPoint(e: L.LeafletMouseEvent) {
-        let marker = this.createPoiMarker({ latlng: e.latlng, title: "" } as Common.MarkerData, true);
-        this.context.route.markers.push({
-            latlng: e.latlng,
-            marker: marker,
+        let snappingPointResponse = this.context.snappingService.snapToPoint(e.latlng);
+        let markerData = {
+            latlng: snappingPointResponse.latlng,
             title: "",
             type: IconsService.getAvailableIconTypes()[0]
-        });
+        } as Common.MarkerData;
+        if (snappingPointResponse.markerData) {
+            markerData = snappingPointResponse.markerData;
+        }
+        let marker = this.createPoiMarker(markerData, true);
+        marker.identifier = markerData.id;
+        let markerWithData = markerData as IMarkerWithData;
+        markerWithData.marker = marker;
+        this.context.route.markers.push(markerWithData);
         this.addComponentToMarker(marker);
         setTimeout(() => marker.openPopup(), 200);
         this.context.raiseDataChanged();

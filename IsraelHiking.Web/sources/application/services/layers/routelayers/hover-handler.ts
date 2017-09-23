@@ -63,7 +63,8 @@ export class HoverHandler {
         }
         if (this.routeHover === false) {
             this.setState(HoverHandler.ADD_POINT);
-            this.hoverMarker.setLatLng(e.latlng);
+            let snapToPointResponse = this.context.snappingService.snapToPoint(e.latlng);
+            this.hoverMarker.setLatLng(snapToPointResponse.latlng);
             this.middleMarker.setOpacity(0.0);
             return;
         }

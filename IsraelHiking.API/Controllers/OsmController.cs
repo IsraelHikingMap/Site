@@ -78,9 +78,13 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of features in GeoJSON format</returns>
         // GET api/osm?northeast=1.2,3.4&southwest=5.6,7.8
         [HttpGet]
-        public async Task<List<Feature>> GetHighways(string northEast, string southWest)
+        public async Task<List<Feature>> GetSnappings(string northEast, string southWest)
         {
-            return await _elasticSearchGateway.GetHighways(new Coordinate().FromLatLng(northEast), new Coordinate().FromLatLng(southWest));
+            var northEastCooridnate = new Coordinate().FromLatLng(northEast);
+            var southWestCoordinate = new Coordinate().FromLatLng(southWest);
+            var highways = await _elasticSearchGateway.GetHighways(northEastCooridnate, southWestCoordinate);
+            var points = await _elasticSearchGateway.GetPointsOfInterest(northEastCooridnate, southWestCoordinate, Categories.Points);
+            return highways.Concat(points.Where(p => Sources.OSM.Equals(p.Attributes[FeatureAttributes.POI_SOURCE]))).ToList();
         }
 
         /// <summary>

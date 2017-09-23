@@ -190,6 +190,8 @@ export class ResourcesService {
     public camping: string;
     public other: string;
     public uploadPoint: string;
+    public updatePoint: string;
+    public addPoint: string;
     public spring: string;
     public historic: string;
     public website: string;
@@ -611,6 +613,8 @@ export class ResourcesService {
                 this.camping = this.gettextCatalog.getString("Camping");
                 this.other = this.gettextCatalog.getString("Other");
                 this.uploadPoint = this.gettextCatalog.getString("Upload Point");
+                this.updatePoint = this.gettextCatalog.getString("Update Point");
+                this.addPoint = this.gettextCatalog.getString("Add Point");
                 this.spring = this.gettextCatalog.getString("Spring");
                 this.historic = this.gettextCatalog.getString("Historic");
                 this.website = this.gettextCatalog.getString("Website");

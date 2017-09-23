@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using OsmSharp.Complete;
 using System.IO;
+using OsmSharp;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
@@ -9,5 +10,6 @@ namespace IsraelHiking.DataAccessInterfaces
     {
         Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(Stream osmFileStream);
         Task<List<CompleteWay>> GetAllHighways(Stream osmFileStream);
+        Task<List<Node>> GetPointsWithNoNameByTags(Stream osmFileStream, List<KeyValuePair<string, string>> tags);
     }
 }

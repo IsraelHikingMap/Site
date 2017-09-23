@@ -34,20 +34,18 @@ describe("SnappingService", () => {
         mapServiceMock.destructor();
     });
 
-    it("Should clear snappings layer when disabled", inject([SnappingService], (snappingService: SnappingService) => {
+    it("Should not be enabled when enable is called with false", inject([SnappingService], (snappingService: SnappingService) => {
         snappingService.enable(false);
-        mapServiceMock.mapService.map.setZoom(14); // this fires moveend
-
-        expect(snappingService.snappings.getLayers().length).toBe(0);
         expect(snappingService.isEnabled()).toBe(false);
     }));
 
-    it("Should clear snappings layer when zoom is less than 14", inject([SnappingService], (snappingService: SnappingService) => {
+    it("Should return empty snappings when zoom is less than 14", inject([SnappingService], (snappingService: SnappingService) => {
         snappingService.enable(true);
 
         mapServiceMock.mapService.map.setZoom(12); // this fires moveend
 
-        expect(snappingService.snappings.getLayers().length).toBe(0);
+        let snap = snappingService.snapTo(L.latLng(0, 0));
+        expect(snap.polyline).toBeNull();
     }));
 
     it("Should add one snappings linestring when zoom is 14", inject([SnappingService, XHRBackend], fakeAsync((snappingService: SnappingService, mockBackend: MockBackend) => {
@@ -72,7 +70,8 @@ describe("SnappingService", () => {
         mapServiceMock.mapService.map.setView(L.latLng(0, 0), 14);
         flushMicrotasks();
 
-        expect(snappingService.snappings.getLayers().length).toBe(1);
+        let snap = snappingService.snapTo(L.latLng(1, 2));
+        expect(snap.polyline).not.toBeNull();
     })));
 
     it("Should add one snappings polygon when zoom is 14", fakeAsync(inject([SnappingService, XHRBackend], (snappingService: SnappingService, mockBackend: MockBackend) => {
@@ -97,14 +96,12 @@ describe("SnappingService", () => {
         mapServiceMock.mapService.map.setView(L.latLng(1, 1), 14);
         flushMicrotasks();
 
-        expect(snappingService.snappings.getLayers().length).toBe(1);
+        let snap = snappingService.snapTo(L.latLng(1, 2));
+        expect(snap.polyline).not.toBeNull();
     })));
 
     it("Should clear layer upon http error", fakeAsync(inject([SnappingService, XHRBackend], (snappingService: SnappingService, mockBackend: MockBackend) => {
         snappingService.enable(true);
-
-        snappingService.snappings.addLayer(L.polyline([L.latLng(1, 1), L.latLng(2, 2)]));
-        expect(snappingService.snappings.getLayers().length).toBe(1);
 
         mockBackend.connections.subscribe((connection: MockConnection) => {
             connection.mockError(new Error("Server error"));
@@ -113,15 +110,20 @@ describe("SnappingService", () => {
         mapServiceMock.mapService.map.setView(L.latLng(2, 2), 14);
         flushMicrotasks();
 
-        expect(snappingService.snappings.getLayers().length).toBe(0);
+        let snap = snappingService.snapTo(L.latLng(0, 0));
+        expect(snap.polyline).toBeNull();
     })));
 
 
     it("Should snap to its own layers", inject([SnappingService], (snappingService: SnappingService) => {
         snappingService.enable(true);
-        snappingService.snappings.addLayer(L.polyline([L.latLng(1, 1), L.latLng(1, 2)]));
+        let layers = [L.polyline([L.latLng(1, 1), L.latLng(1, 2)])];
 
-        let snap = snappingService.snapTo(L.latLng(1.00001, 1));
+        let snap = snappingService.snapTo(L.latLng(1.00001, 1),
+            {
+                layers: layers,
+                sensitivity: 10
+            } as ISnappingOptions);
 
         expect(snap.latlng.lat).toBe(1.0);
         expect(snap.latlng.lng).toBe(1.0);
@@ -129,29 +131,39 @@ describe("SnappingService", () => {
 
     it("Should snap to closest point", inject([SnappingService], (snappingService: SnappingService) => {
         snappingService.enable(true);
-        snappingService.snappings.addLayer(L.polyline([L.latLng(1, 1), L.latLng(1, 1.00001), L.latLng(1, 2)]));
+        let layers = [L.polyline([L.latLng(1, 1), L.latLng(1, 1.00001), L.latLng(1, 2)])];
 
-        let snap = snappingService.snapTo(L.latLng(1, 1.0001));
+        let snap = snappingService.snapTo(L.latLng(1, 1.0001),
+            {
+                layers: layers,
+                sensitivity: 10
+            } as ISnappingOptions);
 
         expect(snap.latlng.lng).toBeGreaterThan(1.0);
     }));
 
     it("Should snap to its own layers but ignore a line with single point", inject([SnappingService], (snappingService: SnappingService) => {
         snappingService.enable(true);
-        snappingService.snappings.addLayer(L.polyline([L.latLng(1, 1)]));
-        snappingService.snappings.addLayer(L.polyline([L.latLng(1, 1), L.latLng(1, 2)]));
+        let layers = [L.polyline([L.latLng(1, 1)]), L.polyline([L.latLng(1, 1), L.latLng(1, 2)])];
 
-        let snap = snappingService.snapTo(L.latLng(1.00001, 1));
+        let snap = snappingService.snapTo(L.latLng(1.00001, 1),
+            {
+                layers: layers,
+                sensitivity: 10
+            } as ISnappingOptions);
 
         expect(snap.latlng.lat).toBe(1.0);
         expect(snap.latlng.lng).toBe(1.0);
     }));
 
     it("Should snap to a given layer", inject([SnappingService], (snappingService: SnappingService) => {
-        let layers = L.layerGroup([]);
-        layers.addLayer(L.polyline([L.latLng(1, 1), L.latLng(1, 2)]));
+        let layers = [L.polyline([L.latLng(1, 1), L.latLng(1, 2)])];
 
-        let snap = snappingService.snapTo(L.latLng(1.01, 1), { layers: layers, sensitivity: 1000 } as ISnappingOptions);
+        let snap = snappingService.snapTo(L.latLng(1.01, 1),
+            {
+                layers: layers,
+                sensitivity: 1000
+            } as ISnappingOptions);
 
         expect(snap.latlng.lat).toBe(1.0);
         expect(snap.latlng.lng).toBe(1.0);
@@ -164,9 +176,12 @@ describe("SnappingService", () => {
     }));
 
     it("Should not snap when point is too far", inject([SnappingService], (snappingService: SnappingService) => {
-        snappingService.snappings.addLayer(L.polyline([L.latLng(1, 1), L.latLng(2, 2)]));
 
-        let snap = snappingService.snapTo(L.latLng(10, 10));
+        let snap = snappingService.snapTo(L.latLng(10, 10),
+            {
+                layers: [L.polyline([L.latLng(1, 1), L.latLng(2, 2)])],
+                sensitivity: 10
+            } as ISnappingOptions);
 
         expect(snap.polyline).toBeNull();
     }));

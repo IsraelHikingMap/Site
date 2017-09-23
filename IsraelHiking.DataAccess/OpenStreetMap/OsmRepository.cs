@@ -6,8 +6,8 @@ using OsmSharp.Complete;
 using OsmSharp.Streams;
 using OsmSharp.Streams.Complete;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.FileProviders;
 using System.IO;
+using OsmSharp;
 
 namespace IsraelHiking.DataAccess.OpenStreetMap
 {
@@ -16,12 +16,10 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         private const string NAME = "name";
 
         private readonly ILogger _logger;
-        private readonly IFileProvider _fileProvider;
 
-        public OsmRepository(ILogger logger, IFileProvider fileProvider)
+        public OsmRepository(ILogger logger)
         {
             _logger = logger;
-            _fileProvider = fileProvider;
         }
 
         public Task<Dictionary<string, List<ICompleteOsmGeo>>> GetElementsWithName(Stream osmFileStream)
@@ -35,7 +33,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                     .Where(o => string.IsNullOrWhiteSpace(GetName(o)) == false)
                     .GroupBy(GetName)
                     .ToDictionary(g => g.Key, g => g.ToList());
-                _logger.LogInformation("Finished grouping data by name.");
+                _logger.LogInformation("Finished grouping data by name. " + namesDictionary.Values.Count);
                 return namesDictionary;
             });
         }
@@ -70,6 +68,26 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 }
             }
             return string.Empty;
+        }
+
+        public Task<List<Node>> GetPointsWithNoNameByTags(Stream osmFileStream, List<KeyValuePair<string, string>> tags)
+        {
+            return Task.Run(() =>
+            {
+                _logger.LogInformation($"Extracting nodes by tags from OSM stream.");
+                var source = new PBFOsmStreamSource(osmFileStream);
+                var completeSource = new OsmSimpleCompleteStreamSource(source);
+                var nodes = completeSource
+                    .OfType<Node>()
+                    .Where(node =>
+                        GetName(node) == string.Empty &&
+                        tags.Any(t => node.Tags.ContainsKey(t.Key) &&
+                        node.Tags[t.Key].Equals(t.Value))
+                    )
+                    .ToList();
+                _logger.LogInformation("Finished getting nodes by tags. " + nodes.Count);
+                return nodes;
+            });
         }
     }
 }

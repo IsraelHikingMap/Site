@@ -180,7 +180,9 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.routesService.selectedRoute.route.markers.push({
             latlng: this.latLng,
             title: this.title || this.description,
-            type: icon.replace("icon-", "")
+            type: icon.replace("icon-", ""),
+            id: this.poiExtended.id,
+            marker: null
         } as IMarkerWithData);
         this.routesService.selectedRoute.setEditPoiState();
     }

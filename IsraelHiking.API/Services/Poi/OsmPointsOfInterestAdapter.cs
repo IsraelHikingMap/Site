@@ -46,7 +46,8 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
             var features = await _elasticSearchGateway.GetPointsOfInterest(northEast, southWest, categories);
-            return await Task.WhenAll(features.Select(f => ConvertToPoiItem<PointOfInterest>(f, language)));
+            var tasks = features.Where(f => IsFeatureAProperPoi(f,language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language));
+            return await Task.WhenAll(tasks);
         }
 
         /// <inheritdoc />
@@ -134,6 +135,9 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
         {
             var osmNamesDictionary = await _osmRepository.GetElementsWithName(memoryStream);
+            var relevantTagsDictionary = _tagsHelper.GetAllTags();
+            var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(memoryStream, relevantTagsDictionary);
+            osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
             var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
             return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
         }
@@ -215,6 +219,13 @@ namespace IsraelHiking.API.Services.Poi
                     tags.RemoveKeyValue(currentTag);
                 }
             }
+        }
+
+        private bool IsFeatureAProperPoi(IFeature feature, string language)
+        {
+            return GetAttributeByLanguage(feature.Attributes, FeatureAttributes.NAME, language) != string.Empty ||
+                   GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language) != string.Empty ||
+                   feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL));
         }
     }
 }
