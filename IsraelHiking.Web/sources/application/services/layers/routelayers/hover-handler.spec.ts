@@ -62,7 +62,14 @@ describe("HoverHandler", () => {
     it("Should transition to add point state when using hover for point", () => {
         hoverHandler.setState(HoverHandler.NONE);
         hoverHandler.setRouteHover(false);
-        
+        context.snappingService = {
+            snapToPoint: () => {
+                return {
+                    latlng: L.latLng([0, 0])
+                }
+            }
+        };
+
         hoverHandler.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
 
         expect(hoverHandler.getState()).toBe(HoverHandler.ADD_POINT);
