@@ -47,6 +47,7 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation($"Upload an image to wikimedia common: {imageName}, Location: {location.Y}, {location.X}");
             var wikiFileName = "File:Israel_Hiking_Map_" + imageName.Replace(" ", "_");
             var comment = CreateWikipediaComment(location, imageName);
+            await _site.GetTokenAsync("edit", true);
             var results = await FilePage.UploadAsync(_site, contentStream, wikiFileName, comment, true);
             if (results.ResultCode != UploadResultCode.Success)
             {
