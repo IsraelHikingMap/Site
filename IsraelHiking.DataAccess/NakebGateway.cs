@@ -54,7 +54,7 @@ namespace IsraelHiking.DataAccess
                 var nakebItem = JsonConvert.DeserializeObject<JsonNakebItemExtended>(content);
                 var attributes = GetAttributes(nakebItem);
                 var description = nakebItem.prolog ?? string.Empty;
-                description += $"\n{string.Join(",", nakebItem.attributes)}\nאורך: {nakebItem.length} ק\"מ";
+                description += $"\n{string.Join(", ", nakebItem.attributes)}\nאורך: {nakebItem.length} ק\"מ";
                 attributes.Add(FeatureAttributes.DESCRIPTION, description);
                 attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.picture);
                 attributes.Add(FeatureAttributes.WEBSITE, nakebItem.link);
