@@ -184,7 +184,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             componentRef.instance.angularBinding(componentRef.hostView);
             mainMarker.bindPopup(markerPopupDiv);
             this.osmTraceLayer.addLayer(mainMarker);
-            this.fitBoundsService.fitBounds(bounds, { maxZoom: LayersService.MAX_NATIVE_ZOOM } as L.FitBoundsOptions);
+            this.fitBoundsService.fitBounds(bounds, { maxZoom: FitBoundsService.DEFAULT_MAX_ZOOM } as L.FitBoundsOptions);
         });
         return promise;
     }

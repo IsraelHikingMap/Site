@@ -1,4 +1,4 @@
-﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ElementRef } from "@angular/core";
+﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ElementRef, ComponentFactory } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Http } from "@angular/http";
 import * as L from "leaflet";
@@ -7,7 +7,6 @@ import * as _ from "lodash";
 import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
 import { HashService } from "../services/hash.service";
-import { LayersService } from "../services/layers/layers.service";
 import { DataContainerService } from "../services/data-container.service";
 import { ElevationProvider } from "../services/elevation.provider";
 import { RouterService } from "../services/routers/router.service";
@@ -17,7 +16,9 @@ import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider, ISearchResults } from "../services/search-results.provider";
 import { BaseMapComponent } from "./base-map.component";
 import { SearchResultsMarkerPopupComponent } from "./markerpopup/search-results-marker-popup.component";
+import { CategoriesLayerFactory } from "../services/layers/categories-layers.factory";
 import * as Common from "../common/IsraelHiking";
+
 
 export interface ISearchContext {
     searchTerm: string;
@@ -45,7 +46,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     public searchFrom: FormControl;
     public searchTo: FormControl;
     private requestsQueue: ISearchRequestQueueItem[];
-    private featureGroup: L.FeatureGroup;
+    private readonlyLayer: L.FeatureGroup;
 
     @ViewChild("searchFromInput")
     public searchFromInput: ElementRef;
@@ -62,11 +63,12 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         private injector: Injector,
         private componentFactoryResolver: ComponentFactoryResolver,
         private toastService: ToastService,
+        private categoriesLayerFactory: CategoriesLayerFactory
     ) {
         super(resources);
         this.requestsQueue = [];
-        this.featureGroup = L.featureGroup();
-        this.mapService.map.addLayer(this.featureGroup);
+        this.readonlyLayer = L.featureGroup();
+        this.mapService.map.addLayer(this.readonlyLayer);
         this.isVisible = false;
         this.isDirectional = false;
         this.routingType = "Hike";
@@ -143,39 +145,17 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     public moveToResults = (searchResults: ISearchResults, e: Event) => {
         this.toggleVisibility(e);
-        this.featureGroup.clearLayers();
-        this.fitBoundsService.fitBounds(searchResults.bounds, { maxZoom: LayersService.MAX_NATIVE_ZOOM } as L.FitBoundsOptions);
-        let divIcon = IconsService.createSearchMarkerIcon(searchResults.icon, searchResults.iconColor);
-        let marker = L.marker(searchResults.location, { icon: divIcon, draggable: false }) as Common.IMarkerWithTitle;
-        marker.title = searchResults.displayName;
-        marker.identifier = searchResults.id;
-        let markerPopupDiv = L.DomUtil.create("div");
-        let componentFactory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
-        let componentRef = componentFactory.create(this.injector, [], markerPopupDiv);
-        componentRef.instance.setMarker(marker);
-        componentRef.instance.setIdAndSource(searchResults.id, searchResults.source);
-        componentRef.instance.remove = () => {
-            this.featureGroup.clearLayers();
+        if (searchResults.isRoute) {
+            this.categoriesLayerFactory.get("Routes").moveToSearchResults(searchResults, searchResults.bounds);
+        } else {
+            this.categoriesLayerFactory.get("Points of Interest").moveToSearchResults(searchResults, searchResults.bounds);
         }
-        componentRef.instance.angularBinding(componentRef.hostView);
-        componentRef.instance.selectRoute = (routeData: Common.RouteData) => {
-            this.mapService.updateReadOnlyLayer(this.featureGroup, routeData);
-            this.featureGroup.addLayer(marker);
-            setTimeout(() => {
-                marker.openPopup();
-            }, 500);
-        }
-        componentRef.instance.clearSelectedRoute = () => {
-            this.featureGroup.clearLayers();
-        }
-        marker.bindPopup(markerPopupDiv);
-        this.suppressEvents(e);
     }
 
-    private selectResults = (searchContext: ISearchContext, searchResult: ISearchResults) => { //, e: Event
+    private selectResults = (searchContext: ISearchContext, searchResult: ISearchResults) => {
         searchContext.selectedSearchResults = searchResult;
         if (!this.isDirectional) {
-            this.moveToResults(searchResult, new Event("click"));//e);
+            this.moveToResults(searchResult, new Event("click"));
         }
     };
 
@@ -195,10 +175,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             return;
         }
         this.routerService.getRoute(this.fromContext.selectedSearchResults.location, this.toContext.selectedSearchResults.location, this.routingType).then((response: Common.RouteSegmentData[]) => {
-            this.featureGroup.clearLayers();
+            this.readonlyLayer.clearLayers();
             for (let segment of response) {
                 let polyLine = L.polyline(segment.latlngs, this.getPathOprtions());
-                this.featureGroup.addLayer(polyLine);
+                this.readonlyLayer.addLayer(polyLine);
             }
             var markerFrom = L.marker(this.fromContext.selectedSearchResults.location, { icon: IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
             markerFrom.title = this.fromContext.selectedSearchResults.displayName;
@@ -218,38 +198,32 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                         }
                     ]
                 } as Common.DataContainer);
-                this.featureGroup.clearLayers();
+                this.readonlyLayer.clearLayers();
             }
 
             let componentFactory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
-            let markerPopupFromDiv = L.DomUtil.create("div");
-            let componentRefFrom = componentFactory.create(this.injector, [], markerPopupFromDiv);
-            componentRefFrom.instance.setMarker(markerFrom);
-            componentRefFrom.instance.remove = () => {
-                this.featureGroup.clearLayers();
-            }
-            componentRefFrom.instance.convertToRoute = convertToRoute;
-            componentRefFrom.instance.angularBinding(componentRefFrom.hostView);
-            markerFrom.bindPopup(markerPopupFromDiv);
-            this.featureGroup.addLayer(markerFrom);
+            this.createSearchRouteMarkerPopup(markerFrom, componentFactory, convertToRoute);
+            this.createSearchRouteMarkerPopup(markerTo, componentFactory, convertToRoute);
 
-            let markerPopupToDiv = L.DomUtil.create("div");
-            let componentRefTo = componentFactory.create(this.injector, [], markerPopupToDiv);
-            componentRefTo.instance.setMarker(markerTo);
-            componentRefTo.instance.remove = () => {
-                this.featureGroup.clearLayers();
-            }
-            componentRefTo.instance.convertToRoute = convertToRoute;
-            componentRefTo.instance.angularBinding(componentRefTo.hostView);
-            markerTo.bindPopup(markerPopupToDiv);
-            this.featureGroup.addLayer(markerTo);
-
-            this.fitBoundsService.fitBounds(this.featureGroup.getBounds());
+            this.fitBoundsService.fitBounds(this.readonlyLayer.getBounds());
 
             setTimeout(() => {
                 markerTo.openPopup();
             }, 500);
         });
+    }
+    
+    private createSearchRouteMarkerPopup(marker: Common.IMarkerWithTitle, componentFactory: ComponentFactory<SearchResultsMarkerPopupComponent>, convertToRoute: () => void) {
+        let markerPopupDiv = L.DomUtil.create("div");
+        let componentRef = componentFactory.create(this.injector, [], markerPopupDiv);
+        componentRef.instance.setMarker(marker);
+        componentRef.instance.remove = () => {
+            this.readonlyLayer.clearLayers();
+        }
+        componentRef.instance.convertToRoute = convertToRoute;
+        componentRef.instance.angularBinding(componentRef.hostView);
+        marker.bindPopup(markerPopupDiv);
+        this.readonlyLayer.addLayer(marker);
     }
 
     @HostListener("window:keydown", ["$event"])

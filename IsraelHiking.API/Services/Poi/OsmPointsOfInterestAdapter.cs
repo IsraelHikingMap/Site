@@ -62,6 +62,8 @@ namespace IsraelHiking.API.Services.Poi
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
             await AddExtendedData(poiItem, feature, language);
             poiItem.IsRoute = poiItem.FeatureCollection.Features.Any(f => !(f.Geometry is Point));
+            poiItem.IsEditable = _tagsHelper.GetAllTags()
+                .Any(t => feature.Attributes.GetNames().Contains(t.Key) && feature.Attributes[t.Key].Equals(t.Value));
             return poiItem;
         }
 

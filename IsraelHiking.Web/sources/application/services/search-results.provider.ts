@@ -29,6 +29,7 @@ export class SearchResultsProvider {
                 let data = response.json() as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
                 let results = [] as ISearchResults[];
                 for (let feature of data.features) {
+                    // HM TODO: change search results to POIs?
                     let properties = feature.properties as any;
                     try {
                         let singleResult = {
@@ -38,6 +39,7 @@ export class SearchResultsProvider {
                             source: properties.poiSource,
                             id: properties.identifier,
                             location: L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.geolocation.alt),
+                            isRoute: feature.geometry.type !== "Point"
                         } as ISearchResults;
                         let geo = L.geoJSON(feature);
                         singleResult.bounds = geo.getBounds();

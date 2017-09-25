@@ -5,6 +5,8 @@ import { CategoriesLayer } from "./categories.layer";
 import { MapService } from "../map.service";
 import { ResourcesService } from "../resources.service";
 import { PoiService, CategoriesType } from "../poi.service";
+import { FitBoundsService } from "../fit-bounds.service";
+
 
 @Injectable()
 export class CategoriesLayerFactory {
@@ -16,7 +18,8 @@ export class CategoriesLayerFactory {
         private applicationRef: ApplicationRef,
         private resources: ResourcesService,
         private localStorageService: LocalStorageService,
-        private poiService: PoiService) {
+        private poiService: PoiService,
+        private fitBoundsService: FitBoundsService) {
         this.categoryLayers = new Map<CategoriesType, CategoriesLayer>();
         for (let category of this.poiService.getCategoriesTypes()) {
             let layer = new CategoriesLayer(this.mapService,
@@ -26,6 +29,7 @@ export class CategoriesLayerFactory {
                 this.resources,
                 this.localStorageService,
                 this.poiService,
+                this.fitBoundsService,
                 category);
             this.categoryLayers.set(category, layer);
         }

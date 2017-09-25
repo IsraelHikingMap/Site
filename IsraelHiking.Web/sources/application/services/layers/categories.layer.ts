@@ -1,5 +1,6 @@
-﻿import { Injector, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
+﻿import { Injector, ComponentFactoryResolver, ApplicationRef, ComponentFactory } from "@angular/core";
 import { LocalStorageService } from "ngx-store"
+import { Subject } from "rxjs/Subject";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
@@ -9,7 +10,9 @@ import { PoiMarkerPopupComponent } from "../../components/markerpopup/poi-marker
 import { IconsService } from "../icons.service";
 import { ResourcesService } from "../resources.service";
 import { IPointOfInterest, PoiService, CategoriesType, ICategory } from "../poi.service";
+import { FitBoundsService } from "../fit-bounds.service";
 import * as Common from "../../common/IsraelHiking";
+
 
 export class CategoriesLayer extends BasePoiMarkerLayer {
 
@@ -17,6 +20,8 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
     private static readonly SELECTED_PREFIX = "_selected";
 
     private requestsNumber: number;
+    private markersLoaded: Subject<void>;
+    private searchResultsMarker: Common.IMarkerWithTitle;
     public categories: ICategory[];
 
     constructor(mapService: MapService,
@@ -26,9 +31,12 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         private resources: ResourcesService,
         private localStorageService: LocalStorageService,
         private poiService: PoiService,
+        private fitBoundsService: FitBoundsService,
         private categoriesType: CategoriesType) {
         super(mapService);
         this.categories = [];
+        this.searchResultsMarker = null;
+        this.markersLoaded = new Subject<void>();
         this.requestsNumber = 0;
         this.visible = this.localStorageService.get(this.categoriesType + CategoriesLayer.VISIBILITY_PREFIX) || false;
         this.markerIcon = IconsService.createPoiIcon("icon-star", "orange");
@@ -48,7 +56,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             }
             this.updateMarkers();
         });
-        
+
         this.resources.languageChanged.subscribe(() => {
             this.markers.clearLayers();
             this.updateMarkers();
@@ -114,30 +122,18 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                     } else if (pointOfInterestMarker != null) {
                         pointsOfInterest.splice(pointsOfInterest.indexOf(pointOfInterestMarker), 1);
                     }
+                    if (this.searchResultsMarker != null && this.searchResultsMarker.identifier === markerWithTitle.identifier) {
+                        this.clearSearchResultsMarker();
+                    }
                 });
 
                 let factory = this.componentFactoryResolver.resolveComponentFactory(PoiMarkerPopupComponent);
                 for (let pointOfInterest of pointsOfInterest) {
-                    let latLng = L.latLng(pointOfInterest.location.lat, pointOfInterest.location.lng, pointOfInterest.location.alt);
-                    let marker = L.marker(latLng, { draggable: false, clickable: true, icon: IconsService.createPoiIcon(pointOfInterest.icon, pointOfInterest.iconColor), title: pointOfInterest.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
-                    marker.title = pointOfInterest.title;
-                    marker.identifier = pointOfInterest.id;
-                    let clickLambda = () => {
-                        // for performance
-                        let markerPopupContainer = L.DomUtil.create("div");
-                        let componentRef = factory.create(this.injector, null, markerPopupContainer);
-                        componentRef.instance.source = pointOfInterest.source;
-                        componentRef.instance.setMarker(marker);
-                        componentRef.instance.selectRoute = (route) => { this.mapService.updateReadOnlyLayer(this.readOnlyLayer, route) };
-                        componentRef.instance.clearSelectedRoute = () => this.readOnlyLayer.clearLayers();
-                        componentRef.instance.angularBinding(componentRef.hostView);
-                        marker.bindPopup(markerPopupContainer, { autoPan: false } as L.PopupOptions);
-                        marker.openPopup();
-                        marker.off("click", clickLambda);
-                    };
-                    marker.on("click", clickLambda);
+                    let marker = this.pointOfInterestToMarker(pointOfInterest, factory);
                     this.markers.addLayer(marker);
                 }
+                // raise event
+                this.markersLoaded.next();
             }, () => {
                 this.requestArrieved();
             });
@@ -146,6 +142,73 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
     private requestArrieved() {
         if (this.requestsNumber > 0) {
             this.requestsNumber--;
+        }
+    }
+
+    public moveToSearchResults(pointOfInterest: IPointOfInterest, bounds: L.LatLngBounds) {
+        let factory = this.componentFactoryResolver.resolveComponentFactory(PoiMarkerPopupComponent);
+        this.clearSearchResultsMarker();
+        let subscription = this.markersLoaded.subscribe(() => {
+            subscription.unsubscribe();
+            let foundMarker = false;
+            this.markers.eachLayer(existingMarker => {
+                let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
+                if (markerWithTitle.identifier !== pointOfInterest.id) {
+                    return;
+                }
+                foundMarker = true;
+                setTimeout(() => {
+                    var parent = this.markers.getVisibleParent(markerWithTitle);
+                    if (parent !== markerWithTitle) {
+                        this.searchResultsMarker = this.pointOfInterestToMarker(pointOfInterest, factory);
+                        this.mapService.map.addLayer(this.searchResultsMarker);
+                        markerWithTitle = this.searchResultsMarker;
+                    }
+                    markerWithTitle.fireEvent("click");
+                    markerWithTitle.openPopup();
+                }, 500);
+            });
+            if (foundMarker) {
+                return;
+            }
+            // HM TODO: different marker in case this is not a proper POI?
+            this.searchResultsMarker = this.pointOfInterestToMarker(pointOfInterest, factory);
+            this.mapService.map.addLayer(this.searchResultsMarker);
+            this.searchResultsMarker.fireEvent("click");
+            this.searchResultsMarker.openPopup();
+        });
+
+        // triggers the subscription
+        this.fitBoundsService.fitBounds(bounds, { maxZoom: FitBoundsService.DEFAULT_MAX_ZOOM } as L.FitBoundsOptions);
+        this.updateMarkersInternal();
+    }
+
+    private pointOfInterestToMarker(pointOfInterest: IPointOfInterest, factory: ComponentFactory<PoiMarkerPopupComponent>): Common.IMarkerWithTitle {
+        let latLng = L.latLng(pointOfInterest.location.lat, pointOfInterest.location.lng, pointOfInterest.location.alt);
+        let marker = L.marker(latLng, { draggable: false, clickable: true, icon: IconsService.createPoiIcon(pointOfInterest.icon, pointOfInterest.iconColor), title: pointOfInterest.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
+        marker.title = pointOfInterest.title;
+        marker.identifier = pointOfInterest.id;
+        let clickLambda = () => {
+            // for performance
+            let markerPopupContainer = L.DomUtil.create("div");
+            let componentRef = factory.create(this.injector, null, markerPopupContainer);
+            componentRef.instance.source = pointOfInterest.source;
+            componentRef.instance.setMarker(marker);
+            componentRef.instance.selectRoute = (route) => { this.mapService.updateReadOnlyLayer(this.readOnlyLayer, route) };
+            componentRef.instance.clearSelectedRoute = () => this.readOnlyLayer.clearLayers();
+            componentRef.instance.angularBinding(componentRef.hostView);
+            marker.bindPopup(markerPopupContainer, { autoPan: false } as L.PopupOptions);
+            marker.openPopup();
+            marker.off("click", clickLambda);
+        };
+        marker.on("click", clickLambda);
+        return marker;
+    }
+
+    private clearSearchResultsMarker() {
+        if (this.searchResultsMarker != null) {
+            this.mapService.map.removeLayer(this.searchResultsMarker);
+            this.searchResultsMarker = null;
         }
     }
 }

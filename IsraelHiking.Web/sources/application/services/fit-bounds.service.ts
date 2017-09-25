@@ -6,6 +6,7 @@ import { SidebarService } from "./sidebar.service";
 
 @Injectable()
 export class FitBoundsService {
+    public static readonly DEFAULT_MAX_ZOOM = 16;
 
     constructor(private mapService: MapService,
         private sidebarService: SidebarService) { }

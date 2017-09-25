@@ -27,6 +27,7 @@ export interface IPointOfInterest {
     source: string;
     icon: string;
     iconColor: string;
+    isRoute: boolean;
 }
 
 export interface IPointOfInterestExtended extends IPointOfInterest {
