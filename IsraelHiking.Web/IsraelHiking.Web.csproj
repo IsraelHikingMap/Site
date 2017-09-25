@@ -105,13 +105,13 @@
     <Exec Command="npm install" />
   </Target>
   
-  <Target Name="DebugRunNgBuild" BeforeTargets="Build" DependsOnTargets="NodeInitialize" Condition=" '$(Configuration)' == 'Debug'">
+  <Target Name="DebugRunNgBuild" BeforeTargets="Build" DependsOnTargets="NodeInitialize" Condition=" '$(Configuration)' == 'Debug' and '$(DeployOnBuild)' != 'true'">
     <Message Importance="high" Text="Starting Ng Build for development" />
     <Exec Command="ng build --target=development --environment=dev --no-progress" />
     <Message Importance="high" Text="Ng Build for development ended" />
   </Target>
-
-  <Target Name="ReleaseRunNgBuild" BeforeTargets="Build" DependsOnTargets="NodeInitialize" Condition=" '$(Configuration)' == 'Release'">
+  
+  <Target Name="ReleaseRunNgBuild" BeforeTargets="Build" DependsOnTargets="NodeInitialize" Condition=" '$(Configuration)' == 'Release' and '$(DeployOnBuild)' != 'true'">
     <Message Importance="high" Text="Starting Ng Build for production" />
     <Exec Command="ng build --target=production --environment=prod --no-progress" />
     <Message Importance="high" Text="Ng Build for production ended" />
