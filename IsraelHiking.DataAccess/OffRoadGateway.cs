@@ -89,12 +89,13 @@ namespace IsraelHiking.DataAccess
                 //    walking = true
                 //};
                 //var response = await client.PostAsync(address, new StringContent(JsonConvert.SerializeObject(requestBody)));
-                
+
                 var response = await client.PostAsync(address, null);
                 var stringContent = await response.Content.ReadAsStringAsync();
                 var jsonResponse = JsonConvert.DeserializeObject<JsonOffRoadResponse>(stringContent);
                 return jsonResponse.items
-                    .Where(i => i.track.myAdventureUserId != "6290631567605760")
+                    .Where(i => i.track.myAdventureUserId != "6290631567605760" && //Mapa
+                        i.track.myAdventureUserId != "6214979527114752") // Nakeb
                     .Select(ConvertToPointFeature)
                     .Where(f => f != null)
                     .ToList();
@@ -159,29 +160,6 @@ namespace IsraelHiking.DataAccess
                 default:
                     return "icon-four-by-four";
             }
-        }
-
-        // HM TODO: remove this as it is no longer needed?
-        private string GetIcon(string myAdventureUserId)
-        {
-            switch (myAdventureUserId)
-            {
-                //"shaylazmi1975@gmail.com"://
-                case "5766520500125696":
-                    return "icon-loveil";
-                    //"figo777moshe@gmail.com": //
-                case  "5689717408399360":
-                    return "icon-kaldanei-hashetakh";
-                //"jeepolog.offroad@gmail.com": //
-                case "5161452050579456":
-                    return "icon-jeepolog";
-                //"mapa.offroad@gmail.com"://
-                case "6290631567605760":
-                    return null;
-                default:
-                    return "icon-off-road";
-            }
-            // return null for unsupported sources
         }
 
         public async Task<FeatureCollection> GetById(string id)
