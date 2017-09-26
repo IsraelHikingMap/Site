@@ -23,6 +23,10 @@
     max-width: 480px;
 }
 
+.dialog-xs {
+    max-width: 360px;
+}
+
 @media (max-width:767px) {
     md-dialog-container {
         margin: 0 auto;

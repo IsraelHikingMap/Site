@@ -51,14 +51,11 @@ export class ShareDialogComponent extends BaseMapComponent {
     public shareAddress: string;
     public whatappShareAddress: SafeUrl;
     public facebookShareAddress: string;
-    public width: number;
-    public height: number;
-    public size: string;
-    public embedText: string;
     public isLoading: boolean;
     public siteUrlId: string;
     public offroadRequest: IOffroadPostRequest;
     public showOffroadForm: boolean;
+    public offroadPublicTrack: boolean;
 
     @LocalStorage()
     public storedUserEmail: string = "";
@@ -77,12 +74,13 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.osmUserService = osmUserService;
         this.title = "";
         this.description = "";
-        this.width = 400;
-        this.height = 300;
-        this.size = this.resources.small;
         this.isLoading = false;
         this.showOffroadForm = false;
-        this.embedText = this.getEmbedText();
+        this.shareAddress = "";
+        this.whatappShareAddress = null;
+        this.facebookShareAddress = "";
+        this.siteUrlId = "";
+        this.offroadPublicTrack = false;
         this.offroadRequest = {} as IOffroadPostRequest;
         this.offroadRequest.userMail = this.storedUserEmail;
         this.offroadRequest.activityType = "OffRoading";
@@ -102,20 +100,6 @@ export class ShareDialogComponent extends BaseMapComponent {
                 }
             }
         }
-        this.clearShareAddress();
-    }
-
-    public clearShareAddress = () => {
-        this.shareAddress = "";
-        this.whatappShareAddress = null;
-        this.facebookShareAddress = "";
-        this.siteUrlId = "";
-    }
-
-    public updateEmbedText = (width: number, height: number) => {
-        this.width = width;
-        this.height = height;
-        this.embedText = this.getEmbedText();
     }
 
     public generateUrl = () => {
@@ -143,30 +127,11 @@ export class ShareDialogComponent extends BaseMapComponent {
             let escaped = encodeURIComponent(this.shareAddress);
             this.whatappShareAddress = this.sanitizer.bypassSecurityTrustUrl(`whatsapp://send?text=${escaped}`);
             this.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
-            this.embedText = this.getEmbedText();
             this.isLoading = false;
         }, () => {
             this.toastService.error(this.resources.unableToGenerateUrl);
             this.isLoading = false;
         });
-    }
-
-    public setSize = (size: string) => {
-        switch (size) {
-            case this.resources.small:
-                this.width = 400;
-                this.height = 300;
-                break;
-            case this.resources.medium:
-                this.width = 600;
-                this.height = 450;
-                break;
-            case this.resources.large:
-                this.width = 800;
-                this.height = 600;
-                break;
-        }
-        this.embedText = this.getEmbedText();
     }
 
     public sendToOffroad = () => {
@@ -180,7 +145,7 @@ export class ShareDialogComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.pleaseAddPointsToRoute);
             return;
         }
-        this.offroadRequest.sharingCode = 3; //fixed
+        this.offroadRequest.sharingCode = this.offroadPublicTrack ? 5 : 3;
         this.offroadRequest.path = [];
         this.offroadRequest.mapItems = [];
         this.offroadRequest.externalUrl = this.shareAddress;
@@ -208,10 +173,5 @@ export class ShareDialogComponent extends BaseMapComponent {
             this.toastService.error(this.resources.unableToSendRoute);
             console.error(err);
         });
-    }
-
-    private getEmbedText = () => {
-        var shareAddress = `//${window.location.host}${this.osmUserService.getSiteUrlPostfix(this.siteUrlId)}`;
-        return `<iframe src='${shareAddress}' width='${this.width}' height='${this.height}' frameborder='0' scrolling='no'></iframe>`;
     }
 }
