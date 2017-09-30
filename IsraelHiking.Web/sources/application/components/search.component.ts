@@ -121,7 +121,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.isVisible = !this.isVisible;
         if (this.isVisible) {
             // allow DOM make the input visible
-            setTimeout(() => this.searchFromInput.nativeElement.focus(), 100);
+            setTimeout(() => {
+                this.searchFromInput.nativeElement.focus();
+                this.searchFromInput.nativeElement.select();
+            }, 100);
         }
         this.suppressEvents(e);
     }
