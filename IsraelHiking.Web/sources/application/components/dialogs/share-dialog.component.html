@@ -1,27 +1,27 @@
 ﻿<div [dir]="resources.direction" class="dialog-xs">
-    <div md-dialog-title>
+    <div matDialogTitle>
         <div>
             {{title}}
         </div>
         <div>
-            <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
+            <button mat-button type="button" matDialogClose><i class="fa icon-close"></i></button>
         </div>
     </div>
-    <div md-dialog-content>
+    <div mat-dialog-content>
         <div [hidden]="shareAddress">
             <div fxLayout="row">
-                <md-form-field fxFill hintLabel="{{resources.titlePlaceHolder}}">
-                    <input mdInput fxFill type="text" [(ngModel)]="title" placeholder="{{resources.title}}" />
-                </md-form-field>
+                <mat-form-field fxFill hintLabel="{{resources.titlePlaceHolder}}">
+                    <input matInput fxFill type="text" [(ngModel)]="title" placeholder="{{resources.title}}" />
+                </mat-form-field>
             </div>
             <div fxLayout="row">
-                <md-form-field fxFill hintLabel="{{resources.descriptionPlaceHolder}}">
-                    <textarea mdInput rows="2" type="text" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
-                </md-form-field>
+                <mat-form-field fxFill hintLabel="{{resources.descriptionPlaceHolder}}">
+                    <textarea matInput rows="2" type="text" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
+                </mat-form-field>
             </div>
             <div class="input-wrapper-spacer"></div>
             <div fxLayout="row">
-                <button md-raised-button color="primary" (click)="generateUrl()" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share create">{{resources.generateUrlToShareWithYourFriends}}</button>
+                <button mat-raised-button color="primary" (click)="generateUrl()" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share create">{{resources.generateUrlToShareWithYourFriends}}</button>
             </div>
         </div>
         <div [hidden]="!shareAddress">
@@ -37,23 +37,23 @@
             <div class="input-wrapper-spacer"></div>
             <div fxLayout="row" fxFill>
                 <div fxFlex>
-                    <a md-button fxFill [href]="facebookShareAddress" [target]="'_blank'" class="chrome-wordwrap-fix" mdTooltip="{{resources.shareWithFacebook}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share facebook"><i class="fa icon-facebook fa-lg"></i></a>
+                    <a mat-button fxFill [href]="facebookShareAddress" [target]="'_blank'" class="chrome-wordwrap-fix" matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share facebook"><i class="fa icon-facebook fa-lg"></i></a>
                 </div>
                 <div fxFlex fxHide fxShow.sm fxShow.xs>
-                    <a md-button fxFill [href]="whatappShareAddress" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share whatapp"><i class="fa icon-whatsapp fa-lg"></i></a>
+                    <a mat-button fxFill [href]="whatappShareAddress" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share whatapp"><i class="fa icon-whatsapp fa-lg"></i></a>
                 </div>
                 <div fxFlex>
-                    <button md-button fxFill ngxClipboard [cbContent]="shareAddress" mdTooltip="{{resources.copyUrl}}" mdTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
+                    <button mat-button fxFill ngxClipboard [cbContent]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
                 </div>
                 <div fxFlex>
-                    <button md-button fxFill (click)="showOffroadForm = true" [ngClass]="{active: showOffroadForm}" mdTooltip="{{resources.shareWithOffroad}}" mdTooltipPosition="above"><i class="fa icon-off-road fa-lg"></i></button>
+                    <button mat-button fxFill (click)="showOffroadForm = true" [ngClass]="{active: showOffroadForm}" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above"><i class="fa icon-off-road fa-lg"></i></button>
                 </div>
             </div>
             <div [hidden]="!showOffroadForm">
                 <div fxLayout="row">
-                    <md-form-field fxFill hintLabel="{{resources.userEmailMutedOffroad}}">
-                        <input mdInput type="text" [(ngModel)]="offroadRequest.userMail" placeholder="{{resources.userEmail}}" />
-                    </md-form-field>
+                    <mat-form-field fxFill hintLabel="{{resources.userEmailMutedOffroad}}">
+                        <input matInput type="text" [(ngModel)]="offroadRequest.userMail" placeholder="{{resources.userEmail}}" />
+                    </mat-form-field>
                 </div>
                 <div class="input-wrapper-spacer"></div>
                 <div fxLayout="row">
@@ -65,33 +65,33 @@
                             <div fxFlex>
                                 <div fxLayout="row">
                                     <div fxFlex="20">
-                                        <a md-button (click)="offroadRequest.activityType = 'Walking'" [ngClass]="{active: offroadRequest.activityType == 'Walking'}" fxFill><i class="fa icon-hike fa-lg"></i></a>
+                                        <a mat-button (click)="offroadRequest.activityType = 'Walking'" [ngClass]="{active: offroadRequest.activityType == 'Walking'}" fxFill><i class="fa icon-hike fa-lg"></i></a>
                                     </div>
                                     <div fxFlex="20">
-                                        <a md-button (click)="offroadRequest.activityType = 'Cycling'" [ngClass]="{active: offroadRequest.activityType == 'Cycling'}" fxFill><i class="fa icon-bike fa-lg"></i></a>
+                                        <a mat-button (click)="offroadRequest.activityType = 'Cycling'" [ngClass]="{active: offroadRequest.activityType == 'Cycling'}" fxFill><i class="fa icon-bike fa-lg"></i></a>
                                     </div>
                                     <div fxFlex="20">
-                                        <a md-button (click)="offroadRequest.activityType = 'OffRoading'" [ngClass]="{active: offroadRequest.activityType == 'OffRoading'}" fxFill><i class="fa icon-four-by-four fa-lg"></i></a>
+                                        <a mat-button (click)="offroadRequest.activityType = 'OffRoading'" [ngClass]="{active: offroadRequest.activityType == 'OffRoading'}" fxFill><i class="fa icon-four-by-four fa-lg"></i></a>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div fxFlex>
-                        <md-select placeholder="{{resources.difficulty}}" fxFill [(ngModel)]="offroadRequest.difficultyLevel">
-                            <md-option value="1">{{resources.easy}}</md-option>
-                            <md-option value="3">{{resources.moderate}}</md-option>
-                            <md-option value="5">{{resources.hard}}</md-option>
-                        </md-select>
+                        <mat-select placeholder="{{resources.difficulty}}" fxFill [(ngModel)]="offroadRequest.difficultyLevel">
+                            <mat-option value="1">{{resources.easy}}</mat-option>
+                            <mat-option value="3">{{resources.moderate}}</mat-option>
+                            <mat-option value="5">{{resources.hard}}</mat-option>
+                        </mat-select>
                     </div>
                 </div>
                 <div class="input-wrapper-spacer"></div>
                 <div fxLayout="row">
                     <div fxFlex="50">
-                        <md-checkbox [(ngModel)]="offroadPublicTrack">{{resources.suggestAsPublicTrack}}</md-checkbox>
+                        <mat-checkbox [(ngModel)]="offroadPublicTrack">{{resources.suggestAsPublicTrack}}</mat-checkbox>
                     </div>
                     <div fxFlex="50">
-                        <a md-button (click)="sendToOffroad()" fxFill color="primary" md-raised-button><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>
+                        <a mat-button (click)="sendToOffroad()" fxFill color="primary" mat-raised-button><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>
                     </div>
                 </div>
                 <br/>

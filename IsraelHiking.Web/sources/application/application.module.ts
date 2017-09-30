@@ -7,7 +7,21 @@ import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpModule, JsonpModule } from "@angular/http";
 import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
-import { MaterialModule, MdDialogModule, MdButtonModule, MdInputModule, MdSliderModule, MdSnackBarModule, MdAutocompleteModule } from "@angular/material";
+import {
+    MdDialogModule,
+    MdButtonModule,
+    MdInputModule,
+    MdSliderModule,
+    MdSnackBarModule,
+    MdAutocompleteModule,
+    MdSlideToggleModule,
+    MdTooltipModule,
+    MdSelectModule,
+    MdProgressBarModule,
+    MdTabsModule,
+    MdRadioModule,
+    MATERIAL_COMPATIBILITY_MODE
+} from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
 import { ClipboardModule } from "ngx-clipboard";
@@ -95,13 +109,18 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         HttpModule,
         JsonpModule,
         BrowserAnimationsModule,
-        MaterialModule,
         MdDialogModule,
         MdButtonModule,
         MdInputModule,
         MdSnackBarModule,
         MdSliderModule,
         MdAutocompleteModule,
+        MdSlideToggleModule,
+        MdTooltipModule,
+        MdSelectModule,
+        MdProgressBarModule,
+        MdTabsModule,
+        MdRadioModule,
         FormsModule,
         ReactiveFormsModule,
         FlexLayoutModule,
@@ -149,7 +168,9 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ImageDialogCompnent,
         TermsOfServiceDialogComponent
     ],
-    providers: [SessionStorageService,
+    providers: [
+        { provide: MATERIAL_COMPATIBILITY_MODE, useValue: true },
+        SessionStorageService,
         LocalStorageService,
         AuthorizationService,
         { provide: BrowserXhr, useClass: NgProgressBrowserXhr },

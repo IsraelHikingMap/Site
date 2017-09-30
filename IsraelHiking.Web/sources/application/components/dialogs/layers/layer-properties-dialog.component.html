@@ -1,41 +1,41 @@
 ﻿<div [dir]="resources.direction">
-    <div md-dialog-title>
+    <div matDialogTitle>
         <div>
             {{title}}
         </div>
         <div>
-            <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
+            <button mat-button type="button" matDialogClose><i class="fa icon-close"></i></button>
         </div>
     </div>
-    <div md-dialog-content>
+    <div mat-dialog-content>
         <div fxLayout="row">
-            <md-form-field hintLabel="{{resources.layerNamePlaceHolder}}" fxFill>
-                <input mdInput type="text" [(ngModel)]="key" name="key" placeholder="{{resources.name}}" required="" fxFill />
-            </md-form-field>
+            <mat-form-field hintLabel="{{resources.layerNamePlaceHolder}}" fxFill>
+                <input matInput type="text" [(ngModel)]="key" name="key" placeholder="{{resources.name}}" required="" fxFill />
+            </mat-form-field>
         </div>
         <div fxLayout="row">
-            <md-form-field hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill [dir]="'ltr'">
-                <input mdInput type="text" [ngModel]="address" (ngModelChange)="addressChanged($event)" name="address" placeholder="{{resources.address}}" required="" fxFill />
-            </md-form-field>
+            <mat-form-field hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill [dir]="'ltr'">
+                <input matInput type="text" [ngModel]="address" (ngModelChange)="addressChanged($event)" name="address" placeholder="{{resources.address}}" required="" fxFill />
+            </mat-form-field>
         </div>
         <div fxLayout="row">
             <a [ngStyle]="{'font-size': 'small' }" href="https://qms.nextgis.com/" target="_blank">{{resources.moreMapAddresses}}</a>
         </div>
         <div class="input-wrapper-spacer"></div>
         <div fxLayout="row" fxFlexs>
-            <md-form-field fxFlex>
-                <input mdInput type="number" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" />
-            </md-form-field>
-            <md-form-field fxFlex class="margin-10">
-                <input mdInput type="number" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" />
-            </md-form-field>
+            <mat-form-field fxFlex>
+                <input matInput type="number" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" />
+            </mat-form-field>
+            <mat-form-field fxFlex class="margin-10">
+                <input matInput type="number" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" />
+            </mat-form-field>
         </div>
         <div fxLayout="row">
             <div id="mapPreview" [style.height]="'100px'" [style.width]="'100%'" fxfill></div>
         </div>
     </div>
-    <div md-dialog-actions fxLayoutAlign="end">
-        <button md-dialog-close type="button" md-button (click)="saveLayer($event)" mdTooltip="{{resources.save}}" mdTooltipPosition="above"><i class="fa icon-check"></i></button>
-        <button md-dialog-close type="button" md-button [hidden]="isNew" (click)="removeLayer($event)" mdTooltip="{{resources.deleteLayer}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
+    <div mat-dialog-actions fxLayoutAlign="end">
+        <button matDialogClose type="button" mat-button (click)="saveLayer($event)" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
+        <button matDialogClose type="button" mat-button [hidden]="isNew" (click)="removeLayer($event)" matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsEvent="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
     </div>
 </div>

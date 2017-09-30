@@ -1,7 +1,7 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
-    <md-form-field fxFill>
-        <textarea mdInput #titleInput rows="2" type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates()" placeholder="{{resources.title}}" fxFill></textarea>
-    </md-form-field>
+    <mat-form-field fxFill>
+        <textarea matInput #titleInput rows="2" type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates()" placeholder="{{resources.title}}" fxFill></textarea>
+    </mat-form-field>
     <div [hidden]="!showIcons">
         <div *ngFor="let group of iconsGroups">
             <div fxLayout="row" fxFill>
@@ -13,19 +13,19 @@
     </div>
     <div fxLayout="row">
         <div fxFlex>
-            <button md-button type="button" (click)="save(title, markerType)" mdTooltip="{{resources.save}}" mdTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
+            <button mat-button type="button" (click)="save(title, markerType)" matTooltip="{{resources.save}}" matTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
         </div>
         <div fxFlex>
-            <button md-button type="button" (click)="remove()" mdTooltip="{{resources.deletePoi}}" mdTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>
+            <button mat-button type="button" (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>
         </div>
         <div fxFlex>
-            <button md-button type="button" (click)="hideCoordinates = !hideCoordinates" mdTooltip="{{resources.showCoordinates}}" mdTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
+            <button mat-button type="button" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
         </div>
         <div fxFlex>
-            <button md-button type="button" (click)="showIcons = !showIcons" mdTooltip="{{resources.selectIcon}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsEvent="Toggle select icon" fxFill><i class="fa icon-{{markerType}}"></i></button>
+            <button mat-button type="button" (click)="showIcons = !showIcons" matTooltip="{{resources.selectIcon}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsEvent="Toggle select icon" fxFill><i class="fa icon-{{markerType}}"></i></button>
         </div>
         <div fxFlex [hidden]="!showOpenDialogButton()">
-            <button md-button type="button" (click)="openAddPointDialog($event)" mdTooltip="{{resources.uploadPoint}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
+            <button mat-button type="button" (click)="openAddPointDialog($event)" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
         </div>
     </div>
     <div [hidden]="hideCoordinates">

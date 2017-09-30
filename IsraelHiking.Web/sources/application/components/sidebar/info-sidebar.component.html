@@ -1,6 +1,6 @@
 ﻿<div [dir]="resources.direction">
-    <md-tab-group [(selectedIndex)]="selectedTabIndex" [dynamicHeight]="'true'">
-        <md-tab label="{{resources.about}}" (click)="setState('about')" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info about select">
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" [dynamicHeight]="'true'">
+        <mat-tab label="{{resources.about}}" (click)="setState('about')" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info about select">
             <div>
                 <p><span [innerHtml]="resources.infoSubheader"></span></p>
                 <h4>{{resources.infoHelpfulLinks}}</h4>
@@ -17,7 +17,7 @@
                     <div fxFlex [innerHtml]="resources.infoOsmWikiLink"></div>
                 </div>
                 <div fxLayout="row" class="bottom-border cursor-pointer" (click)="openDownloadDialog()" angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download open">
-                    <button md-raised-button color="primary" fxFill><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
+                    <button mat-raised-button color="primary" fxFill><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
                 </div>
                 <p>
                     <i>
@@ -26,8 +26,8 @@
                     </i>
                 </p>
             </div>
-        </md-tab>
-        <md-tab label="{{resources.legend}}" [disabled]="legendSections.length === 0" (click)="setState('legend')" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info legend select">
+        </mat-tab>
+        <mat-tab label="{{resources.legend}}" [disabled]="legendSections.length === 0" (click)="setState('legend')" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info legend select">
             <div *ngFor="let section of legendSections" id="{{section.id}}">
                 <div class="legend-section">
                     <div class="legend-section-header">
@@ -41,8 +41,8 @@
                     </div>
                 </div>
             </div>
-        </md-tab>
-    </md-tab-group>
+        </mat-tab>
+    </mat-tab-group>
 </div>
 
 

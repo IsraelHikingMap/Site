@@ -1,6 +1,5 @@
 ﻿import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
-import { MaterialModule } from "@angular/material";
 import * as L from "leaflet";
 
 import { RouteLayer } from "./route.layer";
@@ -44,9 +43,7 @@ describe("RouteLayer", () => {
         };
         
         TestBed.configureTestingModule({
-            imports: [
-                MaterialModule
-            ],
+            imports: [],
             providers: [
                 Injector,
                 { provide: ResourcesService, useValue: mapServiceMock.resourcesService },

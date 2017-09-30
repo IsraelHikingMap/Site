@@ -1,10 +1,10 @@
-﻿import { Component, ElementRef } from "@angular/core";
+import { Component, ElementRef } from "@angular/core";
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 
 @Component({
     selector: "location-button",
-    template:   `<a mdTooltip="{{resources.showMeWhereIAm}}" mdTooltipPosition="right">
+    template:   `<a matTooltip="{{resources.showMeWhereIAm}}" matTooltipPosition="right">
                     <i class="fa fa-lg icon-crosshairs"></i>
                 </a>`
 })

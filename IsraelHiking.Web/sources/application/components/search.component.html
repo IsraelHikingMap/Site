@@ -1,44 +1,44 @@
 ﻿<div class="leaflet-bar" [hidden]="isVisible" [dir]="resources.direction">
-    <a class="cursor-pointer" (click)="toggleVisibility($event)" mdTooltip="{{resources.search}}" mdTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Search toggle"><i class="fa icon-search fa-lg"></i></a>
+    <a class="cursor-pointer" (click)="toggleVisibility($event)" matTooltip="{{resources.search}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Search toggle"><i class="fa icon-search fa-lg"></i></a>
 </div>
 <div [hidden]="!isVisible">
     <div class="leaflet-bar" fxLayout="row">
-        <a class="cursor-pointer control-icon-last" (click)="toggleDirectional($event)" mdTooltip="{{resources.directionalSearch}}" mdTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !isDirectional, 'icon-minus': isDirectional}"></i></a>
+        <a class="cursor-pointer control-icon-last" (click)="toggleDirectional($event)" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !isDirectional, 'icon-minus': isDirectional}"></i></a>
         <div [dir]="resources.direction">
-            <md-form-field class="search-input-container">
-                <input type="text" mdInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [mdAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)">
-            </md-form-field>
-            <md-autocomplete positionY="below" #autoFrom="mdAutocomplete" [displayWith]="displayResults">
-                <md-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
+            <mat-form-field class="search-input-container">
+                <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)">
+            </mat-form-field>
+            <mat-autocomplete positionY="below" #autoFrom="matAutocomplete" [displayWith]="displayResults">
+                <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
                     <i [hidden]="!result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
                     {{result.displayName}}
-                </md-option>
-            </md-autocomplete>
+                </mat-option>
+            </mat-autocomplete>
         </div>
         <a class="cursor-pointer control-icon-first" (click)="toggleVisibility($event)"><i class="fa icon-search fa-lg"></i></a>
     </div>
     <br [hidden]="!isDirectional"/>
     <div fxLayout="row" [hidden]="!isDirectional">
         <div class="pull-left leaflet-bar">
-            <a class="cursor-pointer pull-left" (click)="setRouting('Hike', $event)" [ngClass]="{'leaflet-active' : routingType == 'Hike' }" mdTooltip="{{resources.hikeRouting}}" mdTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></a>
-            <a class="cursor-pointer pull-left" (click)="setRouting('Bike', $event)" [ngClass]="{'leaflet-active' : routingType == 'Bike' }" mdTooltip="{{resources.bikeRouting}}" mdTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></a>
-            <a class="cursor-pointer pull-left" (click)="setRouting('4WD', $event)" [ngClass]="{'leaflet-active' : routingType == '4WD' }" mdTooltip="{{resources.fourWheelDriveRouting}}" mdTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></a>
-            <a class="cursor-pointer pull-left" (click)="setRouting('None', $event)" [ngClass]="{'leaflet-active' : routingType == 'None' }" mdTooltip="{{resources.straightLines}}" mdTooltipPosition="below"><i class="fa icon-none fa-lg"></i></a>
+            <a class="cursor-pointer pull-left" (click)="setRouting('Hike', $event)" [ngClass]="{'leaflet-active' : routingType == 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></a>
+            <a class="cursor-pointer pull-left" (click)="setRouting('Bike', $event)" [ngClass]="{'leaflet-active' : routingType == 'Bike' }" matTooltip="{{resources.bikeRouting}}" matTooltipPosition="below"><i class="fa icon-bike fa-lg"></i></a>
+            <a class="cursor-pointer pull-left" (click)="setRouting('4WD', $event)" [ngClass]="{'leaflet-active' : routingType == '4WD' }" matTooltip="{{resources.fourWheelDriveRouting}}" matTooltipPosition="below"><i class="fa icon-four-by-four fa-lg"></i></a>
+            <a class="cursor-pointer pull-left" (click)="setRouting('None', $event)" [ngClass]="{'leaflet-active' : routingType == 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="below"><i class="fa icon-none fa-lg"></i></a>
         </div>
     </div>
     <br [hidden]="!isDirectional"/>
     <div class="leaflet-bar" [hidden]="!isDirectional" fxLayout="row">
         <a class="cursor-pointer control-icon-last" (click)="searchRoute($event)"><i class="fa icon-arrow-left fa-lg"></i></a>
         <div [dir]="resources.direction">
-            <md-form-field class="pull-right search-input-container">
-                <input type="text" mdInput #searchToInput [formControl]="searchTo" [mdAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(toContext.searchTerm)">
-            </md-form-field>
-            <md-autocomplete positionY="below" #autoTo="mdAutocomplete" [displayWith]="displayResults">
-                <md-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
+            <mat-form-field class="pull-right search-input-container">
+                <input type="text" matInput #searchToInput [formControl]="searchTo" [matAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(toContext.searchTerm)">
+            </mat-form-field>
+            <mat-autocomplete positionY="below" #autoTo="matAutocomplete" [displayWith]="displayResults">
+                <mat-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
                     <i [hidden]="!result.icon" class="fa" [ngClass]="result.icon"></i>
                     {{result.displayName}}
-                </md-option>
-            </md-autocomplete>
+                </mat-option>
+            </mat-autocomplete>
         </div>
         <a class="control-icon-first" (click)="toggleVisibility($event)"><i class="fa icon-search fa-lg"></i></a>
     </div>

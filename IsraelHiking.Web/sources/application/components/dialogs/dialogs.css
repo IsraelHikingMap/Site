@@ -1,17 +1,17 @@
-﻿[md-dialog-title] {
+﻿[matDialogTitle] {
     display: flex !important;
     justify-content: space-between;
     align-items: top;
 }
 
-    [md-dialog-title] [md-dialog-close] {
+    [matDialogTitle] [matDialogClose] {
         min-width: 0;
         min-height: 0;
         line-height: initial;
         padding: 5px;
     }
 
-        [md-dialog-title] [md-dialog-close] i {
+        [matDialogTitle] [matDialogClose] i {
             display: block;
         }
 
@@ -28,11 +28,11 @@
 }
 
 @media (max-width:767px) {
-    md-dialog-container {
+    mat-dialog-container {
         margin: 0 auto;
     }
 
-        md-dialog-container .mat-button {
+        mat-dialog-container .mat-button {
             white-space: normal;
         }
 }

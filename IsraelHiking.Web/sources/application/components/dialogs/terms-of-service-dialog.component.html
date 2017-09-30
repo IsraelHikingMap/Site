@@ -1,13 +1,13 @@
 ﻿<div [dir]="resources.direction" class="dialog-small">
-    <div md-dialog-title>
+    <div matDialogTitle>
         <div>
             {{resources.termsOfService}}
         </div>
         <div>
-            <button md-button type="button" md-dialog-close="false"><i class="fa icon-close"></i></button>
+            <button mat-button type="button" matDialogClose="false"><i class="fa icon-close"></i></button>
         </div>
     </div>
-    <div md-dialog-content>
+    <div mat-dialog-content>
         <div >
             <div fxLayout="row">
                 <p fxFill>{{resources.termsOfServiceElaborated}}</p>
@@ -19,12 +19,12 @@
                 <a [href]="wikimediaTermsOfServiceUrl" target="_blank">{{resources.wikimediaTermsOfService}}</a>
             </div>
             <div fxLayout="row">
-                <md-checkbox [(ngModel)]="iAgree">{{resources.iHaveReadAndAgree}}</md-checkbox>
+                <mat-checkbox [(ngModel)]="iAgree">{{resources.iHaveReadAndAgree}}</mat-checkbox>
             </div>
             <br />
         </div>
     </div>
-    <div md-dialog-actions>
-        <button md-dialog-close="true" md-raised-button color="primary" [disabled]="iAgree === false" (click)="submit()" angulartics2On="click" angularticsCategory="Terms Of Service" angularticsEvent="Sumbit">{{resources.submit}}</button>
+    <div mat-dialog-actions>
+        <button matDialogClose="true" mat-raised-button color="primary" [disabled]="iAgree === false" (click)="submit()" angulartics2On="click" angularticsCategory="Terms Of Service" angularticsEvent="Sumbit">{{resources.submit}}</button>
     </div>
 </div>

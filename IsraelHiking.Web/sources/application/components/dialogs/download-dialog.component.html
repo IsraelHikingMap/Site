@@ -1,49 +1,49 @@
 ﻿<div [dir]="resources.direction">
-    <div md-dialog-title>
+    <div matDialogTitle>
         <div>
             {{resources.infoDownloadMapForOfflineUse}}
         </div>
         <div>
-            <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
+            <button mat-button type="button" matDialogClose><i class="fa icon-close"></i></button>
         </div>
     </div>
-    <div md-dialog-content>
+    <div mat-dialog-content>
         <div class="text-center">
             <a class="download-app-link" href="{{getGooglePlayStoreAddress(app)}}" target="_blank" tabindex="-1"><img src="/content/google-play-badge.png" class="img-responsive" alt="" fxFill tabindex="-1"/></a>
         </div>
         <h5 class="text-center">{{resources.application}}</h5>
         <div fxLayout="row">
             <div fxFlex="33">
-                <a md-button (click)="app = 'Locus'" [ngClass]="{active: app == 'Locus'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download Locus">Locus</a>
+                <a mat-button (click)="app = 'Locus'" [ngClass]="{active: app == 'Locus'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download Locus">Locus</a>
             </div>
             <div fxFlex="33">
-                <a md-button (click)="app = 'OruxMaps'" [ngClass]="{active: app == 'OruxMaps'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download OruxMaps">OruxMaps</a>
+                <a mat-button (click)="app = 'OruxMaps'" [ngClass]="{active: app == 'OruxMaps'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download OruxMaps">OruxMaps</a>
             </div>
             <div fxFlex>
-                <a md-button (click)="app = 'Offroad'" [ngClass]="{active: app == 'Offroad'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download off-road">off-road</a>
+                <a mat-button (click)="app = 'Offroad'" [ngClass]="{active: app == 'Offroad'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download off-road">off-road</a>
             </div>
         </div>
         <h5 class="text-center">{{resources.map}}</h5>
         <div fxLayout="row">
             <div fxFlex="50">
-                <a md-button (click)="mapType = 'IHM'" [ngClass]="{active: mapType == 'IHM'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download IHM">{{resources.israelHikingMap}}</a>
+                <a mat-button (click)="mapType = 'IHM'" [ngClass]="{active: mapType == 'IHM'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download IHM">{{resources.israelHikingMap}}</a>
             </div>
             <div fxFlex>
-                <a md-button (click)="mapType = 'MTB'" [ngClass]="{active: mapType == 'MTB'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download MTB">{{resources.israelMTBMap}}</a>
+                <a mat-button (click)="mapType = 'MTB'" [ngClass]="{active: mapType == 'MTB'}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download MTB">{{resources.israelMTBMap}}</a>
             </div>
         </div>
         <h5 class="text-center">{{resources.detailsLevel}} ({{resources.upToZoom}})</h5>
         <div fxLayout="row">
             <div fxFlex="50">
-                <a md-button (click)="zoom = 15" [ngClass]="{active: zoom === 15}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download zoom 15">15 [750Mb]</a>
+                <a mat-button (click)="zoom = 15" [ngClass]="{active: zoom === 15}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download zoom 15">15 [750Mb]</a>
             </div>
             <div fxFlex>
-                <a md-button (click)="zoom = 16" [ngClass]="{active: zoom === 16}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download zoom 16">16 [2.2Gb]</a>
+                <a mat-button (click)="zoom = 16" [ngClass]="{active: zoom === 16}" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download zoom 16">16 [2.2Gb]</a>
             </div>
         </div>
         <br />
         <div fxLayout="row">
-            <a md-raised-button color="primary" [href]="getDownloadUrl()" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download offline map {{app}} {{mapType}} {{zoom}}"><i class="fa icon-download fa-lg"></i> {{resources.startDownload}}</a>
+            <a mat-raised-button color="primary" [href]="getDownloadUrl()" fxFill angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download offline map {{app}} {{mapType}} {{zoom}}"><i class="fa icon-download fa-lg"></i> {{resources.startDownload}}</a>
         </div>
         <h4>{{resources.installationInstructions}}</h4>
         <p>{{resources.offlineMapBenifits}}</p>

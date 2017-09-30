@@ -1,12 +1,12 @@
 ﻿<div class="control-container leaflet-bar" [dir]="resources.direction">
-    <a class="cursor-pointer control-icon-first" (click)="toggle($event)" [ngClass]="{active: isVisible()}" mdTooltip="{{resources.routeStatistics}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsEvent="Route statistics toggle"><i class="fa icon-area-chart fa-lg"></i></a>
-    <div class="pull-right" mdTooltip="{{resources.length}}" mdTooltipPosition="above">
+    <a class="cursor-pointer control-icon-first" (click)="toggle($event)" [ngClass]="{active: isVisible()}" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsEvent="Route statistics toggle"><i class="fa icon-area-chart fa-lg"></i></a>
+    <div class="pull-right" matTooltip="{{resources.length}}" matTooltipPosition="above">
         <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>
     </div>
-    <div class="pull-right" mdTooltip="{{resources.gain}}" mdTooltipPosition="above">
+    <div class="pull-right" matTooltip="{{resources.gain}}" matTooltipPosition="above">
         <span class="control-container-item gutters"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} {{getUnits(gain)}}</span>
     </div>
-    <div class="pull-right" mdTooltip="{{resources.loss}}" mdTooltipPosition="above">
+    <div class="pull-right" matTooltip="{{resources.loss}}" matTooltipPosition="above">
         <span class="control-container-item gutters"><i class="fa icon-arrow-down"></i> <span dir="ltr">{{toShortNumber(loss)}}</span> {{getUnits(loss)}}</span>
     </div>
 </div>

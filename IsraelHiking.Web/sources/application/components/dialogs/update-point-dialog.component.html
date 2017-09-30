@@ -1,54 +1,54 @@
 ﻿<div [dir]="resources.direction" class="dialog-small">
-    <div md-dialog-title>
+    <div matDialogTitle>
         <div>
             {{identifier ? resources.updatePoint : resources.addPoint}}
         </div>
         <div>
-            <button md-button type="button" md-dialog-close><i class="fa icon-close"></i></button>
+            <button mat-button type="button" matDialogClose><i class="fa icon-close"></i></button>
         </div>
     </div>
-    <div md-dialog-content>
+    <div mat-dialog-content>
         <div fxLayout="row" fxLayout.xs="column">
             <div fxFlex="50" fxFlex.xs="100">
                 <div fxLayout="row">
-                    <md-form-field fxFill>
-                        <input mdInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.nameInLanguage}}" fxFill />
-                    </md-form-field>
+                    <mat-form-field fxFill>
+                        <input matInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.nameInLanguage}}" fxFill />
+                    </mat-form-field>
                 </div>
                 <div fxLayout="row">
-                    <md-form-field fxFill>
-                        <textarea mdInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
-                    </md-form-field>
+                    <mat-form-field fxFill>
+                        <textarea matInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
+                    </mat-form-field>
                 </div>
             </div>
             <div fxFlex="50" fxFlex.xs="100">
                 <div fxLayout="row">
                     <img [hidden]="!imageUrl" [src]="imageUrl" class="img-responsive" fxFill />
                     <label [hidden]="imageUrl" fxFill>
-                        <a md-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
+                        <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
                         <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
                     </label>
                 </div>
                 <div fxLayout="row">
-                    <button [hidden]="!imageUrl" md-button (click)="imageUrl=''" fxFill><i class="fa icon-trash"></i></button>
+                    <button [hidden]="!imageUrl" mat-button (click)="imageUrl=''" fxFill><i class="fa icon-trash"></i></button>
                 </div>
             </div>
         </div>
         <div fxLayout="row">
-            <md-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
-                <input mdInput type="text" [dir]="'ltr'" [(ngModel)]="websiteUrl" placeholder="{{resources.website}}" fxFill />
-            </md-form-field>
+            <mat-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
+                <input matInput type="text" [dir]="'ltr'" [(ngModel)]="websiteUrl" placeholder="{{resources.website}}" fxFill />
+            </mat-form-field>
         </div>
         <br />
         <div fxLayout="row">
-            <md-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (change)="selectCategory($event)" fxFill>
-                <md-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{category.label}}</md-option>
-            </md-select>
+            <mat-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (change)="selectCategory($event)" fxFill>
+                <mat-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{category.label}}</mat-option>
+            </mat-select>
         </div>
         <br />
         <br />
         <div fxLayout="row" fxLayoutWrap>
-            <button md-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
+            <button mat-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
                 <i class="fa" [ngClass]="icon.icon" [style.color]="icon.color"></i>
                 <br />
                 {{icon.label}}
@@ -56,10 +56,10 @@
         </div>
         <div fxLayout="row">
             <div fxFlex>
-                <button md-raised-button color="primary" [disabled]="!title && !description && !imageUrl" (click)="updatePoint()" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{identifier ? resources.updatePoint : resources.addPoint}}</button>
+                <button mat-raised-button color="primary" [disabled]="!title && !description && !imageUrl" (click)="updatePoint()" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{identifier ? resources.updatePoint : resources.addPoint}}</button>
             </div>
             <div fxFlex="10" fxShow fxHide.xs [hidden]="identifier">
-                <a md-button [href]="getEditElementOsmAddress()" target="_blank" fxFill mdTooltip="{{resources.editThisMapUsingOsm}}" mdTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit element in OSM"><i class="fa icon-map-editing fa-lg"></i></a>
+                <a mat-button [href]="getEditElementOsmAddress()" target="_blank" fxFill matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit element in OSM"><i class="fa icon-map-editing fa-lg"></i></a>
             </div>
         </div>
     </div>
