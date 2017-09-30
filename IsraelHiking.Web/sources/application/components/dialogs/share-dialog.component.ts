@@ -25,7 +25,7 @@ export interface IOffroadPostRequest {
     description: string;
     activityType: string;
     difficultyLevel: string;
-    sharingCode: number; //should be 3 fixed
+    sharingCode: number;
     backgroundServeUrl: string;
     path: IIOffroadCoordinates[];
     mapItems: IIOffroadMarker[];
@@ -145,7 +145,7 @@ export class ShareDialogComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.pleaseAddPointsToRoute);
             return;
         }
-        this.offroadRequest.sharingCode = this.offroadPublicTrack ? 5 : 3;
+        this.offroadRequest.sharingCode = this.offroadPublicTrack ? 1 : 3;
         this.offroadRequest.path = [];
         this.offroadRequest.mapItems = [];
         this.offroadRequest.externalUrl = this.shareAddress;
