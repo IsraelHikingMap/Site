@@ -51,6 +51,7 @@ export class ShareDialogComponent extends BaseMapComponent {
     public shareAddress: string;
     public whatappShareAddress: SafeUrl;
     public facebookShareAddress: string;
+    public nakebCreateHikeAddress: string;
     public isLoading: boolean;
     public siteUrlId: string;
     public offroadRequest: IOffroadPostRequest;
@@ -79,6 +80,7 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.shareAddress = "";
         this.whatappShareAddress = null;
         this.facebookShareAddress = "";
+        this.nakebCreateHikeAddress = "";
         this.siteUrlId = "";
         this.offroadPublicTrack = false;
         this.offroadRequest = {} as IOffroadPostRequest;
@@ -127,6 +129,7 @@ export class ShareDialogComponent extends BaseMapComponent {
             let escaped = encodeURIComponent(this.shareAddress);
             this.whatappShareAddress = this.sanitizer.bypassSecurityTrustUrl(`whatsapp://send?text=${escaped}`);
             this.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
+            this.nakebCreateHikeAddress = `https://www.nakeb.co.il/add_new_hike?ihm_link=${data.id}`;
             this.isLoading = false;
         }, () => {
             this.toastService.error(this.resources.unableToGenerateUrl);

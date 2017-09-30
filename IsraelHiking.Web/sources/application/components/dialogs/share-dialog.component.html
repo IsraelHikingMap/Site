@@ -46,6 +46,9 @@
                     <button mat-button fxFill ngxClipboard [cbContent]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
                 </div>
                 <div fxFlex>
+                    <a mat-button fxFill [href]="nakebCreateHikeAddress" [target]="'_blank'" matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above"><i class="fa icon-nakeb fa-lg"></i></a>
+                </div>
+                <div fxFlex>
                     <button mat-button fxFill (click)="showOffroadForm = true" [ngClass]="{active: showOffroadForm}" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above"><i class="fa icon-off-road fa-lg"></i></button>
                 </div>
             </div>
@@ -88,7 +91,7 @@
                 <div class="input-wrapper-spacer"></div>
                 <div fxLayout="row">
                     <div fxFlex="50">
-                        <mat-checkbox [(ngModel)]="offroadPublicTrack">{{resources.suggestAsPublicTrack}}</mat-checkbox>
+                        <mat-checkbox [(ngModel)]="offroadPublicTrack" ngDefaultControl>{{resources.suggestAsPublicTrack}}</mat-checkbox>
                     </div>
                     <div fxFlex="50">
                         <a mat-button (click)="sendToOffroad()" fxFill color="primary" mat-raised-button><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>

@@ -19,7 +19,7 @@
                 <a [href]="wikimediaTermsOfServiceUrl" target="_blank">{{resources.wikimediaTermsOfService}}</a>
             </div>
             <div fxLayout="row">
-                <mat-checkbox [(ngModel)]="iAgree">{{resources.iHaveReadAndAgree}}</mat-checkbox>
+                <mat-checkbox [(ngModel)]="iAgree" ngDefaultControl>{{resources.iHaveReadAndAgree}}</mat-checkbox>
             </div>
             <br />
         </div>
