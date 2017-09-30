@@ -1,4 +1,5 @@
 ﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ElementRef, ComponentFactory } from "@angular/core";
+import { MdAutocomplete } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { Http } from "@angular/http";
 import * as L from "leaflet";
@@ -50,6 +51,11 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     @ViewChild("searchFromInput")
     public searchFromInput: ElementRef;
+
+    @ViewChild("autoFrom")
+    public matAutocompleteFrom: MdAutocomplete;
+    @ViewChild("autoTo")
+    public matAutocompleteTo: MdAutocomplete;
 
     constructor(resources: ResourcesService,
         private http: Http,
@@ -107,6 +113,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         });
 
         if (this.isVisible) {
+            // search from url:
             this.search(this.fromContext);
         }
     }
@@ -122,9 +129,13 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         if (this.isVisible) {
             // allow DOM make the input visible
             setTimeout(() => {
-                this.searchFromInput.nativeElement.focus();
-                this.searchFromInput.nativeElement.select();
-            }, 100);
+                    this.searchFromInput.nativeElement.focus();
+                    this.searchFromInput.nativeElement.select();
+                },
+                100);
+        } else {
+            this.matAutocompleteFrom.showPanel = false;
+            this.matAutocompleteTo.showPanel = false;
         }
         this.suppressEvents(e);
     }

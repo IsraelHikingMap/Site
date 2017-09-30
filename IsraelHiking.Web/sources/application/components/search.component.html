@@ -9,7 +9,7 @@
                 <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)">
             </mat-form-field>
             <mat-autocomplete positionY="below" #autoFrom="matAutocomplete" [displayWith]="displayResults">
-                <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
+                <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.title)" [dir]="resources.getDirection(result.title)">
                     <i [hidden]="!result.icon" class="fa" [ngClass]="result.icon" [style.color]="result.iconColor"></i>
                     {{result.displayName}}
                 </mat-option>
@@ -34,7 +34,7 @@
                 <input type="text" matInput #searchToInput [formControl]="searchTo" [matAutocomplete]="autoTo" class="control-container-item" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(toContext.searchTerm)">
             </mat-form-field>
             <mat-autocomplete positionY="below" #autoTo="matAutocomplete" [displayWith]="displayResults">
-                <mat-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.name)" [dir]="resources.getDirection(result.name)">
+                <mat-option *ngFor="let result of toContext.searchResults" [value]="result" [ngClass]="resources.getTextAlignment(result.title)" [dir]="resources.getDirection(result.title)">
                     <i [hidden]="!result.icon" class="fa" [ngClass]="result.icon"></i>
                     {{result.displayName}}
                 </mat-option>
