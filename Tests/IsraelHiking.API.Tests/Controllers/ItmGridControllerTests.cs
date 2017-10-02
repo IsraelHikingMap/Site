@@ -16,7 +16,11 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetItmCoordinates_ShouldConvertToNorthEast()
         {
             var northEast = new Coordinate { Y = 3, X = 4 };
-            _itmGridController = new ItmGridController(new ItmWgs84MathTransfromFactory());
+            var converter = Substitute.For<IMathTransform>();
+            var factory = Substitute.For<IItmWgs84MathTransfromFactory>();
+            factory.CreateInverse().Returns(converter);
+            converter.Transform(Arg.Any<Coordinate>()).Returns(northEast);
+            _itmGridController = new ItmGridController(factory);
 
             var response = _itmGridController.GetItmCoordinates(1, 2);
 
