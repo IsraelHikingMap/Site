@@ -2,6 +2,7 @@
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
@@ -45,7 +46,8 @@ namespace IsraelHiking.DataAccess
         public async Task<string> UploadImage(string imageName, Stream contentStream, Coordinate location)
         {
             _logger.LogInformation($"Upload an image to wikimedia common: {imageName}, Location: {location.Y}, {location.X}");
-            var wikiFileName = "File:Israel_Hiking_Map_" + imageName.Replace(" ", "_").Replace("\"", "_");
+            var invalidCharacterReularExpression = new Regex(@"[\\#<>\[\]|:{}/~\s+]");
+            var wikiFileName = "File:Israel_Hiking_Map_" + invalidCharacterReularExpression.Replace(imageName, "_");
             var comment = CreateWikipediaComment(location, imageName);
             await _site.GetTokenAsync("edit", true);
             var results = await FilePage.UploadAsync(_site, contentStream, wikiFileName, comment, true);
