@@ -20,7 +20,8 @@ namespace IsraelHiking.API.Services
     {
         private readonly IGpxLoopsSplitterExecutor _gpxLoopsSplitterExecutor;
         private readonly IGpxProlongerExecutor _gpxProlongerExecutor;
-        private readonly IMathTransform _itmWgs84MathTransfrom;
+        private readonly IMathTransform _itmWgs84MathTransform;
+        private readonly IMathTransform _wgs84ItmMathTransform;
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IGeometryFactory _geometryFactory;
         private readonly ILogger _logger;
@@ -31,14 +32,14 @@ namespace IsraelHiking.API.Services
         /// </summary>
         /// <param name="gpxLoopsSplitterExecutor"></param>
         /// <param name="gpxProlongerExecutor"></param>
-        /// <param name="itmWgs84MathTransfrom"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="options"></param>
         /// <param name="geometryFactory"></param>
         /// <param name="logger"></param>
         public AddibleGpxLinesFinderService(IGpxLoopsSplitterExecutor gpxLoopsSplitterExecutor,
             IGpxProlongerExecutor gpxProlongerExecutor,
-            IMathTransform itmWgs84MathTransfrom, 
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IElasticSearchGateway elasticSearchGateway, 
             IOptions<ConfigurationData> options,
             IGeometryFactory geometryFactory,
@@ -46,7 +47,8 @@ namespace IsraelHiking.API.Services
         {
             _gpxLoopsSplitterExecutor = gpxLoopsSplitterExecutor;
             _gpxProlongerExecutor = gpxProlongerExecutor;
-            _itmWgs84MathTransfrom = itmWgs84MathTransfrom;
+            _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
+            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _elasticSearchGateway = elasticSearchGateway;
             _geometryFactory = geometryFactory;
             _logger = logger;
@@ -188,12 +190,12 @@ namespace IsraelHiking.API.Services
 
         private async Task<List<ILineString>> GetLineStringsInArea(ILineString gpxItmLine, double tolerance)
         {
-            var northEast = _itmWgs84MathTransfrom.Transform(new Coordinate
+            var northEast = _itmWgs84MathTransform.Transform(new Coordinate
             {
                 Y = gpxItmLine.Coordinates.Max(c => c.Y) + tolerance,
                 X = gpxItmLine.Coordinates.Max(c => c.X) + tolerance
             });
-            var southWest = _itmWgs84MathTransfrom.Transform(new Coordinate
+            var southWest = _itmWgs84MathTransform.Transform(new Coordinate
             {
                 Y = gpxItmLine.Coordinates.Min(c => c.Y) - tolerance,
                 X = gpxItmLine.Coordinates.Min(c => c.X) - tolerance
@@ -204,7 +206,7 @@ namespace IsraelHiking.API.Services
 
         private ILineString ToItmLineString(IEnumerable<Coordinate> coordinates, string id)
         {
-            var itmCoordinates = coordinates.Select(_itmWgs84MathTransfrom.Inverse().Transform).ToArray();
+            var itmCoordinates = coordinates.Select(_wgs84ItmMathTransform.Transform).ToArray();
             var line = _geometryFactory.CreateLineString(itmCoordinates);
             line.SetOsmId(id);
             return line;

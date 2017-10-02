@@ -24,7 +24,7 @@ namespace IsraelHiking.API.Tests.Services
         private void SetupHighways(List<LineString> lineStrings = null)
         {
             lineStrings = lineStrings ?? new List<LineString>();
-            var conveter = ItmWgs84MathTransfromFactory.Create();
+            var conveter = new ItmWgs84MathTransfromFactory().Create();
             var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(conveter.Transform).ToArray()), new AttributesTable())).ToList();
             foreach (var highway in highways)
             {
@@ -41,7 +41,7 @@ namespace IsraelHiking.API.Tests.Services
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(_options);
             var geometryFactory = GeometryFactory.Default;
-            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), ItmWgs84MathTransfromFactory.Create(), _elasticSearchGateway, optionsProvider, geometryFactory, Substitute.For<ILogger>());
+            _service = new AddibleGpxLinesFinderService(new GpxLoopsSplitterExecutor(geometryFactory), new GpxProlongerExecutor(geometryFactory), new ItmWgs84MathTransfromFactory(), _elasticSearchGateway, optionsProvider, geometryFactory, Substitute.For<ILogger>());
         }
         
         [TestMethod]

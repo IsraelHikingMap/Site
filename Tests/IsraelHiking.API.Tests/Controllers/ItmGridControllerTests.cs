@@ -1,6 +1,7 @@
 ﻿using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
+using IsraelHiking.API.Executors;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 
@@ -15,10 +16,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetItmCoordinates_ShouldConvertToNorthEast()
         {
             var northEast = new Coordinate { Y = 3, X = 4 };
-            var converter = Substitute.For<IMathTransform>();
-            converter.Inverse().Returns(converter);
-            converter.Transform(Arg.Any<Coordinate>()).Returns(northEast);
-            _itmGridController = new ItmGridController(converter);
+            _itmGridController = new ItmGridController(new ItmWgs84MathTransfromFactory());
 
             var response = _itmGridController.GetItmCoordinates(1, 2);
 

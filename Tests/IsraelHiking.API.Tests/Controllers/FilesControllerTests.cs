@@ -59,7 +59,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _gpxDataContainerConverter = new GpxDataContainerConverter();
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(new ConfigurationData());
-            _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new RouteDataSplitterService(ItmWgs84MathTransfromFactory.Create(), optionsProvider));
+            _dataContainerConverterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), _gpxDataContainerConverter, new RouteDataSplitterService(new ItmWgs84MathTransfromFactory(), optionsProvider));
             _controller = new FilesController(_elevationDataStorage, factory, _dataContainerConverterService, new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>()));
         }
 

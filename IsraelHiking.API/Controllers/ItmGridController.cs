@@ -1,5 +1,6 @@
 ﻿using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Controllers
@@ -25,15 +26,15 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class ItmGridController : Controller
     {
-        private readonly IMathTransform _itmWgs84MathTransform;
+        private readonly IMathTransform _wgs84ItmMathTransform;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="itmWgs84MathTransform"></param>
-        public ItmGridController(IMathTransform itmWgs84MathTransform)
+        /// <param name="itmWgs84MathTransfromFactory"></param>
+        public ItmGridController(IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory)
         {
-            _itmWgs84MathTransform = itmWgs84MathTransform;
+            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
         }
 
         /// <summary>
@@ -46,7 +47,7 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public NorthEast GetItmCoordinates(double lat, double lon)
         {
-            var coordiante = _itmWgs84MathTransform.Inverse().Transform(new Coordinate { Y = lat, X = lon });
+            var coordiante = _wgs84ItmMathTransform.Transform(new Coordinate { Y = lat, X = lon });
             return new NorthEast { East = (int)coordiante.X, North = (int)coordiante.Y };
         }
     }

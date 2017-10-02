@@ -20,6 +20,7 @@ namespace IsraelHiking.API.Services.Osm
     {
         private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IMathTransform _itmWgs84MathTransform;
+        private readonly IMathTransform _wgs84ItmMathTransform;
         private readonly IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly ConfigurationData _options;
@@ -30,18 +31,19 @@ namespace IsraelHiking.API.Services.Osm
         /// Constructor
         /// </summary>
         /// <param name="elasticSearchGateway"></param>
-        /// <param name="itmWgs84MathTransform"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="options"></param>
         /// <param name="geoJsonPreprocessorExecutor"></param>
         /// <param name="httpGatewayFactory"></param>
         public OsmLineAdderService(IElasticSearchGateway elasticSearchGateway,
-            IMathTransform itmWgs84MathTransform,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOptions<ConfigurationData> options,
             IOsmGeoJsonPreprocessorExecutor geoJsonPreprocessorExecutor,
             IHttpGatewayFactory httpGatewayFactory)
         {
             _elasticSearchGateway = elasticSearchGateway;
-            _itmWgs84MathTransform = itmWgs84MathTransform;
+            _itmWgs84MathTransform = itmWgs84MathTransfromFactory.Create();
+            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
             _options = options.Value;
             _geoJsonPreprocessorExecutor = geoJsonPreprocessorExecutor;
             _httpGatewayFactory = httpGatewayFactory;
@@ -149,12 +151,12 @@ namespace IsraelHiking.API.Services.Osm
 
         private async Task<List<Feature>> GetHighwaysInArea(LineString line)
         {
-            var northEast = _itmWgs84MathTransform.Inverse().Transform(new Coordinate
+            var northEast = _wgs84ItmMathTransform.Transform(new Coordinate
             {
                 Y = line.Coordinates.Max(c => c.Y),
                 X = line.Coordinates.Max(c => c.X)
             });
-            var southWest = _itmWgs84MathTransform.Inverse().Transform(new Coordinate
+            var southWest = _wgs84ItmMathTransform.Transform(new Coordinate
             {
                 Y = line.Coordinates.Min(c => c.Y),
                 X = line.Coordinates.Min(c => c.X)
@@ -173,7 +175,7 @@ namespace IsraelHiking.API.Services.Osm
 
         private Point GetItmCoordinate(Coordinate coordinate)
         {
-            var northEast = _itmWgs84MathTransform.Inverse().Transform(coordinate);
+            var northEast = _wgs84ItmMathTransform.Transform(coordinate);
             return new Point(northEast);
         }
 
@@ -196,7 +198,7 @@ namespace IsraelHiking.API.Services.Osm
 
         private LineString ToItmLineString(Feature feature)
         {
-            var itmCoordinates = feature.Geometry.Coordinates.Select(_itmWgs84MathTransform.Inverse().Transform).ToArray();
+            var itmCoordinates = feature.Geometry.Coordinates.Select(_wgs84ItmMathTransform.Transform).ToArray();
             var lineString = new LineString(itmCoordinates);
             lineString.SetOsmId(feature.Attributes[FeatureAttributes.ID].ToString());
             return lineString;

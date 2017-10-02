@@ -6,18 +6,17 @@ using ProjNet.CoordinateSystems.Transformations;
 
 namespace IsraelHiking.API.Executors
 {
-    /// <summary>
-    /// This is a helper factory for dependency injection of IMathtransform since creating this object is not straight forward.
-    /// </summary>
-    public static class ItmWgs84MathTransfromFactory
+    /// <inheritdoc />
+    public class ItmWgs84MathTransfromFactory : IItmWgs84MathTransfromFactory
     {
+        private readonly IProjectedCoordinateSystem _itm;
+        private readonly IGeographicCoordinateSystem _wgs84;
+
         /// <summary>
-        /// Creates a coordinats transfomation from ITM to WGS84.
+        /// Factory's constructor
         /// </summary>
-        /// <returns></returns>
-        public static IMathTransform Create()
+        public ItmWgs84MathTransfromFactory()
         {
-            var coordinateTransformFactory = new CoordinateTransformationFactory();
             var coordinateSystemFactory = new CoordinateSystemFactory();
             var itmParameters = new List<ProjectionParameter>
             {
@@ -35,11 +34,24 @@ namespace IsraelHiking.API.Executors
                 PrimeMeridian.Greenwich, new AxisInfo("East", AxisOrientationEnum.East), new AxisInfo("North", AxisOrientationEnum.North));
 
             var itmProjection = coordinateSystemFactory.CreateProjection("Transverse_Mercator", "Transverse_Mercator", itmParameters);
-            var itm = coordinateSystemFactory.CreateProjectedCoordinateSystem("ITM", itmGeo, itmProjection, LinearUnit.Metre,
+            _itm = coordinateSystemFactory.CreateProjectedCoordinateSystem("ITM", itmGeo, itmProjection, LinearUnit.Metre,
                 new AxisInfo("East", AxisOrientationEnum.East), new AxisInfo("North", AxisOrientationEnum.North));
 
-            var wgs84 = ProjectedCoordinateSystem.WGS84_UTM(36, true).GeographicCoordinateSystem;
-            return coordinateTransformFactory.CreateFromCoordinateSystems(itm, wgs84).MathTransform;
+            _wgs84 = ProjectedCoordinateSystem.WGS84_UTM(36, true).GeographicCoordinateSystem;
+        }
+
+        /// <inheritdoc />
+        public IMathTransform Create()
+        {
+            var coordinateTransformFactory = new CoordinateTransformationFactory();
+            return coordinateTransformFactory.CreateFromCoordinateSystems(_itm, _wgs84).MathTransform;
+        }
+
+        /// <inheritdoc />
+        public IMathTransform CreateInverse()
+        {
+            var coordinateTransformFactory = new CoordinateTransformationFactory();
+            return coordinateTransformFactory.CreateFromCoordinateSystems(_wgs84, _itm).MathTransform;
         }
     }
 }

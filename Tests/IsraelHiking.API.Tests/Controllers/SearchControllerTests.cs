@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
-using IsraelHiking.API.Services;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -13,17 +12,13 @@ namespace IsraelHiking.API.Tests.Controllers
     public class SearchControllerTests
     {
         private IElasticSearchGateway _elasticSearchGateway;
-        IDataContainerConverterService _dataContainerConverterService;
         private SearchController _controller;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            var elevationDataStorage = Substitute.For<IElevationDataStorage>();
-
-            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _controller = new SearchController(_elasticSearchGateway, _dataContainerConverterService, elevationDataStorage, ItmWgs84MathTransfromFactory.Create());
+            _controller = new SearchController(_elasticSearchGateway, new ItmWgs84MathTransfromFactory());
         }
 
         [TestMethod]

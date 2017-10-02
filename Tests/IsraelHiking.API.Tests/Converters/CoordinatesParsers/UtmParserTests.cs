@@ -12,7 +12,7 @@ namespace IsraelHiking.API.Tests.Converters.CoordinatesParsers
         [TestInitialize]
         public void TestInitialize()
         {
-            _parser = new UtmParser(ItmWgs84MathTransfromFactory.Create());
+            _parser = new UtmParser(new ItmWgs84MathTransfromFactory().Create());
         }
 
         [TestMethod]

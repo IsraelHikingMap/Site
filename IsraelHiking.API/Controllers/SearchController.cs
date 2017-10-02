@@ -2,11 +2,9 @@
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
-using IsraelHiking.API.Services;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using Microsoft.AspNetCore.Mvc;
-using GeoAPI.CoordinateSystems.Transformations;
 using NetTopologySuite.Geometries;
 using System.Collections.Generic;
 using IsraelHiking.API.Converters.CoordinatesParsers;
@@ -20,33 +18,24 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class SearchController : Controller
     {
-        private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IElasticSearchGateway _elasticSearchGateway;
-        private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly List<ICoordinatesParser> _coordinatesParsers;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="elasticSearchGateway"></param>
-        /// <param name="dataContainerConverterService"></param>
-        /// <param name="elevationDataStorage"></param>
-        /// <param name="itmWgs84MathTransform"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
         public SearchController(IElasticSearchGateway elasticSearchGateway,
-            IDataContainerConverterService dataContainerConverterService,
-            IElevationDataStorage elevationDataStorage,
-            IMathTransform itmWgs84MathTransform)
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory)
         {
             _elasticSearchGateway = elasticSearchGateway;
-            _dataContainerConverterService = dataContainerConverterService;
-            _elevationDataStorage = elevationDataStorage;
-
             _coordinatesParsers = new List<ICoordinatesParser>
             {
                 new ReverseDegreesMinutesSecondsLatLonParser(),
                 new DegreesMinutesSecondsLatLonParser(),
                 new DecimalLatLonParser(),
-                new UtmParser(itmWgs84MathTransform)
+                new UtmParser(itmWgs84MathTransfromFactory.Create())
             };
         }
 
