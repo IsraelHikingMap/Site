@@ -16,7 +16,6 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private BootstrapFontAwesomeDirectoryFormatter _formatter;
         private IFileSystemHelper _fileSystemHelper;
-        private const string EXAMPLE_DIRECTORY = @"C:\Exmple";
 
         [TestInitialize]
         public void TestInitialize()
