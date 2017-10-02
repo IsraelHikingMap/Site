@@ -91,7 +91,7 @@
                 <div class="input-wrapper-spacer"></div>
                 <div fxLayout="row">
                     <div fxFlex="50">
-                        <mat-checkbox [(ngModel)]="offroadPublicTrack" ngDefaultControl>{{resources.suggestAsPublicTrack}}</mat-checkbox>
+                        <mat-checkbox [(ngModel)]="offroadPublicTrack">{{resources.suggestAsPublicTrack}}</mat-checkbox>
                     </div>
                     <div fxFlex="50">
                         <a mat-button (click)="sendToOffroad()" fxFill color="primary" mat-raised-button><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>

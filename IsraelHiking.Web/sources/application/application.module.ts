@@ -20,6 +20,7 @@ import {
     MdProgressBarModule,
     MdTabsModule,
     MdRadioModule,
+    MdCheckboxModule,
     MATERIAL_COMPATIBILITY_MODE
 } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
@@ -121,6 +122,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         MdProgressBarModule,
         MdTabsModule,
         MdRadioModule,
+        MdCheckboxModule,
         FormsModule,
         ReactiveFormsModule,
         FlexLayoutModule,
