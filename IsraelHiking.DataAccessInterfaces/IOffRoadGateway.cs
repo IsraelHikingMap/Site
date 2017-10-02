@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using NetTopologySuite.Features;
 
-namespace IsraelHiking.DataAccess
+namespace IsraelHiking.DataAccessInterfaces
 {
     public interface IOffRoadGateway
     {

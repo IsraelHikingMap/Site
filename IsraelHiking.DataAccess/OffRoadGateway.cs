@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
+using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
@@ -49,7 +50,6 @@ namespace IsraelHiking.DataAccess
         public string id { get; set; }
         public string activityType { get; set; }
         public string userId { get; set; }
-        //public string trackIconResourceName { get; set; }
         public string myAdventureUserId { get; set; }
     }
 
@@ -58,7 +58,7 @@ namespace IsraelHiking.DataAccess
         public string shortDescription { get; set; }
         public string trackLayerKey { get; set; }
         public string externalUrl { get; set; }
-        public string trackIconResourceName { get; set; }
+        public string iconUrl { get; set; }
         public JsonUrlAndTitle[] galleryImages { get; set; }
     }
 
@@ -178,9 +178,7 @@ namespace IsraelHiking.DataAccess
                 ? track.externalUrl
                 : string.Empty;
             attributes.Add(FeatureAttributes.WEBSITE, externalUrl);
-            var imageSourceUrl = string.IsNullOrWhiteSpace(track.trackIconResourceName)
-                ? string.Empty
-                : $"http://off-road.io/images/res/drawable-mdpi/{track.trackIconResourceName}.png";
+            var imageSourceUrl = track.iconUrl ?? string.Empty;
             attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, imageSourceUrl);
             var trackLayerKey = track.trackLayerKey;
             using (var client = new HttpClient())
