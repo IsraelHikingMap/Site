@@ -33,7 +33,7 @@ export interface IPointOfInterest {
 export interface IPointOfInterestExtended extends IPointOfInterest {
     isEditable: boolean;
     isRoute: boolean;
-    imageUrl: string;
+    imagesUrls: string[];
     description: string;
     url: string;
     sourceImageUrl: string;

@@ -78,10 +78,15 @@ namespace IsraelHiking.API.Services.Poi
                 Longitude = pointOfInterest.Location.lng,
                 Tags = new TagsCollection
                 {
-                    {FeatureAttributes.IMAGE_URL, pointOfInterest.ImageUrl},
                     {FeatureAttributes.WEBSITE, pointOfInterest.Url}
                 }
             };
+            for (var imageIndex = 0; imageIndex < pointOfInterest.ImagesUrls.Length; imageIndex++)
+            {
+                var imageUrl = pointOfInterest.ImagesUrls[imageIndex];
+                var tagName = imageIndex == 0 ? FeatureAttributes.IMAGE_URL : FeatureAttributes.IMAGE_URL + imageIndex;
+                node.Tags.Add(tagName, imageUrl);
+            }
             SetTagByLanguage(node.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             AddTagsByIcon(node.Tags, pointOfInterest.Icon);
@@ -114,10 +119,10 @@ namespace IsraelHiking.API.Services.Poi
             {
                 completeOsmGeo = await osmGateway.GetCompleteRelation(id);
             }
+            completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url;
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
-            completeOsmGeo.Tags[FeatureAttributes.IMAGE_URL] = pointOfInterest.ImageUrl;
-            completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url;
+            SyncImages(completeOsmGeo.Tags, pointOfInterest.ImagesUrls);
             var oldIcon = feature.Attributes[FeatureAttributes.ICON].ToString();
             if (pointOfInterest.Icon != oldIcon)
             {
@@ -144,12 +149,36 @@ namespace IsraelHiking.API.Services.Poi
             return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
         }
 
+        private void SyncImages(TagsCollectionBase tags, string[] images)
+        {
+            var tagsToRemove = tags.Where(t => t.Key.StartsWith(FeatureAttributes.IMAGE_URL) && images.Contains(t.Value) == false).ToArray();
+            foreach (var tag in tagsToRemove)
+            {
+                tags.RemoveKeyValue(tag);
+            }
+            var imagesToAdd = images.Where(i => tags.Any(t => t.Value == i) == false).ToList();
+            foreach (var imageUrl in imagesToAdd)
+            {
+                if (!tags.ContainsKey(FeatureAttributes.IMAGE_URL))
+                {
+                    tags[FeatureAttributes.IMAGE_URL] = imageUrl;
+                    continue;
+                }
+                int imageIndex = 1;
+                while (tags.ContainsKey(FeatureAttributes.IMAGE_URL + imageIndex))
+                {
+                    imageIndex++;
+                }
+                tags[FeatureAttributes.IMAGE_URL + imageIndex] = imageUrl;
+            }
+        }
+
         private async Task<Feature> UpdateElasticSearch(ICompleteOsmGeo osm, string name)
         {
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(
                 new Dictionary<string, List<ICompleteOsmGeo>>
                 {
-                    {name, new List<ICompleteOsmGeo> {osm}}
+                    {name ?? string.Empty, new List<ICompleteOsmGeo> {osm}}
                 });
             var feature = features.Values.FirstOrDefault()?.FirstOrDefault();
             if (feature != null)

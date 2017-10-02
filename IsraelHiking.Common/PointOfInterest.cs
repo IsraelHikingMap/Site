@@ -18,11 +18,11 @@ namespace IsraelHiking.Common
     {
         public bool IsEditable { get; set; }
         public bool IsRoute { get; set; }
-        public string ImageUrl { get; set; }   
         public string Url { get; set; }
         public string Description { get; set; }
         public string SourceImageUrl { get; set; }
-        
+        public string[] ImagesUrls { get; set; }
+
         public Rating Rating { get; set; }
         public FeatureCollection FeatureCollection { get; set; }
     }

@@ -124,7 +124,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public save() {
         this.editMode = false;
         this.poiExtended.description = this.description;
-        this.poiExtended.imageUrl = this.thumbnail;
+        this.poiExtended.imagesUrls = [this.thumbnail];
         this.poiService.uploadPoint(this.poiExtended).then(() => {
             this.toastService.info(this.resources.dataUpdatedSuccefully);
         });
@@ -200,7 +200,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.poiExtended = poiExtended;
             this.description = poiExtended.description;
             this.address = poiExtended.url;
-            this.thumbnail = poiExtended.imageUrl;
+            this.thumbnail = poiExtended.imagesUrls[0] || "";
             this.sourceImageUrl = poiExtended.sourceImageUrl;
             this.rating = this.getRatingNumber(poiExtended.rating);
             var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
@@ -251,7 +251,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.poiExtended = poiExtended;
             this.title = poiExtended.title;
             this.description = poiExtended.description;
-            this.thumbnail = poiExtended.imageUrl;
+            this.thumbnail = poiExtended.imagesUrls[0] || "";
             this.address = poiExtended.url;
             this.rating = this.getRatingNumber(poiExtended.rating);
             this.marker.setIcon(IconsService.createPoiIcon(poiExtended.icon, poiExtended.iconColor));

@@ -107,7 +107,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             icon: this.selectedCategory.selectedIcon.icon,
             iconColor: this.selectedCategory.selectedIcon.color,
             id: this.identifier,
-            imageUrl: this.imageUrl,
+            imagesUrls: [this.imageUrl],
             title: this.title,
             url: this.websiteUrl,
             source: this.source,
