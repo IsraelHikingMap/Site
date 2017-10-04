@@ -13,13 +13,6 @@ using Newtonsoft.Json;
 
 namespace IsraelHiking.DataAccess
 {
-    internal class OffroadJsonRequest
-    {
-        public bool offRoading { get; set; }
-        public bool walking { get; set; }
-        public bool cycling { get; set; }
-    }
-
     internal class JsonOffRoadResponse
     {
         public JsonOffroadItem[] items { get; set; }
@@ -81,21 +74,17 @@ namespace IsraelHiking.DataAccess
             var address = $"{OFFROAD_BASE_ADDRESS}/getTracksByFilter?fields=items(mapItemList,track(activityType,myAdventureUserId,id,start,end,title,userMail))";
             using (var client = new HttpClient())
             {
-                // this doesn't work, HM TODO: wait for Cadan's response.
-                //var requestBody = new OffroadJsonRequest
-                //{
-                //    cycling = true,
-                //    offRoading = true,
-                //    walking = true
-                //};
-                //var response = await client.PostAsync(address, new StringContent(JsonConvert.SerializeObject(requestBody)));
-
+                var ignoredUsers = new[]
+                {
+                    "6290631567605760", // Mapa
+                    "6214979527114752", // Nakeb
+                    "6221031622574080" // KKL
+                };
                 var response = await client.PostAsync(address, null);
                 var stringContent = await response.Content.ReadAsStringAsync();
                 var jsonResponse = JsonConvert.DeserializeObject<JsonOffRoadResponse>(stringContent);
                 return jsonResponse.items
-                    .Where(i => i.track.myAdventureUserId != "6290631567605760" && //Mapa
-                        i.track.myAdventureUserId != "6214979527114752") // Nakeb
+                    .Where(i => ignoredUsers.Contains(i.track.myAdventureUserId) == false)
                     .Select(ConvertToPointFeature)
                     .Where(f => f != null)
                     .ToList();
