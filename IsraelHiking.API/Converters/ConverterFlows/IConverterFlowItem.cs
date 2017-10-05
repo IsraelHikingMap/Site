@@ -61,6 +61,14 @@
         /// BZ2 compressed GPX
         /// </summary>
         public const string GPX_BZ2 = "gpx.bz2";
+        /// <summary>
+        /// Ozi explorer alias in GPSBabel
+        /// </summary>
+        public const string OZI_BABEL_FORMAT = "ozi";
+        /// <summary>
+        /// compegps alias in GPSBabel
+        /// </summary>
+        public const string COMPEGPS_BABEL_FORMAT = "compegps";
     }
 
     /// <summary>

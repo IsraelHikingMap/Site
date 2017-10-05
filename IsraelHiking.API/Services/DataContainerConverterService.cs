@@ -174,6 +174,18 @@ namespace IsraelHiking.API.Services
             {
                 return FlowFormats.GEOJSON;
             }
+            if (fileNameOrFormat.EndsWith("plt"))
+            {
+                return FlowFormats.OZI_BABEL_FORMAT;
+            }
+            if (fileNameOrFormat.EndsWith("rte"))
+            {
+                return FlowFormats.COMPEGPS_BABEL_FORMAT;
+            }
+            if (fileNameOrFormat.EndsWith("trk"))
+            {
+                return FlowFormats.COMPEGPS_BABEL_FORMAT;
+            }
             if (fileNameOrFormat == FlowFormats.GPX_SINGLE_TRACK)
             {
                 return fileNameOrFormat;
