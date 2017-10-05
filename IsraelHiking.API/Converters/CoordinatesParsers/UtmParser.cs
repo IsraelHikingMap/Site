@@ -44,7 +44,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
             }
             if (easting >= 100000 && easting <= 300000)
             {
-                return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
+                return _itmWgs84MathTransform.Transform(new Coordinate(easting, northing));
             }
             return null;
         }
