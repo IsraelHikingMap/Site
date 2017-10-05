@@ -23,7 +23,7 @@ The technology stack of this site is base on the following frameworks:
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:
-* application - where all the is, top most folder.
+* application - where all the is, topmost folder.
   * common - used to store data types that are common to the entire app.
   * content - used for images, mainly favicon.
   * components - this layer handles the UI calls and bindings along with the relevant css and html files.
@@ -37,10 +37,10 @@ The architecture is based heavily on Angular:
  
 # Architecture of Server
 The architecture is based on layers
-* Contollers - the top most layer to catch all the requests
-* Services - responible for orchastrating executors
+* Contollers - the topmost layer to catch all the requests
+* Services - responsible for orchastrating executors
 * Converters - converters logic between types of geo structures
-* Executers - basic logical building blocks 
+* Executers - basic logical building blocks
 * DataAccessInterfaces - a slim layer to decouple business logic from data access
 * DataAccess - database, file system and network request are processed in this layer
 
