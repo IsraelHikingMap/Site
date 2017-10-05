@@ -30,16 +30,14 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        [Ignore]
         public void UploadFileTest()
         {
             var formFile = Substitute.For<IFormFile>();
-            formFile.OpenReadStream().Returns(new FileStream(@"C:\Users\harel\Desktop\Font\flowers.svg", FileMode.Open,
-                FileAccess.Read));
-            formFile.Name.Returns("flowers.svg");
+            formFile.OpenReadStream().Returns(new MemoryStream());
+            formFile.FileName.Returns("file.jpg");
             _controller.UploadImage(formFile, "title", "1,2").Wait();
 
-            _wikipediaGateway.Received(1).UploadImage(Arg.Any<string>(), Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikipediaGateway.Received(1).UploadImage("title", "file.jpg", Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikipediaGateway.Received(1).GetImageUrl(Arg.Any<string>());
         }
     }

@@ -43,12 +43,11 @@ namespace IsraelHiking.DataAccess
             await _site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
         }
 
-        public async Task<string> UploadImage(string imageName, Stream contentStream, Coordinate location)
+        public async Task<string> UploadImage(string title, string fileName, Stream contentStream, Coordinate location)
         {
-            _logger.LogInformation($"Upload an image to wikimedia common: {imageName}, Location: {location.Y}, {location.X}");
-            var invalidCharacterReularExpression = new Regex(@"[\\#<>\[\]|:{}/~\s+]");
-            var wikiFileName = "File:Israel_Hiking_Map_" + invalidCharacterReularExpression.Replace(imageName, "_");
-            var comment = CreateWikipediaComment(location, imageName);
+            _logger.LogInformation($"Upload an image to wikimedia common. title: {title}, fileName: {fileName}, Location: {location.Y}, {location.X}");
+            var wikiFileName = GetNonExistingFilePageName(title, fileName);
+            var comment = CreateWikipediaComment(location, string.IsNullOrWhiteSpace(title) ? title : fileName);
             await _site.GetTokenAsync("edit", true);
             var results = await FilePage.UploadAsync(_site, contentStream, wikiFileName, comment, true);
             if (results.ResultCode != UploadResultCode.Success)
@@ -57,18 +56,20 @@ namespace IsraelHiking.DataAccess
             }
             if (results.Warnings.Any(kvp => kvp.Key == "badfilename"))
             {
-                wikiFileName = "File:" + results.Warnings.First(kvp => kvp.Key == "badfilename").Value;
+                var correctWikiFileName = results.Warnings.First(kvp => kvp.Key == "badfilename").Value;
+                _logger.LogWarning($"Received bad file name from wikipedia. old: {wikiFileName}, correct: File:{correctWikiFileName}");
+                wikiFileName = "File:" + correctWikiFileName;
             }
-            _logger.LogInformation($"Finished uploading image {imageName}");
+            _logger.LogInformation($"Finished uploading image succesfully. title: {title}, fileName: {fileName}, wikipage: {wikiFileName}");
             return wikiFileName;
         }
 
-        private string CreateWikipediaComment(Coordinate location, string imageName)
+        private string CreateWikipediaComment(Coordinate location, string description)
         {
             return "=={{int:filedesc}}==" + Environment.NewLine +
                    "{{Information" + Environment.NewLine +
                    $"|date={DateTime.Now:yyyy-MM-dd}" + Environment.NewLine +
-                   $"|description={imageName}" + Environment.NewLine +
+                   $"|description={description}" + Environment.NewLine +
                    "|source={{own}}" + Environment.NewLine +
                    "|author=[[User:IsraelHikingMap|IsraelHikingMap]]" + Environment.NewLine +
                    "|permission=" + Environment.NewLine +
@@ -88,9 +89,55 @@ namespace IsraelHiking.DataAccess
                 var response = await client.GetAsync(address);
                 var contentString = await response.Content.ReadAsStringAsync();
                 var jObject = JObject.Parse(contentString);
-                return jObject.Descendants().FirstOrDefault(d => d.SelectToken("url") != null)?.Value<string>("url");
+                return jObject.SelectToken("$..url")?.Value<string>();
             }
         }
 
+        private string GetNonExistingFilePageName(string title, string fileName)
+        {
+            var name = string.IsNullOrWhiteSpace(title) ? fileName : title;
+            if (Path.HasExtension(name) == false)
+            {
+                name += Path.GetExtension(fileName);
+            }
+            name = name.Replace(".jpg", ".jpeg");
+            var invalidCharacterReularExpression = new Regex(@"[\\#<>\[\]|:{}/~\s+]");
+            var wikiFileName = "Israel_Hiking_Map_" + invalidCharacterReularExpression.Replace(name, "_");
+
+            var countingFileName = Path.GetFileNameWithoutExtension(wikiFileName);
+            var extension = Path.GetExtension(wikiFileName);
+            ParallelLoopResult results;
+            var loopIndex = 0;
+            var loopRange = 5;
+            do
+            {
+                results = Parallel.For(loopIndex, loopIndex + loopRange, (index, options) =>
+                {
+                    using (var client = new HttpClient())
+                    {
+                        var pageNameToTest = GetWikiPageFileNameFromIndex(index, countingFileName, extension);
+                        var address =
+                            $"{BASE_API_ADDRESS}?action=query&titles={pageNameToTest}&prop=imageinfo&iiprop=url&iimetadataversion=latest&format=json";
+                        var response = client.GetAsync(address).Result;
+                        var contentString = response.Content.ReadAsStringAsync().Result;
+                        var jObject = JObject.Parse(contentString);
+                        if (jObject.SelectToken("$..pages")["-1"] != null)
+                        {
+                            options.Break();
+                        }
+                    }
+                });
+                loopIndex += loopRange;
+            } while (results.LowestBreakIteration.HasValue == false);
+            return GetWikiPageFileNameFromIndex(results.LowestBreakIteration.Value, countingFileName, extension);
+        }
+
+        private string GetWikiPageFileNameFromIndex(long index, string countingFileName, string extension)
+        {
+            var fullFileName = index == 0
+                ? countingFileName + extension
+                : countingFileName + "_" + index + extension;
+            return $"File:{fullFileName}";
+        }
     }
 }

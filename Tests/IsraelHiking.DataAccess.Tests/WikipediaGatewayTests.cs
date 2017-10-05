@@ -21,6 +21,5 @@ namespace IsraelHiking.DataAccess.Tests
 
             Assert.IsNotNull(results);
         }
-
     }
 }

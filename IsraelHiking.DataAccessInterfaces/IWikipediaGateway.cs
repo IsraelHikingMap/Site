@@ -7,7 +7,7 @@ namespace IsraelHiking.DataAccessInterfaces
     public interface IWikipediaGateway
     {
         Task Initialize();
-        Task<string> UploadImage(string imageName, Stream contentStream, Coordinate location);
+        Task<string> UploadImage(string title, string fileName, Stream contentStream, Coordinate location);
         Task<string> GetImageUrl(string pageName);
     }
 }

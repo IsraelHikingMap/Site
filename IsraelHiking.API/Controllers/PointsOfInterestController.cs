@@ -145,9 +145,8 @@ namespace IsraelHiking.API.Controllers
         public async Task<IActionResult> UploadImage([FromForm] IFormFile file, [FromQuery] string title,
             [FromQuery] string location)
         {
-            var name = string.IsNullOrWhiteSpace(title) ? file.FileName : title;
             var imageName =
-                await _wikipediaGateway.UploadImage(name, file.OpenReadStream(), new Coordinate().FromLatLng(location));
+                await _wikipediaGateway.UploadImage(title, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(location));
             var url = await _wikipediaGateway.GetImageUrl(imageName);
             return Ok(url);
         }
