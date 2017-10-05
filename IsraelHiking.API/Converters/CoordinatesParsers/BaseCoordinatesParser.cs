@@ -16,7 +16,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
         /// <summary>
         /// The regular expression to match, overide when deriving
         /// </summary>
-        public virtual Regex Matcher { get; }
+        public abstract Regex Matcher { get; }
 
         /// <inheritdoc/>
         public virtual Coordinate TryParse(string term)

@@ -208,6 +208,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.routeData = container.routes[0];
             this.selectRoute(this.routeData);
             this.isLoading = false;
+        }, () => {
+            this.isLoading = false;
         });
     }
 

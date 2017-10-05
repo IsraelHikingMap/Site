@@ -11,7 +11,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
         /// <summary>
         /// Degrees regex string
         /// </summary>
-        public const string DEGREES_REGEX_STRING = @"([\d\.°'""\u2032\u2033\s]+)";
+        public const string DEGREES_REGEX_STRING = @"([\d\.°':""\u2032\u2033\s]+)";
         /// <summary>
         /// Degrees regex string with north-south postfix
         /// </summary>
@@ -26,13 +26,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
         private readonly Regex _degreesMinutesRegex;
 
         /// <inheritdoc/>
-        public override Regex Matcher
-        {
-            get
-            {
-                return new Regex("^" + NORTH_SOUTH_REGEX_STRING + DELIMITER_REGEX_STRING + EAST_WEST_REGEX_STRING + "$");
-            }
-        }
+        public override Regex Matcher => new Regex("^" + NORTH_SOUTH_REGEX_STRING + DELIMITER_REGEX_STRING + EAST_WEST_REGEX_STRING + "$");
 
         /// <summary>
         /// Constructor
@@ -40,8 +34,8 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
         public DegreesMinutesSecondsLatLonParser()
         {
             _decimalDegreesRegex = new Regex("^" + DecimalLatLonParser.DECIMAL_DEGREES_REGEX_STRING + "$");
-            _degreesMinutesSecondsRegex = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2})(?:['\u2032\s]\s*)(\d{1,2}(?:\.\d+)?)[""\u2033]?\s*$");
-            _degreesMinutesRegex = new Regex(@"^\s*(\d{1,3})(?:[°\s]\s*)(\d{1,2}(?:\.\d+)?)['\u2032']?\s*$");
+            _degreesMinutesSecondsRegex = new Regex(@"^\s*(\d{1,3})(?:[:°\s]\s*)(\d{1,2})(?:[:'\u2032\s]\s*)(\d{1,2}(?:\.\d+)?)[:""\u2033]?\s*$");
+            _degreesMinutesRegex = new Regex(@"^\s*(\d{1,3})(?:[:°\s]\s*)(\d{1,2}(?:\.\d+)?)[:'\u2032']?\s*$");
         }
 
         /// <inheritdoc/>

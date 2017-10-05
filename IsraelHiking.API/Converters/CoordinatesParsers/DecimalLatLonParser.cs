@@ -14,13 +14,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
         public const string DECIMAL_DEGREES_REGEX_STRING = @"([-+]?\d{1,3}(?:\.\d+)?)°?";
 
         /// <inheritdoc/>
-        public override Regex Matcher
-        {
-            get
-            {
-                return new Regex("^" + DECIMAL_DEGREES_REGEX_STRING + DELIMITER_REGEX_STRING + DECIMAL_DEGREES_REGEX_STRING + "$");
-            }
-        }
+        public override Regex Matcher => new Regex("^" + DECIMAL_DEGREES_REGEX_STRING + DELIMITER_REGEX_STRING + DECIMAL_DEGREES_REGEX_STRING + "$");
 
         /// <inheritdoc/>
         protected override Coordinate GetCoordinates(Match latLonMatch)

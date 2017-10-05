@@ -12,13 +12,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
         private readonly IMathTransform _itmWgs84MathTransform;
 
         /// <inheritdoc/>
-        public override Regex Matcher
-        {
-            get
-            {
-                return new Regex(@"^(\d{6})" + DELIMITER_REGEX_STRING + @"(\d{6,7})$");
-            }
-        }
+        public override Regex Matcher => new Regex(@"^(\d{6})" + DELIMITER_REGEX_STRING + @"(\d{6,7})$");
 
         /// <summary>
         /// Constructor
@@ -34,22 +28,23 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
         {
             var easting = int.Parse(itmMatch.Groups[1].Value);
             var northing = int.Parse(itmMatch.Groups[2].Value);
-            if (northing < 1350000)
+            if (northing >= 1350000)
             {
-                if (northing < 350000)
-                {
-                    easting = easting + 50000;
-                    northing = northing + 500000;
-                }
-                else if (northing > 850000)
-                {
-                    easting = easting + 50000;
-                    northing = northing - 500000;
-                }
-                if (easting >= 100000 && easting <= 300000)
-                {
-                    return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
-                }
+                return null;
+            }
+            if (northing < 350000)
+            {
+                easting = easting + 50000;
+                northing = northing + 500000;
+            }
+            else if (northing > 850000)
+            {
+                easting = easting + 50000;
+                northing = northing - 500000;
+            }
+            if (easting >= 100000 && easting <= 300000)
+            {
+                return _itmWgs84MathTransform.Transform(new Coordinate(double.Parse(itmMatch.Groups[1].Value), double.Parse(itmMatch.Groups[2].Value)));
             }
             return null;
         }

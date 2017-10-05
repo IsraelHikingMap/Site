@@ -23,7 +23,8 @@ export class SearchResultsProvider {
     public getResults = (searchTerm: string, isHebrew: boolean): Promise<ISearchResults[]> => {
         return new Promise((resolve, reject) => {
             var params = isHebrew ? {} : { language: "en" };
-            this.http.get(Urls.search + encodeURIComponent(searchTerm.replace("/", " ")), {
+            let searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
+            this.http.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
                 params: params
             }).toPromise().then((response) => {
                 let data = response.json() as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;

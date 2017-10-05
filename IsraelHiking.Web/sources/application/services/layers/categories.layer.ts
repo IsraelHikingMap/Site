@@ -171,7 +171,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             if (foundMarker) {
                 return;
             }
-            // HM TODO: different marker in case this is not a proper POI?
+            pointOfInterest.icon = pointOfInterest.icon || "icon-search";
             this.searchResultsMarker = this.pointOfInterestToMarker(pointOfInterest, factory);
             this.mapService.map.addLayer(this.searchResultsMarker);
             this.searchResultsMarker.fireEvent("click");

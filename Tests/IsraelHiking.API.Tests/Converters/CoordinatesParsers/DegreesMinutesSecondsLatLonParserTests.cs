@@ -49,5 +49,21 @@ namespace IsraelHiking.API.Tests.Converters.CoordinatesParsers
 
             Assert.IsNull(results);
         }
+
+        [TestMethod]
+        public void TryParse_DegreesMinutesSecondsColon_ShouldPass()
+        {
+            var results = _parser.TryParse("33:05:23N 35:19:10E");
+
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void TryParse_DegreesMinutesColon_ShouldPass()
+        {
+            var results = _parser.TryParse("33:05S 35:19W");
+
+            Assert.IsNotNull(results);
+        }
     }
 }
