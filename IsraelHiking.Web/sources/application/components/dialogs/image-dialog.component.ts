@@ -12,7 +12,7 @@ export class ImageDialogCompnent extends BaseMapComponent implements AfterViewIn
 
     public title: string;
     public imagesUrls: string[];
-    private selectedTabIndex: number;
+    public selectedTabIndex: number;
 
     @ViewChildren("imageContainer")
     public imagesElementRef: QueryList<ElementRef>;
