@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
@@ -14,6 +16,7 @@ using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using NSubstitute;
 using OsmSharp;
+using OsmSharp.Complete;
 using OsmSharp.Tags;
 
 namespace IsraelHiking.API.Tests.Services.Poi
@@ -77,6 +80,47 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var results = _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Result;
 
             CollectionAssert.AreEqual(pointOfInterest.ImagesUrls.OrderBy(i => i).ToArray(), results.ImagesUrls.OrderBy(i => i).ToArray());
+        }
+
+        [TestMethod]
+        public void GetPointsForIndexing_ShouldRemoveKklRoutes()
+        {
+            var memoryStream = new MemoryStream();
+            var osmNamesDictionary = new Dictionary<string, List<ICompleteOsmGeo>>
+            {
+                {
+                    "name",
+                    new List<ICompleteOsmGeo>
+                    {
+                        new Node
+                        {
+                            Id = 10,
+                            Tags = new TagsCollection
+                            {
+                                {"natural", "spring"},
+                            }
+                        },
+                        new CompleteRelation
+                        {
+                            Tags = new TagsCollection
+                            {
+                                {"operator", "kkl"},
+                                {"route", "mtb"}
+                            },
+                            Members = new[]
+                            {
+                                new CompleteRelationMember {Member = new CompleteWay(), Role = "outer"}
+                            }
+                        }
+                    }
+                },
+            };
+            _osmRepository.GetElementsWithName(memoryStream).Returns(osmNamesDictionary);
+            _osmRepository.GetPointsWithNoNameByTags(memoryStream, Arg.Any<List<KeyValuePair<string, string>>>()).Returns(new List<Node>());
+
+            var results = _adapter.GetPointsForIndexing(memoryStream).Result;
+
+            Assert.AreEqual(1, results.Count);
         }
     }
 }

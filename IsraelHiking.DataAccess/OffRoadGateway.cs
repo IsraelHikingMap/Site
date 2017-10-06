@@ -78,7 +78,7 @@ namespace IsraelHiking.DataAccess
                 {
                     "6290631567605760", // Mapa
                     "6214979527114752", // Nakeb
-                    "6221031622574080" // KKL
+                    //"6221031622574080" // KKL - keeping it here and ignoring OSM data.
                 };
                 var response = await client.PostAsync(address, null);
                 var stringContent = await response.Content.ReadAsStringAsync();

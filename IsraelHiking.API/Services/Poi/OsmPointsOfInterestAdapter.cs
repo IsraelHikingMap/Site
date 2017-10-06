@@ -145,8 +145,33 @@ namespace IsraelHiking.API.Services.Poi
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(memoryStream, relevantTagsDictionary);
             osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
+            RemoveKklRoutes(osmNamesDictionary);
             var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
             return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
+        }
+
+        private static void RemoveKklRoutes(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary)
+        {
+            var listOfKeysToRemove = new List<string>();
+            foreach (var key in osmNamesDictionary.Keys)
+            {
+                var list = osmNamesDictionary[key];
+                var itemsToRemove = list.Where(osm => osm.Type == OsmGeoType.Relation &&
+                                                      osm.Tags.Contains("operator", "kkl") &&
+                                                      osm.Tags.Contains("route", "mtb")).ToArray();
+                foreach (var itemToRemove in itemsToRemove)
+                {
+                    list.Remove(itemToRemove);
+                }
+                if (!list.Any())
+                {
+                    listOfKeysToRemove.Add(key);
+                }
+            }
+            foreach (var key in listOfKeysToRemove)
+            {
+                osmNamesDictionary.Remove(key);
+            }
         }
 
         private void SyncImages(TagsCollectionBase tags, string[] images)
