@@ -26,10 +26,6 @@ body {
     margin-bottom: 1rem;
 }
 
-.marker-popup {
-    min-width: 250px;
-}
-
 .leaflet-left {
     z-index: 1020 !important;
 }
@@ -135,9 +131,16 @@ body {
     }
 }
 
+.marker-popup {
+    width: 300px;
+}
+
 @media (max-width:767px) {
     .hidden-xs {
         display: none !important
+    }
+    .marker-popup {
+        width: 260px;
     }
 }
 

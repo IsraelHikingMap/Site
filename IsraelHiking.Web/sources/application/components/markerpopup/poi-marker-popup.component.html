@@ -1,8 +1,8 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
-    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="thumbnail || !sourceImageUrl">
+    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="imagesUrls.length > 0 || !sourceImageUrl">
         <img [src]="sourceImageUrl" alt="" height="100"/>
     </div>
-    <div fxLayout="row" [hidden]="thumbnail || sourceImageUrl">
+    <div fxLayout="row" [hidden]="imagesUrls.length > 0 || sourceImageUrl">
         <div fxFlex [ngClass]="resources.getTextAlignment()">
             <label [hidden]="!isEditMode()">
                 <a mat-button [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsEvent="Upload image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
@@ -14,8 +14,8 @@
             <h2 [ngClass]="resources.getTextAlignment()" (click)="setEditMode()">{{resources.clickToEdit}}</h2>
         </div>
     </div>
-    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="!thumbnail">
-        <img [src]="thumbnail" class="img-responsive curson-zoom-in" height="100" (click)="showImage()"/>
+    <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="imagesUrls.length === 0">
+        <img [src]="imagesUrls[0]" class="img-responsive curson-zoom-in" height="100" (click)="showImage()"/>
         <div [hidden]="!sourceImageUrl">
             <img [src]="sourceImageUrl" alt="" height="64"/>
         </div>

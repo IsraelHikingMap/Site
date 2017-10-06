@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+﻿import { Component, ViewEncapsulation } from "@angular/core";
 import { Http } from "@angular/http";
 import { MdDialogRef, MdSelectChange } from "@angular/material";
 import * as _ from "lodash";
@@ -17,14 +17,16 @@ export interface ICategoryWithIcons extends ICategory {
 
 @Component({
     selector: "update-point-dialog",
-    templateUrl: "./update-point-dialog.component.html"
+    templateUrl: "./update-point-dialog.component.html",
+    styleUrls: ["./update-point-dialog.component.css"],
+    encapsulation: ViewEncapsulation.None
 })
 export class UpdatePointDialogComponent extends BaseMapComponent {
     public categories: ICategoryWithIcons[];
     public source: string;
     public title: string;
     public description: string;
-    public imageUrl: string;
+    public imagesUrls: string[];
     public websiteUrl: string;
     public identifier: string;
     public elementType: string;
@@ -32,6 +34,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public selectedCategory: ICategoryWithIcons;
     public icons: IIconColorLabel[];
     public initializationPromise: Promise<any>;
+    private currentImageIndex: number;
 
     constructor(resources: ResourcesService,
         public dialogRef: MdDialogRef<UpdatePointDialogComponent>,
@@ -42,6 +45,8 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         private osmUserService: OsmUserService) {
         super(resources);
         this.categories = [];
+        this.currentImageIndex = 0;
+        this.imagesUrls = [];
         this.initializationPromise = new Promise((resolve, reject) => {
             this.poiService.getCategories("Points of Interest").then((response) => {
                 for (let categoryType in response) {
@@ -95,7 +100,8 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             return;
         }
         this.fileService.uploadImage(file, this.title, this.location).then((imageUrl: string) => {
-            this.imageUrl = imageUrl;
+            this.imagesUrls.push(imageUrl);
+            this.currentImageIndex = this.imagesUrls.length - 1;
         }, () => {
             this.toastService.error(this.resources.unableToUploadFile);
         });
@@ -107,7 +113,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             icon: this.selectedCategory.selectedIcon.icon,
             iconColor: this.selectedCategory.selectedIcon.color,
             id: this.identifier,
-            imagesUrls: [this.imageUrl],
+            imagesUrls: this.imagesUrls,
             title: this.title,
             url: this.websiteUrl,
             source: this.source,
@@ -123,5 +129,36 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
 
     public getEditElementOsmAddress(): string {
         return this.osmUserService.getEditElementOsmAddress("", this.elementType, this.identifier);
+    }
+
+    public getCurrentImage() {
+        if (this.imagesUrls.length === 0) {
+            return null;
+        }
+        return this.imagesUrls[this.currentImageIndex];
+    }
+
+    public nextImage() {
+        this.currentImageIndex++;
+        if (this.currentImageIndex >= this.imagesUrls.length) {
+            this.currentImageIndex = this.imagesUrls.length - 1;
+        }
+    }
+
+    public previousImage() {
+        this.currentImageIndex--;
+        if (this.currentImageIndex < 0) {
+            this.currentImageIndex = 0;
+        }
+    }
+
+    public disableChangeImage(type: string) {
+        switch (type) {
+            case "previous":
+                return this.currentImageIndex <= 0;
+            case "next":
+                return this.currentImageIndex >= this.imagesUrls.length - 1;
+        }
+        return false;
     }
 }

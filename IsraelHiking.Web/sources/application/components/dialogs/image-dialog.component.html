@@ -6,6 +6,22 @@
         </div>
     </div>
     <div mat-dialog-content>
-        <img class="img-responsive main-image" [src]="imageUrl"/>
+        <div fxLayout="row" [hidden]="imagesUrls.length > 1">
+            <div class="img-container" >
+                <img class="img-responsive img-center" [src]="imagesUrls[0]"/>
+            </div>
+        </div>
+        <mat-tab-group [hidden]="imagesUrls.length <= 1" [(selectedIndex)]="selectedTabIndex">
+            <mat-tab *ngFor="let imageUrl of imagesUrls">
+                <ng-template mat-tab-label>
+                    <img [src]="imageUrl" height="32"/>
+                </ng-template>
+                <div fxLayout="row" #imageContainer>
+                    <div class="img-container">
+                        <img class="img-responsive img-center" [src]="imageUrl"/>
+                    </div>
+                </div>
+            </mat-tab>
+        </mat-tab-group>
     </div>
 </div>

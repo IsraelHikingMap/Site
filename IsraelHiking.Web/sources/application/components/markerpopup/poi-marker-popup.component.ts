@@ -29,7 +29,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private static readonly THREE_HOURES = 3 * 60 * 60 * 1000;
 
     public description: string;
-    public thumbnail: string;
+    public imagesUrls: string[];
     public address: string;
     public source: string;
     public rating: number;
@@ -55,6 +55,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.editMode = false;
         this.isLoading = false;
         this.extendedDataArrivedTimeStamp = null;
+        this.imagesUrls = [];
     }
 
     protected setMarkerInternal = (marker: Common.IMarkerWithTitle) => {
@@ -124,7 +125,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public save() {
         this.editMode = false;
         this.poiExtended.description = this.description;
-        this.poiExtended.imagesUrls = [this.thumbnail];
+        this.poiExtended.imagesUrls = this.imagesUrls;
         this.poiService.uploadPoint(this.poiExtended).then(() => {
             this.toastService.info(this.resources.dataUpdatedSuccefully);
         });
@@ -200,7 +201,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.poiExtended = poiExtended;
             this.description = poiExtended.description;
             this.address = poiExtended.url;
-            this.thumbnail = poiExtended.imagesUrls[0] || "";
+            this.imagesUrls = poiExtended.imagesUrls;
             this.sourceImageUrl = poiExtended.sourceImageUrl;
             this.rating = this.getRatingNumber(poiExtended.rating);
             var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
@@ -219,7 +220,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             return;
         }
         this.fileService.uploadImage(file, this.title, this.marker.getLatLng()).then((imageUrl: string) => {
-            this.thumbnail = imageUrl;
+            this.imagesUrls.push(imageUrl);
         }, () => {
             this.toastService.error(this.resources.unableToUploadFile);
         });
@@ -230,7 +231,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         let compoent = this.mdDialog.open(UpdatePointDialogComponent);
         compoent.componentInstance.title = this.title;
         compoent.componentInstance.description = this.description;
-        compoent.componentInstance.imageUrl = this.thumbnail;
+        compoent.componentInstance.imagesUrls = this.imagesUrls;
         compoent.componentInstance.websiteUrl = this.address;
         compoent.componentInstance.location = this.marker.getLatLng();
         compoent.componentInstance.source = this.poiExtended.source;
@@ -253,7 +254,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.poiExtended = poiExtended;
             this.title = poiExtended.title;
             this.description = poiExtended.description;
-            this.thumbnail = poiExtended.imagesUrls[0] || "";
+            this.imagesUrls = poiExtended.imagesUrls;
             this.address = poiExtended.url;
             this.rating = this.getRatingNumber(poiExtended.rating);
             this.marker.setIcon(IconsService.createPoiIcon(poiExtended.icon, poiExtended.iconColor));
@@ -268,7 +269,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public showImage() {
         let dialog = this.mdDialog.open(ImageDialogCompnent);
         dialog.componentInstance.title = this.title;
-        dialog.componentInstance.imageUrl = this.thumbnail;
+        dialog.componentInstance.imagesUrls = this.imagesUrls;
     }
 
     public getOffRoadUrl() {

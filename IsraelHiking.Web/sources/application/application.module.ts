@@ -8,6 +8,7 @@ import { HttpModule, JsonpModule } from "@angular/http";
 import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
+    GestureConfig,
     MdDialogModule,
     MdButtonModule,
     MdInputModule,
@@ -171,6 +172,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         TermsOfServiceDialogComponent
     ],
     providers: [
+        GestureConfig,
         { provide: MATERIAL_COMPATIBILITY_MODE, useValue: true },
         SessionStorageService,
         LocalStorageService,

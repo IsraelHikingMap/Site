@@ -1,9 +1,12 @@
-﻿.main-image {
-    height: 480px;
+﻿.img-container {
+    position: relative;
+    width: 540px;
+    height: 400px;
 }
 
 @media only screen and (max-height: 640px) {
-    .main-image {
+    .img-container {
+        width: 400px;
         height: 300px;
     }
 }
