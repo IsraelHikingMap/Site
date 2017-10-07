@@ -1,13 +1,13 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp1.1</TargetFramework>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
     <DebugType>full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5-pre4" />
-    <PackageReference Include="NetTopologySuite" Version="1.15.0-pre017" />
+    <PackageReference Include="NetTopologySuite" Version="1.15.0-pre019" />
     <PackageReference Include="OsmSharp" Version="6.0.0-pre04" />
   </ItemGroup>
 

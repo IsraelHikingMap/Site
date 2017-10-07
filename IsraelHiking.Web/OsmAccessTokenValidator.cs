@@ -54,10 +54,10 @@ namespace IsraelHiking.Web
             {
                 throw new ArgumentException("Invalid user id", nameof(securityToken));
             }
-            ClaimsIdentity identity = new ClaimsIdentity("Osm");
+            var identity = new ClaimsIdentity("Osm");
             identity.AddClaim(new Claim(ClaimTypes.NameIdentifier, userId));
             identity.AddClaim(new Claim(ClaimTypes.Name, userId));
-
+            
             return new ClaimsPrincipal(identity);
         }
     }

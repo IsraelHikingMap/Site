@@ -57,7 +57,7 @@ namespace IsraelHiking.API.Services
             _circleFillBrush = Brushes.White.Clone() as Brush;
             _startRoutePen = new Pen(Color.Green, 7);
             _endRoutePen = new Pen(Color.Red, 7);
-            _routeColors = options.Value.Colors.Select(v => ColorTranslator.FromHtml(v)).ToArray();
+            _routeColors = options.Value.Colors.Select(Color.FromName).ToArray();
         }
 
         ///<inheritdoc />
@@ -179,7 +179,7 @@ namespace IsraelHiking.API.Services
                     routeColorIndex = routeColorIndex % _routeColors.Length;
                     if (!string.IsNullOrEmpty(route.color))
                     {
-                        lineColor = ColorTranslator.FromHtml(route.color);
+                        lineColor = Color.FromName(route.color);
                     }
                     graphics.DrawLines(_outLinerPen, points);
                     var linePen = new Pen(lineColor, PEN_WIDTH) { LineJoin = LineJoin.Bevel };

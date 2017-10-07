@@ -9,7 +9,6 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Http.Extensions;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Microsoft.AspNetCore.Rewrite;
 using Microsoft.Extensions.Configuration;
@@ -26,96 +25,21 @@ using NLog.Web;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace IsraelHiking.Web
 {
-    // HM TODO: workaround until issue is resolved:
-    // https://github.com/aspnet/BasicMiddleware/issues/194
-
-    public class RewriteWithQueryRule : IRule
-    {
-        private readonly TimeSpan _regexTimeout = TimeSpan.FromSeconds(1);
-        public Regex InitialMatch { get; }
-        public string Replacement { get; }
-        public bool StopProcessing { get; }
-        public RewriteWithQueryRule(string regex, string replacement, bool stopProcessing)
-        {
-            if (string.IsNullOrEmpty(regex))
-            {
-                throw new ArgumentException(nameof(regex));
-            }
-
-            if (string.IsNullOrEmpty(replacement))
-            {
-                throw new ArgumentException(nameof(replacement));
-            }
-
-            InitialMatch = new Regex(regex, RegexOptions.Compiled | RegexOptions.CultureInvariant, _regexTimeout);
-            Replacement = replacement;
-            StopProcessing = stopProcessing;
-        }
-
-        public virtual void ApplyRule(RewriteContext context)
-        {
-            var pathWithQuery = context.HttpContext.Request.Path + context.HttpContext.Request.QueryString;
-            var initMatchResults = InitialMatch.Match(pathWithQuery == PathString.Empty 
-                ? pathWithQuery 
-                : pathWithQuery.Substring(1));
-            if (!initMatchResults.Success)
-            {
-                return;
-            }
-            var result = initMatchResults.Result(Replacement);
-            var request = context.HttpContext.Request;
-
-            if (StopProcessing)
-            {
-                context.Result = RuleResult.SkipRemainingRules;
-            }
-
-            if (string.IsNullOrEmpty(result))
-            {
-                result = "/";
-            }
-
-            if (result.IndexOf("://", StringComparison.Ordinal) >= 0)
-            {
-                UriHelper.FromAbsolute(result, out var scheme, out var host, out var pathString, out var query, out FragmentString _);
-
-                request.Scheme = scheme;
-                request.Host = host;
-                request.Path = pathString;
-                request.QueryString = query.Add(request.QueryString);
-            }
-            else
-            {
-                var split = result.IndexOf('?');
-                if (split >= 0)
-                {
-                    var newPath = result.Substring(0, split);
-                    request.Path = newPath[0] == '/' 
-                        ? PathString.FromUriComponent(newPath) 
-                        : PathString.FromUriComponent('/' + newPath);
-                    request.QueryString = request.QueryString.Add(QueryString.FromUriComponent(result.Substring(split)));
-                }
-                else
-                {
-                    request.Path = result[0] == '/' 
-                        ? PathString.FromUriComponent(result) 
-                        : PathString.FromUriComponent('/' + result);
-                }
-            }
-        }
-    }
-
     public class Startup
     {
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddIHMDataAccess();
+            services.AddIHMApi();
+            services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
+            services.AddSingleton<IGeometryFactory, GeometryFactory>(serviceProvider => new GeometryFactory(new PrecisionModel(100000000)));
             services.AddMvc(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
@@ -130,6 +54,11 @@ namespace IsraelHiking.Web
                 options.SerializerSettings.Converters.Add(new ICRSObjectConverter());
                 options.SerializerSettings.Converters.Add(new GeometryArrayConverter());
                 options.SerializerSettings.Converters.Add(new EnvelopeConverter());
+            });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.SecurityTokenValidators.Clear();
+                options.SecurityTokenValidators.Add(services.BuildServiceProvider().GetRequiredService<ISecurityTokenValidator>());
             });
             services.AddCors();
             services.AddOptions();
@@ -155,11 +84,6 @@ namespace IsraelHiking.Web
                 return new PhysicalFileProvider(binariesFolder);
             });
 
-            services.AddIHMDataAccess();
-            services.AddIHMApi();
-
-            services.AddSingleton<IGeometryFactory, GeometryFactory>((serviceProvider) => new GeometryFactory(new PrecisionModel(100000000)));
-            services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new Info { Title = "Israel Hiking API", Version = "v1" });
@@ -195,14 +119,10 @@ namespace IsraelHiking.Web
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials();
             });
-
-            var jwtBearerOptions = new JwtBearerOptions();
-            jwtBearerOptions.SecurityTokenValidators.Clear();
-            jwtBearerOptions.SecurityTokenValidators.Add(app.ApplicationServices.GetRequiredService<ISecurityTokenValidator>());
-            app.UseJwtBearerAuthentication(jwtBearerOptions);
-
+            app.UseAuthentication();
             app.UseMvc();
             SetupStaticFiles(app);
+
             app.UseSwagger();
             app.UseSwaggerUI(c =>
             {

@@ -13,7 +13,7 @@ namespace IsraelHiking.DataAccess.Tests.GraphHopper
         public void Initialize_ShouldAddService()
         {
             var logger = new TraceLogger();
-            var physical = new PhysicalFileProvider(@"D:\Github\IsraelHikingMap\Site\IsraelHiking.Web\bin\Debug\netcoreapp1.1");
+            var physical = new PhysicalFileProvider(@"D:\Github\IsraelHikingMap\Site\IsraelHiking.Web\bin\Debug\netcoreapp2.0");
             var gateway = new GraphHopperGateway(logger, physical);
             var memoryStream = new MemoryStream();
             physical.GetFileInfo("israel-and-palestine-latest.osm.pbf").CreateReadStream().CopyTo(memoryStream);

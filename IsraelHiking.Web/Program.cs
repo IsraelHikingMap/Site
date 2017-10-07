@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
 namespace IsraelHiking.Web
@@ -7,15 +8,11 @@ namespace IsraelHiking.Web
     {
         public static void Main(string[] args)
         {
-            var host = new WebHostBuilder()
-                .UseKestrel()
-                .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseIISIntegration()
+            WebHost.CreateDefaultBuilder(args)
                 .UseStartup<Startup>()
-                .UseApplicationInsights()
-                .Build();
-
-            host.Run();
-        }
+                .UseContentRoot(Directory.GetCurrentDirectory())
+                .Build()
+                .Run();
+        }   
     }
 }
