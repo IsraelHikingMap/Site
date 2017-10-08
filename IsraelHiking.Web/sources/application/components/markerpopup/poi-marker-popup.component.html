@@ -15,7 +15,7 @@
         </div>
     </div>
     <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="imagesUrls.length === 0">
-        <img [src]="imagesUrls[0]" class="img-responsive curson-zoom-in" height="100" (click)="showImage()"/>
+        <img [src]="resources.getResizedWikipediaImage(imagesUrls[0], 300)" class="img-responsive curson-zoom-in" height="100" (click)="showImage()"/>
         <div [hidden]="!sourceImageUrl">
             <img [src]="sourceImageUrl" alt="" height="64"/>
         </div>

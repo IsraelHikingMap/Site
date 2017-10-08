@@ -859,4 +859,14 @@ export class ResourcesService {
     public getCurrentLanguageCodeSimplified = () => {
         return this.currentLanguage.code.split("-")[0];
     }
+
+    public getResizedWikipediaImage(imageUrl: string, size: number) {
+        if (!imageUrl) {
+            return imageUrl;
+        }
+        if (imageUrl.indexOf("//upload.wikimedia.org/wikipedia/commons/") === -1) {
+            return imageUrl;
+        }
+        return imageUrl.replace(/(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)/, `$1thumb/$2$3/${size}px-$3`);
+    }
 }

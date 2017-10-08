@@ -135,7 +135,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         if (this.imagesUrls.length === 0) {
             return null;
         }
-        return this.imagesUrls[this.currentImageIndex];
+        return this.resources.getResizedWikipediaImage(this.imagesUrls[this.currentImageIndex], 800);
     }
 
     public nextImage() {
