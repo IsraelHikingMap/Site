@@ -5,6 +5,14 @@ This repository holds all the files that the site needs in order to run.
 [![Test status](http://teststatusbadge.azurewebsites.net/api/status/HarelM/site)](https://ci.appveyor.com/project/HarelM/site)
 [![Coverage Status](https://coveralls.io/repos/github/IsraelHikingMap/Site/badge.svg?branch=master)](https://coveralls.io/github/IsraelHikingMap/Site?branch=master)
 
+## Contents
+* [Technology stack](#technology-stack)
+* [Architecture and folder stucture of UI](#architecture-and-folder-stucture-of-ui)
+* [Architecture of Server](#architecture-of-server)
+* [Setting Up the Project for Development](#setting-up-the-project-for-development)
+* [Starting a debug session](#starting-a-debug-session)
+* [Setup the server](#setup-the-server)
+
 # Technology stack
 The technology stack of this site is base on the following frameworks:
 * [Typescript](http://www.typescriptlang.org/)
@@ -19,7 +27,6 @@ The technology stack of this site is base on the following frameworks:
 * [Elastic Search and NEST](https://www.elastic.co/)
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite)
 * [OsmSharp](http://www.osmsharp.com/)
-
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:
