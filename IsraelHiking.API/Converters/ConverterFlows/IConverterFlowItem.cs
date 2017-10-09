@@ -69,6 +69,10 @@
         /// compegps alias in GPSBabel
         /// </summary>
         public const string COMPEGPS_BABEL_FORMAT = "compegps";
+        /// <summary>
+        /// jpg/jpeg alias in GPSBabel
+        /// </summary>
+        public const string JPG_BABEL_FORMAT = "exif";
     }
 
     /// <summary>

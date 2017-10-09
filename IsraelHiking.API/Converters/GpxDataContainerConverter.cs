@@ -54,14 +54,15 @@ namespace IsraelHiking.API.Converters
                 routes = ConvertRoutesToRoutesData(gpx.rte ?? new rteType[0])
             };
             container.routes.AddRange(ConvertTracksToRouteData(gpx.trk ?? new trkType[0]));
-            var markers = (gpx.wpt ?? new wptType[0]).Select(ToMarkerData).ToList();
+            var nonEmptyWayPoints = gpx.wpt ?? new wptType[0];
+            var markers = nonEmptyWayPoints.Select(ToMarkerData).ToList();
             if (markers.Any())
             {
                 if (!container.routes.Any())
                 {
                     var title = string.IsNullOrWhiteSpace(markers.First().title) ? "Markers" : markers.First().title;
                     var name = markers.Count == 1 ? title : "Markers";
-                    container.routes.Add(new RouteData {name = name});
+                    container.routes.Add(new RouteData {name = name, description = nonEmptyWayPoints.First().desc});
                 }
                 container.routes.First().markers = markers;
             }
