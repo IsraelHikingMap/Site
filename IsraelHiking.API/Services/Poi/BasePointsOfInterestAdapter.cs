@@ -38,8 +38,7 @@ namespace IsraelHiking.API.Services.Poi
         protected async Task<TPoiItem> ConvertToPoiItem<TPoiItem>(IFeature feature, string language) where TPoiItem : PointOfInterest, new()
         {
             var poiItem = new TPoiItem();
-            var geoLocation = feature.Attributes[FeatureAttributes.GEOLOCATION] as AttributesTable;
-            if (geoLocation != null)
+            if (feature.Attributes[FeatureAttributes.GEOLOCATION] is AttributesTable geoLocation)
             {
                 poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
                 var alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(poiItem.Location));
