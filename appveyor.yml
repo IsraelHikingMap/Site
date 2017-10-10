@@ -1,0 +1,31 @@
+version: 5.1.{build}
+image: Visual Studio 2017
+configuration: Release
+install:
+- ps: >-
+    nuget sources add -Name AppVeyourNuget -Source https://ci.appveyor.com/nuget/harelm-5w3ovweuanp1 -UserName $env:nuget_user -Password $env:nuget_password
+
+    Install-Product node 6.10
+
+    node -v
+
+    npm install -g @angular/cli@1.4.4 --silent
+before_build:
+- ps: dotnet restore
+build:
+  project: IsraelHiking.sln
+  parallel: true
+  verbosity: minimal
+after_test:
+- ps: >-
+    $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\AppveyorBuild\PostBuildTests.ps1"
+
+    Write-Host $PostBuildTests
+
+    & "$PostBuildTests"
+
+    $PostBuildPackArtifacts = "$env:APPVEYOR_BUILD_FOLDER\AppveyorBuild\PostBuildPackArtifacts.ps1"
+
+    Write-Host $PostBuildPackArtifacts
+
+    & "$PostBuildPackArtifacts"

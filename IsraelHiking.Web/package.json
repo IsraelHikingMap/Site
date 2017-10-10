@@ -62,7 +62,6 @@
     "karma-coverage-istanbul-reporter": "1.1.0",
     "karma-jasmine": "1.1.0",
     "karma-jasmine-html-reporter": "0.2.2",
-    "karma-junit-reporter": "2.0.0",
     "md5-file": "*",
     "protractor": "5.1.2",
     "tslint": "5.7.0",
