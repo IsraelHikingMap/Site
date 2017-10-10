@@ -20,6 +20,8 @@
 .legend-item-text {
     padding-left: 10px;
     padding-right: 10px;
+    text-decoration: none;
+    color: black;
 }
 
 .legend-route {
