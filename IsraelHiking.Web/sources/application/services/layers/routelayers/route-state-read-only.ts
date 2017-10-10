@@ -1,10 +1,12 @@
 import * as L from "leaflet";
+import * as _ from "lodash";
 
 import { EditMode } from "./iroute-state";
 import { RouteStateBase } from "./route-state-base";
 import { IRouteLayer, EditModeString } from "./iroute.layer";
 import { IconsService } from "../../icons.service";
 import { ISnappingOptions } from "../../snapping.service";
+import * as Common from "../../../common/IsraelHiking";
 
 export class RouteStateReadOnly extends RouteStateBase {
     private readOnlyLayers: L.LayerGroup;
@@ -66,7 +68,9 @@ export class RouteStateReadOnly extends RouteStateBase {
             this.addPolyline(groupedLatLngs);
         }
         for (let marker of this.context.route.markers) {
-            this.readOnlyLayers.addLayer(this.createPoiMarker(marker, false));
+            let markerWithTitle = this.createPoiMarker(marker, false);
+            markerWithTitle.on("click", () => this.changeStateToEditPoi(markerWithTitle));
+            this.readOnlyLayers.addLayer(markerWithTitle);
         }
         this.context.mapService.map.on("mousemove", this.onMouseMove);
     }
@@ -91,6 +95,16 @@ export class RouteStateReadOnly extends RouteStateBase {
             this.context.polylineHovered.next(null);
         } else {
             this.context.polylineHovered.next(response.latlng);
+        }
+    }
+
+    private changeStateToEditPoi(markerWithTitle: Common.IMarkerWithTitle) {
+        let markerLatLng = markerWithTitle.getLatLng();
+        this.context.setEditPoiState();
+        // old markers are destroyed and new markers are created.
+        let newMarker = _.find(this.context.route.markers, m => m.marker != null && m.marker.getLatLng().equals(markerLatLng));
+        if (newMarker != null) {
+            newMarker.marker.openPopup();
         }
     }
 }

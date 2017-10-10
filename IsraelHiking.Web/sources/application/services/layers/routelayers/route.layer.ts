@@ -57,6 +57,24 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         return this.currentState.getEditMode();
     }
 
+    public setEditMode(editMode: EditMode) {
+        switch (editMode) {
+            case EditModeString.poi:
+                this.setEditPoiState();
+                break;
+            case EditModeString.route:
+                this.setEditRouteState();
+                break;
+            case EditModeString.none:
+                if (this.route.properties.isVisible) {
+                    this.setReadOnlyState();
+                } else {
+                    this.setHiddenState();
+                }
+                break;
+        }
+    }
+
     public setRouteProperties(properties: IRouteProperties) {
         this.route.properties = properties;
         this.currentState.clear();
@@ -79,7 +97,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         for (let segment of this.route.segments) {
             segmentsData.push({
                 routePoint: segment.routePoint,
-                latlngs: [ ...segment.latlngs ],
+                latlngs: [...segment.latlngs],
                 routingType: segment.routingType
             } as Common.RouteSegmentData);
         }
