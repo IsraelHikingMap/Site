@@ -99,6 +99,7 @@ import { WikiMarkerPopupComponent } from "./components/markerpopup/wiki-marker-p
 import { UpdatePointDialogComponent } from "./components/dialogs/update-point-dialog.component";
 import { ImageDialogCompnent } from "./components/dialogs/image-dialog.component";
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
+import { IhmLinkComponent } from "./components/ihm-link.component";
 
 export function getWindow() { return window; }
 export function getRoutesService(routesService: RoutesService) { return routesService; }
@@ -169,7 +170,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         WikiMarkerPopupComponent,
         UpdatePointDialogComponent,
         ImageDialogCompnent,
-        TermsOfServiceDialogComponent
+        TermsOfServiceDialogComponent,
+        IhmLinkComponent
     ],
     providers: [
         GestureConfig,
@@ -248,7 +250,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DraggableResizableDirective,
         UpdatePointDialogComponent,
         ImageDialogCompnent,
-        TermsOfServiceDialogComponent
+        TermsOfServiceDialogComponent,
+        IhmLinkComponent
     ],
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })

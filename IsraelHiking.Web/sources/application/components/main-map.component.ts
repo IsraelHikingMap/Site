@@ -25,6 +25,7 @@ import { DrawingComponent } from "./drawing.component";
 import { SearchComponent } from "./search.component";
 import { InfoComponent } from "./info.component";
 import { ShareComponent } from "./share.component";
+import { IhmLinkComponent } from "./ihm-link.component";
 
 @Component({
     template: `<ng-progress [ngStyle]="{'z-index':1500}"></ng-progress>`,
@@ -98,6 +99,7 @@ export class MainMapComponent extends BaseMapComponent {
         this.createContorl("drawing-control", DrawingComponent, "topright");
         this.createContorl("share-control", ShareComponent, "topright");
         this.createContorl("language-control", LanguageComponent, "topright");
+        this.createContorl("ihm-link-control", IhmLinkComponent, "bottomleft");
         this.createContorl("route-statistics-control", RouteStatisticsComponent, "bottomright");
 
         L.control.scale({ imperial: false, position: "bottomright" } as L.Control.ScaleOptions).addTo(this.mapService.map);
