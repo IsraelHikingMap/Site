@@ -1,9 +1,9 @@
 # Intro
 This repository holds all the files that the site needs in order to run.
 
-[![Build status](https://ci.appveyor.com/api/projects/status/38up550uh57s8khw/branch/master?svg=true)](https://ci.appveyor.com/project/HarelM/site/branch/master)
-[![Test status](http://teststatusbadge.azurewebsites.net/api/status/HarelM/site)](https://ci.appveyor.com/project/HarelM/site)
-[![Coverage Status](https://coveralls.io/repos/github/IsraelHikingMap/Site/badge.svg?branch=master)](https://coveralls.io/github/IsraelHikingMap/Site?branch=master)
+[![AppVeyor](https://img.shields.io/appveyor/ci/IsraelHikingHost/site/master.svg)]()
+[![AppVeyor tests](https://img.shields.io/appveyor/tests/IsraelHikingHost/site/master.svg)]()
+[![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/master.svg)]()
 
 ## Contents
 * [Technology stack](#technology-stack)
