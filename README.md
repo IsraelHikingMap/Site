@@ -1,9 +1,9 @@
 # Intro
 This repository holds all the files that the site needs in order to run.
 
-[![AppVeyor](https://img.shields.io/appveyor/ci/IsraelHikingHost/site/master.svg)]()
-[![AppVeyor tests](https://img.shields.io/appveyor/tests/IsraelHikingHost/site/master.svg)]()
-[![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/master.svg)]()
+[![AppVeyor](https://img.shields.io/appveyor/ci/IsraelHikingHost/site/master.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site)
+[![AppVeyor tests](https://img.shields.io/appveyor/tests/IsraelHikingHost/site/master.svg)](https://ci.appveyor.com/project/IsraelHikingHost/site/build/tests)
+[![Codecov](https://img.shields.io/codecov/c/github/israelhikingmap/site/master.svg)](https://codecov.io/gh/IsraelHikingMap/Site/list/master/)
 
 ## Contents
 * [Technology stack](#technology-stack)
