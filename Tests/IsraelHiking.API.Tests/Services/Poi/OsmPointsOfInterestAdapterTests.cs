@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
@@ -22,7 +21,7 @@ using OsmSharp.Tags;
 namespace IsraelHiking.API.Tests.Services.Poi
 {
     [TestClass]
-    public class OsmPointsOfInterestAdapterTests
+    public class OsmPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
     {
         private OsmPointsOfInterestAdapter _adapter;
         private IElasticSearchGateway _elasticSearchGateway;
@@ -53,6 +52,88 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
+        public void GetPointsOfInterest_FilterRelevant_ShouldReturnEmptyElist()
+        {
+            _elasticSearchGateway.GetPointsOfInterest(null, null, null).Returns(new List<Feature>
+            {
+                new Feature { Geometry = new Point(null), Attributes = new AttributesTable() }
+            });
+
+            var results = _adapter.GetPointsOfInterest(null, null, null, null).Result;
+
+            Assert.AreEqual(0, results.Length);
+        }
+
+        [TestMethod]
+        public void GetPointsOfInterest_EnglishTitleOnly_ShouldReturnIt()
+        {
+            var name = "English name";
+            var feature = GetValidFeature("poiId", _adapter.Source);
+            feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
+            feature.Attributes.AddAttribute("name:en", name);
+            _elasticSearchGateway.GetPointsOfInterest(null, null, null).Returns(new List<Feature> { feature });
+
+            var result = _adapter.GetPointsOfInterest(null, null, null, "en").Result;
+
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual(name, result.First().Title);
+        }
+
+        [TestMethod]
+        public void GetPointsOfInterest_ImageAndDescriptionOnly_ShouldReturnIt()
+        {
+            var feature = GetValidFeature("poiId", _adapter.Source);
+            feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
+            feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
+            feature.Attributes.AddAttribute(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
+            _elasticSearchGateway.GetPointsOfInterest(null, null, null).Returns(new List<Feature> { feature });
+
+            var result = _adapter.GetPointsOfInterest(null, null, null, "he").Result;
+
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual(string.Empty, result.First().Title);
+        }
+
+        [TestMethod]
+        public void GetPointsOfInterestById_RouteWithMultipleImagesAndDescriptionOnly_ShouldReturnIt()
+        {
+            var poiId = "poiId";
+            var feature = GetValidFeature(poiId, _adapter.Source);
+            feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
+            feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
+            feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL + "1", FeatureAttributes.IMAGE_URL + "1");
+            feature.Attributes.AddAttribute(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
+            _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
+
+            var result = _adapter.GetPointOfInterestById(poiId, null).Result;
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(string.Empty, result.Title);
+            Assert.AreEqual(FeatureAttributes.DESCRIPTION, result.Description);
+            Assert.AreEqual(2, result.ImagesUrls.Length);
+            Assert.AreEqual(FeatureAttributes.IMAGE_URL, result.ImagesUrls.First());
+            Assert.IsTrue(result.IsRoute);
+        }
+
+        [TestMethod]
+        public void AddPointOfInterest_ShouldUpdateOsmAndElasticSearch()
+        {
+            var gateway = SetupHttpFactory();
+            gateway.CreateElement(Arg.Any<string>(), Arg.Any<Node>()).Returns("42");
+            var pointOfInterestToAdd = new PointOfInterestExtended
+            {
+                Location = new LatLng(),
+                ImagesUrls = new string[0],
+                Icon = _tagsHelper.GetIconsPerCategoryByType(Categories.POINTS_OF_INTEREST).Values.First().First().Icon
+            };
+
+            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, null, "he").Result;
+
+            Assert.IsNotNull(resutls);
+            _elasticSearchGateway.Received(1).UpdateNamesData(Arg.Any<Feature>());
+        }
+
+        [TestMethod]
         public void UpdatePoint_SyncImages()
         {
             var gateway = SetupHttpFactory();
@@ -67,7 +148,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 {
                     {FeatureAttributes.ICON, "icon"}
                 }));
-            gateway.GetNode(pointOfInterest.Id).Returns(Task.FromResult(new Node
+            gateway.GetNode(pointOfInterest.Id).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -75,7 +156,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     new Tag("image", "imageurl1"),
                     new Tag("image1", "imageurl3"),
                 }
-            }));
+            });
 
             var results = _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Result;
 

@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -9,26 +7,25 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
     [TestClass]
-    public class NakebPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
+    public class OffRoadPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
     {
-        private NakebPointsOfInterestAdapter _adapter;
-        private INakebGateway _nakebGateway;
+        private OffRoadPointsOfInterestAdapter _adapter;
+        private IOffRoadGateway _offRoadGateway;
         private IElevationDataStorage _elevationDataStorage;
         private IElasticSearchGateway _elasticSearchGateway;
 
         [TestInitialize]
-        public void TestInitialize()
+        public void TestInialize()
         {
-            _nakebGateway = Substitute.For<INakebGateway>();
+            _offRoadGateway = Substitute.For<IOffRoadGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _elevationDataStorage, _elasticSearchGateway, Substitute.For<ILogger>());
+            _adapter = new OffRoadPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _offRoadGateway, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -44,9 +41,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var language = "en";
             var featureCollection = new FeatureCollection
             {
-                Features = { GetValidFeature(poiId, _adapter.Source) }
+                Features = {GetValidFeature(poiId, _adapter.Source)}
             };
-            _nakebGateway.GetById(42).Returns(featureCollection);
+
+            _offRoadGateway.GetById("42").Returns(featureCollection);
 
             var results = _adapter.GetPointOfInterestById(poiId, language).Result;
 
@@ -72,8 +70,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetPointsForIndexing_ShouldGetAllPointsFromGateway()
         {
-            var featuresList = new List<Feature> { new Feature(null, null)};
-            _nakebGateway.GetAll().Returns(featuresList);
+            var featuresList = new List<Feature> { new Feature(null, null) };
+            _offRoadGateway.GetAll().Returns(featuresList);
 
             var points = _adapter.GetPointsForIndexing(null).Result;
 

@@ -56,15 +56,13 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
-            // Not supported
-            throw new NotImplementedException();
+            throw new Exception("OffRoad does not support adding.");
         }
 
         /// <inheritdoc />
         public Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
-            // Not supported
-            throw new NotImplementedException();
+            throw new Exception("OffRoad does not support updating.");
         }
 
         /// <inheritdoc />

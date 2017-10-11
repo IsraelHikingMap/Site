@@ -37,12 +37,11 @@ namespace IsraelHiking.API.Tests.Services
             var stream = new MemoryStream();
             bitmap.Save(stream, ImageFormat.Png);
             _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>())
-                .Returns(
-                    Task.FromResult(new RemoteFileFetcherGatewayResponse
-                    {
-                        FileName = "file.png",
-                        Content = stream.ToArray()
-                    }));
+                .Returns(new RemoteFileFetcherGatewayResponse
+                {
+                    FileName = "file.png",
+                    Content = stream.ToArray()
+                });
         }
 
         private DataContainer GetDataContainer(List<LatLng> latLngs)
@@ -90,12 +89,11 @@ namespace IsraelHiking.API.Tests.Services
                 new LatLng {lat = 0.0002, lng = 0.0002}
             });
             _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>())
-                .Returns(
-                    Task.FromResult(new RemoteFileFetcherGatewayResponse
-                    {
-                        FileName = "missing.png",
-                        Content = new byte[0]
-                    }));
+                .Returns(new RemoteFileFetcherGatewayResponse
+                {
+                    FileName = "missing.png",
+                    Content = new byte[0]
+                });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
 
