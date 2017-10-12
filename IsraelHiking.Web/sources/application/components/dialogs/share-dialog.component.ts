@@ -127,7 +127,7 @@ export class ShareDialogComponent extends BaseMapComponent {
             this.shareAddress = this.osmUserService.getUrlFromSiteUrlId(data);
             this.imageUrl = this.osmUserService.getImageFromSiteUrlId(data);
             let escaped = encodeURIComponent(this.shareAddress);
-            this.whatappShareAddress = this.sanitizer.bypassSecurityTrustUrl(`whatsapp://send?text=${escaped}`);
+            this.whatappShareAddress = this.sanitizer.bypassSecurityTrustUrl(`whatsapp://send?text=${data.title} - ${data.description}: ${escaped}`);
             this.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
             this.nakebCreateHikeAddress = `https://www.nakeb.co.il/add_new_hike?ihm_link=${data.id}`;
             this.isLoading = false;
