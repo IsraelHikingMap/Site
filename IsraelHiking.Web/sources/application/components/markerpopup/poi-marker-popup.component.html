@@ -49,14 +49,14 @@
         </div>
         <div fxFlex>
             <div fxLayout="row">
-                <button mat-button fxFill (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="before"><i class="fa-2x icon-thumbs-up" [style.color]="canVote() ? 'green' : 'grey'"></i></button>
+                <button mat-button fxFill (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="before"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
             </div>
             <div fxLayout="row">
                 <h3 fxFill class="text-center"><span dir="ltr">{{rating || 0}}</span>
                 </h3>
             </div>
             <div fxLayout="row">
-                <button mat-button fxFill (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="before"><i class="fa-2x icon-thumbs-down" [style.color]="canVote() ? 'red' : 'grey'"></i></button>
+                <button mat-button fxFill (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="before"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
             </div>
         </div>
     </div>

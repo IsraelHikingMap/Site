@@ -139,23 +139,28 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.vote(-1);
     }
 
-    public canVote(): boolean {
+    public canVote(type: string): boolean {
         if (this.osmUserService.isLoggedIn() === false) {
             return false;
         }
         if (this.poiExtended == null) {
             return false;
         }
-        return this.poiExtended.rating.raters.filter(r => r.id === this.osmUserService.userId).length === 0;
+        let vote = _.find(this.poiExtended.rating.raters, r => r.id === this.osmUserService.userId);
+        if (vote == null) {
+            return true;
+        }
+        return type === "up" && vote.value < 0 || type === "down" && vote.value > 0;
     }
 
     private vote(value: number) {
-        if (this.canVote() === false) {
+        if (this.canVote(value > 0 ? "up" : "down") === false) {
             if (this.osmUserService.isLoggedIn() === false) {
                 this.toastService.info(this.resources.loginRequired);
             }
             return;
         }
+        this.poiExtended.rating.raters = this.poiExtended.rating.raters.filter(r => r.id !== this.osmUserService.userId);
         this.poiExtended.rating.raters.push({ id: this.osmUserService.userId, value: value } as IRater);
         this.poiService.uploadRating(this.poiExtended.rating).then((response) => {
             let rating = response.json() as IRating;
