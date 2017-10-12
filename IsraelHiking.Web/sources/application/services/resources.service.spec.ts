@@ -1,5 +1,4 @@
 ﻿import { TestBed, async, inject } from "@angular/core/testing";
-import { MockBackend } from "@angular/http/testing";
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 
@@ -23,16 +22,6 @@ describe("ResourcesService", () => {
             ]
         });
     });
-
-    // HM TODO: how to test local storage?
-    //it("Should initialize from local storage with english", () => {
-    //    localStorageService.get = () => resourcesService.availableLanguages[1];
-    //
-    //    resourcesService = new IsraelHiking.Services.ResourcesService($sce, localStorageService, gettextCatalog);
-    //
-    //    expect(resourcesService.currentLanguage.code).toBe(resourcesService.availableLanguages[1].code);
-    //    expect(resourcesService.route).toBe("Route");
-    //});
 
     it("Should have available languages on startup", inject([ResourcesService], (service: ResourcesService) => {
         expect(service.availableLanguages.length).toBeGreaterThan(0);

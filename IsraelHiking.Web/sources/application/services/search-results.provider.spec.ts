@@ -18,7 +18,6 @@ describe("SearchResultsProvider", () => {
     });
 
     it("Should get all kind of features in results", async(inject([SearchResultsProvider, XHRBackend], (provider: SearchResultsProvider, mockBackend: MockBackend) => {
-
         let features = [
             {
                 type: "Feature",

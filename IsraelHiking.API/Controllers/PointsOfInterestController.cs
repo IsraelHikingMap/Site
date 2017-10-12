@@ -49,7 +49,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [Route("categories/{categoriesType}")]
         [HttpGet]
-        public Dictionary<string, IEnumerable<IconColorCategory>> GetCategoriesByGroup(string categoriesType)
+        public Dictionary<string, IEnumerable<IconColorCategory>> GetCategoriesByType(string categoriesType)
         {
             return _tagsHelper.GetIconsPerCategoryByType(categoriesType);
         }

@@ -66,10 +66,6 @@ export class PoiService {
         this.categoriesToIconsMap.set("Routes", {});
     }
 
-    public getCategoriesTypes(): CategoriesType[] {
-        return Array.from(this.categoriesToIconsMap.keys());
-    }
-
     public getCategories(categoriesType: CategoriesType): Promise<{}> {
         return new Promise((resolve, reject) => {
             let categories = this.categoriesToIconsMap.get(categoriesType);
@@ -89,6 +85,10 @@ export class PoiService {
                 reject(error);
             });
         });
+    }
+
+    public getCategoriesTypes(): CategoriesType[] {
+        return Array.from(this.categoriesToIconsMap.keys());
     }
 
     public getPoints(northEast: L.LatLng, southWest: L.LatLng, categoriesTypes: string[]): Promise<Response> {
