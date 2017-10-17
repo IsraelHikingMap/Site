@@ -23,6 +23,7 @@ import * as Common from "../../common/IsraelHiking";
 @Component({
     selector: "poi-marker-popup",
     templateUrl: "./poi-marker-popup.component.html",
+    styleUrls: ["./poi-marker-popup.component.css"],
     encapsulation: ViewEncapsulation.None
 })
 export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {

@@ -1,6 +1,6 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
     <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="10px" [hidden]="imagesUrls.length > 0 || !sourceImageUrl">
-        <img [src]="sourceImageUrl" alt="" height="100"/>
+        <img class="img-top" [src]="sourceImageUrl" alt=""/>
     </div>
     <div fxLayout="row" [hidden]="imagesUrls.length > 0 || sourceImageUrl">
         <div fxFlex [ngClass]="resources.getTextAlignment()">
@@ -40,7 +40,7 @@
             <div fxLayout="row" [hidden]="!isEditMode() || isRoute()">
                 <a class="cursor-pointer" (click)="openUpdatePointDialog($event)">{{resources.more}}</a>
             </div>
-            <div fxLayout="row" [hidden]="isEditMode()" *ngFor="let descriptionLine of getDescrition()">
+            <div fxLayout="row" class="description-container" [hidden]="isEditMode()" *ngFor="let descriptionLine of getDescrition()">
                 <p fxFill [ngClass]="resources.getTextAlignment(descriptionLine)"
                    [dir]="resources.getDirection(descriptionLine)">
                     {{descriptionLine}}
