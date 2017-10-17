@@ -122,7 +122,9 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                     } else if (pointOfInterestMarker != null) {
                         pointsOfInterest.splice(pointsOfInterest.indexOf(pointOfInterestMarker), 1);
                     }
-                    if (this.searchResultsMarker != null && this.searchResultsMarker.identifier === markerWithTitle.identifier) {
+                    if (this.searchResultsMarker != null && 
+                        this.searchResultsMarker.identifier === markerWithTitle.identifier &&
+                        this.markers.getVisibleParent(markerWithTitle) === markerWithTitle) {
                         this.clearSearchResultsMarker();
                     }
                 });
@@ -153,7 +155,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             let foundMarker = false;
             this.markers.eachLayer(existingMarker => {
                 let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
-                if (markerWithTitle.identifier !== pointOfInterest.id) {
+                if (markerWithTitle.identifier !== pointOfInterest.id || foundMarker) {
                     return;
                 }
                 foundMarker = true;
@@ -166,7 +168,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                     }
                     markerWithTitle.fireEvent("click");
                     markerWithTitle.openPopup();
-                }, 500);
+                }, 1000);
             });
             if (foundMarker) {
                 return;
