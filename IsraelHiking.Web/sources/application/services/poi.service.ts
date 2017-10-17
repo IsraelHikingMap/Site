@@ -4,6 +4,7 @@ import { Http, Response } from "@angular/http";
 import { AuthorizationService } from "./authorization.service";
 import { Urls } from "../common/Urls";
 import { ResourcesService } from "./resources.service";
+import * as Common from "../common/IsraelHiking";
 
 export type CategoriesType = "Points of Interest" | "Routes";
 
@@ -21,13 +22,13 @@ export interface IRating {
 
 export interface IPointOfInterest {
     id: string;
+    type: string;
     category: string;
     title: string;
     location: L.LatLng;
     source: string;
     icon: string;
     iconColor: string;
-    isRoute: boolean;
 }
 
 export interface IPointOfInterestExtended extends IPointOfInterest {
@@ -37,9 +38,10 @@ export interface IPointOfInterestExtended extends IPointOfInterest {
     description: string;
     url: string;
     sourceImageUrl: string;
+    
 
     rating: IRating;
-    featureCollection: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
+    dataContainer: Common.DataContainer;
 }
 
 export interface IIconColorLabel {
@@ -103,10 +105,13 @@ export class PoiService {
             }).toPromise();
     }
 
-    public getPoint(id: string, source: string): Promise<Response> {
+    public getPoint(id: string, source: string, type: string): Promise<Response> {
         return this.http.get(Urls.poi + source + "/" + id,
             {
-                params: { language: this.resources.getCurrentLanguageCodeSimplified() }
+                params: {
+                     language: this.resources.getCurrentLanguageCodeSimplified(),
+                     type: type
+                }
             }).toPromise();
     }
 

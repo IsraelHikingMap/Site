@@ -36,6 +36,7 @@
         public const string DESCRIPTION = "description";
         public const string POI_SOURCE = "poiSource";
         public const string POI_CATEGORY = "poiCategory";
+        public const string POI_TYPE = "poiType";
         public const string WEBSITE = "website";
         public const string SEARCH_FACTOR = "searchFactor";
         public const string GEOLOCATION = "geolocation";

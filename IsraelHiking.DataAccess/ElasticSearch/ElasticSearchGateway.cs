@@ -243,13 +243,14 @@ namespace IsraelHiking.DataAccess.ElasticSearch
             return response.Documents.ToList();
         }
 
-        public async Task<Feature> GetPointOfInterestById(string id, string source)
+        public async Task<Feature> GetPointOfInterestById(string id, string source, string type)
         {
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_NAMES_ALIAS)
                     .Size(1).Query(
                         q => q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
                              && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ID}").Value(id))
+                             && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_TYPE}").Value(type))
                     )
             );
             return response.Documents.FirstOrDefault();

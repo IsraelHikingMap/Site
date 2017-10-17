@@ -27,9 +27,9 @@ namespace IsraelHiking.API.Controllers
         /// Controller's constructor
         /// </summary>
         /// <param name="adapters"></param>
+        /// <param name="tagsHelper"></param>
         /// <param name="wikipediaGateway"></param>
         /// <param name="cache"></param>
-        /// <param name="tagsHelper"></param>
         public PointsOfInterestController(IEnumerable<IPointsOfInterestAdapter> adapters,
             ITagsHelper tagsHelper,
             IWikipediaGateway wikipediaGateway,
@@ -90,17 +90,18 @@ namespace IsraelHiking.API.Controllers
         /// <param name="source">The source</param>
         /// <param name="id">The ID</param>
         /// <param name="language">The required language</param>
+        /// <param name="type"></param>
         /// <returns></returns>
         [Route("{source}/{id}")]
         [HttpGet]
-        public async Task<IActionResult> GetPointOfInterest(string source, string id, string language = "")
+        public async Task<IActionResult> GetPointOfInterest(string source, string id, string language = "", string type = "")
         {
             if (_adapters.ContainsKey(source) == false)
             {
                 return BadRequest($"{source} is not a know POIs source...");
             }
             var adapter = _adapters[source];
-            var poiItem = await adapter.GetPointOfInterestById(id, language);
+            var poiItem = await adapter.GetPointOfInterestById(id, language, type);
             if (poiItem == null)
             {
                 return NotFound();

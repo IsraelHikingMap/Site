@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -28,7 +29,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _nakebGateway = Substitute.For<INakebGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _elevationDataStorage, _elasticSearchGateway, Substitute.For<ILogger>());
+            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _elevationDataStorage, _elasticSearchGateway, Substitute.For<IDataContainerConverterService>(),  Substitute.For<ILogger>());
         }
 
         [TestMethod]

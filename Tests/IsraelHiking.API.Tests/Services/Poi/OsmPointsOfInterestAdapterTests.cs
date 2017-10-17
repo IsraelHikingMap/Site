@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
@@ -29,6 +28,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IHttpGatewayFactory _httpGatewayFactory;
         private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private IOsmRepository _osmRepository;
+        private IDataContainerConverterService _dataContainerConverterService;
         private ITagsHelper _tagsHelper;
 
         [TestInitialize]
@@ -40,8 +40,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _tagsHelper = new TagsHelper(new OptionsWrapper<ConfigurationData>(new ConfigurationData()));
             _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), _tagsHelper);
             _osmRepository = Substitute.For<IOsmRepository>();
-
-            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _tagsHelper);
+            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
+            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _tagsHelper);
         }
 
         private IOsmGateway SetupHttpFactory()
@@ -103,7 +103,23 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
             feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL + "1", FeatureAttributes.IMAGE_URL + "1");
             feature.Attributes.AddAttribute(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
-            _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source).Returns(feature);
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_TYPE, FeatureAttributes.POI_TYPE);
+            _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source, Arg.Any<string>()).Returns(feature);
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
+                new DataContainer
+                {
+                    routes = new List<RouteData>
+                    {
+                        new RouteData
+                        {
+                            segments = new List<RouteSegmentData>
+                            {
+                                new RouteSegmentData(),
+                                new RouteSegmentData()
+                            }
+                        }
+                    }
+                });
 
             var result = _adapter.GetPointOfInterestById(poiId, null).Result;
 
@@ -126,6 +142,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 ImagesUrls = new string[0],
                 Icon = _tagsHelper.GetIconsPerCategoryByType(Categories.POINTS_OF_INTEREST).Values.First().First().Icon
             };
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {routes = new List<RouteData>()});
 
             var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, null, "he").Result;
 
@@ -141,13 +158,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 ImagesUrls = new[] { "imageurl2", "imageurl1", "imageurl4" },
                 Id = "1",
-                Icon = "oldIcon"
+                Icon = "oldIcon",
+                Type = OsmGeoType.Node.ToString().ToLower()
             };
-            _elasticSearchGateway.GetPointOfInterestById(pointOfInterest.Id, Arg.Any<string>())
-                .Returns(new Feature(new Point(new Coordinate()), new AttributesTable
-                {
-                    {FeatureAttributes.ICON, "icon"}
-                }));
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {routes = new List<RouteData>()});
             gateway.GetNode(pointOfInterest.Id).Returns(new Node
             {
                 Id = 1,

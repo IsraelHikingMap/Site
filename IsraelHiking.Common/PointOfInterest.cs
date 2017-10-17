@@ -5,6 +5,7 @@ namespace IsraelHiking.Common
     public class PointOfInterest
     {
         public string Id { get; set; }
+        public string Type { get; set; }
         public string Category { get; set; }
         public string Title { get; set; }
         public string Source { get; set; }
@@ -24,6 +25,6 @@ namespace IsraelHiking.Common
         public string[] ImagesUrls { get; set; }
 
         public Rating Rating { get; set; }
-        public FeatureCollection FeatureCollection { get; set; }
+        public DataContainer DataContainer { get; set; }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -31,7 +32,8 @@ namespace IsraelHiking.API.Services.Poi
             IHttpGatewayFactory httpGatewayFactory,
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
             IOsmRepository osmRepository,
-            ITagsHelper tagsHelper) : base(elevationDataStorage, elasticSearchGateway)
+            IDataContainerConverterService dataContainerConverterService,
+            ITagsHelper tagsHelper) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
         {
             _elasticSearchGateway = elasticSearchGateway;
             _httpGatewayFactory = httpGatewayFactory;
@@ -51,9 +53,9 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
+        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = null)
         {
-            var feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM);
+            var feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM, type);
             return await FeatureToExtendedPoi(feature, language);
         }
 
@@ -61,7 +63,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
             await AddExtendedData(poiItem, feature, language);
-            poiItem.IsRoute = poiItem.FeatureCollection.Features.Any(f => !(f.Geometry is Point));
+            poiItem.IsRoute = poiItem.DataContainer.routes.Any(r => r.segments.Count > 1);
             poiItem.IsEditable = _tagsHelper.GetAllTags()
                 .Any(t => feature.Attributes.GetNames().Contains(t.Key) && feature.Attributes[t.Key].Equals(t.Value));
             return poiItem;
@@ -103,27 +105,31 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
-
-            var feature = await _elasticSearchGateway.GetPointOfInterestById(pointOfInterest.Id, Sources.OSM);
             var id = pointOfInterest.Id;
             ICompleteOsmGeo completeOsmGeo;
-            if (feature.Geometry is Point)
+            if (pointOfInterest.Type == OsmGeoType.Node.ToString().ToLower())
             {
                 completeOsmGeo = await osmGateway.GetNode(id);
             }
-            else if (feature.Geometry is LineString || feature.Geometry is Polygon)
+            else if (pointOfInterest.Type == OsmGeoType.Way.ToString().ToLower())
             {
                 completeOsmGeo = await osmGateway.GetCompleteWay(id);
             }
-            else
+            else if (pointOfInterest.Type == OsmGeoType.Relation.ToString().ToLower())
             {
                 completeOsmGeo = await osmGateway.GetCompleteRelation(id);
             }
+            else
+            {
+                throw new ArgumentException(nameof(pointOfInterest.Type) + " is not known: " + pointOfInterest.Type);
+            }
+            var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
+            var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.ICON].ToString();
+
             completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url;
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             SyncImages(completeOsmGeo.Tags, pointOfInterest.ImagesUrls);
-            var oldIcon = feature.Attributes[FeatureAttributes.ICON].ToString();
             if (pointOfInterest.Icon != oldIcon)
             {
                 RemoveTagsByIcon(completeOsmGeo.Tags, oldIcon);
@@ -198,14 +204,19 @@ namespace IsraelHiking.API.Services.Poi
             }
         }
 
-        private async Task<Feature> UpdateElasticSearch(ICompleteOsmGeo osm, string name)
+        private Feature ConvertOsmToFeature(ICompleteOsmGeo osm, string name)
         {
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(
                 new Dictionary<string, List<ICompleteOsmGeo>>
                 {
                     {name ?? string.Empty, new List<ICompleteOsmGeo> {osm}}
                 });
-            var feature = features.Values.FirstOrDefault()?.FirstOrDefault();
+            return features.Values.FirstOrDefault()?.FirstOrDefault();
+        }
+
+        private async Task<Feature> UpdateElasticSearch(ICompleteOsmGeo osm, string name)
+        {
+            var feature = ConvertOsmToFeature(osm, name);
             if (feature != null)
             {
                 await _elasticSearchGateway.UpdateNamesData(feature);

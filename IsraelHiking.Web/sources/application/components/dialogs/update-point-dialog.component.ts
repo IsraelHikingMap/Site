@@ -117,6 +117,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             title: this.title,
             url: this.websiteUrl,
             source: this.source,
+            type: this.elementType,
             location: this.location
         } as IPointOfInterestExtended;
         this.poiService.uploadPoint(poiExtended).then((response) => {

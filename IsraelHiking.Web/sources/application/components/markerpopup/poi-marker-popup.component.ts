@@ -11,8 +11,8 @@ import { OsmUserService } from "../../services/osm-user.service";
 import { FileService } from "../../services/file.service";
 import { IPointOfInterestExtended, PoiService, IRating, IRater } from "../../services/poi.service";
 import { IconsService } from "../../services/icons.service";
+import { MapService } from "../../services/map.service";
 import { ElevationProvider } from "../../services/elevation.provider";
-import { GeoJsonParser } from "../../services/geojson.parser";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
 import { ImageDialogCompnent } from "../dialogs/image-dialog.component";
 import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
@@ -32,11 +32,11 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public imagesUrls: string[];
     public address: string;
     public source: string;
+    public type: string;
     public rating: number;
     public isLoading: boolean;
     public sourceImageUrl: string;
     private editMode: boolean;
-    private routeData: Common.RouteData;
     private extendedDataArrivedTimeStamp: Date;
     private poiExtended: IPointOfInterestExtended;
 
@@ -45,12 +45,12 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         applicationRef: ApplicationRef,
         private mdDialog: MdDialog,
         elevationProvider: ElevationProvider,
-        private geoJsonParser: GeoJsonParser,
         private toastService: ToastService,
         private routesService: RoutesService,
         private osmUserService: OsmUserService,
         private fileService: FileService,
-        private poiService: PoiService) {
+        private poiService: PoiService,
+        private mapService: MapService) {
         super(resources, http, applicationRef, elevationProvider);
         this.editMode = false;
         this.isLoading = false;
@@ -112,7 +112,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public isRoute() {
-        return this.routeData && this.routeData.segments.length > 0;
+        return this.poiExtended && this.poiExtended.isRoute;
     }
 
     public getIcon() {
@@ -170,8 +170,11 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public convertToRoute() {
-        this.routeData.description = this.description;
-        this.routesService.setData([this.routeData]);
+        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes))  as Common.RouteData[];
+        this.mapService.routesJsonToRoutesObject(routesCopy);
+        let routeData = routesCopy[0];
+        routeData.description = this.description;
+        this.routesService.setData([routeData]);
         this.clearSelectedRoute();
         this.marker.closePopup();
     }
@@ -194,13 +197,14 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     private getPoiData() {
-        if (this.extendedDataArrivedTimeStamp != null &&
+        if (this.poiExtended &&
+            this.extendedDataArrivedTimeStamp != null &&
             Date.now() - this.extendedDataArrivedTimeStamp.getTime() < PoiMarkerPopupComponent.THREE_HOURES) {
-            this.selectRoute(this.routeData);
+            this.selectRoute(this.poiExtended.dataContainer.routes[0]);
             return;
         }
         this.isLoading = true;
-        this.poiService.getPoint(this.marker.identifier, this.source).then((response) => {
+        this.poiService.getPoint(this.marker.identifier, this.source, this.type).then((response) => {
             this.extendedDataArrivedTimeStamp = new Date();
             let poiExtended = response.json() as IPointOfInterestExtended;
             this.poiExtended = poiExtended;
@@ -208,11 +212,9 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.address = poiExtended.url;
             this.imagesUrls = poiExtended.imagesUrls;
             this.sourceImageUrl = poiExtended.sourceImageUrl;
-            this.rating = this.getRatingNumber(poiExtended.rating);
-            var container = this.geoJsonParser.toDataContainer(poiExtended.featureCollection,
-                this.resources.getCurrentLanguageCodeSimplified());
-            this.routeData = container.routes[0];
-            this.selectRoute(this.routeData);
+            this.rating = this.getRatingNumber(this.poiExtended.rating);
+            this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
+            this.selectRoute(this.poiExtended.dataContainer.routes[0]);
             this.isLoading = false;
         }, () => {
             this.isLoading = false;
@@ -241,7 +243,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         compoent.componentInstance.location = this.marker.getLatLng();
         compoent.componentInstance.source = this.poiExtended.source;
         compoent.componentInstance.identifier = this.poiExtended.id;
-        compoent.componentInstance.elementType = this.geoJsonParser.getOsmElementType(this.poiExtended.featureCollection.features[0].geometry.type);
+        compoent.componentInstance.elementType = this.poiExtended.type;
         compoent.componentInstance.initializationPromise.then(() => {
             for (let category of compoent.componentInstance.categories) {
                 let icon = _.find(category.icons, iconToFind => iconToFind.icon === this.poiExtended.icon);

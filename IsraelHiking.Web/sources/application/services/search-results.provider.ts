@@ -4,11 +4,11 @@ import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { GeoJsonParser } from "../services/geojson.parser";
-import { IPointOfInterest } from "./poi.service";
+import { IPointOfInterestExtended } from "./poi.service";
 import { Urls } from "../common/Urls";
 
 
-export interface ISearchResults extends IPointOfInterest {
+export interface ISearchResults extends IPointOfInterestExtended {
     bounds: L.LatLngBounds;
     displayName: string;
 }
@@ -39,6 +39,7 @@ export class SearchResultsProvider {
                             iconColor: properties.iconColor,
                             source: properties.poiSource,
                             id: properties.identifier,
+                            type: properties.poiType,
                             location: L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.geolocation.alt),
                             isRoute: feature.geometry.type !== "Point"
                         } as ISearchResults;

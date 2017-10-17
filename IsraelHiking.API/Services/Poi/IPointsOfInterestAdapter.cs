@@ -25,13 +25,15 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="language">The language</param>
         /// <returns>An array of POIs</returns>
         Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language);
+
         /// <summary>
         /// This method should be used to get more information on a given POI
         /// </summary>
         /// <param name="id">The POI's ID</param>
         /// <param name="language">The relevant language</param>
+        /// <param name="type">The type of the POI is needed</param>
         /// <returns>A POI with more data</returns>
-        Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language);
+        Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = null);
 
         /// <summary>
         /// Adds a POI

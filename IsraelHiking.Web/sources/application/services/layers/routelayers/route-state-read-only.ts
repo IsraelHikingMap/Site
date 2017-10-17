@@ -50,22 +50,14 @@ export class RouteStateReadOnly extends RouteStateBase {
         this.readOnlyLayers.clearLayers();
         if (this.context.route.segments.length > 0) {
             this.createStartAndEndMarkers();
-            let groupedLatLngs = [] as L.LatLng[]; // gourp as many segment in order for the ant path to look smoother
             for (let segment of this.context.route.segments) {
                 segment.routePointMarker = null;
                 segment.polyline = null;
-                if (groupedLatLngs.length === 0) {
-                    groupedLatLngs = segment.latlngs;
-                    continue;
-                }
-                if (groupedLatLngs[groupedLatLngs.length - 1].equals(segment.latlngs[0])) {
-                    groupedLatLngs = groupedLatLngs.concat(segment.latlngs);
-                    continue;
-                }
-                this.addPolyline(groupedLatLngs);
-                groupedLatLngs = segment.latlngs;
             }
-            this.addPolyline(groupedLatLngs);
+            let groupedLatLngs = this.context.mapService.getGroupedLatLngForAntPath(this.context.route.segments);
+            for (let group of groupedLatLngs) {
+                this.addPolyline(group);
+            }
         }
         for (let marker of this.context.route.markers) {
             let markerWithTitle = this.createPoiMarker(marker, false);

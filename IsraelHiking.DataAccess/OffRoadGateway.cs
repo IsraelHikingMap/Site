@@ -142,6 +142,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.NAME, offroadTrack.title},
                 {FeatureAttributes.POI_SOURCE, Sources.OFFROAD},
                 {FeatureAttributes.POI_CATEGORY, category},
+                {FeatureAttributes.POI_TYPE, string.Empty},
                 {FeatureAttributes.ICON, GetIconByCategory(category)},
                 {FeatureAttributes.ICON_COLOR, "black"},
                 {FeatureAttributes.SEARCH_FACTOR, 1},

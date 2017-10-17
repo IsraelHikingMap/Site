@@ -68,13 +68,15 @@ describe("Poi Service", () => {
     it("Should get a point by id and source from the server", async(inject([PoiService, XHRBackend], (poiService: PoiService, mockBackend: MockBackend) => {
         let id = "42";
         let source = "source";
+        let type = "type";
         checkHttpRequest(mockBackend,
             (request) => {
                 return request.url.indexOf(id) !== -1 &&
-                    request.url.indexOf(source) !== -1;
+                    request.url.indexOf(source) !== -1 &&
+                    request.url.indexOf(type) !== -1;
             });
 
-        return poiService.getPoint(id, source);
+        return poiService.getPoint(id, source, "");
     })));
 
     it("Should update point using the server", async(inject([PoiService, XHRBackend], (poiService: PoiService, mockBackend: MockBackend) => {
