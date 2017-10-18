@@ -103,7 +103,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
             feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL + "1", FeatureAttributes.IMAGE_URL + "1");
             feature.Attributes.AddAttribute(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_TYPE, FeatureAttributes.POI_TYPE);
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source, Arg.Any<string>()).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer
