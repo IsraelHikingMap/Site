@@ -1,8 +1,8 @@
-﻿[osm-user-dialog] .mat-dialog-title {
+﻿osm-user-dialog .mat-dialog-title {
     margin-bottom: 0;
 }
 
-[osm-user-dialog] .mat-dialog-content {
+osm-user-dialog .mat-dialog-content {
     max-height: 55vh;
 }
 
@@ -61,8 +61,8 @@
 }
 
 @media (max-width:600px) {
-    [osm-user-dialog] .mat-dialog-content {
-        max-height: 35vh;
+    osm-user-dialog .mat-dialog-content {
+        max-height: 33vh;
     }
 
     .trace-tools .trace-buttons {
