@@ -17,13 +17,13 @@ build:
   verbosity: minimal
 after_test:
 - ps: >-
-    $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\AppveyorBuild\PostBuildTests.ps1"
+    $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
 
     Write-Host $PostBuildTests
 
     & "$PostBuildTests"
 
-    $PostBuildPackArtifacts = "$env:APPVEYOR_BUILD_FOLDER\AppveyorBuild\PostBuildPackArtifacts.ps1"
+    $PostBuildPackArtifacts = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildPackArtifacts.ps1"
 
     Write-Host $PostBuildPackArtifacts
 

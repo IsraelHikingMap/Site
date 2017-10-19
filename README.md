@@ -39,7 +39,7 @@ The architecture is based heavily on Angular:
     * layers - where the layers logic is - POI, route, wiki, nakeb, relevant services, etc...
     * routers - handles the routing - currently there are 4 routers - hike, bike, fourbyfour and none.
 * fonts - icomoon generated font for icons instead of images.
-* Environments - used for angular-cli to define production and dev variables.
+* environments - used for angular-cli to define production and dev variables.
 * translations - all relevant data related to i18n
  
 # Architecture of Server
@@ -100,4 +100,4 @@ In order to be able to make the server work a few prerequisits are needed:
   * Create task
   * Add an action to run `UpdateDB.bat` after you download a new osm.pbf file.
   * Add a "On a schedule" trigger to run once a day or at the frequency of the map updates.
-  * Add a "At startup" trigger.
+* Create a task to clean the IIS logs using `Scripts\CleanLogs.cmd`
