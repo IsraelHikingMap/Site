@@ -71,7 +71,7 @@
             <div fxFlex>
                 <button mat-raised-button color="primary" [disabled]="!title && !description && imagesUrls.length === 0" (click)="updatePoint()" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{identifier ? resources.updatePoint : resources.addPoint}}</button>
             </div>
-            <div fxFlex="10" fxShow fxHide.xs [hidden]="identifier">
+            <div fxFlex="10" fxShow fxHide.xs [hidden]="!identifier">
                 <a mat-button [href]="getEditElementOsmAddress()" target="_blank" fxFill matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit element in OSM"><i class="fa icon-map-editing fa-lg"></i></a>
             </div>
         </div>

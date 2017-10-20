@@ -1,5 +1,4 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
@@ -92,11 +91,9 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostSiteUrl_RandomHitsItemInDatabase_ShouldAddSiteUrl()
         {
-            var queue = new Queue<SiteUrl>();
-            queue.Enqueue(new SiteUrl());
-            queue.Enqueue(null);
+            // first fetch from repository returns an item while the second one doesn't
             _israelHikingRepository.GetUrlById(Arg.Any<string>())
-                .Returns(x => Task.FromResult(new SiteUrl()), x => Task.FromResult((SiteUrl)null));
+                .Returns(x => new SiteUrl(), x => null as SiteUrl);
 
             var results = _controller.PostSiteUrl(new SiteUrl()).Result as OkObjectResult;
 

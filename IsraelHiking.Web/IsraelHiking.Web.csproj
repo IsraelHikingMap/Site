@@ -57,7 +57,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="CoreCompat.System.Drawing.v2" Version="5.2.0-preview1-r131" />
-    <PackageReference Include="coveralls.net" Version="0.8.0-unstable0013" />
+    <PackageReference Include="Codecov" Version="1.0.3" />
     <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.6.0-int6" />
     <PackageReference Include="GeoAPI" Version="1.7.5-pre4" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.1.1" />

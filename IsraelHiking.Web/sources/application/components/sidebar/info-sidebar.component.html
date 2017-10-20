@@ -36,7 +36,7 @@
                     <div [hidden]="!isSectionVisible(section)">
                         <div *ngFor="let item of section.items" class="legend-item" [ngClass]="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
                             <div class="legend-item-map" id="{{item.id}}"></div>
-                            <span class="legend-item-text">{{item.title}}</span>
+                            <a [href]="item.link" [target]="'_blank'" matTooltip="{{item.osmTags.join(', ')}}" matTooltipPosition="below" class="legend-item-text">{{item.title}}</a>
                         </div>
                     </div>
                 </div>

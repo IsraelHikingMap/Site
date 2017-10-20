@@ -1,0 +1,1 @@
+forfiles -p "C:\inetpub\logs\LogFiles\W3SVC3" -s -m *.* -d -60 -c "cmd /c del @path"

@@ -57,6 +57,7 @@ export interface IRouteLayer {
     isUndoDisbaled(): boolean;
     clear(): void;
     getEditMode(): EditMode;
+    setEditMode(editMode: EditMode): void;
     snapToRoute(latlng: L.LatLng): ISnappingResponse;
     raiseDataChanged(): void;
     getData(): Common.RouteData;

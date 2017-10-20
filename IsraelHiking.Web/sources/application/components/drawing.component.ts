@@ -16,19 +16,11 @@ import * as Common from "../common/IsraelHiking";
 })
 export class DrawingComponent extends BaseMapComponent {
 
-    public editMode: EditMode;
-
     constructor(resources: ResourcesService,
         private mapService: MapService,
         private routesService: RoutesService,
         private routeLayerFactory: RouteLayerFactory) {
         super(resources);
-
-        this.editMode = EditModeString.none;
-
-        this.routesService.routeChanged.subscribe(() => {
-            this.editMode = (this.routesService.selectedRoute != null) ? this.routesService.selectedRoute.getEditMode() : EditModeString.none;
-        });
     }
 
     @HostListener("window:keydown", ["$event"])
@@ -39,13 +31,7 @@ export class DrawingComponent extends BaseMapComponent {
         if ($event.ctrlKey && String.fromCharCode($event.which).toLowerCase() === "z") {
             this.undo($event);
         } else if ($event.keyCode === ESCAPE) {
-            let layer = this.routesService.selectedRoute;
-            if (layer != null) {
-                layer.setReadOnlyState();
-            }
-            this.editMode = EditModeString.none;
-        } else {
-            return;
+            this.setEditMode(EditModeString.none, $event);
         }
     }
 
@@ -57,31 +43,24 @@ export class DrawingComponent extends BaseMapComponent {
         }
     }
 
+    public getEditMode(): EditMode {
+        if (this.routesService.selectedRoute == null) {
+            return EditModeString.none;
+        }
+        return this.routesService.selectedRoute.getEditMode();
+    }
+
     public setEditMode(editMode: EditMode, e: Event) {
         this.suppressEvents(e);
         let selectedRoute = this.routesService.selectedRoute;
-        if (this.editMode === editMode) {
-            if (selectedRoute != null) {
-                selectedRoute.setReadOnlyState();
-            }
-            this.editMode = EditModeString.none;
+        if (selectedRoute == null) {
             return;
         }
-
-        switch (editMode) {
-            case EditModeString.poi:
-                if (selectedRoute != null) {
-                    selectedRoute.setEditPoiState();
-                    this.editMode = editMode;
-                }
-                return;
-            case EditModeString.route:
-                if (selectedRoute != null) {
-                    selectedRoute.setEditRouteState();
-                    this.editMode = editMode;
-                }
-                return;
+        if (this.getEditMode() === editMode) {
+            selectedRoute.setReadOnlyState();
+            return;
         }
+        this.routesService.selectedRoute.setEditMode(editMode);
     };
 
     public setRouting(routingType: Common.RoutingType, e: Event) {

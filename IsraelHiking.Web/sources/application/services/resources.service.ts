@@ -1,5 +1,4 @@
-﻿// link to translations: https://translate.zanata.org/iteration/view/IsraelHiking/Main
-import { Injectable } from "@angular/core";
+﻿import { Injectable } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
 import { Subject } from "rxjs/Subject";
 import { LocalStorage } from "ngx-store";
@@ -211,6 +210,7 @@ export class ResourcesService {
     public esri: string;
     public suggestAsPublicTrack: string;
     public createNakebHike: string;
+    public flowers: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -636,6 +636,7 @@ export class ResourcesService {
                 this.esri = this.gettextCatalog.getString("ESRI");
                 this.suggestAsPublicTrack = this.gettextCatalog.getString("Suggest as public track");
                 this.createNakebHike = this.gettextCatalog.getString("Create new hike in Nakeb");
+                this.flowers = this.gettextCatalog.getString("Flowers");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -858,5 +859,15 @@ export class ResourcesService {
 
     public getCurrentLanguageCodeSimplified = () => {
         return this.currentLanguage.code.split("-")[0];
+    }
+
+    public getResizedWikipediaImage(imageUrl: string, size: number) {
+        if (!imageUrl) {
+            return imageUrl;
+        }
+        if (imageUrl.indexOf("//upload.wikimedia.org/wikipedia/commons/") === -1) {
+            return imageUrl;
+        }
+        return imageUrl.replace(/(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)/, `$1thumb/$2$3/${size}px-$3`);
     }
 }

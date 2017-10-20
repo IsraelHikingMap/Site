@@ -1,0 +1,12 @@
+﻿.link-container {
+    position: relative;
+}
+
+.ihm-text {
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    color: blue;
+    font-weight: bold;
+    white-space: nowrap;
+}

@@ -4,30 +4,6 @@ if (!$env:APPVEYOR_BUILD_FOLDER) {
 	$env:APPVEYOR_BUILD_FOLDER = (get-item $scriptPath).parent.FullName
 }
 
-if (!$env:COVERALLS_REPO_TOKEN) {
-	$env:COVERALLS_REPO_TOKEN = "w3WvP9CEZ5M23oBONNsalxIgEzOmBwo9f"
-}
-if (!$env:APPVEYOR_REPO_COMMIT)
-{
-	$env:APPVEYOR_REPO_COMMIT = "178ba9471ed93c8b8a63bda2331867bb60f83829"
-}
-if (!$env:APPVEYOR_REPO_BRANCH)
-{
-	$env:APPVEYOR_REPO_BRANCH = "master"
-}
-if (!$env:APPVEYOR_REPO_COMMIT_AUTHOR)
-{
-	$env:APPVEYOR_REPO_COMMIT_AUTHOR = "Harel Mazor"
-}
-if (!$env:APPVEYOR_REPO_COMMIT_MESSAGE)
-{
-	$env:APPVEYOR_REPO_COMMIT_MESSAGE = "Debug commit message!"
-}
-if (!$env:APPVEYOR_JOB_ID) 
-{
-	$env:APPVEYOR_JOB_ID = "JobID"
-}
-
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
 
 # Locate Files
@@ -82,19 +58,25 @@ if ($LastExitCode) {
 
 $LcovCoverageFile = "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web\coverage\lcov.info"
 
-# Locate coveralls
+# Locate codecov
 
-$CoverAlls = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" csmacnz.Coveralls.exe -recurse | select-object -first 1 | select -expand FullName
+$CodeCov = get-childitem "C:\Users\$($env:UserName)\.nuget\packages\" codecov.exe -recurse | select-object -first 1 | select -expand FullName
 
-# Run coveralls
+# Run codecov
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
+$CodeCovToken = "fc1bea1d-f43a-437e-84d3-baef07be7454"
 
-# Fix issue with " in commit message
-$CommitMessage = $env:APPVEYOR_REPO_COMMIT_MESSAGE -replace "`"", "'"
-$CoverAllsCmd = "$($CoverAlls) --multiple -i `"opencover=$OpenCoverAPICoverageFile;opencover=$OpenCoverDACoverageFile;lcov=$LcovCoverageFile`" --repoToken $env:COVERALLS_REPO_TOKEN --commitId $env:APPVEYOR_REPO_COMMIT --commitBranch $env:APPVEYOR_REPO_BRANCH --commitAuthor `"$env:APPVEYOR_REPO_COMMIT_AUTHOR`" --commitMessage `"$CommitMessage`" --jobId $env:APPVEYOR_JOB_ID --commitEmail none --useRelativePaths"
-Write-Host $CoverAllsCmd
-Invoke-Expression $CoverAllsCmd
+$CodeCovCmd = "$($CodeCov) -f $OpenCoverAPICoverageFile -t $CodeCovToken"
+Write-Host $CodeCovCmd
+Invoke-Expression $CodeCovCmd
+$CodeCovCmd = "$($CodeCov) -f $OpenCoverDACoverageFile -t $CodeCovToken"
+Write-Host $CodeCovCmd
+Invoke-Expression $CodeCovCmd
+$CodeCovCmd = "$($CodeCov) -f $LcovCoverageFile -t $CodeCovToken"
+Write-Host $CodeCovCmd
+Invoke-Expression $CodeCovCmd
+
 if ($LastExitCode) {
 	$anyFailures = $TRUE
 }

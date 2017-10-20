@@ -4,8 +4,8 @@ import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { ResourcesService } from "./resources.service";
+import { IconsService } from "./icons.service";
 import * as Common from "../common/IsraelHiking";
-import {IconsService} from "./icons.service";
 
 
 @Injectable()
@@ -53,12 +53,9 @@ export class MapService {
         if (routeData == null || routeData.segments.length === 0) {
             return;
         }
-        for (let segment of routeData.segments) {
-            if (segment.latlngs.length < 2 ||
-                (segment.latlngs.length === 2 && segment.latlngs[0].equals(segment.latlngs[1]))) {
-                continue;
-            }
-            let polyLine = L.polyline(segment.latlngs,
+        let groupedLatLngs = this.getGroupedLatLngForAntPath(routeData.segments);
+        for (let group of groupedLatLngs) {
+            let polyLine = L.polyline(group,
                 {
                     opacity: 1,
                     color: "Blue",
@@ -67,21 +64,22 @@ export class MapService {
                     className: "segment-readonly-indicator"
                 } as L.PathOptions);
             readOnlyLayer.addLayer(polyLine);
-            readOnlyLayer.addLayer(L.marker(segment.latlngs[0],
-                {
-                    opacity: 1,
-                    draggable: false,
-                    clickable: false,
-                    icon: IconsService.createRoundIcon("green")
-                }));
-            readOnlyLayer.addLayer(L.marker(_.last(segment.latlngs),
-                {
-                    opacity: 1,
-                    draggable: false,
-                    clickable: false,
-                    icon: IconsService.createRoundIcon("red")
-                }));
         }
+
+        readOnlyLayer.addLayer(L.marker(_.first(_.first(routeData.segments).latlngs),
+            {
+                opacity: 1,
+                draggable: false,
+                clickable: false,
+                icon: IconsService.createRoundIcon("green")
+            }));
+        readOnlyLayer.addLayer(L.marker(_.last(_.last(routeData.segments).latlngs),
+            {
+                opacity: 1,
+                draggable: false,
+                clickable: false,
+                icon: IconsService.createRoundIcon("red")
+            }));
 
         for (let markerData of routeData.markers) {
             let marker = L.marker(markerData.latlng,
@@ -92,6 +90,48 @@ export class MapService {
                 } as L.MarkerOptions);
             marker.bindTooltip(markerData.title, { permanent: true, direction: "bottom" } as L.TooltipOptions);
             readOnlyLayer.addLayer(marker);
+        }
+    }
+
+    /**
+     * Gourp as many segment coordinates in order for the ant path to look smoother
+     * @param segments - the segments to group
+     * @returns {} - an array of array of coordinates
+     */
+    public getGroupedLatLngForAntPath(segments: Common.RouteSegmentData[]): L.LatLng[][] {
+        let groupedLatLngs = [] as L.LatLng[][]; 
+        let currentGroup = [] as L.LatLng[];
+        for (let segment of segments) {
+            if (currentGroup.length === 0) {
+                currentGroup = segment.latlngs;
+                continue;
+            }
+            if (_.last(currentGroup).equals(_.first(segment.latlngs))) {
+                currentGroup = currentGroup.concat(_.drop(segment.latlngs, 1));
+                continue;
+            }
+            groupedLatLngs.push(currentGroup);
+            currentGroup = segment.latlngs;
+        }
+        groupedLatLngs.push(currentGroup);
+        return groupedLatLngs;
+    }
+
+    public routesJsonToRoutesObject(routes: Common.RouteData[]) {
+        for (let route of routes) {
+            for (let segment of route.segments) {
+                let latlngs = [] as L.LatLng[];
+                for (let latlng of segment.latlngs) {
+                    var fullLatLng = L.latLng(latlng.lat, latlng.lng, latlng.alt);
+                    latlngs.push(fullLatLng);
+                }
+                segment.latlngs = latlngs;
+                segment.routePoint = L.latLng(segment.routePoint.lat, segment.routePoint.lng, segment.routePoint.alt);
+            }
+            route.markers = route.markers || [];
+            for (let marker of route.markers) {
+                marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng, marker.latlng.alt);
+            }
         }
     }
 }

@@ -109,19 +109,9 @@ export class RoutesService implements IRoutesService {
         if (!routes || routes.length === 0) {
             return;
         }
+        this.mapService.routesJsonToRoutesObject(routes);
         for (let route of routes) {
-            for (let segment of route.segments) {
-                let latlngs = [] as L.LatLng[];
-                for (let latlng of segment.latlngs) {
-                    var fullLatLng = L.latLng(latlng.lat, latlng.lng, latlng.alt);
-                    latlngs.push(fullLatLng);
-                }
-                segment.latlngs = latlngs;
-                segment.routePoint = L.latLng(segment.routePoint.lat, segment.routePoint.lng);
-            }
-            route.markers = route.markers || [];
             for (let marker of route.markers) {
-                marker.latlng = L.latLng(marker.latlng.lat, marker.latlng.lng);
                 if (!_.find(IconsService.getAvailableIconTypes(), m => m === marker.type)) {
                     marker.type = IconsService.getAvailableIconTypes()[0];
                 }

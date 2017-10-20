@@ -35,13 +35,13 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(Rating), 200)]
         public async Task<IActionResult> GetRating(string id, string source)
         {
-            if (string.IsNullOrWhiteSpace(source))
-            {
-                return BadRequest("Source is missing.");
-            }
             if (string.IsNullOrWhiteSpace(id))
             {
                 return BadRequest("Id is missing.");
+            }
+            if (string.IsNullOrWhiteSpace(source))
+            {
+                return BadRequest("Source is missing.");
             }
             return Ok(await _elasticSearchGateway.GetRating(id, source));
         }
@@ -56,23 +56,24 @@ namespace IsraelHiking.API.Controllers
         [Route("")]
         public async Task<IActionResult> UploadRating([FromBody] Rating rating)
         {
-            if (string.IsNullOrWhiteSpace(rating.Source))
-            {
-                return BadRequest("Source is missing.");
-            }
             if (string.IsNullOrWhiteSpace(rating.Id))
             {
                 return BadRequest("Id is missing.");
             }
-            var ratingFromDatabase = await _elasticSearchGateway.GetRating(rating.Id, rating.Source);
-            if (ratingFromDatabase.Raters.FirstOrDefault(r => r.Id == User.Identity.Name) != null)
+            if (string.IsNullOrWhiteSpace(rating.Source))
             {
-                return BadRequest("User already rated this item.");
+                return BadRequest("Source is missing.");
             }
             var rater = rating.Raters.FirstOrDefault(r => r.Id == User.Identity.Name);
             if (rater == null)
             {
                 return BadRequest("Invalid rating, new rating's raters should contain logged in user");
+            }
+            var ratingFromDatabase = await _elasticSearchGateway.GetRating(rating.Id, rating.Source);
+            var raterFromDatabase = ratingFromDatabase.Raters.FirstOrDefault(r => r.Id == User.Identity.Name);
+            if (raterFromDatabase != null)
+            {
+                ratingFromDatabase.Raters.Remove(raterFromDatabase);
             }
             ratingFromDatabase.Raters.Add(rater);
             await _elasticSearchGateway.UpdateRating(ratingFromDatabase);

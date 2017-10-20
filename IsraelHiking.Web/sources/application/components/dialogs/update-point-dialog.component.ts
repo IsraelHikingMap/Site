@@ -117,6 +117,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             title: this.title,
             url: this.websiteUrl,
             source: this.source,
+            type: this.elementType,
             location: this.location
         } as IPointOfInterestExtended;
         this.poiService.uploadPoint(poiExtended).then((response) => {
@@ -135,7 +136,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         if (this.imagesUrls.length === 0) {
             return null;
         }
-        return this.imagesUrls[this.currentImageIndex];
+        return this.resources.getResizedWikipediaImage(this.imagesUrls[this.currentImageIndex], 800);
     }
 
     public nextImage() {

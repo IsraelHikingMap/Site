@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net.Http;
+using System.Text;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
@@ -13,6 +14,18 @@ using Newtonsoft.Json;
 
 namespace IsraelHiking.DataAccess
 {
+    internal class JsonOffRoadRequest
+    {
+        public bool easy { get; set; }
+        public bool hard { get; set; }
+        public bool moderate { get; set; }
+        public bool cycling { get; set; }
+        public bool driving { get; set; }
+        public bool offRoading { get; set; }
+        public bool sailing { get; set; }
+        public bool walking { get; set; }
+    }
+
     internal class JsonOffRoadResponse
     {
         public JsonOffroadItem[] items { get; set; }
@@ -71,6 +84,19 @@ namespace IsraelHiking.DataAccess
 
         public async Task<List<Feature>> GetAll()
         {
+            // Need to split due to issues in off-road server
+            var tasks = new []
+            {
+                GetForCategory(new JsonOffRoadRequest {offRoading = true, hard = true, moderate = true, easy = true}),
+                GetForCategory(new JsonOffRoadRequest {cycling = true, hard = true, moderate = true, easy = true}),
+                GetForCategory(new JsonOffRoadRequest {walking = true, hard = true, moderate = true, easy = true})
+            };
+            var results = await Task.WhenAll(tasks);
+            return results.SelectMany(l => l).ToList();
+        }
+
+        private async Task<List<Feature>> GetForCategory(JsonOffRoadRequest request)
+        {
             var address = $"{OFFROAD_BASE_ADDRESS}/getTracksByFilter?fields=items(mapItemList,track(activityType,myAdventureUserId,id,start,end,title,userMail))";
             using (var client = new HttpClient())
             {
@@ -80,7 +106,8 @@ namespace IsraelHiking.DataAccess
                     "6214979527114752", // Nakeb
                     //"6221031622574080" // KKL - keeping it here and ignoring OSM data.
                 };
-                var response = await client.PostAsync(address, null);
+                var requestString = JsonConvert.SerializeObject(request);
+                var response = await client.PostAsync(address, new StringContent(requestString, Encoding.UTF8, "application/json"));
                 var stringContent = await response.Content.ReadAsStringAsync();
                 var jsonResponse = JsonConvert.DeserializeObject<JsonOffRoadResponse>(stringContent);
                 return jsonResponse.items
@@ -115,6 +142,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.NAME, offroadTrack.title},
                 {FeatureAttributes.POI_SOURCE, Sources.OFFROAD},
                 {FeatureAttributes.POI_CATEGORY, category},
+                {FeatureAttributes.POI_TYPE, string.Empty},
                 {FeatureAttributes.ICON, GetIconByCategory(category)},
                 {FeatureAttributes.ICON_COLOR, "black"},
                 {FeatureAttributes.SEARCH_FACTOR, 1},

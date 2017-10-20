@@ -29,11 +29,13 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="nakebGateway"></param>
         /// <param name="elevationDataStorage"></param>
         /// <param name="elasticSearchGateway"></param>
+        /// <param name="dataContainerConverterService"></param>
         /// <param name="logger"></param>
         public NakebPointsOfInterestAdapter(INakebGateway nakebGateway,
             IElevationDataStorage elevationDataStorage,
             IElasticSearchGateway elasticSearchGateway,
-            ILogger logger) : base(elevationDataStorage, elasticSearchGateway)
+            IDataContainerConverterService dataContainerConverterService,
+            ILogger logger) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
         {
             _nakebGateway = nakebGateway;
             _logger = logger;
@@ -47,14 +49,14 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
+        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = "")
         {
             var featureCollection = await _nakebGateway.GetById(int.Parse(id));
             var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, "he");
             await AddExtendedData(poiItem, mainFeature, language);
-            poiItem.FeatureCollection = featureCollection;
             poiItem.IsEditable = false;
+            poiItem.IsRoute = true;
             poiItem.SourceImageUrl = "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg";
             return poiItem;
         }

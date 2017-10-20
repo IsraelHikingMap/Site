@@ -21,6 +21,8 @@ export interface ILegendItem {
     id: string;
     map: L.Map;
     type: LegendItemType;
+    osmTags: string[];
+    link: string;
 }
 
 export interface ILegendSection {
@@ -125,7 +127,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: ["colour=red", "highway=track"],
+                        link: ""
                     },
                     {
                         title: this.resources.legendBlueMarkedTrail,
@@ -133,7 +137,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendGreenMarkedTrail,
@@ -141,7 +147,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendBlackMarkedTrail,
@@ -149,7 +157,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendIsraelTrail,
@@ -157,7 +167,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendPurpleRegionalTrail,
@@ -165,7 +177,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendOrangeRegionalTrail,
@@ -173,7 +187,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -187,7 +203,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendSeatoSeaTrail,
@@ -195,7 +213,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendGolanTrail,
@@ -203,7 +223,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendKinneretTrail,
@@ -211,7 +233,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendHaifaWadisTrail,
@@ -219,7 +243,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendKinneretBicycleTrail,
@@ -227,7 +253,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -241,7 +269,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendEasyWithDirection,
@@ -249,7 +279,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendModerate,
@@ -257,7 +289,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendAdvanced,
@@ -265,7 +299,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendChallangingWithDirection,
@@ -273,7 +309,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -287,7 +325,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendRegionalTrail,
@@ -295,7 +335,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendNationalTrail,
@@ -303,7 +345,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -317,7 +361,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendLight4WDVehicles,
@@ -325,7 +371,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendStrong4WDVehicles,
@@ -333,7 +381,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendDifficult4WD,
@@ -341,7 +391,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendPath,
@@ -349,7 +401,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendFootPath,
@@ -357,7 +411,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendBicyclePath,
@@ -365,7 +421,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendSteps,
@@ -373,7 +431,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -387,7 +447,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendWadi,
@@ -395,7 +457,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendRiver,
@@ -403,7 +467,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendLakeReservoir,
@@ -411,7 +477,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendSeasonalLake,
@@ -419,7 +487,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendWetland,
@@ -427,7 +497,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendDryRiverbed,
@@ -435,7 +507,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendSpringPond,
@@ -443,7 +517,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendWaterHole,
@@ -451,7 +527,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendWaterWell,
@@ -459,7 +537,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendCistern,
@@ -467,7 +547,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendWaterfall,
@@ -475,7 +557,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendWaterTower,
@@ -483,7 +567,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -497,7 +583,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendTrunk,
@@ -505,7 +593,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 14,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendPrimary,
@@ -513,7 +603,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendSecondary,
@@ -521,7 +613,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendTertiary,
@@ -529,7 +623,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendUnclassified,
@@ -537,7 +633,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendLowSpeedStreet,
@@ -545,7 +643,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendResidental,
@@ -553,7 +653,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendBridge,
@@ -561,7 +663,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendTunnel,
@@ -569,7 +673,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -583,7 +689,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendRailwayTunnel,
@@ -591,7 +699,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendRailwayStation,
@@ -599,7 +709,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendRunwayTaxiway,
@@ -607,7 +719,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendAerialway,
@@ -615,7 +729,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -629,7 +745,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendPeak,
@@ -637,7 +755,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 14,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendRuins,
@@ -645,7 +765,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendArcheologicalSite,
@@ -653,7 +775,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendCave,
@@ -661,7 +785,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendAttraction,
@@ -669,7 +795,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendTree,
@@ -677,15 +805,19 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendSynagogue,
-                        latlng: L.latLng(31.7766,35.2343),
+                        latlng: L.latLng(31.7766, 35.2343),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendChurch,
@@ -693,7 +825,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendMosque,
@@ -701,7 +835,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendHolyPlace,
@@ -709,7 +845,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendMemorial,
@@ -717,7 +855,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendMonument,
@@ -725,7 +865,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendObservationTower,
@@ -733,7 +875,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendAntenna,
@@ -741,7 +885,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendPowerLine,
@@ -749,7 +895,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendPlayground,
@@ -757,7 +905,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -771,7 +921,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendClosedGate,
@@ -779,7 +931,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendStile,
@@ -787,7 +941,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendBlock,
@@ -795,7 +951,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendLiftGate,
@@ -803,7 +961,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendCattleGrid,
@@ -811,7 +971,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendFence,
@@ -819,7 +981,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendWall,
@@ -827,7 +991,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendCliff,
@@ -835,7 +1001,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -849,7 +1017,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendNatureReserveNationalPark,
@@ -857,7 +1027,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendMilitaryArea,
@@ -865,7 +1037,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendAreaA,
@@ -873,7 +1047,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendAreaB,
@@ -881,7 +1057,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendInternationalBorder,
@@ -889,7 +1067,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendTheGreenLine,
@@ -897,7 +1077,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendThePurpleLine,
@@ -905,7 +1087,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 14,
                         id: "_" + id++,
                         map: null,
-                        type: "Way"
+                        type: "Way",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -919,7 +1103,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 14,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendFirstAid,
@@ -927,7 +1113,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendPicnicArea,
@@ -935,7 +1123,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendCampsite,
@@ -943,7 +1133,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendDrinkingWater,
@@ -951,7 +1143,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendCafé,
@@ -959,7 +1153,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendReastaurant,
@@ -967,7 +1163,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendParking,
@@ -975,7 +1173,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendFuelStation,
@@ -983,7 +1183,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendConvenienceStore,
@@ -991,7 +1193,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendLodging,
@@ -999,7 +1203,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 14,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendToilettes,
@@ -1007,7 +1213,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendInformationCenter,
@@ -1015,7 +1223,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendGuidepost,
@@ -1023,7 +1233,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             },
@@ -1037,7 +1249,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 13,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendOrchard,
@@ -1045,7 +1259,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendCrop,
@@ -1053,7 +1269,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendWoods,
@@ -1061,7 +1279,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendGrass,
@@ -1069,7 +1289,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendScrub,
@@ -1077,7 +1299,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendSand,
@@ -1085,7 +1309,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendCemetary,
@@ -1093,7 +1319,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     },
                     {
                         title: this.resources.legendQuarry,
@@ -1101,7 +1329,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: ["landuse=quarry"],
+                        link: "http://wiki.openstreetmap.org/wiki/Tag:landuse%3Dquarry"
                     },
                     {
                         title: this.resources.legendConstructionSite,
@@ -1109,7 +1339,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
-                        type: "POI"
+                        type: "POI",
+                        osmTags: [],
+                        link: ""
                     }
                 ]
             }
@@ -1173,7 +1405,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
         this.removeItemInSection(this.resources.legendBarriers, this.resources.legendStile);
         this.removeItemInSection(this.resources.legendBarriers, this.resources.legendLiftGate);
-        
+
         this.removeItemInSection(this.resources.legendBorders, this.resources.legendBikePark);
 
         this.removeItemInSection(this.resources.legendRoads, this.resources.legendLowSpeedStreet);

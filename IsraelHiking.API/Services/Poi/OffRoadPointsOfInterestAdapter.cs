@@ -23,8 +23,9 @@ namespace IsraelHiking.API.Services.Poi
         public OffRoadPointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
             IElasticSearchGateway elasticSearchGateway, 
             IOffRoadGateway offRoadGateway,
+            IDataContainerConverterService dataContainerConverterService,
             ILogger logger) : 
-            base(elevationDataStorage, elasticSearchGateway)
+            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
         {
             _offRoadGateway = offRoadGateway;
             _logger = logger;
@@ -41,13 +42,12 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
+        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = "")
         {
             var featureCollection = await _offRoadGateway.GetById(id);
             var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, "he");
             await AddExtendedData(poiItem, mainFeature, language);
-            poiItem.FeatureCollection = featureCollection;
             poiItem.IsEditable = false;
             poiItem.IsRoute = true;
             return poiItem;
@@ -56,15 +56,13 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
-            // Not supported
-            throw new NotImplementedException();
+            throw new Exception("OffRoad does not support adding.");
         }
 
         /// <inheritdoc />
         public Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
-            // Not supported
-            throw new NotImplementedException();
+            throw new Exception("OffRoad does not support updating.");
         }
 
         /// <inheritdoc />

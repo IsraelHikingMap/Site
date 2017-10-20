@@ -4,8 +4,8 @@ import { Http } from "@angular/http";
 import { ResourcesService } from "../../services/resources.service";
 import { PoiService, IPointOfInterestExtended } from "../../services/poi.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
+import { MapService } from "../../services/map.service";
 import { ElevationProvider } from "../../services/elevation.provider";
-import { GeoJsonParser } from "../../services/geojson.parser";
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 import * as Common from "../../common/IsraelHiking";
 
@@ -17,6 +17,7 @@ import * as Common from "../../common/IsraelHiking";
 export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent {
     public id: string;
     public source: string;
+    public type: string;
 
     private poiExtended: IPointOfInterestExtended;
 
@@ -25,8 +26,8 @@ export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent 
         applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider,
         private poiService: PoiService,
-        private geoJsonParser: GeoJsonParser,
-        private routesService: RoutesService) {
+        private routesService: RoutesService,
+        private mapService: MapService) {
         super(resources, http, applicationRef, elevationProvider);
     }
 
@@ -36,21 +37,21 @@ export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent 
     };
     public clearSelectedRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
 
-    public setIdAndSource(id: string, source: string) {
+    public setIdSourceAndType(id: string, source: string, type: string) {
         this.id = id;
         this.source = source;
-        this.poiService.getPoint(this.id, this.source).then((response) => {
+        this.type = type;
+        this.poiService.getPoint(this.id, this.source, this.type).then((response) => {
             this.poiExtended = response.json() as IPointOfInterestExtended;
-            var dataContainer = this.geoJsonParser.toDataContainer(this.poiExtended.featureCollection,
-                this.resources.getCurrentLanguageCodeSimplified());
-            this.selectRoute(dataContainer.routes[0]);
+            this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
+            this.selectRoute(this.poiExtended.dataContainer.routes[0]);
         });
     }
 
     public convertToRoute = () => {
-        var container = this.geoJsonParser.toDataContainer(this.poiExtended.featureCollection,
-            this.resources.getCurrentLanguageCodeSimplified());
-        this.routesService.setData([container.routes[0]]);
+        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes)) as Common.RouteData[];
+        this.mapService.routesJsonToRoutesObject(routesCopy);
+        this.routesService.setData([routesCopy[0]]);
         this.clearSelectedRoute();
         this.marker.closePopup();
     }

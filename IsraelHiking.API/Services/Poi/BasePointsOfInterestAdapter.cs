@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
@@ -15,17 +16,21 @@ namespace IsraelHiking.API.Services.Poi
     {
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IDataContainerConverterService _dataContainerConverterService;
 
         /// <summary>
         /// Adapter's constructor
         /// </summary>
         /// <param name="elevationDataStorage"></param>
         /// <param name="elasticSearchGateway"></param>
+        /// <param name="dataContainerConverterService"></param>
         protected BasePointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
-            IElasticSearchGateway elasticSearchGateway)
+            IElasticSearchGateway elasticSearchGateway, 
+            IDataContainerConverterService dataContainerConverterService)
         {
             _elevationDataStorage = elevationDataStorage;
             _elasticSearchGateway = elasticSearchGateway;
+            _dataContainerConverterService = dataContainerConverterService;
         }
 
         /// <summary>
@@ -38,8 +43,7 @@ namespace IsraelHiking.API.Services.Poi
         protected async Task<TPoiItem> ConvertToPoiItem<TPoiItem>(IFeature feature, string language) where TPoiItem : PointOfInterest, new()
         {
             var poiItem = new TPoiItem();
-            var geoLocation = feature.Attributes[FeatureAttributes.GEOLOCATION] as AttributesTable;
-            if (geoLocation != null)
+            if (feature.Attributes[FeatureAttributes.GEOLOCATION] is AttributesTable geoLocation)
             {
                 poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
                 var alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(poiItem.Location));
@@ -51,6 +55,7 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString();
             poiItem.Icon = feature.Attributes[FeatureAttributes.ICON].ToString();
             poiItem.IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString();
+            poiItem.Type = feature.Attributes[FeatureAttributes.POI_TYPE].ToString();
             return poiItem;
         }
 
@@ -87,7 +92,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
             }
-            poiItem.FeatureCollection = new FeatureCollection(new Collection<IFeature> { feature });
+            poiItem.DataContainer = await  _dataContainerConverterService.ToDataContainer(new FeatureCollection(new Collection<IFeature> { feature }).ToBytes(), poiItem.Title + ".geojson");
             poiItem.Url = feature.Attributes.GetNames().Contains(FeatureAttributes.WEBSITE)
                 ? feature.Attributes[FeatureAttributes.WEBSITE].ToString()
                 : string.Empty;

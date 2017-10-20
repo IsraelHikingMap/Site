@@ -1,4 +1,4 @@
-﻿import { Component, ViewEncapsulation } from "@angular/core";
+﻿import { Component, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MdDialog } from "@angular/material";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
@@ -31,7 +31,7 @@ interface ICategoriesContainer {
     styleUrls: ["./layers-sidebar.component.css"],
     encapsulation: ViewEncapsulation.None
 })
-export class LayersSidebarComponent extends BaseMapComponent {
+export class LayersSidebarComponent extends BaseMapComponent implements OnDestroy {
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public routes: IRouteLayer[];
@@ -64,6 +64,10 @@ export class LayersSidebarComponent extends BaseMapComponent {
                 isExpanded: false
             });
         }
+    }
+
+    public ngOnDestroy() {
+        // this is required in order for local storage to work properly.
     }
 
     public closeSidebar() {
