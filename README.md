@@ -57,6 +57,7 @@ In order to be able to build this site you'll need some tools:
 * Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
+* [.Net core SDK 2.0 ](https://www.microsoft.com/net/download/core)
 * Install [node.js](https://nodejs.org/en/) for windows (6.10+). Use the recommended 64-bit installer on modern Windows versions.
 * Open Visual Studio
 * Follow [these steps](http://stackoverflow.com/questions/43849585/update-node-version-in-visual-studio-2017) to update the version of node.js Visual Studio uses
@@ -70,19 +71,21 @@ In order to be able to build this site you'll need some tools:
   * Find the `VSIX Installer` window and click _Modify_, wait for the installation to complete, and close it
   * Open Visual Studio, wait for the installations to complete, and restart when asked
 * Open `IsraelHiking.sln`. You may use _File &rarr; Recent Projects and Solutions_
-* Compile using `Ctrl-Shift-B` - Note that it will take time to download all the packages so be patience
-* Place a `nonPublic.json` at `D:\Dropbox\IsraelHikingGithub` (or change the `appsetting.json` nonPublic property to a file containineg the following json)
+* Compile using `Ctrl-Shift-B` - Note that it will take time to download all the packages so be patient
+* Right click on IsraelHiking.Web and select Manage User Secrets. in the file that opens add the following fields (note that wiki is required for uploading images from your debug environment and zanata is required for translation - if you are not using wither you can keep the file empty).
 ```
 {
 	wikiMediaUserName: "your wikimedia user",
 	wikiMediaPassword: "your wikimedia password"
+	"zanataUserName": "your zanata user",
+  	"zanataApiKey": "your zanata api key"
 }
 ```
 * In Visual Studio, _View &rarr; Other Windows... &rarr; Package Manager Console_
   * Select IsraelHiking.DataAccess from the Default project dropdown
   * Type the following commands at the `PM>` prompt. Most of the commands may take a while. Ignore all _WARN_ messsages.
   ```
-  npm install -g @angular/cli@latest --loglevel error
+  npm install -g @angular/cli@1.4.4 --loglevel error
   Update-Database
   ```
 # Starting a debug session
