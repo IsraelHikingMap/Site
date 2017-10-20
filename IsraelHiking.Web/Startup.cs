@@ -32,6 +32,17 @@ namespace IsraelHiking.Web
 {
     public class Startup
     {
+        private readonly bool _isDevelopment;
+        private readonly IConfigurationRoot _nonPublicConfiguration;
+
+        public Startup(IHostingEnvironment env)
+        {
+            _isDevelopment = env.IsDevelopment();
+            var builder = new ConfigurationBuilder();
+            builder.AddUserSecrets<NonPublicConfigurationData>();
+            _nonPublicConfiguration = builder.Build();
+        }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -40,6 +51,7 @@ namespace IsraelHiking.Web
             services.AddIHMApi();
             services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
             services.AddSingleton<IGeometryFactory, GeometryFactory>(serviceProvider => new GeometryFactory(new PrecisionModel(100000000)));
+            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>();
             services.AddMvc(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
@@ -55,26 +67,15 @@ namespace IsraelHiking.Web
                 options.SerializerSettings.Converters.Add(new GeometryArrayConverter());
                 options.SerializerSettings.Converters.Add(new EnvelopeConverter());
             });
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
-            {
-                options.SecurityTokenValidators.Clear();
-                options.SecurityTokenValidators.Add(services.BuildServiceProvider().GetRequiredService<ISecurityTokenValidator>());
-            });
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
             services.AddCors();
             services.AddOptions();
-            
-            var configFileName = services.BuildServiceProvider().GetService<IHostingEnvironment>().IsDevelopment()
-                ? "appsettings.json"
-                : "appsettings.Production.json";
+
             var config = new ConfigurationBuilder()
-                .AddJsonFile(configFileName, optional: false, reloadOnChange: true)
+                .AddJsonFile(_isDevelopment ? "appsettings.json" : "appsettings.Production.json", optional: false, reloadOnChange: true)
                 .Build();
             services.Configure<ConfigurationData>(config);
-            var nonPublicConfigurationFilePath = services.BuildServiceProvider().GetService<IOptions<ConfigurationData>>().Value.NonPublicConfigurationFilePath;
-            var nonPublicConfiguration = new ConfigurationBuilder()
-                .AddJsonFile(nonPublicConfigurationFilePath, optional: true, reloadOnChange: true)
-                .Build();
-            services.Configure<NonPublicConfigurationData>(nonPublicConfiguration);
+            services.Configure<NonPublicConfigurationData>(_nonPublicConfiguration);
 
             services.AddSingleton(serviceProvider => serviceProvider.GetRequiredService<ILoggerFactory>().CreateLogger("IHM"));
             var binariesFolder = "";
@@ -160,12 +161,12 @@ namespace IsraelHiking.Web
                         Formatter = new BootstrapFontAwesomeDirectoryFormatter(app.ApplicationServices
                             .GetRequiredService<IFileSystemHelper>())
                     },
-                    StaticFileOptions = {ContentTypeProvider = fileExtensionContentTypeProvider},
+                    StaticFileOptions = { ContentTypeProvider = fileExtensionContentTypeProvider },
                 };
                 app.UseFileServer(fileServerOptions);
             }
             // serve https certificate folder
-            var wellKnownFolder = Path.Combine(Directory.GetCurrentDirectory(), @".well-known");
+            var wellKnownFolder = Path.Combine(Directory.GetCurrentDirectory(), ".well-known");
             if (Directory.Exists(wellKnownFolder))
             {
                 app.UseStaticFiles(new StaticFileOptions

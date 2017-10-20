@@ -20,8 +20,6 @@ namespace IsraelHiking.Common
         public double ClosestPointTolerance { get; set; }
         public string BinariesFolder { get; set; }
         public string DefaultLanguage { get; set; }
-        public string NonPublicConfigurationFilePath { get; set; }
-        // Should be in non publish, but I'm keeping it here for simplicity.
         public OsmConfiguraionData OsmConfiguraion { get; set; }
         public Dictionary<string, string> ListingDictionary { get; set; }
         public List<string> Colors { get; set; }
@@ -44,7 +42,6 @@ namespace IsraelHiking.Common
             SearchFactor = 0.5; // number
             BinariesFolder = string.Empty;
             DefaultLanguage = "he";
-            NonPublicConfigurationFilePath = "someFile.json";
             OsmConfiguraion = new OsmConfiguraionData
             {
                 ConsumerKey = "E8p0RX0rnQPxDaj3IijgpMNeK8lRTyy6rlKxQ8IF",

@@ -57,10 +57,7 @@ namespace IsraelHiking.API.Controllers
             return Ok(userLayers);
         }
 
-        /// <summary>
-        /// Follows dispose pattern
-        /// </summary>
-        /// <param name="disposing"></param>
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing && _repository != null)

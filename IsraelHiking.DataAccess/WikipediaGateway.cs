@@ -49,7 +49,8 @@ namespace IsraelHiking.DataAccess
             var wikiFileName = GetNonExistingFilePageName(title, fileName);
             var comment = CreateWikipediaComment(location, string.IsNullOrWhiteSpace(title) ? title : fileName);
             await _site.GetTokenAsync("edit", true);
-            var results = await FilePage.UploadAsync(_site, contentStream, wikiFileName, comment, true);
+            var filePage = new FilePage(_site, wikiFileName);
+            var results = await filePage.UploadAsync(new StreamUploadSource(contentStream), comment, true);
             if (results.ResultCode != UploadResultCode.Success)
             {
                 throw new Exception("Unable to upload the file\n" + string.Join("\n", results.Warnings.Select(kvp => kvp.Key + ": " + kvp.Value)));
