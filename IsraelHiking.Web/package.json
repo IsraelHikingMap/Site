@@ -26,7 +26,7 @@
     "leaflet.markercluster": "^1.0.5",
     "lodash": "^4.17.4",
     "ngx-clipboard": "^8.1.0",
-    "ngx-pagination": "^3.0.1",
+    "ngx-pagination": "3.0.1",
     "ngx-progressbar": "^2.0.8",
     "ngx-store": "^1.1.8",
     "osm-auth": "^1.0.2",
