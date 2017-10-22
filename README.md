@@ -72,22 +72,24 @@ In order to be able to build this site you'll need some tools:
   * Open Visual Studio, wait for the installations to complete, and restart when asked
 * Open `IsraelHiking.sln`. You may use _File &rarr; Recent Projects and Solutions_
 * Compile using `Ctrl-Shift-B` - Note: please be patient as it will take time to download all the packages.
-* Right-click on `IsraelHiking.Web` and select `Manage User Secrets`.<br/><img width="397" alt="2017-10-22 10_47_32-" src="https://user-images.githubusercontent.com/1304610/31860867-3b283092-b72a-11e7-8119-fe04ecd13852.png"><br> In the file that opens add the following fields (note that wiki is required for uploading images from your debug environment and zanata is required for translation - if you are not using either you can keep the file empty).
-```
-{
-	wikiMediaUserName: "your wikimedia user",
-	wikiMediaPassword: "your wikimedia password"
-	"zanataUserName": "your zanata user",
-  	"zanataApiKey": "your zanata api key"
-}
-```
+* If you want to update the translations or upload images from your debug environment, right-click on `IsraelHiking.Web` and select `Manage User Secrets`. Otherwise, skip this step.    
+  <img width="397" alt="2017-10-22 10_47_32-" src="https://user-images.githubusercontent.com/1304610/31860867-3b283092-b72a-11e7-8119-fe04ecd13852.png">    
+  In the `secrets.json` file that opens add the applicable fields and save the file.
+  ```
+  {
+    wikiMediaUserName: "your wikimedia user",
+    wikiMediaPassword: "your wikimedia password"
+    "zanataUserName": "your zanata user",
+    "zanataApiKey": "your zanata api key"
+  }
+  ```
 * In Visual Studio, _View &rarr; Other Windows... &rarr; Package Manager Console_
   * Select IsraelHiking.DataAccess from the Default project dropdown
   * Type the following commands at the `PM>` prompt. Most of the commands may take a while. Ignore all _WARN_ messsages.
-  ```
-  npm install -g @angular/cli@1.4.4 --loglevel error
-  Update-Database
-  ```
+    ```
+    npm install -g @angular/cli@1.4.4 --loglevel error
+    Update-Database
+    ```
 # Starting a debug session
 [See the relevant page in our wiki](https://github.com/IsraelHikingMap/Site/wiki/Debug-Environment-Setup)
 
