@@ -55,6 +55,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GenerateContentAsync_ForDeeperPath_ShouldReturnFiles()
         {
             var context = new DefaultHttpContext();
+            context.Request.Path = "/path/to/file";
             var stream = new MemoryStream();
             context.Response.Body = stream;
             var fileNames = new[] {"zipfile.zip", "image.png", "xml.xml", "text.txt"};
@@ -75,7 +76,8 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _formatter.GenerateContentAsync(context, content).Wait();
             var html = Encoding.UTF8.GetString(stream.ToArray());
-            
+
+            Assert.IsTrue(html.Contains("<a href='/path/to/file/'"));
             Assert.IsTrue(html.Contains("fa-file-zip"));
             Assert.IsTrue(html.Contains("fa-file-code"));
             Assert.IsTrue(html.Contains("fa-file-image"));
