@@ -128,7 +128,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: ["colour=red", "highway=track"],
+                        osmTags: ["colour=red"],
                         link: ""
                     },
                     {
@@ -138,7 +138,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["colour=blue"],
                         link: ""
                     },
                     {
@@ -148,7 +148,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["colour=green"],
                         link: ""
                     },
                     {
@@ -158,7 +158,17 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["colour=black"],
+                        link: ""
+                    },
+                    {
+                        title: this.resources.legendUnmarkedTrail,
+                        latlng: L.latLng(31.1859, 34.7866),
+                        zoom: 16,
+                        id: "_" + id++,
+                        map: null,
+                        type: "Way",
+                        osmTags: ['no "colour" tag'],
                         link: ""
                     },
                     {
@@ -270,7 +280,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ['no "mtb:scale" tag'],
                         link: ""
                     },
                     {
@@ -280,7 +290,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["mtb:scale=0"],
                         link: ""
                     },
                     {
@@ -290,7 +300,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["mtb:scale=2, mtb:scale=3"],
                         link: ""
                     },
                     {
@@ -300,7 +310,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["mtb:scale=4, mtb:scale=5"],
                         link: ""
                     },
                     {
@@ -310,7 +320,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+			osmTags: ["mtb:scale=6"],
                         link: ""
                     }
                 ]
