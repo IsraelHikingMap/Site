@@ -1,4 +1,5 @@
-﻿using IsraelHiking.Common;
+﻿using System.Diagnostics.CodeAnalysis;
+using IsraelHiking.Common;
 using Microsoft.EntityFrameworkCore;
 
 namespace IsraelHiking.DataAccess.Database
