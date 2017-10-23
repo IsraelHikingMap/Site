@@ -141,9 +141,32 @@ namespace IsraelHiking.API.Tests.Controllers
             _israelHikingRepository.Received(1).Update(Arg.Any<SiteUrl>());
         }
 
+        [TestMethod]
+        public void DeleteSiteUrl_ItemNotInDatabase_ShouldReturnNotFound()
+        {
+            var id = "42";
+            _israelHikingRepository.GetUrlById(id).Returns(null as SiteUrl);
+
+            var result = _controller.DeleteSiteUrl(id).Result as NotFoundResult;
+
+            Assert.IsNotNull(result);
+        }
 
         [TestMethod]
-        public void DeleteSiteUrl_ItemNotInDatabase_ShouldRemoveIt()
+        public void DeleteSiteUrl_ItemUserIdDoesNotMatchUSer_ShouldReturnBadRequest()
+        {
+            _controller.SetupIdentity("1");
+            var siteUrl = new SiteUrl { Id = "11", OsmUserId = "11" };
+            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
+
+            var result = _controller.DeleteSiteUrl(siteUrl.Id).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(result);
+        }
+
+
+        [TestMethod]
+        public void DeleteSiteUrl_ItemInDatabase_ShouldRemoveIt()
         {
             var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
             _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);

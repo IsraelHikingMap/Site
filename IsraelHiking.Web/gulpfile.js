@@ -9,13 +9,12 @@ var upload = require("gulp-upload");
 var md5File = require("md5-file");
 var download = require("gulp-download-stream");
 var open = require("gulp-open");
-var appSettings = require("./appsettings.json");
 
-if (fs.existsSync(appSettings.nonPublicConfigurationFilePath)) {
-    var nonPublic = require(appSettings.nonPublicConfigurationFilePath);
+var secretsFile = process.env.APPDATA + "\\Microsoft\\UserSecrets\\a21e53dc-017c-42f4-be3d-5dbe7eaf9433\\secrets.json";
+if (fs.existsSync(secretsFile)) {
+    var nonPublic = require(secretsFile);
 } else {
-    throw new Error("The following file is needed: " + appSettings.nonPublicConfigurationFilePath + "\n" +
-        "the path is defined in appsettings.json file property: 'nonPublicConfigurationFilePath'\n" +
+    throw new Error("The following file is needed: " + secretsFile + "\n" +
         "see 'https://github.com/IsraelHikingMap/Site/wiki/Adding-New-Text-and-Updating-the-Translations' for more information");
 }
 
@@ -41,7 +40,7 @@ var uploadOptions = {
     },
     headers: {
         "X-Auth-User": nonPublic.zanataUserName,
-        "X-Auth-Token": nonPublic.nonzanataApiKey
+        "X-Auth-Token": nonPublic.zanataApiKey
     },
     callback: function (err, data, res) {
         if (err) {

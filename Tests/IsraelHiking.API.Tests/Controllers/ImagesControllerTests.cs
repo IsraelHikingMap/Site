@@ -27,6 +27,12 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller = new ImagesController(_repository, _imageCreationService, options);
         }
 
+        [TestCleanup]
+        public void TestCleanUp()
+        {
+            _controller.Dispose();
+        }
+
         [TestMethod]
         public void GetImage_NoUrl_ShouldNotFound()
         {
@@ -48,6 +54,14 @@ namespace IsraelHiking.API.Tests.Controllers
             var results = _controller.GetImage(siteUrl.Id).Result as FileContentResult;
 
             Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void GetColors()
+        {
+            var results = _controller.GetColors();
+
+            Assert.AreEqual(new ConfigurationData().Colors.Count, results.Count);
         }
     }
 }
