@@ -282,6 +282,7 @@ export class ResourcesService {
     public legendBlueMarkedTrail: string;
     public legendGreenMarkedTrail: string;
     public legendBlackMarkedTrail: string;
+    public legendUnmarkedTrail: string;
     public legendIsraelTrail: string;
     public legendRegionalTrail: string;
     public legendTrails: string;
@@ -709,6 +710,7 @@ export class ResourcesService {
                 this.legendBlueMarkedTrail = this.gettextCatalog.getString("Blue Marked Trail");
                 this.legendGreenMarkedTrail = this.gettextCatalog.getString("Green Marked Trail");
                 this.legendBlackMarkedTrail = this.gettextCatalog.getString("Black Marked Trail");
+                this.legendUnmarkedTrail = this.gettextCatalog.getString("Unarked Trail");
                 this.legendIsraelTrail = this.gettextCatalog.getString("Israel Trail");
                 this.legendRegionalTrail = this.gettextCatalog.getString("Regional Trail");
                 this.legendTrails = this.gettextCatalog.getString("Trails");
