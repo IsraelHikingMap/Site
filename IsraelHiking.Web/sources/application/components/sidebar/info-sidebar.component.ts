@@ -163,7 +163,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendUnmarkedTrail,
-                        latlng: L.latLng(31.1859, 34.7866),
+                        latlng: L.latLng(31.1862, 34.7866),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
