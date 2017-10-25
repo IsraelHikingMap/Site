@@ -51,7 +51,7 @@ namespace IsraelHiking.DataAccess
                 }
                 else
                 {
-                    _logger.LogError($"Process {fileName} did not finished succesfully");
+                    _logger.LogError($"Process {processToRun} {cmdArguments} did not finished succesfully");
                 }
             }
         }

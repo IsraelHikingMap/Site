@@ -37,7 +37,7 @@ namespace IsraelHiking.DataAccess
                 return Task.CompletedTask;
             }
             var hgtZipFiles = _fileProvider.GetDirectoryContents(ELEVATION_CACHE);
-            _logger.LogDebug("Found " + hgtZipFiles.Count() + " files in: " + _fileProvider.GetFileInfo(ELEVATION_CACHE).PhysicalPath);
+            _logger.LogInformation("Found " + hgtZipFiles.Count() + " files in: " + _fileProvider.GetFileInfo(ELEVATION_CACHE).PhysicalPath);
             foreach (var hgtZipFile in hgtZipFiles)
             {
                 var bottomLeftLat = int.Parse(hgtZipFile.Name.Substring(1, 2));
@@ -46,7 +46,7 @@ namespace IsraelHiking.DataAccess
 
                 _initializationTaskPerLatLng[key] = Task.Run(() =>
                 {
-                    _logger.LogDebug("Reading file " + hgtZipFile.Name);
+                    _logger.LogInformation("Reading file " + hgtZipFile.Name);
                     var byteArray = GetByteArrayFromZip(hgtZipFile);
                     int samples = (short) (Math.Sqrt(byteArray.Length/2.0) + 0.5);
                     var elevationArray = new short[samples, samples];
@@ -56,7 +56,7 @@ namespace IsraelHiking.DataAccess
                         elevationArray[(byteIndex/2)/samples, (byteIndex/2)%samples] = currentElevation;
                     }
                     _elevationData[key] = elevationArray;
-                    _logger.LogDebug("Finished reading file " + hgtZipFile.Name);
+                    _logger.LogInformation("Finished reading file " + hgtZipFile.Name);
                 });
             }
 

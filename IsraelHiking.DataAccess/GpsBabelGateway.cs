@@ -41,7 +41,7 @@ namespace IsraelHiking.DataAccess
                 File.Delete(inputTempfileName);
                 var outputContent = File.ReadAllBytes(outputTempfileName);
                 File.Delete(outputTempfileName);
-                _logger.LogDebug("Finished converting data from: " + inputFormat + " to: " + outputFormat);
+                _logger.LogInformation("Finished converting data from: " + inputFormat + " to: " + outputFormat);
                 return outputContent;
             });
         }

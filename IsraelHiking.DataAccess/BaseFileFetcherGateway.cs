@@ -34,7 +34,7 @@ namespace IsraelHiking.DataAccess
                 }
                 else
                 {
-                    _logger.LogDebug("Unable to retrieve file from: " + url + ", Status code: " + response.StatusCode);
+                    _logger.LogError("Unable to retrieve file from: " + url + ", Status code: " + response.StatusCode);
                 }
 
                 return new RemoteFileFetcherGatewayResponse
