@@ -1,0 +1,42 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+    <metadata>
+		<!-- The identifier that must be unique within the hosting gallery -->
+		<id>IsraelHiking.GraphHopper</id>
+		<!-- The package version number that is used when resolving dependencies -->
+		<version>0.10</version>
+		<!-- Authors contain text that appears directly on the gallery -->
+		<authors>HarelM, graphhopper</authors>
+		<!-- Owners are typically nuget.org identities that allow gallery
+				users to easily find other packages by the same owners.  -->
+		<owners>IsraelHikingMap</owners>
+		<!-- License and project URLs provide links for the gallery -->
+		<licenseUrl>https://github.com/graphhopper/graphhopper/blob/master/LICENSE.txt</licenseUrl>
+		<projectUrl>https://github.com/graphhopper/graphhopper</projectUrl>
+		<!-- The icon is used in Visual Studio's package manager UI -->
+		<iconUrl>https://en.gravatar.com/userimage/129163156/eec1d47a913cf19abfcd9f6911b4a54a.png</iconUrl>
+		<!-- If true, this value prompts the user to accept the license when
+				installing the package. -->
+		<requireLicenseAcceptance>true</requireLicenseAcceptance>
+		<!-- Any details about this particular release -->
+		<releaseNotes></releaseNotes>
+		<!-- The description can be used in package manager UI. Note that the
+				nuget.org gallery uses information you add in the portal. -->
+		<description>GraphHopper is a fast and memory efficient Java routing engine released under Apache License 2.0. Per default it uses OpenStreetMap and GTFS data but can import other data sources.</description>
+		<!-- Copyright information -->
+		<copyright>© 2017. All Rights Reserved - GraphHopper</copyright>
+		<!-- Tags appear in the gallery and can be used for tag searches -->
+		<tags>graphhopper,graph,hopper,routing</tags>
+		<!-- Dependencies are automatically installed when the package is installed -->
+		<dependencies>
+		</dependencies>
+    </metadata>
+
+    <!-- A readme.txt to display when the package is installed -->
+    <files>
+        <file src="GraphHopper\IsraelHiking.GraphHopper.targets" target="build\" />
+        <file src="GraphHopper\*.jar" target="content\GraphHopper\" />
+		<file src="GraphHopper\*.config" target="content\GraphHopper\" />
+		<file src="GraphHopper\*.cmd" target="content\GraphHopper\" />
+    </files>
+</package>

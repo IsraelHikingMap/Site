@@ -76,7 +76,7 @@
     <PackageReference Include="OpenCover" Version="4.6.519" />
     <PackageReference Include="OsmSharp" Version="6.0.0-pre04" />
     <PackageReference Include="ProjNET4GeoAPI" Version="1.3.2-pre3" />
-    <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
+    <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="1.0.0" />
     <PackageReference Include="System.Text.RegularExpressions" Version="4.3.0" />
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />

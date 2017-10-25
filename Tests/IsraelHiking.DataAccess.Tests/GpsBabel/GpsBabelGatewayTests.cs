@@ -2,7 +2,6 @@
 using System.Linq;
 using System.Xml.Linq;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccess.GPSBabel;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;

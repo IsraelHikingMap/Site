@@ -1,7 +1,4 @@
 ﻿using IsraelHiking.DataAccess.Database;
-using IsraelHiking.DataAccess.ElasticSearch;
-using IsraelHiking.DataAccess.GPSBabel;
-using IsraelHiking.DataAccess.GraphHopper;
 using IsraelHiking.DataAccess.OpenStreetMap;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.DependencyInjection;

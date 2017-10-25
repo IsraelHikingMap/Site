@@ -1,5 +1,4 @@
 ﻿using GeoAPI.Geometries;
-using IsraelHiking.DataAccess.ElasticSearch;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch
@@ -27,6 +26,13 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var southWest = new Coordinate(35.0251, 31.7467);
             var results = gateway.GetHighways(northEast, southWest).Result;
             Assert.AreEqual(36, results.Count);
+        }
+
+        [TestMethod]
+        public void SetIndex_ShouldReturnResults()
+        {
+            var gateway = new ElasticSearchGateway(new TraceLogger());
+            gateway.Initialize();
         }
     }
 }

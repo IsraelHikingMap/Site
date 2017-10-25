@@ -98,7 +98,7 @@ In order to be able to make the server work a few prerequisits are needed:
 * Windows machine with IIS enabled and a site (Although this site should be able to run on Linux it was never fully tested).
 * Install Java Runtime Environment.
 * Add `curl` to path.
-* `ElasticSearch.cmd` and `GraphHopper.cmd` should be processes that run when the server machine starts and never die - use a watchdog or windows service to make sure they do (we use NSSM. for linux, check the java command inside those files and use a deamon to run them).
+* `Elasticsearch.bat` and `GraphHopper.cmd` should be processes that run when the server machine starts and never die - use a watchdog or windows service to make sure they do (we use NSSM. for linux, check the java command inside those files and use a deamon to run them).
 * Place the israelhiking.sqlite file along side the dlls and make sure the user that runs the server has write access to it (IIS user for windows).
 * Create a task to update Graph Hopper and Elastic Search:
   * Open Windows' Task Scheduler

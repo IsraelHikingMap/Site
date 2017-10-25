@@ -6,46 +6,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="ElasticSearch\config\elasticsearch.yml" />
-    <None Remove="ElasticSearch\config\logging.yml" />
-    <None Remove="ElasticSearch\ElasticSearch.cmd" />
-    <None Remove="ElasticSearch\lib\apache-log4j-extras-1.2.17.jar" />
-    <None Remove="ElasticSearch\lib\commons-cli-1.3.1.jar" />
-    <None Remove="ElasticSearch\lib\compiler-0.8.13.jar" />
-    <None Remove="ElasticSearch\lib\compress-lzf-1.0.2.jar" />
-    <None Remove="ElasticSearch\lib\elasticsearch-2.3.5.jar" />
-    <None Remove="ElasticSearch\lib\guava-18.0.jar" />
-    <None Remove="ElasticSearch\lib\HdrHistogram-2.1.6.jar" />
-    <None Remove="ElasticSearch\lib\hppc-0.7.1.jar" />
-    <None Remove="ElasticSearch\lib\jackson-core-2.6.6.jar" />
-    <None Remove="ElasticSearch\lib\jackson-dataformat-cbor-2.6.6.jar" />
-    <None Remove="ElasticSearch\lib\jackson-dataformat-smile-2.6.6.jar" />
-    <None Remove="ElasticSearch\lib\jackson-dataformat-yaml-2.6.6.jar" />
-    <None Remove="ElasticSearch\lib\jna-4.1.0.jar" />
-    <None Remove="ElasticSearch\lib\joda-convert-1.2.jar" />
-    <None Remove="ElasticSearch\lib\joda-time-2.9.4.jar" />
-    <None Remove="ElasticSearch\lib\jsr166e-1.1.0.jar" />
-    <None Remove="ElasticSearch\lib\jts-1.13.jar" />
-    <None Remove="ElasticSearch\lib\log4j-1.2.17.jar" />
-    <None Remove="ElasticSearch\lib\lucene-analyzers-common-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-backward-codecs-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-core-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-grouping-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-highlighter-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-join-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-memory-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-misc-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-queries-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-queryparser-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-sandbox-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-spatial-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-spatial3d-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\lucene-suggest-5.5.0.jar" />
-    <None Remove="ElasticSearch\lib\netty-3.10.5.Final.jar" />
-    <None Remove="ElasticSearch\lib\securesm-1.0.jar" />
-    <None Remove="ElasticSearch\lib\snakeyaml-1.15.jar" />
-    <None Remove="ElasticSearch\lib\spatial4j-0.5.jar" />
-    <None Remove="ElasticSearch\lib\t-digest-3.0.jar" />
     <None Remove="elevation-cache\N28E034.hgt.zip" />
     <None Remove="elevation-cache\N29E034.hgt.zip" />
     <None Remove="elevation-cache\N29E035.hgt.zip" />
@@ -60,140 +20,9 @@
     <None Remove="elevation-cache\N32E036.hgt.zip" />
     <None Remove="elevation-cache\N33E034.hgt.zip" />
     <None Remove="elevation-cache\N33E035.hgt.zip" />
-    <None Remove="GPSBabel\gpsbabel.exe" />
-    <None Remove="GPSBabel\icudt51.dll" />
-    <None Remove="GPSBabel\icuin51.dll" />
-    <None Remove="GPSBabel\icuuc51.dll" />
-    <None Remove="GPSBabel\libgcc_s_dw2-1.dll" />
-    <None Remove="GPSBabel\libstdc++-6.dll" />
-    <None Remove="GPSBabel\libwinpthread-1.dll" />
-    <None Remove="GPSBabel\Qt5Core.dll" />
-    <None Remove="GraphHopper\graphhopper-web-0.10-SNAPSHOT-with-dep.jar" />
-    <None Remove="GraphHopper\GraphHopper.cmd" />
-    <None Remove="GraphHopper\israel-hiking-config.properties" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="ElasticSearch\config\elasticsearch.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\config\logging.yml">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\ElasticSearch.cmd">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\apache-log4j-extras-1.2.17.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\commons-cli-1.3.1.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\compiler-0.8.13.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\compress-lzf-1.0.2.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\elasticsearch-2.3.5.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\guava-18.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\HdrHistogram-2.1.6.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\hppc-0.7.1.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\jackson-core-2.6.6.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\jackson-dataformat-cbor-2.6.6.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\jackson-dataformat-smile-2.6.6.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\jackson-dataformat-yaml-2.6.6.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\jna-4.1.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\joda-convert-1.2.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\joda-time-2.9.4.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\jsr166e-1.1.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\jts-1.13.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\log4j-1.2.17.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-analyzers-common-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-backward-codecs-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-core-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-grouping-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-highlighter-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-join-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-memory-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-misc-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-queries-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-queryparser-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-sandbox-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-spatial-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-spatial3d-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\lucene-suggest-5.5.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\netty-3.10.5.Final.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\securesm-1.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\snakeyaml-1.15.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\spatial4j-0.5.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="ElasticSearch\lib\t-digest-3.0.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
     <Content Include="elevation-cache\N28E034.hgt.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
@@ -236,44 +65,14 @@
     <Content Include="elevation-cache\N33E035.hgt.zip">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="GPSBabel\gpsbabel.exe">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GPSBabel\icudt51.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GPSBabel\icuin51.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GPSBabel\icuuc51.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GPSBabel\libgcc_s_dw2-1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GPSBabel\libstdc++-6.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GPSBabel\libwinpthread-1.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GPSBabel\Qt5Core.dll">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GraphHopper\graphhopper-web-0.10-SNAPSHOT-with-dep.jar">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GraphHopper\GraphHopper.cmd">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="GraphHopper\israel-hiking-config.properties">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.6.0-int6" />
     <PackageReference Include="GeoAPI" Version="1.7.5-pre4" />
+    <PackageReference Include="IsraelHiking.Elasticsearch" Version="5.6.3.1" />
+    <PackageReference Include="IsraelHiking.GPSBabel" Version="1.5.4" />
+    <PackageReference Include="IsraelHiking.GraphHopper" Version="0.10.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.0.0" />
     <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="2.0.0" />
@@ -284,7 +83,7 @@
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="OAuth.DotNetCore" Version="1.0.4" />
     <PackageReference Include="OsmSharp" Version="6.0.0-pre04" />
-    <PackageReference Include="SharpZipLib.NETStandard" Version="0.86.0.1" />
+    <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
 

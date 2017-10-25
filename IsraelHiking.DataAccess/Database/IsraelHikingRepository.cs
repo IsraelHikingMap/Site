@@ -60,11 +60,7 @@ namespace IsraelHiking.DataAccess.Database
 
         public async Task UpdateUserLayers(string osmUserId, UserLayers newUserLayers)
         {
-            var oldUserLayers = await GetUserLayers(osmUserId);
-            if (oldUserLayers != null)
-            {
-                _dbContext.UsersLayers.Remove(oldUserLayers);
-            }
+            _dbContext.UsersLayers.RemoveRange(_dbContext.UsersLayers.Where(ul => ul.OsmUserId == osmUserId));
             newUserLayers.Id = 0;
             newUserLayers.OsmUserId = osmUserId;
             foreach (var newUserLayer in newUserLayers.Layers)

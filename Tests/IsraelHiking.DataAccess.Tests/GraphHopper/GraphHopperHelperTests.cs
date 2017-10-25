@@ -1,5 +1,4 @@
-﻿using IsraelHiking.DataAccess.GraphHopper;
-using Microsoft.Extensions.FileProviders;
+﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.IO;
 
