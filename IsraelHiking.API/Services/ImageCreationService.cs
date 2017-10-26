@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -41,7 +42,7 @@ namespace IsraelHiking.API.Services
         private Pen _startRoutePen;
         private Pen _endRoutePen;
         private Brush _circleFillBrush;
-        private Color[] _routeColors;
+        private readonly Color[] _routeColors;
 
         /// <summary>
         /// Contstructor, creates relevant colors and brushes accoridng to configuration
@@ -57,7 +58,7 @@ namespace IsraelHiking.API.Services
             _circleFillBrush = Brushes.White.Clone() as Brush;
             _startRoutePen = new Pen(Color.Green, 7);
             _endRoutePen = new Pen(Color.Red, 7);
-            _routeColors = options.Value.Colors.Select(Color.FromName).ToArray();
+            _routeColors = options.Value.Colors.Select(c => FromColorString(c)).ToArray();
         }
 
         ///<inheritdoc />
@@ -179,7 +180,7 @@ namespace IsraelHiking.API.Services
                     routeColorIndex = routeColorIndex % _routeColors.Length;
                     if (!string.IsNullOrEmpty(route.color))
                     {
-                        lineColor = Color.FromName(route.color);
+                        lineColor = FromColorString(route.color, route.opacity);
                     }
                     graphics.DrawLines(_outLinerPen, points);
                     var linePen = new Pen(lineColor, PEN_WIDTH) { LineJoin = LineJoin.Bevel };
@@ -238,6 +239,21 @@ namespace IsraelHiking.API.Services
             {
                 topLeft.Y--;
             }
+        }
+
+        private Color FromColorString(string colorString, double? opacity = null)
+        {
+            if (colorString.StartsWith("#"))
+            {
+                var hexNumberString = colorString.Replace("#", "");
+                if (hexNumberString.Length == 6)
+                {
+                    var alpha = ((int)Math.Round((opacity ?? 1.0) * 255)).ToString("X2");
+                    hexNumberString = alpha + hexNumberString;
+                }
+                return Color.FromArgb(int.Parse(hexNumberString, NumberStyles.HexNumber));
+            }
+            return Color.FromName(colorString);
         }
 
         /// <summary>
