@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <TargetFramework>netcoreapp1.1</TargetFramework>
     <DebugType>full</DebugType>
     <UserSecretsId>a21e53dc-017c-42f4-be3d-5dbe7eaf9433</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="GeoAPI" Version="1.7.5-pre4" />
-    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="1.1.2" />
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre019" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
   </ItemGroup>

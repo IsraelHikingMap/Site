@@ -8,11 +8,20 @@ namespace IsraelHiking.Web
     {
         public static void Main(string[] args)
         {
-            WebHost.CreateDefaultBuilder(args)
-                .UseStartup<Startup>()
+            new WebHostBuilder()
+                .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseIISIntegration()
+                .UseStartup<Startup>()
                 .Build()
                 .Run();
-        }   
+
+            // .net core 2.0
+            //WebHost.CreateDefaultBuilder(args)
+            //    .UseStartup<Startup>()
+            //    .UseContentRoot(Directory.GetCurrentDirectory())
+            //    .Build()
+            //    .Run();
+        }
     }
 }
