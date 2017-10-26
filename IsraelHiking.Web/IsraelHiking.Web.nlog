@@ -15,14 +15,14 @@
             name="error" 
             fileName="Logs\${shortdate}-errors.log"
             maxArchiveFiles="10"
-            layout="${longdate} |${pad:padding=3:inner=${event-properties:item=EventId.Id}}|${pad:padding=-5:inner=${level:uppercase=true}}| ${logger} | ${message} ${exception:format=ToString}" />
+            layout="${longdate} |${pad:padding=3:fixedLength:true:inner=${threadid}} |${pad:padding=-5:inner=${level:uppercase=true}}| ${logger} | ${message} ${exception:format=ToString}" />
 
     <!-- another file log, only site logs  -->
     <target xsi:type="File" 
             name="site" 
             fileName="Logs\${shortdate}-site.log"
             maxArchiveFiles="10"
-            layout="${longdate} |${pad:padding=3:inner=${event-properties:item=EventId.Id}}|${pad:padding=-5:inner=${level:uppercase=true}}| ${message} ${exception}" />
+            layout="${longdate} |${pad:padding=3:fixedLength:true:inner=${threadid}} |${pad:padding=-5:inner=${level:uppercase=true}}| ${message} ${exception}" />
 
     <!-- write to the void aka just remove -->
     <target xsi:type="Null" name="blackhole" />
