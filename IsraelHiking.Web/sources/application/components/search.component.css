@@ -25,11 +25,30 @@
     margin-top: 0 !important;
 }
 
+.search-result-option {
+    white-space: normal;
+    overflow: visible;
+    height: auto;
+    display: flex;
+    line-height: inherit;
+    align-items: baseline;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+.search-result-option i {
+    padding: 0 5px 0 0;
+}
+
+    .search-result-option[dir=rtl] i {
+        padding: 0 0 0 5px;
+    }
+
 @media only screen and (min-width : 768px) {
     .search-input-container .mat-input-wrapper {
-        width: 250px;
+        width: 100%;
     }
     .search-input-container {
-        width: 250px;
+        width: 350px;
     }
 }
