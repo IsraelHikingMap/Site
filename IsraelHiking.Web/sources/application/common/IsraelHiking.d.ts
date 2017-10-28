@@ -4,7 +4,7 @@ export interface SiteUrl {
     id: string;
     title: string;
     description: string;
-    jsonData: string;
+    dataContainer: DataContainer;
     osmUserId: string;
     viewsCount: number;
 }

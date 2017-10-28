@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace IsraelHiking.Common
 {
@@ -12,13 +13,16 @@ namespace IsraelHiking.Common
 
     public class RouteSegmentData
     {
-        public LatLng routePoint { get; set; }
-        public List<LatLng> latlngs { get; set; }
-        public string routingType { get; set; }
-
+        [JsonProperty("routingType")]
+        public string RoutingType { get; set; }
+        [JsonProperty("routePoint")]
+        public LatLng RoutePoint { get; set; }
+        [JsonProperty("latlngs")]
+        public List<LatLng> Latlngs { get; set; }
+        
         public RouteSegmentData()
         {
-            latlngs = new List<LatLng>();
+            Latlngs = new List<LatLng>();
         }
     }
 }

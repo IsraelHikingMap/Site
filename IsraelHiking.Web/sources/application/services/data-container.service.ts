@@ -73,8 +73,7 @@ export class DataContainerService {
             this.http.get(Urls.urls + this.hashService.siteUrl).toPromise()
                 .then((response) => {
                     let siteUrl = response.json() as Common.SiteUrl;
-                    let data = JSON.parse(siteUrl.jsonData) as Common.DataContainer;
-                    this.setInitialData(data);
+                    this.setInitialData(siteUrl.dataContainer);
                     this.toastService.info(siteUrl.description, siteUrl.title);
                     deferred.resolve();
                 }, () => {

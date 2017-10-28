@@ -4,7 +4,6 @@ using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Swagger;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccess;
-using IsraelHiking.DataAccess.Database;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -25,7 +24,6 @@ using NLog.Web;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace IsraelHiking.Web
@@ -93,7 +91,6 @@ namespace IsraelHiking.Web
                 c.OperationFilter<AssignOAuthSecurityRequirements>();
                 c.IncludeXmlComments(Path.Combine(binariesFolder, "israelhiking.API.xml"));
             });
-            services.AddEntityFrameworkSqlite().AddDbContext<IsraelHikingDbContext>();
             services.AddDirectoryBrowser();
         }
 

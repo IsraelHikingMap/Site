@@ -6,7 +6,7 @@ using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IElasticSearchGateway
+    public interface IElasticSearchGateway : IRepository
     {
         void Initialize(string uri = "http://localhost:9200/");
         Task<List<Feature>> Search(string searchTerm, string fieldName);
@@ -14,9 +14,8 @@ namespace IsraelHiking.DataAccessInterfaces
         Task UpdateHighwaysData(List<Feature> features);
         Task UpdateNamesData(Feature feature);
         Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest);
+
         Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories);
         Task<Feature> GetPointOfInterestById(string id, string source, string type);
-        Task<Rating> GetRating(string id, string source);
-        Task UpdateRating(Rating rating);
     }
 }

@@ -34,15 +34,15 @@ namespace IsraelHiking.API.Tests.Gpx
         {
             var dataContainer = new DataContainer
             {
-                routes = new List<RouteData>
+                Routes = new List<RouteData>
                 {
                     new RouteData
                     {
-                        name = "name",
-                        markers = new List<MarkerData> { new MarkerData { latlng = new LatLng { lat = 1, lng = 2 } } },
-                        segments = new List<RouteSegmentData>
+                        Name = "name",
+                        Markers = new List<MarkerData> { new MarkerData { Latlng = new LatLng { Lat = 1, Lng = 2 } } },
+                        Segments = new List<RouteSegmentData>
                         {
-                            new RouteSegmentData {latlngs = new List<LatLng> {new LatLng {lat = 3, lng = 4, alt = 5}}}
+                            new RouteSegmentData {Latlngs = new List<LatLng> {new LatLng {Lat = 3, Lng = 4, Alt = 5}}}
                         }
                     }
                 }
@@ -68,7 +68,7 @@ namespace IsraelHiking.API.Tests.Gpx
 
             var dataContainer = _converter.ToDataContainer(gpx);
 
-            Assert.AreEqual(0, dataContainer.routes.Count);
+            Assert.AreEqual(0, dataContainer.Routes.Count);
         }
 
         [TestMethod]
@@ -79,7 +79,7 @@ namespace IsraelHiking.API.Tests.Gpx
                 trk = new[] { new trkType() }
             };
             var dataContainer = _converter.ToDataContainer(gpx);
-            Assert.AreEqual(0, dataContainer.routes.Count);
+            Assert.AreEqual(0, dataContainer.Routes.Count);
         }
 
         [TestMethod]
@@ -91,8 +91,8 @@ namespace IsraelHiking.API.Tests.Gpx
                 rte = new[] { new rteType { rtept = new [] { new wptType { lat = 1, lon = 2, ele = 3, eleSpecified = true} } } }
             };
             var dataContainer = _converter.ToDataContainer(gpx);
-            Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
+            Assert.AreEqual(1, dataContainer.Routes.Count);
+            Assert.AreEqual(1, dataContainer.Routes.First().Markers.Count);
         }
 
         [TestMethod]
@@ -103,9 +103,9 @@ namespace IsraelHiking.API.Tests.Gpx
                 wpt = new[] { new wptType { lat = 4, lon = 5, ele = 6, eleSpecified = true } },
             };
             var dataContainer = _converter.ToDataContainer(gpx);
-            Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(0, dataContainer.routes.First().segments.Count);
-            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
+            Assert.AreEqual(1, dataContainer.Routes.Count);
+            Assert.AreEqual(0, dataContainer.Routes.First().Segments.Count);
+            Assert.AreEqual(1, dataContainer.Routes.First().Markers.Count);
         }
 
 
@@ -117,9 +117,9 @@ namespace IsraelHiking.API.Tests.Gpx
                 trk = new[] { new trkType { trkseg = new [] { new trksegType { trkpt = new[] { new wptType { lat = 1, lon = 2} } } } } }
             };
             var dataContainer = _converter.ToDataContainer(gpx);
-            Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(0, dataContainer.routes.First().markers.Count);
-            Assert.AreEqual(0, dataContainer.routes.First().segments.Count);
+            Assert.AreEqual(1, dataContainer.Routes.Count);
+            Assert.AreEqual(0, dataContainer.Routes.First().Markers.Count);
+            Assert.AreEqual(0, dataContainer.Routes.First().Segments.Count);
         }
 
         [TestMethod]
@@ -130,9 +130,9 @@ namespace IsraelHiking.API.Tests.Gpx
                 trk = new[] { new trkType { trkseg = new[] { new trksegType { trkpt = new[] { new wptType { lat = 1, lon = 2 }, new wptType { lat = 3, lon = 4 } } } } } }
             };
             var dataContainer = _converter.ToDataContainer(gpx);
-            Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(0, dataContainer.routes.First().markers.Count);
-            Assert.AreEqual(1, dataContainer.routes.First().segments.Count);
+            Assert.AreEqual(1, dataContainer.Routes.Count);
+            Assert.AreEqual(0, dataContainer.Routes.First().Markers.Count);
+            Assert.AreEqual(1, dataContainer.Routes.First().Segments.Count);
         }
 
         [TestMethod]
@@ -140,33 +140,33 @@ namespace IsraelHiking.API.Tests.Gpx
         {
             var dataContainer = new DataContainer
             {
-                routes = new List<RouteData>
+                Routes = new List<RouteData>
                 {
                     new RouteData
                     {
-                        name = "name1",
-                        markers = new List<MarkerData> { new MarkerData { latlng = new LatLng { lat = 1, lng = 2 } } },
-                        segments = new List<RouteSegmentData>
+                        Name = "name1",
+                        Markers = new List<MarkerData> { new MarkerData { Latlng = new LatLng { Lat = 1, Lng = 2 } } },
+                        Segments = new List<RouteSegmentData>
                         {
                             new RouteSegmentData {
-                                latlngs = new List<LatLng>
+                                Latlngs = new List<LatLng>
                                 {
-                                    new LatLng {lat = 3, lng = 4, alt = 5},
-                                    new LatLng {lat = 6, lng = 7, alt = 8}
+                                    new LatLng {Lat = 3, Lng = 4, Alt = 5},
+                                    new LatLng {Lat = 6, Lng = 7, Alt = 8}
                                 },
-                                routePoint = new LatLng { lat = 6, lng = 7}
+                                RoutePoint = new LatLng { Lat = 6, Lng = 7}
                             }
                         }
                     },
                     new RouteData
                     {
-                        name = "name2",
-                        segments = new List<RouteSegmentData>
+                        Name = "name2",
+                        Segments = new List<RouteSegmentData>
                         {
-                            new RouteSegmentData {latlngs = new List<LatLng>
+                            new RouteSegmentData {Latlngs = new List<LatLng>
                             {
-                                new LatLng {lat = 13, lng = 14, alt = 15},
-                                new LatLng {lat = 16, lng = 17, alt = 18}
+                                new LatLng {Lat = 13, Lng = 14, Alt = 15},
+                                new LatLng {Lat = 16, Lng = 17, Alt = 18}
                             }}
                         }
                     }
@@ -176,11 +176,11 @@ namespace IsraelHiking.API.Tests.Gpx
             var gpx = _converter.ToGpx(dataContainer);
             var newDataContainer = _converter.ToDataContainer(gpx);
 
-            Assert.AreEqual(dataContainer.routes.Count, newDataContainer.routes.Count);
-            Assert.AreEqual(dataContainer.routes.First().name, newDataContainer.routes.First().name);
-            CollectionAssert.AreEqual(dataContainer.routes.First().segments.First().latlngs, newDataContainer.routes.First().segments.First().latlngs);
-            Assert.AreEqual(dataContainer.routes.First().markers.First().latlng, newDataContainer.routes.First().markers.First().latlng);
-            Assert.AreEqual(dataContainer.routes.Last().name, newDataContainer.routes.Last().name);
+            Assert.AreEqual(dataContainer.Routes.Count, newDataContainer.Routes.Count);
+            Assert.AreEqual(dataContainer.Routes.First().Name, newDataContainer.Routes.First().Name);
+            CollectionAssert.AreEqual(dataContainer.Routes.First().Segments.First().Latlngs, newDataContainer.Routes.First().Segments.First().Latlngs);
+            Assert.AreEqual(dataContainer.Routes.First().Markers.First().Latlng, newDataContainer.Routes.First().Markers.First().Latlng);
+            Assert.AreEqual(dataContainer.Routes.Last().Name, newDataContainer.Routes.Last().Name);
         }
     }
 }

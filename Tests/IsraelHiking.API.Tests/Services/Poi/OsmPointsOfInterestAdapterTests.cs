@@ -107,11 +107,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer
                 {
-                    routes = new List<RouteData>
+                    Routes = new List<RouteData>
                     {
                         new RouteData
                         {
-                            segments = new List<RouteSegmentData>
+                            Segments = new List<RouteSegmentData>
                             {
                                 new RouteSegmentData(),
                                 new RouteSegmentData()
@@ -141,7 +141,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 ImagesUrls = new string[0],
                 Icon = _tagsHelper.GetIconsPerCategoryByType(Categories.POINTS_OF_INTEREST).Values.First().First().Icon
             };
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {routes = new List<RouteData>()});
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
 
             var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, null, "he").Result;
 
@@ -160,7 +160,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Icon = "oldIcon",
                 Type = OsmGeoType.Node.ToString().ToLower()
             };
-            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {routes = new List<RouteData>()});
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
             gateway.GetNode(pointOfInterest.Id).Returns(new Node
             {
                 Id = 1,

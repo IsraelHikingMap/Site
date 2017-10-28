@@ -115,13 +115,13 @@ export class ShareDialogComponent extends BaseMapComponent {
                 dataToSave.routes.splice(routeIndex, 1);
             }
         }
-        var siteUrl = {
+        var shareUrl = {
             title: this.title,
             description: this.description,
-            jsonData: JSON.stringify(dataToSave),
+            dataContainer: dataToSave,
             osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
         } as Common.SiteUrl;
-        this.osmUserService.createSiteUrl(siteUrl).then((siteUrlResponse) => {
+        this.osmUserService.createSiteUrl(shareUrl).then((siteUrlResponse) => {
             let data = siteUrlResponse.json() as Common.SiteUrl;
             this.siteUrlId = data.id;
             this.shareAddress = this.osmUserService.getUrlFromSiteUrlId(data);

@@ -314,9 +314,9 @@ namespace IsraelHiking.API.Tests.Services
             var converter = new GpxDataContainerConverter();
             var container = converter.ToDataContainer(Encoding.ASCII.GetBytes(gpxString).ToGpx());
 
-            var route = _service.Split(container.routes.First(), RoutingType.HIKE);
+            var route = _service.Split(container.Routes.First(), RoutingType.HIKE);
 
-            Assert.IsTrue(route.segments.Count <= 40);
+            Assert.IsTrue(route.Segments.Count <= 40);
         }
 
         [TestMethod]
@@ -324,17 +324,17 @@ namespace IsraelHiking.API.Tests.Services
         {
             var routeToSimplify = new RouteData
             {
-                segments = new List<RouteSegmentData>
+                Segments = new List<RouteSegmentData>
                 {
                     new RouteSegmentData
                     {
-                        latlngs = new List<LatLng>
+                        Latlngs = new List<LatLng>
                         {
-                            new LatLng {lat = 1, lng = 1},
-                            new LatLng {lat = 2, lng = 2},
-                            new LatLng {lat = 3, lng = 3},
-                            new LatLng {lat = 4, lng = 4},
-                            new LatLng {lat = 1, lng = 1},
+                            new LatLng {Lat = 1, Lng = 1},
+                            new LatLng {Lat = 2, Lng = 2},
+                            new LatLng {Lat = 3, Lng = 3},
+                            new LatLng {Lat = 4, Lng = 4},
+                            new LatLng {Lat = 1, Lng = 1},
                         }
                     }
                 }
@@ -342,7 +342,7 @@ namespace IsraelHiking.API.Tests.Services
 
             var route = _service.Split(routeToSimplify, RoutingType.HIKE);
 
-            Assert.IsTrue(route.segments.Count <= 5);
+            Assert.IsTrue(route.Segments.Count <= 5);
         }
 
         [TestMethod]
@@ -350,14 +350,14 @@ namespace IsraelHiking.API.Tests.Services
         {
             var routeToSimplify = new RouteData
             {
-                segments = new List<RouteSegmentData>
+                Segments = new List<RouteSegmentData>
                 {
                     new RouteSegmentData
                     {
-                        latlngs = new List<LatLng>
+                        Latlngs = new List<LatLng>
                         {
-                            new LatLng {lat = 1, lng = 1},
-                            new LatLng {lat = 2, lng = 2}
+                            new LatLng {Lat = 1, Lng = 1},
+                            new LatLng {Lat = 2, Lng = 2}
                         }
                     }
                 }
@@ -365,7 +365,7 @@ namespace IsraelHiking.API.Tests.Services
 
             var route = _service.Split(routeToSimplify, RoutingType.HIKE);
 
-            Assert.AreEqual(2, route.segments.Count);
+            Assert.AreEqual(2, route.Segments.Count);
         }
     }
 }

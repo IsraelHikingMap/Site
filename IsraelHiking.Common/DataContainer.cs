@@ -1,18 +1,24 @@
 ﻿using System.Collections.Generic;
+using Newtonsoft.Json;
 
 namespace IsraelHiking.Common
 {
     public class DataContainer
     {
-        public List<RouteData> routes { get; set; }
-        public LatLng northEast { get; set; }
-        public LatLng southWest { get; set; }
-        public LayerData baseLayer { get; set; }
-        public List<LayerData> overlays { get; set; }
+        [JsonProperty("routes")]
+        public List<RouteData> Routes { get; set; }
+        [JsonProperty("northEast")]
+        public LatLng NorthEast { get; set; }
+        [JsonProperty("southWest")]
+        public LatLng SouthWest { get; set; }
+        [JsonProperty("baseLayer")]
+        public LayerData BaseLayer { get; set; }
+        [JsonProperty("overlays")]
+        public List<LayerData> Overlays { get; set; }
 
         public DataContainer()
         {
-            routes = new List<RouteData>();
+            Routes = new List<RouteData>();
         }
     }
 }

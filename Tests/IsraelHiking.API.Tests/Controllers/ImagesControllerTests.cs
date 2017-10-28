@@ -3,7 +3,6 @@ using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
@@ -14,13 +13,13 @@ namespace IsraelHiking.API.Tests.Controllers
     public class ImagesControllerTests
     {
         private ImagesController _controller;
-        private IIsraelHikingRepository _repository;
+        private IRepository _repository;
         private IImageCreationService _imageCreationService;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _repository = Substitute.For<IIsraelHikingRepository>();
+            _repository = Substitute.For<IRepository>();
             _imageCreationService = Substitute.For<IImageCreationService>();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
@@ -44,10 +43,10 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetImage_UrlInDatabase_ShouldCreateIt()
         {
-            var siteUrl = new SiteUrl
+            var siteUrl = new ShareUrl
             {
                 Id = "1",
-                JsonData = JsonConvert.SerializeObject(new DataContainer())
+                DataContainer = new DataContainer()
             };
             _repository.GetUrlById(siteUrl.Id).Returns(siteUrl);
 

@@ -76,8 +76,8 @@ namespace IsraelHiking.DataAccess
         {
             var geoLocation = new AttributesTable
             {
-                {FeatureAttributes.LAT, nakebItem.start.lat},
-                {FeatureAttributes.LON, nakebItem.start.lng}
+                {FeatureAttributes.LAT, nakebItem.start.Lat},
+                {FeatureAttributes.LON, nakebItem.start.Lng}
             };
             var attributes = new AttributesTable
             {
@@ -98,8 +98,8 @@ namespace IsraelHiking.DataAccess
 
         private IFeature ConvertToPointFeature(MarkerData markerData)
         {
-            var point = new Point(new Coordinate().FromLatLng(markerData.latlng));
-            var attributes = new AttributesTable {{FeatureAttributes.NAME, markerData.title}};
+            var point = new Point(new Coordinate().FromLatLng(markerData.Latlng));
+            var attributes = new AttributesTable {{FeatureAttributes.NAME, markerData.Title}};
             return new Feature(point, attributes);
         }
     }

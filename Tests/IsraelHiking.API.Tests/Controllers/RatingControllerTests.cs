@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -13,14 +11,14 @@ namespace IsraelHiking.API.Tests.Controllers
     [TestClass]
     public class RatingControllerTests
     {
-        private IElasticSearchGateway _elasticSearchGateway;
+        private IRepository _repository;
         private RatingController _controller;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _controller = new RatingController(_elasticSearchGateway);
+            _repository = Substitute.For<IElasticSearchGateway>();
+            _controller = new RatingController(_repository);
         }
 
         [TestMethod]
@@ -47,7 +45,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var result = _controller.GetRating(id, source).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            _elasticSearchGateway.Received(1).GetRating(id, source);
+            _repository.Received(1).GetRating(id, source);
         }
 
         [TestMethod]
@@ -83,14 +81,14 @@ namespace IsraelHiking.API.Tests.Controllers
             var osmUserId = "42";
             var source = "source";
             _controller.SetupIdentity(osmUserId);
-            _elasticSearchGateway.GetRating(poiId, source).Returns(new Rating {Raters = new List<Rater>()});
+            _repository.GetRating(poiId, source).Returns(new Rating {Raters = new List<Rater>()});
             var resutls = _controller.UploadRating(new Rating { Id = poiId, Source = source, Raters = new List<Rater> { new Rater { Id = osmUserId, Value = 1}}}).Result as OkObjectResult;
 
             Assert.IsNotNull(resutls);
             var returnedRating = resutls.Value as Rating;
             Assert.IsNotNull(returnedRating);
             Assert.AreEqual(1, returnedRating.Raters.Count);
-            _elasticSearchGateway.Received(1).UpdateRating(Arg.Any<Rating>());
+            _repository.Received(1).UpdateRating(Arg.Any<Rating>());
         }
 
         [TestMethod]
@@ -100,14 +98,14 @@ namespace IsraelHiking.API.Tests.Controllers
             var osmUserId = "42";
             var source = "source";
             _controller.SetupIdentity(osmUserId);
-            _elasticSearchGateway.GetRating(poiId, source).Returns(new Rating {Raters = new List<Rater> {new Rater {Id = osmUserId, Value = -1}}});
+            _repository.GetRating(poiId, source).Returns(new Rating {Raters = new List<Rater> {new Rater {Id = osmUserId, Value = -1}}});
             var resutls = _controller.UploadRating(new Rating { Id = poiId, Source = source, Raters = new List<Rater> { new Rater { Id = osmUserId, Value = 1 } } }).Result as OkObjectResult;
 
             Assert.IsNotNull(resutls);
             var returnedRating = resutls.Value as Rating;
             Assert.IsNotNull(returnedRating);
             Assert.AreEqual(1, returnedRating.Raters.Count);
-            _elasticSearchGateway.Received(1).UpdateRating(Arg.Any<Rating>());
+            _repository.Received(1).UpdateRating(Arg.Any<Rating>());
         }
     }
 }

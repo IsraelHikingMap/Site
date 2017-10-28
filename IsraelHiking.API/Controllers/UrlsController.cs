@@ -4,7 +4,6 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.API.Services;
-using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Net.Http.Headers;
@@ -12,13 +11,14 @@ using System.Collections.Generic;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <inheritdoc />
     /// <summary>
     /// This controller handles the shared routes
     /// </summary>
     [Route("api/[controller]")]
     public class UrlsController : Controller
     {
-        private IIsraelHikingRepository _repository;
+        private readonly IRepository _repository;
         private readonly IDataContainerConverterService _dataContainerConverterService;
 
         /// <summary>
@@ -26,7 +26,7 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="repository"></param>
         /// <param name="dataContainerConverterService"></param>
-        public UrlsController(IIsraelHikingRepository repository, 
+        public UrlsController(IRepository repository, 
             IDataContainerConverterService dataContainerConverterService)
         {
             _repository = repository;
@@ -42,26 +42,26 @@ namespace IsraelHiking.API.Controllers
         // GET api/Urls/abc?format=gpx
         [HttpGet]
         [Route("{id}")]
-        public async Task<IActionResult> GetSiteUrl(string id, string format = "")
+        public async Task<IActionResult> GetShareUrl(string id, string format = "")
         {
-            var siteUrl = await _repository.GetUrlById(id);
-            if (siteUrl == null)
+            var shareUrl = await _repository.GetUrlById(id);
+            if (shareUrl == null)
             {
                 return BadRequest();
             }
-            siteUrl.LastViewed = DateTime.Now;
-            siteUrl.ViewsCount++;
-            await _repository.Update(siteUrl);
+            shareUrl.LastViewed = DateTime.Now;
+            shareUrl.ViewsCount++;
+            await _repository.Update(shareUrl);
             if (string.IsNullOrWhiteSpace(format))
             {
-                return Ok(siteUrl);
+                return Ok(shareUrl);
             }
-            return await GetUrlAsFile(id, format, siteUrl);
+            return await GetUrlAsFile(id, format, shareUrl);
         }
 
-        private async Task<IActionResult> GetUrlAsFile(string id, string format, SiteUrl siteUrl)
+        private async Task<IActionResult> GetUrlAsFile(string id, string format, ShareUrl shareUrl)
         {
-            var bytes = await _dataContainerConverterService.ToAnyFormat(JsonConvert.DeserializeObject<DataContainer>(siteUrl.JsonData), format);
+            var bytes = await _dataContainerConverterService.ToAnyFormat(shareUrl.DataContainer, format);
             var restuls = new FileContentResult(bytes, new MediaTypeHeaderValue($"application/{format}"))
             {
                 FileDownloadName = id + "." + format
@@ -76,67 +76,67 @@ namespace IsraelHiking.API.Controllers
         // GET api/Urls
         [Authorize]
         [HttpGet]
-        [ProducesResponseType(typeof(IEnumerable<SiteUrl>), 200)]
-        public async Task<IActionResult> GetSiteUrlForUser()
+        [ProducesResponseType(typeof(IEnumerable<ShareUrl>), 200)]
+        public async Task<IActionResult> GetShareUrlForUser()
         {
-            var siteUrls = await _repository.GetUrlsByUser(User.Identity.Name);
-            return Ok(siteUrls);
+            var shareUrls = await _repository.GetUrlsByUser(User.Identity.Name);
+            return Ok(shareUrls);
         }
 
         /// <summary>
         /// Adds a shared route, user ID is optional
         /// </summary>
-        /// <param name="siteUrl">The shared route's data</param>
+        /// <param name="shareUrl">The shared route's data</param>
         /// <returns>Whether the operation succeeded or not</returns>
         // POST api/urls
         [HttpPost]
-        [ProducesResponseType(typeof(SiteUrl), 200)]
-        public async Task<IActionResult> PostSiteUrl([FromBody]SiteUrl siteUrl)
+        [ProducesResponseType(typeof(ShareUrl), 200)]
+        public async Task<IActionResult> PostShareUrl([FromBody]ShareUrl shareUrl)
         {
-            if (string.IsNullOrWhiteSpace(siteUrl.OsmUserId) == false && siteUrl.OsmUserId != User.Identity.Name)
+            if (string.IsNullOrWhiteSpace(shareUrl.OsmUserId) == false && shareUrl.OsmUserId != User.Identity.Name)
             {
                 return BadRequest("You can't create a share as someone else!");
             }
             var random = new Random(Guid.NewGuid().GetHashCode());
-            siteUrl.CreationDate = DateTime.Now;
-            siteUrl.LastViewed = DateTime.Now;
-            siteUrl.ViewsCount = 0;
+            shareUrl.CreationDate = DateTime.Now;
+            shareUrl.LastViewed = DateTime.Now;
+            shareUrl.ViewsCount = 0;
             var id = GetRandomString(10, random);
             while (await _repository.GetUrlById(id) != null)
             {
                 id = GetRandomString(10, random);
             }
-            siteUrl.Id = id;
-            await _repository.AddUrl(siteUrl);
-            return Ok(siteUrl);
+            shareUrl.Id = id;
+            await _repository.AddUrl(shareUrl);
+            return Ok(shareUrl);
         }
 
         /// <summary>
         /// Update a shared route
         /// </summary>
         /// <param name="id">The shared route's ID</param>
-        /// <param name="siteUrl">The new shared route data</param>
+        /// <param name="shareUrl">The new shared route data</param>
         /// <returns>Whether the operation succeeded or not</returns>
         // PUT api/urls/42
         [Authorize]
         [HttpPut]
         [Route("{id}")]
-        [ProducesResponseType(typeof(SiteUrl), 200)]
-        public async Task<IActionResult> PutSiteUrl(string id, [FromBody]SiteUrl siteUrl)
+        [ProducesResponseType(typeof(ShareUrl), 200)]
+        public async Task<IActionResult> PutShareUrl(string id, [FromBody]ShareUrl shareUrl)
         {
-            var siteUrlFromDatabase = await _repository.GetUrlById(id);
-            if (siteUrlFromDatabase == null)
+            var shareUrlFromDatabase = await _repository.GetUrlById(id);
+            if (shareUrlFromDatabase == null)
             {
                 return NotFound();
             }
-            if (siteUrlFromDatabase.OsmUserId != User.Identity.Name)
+            if (shareUrlFromDatabase.OsmUserId != User.Identity.Name)
             {
                 return BadRequest("You can't update someone else's share!");
             }
-            siteUrlFromDatabase.Title = siteUrl.Title;
-            siteUrlFromDatabase.Description = siteUrl.Description;
-            await _repository.Update(siteUrlFromDatabase);
-            return Ok(siteUrlFromDatabase);
+            shareUrlFromDatabase.Title = shareUrl.Title;
+            shareUrlFromDatabase.Description = shareUrl.Description;
+            await _repository.Update(shareUrlFromDatabase);
+            return Ok(shareUrlFromDatabase);
         }
 
         // Delete delete/urls/abc
@@ -148,18 +148,18 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         [HttpDelete]
         [Route("{id}")]
-        public async Task<IActionResult> DeleteSiteUrl(string id)
+        public async Task<IActionResult> DeleteShareUrl(string id)
         {
-            var siteUrlFromDatabase = await _repository.GetUrlById(id);
-            if (siteUrlFromDatabase == null)
+            var shareUrlFromDatabase = await _repository.GetUrlById(id);
+            if (shareUrlFromDatabase == null)
             {
                 return NotFound();
             }
-            if (siteUrlFromDatabase.OsmUserId != User.Identity.Name)
+            if (shareUrlFromDatabase.OsmUserId != User.Identity.Name)
             {
                 return BadRequest("You can't delete someone else's share!");
             }
-            await _repository.Delete(siteUrlFromDatabase);
+            await _repository.Delete(shareUrlFromDatabase);
             return Ok();
         }
 
@@ -167,21 +167,6 @@ namespace IsraelHiking.API.Controllers
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
-        }
-
-        /// <summary>
-        /// Follows dispose pattern
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && _repository != null)
-            {
-                _repository.Dispose();
-                _repository = null;
-            }
-
-            base.Dispose(disposing);
         }
     }
 }

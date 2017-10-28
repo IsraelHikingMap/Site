@@ -12,21 +12,21 @@ namespace IsraelHiking.API.Tests.Controllers
     public class OpenGraphControllerTests
     {
         private OpenGraphController _controller;
-        private IIsraelHikingRepository _israelHikingRepository;
+        private IRepository _repository;
 
         [TestInitialize]
         public void TestInitiazlie()
         {
             var urlHelper = Substitute.For<IUrlHelper>();
             urlHelper.Content(Arg.Any<string>()).Returns(x => x[0]);
-            _israelHikingRepository = Substitute.For<IIsraelHikingRepository>();
-            _controller = new OpenGraphController(_israelHikingRepository, Substitute.For<ILogger>()) { Url = urlHelper };
+            _repository = Substitute.For<IRepository>();
+            _controller = new OpenGraphController(_repository, Substitute.For<ILogger>()) { Url = urlHelper };
         }
 
         [TestMethod]
         public void GetHtml_WithTitle_ShouldReturnIt()
         {
-            _israelHikingRepository.GetUrlById(Arg.Any<string>()).Returns(new SiteUrl { Title = "somthing with <>\"" });
+            _repository.GetUrlById(Arg.Any<string>()).Returns(new ShareUrl { Title = "somthing with <>\"" });
 
             var response = _controller.GetHtml("42").Result as ContentResult;
 
@@ -43,7 +43,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetHtml_WithNoTitle_ShouldReturnIt()
         {
-            _israelHikingRepository.GetUrlById(Arg.Any<string>()).Returns(new SiteUrl { Title = "   " });
+            _repository.GetUrlById(Arg.Any<string>()).Returns(new ShareUrl { Title = "   " });
 
             var response = _controller.GetHtml("42").Result as ContentResult;
 

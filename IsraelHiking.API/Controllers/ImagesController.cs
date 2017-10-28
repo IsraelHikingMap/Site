@@ -2,7 +2,6 @@
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Newtonsoft.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using System.Collections.Generic;
@@ -10,27 +9,28 @@ using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <inheritdoc />
     /// <summary>
     /// This controller is responsible for image creation
     /// </summary>
     [Route("api/[controller]")]
     public class ImagesController : Controller
     {
-        private IIsraelHikingRepository _israelHikingRepository;
         private IImageCreationService _imageCreationService;
+        private readonly IRepository _repository;
         private readonly ConfigurationData _options;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="israelHikingRepository"></param>
+        /// <param name="repository"></param>
         /// <param name="imageCreationService"></param>
         /// <param name="options"></param>
-        public ImagesController(IIsraelHikingRepository israelHikingRepository,
+        public ImagesController(IRepository repository,
             IImageCreationService imageCreationService,
             IOptions<ConfigurationData> options)
         {
-            _israelHikingRepository = israelHikingRepository;
+            _repository = repository;
             _imageCreationService = imageCreationService;
             _options = options.Value;
         }
@@ -44,12 +44,12 @@ namespace IsraelHiking.API.Controllers
         [Route("{id}")]
         public async Task<IActionResult> GetImage(string id)
         {
-            var url = await _israelHikingRepository.GetUrlById(id);
+            var url = await _repository.GetUrlById(id);
             if (url == null)
             {
                 return NotFound();
             }
-            var imageData = await _imageCreationService.Create(JsonConvert.DeserializeObject<DataContainer>(url.JsonData));
+            var imageData = await _imageCreationService.Create(url.DataContainer);
             return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
         }
 
@@ -64,6 +64,7 @@ namespace IsraelHiking.API.Controllers
             return _options.Colors;
         }
 
+        /// <inheritdoc />
         /// <summary>
         /// Dispose method, following dispose pattern
         /// </summary>
@@ -72,11 +73,6 @@ namespace IsraelHiking.API.Controllers
         {
             if (disposing)
             {
-                if (_israelHikingRepository != null)
-                {
-                    _israelHikingRepository.Dispose();
-                    _israelHikingRepository = null;
-                }
                 if (_imageCreationService != null)
                 {
                     _imageCreationService.Dispose();

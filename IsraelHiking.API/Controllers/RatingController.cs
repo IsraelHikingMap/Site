@@ -13,15 +13,15 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class RatingController : Controller
     {
-        private readonly IElasticSearchGateway _elasticSearchGateway;
+        private readonly IRepository _repository;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="elasticSearchGateway"></param>
-        public RatingController(IElasticSearchGateway elasticSearchGateway)
+        /// <param name="repository"></param>
+        public RatingController(IRepository repository)
         {
-            _elasticSearchGateway = elasticSearchGateway;
+            _repository = repository;
         }
 
         /// <summary>
@@ -43,7 +43,7 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("Source is missing.");
             }
-            return Ok(await _elasticSearchGateway.GetRating(id, source));
+            return Ok(await _repository.GetRating(id, source));
         }
 
         /// <summary>
@@ -69,14 +69,14 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("Invalid rating, new rating's raters should contain logged in user");
             }
-            var ratingFromDatabase = await _elasticSearchGateway.GetRating(rating.Id, rating.Source);
+            var ratingFromDatabase = await _repository.GetRating(rating.Id, rating.Source);
             var raterFromDatabase = ratingFromDatabase.Raters.FirstOrDefault(r => r.Id == User.Identity.Name);
             if (raterFromDatabase != null)
             {
                 ratingFromDatabase.Raters.Remove(raterFromDatabase);
             }
             ratingFromDatabase.Raters.Add(rater);
-            await _elasticSearchGateway.UpdateRating(ratingFromDatabase);
+            await _repository.UpdateRating(ratingFromDatabase);
             return Ok(ratingFromDatabase);
         }
     }

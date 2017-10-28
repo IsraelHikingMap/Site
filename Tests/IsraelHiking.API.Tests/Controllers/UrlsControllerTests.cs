@@ -4,7 +4,6 @@ using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
 
@@ -14,48 +13,49 @@ namespace IsraelHiking.API.Tests.Controllers
     public class UrlsControllerTests
     {
         private UrlsController _controller;
-        private IIsraelHikingRepository _israelHikingRepository;
+        private IRepository _repository;
         private IDataContainerConverterService _containerConverterService;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _israelHikingRepository = Substitute.For<IIsraelHikingRepository>();
+            _repository = Substitute.For<IRepository>();
             _containerConverterService = Substitute.For<IDataContainerConverterService>();
-            _controller = new UrlsController(_israelHikingRepository, _containerConverterService);
+            _controller = new UrlsController(_repository, _containerConverterService);
         }
 
         [TestMethod]
-        public void GetSiteUrl_ItemNotInDatabase_ShouldReturnBadRequest()
+        public void GetShareUrl_ItemNotInDatabase_ShouldReturnBadRequest()
         {
-            var results = _controller.GetSiteUrl("42").Result as BadRequestResult;
+            var results = _controller.GetShareUrl("42").Result as BadRequestResult;
 
             Assert.IsNotNull(results);
         }
 
         [TestMethod]
-        public void GetSiteUrl_ItemInDatabase_ShouldReturnIt()
+        public void GetShareUrl_ItemInDatabase_ShouldReturnIt()
         {
             var id = "someId";
-            _israelHikingRepository.GetUrlById(id).Returns(new SiteUrl { Id = id });
+            _repository.GetUrlById(id).Returns(new ShareUrl { Id = id });
 
-            var results = _controller.GetSiteUrl(id).Result as OkObjectResult;
+            var results = _controller.GetShareUrl(id).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
-            var content = results.Value as SiteUrl;
+            var content = results.Value as ShareUrl;
             Assert.IsNotNull(results);
+            Assert.IsNotNull(content);
             Assert.AreEqual(id, content.Id);
         }
 
         [TestMethod]
-        public void GetSiteUrl_ItemInDatabase_ShouldReturnItAccordingToFromat()
+        public void GetShareUrl_ItemInDatabase_ShouldReturnItAccordingToFromat()
         {
             var id = "someId";
             var bytes = new byte[] { 1 };
-            _israelHikingRepository.GetUrlById(id).Returns(new SiteUrl { Id = id, JsonData = JsonConvert.SerializeObject(new DataContainer()) });
+            _repository.GetUrlById(id).Returns(new ShareUrl { Id = id, DataContainer = new DataContainer() });
             _containerConverterService.ToAnyFormat(Arg.Any<DataContainer>(), "gpx").Returns(bytes);
 
-            var results = _controller.GetSiteUrl(id, "gpx").Result as FileContentResult;
+            var results = _controller.GetShareUrl(id, "gpx").Result as FileContentResult;
 
             Assert.IsNotNull(results);
             var content = results.FileContents;
@@ -64,117 +64,118 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetSiteUrlForUser_ItemInDatabase_ShouldReturnItAccordingToFromat()
+        public void GetShareUrlForUser_ItemInDatabase_ShouldReturnItAccordingToFromat()
         {
             var id = "someId";
-            var list = new List<SiteUrl> { new SiteUrl { OsmUserId = id } };
+            var list = new List<ShareUrl> { new ShareUrl { OsmUserId = id } };
             _controller.SetupIdentity(id);
-            _israelHikingRepository.GetUrlsByUser(id).Returns(list);
+            _repository.GetUrlsByUser(id).Returns(list);
 
-            var results = _controller.GetSiteUrlForUser().Result as OkObjectResult;
+            var results = _controller.GetShareUrlForUser().Result as OkObjectResult;
 
             Assert.IsNotNull(results);
-            Assert.AreEqual(list.Count, (results.Value as List<SiteUrl>).Count);
+            Assert.AreEqual(list.Count, (results.Value as List<ShareUrl>).Count);
         }
 
         [TestMethod]
-        public void PostSiteUrl_IncorrectUser_ShouldReturnBadRequest()
+        public void PostShareUrl_IncorrectUser_ShouldReturnBadRequest()
         {
-            var url = new SiteUrl { OsmUserId = "1" };
+            var url = new ShareUrl { OsmUserId = "1" };
             _controller.SetupIdentity("2");
 
-            var results = _controller.PostSiteUrl(url).Result as BadRequestObjectResult;
+            var results = _controller.PostShareUrl(url).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
         }
 
         [TestMethod]
-        public void PostSiteUrl_RandomHitsItemInDatabase_ShouldAddSiteUrl()
+        public void PostShareUrl_RandomHitsItemInDatabase_ShouldAddShareUrl()
         {
             // first fetch from repository returns an item while the second one doesn't
-            _israelHikingRepository.GetUrlById(Arg.Any<string>())
-                .Returns(x => new SiteUrl(), x => null as SiteUrl);
+            _repository.GetUrlById(Arg.Any<string>())
+                .Returns(x => new ShareUrl(), x => null as ShareUrl);
 
-            var results = _controller.PostSiteUrl(new SiteUrl()).Result as OkObjectResult;
+            var results = _controller.PostShareUrl(new ShareUrl()).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
-            var content = results.Value as SiteUrl;
+            var content = results.Value as ShareUrl;
             Assert.IsNotNull(results);
+            Assert.IsNotNull(content);
             Assert.AreEqual(10, content.Id.Length);
         }
 
         [TestMethod]
-        public void PutSiteUrl_ItemNotInDatabase_ShouldReturnBadRequest()
+        public void PutShareUrl_ItemNotInDatabase_ShouldReturnBadRequest()
         {
-            var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
-            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns((SiteUrl)null);
+            var shareUrl = new ShareUrl { Id = "42", OsmUserId = "42" };
+            _repository.GetUrlById(shareUrl.Id).Returns((ShareUrl)null);
 
-            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as NotFoundResult;
+            var results = _controller.PutShareUrl(shareUrl.Id, shareUrl).Result as NotFoundResult;
 
             Assert.IsNotNull(results);
-            _israelHikingRepository.DidNotReceive().Update(Arg.Any<SiteUrl>());
+            _repository.DidNotReceive().Update(Arg.Any<ShareUrl>());
         }
 
         [TestMethod]
-        public void PutSiteUrl_ItemDoesNotBelongToUSer_ShouldReturnBadRequest()
+        public void PutShareUrl_ItemDoesNotBelongToUSer_ShouldReturnBadRequest()
         {
-            var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
-            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
+            var shareUrl = new ShareUrl { Id = "42", OsmUserId = "42" };
+            _repository.GetUrlById(shareUrl.Id).Returns(shareUrl);
             _controller.SetupIdentity("1");
 
-            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as BadRequestObjectResult;
+            var results = _controller.PutShareUrl(shareUrl.Id, shareUrl).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(results);
-            _israelHikingRepository.DidNotReceive().Update(Arg.Any<SiteUrl>());
+            _repository.DidNotReceive().Update(Arg.Any<ShareUrl>());
         }
 
         [TestMethod]
-        public void PutSiteUrl_ItemBelongsToUSer_ShouldUpdateIt()
+        public void PutShareUrl_ItemBelongsToUSer_ShouldUpdateIt()
         {
-            var siteUrl = new SiteUrl { Id = "1", OsmUserId = "1" };
-            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
-            _controller.SetupIdentity(siteUrl.OsmUserId);
+            var shareUrl = new ShareUrl { Id = "1", OsmUserId = "1" };
+            _repository.GetUrlById(shareUrl.Id).Returns(shareUrl);
+            _controller.SetupIdentity(shareUrl.OsmUserId);
 
-            var results = _controller.PutSiteUrl(siteUrl.Id, siteUrl).Result as OkObjectResult;
+            var results = _controller.PutShareUrl(shareUrl.Id, shareUrl).Result as OkObjectResult;
 
             Assert.IsNotNull(results);
-            _israelHikingRepository.Received(1).Update(Arg.Any<SiteUrl>());
+            _repository.Received(1).Update(Arg.Any<ShareUrl>());
         }
 
         [TestMethod]
-        public void DeleteSiteUrl_ItemNotInDatabase_ShouldReturnNotFound()
+        public void DeleteShareUrl_ItemNotInDatabase_ShouldReturnNotFound()
         {
             var id = "42";
-            _israelHikingRepository.GetUrlById(id).Returns(null as SiteUrl);
+            _repository.GetUrlById(id).Returns(null as ShareUrl);
 
-            var result = _controller.DeleteSiteUrl(id).Result as NotFoundResult;
+            var result = _controller.DeleteShareUrl(id).Result as NotFoundResult;
 
             Assert.IsNotNull(result);
         }
 
         [TestMethod]
-        public void DeleteSiteUrl_ItemUserIdDoesNotMatchUSer_ShouldReturnBadRequest()
+        public void DeleteShareUrl_ItemUserIdDoesNotMatchUSer_ShouldReturnBadRequest()
         {
             _controller.SetupIdentity("1");
-            var siteUrl = new SiteUrl { Id = "11", OsmUserId = "11" };
-            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
+            var shareUrl = new ShareUrl { Id = "11", OsmUserId = "11" };
+            _repository.GetUrlById(shareUrl.Id).Returns(shareUrl);
 
-            var result = _controller.DeleteSiteUrl(siteUrl.Id).Result as BadRequestObjectResult;
+            var result = _controller.DeleteShareUrl(shareUrl.Id).Result as BadRequestObjectResult;
 
             Assert.IsNotNull(result);
         }
 
 
         [TestMethod]
-        public void DeleteSiteUrl_ItemInDatabase_ShouldRemoveIt()
+        public void DeleteShareUrl_ItemInDatabase_ShouldRemoveIt()
         {
-            var siteUrl = new SiteUrl { Id = "42", OsmUserId = "42" };
-            _israelHikingRepository.GetUrlById(siteUrl.Id).Returns(siteUrl);
-            _controller.SetupIdentity(siteUrl.OsmUserId);
+            var shareUrl = new ShareUrl { Id = "42", OsmUserId = "42" };
+            _repository.GetUrlById(shareUrl.Id).Returns(shareUrl);
+            _controller.SetupIdentity(shareUrl.OsmUserId);
 
-            _controller.DeleteSiteUrl(siteUrl.Id).Wait();
+            _controller.DeleteShareUrl(shareUrl.Id).Wait();
 
-            _israelHikingRepository.Received(1).Delete(siteUrl);
+            _repository.Received(1).Delete(shareUrl);
             _controller.Dispose();
         }
     }

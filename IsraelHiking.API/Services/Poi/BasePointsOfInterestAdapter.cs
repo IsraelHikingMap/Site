@@ -47,7 +47,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 poiItem.Location = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
                 var alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(poiItem.Location));
-                poiItem.Location.alt = alt;
+                poiItem.Location.Alt = alt;
             }
             poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();
             poiItem.Title = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.NAME, language);

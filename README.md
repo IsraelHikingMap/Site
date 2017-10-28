@@ -22,7 +22,6 @@ The technology stack of this site is base on the following frameworks:
 * [Jasmine](http://jasmine.github.io/) + [Karma](https://karma-runner.github.io/) - for unit testing.
 * [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/)
 * [NSubstitute](http://nsubstitute.github.io/)
-* [Sqlite](https://www.sqlite.org/)
 * [GraphHopper](https://graphhopper.com/)
 * [Elastic Search and NEST](https://www.elastic.co/)
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite)
@@ -88,7 +87,6 @@ In order to be able to build this site you'll need some tools:
   * Type the following commands at the `PM>` prompt. Most of the commands may take a while. Ignore all _WARN_ messsages.
     ```
     npm install -g @angular/cli@1.4.4 --loglevel error
-    Update-Database
     ```
 # Starting a debug session
 [See the relevant page in our wiki](https://github.com/IsraelHikingMap/Site/wiki/Debug-Environment-Setup)
@@ -99,7 +97,6 @@ In order to be able to make the server work a few prerequisits are needed:
 * Install Java Runtime Environment.
 * Add `curl` to path.
 * `Elasticsearch.bat` and `GraphHopper.cmd` should be processes that run when the server machine starts and never die - use a watchdog or windows service to make sure they do (we use NSSM. for linux, check the java command inside those files and use a deamon to run them).
-* Place the israelhiking.sqlite file along side the dlls and make sure the user that runs the server has write access to it (IIS user for windows).
 * Create a task to update Graph Hopper and Elastic Search:
   * Open Windows' Task Scheduler
   * Create task

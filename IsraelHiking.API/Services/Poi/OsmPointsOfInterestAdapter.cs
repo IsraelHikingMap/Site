@@ -63,7 +63,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
             await AddExtendedData(poiItem, feature, language);
-            poiItem.IsRoute = poiItem.DataContainer.routes.Any(r => r.segments.Count > 1);
+            poiItem.IsRoute = poiItem.DataContainer.Routes.Any(r => r.Segments.Count > 1);
             poiItem.IsEditable = _tagsHelper.GetAllTags()
                 .Any(t => feature.Attributes.GetNames().Contains(t.Key) && feature.Attributes[t.Key].Equals(t.Value));
             return poiItem;
@@ -76,8 +76,8 @@ namespace IsraelHiking.API.Services.Poi
             var changesetId = await osmGateway.CreateChangeset("Add POI interface from IHM site.");
             var node = new Node
             {
-                Latitude = pointOfInterest.Location.lat,
-                Longitude = pointOfInterest.Location.lng,
+                Latitude = pointOfInterest.Location.Lat,
+                Longitude = pointOfInterest.Location.Lng,
                 Tags = new TagsCollection
                 {
                     {FeatureAttributes.WEBSITE, pointOfInterest.Url}

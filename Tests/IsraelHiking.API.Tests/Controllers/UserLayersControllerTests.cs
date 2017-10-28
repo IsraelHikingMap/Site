@@ -11,14 +11,14 @@ namespace IsraelHiking.API.Tests.Controllers
     [TestClass]
     public class UserLayersControllerTests
     {
-        private IIsraelHikingRepository _israelHikingRepository;
+        private IRepository _repository;
         private UserLayersController _controller;
         
         [TestInitialize]
         public void TestInitialize()
         {
-            _israelHikingRepository = Substitute.For<IIsraelHikingRepository>();
-            _controller = new UserLayersController(_israelHikingRepository);
+            _repository = Substitute.For<IRepository>();
+            _controller = new UserLayersController(_repository);
         }
 
         [TestCleanup]
@@ -30,15 +30,15 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetLayers_ShouldGetThem()
         {
-            var userLayers = new UserLayers {Layers = new List<UserLayerData> {new UserLayerData()}};
+            var userLayers = new UserMapLayers {Layers = new List<MapLayerData> {new MapLayerData()}};
             var osmUser = "osmUser";
             _controller.SetupIdentity(osmUser);
-            _israelHikingRepository.GetUserLayers(osmUser).Returns(userLayers);
+            _repository.GetUserLayers(osmUser).Returns(userLayers);
             
             var result = _controller.GetUserLayers().Result as OkObjectResult;
             
             Assert.IsNotNull(result);
-            var returnedUserLayers = result.Value as UserLayers;
+            var returnedUserLayers = result.Value as UserMapLayers;
             Assert.IsNotNull(returnedUserLayers);
             Assert.AreEqual(returnedUserLayers.Layers.Count, userLayers.Layers.Count);
         }
@@ -48,7 +48,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var results = _controller.PostUserLayers(string.Empty, null).Result;
             
-            Assert.IsNotNull(results as UnauthorizedResult);
+            Assert.IsNotNull(results as BadRequestResult);
         }
 
         [TestMethod]
@@ -57,7 +57,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity("123");
             var results = _controller.PostUserLayers("456", null).Result;
 
-            Assert.IsNotNull(results as UnauthorizedResult);
+            Assert.IsNotNull(results as BadRequestResult);
         }
 
         [TestMethod]
@@ -66,10 +66,10 @@ namespace IsraelHiking.API.Tests.Controllers
             var osmUserId = "osmUserId";
             _controller.SetupIdentity(osmUserId);
 
-            var results = _controller.PostUserLayers(osmUserId, new UserLayers()).Result;
+            var results = _controller.PostUserLayers(osmUserId, new UserMapLayers()).Result;
 
             Assert.IsNotNull(results as OkObjectResult);
-            _israelHikingRepository.Received(1).UpdateUserLayers(osmUserId, Arg.Any<UserLayers>());
+            _repository.Received(1).UpdateUserLayers(osmUserId, Arg.Any<UserMapLayers>());
         }
     }
 }

@@ -48,16 +48,16 @@ namespace IsraelHiking.API.Tests.Services
         {
             return new DataContainer
             {
-                baseLayer = new LayerData(),
-                routes = new List<RouteData>
+                BaseLayer = new LayerData(),
+                Routes = new List<RouteData>
                 {
                     new RouteData
                     {
-                        segments = new List<RouteSegmentData>
+                        Segments = new List<RouteSegmentData>
                         {
                             new RouteSegmentData
                             {
-                                latlngs = latLngs
+                                Latlngs = latLngs
                             }
                         }
                     }
@@ -70,8 +70,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLng {lat = 0.0001, lng = 0.0001},
-                new LatLng {lat = 0.0002, lng = 0.0002}
+                new LatLng {Lat = 0.0001, Lng = 0.0001},
+                new LatLng {Lat = 0.0002, Lng = 0.0002}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -85,8 +85,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLng {lat = 0.0001, lng = 0.0001},
-                new LatLng {lat = 0.0002, lng = 0.0002}
+                new LatLng {Lat = 0.0001, Lng = 0.0001},
+                new LatLng {Lat = 0.0002, Lng = 0.0002}
             });
             _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>())
                 .Returns(new RemoteFileFetcherGatewayResponse
@@ -106,8 +106,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLng {lat = 0.01, lng = 0.01},
-                new LatLng {lat = 0.01, lng = 0.015}
+                new LatLng {Lat = 0.01, Lng = 0.01},
+                new LatLng {Lat = 0.01, Lng = 0.015}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -121,8 +121,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLng {lat = 0.01, lng = 0.01},
-                new LatLng {lat = 0.015, lng = 0.01}
+                new LatLng {Lat = 0.01, Lng = 0.01},
+                new LatLng {Lat = 0.015, Lng = 0.01}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -136,8 +136,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLng {lat = 0.1, lng = 0.1},
-                new LatLng {lat = 0.15, lng = 0.15}
+                new LatLng {Lat = 0.1, Lng = 0.1},
+                new LatLng {Lat = 0.15, Lng = 0.15}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -151,8 +151,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLng {lat = 0.1, lng = 0.1},
-                new LatLng {lat = 0.1, lng = 0.15}
+                new LatLng {Lat = 0.1, Lng = 0.1},
+                new LatLng {Lat = 0.1, Lng = 0.15}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -166,8 +166,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             var dataContainer = GetDataContainer(new List<LatLng>
             {
-                new LatLng {lat = 0.1, lng = 0.1},
-                new LatLng {lat = 0.15, lng = 0.1}
+                new LatLng {Lat = 0.1, Lng = 0.1},
+                new LatLng {Lat = 0.15, Lng = 0.1}
             });
 
             var ressults = _imageCreationService.Create(dataContainer).Result;
@@ -181,10 +181,10 @@ namespace IsraelHiking.API.Tests.Services
         {
             var dataContainer = new DataContainer
             {
-                northEast = new LatLng { lat = 0.1, lng = 0.1 },
-                southWest = new LatLng { lat = 0.15, lng = 0.15 },
-                baseLayer = new LayerData { Address = "/Tiles/{z}/{x}/{y}.png"},
-                routes = new List<RouteData> {  new RouteData() }
+                NorthEast = new LatLng { Lat = 0.1, Lng = 0.1 },
+                SouthWest = new LatLng { Lat = 0.15, Lng = 0.15 },
+                BaseLayer = new LayerData { Address = "/Tiles/{z}/{x}/{y}.png"},
+                Routes = new List<RouteData> {  new RouteData() }
             };
 
             var ressults = _imageCreationService.Create(dataContainer).Result;

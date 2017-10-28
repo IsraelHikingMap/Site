@@ -1,23 +1,26 @@
 ﻿using System;
 using System.Linq;
+using Newtonsoft.Json;
 
 namespace IsraelHiking.Common
 {
     public class LatLng : IEquatable<LatLng>
     {
-        public double lat { get; set; }
-        public double lng { get; set; }
-        public double? alt { get; set; }
+        [JsonProperty("lat")]
+        public double Lat { get; set; }
+        [JsonProperty("lng")]
+        public double Lng { get; set; }
+        [JsonProperty("alt")]
+        public double? Alt { get; set; }
 
         public bool Equals(LatLng other)
         {
-            return Math.Abs(other.lat - lat) < double.Epsilon && Math.Abs(other.lng - lng) < double.Epsilon;
+            return Math.Abs(other.Lat - Lat) < double.Epsilon && Math.Abs(other.Lng - Lng) < double.Epsilon;
         }
 
         public override bool Equals(object obj)
         {
-            var latLng = obj as LatLng;
-            if (latLng != null)
+            if (obj is LatLng latLng)
             {
                 return Equals(latLng);
             }
@@ -28,7 +31,7 @@ namespace IsraelHiking.Common
         {
             unchecked
             {
-                return (lat.GetHashCode()*397) ^ lng.GetHashCode();
+                return (Lat.GetHashCode()*397) ^ Lng.GetHashCode();
             }
         }
 
@@ -36,9 +39,9 @@ namespace IsraelHiking.Common
 
         public LatLng(double latitude, double longitude, double? altitude = null)
         {
-            lat = latitude;
-            lng = longitude;
-            alt = altitude;
+            Lat = latitude;
+            Lng = longitude;
+            Alt = altitude;
         }
 
         public LatLng(string latlngString) : this()
@@ -48,8 +51,8 @@ namespace IsraelHiking.Common
             {
                 return;
             }
-            lat = double.Parse(split.First());
-            lng = double.Parse(split.Last());
+            Lat = double.Parse(split.First());
+            Lng = double.Parse(split.Last());
         }
     }
 }

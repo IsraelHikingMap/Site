@@ -1,9 +1,14 @@
-﻿namespace IsraelHiking.Common
+﻿using Newtonsoft.Json;
+
+namespace IsraelHiking.Common
 {
     public class MarkerData
     {
-        public LatLng latlng { get; set; }
-        public string title { get; set; }
-        public string type { get; set; }
+        [JsonProperty("latlng")]
+        public LatLng Latlng { get; set; }
+        [JsonProperty("title")]
+        public string Title { get; set; }
+        [JsonProperty("type")]
+        public string Type { get; set; }
     }
 }

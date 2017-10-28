@@ -30,17 +30,17 @@ namespace IsraelHiking.API.Converters
         ///<inheritdoc />
         public gpxType ToGpx(DataContainer container)
         {
-            var containerRoutes = container.routes ?? new List<RouteData>();
-            var nonEmptyRoutes = containerRoutes.Where(r => r.segments.SelectMany(s => s.latlngs).Any());
+            var containerRoutes = container.Routes ?? new List<RouteData>();
+            var nonEmptyRoutes = containerRoutes.Where(r => r.Segments.SelectMany(s => s.Latlngs).Any());
             return new gpxType
             {
-                wpt = containerRoutes.SelectMany(r => r.markers).Select(ToWptType).ToArray(),
+                wpt = containerRoutes.SelectMany(r => r.Markers).Select(ToWptType).ToArray(),
                 rte = new rteType[0],
                 trk = nonEmptyRoutes.Select(r => new trkType
                 {
-                    name = r.name,
-                    desc = r.description,
-                    trkseg = r.segments.Select(ToTrksegType).ToArray()
+                    name = r.Name,
+                    desc = r.Description,
+                    trkseg = r.Segments.Select(ToTrksegType).ToArray()
                 }).ToArray()
             }.UpdateBounds();
         }
@@ -51,20 +51,20 @@ namespace IsraelHiking.API.Converters
             gpx.UpdateBounds();
             var container = new DataContainer
             {
-                routes = ConvertRoutesToRoutesData(gpx.rte ?? new rteType[0])
+                Routes = ConvertRoutesToRoutesData(gpx.rte ?? new rteType[0])
             };
-            container.routes.AddRange(ConvertTracksToRouteData(gpx.trk ?? new trkType[0]));
+            container.Routes.AddRange(ConvertTracksToRouteData(gpx.trk ?? new trkType[0]));
             var nonEmptyWayPoints = gpx.wpt ?? new wptType[0];
             var markers = nonEmptyWayPoints.Select(ToMarkerData).ToList();
             if (markers.Any())
             {
-                if (!container.routes.Any())
+                if (!container.Routes.Any())
                 {
-                    var title = string.IsNullOrWhiteSpace(markers.First().title) ? "Markers" : markers.First().title;
+                    var title = string.IsNullOrWhiteSpace(markers.First().Title) ? "Markers" : markers.First().Title;
                     var name = markers.Count == 1 ? title : "Markers";
-                    container.routes.Add(new RouteData {name = name, description = nonEmptyWayPoints.First().desc});
+                    container.Routes.Add(new RouteData {Name = name, Description = nonEmptyWayPoints.First().desc});
                 }
-                container.routes.First().markers = markers;
+                container.Routes.First().Markers = markers;
             }
             if (gpx.metadata?.bounds != null)
             {
@@ -77,14 +77,14 @@ namespace IsraelHiking.API.Converters
         {
             var routesData = routes.Where(r => r.rtept != null && r.rtept.Any()).Select(route => new RouteData
             {
-                name = route.name,
-                description = route.desc,
-                segments = new List<RouteSegmentData>
+                Name = route.name,
+                Description = route.desc,
+                Segments = new List<RouteSegmentData>
                 {
                     new RouteSegmentData
                     {
-                        latlngs = route.rtept.Select(ToLatLng).ToList(),
-                        routePoint = ToLatLng(route.rtept.Last())
+                        Latlngs = route.rtept.Select(ToLatLng).ToList(),
+                        RoutePoint = ToLatLng(route.rtept.Last())
                     }
                 }
             }).ToList();
@@ -95,13 +95,13 @@ namespace IsraelHiking.API.Converters
         {
             var tracks = trks.Where(t => t.trkseg != null && t.trkseg.Any()).Select(t => new RouteData
             {
-                name = t.name,
-                description = t.desc,
-                segments = t.trkseg.Where(seg => seg?.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
+                Name = t.name,
+                Description = t.desc,
+                Segments = t.trkseg.Where(seg => seg?.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
                 {
-                    latlngs = seg.trkpt.Select(ToLatLng).ToList(),
-                    routePoint = ToLatLng(seg.trkpt.Last()),
-                    routingType = RoutingTypeConverter.FromXml(seg.extensions)
+                    Latlngs = seg.trkpt.Select(ToLatLng).ToList(),
+                    RoutePoint = ToLatLng(seg.trkpt.Last()),
+                    RoutingType = RoutingTypeConverter.FromXml(seg.extensions)
                 }).ToList(),
             });
             return tracks;
@@ -109,16 +109,16 @@ namespace IsraelHiking.API.Converters
 
         private void UpdateBoundingBox(DataContainer container, boundsType bounds)
         {
-            container.northEast = new LatLng 
+            container.NorthEast = new LatLng 
             {
-                lat = (double)bounds.maxlat,
-                lng = (double)bounds.maxlon
+                Lat = (double)bounds.maxlat,
+                Lng = (double)bounds.maxlon
             };
 
-            container.southWest = new LatLng
+            container.SouthWest = new LatLng
             {
-                lat = (double)bounds.minlat,
-                lng = (double)bounds.minlon
+                Lat = (double)bounds.minlat,
+                Lng = (double)bounds.minlon
             };
         }
 
@@ -126,9 +126,9 @@ namespace IsraelHiking.API.Converters
         {
             return new LatLng
             {
-                lat = (double)point.lat,
-                lng = (double)point.lon,
-                alt = (double)point.ele
+                Lat = (double)point.lat,
+                Lng = (double)point.lon,
+                Alt = (double)point.ele
             };
         }
 
@@ -136,9 +136,9 @@ namespace IsraelHiking.API.Converters
         {
             return new MarkerData
             {
-                latlng = ToLatLng(point),
-                title = point.name,
-                type = point.type
+                Latlng = ToLatLng(point),
+                Title = point.name,
+                Type = point.type
             };
         }
 
@@ -146,10 +146,10 @@ namespace IsraelHiking.API.Converters
         {
             return new wptType
             {
-                lat = (decimal)marker.latlng.lat,
-                lon = (decimal)marker.latlng.lng,
-                name = marker.title,
-                type = marker.type
+                lat = (decimal)marker.Latlng.Lat,
+                lon = (decimal)marker.Latlng.Lng,
+                name = marker.Title,
+                type = marker.Type
             };
         }
 
@@ -157,10 +157,10 @@ namespace IsraelHiking.API.Converters
         {
             return new wptType
             {
-                lat = (decimal)latLng.lat,
-                lon = (decimal)latLng.lng,
-                ele = (decimal)(latLng.alt ?? 0),
-                eleSpecified = latLng.alt.HasValue
+                lat = (decimal)latLng.Lat,
+                lon = (decimal)latLng.Lng,
+                ele = (decimal)(latLng.Alt ?? 0),
+                eleSpecified = latLng.Alt.HasValue
             };
         }
 
@@ -168,8 +168,8 @@ namespace IsraelHiking.API.Converters
         {
             return new trksegType
             {
-                trkpt = segmentData.latlngs.Select(ToWptType).ToArray(),
-                extensions = new extensionsType { Any = new[] { RoutingTypeConverter.ToXml(segmentData.routingType) } }
+                trkpt = segmentData.Latlngs.Select(ToWptType).ToArray(),
+                extensions = new extensionsType { Any = new[] { RoutingTypeConverter.ToXml(segmentData.RoutingType) } }
             };
         }
     }

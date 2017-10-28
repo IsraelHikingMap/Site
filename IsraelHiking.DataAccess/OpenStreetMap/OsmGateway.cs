@@ -334,8 +334,8 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                             Description = trace.Description,
                             Visibility = trace.Visibility,
                             Id = int.Parse(trace.Id),
-                            Lat = trace.LatLng.lat,
-                            Lon = trace.LatLng.lng,
+                            Lat = trace.LatLng.Lat,
+                            Lon = trace.LatLng.Lng,
                             Tags = trace.Tags.ToArray()
                         }
                     }

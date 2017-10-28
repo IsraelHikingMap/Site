@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <inheritdoc />
     /// <summary>
     /// This contoller is used to return an HTML page for facebook crawler
     /// </summary>
@@ -13,14 +14,14 @@ namespace IsraelHiking.API.Controllers
     public class OpenGraphController : Controller
     {
         private readonly ILogger _logger;
-        private IIsraelHikingRepository _repository;
+        private readonly IRepository _repository;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="repository"></param>
         /// <param name="logger"></param>
-        public OpenGraphController(IIsraelHikingRepository repository, 
+        public OpenGraphController(IRepository repository, 
             ILogger logger)
         {
             _repository = repository;
@@ -87,20 +88,6 @@ namespace IsraelHiking.API.Controllers
                 </body>
                 </html>
             ";
-        }
-
-        /// <summary>
-        /// Dispose method, follows dispoase pattern
-        /// </summary>
-        /// <param name="disposing"></param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing && _repository != null)
-            {
-                _repository.Dispose();
-                _repository = null;
-            }
-            base.Dispose(disposing);
         }
     }
 }

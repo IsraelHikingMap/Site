@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Services
             _remoteFileFetcherGateway = httpGatewayFactory.CreateRemoteFileFetcherGateway(null);
             _logger = logger;
             _outLinerPen = new Pen(Color.White, PEN_WIDTH + 8) { LineJoin = LineJoin.Bevel };
-            _circleFillBrush = Brushes.White.Clone() as Brush;
+            _circleFillBrush = new SolidBrush(Color.White);
             _startRoutePen = new Pen(Color.Green, 7);
             _endRoutePen = new Pen(Color.Red, 7);
             _routeColors = options.Value.Colors.Select(c => FromColorString(c)).ToArray();
@@ -65,10 +65,10 @@ namespace IsraelHiking.API.Services
         public async Task<byte[]> Create(DataContainer dataContainer)
         {
             _logger.LogDebug("Creating image for thumbnail started.");
-            var allLocations = dataContainer.routes.SelectMany(r => r.segments).SelectMany(s => s.latlngs).ToArray();
+            var allLocations = dataContainer.Routes.SelectMany(r => r.Segments).SelectMany(s => s.Latlngs).ToArray();
             if (!allLocations.Any())
             {
-                allLocations = new[] { dataContainer.northEast, dataContainer.southWest };
+                allLocations = new[] { dataContainer.NorthEast, dataContainer.SouthWest };
             }
             var backgroundImage = await GetBackGroundImage(GetAddressTemplate(dataContainer), allLocations);
             DrawRoutesOnImage(backgroundImage, dataContainer);
@@ -85,15 +85,15 @@ namespace IsraelHiking.API.Services
             var n = Math.Pow(2, zoom);
             var tiles = new Point
             {
-                X = (int)Math.Ceiling(Math.Ceiling(GetXTile(allLocations.Max(l => l.lng), n)) - Math.Floor(GetXTile(allLocations.Min(l => l.lng), n))),
-                Y = (int)Math.Ceiling(Math.Ceiling(GetYTile(allLocations.Min(l => l.lat), n)) - Math.Floor(GetYTile(allLocations.Max(l => l.lat), n)))
+                X = (int)Math.Ceiling(Math.Ceiling(GetXTile(allLocations.Max(l => l.Lng), n)) - Math.Floor(GetXTile(allLocations.Min(l => l.Lng), n))),
+                Y = (int)Math.Ceiling(Math.Ceiling(GetYTile(allLocations.Min(l => l.Lat), n)) - Math.Floor(GetYTile(allLocations.Max(l => l.Lat), n)))
             };
             while (tiles.X > NUMBER_OF_TILES_FOR_IMAGE_X || tiles.Y > NUMBER_OF_TILES_FOR_IMAGE_Y)
             {
                 zoom--;
                 n = Math.Pow(2, zoom);
-                tiles.X = (int)Math.Ceiling(Math.Ceiling(GetXTile(allLocations.Max(l => l.lng), n)) - Math.Floor(GetXTile(allLocations.Min(l => l.lng), n)));
-                tiles.Y = (int)Math.Ceiling(Math.Ceiling(GetYTile(allLocations.Min(l => l.lat), n)) - Math.Floor(GetYTile(allLocations.Max(l => l.lat), n)));
+                tiles.X = (int)Math.Ceiling(Math.Ceiling(GetXTile(allLocations.Max(l => l.Lng), n)) - Math.Floor(GetXTile(allLocations.Min(l => l.Lng), n)));
+                tiles.Y = (int)Math.Ceiling(Math.Ceiling(GetYTile(allLocations.Min(l => l.Lat), n)) - Math.Floor(GetYTile(allLocations.Max(l => l.Lat), n)));
             }
             return new BackgroundImage
             {
@@ -106,8 +106,8 @@ namespace IsraelHiking.API.Services
         private async Task<BackgroundImage> GetBackGroundImage(string addressTemplate, LatLng[] allLocations)
         {
             var backgroundImage = InitBackgroundImageTiles(allLocations);
-            var topLeft = new Point((int)GetXTile(allLocations.Min(l => l.lng), backgroundImage.N), (int)GetYTile(allLocations.Max(l => l.lat), backgroundImage.N));
-            var bottomRight = new Point((int)GetXTile(allLocations.Max(l => l.lng), backgroundImage.N), (int)GetYTile(allLocations.Min(l => l.lat), backgroundImage.N));
+            var topLeft = new Point((int)GetXTile(allLocations.Min(l => l.Lng), backgroundImage.N), (int)GetYTile(allLocations.Max(l => l.Lat), backgroundImage.N));
+            var bottomRight = new Point((int)GetXTile(allLocations.Max(l => l.Lng), backgroundImage.N), (int)GetYTile(allLocations.Min(l => l.Lat), backgroundImage.N));
             if (backgroundImage.Tiles.X == 2 && backgroundImage.Tiles.Y == 1)
             {
                 // no need to do anything.
@@ -152,9 +152,9 @@ namespace IsraelHiking.API.Services
 
         private static string GetAddressTemplate(DataContainer dataContainer)
         {
-            var address = string.IsNullOrWhiteSpace(dataContainer.baseLayer.Address)
+            var address = string.IsNullOrWhiteSpace(dataContainer.BaseLayer.Address)
                 ? "https://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png"
-                : dataContainer.baseLayer.Address;
+                : dataContainer.BaseLayer.Address;
             address = address.Trim().ToLower();
             if (address.StartsWith("http") == false && address.StartsWith("www") == false)
             {
@@ -169,18 +169,18 @@ namespace IsraelHiking.API.Services
             {
                 var routeColorIndex = 0;
                 // HM TODO: add markers?
-                foreach (var route in dataContainer.routes)
+                foreach (var route in dataContainer.Routes)
                 {
-                    var points = route.segments.SelectMany(s => s.latlngs).Select(l => ConvertLatLngToPoint(l, backgroundImage)).ToArray();
+                    var points = route.Segments.SelectMany(s => s.Latlngs).Select(l => ConvertLatLngToPoint(l, backgroundImage)).ToArray();
                     if (!points.Any())
                     {
                         continue;
                     }
                     var lineColor = _routeColors[routeColorIndex++];
                     routeColorIndex = routeColorIndex % _routeColors.Length;
-                    if (!string.IsNullOrEmpty(route.color))
+                    if (!string.IsNullOrEmpty(route.Color))
                     {
-                        lineColor = FromColorString(route.color, route.opacity);
+                        lineColor = FromColorString(route.Color, route.Opacity);
                     }
                     graphics.DrawLines(_outLinerPen, points);
                     var linePen = new Pen(lineColor, PEN_WIDTH) { LineJoin = LineJoin.Bevel };
@@ -215,8 +215,8 @@ namespace IsraelHiking.API.Services
 
         private PointF ConvertLatLngToPoint(LatLng latLng, BackgroundImage backgroundImage)
         {
-            var x = (float)((GetXTile(latLng.lng, backgroundImage.N) - backgroundImage.TopLeft.X) * TARGET_TILE_SIZE_X / backgroundImage.Tiles.X);
-            var y = (float)((GetYTile(latLng.lat, backgroundImage.N) - backgroundImage.TopLeft.Y) * TARGET_TILE_SIZE_Y / backgroundImage.Tiles.Y);
+            var x = (float)((GetXTile(latLng.Lng, backgroundImage.N) - backgroundImage.TopLeft.X) * TARGET_TILE_SIZE_X / backgroundImage.Tiles.X);
+            var y = (float)((GetYTile(latLng.Lat, backgroundImage.N) - backgroundImage.TopLeft.Y) * TARGET_TILE_SIZE_Y / backgroundImage.Tiles.Y);
             return new PointF(x, y);
         }
 

@@ -60,6 +60,8 @@ namespace IsraelHiking.DataAccess
         private const string OSM_NAMES_ALIAS = "osm_names";
         private const string OSM_HIGHWAYS_ALIAS = "osm_highways";
         private const string RATINGS = "ratings";
+        private const string SHARES = "shares";
+        private const string USER_LAYERS = "user_layers";
 
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
@@ -80,7 +82,7 @@ namespace IsraelHiking.DataAccess
                 new SerializerFactory(s => new GeoJsonNetSerializer(s)))
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
-            if (_elasticClient.IndexExists(OSM_NAMES_INDEX1).Exists == false && 
+            if (_elasticClient.IndexExists(OSM_NAMES_INDEX1).Exists == false &&
                 _elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists == false)
             {
                 CreateNamesIndex(OSM_NAMES_INDEX1);
@@ -106,7 +108,15 @@ namespace IsraelHiking.DataAccess
             {
                 _elasticClient.CreateIndex(RATINGS);
             }
-            _logger.LogInformation("Finished initialing elastic search with uri: " + uri);
+            if (_elasticClient.IndexExists(SHARES).Exists == false)
+            {
+                _elasticClient.CreateIndex(SHARES);
+            }
+            if (_elasticClient.IndexExists(USER_LAYERS).Exists == false)
+            {
+                _elasticClient.CreateIndex(SHARES);
+            }
+            _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
 
         public async Task UpdateDataZeroDownTime(List<Feature> names, List<Feature> highways)
@@ -148,7 +158,7 @@ namespace IsraelHiking.DataAccess
 
         public Task UpdateNamesData(Feature feature)
         {
-            return UpdateData(new List<Feature> {feature}, OSM_NAMES_ALIAS);
+            return UpdateData(new List<Feature> { feature }, OSM_NAMES_ALIAS);
         }
 
         public Task UpdateRating(Rating rating)
@@ -233,7 +243,7 @@ namespace IsraelHiking.DataAccess
                 s => s.Index(OSM_NAMES_ALIAS)
                     .Size(10000).Query(
                         q => q.GeoBoundingBox(
-                            b => b.BoundingBox(bb => 
+                            b => b.BoundingBox(bb =>
                                 bb.TopLeft(new GeoCoordinate(northEast.Y, southWest.X))
                                 .BottomRight(new GeoCoordinate(southWest.Y, northEast.X))
                                 ).Field($"{PROPERTIES}.{FeatureAttributes.GEOLOCATION}")
@@ -334,6 +344,46 @@ namespace IsraelHiking.DataAccess
         private string GetId(string source, string id)
         {
             return source + "_" + id;
+        }
+
+        public Task AddUrl(ShareUrl shareUrl)
+        {
+            return _elasticClient.IndexAsync(shareUrl, r => r.Index(SHARES).Id(shareUrl.Id));
+        }
+
+        public async Task<ShareUrl> GetUrlById(string id)
+        {
+            var response = await _elasticClient.GetAsync<ShareUrl>(id, r => r.Index(SHARES));
+            return response.Source;
+        }
+
+        public async Task<List<ShareUrl>> GetUrlsByUser(string osmUserId)
+        {
+            var response = await _elasticClient.SearchAsync<ShareUrl>(s => s.Index(SHARES).Size(1000)
+                .Query(q => q.Term(t => t.OsmUserId, osmUserId)));
+            return response.Documents.ToList();
+
+        }
+
+        public Task Delete(ShareUrl shareUrl)
+        {
+            return _elasticClient.DeleteAsync<ShareUrl>(shareUrl.Id);
+        }
+
+        public Task Update(ShareUrl shareUrl)
+        {
+            return AddUrl(shareUrl);
+        }
+
+        public async Task<UserMapLayers> GetUserLayers(string osmUserId)
+        {
+            var response = await _elasticClient.GetAsync<UserMapLayers>(osmUserId, r => r.Index(USER_LAYERS));
+            return response.Source ?? new UserMapLayers { OsmUserId = osmUserId };
+        }
+
+        public Task UpdateUserLayers(string osmUserId, UserMapLayers userLayers)
+        {
+            return _elasticClient.IndexAsync(userLayers, r => r.Index(USER_LAYERS).Id(osmUserId));
         }
     }
 }

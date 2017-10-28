@@ -1,4 +1,5 @@
 ﻿using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace IsraelHiking.DataAccess.Tests.ElasticSearch
@@ -29,10 +30,15 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         }
 
         [TestMethod]
+        [Ignore]
         public void SetIndex_ShouldReturnResults()
         {
             var gateway = new ElasticSearchGateway(new TraceLogger());
             gateway.Initialize();
+            gateway.AddUrl(new ShareUrl {Id = "123", OsmUserId = "789"});
+            var b = gateway.GetUrlsByUser("789").Result;
+            var a = gateway.GetUrlById("123").Result;
+            gateway.Delete(new ShareUrl {Id = "123", OsmUserId = "456"});
         }
     }
 }

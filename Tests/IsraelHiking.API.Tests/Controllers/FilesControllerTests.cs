@@ -82,8 +82,8 @@ namespace IsraelHiking.API.Tests.Controllers
 
             var dataContainer = _controller.GetRemoteFile(url).Result;
 
-            Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
+            Assert.AreEqual(1, dataContainer.Routes.Count);
+            Assert.AreEqual(1, dataContainer.Routes.First().Markers.Count);
         }
 
         [TestMethod]
@@ -91,21 +91,21 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var dataContainer = new DataContainer
             {
-                routes = new List<RouteData>
+                Routes = new List<RouteData>
                 {
                     new RouteData
                     {
-                        markers = new List<MarkerData>
+                        Markers = new List<MarkerData>
                         {
                             new MarkerData
                             {
-                                latlng = new LatLng {lat = 10, lng = 10},
-                                title = "title"
+                                Latlng = new LatLng {Lat = 10, Lng = 10},
+                                Title = "title"
                             }
                         },
-                        segments = new List<RouteSegmentData>
+                        Segments = new List<RouteSegmentData>
                         {
-                            new RouteSegmentData {latlngs = new List<LatLng> {new LatLng()}}
+                            new RouteSegmentData {Latlngs = new List<LatLng> {new LatLng()}}
                         }
                     }
                 }
@@ -139,11 +139,11 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(results);
             var dataContainer = results.Value as DataContainer;
 
-            Assert.AreEqual(1, dataContainer.routes.Count);
-            Assert.AreEqual(1, dataContainer.routes.First().segments.Count);
-            Assert.AreEqual(6, dataContainer.routes.First().segments.First().latlngs.Count);
-            Assert.AreEqual(1, dataContainer.routes.First().markers.Count);
-            Assert.IsTrue(dataContainer.routes.SelectMany(r => r.segments.SelectMany(s => s.latlngs)).All(l => l.alt != 0));
+            Assert.AreEqual(1, dataContainer.Routes.Count);
+            Assert.AreEqual(1, dataContainer.Routes.First().Segments.Count);
+            Assert.AreEqual(6, dataContainer.Routes.First().Segments.First().Latlngs.Count);
+            Assert.AreEqual(1, dataContainer.Routes.First().Markers.Count);
+            Assert.IsTrue(dataContainer.Routes.SelectMany(r => r.Segments.SelectMany(s => s.Latlngs)).All(l => l.Alt != 0));
         }
     }
 }
