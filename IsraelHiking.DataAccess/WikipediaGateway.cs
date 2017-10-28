@@ -30,6 +30,10 @@ namespace IsraelHiking.DataAccess
         {
             _logger = logger;
             _options = options.Value;
+            if (string.IsNullOrWhiteSpace(_options.WikiMediaUserName))
+            {
+                _logger.LogError("Wikimedia user is empty!");
+            }
         }
 
         public async Task Initialize()

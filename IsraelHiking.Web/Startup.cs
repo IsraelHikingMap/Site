@@ -37,7 +37,14 @@ namespace IsraelHiking.Web
         {
             _isDevelopment = env.IsDevelopment();
             var builder = new ConfigurationBuilder();
-            builder.AddUserSecrets<NonPublicConfigurationData>();
+            if (_isDevelopment)
+            {
+                builder.AddUserSecrets<NonPublicConfigurationData>();
+            }
+            else
+            {
+                builder.AddJsonFile("nonPublic.json");
+            }
             _nonPublicConfiguration = builder.Build();
         }
 
