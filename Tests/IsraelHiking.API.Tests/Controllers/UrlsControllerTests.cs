@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
@@ -64,17 +66,24 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetShareUrlForUser_ItemInDatabase_ShouldReturnItAccordingToFromat()
+        public void GetShareUrlForUser_ItemInDatabase_ShouldReturnShortedByCreationDate()
         {
             var id = "someId";
-            var list = new List<ShareUrl> { new ShareUrl { OsmUserId = id } };
+            var list = new List<ShareUrl>
+            {
+                new ShareUrl { OsmUserId = id, CreationDate = DateTime.Now.AddDays(-1)},
+                new ShareUrl { OsmUserId = id, CreationDate = DateTime.Now.AddDays(-2)},
+                new ShareUrl { OsmUserId = id, CreationDate = DateTime.Now}
+            };
             _controller.SetupIdentity(id);
             _repository.GetUrlsByUser(id).Returns(list);
 
             var results = _controller.GetShareUrlForUser().Result as OkObjectResult;
 
             Assert.IsNotNull(results);
-            Assert.AreEqual(list.Count, (results.Value as List<ShareUrl>).Count);
+            Assert.IsNotNull(results.Value as IEnumerable<ShareUrl>);
+            Assert.AreEqual(list.Count, ((IEnumerable<ShareUrl>) results.Value).Count());
+            Assert.AreEqual(list.OrderByDescending(d => d.CreationDate).First().CreationDate, ((IEnumerable<ShareUrl>)results.Value).First().CreationDate);
         }
 
         [TestMethod]

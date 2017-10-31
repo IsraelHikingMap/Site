@@ -80,7 +80,7 @@ namespace IsraelHiking.API.Controllers
         public async Task<IActionResult> GetShareUrlForUser()
         {
             var shareUrls = await _repository.GetUrlsByUser(User.Identity.Name);
-            return Ok(shareUrls);
+            return Ok(shareUrls.OrderByDescending(d => d.CreationDate));
         }
 
         /// <summary>
