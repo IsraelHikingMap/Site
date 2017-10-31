@@ -367,7 +367,7 @@ namespace IsraelHiking.DataAccess
 
         public Task Delete(ShareUrl shareUrl)
         {
-            return _elasticClient.DeleteAsync<ShareUrl>(shareUrl.Id);
+            return _elasticClient.DeleteAsync<ShareUrl>(shareUrl.Id, d => d.Index(SHARES));
         }
 
         public Task Update(ShareUrl shareUrl)
