@@ -859,6 +859,10 @@ export class ResourcesService {
         return `text-${this.getDirection(words) === "rtl" ? "right" : "left"}`;
     }
 
+    public getImageFloat = (words?: string) => {
+        return this.getDirection(words) === "rtl" ? "left" : "right";
+    }
+
     public getCurrentLanguageCodeSimplified = () => {
         return this.currentLanguage.code.split("-")[0];
     }

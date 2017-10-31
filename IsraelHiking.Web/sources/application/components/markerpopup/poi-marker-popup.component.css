@@ -1,8 +1,14 @@
-﻿.img-top {
-    height: 100px;
+﻿.img-placeholder {
+    width: 100px;
 }
 
 .description-container {
     max-height: 200px;
     overflow-y: auto;
+}
+
+.flex-center {
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }

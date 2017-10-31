@@ -42,7 +42,7 @@ body {
     cursor: pointer;
 }
 
-.curson-zoom-in {
+.cursor-zoom-in {
     cursor: zoom-in;
 }
 
@@ -121,6 +121,16 @@ body {
 [dir=rtl] .margin-10 {
     margin-right: 10px;
     margin-left: 0;
+}
+
+.margin-10-reverse {
+    margin-left: 0 !important;
+    margin-right: 10px !important;
+}
+
+[dir=rtl] .margin-10-reverse {
+    margin-right: 0 !important;
+    margin-left: 10px !important;
 }
 /*#endregion*/
 
