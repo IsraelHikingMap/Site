@@ -23,12 +23,16 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         private routeStatisticsService: RouteStatisticsService) {
         super(resources);
 
-        this.length = 0;
-        this.gain = 0;
-        this.loss = 0;
+        this.initalizeStatistics();
         this.routeChangedSubscription = null;
         this.routeDataChangedSubscription = null;
 
+    }
+
+    private initalizeStatistics(): void {
+        this.length = 0;
+        this.gain = 0;
+        this.loss = 0;
     }
 
     public ngOnInit() {
@@ -71,6 +75,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         let routeLayer = this.routesService.selectedRoute;
         if (!routeLayer) {
+            this.initalizeStatistics();
             return;
         }
         this.routeDataChangedSubscription = routeLayer.dataChanged.subscribe(() => this.onRouteDataChanged());
