@@ -54,6 +54,9 @@ export class DrawingComponent extends BaseMapComponent {
         this.suppressEvents(e);
         let selectedRoute = this.routesService.selectedRoute;
         if (selectedRoute == null) {
+            let properties = this.routeLayerFactory.createRoute(this.routesService.createRouteName()).properties;
+            this.routesService.addRoute({ properties: properties, segments: [], markers: [] });
+            this.routesService.selectedRoute.setEditMode(editMode);
             return;
         }
         if (this.getEditMode() === editMode) {
@@ -98,7 +101,7 @@ export class DrawingComponent extends BaseMapComponent {
     
     public getRouteColor = (): string => {
         if (this.routesService.selectedRoute == null) {
-            return "";
+            return "black";
         }
         return this.routesService.selectedRoute.route.properties.pathOptions.color;
     }
