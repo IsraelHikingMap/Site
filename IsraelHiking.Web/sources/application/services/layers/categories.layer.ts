@@ -49,7 +49,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                     this.categories.push({
                         key: categoryType,
                         isSelected: selected,
-                        label: this.resources.translate(categoryType),
+                        label: categoryType,
                         icon: response[categoryType][0].icon
                     } as ICategory);
                 }
