@@ -237,8 +237,10 @@ namespace IsraelHiking.DataAccess
             return response.Documents.ToList();
         }
 
-        public async Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories)
+        public async Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
+            var languages = language == Languages.ALL ? Languages.Array : new[] {language};
+            languages = languages.Concat(new [] { Languages.ALL }).ToArray();
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_NAMES_ALIAS)
                     .Size(10000).Query(
@@ -247,7 +249,9 @@ namespace IsraelHiking.DataAccess
                                 bb.TopLeft(new GeoCoordinate(northEast.Y, southWest.X))
                                 .BottomRight(new GeoCoordinate(southWest.Y, northEast.X))
                                 ).Field($"{PROPERTIES}.{FeatureAttributes.GEOLOCATION}")
-                        ) && q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories.Select(c => c.ToLower()).ToArray()))
+                        ) && 
+                        q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories.Select(c => c.ToLower()).ToArray())) &&
+                        q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LANGUAGE}").Terms(languages))
                     )
             );
             return response.Documents.ToList();

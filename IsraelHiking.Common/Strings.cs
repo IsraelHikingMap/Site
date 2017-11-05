@@ -8,6 +8,7 @@
         public const string HISTORIC = "Historic";
         public const string NATURAL = "Natural";
         public const string OTHER = "Other";
+        public const string WIKIPEDIA = "Wikipedia";
         public const string ROUTE_HIKE = "Hiking";
         public const string ROUTE_BIKE = "Bicycle";
         public const string ROUTE_4X4 = "4x4";
@@ -20,6 +21,7 @@
             HISTORIC,
             CAMPING,
             NATURAL,
+            WIKIPEDIA,
             OTHER
         };
         public static readonly string[] Routes = {
@@ -37,6 +39,7 @@
         public const string POI_SOURCE = "poiSource";
         public const string POI_CATEGORY = "poiCategory";
         public const string POI_TYPE = "poiType";
+        public const string POI_LANGUAGE = "poiLanguage";
         public const string WEBSITE = "website";
         public const string SEARCH_FACTOR = "searchFactor";
         public const string GEOLOCATION = "geolocation";
@@ -54,5 +57,18 @@
         public const string OSM_ADDRESS = "https://www.openstreetmap.org/";
         public const string NAKEB = "Nakeb";
         public const string OFFROAD = "Off-road";
+        public const string WIKIPEDIA = "Wikipedia";
+    }
+
+    public static class Languages
+    {
+        public const string ALL = "all";
+        public const string HEBREW = "he";
+        public const string ENGLISH = "en";
+        public static readonly string[] Array =
+        {
+            HEBREW,
+            ENGLISH
+        };
     }
 }

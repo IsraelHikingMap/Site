@@ -1,8 +1,5 @@
-﻿using IsraelHiking.Common;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using GeoAPI.Geometries;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NSubstitute;
 
 namespace IsraelHiking.DataAccess.Tests
 {
@@ -10,16 +7,19 @@ namespace IsraelHiking.DataAccess.Tests
     public class WikipediaGatewayTests
     {
         [TestMethod]
-        public void GetImageUrl()
+        public void GetWikiPageById()
         {
-            var options = new NonPublicConfigurationData();
-            var optionsContainer = Substitute.For<IOptions<NonPublicConfigurationData>>();
-            var logger = Substitute.For<ILogger>();
-            optionsContainer.Value.Returns(options);
-            var gateway = new WikipediaGateway(optionsContainer, logger);
-            var results = gateway.GetImageUrl("File:Israel_Hiking_Map_עין_מחוללים.jpeg").Result;
-
+            var wikiGateway = new WikipediaGateway(new TraceLogger());
+            var results = wikiGateway.GetById("he_104020").Result;
             Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void GetWikiPageByLocation()
+        {
+            var wikiGateway = new WikipediaGateway(new TraceLogger());
+            var results = wikiGateway.GetByLocation(new Coordinate(35.12, 31.773), "he").Result;
+            Assert.IsTrue(results.Count > 0);
         }
     }
 }

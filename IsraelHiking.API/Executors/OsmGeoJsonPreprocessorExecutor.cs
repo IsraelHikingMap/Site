@@ -109,6 +109,7 @@ namespace IsraelHiking.API.Executors
                 feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, iconColorCategory.Color);
                 feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
                 feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
                 UpdateLocation(feature);
             }
         }

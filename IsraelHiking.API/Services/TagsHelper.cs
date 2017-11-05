@@ -159,6 +159,9 @@ namespace IsraelHiking.API.Services
                     new KeyValuePair<string, string>("boundary", "protected_area")
                 });
 
+            var wikipediaIcon = new IconColorCategory("icon-wikipedia-w", Categories.WIKIPEDIA);
+            _iconsToTags[wikipediaIcon.Icon] = new IconTags(wikipediaIcon, new List<KeyValuePair<string, string>>());
+
             var hikingIcon = new IconColorCategory("icon-hike", Categories.ROUTE_HIKE);
             _iconsToTags[hikingIcon.Icon] = new IconTags(hikingIcon, CreateOne("route", "hiking"));
 

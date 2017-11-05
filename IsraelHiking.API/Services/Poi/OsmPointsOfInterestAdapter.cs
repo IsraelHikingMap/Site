@@ -47,7 +47,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
-            var features = await _elasticSearchGateway.GetPointsOfInterest(northEast, southWest, categories);
+            var features = await _elasticSearchGateway.GetPointsOfInterest(northEast, southWest, categories, language);
             var tasks = features.Where(f => IsFeatureAProperPoi(f,language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language));
             return await Task.WhenAll(tasks);
         }

@@ -93,6 +93,7 @@ namespace IsraelHiking.API.Services.Poi
                 coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
             }
             poiItem.DataContainer = await  _dataContainerConverterService.ToDataContainer(new FeatureCollection(new Collection<IFeature> { feature }).ToBytes(), poiItem.Title + ".geojson");
+            // HM TODO: elevation?
             poiItem.Url = feature.Attributes.GetNames().Contains(FeatureAttributes.WEBSITE)
                 ? feature.Attributes[FeatureAttributes.WEBSITE].ToString()
                 : string.Empty;
@@ -105,7 +106,7 @@ namespace IsraelHiking.API.Services.Poi
                 : string.Empty;
             poiItem.Description = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language);
             poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
-            poiItem.IsEditable = true;
+            poiItem.IsEditable = false;
         }
     }
 }

@@ -51,13 +51,11 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = "")
         {
-            var featureCollection = await _nakebGateway.GetById(int.Parse(id));
+            var featureCollection = await _nakebGateway.GetById(id);
             var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, "he");
+            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, language);
             await AddExtendedData(poiItem, mainFeature, language);
-            poiItem.IsEditable = false;
             poiItem.IsRoute = true;
-            poiItem.SourceImageUrl = "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg";
             return poiItem;
         }
 

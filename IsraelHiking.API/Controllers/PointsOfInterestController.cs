@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly Dictionary<string, IPointsOfInterestAdapter> _adapters;
         private readonly ITagsHelper _tagsHelper;
-        private readonly IWikipediaGateway _wikipediaGateway;
+        private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
         /// <summary>
@@ -28,18 +28,18 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="adapters"></param>
         /// <param name="tagsHelper"></param>
-        /// <param name="wikipediaGateway"></param>
+        /// <param name="wikimediaCommonGateway"></param>
         /// <param name="cache"></param>
         public PointsOfInterestController(IEnumerable<IPointsOfInterestAdapter> adapters,
             ITagsHelper tagsHelper,
-            IWikipediaGateway wikipediaGateway,
+            IWikimediaCommonGateway wikimediaCommonGateway,
             LruCache<string, TokenAndSecret> cache)
         {
             _adapters = adapters.ToDictionary(a => a.Source, a => a);
 
             _tagsHelper = tagsHelper;
             _cache = cache;
-            _wikipediaGateway = wikipediaGateway;
+            _wikimediaCommonGateway = wikimediaCommonGateway;
         }
 
         /// <summary>
@@ -147,8 +147,8 @@ namespace IsraelHiking.API.Controllers
             [FromQuery] string location)
         {
             var imageName =
-                await _wikipediaGateway.UploadImage(title, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(location));
-            var url = await _wikipediaGateway.GetImageUrl(imageName);
+                await _wikimediaCommonGateway.UploadImage(title, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(location));
+            var url = await _wikimediaCommonGateway.GetImageUrl(imageName);
             return Ok(url);
         }
     }

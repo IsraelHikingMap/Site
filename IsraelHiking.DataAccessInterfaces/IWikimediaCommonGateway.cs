@@ -4,7 +4,7 @@ using GeoAPI.Geometries;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
-    public interface IWikipediaGateway
+    public interface IWikimediaCommonGateway
     {
         Task Initialize();
         Task<string> UploadImage(string title, string fileName, Stream contentStream, Coordinate location);

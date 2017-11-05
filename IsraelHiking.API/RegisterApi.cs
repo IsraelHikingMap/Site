@@ -38,6 +38,7 @@ namespace IsraelHiking.API
             services.AddTransient<IPointsOfInterestAdapter, OsmPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, NakebPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, OffRoadPointsOfInterestAdapter>();
+            services.AddTransient<IPointsOfInterestAdapter, WikipediaPointsOfInterestAdapter>();
             services.AddSingleton<IItmWgs84MathTransfromFactory, ItmWgs84MathTransfromFactory>();
             return services;
         }

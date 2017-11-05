@@ -1,8 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+using System.Collections.ObjectModel;
+using System.IO;
+using System.Linq;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Converters;
+using IsraelHiking.API.Executors;
+using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -10,26 +14,29 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
     [TestClass]
-    public class NakebPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
+    public class WikipediaPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
     {
-        private NakebPointsOfInterestAdapter _adapter;
-        private INakebGateway _nakebGateway;
+        private WikipediaPointsOfInterestAdapter _adapter;
+        private IWikipediaGateway _wikipediaGateway;
         private IElevationDataStorage _elevationDataStorage;
         private IElasticSearchGateway _elasticSearchGateway;
+        private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
 
         [TestInitialize]
-        public void TestInitialize()
+        public void TestInialize()
         {
-            _nakebGateway = Substitute.For<INakebGateway>();
+            _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _elevationDataStorage, _elasticSearchGateway, Substitute.For<IDataContainerConverterService>(),  Substitute.For<ILogger>());
+            var factory = Substitute.For<IHttpGatewayFactory>();
+            _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
+            factory.CreateRemoteFileFetcherGateway(null).Returns(_remoteFileFetcherGateway);
+            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, Substitute.For<IDataContainerConverterService>(), _wikipediaGateway, factory, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -47,7 +54,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 Features = { GetValidFeature(poiId, _adapter.Source) }
             };
-            _nakebGateway.GetById("42").Returns(featureCollection);
+
+            _wikipediaGateway.GetById("42").Returns(featureCollection);
 
             var results = _adapter.GetPointOfInterestById(poiId, language).Result;
 
@@ -73,12 +81,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetPointsForIndexing_ShouldGetAllPointsFromGateway()
         {
-            var featuresList = new List<Feature> { new Feature(null, null)};
-            _nakebGateway.GetAll().Returns(featuresList);
-
+            _wikipediaGateway.GetByLocation(Arg.Any<Coordinate>(), Arg.Any<string>()).Returns(new List<Feature> {GetValidFeature("1", Sources.WIKIPEDIA)});
             var points = _adapter.GetPointsForIndexing(null).Result;
 
-            Assert.AreEqual(featuresList.Count, points.Count);
+            _wikipediaGateway.Received(1092).GetByLocation(Arg.Any<Coordinate>(), Arg.Any<string>());
+            Assert.AreEqual(1, points.Count); // only 1 distinct
         }
+
     }
 }

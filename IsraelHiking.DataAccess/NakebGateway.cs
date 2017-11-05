@@ -45,7 +45,7 @@ namespace IsraelHiking.DataAccess
             }
         }
 
-        public async Task<FeatureCollection> GetById(int id)
+        public async Task<FeatureCollection> GetById(string id)
         {
             using (var client = new HttpClient())
             {
@@ -58,6 +58,7 @@ namespace IsraelHiking.DataAccess
                 attributes.Add(FeatureAttributes.DESCRIPTION, description);
                 attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.picture);
                 attributes.Add(FeatureAttributes.WEBSITE, nakebItem.link);
+                attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg");
                 var lineString =
                     new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
                 var features = new List<IFeature> {new Feature(lineString, attributes)};
@@ -85,6 +86,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.NAME, nakebItem.title},
                 {FeatureAttributes.POI_SOURCE, Sources.NAKEB},
                 {FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE},
+                {FeatureAttributes.POI_LANGUAGE, Languages.ALL},
                 {FeatureAttributes.POI_TYPE, string.Empty},
                 {FeatureAttributes.ICON, "icon-hike"},
                 {FeatureAttributes.ICON_COLOR, "black"},

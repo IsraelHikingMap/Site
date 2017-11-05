@@ -54,7 +54,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestMethod]
         public void GetPointsOfInterest_FilterRelevant_ShouldReturnEmptyElist()
         {
-            _elasticSearchGateway.GetPointsOfInterest(null, null, null).Returns(new List<Feature>
+            _elasticSearchGateway.GetPointsOfInterest(null, null, null, null).Returns(new List<Feature>
             {
                 new Feature { Geometry = new Point(null), Attributes = new AttributesTable() }
             });
@@ -71,7 +71,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var feature = GetValidFeature("poiId", _adapter.Source);
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
             feature.Attributes.AddAttribute("name:en", name);
-            _elasticSearchGateway.GetPointsOfInterest(null, null, null).Returns(new List<Feature> { feature });
+            _elasticSearchGateway.GetPointsOfInterest(null, null, null, "en").Returns(new List<Feature> { feature });
 
             var result = _adapter.GetPointsOfInterest(null, null, null, "en").Result;
 
@@ -86,7 +86,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.DeleteAttribute(FeatureAttributes.NAME);
             feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
             feature.Attributes.AddAttribute(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
-            _elasticSearchGateway.GetPointsOfInterest(null, null, null).Returns(new List<Feature> { feature });
+            _elasticSearchGateway.GetPointsOfInterest(null, null, null, "he").Returns(new List<Feature> { feature });
 
             var result = _adapter.GetPointsOfInterest(null, null, null, "he").Result;
 

@@ -15,7 +15,7 @@ namespace IsraelHiking.DataAccessInterfaces
         Task UpdateNamesData(Feature feature);
         Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest);
 
-        Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories);
+        Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language);
         Task<Feature> GetPointOfInterestById(string id, string source, string type);
     }
 }

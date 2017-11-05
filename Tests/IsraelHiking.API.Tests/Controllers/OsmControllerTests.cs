@@ -74,7 +74,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var list = new List<Feature> { new Feature(new LineString(new Coordinate[0]), new AttributesTable())};
             _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(list);
-            _elasticSearchGateway.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>()).Returns(new List<Feature>());
+            _elasticSearchGateway.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>()).Returns(new List<Feature>());
 
             var results = _controller.GetSnappings("0,0", "1,1").Result;
 

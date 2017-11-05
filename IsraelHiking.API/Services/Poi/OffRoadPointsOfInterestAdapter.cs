@@ -46,9 +46,8 @@ namespace IsraelHiking.API.Services.Poi
         {
             var featureCollection = await _offRoadGateway.GetById(id);
             var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, "he");
+            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, language);
             await AddExtendedData(poiItem, mainFeature, language);
-            poiItem.IsEditable = false;
             poiItem.IsRoute = true;
             return poiItem;
         }

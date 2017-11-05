@@ -86,8 +86,11 @@ namespace IsraelHiking.API.Controllers
             var northEastCooridnate = new Coordinate().FromLatLng(northEast);
             var southWestCoordinate = new Coordinate().FromLatLng(southWest);
             var highways = await _elasticSearchGateway.GetHighways(northEastCooridnate, southWestCoordinate);
-            var points = await _elasticSearchGateway.GetPointsOfInterest(northEastCooridnate, southWestCoordinate, Categories.Points);
-            return highways.Concat(points.Where(p => Sources.OSM.Equals(p.Attributes[FeatureAttributes.POI_SOURCE]))).ToList();
+            var points = await _elasticSearchGateway.GetPointsOfInterest(northEastCooridnate, southWestCoordinate, Categories.Points, Languages.ALL);
+            return highways.Concat(points.Where(p =>
+                Sources.OSM.Equals(p.Attributes[FeatureAttributes.POI_SOURCE]) ||
+                Sources.WIKIPEDIA.Equals(p.Attributes[FeatureAttributes.POI_SOURCE])
+            )).ToList();
         }
 
         /// <summary>
@@ -139,7 +142,7 @@ namespace IsraelHiking.API.Controllers
                 return BadRequest("File does not contain any traces...");
             }
             var manipulatedItmLines = await _addibleGpxLinesFinderService.GetLines(gpxItmLines);
-            var attributesTable = new AttributesTable {{"highway", highwayType}};
+            var attributesTable = new AttributesTable { { "highway", highwayType } };
             if (string.IsNullOrEmpty(url) == false)
             {
                 attributesTable.Add("source", url);
@@ -194,11 +197,11 @@ namespace IsraelHiking.API.Controllers
             }
             foreach (var waypoints in waypointsGoups.Where(g => g.Length > 1))
             {
-                var lengthInKm = ToItmLineString(waypoints).Length/1000;
+                var lengthInKm = ToItmLineString(waypoints).Length / 1000;
                 var timeInHours = (waypoints.Last().time - waypoints.First().time).TotalHours;
-                velocityList.Add(lengthInKm/timeInHours);
+                velocityList.Add(lengthInKm / timeInHours);
             }
-            var averageVelocity = velocityList.Sum()/velocityList.Count;
+            var averageVelocity = velocityList.Sum() / velocityList.Count;
             if (averageVelocity <= 6)
             {
                 return "footway";
@@ -212,7 +215,7 @@ namespace IsraelHiking.API.Controllers
 
         private ILineString ToItmLineString(IEnumerable<wptType> waypoints)
         {
-            var coordinates = waypoints.Select(wptType => _wgs84ItmMathTransform.Transform(new Coordinate((double) wptType.lon, (double) wptType.lat)));
+            var coordinates = waypoints.Select(wptType => _wgs84ItmMathTransform.Transform(new Coordinate((double)wptType.lon, (double)wptType.lat)));
             var nonDuplicates = new List<Coordinate>();
             foreach (var coordinate in coordinates)
             {

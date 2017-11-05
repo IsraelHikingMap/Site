@@ -17,7 +17,7 @@ namespace IsraelHiking.API.Tests.Controllers
     [TestClass]
     public class PointsOfInterestControllerTests
     {
-        private IWikipediaGateway _wikipediaGateway;
+        private IWikimediaCommonGateway _wikimediaCommonGateway;
         private PointsOfInterestController _controller;
         private ITagsHelper _tagHelper;
         private IPointsOfInterestAdapter _adapter;
@@ -28,9 +28,9 @@ namespace IsraelHiking.API.Tests.Controllers
             _adapter = Substitute.For<IPointsOfInterestAdapter>();
             _adapter.Source.Returns("source");
             _tagHelper = Substitute.For<ITagsHelper>();
-            _wikipediaGateway = Substitute.For<IWikipediaGateway>();
+            _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             var cache = new LruCache<string, TokenAndSecret>(Substitute.For<IOptions<ConfigurationData>>(), Substitute.For<ILogger>());
-            _controller = new PointsOfInterestController(new [] { _adapter }, _tagHelper, _wikipediaGateway, cache);
+            _controller = new PointsOfInterestController(new [] { _adapter }, _tagHelper, _wikimediaCommonGateway, cache);
         }
 
         [TestMethod]
@@ -135,8 +135,8 @@ namespace IsraelHiking.API.Tests.Controllers
             formFile.FileName.Returns("file.jpg");
             _controller.UploadImage(formFile, "title", "1,2").Wait();
 
-            _wikipediaGateway.Received(1).UploadImage("title", "file.jpg", Arg.Any<Stream>(), Arg.Any<Coordinate>());
-            _wikipediaGateway.Received(1).GetImageUrl(Arg.Any<string>());
+            _wikimediaCommonGateway.Received(1).UploadImage("title", "file.jpg", Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
         }
     }
 }
