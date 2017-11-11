@@ -53,11 +53,11 @@ namespace IsraelHiking.DataAccess
         private const int PAGE_SIZE = 10000;
 
         private const string PROPERTIES = "properties";
-        private const string OSM_NAMES_INDEX1 = "osm_names1";
-        private const string OSM_NAMES_INDEX2 = "osm_names2";
+        private const string OSM_POIS_INDEX1 = "osm_names1";
+        private const string OSM_POIS_INDEX2 = "osm_names2";
+        private const string OSM_POIS_ALIAS = "osm_names";
         private const string OSM_HIGHWAYS_INDEX1 = "osm_highways1";
         private const string OSM_HIGHWAYS_INDEX2 = "osm_highways2";
-        private const string OSM_NAMES_ALIAS = "osm_names";
         private const string OSM_HIGHWAYS_ALIAS = "osm_highways";
         private const string RATINGS = "ratings";
         private const string SHARES = "shares";
@@ -82,16 +82,16 @@ namespace IsraelHiking.DataAccess
                 new SerializerFactory(s => new GeoJsonNetSerializer(s)))
                 .PrettyJson();
             _elasticClient = new ElasticClient(connectionString);
-            if (_elasticClient.IndexExists(OSM_NAMES_INDEX1).Exists == false &&
-                _elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists == false)
+            if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists == false &&
+                _elasticClient.IndexExists(OSM_POIS_INDEX2).Exists == false)
             {
-                CreateNamesIndex(OSM_NAMES_INDEX1);
-                _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_NAMES_ALIAS).Index(OSM_NAMES_INDEX1)));
+                CreatePointsOfInterestIndex(OSM_POIS_INDEX1);
+                _elasticClient.Alias(a => a.Add(add => add.Alias(OSM_POIS_ALIAS).Index(OSM_POIS_INDEX1)));
             }
-            if (_elasticClient.IndexExists(OSM_NAMES_INDEX1).Exists &&
-                _elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists)
+            if (_elasticClient.IndexExists(OSM_POIS_INDEX1).Exists &&
+                _elasticClient.IndexExists(OSM_POIS_INDEX2).Exists)
             {
-                _elasticClient.DeleteIndex(OSM_NAMES_INDEX2);
+                _elasticClient.DeleteIndex(OSM_POIS_INDEX2);
             }
             if (_elasticClient.IndexExists(OSM_HIGHWAYS_INDEX1).Exists == false &&
                 _elasticClient.IndexExists(OSM_HIGHWAYS_INDEX2).Exists == false)
@@ -119,36 +119,42 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
 
-        public async Task UpdateDataZeroDownTime(List<Feature> names, List<Feature> highways)
+        private async Task UpdateZeroDownTime(string index1, string index2, string alias, Func<string, Task> createIndexDelegate, List<Feature> features)
         {
-            // init
-            var currentNameIndex = OSM_NAMES_INDEX1;
-            var currentHighwayIndex = OSM_HIGHWAYS_INDEX1;
-            var newNameIndex = OSM_NAMES_INDEX2;
-            var newHighwayIndex = OSM_HIGHWAYS_INDEX2;
-            if (_elasticClient.IndexExists(OSM_NAMES_INDEX2).Exists)
+            var currentIndex = index1;
+            var newIndex = index2;
+            if (_elasticClient.IndexExists(index2).Exists)
             {
-                currentNameIndex = OSM_NAMES_INDEX2;
-                currentHighwayIndex = OSM_HIGHWAYS_INDEX2;
-                newNameIndex = OSM_NAMES_INDEX1;
-                newHighwayIndex = OSM_HIGHWAYS_INDEX1;
+                currentIndex = index2;
+                newIndex = index1;
             }
-            // create new indexes
-            await CreateNamesIndex(newNameIndex);
-            await CreateHighwaysIndex(newHighwayIndex);
-            // update data
-            await UpdateUsingPaging(names, newNameIndex);
-            await UpdateUsingPaging(highways, newHighwayIndex);
-            // change alias
+
+            await createIndexDelegate(newIndex);
+            await UpdateUsingPaging(features, newIndex);
+
             await _elasticClient.AliasAsync(a => a
-                .Remove(i => i.Alias(OSM_NAMES_ALIAS).Index(currentNameIndex))
-                .Remove(i => i.Alias(OSM_HIGHWAYS_ALIAS).Index(currentHighwayIndex))
-                .Add(i => i.Alias(OSM_NAMES_ALIAS).Index(newNameIndex))
-                .Add(i => i.Alias(OSM_HIGHWAYS_ALIAS).Index(newHighwayIndex))
-                );
-            // delete old indexes
-            await _elasticClient.DeleteIndexAsync(currentNameIndex);
-            await _elasticClient.DeleteIndexAsync(currentHighwayIndex);
+                .Remove(i => i.Alias(alias).Index(currentIndex))
+                .Add(i => i.Alias(alias).Index(newIndex))
+            );
+            await _elasticClient.DeleteIndexAsync(currentIndex);
+        }
+
+        public Task UpdateHighwaysZeroDownTime(List<Feature> highways)
+        {
+            return UpdateZeroDownTime(OSM_HIGHWAYS_INDEX1, 
+                OSM_HIGHWAYS_INDEX2, 
+                OSM_HIGHWAYS_ALIAS, 
+                CreateHighwaysIndex, 
+                highways);
+        }
+
+        public Task UpdatePointsOfInterestZeroDownTime(List<Feature> pointsOfInterest)
+        {
+            return UpdateZeroDownTime(OSM_POIS_INDEX1, 
+                OSM_POIS_INDEX2, 
+                OSM_POIS_ALIAS, 
+                CreatePointsOfInterestIndex,
+                pointsOfInterest);
         }
 
         public Task UpdateHighwaysData(List<Feature> features)
@@ -156,9 +162,9 @@ namespace IsraelHiking.DataAccess
             return UpdateData(features, OSM_HIGHWAYS_ALIAS);
         }
 
-        public Task UpdateNamesData(Feature feature)
+        public Task UpdatePointsOfInterestData(Feature feature)
         {
-            return UpdateData(new List<Feature> { feature }, OSM_NAMES_ALIAS);
+            return UpdateData(new List<Feature> { feature }, OSM_POIS_ALIAS);
         }
 
         public Task UpdateRating(Rating rating)
@@ -190,7 +196,7 @@ namespace IsraelHiking.DataAccess
             }
             var field = $"{PROPERTIES}.{fieldName}";
             var response = await _elasticClient.SearchAsync<Feature>(
-                s => s.Index(OSM_NAMES_ALIAS)
+                s => s.Index(OSM_POIS_ALIAS)
                     .Size(NUMBER_OF_RESULTS)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
@@ -242,7 +248,7 @@ namespace IsraelHiking.DataAccess
             var languages = language == Languages.ALL ? Languages.Array : new[] {language};
             languages = languages.Concat(new [] { Languages.ALL }).ToArray();
             var response = await _elasticClient.SearchAsync<Feature>(
-                s => s.Index(OSM_NAMES_ALIAS)
+                s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000).Query(
                         q => q.GeoBoundingBox(
                             b => b.BoundingBox(bb =>
@@ -260,7 +266,7 @@ namespace IsraelHiking.DataAccess
         public async Task<Feature> GetPointOfInterestById(string id, string source, string type)
         {
             var response = await _elasticClient.SearchAsync<Feature>(
-                s => s.Index(OSM_NAMES_ALIAS)
+                s => s.Index(OSM_POIS_ALIAS)
                     .Size(1).Query(
                         q => q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
                              && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ID}").Value(id))
@@ -298,9 +304,9 @@ namespace IsraelHiking.DataAccess
             );
         }
 
-        private Task CreateNamesIndex(string namesIndexName)
+        private Task CreatePointsOfInterestIndex(string poisIndexName)
         {
-            return _elasticClient.CreateIndexAsync(namesIndexName,
+            return _elasticClient.CreateIndexAsync(poisIndexName,
                 f => f.Mappings(ms => ms
                     .Map<Feature>(m => m
                         .Properties(ps => ps

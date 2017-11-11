@@ -3,6 +3,7 @@ import { LocalStorageService } from "ngx-store"
 import { Subject } from "rxjs/Subject";
 import * as L from "leaflet";
 import * as _ from "lodash";
+import "leaflet.markercluster";
 
 import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
 import { MapService } from "../map.service";

@@ -55,6 +55,7 @@
     {
         public const string OSM = "OSM";
         public const string OSM_ADDRESS = "https://www.openstreetmap.org/";
+        public const string OSM_FILE_NAME = "israel-and-palestine-latest.osm.pbf";
         public const string NAKEB = "Nakeb";
         public const string OFFROAD = "Off-road";
         public const string WIKIPEDIA = "Wikipedia";

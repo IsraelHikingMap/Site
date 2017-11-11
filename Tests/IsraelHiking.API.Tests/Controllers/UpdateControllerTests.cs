@@ -4,6 +4,7 @@ using System.Net;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Poi;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -23,6 +24,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IElasticSearchGateway _elasticSearchGateway;
         private IOsmRepository _osmRepository;
         private IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
+        private IOsmLatestFileFetcher _osmLatestFileFetcher;
 
         [TestInitialize]
         public void TestInitialize()
@@ -31,8 +33,9 @@ namespace IsraelHiking.API.Tests.Controllers
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _osmRepository = Substitute.For<IOsmRepository>();
             _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
+            _osmLatestFileFetcher = Substitute.For<IOsmLatestFileFetcher>();
             var logger = Substitute.For<ILogger>();
-            _updateController = new UpdateController(_graphHopperGateway, _elasticSearchGateway, _geoJsonPreprocessorExecutor, _osmRepository, new List<IPointsOfInterestAdapter>(), logger);
+            _updateController = new UpdateController(_graphHopperGateway, _elasticSearchGateway, _geoJsonPreprocessorExecutor, _osmRepository, _osmLatestFileFetcher, new List<IPointsOfInterestAdapter>(), logger);
         }
 
         private void SetupContext(IPAddress localIp, IPAddress remoteIp)
@@ -61,28 +64,30 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void PostUpdateData_FileIsNull_ShouldReturnBadRequest()
+        public void PostUpdateData_RequestIsNull_ShouldUpdateAllGateways()
         {
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
-            
-            var results = _updateController.PostUpdateData(null).Result;
+            _osmLatestFileFetcher.Get().Returns(new MemoryStream(new byte[] { 1 }));
 
-            Assert.IsNotNull(results as BadRequestObjectResult);
+            _updateController.PostUpdateData(null).Wait();
+
+            _graphHopperGateway.Received(1).Rebuild(Arg.Any<MemoryStream>(), Arg.Any<string>());
+            _elasticSearchGateway.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
+            _elasticSearchGateway.Received(1).UpdatePointsOfInterestZeroDownTime(Arg.Any<List<Feature>>());
         }
 
         [TestMethod]
-        public void PostUpdateData_RemoteIs10101010_ShouldUpdateGateways()
+        public void PostUpdateData_RemoteIs10101010Defaultrequest_ShouldUpdateAllGateways()
         {
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("10.10.10.10"));
-            var file = Substitute.For<IFormFile>();
-            file.FileName.Returns("somefile.pbf");
-            file.OpenReadStream().Returns(new MemoryStream(new byte[] { 1 }));
+            _osmLatestFileFetcher.Get().Returns(new MemoryStream(new byte[] {1}));
             _geoJsonPreprocessorExecutor.Preprocess(Arg.Any<Dictionary<string, List<ICompleteOsmGeo>>>()).Returns(new Dictionary<string, List<Feature>>());
             
-            _updateController.PostUpdateData(file).Wait();
+            _updateController.PostUpdateData(new UpdateRequest()).Wait();
 
             _graphHopperGateway.Received(1).Rebuild(Arg.Any<MemoryStream>(), Arg.Any<string>());
-            _elasticSearchGateway.Received(1).UpdateDataZeroDownTime(Arg.Any<List<Feature>>(), Arg.Any<List<Feature>>());
+            _elasticSearchGateway.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
+            _elasticSearchGateway.Received(1).UpdatePointsOfInterestZeroDownTime(Arg.Any<List<Feature>>());
         }
     }
 }

@@ -52,7 +52,6 @@ import { ToastService } from "./services/toast.service";
 import { ElevationProvider } from "./services/elevation.provider";
 import { SearchResultsProvider } from "./services/search-results.provider";
 import { GeoJsonParser } from "./services/geojson.parser";
-import { WikiMarkersLayer } from "./services/layers/wiki-markers.layer";
 import { CategoriesLayerFactory } from "./services/layers/categories-layers.factory";
 import { DragAndDropService } from "./services/drag-and-drop.service";
 import { PoiService } from "./services/poi.service";
@@ -95,7 +94,6 @@ import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.componen
 import { DownloadDialogComponent } from "./components/dialogs/download-dialog.component";
 import { ShareComponent } from "./components/share.component";
 import { ShareDialogComponent } from "./components/dialogs/share-dialog.component";
-import { WikiMarkerPopupComponent } from "./components/markerpopup/wiki-marker-popup.component";
 import { UpdatePointDialogComponent } from "./components/dialogs/update-point-dialog.component";
 import { ImageDialogCompnent } from "./components/dialogs/image-dialog.component";
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
@@ -167,7 +165,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DownloadDialogComponent,
         ShareComponent,
         ShareDialogComponent,
-        WikiMarkerPopupComponent,
         UpdatePointDialogComponent,
         ImageDialogCompnent,
         TermsOfServiceDialogComponent,
@@ -205,7 +202,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ElevationProvider,
         SearchResultsProvider,
         GeoJsonParser,
-        WikiMarkersLayer,
         CategoriesLayerFactory,
         DragAndDropService,
         PoiService
@@ -245,7 +241,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DownloadDialogComponent,
         ShareComponent,
         ShareDialogComponent,
-        WikiMarkerPopupComponent,
         GoogleChartDirective,
         DraggableResizableDirective,
         UpdatePointDialogComponent,

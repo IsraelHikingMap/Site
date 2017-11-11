@@ -5,7 +5,6 @@ import * as _ from "lodash";
 import * as L from "leaflet";
 
 import { MapService } from "../map.service";
-import { WikiMarkersLayer } from "./wiki-markers.layer";
 import { ResourcesService } from "../resources.service";
 import { OsmUserService } from "../osm-user.service";
 import { PoiService } from "../poi.service";
@@ -38,7 +37,6 @@ export class LayersService {
     private static MAX_ZOOM = 20;
     private static HIKING_TRAILS = "Hiking Trails";
     private static BICYCLE_TRAILS = "Bicycle Trails";
-    private static WIKIPEDIA = "Wikipedia";
     private static ATTRIBUTION = "Tiles © <a href='https://IsraelHiking.osm.org.il' target='_blank'>Israel Hiking</a>, <a href='https://creativecommons.org/licenses/by-nc-sa/3.0/' target='_blank'>CC BY-NC-SA 3.0</a>. Data by <a href='https://openstreetmap.org' target='_blank'>OpenStreetMap</a> under <a href='https://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
     private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION;
     private static TRAILS_ATTRIBUTION = "Trail " + LayersService.ATTRIBUTION;
@@ -71,7 +69,6 @@ export class LayersService {
         private mapService: MapService,
         private resourcesService: ResourcesService,
         private osmUserService: OsmUserService,
-        private wikiMarkersLayer: WikiMarkersLayer,
         categoriesLayersFactory: CategoriesLayerFactory,
         poiService: PoiService,
     ) {
@@ -129,8 +126,6 @@ export class LayersService {
             maxZoom: LayersService.MAX_NATIVE_ZOOM
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
         bicycleTrailsOverlay.isEditable = false;
-
-        this.overlays.push({ visible: false, isEditable: false, address: "", key: LayersService.WIKIPEDIA, layer: this.wikiMarkersLayer as L.Layer } as IOverlay);
         this.selectBaseLayerAccordingToStorage(false);
     }
 
@@ -158,8 +153,7 @@ export class LayersService {
         let overlaysToStore = [] as Common.LayerData[];
         for (let overlay of this.overlays) {
             if (overlay.key === LayersService.HIKING_TRAILS ||
-                overlay.key === LayersService.BICYCLE_TRAILS ||
-                overlay.key === LayersService.WIKIPEDIA) {
+                overlay.key === LayersService.BICYCLE_TRAILS) {
                 continue;
             }
             overlaysToStore.push(this.extractDataFromLayer(overlay));

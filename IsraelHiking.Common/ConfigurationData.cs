@@ -19,6 +19,7 @@ namespace IsraelHiking.Common
         public double SimplificationTolerance { get; set; }
         public double ClosestPointTolerance { get; set; }
         public string BinariesFolder { get; set; }
+        public string SiteCacheFolder { get; set; }
         public string DefaultLanguage { get; set; }
         public OsmConfiguraionData OsmConfiguraion { get; set; }
         public Dictionary<string, string> ListingDictionary { get; set; }
@@ -41,6 +42,7 @@ namespace IsraelHiking.Common
             RadialSimplificationAngle = 90; // degrees
             SearchFactor = 0.5; // number
             BinariesFolder = string.Empty;
+            SiteCacheFolder = "site-cache";
             DefaultLanguage = "he";
             OsmConfiguraion = new OsmConfiguraionData
             {

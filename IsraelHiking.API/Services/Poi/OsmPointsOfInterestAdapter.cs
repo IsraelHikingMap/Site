@@ -8,7 +8,6 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.Tags;
@@ -219,7 +218,7 @@ namespace IsraelHiking.API.Services.Poi
             var feature = ConvertOsmToFeature(osm, name);
             if (feature != null)
             {
-                await _elasticSearchGateway.UpdateNamesData(feature);
+                await _elasticSearchGateway.UpdatePointsOfInterestData(feature);
             }
             return feature;
         }

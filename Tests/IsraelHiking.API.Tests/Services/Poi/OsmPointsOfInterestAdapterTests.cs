@@ -146,7 +146,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, null, "he").Result;
 
             Assert.IsNotNull(resutls);
-            _elasticSearchGateway.Received(1).UpdateNamesData(Arg.Any<Feature>());
+            _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Any<Feature>());
         }
 
         [TestMethod]

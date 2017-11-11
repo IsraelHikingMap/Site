@@ -27,5 +27,10 @@ namespace IsraelHiking.DataAccess
         {
             return Directory.GetCurrentDirectory();
         }
+
+        public void CreateDirectory(string path)
+        {
+            Directory.CreateDirectory(path);
+        }
     }
 }
