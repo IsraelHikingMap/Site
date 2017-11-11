@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -18,6 +19,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IOffRoadGateway _offRoadGateway;
         private IElevationDataStorage _elevationDataStorage;
         private IElasticSearchGateway _elasticSearchGateway;
+        private IDataContainerConverterService _dataContainerConverterService;
 
         [TestInitialize]
         public void TestInialize()
@@ -25,7 +27,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _offRoadGateway = Substitute.For<IOffRoadGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _adapter = new OffRoadPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _offRoadGateway, Substitute.For<IDataContainerConverterService>(), Substitute.For<ILogger>());
+            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
+            _adapter = new OffRoadPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _offRoadGateway, _dataContainerConverterService, Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -43,6 +46,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 Features = {GetValidFeature(poiId, _adapter.Source)}
             };
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
 
             _offRoadGateway.GetById("42").Returns(featureCollection);
 

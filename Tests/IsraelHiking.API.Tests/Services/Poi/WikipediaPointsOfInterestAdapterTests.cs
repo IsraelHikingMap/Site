@@ -26,6 +26,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IElevationDataStorage _elevationDataStorage;
         private IElasticSearchGateway _elasticSearchGateway;
         private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
+        private IDataContainerConverterService _dataContainerConverterService;
 
         [TestInitialize]
         public void TestInialize()
@@ -33,10 +34,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
+            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
             var factory = Substitute.For<IHttpGatewayFactory>();
             _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
             factory.CreateRemoteFileFetcherGateway(null).Returns(_remoteFileFetcherGateway);
-            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, Substitute.For<IDataContainerConverterService>(), _wikipediaGateway, factory, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
+            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, factory, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -54,6 +56,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 Features = { GetValidFeature(poiId, _adapter.Source) }
             };
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
 
             _wikipediaGateway.GetById("42").Returns(featureCollection);
 

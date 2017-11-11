@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
@@ -10,7 +8,6 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Services.Poi
@@ -22,6 +19,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private INakebGateway _nakebGateway;
         private IElevationDataStorage _elevationDataStorage;
         private IElasticSearchGateway _elasticSearchGateway;
+        private IDataContainerConverterService _dataContainerConverterService;
 
         [TestInitialize]
         public void TestInitialize()
@@ -29,7 +27,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _nakebGateway = Substitute.For<INakebGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _elevationDataStorage, _elasticSearchGateway, Substitute.For<IDataContainerConverterService>(),  Substitute.For<ILogger>());
+            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
+            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService,  Substitute.For<ILogger>());
         }
 
         [TestMethod]
@@ -47,6 +46,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 Features = { GetValidFeature(poiId, _adapter.Source) }
             };
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
             _nakebGateway.GetById("42").Returns(featureCollection);
 
             var results = _adapter.GetPointOfInterestById(poiId, language).Result;
