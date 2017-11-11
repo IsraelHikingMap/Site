@@ -427,11 +427,6 @@ export class ResourcesService {
             this.currentLanguage = this.availableLanguages[0];
         }
         this.setLanguage(this.currentLanguage);
-        if (this.currentLanguage.code === "he") {
-            this.route = "מסלול"; // required for layers service to be initialized - this is an ugly workaround... :-/
-        } else {
-            this.route = "Route";
-        }
     }
 
     private setRtl = (rtl: boolean) => {

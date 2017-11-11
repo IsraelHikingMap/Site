@@ -27,13 +27,6 @@ export class RoutesService implements IRoutesService {
         this.routes = [];
         this.selectedRoute = null;
         this.routeChanged = new Subject<any>();
-        // Add default route
-        let routes = [{
-            name: this.createRouteName(),
-            markers: [],
-            segments: []
-        }] as Common.RouteData[];
-        this.addLayersToMap(routes);
     }
 
     public addRoute = (route: IRoute) => {
