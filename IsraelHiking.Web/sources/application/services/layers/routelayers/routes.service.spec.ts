@@ -19,9 +19,11 @@ describe("RoutesService", () => {
             }
         } as IRoute;
         initialRouteLayer.setReadOnlyState = () => { };
+        initialRouteLayer.setEditRouteState = () => { };
         routeLayerFactory = {
-            createRouteLayerFromData: () => initialRouteLayer
-        }
+            createRouteLayerFromData: () => initialRouteLayer,
+            createRouteLayer: () => initialRouteLayer
+        };
         routesService = new RoutesService(mapServiceMock.resourcesService, mapServiceMock.mapService, routeLayerFactory);
     });
 
@@ -30,8 +32,8 @@ describe("RoutesService", () => {
     });
 
     it("Should initialize with a single selected route", () => {
-        expect(routesService.routes.length).toBe(1);
-        expect(routesService.selectedRoute).not.toBe(null);
+        expect(routesService.routes.length).toBe(0);
+        expect(routesService.selectedRoute).toBe(null);
     });
 
     it("Should set route state to edit when adding a route", () => {
@@ -43,13 +45,13 @@ describe("RoutesService", () => {
         routesService.addRoute(null);
 
         expect(mockRouteLayer.setEditRouteState).toHaveBeenCalled();
-        expect(routesService.routes.length).toBe(2);
+        expect(routesService.routes.length).toBe(1);
     });
 
     it("Should not remove route if the name is not in the list", () => {
         routesService.removeRoute("not name");
 
-        expect(routesService.routes.length).toBe(1);
+        expect(routesService.routes.length).toBe(0);
     });
 
     it("Should remove selected route by name and set selected route to null", () => {
@@ -60,12 +62,12 @@ describe("RoutesService", () => {
     });
 
     it("Should know if a name is availble or nor", () => {
-        expect(routesService.isNameAvailable("name")).toBeFalsy();
         expect(routesService.isNameAvailable("not name")).toBeTruthy();
     });
 
     it("Should remove a selected route from the map when changing its state", () => {
         initialRouteLayer.route.properties.isVisible = true;
+        routesService.addRoute(null);
         spyOn(mapServiceMock.mapService.map, "removeLayer");
 
         routesService.changeRouteState(initialRouteLayer);
@@ -85,7 +87,8 @@ describe("RoutesService", () => {
         expect(mapServiceMock.mapService.map.addLayer).toHaveBeenCalled();
     });
 
-    it("Should create index based names", () => {
+    it("Should create index based names when they exists", () => {
+        routesService.addRoute(null);
         let routeName = routesService.createRouteName();
         initialRouteLayer.route.properties.name = routeName;
         routeName = routesService.createRouteName();
@@ -104,12 +107,12 @@ describe("RoutesService", () => {
         let segment1 = { latlngs: [latLng1, latLng1], routePoint: latLng1 } as IRouteSegment;
         let segment2 = { latlngs: [latLng1, latLng2], routePoint: latLng2 } as IRouteSegment;
         initialRouteLayer.setHiddenState = () => { };
-        initialRouteLayer.setEditRouteState = () => { };
         initialRouteLayer.raiseDataChanged = () => { };
         initialRouteLayer.getLastLatLng = () => latLng2;
         initialRouteLayer.route.segments = [];
         initialRouteLayer.route.segments.push(segment1);
         initialRouteLayer.route.segments.push(segment2);
+        routesService.addRoute(null);
 
         routesService.splitSelectedRouteAt(segment1);
 
@@ -122,12 +125,12 @@ describe("RoutesService", () => {
         let segment1 = { latlngs: [latLng1, latLng1], routePoint: latLng1 } as IRouteSegment;
         let segment2 = { latlngs: [latLng1, latLng2], routePoint: latLng2 } as IRouteSegment;
         initialRouteLayer.setHiddenState = () => { };
-        initialRouteLayer.setEditRouteState = () => { };
         initialRouteLayer.raiseDataChanged = () => { };
         initialRouteLayer.getLastLatLng = () => latLng2;
         initialRouteLayer.route.segments = [];
         initialRouteLayer.route.segments.push(segment1);
         initialRouteLayer.route.segments.push(segment2);
+        routesService.addRoute(null);
 
         let secondRoute = {
             route: {
