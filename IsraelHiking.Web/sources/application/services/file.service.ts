@@ -48,17 +48,23 @@ export class FileService {
     }
 
     public openFromFile(file: File): Promise<Common.DataContainer> {
-        return new Promise((resolve, reject) => {
-
-            this.upload(Urls.openFile, file).then((response) => {
-                resolve(JSON.parse(response) as Common.DataContainer);
-            }, (err) => {
-                reject(err);
-            });
-        });
+        return this.upload(Urls.openFile, file);
+        //new Promise((resolve, reject) => {
+        //    this.upload(Urls.openFile, file).then((response: Common.DataContainer) => {
+        //        resolve(response);
+        //    }, (err) => {
+        //        reject(err);
+        //    });
+        //});
     }
 
     public upload(url: string, file: File): Promise<any> {
+        let formData = new FormData();
+        formData.append("file", file, file.name);
+        return this.uploadWithData(url, formData);
+    }
+
+    public uploadWithData(url: string, formData: FormData): Promise<{}> {
         return new Promise((resolve, reject) => {
 
             let request = this.authorizationService.createXMLHttpRequest();
@@ -68,7 +74,7 @@ export class FileService {
                 }
                 if (request.status === 200) {
                     this.progressService.done();
-                    resolve(request.response);
+                    resolve(JSON.parse(request.response));
                 } else {
                     this.progressService.done();
                     reject(request.response);
@@ -78,8 +84,6 @@ export class FileService {
             request.open("POST", url, true);
             this.authorizationService.setXhrHeader(request);
 
-            let formData = new FormData();
-            formData.append("file", file, file.name);
             this.progressService.start();
             request.send(formData);
         });
@@ -87,10 +91,6 @@ export class FileService {
 
     public openFromUrl = (url: string): Promise<Response> => {
         return this.http.get(Urls.files + "?url=" + url, this.authorizationService.getHeader()).toPromise();
-    }
-
-    public uploadImage = (file: File, title: string, latlng: L.LatLng): Promise<string> => {
-        return this.upload(`${Urls.poiImage}?title=${title}&location=${latlng.lat},${latlng.lng}`, file);
     }
 
     private saveBytesResponseToFile = (data: any, fileName: string) => {

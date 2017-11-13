@@ -30,8 +30,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private static readonly THREE_HOURES = 3 * 60 * 60 * 1000;
 
     public description: string;
-    public imagesUrls: string[];
-    public address: string;
+    public imagePreviewUrl: string;
+    public url: string;
     public source: string;
     public type: string;
     public rating: number;
@@ -40,6 +40,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private editMode: boolean;
     private extendedDataArrivedTimeStamp: Date;
     private poiExtended: IPointOfInterestExtended;
+    private currentImageFile: File;
 
     constructor(resources: ResourcesService,
         http: Http,
@@ -56,7 +57,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.editMode = false;
         this.isLoading = false;
         this.extendedDataArrivedTimeStamp = null;
-        this.imagesUrls = [];
+        this.imagePreviewUrl = "";
+        this.currentImageFile = null;
     }
 
     protected setMarkerInternal = (marker: Common.IMarkerWithTitle) => {
@@ -126,9 +128,11 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public save() {
         this.editMode = false;
         this.poiExtended.description = this.description;
-        this.poiExtended.imagesUrls = this.imagesUrls;
-        this.poiService.uploadPoint(this.poiExtended).then(() => {
+        this.poiService.uploadPoint(this.poiExtended, this.currentImageFile).then((poiExtended: IPointOfInterestExtended) => {
+            this.initFromPointOfInterestExtended(poiExtended);
             this.toastService.info(this.resources.dataUpdatedSuccefully);
+        }, () => {
+            this.toastService.error(this.resources.unableToSaveData);
         });
     }
 
@@ -208,13 +212,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.poiService.getPoint(this.marker.identifier, this.source, this.type).then((response) => {
             this.extendedDataArrivedTimeStamp = new Date();
             let poiExtended = response.json() as IPointOfInterestExtended;
-            this.poiExtended = poiExtended;
-            this.description = poiExtended.description;
-            this.address = poiExtended.url;
-            this.imagesUrls = poiExtended.imagesUrls;
-            this.sourceImageUrl = poiExtended.sourceImageUrl;
-            this.rating = this.getRatingNumber(this.poiExtended.rating);
-            this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
+            this.initFromPointOfInterestExtended(poiExtended);
             this.selectRoute(this.poiExtended.dataContainer.routes[0]);
             this.isLoading = false;
         }, () => {
@@ -222,16 +220,19 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         });
     }
 
-    public uploadImage(e: any) {
+    public imageChanged(e: any) {
         let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
         if (!file) {
             return;
         }
-        this.fileService.uploadImage(file, this.title, this.marker.getLatLng()).then((imageUrl: string) => {
-            this.imagesUrls.push(imageUrl);
-        }, () => {
-            this.toastService.error(this.resources.unableToUploadFile);
-        });
+        this.currentImageFile = file;
+        let reader = new FileReader();
+
+        reader.onload = (event: any) => {
+            this.imagePreviewUrl = event.target.result;
+        }
+
+        reader.readAsDataURL(file);
     }
 
     public openUpdatePointDialog(e: Event) {
@@ -239,8 +240,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         let compoent = this.mdDialog.open(UpdatePointDialogComponent);
         compoent.componentInstance.title = this.title;
         compoent.componentInstance.description = this.description;
-        compoent.componentInstance.imagesUrls = this.imagesUrls;
-        compoent.componentInstance.websiteUrl = this.address;
+        compoent.componentInstance.websiteUrl = this.url;
+        compoent.componentInstance.imagesUrls = this.poiExtended.imagesUrls;
         compoent.componentInstance.location = this.marker.getLatLng();
         compoent.componentInstance.source = this.poiExtended.source;
         compoent.componentInstance.identifier = this.poiExtended.id;
@@ -259,12 +260,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             if (!poiExtended) {
                 return;
             }
-            this.poiExtended = poiExtended;
-            this.title = poiExtended.title;
-            this.description = poiExtended.description;
-            this.imagesUrls = poiExtended.imagesUrls;
-            this.address = poiExtended.url;
-            this.rating = this.getRatingNumber(poiExtended.rating);
+            this.initFromPointOfInterestExtended(poiExtended);
             this.marker.setIcon(IconsService.createPoiIcon(poiExtended.icon, poiExtended.iconColor));
             this.editMode = false;
         });
@@ -277,7 +273,10 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public showImage() {
         let dialog = this.mdDialog.open(ImageDialogCompnent);
         dialog.componentInstance.title = this.title;
-        dialog.componentInstance.imagesUrls = this.imagesUrls;
+        dialog.componentInstance.imagesUrls = [...this.poiExtended.imagesUrls];
+        if (this.imagePreviewUrl && !this.poiExtended.imagesUrls.find(s => s === this.imagePreviewUrl)) {
+            dialog.componentInstance.imagesUrls.splice(0, 0, this.imagePreviewUrl);
+        }
     }
 
     public getOffRoadUrl() {
@@ -285,5 +284,15 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             return "";
         }
         return `http://off-road.io/track/${this.poiExtended.id}`;
+    }
+
+    private initFromPointOfInterestExtended = (poiExtended: IPointOfInterestExtended) => {
+        this.poiExtended = poiExtended;
+        this.description = poiExtended.description;
+        this.url = poiExtended.url;
+        this.imagePreviewUrl = poiExtended.imagesUrls.length > 0 ? poiExtended.imagesUrls[0] : "";
+        this.sourceImageUrl = poiExtended.sourceImageUrl;
+        this.rating = this.getRatingNumber(this.poiExtended.rating);
+        this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
     }
 }

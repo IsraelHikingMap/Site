@@ -334,6 +334,7 @@
         "Unable to load from file...": "לא ניתן לפתוח את הקובץ...",
         "Unable to login...": "הכניסה נכשלה...",
         "Unable to save an empty route, Please try and select a different one from the layers control on your left.": "לא ניתן לשמור מסלול ריק, אנא נסו לבחור מסלול אחר מפקד השכבות שמשמאל.",
+        "Unable to save data, please try again later...": "אין באפשרותינו לשמור את המידע כרגע, אנא נסו מאוחר יותר...",
         "Unable to save to file...": "לא ניתן לשמור את הקובץ...",
         "Unable to send route...": "לא ניתן לשלוח את המסלול...",
         "Unable to upload the file...": "אין אפשרות לעלות את הקובץ...",

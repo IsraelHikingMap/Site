@@ -28,7 +28,7 @@
                     </div>    
                     <label [hidden]="imagesUrls.length > 0" fxFill>
                         <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
-                        <input type="file" (change)="uploadImage($event)" [style.display]="'none'"/>
+                        <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*"/>
                     </label>
                 </div>
                 <div fxLayout="row" [hidden]="imagesUrls.length === 0">
@@ -38,7 +38,7 @@
                     <div fxFlex>
                         <label fxFill>
                             <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Upload non first image"><i class="fa icon-plus"></i></a>
-                            <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
+                            <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" />
                         </label>
                     </div>
                     <div fxFlex="25">
@@ -69,7 +69,7 @@
         </div>
         <div fxLayout="row">
             <div fxFlex>
-                <button mat-raised-button color="primary" [disabled]="!title && !description && imagesUrls.length === 0" (click)="updatePoint()" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{identifier ? resources.updatePoint : resources.addPoint}}</button>
+                <button mat-raised-button color="primary" [disabled]="!title && !description && imagesUrls.length === 0" (click)="uploadPoint()" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{identifier ? resources.updatePoint : resources.addPoint}}</button>
             </div>
             <div fxFlex="10" fxShow fxHide.xs [hidden]="!identifier">
                 <a mat-button [href]="getEditElementOsmAddress()" target="_blank" fxFill matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit element in OSM"><i class="fa icon-map-editing fa-lg"></i></a>

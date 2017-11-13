@@ -7,6 +7,7 @@ import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
 import { AuthorizationService } from "./authorization.service";
 import { PoiService, IPointOfInterestExtended, IRating } from "./poi.service";
+import { FileService } from "./file.service";
 
 describe("Poi Service", () => {
 
@@ -23,11 +24,13 @@ describe("Poi Service", () => {
 
     beforeEach(() => {
         var toastMock = new ToastServiceMockCreator();
+        var fileServiceMock = { uploadWithData: () => {} };
         TestBed.configureTestingModule({
             imports: [HttpModule],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: XHRBackend, useClass: MockBackend },
+                { provide: FileService, useValue: fileServiceMock },
                 AuthorizationService,
                 PoiService
             ]
@@ -79,14 +82,13 @@ describe("Poi Service", () => {
         return poiService.getPoint(id, source, "");
     })));
 
-    it("Should update point using the server", async(inject([PoiService, XHRBackend], (poiService: PoiService, mockBackend: MockBackend) => {
-        checkHttpRequest(mockBackend,
-            (request) => {
-                return request.method === RequestMethod.Post;
-            });
+    it("Should update point using the server", inject([PoiService, FileService], (poiService: PoiService, fileServiceMock: FileService) => {
+        spyOn(fileServiceMock, "uploadWithData");
 
-        return poiService.uploadPoint({} as IPointOfInterestExtended);
-    })));
+        poiService.uploadPoint({} as IPointOfInterestExtended, {name: "file.name"} as File);
+
+        expect(fileServiceMock.uploadWithData).toHaveBeenCalled();
+    }));
 
     it("Should update rating using the server", async(inject([PoiService, XHRBackend], (poiService: PoiService, mockBackend: MockBackend) => {
         checkHttpRequest(mockBackend,

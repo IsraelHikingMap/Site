@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Newtonsoft.Json;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Controllers
@@ -98,7 +99,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var poi = new PointOfInterestExtended {Source = "wrong source"};
 
-            var result = _controller.UploadPointOfInterest(poi).Result as BadRequestObjectResult;
+            var result = _controller.UploadPointOfInterest(null, JsonConvert.SerializeObject(poi), "he").Result as BadRequestObjectResult;
 
             Assert.IsNotNull(result);
         }
@@ -109,7 +110,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity();
             var poi = new PointOfInterestExtended { Source = "source", Id = "" };
 
-            var result = _controller.UploadPointOfInterest(poi).Result as OkObjectResult;
+            var result = _controller.UploadPointOfInterest(null, JsonConvert.SerializeObject(poi), "he").Result as OkObjectResult;
 
             Assert.IsNotNull(result);
             _adapter.Received(1).AddPointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
@@ -121,21 +122,23 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity();
             var poi = new PointOfInterestExtended { Source = "source", Id = "1" };
 
-            var result = _controller.UploadPointOfInterest(poi).Result as OkObjectResult;
+            var result = _controller.UploadPointOfInterest(null, JsonConvert.SerializeObject(poi), "he").Result as OkObjectResult;
 
             Assert.IsNotNull(result);
             _adapter.Received(1).UpdatePointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
         }
 
         [TestMethod]
-        public void UploadImage_ShouldUpload()
+        public void UploadPointOfInterest_WithImageIdExists_ShouldUpdate()
         {
+            _controller.SetupIdentity();
             var formFile = Substitute.For<IFormFile>();
             formFile.OpenReadStream().Returns(new MemoryStream());
             formFile.FileName.Returns("file.jpg");
-            _controller.UploadImage(formFile, "title", "1,2").Wait();
+            var poi = new PointOfInterestExtended { Title = "title", Source = "source", Id = "1", Location = new LatLng(5,6), ImagesUrls = new string[0]};
+            _controller.UploadPointOfInterest(formFile, JsonConvert.SerializeObject(poi), "he").Wait();
 
-            _wikimediaCommonGateway.Received(1).UploadImage("title", "file.jpg", Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, formFile.FileName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
         }
     }

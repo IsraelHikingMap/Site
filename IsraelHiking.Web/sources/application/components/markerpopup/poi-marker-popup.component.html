@@ -1,13 +1,13 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
     <div fxLayout="row">
         <div fxFlex>
-            <a [hidden]="!address" href="{{address}}" target="_blank">
+            <a [hidden]="!url" [href]="url" [target]="'_blank'">
                 <h3 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">
                     <img [src]="sourceImageUrl" alt="" width="32" [hidden]="!sourceImageUrl" [style.float]="resources.getImageFloat(title)"/>
                     {{title}}
                 </h3>
             </a>
-            <h3 [hidden]="address" [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">
+            <h3 [hidden]="url" [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">
                 <img [src]="sourceImageUrl" alt="" width="32" [hidden]="!sourceImageUrl" [style.float]="resources.getImageFloat(title)" />
                 {{title}}
             </h3>
@@ -25,12 +25,12 @@
             </mat-form-field>
         </div>
         <div fxFlex>
-            <label [hidden]="imagesUrls.length > 0">
+            <label [hidden]="imagePreviewUrl">
                 <a mat-button class="flex-center" [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsEvent="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
-                <input type="file" (change)="uploadImage($event)" [style.display]="'none'" />
+                <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" />
             </label>
-            <img fxFill [hidden]="imagesUrls.length === 0"
-                 [src]="resources.getResizedWikipediaImage(imagesUrls[0], 300)" 
+            <img fxFill [hidden]="!imagePreviewUrl"
+                 [src]="resources.getResizedWikipediaImage(imagePreviewUrl, 300)" 
                  class="img-responsive cursor-zoom-in" 
                  (click)="showImage()" />
         </div>
@@ -40,12 +40,12 @@
     </div>
     <div fxLayout="row" class="description-container" [hidden]="isEditMode()">
         <p fxFill [ngClass]="resources.getTextAlignment(getDescrition()[0])" [dir]="resources.getDirection(getDescrition()[0])">
-            <img [hidden]="imagesUrls.length === 0" 
-                [src]="resources.getResizedWikipediaImage(imagesUrls[0], 300)" 
+            <img [hidden]="!imagePreviewUrl" 
+                [src]="resources.getResizedWikipediaImage(imagePreviewUrl, 300)" 
                 class="img-placeholder cursor-zoom-in" 
                 (click)="showImage()" 
                 [style.float]="resources.getImageFloat(getDescrition()[0])"/>
-            <i [hidden]="imagesUrls.length > 0"
+            <i [hidden]="imagePreviewUrl"
                 class="fa fa-5x img-placeholder {{getIcon()}} flex-center"
                 [style.float]="resources.getImageFloat(getDescrition()[0])"></i>
             <ng-container *ngFor="let descriptionLine of getDescrition()">

@@ -9,6 +9,7 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -110,21 +111,34 @@ namespace IsraelHiking.API.Controllers
         }
 
         /// <summary>
-        /// Update a POI by id and source
+        /// Update a POI by id and source, upload the image to wikimedia commons if needed.
         /// </summary>
-        /// <param name="pointOfInterest"></param>
-        /// <param name="language"></param>
+        /// <param name="file">An image file to add as a URL</param>
+        /// <param name="poiData">A JSON string of <see cref="PointOfInterestExtended"/> </param>
+        /// <param name="language">The language code</param>
         /// <returns></returns>
         [Route("")]
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UploadPointOfInterest([FromBody] PointOfInterestExtended pointOfInterest,
-            string language = "")
+        public async Task<IActionResult> UploadPointOfInterest([FromForm] IFormFile file, 
+            [FromForm] string poiData,
+            [FromQuery] string language)
         {
+            var pointOfInterest = JsonConvert.DeserializeObject<PointOfInterestExtended>(poiData);
             if (_adapters.ContainsKey(pointOfInterest.Source) == false)
             {
                 return BadRequest($"{pointOfInterest.Source} is not a know POIs source...");
             }
+            if (file != null)
+            {
+                // HM TODO: add author?
+                var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(pointOfInterest.Location));
+                var url = await _wikimediaCommonGateway.GetImageUrl(imageName);
+                var imageUrls = pointOfInterest.ImagesUrls.ToList();
+                imageUrls.Insert(0, url);
+                pointOfInterest.ImagesUrls = imageUrls.ToArray();
+            }
+            
             var adapter = _adapters[pointOfInterest.Source];
             var tokenAndSecret = _cache.Get(User.Identity.Name);
             if (string.IsNullOrWhiteSpace(pointOfInterest.Id))
@@ -132,24 +146,6 @@ namespace IsraelHiking.API.Controllers
                 return Ok(await adapter.AddPointOfInterest(pointOfInterest, tokenAndSecret, language));
             }
             return Ok(await adapter.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language));
-        }
-
-        /// <summary>
-        /// Upload an image to wikimedia common
-        /// </summary>
-        /// <param name="file">The image file to upload</param>
-        /// <param name="title">The title to upload it with</param>
-        /// <param name="location">The location the image was taken</param>
-        /// <returns></returns>
-        [HttpPost]
-        [Route("image/")]
-        public async Task<IActionResult> UploadImage([FromForm] IFormFile file, [FromQuery] string title,
-            [FromQuery] string location)
-        {
-            var imageName =
-                await _wikimediaCommonGateway.UploadImage(title, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(location));
-            var url = await _wikimediaCommonGateway.GetImageUrl(imageName);
-            return Ok(url);
         }
     }
 }

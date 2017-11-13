@@ -35,6 +35,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public icons: IIconColorLabel[];
     public initializationPromise: Promise<any>;
     private currentImageIndex: number;
+    private currentImageFile: File;
 
     constructor(resources: ResourcesService,
         public dialogRef: MdDialogRef<UpdatePointDialogComponent>,
@@ -47,6 +48,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         this.categories = [];
         this.currentImageIndex = 0;
         this.imagesUrls = [];
+        this.currentImageFile = null;
         this.initializationPromise = new Promise((resolve, reject) => {
             this.poiService.getCategories("Points of Interest").then((response) => {
                 for (let categoryType in response) {
@@ -94,20 +96,30 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         this.selectedCategory.selectedIcon = icon;
     }
 
-    public uploadImage(e: any) {
+    public imageChanged(e: any) {
         let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
         if (!file) {
             return;
         }
-        this.fileService.uploadImage(file, this.title, this.location).then((imageUrl: string) => {
-            this.imagesUrls.push(imageUrl);
+        if (this.currentImageFile) {
+            this.imagesUrls.splice(this.imagesUrls.length - 1, 1);
+        }        
+
+        this.currentImageFile = file;
+        let reader = new FileReader();
+
+        reader.onload = (event: any) => {
+            this.imagesUrls.push(event.target.result);
             this.currentImageIndex = this.imagesUrls.length - 1;
-        }, () => {
-            this.toastService.error(this.resources.unableToUploadFile);
-        });
+        }
+
+        reader.readAsDataURL(file);
     }
 
-    public updatePoint() {
+    public uploadPoint() {
+        if (this.currentImageFile) {
+            this.imagesUrls.splice(this.imagesUrls.length - 1, 1);
+        }
         let poiExtended = {
             description: this.description,
             icon: this.selectedCategory.selectedIcon.icon,
@@ -120,9 +132,9 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             type: this.elementType,
             location: this.location
         } as IPointOfInterestExtended;
-        this.poiService.uploadPoint(poiExtended).then((response) => {
+        this.poiService.uploadPoint(poiExtended, this.currentImageFile).then((poi) => {
             this.toastService.info(this.resources.dataUpdatedSuccefully);
-            this.dialogRef.close(response.json());
+            this.dialogRef.close(poi);
         }, () => {
             this.dialogRef.close(null);
         });

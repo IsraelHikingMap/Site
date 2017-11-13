@@ -2,8 +2,9 @@
 import { Http, Response } from "@angular/http";
 
 import { AuthorizationService } from "./authorization.service";
-import { Urls } from "../common/Urls";
+import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
+import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
 export type CategoriesType = "Points of Interest" | "Routes";
@@ -61,7 +62,8 @@ export class PoiService {
 
     constructor(private resources: ResourcesService,
         private http: Http,
-        private authorizationService: AuthorizationService) {
+        private authorizationService: AuthorizationService, 
+        private fileService: FileService) {
 
         this.categoriesToIconsMap = new Map<CategoriesType, {}>();
         this.categoriesToIconsMap.set("Points of Interest", {});
@@ -114,13 +116,15 @@ export class PoiService {
                 }
             }).toPromise();
     }
-
-    public uploadPoint(poiExtended: IPointOfInterestExtended): Promise<Response> {
-        let options = this.authorizationService.getHeader();
-        options.params = {
-            language: this.resources.getCurrentLanguageCodeSimplified()
-        };
-        return this.http.post(Urls.poi, poiExtended, options).toPromise();
+    
+    public uploadPoint(poiExtended: IPointOfInterestExtended, file: File): Promise<IPointOfInterestExtended> {
+        let formData = new FormData();
+        if (file) {
+            formData.append("file", file, file.name);
+        }
+        formData.append("poiData", JSON.stringify(poiExtended));
+        let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+        return this.fileService.uploadWithData(uploadAddress, formData);
     }
 
     public uploadRating(rating: IRating): Promise<Response> {
