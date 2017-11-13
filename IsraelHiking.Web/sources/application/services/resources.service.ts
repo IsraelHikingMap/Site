@@ -240,6 +240,7 @@ export class ResourcesService {
     public closeWhileInEditMode: string;
     public dataUpdatedSuccefully: string;
     public loginRequired: string;
+    public noDescriptionLoginRequired: string;
     public nameInLanguage: string;
     public descriptionInLanguage: string;
     public unableToSaveData:string;
@@ -663,6 +664,7 @@ export class ResourcesService {
                 this.closeWhileInEditMode = this.gettextCatalog.getString("Please note that you did not save your work before closing the popup...");
                 this.dataUpdatedSuccefully = this.gettextCatalog.getString("The data was updated successfully!");
                 this.loginRequired = this.gettextCatalog.getString("You need to login to OSM first, please use the button in the upper right corner to login.");
+                this.noDescriptionLoginRequired = this.gettextCatalog.getString("There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login.");
                 this.nameInLanguage = this.gettextCatalog.getString("Name in {{translation language}}");
                 this.descriptionInLanguage = this.gettextCatalog.getString("Description in {{translation language}}");
                 this.unableToSaveData = this.gettextCatalog.getString("Unable to save data, please try again later...");

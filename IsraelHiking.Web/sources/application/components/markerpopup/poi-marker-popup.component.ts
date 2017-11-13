@@ -90,7 +90,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             return [""];
         }
         if (this.osmUserService.isLoggedIn() === false) {
-            return [this.resources.loginRequired];
+            return [this.resources.noDescriptionLoginRequired];
         }
         return [this.resources.emptyPoiDescription];
     }
