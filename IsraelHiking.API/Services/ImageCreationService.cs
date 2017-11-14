@@ -140,9 +140,10 @@ namespace IsraelHiking.API.Services
                 {
                     for (int y = 0; y < verticalTiles; y++)
                     {
-                        graphics.DrawImage(await GetTileImage(topLeft.X + x, topLeft.Y + y, zoom, addressTemplate),
+                        var tileImage = await GetTileImage(topLeft.X + x, topLeft.Y + y, zoom, addressTemplate);
+                        graphics.DrawImage(tileImage,
                             new Rectangle(x * targetSizeX, y * targetSizeY, targetSizeX, targetSizeY),
-                            new Rectangle(0, 0, TILE_SIZE, TILE_SIZE),
+                            new Rectangle(0, 0, tileImage.Width, tileImage.Height),
                             GraphicsUnit.Pixel);
                     }
                 }
