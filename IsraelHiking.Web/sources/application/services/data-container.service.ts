@@ -69,15 +69,15 @@ export class DataContainerService {
     }
 
     private addDataFromHash = (deferred: Deferred<any>) => {
-        if (this.hashService.siteUrl) {
-            this.http.get(Urls.urls + this.hashService.siteUrl).toPromise()
+        if (this.hashService.shareUrl) {
+            this.http.get(Urls.urls + this.hashService.shareUrl).toPromise()
                 .then((response) => {
-                    let siteUrl = response.json() as Common.SiteUrl;
-                    this.setInitialData(siteUrl.dataContainer);
-                    this.toastService.info(siteUrl.description, siteUrl.title);
+                    let shareUrl = response.json() as Common.ShareUrl;
+                    this.setInitialData(shareUrl.dataContainer);
+                    this.toastService.info(shareUrl.description, shareUrl.title);
                     deferred.resolve();
                 }, () => {
-                    this.hashService.siteUrl = "";
+                    this.hashService.shareUrl = "";
                     this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
                     deferred.resolve();
                 });

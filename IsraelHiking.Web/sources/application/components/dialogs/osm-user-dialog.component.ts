@@ -46,18 +46,18 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     private static OSM_USER_DIALOG_STATE_KEY = "OsmUserDialogState";
 
     public ranks: IRank[];
-    public filteredSiteUrls: Common.SiteUrl[];
+    public filteredShareUrls: Common.ShareUrl[];
     public filteredTraces: ITrace[];
     public state: IOsmUserDialogState;
     public file: File;
     public loadingTraces: boolean;
-    public loadingSiteUrls: boolean;
+    public loadingShareUrls: boolean;
     public searchTerm: FormControl;
 
     private osmTraceLayer: L.LayerGroup;
     private languageChangeSubscription: Subscription;
     private tracesChangedSubscription: Subscription;
-    private siteUrlChangedSubscription: Subscription;
+    private shareUrlChangedSubscription: Subscription;
 
     @ViewChild("dialogContentForScroll") dialogContent: ElementRef;
     
@@ -77,7 +77,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     ) {
         super(resources);
         this.loadingTraces = false;
-        this.loadingSiteUrls = false;
+        this.loadingShareUrls = false;
         this.initializeRanks();
         this.osmTraceLayer = L.layerGroup([]);
         this.mapService.map.addLayer(this.osmTraceLayer);
@@ -98,15 +98,15 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             this.updateFilteredLists(this.searchTerm.value);
             this.loadingTraces = false;
         });
-        this.siteUrlChangedSubscription = this.userService.siteUrlsChanged.subscribe(() => {
+        this.shareUrlChangedSubscription = this.userService.shareUrlsChanged.subscribe(() => {
             this.updateFilteredLists(this.searchTerm.value);
-            this.loadingSiteUrls = false;
+            this.loadingShareUrls = false;
         });
     }
 
     public ngOnInit() {
         this.loadingTraces = true;
-        this.loadingSiteUrls = true;
+        this.loadingShareUrls = true;
         this.userService.refreshDetails();
         let dialogElement = this.dialogContent.nativeElement as HTMLElement;
         setTimeout(() => dialogElement.scrollTop = this.state.scrollPosition, 700);
@@ -119,7 +119,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public ngOnDestroy() {
         this.languageChangeSubscription.unsubscribe();
         this.tracesChangedSubscription.unsubscribe();
-        this.siteUrlChangedSubscription.unsubscribe();
+        this.shareUrlChangedSubscription.unsubscribe();
     }
 
     public getRank() {
@@ -241,7 +241,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         searchTerm = searchTerm.trim();
         this.state.searchTerm = searchTerm;
         this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
-        this.filteredSiteUrls = this.userService.siteUrls.filter((s) => this.findInSiteUrl(s, searchTerm));
+        this.filteredShareUrls = this.userService.shareUrls.filter((s) => this.findInShareUrl(s, searchTerm));
         this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInTrace(t, searchTerm)), ["date"], ["desc"]);
     }
 
@@ -303,19 +303,19 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.fitBoundsService.fitBounds(geoJsonLayer.getBounds());
     }
 
-    private findInSiteUrl(siteUrl: Common.SiteUrl, searchTerm: string) {
+    private findInShareUrl(shareUrl: Common.ShareUrl, searchTerm: string) {
         if (!searchTerm)
         {
             return true;
         }
         let lowerSearchTerm = searchTerm.toLowerCase();
-        if ((siteUrl.description || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((shareUrl.description || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
-        if ((siteUrl.title || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((shareUrl.title || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
-        if ((siteUrl.id || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((shareUrl.id || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
             return true;
         }
         return false;
@@ -342,7 +342,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
     }
 
-    public deleteSiteUrl(siteUrl: Common.SiteUrl) {
-        this.userService.deleteSiteUrl(siteUrl);
+    public deleteShareUrl(shareUrl: Common.ShareUrl) {
+        this.userService.deleteShareUrl(shareUrl);
     }
 }

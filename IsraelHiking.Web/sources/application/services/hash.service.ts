@@ -21,7 +21,7 @@ export class HashService {
 
     public searchTerm: string;
     public externalUrl: string;
-    public siteUrl: string;
+    public shareUrl: string;
     public download: boolean;
     private internalUpdate: boolean;
 
@@ -84,7 +84,7 @@ export class HashService {
         let searchParams = new URLSearchParams(this.window.location.hash.replace("#!/?", ""));
         this.searchTerm = decodeURIComponent(searchParams.get(HashService.SEARCH_QUERY) || "");
         this.externalUrl = searchParams.get(HashService.URL) || "";
-        this.siteUrl = searchParams.get(HashService.SITE_SHARE) || "";
+        this.shareUrl = searchParams.get(HashService.SITE_SHARE) || "";
         this.download = searchParams.has(HashService.DOWNLOAD);
         this.baseLayer = this.stringToBaseLayer(searchParams.get(HashService.BASE_LAYER) || "");
         let latLng = this.parsePathToGeoLocation();

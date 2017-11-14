@@ -74,7 +74,7 @@ describe("OSM User Service", () => {
         mockBackend.connections.subscribe((connection: MockConnection) => {
             if (connection.request.url.indexOf(Urls.urls) !== -1) {
                 connection.mockRespond(new Response(new ResponseOptions({
-                    body: JSON.stringify([{ title: "some share" } as Common.SiteUrl])
+                    body: JSON.stringify([{ title: "some share" } as Common.ShareUrl])
                 })));
                 return;
             }
@@ -90,7 +90,7 @@ describe("OSM User Service", () => {
         flushMicrotasks();
 
         expect(osmUserService.isLoggedIn()).toBeTruthy();
-        expect(osmUserService.siteUrls.length).toBe(1);
+        expect(osmUserService.shareUrls.length).toBe(1);
         expect(osmUserService.traces.length).toBe(1);
     })));
     
@@ -117,7 +117,7 @@ describe("OSM User Service", () => {
         }, () => {
             flushMicrotasks();
             expect(osmUserService.isLoggedIn()).toBe(true);
-            expect(osmUserService.siteUrls.length).toBe(0);
+            expect(osmUserService.shareUrls.length).toBe(0);
             expect(osmUserService.traces.length).toBe(0);    
         });
     })));
@@ -133,32 +133,32 @@ describe("OSM User Service", () => {
 
     
     it("Should update site url", inject([OsmUserService, XHRBackend], fakeAsync((osmUserService: OsmUserService, mockBackend: MockBackend) => {
-        let siteUrl = { id: "42" } as Common.SiteUrl;
+        let shareUrl = { id: "42" } as Common.ShareUrl;
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.urls + siteUrl.id) === -1 || connection.request.method !== RequestMethod.Put) {
+            if (connection.request.url.indexOf(Urls.urls + shareUrl.id) === -1 || connection.request.method !== RequestMethod.Put) {
                 fail();
             }
         });
 
-        osmUserService.updateSiteUrl(siteUrl);
+        osmUserService.updateShareUrl(shareUrl);
         flushMicrotasks();
     })));
 
     it("Should delete site url", inject([OsmUserService, XHRBackend], fakeAsync((osmUserService: OsmUserService, mockBackend: MockBackend) => {
-        let siteUrl = { id: "42" } as Common.SiteUrl;
-        osmUserService.siteUrls = [siteUrl];
+        let shareUrl = { id: "42" } as Common.ShareUrl;
+        osmUserService.shareUrls = [shareUrl];
 
         mockBackend.connections.subscribe((connection: MockConnection) => {
-            if (connection.request.url.indexOf(Urls.urls + siteUrl.id) === -1 || connection.request.method !== RequestMethod.Delete) {
+            if (connection.request.url.indexOf(Urls.urls + shareUrl.id) === -1 || connection.request.method !== RequestMethod.Delete) {
                 fail();
             }
             connection.mockRespond(new Response(new ResponseOptions()));
         });
 
-        osmUserService.deleteSiteUrl(siteUrl);
+        osmUserService.deleteShareUrl(shareUrl);
     
         flushMicrotasks();
-        expect(osmUserService.siteUrls.length).toBe(0);
+        expect(osmUserService.shareUrls.length).toBe(0);
     })));
 
     
@@ -187,10 +187,10 @@ describe("OSM User Service", () => {
 
     
     it("Should get image for site url", inject([OsmUserService], (osmUserService: OsmUserService) => {
-        let siteUrl = { id: "42" } as Common.SiteUrl;
-        let imageUrl = osmUserService.getImageFromSiteUrlId(siteUrl);
+        let shareUrl = { id: "42" } as Common.ShareUrl;
+        let imageUrl = osmUserService.getImageFromShareId(shareUrl);
 
-        expect(imageUrl).toContain(siteUrl.id);
+        expect(imageUrl).toContain(shareUrl.id);
     }));
 
     
@@ -214,12 +214,12 @@ describe("OSM User Service", () => {
 
     
     it("Should return full address of shared route", inject([OsmUserService], (osmUserService: OsmUserService) => {
-        let siteUrl = { id: "12345" } as Common.SiteUrl;
+        let shareUrl = { id: "12345" } as Common.ShareUrl;
 
-        let address = osmUserService.getUrlFromSiteUrlId(siteUrl);
+        let address = osmUserService.getUrlFromShareId(shareUrl);
 
         expect(address).toContain("/#!/");
         expect(address).toContain(Urls.baseAddress);
-        expect(address).toContain(siteUrl.id);
+        expect(address).toContain(shareUrl.id);
     }));
 });

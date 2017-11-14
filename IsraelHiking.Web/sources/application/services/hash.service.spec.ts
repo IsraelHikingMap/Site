@@ -84,12 +84,12 @@ describe("HashService", () => {
         expect(hashService.getBaseLayer().address).toEqual("");
     }));
 
-    it("Should inialize siteUrl from hash", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "#!/?s=siteUrl";
+    it("Should inialize share from hash", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/?s=shareUrl";
 
         hashService = new HashService(router, windowMock, mapService);
 
-        expect(hashService.siteUrl).toBe("siteUrl");
+        expect(hashService.shareUrl).toBe("shareUrl");
     }));
 
     it("Should get url for external file", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {

@@ -53,7 +53,7 @@ export class ShareDialogComponent extends BaseMapComponent {
     public facebookShareAddress: string;
     public nakebCreateHikeAddress: string;
     public isLoading: boolean;
-    public siteUrlId: string;
+    public shareUrlId: string;
     public offroadRequest: IOffroadPostRequest;
     public showOffroadForm: boolean;
     public offroadPublicTrack: boolean;
@@ -81,7 +81,7 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.whatappShareAddress = null;
         this.facebookShareAddress = "";
         this.nakebCreateHikeAddress = "";
-        this.siteUrlId = "";
+        this.shareUrlId = "";
         this.offroadPublicTrack = false;
         this.offroadRequest = {} as IOffroadPostRequest;
         this.offroadRequest.userMail = this.storedUserEmail;
@@ -120,12 +120,12 @@ export class ShareDialogComponent extends BaseMapComponent {
             description: this.description,
             dataContainer: dataToSave,
             osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
-        } as Common.SiteUrl;
-        this.osmUserService.createSiteUrl(shareUrl).then((siteUrlResponse) => {
-            let data = siteUrlResponse.json() as Common.SiteUrl;
-            this.siteUrlId = data.id;
-            this.shareAddress = this.osmUserService.getUrlFromSiteUrlId(data);
-            this.imageUrl = this.osmUserService.getImageFromSiteUrlId(data);
+        } as Common.ShareUrl;
+        this.osmUserService.createShareUrl(shareUrl).then((shareUrlResponse) => {
+            let data = shareUrlResponse.json() as Common.ShareUrl;
+            this.shareUrlId = data.id;
+            this.shareAddress = this.osmUserService.getUrlFromShareId(data);
+            this.imageUrl = this.osmUserService.getImageFromShareId(data);
             let escaped = encodeURIComponent(this.shareAddress);
             this.whatappShareAddress = this.sanitizer.bypassSecurityTrustUrl(`whatsapp://send?text=${data.title} - ${data.description}: ${escaped}`);
             this.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
@@ -152,7 +152,7 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.offroadRequest.path = [];
         this.offroadRequest.mapItems = [];
         this.offroadRequest.externalUrl = this.shareAddress;
-        this.offroadRequest.backgroundServeUrl = Urls.images + this.siteUrlId;
+        this.offroadRequest.backgroundServeUrl = Urls.images + this.shareUrlId;
 
         for (let segment of route.segments) {
             for (let latlng of segment.latlngs) {

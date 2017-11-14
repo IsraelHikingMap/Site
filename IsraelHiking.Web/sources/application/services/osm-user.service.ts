@@ -41,7 +41,7 @@ export class OsmUserService {
     private baseUrl: string;
 
     public tracesChanged: Subject<any>;
-    public siteUrlsChanged: Subject<any>;
+    public shareUrlsChanged: Subject<any>;
     public userLayersChanged: Subject<any>;
     public initializationFinished: Promise<any>;
 
@@ -49,7 +49,7 @@ export class OsmUserService {
     public imageUrl: string;
     public changeSets: number;
     public traces: ITrace[];
-    public siteUrls: Common.SiteUrl[];
+    public shareUrls: Common.ShareUrl[];
     public baseLayers: Common.LayerData[];
     public overlays: Common.LayerData[];
     public userId: string;
@@ -58,11 +58,11 @@ export class OsmUserService {
         private authorizationService: AuthorizationService) {
         this.x2Js = new X2JS();
         this.traces = [];
-        this.siteUrls = [];
+        this.shareUrls = [];
         this.baseLayers = [];
         this.overlays = [];
         this.tracesChanged = new Subject();
-        this.siteUrlsChanged = new Subject();
+        this.shareUrlsChanged = new Subject();
         this.userLayersChanged = new Subject();
         let deferred = new Deferred<any>();
         this.initializationFinished = deferred.promise;
@@ -110,13 +110,13 @@ export class OsmUserService {
         return deferred.promise;
     }
 
-    public getSiteUrlPostfix(id: string) {
+    public getShareUrlPostfix(id: string) {
         return `/#!/?s=${id}`;
     }
 
     public refreshDetails = (): Promise<any> => {
         let getTracesPromise = this.getTraces();
-        let getSiteUtlsPromise = this.getSiteUrls();
+        let getSiteUtlsPromise = this.getShareUrls();
         return Promise.all([getTracesPromise, getSiteUtlsPromise]);
     }
 
@@ -184,42 +184,42 @@ export class OsmUserService {
         return promise;
     }
 
-    private getSiteUrls = (): Promise<any> => {
+    private getShareUrls = (): Promise<any> => {
         let promise = this.http.get(Urls.urls, this.authorizationService.getHeader()).toPromise();
         promise.then(response => {
-            let siteUrls = response.json() as Common.SiteUrl[];
-            this.siteUrls.splice(0);
-            this.siteUrls.push(...siteUrls);
-            this.siteUrlsChanged.next();
+            let shareUrls = response.json() as Common.ShareUrl[];
+            this.shareUrls.splice(0);
+            this.shareUrls.push(...shareUrls);
+            this.shareUrlsChanged.next();
         }, () => {
              console.error("Unable to get user's shares.");
         });
         return promise;
     }
     
-    public createSiteUrl = (siteUrl: Common.SiteUrl): Promise<Response> => {
-        return this.http.post(Urls.urls, siteUrl, this.authorizationService.getHeader()).toPromise();
+    public createShareUrl = (shareUrl: Common.ShareUrl): Promise<Response> => {
+        return this.http.post(Urls.urls, shareUrl, this.authorizationService.getHeader()).toPromise();
     }
 
-    public updateSiteUrl = (siteUrl: Common.SiteUrl): Promise<{}> => {
-        return this.http.put(Urls.urls + siteUrl.id, siteUrl, this.authorizationService.getHeader()).toPromise();
+    public updateShareUrl = (shareUrl: Common.ShareUrl): Promise<{}> => {
+        return this.http.put(Urls.urls + shareUrl.id, shareUrl, this.authorizationService.getHeader()).toPromise();
     }
 
-    public deleteSiteUrl = (siteUrl: Common.SiteUrl): Promise<Response> => {
-        let promise = this.http.delete(Urls.urls + siteUrl.id, this.authorizationService.getHeader()).toPromise();
+    public deleteShareUrl = (shareUrl: Common.ShareUrl): Promise<Response> => {
+        let promise = this.http.delete(Urls.urls + shareUrl.id, this.authorizationService.getHeader()).toPromise();
         promise.then(() => {
-            _.remove(this.siteUrls, s => s.id === siteUrl.id);
-            this.siteUrlsChanged.next();
+            _.remove(this.shareUrls, s => s.id === shareUrl.id);
+            this.shareUrlsChanged.next();
         });
         return promise;
     }
 
-    public getImageFromSiteUrlId = (siteUrl: Common.SiteUrl) => {
-        return Urls.images + siteUrl.id;
+    public getImageFromShareId = (shareUrl: Common.ShareUrl) => {
+        return Urls.images + shareUrl.id;
     }
 
-    public getUrlFromSiteUrlId = (siteUrl: Common.SiteUrl) => {
-        return Urls.baseAddress + this.getSiteUrlPostfix(siteUrl.id);
+    public getUrlFromShareId = (shareUrl: Common.ShareUrl) => {
+        return Urls.baseAddress + this.getShareUrlPostfix(shareUrl.id);
     }
 
     public getMissingParts(trace: ITrace): Promise<any> {

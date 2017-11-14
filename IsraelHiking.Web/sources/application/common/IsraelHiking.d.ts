@@ -1,6 +1,6 @@
 ﻿export type RoutingType = "Hike" | "Bike" | "4WD" | "None";
 
-export interface SiteUrl {
+export interface ShareUrl {
     id: string;
     title: string;
     description: string;
