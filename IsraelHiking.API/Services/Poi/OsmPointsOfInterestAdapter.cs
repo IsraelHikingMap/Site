@@ -124,6 +124,7 @@ namespace IsraelHiking.API.Services.Poi
             }
             var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
             var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.ICON].ToString();
+            var oldTags = completeOsmGeo.Tags.ToArray();
 
             completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url;
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
@@ -135,12 +136,34 @@ namespace IsraelHiking.API.Services.Poi
                 AddTagsByIcon(completeOsmGeo.Tags, pointOfInterest.Icon);
             }
             RemoveEmptyTags(completeOsmGeo.Tags);
+            if (AreTagsCollectionEqual(oldTags, completeOsmGeo.Tags.ToArray()))
+            {
+                var feature = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
+                return await FeatureToExtendedPoi(feature, language);
+            }
+
             var changesetId = await osmGateway.CreateChangeset("Update POI interface from IHM site.");
             await osmGateway.UpdateElement(changesetId, completeOsmGeo);
             await osmGateway.CloseChangeset(changesetId);
 
             var featureToReturn = await UpdateElasticSearch(completeOsmGeo, pointOfInterest.Title);
             return await FeatureToExtendedPoi(featureToReturn, language);
+        }
+
+        private bool AreTagsCollectionEqual(Tag[] oldTags, Tag[] currentTags)
+        {
+            if (oldTags.Length != currentTags.Length)
+            {
+                return false;
+            }
+            foreach (var currentTag in currentTags)
+            {
+                if (!oldTags.Any(t => t.Equals(currentTag)))
+                {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /// <inheritdoc />

@@ -177,6 +177,35 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
+        public void UpdatePoint_DoNotUpdateInCaseTagsAreEqual()
+        {
+            var gateway = SetupHttpFactory();
+            var pointOfInterest = new PointOfInterestExtended
+            {
+                ImagesUrls = new[] { "imageurl2", "imageurl1" },
+                Id = "1",
+                Icon = "oldIcon",
+                Type = OsmGeoType.Node.ToString().ToLower()
+            };
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
+            gateway.GetNode(pointOfInterest.Id).Returns(new Node
+            {
+                Id = 1,
+                Tags = new TagsCollection
+                {
+                    new Tag("image", "imageurl2"),
+                    new Tag("image1", "imageurl1"),
+                }
+            });
+
+            _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Wait();
+
+            _elasticSearchGateway.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<Feature>());
+            gateway.DidNotReceive().CreateChangeset(Arg.Any<string>());
+            gateway.DidNotReceive().CloseChangeset(Arg.Any<string>());
+        }
+
+        [TestMethod]
         public void GetPointsForIndexing_ShouldRemoveKklRoutes()
         {
             var memoryStream = new MemoryStream();
