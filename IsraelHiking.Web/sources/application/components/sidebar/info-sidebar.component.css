@@ -17,9 +17,12 @@
     width: 201px;
 }
 
-.legend-item-text {
+.legend-item-text-container {
     padding-left: 10px;
     padding-right: 10px;
+}
+
+.legend-item-text {
     text-decoration: none;
     color: black;
 }
@@ -46,7 +49,7 @@
         height: 50px;
     }
 
-    .legend-poi .legend-item-text {
+    .legend-poi .legend-item-text-container {
         vertical-align: middle;
         display: table-cell;
         text-align: start;

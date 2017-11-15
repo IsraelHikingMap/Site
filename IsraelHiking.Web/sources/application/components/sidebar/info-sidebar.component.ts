@@ -98,6 +98,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
         }
     }
 
+    public moveToLocation(item: ILegendItem) {
+        this.mapService.map.setView(item.latlng, item.zoom);
+    }
+
     private initializeItemMap = (item: ILegendItem): void => {
         setTimeout(() => {
             item.map = L.map(item.id.toString(),
@@ -178,7 +182,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ['Relation "שביל ישראל"'],
                         link: ""
                     },
                     {
@@ -214,17 +218,17 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ['Relation "שביל ירושלים"'],
                         link: ""
                     },
                     {
-                        title: this.resources.legendSeatoSeaTrail,
+                        title: this.resources.legendSeaToSeaTrail,
                         latlng: L.latLng(33.0039669, 35.384796),
                         zoom: 15,
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ['Relation "מים אל ים"'],
                         link: ""
                     },
                     {
@@ -234,7 +238,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ['Relation "שביל הגולן"'],
                         link: ""
                     },
                     {
@@ -244,7 +248,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ['Relation "שביל סובב כינרת"'],
                         link: ""
                     },
                     {
@@ -254,7 +258,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ['Relation "שביל ואדיות חיפה"'],
                         link: ""
                     },
                     {
@@ -264,7 +268,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ['Relation "שביל אופניים צופה כינרת"'],
                         link: ""
                     }
                 ]
@@ -320,7 +324,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-			osmTags: ["mtb:scale=6"],
+			            osmTags: ["mtb:scale=6"],
                         link: ""
                     }
                 ]
@@ -372,7 +376,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=track", "tracktype=grade1"],
                         link: ""
                     },
                     {
@@ -382,7 +386,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=track", "tracktype=grade3"],
                         link: ""
                     },
                     {
@@ -392,7 +396,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=track", "tracktype=grade4"],
                         link: ""
                     },
                     {
@@ -402,7 +406,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=track", "tracktype=grade5"],
                         link: ""
                     },
                     {
@@ -412,7 +416,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=path"],
                         link: ""
                     },
                     {
@@ -422,7 +426,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=footway", "bicycle=no"],
                         link: ""
                     },
                     {
@@ -432,7 +436,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=cycleway", "bicycle=designated"],
                         link: ""
                     },
                     {
@@ -442,7 +446,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=steps"],
                         link: ""
                     }
                 ]
@@ -458,7 +462,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["waterway=stream"],
                         link: ""
                     },
                     {
@@ -468,7 +472,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["waterway=stream", "intermittent=yes"],
                         link: ""
                     },
                     {
@@ -478,7 +482,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["waterway=river"],
                         link: ""
                     },
                     {
@@ -488,7 +492,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["landuse=reservoir"],
                         link: ""
                     },
                     {
@@ -498,7 +502,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["natural=water", "water=reservoir", "intermittent=yes"],
                         link: ""
                     },
                     {
@@ -508,7 +512,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["natural=wetland"],
                         link: ""
                     },
                     {
@@ -518,7 +522,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["waterway=riverbank", "intermittent=yes"],
                         link: ""
                     },
                     {
@@ -528,7 +532,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["natural=spring"],
                         link: ""
                     },
                     {
@@ -538,7 +542,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["natural=waterhole"],
                         link: ""
                     },
                     {
@@ -548,7 +552,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["man_made=water_well"],
                         link: ""
                     },
                     {
@@ -558,7 +562,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["man_made=cistern"],
                         link: ""
                     },
                     {
@@ -568,7 +572,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["waterway=waterfall"],
                         link: ""
                     },
                     {
@@ -578,7 +582,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["man_made=water_tower"],
                         link: ""
                     }
                 ]
@@ -594,7 +598,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["hihgway=motorway"],
                         link: ""
                     },
                     {
@@ -604,7 +608,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["hihgway=trunk"],
                         link: ""
                     },
                     {
@@ -614,7 +618,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["hihgway=primary"],
                         link: ""
                     },
                     {
@@ -624,7 +628,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["hihgway=secondary"],
                         link: ""
                     },
                     {
@@ -634,7 +638,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["hihgway=tertiary"],
                         link: ""
                     },
                     {
@@ -644,7 +648,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["hihgway=unclassified"],
                         link: ""
                     },
                     {
@@ -654,7 +658,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=residential", "maxspeed=..."],
                         link: ""
                     },
                     {
@@ -664,7 +668,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=residential"],
                         link: ""
                     },
                     {
@@ -674,7 +678,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=...", "bridge=yes"],
                         link: ""
                     },
                     {
@@ -684,7 +688,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["highway=...", "tunnel=yes"],
                         link: ""
                     }
                 ]
@@ -700,7 +704,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["railway=rail"],
                         link: ""
                     },
                     {
@@ -710,7 +714,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["railway=rail", "tunnel=yes"],
                         link: ""
                     },
                     {
@@ -720,7 +724,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["railway=station"],
                         link: ""
                     },
                     {
@@ -730,7 +734,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["aeroway=runway", "aeroway=taxiway"],
                         link: ""
                     },
                     {
@@ -740,7 +744,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["aerialway=cable_car"],
                         link: ""
                     }
                 ]
@@ -756,7 +760,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["tourism=viewpoint"],
                         link: ""
                     },
                     {
@@ -766,7 +770,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["natural=peak"],
                         link: ""
                     },
                     {
@@ -776,7 +780,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["historic=ruins"],
                         link: ""
                     },
                     {
@@ -786,7 +790,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["historic=archaeological_site"],
                         link: ""
                     },
                     {
@@ -796,7 +800,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["natural=cave"],
                         link: ""
                     },
                     {
@@ -806,7 +810,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["tourism=attraction"],
                         link: ""
                     },
                     {
@@ -816,7 +820,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["natural=tree"],
                         link: ""
                     },
                     {
@@ -826,7 +830,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=place_of_worship", "religion=jewish"],
                         link: ""
                     },
                     {
@@ -836,7 +840,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=place_of_worship", "religion=christian"],
                         link: ""
                     },
                     {
@@ -846,7 +850,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=place_of_worship", "religion=muslim"],
                         link: ""
                     },
                     {
@@ -856,7 +860,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=place_of_worship", "religion=bahai"],
                         link: ""
                     },
                     {
@@ -866,7 +870,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["historic=memorial"],
                         link: ""
                     },
                     {
@@ -876,7 +880,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["historic=monument"],
                         link: ""
                     },
                     {
@@ -886,7 +890,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["man_made=tower", "tower:type=observation"],
                         link: ""
                     },
                     {
@@ -896,7 +900,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["man_made=tower", "tower:type=communication"],
                         link: ""
                     },
                     {
@@ -906,7 +910,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["power=line"],
                         link: ""
                     },
                     {
@@ -916,7 +920,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["leisure=playground"],
                         link: ""
                     }
                 ]
@@ -932,7 +936,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["barrier=gate", "access=yes"],
                         link: ""
                     },
                     {
@@ -942,7 +946,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["barrier=gate", "access=no"],
                         link: ""
                     },
                     {
@@ -952,7 +956,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["barrier=stile"],
                         link: ""
                     },
                     {
@@ -962,7 +966,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["barrier=block"],
                         link: ""
                     },
                     {
@@ -972,7 +976,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["barrier=lift_gate"],
                         link: ""
                     },
                     {
@@ -982,7 +986,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["barrier=cattle_grid"],
                         link: ""
                     },
                     {
@@ -992,7 +996,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["barrier=fence"],
                         link: ""
                     },
                     {
@@ -1002,7 +1006,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["barrier=wall"],
                         link: ""
                     },
                     {
@@ -1012,7 +1016,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["natural=cliff"],
                         link: ""
                     }
                 ]
@@ -1038,7 +1042,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["boundary=protected_area"],
                         link: ""
                     },
                     {
@@ -1048,7 +1052,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["landuse=military"],
                         link: ""
                     },
                     {
@@ -1058,7 +1062,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["boundary=administrative", "admin_level=4", 'Relation "שטח A"'],
                         link: ""
                     },
                     {
@@ -1068,7 +1072,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["boundary=administrative", "admin_level=4", 'Relation "שטח B"'],
                         link: ""
                     },
                     {
@@ -1078,7 +1082,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["boundary=administrative", "admin_level=2", "border_type=nation"],
                         link: ""
                     },
                     {
@@ -1088,7 +1092,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["boundary=administrative", "admin_level=2", "border_type=armistice line"],
                         link: ""
                     },
                     {
@@ -1098,7 +1102,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: [],
+                        osmTags: ["boundary=administrative", "admin_level=2", "border_type=armistice line"],
                         link: ""
                     }
                 ]
@@ -1114,7 +1118,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["shop=bicycle"],
                         link: ""
                     },
                     {
@@ -1124,7 +1128,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=clinic"],
                         link: ""
                     },
                     {
@@ -1134,7 +1138,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["tourism=picnic_site"],
                         link: ""
                     },
                     {
@@ -1144,7 +1148,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["tourism=camp_site"],
                         link: ""
                     },
                     {
@@ -1154,7 +1158,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=drinking_water"],
                         link: ""
                     },
                     {
@@ -1164,7 +1168,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=cafe"],
                         link: ""
                     },
                     {
@@ -1174,7 +1178,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=restaurant"],
                         link: ""
                     },
                     {
@@ -1184,7 +1188,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=parking"],
                         link: ""
                     },
                     {
@@ -1194,7 +1198,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=fuel"],
                         link: ""
                     },
                     {
@@ -1204,7 +1208,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["shop=supermarket"],
                         link: ""
                     },
                     {
@@ -1214,7 +1218,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["tourism=guest_house"],
                         link: ""
                     },
                     {
@@ -1224,7 +1228,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["amenity=toilets"],
                         link: ""
                     },
                     {
@@ -1234,7 +1238,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["tourism=information"],
                         link: ""
                     },
                     {
@@ -1244,7 +1248,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["tourism=information", "information=guidepost"],
                         link: ""
                     }
                 ]
@@ -1260,7 +1264,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["place=...", "landuse=residential"],
                         link: ""
                     },
                     {
@@ -1270,7 +1274,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["landuse=orchard"],
                         link: ""
                     },
                     {
@@ -1280,7 +1284,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["landuse=farmland"],
                         link: ""
                     },
                     {
@@ -1290,7 +1294,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["landuse=forst"],
                         link: ""
                     },
                     {
@@ -1300,7 +1304,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["leisure=park"],
                         link: ""
                     },
                     {
@@ -1310,7 +1314,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["natural=scrub"],
                         link: ""
                     },
                     {
@@ -1320,7 +1324,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["natural=sand"],
                         link: ""
                     },
                     {
@@ -1330,7 +1334,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["landuse=cemetery"],
                         link: ""
                     },
                     {
@@ -1350,7 +1354,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "POI",
-                        osmTags: [],
+                        osmTags: ["landuse=construction"],
                         link: ""
                     }
                 ]

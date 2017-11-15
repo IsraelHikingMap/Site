@@ -381,7 +381,7 @@ export class ResourcesService {
     public legendFirstAid: string;
     public legendRegionalTrails: string;
     public legendJerusalemTrail: string;
-    public legendSeatoSeaTrail: string;
+    public legendSeaToSeaTrail: string;
     public legendGolanTrail: string;
     public legendKinneretTrail: string;
     public legendHaifaWadisTrail: string;
@@ -806,7 +806,7 @@ export class ResourcesService {
                 this.legendFirstAid = this.gettextCatalog.getString("First Aid");
                 this.legendRegionalTrails = this.gettextCatalog.getString("Regional Trails");
                 this.legendJerusalemTrail = this.gettextCatalog.getString("Jerusalem Trail");
-                this.legendSeatoSeaTrail = this.gettextCatalog.getString("Sea to Sea Trail");
+                this.legendSeaToSeaTrail = this.gettextCatalog.getString("Sea to Sea Trail");
                 this.legendGolanTrail = this.gettextCatalog.getString("Golan Trail");
                 this.legendKinneretTrail = this.gettextCatalog.getString("Kinneret Trail");
                 this.legendHaifaWadisTrail = this.gettextCatalog.getString("Haifa Wadis Trail");

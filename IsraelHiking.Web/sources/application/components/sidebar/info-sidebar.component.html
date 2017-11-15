@@ -34,9 +34,12 @@
                         <a class="cursor-pointer" (click)="toggleSectionVisibility(section)" [ngx-scroll-to]="section.id"><h4><i class="fa" [ngClass]="{'icon-plus': !isSectionVisible(section), 'icon-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
                     </div>
                     <div [hidden]="!isSectionVisible(section)">
-                        <div *ngFor="let item of section.items" class="legend-item" [ngClass]="{'legend-route': item.type == 'Way', 'legend-poi' : item.type == 'POI'}">
-                            <div class="legend-item-map" id="{{item.id}}"></div>
-                            <a [href]="item.link" [target]="'_blank'" matTooltip="{{item.osmTags.join(', ')}}" matTooltipPosition="below" class="legend-item-text">{{item.title}}</a>
+                        <div *ngFor="let item of section.items" class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
+                            <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer" id="{{item.id}}"></div>
+                            <div class="legend-item-text-container" matTooltip="{{item.osmTags.join(', ')}}" matTooltipPosition="{{item.type === 'Way' ? 'above' : 'right'}}">
+                                <a [hidden]="!item.link" [href]="item.link" [target]="'_blank'" class="legend-item-text">{{item.title}}</a>
+                                <span [hidden]="item.link" class="legend-item-text">{{item.title}}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
