@@ -17,6 +17,7 @@ import { Urls } from "../common/Urls";
 @Injectable()
 export class DataContainerService {
     public initializationFinished: Promise<any>;
+    public shareUrlId: string;
 
     constructor(private http: Http,
         private layersService: LayersService,
@@ -28,6 +29,7 @@ export class DataContainerService {
         private toastService: ToastService) {
 
         let deferred = new Deferred<any>();
+        this.shareUrlId = "";
         this.initializationFinished = deferred.promise;
         this.layersService.initializationFinished.then(
             () => this.addDataFromHash(deferred),
@@ -73,7 +75,8 @@ export class DataContainerService {
             this.http.get(Urls.urls + this.hashService.shareUrl).toPromise()
                 .then((response) => {
                     let shareUrl = response.json() as Common.ShareUrl;
-                    this.setInitialData(shareUrl.dataContainer);
+                    this.setData(shareUrl.dataContainer);
+                    this.shareUrlId = shareUrl.id;
                     this.toastService.info(shareUrl.description, shareUrl.title);
                     deferred.resolve();
                 }, () => {
@@ -88,7 +91,7 @@ export class DataContainerService {
                 .then((response) => {
                     let data = response.json() as Common.DataContainer;
                     data.baseLayer = this.hashService.getBaseLayer();
-                    this.setInitialData(data);
+                    this.setData(data);
                     deferred.resolve();
                 }, () => {
                     deferred.reject();
@@ -97,17 +100,5 @@ export class DataContainerService {
             this.layersService.addExternalBaseLayer(this.hashService.getBaseLayer());
             deferred.resolve();
         }
-    }
-
-    /**
-     * This method assums it is being called when the application loads
-     * so there's only one route in the routes layer - and it needs to be removed if other route is loaded.
-     * @param data
-     */
-    private setInitialData(data: Common.DataContainer) {
-        if (data.routes && data.routes.length !== 0) {
-            this.routesService.removeRoute(this.routesService.selectedRoute.route.properties.name);
-        }
-        this.setData(data);
     }
 }

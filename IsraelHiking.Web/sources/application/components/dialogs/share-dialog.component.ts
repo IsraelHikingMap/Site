@@ -57,6 +57,8 @@ export class ShareDialogComponent extends BaseMapComponent {
     public offroadRequest: IOffroadPostRequest;
     public showOffroadForm: boolean;
     public offroadPublicTrack: boolean;
+    public canUpdate: boolean;
+    public updateCurrentShare: boolean;
 
     @LocalStorage()
     public storedUserEmail: string = "";
@@ -82,6 +84,9 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.facebookShareAddress = "";
         this.nakebCreateHikeAddress = "";
         this.shareUrlId = "";
+        this.canUpdate = this.dataContainerService.shareUrlId &&
+            this.osmUserService.shareUrls.find(s => s.id === this.dataContainerService.shareUrlId) != null;
+        this.updateCurrentShare = false;
         this.offroadPublicTrack = false;
         this.offroadRequest = {} as IOffroadPostRequest;
         this.offroadRequest.userMail = this.storedUserEmail;
@@ -104,26 +109,18 @@ export class ShareDialogComponent extends BaseMapComponent {
         }
     }
 
-    public generateUrl = () => {
+    public uploadShareUrl = () => {
         this.isLoading = true;
-        this.offroadRequest.title = this.title;
-        this.offroadRequest.description = this.description;
-        var dataToSave = this.dataContainerService.getData();
-        for (let routeIndex = dataToSave.routes.length - 1; routeIndex >= 0; routeIndex--) {
-            let route = dataToSave.routes[routeIndex];
-            if (route.segments.length === 0 && route.markers.length === 0) {
-                dataToSave.routes.splice(routeIndex, 1);
-            }
-        }
-        var shareUrl = {
-            title: this.title,
-            description: this.description,
-            dataContainer: dataToSave,
-            osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
-        } as Common.ShareUrl;
-        this.osmUserService.createShareUrl(shareUrl).then((shareUrlResponse) => {
+        let shareUrl = this.createShareUrlObject();
+
+        let promise = this.updateCurrentShare
+            ? this.osmUserService.updateShareUrl(shareUrl)
+            : this.osmUserService.createShareUrl(shareUrl);
+
+        promise.then((shareUrlResponse) => {
             let data = shareUrlResponse.json() as Common.ShareUrl;
             this.shareUrlId = data.id;
+            this.dataContainerService.shareUrlId = this.shareUrlId;
             this.shareAddress = this.osmUserService.getUrlFromShareId(data);
             this.imageUrl = this.osmUserService.getImageFromShareId(data);
             let escaped = encodeURIComponent(this.shareAddress);
@@ -137,7 +134,31 @@ export class ShareDialogComponent extends BaseMapComponent {
         });
     }
 
+    private createShareUrlObject = (): Common.ShareUrl => {
+        if (this.routesService.routes.length === 1 && !this.routesService.routes[0].route.properties.description) {
+            this.routesService.routes[0].route.properties.description = this.description;
+        }
+        var dataToSave = this.dataContainerService.getData();
+        for (let routeIndex = dataToSave.routes.length - 1; routeIndex >= 0; routeIndex--) {
+            let route = dataToSave.routes[routeIndex];
+            if (route.segments.length === 0 && route.markers.length === 0) {
+                dataToSave.routes.splice(routeIndex, 1);
+            }
+        }
+
+        var shareUrl = {
+            id: this.dataContainerService.shareUrlId,
+            title: this.title,
+            description: this.description,
+            dataContainer: dataToSave,
+            osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
+        } as Common.ShareUrl;
+        return shareUrl;
+    }
+
     public sendToOffroad = () => {
+        this.offroadRequest.title = this.title;
+        this.offroadRequest.description = this.description;
         this.storedUserEmail = this.offroadRequest.userMail;
         if (this.routesService.selectedRoute == null) {
             this.toastService.warning(this.resources.pleaseSelectARoute);

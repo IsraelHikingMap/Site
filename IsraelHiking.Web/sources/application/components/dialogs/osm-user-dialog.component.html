@@ -111,7 +111,7 @@
                                 <div fxFlex>
                                     <div fxLayout="column" fxLayoutAlign="space-between stretch">
                                         <button [hidden]="editMode" mat-button (click)="editMode = true" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
-                                        <button [hidden]="!editMode" mat-button (click)="editMode = false; userService.updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
+                                        <button [hidden]="!editMode" mat-button (click)="editMode = false; userService.updateShareUrl(shareUrl);" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
                                     </div>
                                 </div>
                             </div>

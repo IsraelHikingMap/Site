@@ -211,6 +211,7 @@ export class ResourcesService {
     public suggestAsPublicTrack: string;
     public createNakebHike: string;
     public flowers: string;
+    public updateCurrentShare: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -635,6 +636,7 @@ export class ResourcesService {
                 this.suggestAsPublicTrack = this.gettextCatalog.getString("Suggest as public track");
                 this.createNakebHike = this.gettextCatalog.getString("Create new hike in Nakeb");
                 this.flowers = this.gettextCatalog.getString("Flowers");
+                this.updateCurrentShare = this.gettextCatalog.getString("Update current share");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

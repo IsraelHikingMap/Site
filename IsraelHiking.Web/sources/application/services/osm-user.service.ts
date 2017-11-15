@@ -198,10 +198,16 @@ export class OsmUserService {
     }
     
     public createShareUrl = (shareUrl: Common.ShareUrl): Promise<Response> => {
-        return this.http.post(Urls.urls, shareUrl, this.authorizationService.getHeader()).toPromise();
+        let promise = this.http.post(Urls.urls, shareUrl, this.authorizationService.getHeader()).toPromise();
+        promise.then(response => {
+            let createdShareUrl = response.json() as Common.ShareUrl;
+            this.shareUrls.splice(0, 0, createdShareUrl);
+            this.shareUrlsChanged.next();
+        });
+        return promise;
     }
 
-    public updateShareUrl = (shareUrl: Common.ShareUrl): Promise<{}> => {
+    public updateShareUrl = (shareUrl: Common.ShareUrl): Promise<Response> => {
         return this.http.put(Urls.urls + shareUrl.id, shareUrl, this.authorizationService.getHeader()).toPromise();
     }
 

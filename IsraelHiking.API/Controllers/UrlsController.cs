@@ -135,6 +135,8 @@ namespace IsraelHiking.API.Controllers
             }
             shareUrlFromDatabase.Title = shareUrl.Title;
             shareUrlFromDatabase.Description = shareUrl.Description;
+            shareUrlFromDatabase.DataContainer = shareUrl.DataContainer;
+
             await _repository.Update(shareUrlFromDatabase);
             return Ok(shareUrlFromDatabase);
         }
