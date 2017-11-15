@@ -12,10 +12,11 @@ import { FileService } from "../../services/file.service";
 import { IPointOfInterestExtended, PoiService, IRating, IRater } from "../../services/poi.service";
 import { IconsService } from "../../services/icons.service";
 import { MapService } from "../../services/map.service";
+import { RouteLayerFactory } from "../../services/layers/routelayers/route-layer.factory";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
 import { ImageDialogCompnent } from "../dialogs/image-dialog.component";
-import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
+import { IMarkerWithData, EditModeString } from "../../services/layers/routelayers/iroute.layer";
 import * as Common from "../../common/IsraelHiking";
 
 
@@ -52,7 +53,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         private osmUserService: OsmUserService,
         private fileService: FileService,
         private poiService: PoiService,
-        private mapService: MapService) {
+        private mapService: MapService,
+        private routeLayerFactory: RouteLayerFactory) {
         super(resources, http, applicationRef, elevationProvider);
         this.editMode = false;
         this.isLoading = false;
@@ -185,8 +187,12 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public addPointToRoute() {
-        if (this.routesService.selectedRoute == null) {
-            return;
+        if (this.routesService.selectedRoute == null && this.routesService.routes.length > 0) {
+            this.routesService.changeRouteState(this.routesService.routes[0]);
+        }
+        if (this.routesService.routes.length === 0) {
+            let properties = this.routeLayerFactory.createRoute(this.routesService.createRouteName()).properties;
+            this.routesService.addRoute({ properties: properties, segments: [], markers: [] });
         }
         let editMode = this.routesService.selectedRoute.getEditMode();
         this.routesService.selectedRoute.setHiddenState();

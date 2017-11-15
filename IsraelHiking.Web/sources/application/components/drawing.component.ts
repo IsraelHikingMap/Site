@@ -53,10 +53,17 @@ export class DrawingComponent extends BaseMapComponent {
     public setEditMode(editMode: EditMode, e: Event) {
         this.suppressEvents(e);
         let selectedRoute = this.routesService.selectedRoute;
-        if (selectedRoute == null) {
+        if (selectedRoute == null && this.routesService.routes.length > 0) {
+            this.routesService.changeRouteState(this.routesService.routes[0]);
+            selectedRoute = this.routesService.selectedRoute;
+        }
+        if (selectedRoute == null && this.routesService.routes.length === 0) {
             let properties = this.routeLayerFactory.createRoute(this.routesService.createRouteName()).properties;
             this.routesService.addRoute({ properties: properties, segments: [], markers: [] });
             this.routesService.selectedRoute.setEditMode(editMode);
+            return;
+        }
+        if (selectedRoute == null) {
             return;
         }
         if (this.getEditMode() === editMode) {
