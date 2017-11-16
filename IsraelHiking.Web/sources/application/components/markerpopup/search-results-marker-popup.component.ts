@@ -32,10 +32,9 @@ export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent 
     }
 
     public selectRoute = (routeData: Common.RouteData): void => {
-        console.log(routeData);
-        throw new Error("This function must be assigned by containing layer!");
+        throw new Error(`This function must be assigned by containing layer! Route: ${routeData.name}`);
     };
-    public clearSelectedRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
+    public convertToRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
 
     public setIdSourceAndType(id: string, source: string, type: string) {
         this.id = id;
@@ -46,13 +45,5 @@ export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent 
             this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
             this.selectRoute(this.poiExtended.dataContainer.routes[0]);
         });
-    }
-
-    public convertToRoute = () => {
-        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes)) as Common.RouteData[];
-        this.mapService.routesJsonToRoutesObject(routesCopy);
-        this.routesService.setData([routesCopy[0]]);
-        this.clearSelectedRoute();
-        this.marker.closePopup();
     }
 }

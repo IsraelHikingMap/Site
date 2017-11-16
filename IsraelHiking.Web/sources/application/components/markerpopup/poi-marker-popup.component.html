@@ -66,8 +66,8 @@
         <div fxFlex [hidden]="isRoute()">
             <button mat-button fxFill (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Convert POI to point"><i class="fa icon-plus"></i></button>
         </div>
-        <div fxFlex [hidden]="!isRoute()">
-            <button mat-button fxFill (click)="clearSelectedRoute()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Clear selected route"><i class="fa icon-eye-slash"></i></button>
+        <div fxFlex>
+            <button mat-button fxFill (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Clear and close"><i class="fa icon-eye-slash"></i></button>
         </div>
         <div fxFlex [hidden]="source !== 'Off-road'">
             <a mat-button [href]="getOffRoadUrl()" fxFill [target]="'_blank'" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Open in off-road"><i class="fa icon-off-road"></i></a>

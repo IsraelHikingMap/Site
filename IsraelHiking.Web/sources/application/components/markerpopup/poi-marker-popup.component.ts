@@ -82,7 +82,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         console.log(routeData);
         throw new Error("This function must be assigned by containing layer!");
     };
-    public clearSelectedRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
+    public clear = (): void => { throw new Error("This function must be assigned by the containing layer!") };
 
     public getDescrition(): string[] {
         if (this.description) {
@@ -182,8 +182,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         let routeData = routesCopy[0];
         routeData.description = this.description;
         this.routesService.setData([routeData]);
-        this.clearSelectedRoute();
-        this.marker.closePopup();
+        this.clear();
     }
 
     public addPointToRoute() {

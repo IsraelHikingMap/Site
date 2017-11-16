@@ -188,12 +188,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             this.toastService.warning(this.resources.pleaseSelectTo);
             return;
         }
-        this.routerService.getRoute(this.fromContext.selectedSearchResults.location, this.toContext.selectedSearchResults.location, this.routingType).then((response: Common.RouteSegmentData[]) => {
+        this.routerService.getRoute(this.fromContext.selectedSearchResults.location, this.toContext.selectedSearchResults.location, this.routingType).then((routeSegments: Common.RouteSegmentData[]) => {
             this.readonlyLayer.clearLayers();
-            for (let segment of response) {
-                let polyLine = L.polyline(segment.latlngs, this.getPathOprtions());
-                this.readonlyLayer.addLayer(polyLine);
-            }
+            this.mapService.updateReadOnlyLayer(this.readonlyLayer, { segments: routeSegments, markers: [] } as Common.RouteData);
             var markerFrom = L.marker(this.fromContext.selectedSearchResults.location, { icon: IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
             markerFrom.title = this.fromContext.selectedSearchResults.displayName;
             var markerTo = L.marker(this.toContext.selectedSearchResults.location, { icon: IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;
@@ -208,7 +205,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                                 { latlng: markerFrom.getLatLng(), title: markerFrom.title },
                                 { latlng: markerTo.getLatLng(), title: markerTo.title }
                             ],
-                            segments: response
+                            segments: routeSegments
                         }
                     ]
                 } as Common.DataContainer);
@@ -278,9 +275,5 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             }, () => {
                 this.toastService.warning(this.resources.unableToGetSearchResults);
             });
-    }
-
-    private getPathOprtions = (): L.PathOptions => {
-        return { opacity: 1, color: "Blue", weight: 3 } as L.PathOptions;
     }
 }
