@@ -24,8 +24,7 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
         this.colors = this.routeLayerFactory.colors;
     }
 
-    public setIsAdvanced(isAdvanced: boolean)
-    {
+    public setIsAdvanced(isAdvanced: boolean) {
         this.isAdvanced = isAdvanced;
     }
 
@@ -36,8 +35,7 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
 
     public saveRoute(e: Event): boolean {
         this.suppressEvents(e);
-        if (this.isRouteNameAlreadyInUse())
-        {
+        if (this.isRouteNameAlreadyInUse()) {
             this.toastService.error(this.resources.routeNameAlreadyInUse);
             return false;
         }
@@ -59,4 +57,5 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public saveRouteToFile(e: Event) { }
     public moveToRoute = (e: Event) => { }
     public deleteRoute(e: Event) { }
+    public makeAllPointsEditable = () => { }
 }
