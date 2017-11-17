@@ -47,50 +47,56 @@ export class MapService {
         marker.bindTooltip(controlDiv, { permanent: true, direction: "bottom" } as L.TooltipOptions);
     }
 
-    public updateReadOnlyLayer = (readOnlyLayer: L.LayerGroup, routeData: Common.RouteData) => {
+    public updateReadOnlyLayer = (readOnlyLayer: L.LayerGroup, routesData: Common.RouteData[]) => {
         readOnlyLayer.clearLayers();
 
-        if (routeData == null || routeData.segments.length === 0) {
+        if (routesData == null || routesData.length === 0) {
             return;
         }
-        let groupedLatLngs = this.getGroupedLatLngForAntPath(routeData.segments);
-        for (let group of groupedLatLngs) {
-            let polyLine = L.polyline(group,
-                {
-                    opacity: 1,
-                    color: "Blue",
-                    weight: 3,
-                    dashArray: "30 10",
-                    className: "segment-readonly-indicator"
-                } as L.PathOptions);
-            readOnlyLayer.addLayer(polyLine);
+        for (let routeData of routesData) {
+            if (routeData.segments.length === 0) {
+                continue;
+            }
+            let groupedLatLngs = this.getGroupedLatLngForAntPath(routeData.segments);
+            for (let group of groupedLatLngs) {
+                let polyLine = L.polyline(group,
+                    {
+                        opacity: 1,
+                        color: "Blue",
+                        weight: 3,
+                        dashArray: "30 10",
+                        className: "segment-readonly-indicator"
+                    } as L.PathOptions);
+                readOnlyLayer.addLayer(polyLine);
+            }
+            for (let markerData of routeData.markers) {
+                let marker = L.marker(markerData.latlng,
+                    {
+                        draggable: false,
+                        clickable: false,
+                        icon: IconsService.createPoiDefaultMarkerIcon("blue")
+                    } as L.MarkerOptions);
+                marker.bindTooltip(markerData.title, { permanent: true, direction: "bottom" } as L.TooltipOptions);
+                readOnlyLayer.addLayer(marker);
+            }
         }
+        let firstPoint = _.first(_.first(_.first(routesData).segments).latlngs);
 
-        readOnlyLayer.addLayer(L.marker(_.first(_.first(routeData.segments).latlngs),
+        readOnlyLayer.addLayer(L.marker(firstPoint,
             {
                 opacity: 1,
                 draggable: false,
                 clickable: false,
                 icon: IconsService.createRoundIcon("green")
             }));
-        readOnlyLayer.addLayer(L.marker(_.last(_.last(routeData.segments).latlngs),
+        let lastPoint = _.last(_.last(_.last(routesData).segments).latlngs);
+        readOnlyLayer.addLayer(L.marker(lastPoint,
             {
                 opacity: 1,
                 draggable: false,
                 clickable: false,
                 icon: IconsService.createRoundIcon("red")
             }));
-
-        for (let markerData of routeData.markers) {
-            let marker = L.marker(markerData.latlng,
-                {
-                    draggable: false,
-                    clickable: false,
-                    icon: IconsService.createPoiDefaultMarkerIcon("blue")
-                } as L.MarkerOptions);
-            marker.bindTooltip(markerData.title, { permanent: true, direction: "bottom" } as L.TooltipOptions);
-            readOnlyLayer.addLayer(marker);
-        }
     }
 
     /**

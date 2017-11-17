@@ -78,9 +78,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         });
     }
 
-    public selectRoute = (routeData: Common.RouteData): void => {
-        console.log(routeData);
-        throw new Error("This function must be assigned by containing layer!");
+    public selectRoutes = (routesData: Common.RouteData[]): void => {
+        throw new Error(`This function must be assigned by containing layer! ${routesData[0].name}`);
     };
     public clear = (): void => { throw new Error("This function must be assigned by the containing layer!") };
 
@@ -179,9 +178,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public convertToRoute() {
         let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes))  as Common.RouteData[];
         this.mapService.routesJsonToRoutesObject(routesCopy);
-        let routeData = routesCopy[0];
-        routeData.description = this.description;
-        this.routesService.setData([routeData]);
+        routesCopy[0].description = this.description;
+        this.routesService.setData(routesCopy);
         this.clear();
     }
 
@@ -210,7 +208,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         if (this.poiExtended &&
             this.extendedDataArrivedTimeStamp != null &&
             Date.now() - this.extendedDataArrivedTimeStamp.getTime() < PoiMarkerPopupComponent.THREE_HOURES) {
-            this.selectRoute(this.poiExtended.dataContainer.routes[0]);
+            this.selectRoutes(this.poiExtended.dataContainer.routes);
             return;
         }
         this.isLoading = true;
@@ -218,7 +216,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.extendedDataArrivedTimeStamp = new Date();
             let poiExtended = response.json() as IPointOfInterestExtended;
             this.initFromPointOfInterestExtended(poiExtended);
-            this.selectRoute(this.poiExtended.dataContainer.routes[0]);
+            this.selectRoutes(this.poiExtended.dataContainer.routes);
             this.isLoading = false;
         }, () => {
             this.isLoading = false;

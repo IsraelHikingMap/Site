@@ -93,7 +93,10 @@ namespace IsraelHiking.API.Services.Poi
                 coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
             }
             poiItem.DataContainer = await  _dataContainerConverterService.ToDataContainer(new FeatureCollection(new Collection<IFeature> { feature }).ToBytes(), poiItem.Title + ".geojson");
-            foreach (var coordinate in poiItem.DataContainer.Routes.SelectMany(r => r.Segments).SelectMany(s => s.Latlngs))
+            foreach (var coordinate in poiItem.DataContainer.Routes
+                .SelectMany(r => r.Segments)
+                .SelectMany(s => s.Latlngs)
+                .Where(l => l.Alt == null || l.Alt.Value == 0))
             {
                 coordinate.Alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(coordinate));
             }

@@ -190,7 +190,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
         this.routerService.getRoute(this.fromContext.selectedSearchResults.location, this.toContext.selectedSearchResults.location, this.routingType).then((routeSegments: Common.RouteSegmentData[]) => {
             this.readonlyLayer.clearLayers();
-            this.mapService.updateReadOnlyLayer(this.readonlyLayer, { segments: routeSegments, markers: [] } as Common.RouteData);
+            this.mapService.updateReadOnlyLayer(this.readonlyLayer, [{ segments: routeSegments, markers: [] } as Common.RouteData]);
             var markerFrom = L.marker(this.fromContext.selectedSearchResults.location, { icon: IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
             markerFrom.title = this.fromContext.selectedSearchResults.displayName;
             var markerTo = L.marker(this.toContext.selectedSearchResults.location, { icon: IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;

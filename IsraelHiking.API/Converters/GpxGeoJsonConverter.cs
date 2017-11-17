@@ -132,6 +132,7 @@ namespace IsraelHiking.API.Converters
             var description = GetFeatureDescription(multiLineStringFeature);
             var tracks = new List<trkType>();
             var currentTrack = new trkType { name = name, desc = description, trkseg = new trksegType[0]};
+            var nameIndex = 1;
             foreach (var lineString in multiLineString.Geometries.OfType<ILineString>().Where(ls => ls.Coordinates.Any()))
             {
                 var currentSegment = new trksegType
@@ -155,7 +156,8 @@ namespace IsraelHiking.API.Converters
                 {
                     // need to start a new track.
                     tracks.Add(currentTrack);
-                    currentTrack = new trkType {name = name, desc = description, trkseg = new[] {currentSegment}};
+                    currentTrack = new trkType {name = name + " " + nameIndex, desc = description, trkseg = new[] {currentSegment}};
+                    nameIndex++;
                 }
             }
             tracks.Add(currentTrack);

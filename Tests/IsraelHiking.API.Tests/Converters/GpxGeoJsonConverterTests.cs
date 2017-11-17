@@ -1,5 +1,6 @@
 ﻿using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
+using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -14,7 +15,10 @@ namespace IsraelHiking.API.Tests.Converters
         {
             var converter = new GpxGeoJsonConverter();
             var geojson = new FeatureCollection();
-            var table = new AttributesTable();
+            var table = new AttributesTable
+            {
+                {FeatureAttributes.NAME, FeatureAttributes.NAME}
+            };
             geojson.Features.Add(new Feature(new Point(new Coordinate(1, 1)), table));
             geojson.Features.Add(new Feature(new MultiPoint(new[] { new Point(new Coordinate(2,2)) as IPoint }), table));
             geojson.Features.Add(new Feature(new Polygon(new LinearRing(new [] { new Coordinate(3,3), new Coordinate(4,4), new Coordinate(5,5), new Coordinate(3,3) })), table));
@@ -32,6 +36,8 @@ namespace IsraelHiking.API.Tests.Converters
             Assert.AreEqual(2, gpx.wpt.Length);
             Assert.AreEqual(3, gpx.rte.Length);
             Assert.AreEqual(2, gpx.trk.Length);
+            Assert.AreNotEqual(gpx.trk[0].name, gpx.trk[1].name);
+            Assert.AreEqual(FeatureAttributes.NAME + " 1", gpx.trk[1].name);
         }
     }
 }
