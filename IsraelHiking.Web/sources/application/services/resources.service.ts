@@ -212,6 +212,7 @@ export class ResourcesService {
     public createNakebHike: string;
     public flowers: string;
     public updateCurrentShare: string;
+    public generateMarkersForAllPoints: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -637,6 +638,7 @@ export class ResourcesService {
                 this.createNakebHike = this.gettextCatalog.getString("Create new hike in Nakeb");
                 this.flowers = this.gettextCatalog.getString("Flowers");
                 this.updateCurrentShare = this.gettextCatalog.getString("Update current share");
+                this.generateMarkersForAllPoints = this.gettextCatalog.getString("Generate markers for all route points");
                 // Toasts: Errors/Warnings/Success
                 this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
                 this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

@@ -62,6 +62,7 @@ export interface IRouteLayer {
     raiseDataChanged(): void;
     getData(): Common.RouteData;
     getBounds(): L.LatLngBounds;
+    makeAllPointsEditable(): void;
 
     getLastSegment(): IRouteSegment;
     getLastLatLng(): L.LatLng;

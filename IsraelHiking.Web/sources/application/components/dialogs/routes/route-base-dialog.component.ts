@@ -50,6 +50,12 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
         return this.routesService.isNameAvailable(this.routeProperties.name) === false;
     }
 
+    public getRoutingIcon = () => {
+        return this.routeProperties.isRoutingPerPoint
+            ? "icon-routing-local"
+            : "icon-routing-global";
+    }
+
     public saveRouteToFile(e: Event) { }
     public moveToRoute = (e: Event) => { }
     public deleteRoute(e: Event) { }

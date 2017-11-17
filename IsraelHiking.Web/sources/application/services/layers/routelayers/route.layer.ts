@@ -220,6 +220,35 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         return bounds;
     }
 
+    public makeAllPointsEditable = () => {
+        if (this.route.segments.length === 0) {
+            return;
+        }
+        let editMode = this.getEditMode();
+        this.setHiddenState();
+        let segments = [];
+        for (let segment of this.route.segments) {
+            if (segment.latlngs.length === 0) {
+                continue;
+            }
+            let previousPoint = segment.latlngs[0];
+            for (let latLng of segment.latlngs) {
+                if (previousPoint.equals(latLng)) {
+                    continue;
+                }
+                segments.push({
+                    latlngs: [previousPoint, latLng],
+                    routingType: segment.routingType,
+                    routePoint: latLng
+                } as Common.RouteSegmentData);
+                previousPoint = latLng;
+            }
+        }
+        this.route.segments = segments;
+        this.raiseDataChanged();
+        this.setEditMode(editMode);
+    }
+
     getLastSegment(): IRouteSegment {
         return this.route.segments[this.route.segments.length - 1];
     }

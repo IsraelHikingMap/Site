@@ -48,9 +48,6 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         if (!super.saveRoute(e)) {
             return false;
         }
-        if (this.routeProperties.isVisible !== this.routeLayer.route.properties.isVisible) {
-            this.routesService.changeRouteState(this.routeLayer);
-        }
         this.routeLayer.setRouteProperties(this.routeProperties);
         return true;
     }
@@ -86,9 +83,8 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         this.suppressEvents(e);
     }
 
-    public getRoutingIcon = () => {
-        return this.routeProperties.isRoutingPerPoint
-            ? "icon-routing-local"
-            : "icon-routing-global";
+    public makeAllPointsEditable = () => {
+        this.routeLayer.makeAllPointsEditable();
+        this.toastService.info(this.resources.dataUpdatedSuccefully);
     }
 }

@@ -44,17 +44,20 @@
     </div>
     <div mat-dialog-actions>
         <div fxLayout="row" fxFill>
-            <div fxFlex="20">
+            <div fxFlex>
                 <button type="button" mat-button [hidden]="isNew || !isAdvanced" (click)="saveRouteToFile($event)" matTooltip="{{resources.saveRouteToFile}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Save route to file" fxFill><i class="fa fa-lg icon-floppy-o"></i></button>
             </div>
-            <div fxFlex="20">
+            <div fxFlex>
                 <button type="button" mat-button [hidden]="isNew || !isAdvanced" (click)="moveToRoute($event)" matTooltip="{{resources.moveToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Move to route" fxFill><i class="fa fa-lg icon-crosshairs"></i></button>
             </div>
-            <div fxFlex="20">
-                <button type="button" mat-button [hidden]="isNew || !isAdvanced" (click)="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" class="btn btn-default" matTooltip="{{resources.toggleRoutingPerSegment}}" matTooltipPosition="above" [ngClass]="{'active': routeProperties.isRoutingPerPoint}" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Toggle route per point" fxFill><i class="fa" [ngClass]="{ 'icon-routing-local': routeProperties.isRoutingPerPoint, 'icon-routing-global': !routeProperties.isRoutingPerPoint}"></i></button>
+            <div fxFlex>
+                <button type="button" mat-button [hidden]="isNew || !isAdvanced" (click)="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" matTooltip="{{resources.toggleRoutingPerSegment}}" matTooltipPosition="above" [ngClass]="{'active': routeProperties.isRoutingPerPoint}" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Toggle route per point" fxFill><i class="fa" [ngClass]="getRoutingIcon()"></i></button>
             </div>
-            <div fxFlex="20">
-                <button matDialogClose type="button" mat-button [hidden]="isNew" (click)="deleteRoute($event)" class="btn btn-danger" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Delete route" fxFill><i class="fa fa-lg icon-trash"></i></button>
+            <div fxFlex>
+                <button type="button" mat-button [hidden]="isNew || !isAdvanced" (click)="makeAllPointsEditable()" matTooltip="{{resources.generateMarkersForAllPoints}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Make all points editable" fxFill><i class="fa fa-lg icon-map-marker-group"></i></button>
+            </div>
+            <div fxFlex>
+                <button matDialogClose type="button" mat-button [hidden]="isNew" (click)="deleteRoute($event)" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsEvent="Delete route" fxFill><i class="fa fa-lg icon-trash"></i></button>
             </div>
             <div fxFlex>
                 <button matDialogClose type="button" mat-button (click)="saveRoute($event)"  matTooltip="{{resources.save}}" matTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
