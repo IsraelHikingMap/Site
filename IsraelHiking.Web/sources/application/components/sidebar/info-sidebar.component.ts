@@ -421,7 +421,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendFootPath,
-                        latlng: L.latLng(30.5362, 34.781),
+                        latlng: L.latLng(30.5360, 34.781),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
@@ -431,7 +431,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     },
                     {
                         title: this.resources.legendBicyclePath,
-                        latlng: L.latLng(31.633, 35.348),
+                        latlng: L.latLng(31.3422, 34.6253),
                         zoom: 16,
                         id: "_" + id++,
                         map: null,
