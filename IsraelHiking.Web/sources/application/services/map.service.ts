@@ -80,7 +80,11 @@ export class MapService {
                 readOnlyLayer.addLayer(marker);
             }
         }
-        let firstPoint = _.first(_.first(_.first(routesData).segments).latlngs);
+        let firstRoute = _.first(routesData);
+        if (firstRoute.segments.length === 0) {
+            return;
+        }
+        let firstPoint = _.first(_.first(firstRoute.segments).latlngs);
 
         readOnlyLayer.addLayer(L.marker(firstPoint,
             {
