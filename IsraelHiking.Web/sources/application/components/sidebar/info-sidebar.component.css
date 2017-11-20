@@ -20,6 +20,8 @@
 .legend-item-text-container {
     padding-left: 10px;
     padding-right: 10px;
+    touch-action: inherit !important;
+    -webkit-user-drag: inherit !important;
 }
 
 .legend-item-text {

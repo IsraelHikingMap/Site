@@ -113,8 +113,12 @@ export class InfoSidebarComponent extends BaseMapComponent {
                     dragging: false,
                     scrollWheelZoom: false,
                     doubleClickZoom: false,
+                    touchZoom: false,
+                    tap: false,
+                    keyboard: false,
+                    inertia: false,
                     layers: [L.tileLayer(this.layersService.selectedBaseLayer.address)]
-                });
+                } as L.MapOptions);
         }, 200);
     }
 
