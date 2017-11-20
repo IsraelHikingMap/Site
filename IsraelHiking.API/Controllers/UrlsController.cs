@@ -80,6 +80,11 @@ namespace IsraelHiking.API.Controllers
         public async Task<IActionResult> GetShareUrlForUser()
         {
             var shareUrls = await _repository.GetUrlsByUser(User.Identity.Name);
+            foreach (var shareUrl in shareUrls)
+            {
+                // reduce response size
+                shareUrl.DataContainer = null;
+            }
             return Ok(shareUrls.OrderByDescending(d => d.CreationDate));
         }
 
@@ -135,7 +140,11 @@ namespace IsraelHiking.API.Controllers
             }
             shareUrlFromDatabase.Title = shareUrl.Title;
             shareUrlFromDatabase.Description = shareUrl.Description;
-            shareUrlFromDatabase.DataContainer = shareUrl.DataContainer;
+            if (shareUrl.DataContainer != null)
+            {
+                // update can be made without the datacontainer data
+                shareUrlFromDatabase.DataContainer = shareUrl.DataContainer;
+            }
 
             await _repository.Update(shareUrlFromDatabase);
             return Ok(shareUrlFromDatabase);
