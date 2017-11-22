@@ -1,5 +1,5 @@
 {
-    "dependencies": {
+  "dependencies": {
     "@angular/animations": "4.4.6",
     "@angular/cdk": "2.0.0-beta.11",
     "@angular/cli": "1.4.4",
@@ -28,7 +28,7 @@
     "ngx-clipboard": "8.1.1",
     "ngx-pagination": "3.0.1",
     "ngx-progressbar": "2.0.8",
-    "ngx-store": "1.2.0",
+    "ngx-store": "1.2.3",
     "osm-auth": "1.0.2",
     "rxjs": "5.5.2",
     "x2js": "3.1.1",
