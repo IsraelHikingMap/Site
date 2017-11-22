@@ -1,5 +1,5 @@
 ﻿import { HttpModule, Http, Response, ResponseOptions, XHRBackend, RequestMethod } from "@angular/http";
-import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
+import { TestBed, inject, fakeAsync, flushMicrotasks, tick } from "@angular/core/testing";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import * as L from "leaflet";
 import * as X2JS from "x2js";
@@ -88,7 +88,7 @@ describe("OSM User Service", () => {
 
         osmUserService.login();
         flushMicrotasks();
-
+        tick();
         expect(osmUserService.isLoggedIn()).toBeTruthy();
         expect(osmUserService.shareUrls.length).toBe(1);
         expect(osmUserService.traces.length).toBe(1);
@@ -116,6 +116,7 @@ describe("OSM User Service", () => {
             fail();
         }, () => {
             flushMicrotasks();
+            tick();
             expect(osmUserService.isLoggedIn()).toBe(true);
             expect(osmUserService.shareUrls.length).toBe(0);
             expect(osmUserService.traces.length).toBe(0);    

@@ -1,4 +1,4 @@
-﻿import { TestBed, inject, flushMicrotasks, fakeAsync } from "@angular/core/testing";
+﻿import { TestBed, inject, flushMicrotasks, fakeAsync, tick } from "@angular/core/testing";
 import { HttpModule, Response, ResponseOptions, XHRBackend } from "@angular/http";
 import { MockBackend, MockConnection } from "@angular/http/testing";
 import * as L from "leaflet";
@@ -69,6 +69,7 @@ describe("SnappingService", () => {
 
         mapServiceMock.mapService.map.setView(L.latLng(0, 0), 14);
         flushMicrotasks();
+        tick();
 
         let snap = snappingService.snapTo(L.latLng(2, 1));
         expect(snap.polyline).not.toBeNull();
@@ -95,6 +96,7 @@ describe("SnappingService", () => {
 
         mapServiceMock.mapService.map.setView(L.latLng(1, 1), 14);
         flushMicrotasks();
+        tick();
 
         let snap = snappingService.snapTo(L.latLng(2, 1));
         expect(snap.polyline).not.toBeNull();
@@ -122,6 +124,7 @@ describe("SnappingService", () => {
 
         mapServiceMock.mapService.map.setView(L.latLng(0, 0), 14);
         flushMicrotasks();
+        tick();
 
         let snap = snappingService.snapToPoint(L.latLng(2, 1));
         expect(snap.markerData).not.toBeNull();
@@ -136,6 +139,7 @@ describe("SnappingService", () => {
 
         mapServiceMock.mapService.map.setView(L.latLng(2, 2), 14);
         flushMicrotasks();
+        tick();
 
         let snap = snappingService.snapTo(L.latLng(0, 0));
         expect(snap.polyline).toBeNull();
