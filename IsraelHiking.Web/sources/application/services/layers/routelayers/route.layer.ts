@@ -79,6 +79,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         this.route.properties = properties;
         this.currentState.clear();
         this.currentState.initialize();
+        this.raiseDataChanged();
     }
 
     public snapToRoute(latlng: L.LatLng): ISnappingResponse {

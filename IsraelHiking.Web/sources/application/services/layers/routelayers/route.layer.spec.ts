@@ -83,9 +83,12 @@ describe("RouteLayer", () => {
     });
 
     it("Should update route properties when requested", () => {
+        spyOn(routeLayer.dataChanged, "next");
+
         routeLayer.setRouteProperties({ pathOptions: { color: "red" } as L.PathOptions } as IRouteProperties);
 
         expect(routeLayer.route.properties.pathOptions.color).toBe("red");
+        expect(routeLayer.dataChanged.next).toHaveBeenCalled();
     });
 
     it("Should use snapping service on route segments", () => {
