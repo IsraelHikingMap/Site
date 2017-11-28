@@ -208,6 +208,7 @@ export class ResourcesService {
     public iHaveReadAndAgree: string;
     public submit: string;
     public esri: string;
+    public mapi2015: string;
     public suggestAsPublicTrack: string;
     public createNakebHike: string;
     public flowers: string;
@@ -634,6 +635,7 @@ export class ResourcesService {
                 this.iHaveReadAndAgree = this.gettextCatalog.getString("I have read and agree to the terms");
                 this.submit = this.gettextCatalog.getString("Submit");
                 this.esri = this.gettextCatalog.getString("ESRI");
+                this.mapi2015 = this.gettextCatalog.getString("MAPI: Orthophoto 2015");
                 this.suggestAsPublicTrack = this.gettextCatalog.getString("Suggest as public track");
                 this.createNakebHike = this.gettextCatalog.getString("Create new hike in Nakeb");
                 this.flowers = this.gettextCatalog.getString("Flowers");

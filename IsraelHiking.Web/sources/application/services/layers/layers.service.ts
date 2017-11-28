@@ -31,6 +31,14 @@ export class LayersService {
     public static ISRAEL_MTB_MAP = "Israel MTB Map";
     public static ISRAEL_HIKING_MAP = "Israel Hiking Map";
     public static ESRI = "ESRI";
+    public static MAPI_2015 = "MAPI 2015";
+    public static DEFAULT_LAYERS = [
+        LayersService.ISRAEL_MTB_MAP,
+        LayersService.ISRAEL_HIKING_MAP,
+        LayersService.ESRI,
+        LayersService.MAPI_2015,
+    ];
+
     public static MIN_ZOOM = 7;
     public static MAX_NATIVE_ZOOM = 16;
 
@@ -42,6 +50,8 @@ export class LayersService {
     private static TRAILS_ATTRIBUTION = "Trail " + LayersService.ATTRIBUTION;
     private static ESRI_ADDRESS = "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
     private static ESRI_ATTRIBUTION = "DigitalGlobe, GeoEye, i-cubed, USDA, USGS, AEX, Getmapping, Aerogrid, IGN, IGP, swisstopo, and the GIS User Community";
+    private static MAPI_2015_ADDRESS = "https://tiles1.arcgis.com/tiles/NQHNcH6HFanEssSJ/arcgis/rest/services/אורתופוטו_2015/MapServer/tile/{z}/{y}/{x}";
+    private static MAPI_2015_ATTRIBUTION = "Survey of Israel";
     private static BASE_LAYERS_KEY = "BaseLayers";
     private static OVERLAYS_KEY = "Overlays";
     private static ACTIVE_BASELAYER_KEY = "ActiveBaseLayer";
@@ -56,7 +66,7 @@ export class LayersService {
     private activeOverlayKeys: string[] = [];
     @LocalStorage()
     private selectedBaseLayerKey: string = LayersService.ISRAEL_HIKING_MAP;
-    
+
 
     private overlayZIndex: any;
 
@@ -111,6 +121,12 @@ export class LayersService {
             isEditable: false
         } as ILayer, LayersService.ESRI_ATTRIBUTION);
 
+        this.addNewBaseLayer({
+            key: LayersService.MAPI_2015,
+            address: LayersService.MAPI_2015_ADDRESS,
+            isEditable: false
+        } as ILayer, LayersService.MAPI_2015_ATTRIBUTION);
+
         let hikingTrailsOverlay = this.addNewOverlay({
             key: LayersService.HIKING_TRAILS,
             address: Urls.OVERLAY_TILES_ADDRESS,
@@ -149,7 +165,7 @@ export class LayersService {
             }
             baseLayersToStore.push(this.extractDataFromLayer(baseLayer));
         }
-        
+
         let overlaysToStore = [] as Common.LayerData[];
         for (let overlay of this.overlays) {
             if (overlay.key === LayersService.HIKING_TRAILS ||
@@ -165,7 +181,7 @@ export class LayersService {
             this.storedBaseLayers = baseLayersToStore;
             this.storedOverlays = overlaysToStore;
         }
-        
+
         this.osmUserService.updateUserLayers(baseLayersToStore, overlaysToStore);
     }
 
@@ -244,7 +260,7 @@ export class LayersService {
             this.selectedBaseLayer = null;
         }
     }
-    
+
     public removeOverlay = (overlay: IOverlay) => {
         this.removeOverlayNoStore(overlay);
         this.storeLayers();
@@ -324,28 +340,28 @@ export class LayersService {
             }
         }
     }
-    
+
     private onOsmUserServiceInitializationFinished = (deferred: Deferred<any>) => {
         this.onUserLayersChanged();
 
         this.selectBaseLayerAccordingToStorage(true);
-        
+
         for (let overlayKey of this.activeOverlayKeys) {
             let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
             if (overlay && overlay.visible === false) {
                 this.toggleOverlay(overlay);
             }
         }
-        
+
         // must be after using local storage values.
         this.onLanguageChange();
-        
+
         this.resourcesService.languageChanged.subscribe(this.onLanguageChange);
         this.osmUserService.userLayersChanged.subscribe(this.onUserLayersChanged);
-        
+
         deferred.resolve();
     }
-    
+
     public addExternalBaseLayer = (layerData: Common.LayerData) => {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
             return;
