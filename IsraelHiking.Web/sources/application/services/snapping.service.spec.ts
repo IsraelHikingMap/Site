@@ -1,6 +1,6 @@
 ﻿import { TestBed, inject, flushMicrotasks, fakeAsync, tick } from "@angular/core/testing";
-import { HttpModule, Response, ResponseOptions, XHRBackend } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
+import { HttpClientModule } from "@angular/common/http";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import * as L from "leaflet";
 
 import { SnappingService, ISnappingOptions } from "./snapping.service";
@@ -18,10 +18,12 @@ describe("SnappingService", () => {
         mapServiceMock = new MapServiceMockCreator();
         let toastMockCreator = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
-            imports: [HttpModule],
+            imports: [
+                HttpClientModule,
+                HttpClientTestingModule
+            ],
             providers: [
                 { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
-                { provide: XHRBackend, useClass: MockBackend },
                 { provide: MapService, useValue: mapServiceMock.mapService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },
                 GeoJsonParser,
@@ -48,7 +50,7 @@ describe("SnappingService", () => {
         expect(snap.polyline).toBeNull();
     }));
 
-    it("Should add one snappings linestring when zoom is 14", inject([SnappingService, XHRBackend], fakeAsync((snappingService: SnappingService, mockBackend: MockBackend) => {
+    it("Should add one snappings linestring when zoom is 14", inject([SnappingService, HttpTestingController], fakeAsync((snappingService: SnappingService, mockBackend: HttpTestingController) => {
         snappingService.enable(true);
 
         let features = [
@@ -61,21 +63,16 @@ describe("SnappingService", () => {
             } as GeoJSON.Feature<GeoJSON.LineString>
         ];
 
-        mockBackend.connections.subscribe((connection) => {
-            connection.mockRespond(new Response(new ResponseOptions({
-                body: JSON.stringify(features)
-            })));
-        });
-
         mapServiceMock.mapService.map.setView(L.latLng(0, 0), 14);
         flushMicrotasks();
+        mockBackend.match(() => true)[0].flush(features);
         tick();
 
         let snap = snappingService.snapTo(L.latLng(2, 1));
         expect(snap.polyline).not.toBeNull();
     })));
 
-    it("Should add one snappings polygon when zoom is 14", fakeAsync(inject([SnappingService, XHRBackend], (snappingService: SnappingService, mockBackend: MockBackend) => {
+    it("Should add one snappings polygon when zoom is 14", fakeAsync(inject([SnappingService, HttpTestingController], (snappingService: SnappingService, mockBackend: HttpTestingController) => {
         snappingService.enable(true);
 
         let features = [
@@ -88,21 +85,16 @@ describe("SnappingService", () => {
             } as GeoJSON.Feature<GeoJSON.Polygon>
         ];
 
-        mockBackend.connections.subscribe((connection) => {
-            connection.mockRespond(new Response(new ResponseOptions({
-                body: JSON.stringify(features)
-            })));
-        });
-
         mapServiceMock.mapService.map.setView(L.latLng(1, 1), 14);
         flushMicrotasks();
+        mockBackend.match(() => true)[0].flush(features);
         tick();
 
         let snap = snappingService.snapTo(L.latLng(2, 1));
         expect(snap.polyline).not.toBeNull();
     })));
 
-    it("Should add one snappings point when zoom is 14", inject([SnappingService, XHRBackend], fakeAsync((snappingService: SnappingService, mockBackend: MockBackend) => {
+    it("Should add one snappings point when zoom is 14", inject([SnappingService, HttpTestingController], fakeAsync((snappingService: SnappingService, mockBackend: HttpTestingController) => {
         snappingService.enable(true);
 
         let features = [
@@ -116,30 +108,22 @@ describe("SnappingService", () => {
             } as GeoJSON.Feature<GeoJSON.Point>
         ];
 
-        mockBackend.connections.subscribe((connection) => {
-            connection.mockRespond(new Response(new ResponseOptions({
-                body: JSON.stringify(features)
-            })));
-        });
-
         mapServiceMock.mapService.map.setView(L.latLng(0, 0), 14);
         flushMicrotasks();
+        mockBackend.match(() => true)[0].flush(features);
         tick();
 
         let snap = snappingService.snapToPoint(L.latLng(2, 1));
         expect(snap.markerData).not.toBeNull();
     })));
 
-    it("Should clear layer upon http error", fakeAsync(inject([SnappingService, XHRBackend], (snappingService: SnappingService, mockBackend: MockBackend) => {
+    it("Should clear layer upon http error", fakeAsync(inject([SnappingService, HttpTestingController], (snappingService: SnappingService, mockBackend: HttpTestingController) => {
         snappingService.enable(true);
-
-        mockBackend.connections.subscribe((connection: MockConnection) => {
-            connection.mockError(new Error("Server error"));
-        });
 
         mapServiceMock.mapService.map.setView(L.latLng(2, 2), 14);
         flushMicrotasks();
         tick();
+        mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
 
         let snap = snappingService.snapTo(L.latLng(0, 0));
         expect(snap.polyline).toBeNull();

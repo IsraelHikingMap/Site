@@ -109,12 +109,11 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         this.requestsNumber++;
         this.poiService
             .getPoints(northEast, southWest, this.categories.filter(f => f.isSelected).map(f => f.key))
-            .then((response) => {
+            .then((pointsOfInterest) => {
                 this.requestArrieved();
                 if (this.requestsNumber !== 0) {
                     return;
                 }
-                let pointsOfInterest = response.json() as IPointOfInterest[];
                 this.markers.eachLayer(existingMarker => {
                     let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
                     let pointOfInterestMarker = _.find(pointsOfInterest, p => p.id === markerWithTitle.identifier);

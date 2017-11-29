@@ -1,10 +1,9 @@
 // angular
 import { NgModule } from "@angular/core";
-import { BrowserXhr } from "@angular/http";
 import { CommonModule } from "@angular/common";
 import { BrowserModule } from "@angular/platform-browser"
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
-import { HttpModule, JsonpModule } from "@angular/http";
+import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
 import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
@@ -28,12 +27,13 @@ import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
 import { ClipboardModule } from "ngx-clipboard";
 import { Angulartics2Module, Angulartics2GoogleAnalytics } from "angulartics2";
-import { NgProgressModule, NgProgressBrowserXhr } from "ngx-progressbar";
+import { NgProgressModule, NgProgressInterceptor } from "ngx-progressbar";
 import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
+import { OsmTokenInterceptor } from "./services/osm-token.interceptor";
 import { MapService } from "./services/map.service";
 import { ResourcesService } from "./services/resources.service";
 import { FileService } from "./services/file.service";
@@ -107,8 +107,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         CommonModule,
         BrowserModule,
         WebStorageModule,
-        HttpModule,
-        JsonpModule,
+        HttpClientModule,
         BrowserAnimationsModule,
         MdDialogModule,
         MdButtonModule,
@@ -176,7 +175,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         SessionStorageService,
         LocalStorageService,
         AuthorizationService,
-        { provide: BrowserXhr, useClass: NgProgressBrowserXhr },
+        { provide: HTTP_INTERCEPTORS, useClass: NgProgressInterceptor, multi: true },
+        { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
         { provide: "Window", useFactory: getWindow },
         GetTextCatalogService,
         MapService,

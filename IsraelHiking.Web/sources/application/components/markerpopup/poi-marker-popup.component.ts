@@ -1,6 +1,6 @@
 ﻿import { Component, ApplicationRef, ViewEncapsulation } from "@angular/core";
-import { Http } from "@angular/http";
-import { MdDialog, MdSelectChange } from "@angular/material";
+import { HttpClient } from "@angular/common/http";
+import { MdDialog } from "@angular/material";
 import * as _ from "lodash";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
@@ -16,7 +16,7 @@ import { RouteLayerFactory } from "../../services/layers/routelayers/route-layer
 import { ElevationProvider } from "../../services/elevation.provider";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
 import { ImageDialogCompnent } from "../dialogs/image-dialog.component";
-import { IMarkerWithData, EditModeString } from "../../services/layers/routelayers/iroute.layer";
+import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
 import * as Common from "../../common/IsraelHiking";
 
 
@@ -44,7 +44,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private currentImageFile: File;
 
     constructor(resources: ResourcesService,
-        http: Http,
+        httpClient: HttpClient,
         applicationRef: ApplicationRef,
         private mdDialog: MdDialog,
         elevationProvider: ElevationProvider,
@@ -55,7 +55,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         private poiService: PoiService,
         private mapService: MapService,
         private routeLayerFactory: RouteLayerFactory) {
-        super(resources, http, applicationRef, elevationProvider);
+        super(resources, httpClient, applicationRef, elevationProvider);
         this.editMode = false;
         this.isLoading = false;
         this.extendedDataArrivedTimeStamp = null;
@@ -168,8 +168,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         }
         this.poiExtended.rating.raters = this.poiExtended.rating.raters.filter(r => r.id !== this.osmUserService.userId);
         this.poiExtended.rating.raters.push({ id: this.osmUserService.userId, value: value } as IRater);
-        this.poiService.uploadRating(this.poiExtended.rating).then((response) => {
-            let rating = response.json() as IRating;
+        this.poiService.uploadRating(this.poiExtended.rating).then((rating) => {
             this.poiExtended.rating = rating;
             this.rating = this.getRatingNumber(rating);
         });
@@ -212,9 +211,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             return;
         }
         this.isLoading = true;
-        this.poiService.getPoint(this.marker.identifier, this.source, this.type).then((response) => {
+        this.poiService.getPoint(this.marker.identifier, this.source, this.type).then((poiExtended) => {
             this.extendedDataArrivedTimeStamp = new Date();
-            let poiExtended = response.json() as IPointOfInterestExtended;
             this.initFromPointOfInterestExtended(poiExtended);
             this.selectRoutes(this.poiExtended.dataContainer.routes);
             this.isLoading = false;
@@ -249,16 +247,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         compoent.componentInstance.source = this.poiExtended.source;
         compoent.componentInstance.identifier = this.poiExtended.id;
         compoent.componentInstance.elementType = this.poiExtended.type;
-        compoent.componentInstance.initializationPromise.then(() => {
-            for (let category of compoent.componentInstance.categories) {
-                let icon = _.find(category.icons, iconToFind => iconToFind.icon === this.poiExtended.icon);
-                if (icon) {
-                    compoent.componentInstance.selectCategory({ value: category } as MdSelectChange);
-                    compoent.componentInstance.selectIcon(icon);
-                    break;
-                }
-            }
-        });
+        compoent.componentInstance.initialize(this.poiExtended.icon);
+
         compoent.afterClosed().subscribe((poiExtended: IPointOfInterestExtended) => {
             if (!poiExtended) {
                 return;

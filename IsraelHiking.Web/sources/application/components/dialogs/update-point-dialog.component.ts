@@ -1,5 +1,4 @@
 ﻿import { Component, ViewEncapsulation } from "@angular/core";
-import { Http } from "@angular/http";
 import { MdDialogRef, MdSelectChange } from "@angular/material";
 import * as _ from "lodash";
 
@@ -33,13 +32,11 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public location: L.LatLng;
     public selectedCategory: ICategoryWithIcons;
     public icons: IIconColorLabel[];
-    public initializationPromise: Promise<any>;
     private currentImageIndex: number;
     private currentImageFile: File;
 
     constructor(resources: ResourcesService,
         public dialogRef: MdDialogRef<UpdatePointDialogComponent>,
-        private http: Http,
         private fileService: FileService,
         private toastService: ToastService,
         private poiService: PoiService,
@@ -49,34 +46,39 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         this.currentImageIndex = 0;
         this.imagesUrls = [];
         this.currentImageFile = null;
-        this.initializationPromise = new Promise((resolve, reject) => {
-            this.poiService.getCategories("Points of Interest").then((response) => {
-                for (let categoryType in response) {
-                    if (!response.hasOwnProperty(categoryType))
-                        continue;
-                    this.categories.push({
-                        key: categoryType,
-                        isSelected: false,
-                        label: this.resources.translate(categoryType),
-                        icon: response[categoryType][0].icon,
-                        color: response[categoryType][0].color,
-                        icons: response[categoryType].map(i => {
-                            return {
-                                color: i.color,
-                                icon: i.icon,
-                                label: this.resources.translate(i.label)
-                            } as IIconColorLabel;
-                        })
-                    } as ICategoryWithIcons);
-                }
-                this.selectedCategory = this.categories[0];
-                this.categories[0].selectedIcon = this.categories[0].icons[0];
-                resolve();
-            }, () => {
-                reject();
-            });
-        });
+    }
 
+    public async initialize(markerIcon: string) {
+        let dictionary = await this.poiService.getCategories("Points of Interest");
+        for (let categoryType in dictionary) {
+            if (!dictionary.hasOwnProperty(categoryType)) {
+                continue;
+            }
+            this.categories.push({
+                key: categoryType,
+                isSelected: false,
+                label: this.resources.translate(categoryType),
+                icon: dictionary[categoryType][0].icon,
+                color: dictionary[categoryType][0].color,
+                icons: dictionary[categoryType].map(i => {
+                    return {
+                        color: i.color,
+                        icon: i.icon,
+                        label: this.resources.translate(i.label)
+                    } as IIconColorLabel;
+                })
+            } as ICategoryWithIcons);
+        }
+        this.selectedCategory = this.categories[0];
+        this.categories[0].selectedIcon = this.categories[0].icons[0];
+
+        for (let category of this.categories) {
+            let icon = _.find(category.icons, iconToFind => iconToFind.icon === markerIcon);
+            if (icon) {
+                this.selectCategory({ value: category } as MdSelectChange);
+                this.selectIcon(icon);
+            }
+        }
     }
 
     public selectCategory(e: MdSelectChange) {
@@ -103,7 +105,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         }
         if (this.currentImageFile) {
             this.imagesUrls.splice(this.imagesUrls.length - 1, 1);
-        }        
+        }
 
         this.currentImageFile = file;
         let reader = new FileReader();

@@ -1,8 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
-import { Http, Response } from "@angular/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 
-import { AuthorizationService } from "./authorization.service";
-import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
@@ -61,60 +59,45 @@ export class PoiService {
     private categoriesToIconsMap: Map<CategoriesType, {}>;
 
     constructor(private resources: ResourcesService,
-        private http: Http,
-        private authorizationService: AuthorizationService, 
-        private fileService: FileService) {
+        private httpClient: HttpClient) {
 
         this.categoriesToIconsMap = new Map<CategoriesType, {}>();
         this.categoriesToIconsMap.set("Points of Interest", {});
         this.categoriesToIconsMap.set("Routes", {});
     }
 
-    public getCategories(categoriesType: CategoriesType): Promise<{}> {
-        return new Promise((resolve, reject) => {
+    public async getCategories(categoriesType: CategoriesType): Promise<{}> {
             let categories = this.categoriesToIconsMap.get(categoriesType);
             if (Object.keys(categories).length > 0) {
-                resolve(categories);
-                return;
+                return categories;
             }
-            this.http.get(Urls.poiCategories + categoriesType).toPromise().then((response) => {
-                let responseDictionary = response.json();
-                for (let property in responseDictionary) {
-                    if (responseDictionary.hasOwnProperty(property)) {
-                        categories[property] = responseDictionary[property];
-                    }
-                }
-                resolve(categories);
-            }, (error) => {
-                reject(error);
-            });
-        });
+        let responseDictionary = await this.httpClient.get(Urls.poiCategories + categoriesType).toPromise() as {};
+        for (let property in responseDictionary) {
+            if (responseDictionary.hasOwnProperty(property)) {
+                categories[property] = responseDictionary[property];
+            }
+        }
+        return categories;
     }
 
     public getCategoriesTypes(): CategoriesType[] {
         return Array.from(this.categoriesToIconsMap.keys());
     }
 
-    public getPoints(northEast: L.LatLng, southWest: L.LatLng, categoriesTypes: string[]): Promise<Response> {
-        return this.http.get(Urls.poi,
-            {
-                params: {
-                    northEast: northEast.lat + "," + northEast.lng,
-                    southWest: southWest.lat + "," + southWest.lng,
-                    categories: categoriesTypes.join(","),
-                    language: this.resources.getCurrentLanguageCodeSimplified(),
-                }
-            }).toPromise();
+    public getPoints(northEast: L.LatLng, southWest: L.LatLng, categoriesTypes: string[]): Promise<IPointOfInterest[]> {
+        let params = new HttpParams()
+            .set("northEast", northEast.lat + "," + northEast.lng)
+            .set("southWest", southWest.lat + "," + southWest.lng)
+            .set("categories", categoriesTypes.join(","))
+            .set("language", this.resources.getCurrentLanguageCodeSimplified());
+        return this.httpClient.get(Urls.poi, { params: params }).toPromise();
     }
 
-    public getPoint(id: string, source: string, type: string): Promise<Response> {
-        return this.http.get(Urls.poi + source + "/" + id,
-            {
-                params: {
-                     language: this.resources.getCurrentLanguageCodeSimplified(),
-                     type: type
-                }
-            }).toPromise();
+    public getPoint(id: string, source: string, type: string): Promise<IPointOfInterestExtended> {
+        let params = new HttpParams()
+            .set("language", this.resources.getCurrentLanguageCodeSimplified())
+            .set("type", type);
+        return this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise();
     }
     
     public uploadPoint(poiExtended: IPointOfInterestExtended, file: File): Promise<IPointOfInterestExtended> {
@@ -124,10 +107,10 @@ export class PoiService {
         }
         formData.append("poiData", JSON.stringify(poiExtended));
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-        return this.fileService.uploadWithData(uploadAddress, formData);
+        return this.httpClient.post(uploadAddress, formData).toPromise();
     }
 
-    public uploadRating(rating: IRating): Promise<Response> {
-        return this.http.post(Urls.rating, rating, this.authorizationService.getHeader()).toPromise();
+    public uploadRating(rating: IRating): Promise<IRating> {
+        return this.httpClient.post(Urls.rating, rating).toPromise();
     }
 }

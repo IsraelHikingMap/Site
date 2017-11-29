@@ -1,5 +1,4 @@
 ﻿import { Injectable } from "@angular/core";
-import { Http } from "@angular/http";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
 import * as L from "leaflet";
@@ -65,8 +64,7 @@ export class LayersService {
     public selectedBaseLayer: IBaseLayer;
     public initializationFinished: Promise<any>;
 
-    constructor(private http: Http,
-        private mapService: MapService,
+    constructor(private mapService: MapService,
         private resourcesService: ResourcesService,
         private osmUserService: OsmUserService,
         categoriesLayersFactory: CategoriesLayerFactory,

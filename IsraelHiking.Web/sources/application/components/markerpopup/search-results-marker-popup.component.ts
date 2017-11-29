@@ -1,5 +1,5 @@
 ﻿import { Component, ApplicationRef } from "@angular/core";
-import { Http } from "@angular/http";
+import { HttpClient } from "@angular/common/http";
 
 import { ResourcesService } from "../../services/resources.service";
 import { PoiService, IPointOfInterestExtended } from "../../services/poi.service";
@@ -22,13 +22,13 @@ export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent 
     private poiExtended: IPointOfInterestExtended;
 
     constructor(resources: ResourcesService,
-        http: Http,
+        httpClient: HttpClient,
         applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider,
         private poiService: PoiService,
         private routesService: RoutesService,
         private mapService: MapService) {
-        super(resources, http, applicationRef, elevationProvider);
+        super(resources, httpClient, applicationRef, elevationProvider);
     }
 
     public selectRoute = (routeData: Common.RouteData): void => {
@@ -40,8 +40,8 @@ export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent 
         this.id = id;
         this.source = source;
         this.type = type;
-        this.poiService.getPoint(this.id, this.source, this.type).then((response) => {
-            this.poiExtended = response.json() as IPointOfInterestExtended;
+        this.poiService.getPoint(this.id, this.source, this.type).then((poiExtended) => {
+            this.poiExtended = poiExtended;
             this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
             this.selectRoute(this.poiExtended.dataContainer.routes[0]);
         });

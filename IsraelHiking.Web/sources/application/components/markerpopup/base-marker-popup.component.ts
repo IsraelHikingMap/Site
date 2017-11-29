@@ -1,5 +1,5 @@
 ﻿import { ApplicationRef, ViewRef } from "@angular/core";
-import { Http } from "@angular/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import * as L from "leaflet";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -23,7 +23,7 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     public remove: () => void;
 
     constructor(resources: ResourcesService,
-        protected http: Http,
+        protected httpClient: HttpClient,
         private applicationRef:ApplicationRef,
         protected elevationProvider: ElevationProvider) {
         super(resources);
@@ -50,15 +50,11 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
         });
     }
 
-    private updateItmCoordinates = () => {
-        this.http.get(Urls.itmGrid, {
-            params: {
-                lat: this.latLng.lat,
-                lon: this.latLng.lng
-            }
-        }).toPromise().then((northEast) => {
-            this.itmCoordinates = northEast.json();
-        });
+    private updateItmCoordinates = async () => {
+        let params = new HttpParams()
+            .set("lat", this.latLng.lat.toString())
+            .set("lon", this.latLng.lng.toString());
+        this.itmCoordinates = await this.httpClient.get(Urls.itmGrid, { params: params }).toPromise() as INorthEast;
     }
 
     private updateHeights = () => {

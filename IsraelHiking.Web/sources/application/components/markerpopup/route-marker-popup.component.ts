@@ -1,6 +1,7 @@
 ﻿import { Component, Injector, ApplicationRef, Inject } from "@angular/core";
-import { Http } from "@angular/http";
+import { HttpClient } from "@angular/common/http";
 import * as _ from "lodash";
+
 import { ResourcesService } from "../../services/resources.service";
 import { IRouteSegment } from "../../services/layers/routelayers/iroute.layer";
 import { ElevationProvider } from "../../services/elevation.provider";
@@ -20,12 +21,12 @@ export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
     private routesService: IRoutesService;
 
     constructor(resources: ResourcesService,
-        http: Http,
+        httpClient: HttpClient,
         applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider,
         private injector: Injector,
         @Inject("RoutesService") routesService: IRoutesService) {
-        super(resources, http, applicationRef, elevationProvider);
+        super(resources, httpClient, applicationRef, elevationProvider);
         this.canMerge = false;
         this.isMiddle = false;
         this.routesService = routesService;

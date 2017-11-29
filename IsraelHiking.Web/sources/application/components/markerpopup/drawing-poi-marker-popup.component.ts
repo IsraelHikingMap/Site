@@ -1,6 +1,6 @@
 ﻿import { Component, ApplicationRef, HostListener, ViewChild, ElementRef } from "@angular/core";
-import { Http } from "@angular/http";
-import { MdDialog, MdSelectChange, ENTER } from "@angular/material";
+import { HttpClient } from "@angular/common/http";
+import { MdDialog, ENTER } from "@angular/material";
 import * as _ from "lodash";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
@@ -33,13 +33,13 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public titleInput: ElementRef;
 
     constructor(resources: ResourcesService,
-        http: Http,
+        httpClient: HttpClient,
         private mdDialog: MdDialog,
         elevationProvider: ElevationProvider,
         applicationRef: ApplicationRef,
         private mapService: MapService,
         private osmUserService: OsmUserService) {
-        super(resources, http, applicationRef, elevationProvider);
+        super(resources, httpClient, applicationRef, elevationProvider);
 
         this.showIcons = false;
         this.wikiCoordinatesString = "";
@@ -118,16 +118,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         compoent.componentInstance.elementType = "node";
         compoent.componentInstance.location = this.marker.getLatLng();
         compoent.componentInstance.identifier = this.marker.identifier;
-        compoent.componentInstance.initializationPromise.then(() => {
-            for (let category of compoent.componentInstance.categories) {
-                let markerIcon = `icon-${this.markerType}`;
-                let icon = _.find(category.icons, iconToFind => iconToFind.icon === markerIcon);
-                if (icon) {
-                    compoent.componentInstance.selectCategory({ value: category } as MdSelectChange);
-                    compoent.componentInstance.selectIcon(icon);
-                }
-            }
-        });
+        compoent.componentInstance.initialize(`icon-${this.markerType}`);
     }
 
     @HostListener("window:keydown", ["$event"])

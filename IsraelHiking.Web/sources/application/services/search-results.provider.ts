@@ -1,5 +1,5 @@
 ﻿import { Injectable } from "@angular/core";
-import { Http } from "@angular/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
@@ -16,49 +16,44 @@ export interface ISearchResults extends IPointOfInterestExtended {
 @Injectable()
 export class SearchResultsProvider {
 
-    constructor(private http: Http,
+    constructor(private httpClient: HttpClient,
         private geoJsonParser: GeoJsonParser) {
     }
 
-    public getResults = (searchTerm: string, isHebrew: boolean): Promise<ISearchResults[]> => {
-        return new Promise((resolve, reject) => {
-            var params = isHebrew ? {} : { language: "en" };
-            let searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
-            this.http.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
-                params: params
-            }).toPromise().then((response) => {
-                let data = response.json() as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
-                let results = [] as ISearchResults[];
-                for (let feature of data.features) {
-                    // HM TODO: change search results to POIs?
-                    let properties = feature.properties as any;
-                    try {
-                        let singleResult = {
-                            title: this.getName(feature, isHebrew),
-                            icon: properties.icon,
-                            iconColor: properties.iconColor,
-                            source: properties.poiSource,
-                            id: properties.identifier,
-                            type: properties.poiType,
-                            location: L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.geolocation.alt),
-                            isRoute: feature.geometry.type !== "Point"
-                        } as ISearchResults;
-                        let geo = L.geoJSON(feature);
-                        singleResult.bounds = geo.getBounds();
-                        let address = isHebrew ? properties.address : feature.properties["address:en"];
-                        singleResult.displayName = singleResult.title + (address ? `, ${address}` : "");
-                        results.push(singleResult);
-                    }
-                    catch (error) {
-                        console.error(error);
-                        console.log(feature);
-                    }
-                }
-                resolve(results);
-            }, (err) => {
-                reject(err);
-            });
-        });
+    public getResults = async (searchTerm: string, isHebrew: boolean): Promise<ISearchResults[]> => {
+        let params = new HttpParams();
+        params = isHebrew ? params : params.set("language", "en");
+        let searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
+        let data = await this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
+            params: params
+        }).toPromise() as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
+        let results = [] as ISearchResults[];
+        for (let feature of data.features) {
+            // HM TODO: change search results to POIs?
+            let properties = feature.properties as any;
+            try {
+                let singleResult = {
+                    title: this.getName(feature, isHebrew),
+                    icon: properties.icon,
+                    iconColor: properties.iconColor,
+                    source: properties.poiSource,
+                    id: properties.identifier,
+                    type: properties.poiType,
+                    location: L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.geolocation.alt),
+                    isRoute: feature.geometry.type !== "Point"
+                } as ISearchResults;
+                let geo = L.geoJSON(feature);
+                singleResult.bounds = geo.getBounds();
+                let address = isHebrew ? properties.address : feature.properties["address:en"];
+                singleResult.displayName = singleResult.title + (address ? `, ${address}` : "");
+                results.push(singleResult);
+            }
+            catch (error) {
+                console.error(error);
+                console.log(feature);
+            }
+        }
+        return results;
     }
 
     private getName(feature: GeoJSON.Feature<GeoJSON.GeometryObject>, isHebrew: boolean): string {

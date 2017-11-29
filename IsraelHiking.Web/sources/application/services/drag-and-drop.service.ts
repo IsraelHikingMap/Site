@@ -43,7 +43,7 @@ export class DragAndDropService  {
             let url = e.dataTransfer.getData("text");
             if (url) {
                 fileService.openFromUrl(url).then((dataContainer) => {
-                    dataContainerService.setData(dataContainer.json());
+                    dataContainerService.setData(dataContainer);
                 }, () => {
                     toastService.error(resourcesService.unableToLoadFromUrl + `: ${url}`);
                 });

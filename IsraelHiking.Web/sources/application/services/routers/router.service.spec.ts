@@ -1,6 +1,6 @@
 ﻿import { TestBed, inject } from "@angular/core/testing";
-import { HttpModule, Response, ResponseOptions, XHRBackend } from "@angular/http";
-import { MockBackend, MockConnection } from "@angular/http/testing";
+import { HttpClientModule } from "@angular/common/http";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import * as L from "leaflet";
 
 import { RouterService } from "./router.service";
@@ -13,22 +13,30 @@ describe("RouterService", () => {
     beforeEach(() => {
         let toastMockCreator = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
-            imports: [HttpModule],
+            imports: [
+                HttpClientModule,
+                HttpClientTestingModule
+            ],
             providers: [
                 { provide: ResourcesService, useValue: toastMockCreator.resourcesService },
                 { provide: ToastService, useValue: toastMockCreator.toastService },
-                { provide: XHRBackend, useClass: MockBackend },
                 GeoJsonParser,
                 RouterService
             ]
         });
     });
 
-    it("Should route between two points", inject([RouterService, XHRBackend], async(router: RouterService, mockBackend: MockBackend) => {
-        mockBackend.connections.subscribe((connection: MockConnection) => {
-            connection.mockRespond(new Response(new ResponseOptions({
-                body: JSON.stringify({
-                    type: "FeatureCollection", features: [
+    it("Should route between two points", (inject([RouterService, HttpTestingController],
+        async (router: RouterService, mockBackend: HttpTestingController) => {
+            router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
+                expect(data.length).toBe(2);
+                expect(data[1].latlngs.length).toBe(3);    
+            }, fail);
+
+            mockBackend.expectOne(() => true).flush(
+                {
+                    type: "FeatureCollection",
+                    features: [
                         {
                             type: "Feature",
                             properties: {
@@ -40,35 +48,24 @@ describe("RouterService", () => {
                             } as GeoJSON.LineString
                         } as GeoJSON.Feature<GeoJSON.LineString>
                     ]
-                } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>)
-            })));
-        });
-            
-        router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
-            expect(data.length).toBe(2);
-            expect(data[1].latlngs.length).toBe(3);
-        });
-    }));
-    
-    it("Should use none router when reponse is not a geojson", inject([RouterService, XHRBackend], async (router: RouterService, mockBackend: MockBackend) => {
-        mockBackend.connections.subscribe((connection: MockConnection) => {
-            connection.mockRespond(new Response(new ResponseOptions({
-                body: JSON.stringify({})
-            })));
-        });
+                } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
+        })));
+
+    it("Should use none router when reponse is not a geojson", inject([RouterService, HttpTestingController], async (router: RouterService, mockBackend: HttpTestingController) => {
         router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
             expect(data.length).toBe(1);
             expect(data[0].latlngs.length).toBe(2);
-        });
+        }, fail);
+
+        mockBackend.expectOne(() => true).flush({});
     }));
     
-    it("Should use none router when getting error response from server", inject([RouterService, XHRBackend], async (router: RouterService, mockBackend: MockBackend) => {
-        mockBackend.connections.subscribe((connection: MockConnection) => {
-            connection.mockError(new Error(""));
-        });
+    it("Should use none router when getting error response from server", inject([RouterService, HttpTestingController], async (router: RouterService, mockBackend: HttpTestingController) => {
         router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
             expect(data.length).toBe(1);
             expect(data[0].latlngs.length).toBe(2);
-        });
+        }, fail);
+
+        mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
     }));
 });

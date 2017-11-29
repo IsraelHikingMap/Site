@@ -1,5 +1,5 @@
 ﻿import { Injectable } from "@angular/core";
-import { Http } from "@angular/http";
+import { HttpClient, HttpParams } from "@angular/common/http";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
@@ -43,7 +43,7 @@ export class SnappingService {
     private enabled: boolean;
     private requestsQueue: ISnappingRequestQueueItem[];
 
-    constructor(private http: Http,
+    constructor(private httpClient: HttpClient,
         private resources: ResourcesService,
         private mapService: MapService,
         private toastService: ToastService,
@@ -59,7 +59,7 @@ export class SnappingService {
         });
     }
 
-    private generateSnappings = () => {
+    private generateSnappings = async () => {
         if (this.mapService.map.getZoom() <= 13 || this.enabled === false) {
             this.highwaySnappings.splice(0);
             this.pointsSnappings.splice(0);
@@ -71,13 +71,11 @@ export class SnappingService {
         this.requestsQueue.push({
             boundsString: boundsString
         } as ISnappingRequestQueueItem);
-
-        this.http.get(Urls.osm, {
-            params: {
-                northEast: bounds.getNorthEast().lat + "," + bounds.getNorthEast().lng,
-                southWest: bounds.getSouthWest().lat + "," + bounds.getSouthWest().lng
-            }
-        }).toPromise().then((response) => {
+        let params = new HttpParams()
+            .set("northEast", bounds.getNorthEast().lat + "," + bounds.getNorthEast().lng)
+            .set("southWest", bounds.getSouthWest().lat + "," + bounds.getSouthWest().lng);
+        try {
+            let features = await this.httpClient.get(Urls.osm, { params: params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>[];
             let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.boundsString === boundsString);
             if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                 this.requestsQueue.splice(0, this.requestsQueue.length - 1);
@@ -85,7 +83,7 @@ export class SnappingService {
             }
             this.highwaySnappings.splice(0);
             this.pointsSnappings.splice(0);
-            for (let feature of response.json() as GeoJSON.Feature<GeoJSON.GeometryObject>[]) {
+            for (let feature of features) {
                 let latlngsArrays = this.geoJsonParser.toLatLngsArray(feature);
                 for (let latlngsArray of latlngsArrays) {
                     if (latlngsArray.length > 1) {
@@ -99,11 +97,11 @@ export class SnappingService {
                 }
             }
             this.requestsQueue.splice(0);
-        }, () => {
+        } catch (ex) {
             this.toastService.warning(this.resources.unableToGetDataForSnapping);
             this.highwaySnappings.splice(0);
             this.pointsSnappings.splice(0);
-        });
+        };
     }
 
     public snapTo = (latlng: L.LatLng, options?: ISnappingOptions): ISnappingResponse => {
@@ -157,7 +155,7 @@ export class SnappingService {
             latlng: latlng,
             markerData: null,
             id: null
-    } as ISnappingPointResponse;
+        } as ISnappingPointResponse;
         var pointOnScreen = this.mapService.map.latLngToLayerPoint(latlng);
         for (let markerData of this.pointsSnappings) {
             let markerPointOnScreen = this.mapService.map.latLngToLayerPoint(markerData.latlng);

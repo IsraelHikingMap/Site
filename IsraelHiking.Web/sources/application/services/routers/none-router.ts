@@ -1,7 +1,6 @@
 ﻿import * as Common from "../../common/IsraelHiking";
 
 export class NoneRouter {
-    constructor() { }
 
     public getRoute(latlngStart: L.LatLng, latlngEnd: L.LatLng): Promise<Common.RouteSegmentData[]> {
         return new Promise<Common.RouteSegmentData[]>((resolve) => {

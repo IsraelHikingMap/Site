@@ -1,10 +1,8 @@
 ﻿import { Injectable } from "@angular/core";
-import { Http, Response } from "@angular/http";
+import { HttpClient } from "@angular/common/http";
 import { saveAs } from "file-saver";
-import { NgProgressService } from "ngx-progressbar";
 import * as L from "leaflet";
 
-import { AuthorizationService } from "./authorization.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -18,13 +16,11 @@ export interface IFormatViewModel {
 export class FileService {
     public formats: IFormatViewModel[];
 
-    constructor(private http: Http,
-        private authorizationService: AuthorizationService,
-        private progressService: NgProgressService) {
+    constructor(private httpClient: HttpClient) {
         this.formats = [];
-        this.http.get(Urls.fileFormats).toPromise().then((response) => {
+        this.httpClient.get(Urls.fileFormats).toPromise().then((response: IFormatViewModel[]) => {
             this.formats.splice(0);
-            for (let format of response.json()) {
+            for (let format of response) {
                 this.formats.push(format);
             }
             this.formats.push({
@@ -40,57 +36,25 @@ export class FileService {
     }
 
     public saveToFile = (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<{}> => {
-        let promise = this.http.post(Urls.files + "?format=" + format, dataContainer).toPromise();
+        let promise = this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise();
         promise.then((responseData) => {
-            this.saveBytesResponseToFile(responseData.json(), fileName);
+            this.saveBytesResponseToFile(responseData, fileName);
         });
         return promise;
     }
 
     public openFromFile(file: File): Promise<Common.DataContainer> {
         return this.upload(Urls.openFile, file);
-        //new Promise((resolve, reject) => {
-        //    this.upload(Urls.openFile, file).then((response: Common.DataContainer) => {
-        //        resolve(response);
-        //    }, (err) => {
-        //        reject(err);
-        //    });
-        //});
     }
 
     public upload(url: string, file: File): Promise<any> {
         let formData = new FormData();
         formData.append("file", file, file.name);
-        return this.uploadWithData(url, formData);
+        return this.httpClient.post(url, formData).toPromise();
     }
 
-    public uploadWithData(url: string, formData: FormData): Promise<{}> {
-        return new Promise((resolve, reject) => {
-
-            let request = this.authorizationService.createXMLHttpRequest();
-            request.onreadystatechange = () => {
-                if (request.readyState !== 4) {
-                    return;
-                }
-                if (request.status === 200) {
-                    this.progressService.done();
-                    resolve(JSON.parse(request.response));
-                } else {
-                    this.progressService.done();
-                    reject(request.response);
-                }
-            };
-
-            request.open("POST", url, true);
-            this.authorizationService.setXhrHeader(request);
-
-            this.progressService.start();
-            request.send(formData);
-        });
-    }
-
-    public openFromUrl = (url: string): Promise<Response> => {
-        return this.http.get(Urls.files + "?url=" + url, this.authorizationService.getHeader()).toPromise();
+    public openFromUrl = (url: string): Promise<Common.DataContainer> => {
+        return this.httpClient.get(Urls.files + "?url=" + url).toPromise();
     }
 
     private saveBytesResponseToFile = (data: any, fileName: string) => {

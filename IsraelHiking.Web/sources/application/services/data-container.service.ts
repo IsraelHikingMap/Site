@@ -1,5 +1,4 @@
 ﻿import { Injectable } from "@angular/core";
-import { Http } from "@angular/http";
 import * as L from "leaflet";
 
 import { LayersService } from "./layers/layers.service";
@@ -9,9 +8,10 @@ import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { HashService } from "./hash.service";
 import { ResourcesService } from "./resources.service";
+import { OsmUserService } from "./osm-user.service";
 import { Deferred } from "../common/deferred";
 import * as Common from "../common/IsraelHiking";
-import { Urls } from "../common/Urls";
+
 
 
 @Injectable()
@@ -19,7 +19,8 @@ export class DataContainerService {
     public initializationFinished: Promise<any>;
     public shareUrlId: string;
 
-    constructor(private http: Http,
+    constructor(
+        private osmUserService: OsmUserService,
         private layersService: LayersService,
         private routesService: RoutesService,
         private mapService: MapService,
@@ -72,9 +73,8 @@ export class DataContainerService {
 
     private addDataFromHash = (deferred: Deferred<any>) => {
         if (this.hashService.shareUrl) {
-            this.http.get(Urls.urls + this.hashService.shareUrl).toPromise()
-                .then((response) => {
-                    let shareUrl = response.json() as Common.ShareUrl;
+            this.osmUserService.getShareUrl(this.hashService.shareUrl)
+                .then((shareUrl: Common.ShareUrl) => {
                     this.setData(shareUrl.dataContainer);
                     this.shareUrlId = shareUrl.id;
                     this.toastService.info(shareUrl.description, shareUrl.title);
@@ -88,8 +88,7 @@ export class DataContainerService {
         }
         if (this.hashService.externalUrl) {
             this.fileService.openFromUrl(this.hashService.externalUrl)
-                .then((response) => {
-                    let data = response.json() as Common.DataContainer;
+                .then((data) => {
                     data.baseLayer = this.hashService.getBaseLayer();
                     this.setData(data);
                     deferred.resolve();

@@ -1,5 +1,5 @@
 ﻿import { Injectable, Inject } from "@angular/core";
-import { URLSearchParams } from "@angular/http";
+import { HttpParams } from "@angular/common/http";
 import { Router, NavigationEnd } from "@angular/router";
 import * as L from "leaflet";
 
@@ -9,12 +9,12 @@ import * as Common from "../common/IsraelHiking";
 @Injectable()
 export class HashService {
 
-    private static PERSICION = 4;
-    private static BASE_LAYER = "baselayer";
-    private static URL = "url";
-    private static DOWNLOAD = "download";
-    private static SITE_SHARE = "s";
-    private static SEARCH_QUERY = "q";
+    private static readonly PERSICION = 4;
+    private static readonly BASE_LAYER = "baselayer";
+    private static readonly URL = "url";
+    private static readonly DOWNLOAD = "download";
+    private static readonly SITE_SHARE = "s";
+    private static readonly SEARCH_QUERY = "q";
 
     private window: Window;
     private baseLayer: Common.LayerData;
@@ -81,7 +81,7 @@ export class HashService {
     }
 
     private addDataFromUrl() {
-        let searchParams = new URLSearchParams(this.window.location.hash.replace("#!/?", ""));
+        let searchParams = new HttpParams({ fromString: this.window.location.hash.replace("#!/?", "") });
         this.searchTerm = decodeURIComponent(searchParams.get(HashService.SEARCH_QUERY) || "");
         this.externalUrl = searchParams.get(HashService.URL) || "";
         this.shareUrl = searchParams.get(HashService.SITE_SHARE) || "";

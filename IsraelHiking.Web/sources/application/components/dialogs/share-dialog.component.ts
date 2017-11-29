@@ -1,5 +1,5 @@
 ﻿import { Component } from "@angular/core";
-import { Http } from "@angular/http";
+import { HttpClient } from "@angular/common/http";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
 import { LocalStorage } from "ngx-store";
@@ -64,7 +64,7 @@ export class ShareDialogComponent extends BaseMapComponent {
     public storedUserEmail: string = "";
 
     constructor(resources: ResourcesService,
-        private http: Http,
+        private httpClient: HttpClient,
         private sanitizer: DomSanitizer,
         private mapService: MapService,
         private routesService: RoutesService,
@@ -117,8 +117,7 @@ export class ShareDialogComponent extends BaseMapComponent {
             ? this.osmUserService.updateShareUrl(shareUrl)
             : this.osmUserService.createShareUrl(shareUrl);
 
-        promise.then((shareUrlResponse) => {
-            let data = shareUrlResponse.json() as Common.ShareUrl;
+        promise.then((data) => {
             this.shareUrlId = data.id;
             this.dataContainerService.shareUrlId = this.shareUrlId;
             this.shareAddress = this.osmUserService.getUrlFromShareId(data);
@@ -191,7 +190,7 @@ export class ShareDialogComponent extends BaseMapComponent {
             });
         }
         let address = "https://brilliant-will-93906.appspot.com/_ah/api/myAdventureApi/v1/tracks/external";
-        this.http.post(address, this.offroadRequest).toPromise().then(() => {
+        this.httpClient.post(address, this.offroadRequest).toPromise().then(() => {
             this.toastService.success(this.resources.routeSentSuccessfully);
         }, (err) => {
             this.toastService.error(this.resources.unableToSendRoute);

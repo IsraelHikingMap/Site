@@ -1,5 +1,5 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
-import { Http } from "@angular/http";
+import { HttpClient } from "@angular/common/http";
 import { LocalStorage } from "ngx-store";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
@@ -38,15 +38,15 @@ export class RouteLayerFactory {
     @LocalStorage()
     public routeOpacity = 0.5;
 
-    constructor(private http: Http,
+    constructor(private httpClient: HttpClient,
         private mapService: MapService,
         private routerService: RouterService,
         private snappingService: SnappingService,
         private elevationProvider: ElevationProvider,
         private injector: Injector,
         private componentFactoryResolver: ComponentFactoryResolver) {
-        http.get(Urls.colors).toPromise().then((colors) => {
-            this.colors.splice(0, this.colors.length, ...colors.json());
+        httpClient.get(Urls.colors).toPromise().then((colors: string[]) => {
+            this.colors.splice(0, this.colors.length, ...colors);
         });
     }
 

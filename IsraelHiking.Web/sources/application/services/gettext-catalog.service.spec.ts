@@ -1,16 +1,18 @@
-﻿import { TestBed, async, inject } from "@angular/core/testing";
-import { HttpModule, Response, ResponseOptions, XHRBackend } from "@angular/http";
-import { MockBackend } from "@angular/http/testing";
+﻿import { TestBed, inject } from "@angular/core/testing";
+import { HttpClientModule } from "@angular/common/http";
+import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 
 describe("GetTextCatalogService", () => {
 
     beforeEach(() => {
         TestBed.configureTestingModule({
-            imports: [HttpModule],
+            imports: [
+                HttpClientModule,
+                HttpClientTestingModule
+            ],
             providers: [
-                GetTextCatalogService,
-                { provide: XHRBackend, useClass: MockBackend }
+                GetTextCatalogService
             ]
         });
     });
@@ -20,32 +22,24 @@ describe("GetTextCatalogService", () => {
         expect(service.getCurrentLanguage()).toBe("he");
     }));
 
-    it("Should load language file from server", async(inject([GetTextCatalogService, XHRBackend], (service: GetTextCatalogService, mockBackend: MockBackend) => {
+    it("Should load language file from server", (inject([GetTextCatalogService, HttpTestingController], async (service: GetTextCatalogService, mockBackend: HttpTestingController) => {
         service.setCurrentLanguage("he");
 
-        mockBackend.connections.subscribe((connection) => {
-            connection.mockRespond(new Response(new ResponseOptions({
-                body: JSON.stringify({ he: { "word": "word's translation" } })
-            })));
-        });
-
-        return service.loadRemote("url").then(() => {
+        service.loadRemote("url").then(() => {
             expect(service.getString("word")).toBe("word's translation");
         });
+
+        mockBackend.match(() => true)[0].flush({ he: { "word": "word's translation" } });
     })));
 
-    it("Should return original word when translation is missing", async(inject([GetTextCatalogService, XHRBackend], (service: GetTextCatalogService, mockBackend: MockBackend) => {
+    it("Should return original word when translation is missing", (inject([GetTextCatalogService, HttpTestingController], async (service: GetTextCatalogService, mockBackend: HttpTestingController) => {
         service.setCurrentLanguage("he");
 
-        mockBackend.connections.subscribe((connection) => {
-            connection.mockRespond(new Response(new ResponseOptions({
-                body: JSON.stringify({ he: {} })
-            })));
-        });
-
-        return service.loadRemote("url").then(() => {
+        service.loadRemote("url").then(() => {
             expect(service.getString("word")).toBe("word");
         });
+
+        mockBackend.match(() => true)[0].flush({ he: {} });
     })));
 
 });

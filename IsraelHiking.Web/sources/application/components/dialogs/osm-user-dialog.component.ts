@@ -1,6 +1,5 @@
 ﻿import { Component, Injector, ComponentFactoryResolver, OnInit, OnDestroy, ViewChild, ElementRef, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { Response } from "@angular/http";
 import { MdDialogRef } from "@angular/material";
 import { SharedStorageService } from "ngx-store";
 import { Subscription } from "rxjs/Subscription";
@@ -148,10 +147,9 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         return "Primary";
     }
 
-    public showTrace = (trace: ITrace): Promise<Response> => {
+    public showTrace = (trace: ITrace): Promise<Common.DataContainer> => {
         let promise = this.fileService.openFromUrl(trace.dataUrl);
-        promise.then((resposnse) => {
-            let data = resposnse.json() as Common.DataContainer;
+        promise.then((data) => {
             this.osmTraceLayer.clearLayers();
             for (let route of data.routes) {
                 for (let segment of route.segments) {
@@ -210,8 +208,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
 
     public findUnmappedRoutes = (trace: ITrace): void => {
         this.userService.getMissingParts(trace)
-            .then((response) => {
-                let geoJson = response.json() as GeoJSON.FeatureCollection<GeoJSON.LineString>;
+            .then((geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
                 if (geoJson.features.length === 0) {
                     this.toastService.success(this.resources.noUnmappedRoutes);
                     return;

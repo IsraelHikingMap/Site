@@ -1,5 +1,5 @@
 ﻿import { Injectable } from "@angular/core";
-import { Http, Response } from "@angular/http";
+import { HttpClient } from "@angular/common/http";
 import { Subject } from "rxjs/Subject";
 import * as X2JS from "x2js";
 import * as _ from "lodash";
@@ -54,7 +54,7 @@ export class OsmUserService {
     public overlays: Common.LayerData[];
     public userId: string;
 
-    constructor(private http: Http,
+    constructor(private httpClient: HttpClient,
         private authorizationService: AuthorizationService) {
         this.x2Js = new X2JS();
         this.traces = [];
@@ -70,8 +70,7 @@ export class OsmUserService {
     }
 
     private initialize(deferred: Deferred<any>): void {
-        this.http.get(Urls.osmConfiguration).toPromise().then((response) => {
-                let data = response.json();
+        this.httpClient.get(Urls.osmConfiguration).toPromise().then((data: any) => {
                 this.baseUrl = data.baseAddress;
                 this.oauth = this.authorizationService.createOSMAuth({
                     oauth_consumer_key: data.consumerKey,
@@ -148,10 +147,10 @@ export class OsmUserService {
     }
 
     private getTraces = (): Promise<any> => {
-        let promise = this.http.get(Urls.osmTrace, this.authorizationService.getHeader()).toPromise();
-        promise.then((response) => {
+        let promise = this.httpClient.get(Urls.osmTrace).toPromise();
+        promise.then((response: any[]) => {
             this.traces.splice(0);
-            let files = [].concat(response.json() || []);
+            let files = [].concat(response || []);
             for (let traceJson of files) {
                 let url = `${this.baseUrl}/user/${traceJson.userName}/traces/${traceJson.id}`;
                 let dataUrl = `${this.baseUrl}/api/0.6/gpx/${traceJson.id}/data`;
@@ -172,11 +171,11 @@ export class OsmUserService {
 
     public updateOsmTrace = (trace: ITrace): Promise<any> => {
         trace.tags = trace.tagsString.split(",").map(t => t.trim());
-        return this.http.put(Urls.osmTrace + trace.id, trace, this.authorizationService.getHeader()).toPromise();
+        return this.httpClient.put(Urls.osmTrace + trace.id, trace).toPromise();
     }
 
     public deleteOsmTrace = (trace: ITrace): Promise<any> => {
-        let promise = this.http.delete(Urls.osmTrace + trace.id, this.authorizationService.getHeader()).toPromise();
+        let promise = this.httpClient.delete(Urls.osmTrace + trace.id).toPromise();
         promise.then(() => {
             _.remove(this.traces, traceToFind => traceToFind.id === trace.id);
             this.tracesChanged.next();
@@ -184,10 +183,13 @@ export class OsmUserService {
         return promise;
     }
 
+    public getShareUrl = (shareUrlId: string): Promise<Common.ShareUrl> => {
+        return this.httpClient.get(Urls.urls + shareUrlId).toPromise();
+    }
+
     private getShareUrls = (): Promise<any> => {
-        let promise = this.http.get(Urls.urls, this.authorizationService.getHeader()).toPromise();
-        promise.then(response => {
-            let shareUrls = response.json() as Common.ShareUrl[];
+        let promise = this.httpClient.get(Urls.urls).toPromise();
+        promise.then((shareUrls: Common.ShareUrl[]) => {
             this.shareUrls.splice(0);
             this.shareUrls.push(...shareUrls);
             this.shareUrlsChanged.next();
@@ -197,22 +199,21 @@ export class OsmUserService {
         return promise;
     }
     
-    public createShareUrl = (shareUrl: Common.ShareUrl): Promise<Response> => {
-        let promise = this.http.post(Urls.urls, shareUrl, this.authorizationService.getHeader()).toPromise();
-        promise.then(response => {
-            let createdShareUrl = response.json() as Common.ShareUrl;
+    public createShareUrl = (shareUrl: Common.ShareUrl): Promise<Common.ShareUrl> => {
+        let promise = this.httpClient.post(Urls.urls, shareUrl).toPromise();
+        promise.then((createdShareUrl: Common.ShareUrl) => {
             this.shareUrls.splice(0, 0, createdShareUrl);
             this.shareUrlsChanged.next();
         });
         return promise;
     }
 
-    public updateShareUrl = (shareUrl: Common.ShareUrl): Promise<Response> => {
-        return this.http.put(Urls.urls + shareUrl.id, shareUrl, this.authorizationService.getHeader()).toPromise();
+    public updateShareUrl = (shareUrl: Common.ShareUrl): Promise<Common.ShareUrl> => {
+        return this.httpClient.put(Urls.urls + shareUrl.id, shareUrl).toPromise();
     }
 
-    public deleteShareUrl = (shareUrl: Common.ShareUrl): Promise<Response> => {
-        let promise = this.http.delete(Urls.urls + shareUrl.id, this.authorizationService.getHeader()).toPromise();
+    public deleteShareUrl = (shareUrl: Common.ShareUrl): Promise<Common.ShareUrl> => {
+        let promise = this.httpClient.delete(Urls.urls + shareUrl.id).toPromise();
         promise.then(() => {
             _.remove(this.shareUrls, s => s.id === shareUrl.id);
             this.shareUrlsChanged.next();
@@ -229,17 +230,16 @@ export class OsmUserService {
     }
 
     public getMissingParts(trace: ITrace): Promise<any> {
-        return this.http.post(Urls.osm + "?url=" + trace.dataUrl, {}, this.authorizationService.getHeader()).toPromise();
+        return this.httpClient.post(Urls.osm + "?url=" + trace.dataUrl, {}).toPromise();
     }
 
     public addAMissingPart(feature: GeoJSON.Feature<GeoJSON.LineString>): Promise<any> {
-        return this.http.put(Urls.osm, feature, this.authorizationService.getHeader()).toPromise();
+        return this.httpClient.put(Urls.osm, feature).toPromise();
     }
 
     private getUserLayers = (): Promise<any> => {
-        let promise = this.http.get(Urls.userLayers, this.authorizationService.getHeader()).toPromise();
-        promise.then(response => {
-            let data = response.json() as IUserLayers;
+        let promise = this.httpClient.get(Urls.userLayers).toPromise();
+        promise.then((data: IUserLayers) => {
             this.baseLayers.splice(0);
             this.overlays.splice(0);
             if (data == null || data.layers == null) {
@@ -271,7 +271,7 @@ export class OsmUserService {
             layers.push(overlayToStore);
         }
         
-        return this.http.post(Urls.userLayers + this.userId, { layers: layers, } as IUserLayers, this.authorizationService.getHeader()).toPromise();
+        return this.httpClient.post(Urls.userLayers + this.userId, { layers: layers, } as IUserLayers).toPromise();
     }
     
     public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, center: L.LatLng): string {

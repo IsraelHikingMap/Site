@@ -18,7 +18,7 @@ describe("ResourcesService", () => {
         TestBed.configureTestingModule({
             providers: [
                 { provide: GetTextCatalogService, useValue: mockCreator.getTextCatalogService },
-                ResourcesService,
+                ResourcesService
             ]
         });
     });
@@ -29,7 +29,7 @@ describe("ResourcesService", () => {
 
     it("Should faciliate language change to english and raise event", async(inject([ResourcesService], (service: ResourcesService) => {
         let eventRaied = false;
-        service.languageChanged.subscribe(() => { eventRaied = true; })
+        service.languageChanged.subscribe(() => { eventRaied = true; });
 
         service.setLanguage(service.availableLanguages[1]).then(() => {
             expect(service.currentLanguage.code).toBe(service.availableLanguages[1].code);
