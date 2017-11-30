@@ -10,12 +10,12 @@
     <div mat-dialog-content>
         <mat-radio-group [(ngModel)]="selectedLanguageCode">
             <div *ngFor="let language of resources.availableLanguages">
-                <mat-radio-button [value]="language.code" angulartics2On="click" angularticsCategory="Language" angularticsEvent="Select language {{language.code}}">{{language.label}}</mat-radio-button>
+                <mat-radio-button [value]="language.code" angulartics2On="click" angularticsCategory="Language" angularticsAction="Select language {{language.code}}">{{language.label}}</mat-radio-button>
             </div>
         </mat-radio-group>
         <br />
     </div>
     <div mat-dialog-actions>
-        <button matDialogClose mat-button (click)="saveLanguage()" angulartics2On="click" angularticsCategory="Language" angularticsEvent="Save language {{selectedLanguageCode}}" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
+        <button matDialogClose mat-button (click)="saveLanguage()" angulartics2On="click" angularticsCategory="Language" angularticsAction="Save language {{selectedLanguageCode}}" matTooltip="{{resources.save}}" matTooltipPosition="above"><i class="fa icon-check"></i></button>
     </div>
 </div>

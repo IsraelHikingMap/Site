@@ -1,5 +1,5 @@
 ﻿import { Component } from "@angular/core";
-import { MdDialog } from "@angular/material";
+import { MatDialog } from "@angular/material";
 import { LocalStorage } from "ngx-store"; 
 
 import { ResourcesService } from "../services/resources.service";
@@ -20,7 +20,7 @@ export class OsmUserComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         public userService: OsmUserService,
-        private dialog: MdDialog,
+        private dialog: MatDialog,
         private toastService: ToastService) {
         super(resources);
     }

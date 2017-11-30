@@ -31,7 +31,7 @@
         <div class="input-wrapper-spacer"></div>
         <div class="upload-wrapper">
             <label>
-                <a fxFill mat-raised-button color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Upload OSM trace"><i class="fa icon-folder-open fa-lg"></i> {{resources.uploadFileToOsm}}</a>
+                <a fxFill mat-raised-button color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload OSM trace"><i class="fa icon-folder-open fa-lg"></i> {{resources.uploadFileToOsm}}</a>
                 <input type="file" (change)="uploadToOsm($event)" [style.display]="'none'" />
             </label>
         </div>
@@ -63,18 +63,20 @@
                                         <input matInput type="text" [(ngModel)]="trace.tagsString" placeholder="{{resources.tags}}"/>
                                     </mat-form-field>
                                     <br />
-                                    <mat-select placeholder="{{resources.visibility}}" [(ngModel)]="trace.visibility">
-                                        <mat-option value="private">{{resources.private}}</mat-option>
-                                        <mat-option value="public">{{resources.public}}</mat-option>
-                                    </mat-select>
+                                    <mat-form-field>
+                                        <mat-select placeholder="{{resources.visibility}}" [(ngModel)]="trace.visibility">
+                                            <mat-option value="private">{{resources.private}}</mat-option>
+                                            <mat-option value="public">{{resources.public}}</mat-option>
+                                        </mat-select>
+                                    </mat-form-field>
                                 </div>
                                 <div class="trace-buttons">
-                                    <button mat-button (click)="findUnmappedRoutes(trace)" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Find unmapped trace parts"><i class="fa icon-plus"></i></button>
-                                    <button mat-button [hidden]="trace.isInEditMode" (click)="editTrace(trace)" matTooltip="{{resources.edit}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit OSM trace"><i class="fa icon-pencil"></i></button>
-                                    <button mat-button [hidden]="!trace.isInEditMode" (click)="updateTrace(trace)" matTooltip="{{resources.save}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit OSM trace"><i class="fa icon-check"></i></button>
-                                    <button mat-button (click)="deleteTrace(trace)" matTooltip="{{resources.delete}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit OSM trace"><i class="fa icon-trash"></i></button>
-                                    <button mat-button matDialogClose (click)="showTrace(trace)" matTooltip="{{resources.view}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="View OSM trace"><i class="fa icon-eye"></i></button>
-                                    <button mat-button (click)="editInOsm(trace)" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="Edit OSM trace in OSM"><i class="fa icon-map-editing fa-lg"></i></button>
+                                    <button mat-button (click)="findUnmappedRoutes(trace)" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Find unmapped trace parts"><i class="fa icon-plus"></i></button>
+                                    <button mat-button [hidden]="trace.isInEditMode" (click)="editTrace(trace)" matTooltip="{{resources.edit}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-pencil"></i></button>
+                                    <button mat-button [hidden]="!trace.isInEditMode" (click)="updateTrace(trace)" matTooltip="{{resources.save}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-check"></i></button>
+                                    <button mat-button (click)="deleteTrace(trace)" matTooltip="{{resources.delete}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-trash"></i></button>
+                                    <button mat-button matDialogClose (click)="showTrace(trace)" matTooltip="{{resources.view}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View OSM trace"><i class="fa icon-eye"></i></button>
+                                    <button mat-button (click)="editInOsm(trace)" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace in OSM"><i class="fa icon-map-editing fa-lg"></i></button>
                                 </div>
                             </div>
                         </div>

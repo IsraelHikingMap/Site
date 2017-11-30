@@ -1,5 +1,4 @@
 ﻿import { Component } from "@angular/core";
-import { MdDialog } from "@angular/material";
 import { ResourcesService, LanguageCode } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
 

@@ -54,7 +54,7 @@ export class FileService {
     }
 
     public openFromUrl = (url: string): Promise<Common.DataContainer> => {
-        return this.httpClient.get(Urls.files + "?url=" + url).toPromise();
+        return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<Common.DataContainer>;
     }
 
     private saveBytesResponseToFile = (data: any, fileName: string) => {

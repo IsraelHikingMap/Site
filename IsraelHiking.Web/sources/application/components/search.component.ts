@@ -1,5 +1,5 @@
 ﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ElementRef, ComponentFactory } from "@angular/core";
-import { MdAutocomplete } from "@angular/material";
+import { MatAutocomplete } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -52,9 +52,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     public searchFromInput: ElementRef;
 
     @ViewChild("autoFrom")
-    public matAutocompleteFrom: MdAutocomplete;
+    public matAutocompleteFrom: MatAutocomplete;
     @ViewChild("autoTo")
-    public matAutocompleteTo: MdAutocomplete;
+    public matAutocompleteTo: MatAutocomplete;
 
     constructor(resources: ResourcesService,
         private mapService: MapService,

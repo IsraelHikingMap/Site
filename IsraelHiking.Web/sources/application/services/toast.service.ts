@@ -1,5 +1,5 @@
 ﻿import { Injectable } from "@angular/core";
-import { MdSnackBar } from "@angular/material";
+import { MatSnackBar } from "@angular/material";
 import { ResourcesService } from "./resources.service";
 
 @Injectable()
@@ -7,7 +7,7 @@ export class ToastService {
     private duration: number;
 
     constructor(private resources: ResourcesService,
-        private snackbar: MdSnackBar) {
+        private snackbar: MatSnackBar) {
         this.duration = 6000;
     }
 

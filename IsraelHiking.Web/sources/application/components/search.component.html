@@ -1,9 +1,9 @@
 ﻿<div class="leaflet-bar" [hidden]="isVisible" [dir]="resources.direction">
-    <a class="cursor-pointer" (click)="toggleVisibility($event)" matTooltip="{{resources.search}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Search toggle"><i class="fa icon-search fa-lg"></i></a>
+    <a class="cursor-pointer" (click)="toggleVisibility($event)" matTooltip="{{resources.search}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Search toggle"><i class="fa icon-search fa-lg"></i></a>
 </div>
 <div [hidden]="!isVisible">
     <div class="leaflet-bar" fxLayout="row">
-        <a class="cursor-pointer control-icon-last" (click)="toggleDirectional($event)" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsEvent="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !isDirectional, 'icon-minus': isDirectional}"></i></a>
+        <a class="cursor-pointer control-icon-last" (click)="toggleDirectional($event)" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !isDirectional, 'icon-minus': isDirectional}"></i></a>
         <div [dir]="resources.direction">
             <mat-form-field class="search-input-container">
                 <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)">

@@ -1,5 +1,5 @@
 ﻿import { Component } from "@angular/core";
-import { MdDialog } from "@angular/material";
+import { MatDialog } from "@angular/material";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
@@ -40,7 +40,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     public selectedTabIndex: number;
 
     constructor(resources: ResourcesService,
-        private dialog: MdDialog,
+        private dialog: MatDialog,
         private sidebarService: SidebarService,
         private mapService: MapService,
         private layersService: LayersService) {
@@ -117,7 +117,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private initalizeLegendSections() {
-        console.log("initalizeLegendSections");
         let id = 1;
         this.legendSections = [
             {

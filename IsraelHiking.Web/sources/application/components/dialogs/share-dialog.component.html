@@ -22,34 +22,34 @@
             <div fxLayout="row" [hidden]="!canUpdate">
                 <mat-checkbox [(ngModel)]="updateCurrentShare">{{resources.updateCurrentShare}}</mat-checkbox>
             </div>
-                <div class="input-wrapper-spacer"></div>
-                <div fxLayout="row">
-                    <button mat-raised-button color="primary" (click)="uploadShareUrl()" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update : resources.generateUrlToShareWithYourFriends}}</button>
-                </div>
+            <div class="input-wrapper-spacer"></div>
+            <div fxLayout="row">
+                <button mat-raised-button color="primary" (click)="uploadShareUrl()" [disabled]="isLoading" fxFill angulartics2On="click" angularticsCategory="Share" angularticsAction="Share {{updateCurrentShare ? 'update' : 'create'}}">{{updateCurrentShare ? resources.update : resources.generateUrlToShareWithYourFriends}}</button>
             </div>
+        </div>
         <div [hidden]="!shareAddress">
             <div fxLayout="row">
-                <img [src]="imageUrl" fxFill height="100"/>
+                <img [src]="imageUrl" fxFill height="100" />
             </div>
             <div fxLayout="row">
                 <h4>{{title}} - {{description}}</h4>
             </div>
             <div fxLayout="row">
-                <a [href]="shareAddress" class="text-left" [target]="'_blank'" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share test address">{{shareAddress}}</a>
+                <a [href]="shareAddress" class="text-left" [target]="'_blank'" fxFill angulartics2On="click" angularticsCategory="Share" angularticsAction="Share test address">{{shareAddress}}</a>
             </div>
             <div class="input-wrapper-spacer"></div>
             <div fxLayout="row" fxFill>
                 <div fxFlex>
-                    <a mat-button fxFill [href]="facebookShareAddress" [target]="'_blank'" class="chrome-wordwrap-fix" matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share facebook"><i class="fa icon-facebook fa-lg"></i></a>
+                    <a mat-button fxFill [href]="facebookShareAddress" [target]="'_blank'" class="chrome-wordwrap-fix" matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook"><i class="fa icon-facebook fa-lg"></i></a>
                 </div>
                 <div fxFlex fxHide fxShow.sm fxShow.xs>
-                    <a mat-button fxFill [href]="whatappShareAddress" angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share whatapp"><i class="fa icon-whatsapp fa-lg"></i></a>
+                    <a mat-button fxFill [href]="whatappShareAddress" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatapp"><i class="fa icon-whatsapp fa-lg"></i></a>
                 </div>
                 <div fxFlex>
-                    <button mat-button fxFill ngxClipboard [cbContent]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="Share" angularticsEvent="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
+                    <button mat-button fxFill ngxClipboard [cbContent]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="above" fxFill angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard"><i class="fa icon-clipboard fa-lg"></i></button>
                 </div>
                 <div fxFlex>
-                    <a mat-button fxFill [href]="nakebCreateHikeAddress" [target]="'_blank'" matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angularticsCategory="Share" angularticsEvent="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>
+                    <a mat-button fxFill [href]="nakebCreateHikeAddress" [target]="'_blank'" matTooltip="{{resources.createNakebHike}}" matTooltipPosition="above" angularticsCategory="Share" angularticsAction="Share nakeb"><i class="fa icon-nakeb fa-lg"></i></a>
                 </div>
                 <div fxFlex>
                     <button mat-button fxFill (click)="showOffroadForm = true" [ngClass]="{active: showOffroadForm}" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above"><i class="fa icon-off-road fa-lg"></i></button>
@@ -84,11 +84,13 @@
                         </div>
                     </div>
                     <div fxFlex>
-                        <mat-select placeholder="{{resources.difficulty}}" fxFill [(ngModel)]="offroadRequest.difficultyLevel">
-                            <mat-option value="1">{{resources.easy}}</mat-option>
-                            <mat-option value="3">{{resources.moderate}}</mat-option>
-                            <mat-option value="5">{{resources.hard}}</mat-option>
-                        </mat-select>
+                        <mat-form-field fxFill>
+                            <mat-select placeholder="{{resources.difficulty}}" fxFill [(ngModel)]="offroadRequest.difficultyLevel">
+                                <mat-option value="1">{{resources.easy}}</mat-option>
+                                <mat-option value="3">{{resources.moderate}}</mat-option>
+                                <mat-option value="5">{{resources.hard}}</mat-option>
+                            </mat-select>
+                        </mat-form-field>
                     </div>
                 </div>
                 <div class="input-wrapper-spacer"></div>
@@ -97,10 +99,10 @@
                         <mat-checkbox [(ngModel)]="offroadPublicTrack">{{resources.suggestAsPublicTrack}}</mat-checkbox>
                     </div>
                     <div fxFlex="50">
-                        <a mat-button (click)="sendToOffroad()" fxFill color="primary" mat-raised-button angularticsCategory="Share" angularticsEvent="Share send off-road"><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>
+                        <a mat-button (click)="sendToOffroad()" fxFill color="primary" mat-raised-button angularticsCategory="Share" angularticsAction="Share send off-road"><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>
                     </div>
                 </div>
-                <br/>
+                <br />
             </div>
         </div>
     </div>

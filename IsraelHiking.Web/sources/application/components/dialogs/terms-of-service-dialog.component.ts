@@ -1,5 +1,5 @@
 ﻿import { Component } from "@angular/core";
-import { MdDialogRef } from "@angular/material";
+import { MatDialogRef } from "@angular/material";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -16,7 +16,7 @@ export class TermsOfServiceDialogComponent extends BaseMapComponent {
     public iAgree: boolean;
 
     constructor(resources: ResourcesService,
-        public dialogRef: MdDialogRef<TermsOfServiceDialogComponent>,
+        public dialogRef: MatDialogRef<TermsOfServiceDialogComponent>,
         private osmUserService: OsmUserService,
         private toastService: ToastService) {
         super(resources);

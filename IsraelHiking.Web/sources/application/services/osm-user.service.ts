@@ -184,7 +184,7 @@ export class OsmUserService {
     }
 
     public getShareUrl = (shareUrlId: string): Promise<Common.ShareUrl> => {
-        return this.httpClient.get(Urls.urls + shareUrlId).toPromise();
+        return this.httpClient.get(Urls.urls + shareUrlId).toPromise() as Promise<Common.ShareUrl>;
     }
 
     private getShareUrls = (): Promise<any> => {
@@ -200,7 +200,7 @@ export class OsmUserService {
     }
 
     public createShareUrl = (shareUrl: Common.ShareUrl): Promise<Common.ShareUrl> => {
-        let promise = this.httpClient.post(Urls.urls, shareUrl).toPromise();
+        let promise = this.httpClient.post(Urls.urls, shareUrl).toPromise() as Promise<Common.ShareUrl>;
         promise.then((createdShareUrl: Common.ShareUrl) => {
             this.shareUrls.splice(0, 0, createdShareUrl);
             this.shareUrlsChanged.next();
@@ -209,11 +209,11 @@ export class OsmUserService {
     }
 
     public updateShareUrl = (shareUrl: Common.ShareUrl): Promise<Common.ShareUrl> => {
-        return this.httpClient.put(Urls.urls + shareUrl.id, shareUrl).toPromise();
+        return this.httpClient.put(Urls.urls + shareUrl.id, shareUrl).toPromise() as Promise<Common.ShareUrl>;
     }
 
     public deleteShareUrl = (shareUrl: Common.ShareUrl): Promise<Common.ShareUrl> => {
-        let promise = this.httpClient.delete(Urls.urls + shareUrl.id).toPromise();
+        let promise = this.httpClient.delete(Urls.urls + shareUrl.id).toPromise() as Promise<Common.ShareUrl>;
         promise.then(() => {
             _.remove(this.shareUrls, s => s.id === shareUrl.id);
             this.shareUrlsChanged.next();

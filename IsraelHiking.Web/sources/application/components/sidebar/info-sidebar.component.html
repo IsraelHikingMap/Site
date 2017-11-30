@@ -1,6 +1,6 @@
 ﻿<div [dir]="resources.direction">
     <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabChanged($event)" [dynamicHeight]="'true'">
-        <mat-tab label="{{resources.about}}" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info about select">
+        <mat-tab label="{{resources.about}}" angulartics2On="click" angularticsCategory="Info" angularticsAction="Info about select">
             <div>
                 <p><span [innerHtml]="resources.infoSubheader"></span></p>
                 <h4>{{resources.infoHelpfulLinks}}</h4>
@@ -16,7 +16,7 @@
                     <div fxFlex="15"><i class="fa icon-wikipedia-w" fxFill></i></div>
                     <div fxFlex [innerHtml]="resources.infoOsmWikiLink"></div>
                 </div>
-                <div fxLayout="row" class="bottom-border cursor-pointer" (click)="openDownloadDialog()" angulartics2On="click" angularticsCategory="Download" angularticsEvent="Download open">
+                <div fxLayout="row" class="bottom-border cursor-pointer" (click)="openDownloadDialog()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download open">
                     <button mat-raised-button color="primary" fxFill><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
                 </div>
                 <p>
@@ -27,7 +27,7 @@
                 </p>
             </div>
         </mat-tab>
-        <mat-tab label="{{resources.legend}}" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info legend select">
+        <mat-tab label="{{resources.legend}}" angulartics2On="click" angularticsCategory="Info" angularticsAction="Info legend select">
             <div [hidden]="legendSections.length > 0">
                 <p>{{resources.legendEmpty}}</p>
             </div>

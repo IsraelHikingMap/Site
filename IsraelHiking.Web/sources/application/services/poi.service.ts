@@ -90,14 +90,14 @@ export class PoiService {
             .set("southWest", southWest.lat + "," + southWest.lng)
             .set("categories", categoriesTypes.join(","))
             .set("language", this.resources.getCurrentLanguageCodeSimplified());
-        return this.httpClient.get(Urls.poi, { params: params }).toPromise();
+        return this.httpClient.get(Urls.poi, { params: params }).toPromise() as Promise<IPointOfInterest[]>;
     }
 
     public getPoint(id: string, source: string, type: string): Promise<IPointOfInterestExtended> {
         let params = new HttpParams()
             .set("language", this.resources.getCurrentLanguageCodeSimplified())
             .set("type", type);
-        return this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise();
+        return this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as Promise<IPointOfInterestExtended>;
     }
     
     public uploadPoint(poiExtended: IPointOfInterestExtended, file: File): Promise<IPointOfInterestExtended> {
@@ -107,10 +107,10 @@ export class PoiService {
         }
         formData.append("poiData", JSON.stringify(poiExtended));
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
-        return this.httpClient.post(uploadAddress, formData).toPromise();
+        return this.httpClient.post(uploadAddress, formData).toPromise() as Promise<IPointOfInterestExtended>;
     }
 
     public uploadRating(rating: IRating): Promise<IRating> {
-        return this.httpClient.post(Urls.rating, rating).toPromise();
+        return this.httpClient.post(Urls.rating, rating).toPromise() as Promise<IRating>;
     }
 }

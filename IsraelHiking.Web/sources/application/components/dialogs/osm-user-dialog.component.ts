@@ -1,6 +1,6 @@
 ﻿import { Component, Injector, ComponentFactoryResolver, OnInit, OnDestroy, ViewChild, ElementRef, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
-import { MdDialogRef } from "@angular/material";
+import { MatDialogRef } from "@angular/material";
 import { SharedStorageService } from "ngx-store";
 import { Subscription } from "rxjs/Subscription";
 import * as L from "leaflet";
@@ -63,7 +63,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     constructor(resources: ResourcesService,
         private injector: Injector,
         private sharedStorageService: SharedStorageService,
-        private mdDialogRef: MdDialogRef<OsmUserDialogComponent>,
+        private matDialogRef: MatDialogRef<OsmUserDialogComponent>,
         private componentFactoryResolver: ComponentFactoryResolver,
         private mapService: MapService,
         private fileService: FileService,
@@ -215,7 +215,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 }
                 this.showTrace(trace).then(() => {
                     this.addMissingPartsToMap(geoJson);
-                    this.mdDialogRef.close();
+                    this.matDialogRef.close();
                 });
             });
     }

@@ -1,5 +1,5 @@
 ﻿import { Component, ViewEncapsulation, OnDestroy } from "@angular/core";
-import { MdDialog } from "@angular/material";
+import { MatDialog } from "@angular/material";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
 
@@ -43,7 +43,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     public isAdvanced: boolean = false;
 
     constructor(resources: ResourcesService,
-        private dialog: MdDialog,
+        private dialog: MatDialog,
         private mapService: MapService,
         private layersService: LayersService,
         private routesService: RoutesService,

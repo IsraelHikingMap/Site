@@ -1,5 +1,5 @@
 ﻿import { Component } from "@angular/core";
-import { MdDialog } from "@angular/material";
+import { MatDialog } from "@angular/material";
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
 import { SidebarService } from "../services/sidebar.service";
@@ -15,7 +15,7 @@ export class InfoComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
         private hashService: HashService,
         private sidebarService: SidebarService,
-        private dialog: MdDialog) {
+        private dialog: MatDialog) {
         super(resources);
 
         if (hashService.download) {

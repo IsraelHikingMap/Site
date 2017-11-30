@@ -1,5 +1,5 @@
 ﻿import { Component } from "@angular/core";
-import { MdDialog } from "@angular/material";
+import { MatDialog } from "@angular/material";
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 import { ShareDialogComponent } from "./dialogs/share-dialog.component";
@@ -11,7 +11,7 @@ import { ShareDialogComponent } from "./dialogs/share-dialog.component";
 export class ShareComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
-        private dialog: MdDialog) {
+        private dialog: MatDialog) {
         super(resources);
 
     }

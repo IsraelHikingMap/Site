@@ -158,12 +158,6 @@ export class GeoJsonParser {
     public toGeoJson(data: Common.DataContainer): GeoJSON.FeatureCollection<GeoJSON.GeometryObject> {
         let geoJson = {
             type: "FeatureCollection",
-            crs: {
-                type: "name",
-                properties: {
-                    name: "EPSG:3857"
-                }
-            } as GeoJSON.NamedCoordinateReferenceSystem,
             features: [] as GeoJSON.Feature<GeoJSON.GeometryObject>[]
         } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
 

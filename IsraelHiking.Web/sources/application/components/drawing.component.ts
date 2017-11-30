@@ -1,5 +1,5 @@
 ﻿import { Component, HostListener } from "@angular/core";
-import { ESCAPE } from "@angular/material";
+import { ESCAPE } from "@angular/cdk/keycodes";
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
 import { RoutesService } from "../services/layers/routelayers/routes.service";

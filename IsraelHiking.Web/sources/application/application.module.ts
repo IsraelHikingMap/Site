@@ -8,25 +8,25 @@ import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
     GestureConfig,
-    MdDialogModule,
-    MdButtonModule,
-    MdInputModule,
-    MdSliderModule,
-    MdSnackBarModule,
-    MdAutocompleteModule,
-    MdSlideToggleModule,
-    MdTooltipModule,
-    MdSelectModule,
-    MdProgressBarModule,
-    MdTabsModule,
-    MdRadioModule,
-    MdCheckboxModule,
-    MATERIAL_COMPATIBILITY_MODE
+    MatDialogModule,
+    MatButtonModule,
+    MatInputModule,
+    MatSliderModule,
+    MatSnackBarModule,
+    MatAutocompleteModule,
+    MatSlideToggleModule,
+    MatTooltipModule,
+    MatSelectModule,
+    MatProgressBarModule,
+    MatTabsModule,
+    MatRadioModule,
+    MatCheckboxModule
 } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
 import { ClipboardModule } from "ngx-clipboard";
-import { Angulartics2Module, Angulartics2GoogleAnalytics } from "angulartics2";
+import { Angulartics2Module } from "angulartics2";
+import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 import { NgProgressModule, NgProgressInterceptor } from "ngx-progressbar";
 import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
@@ -109,19 +109,19 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         WebStorageModule,
         HttpClientModule,
         BrowserAnimationsModule,
-        MdDialogModule,
-        MdButtonModule,
-        MdInputModule,
-        MdSnackBarModule,
-        MdSliderModule,
-        MdAutocompleteModule,
-        MdSlideToggleModule,
-        MdTooltipModule,
-        MdSelectModule,
-        MdProgressBarModule,
-        MdTabsModule,
-        MdRadioModule,
-        MdCheckboxModule,
+        MatDialogModule,
+        MatButtonModule,
+        MatInputModule,
+        MatSnackBarModule,
+        MatSliderModule,
+        MatAutocompleteModule,
+        MatSlideToggleModule,
+        MatTooltipModule,
+        MatSelectModule,
+        MatProgressBarModule,
+        MatTabsModule,
+        MatRadioModule,
+        MatCheckboxModule,
         FormsModule,
         ReactiveFormsModule,
         FlexLayoutModule,
@@ -171,7 +171,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
     ],
     providers: [
         GestureConfig,
-        { provide: MATERIAL_COMPATIBILITY_MODE, useValue: true },
         SessionStorageService,
         LocalStorageService,
         AuthorizationService,

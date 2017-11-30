@@ -1,6 +1,6 @@
 ﻿import { Component, ApplicationRef, ViewEncapsulation } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { MdDialog } from "@angular/material";
+import { MatDialog } from "@angular/material";
 import * as _ from "lodash";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
@@ -46,7 +46,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     constructor(resources: ResourcesService,
         httpClient: HttpClient,
         applicationRef: ApplicationRef,
-        private mdDialog: MdDialog,
+        private matDialog: MatDialog,
         elevationProvider: ElevationProvider,
         private toastService: ToastService,
         private routesService: RoutesService,
@@ -238,7 +238,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     public openUpdatePointDialog(e: Event) {
         this.suppressEvents(e);
-        let compoent = this.mdDialog.open(UpdatePointDialogComponent);
+        let compoent = this.matDialog.open(UpdatePointDialogComponent);
         compoent.componentInstance.title = this.title;
         compoent.componentInstance.description = this.description;
         compoent.componentInstance.websiteUrl = this.url;
@@ -264,7 +264,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public showImage() {
-        let dialog = this.mdDialog.open(ImageDialogCompnent);
+        let dialog = this.matDialog.open(ImageDialogCompnent);
         dialog.componentInstance.title = this.title;
         dialog.componentInstance.imagesUrls = [...this.poiExtended.imagesUrls];
         if (this.imagePreviewUrl && !this.poiExtended.imagesUrls.find(s => s === this.imagePreviewUrl)) {

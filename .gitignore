@@ -192,6 +192,7 @@ _Pvt_Extensions/
 ModelManifest.xml
 /.vs/config
 *.sqlite
+/IsraelHiking.Web/package-lock.json
 /IsraelHiking.Web/wwwroot/**/*.*
 /IsraelHiking.Web/sources/translations/*.po
 /IsraelHiking.Web/coverage

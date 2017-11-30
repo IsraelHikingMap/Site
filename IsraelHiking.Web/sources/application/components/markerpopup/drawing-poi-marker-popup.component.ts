@@ -1,6 +1,7 @@
 ﻿import { Component, ApplicationRef, HostListener, ViewChild, ElementRef } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { MdDialog, ENTER } from "@angular/material";
+import { MatDialog } from "@angular/material";
+import { ENTER } from "@angular/cdk/keycodes";
 import * as _ from "lodash";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
@@ -34,7 +35,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     constructor(resources: ResourcesService,
         httpClient: HttpClient,
-        private mdDialog: MdDialog,
+        private matDialog: MatDialog,
         elevationProvider: ElevationProvider,
         applicationRef: ApplicationRef,
         private mapService: MapService,
@@ -112,7 +113,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     public openAddPointDialog(e: Event) {
         this.suppressEvents(e);
-        let compoent = this.mdDialog.open(UpdatePointDialogComponent);
+        let compoent = this.matDialog.open(UpdatePointDialogComponent);
         compoent.componentInstance.title = this.title;
         compoent.componentInstance.source = "OSM";
         compoent.componentInstance.elementType = "node";

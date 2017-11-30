@@ -1,4 +1,4 @@
-﻿import { MdSnackBar } from "@angular/material";
+﻿import { MatSnackBar } from "@angular/material";
 import { ToastService } from "./toast.service";
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogMockCreator } from "./resources.service.spec";
@@ -7,7 +7,7 @@ export class ToastServiceMockCreator {
     public toastService: ToastService;
     public resourcesService: ResourcesService;
     constructor() {
-        let snackBar = new MdSnackBar(null, null, null, null);
+        let snackBar = new MatSnackBar(null, null, null, null);
         spyOn(snackBar, "open").and.returnValue(null);
         this.resourcesService = new ResourcesService(new GetTextCatalogMockCreator().getTextCatalogService);
         this.toastService = new ToastService(this.resourcesService, snackBar);

@@ -3,11 +3,13 @@ image: Visual Studio 2017
 configuration: Release
 install:
 - ps: >-
-    Install-Product node 6.10
+    Install-Product node 8.9
 
     node -v
 
-    npm install -g @angular/cli@1.4.4 --silent
+    npm install -g npm@5.2.0
+
+    npm install -g @angular/cli@1.5.5 --silent
 
 before_build:
 - ps: dotnet restore

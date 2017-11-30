@@ -26,7 +26,7 @@
         </div>
         <div fxFlex>
             <label [hidden]="imagePreviewUrl">
-                <a mat-button class="flex-center" [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsEvent="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
+                <a mat-button class="flex-center" [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
                 <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" />
             </label>
             <img fxFill [hidden]="!imagePreviewUrl"
@@ -55,22 +55,22 @@
     </div>
     <div fxLayout="row">
         <div fxFlex [hidden]="isHideEditMode()">
-            <button mat-button fxFill (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Edit POI"><i class="fa icon-pencil"></i></button>
+            <button mat-button fxFill (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
         </div>
         <div fxFlex [hidden]="!isEditMode()">
-            <button mat-button fxFill (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Save POI"><i class="fa icon-check"></i></button>
+            <button mat-button fxFill (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
         </div>
         <div fxFlex [hidden]="!isRoute()">
-            <button mat-button fxFill (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Convert POI to route"><i class="fa icon-plus"></i></button>
+            <button mat-button fxFill (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
         </div>
         <div fxFlex [hidden]="isRoute()">
-            <button mat-button fxFill (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Convert POI to point"><i class="fa icon-plus"></i></button>
+            <button mat-button fxFill (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
         </div>
         <div fxFlex>
-            <button mat-button fxFill (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Clear and close"><i class="fa icon-eye-slash"></i></button>
+            <button mat-button fxFill (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
         </div>
         <div fxFlex [hidden]="source !== 'Off-road'">
-            <a mat-button [href]="getOffRoadUrl()" fxFill [target]="'_blank'" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsEvent="Open in off-road"><i class="fa icon-off-road"></i></a>
+            <a mat-button [href]="getOffRoadUrl()" fxFill [target]="'_blank'" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Open in off-road"><i class="fa icon-off-road"></i></a>
         </div>
         <div fxFlex>
             <button mat-button fxFill (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="before"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>

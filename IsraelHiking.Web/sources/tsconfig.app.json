@@ -2,11 +2,10 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "module": "es2016",
+    "module": "amd",
     "baseUrl": "",
     "types": [
-      "google.visualization",
-      "leaflet.gridlayer.googlemutant"
+      "google.visualization"
     ]
   },
   "exclude": [

@@ -1,6 +1,6 @@
 ﻿import { Component, Injector, Type, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Location, LocationStrategy, PathLocationStrategy } from "@angular/common";
-import { Angulartics2GoogleAnalytics, Angulartics2 } from "angulartics2";
+import { Angulartics2 } from "angulartics2";
 import * as L from "leaflet";
 import "leaflet.locatecontrol";
 
@@ -46,7 +46,6 @@ export class MainMapComponent extends BaseMapComponent {
         // needed for initialization
         dataConatnerService: DataContainerService,
         dragAndDropService: DragAndDropService,
-        angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
         angulartics2: Angulartics2
     ) {
         super(resources);

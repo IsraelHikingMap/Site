@@ -1,5 +1,5 @@
 ﻿import { Component, ViewEncapsulation } from "@angular/core";
-import { MdDialogRef, MdSelectChange } from "@angular/material";
+import { MatDialogRef, MatSelectChange } from "@angular/material";
 import * as _ from "lodash";
 
 import { BaseMapComponent } from "../base-map.component";
@@ -36,7 +36,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     private currentImageFile: File;
 
     constructor(resources: ResourcesService,
-        public dialogRef: MdDialogRef<UpdatePointDialogComponent>,
+        public dialogRef: MatDialogRef<UpdatePointDialogComponent>,
         private fileService: FileService,
         private toastService: ToastService,
         private poiService: PoiService,
@@ -75,13 +75,13 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         for (let category of this.categories) {
             let icon = _.find(category.icons, iconToFind => iconToFind.icon === markerIcon);
             if (icon) {
-                this.selectCategory({ value: category } as MdSelectChange);
+                this.selectCategory({ value: category } as MatSelectChange);
                 this.selectIcon(icon);
             }
         }
     }
 
-    public selectCategory(e: MdSelectChange) {
+    public selectCategory(e: MatSelectChange) {
         this.categories.forEach(c => c.isSelected = false);
         this.selectedCategory = e.value;
         this.selectedCategory.isSelected = true;

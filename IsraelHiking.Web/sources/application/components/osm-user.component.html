@@ -1,8 +1,8 @@
 ﻿<div class="leaflet-bar" [hidden]="userService.isLoggedIn()" [dir]="resources.direction">
     <div class="control-container">
-        <a class="control-icon-first" (click)="login($event)" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="OSM login - sign-in icon"><i class="fa icon-sign-in"></i></a>
+        <a class="control-icon-first" (click)="login($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM login - sign-in icon"><i class="fa icon-sign-in"></i></a>
         <div class="pull-right">
-            <div class="control-container-item gutters cursor-pointer" (click)="login($event)" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="OSM login - face and text">
+            <div class="control-container-item gutters cursor-pointer" (click)="login($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM login - face and text">
                 <span class="pull-right"><i class="fa icon-frown-o fa-lg"></i></span>
                 <span class="pull-right hidden-xs"> {{resources.unknownUser}}</span>
             </div>
@@ -13,7 +13,7 @@
 
 <div class="leaflet-bar" [hidden]="!userService.isLoggedIn()">
     <div class="control-container">
-        <a class="control-icon-first" (click)="userService.logout()" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="OSM logout"><i class="fa icon-sign-out"></i></a>
+        <a class="control-icon-first" (click)="userService.logout()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout"><i class="fa icon-sign-out"></i></a>
         <div class="pull-right">
             <div class="control-container-item gutters">
                 <img [hidden]="!userService.imageUrl" class="pull-right" [src]="userService.imageUrl" alt="" width="16" height="16" />
@@ -21,6 +21,6 @@
                 <span class="pull-right hidden-xs"> {{userService.displayName}}</span>
             </div>
         </div>
-        <a class="cursor-pointer control-icon-last" (click)="openUserDetails($event)" angulartics2On="click" angularticsCategory="OSM" angularticsEvent="OSM user details open"><i class="fa icon-wrench"></i></a>
+        <a class="cursor-pointer control-icon-last" (click)="openUserDetails($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user details open"><i class="fa icon-wrench"></i></a>
     </div>
 </div>

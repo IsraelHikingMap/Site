@@ -86,7 +86,7 @@ In order to be able to build this site you'll need some tools:
   * Select IsraelHiking.DataAccess from the Default project dropdown
   * Type the following commands at the `PM>` prompt. Most of the commands may take a while. Ignore all _WARN_ messsages.
     ```
-    npm install -g @angular/cli@1.4.4 --loglevel error
+    npm install -g @angular/cli@1.5.5 --loglevel error
     ```
 # Starting a debug session
 [See the relevant page in our wiki](https://github.com/IsraelHikingMap/Site/wiki/Debug-Environment-Setup)
