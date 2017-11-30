@@ -410,6 +410,7 @@ export class ResourcesService {
     public legendDryRiverbed: string;
     public legendCemetary: string;
     public legendQuarry: string;
+    public legendEmpty: string;
 
     constructor(private gettextCatalog: GetTextCatalogService) {
         this.availableLanguages = [
@@ -837,6 +838,7 @@ export class ResourcesService {
         this.legendCemetary = this.gettextCatalog.getString("Cemetary");
         this.legendQuarry = this.gettextCatalog.getString("Quarry");
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
+        this.legendEmpty = this.gettextCatalog.getString("No legend for this map...");
 
         this.currentLanguage = language;
         this.languageChanged.next(this.currentLanguage);

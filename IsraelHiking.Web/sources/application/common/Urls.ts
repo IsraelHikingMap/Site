@@ -1,28 +1,28 @@
 ﻿export class Urls {
     // api
-    public static baseAddress = window.location.protocol + "//" + window.location.host;
-    public static apiBase = Urls.baseAddress + "/api/";
-    public static urls = Urls.apiBase + "urls/";
-    public static elevation = Urls.apiBase + "elevation";
-    public static routing = Urls.apiBase + "routing";
-    public static itmGrid = Urls.apiBase + "itmGrid";
-    public static files = Urls.apiBase + "files";
-    public static fileFormats = Urls.files + "/formats";
-    public static openFile = Urls.apiBase + "files/open";
-    public static search = Urls.apiBase + "search/";
-    public static images = Urls.apiBase + "images/";
-    public static colors = Urls.images + "colors/";
-    public static translations = Urls.baseAddress + "/translations/";
-    public static osm = Urls.apiBase + "osm/";
-    public static osmConfiguration = Urls.osm + "configuration";
-    public static osmTrace = Urls.osm + "trace/";
-    public static userLayers = Urls.apiBase + "userLayers/";
-    public static poi = Urls.apiBase + "poi/";
-    public static poiCategories = Urls.poi + "categories/";
-    public static rating = Urls.apiBase + "rating/";
+    public static readonly baseAddress = window.location.protocol + "//" + window.location.host;
+    public static readonly apiBase = Urls.baseAddress + "/api/";
+    public static readonly urls = Urls.apiBase + "urls/";
+    public static readonly elevation = Urls.apiBase + "elevation";
+    public static readonly routing = Urls.apiBase + "routing";
+    public static readonly itmGrid = Urls.apiBase + "itmGrid";
+    public static readonly files = Urls.apiBase + "files";
+    public static readonly fileFormats = Urls.files + "/formats";
+    public static readonly openFile = Urls.apiBase + "files/open";
+    public static readonly search = Urls.apiBase + "search/";
+    public static readonly images = Urls.apiBase + "images/";
+    public static readonly colors = Urls.images + "colors/";
+    public static readonly translations = Urls.baseAddress + "/translations/";
+    public static readonly osm = Urls.apiBase + "osm/";
+    public static readonly osmConfiguration = Urls.osm + "configuration";
+    public static readonly osmTrace = Urls.osm + "trace/";
+    public static readonly userLayers = Urls.apiBase + "userLayers/";
+    public static readonly poi = Urls.apiBase + "poi/";
+    public static readonly poiCategories = Urls.poi + "categories/";
+    public static readonly rating = Urls.apiBase + "rating/";
     
-    public static DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
-    public static MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
-    public static OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";
-    public static OVERLAY_MTB_ADDRESS = "/OverlayMTB/{z}/{x}/{y}.png";
+    public static readonly DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
+    public static readonly MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
+    public static readonly OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";
+    public static readonly OVERLAY_MTB_ADDRESS = "/OverlayMTB/{z}/{x}/{y}.png";
 }

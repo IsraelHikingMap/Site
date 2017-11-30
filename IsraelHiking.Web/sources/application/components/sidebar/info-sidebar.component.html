@@ -1,6 +1,6 @@
 ﻿<div [dir]="resources.direction">
-    <mat-tab-group [(selectedIndex)]="selectedTabIndex" [dynamicHeight]="'true'">
-        <mat-tab label="{{resources.about}}" (click)="setState('about')" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info about select">
+    <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabChanged($event)" [dynamicHeight]="'true'">
+        <mat-tab label="{{resources.about}}" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info about select">
             <div>
                 <p><span [innerHtml]="resources.infoSubheader"></span></p>
                 <h4>{{resources.infoHelpfulLinks}}</h4>
@@ -27,7 +27,10 @@
                 </p>
             </div>
         </mat-tab>
-        <mat-tab label="{{resources.legend}}" [disabled]="legendSections.length === 0" (click)="setState('legend')" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info legend select">
+        <mat-tab label="{{resources.legend}}" angulartics2On="click" angularticsCategory="Info" angularticsEvent="Info legend select">
+            <div [hidden]="legendSections.length > 0">
+                <p>{{resources.legendEmpty}}</p>
+            </div>
             <div *ngFor="let section of legendSections" id="{{section.id}}">
                 <div class="legend-section">
                     <div class="legend-section-header">

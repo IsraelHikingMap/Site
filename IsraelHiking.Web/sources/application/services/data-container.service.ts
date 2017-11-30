@@ -9,34 +9,23 @@ import { FileService } from "./file.service";
 import { HashService } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { OsmUserService } from "./osm-user.service";
-import { Deferred } from "../common/deferred";
 import * as Common from "../common/IsraelHiking";
-
-
 
 @Injectable()
 export class DataContainerService {
-    public initializationFinished: Promise<any>;
     public shareUrlId: string;
 
     constructor(
-        private osmUserService: OsmUserService,
-        private layersService: LayersService,
-        private routesService: RoutesService,
-        private mapService: MapService,
-        private hashService: HashService,
-        private fileService: FileService,
-        private resourcesService: ResourcesService,
-        private toastService: ToastService) {
+        private readonly osmUserService: OsmUserService,
+        private readonly layersService: LayersService,
+        private readonly routesService: RoutesService,
+        private readonly mapService: MapService,
+        private readonly hashService: HashService,
+        private readonly fileService: FileService,
+        private readonly resourcesService: ResourcesService,
+        private readonly toastService: ToastService) {
 
-        let deferred = new Deferred<any>();
         this.shareUrlId = "";
-        this.initializationFinished = deferred.promise;
-        this.layersService.initializationFinished.then(
-            () => this.addDataFromHash(deferred),
-            () => this.addDataFromHash(deferred)
-        );
-        
     }
 
     public setData(dataContainer: Common.DataContainer) {
@@ -71,33 +60,25 @@ export class DataContainerService {
         } as Common.DataContainer;
     }
 
-    private addDataFromHash = (deferred: Deferred<any>) => {
+    public initialize = async () => {
+        await this.layersService.initialize();
         if (this.hashService.shareUrl) {
-            this.osmUserService.getShareUrl(this.hashService.shareUrl)
-                .then((shareUrl: Common.ShareUrl) => {
-                    this.setData(shareUrl.dataContainer);
-                    this.shareUrlId = shareUrl.id;
-                    this.toastService.info(shareUrl.description, shareUrl.title);
-                    deferred.resolve();
-                }, () => {
-                    this.hashService.shareUrl = "";
-                    this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
-                    deferred.resolve();
-                });
-            return;
+            try {
+                let shareUrl = await this.osmUserService.getShareUrl(this.hashService.shareUrl);
+                this.setData(shareUrl.dataContainer);
+                this.shareUrlId = shareUrl.id;
+                this.toastService.info(shareUrl.description, shareUrl.title);
+            } catch (ex) {
+                this.hashService.shareUrl = "";
+                this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
+            }
         }
-        if (this.hashService.externalUrl) {
-            this.fileService.openFromUrl(this.hashService.externalUrl)
-                .then((data) => {
-                    data.baseLayer = this.hashService.getBaseLayer();
-                    this.setData(data);
-                    deferred.resolve();
-                }, () => {
-                    deferred.reject();
-                });
+        else if (this.hashService.externalUrl) {
+            let data = await this.fileService.openFromUrl(this.hashService.externalUrl);
+            data.baseLayer = this.hashService.getBaseLayer();
+            this.setData(data);
         } else {
             this.layersService.addExternalBaseLayer(this.hashService.getBaseLayer());
-            deferred.resolve();
         }
     }
 }

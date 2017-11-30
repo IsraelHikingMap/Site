@@ -250,4 +250,14 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
     ],
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })
-export class ApplicationModule { }
+export class ApplicationModule {
+    constructor(dataContainerService: DataContainerService) {
+        console.log("Starting IHM Application Initialization");
+        dataContainerService.initialize().then(() => {
+            console.log("Finished IHM Application Initialization");
+        }, (error) => {
+            console.error("Failed IHM Application Initialization");
+            console.error(error);
+        });
+    }
+}

@@ -9,7 +9,6 @@ import { OsmUserService } from "../osm-user.service";
 import { PoiService } from "../poi.service";
 import { CategoriesLayerFactory } from "./categories-layers.factory";
 import { Urls } from "../../common/Urls";
-import { Deferred } from "../../common/deferred";
 import * as Common from "../../common/IsraelHiking";
 
 export interface ILayer extends Common.LayerData {
@@ -62,11 +61,10 @@ export class LayersService {
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public selectedBaseLayer: IBaseLayer;
-    public initializationFinished: Promise<any>;
 
-    constructor(private mapService: MapService,
-        private resourcesService: ResourcesService,
-        private osmUserService: OsmUserService,
+    constructor(private readonly mapService: MapService,
+        private readonly resourcesService: ResourcesService,
+        private readonly osmUserService: OsmUserService,
         categoriesLayersFactory: CategoriesLayerFactory,
         poiService: PoiService,
     ) {
@@ -75,12 +73,6 @@ export class LayersService {
         this.overlays = [];
         this.overlayZIndex = 10;
         this.initializeDefaultLayers();
-        let deferred = new Deferred<any>();
-        this.initializationFinished = deferred.promise;
-        this.osmUserService.initializationFinished.then(
-            () => this.onOsmUserServiceInitializationFinished(deferred),
-            () => this.onOsmUserServiceInitializationFinished(deferred)
-        );
 
         for (let categoryType of poiService.getCategoriesTypes()) {
             let layer = categoriesLayersFactory.get(categoryType);
@@ -323,7 +315,9 @@ export class LayersService {
         }
     }
     
-    private onOsmUserServiceInitializationFinished = (deferred: Deferred<any>) => {
+    public initialize = async () => {
+        await this.osmUserService.initialize();
+
         this.onUserLayersChanged();
 
         this.selectBaseLayerAccordingToStorage(true);
@@ -340,8 +334,6 @@ export class LayersService {
         
         this.resourcesService.languageChanged.subscribe(this.onLanguageChange);
         this.osmUserService.userLayersChanged.subscribe(this.onUserLayersChanged);
-        
-        deferred.resolve();
     }
     
     public addExternalBaseLayer = (layerData: Common.LayerData) => {

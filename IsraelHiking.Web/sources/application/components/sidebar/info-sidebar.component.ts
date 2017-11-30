@@ -7,11 +7,9 @@ import { MapService } from "../../services/map.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers/layers.service";
-import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
 import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 
-type InfoState = "legend" | "about";
 type LegendItemType = "POI" | "Way";
 
 export interface ILegendItem {
@@ -37,7 +35,6 @@ export interface ILegendSection {
     styleUrls: ["./info-sidebar.component.css"]
 })
 export class InfoSidebarComponent extends BaseMapComponent {
-    public state: InfoState;
     public legendSections: ILegendSection[];
     public visibleSectionId: string;
     public selectedTabIndex: number;
@@ -46,14 +43,12 @@ export class InfoSidebarComponent extends BaseMapComponent {
         private dialog: MdDialog,
         private sidebarService: SidebarService,
         private mapService: MapService,
-        private layersService: LayersService,
-        private dataContainerService: DataContainerService) {
+        private layersService: LayersService) {
         super(resources);
 
         this.visibleSectionId = null;
         this.selectedTabIndex = 0;
-        this.initalizeLegendSections();
-        this.state = "about";
+        this.legendSections = [];
 
         this.resources.languageChanged.subscribe(() => {
             this.initalizeLegendSections();
@@ -91,9 +86,8 @@ export class InfoSidebarComponent extends BaseMapComponent {
         }
     };
 
-    public setState = (state: InfoState) => {
-        this.state = state;
-        if (state === "legend") {
+    public selectedTabChanged(tabIndex: number) {
+        if (tabIndex === 1) {
             this.initalizeLegendSections();
         }
     }
@@ -123,6 +117,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private initalizeLegendSections() {
+        console.log("initalizeLegendSections");
         let id = 1;
         this.legendSections = [
             {
@@ -1366,15 +1361,13 @@ export class InfoSidebarComponent extends BaseMapComponent {
         ];
         // End Of Legend content definition //
 
-        this.dataContainerService.initializationFinished.then(() => {
-            if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP) {
-                this.removeMtbUnwantedLegend();
-            } else if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP) {
-                this.removeIhmUnwantedLegend();
-            } else if (this.layersService.selectedBaseLayer.key === LayersService.ESRI) {
-                this.legendSections = [];
-            }
-        });
+        if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP) {
+            this.removeMtbUnwantedLegend();
+        } else if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP) {
+            this.removeIhmUnwantedLegend();
+        } else if (this.layersService.selectedBaseLayer.key === LayersService.ESRI) {
+            this.legendSections = [];
+        }
         let section = _.find(this.legendSections, sectionToFind => sectionToFind.id === this.visibleSectionId);
         if (!section) {
             return;
