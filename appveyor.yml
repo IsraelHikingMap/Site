@@ -7,9 +7,9 @@ install:
 
     node -v
 
-    npm install -g npm@5.2.0
+    npm install -g npm@5.2.0 --loglevel=error
 
-    npm install -g @angular/cli@1.5.5
+    npm install -g @angular/cli@1.5.5 --loglevel=error
 
 before_build:
 - ps: dotnet restore
