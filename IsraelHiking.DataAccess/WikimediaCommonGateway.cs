@@ -1,6 +1,4 @@
 ﻿using System;
-using System.Data;
-using System.Data.Common;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
@@ -9,10 +7,8 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using NetTopologySuite.Features;
 using Newtonsoft.Json.Linq;
 using WikiClientLibrary.Client;
 using WikiClientLibrary.Pages;

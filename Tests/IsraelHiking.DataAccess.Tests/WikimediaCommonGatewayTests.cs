@@ -1,13 +1,7 @@
-﻿using System.Data.Common;
-using System.IO;
-using System.Text.RegularExpressions;
-using GeoAPI.Geometries;
-using IsraelHiking.Common;
-using Microsoft.Data.Sqlite;
+﻿using IsraelHiking.Common;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Nest;
 using NSubstitute;
 
 namespace IsraelHiking.DataAccess.Tests

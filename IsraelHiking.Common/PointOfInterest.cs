@@ -1,6 +1,4 @@
-﻿using NetTopologySuite.Features;
-
-namespace IsraelHiking.Common
+﻿namespace IsraelHiking.Common
 {
     public class PointOfInterest
     {
