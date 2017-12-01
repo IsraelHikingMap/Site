@@ -15,6 +15,7 @@ install:
 
 before_build:
 - ps: dotnet restore
+- ps: (Get-Content $env:appdata\npm\ng.cmd).Replace("node ", "node --max-old-space-size=2048 ") | Set-Content $env:appdata\npm\ng.cmd
 build:
   project: IsraelHiking.sln
   parallel: true
