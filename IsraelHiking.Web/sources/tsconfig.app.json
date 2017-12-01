@@ -2,12 +2,15 @@
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "outDir": "../out-tsc/app",
-    "module": "amd",
+    "module": "esnext",
     "baseUrl": "",
     "types": [
       "google.visualization"
     ]
   },
+  "include": [
+    "**/*.ts"
+  ],
   "exclude": [
     "test.ts",
     "**/*.spec.ts"
