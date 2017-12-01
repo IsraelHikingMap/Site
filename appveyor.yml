@@ -3,6 +3,8 @@ image: Visual Studio 2017
 configuration: Release
 install:
 - ps: >-
+     iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
     Install-Product node 6.10
 
     node -v
@@ -19,6 +21,8 @@ build:
   verbosity: minimal
 after_test:
 - ps: >-
+    $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
     $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
 
     Write-Host $PostBuildTests
