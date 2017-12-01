@@ -9,7 +9,7 @@ install:
 
     npm install -g npm@5.2.0
 
-    npm install -g @angular/cli@1.5.5 --silent
+    npm install -g @angular/cli@1.5.5
 
 before_build:
 - ps: dotnet restore
