@@ -88,7 +88,7 @@ export class OsmUserService {
                 await this.getUserDetails();
             }
         } catch (ex) {
-            console.error("Unable to get OSM configuration");
+            console.error(`Unable to get OSM configuration: ${JSON.stringify(ex)}`);
         }
     }
 

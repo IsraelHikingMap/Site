@@ -1,6 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { LocalStorage } from "ngx-store";
-import osmAuth = require("osm-auth");
+import * as osmAuth from "osm-auth";
 
 @Injectable()
 export class AuthorizationService {
