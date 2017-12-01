@@ -3,7 +3,7 @@ image: Visual Studio 2017
 configuration: Release
 install:
 - ps: >-
-    Install-Product node 8.9
+    Install-Product node 6.10
 
     node -v
 
