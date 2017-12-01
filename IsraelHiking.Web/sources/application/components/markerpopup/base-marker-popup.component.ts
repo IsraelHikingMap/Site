@@ -1,5 +1,6 @@
-﻿import { ApplicationRef, ViewRef } from "@angular/core";
+﻿import { ApplicationRef, ViewRef, ViewChildren, QueryList } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
+import { MatTooltip } from "@angular/material";
 import * as L from "leaflet";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -19,6 +20,9 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     public latLng: L.LatLng;
     public itmCoordinates: INorthEast;
     public hideCoordinates: boolean;
+
+    @ViewChildren(MatTooltip)
+    public tooltips: QueryList<MatTooltip>;
 
     public remove: () => void;
 
@@ -69,11 +73,12 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
             this.applicationRef.attachView(hostView);
         });
         this.marker.on("popupclose", () => {
-            // to allow tooltip to close
+            if (this.tooltips) {
+                this.tooltips.forEach(tooltip => tooltip.hide());
+            }
             setTimeout(() => {
-                if (!this.marker.getPopup().isOpen()) {
-                    this.applicationRef.detachView(hostView);
-                }   
+                // Allow time for tooltips to close.
+                this.applicationRef.detachView(hostView);
             }, 1000);
         });
     }
