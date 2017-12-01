@@ -8,9 +8,6 @@
       "google.visualization"
     ]
   },
-  "include": [
-    "**/*.ts"
-  ],
   "exclude": [
     "test.ts",
     "**/*.spec.ts"
