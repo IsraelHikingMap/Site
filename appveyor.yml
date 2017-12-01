@@ -3,17 +3,15 @@ image: Visual Studio 2017
 configuration: Release
 install:
 - ps: >-
-    iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
-    Install-Product node 6.10
+    Install-Product node 8.9
 
     node -v
+
+    npm -v
 
     npm install -g npm@5.2.0 --loglevel=error
 
     npm install -g @angular/cli@1.5.5 --loglevel=error
-
-    $blockRdp = $true;
 
 before_build:
 - ps: dotnet restore
