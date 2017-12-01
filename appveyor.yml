@@ -13,6 +13,8 @@ install:
 
     npm install -g @angular/cli@1.5.5 --loglevel=error
 
+    $blockRdp = $true;
+
 before_build:
 - ps: dotnet restore
 build:
@@ -21,7 +23,6 @@ build:
   verbosity: minimal
 after_test:
 - ps: >-
-    $blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
 
     $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
 
