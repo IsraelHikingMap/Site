@@ -98,10 +98,10 @@
                         <div fxFlex="100" fxFlex.gt-md="67" class="margin-10">
                             <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                                 <div fxFlex="75">
-                                    <div [hidden]="editMode">
+                                    <div [hidden]="isShareUrlInEditMode(shareUrl)">
                                         <h4>{{shareUrl.title}} - {{shareUrl.description}}</h4>
                                     </div>
-                                    <div [hidden]="!editMode">
+                                    <div [hidden]="!isShareUrlInEditMode(shareUrl)">
                                         <mat-form-field>
                                             <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
                                         </mat-form-field>
@@ -112,8 +112,8 @@
                                 </div>
                                 <div fxFlex>
                                     <div fxLayout="column" fxLayoutAlign="space-between stretch">
-                                        <button [hidden]="editMode" mat-button (click)="editMode = true" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
-                                        <button [hidden]="!editMode" mat-button (click)="editMode = false; userService.updateShareUrl(shareUrl);" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
+                                        <button [hidden]="isShareUrlInEditMode(shareUrl)" mat-button (click)="shareUrlInEditMode = shareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
+                                        <button [hidden]="!isShareUrlInEditMode(shareUrl)" mat-button (click)="updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
                                     </div>
                                 </div>
                             </div>

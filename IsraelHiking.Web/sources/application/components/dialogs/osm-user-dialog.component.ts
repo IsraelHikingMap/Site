@@ -47,6 +47,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public ranks: IRank[];
     public filteredShareUrls: Common.ShareUrl[];
     public filteredTraces: ITrace[];
+    public shareUrlInEditMode: Common.ShareUrl;
     public state: IOsmUserDialogState;
     public file: File;
     public loadingTraces: boolean;
@@ -81,6 +82,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.osmTraceLayer = L.layerGroup([]);
         this.mapService.map.addLayer(this.osmTraceLayer);
         this.searchTerm = new FormControl();
+        this.shareUrlInEditMode = null;
         this.state = this.sharedStorageService.get(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY) || {
             scrollPosition: 0,
             searchTerm: "",
@@ -341,5 +343,15 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
 
     public deleteShareUrl(shareUrl: Common.ShareUrl) {
         this.userService.deleteShareUrl(shareUrl);
+    }
+
+    public isShareUrlInEditMode(shareUrl: Common.ShareUrl) {
+        return this.shareUrlInEditMode === shareUrl;
+    }
+
+    public async updateShareUrl(shareUrl: Common.ShareUrl) {
+        this.shareUrlInEditMode = null;
+        await this.userService.updateShareUrl(shareUrl);
+        this.toastService.success(this.resources.dataUpdatedSuccefully);
     }
 }
