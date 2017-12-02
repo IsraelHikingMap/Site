@@ -18,6 +18,7 @@ import {
     MatTooltipModule,
     MatSelectModule,
     MatProgressBarModule,
+    MatProgressSpinnerModule,
     MatTabsModule,
     MatRadioModule,
     MatCheckboxModule
@@ -120,6 +121,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         MatTooltipModule,
         MatSelectModule,
         MatProgressBarModule,
+        MatProgressSpinnerModule,
         MatTabsModule,
         MatRadioModule,
         MatCheckboxModule,

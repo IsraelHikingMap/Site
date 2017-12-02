@@ -13,11 +13,7 @@
             </h3>
         </div>
     </div>
-    <div class="cssload-loader" [hidden]="!isLoading">
-        <div class="cssload-inner cssload-one"></div>
-        <div class="cssload-inner cssload-two"></div>
-        <div class="cssload-inner cssload-three"></div>
-    </div>
+    <mat-spinner [hidden]="!isLoading"></mat-spinner>
     <div fxLayout="row" [hidden]="!isEditMode()" fxLayoutGap="10px">
         <div fxFlex="70" class="margin-10-reverse">
             <mat-form-field fxFill hintLabel="{{resources.itsYourTimeToShine}}">

@@ -80,11 +80,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="cssload-loader" [hidden]="!loadingTraces">
-                    <div class="cssload-inner cssload-one"></div>
-                    <div class="cssload-inner cssload-two"></div>
-                    <div class="cssload-inner cssload-three"></div>
-                </div>
+                <mat-spinner [hidden]="!loadingTraces"></mat-spinner>
                 <p [hidden]="userService.traces.length !== 0 || loadingTraces">{{resources.noTraces}}</p>
             </mat-tab>
             <mat-tab label="{{resources.myShares}}">
@@ -121,11 +117,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="cssload-loader" [hidden]="!loadingShareUrls">
-                    <div class="cssload-inner cssload-one"></div>
-                    <div class="cssload-inner cssload-two"></div>
-                    <div class="cssload-inner cssload-three"></div>
-                </div>
+                <mat-spinner [hidden]="!loadingShareUrls"></mat-spinner>
                 <p [hidden]="userService.shareUrls.length !== 0 || loadingShareUrls">{{resources.noShares}}</p>
             </mat-tab>
         </mat-tab-group>
