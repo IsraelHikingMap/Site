@@ -213,6 +213,12 @@ export class ResourcesService {
     public flowers: string;
     public updateCurrentShare: string;
     public generateMarkersForAllPoints: string;
+    public yes: string;
+    public no: string;
+    public ok: string;
+    public cancel: string;
+    public areYouSure: string;
+    public deletionOf: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -640,6 +646,12 @@ export class ResourcesService {
         this.flowers = this.gettextCatalog.getString("Flowers");
         this.updateCurrentShare = this.gettextCatalog.getString("Update current share");
         this.generateMarkersForAllPoints = this.gettextCatalog.getString("Generate markers for all route points");
+        this.yes = this.gettextCatalog.getString("Yes");
+        this.no = this.gettextCatalog.getString("No");
+        this.ok = this.gettextCatalog.getString("OK");
+        this.cancel = this.gettextCatalog.getString("Cancel");
+        this.areYouSure = this.gettextCatalog.getString("Are you sure?");
+        this.deletionOf = this.gettextCatalog.getString("Deletion of");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

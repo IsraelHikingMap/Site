@@ -18,9 +18,9 @@ describe("ToastService", () => {
     it("should raise toast", () => {
         let service = new ToastServiceMockCreator().toastService;
 
-        expect(() => service.error("")).not.toThrow()
-        expect(() => service.warning("")).not.toThrow()
-        expect(() => service.info("")).not.toThrow()
-        expect(() => service.success("")).not.toThrow()
+        expect(() => service.error("")).not.toThrow();
+        expect(() => service.warning("")).not.toThrow();
+        expect(() => service.info("")).not.toThrow();
+        expect(() => service.success("")).not.toThrow();
     });
 });

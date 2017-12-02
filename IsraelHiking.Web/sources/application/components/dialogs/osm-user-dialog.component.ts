@@ -200,7 +200,8 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
 
     public deleteTrace(trace: ITrace) {
         trace.isInEditMode = false;
-        this.userService.deleteOsmTrace(trace);
+        let message = `${this.resources.deletionOf} ${trace.name}, ${this.resources.areYouSure}`;
+        this.toastService.confirm(message, () => this.userService.deleteOsmTrace(trace), () => {}, true);
     }
 
     public editInOsm(trace: ITrace) {
@@ -342,7 +343,8 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     }
 
     public deleteShareUrl(shareUrl: Common.ShareUrl) {
-        this.userService.deleteShareUrl(shareUrl);
+        let message = `${this.resources.deletionOf} ${this.userService.getShareUrlDisplayName(shareUrl)}, ${this.resources.areYouSure}`;
+        this.toastService.confirm(message, () => this.userService.deleteShareUrl(shareUrl), () => { }, true);
     }
 
     public isShareUrlInEditMode(shareUrl: Common.ShareUrl) {

@@ -98,6 +98,7 @@ import { UpdatePointDialogComponent } from "./components/dialogs/update-point-di
 import { ImageDialogCompnent } from "./components/dialogs/image-dialog.component";
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
 import { IhmLinkComponent } from "./components/ihm-link.component";
+import { ConfirmDialogComponent } from "./components/dialogs/confirm-dialog.component";
 
 export function getWindow() { return window; }
 export function getRoutesService(routesService: RoutesService) { return routesService; }
@@ -167,7 +168,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         UpdatePointDialogComponent,
         ImageDialogCompnent,
         TermsOfServiceDialogComponent,
-        IhmLinkComponent
+        IhmLinkComponent,
+        ConfirmDialogComponent
     ],
     providers: [
         GestureConfig,
@@ -245,7 +247,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         UpdatePointDialogComponent,
         ImageDialogCompnent,
         TermsOfServiceDialogComponent,
-        IhmLinkComponent
+        IhmLinkComponent,
+        ConfirmDialogComponent
     ],
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })

@@ -109,6 +109,10 @@ export class ShareDialogComponent extends BaseMapComponent {
         }
     }
 
+    public getDisplayName() {
+        return this.osmUserService.getDisplayNameFromTitleAndDescription(this.title, this.description);
+    }
+
     public uploadShareUrl = () => {
         this.isLoading = true;
         let shareUrl = this.createShareUrlObject();

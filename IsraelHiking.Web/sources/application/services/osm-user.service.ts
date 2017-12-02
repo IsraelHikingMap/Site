@@ -111,6 +111,14 @@ export class OsmUserService {
         return `/#!/?s=${id}`;
     }
 
+    public getShareUrlDisplayName(shareUrl: Common.ShareUrl): string {
+        return this.getDisplayNameFromTitleAndDescription(shareUrl.title, shareUrl.description);
+    }
+
+    public getDisplayNameFromTitleAndDescription(title: string, description: string): string {
+        return `${title} - ${description}`;
+    }
+
     public refreshDetails = (): Promise<any> => {
         let getTracesPromise = this.getTraces();
         let getSiteUtlsPromise = this.getShareUrls();
@@ -212,8 +220,8 @@ export class OsmUserService {
         return this.httpClient.put(Urls.urls + shareUrl.id, shareUrl).toPromise() as Promise<Common.ShareUrl>;
     }
 
-    public deleteShareUrl = (shareUrl: Common.ShareUrl): Promise<Common.ShareUrl> => {
-        let promise = this.httpClient.delete(Urls.urls + shareUrl.id).toPromise() as Promise<Common.ShareUrl>;
+    public deleteShareUrl = (shareUrl: Common.ShareUrl): Promise<any> => {
+        let promise = this.httpClient.delete(Urls.urls + shareUrl.id, { responseType: "text" }).toPromise() as Promise<any>;
         promise.then(() => {
             _.remove(this.shareUrls, s => s.id === shareUrl.id);
             this.shareUrlsChanged.next();

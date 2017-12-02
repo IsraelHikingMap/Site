@@ -99,7 +99,7 @@
                             <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
                                 <div fxFlex="75">
                                     <div [hidden]="isShareUrlInEditMode(shareUrl)">
-                                        <h4>{{shareUrl.title}} - {{shareUrl.description}}</h4>
+                                        <h4>{{userService.getShareUrlDisplayName(shareUrl)}}</h4>
                                     </div>
                                     <div [hidden]="!isShareUrlInEditMode(shareUrl)">
                                         <mat-form-field>

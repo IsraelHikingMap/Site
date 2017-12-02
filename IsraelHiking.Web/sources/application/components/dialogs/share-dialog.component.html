@@ -32,7 +32,7 @@
                 <img [src]="imageUrl" fxFill height="100" />
             </div>
             <div fxLayout="row">
-                <h4>{{title}} - {{description}}</h4>
+                <h4>{{getDisplayName()}}</h4>
             </div>
             <div fxLayout="row">
                 <a [href]="shareAddress" class="text-left" [target]="'_blank'" fxFill angulartics2On="click" angularticsCategory="Share" angularticsAction="Share test address">{{shareAddress}}</a>

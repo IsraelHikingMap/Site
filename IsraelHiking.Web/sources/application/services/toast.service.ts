@@ -1,6 +1,7 @@
 ﻿import { Injectable } from "@angular/core";
 import { MatSnackBar } from "@angular/material";
 import { ResourcesService } from "./resources.service";
+import { ConfirmDialogComponent } from "../components/dialogs/confirm-dialog.component";
 
 @Injectable()
 export class ToastService {
@@ -42,5 +43,17 @@ export class ToastService {
         });
     }
 
-
+    public confirm(message: string, confirmAction: Function, declineAction: Function, isYesNo: boolean) {
+        let componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent);
+        componentRef.instance.confirmMessage = message;
+        componentRef.instance.confirmAction = () => {
+            confirmAction();
+            this.snackbar.dismiss();
+        };
+        componentRef.instance.declineAction = () => {
+            declineAction();
+            this.snackbar.dismiss();
+        }
+        componentRef.instance.confirmType = isYesNo ? "YesNo" : "OkCancel";
+    }
 }
