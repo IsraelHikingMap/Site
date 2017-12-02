@@ -124,10 +124,38 @@
     </div>
     <div mat-dialog-actions>
         <div [hidden]="state.selectedTabIndex !== 0">
-            <pagination-controls (pageChange)="state.tracesPage = $event" previousLabel="" nextLabel="" id="tracesPaging"></pagination-controls>
+            <pagination-template #paginationTraces="paginationApi"
+                                 id="tracesPaging"
+                                 (pageChange)="state.tracesPage = $event">
+                <div fxLayout="row">
+                    <div fxFlex>
+                        <button mat-button fxFill [disabled]="paginationTraces.isFirstPage()" (click)="paginationTraces.previous()"><i class="fa icon-chevron-right"></i></button>
+                    </div>
+                    <div fxFlex *ngFor="let page of paginationTraces.pages">
+                        <button fxFill mat-button [class.active]="paginationTraces.getCurrent() === page.value" (click)="paginationTraces.setCurrent(page.value)">{{ page.label }}</button>    
+                    </div>
+                    <div fxFlex>
+                        <button mat-button fxFill [disabled]="paginationTraces.isLastPage()" (click)="paginationTraces.next()"><i class="fa icon-chevron-left"></i></button>    
+                    </div>
+                </div>
+            </pagination-template>
         </div>
         <div [hidden]="state.selectedTabIndex !== 1">
-            <pagination-controls (pageChange)="state.sharesPage = $event" previousLabel="" nextLabel="" id="sharesPaging"></pagination-controls>
+            <pagination-template #paginationShares="paginationApi"
+                                 id="sharesPaging"
+                                 (pageChange)="state.sharesPage = $event">
+                <div fxLayout="row">
+                    <div fxFlex>
+                        <button mat-button fxFill [disabled]="paginationShares.isFirstPage()" (click)="paginationShares.previous()"><i class="fa icon-chevron-right"></i></button>
+                    </div>
+                    <div fxFlex *ngFor="let page of paginationShares.pages">
+                        <button fxFill mat-button [class.active]="paginationShares.getCurrent() === page.value" (click)="paginationShares.setCurrent(page.value)">{{ page.label }}</button>
+                    </div>
+                    <div fxFlex>
+                        <button mat-button fxFill [disabled]="paginationShares.isLastPage()" (click)="paginationShares.next()"><i class="fa icon-chevron-left"></i></button>
+                    </div>
+                </div>
+            </pagination-template>
         </div>
     </div>
 </div>
