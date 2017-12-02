@@ -343,6 +343,9 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     }
 
     public deleteShareUrl(shareUrl: Common.ShareUrl) {
+        if (this.shareUrlInEditMode === shareUrl) {
+            this.shareUrlInEditMode = null;
+        }
         let message = `${this.resources.deletionOf} ${this.userService.getShareUrlDisplayName(shareUrl)}, ${this.resources.areYouSure}`;
         this.toastService.confirm(message, () => this.userService.deleteShareUrl(shareUrl), () => { }, true);
     }

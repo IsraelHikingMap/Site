@@ -8,7 +8,7 @@
     <div>
         <div class="osm-user-details">
             <div class="image-n-name">
-                <div class="image">
+                <div class="profile-image">
                     <img class="img-responsive" [src]="userService.imageUrl" alt="" />
                 </div>
                 <div class="username margin-10">
@@ -29,24 +29,22 @@
             </div>
         </div>
         <div class="input-wrapper-spacer"></div>
-        <div class="upload-wrapper">
-            <label>
-                <a fxFill mat-raised-button color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload OSM trace"><i class="fa icon-folder-open fa-lg"></i> {{resources.uploadFileToOsm}}</a>
-                <input type="file" (change)="uploadToOsm($event)" [style.display]="'none'" />
-            </label>
-        </div>
+        <label>
+            <a fxFill mat-raised-button color="primary" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload OSM trace"><i class="fa icon-folder-open fa-lg"></i> {{resources.uploadFileToOsm}}</a>
+            <input type="file" (change)="uploadToOsm($event)" [style.display]="'none'" />
+        </label>
     </div>
     <div mat-dialog-content #dialogContentForScroll id="dialogContentForScroll">
         <mat-tab-group [(selectedIndex)]="state.selectedTabIndex" [dynamicHeight]="'true'" (selectChange)="setSelectedTab()">
             <mat-tab label="{{resources.myTraces}}">
                 <br />
-                <div *ngFor="let trace of filteredTraces | paginate: { itemsPerPage: 5, currentPage: state.tracesPage, id: 'tracesPaging' }" class="trace">
+                <div *ngFor="let trace of filteredTraces | paginate: { itemsPerPage: 5, currentPage: state.tracesPage, id: 'tracesPaging' }" class="item">
                     <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row">
-                        <div fxFlex="20" class="trace-image">
+                        <div fxFlex="20" class="item-image">
                             <img [src]="trace.imageUrl" alt="" fxFill />
                         </div>
                         <div fxFlex="80" class="margin-10">
-                            <div class="trace-tools">
+                            <div class="item-content">
                                 <div [hidden]="trace.isInEditMode">
                                     <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.name}}</a><br />
                                     {{trace.description}}<br />
@@ -56,11 +54,11 @@
                                 </div>
                                 <div [hidden]="!trace.isInEditMode">
                                     <mat-form-field>
-                                        <input matInput type="text" [(ngModel)]="trace.description" placeholder="{{resources.description}}"/>
+                                        <input matInput type="text" [(ngModel)]="trace.description" placeholder="{{resources.description}}" />
                                     </mat-form-field>
-                                    <br/>
+                                    <br />
                                     <mat-form-field>
-                                        <input matInput type="text" [(ngModel)]="trace.tagsString" placeholder="{{resources.tags}}"/>
+                                        <input matInput type="text" [(ngModel)]="trace.tagsString" placeholder="{{resources.tags}}" />
                                     </mat-form-field>
                                     <br />
                                     <mat-form-field>
@@ -70,7 +68,7 @@
                                         </mat-select>
                                     </mat-form-field>
                                 </div>
-                                <div class="trace-buttons">
+                                <div class="action-buttons">
                                     <button mat-button (click)="findUnmappedRoutes(trace)" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Find unmapped trace parts"><i class="fa icon-plus"></i></button>
                                     <button mat-button [hidden]="trace.isInEditMode" (click)="editTrace(trace)" matTooltip="{{resources.edit}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-pencil"></i></button>
                                     <button mat-button [hidden]="!trace.isInEditMode" (click)="updateTrace(trace)" matTooltip="{{resources.save}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-check"></i></button>
@@ -87,67 +85,56 @@
                     <div class="cssload-inner cssload-two"></div>
                     <div class="cssload-inner cssload-three"></div>
                 </div>
-                <p [hidden]="userService.traces.length != 0 || loadingTraces">{{resources.noTraces}}</p>
+                <p [hidden]="userService.traces.length !== 0 || loadingTraces">{{resources.noTraces}}</p>
             </mat-tab>
             <mat-tab label="{{resources.myShares}}">
-                <div *ngFor="let shareUrl of filteredShareUrls | paginate: { itemsPerPage: 5, currentPage: state.sharesPage, id: 'sharesPaging' }">
-                    <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
-                        <div fxFlex="100" fxFlex.gt-md="33">
+                <br />
+                <div *ngFor="let shareUrl of filteredShareUrls | paginate: { itemsPerPage: 5, currentPage: state.sharesPage, id: 'sharesPaging' }" class="item">
+                    <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row">
+                        <div fxFlex="20" class="item-image">
                             <img [src]="userService.getImageFromShareId(shareUrl)" fxFill />
                         </div>
-                        <div fxFlex="100" fxFlex.gt-md="67" class="margin-10">
-                            <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
-                                <div fxFlex="75">
-                                    <div [hidden]="isShareUrlInEditMode(shareUrl)">
-                                        <h4>{{userService.getShareUrlDisplayName(shareUrl)}}</h4>
-                                    </div>
-                                    <div [hidden]="!isShareUrlInEditMode(shareUrl)">
-                                        <mat-form-field>
-                                            <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
-                                        </mat-form-field>
-                                        <mat-form-field>
-                                            <input matInput type="text" [(ngModel)]="shareUrl.description" placeholder="{{resources.descriptionPlaceHolder}}" />
-                                        </mat-form-field>
-                                    </div>
-                                </div>
-                                <div fxFlex>
-                                    <div fxLayout="column" fxLayoutAlign="space-between stretch">
-                                        <button [hidden]="isShareUrlInEditMode(shareUrl)" mat-button (click)="shareUrlInEditMode = shareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
-                                        <button [hidden]="!isShareUrlInEditMode(shareUrl)" mat-button (click)="updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div fxLayout="row" fxLayoutAlign="space-around none" fxLayoutGap="15px">
-                                <div fxFlex="75">
+                        <div fxFlex="80" class="margin-10">
+                            <div class="item-content">
+                                <div [hidden]="isShareUrlInEditMode(shareUrl)">
+                                    <h4>{{userService.getShareUrlDisplayName(shareUrl)}}</h4>
                                     <a href="{{userService.getUrlFromShareId(shareUrl)}}" target="_blank">{{userService.getUrlFromShareId(shareUrl)}}</a><br />
                                     {{resources.views}}: {{shareUrl.viewsCount}}<br />
                                     {{resources.lastViewed}}: {{shareUrl.lastViewed | date:'dd/MM/yyyy'}}
                                 </div>
-                                <div fxFlex>
-                                    <div fxLayout="column" fxLayoutAlign="space-between stretch">
-                                        <button mat-button ngxClipboard [cbContent]="userService.getUrlFromShareId(shareUrl)" matTooltip="{{resources.copyUrl}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-clipboard"></i></button>
-                                        <button mat-button (click)="editMode = false; deleteShareUrl(shareUrl)" matTooltip="{{resources.delete}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-trash"></i></button>
-                                    </div>
+                                <div [hidden]="!isShareUrlInEditMode(shareUrl)">
+                                    <mat-form-field>
+                                        <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
+                                    </mat-form-field>
+                                    <br />
+                                    <mat-form-field>
+                                        <input matInput type="text" [(ngModel)]="shareUrl.description" placeholder="{{resources.descriptionPlaceHolder}}" />
+                                    </mat-form-field>
+                                </div>
+                                <div class="action-buttons">
+                                    <button mat-button [hidden]="isShareUrlInEditMode(shareUrl)" (click)="shareUrlInEditMode = shareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
+                                    <button mat-button [hidden]="!isShareUrlInEditMode(shareUrl)" (click)="updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
+                                    <button mat-button ngxClipboard [cbContent]="userService.getUrlFromShareId(shareUrl)" matTooltip="{{resources.copyUrl}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-clipboard"></i></button>
+                                    <button mat-button (click)="deleteShareUrl(shareUrl)" matTooltip="{{resources.delete}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-trash"></i></button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                    <br />
                 </div>
                 <div class="cssload-loader" [hidden]="!loadingShareUrls">
                     <div class="cssload-inner cssload-one"></div>
                     <div class="cssload-inner cssload-two"></div>
                     <div class="cssload-inner cssload-three"></div>
                 </div>
-                <p [hidden]="userService.shareUrls.length != 0 || loadingShareUrls">{{resources.noShares}}</p>
+                <p [hidden]="userService.shareUrls.length !== 0 || loadingShareUrls">{{resources.noShares}}</p>
             </mat-tab>
         </mat-tab-group>
     </div>
     <div mat-dialog-actions>
-        <div [hidden]="state.selectedTabIndex != 0">
+        <div [hidden]="state.selectedTabIndex !== 0">
             <pagination-controls (pageChange)="state.tracesPage = $event" previousLabel="" nextLabel="" id="tracesPaging"></pagination-controls>
         </div>
-        <div [hidden]="state.selectedTabIndex != 1">
+        <div [hidden]="state.selectedTabIndex !== 1">
             <pagination-controls (pageChange)="state.sharesPage = $event" previousLabel="" nextLabel="" id="sharesPaging"></pagination-controls>
         </div>
     </div>
