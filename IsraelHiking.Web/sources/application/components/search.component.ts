@@ -1,8 +1,10 @@
-﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ElementRef, ComponentFactory } from "@angular/core";
-import { MatAutocomplete } from "@angular/material";
+﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ViewChildren, ElementRef, ComponentFactory, QueryList } from "@angular/core";
+import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
+import { Observable } from "rxjs";
 import * as L from "leaflet";
 import * as _ from "lodash";
+import "rxjs/add/operator/debounce";
 
 import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
@@ -51,10 +53,8 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     @ViewChild("searchFromInput")
     public searchFromInput: ElementRef;
 
-    @ViewChild("autoFrom")
-    public matAutocompleteFrom: MatAutocomplete;
-    @ViewChild("autoTo")
-    public matAutocompleteTo: MatAutocomplete;
+    @ViewChildren(MatAutocompleteTrigger)
+    public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
 
     constructor(resources: ResourcesService,
         private mapService: MapService,
@@ -89,32 +89,30 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.isVisible = this.fromContext.searchTerm ? true : false;
         this.searchFrom = new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResults);
         this.searchTo = new FormControl();
-        this.searchFrom.valueChanges.subscribe((x) => {
-            if (typeof x === "string") {
-                this.fromContext.searchTerm = x;
-                this.fromContext.selectedSearchResults = null;
-                this.search(this.fromContext);
-            }
-            else {
-                this.selectResults(this.fromContext, x);
-            }
-        });
-        this.searchTo.valueChanges.subscribe((x) => {
-            if (typeof x === "string") {
-                this.toContext.searchTerm = x;
-                this.toContext.selectedSearchResults = null;
-                this.search(this.toContext);
-            }
-            else {
-                this.selectResults(this.toContext, x);
-            }
-        });
+        this.configureInputFormControl(this.searchFrom, this.fromContext);
+        this.configureInputFormControl(this.searchTo, this.toContext);
 
         if (this.isVisible) {
             // search from url:
             this.search(this.fromContext);
         }
     }
+
+    private configureInputFormControl(input: FormControl, context: ISearchContext) {
+        input.valueChanges
+            .do(x => {
+                if (typeof x != "string") {
+                    this.selectResults(context, x);
+                }
+            })
+            .filter(x => typeof x === "string")
+            .debounce(() => Observable.timer(500))
+            .subscribe((x) => {
+                context.searchTerm = x;
+                context.selectedSearchResults = null;
+                this.search(context);
+            });
+        }
 
     public ngAfterViewInit() {
         if (this.isVisible) {
@@ -132,8 +130,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 },
                 100);
         } else {
-            this.matAutocompleteFrom.showPanel = false;
-            this.matAutocompleteTo.showPanel = false;
+            this.matAutocompleteTriggers.forEach(trigger => trigger.closePanel());
         }
         this.suppressEvents(e);
     }
