@@ -41,6 +41,7 @@
         public const string POI_TYPE = "poiType";
         public const string POI_LANGUAGE = "poiLanguage";
         public const string WEBSITE = "website";
+        public const string WIKIPEDIA = "wikipedia";
         public const string SEARCH_FACTOR = "searchFactor";
         public const string GEOLOCATION = "geolocation";
         public const string LAT = "lat";

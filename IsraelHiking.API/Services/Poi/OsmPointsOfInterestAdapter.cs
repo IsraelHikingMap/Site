@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
@@ -77,11 +79,9 @@ namespace IsraelHiking.API.Services.Poi
             {
                 Latitude = pointOfInterest.Location.Lat,
                 Longitude = pointOfInterest.Location.Lng,
-                Tags = new TagsCollection
-                {
-                    {FeatureAttributes.WEBSITE, pointOfInterest.Url}
-                }
+                Tags = new TagsCollection()
             };
+            SetWebsiteUrl(node.Tags, pointOfInterest);
             for (var imageIndex = 0; imageIndex < pointOfInterest.ImagesUrls.Length; imageIndex++)
             {
                 var imageUrl = pointOfInterest.ImagesUrls[imageIndex];
@@ -126,7 +126,7 @@ namespace IsraelHiking.API.Services.Poi
             var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.ICON].ToString();
             var oldTags = completeOsmGeo.Tags.ToArray();
 
-            completeOsmGeo.Tags[FeatureAttributes.WEBSITE] = pointOfInterest.Url;
+            SetWebsiteUrl(completeOsmGeo.Tags, pointOfInterest);
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             SyncImages(completeOsmGeo.Tags, pointOfInterest.ImagesUrls);
@@ -315,6 +315,40 @@ namespace IsraelHiking.API.Services.Poi
             return GetAttributeByLanguage(feature.Attributes, FeatureAttributes.NAME, language) != string.Empty ||
                    GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language) != string.Empty ||
                    feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL));
+        }
+
+
+        protected override string GetWebsiteUrl(IFeature feature)
+        {
+            if (feature.Attributes.GetNames().Contains(FeatureAttributes.WIKIPEDIA) == false)
+            {
+                return base.GetWebsiteUrl(feature);
+            }
+            var wikipediaTag = feature.Attributes[FeatureAttributes.WIKIPEDIA].ToString();
+            if (string.IsNullOrWhiteSpace(wikipediaTag))
+            {
+                return base.GetWebsiteUrl(feature);
+            }
+            var splitted = wikipediaTag.Split(':').Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
+            if (splitted.Length != 2)
+            {
+                return base.GetWebsiteUrl(feature);
+            }
+            return $"https://{splitted.First()}.wikipedia.org/wiki/{splitted.Last().Trim().Replace(" ", "_")}";
+        }
+
+        private void SetWebsiteUrl(TagsCollectionBase tags, PointOfInterestExtended pointOfInterest)
+        {
+            var regexp = new Regex("((https?://)|^)([a-z]+).wikipedia.org/wiki/(.*)");
+            var match = regexp.Match(pointOfInterest.Url ?? string.Empty);
+            if (match.Success)
+            {
+                tags.Add(FeatureAttributes.WIKIPEDIA, match.Groups[3].Value + ":" + WebUtility.UrlDecode(match.Groups[4].Value.Replace("_", " ")));
+            }
+            else
+            {
+                tags.Add(FeatureAttributes.WEBSITE, pointOfInterest.Url);
+            }
         }
     }
 }

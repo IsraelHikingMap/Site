@@ -100,9 +100,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 coordinate.Alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(coordinate));
             }
-            poiItem.Url = feature.Attributes.GetNames().Contains(FeatureAttributes.WEBSITE)
-                ? feature.Attributes[FeatureAttributes.WEBSITE].ToString()
-                : string.Empty;
+            poiItem.Url = GetWebsiteUrl(feature);
             poiItem.ImagesUrls = feature.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                 .Select(n => feature.Attributes[n].ToString())
@@ -113,6 +111,18 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Description = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language);
             poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
             poiItem.IsEditable = false;
+        }
+
+        /// <summary>
+        /// This function is used to get the website Url from the feature
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <returns></returns>
+        protected virtual string GetWebsiteUrl(IFeature feature)
+        {
+            return feature.Attributes.GetNames().Contains(FeatureAttributes.WEBSITE)
+                ? feature.Attributes[FeatureAttributes.WEBSITE].ToString()
+                : string.Empty;
         }
     }
 }
