@@ -116,7 +116,7 @@ export class OsmUserService {
     }
 
     public getDisplayNameFromTitleAndDescription(title: string, description: string): string {
-        return `${title} - ${description}`;
+        return description ? `${title} - ${description}` : title;
     }
 
     public refreshDetails = (): Promise<any> => {
