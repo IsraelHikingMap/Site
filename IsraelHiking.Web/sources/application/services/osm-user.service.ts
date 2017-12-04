@@ -183,7 +183,7 @@ export class OsmUserService {
     }
 
     public deleteOsmTrace = (trace: ITrace): Promise<any> => {
-        let promise = this.httpClient.delete(Urls.osmTrace + trace.id).toPromise();
+        let promise = this.httpClient.delete(Urls.osmTrace + trace.id, { responseType: "text" }).toPromise();
         promise.then(() => {
             _.remove(this.traces, traceToFind => traceToFind.id === trace.id);
             this.tracesChanged.next();

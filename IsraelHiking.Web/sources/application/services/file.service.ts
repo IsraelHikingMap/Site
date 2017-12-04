@@ -50,7 +50,7 @@ export class FileService {
     public upload(url: string, file: File): Promise<any> {
         let formData = new FormData();
         formData.append("file", file, file.name);
-        return this.httpClient.post(url, formData).toPromise();
+        return this.httpClient.post(url, formData, { responseType: "text" }).toPromise();
     }
 
     public openFromUrl = (url: string): Promise<Common.DataContainer> => {
