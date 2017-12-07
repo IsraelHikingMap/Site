@@ -223,17 +223,18 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             });
     }
 
-    public uploadToOsm(e: any) {
+    public async uploadToOsm(e: any) {
         let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
         if (!file) {
             return;
         }
-        this.fileService.upload(Urls.osmTrace, file).then(() => {
+        try {
+            await this.fileService.uploadTrace(file);
             this.toastService.success(this.resources.fileUploadedSuccefullyItWillTakeTime);
             this.userService.refreshDetails();
-        }, () => {
+        } catch (ex) {
             this.toastService.error(this.resources.unableToUploadFile);
-        });
+        };
     }
 
     private updateFilteredLists(searchTerm: string)

@@ -44,13 +44,15 @@ export class FileService {
     }
 
     public openFromFile(file: File): Promise<Common.DataContainer> {
-        return this.upload(Urls.openFile, file);
-    }
-
-    public upload(url: string, file: File): Promise<any> {
         let formData = new FormData();
         formData.append("file", file, file.name);
-        return this.httpClient.post(url, formData, { responseType: "text" }).toPromise();
+        return this.httpClient.post(Urls.openFile, formData).toPromise() as Promise<Common.DataContainer>;
+    }
+
+    public uploadTrace(file: File): Promise<any> {
+        let formData = new FormData();
+        formData.append("file", file, file.name);
+        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
     }
 
     public openFromUrl = (url: string): Promise<Common.DataContainer> => {
