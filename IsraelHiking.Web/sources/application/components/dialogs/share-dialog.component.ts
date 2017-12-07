@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+﻿import { Component, AfterViewInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
@@ -44,7 +44,8 @@ export interface IIOffroadMarker {
     selector: "share-dialog",
     templateUrl: "./share-dialog.component.html"
 })
-export class ShareDialogComponent extends BaseMapComponent {
+export class ShareDialogComponent extends BaseMapComponent implements AfterViewInit {
+
     public title: string;
     public description: string;
     public imageUrl: string;
@@ -77,6 +78,7 @@ export class ShareDialogComponent extends BaseMapComponent {
         this.osmUserService = osmUserService;
         this.title = "";
         this.description = "";
+        this.imageUrl = "";
         this.isLoading = false;
         this.showOffroadForm = false;
         this.shareAddress = "";
@@ -109,32 +111,38 @@ export class ShareDialogComponent extends BaseMapComponent {
         }
     }
 
+    public async ngAfterViewInit(): Promise<any> {
+        let shareUrl = this.createShareUrlObject();
+        let imageUrl = await this.osmUserService.getImagePreview(shareUrl);
+        this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(imageUrl) as string;
+    }
+
     public getDisplayName() {
         return this.osmUserService.getDisplayNameFromTitleAndDescription(this.title, this.description);
     }
 
-    public uploadShareUrl = () => {
+    public uploadShareUrl = async () => {
         this.isLoading = true;
-        let shareUrl = this.createShareUrlObject();
+        let shareUrlToSend = this.createShareUrlObject();
 
-        let promise = this.updateCurrentShare
-            ? this.osmUserService.updateShareUrl(shareUrl)
-            : this.osmUserService.createShareUrl(shareUrl);
+        try {
+            let shareUrl = this.updateCurrentShare
+                ? await this.osmUserService.updateShareUrl(shareUrlToSend)
+                : await this.osmUserService.createShareUrl(shareUrlToSend);
 
-        promise.then((data) => {
-            this.shareUrlId = data.id;
+            this.shareUrlId = shareUrl.id;
             this.dataContainerService.shareUrlId = this.shareUrlId;
-            this.shareAddress = this.osmUserService.getUrlFromShareId(data);
-            this.imageUrl = this.osmUserService.getImageFromShareId(data);
-            let escaped = encodeURIComponent(this.shareAddress);
-            this.whatappShareAddress = this.sanitizer.bypassSecurityTrustUrl(`whatsapp://send?text=${data.title} - ${data.description}: ${escaped}`);
-            this.facebookShareAddress = `http://www.facebook.com/sharer/sharer.php?u=${escaped}`;
-            this.nakebCreateHikeAddress = `https://www.nakeb.co.il/add_new_hike?ihm_link=${data.id}`;
-            this.isLoading = false;
-        }, () => {
+            this.imageUrl = this.osmUserService.getImageFromShareId(shareUrl);
+            let links = this.osmUserService.getShareSocialLinks(shareUrl);
+            this.shareAddress = links.ihm;
+            this.whatappShareAddress = this.sanitizer.bypassSecurityTrustUrl(links.whatsapp);
+            this.facebookShareAddress = links.facebook;
+            this.nakebCreateHikeAddress = links.nakeb;
+        } catch (ex) {
             this.toastService.error(this.resources.unableToGenerateUrl);
+        } finally {
             this.isLoading = false;
-        });
+        }
     }
 
     private createShareUrlObject = (): Common.ShareUrl => {

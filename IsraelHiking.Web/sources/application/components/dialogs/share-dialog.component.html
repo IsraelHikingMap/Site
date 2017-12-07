@@ -8,10 +8,13 @@
         </div>
     </div>
     <div mat-dialog-content>
+        <div fxLayout="row" *ngIf="imageUrl">
+            <img [src]="imageUrl" fxFill height="100" />
+        </div>
         <div [hidden]="shareAddress">
             <div fxLayout="row">
                 <mat-form-field fxFill hintLabel="{{resources.titlePlaceHolder}}">
-                    <input matInput fxFill type="text" [(ngModel)]="title" placeholder="{{resources.title}}" />
+                    <input matInput fxFill type="text" [(ngModel)]="title" placeholder="{{resources.title}}"/>
                 </mat-form-field>
             </div>
             <div fxLayout="row">
@@ -28,9 +31,6 @@
             </div>
         </div>
         <div [hidden]="!shareAddress">
-            <div fxLayout="row">
-                <img [src]="imageUrl" fxFill height="100" />
-            </div>
             <div fxLayout="row">
                 <h4>{{getDisplayName()}}</h4>
             </div>
@@ -58,7 +58,7 @@
             <div [hidden]="!showOffroadForm">
                 <div fxLayout="row">
                     <mat-form-field fxFill hintLabel="{{resources.userEmailMutedOffroad}}">
-                        <input matInput type="text" [(ngModel)]="offroadRequest.userMail" placeholder="{{resources.userEmail}}" />
+                        <input matInput type="text" [(ngModel)]="offroadRequest.userMail" placeholder="{{resources.userEmail}}"/>
                     </mat-form-field>
                 </div>
                 <div class="input-wrapper-spacer"></div>
@@ -102,7 +102,7 @@
                         <a mat-button (click)="sendToOffroad()" fxFill color="primary" mat-raised-button angularticsCategory="Share" angularticsAction="Share send off-road"><i class="fa icon-paper-plane fa-lg"></i> {{resources.send}}</a>
                     </div>
                 </div>
-                <br />
+                <br/>
             </div>
         </div>
     </div>

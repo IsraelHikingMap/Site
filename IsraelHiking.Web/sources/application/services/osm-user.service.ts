@@ -38,6 +38,13 @@ interface IOsmConfiguration {
     consumerSecret: string;
 }
 
+interface IShareUrlSocialLinks {
+    facebook: string;
+    whatsapp: string;
+    nakeb: string;
+    ihm: string;
+}
+
 @Injectable()
 export class OsmUserService {
 
@@ -117,6 +124,17 @@ export class OsmUserService {
 
     public getDisplayNameFromTitleAndDescription(title: string, description: string): string {
         return description ? `${title} - ${description}` : title;
+    }
+
+    public getShareSocialLinks(shareUrl: Common.ShareUrl): IShareUrlSocialLinks {
+        let ihm = this.getUrlFromShareId(shareUrl);
+        let escaped = encodeURIComponent(ihm);
+        return {
+            ihm: ihm,
+            facebook: `http://www.facebook.com/sharer/sharer.php?u=${escaped}`,
+            whatsapp: `whatsapp://send?text=${this.getShareUrlDisplayName(shareUrl)}: ${escaped}`,
+            nakeb: `https://www.nakeb.co.il/add_new_hike?ihm_link=${shareUrl.id}`
+        }
     }
 
     public refreshDetails = (): Promise<any> => {
@@ -308,5 +326,8 @@ export class OsmUserService {
         return background;
     }
 
-
+    public async getImagePreview(shareUrl: Common.ShareUrl) {
+        let image = await this.httpClient.post(Urls.images, shareUrl.dataContainer, { responseType: "blob" }).toPromise();
+        return window.URL.createObjectURL(image);
+    }
 }

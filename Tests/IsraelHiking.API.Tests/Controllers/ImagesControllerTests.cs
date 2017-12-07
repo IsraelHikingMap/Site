@@ -62,5 +62,15 @@ namespace IsraelHiking.API.Tests.Controllers
 
             Assert.AreEqual(new ConfigurationData().Colors.Count, results.Count);
         }
+
+        [TestMethod]
+        public void PostDataContainer_ShouldCreateImage()
+        {
+            var dataContainer = new DataContainer();
+
+            _controller.PostDataContainer(dataContainer).Wait();
+
+            _imageCreationService.Received(1).Create(dataContainer);
+        }
     }
 }

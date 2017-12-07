@@ -64,6 +64,19 @@ namespace IsraelHiking.API.Controllers
             return _options.Colors;
         }
 
+        /// <summary>
+        /// When sending a <see cref="DataContainer"/> you'll recieve the image preview
+        /// </summary>
+        /// <param name="dataContainer"></param>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("")]
+        public async Task<IActionResult> PostDataContainer([FromBody]DataContainer dataContainer)
+        {
+            var imageData = await _imageCreationService.Create(dataContainer);
+            return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
+        }
+
         /// <inheritdoc />
         /// <summary>
         /// Dispose method, following dispose pattern

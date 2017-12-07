@@ -190,4 +190,23 @@ describe("OSM User Service", () => {
         expect(address).toContain(Urls.baseAddress);
         expect(address).toContain(shareUrl.id);
     }));
+
+    it("Should return social links", inject([OsmUserService], (osmUserService: OsmUserService) => {
+        let shareUrl = { id: "12345" } as Common.ShareUrl;
+
+        let links = osmUserService.getShareSocialLinks(shareUrl);
+
+        expect(links.ihm).toContain("/#!/");
+        expect(links.ihm).toContain(Urls.baseAddress);
+        expect(links.ihm).toContain(shareUrl.id);
+        expect(links.facebook).toContain("facebook");
+        expect(links.whatsapp).toContain("whatsapp://");
+        expect(links.nakeb).toContain("nakeb");
+    }));
+
+    it("Should get image preview by sending a request to server", inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+        osmUserService.getImagePreview({ id: "12345", dataContainer: {} } as Common.ShareUrl);
+
+        mockBackend.expectOne(Urls.images);
+    }));
 });
