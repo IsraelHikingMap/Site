@@ -69,7 +69,7 @@
                                     </mat-form-field>
                                 </div>
                                 <div class="action-buttons">
-                                    <button mat-button (click)="findUnmappedRoutes(trace)" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Find unmapped trace parts"><i class="fa icon-plus"></i></button>
+                                    <button mat-button (click)="findUnmappedRoutes(trace)" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Find unmapped trace parts"><i class="fa icon-search"></i></button>
                                     <button mat-button [hidden]="trace.isInEditMode" (click)="editTrace(trace)" matTooltip="{{resources.edit}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-pencil"></i></button>
                                     <button mat-button [hidden]="!trace.isInEditMode" (click)="updateTrace(trace)" matTooltip="{{resources.save}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-check"></i></button>
                                     <button mat-button (click)="deleteTrace(trace)" matTooltip="{{resources.delete}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-trash"></i></button>
@@ -111,6 +111,7 @@
                                     <button mat-button [hidden]="isShareUrlInEditMode(shareUrl)" (click)="shareUrlInEditMode = shareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
                                     <button mat-button [hidden]="!isShareUrlInEditMode(shareUrl)" (click)="updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
                                     <button mat-button ngxClipboard [cbContent]="userService.getUrlFromShareId(shareUrl)" matTooltip="{{resources.copyUrl}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-clipboard"></i></button>
+                                    <button mat-button matDialogClose (click)="convertShareUrlToRoute(shareUrl)" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-plus"></i></button>
                                     <button mat-button (click)="deleteShareUrl(shareUrl)" matTooltip="{{resources.delete}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-trash"></i></button>
                                 </div>
                             </div>
