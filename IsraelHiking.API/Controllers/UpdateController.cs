@@ -85,8 +85,10 @@ namespace IsraelHiking.API.Controllers
             }
             _logger.LogInformation("Updating site's databases according to request:\n" + JsonConvert.SerializeObject(request));
             var memoryStream = new MemoryStream();
-            var stream = await _osmLatestFileFetcher.Get();
-            stream.CopyTo(memoryStream);
+            using (var stream = await _osmLatestFileFetcher.Get())
+            {
+                stream.CopyTo(memoryStream);
+            }
             _logger.LogInformation("Copy osm data completed.");
 
             var elasticSearchTask = UpdateElasticSearch(request, memoryStream);

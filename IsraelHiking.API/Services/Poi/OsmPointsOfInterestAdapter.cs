@@ -317,7 +317,7 @@ namespace IsraelHiking.API.Services.Poi
                    feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL));
         }
 
-
+        /// <inheritdoc />
         protected override string GetWebsiteUrl(IFeature feature)
         {
             if (feature.Attributes.GetNames().Contains(FeatureAttributes.WIKIPEDIA) == false)
