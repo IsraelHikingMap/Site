@@ -8,7 +8,6 @@ import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
 import { SidebarService } from "../services/sidebar.service";
 import { RouteStatisticsService } from "../services/route-statistics.service";
-import { DataContainerService } from "../services/data-container.service";
 import { ToastService } from "../services/toast.service";
 import { DragAndDropService } from "../services/drag-and-drop.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -44,7 +43,6 @@ export class MainMapComponent extends BaseMapComponent {
         private applicationRef: ApplicationRef,
         private toastService: ToastService,
         // needed for initialization
-        dataConatnerService: DataContainerService,
         dragAndDropService: DragAndDropService,
         angulartics2: Angulartics2
     ) {
@@ -77,14 +75,7 @@ export class MainMapComponent extends BaseMapComponent {
                 }
             },
             onLocationError: () => {
-                if (window.location.protocol === "https") {
-                    this.toastService.warning(this.resources.unableToFindYourLocation);
-                } else {
-                    this.toastService.warning(this.resources.unableToFindYourLocation + "\n" + this.resources.redirectingToSecuredSite);
-                    setTimeout(() => {
-                        window.location.href = window.location.href.replace("http", "https");
-                    }, 3000);
-                }
+                this.toastService.warning(this.resources.unableToFindYourLocation);
             }
         } as L.LocateOptions).addTo(this.mapService.map);
 
