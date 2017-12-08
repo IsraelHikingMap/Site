@@ -176,6 +176,22 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
+        public void Zoom13_RouteIsNarrowVerticalLineWithOverlay_ShouldFetchOverlayTiles()
+        {
+            var dataContainer = GetDataContainer(new List<LatLng>
+            {
+                new LatLng {Lat = 0.1, Lng = 0.1},
+                new LatLng {Lat = 0.15, Lng = 0.1}
+            });
+            dataContainer.Overlays = new List<LayerData>{ new LayerData { Address = "overlay" } };
+
+            var ressults = _imageCreationService.Create(dataContainer).Result;
+
+            Assert.IsTrue(ressults.Length > 0);
+            _remoteFileFetcherGateway.Received(16).GetFileContent(Arg.Any<string>());
+        }
+
+        [TestMethod]
         public void LocalTiles_RouteWithNoPoints_ShouldReturnBackgroungImageFromBounds()
         {
             var dataContainer = new DataContainer

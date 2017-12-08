@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -20,6 +21,11 @@ namespace IsraelHiking.API.Services
         public Point Tiles { get; set; }
         public double N { get; set; }
         public int Zoom { get; set; }
+    }
+
+    internal class ImageWithOffset {
+        public Image Image { get; set; }
+        public Point Offset { get; set; }
     }
 
     ///<inheritdoc />
@@ -70,7 +76,8 @@ namespace IsraelHiking.API.Services
             {
                 allLocations = new[] { dataContainer.NorthEast, dataContainer.SouthWest };
             }
-            var backgroundImage = await GetBackGroundImage(GetAddressTemplate(dataContainer), allLocations);
+            var addressTemplates = GetAddressTemplates(dataContainer);
+            var backgroundImage = await GetBackGroundImage(addressTemplates, allLocations);
             DrawRoutesOnImage(backgroundImage, dataContainer);
             var resizedForFacebook = new Bitmap(backgroundImage.Image, new Size(600, 315));
             var imageStream = new MemoryStream();
@@ -103,7 +110,7 @@ namespace IsraelHiking.API.Services
             };
         }
 
-        private async Task<BackgroundImage> GetBackGroundImage(string addressTemplate, LatLng[] allLocations)
+        private async Task<BackgroundImage> GetBackGroundImage(string[] addressTemplates, LatLng[] allLocations)
         {
             var backgroundImage = InitBackgroundImageTiles(allLocations);
             var topLeft = new Point((int)GetXTile(allLocations.Min(l => l.Lng), backgroundImage.N), (int)GetYTile(allLocations.Max(l => l.Lat), backgroundImage.N));
@@ -123,40 +130,66 @@ namespace IsraelHiking.API.Services
                 UpdateImageRectangle(ref topLeft, ref bottomRight);
             }
             backgroundImage.TopLeft = topLeft;
-            backgroundImage.Image = await CreateSingleImageFromTiles(topLeft, bottomRight, backgroundImage.Zoom, addressTemplate);
+            backgroundImage.Image = await CreateSingleImageFromTiles(topLeft, bottomRight, backgroundImage.Zoom, addressTemplates);
             return backgroundImage;
         }
 
-        private async Task<Image> CreateSingleImageFromTiles(Point topLeft, Point bottomRight, int zoom, string addressTemplate)
+        private async Task<Image> CreateSingleImageFromTiles(Point topLeft, Point bottomRight, int zoom, string[] addressTemplates)
         {
             var bitmap = new Bitmap(TARGET_TILE_SIZE_X, TARGET_TILE_SIZE_Y);
             var verticalTiles = bottomRight.Y - topLeft.Y + 1;
             var horizontalTiles = bottomRight.X - topLeft.X + 1;
             var targetSizeX = TARGET_TILE_SIZE_X / horizontalTiles;
             var targetSizeY = TARGET_TILE_SIZE_Y / verticalTiles;
-            using (var graphics = Graphics.FromImage(bitmap))
+
+            var tasks = new List<Task<ImageWithOffset>>();
+            foreach (var addressTemplate in addressTemplates)
             {
                 for (int x = 0; x < horizontalTiles; x++)
                 {
                     for (int y = 0; y < verticalTiles; y++)
                     {
-                        var tileImage = await GetTileImage(topLeft.X + x, topLeft.Y + y, zoom, addressTemplate);
-                        graphics.DrawImage(tileImage,
-                            new Rectangle(x * targetSizeX, y * targetSizeY, targetSizeX, targetSizeY),
-                            new Rectangle(0, 0, tileImage.Width, tileImage.Height),
-                            GraphicsUnit.Pixel);
+                        var task = GetTileImage(topLeft, new Point(x, y), zoom, addressTemplate);
+                        tasks.Add(task);
                     }
                 }
+            }
+
+            var imagesWithOffsets = await Task.WhenAll(tasks);
+            using (var graphics = Graphics.FromImage(bitmap))
+            {
+                foreach (var imageWithOffset in imagesWithOffsets)
+                {
+                    graphics.DrawImage(imageWithOffset.Image,
+                        new Rectangle(imageWithOffset.Offset.X * targetSizeX, imageWithOffset.Offset.Y * targetSizeY, targetSizeX, targetSizeY),
+                        new Rectangle(0, 0, imageWithOffset.Image.Width, imageWithOffset.Image.Height),
+                        GraphicsUnit.Pixel);
+                }
+                
             }
             return bitmap;
         }
 
-        private static string GetAddressTemplate(DataContainer dataContainer)
+        private static string[] GetAddressTemplates(DataContainer dataContainer)
         {
             var address = string.IsNullOrWhiteSpace(dataContainer.BaseLayer.Address)
                 ? "https://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png"
                 : dataContainer.BaseLayer.Address;
-            address = address.Trim().ToLower();
+
+            var addressTemplates = new List<string> {FixAdrressTemplate(address)};
+            foreach (var layerData in dataContainer.Overlays ?? new List<LayerData>())
+            {
+                if (!string.IsNullOrWhiteSpace(layerData.Address))
+                {
+                    addressTemplates.Add(FixAdrressTemplate(layerData.Address));
+                }
+            }
+            return addressTemplates.ToArray();
+        }
+
+        private static string FixAdrressTemplate(string addressTemplate)
+        {
+            var address = addressTemplate.Trim().ToLower();
             if (address.StartsWith("http") == false && address.StartsWith("www") == false)
             {
                 address = "https://israelhiking.osm.org.il" + address;
@@ -204,14 +237,21 @@ namespace IsraelHiking.API.Services
             return (n / 2) * (1 - Math.Log(Math.Tan(latitudeInRadians) + 1.0 / Math.Cos(latitudeInRadians)) / Math.PI);
         }
 
-        private async Task<Image> GetTileImage(int x, int y, int zoom, string addressTemplate)
+        private async Task<ImageWithOffset> GetTileImage(Point topLeft, Point offset, int zoom, string addressTemplate)
         {
             var file = addressTemplate.Replace("{z}", zoom.ToString())
                         .Replace("{zoom}", zoom.ToString())
-                        .Replace("{x}", x.ToString())
-                        .Replace("{y}", y.ToString());
+                        .Replace("{x}", (topLeft.X + offset.X).ToString())
+                        .Replace("{y}", (topLeft.Y + offset.Y).ToString());
             var fileResponse = await _remoteFileFetcherGateway.GetFileContent(file);
-            return fileResponse.Content.Any() ? Image.FromStream(new MemoryStream(fileResponse.Content), true) : new Bitmap(TILE_SIZE, TILE_SIZE);
+
+            return new ImageWithOffset
+            {
+                Image = fileResponse.Content.Any()
+                    ? Image.FromStream(new MemoryStream(fileResponse.Content), true)
+                    : new Bitmap(TILE_SIZE, TILE_SIZE),
+                Offset = offset
+            };
         }
 
         private PointF ConvertLatLngToPoint(LatLng latLng, BackgroundImage backgroundImage)
