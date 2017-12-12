@@ -44,7 +44,6 @@ export class MainMapComponent extends BaseMapComponent {
         private toastService: ToastService,
         // needed for initialization
         dragAndDropService: DragAndDropService,
-        angulartics2: Angulartics2
     ) {
         super(resources);
         this.createControls();

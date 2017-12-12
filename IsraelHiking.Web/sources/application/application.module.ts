@@ -255,7 +255,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })
 export class ApplicationModule {
-    constructor(dataContainerService: DataContainerService) {
+    constructor(dataContainerService: DataContainerService,
+        angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics) {
         console.log("Starting IHM Application Initialization");
         dataContainerService.initialize().then(() => {
             console.log("Finished IHM Application Initialization");
