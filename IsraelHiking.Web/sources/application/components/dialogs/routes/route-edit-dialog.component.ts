@@ -44,12 +44,9 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
             this.routesService.isNameAvailable(this.routeProperties.name) === false;
     }
 
-    public saveRoute(e: Event): boolean {
-        if (!super.saveRoute(e)) {
-            return false;
-        }
+    public saveRoute(e: Event) {
+        super.saveRoute(e);
         this.routeLayer.setRouteProperties(this.routeProperties);
-        return true;
     }
 
     public deleteRoute(e: Event) {

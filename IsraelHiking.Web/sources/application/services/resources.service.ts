@@ -661,7 +661,7 @@ export class ResourcesService {
         this.unableToSaveToFile = this.gettextCatalog.getString("Unable to save to file...");
         this.unableToLoadFromFile = this.gettextCatalog.getString("Unable to load from file...");
         this.unableToLoadFromUrl = this.gettextCatalog.getString("Unable to load from URL...");
-        this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route name is already in use, please select another name...");
+        this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route's name was altered since it is in use...");
         this.unableToGenerateUrl = this.gettextCatalog.getString("Unable to generate URL, please try again later...");
         this.unableToGetElevationData = this.gettextCatalog.getString("Unable to get elevation data:");
         this.unableToGetDataForSnapping = this.gettextCatalog.getString("Unable to get data for snapping...");

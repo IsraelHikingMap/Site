@@ -33,15 +33,14 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
         this.routeLayerFactory.routeOpacity = this.routeProperties.pathOptions.opacity;
     }
 
-    public saveRoute(e: Event): boolean {
+    public saveRoute(e: Event) {
         this.suppressEvents(e);
         if (this.isRouteNameAlreadyInUse()) {
-            this.toastService.error(this.resources.routeNameAlreadyInUse);
-            return false;
+            this.routeProperties.name = this.routesService.createRouteName(this.routeProperties.name);
+            this.toastService.warning(this.resources.routeNameAlreadyInUse);
         }
         this.routeProperties.pathOptions = this.pathOptions;
         this.updateLocalStorage();
-        return true;
     }
 
     protected isRouteNameAlreadyInUse(): boolean {

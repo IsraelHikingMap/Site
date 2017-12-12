@@ -96,6 +96,13 @@ describe("RoutesService", () => {
         expect(routeName).toBe(mapServiceMock.resourcesService.route + " 2");
     });
 
+    it("Should append index to route name", () => {
+        let name = "name";
+
+        let newName = routesService.createRouteName(name);
+
+        expect(newName).toBe(name + " 1");
+    });
     it("Should be able to get route by name", () => {
         let routeByName = routesService.getRouteByName(initialRouteLayer.route.properties.name);
         expect(routeByName).not.toBeNull();

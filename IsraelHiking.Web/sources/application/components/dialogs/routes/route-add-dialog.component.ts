@@ -26,11 +26,8 @@ export class RouteAddDialogComponent extends RouteBaseDialogComponent {
         this.title = this.resources.addRoute;
     }
 
-    public saveRoute(e: Event): boolean {
-        if (!super.saveRoute(e)) {
-            return false;
-        }
+    public saveRoute(e: Event) {
+        super.saveRoute(e);
         this.routesService.addRoute({ properties: this.routeProperties, segments: [], markers: [] });
-        return true;
     }
 }

@@ -74,14 +74,15 @@ export class RoutesService implements IRoutesService {
         this.routeChanged.next();
     }
 
-    public createRouteName = () => {
+    public createRouteName = (routeName: string = this.resourcesService.route) => {
         var index = 1;
-        var routeName = `${this.resourcesService.route} ${index}`;
-        while (_.some(this.routes, (routeLayer) => routeLayer.route.properties.name === routeName)) {
+        routeName = routeName.replace(/(.*) \d+/, "$1");
+        var availableRouteName = `${routeName} ${index}`;
+        while (_.some(this.routes, (routeLayer) => routeLayer.route.properties.name === availableRouteName)) {
             index++;
-            routeName = `${this.resourcesService.route} ${index}`;
+            availableRouteName = `${routeName} ${index}`;
         }
-        return routeName;
+        return availableRouteName;
     }
 
     public getRouteByName = (routeName: string): IRouteLayer => {
@@ -116,7 +117,7 @@ export class RoutesService implements IRoutesService {
     private addLayersToMap = (routes: Common.RouteData[]) => {
         for (let routeData of routes) {
             if (this.isNameAvailable(routeData.name) === false) {
-                routeData.name = this.createRouteName();
+                routeData.name = this.createRouteName(routeData.name);
             }
             let routeLayer = this.routeLayerFactory.createRouteLayerFromData(routeData);
             this.routes.push(routeLayer);
