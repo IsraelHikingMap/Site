@@ -197,7 +197,7 @@ export class OsmUserService {
 
     public updateOsmTrace = (trace: ITrace): Promise<any> => {
         trace.tags = trace.tagsString.split(",").map(t => t.trim());
-        return this.httpClient.put(Urls.osmTrace + trace.id, trace).toPromise();
+        return this.httpClient.put(Urls.osmTrace + trace.id, trace, { responseType: "text" }).toPromise();
     }
 
     public deleteOsmTrace = (trace: ITrace): Promise<any> => {
@@ -255,12 +255,12 @@ export class OsmUserService {
         return Urls.baseAddress + this.getShareUrlPostfix(shareUrl.id);
     }
 
-    public getMissingParts(trace: ITrace): Promise<any> {
+    public getMissingParts(trace: ITrace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
         return this.httpClient.post(Urls.osm + "?url=" + trace.dataUrl, {}).toPromise();
     }
 
     public addAMissingPart(feature: GeoJSON.Feature<GeoJSON.LineString>): Promise<any> {
-        return this.httpClient.put(Urls.osm, feature).toPromise();
+        return this.httpClient.put(Urls.osm, feature, { responseType: "text" }).toPromise();
     }
 
     private getUserLayers = async (): Promise<any> => {
@@ -285,9 +285,9 @@ export class OsmUserService {
         }
     }
 
-    public updateUserLayers = (baseLayersToStore: Common.LayerData[], overlaysToStore: Common.LayerData[]): Promise<any> => {
+    public updateUserLayers = async (baseLayersToStore: Common.LayerData[], overlaysToStore: Common.LayerData[]): Promise<IUserLayer> => {
         if (!this.isLoggedIn()) {
-            return Promise.resolve();
+            return {} as IUserLayer;
         }
 
         let layers = [...baseLayersToStore];
@@ -296,7 +296,7 @@ export class OsmUserService {
             layers.push(overlayToStore);
         }
 
-        return this.httpClient.post(Urls.userLayers + this.userId, { layers: layers, } as IUserLayers).toPromise();
+        return await this.httpClient.post(Urls.userLayers + this.userId, { layers: layers } as IUserLayers).toPromise() as IUserLayer;
     }
 
     public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, center: L.LatLng): string {
