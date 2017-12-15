@@ -52,7 +52,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _closeChangesetAddress = osmApiBaseAddress + "changeset/:id/close";
             _createElementAddress = osmApiBaseAddress + ":type/create";
             _elementAddress = osmApiBaseAddress + ":type/:id";
-            
+
             _completeElementAddress = osmApiBaseAddress + ":type/:id/full";
             _traceAddress = osmApiBaseAddress + "gpx/:id";
             _getTracesAddress = osmApiBaseAddress + "user/gpx_files";
@@ -170,7 +170,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             return GetCompleteElement<CompleteRelation>(relationId, "relation");
         }
 
-        private async Task<TCompleteOsmGeo> GetCompleteElement<TCompleteOsmGeo>(string id, string type) where TCompleteOsmGeo:  class, ICompleteOsmGeo
+        private async Task<TCompleteOsmGeo> GetCompleteElement<TCompleteOsmGeo>(string id, string type) where TCompleteOsmGeo : class, ICompleteOsmGeo
         {
             using (var client = new HttpClient())
             {
@@ -245,9 +245,9 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 case OsmGeoType.Node:
                     return UpdateElement(changesetId, osmGeo as OsmGeo);
                 case OsmGeoType.Way:
-                    return UpdateElement(changesetId, (osmGeo as CompleteWay).ToSimple());
+                    return UpdateElement(changesetId, ((CompleteWay)osmGeo).ToSimple());
                 case OsmGeoType.Relation:
-                    return UpdateElement(changesetId, (osmGeo as CompleteRelation).ToSimple());
+                    return UpdateElement(changesetId, ((CompleteRelation)osmGeo).ToSimple());
                 default:
                     throw new Exception($"Invalid OSM geometry type: {osmGeo.Type}");
             }
