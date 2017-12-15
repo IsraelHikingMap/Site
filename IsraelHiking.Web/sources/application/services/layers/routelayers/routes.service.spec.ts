@@ -88,6 +88,7 @@ describe("RoutesService", () => {
     });
 
     it("Should create index based names when they exists", () => {
+        mapServiceMock.resourcesService.route = "route";
         routesService.addRoute(null);
         let routeName = routesService.createRouteName();
         initialRouteLayer.route.properties.name = routeName;
