@@ -17,7 +17,7 @@
                 </div>
                 <div fxLayout="row">
                     <mat-form-field fxFill>
-                        <textarea matInput rows="3" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
+                        <textarea matInput rows="3" maxlength="255" type="text" [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
                     </mat-form-field>
                 </div>
             </div>
@@ -71,10 +71,10 @@
         </div>
         <div fxLayout="row">
             <div fxFlex>
-                <button mat-raised-button color="primary" [disabled]="!title && !description && imagesUrls.length === 0" (click)="uploadPoint()" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{identifier ? resources.updatePoint : resources.addPoint}}</button>
+                <button mat-raised-button color="primary" [disabled]="!canUpload()" (click)="uploadPoint()" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{identifier ? resources.updatePoint : resources.addPoint}}</button>
             </div>
             <div fxFlex="10" fxShow fxHide.xs [hidden]="!identifier">
-                <a mat-button [href]="getEditElementOsmAddress()" target="_blank" fxFill matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit element in OSM"><i class="fa icon-map-editing fa-lg"></i></a>
+                <button mat-button [href]="getEditElementOsmAddress()" target="_blank" fxFill matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit element in OSM"><i class="fa icon-map-editing fa-lg"></i></button>
             </div>
         </div>
     </div>

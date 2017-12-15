@@ -32,6 +32,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public location: L.LatLng;
     public selectedCategory: ICategoryWithIcons;
     public icons: IIconColorLabel[];
+    public uploading: boolean;
     private currentImageIndex: number;
     private currentImageFile: File;
 
@@ -46,6 +47,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         this.currentImageIndex = 0;
         this.imagesUrls = [];
         this.currentImageFile = null;
+        this.uploading = false;
     }
 
     public async initialize(markerIcon: string) {
@@ -118,28 +120,34 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         reader.readAsDataURL(file);
     }
 
-    public uploadPoint() {
-        if (this.currentImageFile) {
-            this.imagesUrls.splice(this.imagesUrls.length - 1, 1);
-        }
+    public async uploadPoint() {
+        this.uploading = true;
+        let imageUrls = this.currentImageFile
+            ? _.dropRight(this.imagesUrls)
+            : this.imagesUrls;
+
         let poiExtended = {
             description: this.description,
             icon: this.selectedCategory.selectedIcon.icon,
             iconColor: this.selectedCategory.selectedIcon.color,
             id: this.identifier,
-            imagesUrls: this.imagesUrls,
+            imagesUrls: imageUrls,
             title: this.title,
             url: this.websiteUrl,
             source: this.source,
             type: this.elementType,
             location: this.location
         } as IPointOfInterestExtended;
-        this.poiService.uploadPoint(poiExtended, this.currentImageFile).then((poi) => {
+        try {
+            let poi = await this.poiService.uploadPoint(poiExtended, this.currentImageFile);
             this.toastService.info(this.resources.dataUpdatedSuccefully);
             this.dialogRef.close(poi);
-        }, () => {
+        } catch (ex) {
+            this.toastService.error(this.resources.unableToSaveData);
             this.dialogRef.close(null);
-        });
+        } finally {
+            this.uploading = false;
+        };
     }
 
     public getEditElementOsmAddress(): string {
@@ -175,5 +183,10 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
                 return this.currentImageIndex >= this.imagesUrls.length - 1;
         }
         return false;
+    }
+
+    public canUpload() {
+        return (this.title || this.description || this.imagesUrls.length !== 0) &&
+            !this.uploading;
     }
 }

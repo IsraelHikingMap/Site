@@ -17,7 +17,7 @@
     <div fxLayout="row" [hidden]="!isEditMode()" fxLayoutGap="10px">
         <div fxFlex="70" class="margin-10-reverse">
             <mat-form-field fxFill hintLabel="{{resources.itsYourTimeToShine}}">
-                <textarea rows="4" matInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
+                <textarea rows="4" maxlength="255" matInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
             </mat-form-field>
         </div>
         <div fxFlex>
