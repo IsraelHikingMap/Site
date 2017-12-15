@@ -30,13 +30,13 @@ namespace IsraelHiking.API.Converters
                     var node = completeOsmGeo as Node;
                     return new Feature(new Point(ConvertNode(node)), ConvertTags(node));
                 case OsmGeoType.Way:
-                    var way = completeOsmGeo as CompleteWay;
-                    if (way == null || way.Nodes.Length <= 1)
+                    if (!(completeOsmGeo is CompleteWay way) || way.Nodes.Length <= 1)
                     {
                         // can't convert a way with 1 coordinates to geojson.
                         return null;
                     }
                     var properties = ConvertTags(way);
+                    properties.AddAttribute(FeatureAttributes.OSM_NODES, way.Nodes.Select(n => n.Id).ToArray());
                     var geometry = GetGeometryFromNodes(way.Nodes);
                     return new Feature(geometry, properties);
                 case OsmGeoType.Relation:
@@ -50,7 +50,7 @@ namespace IsraelHiking.API.Converters
         {
             var properties = osmObject.Tags.ToDictionary(t => t.Key, t => t.Value);
             properties.Add(FeatureAttributes.ID, osmObject.Id.ToString());
-            properties.Add(FeatureAttributes.POI_TYPE, osmObject.Type.ToString().ToLower());
+            properties.Add(FeatureAttributes.OSM_TYPE, osmObject.Type.ToString().ToLower());
             var table = new AttributesTable();
             foreach (var key in properties.Keys)
             {

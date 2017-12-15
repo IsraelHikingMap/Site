@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -105,23 +104,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
             var id = pointOfInterest.Id;
-            ICompleteOsmGeo completeOsmGeo;
-            if (pointOfInterest.Type == OsmGeoType.Node.ToString().ToLower())
-            {
-                completeOsmGeo = await osmGateway.GetNode(id);
-            }
-            else if (pointOfInterest.Type == OsmGeoType.Way.ToString().ToLower())
-            {
-                completeOsmGeo = await osmGateway.GetCompleteWay(id);
-            }
-            else if (pointOfInterest.Type == OsmGeoType.Relation.ToString().ToLower())
-            {
-                completeOsmGeo = await osmGateway.GetCompleteRelation(id);
-            }
-            else
-            {
-                throw new ArgumentException(nameof(pointOfInterest.Type) + " is not known: " + pointOfInterest.Type);
-            }
+            ICompleteOsmGeo completeOsmGeo = await osmGateway.GetElement(id, pointOfInterest.Type);
             var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
             var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.ICON].ToString();
             var oldTags = completeOsmGeo.Tags.ToArray();
@@ -241,7 +224,7 @@ namespace IsraelHiking.API.Services.Poi
             var feature = ConvertOsmToFeature(osm, name);
             if (feature != null)
             {
-                await _elasticSearchGateway.UpdatePointsOfInterestData(feature);
+                await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> {feature});
             }
             return feature;
         }

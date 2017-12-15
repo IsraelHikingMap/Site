@@ -1,4 +1,5 @@
-﻿using GeoAPI.Geometries;
+﻿using System.Collections.Generic;
+using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -26,7 +27,9 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var northEast = new Coordinate(35.0516, 31.7553);
             var southWest = new Coordinate(35.0251, 31.7467);
             var results = gateway.GetHighways(northEast, southWest).Result;
-            Assert.AreEqual(36, results.Count);
+            Assert.IsNotNull(results[0].Attributes[FeatureAttributes.OSM_NODES] as IEnumerable<object>);
+            Assert.AreEqual(38, results.Count);
+            
         }
 
         [TestMethod]

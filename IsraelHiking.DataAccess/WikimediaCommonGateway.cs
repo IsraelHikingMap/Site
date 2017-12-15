@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json.Linq;
 using WikiClientLibrary.Client;
+using WikiClientLibrary.Files;
 using WikiClientLibrary.Pages;
 using WikiClientLibrary.Sites;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -43,7 +44,9 @@ namespace IsraelHiking.DataAccess
                 ClientUserAgent = "IsraelHikingMapSite/5.x",
                 Timeout = new TimeSpan(0, 5, 0) // allow large images upload
             };
-            _site = await WikiSite.CreateAsync(wikiClient, new SiteOptions(BASE_API_ADDRESS));
+
+            _site = new WikiSite(wikiClient, new SiteOptions(BASE_API_ADDRESS));
+            await _site.Initialization;
             await _site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
         }
 
@@ -53,8 +56,7 @@ namespace IsraelHiking.DataAccess
             var wikiFileName = GetNonExistingFilePageName(title, fileName);
             var comment = CreateWikipediaComment(location, string.IsNullOrWhiteSpace(title) ? title : fileName);
             await _site.GetTokenAsync("edit", true);
-            var filePage = new FilePage(_site, wikiFileName);
-            var results = await filePage.UploadAsync(new StreamUploadSource(contentStream), comment, true);
+            var results = await _site.UploadAsync(wikiFileName, new StreamUploadSource(contentStream), comment, true);
             if (results.ResultCode != UploadResultCode.Success)
             {
                 throw new Exception("Unable to upload the file\n" + string.Join("\n", results.Warnings.Select(kvp => kvp.Key + ": " + kvp.Value)));

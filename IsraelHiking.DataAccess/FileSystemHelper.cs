@@ -32,5 +32,19 @@ namespace IsraelHiking.DataAccess
         {
             Directory.CreateDirectory(path);
         }
+
+        public void Move(string sourceFileName, string targetFileName)
+        {
+            if (File.Exists(targetFileName))
+            {
+                File.Delete(targetFileName);
+            }
+            File.Move(sourceFileName, targetFileName);
+        }
+
+        public Stream CreateWriteStream(string filePath)
+        {
+            return File.OpenWrite(filePath);
+        }
     }
 }

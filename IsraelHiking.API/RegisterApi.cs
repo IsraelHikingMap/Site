@@ -1,5 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using IsraelHiking.API.Converters;
+﻿using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
@@ -41,6 +40,7 @@ namespace IsraelHiking.API
             services.AddTransient<IPointsOfInterestAdapter, OffRoadPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, WikipediaPointsOfInterestAdapter>();
             services.AddSingleton<IItmWgs84MathTransfromFactory, ItmWgs84MathTransfromFactory>();
+            services.AddTransient<IOsmElasticSearchUpdaterService, OsmElasticSearchUpdaterService>();
             return services;
         }
     }

@@ -9,7 +9,6 @@ using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
-using OsmSharp.Complete;
 using OsmSharp.Tags;
 using Microsoft.Extensions.Options;
 
@@ -66,20 +65,20 @@ namespace IsraelHiking.API.Services.Osm
                     if (coordinateIndex > 0)
                     {
                         var previousCoordinate = line.Coordinates[coordinateIndex - 1];
-                        await AddIntersectingNodes(previousCoordinate, coordinate, nodeIds, itmHighways);
+                        await AddIntersectingNodes(previousCoordinate, coordinate, nodeIds, itmHighways, highways);
                     }
-                    var closestCompleteWay = await GetClosetHighway(coordinate, itmHighways);
-                    if (closestCompleteWay == null)
+                    var closetHighway = GetClosetHighway(coordinate, itmHighways, highways);
+                    if (closetHighway == null)
                     {
                         // no close highways, adding a new node
                         nodeIds.Add(await _osmGateway.CreateElement(changesetId, new Node { Id = 0, Latitude = coordinate.Y, Longitude = coordinate.X }));
                         continue;
                     }
                     var itmPoint = GetItmCoordinate(coordinate);
-                    var closestItmHighway = itmHighways.First(hw => hw.GetOsmId() == closestCompleteWay.Id.ToString());
+                    var closestItmHighway = itmHighways.First(hw => hw.GetOsmId() == closetHighway.Attributes[FeatureAttributes.ID].ToString());
                     var closestItmPointInWay = closestItmHighway.Coordinates.OrderBy(c => c.Distance(itmPoint.Coordinate)).First();
                     var indexOnWay = closestItmHighway.Coordinates.ToList().IndexOf(closestItmPointInWay);
-                    var closestNodeId = closestCompleteWay.Nodes[indexOnWay].Id.ToString();
+                    var closestNodeId = ((List<object>)closetHighway.Attributes[FeatureAttributes.OSM_NODES])[indexOnWay].ToString();
                     if (nodeIds.Any() && nodeIds.Last() == closestNodeId)
                     {
                         continue;
@@ -93,7 +92,7 @@ namespace IsraelHiking.API.Services.Osm
                     // need to add a new node to existing highway
                     var newNodeId = await _osmGateway.CreateElement(changesetId, new Node { Id = 0, Latitude = coordinate.Y, Longitude = coordinate.X });
                     nodeIds.Add(newNodeId);
-                    var simpleWay = AddNewNodeToExistingWay(newNodeId, closestCompleteWay, closestItmHighway, indexOnWay, itmPoint);
+                    var simpleWay = await AddNewNodeToExistingWay(newNodeId, closestItmHighway, indexOnWay, itmPoint);
                     await _osmGateway.UpdateElement(changesetId, simpleWay);
                     waysToUpdateIds.Add(simpleWay.Id.ToString());
                 }
@@ -107,7 +106,7 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
-        private async Task AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<string> nodeIds, List<LineString> itmHighways)
+        private async Task AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<string> nodeIds, List<LineString> itmHighways, List<Feature> highways)
         {
             var lineSegment = new LineString(new [] { GetItmCoordinate(previousCoordinate).Coordinate, GetItmCoordinate(coordinate).Coordinate});
             var closeLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.DistanceToExisitngLineMergeThreshold);
@@ -119,8 +118,9 @@ namespace IsraelHiking.API.Services.Osm
                     continue;
                 }
                 var indexInLine = closeLine.Coordinates.ToList().IndexOf(closestPointInExistingLine.Coordinate);
-                var completeWay = await _osmGateway.GetCompleteWay(closeLine.GetOsmId());
-                var nodeId = completeWay.Nodes[indexInLine].Id.ToString();
+                var closestHighway = highways.First(x => x.Attributes[FeatureAttributes.ID].ToString() == closeLine.GetOsmId());
+
+                var nodeId = ((List<object>)closestHighway.Attributes[FeatureAttributes.OSM_NODES])[indexInLine].ToString();
                 if (nodeIds.Any() && nodeIds.Last() == nodeId)
                 {
                     continue;
@@ -129,7 +129,7 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
-        private Way AddNewNodeToExistingWay(string nodeId, CompleteWay closestCompleteWay, LineString closestItmHighway, int indexOnWay, Point itmPoint)
+        private async Task<Way> AddNewNodeToExistingWay(string nodeId, LineString closestItmHighway, int indexOnWay, Point itmPoint)
         {
             var indexToInsert = indexOnWay;
             if (indexOnWay != closestItmHighway.Coordinates.Length - 1)
@@ -142,7 +142,7 @@ namespace IsraelHiking.API.Services.Osm
                 }
             }
 
-            var simpleWay = (Way)closestCompleteWay.ToSimple();
+            var simpleWay = await _osmGateway.GetWay(closestItmHighway.GetOsmId());
             var updatedList = simpleWay.Nodes.ToList();
             updatedList.Insert(indexToInsert, long.Parse(nodeId));
             simpleWay.Nodes = updatedList.ToArray();
@@ -179,7 +179,7 @@ namespace IsraelHiking.API.Services.Osm
             return new Point(northEast);
         }
 
-        private async Task<CompleteWay> GetClosetHighway(Coordinate coordinate, List<LineString> itmHighways)
+        private Feature GetClosetHighway(Coordinate coordinate, List<LineString> itmHighways, List<Feature> highways)
         {
             var point = GetItmCoordinate(coordinate);
             if (!itmHighways.Any())
@@ -193,7 +193,7 @@ namespace IsraelHiking.API.Services.Osm
             {
                 return null;
             }
-            return await _osmGateway.GetCompleteWay(closestHighway.GetOsmId());
+            return highways.First(h => h.Attributes[FeatureAttributes.ID].ToString() == closestHighway.GetOsmId());
         }
 
         private LineString ToItmLineString(Feature feature)

@@ -155,7 +155,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA},
                 {FeatureAttributes.POI_CATEGORY, Categories.WIKIPEDIA},
                 {FeatureAttributes.POI_LANGUAGE, language},
-                {FeatureAttributes.POI_TYPE, string.Empty},
+                {FeatureAttributes.OSM_TYPE, string.Empty},
                 {FeatureAttributes.ICON, "icon-wikipedia-w"},
                 {FeatureAttributes.ICON_COLOR, "black"},
                 {FeatureAttributes.SEARCH_FACTOR, 1},

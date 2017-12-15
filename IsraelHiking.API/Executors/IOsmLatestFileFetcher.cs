@@ -11,7 +11,13 @@ namespace IsraelHiking.API.Executors
         /// <summary>
         /// Gets a stream to the latest OSM file
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The OSM file stream</returns>
         Task<Stream> Get();
+
+        /// <summary>
+        /// This method returns a stream with the updates
+        /// </summary>
+        /// <returns>A Stream containting all the updates made since last "Get" was called</returns>
+        Task<Stream> GetUpdates();
     }
 }

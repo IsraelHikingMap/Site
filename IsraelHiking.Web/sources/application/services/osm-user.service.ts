@@ -256,7 +256,7 @@ export class OsmUserService {
     }
 
     public getMissingParts(trace: ITrace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
-        return this.httpClient.post(Urls.osm + "?url=" + trace.dataUrl, {}).toPromise();
+        return this.httpClient.post(Urls.osm + "?url=" + trace.dataUrl, {}).toPromise() as Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
     }
 
     public addAMissingPart(feature: GeoJSON.Feature<GeoJSON.LineString>): Promise<any> {

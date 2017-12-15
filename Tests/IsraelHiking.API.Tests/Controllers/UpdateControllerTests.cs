@@ -1,46 +1,43 @@
-﻿using System.Collections.Generic;
-using System.IO;
+﻿using System.IO;
 using System.Net;
+using System.Threading.Tasks;
+using System.Xml.Serialization;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
-using IsraelHiking.API.Services.Poi;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using NetTopologySuite.Features;
 using NSubstitute;
-using OsmSharp.Complete;
+using OsmSharp;
+using OsmSharp.Changesets;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
     [TestClass]
     public class UpdateControllerTests
     {
-        private UpdateController _updateController;
+        private UpdateController _controller;
         private IGraphHopperGateway _graphHopperGateway;
-        private IElasticSearchGateway _elasticSearchGateway;
-        private IOsmRepository _osmRepository;
-        private IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
         private IOsmLatestFileFetcher _osmLatestFileFetcher;
+        private IOsmElasticSearchUpdaterService _osmElasticSearchUpdaterService;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
-            _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _osmRepository = Substitute.For<IOsmRepository>();
-            _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
             _osmLatestFileFetcher = Substitute.For<IOsmLatestFileFetcher>();
             var logger = Substitute.For<ILogger>();
-            _updateController = new UpdateController(_graphHopperGateway, _elasticSearchGateway, _geoJsonPreprocessorExecutor, _osmRepository, _osmLatestFileFetcher, new List<IPointsOfInterestAdapter>(), logger);
+            _osmElasticSearchUpdaterService = Substitute.For<IOsmElasticSearchUpdaterService>();
+            _controller = new UpdateController(_graphHopperGateway, _osmLatestFileFetcher, _osmElasticSearchUpdaterService, logger);
         }
 
         private void SetupContext(IPAddress localIp, IPAddress remoteIp)
         {
-            _updateController.ControllerContext = new ControllerContext
+            _controller.ControllerContext = new ControllerContext
             {
                 HttpContext = new DefaultHttpContext
                 {
@@ -58,7 +55,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("5.6.7.8"));
             
-            var results = _updateController.PostUpdateData(null).Result;
+            var results = _controller.PostUpdateData(null).Result;
             
             Assert.IsNotNull(results as BadRequestObjectResult);
         }
@@ -69,11 +66,11 @@ namespace IsraelHiking.API.Tests.Controllers
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
             _osmLatestFileFetcher.Get().Returns(new MemoryStream(new byte[] { 1 }));
 
-            _updateController.PostUpdateData(null).Wait();
+            _controller.PostUpdateData(null).Wait();
 
             _graphHopperGateway.Received(1).Rebuild(Arg.Any<MemoryStream>(), Arg.Any<string>());
-            _elasticSearchGateway.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
-            _elasticSearchGateway.Received(1).UpdatePointsOfInterestZeroDownTime(Arg.Any<List<Feature>>());
+            _osmElasticSearchUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>(), Arg.Any<Stream>());
+            
         }
 
         [TestMethod]
@@ -81,13 +78,72 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("10.10.10.10"));
             _osmLatestFileFetcher.Get().Returns(new MemoryStream(new byte[] {1}));
-            _geoJsonPreprocessorExecutor.Preprocess(Arg.Any<Dictionary<string, List<ICompleteOsmGeo>>>()).Returns(new Dictionary<string, List<Feature>>());
             
-            _updateController.PostUpdateData(new UpdateRequest()).Wait();
+            _controller.PostUpdateData(new UpdateRequest()).Wait();
 
             _graphHopperGateway.Received(1).Rebuild(Arg.Any<MemoryStream>(), Arg.Any<string>());
-            _elasticSearchGateway.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
-            _elasticSearchGateway.Received(1).UpdatePointsOfInterestZeroDownTime(Arg.Any<List<Feature>>());
+            _osmElasticSearchUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>(), Arg.Any<Stream>());
+        }
+
+        [TestMethod]
+        public void PutUpdateData_NonLocal_ShouldReturnBadReqeust()
+        {
+            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("5.6.7.8"));
+
+            var results = _controller.PutUpdateData().Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void PutUpdateData_Local_ShouldUpdate()
+        {
+            var changes = new OsmChange {Create = new OsmGeo[] {new Node()}};
+            _osmLatestFileFetcher.GetUpdates().Returns(CreateStream(changes));
+            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
+
+            _controller.PutUpdateData().Wait();
+
+            _osmElasticSearchUpdaterService.Received(1).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
+        }
+
+        [TestMethod]
+        public void PutUpdateData_FromTwoThreads_ShouldUpdateTwice()
+        {
+            var changes = new OsmChange {Create = new OsmGeo[] {new Node()}};
+            
+            _osmLatestFileFetcher.GetUpdates().Returns(CreateStream(changes), CreateStream(changes));
+            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
+
+            _controller.PutUpdateData().ContinueWith((t) => { });
+            _controller.PutUpdateData().Wait();
+
+            _osmElasticSearchUpdaterService.Received(2).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
+        }
+
+        [TestMethod]
+        public void PutUpdateData_WhileRebuildIsRunning_ShouldNotUpdate()
+        {
+            var changes = new OsmChange { Create = new OsmGeo[] { new Node() } };
+            _osmLatestFileFetcher.Get().Returns(CreateStream(changes));
+            _osmLatestFileFetcher.GetUpdates().Returns(CreateStream(changes));
+            SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
+
+            _controller.PostUpdateData(new UpdateRequest()).ContinueWith((t) => { });
+            var results = _controller.PutUpdateData().Result as BadRequestObjectResult;
+
+            _osmElasticSearchUpdaterService.DidNotReceive().Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
+            Assert.IsNotNull(results);
+        }
+
+        private async Task<Stream> CreateStream(OsmChange changes)
+        {
+            await Task.Delay(100);
+            Stream stream = new MemoryStream();
+            var serializer = new XmlSerializer(typeof(OsmChange));
+            serializer.Serialize(stream, changes);
+            stream.Seek(0, SeekOrigin.Begin);
+            return stream;
         }
     }
 }

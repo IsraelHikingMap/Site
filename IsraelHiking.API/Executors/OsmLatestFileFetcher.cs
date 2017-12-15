@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -11,7 +12,13 @@ namespace IsraelHiking.API.Executors
     /// <inheritdoc />
     public class OsmLatestFileFetcher : IOsmLatestFileFetcher
     {
-        private const string GEO_FABRIK_ADDRESS = "http://download.geofabrik.de/asia/israel-and-palestine-latest.osm.pbf";
+        private const string OSM_FILE_ADDRESS = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine-latest.osm.pbf";
+        private const string OSM_FILE_TIMESTAMP = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine.state.txt";
+        private const string MINUTES_FILES_BASE_ADDRESS = "http://download.openstreetmap.fr/replication/asia/israel_and_palestine";
+        private const string UPDATES_FILE_NAME = "israel-and-palestine-updates.osc";
+        private const string OSM_UPDATE_EXE = "osmup.exe";
+        private const string OSM_CONVERT_EXE = "osmconvert.exe";
+
 
         private readonly IFileSystemHelper _fileSystemHelper;
         private readonly IProcessHelper _processHelper;
@@ -42,35 +49,54 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public async Task<Stream> Get()
         {
-            var workingDirectory = Path.Combine(_options.BinariesFolder, _options.SiteCacheFolder);
-            var directoryContents = _fileProvider.GetDirectoryContents(_options.SiteCacheFolder);
+            var workingDirectory = Path.Combine(_options.BinariesFolder, _options.OsmFileCacheFolder);
+            var directoryContents = _fileProvider.GetDirectoryContents(_options.OsmFileCacheFolder);
             if (!directoryContents.Any())
             {
                 _fileSystemHelper.CreateDirectory(workingDirectory);
             }
-            var remoteFileSize = await _remoteFileFetcherGateway.GetFileSize(GEO_FABRIK_ADDRESS);
-            if (directoryContents.FirstOrDefault(f => f.Name == Sources.OSM_FILE_NAME) == null)
-            {
-                await DownloadLatestOsmFile(workingDirectory);
-            }
-            var fileInfo = _fileProvider.GetFileInfo(Path.Combine(_options.SiteCacheFolder, Sources.OSM_FILE_NAME));
-            if (fileInfo.Length != remoteFileSize)
-            {
-                await DownloadLatestOsmFile(workingDirectory);
-            }
-            
-            // HM TODO: update OSM file using minutes updates?
-            //var fileName = "osmup.exe";
-            //var processArguments = $@"osmup.exe {osmFile} NUL.osc --base-url=http://download.openstreetmap.fr/replication/asia/israel_and_palestine --minute --tempfiles=openstreetmap_fr\asia\israel_and_palestine --keep-tempfiles --trust-tempfiles";
-            //_processHelper.Start(fileName, processArguments, workingDirectory);
+            await DownloadDailyOsmFile(workingDirectory);
+            UpdateFileToLatestVersion(workingDirectory);
 
+            var fileInfo = _fileProvider.GetFileInfo(Path.Combine(_options.OsmFileCacheFolder, Sources.OSM_FILE_NAME));
             return fileInfo.CreateReadStream();
         }
 
-        private async Task DownloadLatestOsmFile(string workingDirectory)
+        private async Task DownloadDailyOsmFile(string workingDirectory)
         {
-            var response = await _remoteFileFetcherGateway.GetFileContent(GEO_FABRIK_ADDRESS);
+            var response = await _remoteFileFetcherGateway.GetFileContent(OSM_FILE_ADDRESS);
             _fileSystemHelper.WriteAllBytes(Path.Combine(workingDirectory, Sources.OSM_FILE_NAME), response.Content);
+            
+            // Update timestamp to match the one from the server.
+            var file = await _remoteFileFetcherGateway.GetFileContent(OSM_FILE_TIMESTAMP);
+            var stringContent = Encoding.UTF8.GetString(file.Content);
+            var lastLine = stringContent.Split('\n').Last(s => !string.IsNullOrWhiteSpace(s));
+            var timeStamp = lastLine.Split('=').Last().Replace("\\", "");
+            RunOsmConvert($"--timestamp={timeStamp} {Sources.OSM_FILE_NAME}", workingDirectory);
         }
-    }
+
+        private void UpdateFileToLatestVersion(string workingDirectory)
+        {
+            _processHelper.Start(OSM_UPDATE_EXE, $"{Sources.OSM_FILE_NAME} {UPDATES_FILE_NAME} --base-url={MINUTES_FILES_BASE_ADDRESS} --minute", workingDirectory);
+            RunOsmConvert($"{Sources.OSM_FILE_NAME} {UPDATES_FILE_NAME}", workingDirectory);
+        }
+        /// <inheritdoc />
+        public Task<Stream> GetUpdates()
+        {
+            return Task.Run(() =>
+            {
+                var workingDirectory = Path.Combine(_options.BinariesFolder, _options.OsmFileCacheFolder);
+                UpdateFileToLatestVersion(workingDirectory);
+                var fileInfo = _fileProvider.GetFileInfo(Path.Combine(_options.OsmFileCacheFolder, UPDATES_FILE_NAME));
+                return fileInfo.CreateReadStream();
+            });
+        }
+
+        private void RunOsmConvert(string parameters, string workingDirectory)
+        {
+            var tempOsmFileName = $"temp-{Sources.OSM_FILE_NAME}";
+            _processHelper.Start(OSM_CONVERT_EXE, $"{parameters} -o={tempOsmFileName}", workingDirectory);
+            _fileSystemHelper.Move(Path.Combine(workingDirectory, tempOsmFileName), Path.Combine(workingDirectory, Sources.OSM_FILE_NAME));
+        }
+   }
 }

@@ -148,6 +148,12 @@ namespace IsraelHiking.DataAccess
                 highways);
         }
 
+        public async Task DeleteHighwaysById(string id)
+        {
+            var fullId = GetId("way", Sources.OSM, id);
+            await _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_HIGHWAYS_ALIAS));
+        }
+
         public Task UpdatePointsOfInterestZeroDownTime(List<Feature> pointsOfInterest)
         {
             return UpdateZeroDownTime(OSM_POIS_INDEX1, 
@@ -162,9 +168,9 @@ namespace IsraelHiking.DataAccess
             return UpdateData(features, OSM_HIGHWAYS_ALIAS);
         }
 
-        public Task UpdatePointsOfInterestData(Feature feature)
+        public Task UpdatePointsOfInterestData(List<Feature> features)
         {
-            return UpdateData(new List<Feature> { feature }, OSM_POIS_ALIAS);
+            return UpdateData(features, OSM_POIS_ALIAS);
         }
 
         public Task UpdateRating(Rating rating)
@@ -270,10 +276,16 @@ namespace IsraelHiking.DataAccess
                     .Size(1).Query(
                         q => q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
                              && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ID}").Value(id))
-                             && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_TYPE}").Value(type))
+                             && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.OSM_TYPE}").Value(type))
                     )
             );
             return response.Documents.FirstOrDefault();
+        }
+
+        public Task DeletePointOfInterestById(string id, string type)
+        {
+            var fullId = GetId(type, id, Sources.OSM);
+            return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
         }
 
         public Task<Rating> GetRating(string id, string source)
@@ -343,12 +355,17 @@ namespace IsraelHiking.DataAccess
 
         private string GetId(Feature feature)
         {
-            return feature.Geometry.GeometryType + "_" + GetId(feature.Attributes[FeatureAttributes.POI_SOURCE]?.ToString() ?? string.Empty, feature.Attributes[FeatureAttributes.ID]?.ToString() ?? string.Empty);
+            return GetId(feature.Attributes[FeatureAttributes.OSM_TYPE].ToString(), feature.Attributes[FeatureAttributes.POI_SOURCE]?.ToString() ?? string.Empty, feature.Attributes[FeatureAttributes.ID]?.ToString() ?? string.Empty);
         }
 
         private string GetId(Rating rating)
         {
             return GetId(rating.Source, rating.Id);
+        }
+
+        private string GetId(string elementType, string source, string id)
+        {
+            return elementType + "_" + GetId(source, id);
         }
 
         private string GetId(string source, string id)

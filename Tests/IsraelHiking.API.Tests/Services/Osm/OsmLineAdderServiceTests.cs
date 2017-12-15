@@ -52,15 +52,20 @@ namespace IsraelHiking.API.Tests.Services.Osm
 
         private void SetupHighway(int wayId, Coordinate[] coordinates, IOsmGateway osmGateway)
         {
-            var table = new AttributesTable {{FeatureAttributes.ID, wayId.ToString()}};
-            _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>
-            {
-                new Feature(new LineString(coordinates), table)
-            });
             var osmCompleteWay = new CompleteWay { Id = wayId };
             var id = 1;
             osmCompleteWay.Nodes = coordinates.Select(coordinate => new Node { Id = id++, Latitude = coordinate.Y, Longitude = coordinate.X }).ToArray();
             osmGateway.GetCompleteWay(wayId.ToString()).Returns(osmCompleteWay);
+            osmGateway.GetWay(wayId.ToString()).Returns(osmCompleteWay.ToSimple() as Way);
+            var table = new AttributesTable
+            {
+                {FeatureAttributes.ID, wayId.ToString()},
+                {FeatureAttributes.OSM_NODES, osmCompleteWay.Nodes.Select(n => n.Id.Value).Cast<object>().ToList()}
+            };
+            _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(new List<Feature>
+            {
+                new Feature(new LineString(coordinates), table)
+            });
         }
 
         [TestMethod]

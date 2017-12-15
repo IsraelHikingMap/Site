@@ -38,7 +38,7 @@ export class SearchResultsProvider {
                     iconColor: properties.iconColor,
                     source: properties.poiSource,
                     id: properties.identifier,
-                    type: properties.poiType,
+                    type: properties.osmType,
                     location: L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.geolocation.alt),
                     isRoute: feature.geometry.type !== "Point"
                 } as ISearchResults;

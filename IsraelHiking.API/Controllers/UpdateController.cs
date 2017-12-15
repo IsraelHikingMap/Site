@@ -1,15 +1,16 @@
-﻿using System.Collections.Generic;
-using IsraelHiking.API.Executors;
+﻿using IsraelHiking.API.Executors;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.IO;
-using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
-using IsraelHiking.API.Services.Poi;
+using System.Xml.Serialization;
+using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
 using Newtonsoft.Json;
+using OsmSharp.Changesets;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -19,40 +20,31 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class UpdateController : Controller
     {
+        private static readonly Semaphore _rebuildSemaphore = new Semaphore(1, 1);
+        private static readonly SemaphoreSlim _updateSemaphore = new SemaphoreSlim(1, 1);
+
         private readonly ILogger _logger;
         private readonly IGraphHopperGateway _graphHopperGateway;
-        private readonly IElasticSearchGateway _elasticSearchGateway;
-        private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
-        private readonly IOsmRepository _osmRepository;
-        private readonly IEnumerable<IPointsOfInterestAdapter> _adapters;
         private readonly IOsmLatestFileFetcher _osmLatestFileFetcher;
+        private readonly IOsmElasticSearchUpdaterService _osmElasticSearchUpdaterService;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="graphHopperGateway"></param>
-        /// <param name="elasticSearchGateway"></param>
-        /// <param name="osmGeoJsonPreprocessorExecutor"></param>
-        /// <param name="osmRepository"></param>
         /// <param name="osmLatestFileFetcher"></param>
-        /// <param name="adapters"></param>
+        /// <param name="osmElasticSearchUpdaterService"></param>
         /// <param name="logger"></param>
         public UpdateController(IGraphHopperGateway graphHopperGateway,
-            IElasticSearchGateway elasticSearchGateway,
-            IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor,
-            IOsmRepository osmRepository,
             IOsmLatestFileFetcher osmLatestFileFetcher,
-            IEnumerable<IPointsOfInterestAdapter> adapters,
+            IOsmElasticSearchUpdaterService osmElasticSearchUpdaterService,
             ILogger logger)
         {
             _graphHopperGateway = graphHopperGateway;
-            _elasticSearchGateway = elasticSearchGateway;
-            _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
-            _osmRepository = osmRepository;
             _osmLatestFileFetcher = osmLatestFileFetcher;
-            _adapters = adapters;
+            _osmElasticSearchUpdaterService = osmElasticSearchUpdaterService;
             _logger = logger;
-
+            
         }
 
         /// <summary>
@@ -65,60 +57,97 @@ namespace IsraelHiking.API.Controllers
         [Route("")]
         public async Task<IActionResult> PostUpdateData(UpdateRequest request)
         {
-            if (HttpContext.Connection.LocalIpAddress.Equals(HttpContext.Connection.RemoteIpAddress) == false &&
-                IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress) == false &&
-                HttpContext.Connection.RemoteIpAddress.Equals(IPAddress.Parse("10.10.10.10")) == false)
+            if (!_rebuildSemaphore.WaitOne(0))
             {
-                return BadRequest($"This operation can't be done from a remote client, please run this from the server: \n {HttpContext.Connection.LocalIpAddress}, {HttpContext.Connection.RemoteIpAddress}, {IPAddress.Parse("10.10.10.10")}");
+                return BadRequest("Can't run two full updates in parallel");
             }
-            if (request == null || request.Routing == false &&
-                request.Highways == false &&
-                request.PointsOfInterest == false)
+            try
             {
-                request = new UpdateRequest
+                if (!IsRequestLocal())
                 {
-                    Routing = true,
-                    Highways = true,
-                    PointsOfInterest = true
-                };
-                _logger.LogInformation("No specific filters were applied, updating all databases.");
+                    return BadRequest("This operation can't be done from a remote client, please run this from the server");
+                }
+                if (request == null || request.Routing == false &&
+                    request.Highways == false &&
+                    request.PointsOfInterest == false)
+                {
+                    request = new UpdateRequest
+                    {
+                        Routing = true,
+                        Highways = true,
+                        PointsOfInterest = true
+                    };
+                    _logger.LogInformation("No specific filters were applied, updating all databases.");
+                }
+                _logger.LogInformation("Updating site's databases according to request: " +
+                                       JsonConvert.SerializeObject(request));
+                var memoryStream = new MemoryStream();
+                using (var stream = await _osmLatestFileFetcher.Get())
+                {
+                    stream.CopyTo(memoryStream);
+                }
+                _logger.LogInformation("Copy osm data completed.");
+
+                var elasticSearchTask = _osmElasticSearchUpdaterService.Rebuild(request, memoryStream);
+
+                var graphHopperTask = request.Routing
+                    ? _graphHopperGateway.Rebuild(memoryStream, Sources.OSM_FILE_NAME)
+                    : Task.CompletedTask;
+
+                await Task.WhenAll(elasticSearchTask, graphHopperTask);
+                return Ok();
             }
-            _logger.LogInformation("Updating site's databases according to request:\n" + JsonConvert.SerializeObject(request));
-            var memoryStream = new MemoryStream();
-            using (var stream = await _osmLatestFileFetcher.Get())
+            finally
             {
-                stream.CopyTo(memoryStream);
+                _rebuildSemaphore.Release();
             }
-            _logger.LogInformation("Copy osm data completed.");
-
-            var elasticSearchTask = UpdateElasticSearch(request, memoryStream);
-
-            var graphHopperTask = request.Routing
-                ? _graphHopperGateway.Rebuild(memoryStream, Sources.OSM_FILE_NAME)
-                : Task.CompletedTask;
-
-            await Task.WhenAll(elasticSearchTask, graphHopperTask);
-            return Ok();
         }
 
-        private async Task UpdateElasticSearch(UpdateRequest request, MemoryStream memoryStream)
+        
+
+        /// <summary>
+        /// This operation will only update the data since last full update
+        /// It will only add missing data to the database
+        /// It will not run when a full update runs
+        /// </summary>
+        /// <returns></returns>
+        [HttpPut]
+        [Route("")]
+        public async Task<IActionResult> PutUpdateData()
         {
-            if (request.Highways)
+            if (!IsRequestLocal())
             {
-                _logger.LogInformation("Starting updating highways database.");
-                var osmHighways = await _osmRepository.GetAllHighways(memoryStream);
-                var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
-                await _elasticSearchGateway.UpdateHighwaysZeroDownTime(geoJsonHighways);
-                _logger.LogInformation("Finished updating highways database.");
+                return BadRequest("This operation can't be done from a remote client, please run this from the server");
             }
-            if (request.PointsOfInterest)
+            if (!_rebuildSemaphore.WaitOne(0))
             {
-                _logger.LogInformation("Starting updating POIs database.");
-                var fetchTask = _adapters.Select(a => a.GetPointsForIndexing(memoryStream)).ToArray();
-                var features = await Task.WhenAll(fetchTask);
-                await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features.SelectMany(v => v).ToList());
-                _logger.LogInformation("Finished updating POIs database.");
+                return BadRequest("Can't run update while full update is running");
             }
+            _rebuildSemaphore.Release();
+            await _updateSemaphore.WaitAsync();
+            try
+            {
+                _logger.LogInformation("Starting incrementail site's databases update");
+                using (var updatesStream = await _osmLatestFileFetcher.GetUpdates())
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
+                    var changes = (OsmChange) serializer.Deserialize(updatesStream);
+                    await _osmElasticSearchUpdaterService.Update(changes);
+                }
+                _logger.LogInformation("Finished Incrementail site's databases update");
+                return Ok();
+            }
+            finally
+            {
+                _updateSemaphore.Release();
+            }
+        }
+
+        private bool IsRequestLocal()
+        {
+            return HttpContext.Connection.LocalIpAddress.Equals(HttpContext.Connection.RemoteIpAddress) ||
+                   IPAddress.IsLoopback(HttpContext.Connection.RemoteIpAddress) ||
+                   HttpContext.Connection.RemoteIpAddress.Equals(IPAddress.Parse("10.10.10.10"));
         }
     }
 }

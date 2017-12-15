@@ -8,7 +8,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
     /// </summary>
     public class ReverseDegreesMinutesSecondsLatLonParser : ICoordinatesParser
     {
-        private DegreesMinutesSecondsLatLonParser _coordinatesMatcherProxy;
+        private readonly DegreesMinutesSecondsLatLonParser _coordinatesMatcherProxy;
 
         /// <summary>
         /// Constructor
@@ -18,16 +18,12 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
             _coordinatesMatcherProxy = new DegreesMinutesSecondsLatLonParser();
         }
 
-        /// <inheritdoc/>
-        public Regex Matcher
-        {
-            get
-            {
-                return new Regex("^" + DegreesMinutesSecondsLatLonParser.EAST_WEST_REGEX_STRING + 
-                    BaseCoordinatesParser.DELIMITER_REGEX_STRING + 
-                    DegreesMinutesSecondsLatLonParser.NORTH_SOUTH_REGEX_STRING  + "$");
-            }
-        }
+        /// <summary>
+        /// The regular expression matcher for reverse degrees
+        /// </summary>
+        public Regex Matcher => new Regex("^" + DegreesMinutesSecondsLatLonParser.EAST_WEST_REGEX_STRING + 
+                                          BaseCoordinatesParser.DELIMITER_REGEX_STRING + 
+                                          DegreesMinutesSecondsLatLonParser.NORTH_SOUTH_REGEX_STRING  + "$");
 
         /// <inheritdoc/>
         public Coordinate TryParse(string term)
@@ -39,11 +35,7 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
                 term = lonLatMatch.Groups[3].Value + lonLatMatch.Groups[4].Value + " " + lonLatMatch.Groups[1].Value + lonLatMatch.Groups[2].Value;
             }
             var match = _coordinatesMatcherProxy.Matcher.Match(term);
-            if (match.Success)
-            {
-                return _coordinatesMatcherProxy.TryParse(term);
-            }
-            return null;
+            return match.Success ? _coordinatesMatcherProxy.TryParse(term) : null;
         }
     }
 }

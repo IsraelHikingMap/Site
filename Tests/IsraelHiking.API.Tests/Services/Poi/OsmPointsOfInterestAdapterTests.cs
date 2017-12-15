@@ -202,7 +202,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, null, "he").Result;
 
             Assert.IsNotNull(resutls);
-            _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Any<Feature>());
+            _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.Received().CreateElement(Arg.Any<string>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA].Contains("תל שלם")));
         }
 
@@ -218,7 +218,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Type = OsmGeoType.Node.ToString().ToLower()
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
-            gateway.GetNode(pointOfInterest.Id).Returns(new Node
+            gateway.GetElement(pointOfInterest.Id, OsmGeoType.Node.ToString().ToLower()).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -246,7 +246,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Url = "http://en.wikipedia.org/wiki/Literary_Hall"
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
-            gateway.GetNode(pointOfInterest.Id).Returns(new Node
+            gateway.GetElement(pointOfInterest.Id, OsmGeoType.Node.ToString().ToLower()).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -272,7 +272,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Type = OsmGeoType.Node.ToString().ToLower()
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
-            gateway.GetNode(pointOfInterest.Id).Returns(new Node
+            gateway.GetElement(pointOfInterest.Id, OsmGeoType.Node.ToString().ToLower()).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -284,7 +284,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
             _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Wait();
 
-            _elasticSearchGateway.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<Feature>());
+            _elasticSearchGateway.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.DidNotReceive().CreateChangeset(Arg.Any<string>());
             gateway.DidNotReceive().CloseChangeset(Arg.Any<string>());
         }

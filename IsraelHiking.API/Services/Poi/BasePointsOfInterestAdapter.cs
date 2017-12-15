@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString();
             poiItem.Icon = feature.Attributes[FeatureAttributes.ICON].ToString();
             poiItem.IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString();
-            poiItem.Type = feature.Attributes[FeatureAttributes.POI_TYPE].ToString();
+            poiItem.Type = feature.Attributes[FeatureAttributes.OSM_TYPE].ToString();
             return poiItem;
         }
 

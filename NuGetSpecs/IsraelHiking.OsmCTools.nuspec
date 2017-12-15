@@ -1,0 +1,41 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/05/nuspec.xsd">
+    <metadata>
+		<!-- The identifier that must be unique within the hosting gallery -->
+		<id>IsraelHiking.OsmCTools</id>
+		<!-- The package version number that is used when resolving dependencies -->
+		<version>0.10</version>
+		<!-- Authors contain text that appears directly on the gallery -->
+		<authors>HarelM, Hrvoje Nikšić, Markus Weber, Nuernberg</authors>
+		<!-- Owners are typically nuget.org identities that allow gallery
+				users to easily find other packages by the same owners.  -->
+		<owners>IsraelHikingMap</owners>
+		<!-- License and project URLs provide links for the gallery -->
+		<licenseUrl>https://www.gnu.org/licenses/licenses.html#GPL</licenseUrl>
+		<projectUrl>https://gitlab.com/osm-c-tools/osmctools</projectUrl>
+		<!-- The icon is used in Visual Studio's package manager UI -->
+		<iconUrl>https://en.gravatar.com/userimage/129163156/eec1d47a913cf19abfcd9f6911b4a54a.png</iconUrl>
+		<!-- If true, this value prompts the user to accept the license when
+				installing the package. -->
+		<requireLicenseAcceptance>true</requireLicenseAcceptance>
+		<!-- Any details about this particular release -->
+		<releaseNotes></releaseNotes>
+		<!-- The description can be used in package manager UI. Note that the
+				nuget.org gallery uses information you add in the portal. -->
+		<description>A package to facilitate for OSM file download and update including wget, osmconvert and osmupdate for windows</description>
+		<!-- Copyright information -->
+		<copyright>Copyright © 2011..2014 Markus Weber, Nuernberg</copyright>
+		<!-- Tags appear in the gallery and can be used for tag searches -->
+		<tags>osm, osm-c-tools, osmctools, osmconvert, osmupdate, pbf, osc, o5c, o5m, wget</tags>
+		<!-- Dependencies are automatically installed when the package is installed -->
+		<dependencies>
+		</dependencies>
+    </metadata>
+
+    <!-- A readme.txt to display when the package is installed -->
+    <files>
+        <file src="OsmCTools\IsraelHiking.OsmCTools.targets" target="build\" />
+        <file src="OsmCTools\*.dll" target="content\OsmCTools\" />
+		<file src="OsmCTools\*.exe" target="content\OsmCTools\" />
+    </files>
+</package>

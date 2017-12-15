@@ -7,14 +7,13 @@ using OsmSharp.Streams;
 using OsmSharp.Streams.Complete;
 using Microsoft.Extensions.Logging;
 using System.IO;
+using IsraelHiking.Common;
 using OsmSharp;
 
 namespace IsraelHiking.DataAccess.OpenStreetMap
 {
     public class OsmRepository : IOsmRepository
     {
-        private const string NAME = "name";
-
         private readonly ILogger _logger;
 
         public OsmRepository(ILogger logger)
@@ -26,12 +25,12 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         {
             return Task.Run(() =>
             {
-                _logger.LogInformation($"Extracting elements with name from OSM stream.");
+                _logger.LogInformation("Extracting elements with name from OSM stream.");
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var namesDictionary = completeSource
-                    .Where(o => string.IsNullOrWhiteSpace(GetName(o)) == false)
-                    .GroupBy(GetName)
+                    .Where(o => string.IsNullOrWhiteSpace(o.Tags.GetName()) == false)
+                    .GroupBy(o => o.Tags.GetName())
                     .ToDictionary(g => g.Key, g => g.ToList());
                 _logger.LogInformation("Finished grouping data by name. " + namesDictionary.Values.Count);
                 return namesDictionary;
@@ -42,7 +41,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         {
             return Task.Run(() =>
             {
-                _logger.LogInformation($"Extracting highways from OSM stream.");
+                _logger.LogInformation("Extracting highways from OSM stream.");
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var higways = completeSource
@@ -54,36 +53,18 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             });
         }
 
-        private string GetName(ICompleteOsmGeo osm)
-        {
-            if (osm.Tags.ContainsKey(NAME))
-            {
-                return osm.Tags[NAME];
-            }
-            foreach (var tag in osm.Tags)
-            {
-                if (tag.Key.Contains(NAME))
-                {
-                    return tag.Value;
-                }
-            }
-            return string.Empty;
-        }
-
         public Task<List<Node>> GetPointsWithNoNameByTags(Stream osmFileStream, List<KeyValuePair<string, string>> tags)
         {
             return Task.Run(() =>
             {
-                _logger.LogInformation($"Extracting nodes by tags from OSM stream.");
+                _logger.LogInformation("Extracting nodes by tags from OSM stream.");
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var nodes = completeSource
                     .OfType<Node>()
                     .Where(node =>
-                        GetName(node) == string.Empty &&
-                        tags.Any(t => node.Tags.ContainsKey(t.Key) &&
-                        node.Tags[t.Key].Equals(t.Value))
-                    )
+                        node.Tags.GetName() == string.Empty &&
+                        node.Tags.HasAny(tags))
                     .ToList();
                 _logger.LogInformation("Finished getting nodes by tags. " + nodes.Count);
                 return nodes;

@@ -4,6 +4,7 @@ using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -12,7 +13,7 @@ using NSubstitute;
 namespace IsraelHiking.API.Tests.Controllers
 {
     [TestClass]
-    public class OsmTracesControllerTests
+    public class OsmTracesControllerTests 
     {
         private OsmTracesController _controller;
         private IHttpGatewayFactory _httpGatewayFactory;
@@ -26,7 +27,27 @@ namespace IsraelHiking.API.Tests.Controllers
             optionsProvider.Value.Returns(options);
             _controller = new OsmTracesController(_httpGatewayFactory, new LruCache<string, TokenAndSecret>(optionsProvider, Substitute.For<ILogger>()));   
         }
-        
+
+        [TestMethod]
+        public void GetTraces_ShouldGetThemFromOsm()
+        {
+            _controller.SetupIdentity();
+            var osmGateWay = Substitute.For<IOsmGateway>();
+            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(osmGateWay);
+
+            _controller.GetTraces().Wait();
+
+            osmGateWay.Received(1).GetTraces();
+        }
+
+        [TestMethod]
+        public void PostUploadGpsTrace_NoFile_ShouldReturnBadRequest()
+        {
+            var results = _controller.PostUploadGpsTrace(null).Result as BadRequestResult;
+
+            Assert.IsNotNull(results);
+        }
+
         [TestMethod]
         public void PostUploadGpsTrace_UploadFile_ShouldSendItToOsmGateway()
         {
@@ -41,5 +62,30 @@ namespace IsraelHiking.API.Tests.Controllers
             gateway.Received(1).CreateTrace(Arg.Any<string>(), Arg.Any<MemoryStream>());
         }
 
+
+        [TestMethod]
+        public void PutGpsTrace_ShouldUpdate()
+        {
+            _controller.SetupIdentity();
+            var osmGateWay = Substitute.For<IOsmGateway>();
+            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(osmGateWay);
+
+            _controller.PutGpsTrace("42", new OsmTrace()).Wait();
+
+            osmGateWay.Received(1).UpdateTrace(Arg.Any<OsmTrace>());
+        }
+
+        [TestMethod]
+        public void DeleteGpsTrace_ShouldDeteleIt()
+        {
+            var id = "id";
+            _controller.SetupIdentity();
+            var osmGateWay = Substitute.For<IOsmGateway>();
+            _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(osmGateWay);
+
+            _controller.DeleteGpsTrace(id).Wait();
+
+            osmGateWay.Received(1).DeleteTrace(id);
+        }
     }
 }

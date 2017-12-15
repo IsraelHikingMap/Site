@@ -164,7 +164,7 @@ namespace IsraelHiking.API.Services.Poi
                             {FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA},
                             {FeatureAttributes.POI_CATEGORY, Categories.WIKIPEDIA},
                             {FeatureAttributes.POI_LANGUAGE, language},
-                            {FeatureAttributes.POI_TYPE, string.Empty},
+                            {FeatureAttributes.OSM_TYPE, string.Empty},
                             {FeatureAttributes.SEARCH_FACTOR, 1},
                             {FeatureAttributes.GEOLOCATION, geoLocation}
                         });

@@ -143,6 +143,23 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             }
         }
 
+        public async Task<ICompleteOsmGeo> GetElement(string elementId, string type)
+        {
+            if (type == OsmGeoType.Node.ToString().ToLower())
+            {
+                return await GetNode(elementId);
+            }
+            if (type == OsmGeoType.Way.ToString().ToLower())
+            {
+                return await GetCompleteWay(elementId);
+            }
+            if (type == OsmGeoType.Relation.ToString().ToLower())
+            {
+                return await GetCompleteRelation(elementId);
+            }
+            throw new ArgumentException($"invalid {nameof(type)}: {type}");
+        }
+
         public Task<CompleteWay> GetCompleteWay(string wayId)
         {
             return GetCompleteElement<CompleteWay>(wayId, "way");
