@@ -65,7 +65,7 @@ namespace IsraelHiking.API.Services.Osm
                     if (coordinateIndex > 0)
                     {
                         var previousCoordinate = line.Coordinates[coordinateIndex - 1];
-                        await AddIntersectingNodes(previousCoordinate, coordinate, nodeIds, itmHighways, highways);
+                        AddIntersectingNodes(previousCoordinate, coordinate, nodeIds, itmHighways, highways);
                     }
                     var closetHighway = GetClosetHighway(coordinate, itmHighways, highways);
                     if (closetHighway == null)
@@ -106,7 +106,7 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
-        private async Task AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<string> nodeIds, List<LineString> itmHighways, List<Feature> highways)
+        private void AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<string> nodeIds, List<LineString> itmHighways, List<Feature> highways)
         {
             var lineSegment = new LineString(new [] { GetItmCoordinate(previousCoordinate).Coordinate, GetItmCoordinate(coordinate).Coordinate});
             var closeLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.DistanceToExisitngLineMergeThreshold);
