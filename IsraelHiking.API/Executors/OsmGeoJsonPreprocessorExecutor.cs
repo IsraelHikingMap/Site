@@ -77,11 +77,10 @@ namespace IsraelHiking.API.Executors
             });
             
             _logger.LogInformation("Finished converting OSM data to GeoJson, Starting GeoJson preprocessing");
-            var containers = geoJsonNamesDictionary.Values.SelectMany(v => v).Where(f =>
-                !(f.Geometry is MultiLineString) &&
-                !(f.Geometry is LineString) &&
-                !(f.Geometry is MultiPoint) &&
-                !(f.Geometry is Point)).ToList();
+            var containers = geoJsonNamesDictionary.Values
+                .SelectMany(v => v)
+                .Where(IsValidContainer)
+                .OrderBy(f => f.Geometry.Area).ToList();
             _logger.LogInformation("Total possible containers: " + containers.Count);
             var counter = 0;
             foreach (var features in geoJsonNamesDictionary.Values)
@@ -148,10 +147,6 @@ namespace IsraelHiking.API.Executors
 
         private void AddAddressField(Feature feature, List<Feature> containers)
         {
-            if (!(feature.Geometry is Point) && !(feature.Geometry is LineString))
-            {
-                return;
-            }
             Feature invalidFeature = null;
             var containingGeoJson = containers.FirstOrDefault(f =>
             {
@@ -231,6 +226,31 @@ namespace IsraelHiking.API.Executors
                 }
             }
             return waysToKeep;
+        }
+
+        private bool IsValidContainer(Feature feature)
+        {
+            if (feature.Geometry is Point)
+            {
+                return false;
+            }
+            if (feature.Geometry is LineString)
+            {
+                return false;
+            }
+            if (feature.Geometry is MultiLineString)
+            {
+                return false;
+            }
+            if (feature.Geometry is MultiPoint)
+            {
+                return false;
+            }
+            (var _, var icon) = _tagsHelper.GetInfo(feature.Attributes);
+            return icon.Icon == "icon-nature-reserve" || 
+                icon.Icon == "icon-home" || 
+                (feature.Attributes.GetNames().Contains("boundary") && feature.Attributes["boundary"].ToString() == "administrative") ||
+                (feature.Attributes.GetNames().Contains("landuse") && feature.Attributes["landuse"].ToString() == "forest");
         }
 
         /// <summary>

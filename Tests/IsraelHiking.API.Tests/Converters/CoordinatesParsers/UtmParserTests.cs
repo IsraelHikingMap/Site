@@ -58,14 +58,14 @@ namespace IsraelHiking.API.Tests.Converters.CoordinatesParsers
         }
 
         [TestMethod]
-        public void TryParse_OnEastingLowerBoundry_ShouldReturnCoordinates()
+        public void TryParse_OnEastingLowerBoundary_ShouldReturnCoordinates()
         {
             var results = _parser.TryParse("100000 600000");
             Assert.IsNotNull(results);
         }
 
         [TestMethod]
-        public void TryParse_OnEastingUpperBoundry_ShouldReturnCoordinates()
+        public void TryParse_OnEastingUpperBoundary_ShouldReturnCoordinates()
         {
             var results = _parser.TryParse("300000 600000");
             Assert.IsNotNull(results);

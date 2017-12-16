@@ -119,6 +119,83 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
 
+        private QueryContainer FeatureNameSearchQuery(QueryContainerDescriptor<Feature> q, string searchTerm, string field)
+        {
+            return q.FunctionScore(
+                fs => fs.Query(
+                    iq => iq.DisMax(
+                        dm => dm.Queries(
+                            dmq => dmq.MultiMatch(
+                                mm => mm.Query(searchTerm)
+                                    .Fields(f => f.Fields(field, $"{PROPERTIES}.name*", $"{PROPERTIES}._name"))
+                                    .Type(TextQueryType.BestFields)
+                                    .Fuzziness(Fuzziness.Auto)
+                            ),
+                            dmq => dmq.Match(
+                                m => m.Query(searchTerm)
+                                    .Boost(1.2)
+                                    .Field(field)
+                            )
+                        )
+                    )
+                ).Functions(fn => fn.FieldValueFactor(f => f.Field($"{PROPERTIES}.{FeatureAttributes.SEARCH_FACTOR}")))
+            );
+        }
+
+        public async Task<List<Feature>> Search(string searchTerm, string fieldName)
+        {
+            if (string.IsNullOrWhiteSpace(searchTerm))
+            {
+                return new List<Feature>();
+            }
+            var field = $"{PROPERTIES}.{fieldName}";
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Index(OSM_POIS_ALIAS)
+                    .Size(NUMBER_OF_RESULTS)
+                    .TrackScores()
+                    .Sort(f => f.Descending("_score"))
+                    .Query(q => FeatureNameSearchQuery(q, searchTerm, field))
+            );
+            return response.Documents.ToList();
+        }
+
+        public async Task<List<Feature>> SearchPlaces(string place, string fieldName)
+        {
+            var field = $"{PROPERTIES}.{fieldName}";
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Index(OSM_POIS_ALIAS)
+                    .Size(5)
+                    .TrackScores()
+                    .Sort(f => f.Descending("_score"))
+                    .Query(
+                        q => FeatureNameSearchQuery(q, place, field)
+                             && (q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ICON}").Value("reserve")) ||
+                                 q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ICON}").Value("home")) ||
+                                 q.Term(t => t.Field($"{PROPERTIES}.boundary").Value("administrative")) ||
+                                 q.Term(t => t.Field($"{PROPERTIES}.landuse").Value("residental")) ||
+                                 q.Term(t => t.Field($"{PROPERTIES}.landuse").Value("forest"))
+                             )
+                    )
+            );
+            return response.Documents.ToList();
+        }
+
+        public async Task<List<Feature>> SearchByLocation(Coordinate nortEast, Coordinate southWest, string searchTerm, string fieldName)
+        {
+            var field = $"{PROPERTIES}.{fieldName}";
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Index(OSM_POIS_ALIAS)
+                    .Size(NUMBER_OF_RESULTS)
+                    .TrackScores()
+                    .Sort(f => f.Descending("_score"))
+                    .Query(
+                        q => FeatureNameSearchQuery(q, searchTerm, field) &&
+                             q.GeoBoundingBox(b => ConvertToGeoBoundingBox(b, nortEast, southWest))
+                    )
+            );
+            return response.Documents.ToList();
+        }
+
         private async Task UpdateZeroDownTime(string index1, string index2, string alias, Func<string, Task> createIndexDelegate, List<Feature> features)
         {
             var currentIndex = index1;
@@ -141,10 +218,10 @@ namespace IsraelHiking.DataAccess
 
         public Task UpdateHighwaysZeroDownTime(List<Feature> highways)
         {
-            return UpdateZeroDownTime(OSM_HIGHWAYS_INDEX1, 
-                OSM_HIGHWAYS_INDEX2, 
-                OSM_HIGHWAYS_ALIAS, 
-                CreateHighwaysIndex, 
+            return UpdateZeroDownTime(OSM_HIGHWAYS_INDEX1,
+                OSM_HIGHWAYS_INDEX2,
+                OSM_HIGHWAYS_ALIAS,
+                CreateHighwaysIndex,
                 highways);
         }
 
@@ -156,9 +233,9 @@ namespace IsraelHiking.DataAccess
 
         public Task UpdatePointsOfInterestZeroDownTime(List<Feature> pointsOfInterest)
         {
-            return UpdateZeroDownTime(OSM_POIS_INDEX1, 
-                OSM_POIS_INDEX2, 
-                OSM_POIS_ALIAS, 
+            return UpdateZeroDownTime(OSM_POIS_INDEX1,
+                OSM_POIS_INDEX2,
+                OSM_POIS_ALIAS,
                 CreatePointsOfInterestIndex,
                 pointsOfInterest);
         }
@@ -194,79 +271,53 @@ namespace IsraelHiking.DataAccess
             }
         }
 
-        public async Task<List<Feature>> Search(string searchTerm, string fieldName)
+        public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)
         {
-            if (string.IsNullOrWhiteSpace(searchTerm))
-            {
-                return new List<Feature>();
-            }
-            var field = $"{PROPERTIES}.{fieldName}";
             var response = await _elasticClient.SearchAsync<Feature>(
-                s => s.Index(OSM_POIS_ALIAS)
-                    .Size(NUMBER_OF_RESULTS)
-                    .TrackScores()
-                    .Sort(f => f.Descending("_score"))
-                    .Query(
-                        q => q.FunctionScore(
-                            fs => fs.Query(
-                                iq => iq.DisMax(
-                                    dm => dm.Queries(
-                                        dmq => dmq.MultiMatch(
-                                            mm => mm.Query(searchTerm)
-                                                .Fields(f => f.Fields(field, $"{PROPERTIES}.name*", $"{PROPERTIES}._name"))
-                                                .Type(TextQueryType.BestFields)
-                                                .Fuzziness(Fuzziness.Auto)
-                                        ),
-                                        dmq => dmq.Match(
-                                            m => m.Query(searchTerm)
-                                                .Boost(1.2)
-                                                .Field(field)
-                                        )
-                                    )
-                                )
-                            ).Functions(fn => fn.FieldValueFactor(f => f.Field($"{PROPERTIES}.{FeatureAttributes.SEARCH_FACTOR}")))
+                s => s.Index(OSM_HIGHWAYS_ALIAS)
+                    .Size(5000).Query(
+                        q => q.GeoShapeEnvelope(
+                            e => e.Coordinates(new[]
+                                {
+                                    ConvertCoordinate(northEast),
+                                    ConvertCoordinate(southWest),
+                                }).Field(f => f.Geometry)
+                                .Relation(GeoShapeRelation.Intersects)
                         )
                     )
             );
             return response.Documents.ToList();
         }
 
-        public async Task<List<Feature>> GetHighways(Coordinate northEast, Coordinate southWest)
+        private GeoCoordinate ConvertCoordinate(Coordinate coordinate)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
-                s => s.Index(OSM_HIGHWAYS_ALIAS)
-                    .Size(5000).Query(
-                    q => q.GeoShapeEnvelope(
-                        e => e.Coordinates(new List<GeoCoordinate>
-                            {
-                                new GeoCoordinate(southWest.Y, northEast.X),
-                                new GeoCoordinate(northEast.Y, southWest.X)
-                            }).Field("geometry")
-                            .Relation(GeoShapeRelation.Intersects)
-                    )
-                )
-            );
-            return response.Documents.ToList();
+            return new GeoCoordinate(coordinate.Y, coordinate.X);
         }
 
         public async Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
-            var languages = language == Languages.ALL ? Languages.Array : new[] {language};
-            languages = languages.Concat(new [] { Languages.ALL }).ToArray();
+            var languages = language == Languages.ALL ? Languages.Array : new[] { language };
+            languages = languages.Concat(new[] { Languages.ALL }).ToArray();
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000).Query(
                         q => q.GeoBoundingBox(
-                            b => b.BoundingBox(bb =>
-                                bb.TopLeft(new GeoCoordinate(northEast.Y, southWest.X))
-                                .BottomRight(new GeoCoordinate(southWest.Y, northEast.X))
-                                ).Field($"{PROPERTIES}.{FeatureAttributes.GEOLOCATION}")
-                        ) && 
+                            b => ConvertToGeoBoundingBox(b, northEast,southWest)
+                        ) &&
                         q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories.Select(c => c.ToLower()).ToArray())) &&
                         q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LANGUAGE}").Terms(languages))
                     )
             );
             return response.Documents.ToList();
+        }
+
+        private GeoBoundingBoxQueryDescriptor<Feature> ConvertToGeoBoundingBox(GeoBoundingBoxQueryDescriptor<Feature> b,
+            Coordinate northEast, Coordinate southWest)
+        {
+            return b.BoundingBox(
+                bb => bb.TopLeft(new GeoCoordinate(northEast.Y, southWest.X))
+                    .BottomRight(new GeoCoordinate(southWest.Y, northEast.X))
+            ).Field($"{PROPERTIES}.{FeatureAttributes.GEOLOCATION}");
         }
 
         public async Task<Feature> GetPointOfInterestById(string id, string source, string type)

@@ -181,7 +181,10 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var way1 = new CompleteWay
             {
                 Id = 7,
-                Tags = new TagsCollection(),
+                Tags = new TagsCollection
+                {
+                    { "place", "city" }
+                },
                 Nodes = new[] {node1, node2, node3, node4, node1}
             };
             way1.Tags.Add(FeatureAttributes.NAME, container);

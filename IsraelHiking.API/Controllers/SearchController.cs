@@ -56,6 +56,20 @@ namespace IsraelHiking.API.Controllers
                 return GetFeatureCollectionFromCoordinates(term, coordinates);
             }
             var fieldName = string.IsNullOrWhiteSpace(language) ? "name" : "name:" + language;
+            if (term.Count(c => c == ',') == 1)
+            {
+                var splitted = term.Split(',');
+                var place = splitted.Last().Trim();
+                term = splitted.First().Trim();
+                var placesFeatures = await _elasticSearchGateway.SearchPlaces(place, fieldName);
+                if (placesFeatures.Any())
+                {
+                    var envolope = placesFeatures.First().Geometry.EnvelopeInternal;
+                    var featuresWithinPlaces = await _elasticSearchGateway.SearchByLocation(
+                        new Coordinate(envolope.MaxX, envolope.MaxY), new Coordinate(envolope.MinX, envolope.MinY), term, fieldName);
+                    return new FeatureCollection(new Collection<IFeature>(featuresWithinPlaces.OfType<IFeature>().ToList()));
+                }
+            }
             var features = await _elasticSearchGateway.Search(term, fieldName);
             return new FeatureCollection(new Collection<IFeature>(features.OfType<IFeature>().ToList()));
         }

@@ -9,6 +9,8 @@ namespace IsraelHiking.DataAccessInterfaces
     {
         void Initialize(string uri = "http://localhost:9200/");
         Task<List<Feature>> Search(string searchTerm, string fieldName);
+        Task<List<Feature>> SearchPlaces(string place, string fieldName);
+        Task<List<Feature>> SearchByLocation(Coordinate nortEast, Coordinate southWest, string searchTerm, string fieldName);
 
         Task UpdateHighwaysZeroDownTime(List<Feature> highways);
         Task UpdateHighwaysData(List<Feature> features);

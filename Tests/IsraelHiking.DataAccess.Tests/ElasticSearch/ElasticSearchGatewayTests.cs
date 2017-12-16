@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -19,7 +20,21 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         }
 
         [TestMethod]
-        [Ignore]
+        //[Ignore]
+        public void SearchWithinPlace_ShouldReturnResults()
+        {
+            var gateway = new ElasticSearchGateway(new TraceLogger());
+            gateway.Initialize();
+            var placesFeatures = gateway.SearchPlaces("תמרת", "name").Result;
+            Assert.AreEqual(5, placesFeatures.Count);
+            var envolope = placesFeatures.First().Geometry.EnvelopeInternal;
+            var results = gateway.SearchByLocation(
+                new Coordinate(envolope.MaxX, envolope.MaxY), new Coordinate(envolope.MinX, envolope.MinY), "מורן", "name").Result;
+            Assert.AreEqual(1, results.Count);
+        }
+
+        [TestMethod]
+        //[Ignore]
         public void GetHighways_ShouldReturnResults()
         {
             var gateway = new ElasticSearchGateway(new TraceLogger());
