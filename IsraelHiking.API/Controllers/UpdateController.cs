@@ -20,8 +20,8 @@ namespace IsraelHiking.API.Controllers
     [Route("api/[controller]")]
     public class UpdateController : Controller
     {
-        private static readonly Semaphore _rebuildSemaphore = new Semaphore(1, 1);
-        private static readonly SemaphoreSlim _updateSemaphore = new SemaphoreSlim(1, 1);
+        private static readonly Semaphore RebuildSemaphore = new Semaphore(1, 1);
+        private static readonly SemaphoreSlim UpdateSemaphore = new SemaphoreSlim(1, 1);
 
         private readonly ILogger _logger;
         private readonly IGraphHopperGateway _graphHopperGateway;
@@ -49,6 +49,7 @@ namespace IsraelHiking.API.Controllers
 
         /// <summary>
         /// This operation updates elastic search and graph hopper with data stored in osm pbf file.
+        /// If OsmFile is set to false it will download and use the daily file without updating it to latest version.
         /// This opertaion should have minimal down time.
         /// This operation can only be ran from the hosting server.
         /// </summary>
@@ -57,7 +58,7 @@ namespace IsraelHiking.API.Controllers
         [Route("")]
         public async Task<IActionResult> PostUpdateData(UpdateRequest request)
         {
-            if (!_rebuildSemaphore.WaitOne(0))
+            if (!RebuildSemaphore.WaitOne(0))
             {
                 return BadRequest("Can't run two full updates in parallel");
             }
@@ -67,22 +68,25 @@ namespace IsraelHiking.API.Controllers
                 {
                     return BadRequest("This operation can't be done from a remote client, please run this from the server");
                 }
-                if (request == null || request.Routing == false &&
+                if (request == null || 
+                    request.Routing == false &&
                     request.Highways == false &&
-                    request.PointsOfInterest == false)
+                    request.PointsOfInterest == false &&
+                    request.OsmFile == false)
                 {
                     request = new UpdateRequest
                     {
                         Routing = true,
                         Highways = true,
-                        PointsOfInterest = true
+                        PointsOfInterest = true,
+                        OsmFile = true
                     };
                     _logger.LogInformation("No specific filters were applied, updating all databases.");
                 }
                 _logger.LogInformation("Updating site's databases according to request: " +
                                        JsonConvert.SerializeObject(request));
                 var memoryStream = new MemoryStream();
-                using (var stream = await _osmLatestFileFetcher.Get())
+                using (var stream = await _osmLatestFileFetcher.Get(request.OsmFile))
                 {
                     stream.CopyTo(memoryStream);
                 }
@@ -99,7 +103,7 @@ namespace IsraelHiking.API.Controllers
             }
             finally
             {
-                _rebuildSemaphore.Release();
+                RebuildSemaphore.Release();
             }
         }
 
@@ -119,12 +123,12 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest("This operation can't be done from a remote client, please run this from the server");
             }
-            if (!_rebuildSemaphore.WaitOne(0))
+            if (!RebuildSemaphore.WaitOne(0))
             {
                 return BadRequest("Can't run update while full update is running");
             }
-            _rebuildSemaphore.Release();
-            await _updateSemaphore.WaitAsync();
+            RebuildSemaphore.Release();
+            await UpdateSemaphore.WaitAsync();
             try
             {
                 _logger.LogInformation("Starting incrementail site's databases update");
@@ -139,7 +143,7 @@ namespace IsraelHiking.API.Controllers
             }
             finally
             {
-                _updateSemaphore.Release();
+                UpdateSemaphore.Release();
             }
         }
 

@@ -47,7 +47,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc />
-        public async Task<Stream> Get()
+        public async Task<Stream> Get(bool updateFile = true)
         {
             var workingDirectory = Path.Combine(_options.BinariesFolder, _options.OsmFileCacheFolder);
             var directoryContents = _fileProvider.GetDirectoryContents(_options.OsmFileCacheFolder);
@@ -56,8 +56,10 @@ namespace IsraelHiking.API.Executors
                 _fileSystemHelper.CreateDirectory(workingDirectory);
             }
             await DownloadDailyOsmFile(workingDirectory);
-            UpdateFileToLatestVersion(workingDirectory);
-
+            if (updateFile)
+            {
+                UpdateFileToLatestVersion(workingDirectory);
+            }
             var fileInfo = _fileProvider.GetFileInfo(Path.Combine(_options.OsmFileCacheFolder, Sources.OSM_FILE_NAME));
             return fileInfo.CreateReadStream();
         }
