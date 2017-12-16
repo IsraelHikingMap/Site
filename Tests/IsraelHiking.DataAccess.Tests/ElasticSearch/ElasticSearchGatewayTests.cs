@@ -20,7 +20,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         }
 
         [TestMethod]
-        //[Ignore]
+        [Ignore]
         public void SearchWithinPlace_ShouldReturnResults()
         {
             var gateway = new ElasticSearchGateway(new TraceLogger());
@@ -34,7 +34,7 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         }
 
         [TestMethod]
-        //[Ignore]
+        [Ignore]
         public void GetHighways_ShouldReturnResults()
         {
             var gateway = new ElasticSearchGateway(new TraceLogger());
