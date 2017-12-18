@@ -28,6 +28,12 @@ namespace IsraelHiking.API.Services
         public Point Offset { get; set; }
     }
 
+    internal class AddressAndOpacity
+    {
+        public string Address { get; set; }
+        public double Opacity { get; set; }
+    }
+
     ///<inheritdoc />
     public class ImageCreationService : IImageCreationService
     {
@@ -39,8 +45,10 @@ namespace IsraelHiking.API.Services
         private const float CIRCLE_SIZE_X = 24; // pixels
         private const float CIRCLE_SIZE_Y = 28; // pixels
         private const float PEN_WIDTH = 13; // pixels
+        private const float MARKER_LENGTH = 10; // pixels
         private const int MAX_ZOOM = 16;
         
+
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly ILogger _logger;
 
@@ -71,7 +79,14 @@ namespace IsraelHiking.API.Services
         public async Task<byte[]> Create(DataContainer dataContainer)
         {
             _logger.LogDebug("Creating image for thumbnail started.");
-            var allLocations = dataContainer.Routes.SelectMany(r => r.Segments).SelectMany(s => s.Latlngs).ToArray();
+            var allLocations = dataContainer.Routes
+                .SelectMany(r => r.Segments)
+                .SelectMany(s => s.Latlngs)
+                .Concat(dataContainer.Routes
+                    .SelectMany(r => r.Markers)
+                    .Select(m => m.Latlng)
+                )
+                .ToArray();
             if (!allLocations.Any())
             {
                 allLocations = new[] { dataContainer.NorthEast, dataContainer.SouthWest };
@@ -110,7 +125,7 @@ namespace IsraelHiking.API.Services
             };
         }
 
-        private async Task<BackgroundImage> GetBackGroundImage(string[] addressTemplates, LatLng[] allLocations)
+        private async Task<BackgroundImage> GetBackGroundImage(AddressAndOpacity[] addressTemplates, LatLng[] allLocations)
         {
             var backgroundImage = InitBackgroundImageTiles(allLocations);
             var topLeft = new Point((int)GetXTile(allLocations.Min(l => l.Lng), backgroundImage.N), (int)GetYTile(allLocations.Max(l => l.Lat), backgroundImage.N));
@@ -134,7 +149,7 @@ namespace IsraelHiking.API.Services
             return backgroundImage;
         }
 
-        private async Task<Image> CreateSingleImageFromTiles(Point topLeft, Point bottomRight, int zoom, string[] addressTemplates)
+        private async Task<Image> CreateSingleImageFromTiles(Point topLeft, Point bottomRight, int zoom, AddressAndOpacity[] addressTemplates)
         {
             var bitmap = new Bitmap(TARGET_TILE_SIZE_X, TARGET_TILE_SIZE_Y);
             var verticalTiles = bottomRight.Y - topLeft.Y + 1;
@@ -170,19 +185,28 @@ namespace IsraelHiking.API.Services
             return bitmap;
         }
 
-        private static string[] GetAddressTemplates(DataContainer dataContainer)
+        private static AddressAndOpacity[] GetAddressTemplates(DataContainer dataContainer)
         {
             var address = string.IsNullOrWhiteSpace(dataContainer.BaseLayer.Address)
                 ? "https://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png"
                 : dataContainer.BaseLayer.Address;
 
-            var addressTemplates = new List<string> {FixAdrressTemplate(address)};
+            var addressTemplates = new List<AddressAndOpacity>
+            {
+                new AddressAndOpacity { Address = FixAdrressTemplate(address), Opacity = dataContainer.BaseLayer.Opacity ?? 1.0 }
+            };
             foreach (var layerData in dataContainer.Overlays ?? new List<LayerData>())
             {
-                if (!string.IsNullOrWhiteSpace(layerData.Address))
+                if (string.IsNullOrWhiteSpace(layerData.Address))
                 {
-                    addressTemplates.Add(FixAdrressTemplate(layerData.Address));
+                    continue;
                 }
+                var addressAndOpacity = new AddressAndOpacity
+                {
+                    Address = FixAdrressTemplate(layerData.Address),
+                    Opacity = layerData.Opacity ?? 1.0
+                };
+                addressTemplates.Add(addressAndOpacity);
             }
             return addressTemplates.ToArray();
         }
@@ -202,27 +226,32 @@ namespace IsraelHiking.API.Services
             using (var graphics = Graphics.FromImage(backgroundImage.Image))
             {
                 var routeColorIndex = 0;
-                // HM TODO: add markers?
                 foreach (var route in dataContainer.Routes)
                 {
                     var points = route.Segments.SelectMany(s => s.Latlngs).Select(l => ConvertLatLngToPoint(l, backgroundImage)).ToArray();
-                    if (!points.Any())
-                    {
-                        continue;
-                    }
+                    var markerPoints = route.Markers.Select(m => ConvertLatLngToPoint(m.Latlng, backgroundImage));
                     var lineColor = _routeColors[routeColorIndex++];
                     routeColorIndex = routeColorIndex % _routeColors.Length;
                     if (!string.IsNullOrEmpty(route.Color))
                     {
                         lineColor = FromColorString(route.Color, route.Opacity);
                     }
-                    graphics.DrawLines(_outLinerPen, points);
                     var linePen = new Pen(lineColor, PEN_WIDTH) { LineJoin = LineJoin.Bevel };
-                    graphics.DrawLines(linePen, points);
-                    graphics.FillEllipse(_circleFillBrush, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
-                    graphics.DrawEllipse(_startRoutePen, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
-                    graphics.FillEllipse(_circleFillBrush, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
-                    graphics.DrawEllipse(_endRoutePen, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                    if (points.Any())
+                    {
+                        graphics.DrawLines(_outLinerPen, points);
+                        graphics.DrawLines(linePen, points);
+                        graphics.FillEllipse(_circleFillBrush, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                        graphics.DrawEllipse(_startRoutePen, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                        graphics.FillEllipse(_circleFillBrush, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                        graphics.DrawEllipse(_endRoutePen, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                    }
+                    foreach (var markerPoint in markerPoints)
+                    {
+                        graphics.FillEllipse(_circleFillBrush, markerPoint.X - CIRCLE_SIZE_X / 2, markerPoint.Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                        graphics.DrawEllipse(linePen, markerPoint.X - CIRCLE_SIZE_X / 2, markerPoint.Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
+                    }
+
                 }
             }
         }
@@ -237,19 +266,30 @@ namespace IsraelHiking.API.Services
             return (n / 2) * (1 - Math.Log(Math.Tan(latitudeInRadians) + 1.0 / Math.Cos(latitudeInRadians)) / Math.PI);
         }
 
-        private async Task<ImageWithOffset> GetTileImage(Point topLeft, Point offset, int zoom, string addressTemplate)
+        private async Task<ImageWithOffset> GetTileImage(Point topLeft, Point offset, int zoom, AddressAndOpacity addressTemplate)
         {
-            var file = addressTemplate.Replace("{z}", zoom.ToString())
+            var file = addressTemplate.Address.Replace("{z}", zoom.ToString())
                         .Replace("{zoom}", zoom.ToString())
                         .Replace("{x}", (topLeft.X + offset.X).ToString())
                         .Replace("{y}", (topLeft.Y + offset.Y).ToString());
             var fileResponse = await _remoteFileFetcherGateway.GetFileContent(file);
+            if (!fileResponse.Content.Any())
+            {
+                return new ImageWithOffset
+                {
+                    Image = new Bitmap(TILE_SIZE, TILE_SIZE),
+                    Offset = offset
+                };
+            }
 
+            var image = Image.FromStream(new MemoryStream(fileResponse.Content), true);
+            if (addressTemplate.Opacity < 1.0)
+            {
+                image = ChangeOpacity(image, addressTemplate.Opacity);
+            }
             return new ImageWithOffset
             {
-                Image = fileResponse.Content.Any()
-                    ? Image.FromStream(new MemoryStream(fileResponse.Content), true)
-                    : new Bitmap(TILE_SIZE, TILE_SIZE),
+                Image = image,
                 Offset = offset
             };
         }
@@ -295,6 +335,18 @@ namespace IsraelHiking.API.Services
                 return Color.FromArgb(int.Parse(hexNumberString, NumberStyles.HexNumber));
             }
             return Color.FromName(colorString);
+        }
+
+        private static Bitmap ChangeOpacity(Image image, double opacityValue)
+        {
+            Bitmap bmp = new Bitmap(image.Width, image.Height); // Determining Width and Height of Source Image
+            using (Graphics graphics = Graphics.FromImage(bmp)) { 
+                ColorMatrix colormatrix = new ColorMatrix { Matrix33 = (float)opacityValue };
+                ImageAttributes imgAttribute = new ImageAttributes();
+                imgAttribute.SetColorMatrix(colormatrix, ColorMatrixFlag.Default, ColorAdjustType.Bitmap);
+                graphics.DrawImage(image, new Rectangle(0, 0, bmp.Width, bmp.Height), 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, imgAttribute);
+            }
+            return bmp;
         }
 
         /// <summary>

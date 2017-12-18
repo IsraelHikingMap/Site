@@ -28,6 +28,7 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
         this.maxZoom = this.layer.maxZoom;
         this.minZoom = this.layer.minZoom;
         this.address = this.layer.address;
+        this.opacity = this.layer.opacity || 1.0;
     }
 
     public removeLayer(e: Event) {

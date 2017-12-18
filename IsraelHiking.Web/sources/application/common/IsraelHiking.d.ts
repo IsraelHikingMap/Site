@@ -4,9 +4,10 @@ export interface ShareUrl {
     id: string;
     title: string;
     description: string;
-    dataContainer: DataContainer;
     osmUserId: string;
     viewsCount: number;
+
+    dataContainer: DataContainer;
 }
 
 export interface LayerData {
@@ -14,6 +15,7 @@ export interface LayerData {
     address: string;
     minZoom: number;
     maxZoom: number;
+    opacity: number;
 }
 
 export interface MarkerData {

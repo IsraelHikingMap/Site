@@ -14,15 +14,15 @@
             </mat-form-field>
         </div>
         <div fxLayout="row">
-            <mat-form-field hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill [dir]="'ltr'">
-                <input matInput type="text" [ngModel]="address" (ngModelChange)="addressChanged($event)" name="address" placeholder="{{resources.address}}" required="" fxFill />
+            <mat-form-field hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill dir="ltr">
+                <input matInput type="text" [ngModel]="address" (ngModelChange)="onAddressChanged($event)" name="address" placeholder="{{resources.address}}" required="" fxFill />
             </mat-form-field>
         </div>
         <div fxLayout="row">
             <a [ngStyle]="{'font-size': 'small' }" href="https://qms.nextgis.com/" target="_blank">{{resources.moreMapAddresses}}</a>
         </div>
         <div class="input-wrapper-spacer"></div>
-        <div fxLayout="row" fxFlexs>
+        <div fxLayout="row">
             <mat-form-field fxFlex>
                 <input matInput type="number" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" />
             </mat-form-field>
@@ -30,12 +30,17 @@
                 <input matInput type="number" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" />
             </mat-form-field>
         </div>
+        <div fxLayeout="row" *ngIf="isAdvanced">
+            <label class="text-center">{{resources.opacity}}</label>
+            <mat-slider [ngModel]="opacity" (ngModelChange)="onOpacityChanged($event);" min="0.1" max="1.0" step="0.1" fxFill></mat-slider>
+        </div>
+        <br/>
         <div fxLayout="row">
             <div id="mapPreview" [style.height]="'100px'" [style.width]="'100%'" fxfill></div>
         </div>
     </div>
     <div mat-dialog-actions fxLayoutAlign="end">
+        <button matDialogClose type="button" mat-button *ngIf="!isNew" (click)="removeLayer($event)" matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
         <button matDialogClose type="button" mat-button (click)="saveLayer($event)" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Save layer"><i class="fa icon-check"></i></button>
-        <button matDialogClose type="button" mat-button [hidden]="isNew" (click)="removeLayer($event)" matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
     </div>
 </div>

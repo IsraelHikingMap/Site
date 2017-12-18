@@ -12,5 +12,7 @@ namespace IsraelHiking.Common
         public int? MinZoom { get; set; }
         [JsonProperty("maxZoom")]
         public int? MaxZoom { get; set; }
+        [JsonProperty("opacity")]
+        public double? Opacity { get; set; }
     }
 }

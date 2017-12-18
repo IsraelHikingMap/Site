@@ -14,8 +14,10 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public address: string;
     public minZoom: number;
     public maxZoom: number;
+    public opacity: number;
     public isNew: boolean;
-
+    public isAdvanced: boolean;
+    
     private mapPreview: L.Map;
     private tileLayer: L.TileLayer;
     
@@ -29,6 +31,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
         this.maxZoom = LayersService.MAX_NATIVE_ZOOM;
         this.key = "";
         this.address = "";
+        this.opacity = 1.0;
 
         this.tileLayer = null;
     }
@@ -46,10 +49,19 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
         this.mapPreview.addLayer(this.tileLayer);
     }
 
-    public addressChanged(address: string) {
+    public onAddressChanged(address: string) {
         this.address = address.trim();
+        this.refreshPreviewLayer();
+    }
+
+    public onOpacityChanged(opacity: number) {
+        this.opacity = opacity;
+        this.refreshPreviewLayer();
+    }
+
+    protected refreshPreviewLayer() {
         this.mapPreview.removeLayer(this.tileLayer);
-        this.tileLayer = L.tileLayer(this.getTilesAddress());
+        this.tileLayer = L.tileLayer(this.getTilesAddress(), { opacity: this.opacity });
         this.mapPreview.addLayer(this.tileLayer);
     }
 
@@ -59,7 +71,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
             address: this.getTilesAddress(),
             isEditable: true,
             minZoom: parseInt(this.minZoom as any), // fix issue with variable saved as string...
-            maxZoom: parseInt(this.maxZoom as any)
+            maxZoom: parseInt(this.maxZoom as any),
+            opacity: this.opacity
         } as Common.LayerData;
         var message = this.internalSave(layerData);
         if (message !== "") {
@@ -74,5 +87,9 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
 
     private getTilesAddress() {
         return decodeURI(this.address).replace("{zoom}", "{z}").trim();
+    }
+
+    public setIsAdvanced(isAdvanced: boolean) {
+        this.isAdvanced = isAdvanced;
     }
 }

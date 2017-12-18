@@ -402,6 +402,7 @@ export class LayersService {
             minZoom: (layerData.minZoom == null) ? LayersService.MIN_ZOOM : layerData.minZoom,
             maxNativeZoom: maxNativeZoom,
             maxZoom: Math.max(LayersService.MAX_ZOOM, maxNativeZoom),
+            opacity: layerData.opacity || 1.0,
             attribution: attribution
         } as L.TileLayerOptions;
     }
@@ -425,7 +426,8 @@ export class LayersService {
             key: layer.key,
             address: layer.address,
             minZoom: layer.minZoom,
-            maxZoom: layer.maxZoom
+            maxZoom: layer.maxZoom,
+            opacity: layer.opacity || 1.0
         } as Common.LayerData;
     }
 

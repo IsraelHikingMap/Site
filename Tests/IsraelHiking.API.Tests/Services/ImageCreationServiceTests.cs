@@ -2,6 +2,7 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
+using System.Linq;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -58,6 +59,10 @@ namespace IsraelHiking.API.Tests.Services
                             {
                                 Latlngs = latLngs
                             }
+                        },
+                        Markers = new List<MarkerData>
+                        {
+                            new MarkerData {Latlng = latLngs.FirstOrDefault() }
                         }
                     }
                 }

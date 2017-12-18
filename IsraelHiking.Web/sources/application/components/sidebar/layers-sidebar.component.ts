@@ -127,12 +127,14 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
 
     public addOverlay(e: Event) {
         this.suppressEvents(e);
-        this.dialog.open(OverlayAddDialogComponent);
+        let dialogRef = this.dialog.open(OverlayAddDialogComponent);
+        dialogRef.componentInstance.setIsAdvanced(this.isAdvanced);
     }
 
     public editOverlay(layer: IOverlay, e: Event) {
         this.suppressEvents(e);
         let dialogRef = this.dialog.open(OverlayEditDialogComponent);
+        dialogRef.componentInstance.setIsAdvanced(this.isAdvanced);
         dialogRef.componentInstance.setOverlay(layer);
     }
 
