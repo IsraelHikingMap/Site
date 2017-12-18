@@ -117,9 +117,7 @@ describe("RoutesService", () => {
         initialRouteLayer.setHiddenState = () => { };
         initialRouteLayer.raiseDataChanged = () => { };
         initialRouteLayer.getLastLatLng = () => latLng2;
-        initialRouteLayer.route.segments = [];
-        initialRouteLayer.route.segments.push(segment1);
-        initialRouteLayer.route.segments.push(segment2);
+        initialRouteLayer.route.segments = [segment1, segment2];
         routesService.addRoute(null);
 
         routesService.splitSelectedRouteAt(segment1);
@@ -135,9 +133,7 @@ describe("RoutesService", () => {
         initialRouteLayer.setHiddenState = () => { };
         initialRouteLayer.raiseDataChanged = () => { };
         initialRouteLayer.getLastLatLng = () => latLng2;
-        initialRouteLayer.route.segments = [];
-        initialRouteLayer.route.segments.push(segment1);
-        initialRouteLayer.route.segments.push(segment2);
+        initialRouteLayer.route.segments = [segment1, segment2];
         initialRouteLayer.route.markers = [];
         routesService.addRoute(null);
 
@@ -151,7 +147,6 @@ describe("RoutesService", () => {
                 ]
             },
             getLastLatLng: () => latLng1,
-            setHiddenState: () => { }
         } as IRouteLayer;
         routesService.routes.push(secondRoute);
         routesService.mergeSelectedRouteToClosest(true);
@@ -165,11 +160,8 @@ describe("RoutesService", () => {
         let latLng3 = L.latLng([0.2, 0.2]);
         let segment1 = { latlngs: [latLng1, latLng1], routePoint: latLng1 } as IRouteSegment;
         let segment2 = { latlngs: [latLng1, latLng2], routePoint: latLng2 } as IRouteSegment;
-        initialRouteLayer.setHiddenState = () => { };
         initialRouteLayer.getLastLatLng = () => latLng2;
-        initialRouteLayer.route.segments = [];
-        initialRouteLayer.route.segments.push(segment1);
-        initialRouteLayer.route.segments.push(segment2);
+        initialRouteLayer.route.segments = [segment1, segment2];
         initialRouteLayer.route.markers = [{ latlng: latLng1 } as IMarkerWithData];
         initialRouteLayer.reverse = () => {
             initialRouteLayer.route.segments.reverse();

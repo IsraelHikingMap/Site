@@ -172,11 +172,10 @@ export class RoutesService implements IRoutesService {
 
     public mergeSelectedRouteToClosest(isFirst: boolean) {
         let closestRoute = this.getClosestRoute(isFirst);
-        closestRoute.setHiddenState();
         this.selectedRoute.setHiddenState();
+        this.removeRoute(closestRoute.route.properties.name);
         let markersToAdd = closestRoute.route.markers;
         this.selectedRoute.route.markers = this.selectedRoute.route.markers.concat(markersToAdd);
-        this.removeRoute(closestRoute.route.properties.name);
         let latLngToCheck = isFirst
             ? this.selectedRoute.route.segments[0].latlngs[0]
             : this.selectedRoute.getLastLatLng();
