@@ -2,7 +2,7 @@
 
 import { RoutesService } from "./routes.service";
 import { MapServiceMockCreator } from "../../map.service.spec";
-import { IRouteLayer, IRoute, IRouteSegment } from "./iroute.layer";
+import { IRouteLayer, IRoute, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 
 describe("RoutesService", () => {
     var routesService: RoutesService;
@@ -138,6 +138,7 @@ describe("RoutesService", () => {
         initialRouteLayer.route.segments = [];
         initialRouteLayer.route.segments.push(segment1);
         initialRouteLayer.route.segments.push(segment2);
+        initialRouteLayer.route.markers = [];
         routesService.addRoute(null);
 
         let secondRoute = {
@@ -149,11 +150,55 @@ describe("RoutesService", () => {
                     { latlngs: [latLng2, latLng1], routePoint: latLng1 } as IRouteSegment
                 ]
             },
-            getLastLatLng: () => latLng1
+            getLastLatLng: () => latLng1,
+            setHiddenState: () => { }
         } as IRouteLayer;
         routesService.routes.push(secondRoute);
         routesService.mergeSelectedRouteToClosest(true);
 
         expect(routesService.routes.length).toBe(1);
+    });
+
+    it("Should merge the selected route as the last route with markers", () => {
+        let latLng1 = L.latLng([0, 0]);
+        let latLng2 = L.latLng([0.1, 0.1]);
+        let latLng3 = L.latLng([0.2, 0.2]);
+        let segment1 = { latlngs: [latLng1, latLng1], routePoint: latLng1 } as IRouteSegment;
+        let segment2 = { latlngs: [latLng1, latLng2], routePoint: latLng2 } as IRouteSegment;
+        initialRouteLayer.setHiddenState = () => { };
+        initialRouteLayer.getLastLatLng = () => latLng2;
+        initialRouteLayer.route.segments = [];
+        initialRouteLayer.route.segments.push(segment1);
+        initialRouteLayer.route.segments.push(segment2);
+        initialRouteLayer.route.markers = [{ latlng: latLng1 } as IMarkerWithData];
+        initialRouteLayer.reverse = () => {
+            initialRouteLayer.route.segments.reverse();
+            initialRouteLayer.route.segments.forEach(s => s.latlngs.reverse());
+        }
+        routesService.addRoute(null);
+
+        let secondRoute = {
+            route: {
+                properties: {
+                    name: "name2"
+                },
+                segments: [
+                    { latlngs: [latLng3, latLng2], routePoint: latLng2 } as IRouteSegment
+                ],
+                markers: [{
+                    latlng: latLng2,
+                }]
+            },
+            getLastLatLng: () => latLng2,
+            setHiddenState: () => { },
+            setEditRouteState: () => { },
+            raiseDataChanged: () => { }
+        } as IRouteLayer;
+        routesService.routes.push(secondRoute);
+        routesService.selectedRoute = secondRoute;
+        routesService.mergeSelectedRouteToClosest(false);
+
+        expect(routesService.routes.length).toBe(1);
+        expect(routesService.routes[0].route.markers.length).toBe(2);
     });
 });
