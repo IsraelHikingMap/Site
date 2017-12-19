@@ -6,7 +6,7 @@
         <a class="cursor-pointer control-icon-last" (click)="toggleDirectional($event)" matTooltip="{{resources.directionalSearch}}" matTooltipPosition="left" angulartics2On="click" angularticsCategory="Search" angularticsAction="Toggle directional search on"><i class="fa fa-lg" [ngClass]="{'icon-plus': !isDirectional, 'icon-minus': isDirectional}"></i></a>
         <div [dir]="resources.direction">
             <mat-form-field class="search-input-container">
-                <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)">
+                <input type="text" matInput #searchFromInput class="control-container-item" [formControl]="searchFrom" [matAutocomplete]="autoFrom" placeholder="{{resources.searchPlaceHolder}}" [dir]="resources.getDirection(fromContext.searchTerm)" (focus)="hasFocus = true" (blur)="hasFocus = false">
             </mat-form-field>
             <mat-autocomplete positionY="below" #autoFrom="matAutocomplete" [displayWith]="displayResults">
                 <mat-option *ngFor="let result of fromContext.searchResults" [value]="result" [ngClass]="[resources.getTextAlignment(result.title), 'search-result-option']" [dir]="resources.getDirection(result.title)">

@@ -2,6 +2,7 @@
 import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { Observable } from "rxjs";
+import { ENTER } from "@angular/cdk/keycodes";
 import * as L from "leaflet";
 import * as _ from "lodash";
 import "rxjs/add/operator/debounce";
@@ -47,9 +48,12 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     public routingType: Common.RoutingType;
     public searchFrom: FormControl;
     public searchTo: FormControl;
+    public hasFocus: boolean;
+
     private requestsQueue: ISearchRequestQueueItem[];
     private readonlyLayer: L.FeatureGroup;
-
+    private selectFirstSearchResults: boolean;
+    
     @ViewChild("searchFromInput")
     public searchFromInput: ElementRef;
 
@@ -76,6 +80,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.isVisible = false;
         this.isDirectional = false;
         this.routingType = "Hike";
+        this.selectFirstSearchResults = hashService.searchTerm != null;
         this.fromContext = {
             searchTerm: hashService.searchTerm || "",
             searchResults: [],
@@ -91,11 +96,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.searchTo = new FormControl();
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
-
-        if (this.isVisible) {
-            // search from url:
-            this.search(this.fromContext);
-        }
     }
 
     private configureInputFormControl(input: FormControl, context: ISearchContext) {
@@ -103,11 +103,13 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             .do(x => {
                 if (typeof x != "string") {
                     this.selectResults(context, x);
+                } else {
+                    this.selectFirstSearchResults = false;    
                 }
             })
             .filter(x => typeof x === "string")
             .debounce(() => Observable.timer(500))
-            .subscribe((x) => {
+            .subscribe((x: string) => {
                 context.searchTerm = x;
                 context.selectedSearchResults = null;
                 this.search(context);
@@ -116,7 +118,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     public ngAfterViewInit() {
         if (this.isVisible) {
-            this.searchFromInput.nativeElement.focus();
+            setTimeout(() => {
+                this.searchFromInput.nativeElement.focus();
+                this.search(this.fromContext);
+            }, 100);
         }
     }
 
@@ -234,6 +239,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     @HostListener("window:keydown", ["$event"])
     public onSearchShortcutKeys($event: KeyboardEvent) {
+        if ($event.keyCode === ENTER) {
+            return this.handleEnterKeydown();
+        }
         if ($event.ctrlKey === false) {
             return true;
         }
@@ -246,13 +254,35 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
         return false;
     }
+    /**
+     * This function should make sure the ENTER key is behaving as it should:
+     * In case there are search results open and non is selected - select the first result.
+     * In case a search is being made - when the search is finshed select the first result.
+     * @returns true - if no operations was made, false otherwise
+     */
+    private handleEnterKeydown(): boolean {
+        if (!this.hasFocus) {
+            return true;
+        }
+        if (this.matAutocompleteTriggers.first == null) {
+            return true;
+        }
+        if (this.matAutocompleteTriggers.first.activeOption != null) {
+            return true;
+        }
+        if (this.fromContext.selectedSearchResults == null && this.fromContext.searchResults.length > 0) {
+            this.selectResults(this.fromContext, this.fromContext.searchResults[0]);
+            return false;
+        }
+        this.selectFirstSearchResults = true;
+        return false;
+    }
 
     private internalSearch = (searchContext: ISearchContext) => {
         let searchTerm = searchContext.searchTerm;
         this.requestsQueue.push({
             searchTerm: searchTerm
         } as ISearchRequestQueueItem);
-
         this.searchResultsProvider.getResults(searchTerm, this.resources.hasHebrewCharacters(searchTerm))
             .then((results: ISearchResults[]) => {
                 let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
@@ -267,6 +297,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 }
                 searchContext.searchResults = results;
                 this.requestsQueue.splice(0);
+                if (this.selectFirstSearchResults && searchContext.searchResults.length > 0) {
+                    this.selectResults(searchContext, searchContext.searchResults[0]);
+                }
+                this.selectFirstSearchResults = false;
             }, () => {
                 this.toastService.warning(this.resources.unableToGetSearchResults);
             });
