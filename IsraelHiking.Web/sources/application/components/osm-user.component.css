@@ -1,0 +1,17 @@
+﻿.table {
+    display: table
+}
+
+.space-after {
+    margin-left: 5px;
+}
+
+.table-cell {
+    height: 26px;
+    display: table-cell;
+    vertical-align: middle;
+}
+
+.leaflet-touch .table-cell {
+    height: 30px;
+}

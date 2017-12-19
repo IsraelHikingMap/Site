@@ -11,7 +11,8 @@ import {TermsOfServiceDialogComponent} from "./dialogs/terms-of-service-dialog.c
 
 @Component({
     selector: "osm-user",
-    templateUrl: "./osm-user.component.html"
+    templateUrl: "./osm-user.component.html",
+    styleUrls: ["./osm-user.component.css"]
 })
 export class OsmUserComponent extends BaseMapComponent {
 
