@@ -73,13 +73,18 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
             this.applicationRef.attachView(hostView);
         });
         this.marker.on("popupclose", () => {
-            if (this.tooltips) {
-                this.tooltips.forEach(tooltip => tooltip.hide());
-            }
             setTimeout(() => {
-                // Allow time for tooltips to close.
-                this.applicationRef.detachView(hostView);
-            }, 1000);
+                if (this.tooltips) {
+                    this.tooltips.forEach(tooltip => tooltip.hide());
+                }
+                setTimeout(() => {
+                    if (this.tooltips) {
+                        this.tooltips.forEach(tooltip => tooltip.hide());
+                    }
+                    // Allow time for tooltips to close.
+                    this.applicationRef.detachView(hostView);
+                }, 1000);
+            }, 100);
         });
     }
 } 

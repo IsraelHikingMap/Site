@@ -69,13 +69,13 @@
             <a mat-button [href]="getOffRoadUrl()" fxFill [target]="'_blank'" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Open in off-road"><i class="fa icon-off-road"></i></a>
         </div>
         <div fxFlex>
-            <button mat-button fxFill (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="before"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
+            <button mat-button fxFill (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="above"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
         </div>
         <div fxFlex>
             <h3 fxFill class="flex-center"><span dir="ltr">{{rating || 0}}</span></h3>
         </div>
         <div fxFlex>
-            <button mat-button fxFill (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="before"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
+            <button mat-button fxFill (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="above"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
         </div>
     </div>
 </div>
