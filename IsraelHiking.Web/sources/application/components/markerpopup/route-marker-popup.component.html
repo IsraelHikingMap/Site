@@ -6,15 +6,15 @@
         <div fxFlex>
             <button mat-button (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
         </div>
-        <div fxFlex [hidden]="isMiddle">
+        <div fxFlex *ngIf="!isMiddle">
             <button mat-button (click)="reverse()" matTooltip="{{resources.reverseRoute}}" matTooltipPosition="above" fxFill><i class="fa icon-arrows-h"></i></button>
         </div>
         <div fxFlex>
-            <button mat-button [hidden]="!isMiddle" (click)="split()" matTooltip="{{resources.split}}" matTooltipPosition="above" fxFill><i class="fa icon-cut"></i></button>
-            <button mat-button [hidden]="isMiddle" [disabled]="!canMerge" (click)="merge()" matTooltip="{{resources.merge}}" matTooltipPosition="above" fxFill><i class="fa icon-plus"></i></button>
+            <button mat-button *ngIf="isMiddle" (click)="split()" matTooltip="{{resources.split}}" matTooltipPosition="above" fxFill><i class="fa icon-cut"></i></button>
+            <button mat-button *ngIf="!isMiddle" [disabled]="!canMerge" (click)="merge()" matTooltip="{{resources.merge}}" matTooltipPosition="above" fxFill><i class="fa icon-plus"></i></button>
         </div>
     </div>
-    <div [hidden]="hideCoordinates">
+    <div *ngIf="!hideCoordinates">
         <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates"></coordinates>
     </div>
 </div>

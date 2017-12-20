@@ -2,7 +2,7 @@
     <mat-form-field fxFill>
         <textarea matInput #titleInput rows="2" type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates()" placeholder="{{resources.title}}" fxFill></textarea>
     </mat-form-field>
-    <div [hidden]="!showIcons">
+    <div *ngIf="showIcons">
         <div *ngFor="let group of iconsGroups">
             <div fxLayout="row" fxFill>
                 <div *ngFor="let icon of group.icons" (click)="setMerkerType(icon)" class="cursor-pointer text-center" fxFlex="{{100/iconsGroups.length}}" angulartics2On="click" angularticsCategory="Icons" angularticsAction="Select {{icon}}">
@@ -24,11 +24,11 @@
         <div fxFlex>
             <button mat-button type="button" (click)="showIcons = !showIcons" matTooltip="{{resources.selectIcon}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsAction="Toggle select icon" fxFill><i class="fa icon-{{markerType}}"></i></button>
         </div>
-        <div fxFlex [hidden]="!showOpenDialogButton()">
+        <div fxFlex *ngIf="showOpenDialogButton()">
             <button mat-button type="button" (click)="openAddPointDialog($event)" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
         </div>
     </div>
-    <div [hidden]="hideCoordinates">
+    <div *ngIf="!hideCoordinates">
         <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates"></coordinates>
         <p class="chrome-wordwrap-fix {{'text-' + resources.start}}">
             <span [innerHtml]="resources.coordinatesForWikipedia"></span> <span dir="ltr">{{wikiCoordinatesString}}</span>

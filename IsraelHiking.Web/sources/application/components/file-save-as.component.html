@@ -1,7 +1,7 @@
-﻿<div class="leaflet-bar" [hidden]="isOpen" [dir]="resources.direction">
+﻿<div class="leaflet-bar" *ngIf="!isOpen" [dir]="resources.direction">
     <a class="cursor-pointer" (click)="toggleSaveAs($event)" matTooltip="{{resources.saveAs}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as open"><i class="fa icon-save-as fa-lg"></i></a>
 </div>
-<div class="leaflet-bar" [hidden]="!isOpen" [dir]="resources.direction">
+<div class="leaflet-bar" *ngIf="isOpen" [dir]="resources.direction">
     <div class="save-as-dropdown">
         <mat-form-field fxFill>
             <mat-select placeholder="{{resources.saveAs}}" fxFill>

@@ -28,7 +28,7 @@
             </div>
         </mat-tab>
         <mat-tab label="{{resources.legend}}" angulartics2On="click" angularticsCategory="Info" angularticsAction="Info legend select">
-            <div [hidden]="legendSections.length > 0">
+            <div *ngIf="legendSections.length === 0">
                 <p>{{resources.legendEmpty}}</p>
             </div>
             <div *ngFor="let section of legendSections" id="{{section.id}}">
@@ -36,12 +36,12 @@
                     <div class="legend-section-header">
                         <a class="cursor-pointer" (click)="toggleSectionVisibility(section)" [ngx-scroll-to]="section.id"><h4><i class="fa" [ngClass]="{'icon-plus': !isSectionVisible(section), 'icon-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
                     </div>
-                    <div [hidden]="!isSectionVisible(section)">
+                    <div *ngIf="isSectionVisible(section)">
                         <div *ngFor="let item of section.items" class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
                             <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer" id="{{item.id}}"></div>
                             <div class="legend-item-text-container" matTooltip="{{item.osmTags.join(', ')}}" matTooltipPosition="{{item.type === 'Way' ? 'above' : 'right'}}">
-                                <a [hidden]="!item.link" [href]="item.link" [target]="'_blank'" class="legend-item-text">{{item.title}}</a>
-                                <span [hidden]="item.link" class="legend-item-text">{{item.title}}</span>
+                                <a *ngIf="item.link" [href]="item.link" [target]="'_blank'" class="legend-item-text">{{item.title}}</a>
+                                <span *ngIf="!item.link" class="legend-item-text">{{item.title}}</span>
                             </div>
                         </div>
                     </div>

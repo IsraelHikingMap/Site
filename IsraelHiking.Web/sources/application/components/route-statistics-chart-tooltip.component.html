@@ -1,4 +1,4 @@
-﻿<div class="chart-tooltip" [hidden]="hidden">
+﻿<div class="chart-tooltip" *ngIf="!hidden">
     <p class="text-{{resources.start}}" [dir]="resources.direction">
         {{resources.distance}}: {{point.x.toFixed(2)}} {{resources.kmUnit}}<br />
         {{resources.height}}: {{point.y.toFixed(0)}} {{resources.meterUnit}}<br />

@@ -61,7 +61,7 @@
             <button mat-button fxFill (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
         </div>
     </div>
-    <div [hidden]="hideCoordinates">
+    <div *ngIf="!hideCoordinates">
         <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates"></coordinates>
     </div>
 </div>

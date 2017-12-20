@@ -1,8 +1,4 @@
 ﻿/* Extra Small Devices, Phones */
-[hidden] {
-    display: none !important;
-}
-
 .save-as-dropdown {
     float: right;
     height: 26px;

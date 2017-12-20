@@ -23,15 +23,15 @@
             </div>
             <div fxFlex="50" fxFlex.xs="100">
                 <div fxLayout="row">
-                    <div class="img-container-small" [hidden]="imagesUrls.length === 0">
+                    <div class="img-container-small" *ngIf="imagesUrls.length > 0">
                         <img [src]="getCurrentImage()" class="img-responsive img-center" />
                     </div>
-                    <label [hidden]="imagesUrls.length > 0" fxFill>
+                    <label *ngIf="imagesUrls.length === 0" fxFill>
                         <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
                         <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" />
                     </label>
                 </div>
-                <div fxLayout="row" [hidden]="imagesUrls.length === 0">
+                <div fxLayout="row" *ngIf="imagesUrls.length > 0">
                     <div fxFlex="25">
                         <button mat-button (click)="previousImage()" [disabled]="disableChangeImage('previous')" fxFill><i class="fa icon-chevron-{{resources.start}}"></i></button>
                     </div>
@@ -73,7 +73,7 @@
             <div fxFlex>
                 <button mat-raised-button color="primary" [disabled]="!canUpload()" (click)="uploadPoint()" fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Update point submit"><i class="fa icon-cloud-upload fa-lg"></i> {{identifier ? resources.updatePoint : resources.addPoint}}</button>
             </div>
-            <div fxFlex="10" fxShow fxHide.xs [hidden]="!identifier">
+            <div fxFlex="10" fxShow fxHide.xs *ngIf="identifier">
                 <a mat-button [href]="getEditElementOsmAddress()" target="_blank" fxFill matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit element in OSM"><i class="fa icon-map-editing fa-lg"></i></a>
             </div>
         </div>

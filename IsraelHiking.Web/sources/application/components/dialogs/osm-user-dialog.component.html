@@ -45,14 +45,14 @@
                         </div>
                         <div fxFlex="80" class="margin-10">
                             <div class="item-content">
-                                <div [hidden]="trace.isInEditMode">
+                                <div *ngIf="!trace.isInEditMode">
                                     <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.name}}</a><br />
                                     {{trace.description}}<br />
                                     {{trace.date | date:'dd/MM/yyyy'}}<br />
                                     {{resources.translate(trace.visibility === 'private' ? 'Private' : 'Public')}}<br />
                                     {{trace.tagsString || resources.noTags}}
                                 </div>
-                                <div [hidden]="!trace.isInEditMode">
+                                <div *ngIf="trace.isInEditMode">
                                     <mat-form-field>
                                         <input matInput type="text" [(ngModel)]="trace.description" placeholder="{{resources.description}}" />
                                     </mat-form-field>
@@ -70,8 +70,8 @@
                                 </div>
                                 <div class="action-buttons">
                                     <button mat-button (click)="findUnmappedRoutes(trace)" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Find unmapped trace parts"><i class="fa icon-search"></i></button>
-                                    <button mat-button [hidden]="trace.isInEditMode" (click)="editTrace(trace)" matTooltip="{{resources.edit}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-pencil"></i></button>
-                                    <button mat-button [hidden]="!trace.isInEditMode" (click)="updateTrace(trace)" matTooltip="{{resources.save}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-check"></i></button>
+                                    <button mat-button *ngIf="!trace.isInEditMode" (click)="editTrace(trace)" matTooltip="{{resources.edit}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-pencil"></i></button>
+                                    <button mat-button *ngIf="trace.isInEditMode" (click)="updateTrace(trace)" matTooltip="{{resources.save}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-check"></i></button>
                                     <button mat-button (click)="deleteTrace(trace)" matTooltip="{{resources.delete}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-trash"></i></button>
                                     <button mat-button matDialogClose (click)="showTrace(trace)" matTooltip="{{resources.view}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View OSM trace"><i class="fa icon-eye"></i></button>
                                     <button mat-button (click)="editInOsm(trace)" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace in OSM"><i class="fa icon-map-editing fa-lg"></i></button>
@@ -80,8 +80,8 @@
                         </div>
                     </div>
                 </div>
-                <mat-spinner [hidden]="!loadingTraces"></mat-spinner>
-                <p [hidden]="userService.traces.length !== 0 || loadingTraces">{{resources.noTraces}}</p>
+                <mat-spinner *ngIf="loadingTraces"></mat-spinner>
+                <p *ngIf="userService.traces.length === 0 && !loadingTraces">{{resources.noTraces}}</p>
             </mat-tab>
             <mat-tab label="{{resources.myShares}}">
                 <br />
@@ -92,13 +92,13 @@
                         </div>
                         <div fxFlex="80" class="margin-10">
                             <div class="item-content">
-                                <div [hidden]="isShareUrlInEditMode(shareUrl)">
+                                <div *ngIf="!isShareUrlInEditMode(shareUrl)">
                                     <h4>{{userService.getShareUrlDisplayName(shareUrl)}}</h4>
                                     <a href="{{userService.getUrlFromShareId(shareUrl)}}" target="_blank">{{userService.getUrlFromShareId(shareUrl)}}</a><br />
                                     {{resources.views}}: {{shareUrl.viewsCount}}<br />
                                     {{resources.lastViewed}}: {{shareUrl.lastViewed | date:'dd/MM/yyyy'}}
                                 </div>
-                                <div [hidden]="!isShareUrlInEditMode(shareUrl)">
+                                <div *ngIf="isShareUrlInEditMode(shareUrl)">
                                     <mat-form-field>
                                         <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
                                     </mat-form-field>
@@ -108,8 +108,8 @@
                                     </mat-form-field>
                                 </div>
                                 <div class="action-buttons">
-                                    <button mat-button [hidden]="isShareUrlInEditMode(shareUrl)" (click)="shareUrlInEditMode = shareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
-                                    <button mat-button [hidden]="!isShareUrlInEditMode(shareUrl)" (click)="updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
+                                    <button mat-button *ngIf="!isShareUrlInEditMode(shareUrl)" (click)="shareUrlInEditMode = shareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
+                                    <button mat-button *ngIf="isShareUrlInEditMode(shareUrl)" (click)="updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
                                     <button mat-button ngxClipboard [cbContent]="userService.getUrlFromShareId(shareUrl)" matTooltip="{{resources.copyUrl}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-clipboard"></i></button>
                                     <button mat-button matDialogClose (click)="convertShareUrlToRoute(shareUrl)" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-plus"></i></button>
                                     <button mat-button (click)="deleteShareUrl(shareUrl)" matTooltip="{{resources.delete}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-trash"></i></button>
@@ -118,13 +118,13 @@
                         </div>
                     </div>
                 </div>
-                <mat-spinner [hidden]="!loadingShareUrls"></mat-spinner>
-                <p [hidden]="userService.shareUrls.length !== 0 || loadingShareUrls">{{resources.noShares}}</p>
+                <mat-spinner *ngIf="loadingShareUrls"></mat-spinner>
+                <p *ngIf="userService.shareUrls.length === 0 && !loadingShareUrls">{{resources.noShares}}</p>
             </mat-tab>
         </mat-tab-group>
     </div>
     <div mat-dialog-actions>
-        <div [hidden]="state.selectedTabIndex !== 0">
+        <div *ngIf="state.selectedTabIndex === 0">
             <pagination-template #paginationTraces="paginationApi"
                                  id="tracesPaging"
                                  (pageChange)="state.tracesPage = $event">
@@ -141,7 +141,7 @@
                 </div>
             </pagination-template>
         </div>
-        <div [hidden]="state.selectedTabIndex !== 1">
+        <div *ngIf="state.selectedTabIndex === 1">
             <pagination-template #paginationShares="paginationApi"
                                  id="sharesPaging"
                                  (pageChange)="state.sharesPage = $event">

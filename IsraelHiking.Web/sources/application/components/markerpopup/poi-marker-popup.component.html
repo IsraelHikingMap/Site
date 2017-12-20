@@ -1,47 +1,47 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
     <div fxLayout="row">
         <div fxFlex>
-            <a [hidden]="!url" [href]="url" [target]="'_blank'">
+            <a *ngIf="url" [href]="url" [target]="'_blank'">
                 <h3 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">
-                    <img [src]="sourceImageUrl" alt="" width="32" [hidden]="!sourceImageUrl" [style.float]="resources.getImageFloat(title)"/>
+                    <img [src]="sourceImageUrl" alt="" width="32" *ngIf="sourceImageUrl" [style.float]="resources.getImageFloat(title)"/>
                     {{title}}
                 </h3>
             </a>
-            <h3 [hidden]="url" [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">
-                <img [src]="sourceImageUrl" alt="" width="32" [hidden]="!sourceImageUrl" [style.float]="resources.getImageFloat(title)" />
+            <h3 *ngIf="!url" [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">
+                <img [src]="sourceImageUrl" alt="" width="32" *ngIf="sourceImageUrl" [style.float]="resources.getImageFloat(title)" />
                 {{title}}
             </h3>
         </div>
     </div>
-    <mat-spinner [hidden]="!isLoading"></mat-spinner>
-    <div fxLayout="row" [hidden]="!isEditMode()" fxLayoutGap="10px">
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <div fxLayout="row" *ngIf="isEditMode()" fxLayoutGap="10px">
         <div fxFlex="70" class="margin-10-reverse">
             <mat-form-field fxFill hintLabel="{{resources.itsYourTimeToShine}}">
                 <textarea rows="4" maxlength="255" matInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
             </mat-form-field>
         </div>
         <div fxFlex>
-            <label [hidden]="imagePreviewUrl">
+            <label *ngIf="!imagePreviewUrl">
                 <a mat-button class="flex-center" [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
                 <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" />
             </label>
-            <img fxFill [hidden]="!imagePreviewUrl"
+            <img fxFill *ngIf="imagePreviewUrl"
                  [src]="resources.getResizedWikipediaImage(imagePreviewUrl, 300)" 
                  class="img-responsive cursor-zoom-in" 
                  (click)="showImage()" />
         </div>
     </div>
-    <div fxLayout="row" [hidden]="!isEditMode() || isRoute()">
+    <div fxLayout="row" *ngIf="isEditMode() && !isRoute()">
         <a class="cursor-pointer" (click)="openUpdatePointDialog($event)">{{resources.more}}</a>
     </div>
-    <div fxLayout="row" class="description-container" [hidden]="isEditMode()">
+    <div fxLayout="row" class="description-container" *ngIf="!isEditMode()">
         <p fxFill [ngClass]="resources.getTextAlignment(getDescrition()[0])" [dir]="resources.getDirection(getDescrition()[0])">
-            <img [hidden]="!imagePreviewUrl" 
+            <img *ngIf="imagePreviewUrl" 
                 [src]="resources.getResizedWikipediaImage(imagePreviewUrl, 300)" 
                 class="img-placeholder cursor-zoom-in" 
                 (click)="showImage()" 
                 [style.float]="resources.getImageFloat(getDescrition()[0])"/>
-            <i [hidden]="imagePreviewUrl"
+            <i *ngIf="!imagePreviewUrl"
                 class="fa fa-5x img-placeholder {{getIcon()}} flex-center"
                 [style.float]="resources.getImageFloat(getDescrition()[0])"></i>
             <ng-container *ngFor="let descriptionLine of getDescrition()">
@@ -50,22 +50,22 @@
         </p>
     </div>
     <div fxLayout="row">
-        <div fxFlex [hidden]="isHideEditMode()">
+        <div fxFlex *ngIf="!isHideEditMode()">
             <button mat-button fxFill (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
         </div>
-        <div fxFlex [hidden]="!isEditMode()">
+        <div fxFlex *ngIf="isEditMode()">
             <button mat-button fxFill (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
         </div>
-        <div fxFlex [hidden]="!isRoute()">
+        <div fxFlex *ngIf="isRoute()">
             <button mat-button fxFill (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
         </div>
-        <div fxFlex [hidden]="isRoute()">
+        <div fxFlex *ngIf="!isRoute()">
             <button mat-button fxFill (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
         </div>
         <div fxFlex>
             <button mat-button fxFill (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
         </div>
-        <div fxFlex [hidden]="source !== 'Off-road'">
+        <div fxFlex *ngIf="source === 'Off-road'">
             <a mat-button [href]="getOffRoadUrl()" fxFill [target]="'_blank'" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Open in off-road"><i class="fa icon-off-road"></i></a>
         </div>
         <div fxFlex>
