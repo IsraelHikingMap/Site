@@ -105,4 +105,15 @@ export class HashService {
             parseInt(splittedpath[splittedpath.length - 3])
         );
     }
+
+    public getLinkBackToSite() {
+        let link = "https://israelhiking.osm.org.il/";
+        if (this.externalUrl) {
+            link += `#!/?${HashService.URL}=${this.externalUrl}`;
+        }
+        else if (this.shareUrl) {
+            link += `#!/?${HashService.SITE_SHARE}=${this.shareUrl}`;
+        }
+        return link;
+    }
 } 
