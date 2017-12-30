@@ -18,20 +18,6 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
-        public void SimplifyEmptyLine_VeryShort_ShouldReturnNull()
-        {
-            var line = new LineString(new[]
-            {
-                new Coordinate(0,0),
-                new Coordinate(10, 0)
-            });
-
-            var simplified = RadialDistanceByAngleSimplifier.Simplify(line, 30, 90);
-
-            Assert.IsNull(simplified);
-        }
-
-        [TestMethod]
         public void SimplifyEmptyLine_AlreadySimplified_ShouldReturnIt()
         {
             var line = new LineString(new[]

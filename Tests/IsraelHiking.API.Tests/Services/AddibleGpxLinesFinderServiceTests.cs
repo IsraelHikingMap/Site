@@ -26,9 +26,11 @@ namespace IsraelHiking.API.Tests.Services
             lineStrings = lineStrings ?? new List<LineString>();
             var conveter = new ItmWgs84MathTransfromFactory().Create();
             var highways = lineStrings.Select(l => new Feature(new LineString(l.Coordinates.Select(conveter.Transform).ToArray()), new AttributesTable())).ToList();
+            int id = 1;
             foreach (var highway in highways)
             {
-                highway.Attributes.AddAttribute(FeatureAttributes.ID, "1");
+                highway.Attributes.AddAttribute(FeatureAttributes.ID, id.ToString());
+                id++;
             }
             _elasticSearchGateway.GetHighways(Arg.Any<Coordinate>(), Arg.Any<Coordinate>()).Returns(highways);
         }
@@ -51,9 +53,9 @@ namespace IsraelHiking.API.Tests.Services
             _options.MaxNumberOfPointsPerLine = 5;
             _options.MaxLengthPerLine = 5;
             _options.MinimalMissingPartLength = 0;
-            _options.ClosestPointTolerance = 0;
+            _options.MinimalDistanceToClosestPoint = 0;
             _options.MinimalMissingSelfLoopPartLegth = 0;
-            _options.SimplificationTolerance = 0;
+            _options.SimplificationDistanceTolerance = 0;
             SetupHighways();
 
             var results = _service.GetLines(new List<ILineString> {gpxLine}).Result.ToArray();
@@ -76,9 +78,9 @@ namespace IsraelHiking.API.Tests.Services
             });
             _options.MaxNumberOfPointsPerLine = 3;
             _options.MinimalMissingPartLength = 0;
-            _options.ClosestPointTolerance = 0;
+            _options.MinimalDistanceToClosestPoint = 0;
             _options.MinimalMissingSelfLoopPartLegth = 0;
-            _options.SimplificationTolerance = 0;
+            _options.SimplificationDistanceTolerance = 0;
             SetupHighways();
 
             var results = _service.GetLines(new List<ILineString> { gpxLine }).Result.ToArray();
@@ -101,11 +103,11 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0, 50)
             });
             _options.MaxNumberOfPointsPerLine = 3;
-            _options.ClosestPointTolerance = 5;
-            _options.DistanceToExisitngLineMergeThreshold = 1;
+            _options.MinimalDistanceToClosestPoint = 5;
+            _options.MaxDistanceToExisitngLineForMerge = 1;
             _options.MinimalMissingPartLength = 0;
             _options.MinimalMissingSelfLoopPartLegth = 0;
-            _options.SimplificationTolerance = 0;
+            _options.SimplificationDistanceTolerance = 0;
             SetupHighways(new List<LineString> {
                 new LineString(new [] { new Coordinate(0,0), new Coordinate(0,10)}),
                 new LineString(new [] { new Coordinate(0,40), new Coordinate(0,50)})
@@ -136,7 +138,7 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0, 0)
             });
             _options.MaxNumberOfPointsPerLine = 4;
-            _options.ClosestPointTolerance = 5;
+            _options.MinimalDistanceToClosestPoint = 5;
             _options.MinimalMissingPartLength = 0;
             SetupHighways();
 
@@ -171,12 +173,12 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(0, 50)
             });
             _options.MaxNumberOfPointsPerLine = 3;
-            _options.ClosestPointTolerance = 5;
-            _options.DistanceToExisitngLineMergeThreshold = 1;
-            _options.MaximalProlongLineLength = 200;
+            _options.MinimalDistanceToClosestPoint = 5;
+            _options.MaxDistanceToExisitngLineForMerge = 1;
+            _options.MaxProlongLineLength = 200;
             _options.MinimalMissingPartLength = 0;
             _options.MinimalMissingSelfLoopPartLegth = 0;
-            _options.SimplificationTolerance = 0;
+            _options.SimplificationDistanceTolerance = 0;
 
             SetupHighways(new List<LineString> {
                 new LineString(new [] { new Coordinate(0,0), new Coordinate(0,10)}),
@@ -188,32 +190,6 @@ namespace IsraelHiking.API.Tests.Services
             Assert.AreEqual(1, results.Length);
             Assert.AreEqual(10, results.First().Coordinates.First().Y, 1);
             Assert.AreEqual(40, results.First().Coordinates.Last().Y, 1);
-        }
-
-        [TestMethod]
-        public void GetLines_PointsAreTooSparse_ShouldSliptAccoringToDistance()
-        {
-            var gpxItmLine = new LineString(new[]
-            {
-                new Coordinate(0, 0),
-                new Coordinate(0, 10),
-                new Coordinate(0, 20),
-                new Coordinate(0, 30),
-                new Coordinate(0, 40),
-            });
-            _options.MaxNumberOfPointsPerLine = 3;
-            _options.ClosestPointTolerance = 5;
-            _options.MaxLengthPerLine = 3;
-            _options.DistanceToExisitngLineMergeThreshold = 1;
-            _options.MaximalProlongLineLength = 200;
-            _options.MinimalMissingPartLength = 0;
-            _options.MinimalMissingSelfLoopPartLegth = 0;
-            _options.SimplificationTolerance = 0;
-            SetupHighways();
-
-            var results = _service.GetLines(new List<ILineString> { gpxItmLine }).Result.ToArray();
-
-            Assert.AreEqual(0, results.Length);
         }
 
         [TestMethod]
@@ -240,13 +216,13 @@ namespace IsraelHiking.API.Tests.Services
                 new Coordinate(50, 0),
             });
             _options.MaxNumberOfPointsPerLine = 1000;
-            _options.ClosestPointTolerance = 10;
+            _options.MinimalDistanceToClosestPoint = 10;
             _options.MaxLengthPerLine = 3000;
-            _options.DistanceToExisitngLineMergeThreshold = 5;
-            _options.MaximalProlongLineLength = 200;
+            _options.MaxDistanceToExisitngLineForMerge = 5;
+            _options.MaxProlongLineLength = 200;
             _options.MinimalMissingPartLength = 0;
             _options.MinimalMissingSelfLoopPartLegth = 0;
-            _options.SimplificationTolerance = 0;
+            _options.SimplificationDistanceTolerance = 0;
             
             SetupHighways();
 

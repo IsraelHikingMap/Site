@@ -9,25 +9,10 @@ namespace IsraelHiking.API.Executors
     public interface IGpxProlongerExecutor
     {
         /// <summary>
-        /// This method prolongs the line's end according to the original coordinates
+        /// This method will prolong all the lines to prolong and maybe add other lines according to original coordinates
         /// </summary>
-        /// <param name="lineToProlong">The line to prolong</param>
-        /// <param name="originalCoordinates">The original coordinates that start from the line's end</param>
-        /// <param name="existingItmHighways">Existing lines in the area</param>
-        /// <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
-        /// <param name="maximalLength">The maximal length to try and prolong the line</param>
-        /// <returns>A prolonged line</returns>
-        ILineString ProlongLineEnd(ILineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<ILineString> existingItmHighways, double minimalDistance, double maximalLength);
-
-        /// <summary>
-        /// This method prolongs the line's start according to the original coordinates
-        /// </summary>
-        /// <param name="lineToProlong">The line to prolong</param>
-        /// <param name="originalCoordinates">The original coordinates that end in the line's start position</param>
-        /// <param name="existingItmHighways">Existing lines in the area</param>
-        /// <param name="minimalDistance">The minimal distance to another line in order to stop prolonging </param>
-        /// <param name="maximalLength">The maximal length to try and prolong the line</param>
-        /// <returns>A prolonged line</returns>
-        ILineString ProlongLineStart(ILineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<ILineString> existingItmHighways, double minimalDistance, double maximalLength);
+        /// <param name="input">Algorithm's input</param>
+        /// <returns>Updated list of lines</returns>
+        List<ILineString> Prolong(GpxProlongerExecutorInput input);
     }
 }

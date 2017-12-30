@@ -60,10 +60,6 @@ namespace IsraelHiking.API.Services
             {
                 return null;
             }
-            if (coordinates.Length == 2 && coordinates.First().Distance(coordinates.Last()) < DistanceTolerance)
-            {
-                return null;
-            }
             if (coordinates.Length == 2)
             {
                 return new LineString(coordinates);

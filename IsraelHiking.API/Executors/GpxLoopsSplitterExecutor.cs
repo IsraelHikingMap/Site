@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public List<ILineString> GetMissingLines(ILineString gpxLine, IReadOnlyList<ILineString> existingLineStrings, double minimalMissingPartLength, double closestPointTolerance)
+        public List<ILineString> GetMissingLines(ILineString gpxLine, IReadOnlyList<ILineString> existingLineStrings, double minimalMissingPartLength, double minimalDistanceToClosestPoint)
         {
             if (gpxLine.Coordinates.Length <= 1)
             {
@@ -31,7 +31,7 @@ namespace IsraelHiking.API.Executors
             
             foreach (var coordinate in gpxLine.Coordinates)
             {
-                if (IsCloseToALine(coordinate, existingLineStrings, closestPointTolerance))
+                if (IsCloseToALine(coordinate, existingLineStrings, minimalDistanceToClosestPoint))
                 {
                     waypointsGroup.Add(coordinate);
                     AddLineString(gpxSplit, waypointsGroup.ToArray());
@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public List<ILineString> SplitSelfLoops(ILineString gpxLine, double closestPointTolerance)
+        public List<ILineString> SplitSelfLoops(ILineString gpxLine, double minimalDistanceToClosestPoint)
         {
             var lines = new List<ILineString>();
             var reversedGpxLine = ReverseLine(gpxLine);
@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Executors
             int coordinateIndex = 0;
             while (coordinateIndex < reversedGpxLine.Coordinates.Length)
             {
-                var indexOfClosingLine = GetClosingLoopIndex(reversedGpxLine, coordinateIndex, closestPointTolerance);
+                var indexOfClosingLine = GetClosingLoopIndex(reversedGpxLine, coordinateIndex, minimalDistanceToClosestPoint);
                 if (indexOfClosingLine == -1)
                 {
                     coordinateIndex++;
@@ -71,14 +71,14 @@ namespace IsraelHiking.API.Executors
             return lines;
         }
 
-        private int GetClosingLoopIndex(ILineString gpxLine, int currentIndex, double closestPointTolerance)
+        private int GetClosingLoopIndex(ILineString gpxLine, int currentIndex, double minimalDistanceToClosestPoint)
         {
             int indexOfFarEnoughLinePrefix = currentIndex - 1;
             var currentCoordinatePoint = new Point(gpxLine.Coordinates[currentIndex]);
             while (indexOfFarEnoughLinePrefix >= 0)
             {
                 var prefixPoint = new Point(gpxLine.Coordinates[indexOfFarEnoughLinePrefix]);
-                if (currentCoordinatePoint.Distance(prefixPoint) > closestPointTolerance)
+                if (currentCoordinatePoint.Distance(prefixPoint) > minimalDistanceToClosestPoint)
                 {
                     break;
                 }
@@ -91,28 +91,26 @@ namespace IsraelHiking.API.Executors
             var distance = indexOfFarEnoughLinePrefix > 0
                     ? currentCoordinatePoint.Distance(new LineString(gpxLine.Coordinates.Take(indexOfFarEnoughLinePrefix + 1).ToArray()))
                     : currentCoordinatePoint.Distance(new Point(gpxLine.Coordinates[indexOfFarEnoughLinePrefix]));
-            return distance < closestPointTolerance ? indexOfFarEnoughLinePrefix + 1 : -1;
+            return distance < minimalDistanceToClosestPoint ? indexOfFarEnoughLinePrefix + 1 : -1;
         }
 
         private void AddLineString(ICollection<ILineString> gpxSplit, Coordinate[] coordinates)
         {
-
             if (coordinates.Length < 3)
             {
                 return;
             }
-            var lineString = _geometryFactory.CreateLineString(coordinates);
-            gpxSplit.Add(lineString);
+            gpxSplit.Add(_geometryFactory.CreateLineString(coordinates));
         }
 
-        private bool IsCloseToALine(Coordinate coordinate, IReadOnlyList<ILineString> lineStrings, double closestPointTolerance)
+        private bool IsCloseToALine(Coordinate coordinate, IReadOnlyList<ILineString> lineStrings, double minimalDistanceToClosestPoint)
         {
             var point = new Point(coordinate);
             if (!lineStrings.Any())
             {
                 return false;
             }
-            return lineStrings.Min(l => l.Distance(point)) < closestPointTolerance;
+            return lineStrings.Min(l => l.Distance(point)) < minimalDistanceToClosestPoint;
         }
 
         private ILineString ReverseLine(ILineString lineString)

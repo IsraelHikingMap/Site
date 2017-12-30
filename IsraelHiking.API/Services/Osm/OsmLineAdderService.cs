@@ -79,11 +79,11 @@ namespace IsraelHiking.API.Services.Osm
                     var closestItmPointInWay = closestItmHighway.Coordinates.OrderBy(c => c.Distance(itmPoint.Coordinate)).First();
                     var indexOnWay = closestItmHighway.Coordinates.ToList().IndexOf(closestItmPointInWay);
                     var closestNodeId = ((List<object>)closetHighway.Attributes[FeatureAttributes.OSM_NODES])[indexOnWay].ToString();
-                    if (nodeIds.Any() && nodeIds.Last() == closestNodeId)
+                    if (!CanAddNewNode(nodeIds, closestNodeId))
                     {
                         continue;
                     }
-                    if (closestItmPointInWay.Distance(itmPoint.Coordinate) <= _options.DistanceToExisitngLineMergeThreshold)
+                    if (closestItmPointInWay.Distance(itmPoint.Coordinate) <= _options.MaxDistanceToExisitngLineForMerge)
                     {
                         // close hihgway, adding the node id from that highway
                         nodeIds.Add(closestNodeId);
@@ -106,14 +106,28 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
+        private static bool CanAddNewNode(List<string> nodeIds, string newNodeId)
+        {
+            if (nodeIds.Any() && nodeIds.Last() == newNodeId)
+            {
+                return false;
+            }
+            if (nodeIds.Contains(newNodeId) && nodeIds.IndexOf(newNodeId) == nodeIds.Count - 2)
+            {
+                // avoid creating a self intersecting way
+                return false;
+            }
+            return true;
+        }
+
         private void AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<string> nodeIds, List<LineString> itmHighways, List<Feature> highways)
         {
             var lineSegment = new LineString(new [] { GetItmCoordinate(previousCoordinate).Coordinate, GetItmCoordinate(coordinate).Coordinate});
-            var closeLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.DistanceToExisitngLineMergeThreshold);
+            var closeLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.MaxDistanceToExisitngLineForMerge);
             foreach (var closeLine in closeLines)
             {
                 var closestPointInExistingLine = closeLine.Coordinates.Select(c => new Point(c)).OrderBy(p => p.Distance(lineSegment)).First();
-                if (closestPointInExistingLine.Distance(lineSegment) > _options.DistanceToExisitngLineMergeThreshold)
+                if (closestPointInExistingLine.Distance(lineSegment) > _options.MaxDistanceToExisitngLineForMerge)
                 {
                     continue;
                 }
@@ -121,7 +135,7 @@ namespace IsraelHiking.API.Services.Osm
                 var closestHighway = highways.First(x => x.Attributes[FeatureAttributes.ID].ToString() == closeLine.GetOsmId());
 
                 var nodeId = ((List<object>)closestHighway.Attributes[FeatureAttributes.OSM_NODES])[indexInLine].ToString();
-                if (nodeIds.Any() && nodeIds.Last() == nodeId)
+                if (!CanAddNewNode(nodeIds, nodeId))
                 {
                     continue;
                 }
@@ -136,7 +150,7 @@ namespace IsraelHiking.API.Services.Osm
             {
                 // HM TODO: fix this using projection
                 var postItmLine = new LineString(new [] { closestItmHighway.Coordinates[indexOnWay], closestItmHighway.Coordinates[indexOnWay + 1] });
-                if (postItmLine.Distance(itmPoint) <= _options.DistanceToExisitngLineMergeThreshold)
+                if (postItmLine.Distance(itmPoint) <= _options.MaxDistanceToExisitngLineForMerge)
                 {
                     indexToInsert = indexOnWay + 1;
                 }
@@ -162,10 +176,10 @@ namespace IsraelHiking.API.Services.Osm
                 X = line.Coordinates.Min(c => c.X)
             });
             // adding tolerance perimiter to find ways.
-            northEast.Y += _options.ClosestPointTolerance;
-            northEast.X += _options.ClosestPointTolerance;
-            southWest.Y -= _options.ClosestPointTolerance;
-            southWest.X -= _options.ClosestPointTolerance;
+            northEast.Y += _options.MinimalDistanceToClosestPoint;
+            northEast.X += _options.MinimalDistanceToClosestPoint;
+            southWest.Y -= _options.MinimalDistanceToClosestPoint;
+            southWest.X -= _options.MinimalDistanceToClosestPoint;
             var northEastLatLon = _itmWgs84MathTransform.Transform(northEast);
             var southWestLatLon = _itmWgs84MathTransform.Transform(southWest);
 
@@ -186,7 +200,7 @@ namespace IsraelHiking.API.Services.Osm
             {
                 return null;
             }
-            var closestHighway = itmHighways.Where(l => l.Distance(point) <= _options.DistanceToExisitngLineMergeThreshold)
+            var closestHighway = itmHighways.Where(l => l.Distance(point) <= _options.MaxDistanceToExisitngLineForMerge)
                 .OrderBy(l => l.Distance(point))
                 .FirstOrDefault();
             if (closestHighway == null)

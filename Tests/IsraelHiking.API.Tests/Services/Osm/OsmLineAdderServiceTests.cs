@@ -31,8 +31,8 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
             var options = new ConfigurationData
             {
-                ClosestPointTolerance = 30,
-                DistanceToExisitngLineMergeThreshold = 1
+                MinimalDistanceToClosestPoint = 30,
+                MaxDistanceToExisitngLineForMerge = 1
             };
             var optionsProvider = Substitute.For<IOptions<ConfigurationData>>();
             optionsProvider.Value.Returns(options);
@@ -230,6 +230,33 @@ namespace IsraelHiking.API.Tests.Services.Osm
                 new Coordinate(34.7352248,30.8760586)
             }), new Dictionary<string, string>(), null).Wait();
 
+            osmGateway.Received(1).CreateElement(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 4));
+        }
+
+        /// <summary>
+        /// ______
+        /// _____/
+        ///   | 
+        /// </summary>
+        [TestMethod]
+        public void AddAwayAndBackLine_NearAnotherLine_ShouldNotCreateASelfIntersectingLine()
+        {
+            var osmGateway = SetupOsmGateway("42");
+            SetupHighway(42, new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(0, -1),
+                },
+                osmGateway);
+
+            _service.Add(new LineString(new[]
+            {
+                new Coordinate(-1, 0),
+                new Coordinate(1, 0),
+                new Coordinate(-1, 0.00001),
+            }), new Dictionary<string, string>(), null).Wait();
+
+            osmGateway.Received(3).CreateElement(Arg.Any<string>(), Arg.Any<Node>());
             osmGateway.Received(1).CreateElement(Arg.Any<string>(), Arg.Is<Way>(w => w.Nodes.Length == 4));
         }
     }

@@ -1,10 +1,44 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
+using NetTopologySuite.Geometries;
 using NetTopologySuite.LinearReferencing;
+using NetTopologySuite.Operation.Distance;
 
 namespace IsraelHiking.API.Executors
 {
+    internal class LineAndCoordinate {
+        public ILineString Line { get; set; }
+        public Coordinate Coordinate { get; set; }
+    }
+
+    /// <summary>
+    /// This is the required input for the prolong algorithm
+    /// </summary>
+    public class GpxProlongerExecutorInput
+    {
+        /// <summary>
+        /// The lines that needs to be prolonged - non-readonly lines
+        /// </summary>
+        public List<ILineString> LinesToProlong { get; set; }
+
+        /// <summary>
+        /// The original coordinates that start from the line's end
+        /// </summary>
+        public Coordinate[] OriginalCoordinates { get; set; }
+        /// <summary>
+        /// Existing lines in the area in ITM coordinates
+        /// </summary>
+        public IReadOnlyList<ILineString> ExistingItmHighways { get; set; }
+        /// <summary>
+        /// The minimal distance to another line in order to stop prolonging
+        /// </summary>
+        public double MinimalDistance { get; set; }
+        /// <summary>
+        /// The minimal area that is considered to be a valid area to allow prolonging a line
+        /// </summary>
+        public double MinimalAreaSize { get; set; }
+    }
 
     /// <inheritdoc/>
     public class GpxProlongerExecutor : IGpxProlongerExecutor
@@ -21,121 +55,192 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc/>
-        public ILineString ProlongLineStart(ILineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<ILineString> existingItmHighways, double minimalDistance, double maximalLength)
+        public List<ILineString> Prolong(GpxProlongerExecutorInput input)
         {
-            var coordinateToAdd = ProlongLine(lineToProlong.Coordinates.First(), originalCoordinates.Reverse().ToArray(), lineToProlong, existingItmHighways, minimalDistance, maximalLength);
-            if (coordinateToAdd != null)
+            // going from end to start.
+            var endTostart = input.OriginalCoordinates.Reverse().ToList();
+            var linesToProlong = input.LinesToProlong.Select(l => l.Reverse() as ILineString).Reverse().ToList();
+            var allLines = input.ExistingItmHighways.Concat(linesToProlong).ToList();
+            var current = GetClosest(endTostart, allLines, input);
+            if (current == null)
             {
-                return _geometryFactory.CreateLineString(new[] { coordinateToAdd }.Concat(lineToProlong.Coordinates).ToArray());
+                return input.LinesToProlong;
             }
-            return lineToProlong;
+            endTostart = endTostart.Skip(endTostart.IndexOf(current.Coordinate) + 1).ToList();
+            while (endTostart.Any())
+            {
+                var next = GetClosest(endTostart, allLines, input);
+                if (next == null)
+                {
+                    break;
+                }
+                if (next.Line == current.Line && linesToProlong.Contains(current.Line))
+                {
+                    HandleSelfClosingCase(input, current, next, linesToProlong);
+                }
+                else if (current.Line.Intersects(next.Line) || current.Line.Distance(next.Line) < 0.1)
+                {
+                    HandleIntersectionCase(input, current, next, linesToProlong);
+                }
+                else
+                {
+                    HandleTwoLinesCase(input, current, next, linesToProlong);
+                }
+                allLines = input.ExistingItmHighways.Concat(linesToProlong).ToList();
+                endTostart = endTostart.Skip(endTostart.IndexOf(next.Coordinate) + 1).ToList();
+                current.Coordinate = next.Coordinate;
+                current.Line = next.Line;
+            }
+            return linesToProlong.Select(l => l.Reverse() as ILineString).Reverse().ToList();
         }
 
-        /// <inheritdoc/>
-        public ILineString ProlongLineEnd(ILineString lineToProlong, Coordinate[] originalCoordinates, IReadOnlyList<ILineString> existingItmHighways, double minimalDistance, double maximalLength)
+        private void HandleSelfClosingCase(GpxProlongerExecutorInput input, LineAndCoordinate current, LineAndCoordinate next, List<ILineString> linesToProlong)
         {
-            var coordinateToAdd = ProlongLine(lineToProlong.Coordinates.Last(), originalCoordinates, lineToProlong, existingItmHighways, minimalDistance, maximalLength);
-            if (coordinateToAdd != null)
+            var lengthIndexedLine = new LengthIndexedLine(current.Line);
+            var closestCoordinateCurrentIndex = lengthIndexedLine.Project(current.Coordinate);
+            var closestCoordinateNextIndex = lengthIndexedLine.Project(next.Coordinate);
+            var segment = lengthIndexedLine.ExtractLine(closestCoordinateCurrentIndex, closestCoordinateNextIndex);
+            var coordinates = segment.Coordinates.Concat(new[] { segment.Coordinates.First() }).ToArray();
+            if (coordinates.Length < 4)
             {
-                return _geometryFactory.CreateLineString(lineToProlong.Coordinates.Concat(new[] { coordinateToAdd }).ToArray());
+                return;
             }
-            return lineToProlong;
+            var polygon = new Polygon(new LinearRing(coordinates));
+            if (polygon.Area < input.MinimalAreaSize)
+            {
+                return;
+            }
+            var currentCoordinate = lengthIndexedLine.ExtractPoint(closestCoordinateCurrentIndex);
+            var nextCoordinate = lengthIndexedLine.ExtractPoint(closestCoordinateNextIndex);
+            if (!AddCoordinate(current.Line, currentCoordinate, nextCoordinate, linesToProlong, input.MinimalDistance))
+            {
+                linesToProlong.Add(new LineString(new[] { currentCoordinate, nextCoordinate }));
+            }
         }
 
-        private Coordinate ProlongLine(Coordinate startCoordinate, Coordinate[] originalCoordinates, ILineString lineToProlong, IReadOnlyList<ILineString> existingItmHighways, double minimalDistance, double maximalLength)
+        private static void HandleIntersectionCase(GpxProlongerExecutorInput input, LineAndCoordinate current, LineAndCoordinate next, List<ILineString> linesToProlong)
         {
-            var prolongCoordinate = startCoordinate;
-            var lineToTestAgainst = _geometryFactory.CreateLineString(new [] {startCoordinate, prolongCoordinate});
-            var originalCoordinateIndex = 0;
-            if (!existingItmHighways.Any())
+            var intersection = current.Line.Intersection(next.Line).Coordinates
+                .OrderBy(c => c.Distance(current.Coordinate) + c.Distance(next.Coordinate)).FirstOrDefault();
+
+            if (intersection == null)
             {
-                return null;
-            }
-            var closestLine = existingItmHighways.OrderBy(l => lineToTestAgainst.Distance(l)).First();
-            while (closestLine.Distance(lineToTestAgainst) >= minimalDistance)
-            {
-                if (originalCoordinateIndex >= originalCoordinates.Length)
-                {
-                    return null;
-                }
-                if (prolongCoordinate.Distance(startCoordinate) > maximalLength)
-                {
-                    return null;
-                }
-                prolongCoordinate = originalCoordinates[originalCoordinateIndex];
-                originalCoordinateIndex++;
-                lineToTestAgainst = _geometryFactory.CreateLineString(new[] { startCoordinate, prolongCoordinate });
-                closestLine = existingItmHighways.OrderBy(l => lineToTestAgainst.Distance(l)).First();
+                var distance = new DistanceOp(current.Line, next.Line);
+                intersection = distance.NearestPoints().First();
             }
 
-            var coordinateToAdd = GetCoordinateToAdd(lineToTestAgainst, closestLine, minimalDistance);
-            var connectionLine = _geometryFactory.CreateLineString(new[] { startCoordinate, coordinateToAdd });
-            if (connectionLine.Crosses(lineToProlong))
+            var currentLengthIndexedLine = new LengthIndexedLine(current.Line);
+            var closestCoordinateCurrentIndex = currentLengthIndexedLine.Project(current.Coordinate);
+            var closestCoordinateCurrentIntersectionIndex = currentLengthIndexedLine.Project(intersection);
+            var currentSegment =
+                currentLengthIndexedLine.ExtractLine(closestCoordinateCurrentIndex, closestCoordinateCurrentIntersectionIndex);
+
+            var nextLengthIndexedLine = new LengthIndexedLine(next.Line);
+            var closestCoordinateNextIndex = nextLengthIndexedLine.Project(next.Coordinate);
+            var closestCoordinateNextIntersectionIndex = nextLengthIndexedLine.Project(intersection);
+            var nextSegment =
+                nextLengthIndexedLine.ExtractLine(closestCoordinateNextIntersectionIndex, closestCoordinateNextIndex);
+
+            var coordinates = currentSegment.Coordinates.Concat(nextSegment.Coordinates)
+                .Concat(new[] {currentSegment.Coordinates.First()}).ToArray();
+            if (coordinates.Length < 4)
             {
-                return null;
+                return;
             }
-            // HM TODO: fix issue with cross' false positive.
-            //if (closestLine.Crosses(connectionLine))
-            //{
-            //    connectionLine = new LineString(new[] { startCoordinate, closestLine.Intersection(connectionLine).Coordinate });
-            //}
-            var crossedLines = existingItmHighways.Where(l => l.Crosses(connectionLine)).ToArray();
-            if (crossedLines.Any(l => l != closestLine) == false)
+            var polygon = new Polygon(new LinearRing(coordinates));
+            if (polygon.Area < input.MinimalAreaSize)
             {
-                return coordinateToAdd;
+                return;
             }
-            foreach (var crossedLine in crossedLines)
+            var currentCoordinate = currentLengthIndexedLine.ExtractPoint(closestCoordinateCurrentIndex);
+            var nextCoordinate = nextLengthIndexedLine.ExtractPoint(closestCoordinateNextIndex);
+            linesToProlong.Add(new LineString(new[] {currentCoordinate, nextCoordinate}));
+        }
+
+        private void HandleTwoLinesCase(GpxProlongerExecutorInput input, LineAndCoordinate current, LineAndCoordinate next, List<ILineString> linesToProlong)
+        {
+            var currentLengthIndexedLine = new LengthIndexedLine(current.Line);
+            var currentCoordinate = currentLengthIndexedLine.ExtractPoint(currentLengthIndexedLine.Project(current.Coordinate));
+            var nextLengthIndexedLine = new LengthIndexedLine(next.Line);
+            var nextCoordinate = nextLengthIndexedLine.ExtractPoint(nextLengthIndexedLine.Project(next.Coordinate));
+
+            var bothLinesAreInList = linesToProlong.Contains(current.Line) && linesToProlong.Contains(next.Line);
+            if (bothLinesAreInList && current.Line.Coordinates.Last().Distance(current.Coordinate) < input.MinimalDistance &&
+                next.Line.Coordinates.First().Distance(next.Coordinate) < input.MinimalDistance)
             {
-                coordinateToAdd = GetCoordinateToAdd(lineToTestAgainst, crossedLine, minimalDistance);
-                connectionLine = _geometryFactory.CreateLineString(new[] { startCoordinate, coordinateToAdd });
-                if (crossedLines.Any(l => l != crossedLine && l.Crosses(connectionLine)) == false)
+                linesToProlong.Remove(current.Line);
+                linesToProlong.Remove(next.Line);
+                linesToProlong.Add(_geometryFactory.CreateLineString(current.Line.Coordinates
+                    .Concat(next.Line.Coordinates).ToArray()));
+            }
+            else if (bothLinesAreInList &&
+                     current.Line.Coordinates.First().Distance(current.Coordinate) < input.MinimalDistance &&
+                     next.Line.Coordinates.Last().Distance(next.Coordinate) < input.MinimalDistance)
+            {
+                linesToProlong.Remove(current.Line);
+                linesToProlong.Remove(next.Line);
+                linesToProlong.Add(_geometryFactory.CreateLineString(next.Line.Coordinates
+                    .Concat(current.Line.Coordinates).ToArray()));
+            }
+            else if (!AddCoordinate(current.Line, currentCoordinate, nextCoordinate, linesToProlong, input.MinimalDistance))
+            {
+                if (!AddCoordinate(next.Line, currentCoordinate, nextCoordinate, linesToProlong, input.MinimalDistance))
                 {
-                    return coordinateToAdd;
+                    linesToProlong.Add(new LineString(new[] { currentCoordinate, nextCoordinate }));
                 }
+            }
+        }
+
+        private LineAndCoordinate GetClosest(List<Coordinate> endTostart, List<ILineString> allLines, GpxProlongerExecutorInput input)
+        {
+            foreach (var coordinate in endTostart)
+            {
+                var point = new Point(coordinate);
+                var lineString = allLines.FirstOrDefault(l => l.Distance(point) < input.MinimalDistance);
+                if (lineString == null)
+                {
+                    continue;
+                }
+                return new LineAndCoordinate
+                {
+                    Coordinate = coordinate,
+                    Line = lineString
+                };
             }
             return null;
         }
 
-        /// <summary>
-        /// This methods tries to find the coordinate to add on the closest line and prefers to return one of the edges if possible.
-        /// </summary>
-        /// <param name="lineToTestAgainst"></param>
-        /// <param name="closestLine"></param>
-        /// <param name="minimalDistance"></param>
-        /// <returns></returns>
-        private Coordinate GetCoordinateToAdd(ILineString lineToTestAgainst, ILineString closestLine, double minimalDistance)
+        private bool AddCoordinate(ILineString currentLine, Coordinate currentCoordinate, Coordinate nextCoordinate, List<ILineString> linesToProlong, double minimalDistance)
         {
-            var closestCoordinate = lineToTestAgainst.Coordinates.Last();
-            var edgeCoordinate = GetEdgeCoordiante(closestLine, closestCoordinate, minimalDistance, 1.5);
-            if (edgeCoordinate != null)
+            if (linesToProlong.Contains(currentLine) == false)
             {
-                return edgeCoordinate;
+                return false;
             }
-            if (lineToTestAgainst.Intersects(closestLine))
+            if (currentLine.Coordinates.Last().Distance(currentCoordinate) < minimalDistance)
             {
-                var intecsectionCoordinate = lineToTestAgainst.Intersection(closestLine).Coordinates.First();
-                edgeCoordinate = GetEdgeCoordiante(closestLine, intecsectionCoordinate, minimalDistance, 3);
-                return edgeCoordinate ?? intecsectionCoordinate;
+                linesToProlong.Remove(currentLine);
+                linesToProlong.Add(_geometryFactory.CreateLineString(currentLine.Coordinates.Concat(new[] { nextCoordinate }).ToArray()));
+                return true;
             }
-            var closestCoordinateOnExitingLine = closestLine.Coordinates.OrderBy(c => c.Distance(closestCoordinate)).First();
-            if (closestCoordinateOnExitingLine.Distance(closestCoordinate) < minimalDistance)
+            if (currentLine.Coordinates.Last().Distance(nextCoordinate) < minimalDistance)
             {
-                return closestCoordinateOnExitingLine;
+                linesToProlong.Remove(currentLine);
+                linesToProlong.Add(_geometryFactory.CreateLineString(currentLine.Coordinates.Concat(new[] { currentCoordinate }).ToArray()));
+                return true;
             }
-            
-            var closestLineIndexed = new LengthIndexedLine(closestLine);
-            var closestCoordinateProjectedIndex = closestLineIndexed.Project(closestCoordinate);
-            var projectedCoordinate = closestLineIndexed.ExtractPoint(closestCoordinateProjectedIndex);
-            _geometryFactory.PrecisionModel.MakePrecise(projectedCoordinate);
-            edgeCoordinate = GetEdgeCoordiante(closestLine, projectedCoordinate, minimalDistance, 3);
-            return edgeCoordinate ?? projectedCoordinate;
-        }
-
-        private Coordinate GetEdgeCoordiante(ILineString closestLine, Coordinate closestCoordinate, double minimalDistance, double distanceFactor)
-        {
-            var edgeCoordinates = new[] {closestLine.Coordinates.First(), closestLine.Coordinates.Last()};
-            return edgeCoordinates.OrderBy(c => c.Distance(closestCoordinate))
-                    .FirstOrDefault(c => c.Distance(closestCoordinate) < minimalDistance*distanceFactor);
+            if (currentLine.Coordinates.First().Distance(currentCoordinate) < minimalDistance)
+            {
+                linesToProlong.Remove(currentLine);
+                linesToProlong.Add(_geometryFactory.CreateLineString(new[] { nextCoordinate }.Concat(currentLine.Coordinates).ToArray()));
+                return true;
+            }
+            if (currentLine.Coordinates.First().Distance(nextCoordinate) < minimalDistance)
+            {
+                linesToProlong.Remove(currentLine);
+                linesToProlong.Add(_geometryFactory.CreateLineString(new[] { currentCoordinate }.Concat(currentLine.Coordinates).ToArray()));
+                return true;
+            }
+            return false;
         }
     }
 }

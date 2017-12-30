@@ -35,12 +35,12 @@ namespace IsraelHiking.API.Services
             var allRoutePoints = routeData.Segments.SelectMany(s => s.Latlngs).ToList();
             var coordinates = ToWgs84Coordinates(allRoutePoints);
             int maximumPoints = Math.Max(3, Math.Min((int)(new LineString(coordinates).Length / _options.MinimalSegmentLength), _options.MaxSegmentsNumber));
-            var currentTolerance = _options.MinimalSplitSimplificationTolerace;
+            var currentDistanceTolerance = _options.InitialSplitSimplificationDistanceTolerace;
             Coordinate[] simplifiedCoordinates;
             do
             {
-                simplifiedCoordinates = DouglasPeuckerLineSimplifier.Simplify(coordinates, currentTolerance);
-                currentTolerance *= 2;
+                simplifiedCoordinates = DouglasPeuckerLineSimplifier.Simplify(coordinates, currentDistanceTolerance);
+                currentDistanceTolerance *= 2;
             } while (simplifiedCoordinates.Length > maximumPoints);
 
             var manipulatedRouteData = new RouteData

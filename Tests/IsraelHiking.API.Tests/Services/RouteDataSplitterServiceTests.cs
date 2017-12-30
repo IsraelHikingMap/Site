@@ -298,7 +298,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             var options = new ConfigurationData
             {
-                MinimalSplitSimplificationTolerace = 50,
+                InitialSplitSimplificationDistanceTolerace = 50,
                 MaxSegmentsNumber = 40,
                 MinimalSegmentLength = 500
             };

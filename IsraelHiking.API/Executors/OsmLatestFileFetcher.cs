@@ -12,6 +12,7 @@ namespace IsraelHiking.API.Executors
     /// <inheritdoc />
     public class OsmLatestFileFetcher : IOsmLatestFileFetcher
     {
+        private const string OSM_C_TOOLS_FOLDER = "OsmCTools";
         private const string OSM_FILE_ADDRESS = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine-latest.osm.pbf";
         private const string OSM_FILE_TIMESTAMP = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine.state.txt";
         private const string MINUTES_FILES_BASE_ADDRESS = "http://download.openstreetmap.fr/replication/asia/israel_and_palestine";
@@ -49,8 +50,8 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public async Task<Stream> Get(bool updateFile = true)
         {
-            var workingDirectory = Path.Combine(_options.BinariesFolder, _options.OsmFileCacheFolder);
-            var directoryContents = _fileProvider.GetDirectoryContents(_options.OsmFileCacheFolder);
+            var workingDirectory = Path.Combine(_options.BinariesFolder, OSM_C_TOOLS_FOLDER);
+            var directoryContents = _fileProvider.GetDirectoryContents(OSM_C_TOOLS_FOLDER);
             if (!directoryContents.Any())
             {
                 _fileSystemHelper.CreateDirectory(workingDirectory);
@@ -60,7 +61,7 @@ namespace IsraelHiking.API.Executors
             {
                 UpdateFileToLatestVersion(workingDirectory);
             }
-            var fileInfo = _fileProvider.GetFileInfo(Path.Combine(_options.OsmFileCacheFolder, Sources.OSM_FILE_NAME));
+            var fileInfo = _fileProvider.GetFileInfo(Path.Combine(OSM_C_TOOLS_FOLDER, Sources.OSM_FILE_NAME));
             return fileInfo.CreateReadStream();
         }
 
@@ -87,9 +88,9 @@ namespace IsraelHiking.API.Executors
         {
             return Task.Run(() =>
             {
-                var workingDirectory = Path.Combine(_options.BinariesFolder, _options.OsmFileCacheFolder);
+                var workingDirectory = Path.Combine(_options.BinariesFolder, OSM_C_TOOLS_FOLDER);
                 UpdateFileToLatestVersion(workingDirectory);
-                var fileInfo = _fileProvider.GetFileInfo(Path.Combine(_options.OsmFileCacheFolder, UPDATES_FILE_NAME));
+                var fileInfo = _fileProvider.GetFileInfo(Path.Combine(OSM_C_TOOLS_FOLDER, UPDATES_FILE_NAME));
                 return fileInfo.CreateReadStream();
             });
         }
