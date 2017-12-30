@@ -142,7 +142,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
     }
 
     private onPolylineHover(latlng: L.LatLng) {
-        if (!this.chartWrapper || !this.statistics) {
+        if (!this.chartWrapper || !this.statistics || !this.isOpen()) {
             return;
         }
         if (latlng == null) {
