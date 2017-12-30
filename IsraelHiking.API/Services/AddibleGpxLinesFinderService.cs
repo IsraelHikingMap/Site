@@ -59,7 +59,7 @@ namespace IsraelHiking.API.Services
         public async Task<IEnumerable<ILineString>> GetLines(List<ILineString> gpxItmLines)
         {
             _logger.LogInformation($"Looking for unmapped routes started on {gpxItmLines.Count} traces");
-            gpxItmLines = ImproveGpxDensity(gpxItmLines);
+            gpxItmLines = IncreaseGpxDensity(gpxItmLines);
             var linesToReturn = await FindMissingLines(gpxItmLines);
             linesToReturn = SplitSelfLoopsAndRemoveDuplication(linesToReturn);
             linesToReturn = SimplifyLines(linesToReturn);
@@ -73,7 +73,7 @@ namespace IsraelHiking.API.Services
             return linesToReturn;
         }
 
-        private List<ILineString> ImproveGpxDensity(List<ILineString> gpxItmLines)
+        private List<ILineString> IncreaseGpxDensity(List<ILineString> gpxItmLines)
         {
             var denseGpxLines = new List<ILineString>();
             foreach (var gpxItmLine in gpxItmLines.Where(l => l.Coordinates.Length > 0))
