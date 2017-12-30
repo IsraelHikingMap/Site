@@ -88,6 +88,10 @@ namespace IsraelHiking.API.Services
             {
                 route.Segments = _routeDataSplitterService.Split(route, RoutingType.HIKE).Segments;
             }
+            foreach (var route in container.Routes.Where(r => string.IsNullOrWhiteSpace(r.Name)))
+            {
+                route.Name = fileName;
+            }
             return container;
         }
 

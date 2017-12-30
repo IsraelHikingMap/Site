@@ -161,7 +161,7 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
-        public void ConvertGpxToDataContainer_NonSiteFileWithTwoSegmenets_ShouldManipulateRouteData()
+        public void ConvertGpxToDataContainer_NonSiteFileWithTwoSegmenetsNoName_ShouldManipulateRouteData()
         {
             var gpxToConvert = new gpxType
             {
@@ -206,6 +206,7 @@ namespace IsraelHiking.API.Tests.Services
             var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), FlowFormats.GPX).Result;
 
             Assert.AreEqual(1, dataContainer.Routes.Count);
+            Assert.AreEqual(FlowFormats.GPX, dataContainer.Routes.First().Name);
             Assert.AreEqual(newRouteData.Segments.Count, dataContainer.Routes.First().Segments.Count);
         }
 
