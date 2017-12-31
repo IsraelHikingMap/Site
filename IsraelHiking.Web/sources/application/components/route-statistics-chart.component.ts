@@ -35,7 +35,7 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
     private statistics: IRouteStatistics;
     private routeLayerSubscriptions: Subscription[];
     private componentSubscriptions: Subscription[];
-    /// chart:
+    // chart:
     private chartWrapper: google.visualization.ChartWrapper;
     private chartSvg: HTMLElement;
     

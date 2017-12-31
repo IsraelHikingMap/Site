@@ -864,19 +864,19 @@ export class ResourcesService {
         return words.match(/^[^a-zA-Z]*[\u0591-\u05F4]/) != null;
     }
 
-    public getDirection = (words?: string): Direction => {
-        if (!words) {
+    public getDirection = (text?: string): Direction => {
+        if (!text) {
             return this.direction;
         }
-        return this.hasHebrewCharacters(words) ? "rtl" : "ltr";
+        return this.hasHebrewCharacters(text) ? "rtl" : "ltr";
     }
 
-    public getTextAlignment = (words?: string) => {
-        return `text-${this.getDirection(words) === "rtl" ? "right" : "left"}`;
+    public getTextAlignment = (text?: string) => {
+        return `text-${this.getDirection(text) === "rtl" ? "right" : "left"}`;
     }
 
-    public getImageFloat = (words?: string) => {
-        return this.getDirection(words) === "rtl" ? "left" : "right";
+    public getImageFloat = (text?: string) => {
+        return this.getDirection(text) === "rtl" ? "left" : "right";
     }
 
     public getCurrentLanguageCodeSimplified = () => {
