@@ -23,5 +23,6 @@ namespace IsraelHiking.DataAccessInterfaces
     public interface IWikipediaGateway : IPointsOfInterestGateway
     {
         Task<List<Feature>> GetByLocation(Coordinate center, string language);
+        Task Initialize();
     }
 }

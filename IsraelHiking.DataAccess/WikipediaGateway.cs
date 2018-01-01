@@ -2,8 +2,6 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Net;
-using System.Net.Http;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
@@ -11,68 +9,38 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
-using Newtonsoft.Json;
+using WikiClientLibrary;
+using WikiClientLibrary.Client;
+using WikiClientLibrary.Generators;
+using WikiClientLibrary.Pages;
+using WikiClientLibrary.Pages.Queries;
+using WikiClientLibrary.Pages.Queries.Properties;
+using WikiClientLibrary.Sites;
 
 namespace IsraelHiking.DataAccess
 {
-    class JsonGeoSearchWikiPage : JsonCoordiantes
-    {
-        public long pageid { get; set; }
-        public string title { get; set; }
-    }
-
-    class JsonGeoSearchWikiQuery
-    {
-        public JsonGeoSearchWikiPage[] geosearch { get; set; }
-    }
-
-    class JsonGeoSearchWikiResponse
-    {
-        public JsonGeoSearchWikiQuery query { get; set; }
-    }
-
-    class JsonCoordiantes
-    {
-        public double lat { get; set; }
-        public double lon { get; set; }
-    }
-
-    class JsonThumbnail
-    {
-        public double height { get; set; }
-        public double width { get; set; }
-        public string source { get; set; }
-        public string original { get; set; }
-    }
-
-    class JsonWikiPage
-    {
-        public JsonCoordiantes[] coordinates { get; set; }
-        public JsonThumbnail thumbnail { get; set; }
-        public long pageid { get; set; }
-        public string title { get; set; }
-        public string extract { get; set; }
-        public string pageimage { get; set; }
-    }
-
-    class JsonWikiQuery
-    {
-        public Dictionary<long, JsonWikiPage> pages { get; set; }
-    }
-
-    class JsonWikiResponse
-    {
-        public JsonWikiQuery query { get; set; }
-    }
-
-
     public class WikipediaGateway : IWikipediaGateway
     {
         private readonly ILogger _logger;
-
+        private readonly Dictionary<string, WikiSite> _wikiSites;
         public WikipediaGateway(ILogger logger)
         {
             _logger = logger;
+            _wikiSites = new Dictionary<string, WikiSite>();
+        }
+
+        public async Task Initialize()
+        {
+            var wikiClient = new WikiClient
+            {
+                ClientUserAgent = "IsraelHikingMapSite/5.x",
+                Timeout = new TimeSpan(0, 1, 0)
+            };
+            foreach (var language in new [] { "he", "en"})
+            {
+                _wikiSites[language] = new WikiSite(wikiClient, new SiteOptions($"https://{language}.wikipedia.org/w/api.php"));
+                await _wikiSites[language].Initialization;
+            }
         }
 
         public Task<List<Feature>> GetAll()
@@ -83,38 +51,33 @@ namespace IsraelHiking.DataAccess
 
         public async Task<List<Feature>> GetByLocation(Coordinate center, string language)
         {
-            var centerString = $"{center.Y}|{center.X}";
-            var address = $"https://{language}.wikipedia.org/w/api.php?format=json&action=query&list=geosearch&gsradius=10000&gscoord={centerString}&gslimit=500";
             for (int retryIndex = 0; retryIndex < 3; retryIndex++)
             {
                 try
                 {
-                    using (var client = new HttpClient())
+                    var geoSearchGenerator = new GeoSearchGenerator(_wikiSites[language])
                     {
-                        var response = await client.GetAsync(address);
-                        if (!response.IsSuccessStatusCode)
-                        {
-                            return new List<Feature>();
-                        }
-                        var jsonString = await response.Content.ReadAsStringAsync();
-                        var jsonResponse = JsonConvert.DeserializeObject<JsonGeoSearchWikiResponse>(jsonString);
-                        var features = new List<Feature>();
-                        foreach (var geoSearchWikiPage in jsonResponse.query.geosearch)
-                        {
-                            var coordinate = new Coordinate(geoSearchWikiPage.lon, geoSearchWikiPage.lat);
-                            var attributes = GetAttributes(coordinate, geoSearchWikiPage.title,
-                                $"{language}_{geoSearchWikiPage.pageid}", language);
-                            features.Add(new Feature(new Point(coordinate), attributes));
-                        }
-                        return features;
+                        TargetCoordinate = new GeoCoordinate(center.Y, center.X),
+                        Radius = 10000,
+                        PaginationSize = 500
+                    };
+                    var results = await geoSearchGenerator.EnumItemsAsync().ToList();
+                    var features = new List<Feature>();
+                    foreach (var geoSearchResultItem in results)
+                    {
+                        var coordinate = new Coordinate(geoSearchResultItem.Coordinate.Longitude, geoSearchResultItem.Coordinate.Latitude);
+                        var attributes = GetAttributes(coordinate, geoSearchResultItem.Page.Title,
+                            $"{language}_{geoSearchResultItem.Page.Id}", language);
+                        features.Add(new Feature(new Point(coordinate), attributes));
                     }
+                    return features;
                 }
                 catch 
                 {
                     // this is used since this function throws an unrelated timeout error...
                 }
             }
-            _logger.LogError($"All Retries failed while trying to get data from {address}\n");
+            _logger.LogError($"All Retries failed while trying to get data from {language}.wikipedia \n");
             return new List<Feature>();
         }
 
@@ -122,23 +85,26 @@ namespace IsraelHiking.DataAccess
         {
             var language = id.Split('_').First();
             var pageId = id.Split('_').Last();
-            using (var client = new HttpClient())
+            var site = _wikiSites[language];
+            var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).First();
+            var page = new WikiPage(site, stub.Title);
+            await page.RefreshAsync(new WikiPageQueryProvider
             {
-                var baseAddress = $"https://{language}.wikipedia.org/";
-                var address = $"{baseAddress}w/api.php?format=json&action=query&pageids={pageId}&prop=extracts|pageimages|coordinates&explaintext=true&exintro=true&exsentences=1";
-                var response = await client.GetAsync(address);
-                var stringContent = await response.Content.ReadAsStringAsync();
-                var responseObject = JsonConvert.DeserializeObject<JsonWikiResponse>(stringContent);
-                var page = responseObject.query.pages.Values.First();
-                var jsonGeoLocation = page.coordinates.First();
-                var coordinate = new Coordinate(jsonGeoLocation.lon, jsonGeoLocation.lat);
-                var attributes = GetAttributes(coordinate, page.title, id, language);
-                attributes.Add(FeatureAttributes.DESCRIPTION, page.extract ?? string.Empty);
-                attributes.Add(FeatureAttributes.IMAGE_URL, GetOriginalImageUrl(page));
-                attributes.Add(FeatureAttributes.WEBSITE, $"{baseAddress}?curid={page.pageid}");
+                Properties =
+                {
+                    new ExtractsPropertyProvider { AsPlainText = true, IntroductionOnly = true, MaxSentences = 1},
+                    new PageImagesPropertyProvider {QueryOriginalImage = true},
+                    new GeoCoordinatesPropertyProvider {QueryPrimaryCoordinate = true}
+                }
+            });
+            var geoCoordinate = page.GetPropertyGroup<GeoCoordinatesPropertyGroup>().PrimaryCoordinate;
+            var coordinate = new Coordinate(geoCoordinate.Longitude, geoCoordinate.Latitude);
+            var attributes = GetAttributes(coordinate, page.Title, id, language);
+            attributes.Add(FeatureAttributes.DESCRIPTION, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
+            attributes.Add(FeatureAttributes.IMAGE_URL, page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url);
+            attributes.Add(FeatureAttributes.WEBSITE, $"https://{language}.wikipedia.org/?curid={page.Id}");
 
-                return new FeatureCollection(new Collection<IFeature> { new Feature(new Point(coordinate), attributes)});
-            }
+            return new FeatureCollection(new Collection<IFeature> { new Feature(new Point(coordinate), attributes) });
         }
 
         private AttributesTable GetAttributes(Coordinate location, string title, string id, string language)
@@ -163,28 +129,6 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.SOURCE_IMAGE_URL, "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png" }
             };
             return attributes;
-        }
-
-        /// <summary>
-        /// This utility method is used to convert a thumbnail image to the original full size image from wikipedia
-        /// </summary>
-        /// <param name="page">The page containing the data</param>
-        /// <returns></returns>
-        private string GetOriginalImageUrl(JsonWikiPage page)
-        {
-            if (string.IsNullOrWhiteSpace(page.pageimage) || string.IsNullOrWhiteSpace(page.thumbnail?.source))
-            {
-                return page.thumbnail?.source ?? string.Empty;
-            }
-            var imageUrl = WebUtility.UrlDecode(page.thumbnail.source);
-            var indexOfpageImage = imageUrl.IndexOf(page.pageimage, StringComparison.Ordinal);
-            if (indexOfpageImage == -1)
-            {
-                return imageUrl;
-            }
-            imageUrl = imageUrl.Substring(0, indexOfpageImage + page.pageimage.Length);
-            imageUrl = imageUrl.Replace("/thumb/", "/");
-            return imageUrl;
         }
     }
 }
