@@ -192,12 +192,17 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         }
         let editMode = this.routesService.selectedRoute.getEditMode();
         this.routesService.selectedRoute.setHiddenState();
-        var icon = this.poiExtended ? this.poiExtended.icon : "icon-star";
+        var icon = "icon-star";
+        var id = this.title;
+        if (this.poiExtended) {
+            icon = this.poiExtended.icon;
+            id = this.poiExtended.id;
+        }
         this.routesService.selectedRoute.route.markers.push({
             latlng: this.latLng,
             title: this.title || this.description,
             type: icon.replace("icon-", ""),
-            id: this.poiExtended.id,
+            id: id,
             marker: null
         } as IMarkerWithData);
         this.routesService.selectedRoute.setEditMode(editMode);
