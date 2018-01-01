@@ -114,11 +114,11 @@ namespace IsraelHiking.API.Executors
             var nextCoordinate = lengthIndexedLine.ExtractPoint(closestCoordinateNextIndex);
             if (!AddCoordinate(current.Line, currentCoordinate, nextCoordinate, linesToProlong, input.MinimalDistance))
             {
-                linesToProlong.Add(new LineString(new[] { currentCoordinate, nextCoordinate }));
+                linesToProlong.Add(_geometryFactory.CreateLineString(new[] { currentCoordinate, nextCoordinate }));
             }
         }
 
-        private static void HandleIntersectionCase(GpxProlongerExecutorInput input, LineAndCoordinate current, LineAndCoordinate next, List<ILineString> linesToProlong)
+        private void HandleIntersectionCase(GpxProlongerExecutorInput input, LineAndCoordinate current, LineAndCoordinate next, List<ILineString> linesToProlong)
         {
             var intersection = current.Line.Intersection(next.Line).Coordinates
                 .OrderBy(c => c.Distance(current.Coordinate) + c.Distance(next.Coordinate)).FirstOrDefault();
@@ -154,7 +154,7 @@ namespace IsraelHiking.API.Executors
             }
             var currentCoordinate = currentLengthIndexedLine.ExtractPoint(closestCoordinateCurrentIndex);
             var nextCoordinate = nextLengthIndexedLine.ExtractPoint(closestCoordinateNextIndex);
-            linesToProlong.Add(new LineString(new[] {currentCoordinate, nextCoordinate}));
+            linesToProlong.Add(_geometryFactory.CreateLineString(new[] {currentCoordinate, nextCoordinate}));
         }
 
         private void HandleTwoLinesCase(GpxProlongerExecutorInput input, LineAndCoordinate current, LineAndCoordinate next, List<ILineString> linesToProlong)
@@ -186,7 +186,7 @@ namespace IsraelHiking.API.Executors
             {
                 if (!AddCoordinate(next.Line, currentCoordinate, nextCoordinate, linesToProlong, input.MinimalDistance))
                 {
-                    linesToProlong.Add(new LineString(new[] { currentCoordinate, nextCoordinate }));
+                    linesToProlong.Add(_geometryFactory.CreateLineString(new[] { currentCoordinate, nextCoordinate }));
                 }
             }
         }

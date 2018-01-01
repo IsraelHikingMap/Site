@@ -2,17 +2,13 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
-using ICSharpCode.SharpZipLib.GZip;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -113,67 +109,5 @@ namespace IsraelHiking.API.Services.Poi
             _logger.LogInformation($"Finished getting wikipedia pages for indexing, got {wikiFeatures.Count} pages.");
             return wikiFeatures;
         }
-
-        private async Task<List<Feature>> GetPointsForIndexingBySQL()
-        {
-            var wikiFeatures = new List<Feature>();
-            var language = "he";
-            var response = await _remoteFileFetcherGateway.GetFileContent($"https://dumps.wikimedia.org/{language}wiki/latest/{language}wiki-latest-geo_tags.sql.gz");
-            using (var contentStream = new MemoryStream(response.Content))
-            using (var memoryStreamDecompressed = new MemoryStream())
-            using (var decompressionStream = new GZipInputStream(contentStream))
-            {
-                decompressionStream.CopyTo(memoryStreamDecompressed);
-                var bytes = memoryStreamDecompressed.ToArray();
-                var sqlText = Encoding.UTF8.GetString(bytes);
-                var insertLinesRegex = new Regex(@"INSERT INTO `geo_tags` VALUES (.*?);");
-                var valuesRegex = new Regex(@"\((.*?)\)");
-                foreach (Match lineMatch in insertLinesRegex.Matches(sqlText))
-                {
-                    var valuesString = lineMatch.Groups[1].Value;
-                    foreach (Match valuesMatch in valuesRegex.Matches(valuesString))
-                    {
-                        var values = valuesMatch.Groups[1].Value.Split(',');
-                        var title = string.Empty;
-                        if (values.Length >= 9 && values[8] != "NULL" && values[8] != "''")
-                        {
-                            title = values[8];
-                        }
-                        var pageId = language + "_" + values[1];
-
-                        var location = new Coordinate().FromLatLng(values[4] + "," + values[5]);
-                        if (location.X < 34 || location.X > 36)
-                        {
-                            continue;
-                        }
-                        if (location.Y < 29 || location.Y > 34)
-                        {
-                            continue;
-                        }
-                        var geoLocation = new AttributesTable
-                        {
-                            {FeatureAttributes.LAT, location.Y},
-                            {FeatureAttributes.LON, location.X}
-                        };
-                        var wikiPage = new Feature(new Point(location), new AttributesTable
-                        {
-                            {FeatureAttributes.NAME, title},
-                            {FeatureAttributes.ID, pageId},
-                            {FeatureAttributes.ICON, "icon-wikipedia-w"},
-                            {FeatureAttributes.ICON_COLOR, "black"},
-                            {FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA},
-                            {FeatureAttributes.POI_CATEGORY, Categories.WIKIPEDIA},
-                            {FeatureAttributes.POI_LANGUAGE, language},
-                            {FeatureAttributes.OSM_TYPE, string.Empty},
-                            {FeatureAttributes.SEARCH_FACTOR, 1},
-                            {FeatureAttributes.GEOLOCATION, geoLocation}
-                        });
-                        wikiFeatures.Add(wikiPage);
-                    }
-                }
-            }
-            return wikiFeatures;
-        }
-
     }
 }
