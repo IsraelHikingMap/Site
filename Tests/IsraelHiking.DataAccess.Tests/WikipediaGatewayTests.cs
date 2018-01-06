@@ -7,6 +7,7 @@ namespace IsraelHiking.DataAccess.Tests
     public class WikipediaGatewayTests
     {
         [TestMethod]
+        [Ignore]
         public void GetWikiPageById()
         {
             var wikiGateway = new WikipediaGateway(new TraceLogger());
@@ -16,6 +17,7 @@ namespace IsraelHiking.DataAccess.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void GetWikiPageByLocation()
         {
             var wikiGateway = new WikipediaGateway(new TraceLogger());
