@@ -43,7 +43,15 @@ export class HoverHandlerRoute extends HoverHandlerBase {
             return;
         }
 
+        // private POIs
         let snappingPointResponse = this.context.snappingService.snapToPoint(e.latlng, { points: this.context.route.markers, sensitivity: 30 });
+        if (snappingPointResponse.markerData != null) {
+            this.setHoverLineForAddPoint(snappingPointResponse.latlng);
+            return;
+        }
+
+        // public POIs
+        snappingPointResponse = this.context.snappingService.snapToPoint(e.latlng);
         if (snappingPointResponse.markerData != null) {
             this.setHoverLineForAddPoint(snappingPointResponse.latlng);
             return;
