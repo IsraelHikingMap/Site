@@ -11,7 +11,7 @@ import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
 
-export interface ISnappingOptions {
+export interface ISnappingRouteOptions {
     polylines: L.Polyline[];
     /**
      * The sensivitivity of snappings in pixels
@@ -19,10 +19,18 @@ export interface ISnappingOptions {
     sensitivity: number;
 }
 
-export interface ISnappingResponse {
+export interface ISnappingRouteResponse {
     latlng: L.LatLng;
     polyline: L.Polyline;
     beforeIndex: number;
+}
+
+export interface ISnappingPointOptions {
+    points: Common.MarkerData[];
+    /**
+     * The sensivitivity of snappings in pixels
+     */
+    sensitivity: number;
 }
 
 export interface ISnappingPointResponse {
@@ -104,18 +112,18 @@ export class SnappingService {
         };
     }
 
-    public snapTo = (latlng: L.LatLng, options?: ISnappingOptions): ISnappingResponse => {
+    public snapToRoute = (latlng: L.LatLng, options?: ISnappingRouteOptions): ISnappingRouteResponse => {
         if (!options) {
             options = {
                 polylines: this.highwaySnappings,
                 sensitivity: SnappingService.DEFAULT_SENSITIVITY
-            } as ISnappingOptions;
+            } as ISnappingRouteOptions;
         }
         var minDistance = Infinity;
         var response = {
             latlng: latlng,
             polyline: null
-        } as ISnappingResponse;
+        } as ISnappingRouteResponse;
 
         for (let polyline of options.polylines) {
             let latlngs = polyline.getLatLngs();
@@ -150,16 +158,23 @@ export class SnappingService {
         return response;
     }
 
-    public snapToPoint = (latlng: L.LatLng): ISnappingPointResponse => {
-        var response = {
+    public snapToPoint = (latlng: L.LatLng, options?: ISnappingPointOptions): ISnappingPointResponse => {
+        if (!options) {
+            options = {
+                points: this.pointsSnappings,
+                sensitivity: 2 * SnappingService.DEFAULT_SENSITIVITY
+            } as ISnappingPointOptions;
+        }
+
+        let response = {
             latlng: latlng,
             markerData: null,
             id: null
         } as ISnappingPointResponse;
-        var pointOnScreen = this.mapService.map.latLngToLayerPoint(latlng);
-        for (let markerData of this.pointsSnappings) {
+        let pointOnScreen = this.mapService.map.latLngToLayerPoint(latlng);
+        for (let markerData of options.points) {
             let markerPointOnScreen = this.mapService.map.latLngToLayerPoint(markerData.latlng);
-            if (markerPointOnScreen.distanceTo(pointOnScreen) < 2 * SnappingService.DEFAULT_SENSITIVITY && response.markerData == null) {
+            if (markerPointOnScreen.distanceTo(pointOnScreen) < options.sensitivity && response.markerData == null) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
             }

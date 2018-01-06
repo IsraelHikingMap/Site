@@ -96,7 +96,7 @@ describe("RouteLayer", () => {
         routeLayer.route.segments.push({ polyline: L.polyline([]) } as IRouteSegment);
         spyOn(snappingService, "snapTo");
 
-        routeLayer.snapToRoute(L.latLng([0, 0]));
+        routeLayer.snapToSelf(L.latLng([0, 0]));
 
         expect(snappingService.snapTo).toHaveBeenCalled();
     });

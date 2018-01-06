@@ -5,7 +5,7 @@ import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { SnappingService } from "../../snapping.service";
 import { ElevationProvider } from "../../elevation.provider";
-import { ISnappingResponse } from "../../snapping.service"
+import { ISnappingRouteResponse } from "../../snapping.service"
 import * as Common from "../../../common/IsraelHiking";
 
 export namespace EditModeString {
@@ -58,7 +58,7 @@ export interface IRouteLayer {
     clear(): void;
     getEditMode(): EditMode;
     setEditMode(editMode: EditMode): void;
-    snapToRoute(latlng: L.LatLng): ISnappingResponse;
+    snapToSelf(latlng: L.LatLng): ISnappingRouteResponse;
     raiseDataChanged(): void;
     getData(): Common.RouteData;
     getBounds(): L.LatLngBounds;

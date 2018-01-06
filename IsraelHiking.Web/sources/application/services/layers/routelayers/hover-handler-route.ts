@@ -43,22 +43,32 @@ export class HoverHandlerRoute extends HoverHandlerBase {
             return;
         }
 
-        let snapToResponse = this.context.snapToRoute(e.latlng);
-        if (snapToResponse.polyline != null) {
+        let snappingPointResponse = this.context.snappingService.snapToPoint(e.latlng, { points: this.context.route.markers, sensitivity: 30 });
+        if (snappingPointResponse.markerData != null) {
+            this.setHoverLineForAddPoint(snappingPointResponse.latlng);
+            return;
+        }
+        
+        let snappingRouteResponse = this.context.snapToSelf(e.latlng);
+        if (snappingRouteResponse.polyline != null) {
             this.setState(HoverHandlerState.ON_POLYLINE);
             this.middleMarker.setOpacity(1.0);
-            this.middleMarker.setLatLng(snapToResponse.latlng);
+            this.middleMarker.setLatLng(snappingRouteResponse.latlng);
             return;
         }
 
+        snappingRouteResponse = this.context.snappingService.snapToRoute(e.latlng);
+        this.setHoverLineForAddPoint(snappingRouteResponse.latlng);
+    }
+
+    private setHoverLineForAddPoint(latlng: L.LatLng) {
         this.middleMarker.setOpacity(0.0);
         this.setState(HoverHandlerState.ADD_POINT);
-        snapToResponse = this.context.snappingService.snapTo(e.latlng);
-        this.hoverMarker.setLatLng(snapToResponse.latlng);
+        this.hoverMarker.setLatLng(latlng);
         var hoverStartPoint = this.context.route.segments.length > 0
             ? this.context.getLastSegment().routePoint
-            : snapToResponse.latlng;
-        this.hoverPolyline.setLatLngs([hoverStartPoint, snapToResponse.latlng]);
+            : latlng;
+        this.hoverPolyline.setLatLngs([hoverStartPoint, latlng]);
     }
 
     public updateAccordingToRoueProperties(): void {

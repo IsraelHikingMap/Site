@@ -2,7 +2,7 @@ import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { Subject } from "rxjs/Subject";
 import * as L from "leaflet";
 
-import { SnappingService, ISnappingResponse, ISnappingOptions } from "../../snapping.service";
+import { SnappingService, ISnappingRouteResponse, ISnappingRouteOptions } from "../../snapping.service";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { ElevationProvider } from "../../elevation.provider";
@@ -82,15 +82,15 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         this.raiseDataChanged();
     }
 
-    public snapToRoute(latlng: L.LatLng): ISnappingResponse {
+    public snapToSelf(latlng: L.LatLng): ISnappingRouteResponse {
         var polylines = [];
         for (let segment of this.route.segments) {
             polylines.push(segment.polyline);
         }
-        return this.snappingService.snapTo(latlng, {
+        return this.snappingService.snapToRoute(latlng, {
             sensitivity: 30,
             polylines: polylines
-        } as ISnappingOptions);
+        } as ISnappingRouteOptions);
     }
 
     public getData = (): Common.RouteData => {

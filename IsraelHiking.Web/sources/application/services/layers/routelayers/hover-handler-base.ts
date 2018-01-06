@@ -12,7 +12,7 @@ export class HoverHandlerState {
 
 export abstract class HoverHandlerBase {
 
-    protected hoverMarker: L.Marker;
+    public hoverMarker: L.Marker;
     protected hoverState: string;
 
     constructor(protected context: IRouteLayer) {
