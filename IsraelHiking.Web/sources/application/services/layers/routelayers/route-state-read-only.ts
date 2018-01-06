@@ -26,6 +26,10 @@ export class RouteStateReadOnly extends RouteStateBase {
     }
 
     private createStartAndEndMarkers() {
+        if (this.context.route.segments.length <= 0) {
+            return;
+        }
+
         let startLatLng = this.context.route.segments[0].latlngs[0];
         let pathOptions = this.context.route.properties.pathOptions;
         this.readOnlyLayers.addLayer(L.marker(startLatLng,
@@ -49,7 +53,6 @@ export class RouteStateReadOnly extends RouteStateBase {
         this.context.mapService.map.addLayer(this.readOnlyLayers);
         this.readOnlyLayers.clearLayers();
         if (this.context.route.segments.length > 0) {
-            this.createStartAndEndMarkers();
             for (let segment of this.context.route.segments) {
                 segment.routePointMarker = null;
                 segment.polyline = null;
@@ -65,6 +68,7 @@ export class RouteStateReadOnly extends RouteStateBase {
             this.readOnlyLayers.addLayer(markerWithTitle);
         }
         this.context.mapService.map.on("mousemove", this.onMouseMove);
+        this.createStartAndEndMarkers();
     }
 
     public clear() {
@@ -91,6 +95,7 @@ export class RouteStateReadOnly extends RouteStateBase {
     }
 
     private changeStateToEditPoi(markerWithTitle: Common.IMarkerWithTitle) {
+        // HM TODO: move this to marker popup?
         let markerLatLng = markerWithTitle.getLatLng();
         this.context.setEditPoiState();
         // old markers are destroyed and new markers are created.
