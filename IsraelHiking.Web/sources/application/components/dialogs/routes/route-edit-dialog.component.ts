@@ -66,17 +66,15 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     public moveToRoute = (e: Event) => {
-        if (this.routeLayer.getData().segments.length === 0) {
+        let bounds = this.routeLayer.getBounds();
+        if (bounds == null) {
             this.toastService.error(this.resources.pleaseAddPointsToRoute);
             return;
         }
         if (!this.routeProperties.isVisible) {
             this.toastService.warning(this.resources.routeIsHidden);
         }
-        let bounds = this.routeLayer.getBounds();
-        if (bounds != null) {
-            this.fitBoundsService.fitBounds(bounds);
-        }
+        this.fitBoundsService.fitBounds(bounds);
         this.suppressEvents(e);
     }
 
