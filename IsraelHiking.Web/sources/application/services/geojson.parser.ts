@@ -37,16 +37,29 @@ export class GeoJsonParser {
                 let name = this.getPropertyValue(feature.properties, "name", language);
                 let description = this.getPropertyValue(feature.properties, "description", language);
                 let icon = feature.properties["icon"];
+                let id = feature.properties["identifier"];
+                let website = feature.properties["website"];
+                let image = feature.properties["image"];
                 switch (feature.geometry.type) {
                     case GeoJson.point:
                         let point = feature.geometry as GeoJSON.Point;
-                        let marker = this.createMarker(point.coordinates, name, icon);
+                        let marker = this.createMarker(point.coordinates, id, name, icon, description);
+                        if (website) {
+                            marker.urls.push({ mimeType: "text/html", text: marker.title, url: website });
+                        }
+                        if (image) {
+                            marker.urls.push({
+                                mimeType: `image/${image.split(".").pop()}`,
+                                text: "",
+                                url: image
+                            });
+                        }
                         markers.push(marker);
                         break;
                     case GeoJson.multiPoint:
                         let points = feature.geometry as GeoJSON.MultiPoint;
                         for (let pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
-                            let marker = this.createMarker(points.coordinates[pointIndex], name);
+                            let marker = this.createMarker(points.coordinates[pointIndex], id, name, null, description);
                             markers.push(marker);
                         }
                         break;
@@ -89,12 +102,15 @@ export class GeoJsonParser {
         return data;
     }
 
-    private createMarker(coordinates: GeoJSON.Position, message?: string, icon?: string): Common.MarkerData {
+    private createMarker(coordinates: GeoJSON.Position, id: string, message: string, icon: string, description: string): Common.MarkerData {
         return {
+            id: id,
             latlng: GeoJsonParser.createLatlng(coordinates),
             title: message,
-            type: icon ? icon.replace("icon-", "") : ""
-        } as Common.MarkerData;
+            type: icon ? icon.replace("icon-", "") : "",
+            description: description,
+            urls: []
+        };
     }
 
     public static createLatlng(coordinates: GeoJSON.Position): L.LatLng {

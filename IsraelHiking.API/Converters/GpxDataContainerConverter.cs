@@ -138,7 +138,11 @@ namespace IsraelHiking.API.Converters
             {
                 Latlng = ToLatLng(point),
                 Title = point.name,
-                Type = point.type
+                Type = point.type,
+                Description = point.desc,
+                Urls = (point.link ?? new linkType[0])
+                    .Select(l => new LinkData {MimeType = l.type, Url = l.href, Text = l.text})
+                    .ToList()
             };
         }
 
@@ -146,10 +150,13 @@ namespace IsraelHiking.API.Converters
         {
             return new wptType
             {
-                lat = (decimal)marker.Latlng.Lat,
-                lon = (decimal)marker.Latlng.Lng,
+                lat = (decimal) marker.Latlng.Lat,
+                lon = (decimal) marker.Latlng.Lng,
                 name = marker.Title,
-                type = marker.Type
+                desc = marker.Description,
+                type = marker.Type,
+                link = (marker.Urls ?? new List<LinkData>())
+                    .Select(l => new linkType {href = l.Url, text = l.Text, type = l.MimeType}).ToArray()
             };
         }
 

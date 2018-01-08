@@ -189,6 +189,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         if (this.routesService.routes.length === 0) {
             let properties = this.routeLayerFactory.createRoute(this.routesService.createRouteName()).properties;
             this.routesService.addRoute({ properties: properties, segments: [], markers: [] });
+            this.routesService.selectedRoute.setEditMode("None");
         }
         let editMode = this.routesService.selectedRoute.getEditMode();
         this.routesService.selectedRoute.setHiddenState();
@@ -200,12 +201,36 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         }
         this.routesService.selectedRoute.route.markers.push({
             latlng: this.latLng,
-            title: this.title || this.description,
+            title: this.title,
+            description: this.description,
             type: icon.replace("icon-", ""),
             id: id,
+            urls: this.getUrls(),
             marker: null
         } as IMarkerWithData);
         this.routesService.selectedRoute.setEditMode(editMode);
+        this.marker.closePopup();
+    }
+
+    private getUrls(): Common.LinkData[] {
+        let urls = [] as Common.LinkData[];
+        if (this.url) {
+            urls.push({
+                mimeType: "text/html",
+                text: this.title,
+                url: this.url
+            });
+        }
+        if (this.poiExtended && this.poiExtended.imagesUrls.length > 0) {
+            for (let imageUrl of this.poiExtended.imagesUrls) {
+                urls.push({
+                    mimeType: `image/${imageUrl.split(".").pop()}`,
+                    text: "",
+                    url: imageUrl
+                });
+            }
+        }
+        return urls;
     }
 
     private getPoiData() {

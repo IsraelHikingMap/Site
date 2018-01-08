@@ -8,7 +8,7 @@ import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { MapService } from "../../services/map.service";
-import { IRouteLayer } from "../../services/layers/routelayers/iroute.layer";
+import { IRouteLayer, IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
 import { IconsService } from "../../services/icons.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
@@ -27,6 +27,8 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     private routeLayer: IRouteLayer;
     public showIcons: boolean;
     public markerType: string;
+    public description: string;
+    public imageUrl: string;
     public wikiCoordinatesString: string;
     public iconsGroups: IIconsGroup[];
     
@@ -59,15 +61,16 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.marker.setIcon(IconsService.createMarkerIconWithColorAndType(color, markerType));
     }
 
-    public save = (newTitle: string, markerType: string) => {
+    public save = () => {
         let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker);
         if (!routeMarker) {
             return;
         }
-        routeMarker.title = newTitle;
-        routeMarker.type = markerType;
+        routeMarker.title = this.title;
+        routeMarker.type = this.markerType;
+        routeMarker.description = this.description;
         let color = this.routeLayer.route.properties.pathOptions.color;
-        this.mapService.setMarkerTitle(this.marker, newTitle, color);
+        this.mapService.setMarkerTitle(this.marker, this.title, color);
         this.routeLayer.raiseDataChanged();
         this.marker.closePopup();
     }
@@ -78,8 +81,11 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
 
     public setRouteLayer(routeLayer: IRouteLayer) {
         this.routeLayer = routeLayer;
-        let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker);
+        let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker) as IMarkerWithData;
         this.markerType = routeMarker.type;
+        this.description = routeMarker.description;
+        var url = _.first(routeMarker.urls, u => u.type.startsWith("image")) || {};
+        this.imageUrl = url.url;
         this.updateWikiCoordinates();
     }
 
@@ -119,6 +125,8 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         compoent.componentInstance.elementType = "node";
         compoent.componentInstance.location = this.marker.getLatLng();
         compoent.componentInstance.identifier = this.marker.identifier;
+        compoent.componentInstance.description = this.description;
+        compoent.componentInstance.imagesUrls = [this.imageUrl];
         compoent.componentInstance.initialize(`icon-${this.markerType}`);
     }
 
@@ -130,7 +138,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         if ($event.keyCode !== ENTER) {
             return true;
         }
-        this.save(this.title, this.markerType);
+        this.save();
         return false;
     }
 }

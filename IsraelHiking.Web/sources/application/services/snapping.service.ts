@@ -99,7 +99,6 @@ export class SnappingService {
                     } else {
                         let dataContainer = this.geoJsonParser.toDataContainer({ features: [feature], type: "FeatureCollection" });
                         let markerData = dataContainer.routes[0].markers[0];
-                        markerData.id = feature.properties["identifier"];
                         this.pointsSnappings.push(markerData);
                     }
                 }

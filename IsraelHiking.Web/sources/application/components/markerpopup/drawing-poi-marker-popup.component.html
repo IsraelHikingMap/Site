@@ -1,7 +1,29 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
-    <mat-form-field fxFill>
-        <textarea matInput #titleInput rows="2" type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates()" placeholder="{{resources.title}}" fxFill></textarea>
-    </mat-form-field>
+    <div fxLayout="row" fxLayoutGap="10px">
+        <div fxFlex="60" class="margin-10-reverse">
+            <div fxLayout="row">
+                <mat-form-field fxFill>
+                    <input matInput #titleInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" (change)="updateWikiCoordinates()" placeholder="{{resources.title}}" fxFill />
+                </mat-form-field>
+            </div>
+            <div fxLayout="row">
+                <mat-form-field fxFill>
+                    <textarea rows="4" maxlength="255" matInput [dir]="resources.getDirection(description)" [(ngModel)]="description" placeholder="{{resources.description}}" fxFill></textarea>
+                </mat-form-field>
+            </div>
+        </div>
+        <div fxFlex>
+            <div fxLayout="row">
+                <label *ngIf="!imageUrl">
+                    <a mat-button class="flex-center" [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
+                    <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" />
+                </label>
+                <img fxFill *ngIf="imageUrl"
+                     [src]="resources.getResizedWikipediaImage(imageUrl, 300)"
+                     class="img-responsive" />
+            </div>
+        </div>
+    </div>
     <div *ngIf="showIcons">
         <div *ngFor="let group of iconsGroups">
             <div fxLayout="row" fxFill>
@@ -13,7 +35,7 @@
     </div>
     <div fxLayout="row">
         <div fxFlex>
-            <button mat-button type="button" (click)="save(title, markerType)" matTooltip="{{resources.save}}" matTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
+            <button mat-button type="button" (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
         </div>
         <div fxFlex>
             <button mat-button type="button" (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>

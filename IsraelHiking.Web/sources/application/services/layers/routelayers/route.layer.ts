@@ -106,8 +106,10 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         for (let marker of this.route.markers) {
             markersData.push({
                 title: marker.title,
+                description: marker.description,
                 latlng: marker.latlng,
-                type: marker.type
+                type: marker.type,
+                urls: marker.urls
             });
         }
         return {

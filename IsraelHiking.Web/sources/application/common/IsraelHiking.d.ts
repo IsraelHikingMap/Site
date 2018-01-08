@@ -18,11 +18,19 @@ export interface LayerData {
     opacity: number;
 }
 
+export interface LinkData {
+    url: string;
+    text: string;
+    mimeType: string;
+}
+
 export interface MarkerData {
     latlng: L.LatLng;
     title: string;
+    description: string;
     type: string;
     id?: string;
+    urls: LinkData[];
 }
 
 export interface RouteSegmentData {
