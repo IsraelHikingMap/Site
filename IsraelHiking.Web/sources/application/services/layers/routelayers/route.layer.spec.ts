@@ -92,13 +92,13 @@ describe("RouteLayer", () => {
     });
 
     it("Should use snapping service on route segments", () => {
-        snappingService.snapTo = () => { };
+        snappingService.snapToRoute = () => { };
         routeLayer.route.segments.push({ polyline: L.polyline([]) } as IRouteSegment);
-        spyOn(snappingService, "snapTo");
+        spyOn(snappingService, "snapToRoute");
 
         routeLayer.snapToSelf(L.latLng([0, 0]));
 
-        expect(snappingService.snapTo).toHaveBeenCalled();
+        expect(snappingService.snapToRoute).toHaveBeenCalled();
     });
 
     it("Should convert internal data to simple object", () => {

@@ -23,7 +23,8 @@ describe("HoverHandler", () => {
                     }
                 }
             },
-            mapService: mapServiceMockCreator.mapService
+            mapService: mapServiceMockCreator.mapService,
+            snappingService: {}
         };
         hoverHandlerPoi = new HoverHandlerPoi(context);
         hoverHandlerRoute = new HoverHandlerRoute(context, middleMarker);
@@ -70,13 +71,11 @@ describe("HoverHandler", () => {
 
     it("Should transition to add point state when using hover for point", () => {
         hoverHandlerPoi.setState(HoverHandlerState.NONE);
-        context.snappingService = {
-            snapToPoint: () => {
-                return {
-                    latlng: L.latLng([0, 0])
-                }
+        context.snappingService.snapToPoint = () => {
+            return {
+                latlng: L.latLng([0, 0])
             }
-        };
+        }
 
         hoverHandlerPoi.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
 
@@ -85,13 +84,16 @@ describe("HoverHandler", () => {
 
     it("Should transition to on polyline state when using hover for route on route", () => {
         hoverHandlerRoute.setState(HoverHandlerState.NONE);
-        context.snapToRoute = () => {
+        context.snapToSelf = () => {
             return {
                 polyline: L.polyline([]),
                 latlng: L.latLng([0,0])
             };
         }
-        
+        context.snappingService.snapToPoint = () => {
+            return { markerData: null };
+        }
+
         hoverHandlerRoute.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
 
         expect(hoverHandlerRoute.getState()).toBe(HoverHandlerState.ON_POLYLINE);
@@ -99,20 +101,42 @@ describe("HoverHandler", () => {
 
     it("Should transition to add point state when using hover for route not on route", () => {
         hoverHandlerRoute.setState(HoverHandlerState.NONE);
-        context.snapToRoute = () => {
+
+        context.snapToSelf = () => {
             return {
                 polyline: null
-            };
+            }
         };
-        context.snappingService = {
-            snapTo: () => {
+        context.snappingService.snapToPoint = () => {
+            return { markerData: null };
+        }
+        context.snappingService.snapToRoute = () => {
+            return { latlng: L.latLng([0, 0]) };
+        }
+        context.route.segments = [];
+        
+        hoverHandlerRoute.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
+
+        expect(hoverHandlerRoute.getState()).toBe(HoverHandlerState.ADD_POINT);
+    });
+
+    it("Should transition to add point state when using hover for route on self points", () => {
+        hoverHandlerRoute.setState(HoverHandlerState.NONE);
+        context.route.markers = [{ latlng: L.latLng([0, 0]) }];
+        context.snappingService.snapToPoint = (_, options) => {
+            if (options) {
                 return {
+                    markerData: options.points[0],
                     latlng: L.latLng([0, 0])
-                }
+                };
+            } else {
+                return {
+                    markerData: null
+                };
             }
         };
         context.route.segments = [];
-        
+
         hoverHandlerRoute.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
 
         expect(hoverHandlerRoute.getState()).toBe(HoverHandlerState.ADD_POINT);
