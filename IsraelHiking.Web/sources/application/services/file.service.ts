@@ -55,6 +55,12 @@ export class FileService {
         return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
     }
 
+    public uploadAnonymousImage(file: File): Promise<string> {
+        let formData = new FormData();
+        formData.append("file", file, file.name);
+        return this.httpClient.post(Urls.uploadAnonymousImage, formData, { responseType: "text" }).toPromise();
+    }
+
     public openFromUrl = (url: string): Promise<Common.DataContainer> => {
         return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<Common.DataContainer>;
     }

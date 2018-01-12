@@ -1,7 +1,9 @@
-﻿using IsraelHiking.API.Controllers;
+﻿using System.IO;
+using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.AspNetCore.Http;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
@@ -15,15 +17,18 @@ namespace IsraelHiking.API.Tests.Controllers
         private ImagesController _controller;
         private IRepository _repository;
         private IImageCreationService _imageCreationService;
+        private IImgurGateway _imgurGateway;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _repository = Substitute.For<IRepository>();
             _imageCreationService = Substitute.For<IImageCreationService>();
+            _imgurGateway = Substitute.For<IImgurGateway>();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
-            _controller = new ImagesController(_repository, _imageCreationService, options);
+            
+            _controller = new ImagesController(_repository, _imageCreationService, _imgurGateway, options);
         }
 
         [TestCleanup]
@@ -71,6 +76,20 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.PostDataContainer(dataContainer).Wait();
 
             _imageCreationService.Received(1).Create(dataContainer);
+        }
+
+        [TestMethod]
+        public void PostUploadImage_ShouldUpload()
+        {
+            var expectedLink = "link";
+            var file = Substitute.For<IFormFile>();
+            var fileStreamMock = new MemoryStream();
+            file.OpenReadStream().Returns(fileStreamMock);
+            _imgurGateway.UploadImage(fileStreamMock).Returns(expectedLink);
+
+            var results = _controller.PostUploadImage(file).Result;
+
+            Assert.AreEqual(expectedLink, results);
         }
     }
 }

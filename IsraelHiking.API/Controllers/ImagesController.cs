@@ -5,6 +5,7 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Net.Http.Headers;
 using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Controllers
@@ -17,6 +18,7 @@ namespace IsraelHiking.API.Controllers
     public class ImagesController : Controller
     {
         private IImageCreationService _imageCreationService;
+        private readonly IImgurGateway _imgurGateway;
         private readonly IRepository _repository;
         private readonly ConfigurationData _options;
 
@@ -25,13 +27,16 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="repository"></param>
         /// <param name="imageCreationService"></param>
+        /// <param name="imgurGateway"></param>
         /// <param name="options"></param>
         public ImagesController(IRepository repository,
             IImageCreationService imageCreationService,
+            IImgurGateway imgurGateway,
             IOptions<ConfigurationData> options)
         {
             _repository = repository;
             _imageCreationService = imageCreationService;
+            _imgurGateway = imgurGateway;
             _options = options.Value;
         }
 
@@ -75,6 +80,22 @@ namespace IsraelHiking.API.Controllers
         {
             var imageData = await _imageCreationService.Create(dataContainer);
             return new FileContentResult(imageData, new MediaTypeHeaderValue("image/png"));
+        }
+
+        /// <summary>
+        /// Allows uploading of anonymous images
+        /// </summary>
+        /// <param name="file">The image file ot upload</param>
+        /// <returns>A link to the image stored on the web</returns>
+        [HttpPost]
+        [Route("anonymous")]
+        public async Task<string> PostUploadImage([FromForm]IFormFile file)
+        {
+            using (var stream = file.OpenReadStream())
+            {
+                var link = await _imgurGateway.UploadImage(stream);
+                return link;
+            }
         }
 
         /// <inheritdoc />

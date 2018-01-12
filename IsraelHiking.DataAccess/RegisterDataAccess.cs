@@ -23,7 +23,7 @@ namespace IsraelHiking.DataAccess
             services.AddTransient<IOffRoadGateway, OffRoadGateway>();
             services.AddSingleton<IWikipediaGateway, WikipediaGateway>();
             services.AddSingleton<IWikimediaCommonGateway, WikimediaCommonGateway>();
-
+            services.AddTransient<IImgurGateway, ImgurGateway>();
             return services;
         }
     }

@@ -26,6 +26,7 @@ The technology stack of this site is base on the following frameworks:
 * [Elastic Search and NEST](https://www.elastic.co/)
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite)
 * [OsmSharp](http://www.osmsharp.com/)
+* [Imgur](https://imgur.com/) - Used for uploadling anonymous images
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:
@@ -76,10 +77,11 @@ In order to be able to build this site you'll need some tools:
   In the `secrets.json` file that opens add the applicable fields and save the file.
   ```
   {
-    wikiMediaUserName: "your wikimedia user",
-    wikiMediaPassword: "your wikimedia password"
+    "wikiMediaUserName": "your wikimedia user",
+    "wikiMediaPassword": "your wikimedia password"
     "zanataUserName": "your zanata user",
-    "zanataApiKey": "your zanata api key"
+    "zanataApiKey": "your zanata api key",
+    "imgurClientId": "your imgur clinet ID"
   }
   ```
 * In Visual Studio, _View &rarr; Other Windows... &rarr; Package Manager Console_

@@ -11,6 +11,7 @@ import { MapService } from "../../services/map.service";
 import { IRouteLayer, IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
 import { IconsService } from "../../services/icons.service";
 import { OsmUserService } from "../../services/osm-user.service";
+import { FileService } from "../../services/file.service";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
 import * as Common from "../../common/IsraelHiking";
 
@@ -41,7 +42,8 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         elevationProvider: ElevationProvider,
         applicationRef: ApplicationRef,
         private mapService: MapService,
-        private osmUserService: OsmUserService) {
+        private osmUserService: OsmUserService,
+        private fileService: FileService) {
         super(resources, httpClient, applicationRef, elevationProvider);
 
         this.showIcons = false;
@@ -62,13 +64,24 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public save = () => {
-        let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker);
+        let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker) as IMarkerWithData;
         if (!routeMarker) {
             return;
         }
         routeMarker.title = this.title;
         routeMarker.type = this.markerType;
         routeMarker.description = this.description;
+        if (this.imageUrl) {
+            routeMarker.urls = [
+                {
+                    mimeType: `image/${this.imageUrl.split(".").pop()}`,
+                    url: this.imageUrl,
+                    text: ""
+                }
+            ];
+        } else {
+            routeMarker.urls = [];
+        }
         let color = this.routeLayer.route.properties.pathOptions.color;
         this.mapService.setMarkerTitle(this.marker, this.title, color);
         this.routeLayer.raiseDataChanged();
@@ -128,6 +141,15 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         compoent.componentInstance.description = this.description;
         compoent.componentInstance.imagesUrls = [this.imageUrl];
         compoent.componentInstance.initialize(`icon-${this.markerType}`);
+    }
+
+    public async imageChanged(e: any) {
+        let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
+        if (!file) {
+            return;
+        }
+        let link = await this.fileService.uploadAnonymousImage(file);
+        this.imageUrl = link;
     }
 
     @HostListener("window:keydown", ["$event"])
