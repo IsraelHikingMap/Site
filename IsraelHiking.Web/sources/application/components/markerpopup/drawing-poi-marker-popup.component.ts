@@ -32,6 +32,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public imageUrl: string;
     public wikiCoordinatesString: string;
     public iconsGroups: IIconsGroup[];
+    public isEditMode: boolean;
     
     @ViewChild("titleInput")
     public titleInput: ElementRef;
@@ -49,6 +50,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.showIcons = false;
         this.wikiCoordinatesString = "";
         this.iconsGroups = [];
+        this.isEditMode = false;
         let numberOfIconsPerRow = 4;
         for (let iconTypeIndex = 0; iconTypeIndex < IconsService.getAvailableIconTypes().length / numberOfIconsPerRow; iconTypeIndex++) {
             this.iconsGroups.push({
@@ -116,7 +118,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         });
 
         this.marker.on("popupopen", () => {
-            if (this.titleInput.nativeElement) {
+            if (this.titleInput && this.titleInput.nativeElement) {
                 this.titleInput.nativeElement.focus();
             }
         });
@@ -151,6 +153,8 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         let link = await this.fileService.uploadAnonymousImage(file);
         this.imageUrl = link;
     }
+
+    public changeToEditMode = (): void => { throw new Error("Need to be set by ")}
 
     @HostListener("window:keydown", ["$event"])
     public onEnterPress($event: KeyboardEvent) {

@@ -32,6 +32,7 @@ describe("RouteLayer", () => {
         let componentRefMock = {
             instance: {
                 setMarker: () => { },
+                setRouteLayer: () => { },
                 angularBinding: () => { }
             }
         };

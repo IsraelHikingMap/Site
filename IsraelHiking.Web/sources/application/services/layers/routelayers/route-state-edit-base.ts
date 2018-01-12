@@ -38,22 +38,4 @@ export abstract class RouteStateEditBase extends RouteStateBase {
         this.context.mapService.map.off("click", this.addPoint, this);
         this.hoverHandler.setState(HoverHandlerState.NONE);
     }
-
-    protected destoryMarker = (marker: L.Marker) => {
-        if (marker == null) {
-            return;
-        }
-        marker.closePopup();
-        marker.off("click");
-        marker.off("dragstart");
-        marker.off("drag");
-        marker.off("dragend");
-        marker.off("mouseover");
-        marker.off("mouseout");
-        marker.off("dblclick");
-        marker.off("popupopen");
-        marker.off("popupclose");
-        this.context.mapService.map.removeLayer(marker);
-        this.hoverHandler.setState(HoverHandlerState.NONE);
-    }
 }

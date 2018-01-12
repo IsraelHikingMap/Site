@@ -5,11 +5,9 @@ import { RouteStateEditBase } from "./route-state-edit-base";
 import { IconsService } from "../../icons.service";
 import { IRouteLayer, EditModeString, IMarkerWithData } from "./iroute.layer";
 import { EditMode } from "./iroute-state";
-import { DrawingPoiMarkerPopupComponent } from "../../../components/markerpopup/drawing-poi-marker-popup.component";
 import { HoverHandlerState } from "./hover-handler-base";
 import { HoverHandlerPoi } from "./hover-handler-poi";
 import * as Common from "../../../common/IsraelHiking";
-
 
 export class RouteStateEditPoi extends RouteStateEditBase {
     constructor(context: IRouteLayer) {
@@ -23,7 +21,7 @@ export class RouteStateEditPoi extends RouteStateEditBase {
         this.createStartAndEndMarkers();
         for (let routeMarkerWithData of this.context.route.markers) {
             routeMarkerWithData.marker = this.createPoiMarker(routeMarkerWithData, true);
-            this.addComponentToPoiMarker(routeMarkerWithData.marker);
+            this.addComponentToPoiMarkerAndEvents(routeMarkerWithData.marker);
         }
     }
 
@@ -55,7 +53,7 @@ export class RouteStateEditPoi extends RouteStateEditBase {
         let markerWithData = markerData as IMarkerWithData;
         markerWithData.marker = marker;
         this.context.route.markers.push(markerWithData);
-        this.addComponentToPoiMarker(marker);
+        this.addComponentToPoiMarkerAndEvents(marker);
         setTimeout(() => marker.openPopup(), 200);
         this.context.raiseDataChanged();
     }
@@ -64,20 +62,15 @@ export class RouteStateEditPoi extends RouteStateEditBase {
         return EditModeString.poi;
     }
 
-    private addComponentToPoiMarker(marker: Common.IMarkerWithTitle): void {
-        let factory = this.context.componentFactoryResolver.resolveComponentFactory(DrawingPoiMarkerPopupComponent);
-        let containerDiv = L.DomUtil.create("div");
-        let poiMarkerPopupComponentRef = factory.create(this.context.injector, [], containerDiv);
-        poiMarkerPopupComponentRef.instance.setMarker(marker);
-        poiMarkerPopupComponentRef.instance.setRouteLayer(this.context);
-        poiMarkerPopupComponentRef.instance.remove = () => {
+    protected addComponentToPoiMarkerAndEvents(marker: Common.IMarkerWithTitle): void {
+        let component = this.addComponentToPoiMarker(marker);
+        component.isEditMode = true;
+        component.remove = () => {
             let routeMarker = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
             routeMarker.marker.closePopup();
             this.removePoi(routeMarker);
         }
         this.setPoiMarkerEvents(marker);
-        poiMarkerPopupComponentRef.instance.angularBinding(poiMarkerPopupComponentRef.hostView);
-        marker.bindPopup(containerDiv);
     }
 
     private setPoiMarkerEvents(marker: Common.IMarkerWithTitle) {
@@ -105,7 +98,7 @@ export class RouteStateEditPoi extends RouteStateEditBase {
                 marker.setIcon(IconsService.createMarkerIconWithColorAndType(color, snappingPointResponse.markerData.type));
                 this.context.mapService.setMarkerTitle(marker, snappingPointResponse.markerData.title, color);
                 marker.unbindPopup();
-                this.addComponentToPoiMarker(marker);
+                this.addComponentToPoiMarkerAndEvents(marker);
             }
             this.context.raiseDataChanged();
             this.hoverHandler.setState(HoverHandlerState.NONE);

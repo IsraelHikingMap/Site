@@ -26,7 +26,7 @@
                 <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" />
             </label>
             <img fxFill *ngIf="imagePreviewUrl"
-                 [src]="resources.getResizedWikipediaImage(imagePreviewUrl, 300)" 
+                 [src]="resources.getResizedImageUrl(imagePreviewUrl, 300)" 
                  class="img-responsive cursor-zoom-in" 
                  (click)="showImage()" />
         </div>
@@ -37,7 +37,7 @@
     <div fxLayout="row" class="description-container" *ngIf="!isEditMode()">
         <p fxFill [ngClass]="resources.getTextAlignment(getDescrition()[0])" [dir]="resources.getDirection(getDescrition()[0])">
             <img *ngIf="imagePreviewUrl" 
-                [src]="resources.getResizedWikipediaImage(imagePreviewUrl, 300)" 
+                [src]="resources.getResizedImageUrl(imagePreviewUrl, 300)" 
                 class="img-placeholder cursor-zoom-in" 
                 (click)="showImage()" 
                 [style.float]="resources.getImageFloat(getDescrition()[0])"/>

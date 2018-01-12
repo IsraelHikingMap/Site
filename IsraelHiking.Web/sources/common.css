@@ -112,6 +112,10 @@ body {
     max-width: 100%;
 }
 
+.img-placeholder {
+    width: 100px;
+}
+
 /*#region margins*/
 .margin-10 {
     margin-left: 10px;

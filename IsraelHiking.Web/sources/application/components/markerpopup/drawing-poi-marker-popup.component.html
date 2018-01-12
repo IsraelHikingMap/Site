@@ -1,5 +1,5 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
-    <div fxLayout="row" fxLayoutGap="10px">
+    <div fxLayout="row" fxLayoutGap="10px" *ngIf="isEditMode">
         <div fxFlex="60" class="margin-10-reverse">
             <div fxLayout="row">
                 <mat-form-field fxFill>
@@ -19,10 +19,25 @@
                     <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" />
                 </label>
                 <img fxFill *ngIf="imageUrl"
-                     [src]="resources.getResizedWikipediaImage(imageUrl, 300)"
+                     [src]="resources.getResizedImageUrl(imageUrl, 300)"
                      class="img-responsive" />
             </div>
         </div>
+    </div>
+    <h4 *ngIf="!isEditMode" [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)">{{title}}</h4>
+    <div fxLayout="row" *ngIf="!isEditMode">
+        <p fxFill [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">
+            <img *ngIf="imageUrl"
+                 [src]="resources.getResizedImageUrl(imageUrl, 300)"
+                 class="img-placeholder"
+                 [style.float]="resources.getImageFloat(description)" />
+            <i *ngIf="!imageUrl"
+               class="fa fa-5x img-placeholder icon-camera flex-center"
+               [style.float]="resources.getImageFloat(description)"></i>
+            <ng-container>
+                {{description}}<br />
+            </ng-container>
+        </p>
     </div>
     <div *ngIf="showIcons">
         <div *ngFor="let group of iconsGroups">
@@ -34,20 +49,23 @@
         </div>
     </div>
     <div fxLayout="row">
-        <div fxFlex>
+        <div fxFlex *ngIf="isEditMode">
             <button mat-button type="button" (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
         </div>
-        <div fxFlex>
+        <div fxFlex *ngIf="isEditMode">
             <button mat-button type="button" (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>
         </div>
         <div fxFlex>
             <button mat-button type="button" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
         </div>
-        <div fxFlex>
+        <div fxFlex *ngIf="isEditMode">
             <button mat-button type="button" (click)="showIcons = !showIcons" matTooltip="{{resources.selectIcon}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsAction="Toggle select icon" fxFill><i class="fa icon-{{markerType}}"></i></button>
         </div>
         <div fxFlex *ngIf="showOpenDialogButton()">
             <button mat-button type="button" (click)="openAddPointDialog($event)" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
+        </div>
+        <div fxFlex *ngIf="!isEditMode">
+            <button mat-button type="button" (click)="changeToEditMode($event)" matTooltip="{{resources.editPoi}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Edit POI from POI" fxFill><i class="fa icon-pencil"></i></button>
         </div>
     </div>
     <div *ngIf="!hideCoordinates">

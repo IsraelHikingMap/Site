@@ -63,15 +63,19 @@ export class RouteStateReadOnly extends RouteStateBase {
             }
         }
         for (let marker of this.context.route.markers) {
-            let markerWithTitle = this.createPoiMarker(marker, false);
-            markerWithTitle.on("click", () => this.changeStateToEditPoi(markerWithTitle));
-            this.readOnlyLayers.addLayer(markerWithTitle);
+            marker.marker = this.createPoiMarker(marker, false);
+            let component = this.addComponentToPoiMarker(marker.marker);
+            component.isEditMode = false;
+            component.changeToEditMode = () => this.changeStateToEditPoi(marker.marker);
         }
         this.context.mapService.map.on("mousemove", this.onMouseMove);
         this.createStartAndEndMarkers();
     }
 
     public clear() {
+        for (let marker of this.context.route.markers) {
+            this.destoryMarker(marker.marker);
+        }
         this.context.mapService.map.off("mousemove", this.onMouseMove);
         this.readOnlyLayers.clearLayers();
         this.context.mapService.map.removeLayer(this.readOnlyLayers);
@@ -95,7 +99,6 @@ export class RouteStateReadOnly extends RouteStateBase {
     }
 
     private changeStateToEditPoi(markerWithTitle: Common.IMarkerWithTitle) {
-        // HM TODO: move this to marker popup?
         let markerLatLng = markerWithTitle.getLatLng();
         this.context.setEditPoiState();
         // old markers are destroyed and new markers are created.

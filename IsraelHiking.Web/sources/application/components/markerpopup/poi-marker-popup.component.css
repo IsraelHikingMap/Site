@@ -1,8 +1,4 @@
-﻿.img-placeholder {
-    width: 100px;
-}
-
-.description-container {
+﻿.description-container {
     max-height: 200px;
     overflow-y: auto;
 }

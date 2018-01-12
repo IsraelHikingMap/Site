@@ -883,13 +883,32 @@ export class ResourcesService {
         return this.currentLanguage.code.split("-")[0];
     }
 
-    public getResizedWikipediaImage(imageUrl: string, size: number) {
+    public getResizedImageUrl(imageUrl: string, size: number) {
         if (!imageUrl) {
             return imageUrl;
         }
-        if (imageUrl.indexOf("//upload.wikimedia.org/wikipedia/commons/") === -1) {
-            return imageUrl;
+        if (imageUrl.indexOf("//upload.wikimedia.org/wikipedia/commons/") !== -1) {
+            return imageUrl.replace(/(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)/, `$1thumb/$2$3/${size}px-$3`);;
         }
-        return imageUrl.replace(/(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)/, `$1thumb/$2$3/${size}px-$3`);
+        if (imageUrl.indexOf("//i.imgur.com/") !== -1) {
+            var split = imageUrl.split(".");
+            var extenstion = split.pop();
+            var prefix = split.join(".");
+            return prefix + this.getImgurPostfix(size) + "." + extenstion;
+        }
+        return imageUrl;
+    }
+
+    private getImgurPostfix(size: number) {
+        if (size < 200) {
+            return "t";
+        }
+        if (size < 400) {
+            return "m";
+        }
+        if (size < 700) {
+            return "l";
+        }
+        return "";
     }
 }

@@ -3,6 +3,7 @@ import * as L from "leaflet";
 import { IRouteState, EditMode } from "./iroute-state";
 import { IRouteLayer } from "./iroute.layer";
 import { IconsService } from "../../icons.service";
+import { DrawingPoiMarkerPopupComponent } from "../../../components/markerpopup/drawing-poi-marker-popup.component";
 import * as Common from "../../../common/IsraelHiking";
 
 export abstract class RouteStateBase implements IRouteState {
@@ -33,5 +34,33 @@ export abstract class RouteStateBase implements IRouteState {
         this.context.mapService.setMarkerTitle(marker, markerData.title, color);
         marker.addTo(this.context.mapService.map);
         return marker;
+    }
+
+    protected addComponentToPoiMarker(marker: Common.IMarkerWithTitle): DrawingPoiMarkerPopupComponent {
+        let factory = this.context.componentFactoryResolver.resolveComponentFactory(DrawingPoiMarkerPopupComponent);
+        let containerDiv = L.DomUtil.create("div");
+        let poiMarkerPopupComponentRef = factory.create(this.context.injector, [], containerDiv);
+        poiMarkerPopupComponentRef.instance.setMarker(marker);
+        poiMarkerPopupComponentRef.instance.setRouteLayer(this.context);
+        poiMarkerPopupComponentRef.instance.angularBinding(poiMarkerPopupComponentRef.hostView);
+        marker.bindPopup(containerDiv);
+        return poiMarkerPopupComponentRef.instance;
+    }
+
+    protected destoryMarker = (marker: L.Marker) => {
+        if (marker == null) {
+            return;
+        }
+        marker.closePopup();
+        marker.off("click");
+        marker.off("dragstart");
+        marker.off("drag");
+        marker.off("dragend");
+        marker.off("mouseover");
+        marker.off("mouseout");
+        marker.off("dblclick");
+        marker.off("popupopen");
+        marker.off("popupclose");
+        this.context.mapService.map.removeLayer(marker);
     }
 }

@@ -8,17 +8,17 @@
     <div mat-dialog-content>
         <div fxLayout="row" *ngIf="imagesUrls.length <= 1">
             <div class="img-container" >
-                <img class="img-responsive img-center" [src]="resources.getResizedWikipediaImage(imagesUrls[0], 800)"/>
+                <img class="img-responsive img-center" [src]="resources.getResizedImageUrl(imagesUrls[0], 800)"/>
             </div>
         </div>
         <mat-tab-group *ngIf="imagesUrls.length > 1" [(selectedIndex)]="selectedTabIndex">
             <mat-tab *ngFor="let imageUrl of imagesUrls">
                 <ng-template mat-tab-label>
-                    <img [src]="resources.getResizedWikipediaImage(imageUrl, 64)" height="32"/>
+                    <img [src]="resources.getResizedImageUrl(imageUrl, 64)" height="32"/>
                 </ng-template>
                 <div fxLayout="row" #imageContainer>
                     <div class="img-container">
-                        <img class="img-responsive img-center" [src]="resources.getResizedWikipediaImage(imageUrl, 800)"/>
+                        <img class="img-responsive img-center" [src]="resources.getResizedImageUrl(imageUrl, 800)"/>
                     </div>
                 </div>
             </mat-tab>

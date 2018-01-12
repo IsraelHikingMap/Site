@@ -21,7 +21,8 @@ describe("HoverHandler", () => {
                     pathOptions: {
                         opacity: 1
                     }
-                }
+                },
+                markers: []
             },
             mapService: mapServiceMockCreator.mapService,
             snappingService: {}
@@ -82,6 +83,21 @@ describe("HoverHandler", () => {
         expect(hoverHandlerPoi.getState()).toBe(HoverHandlerState.ADD_POINT);
     });
 
+    it("Should not snap to exiting POI if there's already a point there", () => {
+        hoverHandlerPoi.setState(HoverHandlerState.NONE);
+        context.snappingService.snapToPoint = () => {
+            return {
+                latlng: L.latLng([1, 1])
+                
+            }
+        }
+        context.route.markers.push({ marker: L.marker([1, 1]) });
+
+        hoverHandlerPoi.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
+
+        expect(hoverHandlerPoi.hoverMarker.getLatLng().lat).toBe(0);
+    });
+
     it("Should transition to on polyline state when using hover for route on route", () => {
         hoverHandlerRoute.setState(HoverHandlerState.NONE);
         context.snapToSelf = () => {
@@ -122,7 +138,7 @@ describe("HoverHandler", () => {
 
     it("Should transition to add point state when using hover for route on self points", () => {
         hoverHandlerRoute.setState(HoverHandlerState.NONE);
-        context.route.markers = [{ latlng: L.latLng([0, 0]) }];
+        context.route.markers.push({ latlng: L.latLng([0, 0]) });
         context.snappingService.snapToPoint = (_, options) => {
             if (options) {
                 return {
