@@ -154,7 +154,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         this.imageUrl = link;
     }
 
-    public changeToEditMode = (): void => { throw new Error("Need to be set by ")}
+    public changeToEditMode = (): void => { throw new Error("Callback needs to be set by the creating class...")}
 
     @HostListener("window:keydown", ["$event"])
     public onEnterPress($event: KeyboardEvent) {
