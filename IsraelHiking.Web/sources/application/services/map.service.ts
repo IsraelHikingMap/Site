@@ -31,19 +31,24 @@ export class MapService {
         });
     }
 
-    public setMarkerTitle(marker: Common.IMarkerWithTitle, title: string, color: string = "") {
+    public setMarkerTitle(marker: Common.IMarkerWithTitle, data: Common.MarkerData, color: string = "") {
         marker.unbindTooltip();
-        marker.title = title || "";
-        if (!title) {
+        marker.title = data.title || "";
+        if (!data.title) {
             return;
         }
         let controlDiv = L.DomUtil.create("div");
-        for (let line of title.split("\n")) {
-            let lineDiv = L.DomUtil.create("div", "", controlDiv);
-            lineDiv.style.color = color;
-            lineDiv.dir = this.resources.getDirection(line);
-            lineDiv.innerHTML = line;
+        let lines = data.title.split("\n");
+        let displayLine = lines[0];
+        if (lines.length > 1 || data.description) {
+            displayLine += "...";
         }
+        let element = _.some(data.urls, u => u.mimeType.startsWith("image"))
+            ? L.DomUtil.create("i", "fa icon-camera", controlDiv) :
+            L.DomUtil.create("div", "", controlDiv);
+        element.style.color = color;
+        element.dir = this.resources.getDirection(displayLine);
+        element.innerHTML = ` ${displayLine}`;
         marker.bindTooltip(controlDiv, { permanent: true, direction: "bottom" } as L.TooltipOptions);
     }
 

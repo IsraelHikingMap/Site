@@ -31,7 +31,7 @@ export abstract class RouteStateBase implements IRouteState {
                 opacity: pathOptions.opacity
             } as L.MarkerOptions) as Common.IMarkerWithTitle;
         marker.identifier = markerData.id;
-        this.context.mapService.setMarkerTitle(marker, markerData.title, color);
+        this.context.mapService.setMarkerTitle(marker, markerData, color);
         marker.addTo(this.context.mapService.map);
         return marker;
     }

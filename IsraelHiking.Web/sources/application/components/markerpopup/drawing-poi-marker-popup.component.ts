@@ -85,7 +85,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             routeMarker.urls = [];
         }
         let color = this.routeLayer.route.properties.pathOptions.color;
-        this.mapService.setMarkerTitle(this.marker, this.title, color);
+        this.mapService.setMarkerTitle(this.marker, routeMarker, color);
         this.routeLayer.raiseDataChanged();
         this.marker.closePopup();
     }

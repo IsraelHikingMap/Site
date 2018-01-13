@@ -96,7 +96,7 @@ export class RouteStateEditPoi extends RouteStateEditBase {
                 marker.identifier = snappingPointResponse.markerData.id;
                 let color = this.context.route.properties.pathOptions.color;
                 marker.setIcon(IconsService.createMarkerIconWithColorAndType(color, snappingPointResponse.markerData.type));
-                this.context.mapService.setMarkerTitle(marker, snappingPointResponse.markerData.title, color);
+                this.context.mapService.setMarkerTitle(marker, snappingPointResponse.markerData, color);
                 marker.unbindPopup();
                 this.addComponentToPoiMarkerAndEvents(marker);
             }

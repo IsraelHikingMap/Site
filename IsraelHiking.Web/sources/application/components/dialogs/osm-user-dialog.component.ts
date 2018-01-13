@@ -161,7 +161,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 for (let markerData of route.markers) {
                     let icon = IconsService.createPoiDefaultMarkerIcon(this.getPathOprtions().color);
                     let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, riseOnHover: true, icon: icon, opacity: this.getPathOprtions().opacity } as L.MarkerOptions) as Common.IMarkerWithTitle;
-                    this.mapService.setMarkerTitle(marker, markerData.title);
+                    this.mapService.setMarkerTitle(marker, markerData);
                     this.osmTraceLayer.addLayer(marker);
                 }
             }
