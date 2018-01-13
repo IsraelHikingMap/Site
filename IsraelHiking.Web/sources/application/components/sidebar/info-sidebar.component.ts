@@ -302,7 +302,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: ["mtb:scale=2, mtb:scale=3"],
+                        osmTags: ["mtb:scale=1"],
                         link: ""
                     },
                     {
@@ -312,7 +312,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-                        osmTags: ["mtb:scale=4, mtb:scale=5"],
+                        osmTags: ["mtb:scale=2, mtb:scale=3"],
                         link: ""
                     },
                     {
@@ -322,7 +322,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         id: "_" + id++,
                         map: null,
                         type: "Way",
-			            osmTags: ["mtb:scale=6"],
+                        osmTags: ["mtb:scale=4, mtb:scale=5"],
                         link: ""
                     }
                 ]

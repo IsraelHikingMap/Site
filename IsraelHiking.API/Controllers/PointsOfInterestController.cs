@@ -20,6 +20,7 @@ namespace IsraelHiking.API.Controllers
     public class PointsOfInterestController : Controller
     {
         private readonly Dictionary<string, IPointsOfInterestAdapter> _adapters;
+        private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly ITagsHelper _tagsHelper;
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
         private readonly LruCache<string, TokenAndSecret> _cache;
@@ -28,16 +29,19 @@ namespace IsraelHiking.API.Controllers
         /// Controller's constructor
         /// </summary>
         /// <param name="adapters"></param>
+        /// <param name="httpGatewayFactory"></param>
         /// <param name="tagsHelper"></param>
         /// <param name="wikimediaCommonGateway"></param>
         /// <param name="cache"></param>
         public PointsOfInterestController(IEnumerable<IPointsOfInterestAdapter> adapters,
+            IHttpGatewayFactory httpGatewayFactory,
             ITagsHelper tagsHelper,
             IWikimediaCommonGateway wikimediaCommonGateway,
             LruCache<string, TokenAndSecret> cache)
         {
             _adapters = adapters.ToDictionary(a => a.Source, a => a);
 
+            _httpGatewayFactory = httpGatewayFactory;
             _tagsHelper = tagsHelper;
             _cache = cache;
             _wikimediaCommonGateway = wikimediaCommonGateway;
@@ -131,8 +135,9 @@ namespace IsraelHiking.API.Controllers
             }
             if (file != null)
             {
-                // HM TODO: add author?
-                var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(pointOfInterest.Location));
+                var osmGateway = _httpGatewayFactory.CreateOsmGateway(_cache.Get(User.Identity.Name));
+                var user = await osmGateway.GetUser();
+                var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title, user.DisplayName, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(pointOfInterest.Location));
                 var url = await _wikimediaCommonGateway.GetImageUrl(imageName);
                 var imageUrls = pointOfInterest.ImagesUrls.ToList();
                 imageUrls.Insert(0, url);

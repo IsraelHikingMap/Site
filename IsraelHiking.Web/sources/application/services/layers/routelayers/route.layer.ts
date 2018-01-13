@@ -211,12 +211,15 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     }
 
     public getBounds = (): L.LatLngBounds => {
-        if (this.route.segments.length === 0) {
+        if (this.route.segments.length === 0 && this.route.markers.length === 0) {
             return null;
         }
         let featureGroup = L.featureGroup([]);
         for (let segment of this.route.segments) {
             featureGroup.addLayer(L.polyline(segment.latlngs));
+        }
+        for (let marker of this.route.markers) {
+            featureGroup.addLayer(L.marker(marker.latlng));
         }
         let bounds = featureGroup.getBounds();
         featureGroup.clearLayers();
