@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -50,11 +51,11 @@ namespace IsraelHiking.DataAccess
             await _site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
         }
 
-        public async Task<string> UploadImage(string title, string fileName, Stream contentStream, Coordinate location)
+        public async Task<string> UploadImage(string title, string author, string fileName, Stream contentStream, Coordinate location)
         {
             _logger.LogInformation($"Upload an image to wikimedia common. title: {title}, fileName: {fileName}, Location: {location.Y}, {location.X}");
             var wikiFileName = GetNonExistingFilePageName(title, fileName);
-            var comment = CreateWikipediaComment(location, string.IsNullOrWhiteSpace(title) ? title : fileName);
+            var comment = CreateWikipediaComment(location, string.IsNullOrWhiteSpace(title) ? title : fileName, author);
             await _site.GetTokenAsync("edit", true);
             var results = await _site.UploadAsync(wikiFileName, new StreamUploadSource(contentStream), comment, true);
             if (results.ResultCode != UploadResultCode.Success)
@@ -71,14 +72,14 @@ namespace IsraelHiking.DataAccess
             return wikiFileName;
         }
 
-        private string CreateWikipediaComment(Coordinate location, string description)
+        private string CreateWikipediaComment(Coordinate location, string description, string author)
         {
             return "=={{int:filedesc}}==" + Environment.NewLine +
                    "{{Information" + Environment.NewLine +
                    $"|date={DateTime.Now:yyyy-MM-dd}" + Environment.NewLine +
                    $"|description={description}" + Environment.NewLine +
                    "|source={{own}}" + Environment.NewLine +
-                   "|author=[[User:IsraelHikingMap|IsraelHikingMap]]" + Environment.NewLine +
+                   $"|author=[//www.openstreetmap.org/user/{WebUtility.UrlEncode(author)} {author}]" + Environment.NewLine +
                    "|permission=" + Environment.NewLine +
                    "|other versions=" + Environment.NewLine +
                    "}}" + Environment.NewLine + Environment.NewLine +

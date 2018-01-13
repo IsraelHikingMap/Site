@@ -12,6 +12,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 using NSubstitute;
+using OsmSharp.API;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -19,6 +20,7 @@ namespace IsraelHiking.API.Tests.Controllers
     public class PointsOfInterestControllerTests
     {
         private IWikimediaCommonGateway _wikimediaCommonGateway;
+        private IOsmGateway _osmGateway;
         private PointsOfInterestController _controller;
         private ITagsHelper _tagHelper;
         private IPointsOfInterestAdapter _adapter;
@@ -30,8 +32,11 @@ namespace IsraelHiking.API.Tests.Controllers
             _adapter.Source.Returns("source");
             _tagHelper = Substitute.For<ITagsHelper>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
+            _osmGateway = Substitute.For<IOsmGateway>();
             var cache = new LruCache<string, TokenAndSecret>(Substitute.For<IOptions<ConfigurationData>>(), Substitute.For<ILogger>());
-            _controller = new PointsOfInterestController(new [] { _adapter }, _tagHelper, _wikimediaCommonGateway, cache);
+            var factory = Substitute.For<IHttpGatewayFactory>();
+            factory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(_osmGateway);
+            _controller = new PointsOfInterestController(new [] { _adapter }, factory, _tagHelper, _wikimediaCommonGateway, cache);
         }
 
         [TestMethod]
@@ -131,14 +136,16 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void UploadPointOfInterest_WithImageIdExists_ShouldUpdate()
         {
+            var user = new User {DisplayName = "DisplayName"};
             _controller.SetupIdentity();
+            _osmGateway.GetUser().Returns(user);
             var formFile = Substitute.For<IFormFile>();
             formFile.OpenReadStream().Returns(new MemoryStream());
             formFile.FileName.Returns("file.jpg");
             var poi = new PointOfInterestExtended { Title = "title", Source = "source", Id = "1", Location = new LatLng(5,6), ImagesUrls = new string[0]};
             _controller.UploadPointOfInterest(formFile, JsonConvert.SerializeObject(poi), "he").Wait();
 
-            _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, formFile.FileName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, user.DisplayName, formFile.FileName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
         }
     }
