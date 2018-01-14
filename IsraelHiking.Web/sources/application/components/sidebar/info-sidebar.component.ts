@@ -74,10 +74,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
         }
     }
 
-    public moveToLocation(item: ILegendItem) {
-        this.mapService.map.setView(item.latlng, item.zoom);
-    }
-
     private initalizeLegendSections() {
         let id = 1;
         this.legendSections = [

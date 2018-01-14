@@ -2,6 +2,9 @@
 import * as L from "leaflet";
 
 import { LayersService } from "../../services/layers/layers.service";
+import { BaseMapComponent } from "../base-map.component";
+import { ResourcesService } from "../../services/resources.service";
+import { MapService } from "../../services/map.service";
 
 type LegendItemType = "POI" | "Way";
 
@@ -19,7 +22,7 @@ export interface ILegendItem {
     templateUrl: "./legend-item.component.html",
     styleUrls: ["./legend-item.component.css"]
 })
-export class LegendItemComponent implements AfterViewInit {
+export class LegendItemComponent extends BaseMapComponent implements AfterViewInit {
 
     @ViewChild("mapContainer")
     public mapContainer: ElementRef;
@@ -27,7 +30,11 @@ export class LegendItemComponent implements AfterViewInit {
     @Input()
     public item: ILegendItem;
 
-    constructor(private layersService: LayersService) { }
+    constructor(resources: ResourcesService,
+        private mapService: MapService,
+        private layersService: LayersService) {
+        super(resources);
+    }
 
     public ngAfterViewInit(): void {
         L.map(this.mapContainer.nativeElement,
@@ -46,4 +53,8 @@ export class LegendItemComponent implements AfterViewInit {
                 layers: [L.tileLayer(this.layersService.selectedBaseLayer.address)]
             } as L.MapOptions);
     };
+
+    public moveToLocation(item: ILegendItem) {
+        this.mapService.map.setView(item.latlng, item.zoom);
+    }
 }
