@@ -251,16 +251,17 @@ export class LayersService {
         if (baseLayer.selected) {
             return;
         }
-        if (this.selectedBaseLayer) {
-            this.mapService.map.removeLayer(this.selectedBaseLayer.layer);
-            this.selectedBaseLayer.selected = false;
-        }
+        let previousLayer = this.selectedBaseLayer;
         var newSelectedLayer = _.find(this.baseLayers, (layer) => layer.key === baseLayer.key);
         this.mapService.map.addLayer(newSelectedLayer.layer);
         newSelectedLayer.selected = true;
         this.selectedBaseLayer = newSelectedLayer;
 
         this.selectedBaseLayerKey = this.selectedBaseLayer.key;
+        if (previousLayer) {
+            this.mapService.map.removeLayer(previousLayer.layer);
+            previousLayer.selected = false;
+        }
     }
 
     public toggleOverlay = (overlay: IOverlay) => {
