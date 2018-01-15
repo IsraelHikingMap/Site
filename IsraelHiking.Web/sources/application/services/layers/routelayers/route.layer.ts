@@ -2,12 +2,12 @@ import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { Subject } from "rxjs/Subject";
 import * as L from "leaflet";
 
-import { SnappingService, ISnappingRouteResponse, ISnappingRouteOptions } from "../../snapping.service";
+import { SnappingService, ISnappingRouteOptions, ISnappingRouteResponse } from "../../snapping.service";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { ElevationProvider } from "../../elevation.provider";
 import { IRouteState, EditMode } from "./iroute-state";
-import { IRouteLayer, IRoute, IRouteProperties, IRouteSegment, IMarkerWithData, EditModeString } from "./iroute.layer";
+import { IRouteLayer, IRoute, IRouteProperties, IRouteSegment, IMarkerWithData, EditModeString, ISnappingForRouteResponse } from "./iroute.layer";
 import { RouteStateReadOnly } from "./route-state-read-only";
 import { RouteStateHidden } from "./route-state-hidden";
 import { RouteStateEditPoi } from "./route-state-edit-poi";
@@ -91,6 +91,51 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
             sensitivity: 30,
             polylines: polylines
         } as ISnappingRouteOptions);
+    }
+
+    public getSnappingForRoute(latlng: L.LatLng): ISnappingForRouteResponse {
+        // private POIs
+        let snappingPointResponse = this.snappingService.snapToPoint(latlng,
+            {
+                points: this.route.markers,
+                sensitivity: 30
+            });
+        if (snappingPointResponse.markerData != null) {
+            return {
+                latlng: snappingPointResponse.latlng,
+                isSnapToSelfRoute: false
+            };
+        }
+
+        // public POIs
+        snappingPointResponse = this.snappingService.snapToPoint(latlng);
+        if (snappingPointResponse.markerData != null) {
+            return {
+                latlng: snappingPointResponse.latlng,
+                isSnapToSelfRoute: false
+            };
+        }
+
+        let snappingRouteResponse = this.snapToSelf(latlng);
+        if (snappingRouteResponse.polyline != null) {
+            return {
+                latlng: snappingRouteResponse.latlng,
+                isSnapToSelfRoute: true
+            };
+        }
+
+        snappingRouteResponse = this.snappingService.snapToRoute(latlng);
+        if (snappingRouteResponse.polyline != null) {
+            return {
+                latlng: snappingRouteResponse.latlng,
+                isSnapToSelfRoute: false
+            };
+        }
+
+        return {
+            latlng: latlng,
+            isSnapToSelfRoute: false
+        };
     }
 
     public getData = (): Common.RouteData => {

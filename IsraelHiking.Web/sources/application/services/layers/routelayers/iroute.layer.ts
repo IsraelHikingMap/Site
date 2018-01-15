@@ -3,9 +3,8 @@ import { Subject } from "rxjs/Subject";
 import { EditMode } from "./iroute-state";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
-import { SnappingService } from "../../snapping.service";
+import { SnappingService, ISnappingRouteResponse } from "../../snapping.service";
 import { ElevationProvider } from "../../elevation.provider";
-import { ISnappingRouteResponse } from "../../snapping.service"
 import * as Common from "../../../common/IsraelHiking";
 
 export namespace EditModeString {
@@ -38,6 +37,11 @@ export interface IRoute {
     properties: IRouteProperties;
 }
 
+export interface ISnappingForRouteResponse {
+    latlng: L.LatLng;
+    isSnapToSelfRoute: boolean;
+}
+
 export interface IRouteLayer {
     route: IRoute;
     mapService: MapService;
@@ -59,6 +63,7 @@ export interface IRouteLayer {
     getEditMode(): EditMode;
     setEditMode(editMode: EditMode): void;
     snapToSelf(latlng: L.LatLng): ISnappingRouteResponse;
+    getSnappingForRoute(latlng: L.LatLng): ISnappingForRouteResponse;
     raiseDataChanged(): void;
     getData(): Common.RouteData;
     getBounds(): L.LatLngBounds;

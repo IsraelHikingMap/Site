@@ -19,8 +19,11 @@ export interface ISnappingRouteOptions {
     sensitivity: number;
 }
 
-export interface ISnappingRouteResponse {
+export interface ISnappingBaseResponse {
     latlng: L.LatLng;
+}
+
+export interface ISnappingRouteResponse extends ISnappingBaseResponse {
     polyline: L.Polyline;
     beforeIndex: number;
 }
@@ -33,8 +36,7 @@ export interface ISnappingPointOptions {
     sensitivity: number;
 }
 
-export interface ISnappingPointResponse {
-    latlng: L.LatLng;
+export interface ISnappingPointResponse extends ISnappingBaseResponse {
     markerData: Common.MarkerData;
 }
 

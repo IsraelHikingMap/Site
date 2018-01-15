@@ -43,8 +43,11 @@ export class RouteStateEditRoute extends RouteStateEditBase {
     }
 
     protected addPoint(e: L.LeafletMouseEvent): void {
-        let latlng = this.hoverHandler.hoverMarker.getLatLng();
-        this.addPointToRoute(latlng, this.context.route.properties.currentRoutingType).then(() => {
+        let response = this.context.getSnappingForRoute(e.latlng);
+        if (response.isSnapToSelfRoute) {
+            return;
+        }
+        this.addPointToRoute(response.latlng, this.context.route.properties.currentRoutingType).then(() => {
             this.context.raiseDataChanged();
         });
         this.hoverHandler.setState(HoverHandlerState.NONE);

@@ -42,31 +42,14 @@ export class HoverHandlerRoute extends HoverHandlerBase {
         if (!this.canAddPointState()) {
             return;
         }
-
-        // private POIs
-        let snappingPointResponse = this.context.snappingService.snapToPoint(e.latlng, { points: this.context.route.markers, sensitivity: 30 });
-        if (snappingPointResponse.markerData != null) {
-            this.setHoverLineForAddPoint(snappingPointResponse.latlng);
-            return;
-        }
-
-        // public POIs
-        snappingPointResponse = this.context.snappingService.snapToPoint(e.latlng);
-        if (snappingPointResponse.markerData != null) {
-            this.setHoverLineForAddPoint(snappingPointResponse.latlng);
-            return;
-        }
-        
-        let snappingRouteResponse = this.context.snapToSelf(e.latlng);
-        if (snappingRouteResponse.polyline != null) {
+        let snappingResponse = this.context.getSnappingForRoute(e.latlng);
+        if (snappingResponse.isSnapToSelfRoute) {
             this.setState(HoverHandlerState.ON_POLYLINE);
             this.middleMarker.setOpacity(1.0);
-            this.middleMarker.setLatLng(snappingRouteResponse.latlng);
-            return;
+            this.middleMarker.setLatLng(snappingResponse.latlng);
+        } else {
+            this.setHoverLineForAddPoint(snappingResponse.latlng);
         }
-
-        snappingRouteResponse = this.context.snappingService.snapToRoute(e.latlng);
-        this.setHoverLineForAddPoint(snappingRouteResponse.latlng);
     }
 
     private setHoverLineForAddPoint(latlng: L.LatLng) {
