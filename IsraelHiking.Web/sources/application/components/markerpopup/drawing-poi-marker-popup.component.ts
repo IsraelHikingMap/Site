@@ -99,7 +99,9 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker) as IMarkerWithData;
         this.markerType = routeMarker.type;
         this.description = routeMarker.description;
-        var url = _.first(routeMarker.urls, u => u.type.startsWith("image")) || {};
+        console.log(routeMarker.urls);
+        let url = _.find(routeMarker.urls, u => u.mimeType.startsWith("image")) || {};
+        console.log(url);
         this.imageUrl = url.url;
         this.updateWikiCoordinates();
     }
