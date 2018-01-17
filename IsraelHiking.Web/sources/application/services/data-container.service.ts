@@ -1,5 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import * as L from "leaflet";
+import * as _ from "lodash";
 
 import { LayersService } from "./layers/layers.service";
 import { RoutesService } from "./layers/routelayers/routes.service";
@@ -63,15 +64,7 @@ export class DataContainerService {
     public initialize = async () => {
         await this.layersService.initialize();
         if (this.hashService.shareUrl) {
-            try {
-                let shareUrl = await this.osmUserService.getShareUrl(this.hashService.shareUrl);
-                this.setData(shareUrl.dataContainer);
-                this.shareUrlId = shareUrl.id;
-                this.toastService.info(shareUrl.description, shareUrl.title);
-            } catch (ex) {
-                this.hashService.shareUrl = "";
-                this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
-            }
+            this.setShareUrl();
         }
         else if (this.hashService.externalUrl) {
             let data = await this.fileService.openFromUrl(this.hashService.externalUrl);
@@ -79,6 +72,25 @@ export class DataContainerService {
             this.setData(data);
         } else {
             this.layersService.addExternalBaseLayer(this.hashService.getBaseLayer());
+        }
+    }
+
+    private setShareUrl = async () => {
+        try {
+            let shareUrl = await this.osmUserService.getShareUrl(this.hashService.shareUrl);
+            this.setData(shareUrl.dataContainer);
+            // hide overlays that are not part of the share:
+            for (let overlay of this.layersService.overlays) {
+                let overlayInShare = _.find(shareUrl.dataContainer.overlays || [], o => o.key === overlay.key || o.address === overlay.address)
+                if (overlayInShare == null && overlay.visible) {
+                    this.layersService.toggleOverlay(overlay);
+                }
+            }
+            this.shareUrlId = shareUrl.id;
+            this.toastService.info(shareUrl.description, shareUrl.title);
+        } catch (ex) {
+            this.hashService.shareUrl = "";
+            this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
         }
     }
 }
