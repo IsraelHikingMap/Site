@@ -209,6 +209,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             marker: null
         } as IMarkerWithData);
         this.routesService.selectedRoute.setEditMode(editMode);
+        this.routesService.selectedRoute.raiseDataChanged();
         this.clear();
     }
 
