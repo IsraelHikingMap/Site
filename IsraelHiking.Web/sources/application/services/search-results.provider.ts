@@ -49,8 +49,7 @@ export class SearchResultsProvider {
                 results.push(singleResult);
             }
             catch (error) {
-                console.error(error);
-                console.log(feature);
+                console.error(error + " feature: " + JSON.stringify(feature));
             }
         }
         return results;
