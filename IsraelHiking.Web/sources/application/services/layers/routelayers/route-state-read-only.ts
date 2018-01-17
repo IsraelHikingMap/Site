@@ -5,7 +5,6 @@ import { EditMode } from "./iroute-state";
 import { RouteStateBase } from "./route-state-base";
 import { IRouteLayer, EditModeString } from "./iroute.layer";
 import { IconsService } from "../../icons.service";
-import { ISnappingRouteOptions } from "../../snapping.service";
 import * as Common from "../../../common/IsraelHiking";
 
 export class RouteStateReadOnly extends RouteStateBase {
@@ -86,11 +85,7 @@ export class RouteStateReadOnly extends RouteStateBase {
     }
 
     private onMouseMove = (e: L.LeafletMouseEvent): void => {
-        let polylines = this.readOnlyLayers.getLayers().filter(f => f instanceof L.Polyline);
-        let response = this.context.snappingService.snapToRoute(e.latlng, {
-            sensitivity: 10,
-            polylines: polylines
-        } as ISnappingRouteOptions);
+        let response = this.context.snapToSelf(e.latlng);
         if (response.polyline == null) {
             this.context.polylineHovered.next(null);
         } else {

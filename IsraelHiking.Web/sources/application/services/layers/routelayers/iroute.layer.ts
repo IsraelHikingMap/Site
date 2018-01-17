@@ -63,7 +63,7 @@ export interface IRouteLayer {
     getEditMode(): EditMode;
     setEditMode(editMode: EditMode): void;
     snapToSelf(latlng: L.LatLng): ISnappingRouteResponse;
-    getSnappingForRoute(latlng: L.LatLng): ISnappingForRouteResponse;
+    getSnappingForRoute(latlng: L.LatLng, isSnapToSelf?: boolean): ISnappingForRouteResponse;
     raiseDataChanged(): void;
     getData(): Common.RouteData;
     getBounds(): L.LatLngBounds;

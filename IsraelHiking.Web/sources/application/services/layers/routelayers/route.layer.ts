@@ -85,7 +85,11 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     public snapToSelf(latlng: L.LatLng): ISnappingRouteResponse {
         var polylines = [];
         for (let segment of this.route.segments) {
-            polylines.push(segment.polyline);
+            if (segment.polyline) {
+                polylines.push(segment.polyline);    
+            } else {
+                polylines.push(L.polyline(segment.latlngs));
+            }
         }
         return this.snappingService.snapToRoute(latlng, {
             sensitivity: 30,
@@ -93,7 +97,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         } as ISnappingRouteOptions);
     }
 
-    public getSnappingForRoute(latlng: L.LatLng): ISnappingForRouteResponse {
+    public getSnappingForRoute(latlng: L.LatLng, isSnapToSelf: boolean = true): ISnappingForRouteResponse {
         // private POIs
         let snappingPointResponse = this.snappingService.snapToPoint(latlng,
             {
@@ -117,7 +121,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         }
 
         let snappingRouteResponse = this.snapToSelf(latlng);
-        if (snappingRouteResponse.polyline != null) {
+        if (snappingRouteResponse.polyline != null && isSnapToSelf) {
             return {
                 latlng: snappingRouteResponse.latlng,
                 isSnapToSelfRoute: true
