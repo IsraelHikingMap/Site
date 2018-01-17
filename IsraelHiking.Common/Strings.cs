@@ -2,19 +2,16 @@
 {
     public static class Categories
     {
-        public const string VIEWPOINT = "Viewpoint";
-        public const string CAMPING = "Camping";
-        public const string WATER = "Water";
-        public const string HISTORIC = "Historic";
-        public const string NATURAL = "Natural";
-        public const string OTHER = "Other";
-        public const string WIKIPEDIA = "Wikipedia";
-        public const string ROUTE_HIKE = "Hiking";
-        public const string ROUTE_BIKE = "Bicycle";
-        public const string ROUTE_4X4 = "4x4";
-        public const string NONE = "None";
         public const string POINTS_OF_INTEREST = "Points of Interest";
-        public const string ROUTES = "Routes";
+
+        public const string WATER = "Water";
+        public const string VIEWPOINT = "Viewpoint";
+        public const string HISTORIC = "Historic";
+        public const string CAMPING = "Camping";
+        public const string NATURAL = "Natural";
+        public const string WIKIPEDIA = "Wikipedia";
+        public const string OTHER = "Other";
+        public const string NONE = "None";
         public static readonly string[] Points = {
             WATER,
             VIEWPOINT,
@@ -24,6 +21,13 @@
             WIKIPEDIA,
             OTHER
         };
+
+        public const string ROUTES = "Routes";
+
+        public const string ROUTE_HIKE = "Hiking";
+        public const string ROUTE_BIKE = "Bicycle";
+        public const string ROUTE_4X4 = "4x4";
+
         public static readonly string[] Routes = {
             ROUTE_HIKE,
             ROUTE_BIKE,
