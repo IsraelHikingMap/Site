@@ -34,8 +34,8 @@ export class GeoJsonParser {
         let leaftletGeoJson = L.geoJSON(geoJson, {
             onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
                 let routeData = null;
-                let name = this.getPropertyValue(feature.properties, "name", language);
-                let description = this.getPropertyValue(feature.properties, "description", language);
+                let name = GeoJsonParser.getPropertyValue(feature.properties, "name", language);
+                let description = GeoJsonParser.getPropertyValue(feature.properties, "description", language);
                 let icon = feature.properties["icon"];
                 let id = feature.properties["identifier"];
                 let website = feature.properties["website"];
@@ -253,7 +253,7 @@ export class GeoJsonParser {
         return latlngsArray;
     }
 
-    private getPropertyValue(properties: {}, key: string, language?: string): string {
+    public static getPropertyValue(properties: {}, key: string, language?: string): string {
         let value = "";
         if (language) {
             value = properties[key + ":" + language];

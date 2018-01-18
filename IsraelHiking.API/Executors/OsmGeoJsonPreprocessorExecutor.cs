@@ -246,11 +246,23 @@ namespace IsraelHiking.API.Executors
             {
                 return false;
             }
+            var isFeatureADecentCity = feature.Attributes.GetNames().Contains("boundary") &&
+                                       feature.Attributes["boundary"].ToString() == "administrative" &&
+                                       feature.Attributes.GetNames().Contains("admin_level") &&
+                                       int.TryParse(feature.Attributes["admin_level"].ToString(), out int adminLevel) &&
+                                       adminLevel <= 8;
+            if (isFeatureADecentCity)
+            {
+                return true;
+            }
+            var isFeatureAForset = feature.Attributes.GetNames().Contains("landuse") &&
+                                   feature.Attributes["landuse"].ToString() == "forest";
+            if (isFeatureAForset)
+            {
+                return true;
+            }
             (var _, var icon) = _tagsHelper.GetInfo(feature.Attributes);
-            return icon.Icon == "icon-nature-reserve" || 
-                icon.Icon == "icon-home" || 
-                (feature.Attributes.GetNames().Contains("boundary") && feature.Attributes["boundary"].ToString() == "administrative") ||
-                (feature.Attributes.GetNames().Contains("landuse") && feature.Attributes["landuse"].ToString() == "forest");
+            return icon.Icon == "icon-nature-reserve" || icon.Icon == "icon-home";
         }
 
         /// <summary>

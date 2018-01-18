@@ -28,12 +28,13 @@ export class SearchResultsProvider {
             params: params
         }).toPromise() as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
         let results = [] as ISearchResults[];
+        let language = isHebrew ? "he" : "en";
         for (let feature of data.features) {
             // HM TODO: change search results to POIs?
             let properties = feature.properties as any;
             try {
                 let singleResult = {
-                    title: this.getName(feature, isHebrew),
+                    title: this.getName(properties, language),
                     icon: properties.icon,
                     iconColor: properties.iconColor,
                     source: properties.poiSource,
@@ -44,7 +45,7 @@ export class SearchResultsProvider {
                 } as ISearchResults;
                 let geo = L.geoJSON(feature);
                 singleResult.bounds = geo.getBounds();
-                let address = isHebrew ? properties.address : feature.properties["address:en"];
+                let address = GeoJsonParser.getPropertyValue(properties, "address", language);
                 singleResult.displayName = singleResult.title + (address ? `, ${address}` : "");
                 results.push(singleResult);
             }
@@ -55,15 +56,12 @@ export class SearchResultsProvider {
         return results;
     }
 
-    private getName(feature: GeoJSON.Feature<GeoJSON.GeometryObject>, isHebrew: boolean): string {
-        let properties = feature.properties as any;
-        let name = isHebrew
-            ? properties.name || feature.properties["name:he"]
-            : feature.properties["name:en"] || properties.name;
+    private getName(properties: {}, language: string): string {
+        let name = GeoJsonParser.getPropertyValue(properties, "name", language);
         if (name) {
             return name;
         }
-        let resultsArray = _.pick(feature.properties, (value: string, key: any) => key.contains("name"));
+        let resultsArray = _.pick(properties, (value: string, key: any) => key.contains("name"));
         return resultsArray[0];
     }
 }
