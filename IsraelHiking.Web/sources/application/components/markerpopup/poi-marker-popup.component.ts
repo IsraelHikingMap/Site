@@ -129,7 +129,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     public save() {
         this.editMode = false;
         this.poiExtended.description = this.description;
-        this.poiService.uploadPoint(this.poiExtended, this.currentImageFile).then((poiExtended: IPointOfInterestExtended) => {
+        let files = this.currentImageFile ? [this.currentImageFile] : [];
+        this.poiService.uploadPoint(this.poiExtended, files).then((poiExtended: IPointOfInterestExtended) => {
             this.initFromPointOfInterestExtended(poiExtended);
             this.toastService.info(this.resources.dataUpdatedSuccefully);
         }, () => {

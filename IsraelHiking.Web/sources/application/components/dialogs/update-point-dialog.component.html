@@ -28,7 +28,7 @@
                     </div>
                     <label *ngIf="imagesUrls.length === 0" fxFill>
                         <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
-                        <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" />
+                        <input type="file" (change)="imageChanged($event)" [style.display]="'none'" accept="image/*" multiple/>
                     </label>
                 </div>
                 <div fxLayout="row" *ngIf="imagesUrls.length > 0">

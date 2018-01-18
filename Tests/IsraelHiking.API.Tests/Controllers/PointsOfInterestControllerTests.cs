@@ -143,7 +143,7 @@ namespace IsraelHiking.API.Tests.Controllers
             formFile.OpenReadStream().Returns(new MemoryStream());
             formFile.FileName.Returns("file.jpg");
             var poi = new PointOfInterestExtended { Title = "title", Source = "source", Id = "1", Location = new LatLng(5,6), ImagesUrls = new string[0]};
-            _controller.UploadPointOfInterest(formFile, JsonConvert.SerializeObject(poi), "he").Wait();
+            _controller.UploadPointOfInterest(new [] {formFile}, JsonConvert.SerializeObject(poi), "he").Wait();
 
             _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, user.DisplayName, formFile.FileName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());

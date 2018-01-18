@@ -34,7 +34,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public icons: IIconColorLabel[];
     public uploading: boolean;
     private currentImageIndex: number;
-    private currentImageFile: File;
+    private currentImageFiles: File[];
 
     constructor(resources: ResourcesService,
         public dialogRef: MatDialogRef<UpdatePointDialogComponent>,
@@ -46,7 +46,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         this.categories = [];
         this.currentImageIndex = 0;
         this.imagesUrls = [];
-        this.currentImageFile = null;
+        this.currentImageFiles = [];
         this.uploading = false;
     }
 
@@ -101,30 +101,26 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     }
 
     public imageChanged(e: any) {
-        let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
-        if (!file) {
+        let files: File[] = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+        if (!files || files.length === 0) {
             return;
-        }
-        if (this.currentImageFile) {
-            this.imagesUrls.splice(this.imagesUrls.length - 1, 1);
-        }
+        }        
+        for (let file of files) {
+            this.currentImageFiles.push(file);
+            let reader = new FileReader();
 
-        this.currentImageFile = file;
-        let reader = new FileReader();
+            reader.onload = (event: any) => {
+                this.imagesUrls.push(event.target.result);
+                this.currentImageIndex = this.imagesUrls.length - 1;
+            }
 
-        reader.onload = (event: any) => {
-            this.imagesUrls.push(event.target.result);
-            this.currentImageIndex = this.imagesUrls.length - 1;
+            reader.readAsDataURL(file);    
         }
-
-        reader.readAsDataURL(file);
     }
 
     public async uploadPoint() {
         this.uploading = true;
-        let imageUrls = this.currentImageFile
-            ? _.dropRight(this.imagesUrls)
-            : this.imagesUrls;
+        let imageUrls = _.dropRight(this.imagesUrls, this.currentImageFiles.length);
 
         let poiExtended = {
             description: this.description,
@@ -139,7 +135,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             location: this.location
         } as IPointOfInterestExtended;
         try {
-            let poi = await this.poiService.uploadPoint(poiExtended, this.currentImageFile);
+            let poi = await this.poiService.uploadPoint(poiExtended, this.currentImageFiles);
             this.toastService.info(this.resources.dataUpdatedSuccefully);
             this.dialogRef.close(poi);
         } catch (ex) {

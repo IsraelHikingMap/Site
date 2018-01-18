@@ -117,14 +117,14 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Update a POI by id and source, upload the image to wikimedia commons if needed.
         /// </summary>
-        /// <param name="file">An image file to add as a URL</param>
+        /// <param name="files">Image files to add as a URL</param>
         /// <param name="poiData">A JSON string of <see cref="PointOfInterestExtended"/> </param>
         /// <param name="language">The language code</param>
         /// <returns></returns>
         [Route("")]
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UploadPointOfInterest([FromForm] IFormFile file, 
+        public async Task<IActionResult> UploadPointOfInterest([FromForm] IEnumerable<IFormFile> files, 
             [FromForm] string poiData,
             [FromQuery] string language)
         {
@@ -133,19 +133,19 @@ namespace IsraelHiking.API.Controllers
             {
                 return BadRequest($"{pointOfInterest.Source} is not a know POIs source...");
             }
-            if (file != null)
+            var tokenAndSecret = _cache.Get(User.Identity.Name);
+            var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
+            var user = await osmGateway.GetUser();
+            foreach (var file in files ?? new IFormFile[0])
             {
-                var osmGateway = _httpGatewayFactory.CreateOsmGateway(_cache.Get(User.Identity.Name));
-                var user = await osmGateway.GetUser();
                 var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title, user.DisplayName, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(pointOfInterest.Location));
                 var url = await _wikimediaCommonGateway.GetImageUrl(imageName);
                 var imageUrls = pointOfInterest.ImagesUrls.ToList();
                 imageUrls.Insert(0, url);
                 pointOfInterest.ImagesUrls = imageUrls.ToArray();
             }
-            
+
             var adapter = _adapters[pointOfInterest.Source];
-            var tokenAndSecret = _cache.Get(User.Identity.Name);
             if (string.IsNullOrWhiteSpace(pointOfInterest.Id))
             {
                 return Ok(await adapter.AddPointOfInterest(pointOfInterest, tokenAndSecret, language));

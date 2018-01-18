@@ -68,7 +68,7 @@ describe("Poi Service", () => {
     })));
 
     it("Should update point using the server", inject([PoiService, HttpTestingController], async (poiService: PoiService, mockBackend: HttpTestingController) => {
-        poiService.uploadPoint({} as IPointOfInterestExtended, {name: "file.name"} as File);
+        poiService.uploadPoint({} as IPointOfInterestExtended, [{name: "file.name"} as File]);
 
         mockBackend.expectOne((request) => request.url.indexOf(Urls.poi) !== -1);
     }));

@@ -100,10 +100,10 @@ export class PoiService {
         return this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as Promise<IPointOfInterestExtended>;
     }
     
-    public uploadPoint(poiExtended: IPointOfInterestExtended, file: File): Promise<IPointOfInterestExtended> {
+    public uploadPoint(poiExtended: IPointOfInterestExtended, files: File[]): Promise<IPointOfInterestExtended> {
         let formData = new FormData();
-        if (file) {
-            formData.append("file", file, file.name);
+        for (let file of files) {
+            formData.append("files", file, file.name);
         }
         formData.append("poiData", JSON.stringify(poiExtended));
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
