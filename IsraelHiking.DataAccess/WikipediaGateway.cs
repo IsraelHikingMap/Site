@@ -77,7 +77,7 @@ namespace IsraelHiking.DataAccess
                     // this is used since this function throws an unrelated timeout error...
                 }
             }
-            _logger.LogError($"All Retries failed while trying to get data from {language}.wikipedia \n");
+            _logger.LogError($"All Retries failed while trying to get data from {language}.wikipedia");
             return new List<Feature>();
         }
 
