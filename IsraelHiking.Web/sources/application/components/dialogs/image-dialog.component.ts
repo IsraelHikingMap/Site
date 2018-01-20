@@ -1,4 +1,4 @@
-﻿import { Component, ViewChildren, ElementRef, AfterViewInit, QueryList } from "@angular/core";
+﻿import { Component, ViewChildren, ElementRef, AfterViewInit, QueryList, ViewEncapsulation } from "@angular/core";
 import { GestureConfig } from "@angular/material"
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -6,7 +6,8 @@ import { ResourcesService } from "../../services/resources.service";
 @Component({
     selector: "image-dialog",
     templateUrl: "./image-dialog.component.html",
-    styleUrls: ["./image-dialog.component.css"]
+    styleUrls: ["./image-dialog.component.css"],
+    encapsulation: ViewEncapsulation.None
 })
 export class ImageDialogCompnent extends BaseMapComponent implements AfterViewInit {
 
