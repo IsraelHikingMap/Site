@@ -75,7 +75,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _controller.PostDataContainer(dataContainer).Wait();
 
-            _imageCreationService.Received(1).Create(dataContainer);
+            _imageCreationService.Received(1).Create(dataContainer, Arg.Any<int>(), Arg.Any<int>());
         }
 
         [TestMethod]

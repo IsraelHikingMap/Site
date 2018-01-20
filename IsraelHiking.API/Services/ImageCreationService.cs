@@ -14,13 +14,17 @@ using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Services
 {
-    internal class BackgroundImage
+    internal class ImageCreationContext
     {
         public Image Image { get; set; }
         public Point TopLeft { get; set; }
-        public Point Tiles { get; set; }
-        public double N { get; set; }
+        public Point BottomRight { get; set; }
+        public int Width { get; set; }
+        public int Height { get; set; }
         public int Zoom { get; set; }
+        public double N { get; set; }
+        public DataContainer DataContainer { get; set; }
+        public AddressAndOpacity[] AddressesTemplates { get; set; }
     }
 
     internal class ImageWithOffset {
@@ -38,24 +42,12 @@ namespace IsraelHiking.API.Services
     public class ImageCreationService : IImageCreationService
     {
         private const int TILE_SIZE = 256; // pixels
-        private const int NUMBER_OF_TILES_FOR_IMAGE_X = 4; // no units
-        private const int NUMBER_OF_TILES_FOR_IMAGE_Y = 2; // no units
-        private const int TARGET_TILE_SIZE_X = TILE_SIZE * NUMBER_OF_TILES_FOR_IMAGE_X; // pixels
-        private const int TARGET_TILE_SIZE_Y = TILE_SIZE * NUMBER_OF_TILES_FOR_IMAGE_X; // pixels
-        private const float CIRCLE_SIZE_X = 24; // pixels
-        private const float CIRCLE_SIZE_Y = 28; // pixels
+        private const float CIRCLE_SIZE = 24; // pixels
         private const float PEN_WIDTH = 13; // pixels
-        private const float MARKER_LENGTH = 10; // pixels
         private const int MAX_ZOOM = 16;
-        
 
         private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly ILogger _logger;
-
-        private Pen _outLinerPen;
-        private Pen _startRoutePen;
-        private Pen _endRoutePen;
-        private Brush _circleFillBrush;
         private readonly Color[] _routeColors;
 
         /// <summary>
@@ -68,134 +60,117 @@ namespace IsraelHiking.API.Services
         {
             _remoteFileFetcherGateway = httpGatewayFactory.CreateRemoteFileFetcherGateway(null);
             _logger = logger;
-            _outLinerPen = new Pen(Color.White, PEN_WIDTH + 8) { LineJoin = LineJoin.Bevel };
-            _circleFillBrush = new SolidBrush(Color.White);
-            _startRoutePen = new Pen(Color.Green, 7);
-            _endRoutePen = new Pen(Color.Red, 7);
             _routeColors = options.Value.Colors.Select(c => FromColorString(c)).ToArray();
         }
 
         ///<inheritdoc />
-        public async Task<byte[]> Create(DataContainer dataContainer)
+        public async Task<byte[]> Create(DataContainer dataContainer, int width, int height)
         {
             _logger.LogDebug("Creating image for thumbnail started.");
-            var allLocations = dataContainer.Routes
-                .SelectMany(r => r.Segments)
-                .SelectMany(s => s.Latlngs)
-                .Concat(dataContainer.Routes
-                    .SelectMany(r => r.Markers)
-                    .Select(m => m.Latlng)
-                )
-                .ToArray();
-            if (!allLocations.Any())
+            var context = new ImageCreationContext
             {
-                allLocations = new[] { dataContainer.NorthEast, dataContainer.SouthWest };
-            }
-            var addressTemplates = GetAddressTemplates(dataContainer);
-            var backgroundImage = await GetBackGroundImage(addressTemplates, allLocations);
-            DrawRoutesOnImage(backgroundImage, dataContainer);
-            var resizedForFacebook = new Bitmap(backgroundImage.Image, new Size(600, 315));
+                Width = width,
+                Height = height,
+                DataContainer = dataContainer
+            };
+            UpdateCorners(context);
+            UpdateZoom(context);
+            UpdateAddressesTemplates(context);
+            await UpdateBackGroundImage(context);
+            DrawRoutesOnImage(context);
+            CropAndResizeImage(context);
             var imageStream = new MemoryStream();
-            resizedForFacebook.Save(imageStream, ImageFormat.Png);
+            context.Image.Save(imageStream, ImageFormat.Png);
             _logger.LogDebug("Creating image for thumbnail completed.");
             return imageStream.ToArray();
         }
 
-        private BackgroundImage InitBackgroundImageTiles(LatLng[] allLocations)
+        /// <summary>
+        /// Updates the conrners of the datacontainer to fix the relevant image ratio
+        /// It will increase the height or width of the container as needed.
+        /// </summary>
+        /// <param name="context"></param>
+        private void UpdateCorners(ImageCreationContext context)
         {
-            var zoom = MAX_ZOOM;
-            var n = Math.Pow(2, zoom);
-            var tiles = new Point
+            if (context.DataContainer.NorthEast == null || context.DataContainer.SouthWest == null)
             {
-                X = (int)Math.Ceiling(Math.Ceiling(GetXTile(allLocations.Max(l => l.Lng), n)) - Math.Floor(GetXTile(allLocations.Min(l => l.Lng), n))),
-                Y = (int)Math.Ceiling(Math.Ceiling(GetYTile(allLocations.Min(l => l.Lat), n)) - Math.Floor(GetYTile(allLocations.Max(l => l.Lat), n)))
-            };
-            while (tiles.X > NUMBER_OF_TILES_FOR_IMAGE_X || tiles.Y > NUMBER_OF_TILES_FOR_IMAGE_Y)
-            {
-                zoom--;
-                n = Math.Pow(2, zoom);
-                tiles.X = (int)Math.Ceiling(Math.Ceiling(GetXTile(allLocations.Max(l => l.Lng), n)) - Math.Floor(GetXTile(allLocations.Min(l => l.Lng), n)));
-                tiles.Y = (int)Math.Ceiling(Math.Ceiling(GetYTile(allLocations.Min(l => l.Lat), n)) - Math.Floor(GetYTile(allLocations.Max(l => l.Lat), n)));
+                var allLocations = context.DataContainer.Routes
+                    .SelectMany(r => r.Segments)
+                    .SelectMany(s => s.Latlngs)
+                    .Concat(context.DataContainer.Routes
+                        .SelectMany(r => r.Markers)
+                        .Select(m => m.Latlng)
+                    )
+                    .ToArray();
+                context.DataContainer.NorthEast = new LatLng(allLocations.Max(l => l.Lat), allLocations.Max(l => l.Lng));
+                context.DataContainer.SouthWest = new LatLng(allLocations.Min(l => l.Lat), allLocations.Min(l => l.Lng));
             }
-            return new BackgroundImage
+            var n = Math.Pow(2, MAX_ZOOM);
+            var xNorthEast = GetXTile(context.DataContainer.NorthEast.Lng, n);
+            var yNorthEast = GetYTile(context.DataContainer.NorthEast.Lat, n);
+            var xSouthWest = GetXTile(context.DataContainer.SouthWest.Lng, n);
+            var ySouthWest = GetYTile(context.DataContainer.SouthWest.Lat, n);
+            var ratio = context.Width * 1.0 / context.Height;
+            if (xNorthEast - xSouthWest > ratio * (ySouthWest - yNorthEast))
             {
-                Tiles = tiles,
-                Zoom = zoom,
-                N = n
-            };
-        }
-
-        private async Task<BackgroundImage> GetBackGroundImage(AddressAndOpacity[] addressTemplates, LatLng[] allLocations)
-        {
-            var backgroundImage = InitBackgroundImageTiles(allLocations);
-            var topLeft = new Point((int)GetXTile(allLocations.Min(l => l.Lng), backgroundImage.N), (int)GetYTile(allLocations.Max(l => l.Lat), backgroundImage.N));
-            var bottomRight = new Point((int)GetXTile(allLocations.Max(l => l.Lng), backgroundImage.N), (int)GetYTile(allLocations.Min(l => l.Lat), backgroundImage.N));
-            if (backgroundImage.Tiles.X == 2 && backgroundImage.Tiles.Y == 1)
-            {
-                // no need to do anything.
-            }
-            else if (backgroundImage.Tiles.X == 1 && backgroundImage.Tiles.Y == 1)
-            {
-                backgroundImage.Tiles = new Point(2, 1);
-                bottomRight.X++;
+                var desiredY = (xNorthEast - xSouthWest) / ratio;
+                var delatY = (desiredY - (ySouthWest - yNorthEast)) / 2;
+                ySouthWest += delatY;
+                yNorthEast -= delatY;
             }
             else
             {
-                backgroundImage.Tiles = new Point(NUMBER_OF_TILES_FOR_IMAGE_X, NUMBER_OF_TILES_FOR_IMAGE_Y);
-                UpdateImageRectangle(ref topLeft, ref bottomRight);
+                var desiredX = (ySouthWest - yNorthEast) * ratio;
+                var delatX = (desiredX - (xNorthEast - xSouthWest)) / 2;
+                xNorthEast += delatX;
+                xSouthWest -= delatX;
             }
-            backgroundImage.TopLeft = topLeft;
-            backgroundImage.Image = await CreateSingleImageFromTiles(topLeft, bottomRight, backgroundImage.Zoom, addressTemplates);
-            return backgroundImage;
+
+            context.DataContainer.NorthEast.Lng = GetLongitude(xNorthEast, n);
+            context.DataContainer.NorthEast.Lat = GetLatitude(yNorthEast, n);
+            context.DataContainer.SouthWest.Lng = GetLongitude(xSouthWest, n);
+            context.DataContainer.SouthWest.Lat = GetLatitude(ySouthWest, n);
         }
 
-        private async Task<Image> CreateSingleImageFromTiles(Point topLeft, Point bottomRight, int zoom, AddressAndOpacity[] addressTemplates)
+        /// <summary>
+        /// Updates the zoom that will have tiles that have more pixels than the image needs
+        /// This will make sure the image size will be bigger than the desired image to improve quility
+        /// </summary>
+        /// <param name="context"></param>
+        private void UpdateZoom(ImageCreationContext context)
         {
-            var bitmap = new Bitmap(TARGET_TILE_SIZE_X, TARGET_TILE_SIZE_Y);
-            var verticalTiles = bottomRight.Y - topLeft.Y + 1;
-            var horizontalTiles = bottomRight.X - topLeft.X + 1;
-            var targetSizeX = TARGET_TILE_SIZE_X / horizontalTiles;
-            var targetSizeY = TARGET_TILE_SIZE_Y / verticalTiles;
-
-            var tasks = new List<Task<ImageWithOffset>>();
-            foreach (var addressTemplate in addressTemplates)
+            var zoom = 0;
+            double n;
+            double deltaX;
+            double deltaY;
+            do
             {
-                for (int x = 0; x < horizontalTiles; x++)
-                {
-                    for (int y = 0; y < verticalTiles; y++)
-                    {
-                        var task = GetTileImage(topLeft, new Point(x, y), zoom, addressTemplate);
-                        tasks.Add(task);
-                    }
-                }
-            }
-
-            var imagesWithOffsets = await Task.WhenAll(tasks);
-            using (var graphics = Graphics.FromImage(bitmap))
-            {
-                foreach (var imageWithOffset in imagesWithOffsets)
-                {
-                    graphics.DrawImage(imageWithOffset.Image,
-                        new Rectangle(imageWithOffset.Offset.X * targetSizeX, imageWithOffset.Offset.Y * targetSizeY, targetSizeX, targetSizeY),
-                        new Rectangle(0, 0, imageWithOffset.Image.Width, imageWithOffset.Image.Height),
-                        GraphicsUnit.Pixel);
-                }
-                
-            }
-            return bitmap;
+                zoom++;
+                n = Math.Pow(2, zoom);
+                deltaX = GetXTile(context.DataContainer.NorthEast.Lng, n) - GetXTile(context.DataContainer.SouthWest.Lng, n);
+                deltaY = GetYTile(context.DataContainer.SouthWest.Lat, n) - GetYTile(context.DataContainer.NorthEast.Lat, n);
+                deltaX *= TILE_SIZE;
+                deltaY *= TILE_SIZE;
+            } while (deltaX < context.Width && deltaY < context.Height);
+            context.Zoom = zoom;
+            context.N = n;
         }
 
-        private static AddressAndOpacity[] GetAddressTemplates(DataContainer dataContainer)
+        /// <summary>
+        /// This will update the address templates and remove empty addresses
+        /// </summary>
+        /// <param name="context"></param>
+        private void UpdateAddressesTemplates(ImageCreationContext context)
         {
-            var address = string.IsNullOrWhiteSpace(dataContainer.BaseLayer.Address)
+            var address = string.IsNullOrWhiteSpace(context.DataContainer.BaseLayer.Address)
                 ? "https://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png"
-                : dataContainer.BaseLayer.Address;
+                : context.DataContainer.BaseLayer.Address;
 
             var addressTemplates = new List<AddressAndOpacity>
             {
-                new AddressAndOpacity { Address = FixAdrressTemplate(address), Opacity = dataContainer.BaseLayer.Opacity ?? 1.0 }
+                new AddressAndOpacity { Address = FixAdrressTemplate(address), Opacity = context.DataContainer.BaseLayer.Opacity ?? 1.0 }
             };
-            foreach (var layerData in dataContainer.Overlays ?? new List<LayerData>())
+            foreach (var layerData in context.DataContainer.Overlays ?? new List<LayerData>())
             {
                 if (string.IsNullOrWhiteSpace(layerData.Address))
                 {
@@ -208,7 +183,60 @@ namespace IsraelHiking.API.Services
                 };
                 addressTemplates.Add(addressAndOpacity);
             }
-            return addressTemplates.ToArray();
+            context.AddressesTemplates = addressTemplates.ToArray();
+        }
+
+        /// <summary>
+        /// This will update the backgroud image - which is the image created from the baselayer and the overlay tiles
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private async Task UpdateBackGroundImage(ImageCreationContext context)
+        {
+            var topLeft = new Point((int)GetXTile(context.DataContainer.SouthWest.Lng, context.N), (int)GetYTile(context.DataContainer.NorthEast.Lat, context.N));
+            var bottomRight = new Point((int)GetXTile(context.DataContainer.NorthEast.Lng, context.N), (int)GetYTile(context.DataContainer.SouthWest.Lat, context.N));
+            context.TopLeft = topLeft;
+            context.BottomRight = bottomRight;
+            context.Image = await CreateSingleImageFromTiles(context);
+        }
+
+        /// <summary>
+        /// Will create a single image from all the tiles - this image will include the required image inside
+        /// </summary>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private async Task<Image> CreateSingleImageFromTiles(ImageCreationContext context)
+        {
+            var horizontalTiles = context.BottomRight.X - context.TopLeft.X + 1;
+            var verticalTiles = context.BottomRight.Y - context.TopLeft.Y + 1;
+            var bitmap = new Bitmap(horizontalTiles * TILE_SIZE, verticalTiles * TILE_SIZE);
+
+            var tasks = new List<Task<ImageWithOffset>>();
+            foreach (var addressTemplate in context.AddressesTemplates)
+            {
+                for (int x = 0; x < horizontalTiles; x++)
+                {
+                    for (int y = 0; y < verticalTiles; y++)
+                    {
+                        var task = GetTileImage(context.TopLeft, new Point(x, y), context.Zoom, addressTemplate);
+                        tasks.Add(task);
+                    }
+                }
+            }
+
+            var imagesWithOffsets = await Task.WhenAll(tasks);
+            using (var graphics = Graphics.FromImage(bitmap))
+            {
+                foreach (var imageWithOffset in imagesWithOffsets)
+                {
+                    graphics.DrawImage(imageWithOffset.Image,
+                        new Rectangle(imageWithOffset.Offset.X * TILE_SIZE, imageWithOffset.Offset.Y * TILE_SIZE, TILE_SIZE, TILE_SIZE),
+                        new Rectangle(0, 0, imageWithOffset.Image.Width, imageWithOffset.Image.Height),
+                        GraphicsUnit.Pixel);
+                }
+                
+            }
+            return bitmap;
         }
 
         private static string FixAdrressTemplate(string addressTemplate)
@@ -221,57 +249,110 @@ namespace IsraelHiking.API.Services
             return address;
         }
 
-        private void DrawRoutesOnImage(BackgroundImage backgroundImage, DataContainer dataContainer)
+        /// <summary>
+        /// This will draw on the backgroup image the route and markers according to color and opacity
+        /// </summary>
+        /// <param name="context"></param>
+        private void DrawRoutesOnImage(ImageCreationContext context)
         {
-            using (var graphics = Graphics.FromImage(backgroundImage.Image))
+            var penWidth = PEN_WIDTH;
+            var penWidthOffset = 8;
+            var circleOutlineWidth = 7f;
+            var circleSize = CIRCLE_SIZE;
+            using (var graphics = Graphics.FromImage(context.Image))
+            using (var outLinerPen = new Pen(Color.White, penWidth + penWidthOffset) { LineJoin = LineJoin.Bevel })
+            using (var circleFillBrush = new SolidBrush(Color.White))
+            using (var startRoutePen = new Pen(Color.Green, circleOutlineWidth))
+            using (var endRoutePen = new Pen(Color.Red, circleOutlineWidth))
             {
                 var routeColorIndex = 0;
-                foreach (var route in dataContainer.Routes)
+                foreach (var route in context.DataContainer.Routes)
                 {
-                    var points = route.Segments.SelectMany(s => s.Latlngs).Select(l => ConvertLatLngToPoint(l, backgroundImage)).ToArray();
-                    var markerPoints = route.Markers.Select(m => ConvertLatLngToPoint(m.Latlng, backgroundImage));
+                    var points = route.Segments.SelectMany(s => s.Latlngs).Select(l => ConvertLatLngToPoint(l, context)).ToArray();
+                    var markerPoints = route.Markers.Select(m => ConvertLatLngToPoint(m.Latlng, context));
                     var lineColor = _routeColors[routeColorIndex++];
                     routeColorIndex = routeColorIndex % _routeColors.Length;
                     if (!string.IsNullOrEmpty(route.Color))
                     {
                         lineColor = FromColorString(route.Color, route.Opacity);
                     }
-                    var linePen = new Pen(lineColor, PEN_WIDTH) { LineJoin = LineJoin.Bevel };
-                    if (points.Any())
-                    {
-                        graphics.DrawLines(_outLinerPen, points);
-                        graphics.DrawLines(linePen, points);
-                        graphics.FillEllipse(_circleFillBrush, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
-                        graphics.DrawEllipse(_startRoutePen, points.First().X - CIRCLE_SIZE_X / 2, points.First().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
-                        graphics.FillEllipse(_circleFillBrush, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
-                        graphics.DrawEllipse(_endRoutePen, points.Last().X - CIRCLE_SIZE_X / 2, points.Last().Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
-                    }
-                    foreach (var markerPoint in markerPoints)
-                    {
-                        graphics.FillEllipse(_circleFillBrush, markerPoint.X - CIRCLE_SIZE_X / 2, markerPoint.Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
-                        graphics.DrawEllipse(linePen, markerPoint.X - CIRCLE_SIZE_X / 2, markerPoint.Y - CIRCLE_SIZE_Y / 2, CIRCLE_SIZE_X, CIRCLE_SIZE_Y);
-                    }
 
+                    using (var linePen = new Pen(lineColor, penWidth) {LineJoin = LineJoin.Bevel})
+                    {
+                        if (points.Any())
+                        {
+                            graphics.DrawLines(outLinerPen, points);
+                            graphics.DrawLines(linePen, points);
+
+                            graphics.FillEllipse(circleFillBrush, points.First().X - circleSize / 2, points.First().Y - circleSize / 2, circleSize, circleSize);
+                            graphics.DrawEllipse(startRoutePen, points.First().X - circleSize / 2, points.First().Y - circleSize / 2, circleSize, circleSize);
+                            graphics.FillEllipse(circleFillBrush, points.Last().X - circleSize / 2, points.Last().Y - circleSize / 2, circleSize, circleSize);
+                            graphics.DrawEllipse(endRoutePen, points.Last().X - circleSize / 2, points.Last().Y - circleSize / 2, circleSize, circleSize);
+                        }
+                    
+                        foreach (var markerPoint in markerPoints)
+                        {
+                            graphics.FillEllipse(circleFillBrush, markerPoint.X - circleSize / 2, markerPoint.Y - circleSize / 2, circleSize, circleSize);
+                            graphics.DrawEllipse(linePen, markerPoint.X - circleSize / 2, markerPoint.Y - circleSize / 2, circleSize, circleSize);
+                        }
+                    }
                 }
             }
         }
 
+        #region Coordinates Conversion
         private double GetXTile(double longitude, double n)
         {
             return n * ((longitude + 180.0) / 360.0);
         }
+
         private double GetYTile(double latitude, double n)
         {
             var latitudeInRadians = latitude * Math.PI / 180.0;
             return (n / 2) * (1 - Math.Log(Math.Tan(latitudeInRadians) + 1.0 / Math.Cos(latitudeInRadians)) / Math.PI);
         }
 
+        private double GetLongitude(double xTile, double n)
+        {
+            return xTile / n * 360.0 - 180.0;
+        }
+
+        private double GetLatitude(double yTile, double n)
+        {
+            var latitudeInRadians = Math.Atan(Math.Sinh(Math.PI * (1 - 2 * yTile / n)));
+            return latitudeInRadians * 180.0 / Math.PI;
+        }
+        #endregion
+
+        /// <summary>
+        /// This method will fetch the relevant image
+        /// If the required zoom is too big it will fetch and image from a lower zoom and split the relevant part of it
+        /// This allow the other parts of the algorithm to be ignorat to the max zoom .
+        /// </summary>
+        /// <param name="topLeft">Top left corner</param>
+        /// <param name="offset">Offset from corner</param>
+        /// <param name="zoom">required zoom level</param>
+        /// <param name="addressTemplate">The address template to fetch the file from</param>
+        /// <returns></returns>
         private async Task<ImageWithOffset> GetTileImage(Point topLeft, Point offset, int zoom, AddressAndOpacity addressTemplate)
         {
-            var file = addressTemplate.Address.Replace("{z}", zoom.ToString())
+            var xY = new Point(topLeft.X + offset.X, topLeft.Y + offset.Y);
+            var translatedXy = xY;
+            var zoomDifference = Math.Pow(2, zoom - MAX_ZOOM);
+            if (zoomDifference > 1)
+            {
+                // zoom is above max native zoom
+                zoom = MAX_ZOOM;
+                translatedXy = new Point
+                {
+                    X = (int)(xY.X / zoomDifference),
+                    Y = (int)(xY.Y / zoomDifference),
+                };
+            }
+            var file = addressTemplate.Address.Replace("{z}", "{zoom}")
                         .Replace("{zoom}", zoom.ToString())
-                        .Replace("{x}", (topLeft.X + offset.X).ToString())
-                        .Replace("{y}", (topLeft.Y + offset.Y).ToString());
+                        .Replace("{x}", translatedXy.X.ToString())
+                        .Replace("{y}", translatedXy.Y.ToString());
             var fileResponse = await _remoteFileFetcherGateway.GetFileContent(file);
             if (!fileResponse.Content.Any())
             {
@@ -287,6 +368,10 @@ namespace IsraelHiking.API.Services
             {
                 image = ChangeOpacity(image, addressTemplate.Opacity);
             }
+            if (zoomDifference > 1)
+            {
+                image = MagnifyImagePart(image, zoomDifference, xY, translatedXy);
+            }
             return new ImageWithOffset
             {
                 Image = image,
@@ -294,34 +379,25 @@ namespace IsraelHiking.API.Services
             };
         }
 
-        private PointF ConvertLatLngToPoint(LatLng latLng, BackgroundImage backgroundImage)
+        /// <summary>
+        /// Allows conversion between the image pixels and wgs84 coordinates
+        /// </summary>
+        /// <param name="latLng"></param>
+        /// <param name="context"></param>
+        /// <returns></returns>
+        private PointF ConvertLatLngToPoint(LatLng latLng, ImageCreationContext context)
         {
-            var x = (float)((GetXTile(latLng.Lng, backgroundImage.N) - backgroundImage.TopLeft.X) * TARGET_TILE_SIZE_X / backgroundImage.Tiles.X);
-            var y = (float)((GetYTile(latLng.Lat, backgroundImage.N) - backgroundImage.TopLeft.Y) * TARGET_TILE_SIZE_Y / backgroundImage.Tiles.Y);
+            var x = (float)((GetXTile(latLng.Lng, context.N) - context.TopLeft.X) * TILE_SIZE);
+            var y = (float)((GetYTile(latLng.Lat, context.N) - context.TopLeft.Y) * TILE_SIZE);
             return new PointF(x, y);
         }
 
-        private void UpdateImageRectangle(ref Point topLeft, ref Point bottomRight)
-        {
-            if (bottomRight.X - topLeft.X + 1 < NUMBER_OF_TILES_FOR_IMAGE_X)
-            {
-                bottomRight.X++;
-            }
-            if (bottomRight.X - topLeft.X + 1 < NUMBER_OF_TILES_FOR_IMAGE_X)
-            {
-                topLeft.X--;
-            }
-            if (bottomRight.X - topLeft.X + 1 < NUMBER_OF_TILES_FOR_IMAGE_X)
-            {
-                bottomRight.X++;
-            }
-
-            if (bottomRight.Y - topLeft.Y + 1 < NUMBER_OF_TILES_FOR_IMAGE_Y)
-            {
-                topLeft.Y--;
-            }
-        }
-
+        /// <summary>
+        /// Utility method to overcome .net core issues with color.
+        /// </summary>
+        /// <param name="colorString"></param>
+        /// <param name="opacity"></param>
+        /// <returns></returns>
         private Color FromColorString(string colorString, double? opacity = null)
         {
             if (colorString.StartsWith("#"))
@@ -337,7 +413,13 @@ namespace IsraelHiking.API.Services
             return Color.FromName(colorString);
         }
 
-        private static Bitmap ChangeOpacity(Image image, double opacityValue)
+        /// <summary>
+        /// Changes the opacity of an image
+        /// </summary>
+        /// <param name="image">The iamge to use</param>
+        /// <param name="opacityValue">The opacity to change to</param>
+        /// <returns>A new image with updated opacity</returns>
+        private Bitmap ChangeOpacity(Image image, double opacityValue)
         {
             Bitmap bmp = new Bitmap(image.Width, image.Height); // Determining Width and Height of Source Image
             using (Graphics graphics = Graphics.FromImage(bmp)) { 
@@ -350,44 +432,39 @@ namespace IsraelHiking.API.Services
         }
 
         /// <summary>
-        /// Main dispose method
+        /// This takes the relevant image part and convert it to a full size tile
         /// </summary>
-        public void Dispose()
+        /// <param name="image"></param>
+        /// <param name="zoomDifference"></param>
+        /// <param name="xY"></param>
+        /// <param name="translatedXy"></param>
+        /// <returns></returns>
+        private Image MagnifyImagePart(Image image, double zoomDifference, Point xY, Point translatedXy)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            Bitmap bmp = new Bitmap(TILE_SIZE, TILE_SIZE);
+            using (Graphics graphics = Graphics.FromImage(bmp))
+            {
+                var x = xY.X / zoomDifference - translatedXy.X;
+                var y = xY.Y / zoomDifference - translatedXy.Y;
+                graphics.DrawImage(image, new Rectangle(0, 0, bmp.Width, bmp.Height), (int)(x * image.Width), (int)(y * image.Height), (int)(image.Width / zoomDifference), (int)(image.Height / zoomDifference), GraphicsUnit.Pixel);
+            }
+            return bmp;
         }
 
         /// <summary>
-        /// Dispose method, following the dispose pattern
+        /// Crop and resizes the image to the desired dimentions
         /// </summary>
-        /// <param name="disposing"></param>
-        protected virtual void Dispose(bool disposing)
+        /// <param name="context"></param>
+        private void CropAndResizeImage(ImageCreationContext context)
         {
-            if (!disposing)
+            Bitmap bmp = new Bitmap(context.Width, context.Height);
+            using (Graphics graphics = Graphics.FromImage(bmp))
             {
-                return;
+                var topLeft = ConvertLatLngToPoint(context.DataContainer.SouthWest, context);
+                var bottomRight = ConvertLatLngToPoint(context.DataContainer.NorthEast, context);
+                graphics.DrawImage(context.Image, new Rectangle(0, 0, bmp.Width, bmp.Height), topLeft.X, bottomRight.Y, bottomRight.X - topLeft.X, topLeft.Y - bottomRight.Y, GraphicsUnit.Pixel);
             }
-            if (_circleFillBrush != null)
-            {
-                _circleFillBrush.Dispose();
-                _circleFillBrush = null;
-            }
-            if (_endRoutePen != null)
-            {
-                _endRoutePen.Dispose();
-                _endRoutePen = null;
-            }
-            if (_outLinerPen != null)
-            {
-                _outLinerPen.Dispose();
-                _outLinerPen = null;
-            }
-            if (_startRoutePen != null)
-            {
-                _startRoutePen.Dispose();
-                _startRoutePen = null;
-            }
+            context.Image = bmp;
         }
     }
 }

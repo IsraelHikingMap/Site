@@ -87,10 +87,10 @@
                 <br />
                 <div *ngFor="let shareUrl of filteredShareUrls | paginate: { itemsPerPage: 5, currentPage: state.sharesPage, id: 'sharesPaging' }" class="item">
                     <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row">
-                        <div fxFlex="20" class="item-image">
+                        <div fxFlex="34" class="item-image">
                             <img [src]="userService.getImageFromShareId(shareUrl)" fxFill />
                         </div>
-                        <div fxFlex="80" class="margin-10">
+                        <div fxFlex="66" class="margin-10">
                             <div class="item-content">
                                 <div *ngIf="!isShareUrlInEditMode(shareUrl)">
                                     <h4>{{userService.getShareUrlDisplayName(shareUrl)}}</h4>
