@@ -35,6 +35,28 @@ export class FileService {
         });
     }
 
+    public getFileFromEvent(e: any): File {
+        let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
+        if (!file) {
+            return null;
+        }
+        e.srcElement.value = "";
+        return file;
+    }
+
+    public getFilesFromEvent(e: any): File[] {
+        let files: FileList = e.dataTransfer ? e.dataTransfer.files : e.target.files;
+        if (!files || files.length === 0) {
+            return [];
+        }
+        let filesToReturn = [];
+        for (let i = 0; i < files.length; i++) {
+            filesToReturn.push(files[i]);
+        }
+        e.srcElement.value = ""; // this will reset files so we need to clone the array.
+        return filesToReturn;
+    }
+
     public saveToFile = (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<{}> => {
         let promise = this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise();
         promise.then((responseData) => {

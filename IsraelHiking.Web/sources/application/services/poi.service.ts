@@ -38,7 +38,6 @@ export interface IPointOfInterestExtended extends IPointOfInterest {
     description: string;
     url: string;
     sourceImageUrl: string;
-    
 
     rating: IRating;
     dataContainer: Common.DataContainer;

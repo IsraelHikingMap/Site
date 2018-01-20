@@ -101,10 +101,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     }
 
     public imageChanged(e: any) {
-        let files: File[] = e.dataTransfer ? e.dataTransfer.files : e.target.files;
-        if (!files || files.length === 0) {
-            return;
-        }        
+        let files = this.fileService.getFilesFromEvent(e);
         for (let file of files) {
             this.currentImageFiles.push(file);
             let reader = new FileReader();

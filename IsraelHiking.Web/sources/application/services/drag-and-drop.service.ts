@@ -28,13 +28,14 @@ export class DragAndDropService  {
             this.mapService.map.scrollWheelZoom.enable();
             let files = Array.prototype.slice.apply(e.dataTransfer.files) as File[];
             if (files && files.length > 0) {
-                setTimeout(() => {
+                setTimeout(async () => {
                     for (let file of files) {
-                        fileService.openFromFile(file).then((dataContainer) => {
+                        try {
+                            let dataContainer = await fileService.openFromFile(file);
                             dataContainerService.setData(dataContainer);
-                        }, () => {
+                        } catch(ex) {
                             toastService.error(resourcesService.unableToLoadFromFile + `: ${file.name}`);
-                        });
+                        };
                     }
                 }, 25);
                 return;

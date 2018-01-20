@@ -25,16 +25,17 @@ export class FileComponent extends BaseMapComponent {
         super(resources);
     }
 
-    public open(e: any) {
-        let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
+    public async open(e: any) {
+        let file = this.fileService.getFileFromEvent(e);
         if (!file) {
             return;
         }
-        this.fileService.openFromFile(file).then((dataContainer: Common.DataContainer) => {
+        try {
+            let dataContainer = await this.fileService.openFromFile(file);
             this.dataContainerService.setData(dataContainer);
-        }, () => {
+        } catch(ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
-        });
+        }
     }
 
     public save(e: Event) {

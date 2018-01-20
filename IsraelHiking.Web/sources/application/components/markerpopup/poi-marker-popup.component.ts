@@ -254,7 +254,7 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public imageChanged(e: any) {
-        let file = e.dataTransfer ? e.dataTransfer.files[0] : e.target.files[0];
+        let file = this.fileService.getFileFromEvent(e);
         if (!file) {
             return;
         }

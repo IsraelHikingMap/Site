@@ -64,4 +64,41 @@ describe("FileService", () => {
 
         mockBackend.expectOne(Urls.openFile);
     }));
+
+    it("Should not get a file from event when there's no files", inject([FileService], (fileService: FileService) => {
+        let file = fileService.getFileFromEvent({ target: { files: [] } });
+
+        expect(file).toBe(null);
+    }));
+
+    it("Should get a file from event and clear input", inject([FileService], (fileService: FileService) => {
+        let event = {
+            target: { files: [{}] },
+            srcElement: { value: "123" }
+        }
+        let file = fileService.getFileFromEvent(event);
+
+        expect(file).not.toBe(null);
+        expect(event.srcElement.value).toBe("");
+    }));
+
+    it("Should not get a files from event", inject([FileService], (fileService: FileService) => {
+        let event = {
+            target: { dataTransfer: [] },
+        }
+        let files = fileService.getFilesFromEvent(event);
+
+        expect(files.length).toBe(0);
+    }));
+
+    it("Should get a files from event and clear input", inject([FileService], (fileService: FileService) => {
+        let event = {
+            target: { files: [{}] },
+            srcElement: { value: "123" }
+        }
+        let files = fileService.getFilesFromEvent(event);
+
+        expect(files.length).toBe(1);
+        expect(event.srcElement.value).toBe("");
+    }));
 });
