@@ -29,11 +29,11 @@ namespace IsraelHiking.DataAccess
                 client.DefaultRequestHeaders.Add("Authorization", $"Client-ID {_options.ImgurClientId}");
                 var formData = new MultipartFormDataContent {{new StreamContent(stream), "image"}};
                 var response  = await client.PostAsync("https://api.imgur.com/3/image", formData);
+                var content = await response.Content.ReadAsStringAsync();
                 if (!response.IsSuccessStatusCode)
                 {
-                    throw new Exception("Unable to upload an image to imgur");
+                    throw new Exception("Unable to upload an image to imgur: " + content);
                 }
-                var content = await response.Content.ReadAsStringAsync();
                 var jsonObject = JsonConvert.DeserializeObject<JObject>(content);
                 var link = jsonObject.SelectToken("data.link").Value<string>();
                 _logger.LogInformation($"Imgur file uploaded successfully, link: {link}");
