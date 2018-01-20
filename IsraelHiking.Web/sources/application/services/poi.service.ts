@@ -1,5 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
+import * as L from "leaflet";
 
 import { ResourcesService } from "./resources.service";
 import { Urls } from "../common/Urls";

@@ -16,8 +16,7 @@ export interface ISearchResults extends IPointOfInterestExtended {
 @Injectable()
 export class SearchResultsProvider {
 
-    constructor(private httpClient: HttpClient,
-        private geoJsonParser: GeoJsonParser) {
+    constructor(private httpClient: HttpClient) {
     }
 
     public getResults = async (searchTerm: string, isHebrew: boolean): Promise<ISearchResults[]> => {
