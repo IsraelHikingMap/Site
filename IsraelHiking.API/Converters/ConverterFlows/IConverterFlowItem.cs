@@ -81,7 +81,7 @@
     public interface IConverterFlowItem
     {
         /// <summary>
-        /// This method does the "heavy lifting" be doing the conversion
+        /// This method does the "heavy lifting" by doing the conversion
         /// </summary>
         /// <param name="content">The file content to convert</param>
         /// <returns>Converted file content</returns>

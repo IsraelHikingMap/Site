@@ -3,7 +3,7 @@ import { Subject } from "rxjs/Subject";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
-import { IRouteLayer, IRoute, IRouteSegment } from "./iroute.layer";
+import { IRouteLayer, IRoute, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { MapService } from "../../map.service";
 import { RouteLayerFactory } from "./route-layer.factory";
 import { RouteLayer } from "./route.layer";
@@ -115,6 +115,20 @@ export class RoutesService implements IRoutesService {
     }
 
     private addLayersToMap = (routes: Common.RouteData[]) => {
+        if (routes.length === 1 && routes[0].segments.length === 0 && this.routes.length > 0) {
+            // this is the case when the layer has markers only
+            if (this.selectedRoute == null) {
+                this.selectedRoute = this.routes[0];
+            }
+            let editMode = this.selectedRoute.getEditMode();
+            this.selectedRoute.setHiddenState();
+            for (let marker of routes[0].markers) {
+                this.selectedRoute.route.markers.push(marker as IMarkerWithData);
+            }
+
+            this.selectedRoute.setEditMode(editMode);
+            return;
+        }
         for (let routeData of routes) {
             if (this.isNameAvailable(routeData.name) === false) {
                 routeData.name = this.createRouteName(routeData.name);

@@ -26,6 +26,7 @@ namespace IsraelHiking.API.Tests.Services
         private IDataContainerConverterService _converterService;
         private IRouteDataSplitterService _routeDataSplitterService;
         private IGpsBabelGateway _gpsBabelGateway;
+        private IImgurGateway _imgurGateway;
         private byte[] _randomBytes;
         private gpxType _simpleGpx;
 
@@ -35,8 +36,22 @@ namespace IsraelHiking.API.Tests.Services
             _randomBytes = new byte[] { 0, 1, 1, 0 };
             _simpleGpx = new gpxType { wpt = new[] { new wptType() } };
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
+            _imgurGateway = Substitute.For<IImgurGateway>();
             _routeDataSplitterService = Substitute.For<IRouteDataSplitterService>();
-            _converterService = new DataContainerConverterService(_gpsBabelGateway, new GpxGeoJsonConverter(), new GpxDataContainerConverter(), _routeDataSplitterService);
+            var gpxGeoJsonConverter = new GpxGeoJsonConverter();
+            var converterFlowItems = new List<IConverterFlowItem>
+            {
+                new GeoJsonGpxConverterFlow(gpxGeoJsonConverter),
+                new GpxGeoJsonConverterFlow(gpxGeoJsonConverter),
+                new GpxToSingleTrackGpxConverterFlow(),
+                new GpxToRouteGpxConverterFlow(),
+                new KmzToKmlConverterFlow(),
+                new GpxGzToGpxConverterFlow(),
+                new GpxVersion1ToGpxVersion11ConverterFlow(_gpsBabelGateway),
+                new GpxBz2ToGpxConverterFlow(),
+                new JpgToGpxConverterFlow(_gpsBabelGateway, _imgurGateway)
+            };
+            _converterService = new DataContainerConverterService(_gpsBabelGateway, new GpxDataContainerConverter(), _routeDataSplitterService, converterFlowItems);
         }
 
         [TestMethod]
@@ -300,7 +315,7 @@ namespace IsraelHiking.API.Tests.Services
         {
             _gpsBabelGateway.ConvertFileFromat(_randomBytes, "kuku", Arg.Any<string>()).Returns(_simpleGpx.ToBytes());
 
-            var dataContainer = _converterService.ToDataContainer(_randomBytes, "kuku").Result;
+            _converterService.ToDataContainer(_randomBytes, "kuku").Wait();
         }
 
         [TestMethod]
@@ -349,6 +364,21 @@ namespace IsraelHiking.API.Tests.Services
             var dataContainer = _converterService.ToDataContainer(compressedBz2Stream.ToArray(), "file.gpx.bz2").Result;
 
             Assert.AreEqual(1, dataContainer.Routes.Count);
+        }
+
+        [TestMethod]
+        public void ConvertJpegDataContainer_ShouldConvertToDataContainerWithImage()
+        {
+            var url = "Url";
+            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), Arg.Any<string>(), Arg.Any<string>()).Returns(_simpleGpx.ToBytes());
+            _imgurGateway.UploadImage(Arg.Any<Stream>()).Returns(url);
+
+            var dataContainer = _converterService.ToDataContainer(new byte[0], "file.jpg").Result;
+
+            Assert.AreEqual(1, dataContainer.Routes.Count);
+            Assert.AreEqual(1, dataContainer.Routes.First().Markers.Count);
+            Assert.AreEqual(1, dataContainer.Routes.First().Markers.First().Urls.Count);
+            Assert.AreEqual(url, dataContainer.Routes.First().Markers.First().Urls.First().Url);
         }
     }
 }

@@ -28,29 +28,20 @@ namespace IsraelHiking.API.Services
         /// Constructor
         /// </summary>
         /// <param name="gpsBabelGateway"></param>
-        /// <param name="gpxGeoJsonConverter"></param>
         /// <param name="gpxDataContainerConverter"></param>
         /// <param name="routeDataSplitterService"></param>
+        /// <param name="converterFlowItems"></param>
         public DataContainerConverterService(IGpsBabelGateway gpsBabelGateway,
-            IGpxGeoJsonConverter gpxGeoJsonConverter,
             IGpxDataContainerConverter gpxDataContainerConverter,
-            IRouteDataSplitterService routeDataSplitterService)
+            IRouteDataSplitterService routeDataSplitterService,
+            IEnumerable<IConverterFlowItem> converterFlowItems)
         {
             _gpsBabelGateway = gpsBabelGateway;
             _gpxDataContainerConverter = gpxDataContainerConverter;
             _routeDataSplitterService = routeDataSplitterService;
+            _converterFlowItems = new List<IConverterFlowItem>();
+            _converterFlowItems.AddRange(converterFlowItems);
 
-            _converterFlowItems = new List<IConverterFlowItem>
-            {
-                new GeoJsonGpxConverterFlow(gpxGeoJsonConverter),
-                new GpxGeoJsonConverterFlow(gpxGeoJsonConverter),
-                new GpxToSingleTrackGpxConverterFlow(),
-                new GpxToRouteGpxConverterFlow(),
-                new KmzToKmlConverterFlow(),
-                new GpxGzToGpxConverterFlow(),
-                new GpxVersion1ToGpxVersion11ConverterFlow(_gpsBabelGateway),
-                new GpxBz2ToGpxConverterFlow()
-            };
             var supportedGpsBabelFormats = new List<string>
             {
                 FlowFormats.GPX_BABEL_FORMAT,

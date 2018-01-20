@@ -1,4 +1,5 @@
 ﻿using IsraelHiking.API.Converters;
+using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
@@ -41,6 +42,15 @@ namespace IsraelHiking.API
             services.AddTransient<IPointsOfInterestAdapter, WikipediaPointsOfInterestAdapter>();
             services.AddSingleton<IItmWgs84MathTransfromFactory, ItmWgs84MathTransfromFactory>();
             services.AddTransient<IOsmElasticSearchUpdaterService, OsmElasticSearchUpdaterService>();
+            services.AddTransient<IConverterFlowItem, GeoJsonGpxConverterFlow>();
+            services.AddTransient<IConverterFlowItem, GpxGeoJsonConverterFlow>();
+            services.AddTransient<IConverterFlowItem, GpxToSingleTrackGpxConverterFlow>();
+            services.AddTransient<IConverterFlowItem, GpxToRouteGpxConverterFlow>();
+            services.AddTransient<IConverterFlowItem, KmzToKmlConverterFlow>();
+            services.AddTransient<IConverterFlowItem, GpxGzToGpxConverterFlow>();
+            services.AddTransient<IConverterFlowItem, GpxVersion1ToGpxVersion11ConverterFlow>();
+            services.AddTransient<IConverterFlowItem, GpxBz2ToGpxConverterFlow>();
+            services.AddTransient<IConverterFlowItem, JpgToGpxConverterFlow>();
             return services;
         }
     }
