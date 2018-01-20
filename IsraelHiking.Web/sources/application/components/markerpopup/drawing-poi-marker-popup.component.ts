@@ -1,4 +1,4 @@
-﻿import { Component, ApplicationRef, HostListener, ViewChild, ElementRef } from "@angular/core";
+﻿import { Component, ApplicationRef, HostListener, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { MatDialog } from "@angular/material";
 import { ENTER } from "@angular/cdk/keycodes";
@@ -24,7 +24,7 @@ interface IIconsGroup {
     selector: "drawing-poi-marker-popup",
     templateUrl: "./drawing-poi-marker-popup.component.html"
 })
-export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
+export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent implements AfterViewInit {
     private routeLayer: IRouteLayer;
     public showIcons: boolean;
     public markerType: string;
@@ -56,6 +56,16 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.iconsGroups.push({
                 icons: IconsService.getAvailableIconTypes().splice(iconTypeIndex * numberOfIconsPerRow, numberOfIconsPerRow)
             });
+        }
+    }
+
+    public ngAfterViewInit(): void {
+        this.focusTitle();
+    }
+
+    private focusTitle() {
+        if (this.titleInput && this.titleInput.nativeElement) {
+            this.titleInput.nativeElement.focus();
         }
     }
 
@@ -118,9 +128,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         });
 
         this.marker.on("popupopen", () => {
-            if (this.titleInput && this.titleInput.nativeElement) {
-                this.titleInput.nativeElement.focus();
-            }
+            this.focusTitle();
         });
     }
 
