@@ -31,6 +31,7 @@ import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
 import { NgProgressModule, NgProgressInterceptor } from "ngx-progressbar";
 import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
+import { DndModule } from "ng2-dnd";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -134,7 +135,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
         NgProgressModule,
         NgxPaginationModule,
-        ScrollToModule.forRoot()
+        ScrollToModule.forRoot(),
+        DndModule.forRoot()
     ],
     entryComponents: [ZoomComponent,
         LocationButtonComponent,

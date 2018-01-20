@@ -104,20 +104,22 @@
         </div>
     </div>
     <hr class="divider" />
-
-    <div *ngFor="let route of routes">
-        <div fxLayout="row" class="cursor-pointer row-hover" (click)="selectRoute(route, $event)">
-            <div fxFlex="15">
-                <span [ngStyle]="{'color': getRouteColor(route)}">
-                    <i class="fa fa-lg" [ngClass]="{'icon-pencil': isRouteSelected(route), 'icon-eye': isRouteVisisble(route) && !isRouteSelected(route), 'icon-eye-slash': !isRouteVisisble(route) }"></i>
-                </span>
-            </div>
-            <div fxFlex="75" matTooltip="{{getRouteDescription(route)}}" matTooltipPosition="below">
-                <span [ngStyle]="{'color': getRouteColor(route)}">{{getRouteName(route)}}</span>
-            </div>
-            <div fxFlex>
-                <div fxLayout="column" fxFill>
-                    <span fxFill fxLayoutAlign="end start" (click)="editRoute(getRouteName(route), $event)" matTooltip="{{resources.routeProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Route" angularticsAction="Edit route"><i class="fa fa-lg icon-wrench"></i></span>
+    
+    <div dnd-sortable-container [sortableData]="routes">
+        <div *ngFor="let route of routes; let i = index" dnd-sortable [sortableIndex]="i">
+            <div fxLayout="row" class="cursor-pointer row-hover" (click)="selectRoute(route, $event)">
+                <div fxFlex="15">
+                    <span [ngStyle]="{'color': getRouteColor(route)}">
+                        <i class="fa fa-lg" [ngClass]="{'icon-pencil': isRouteSelected(route), 'icon-eye': isRouteVisisble(route) && !isRouteSelected(route), 'icon-eye-slash': !isRouteVisisble(route) }"></i>
+                    </span>
+                </div>
+                <div fxFlex="75" matTooltip="{{getRouteDescription(route)}}" matTooltipPosition="below">
+                    <span [ngStyle]="{'color': getRouteColor(route)}">{{getRouteName(route)}}</span>
+                </div>
+                <div fxFlex>
+                    <div fxLayout="column" fxFill>
+                        <span fxFill fxLayoutAlign="end start" (click)="editRoute(getRouteName(route), $event)" matTooltip="{{resources.routeProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Route" angularticsAction="Edit route"><i class="fa fa-lg icon-wrench"></i></span>
+                    </div>
                 </div>
             </div>
         </div>
