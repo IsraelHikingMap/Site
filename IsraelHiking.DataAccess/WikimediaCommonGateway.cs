@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -51,11 +50,16 @@ namespace IsraelHiking.DataAccess
             await _site.LoginAsync(_options.WikiMediaUserName, _options.WikiMediaPassword);
         }
 
-        public async Task<string> UploadImage(string title, string author, string fileName, Stream contentStream, Coordinate location)
+        public async Task<string> UploadImage(string title, string description, string author, string fileName, Stream contentStream, Coordinate location)
         {
             _logger.LogInformation($"Upload an image to wikimedia common. title: {title}, fileName: {fileName}, Location: {location.Y}, {location.X}");
             var wikiFileName = GetNonExistingFilePageName(title, fileName);
-            var comment = CreateWikipediaComment(location, string.IsNullOrWhiteSpace(title) ? title : fileName, author);
+            description = !string.IsNullOrWhiteSpace(description)
+                ? description
+                : !string.IsNullOrWhiteSpace(title)
+                    ? title
+                    : fileName;
+            var comment = CreateWikipediaComment(location, description, author);
             await _site.GetTokenAsync("edit", true);
             var results = await _site.UploadAsync(wikiFileName, new StreamUploadSource(contentStream), comment, true);
             if (results.ResultCode != UploadResultCode.Success)

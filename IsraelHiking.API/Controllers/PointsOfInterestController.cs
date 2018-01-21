@@ -138,7 +138,7 @@ namespace IsraelHiking.API.Controllers
             var user = await osmGateway.GetUser();
             foreach (var file in files ?? new IFormFile[0])
             {
-                var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title, user.DisplayName, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(pointOfInterest.Location));
+                var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title, pointOfInterest.Description, user.DisplayName, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(pointOfInterest.Location));
                 var url = await _wikimediaCommonGateway.GetImageUrl(imageName);
                 var imageUrls = pointOfInterest.ImagesUrls.ToList();
                 imageUrls.Insert(0, url);
