@@ -1,7 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -326,7 +326,7 @@ namespace IsraelHiking.API.Services.Poi
             var match = regexp.Match(pointOfInterest.Url ?? string.Empty);
             if (match.Success)
             {
-                tags.Add(FeatureAttributes.WIKIPEDIA, match.Groups[3].Value + ":" + WebUtility.UrlDecode(match.Groups[4].Value.Replace("_", " ")));
+                tags.Add(FeatureAttributes.WIKIPEDIA, match.Groups[3].Value + ":" + Uri.UnescapeDataString(match.Groups[4].Value.Replace("_", " ")));
             }
             else
             {
