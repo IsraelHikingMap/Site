@@ -73,13 +73,12 @@ describe("FileService", () => {
 
     it("Should get a file from event and clear input", inject([FileService], (fileService: FileService) => {
         let event = {
-            target: { files: [{}] },
-            srcElement: { value: "123" }
+            target: { files: [{}], value: "123" },
         }
         let file = fileService.getFileFromEvent(event);
 
         expect(file).not.toBe(null);
-        expect(event.srcElement.value).toBe("");
+        expect(event.target.value).toBe("");
     }));
 
     it("Should not get a files from event", inject([FileService], (fileService: FileService) => {
@@ -93,12 +92,11 @@ describe("FileService", () => {
 
     it("Should get a files from event and clear input", inject([FileService], (fileService: FileService) => {
         let event = {
-            target: { files: [{}] },
-            srcElement: { value: "123" }
+            target: { files: [{}], value: "123" },
         }
         let files = fileService.getFilesFromEvent(event);
 
         expect(files.length).toBe(1);
-        expect(event.srcElement.value).toBe("");
+        expect(event.target.value).toBe("");
     }));
 });
