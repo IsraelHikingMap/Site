@@ -40,7 +40,8 @@ export class FileService {
         if (!file) {
             return null;
         }
-        e.srcElement.value = "";
+        let target = e.target || e.srcElement;
+        target.value = "";
         return file;
     }
 
@@ -53,7 +54,8 @@ export class FileService {
         for (let i = 0; i < files.length; i++) {
             filesToReturn.push(files[i]);
         }
-        e.srcElement.value = ""; // this will reset files so we need to clone the array.
+        let target = e.target || e.srcElement;
+        target.value = ""; // this will reset files so we need to clone the array.
         return filesToReturn;
     }
 
