@@ -60,7 +60,7 @@ export class SearchResultsProvider {
         if (name) {
             return name;
         }
-        let resultsArray = _.pick(properties, (value: string, key: any) => key.contains("name"));
+        let resultsArray = _.pickBy(properties, (value: string, key: any) => key.contains("name"));
         return resultsArray[0];
     }
 }
