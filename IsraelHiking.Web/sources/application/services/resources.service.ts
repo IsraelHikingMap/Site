@@ -887,10 +887,10 @@ export class ResourcesService {
         if (!imageUrl) {
             return imageUrl;
         }
-        if (imageUrl.indexOf("//upload.wikimedia.org/wikipedia/commons/") !== -1) {
+        if (imageUrl.includes("//upload.wikimedia.org/wikipedia/commons/")) {
             return imageUrl.replace(/(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)/, `$1thumb/$2$3/${size}px-$3`);;
         }
-        if (imageUrl.indexOf("//i.imgur.com/") !== -1) {
+        if (imageUrl.includes("//i.imgur.com/")) {
             var split = imageUrl.split(".");
             var extenstion = split.pop();
             var prefix = split.join(".");

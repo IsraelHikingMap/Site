@@ -48,8 +48,8 @@ describe("Poi Service", () => {
 
         mockBackend.expectOne((request) => {
             let paramsString = request.params.toString();
-            return paramsString.indexOf(northEast.lat + "," + northEast.lng) !== -1 &&
-                paramsString.indexOf(southWest.lat + "," + southWest.lng) !== -1;
+            return paramsString.includes(northEast.lat + "," + northEast.lng) &&
+                paramsString.includes(southWest.lat + "," + southWest.lng);
         });
     })));
 
@@ -61,16 +61,16 @@ describe("Poi Service", () => {
         poiService.getPoint(id, source, type);
 
         mockBackend.expectOne((request: HttpRequest<any>) => {
-            return request.url.indexOf(id) !== -1 &&
-                request.url.indexOf(source) !== -1 &&
-                request.params.toString().indexOf(type) !== -1;
+            return request.url.includes(id) &&
+                request.url.includes(source) &&
+                request.params.toString().includes(type);
         });
     })));
 
     it("Should update point using the server", inject([PoiService, HttpTestingController], async (poiService: PoiService, mockBackend: HttpTestingController) => {
         poiService.uploadPoint({} as IPointOfInterestExtended, [{name: "file.name"} as File]);
 
-        mockBackend.expectOne((request) => request.url.indexOf(Urls.poi) !== -1);
+        mockBackend.expectOne((request) => request.url.includes(Urls.poi));
     }));
 
     it("Should update rating using the server", inject([PoiService, HttpTestingController], async (poiService: PoiService, mockBackend: HttpTestingController) => {

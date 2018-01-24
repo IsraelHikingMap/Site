@@ -311,13 +311,13 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             return true;
         }
         let lowerSearchTerm = searchTerm.toLowerCase();
-        if ((shareUrl.description || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((shareUrl.description || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
-        if ((shareUrl.title || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((shareUrl.title || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
-        if ((shareUrl.id || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((shareUrl.id || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
         return false;
@@ -328,13 +328,13 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             return true;
         }
         let lowerSearchTerm = searchTerm.toLowerCase();
-        if ((trace.description || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((trace.description || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
-        if ((trace.name || "").toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((trace.name || "").toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
-        if ((trace.id || 0).toString().toLowerCase().indexOf(lowerSearchTerm) !== -1) {
+        if ((trace.id || 0).toString().toLowerCase().includes(lowerSearchTerm)) {
             return true;
         }
         return false;

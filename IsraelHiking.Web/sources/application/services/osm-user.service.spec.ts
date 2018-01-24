@@ -73,7 +73,7 @@ describe("OSM User Service", () => {
 
         oauth.authenticated = () => { return true; };
         oauth.xhr = (addressObject, callback: Function) => {
-            if (addressObject.path.indexOf("details") !== -1) {
+            if (addressObject.path.includes("details")) {
                 callback(null, userDetailsResponse);
             }
         }
@@ -93,7 +93,7 @@ describe("OSM User Service", () => {
     it("Should login even if requests for data fails", inject([OsmUserService, HttpTestingController], fakeAsync((osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
         oauth.authenticated = () => { return true; };
         oauth.xhr = (addressObject, callback: Function) => {
-            if (addressObject.path.indexOf("details") !== -1) {
+            if (addressObject.path.includes("details")) {
                 callback(null, userDetailsResponse);
             }
         }

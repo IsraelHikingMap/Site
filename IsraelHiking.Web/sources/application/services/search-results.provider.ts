@@ -56,11 +56,14 @@ export class SearchResultsProvider {
     }
 
     private getName(properties: {}, language: string): string {
+        if (!properties) {
+            return "";
+        }
         let name = GeoJsonParser.getPropertyValue(properties, "name", language);
         if (name) {
             return name;
         }
-        let resultsArray = _.pickBy(properties, (value: string, key: any) => key.contains("name"));
+        let resultsArray = _.pickBy(properties, (value: string, key: string) => key.includes("name"));
         return resultsArray[0];
     }
 }

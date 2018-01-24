@@ -68,7 +68,7 @@ export class HashService {
     }
 
     private stringToBaseLayer(addressOrKey: string): Common.LayerData {
-        if (addressOrKey.indexOf("www") !== -1 || addressOrKey.indexOf("http") !== -1) {
+        if (addressOrKey.includes("www") || addressOrKey.includes("http")) {
             return {
                 key: "",
                 address: addressOrKey

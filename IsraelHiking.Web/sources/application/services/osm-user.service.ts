@@ -317,7 +317,7 @@ export class OsmUserService {
     private getBackgroundStringForOsmAddress(baseLayerAddress: string): string {
         let background = "background=bing";
         if (baseLayerAddress !== "") {
-            if (baseLayerAddress.indexOf("/") === 0) {
+            if (baseLayerAddress.startsWith("/")) {
                 baseLayerAddress = Urls.baseAddress + baseLayerAddress;
             }
             let address = baseLayerAddress.replace("{s}", "s");
