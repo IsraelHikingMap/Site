@@ -99,7 +99,7 @@ export class SnappingService {
                     if (latlngsArray.length > 1) {
                         this.highwaySnappings.push(L.polyline(latlngsArray, { opacity: 0 } as L.PolylineOptions));
                     } else {
-                        let dataContainer = this.geoJsonParser.toDataContainer({ features: [feature], type: "FeatureCollection" });
+                        let dataContainer = this.geoJsonParser.toDataContainer({ features: [feature], type: "FeatureCollection" }, this.resources.getCurrentLanguageCodeSimplified());
                         let markerData = dataContainer.routes[0].markers[0];
                         this.pointsSnappings.push(markerData);
                     }

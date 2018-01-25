@@ -1,5 +1,7 @@
 ﻿import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import * as L from "leaflet";
+
 import { ResourcesService } from "../resources.service";
 import { ToastService } from "../toast.service";
 import { NoneRouter } from "./none-router";
@@ -25,7 +27,7 @@ export class RouterService {
         var address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng + "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {
             let geojson = await this.httpClient.get(address).timeout(4500).toPromise();
-            let data = this.geoJsonParser.toDataContainer(geojson as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
+            let data = this.geoJsonParser.toDataContainer(geojson as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>, this.resourcesService.getCurrentLanguageCodeSimplified());
             if (!data || data.routes.length === 0 || data.routes[0].segments.length < 2) {
                 throw new Error("Empty data");
             } else {
