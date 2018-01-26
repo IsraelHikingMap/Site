@@ -27,10 +27,50 @@ namespace IsraelHiking.API.Tests.Converters.CoordinatesParsers
         [TestMethod]
         public void TryParse_WithSlash_ShouldReturnCoordinates()
         {
-            var results = _parser.TryParse("11°6'S / 12 12 W");
+            var results = _parser.TryParse("11° 6' 36\" S / 012 12 36 W");
 
             Assert.IsNotNull(results);
-            Assert.AreEqual(-11.1, results.Y);
+            Assert.AreEqual(-11.11, results.Y);
+            Assert.AreEqual(-12.21, results.X);
+        }
+
+        [TestMethod]
+        public void TryParse_WithUnicode1_ShouldReturnCoordinates()
+        {
+            var results = _parser.TryParse("11:6\u00b4 36\u02ba S 112° 12\u02b9 54\u201d W");
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(-11.11, results.Y);
+            Assert.AreEqual(-112.215, results.X);
+        }
+
+        [TestMethod]
+        public void TryParse_WithUnicode2_ShouldReturnCoordinates()
+        {
+            var results = _parser.TryParse("11° 6\u02bc 36\u2033 S 12° 12\u02ca 54\u275e W");
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(-11.11, results.Y);
+            Assert.AreEqual(-12.215, results.X);
+        }
+
+        [TestMethod]
+        public void TryParse_WithUnicode3_ShouldReturnCoordinates()
+        {
+            var results = _parser.TryParse("11° 6\u201d 36\u3003 S 12° 12\u2032 54\u301e W");
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(-11.11, results.Y);
+            Assert.AreEqual(-12.215, results.X);
+        }
+
+        [TestMethod]
+        public void TryParse_WithUnicode4_ShouldReturnCoordinates()
+        {
+            var results = _parser.TryParse("11° 6\u275c 36S 12° 12W");
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(-11.11, results.Y);
             Assert.AreEqual(-12.2, results.X);
         }
 
