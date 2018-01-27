@@ -5,6 +5,7 @@ declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 
 @Injectable()
 export class GeoLocationService {
+    private static readonly TIME_OUT = 30000;
 
     private state: GeoLocationServiceState;
     private watchNumber: number;
@@ -54,14 +55,14 @@ export class GeoLocationService {
                     this.currentLocation = L.latLng(position.coords.latitude, position.coords.longitude);
                     this.positionChanged.next(position);
                 },
-                (error) => {
+                () => {
                     // sending error will terminate the stream
                     this.positionChanged.next(null);
                     this.disable();
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 5000
+                    timeout: GeoLocationService.TIME_OUT
                 });
         }
     }
