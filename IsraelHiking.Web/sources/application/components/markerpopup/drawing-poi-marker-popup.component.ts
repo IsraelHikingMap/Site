@@ -60,7 +60,11 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
     }
 
     public ngAfterViewInit(): void {
-        this.focusTitle();
+        setTimeout(() => {
+            // this is to trigger changes otherwise there's an error: Expression has changed after it was checked
+            this.focusTitle();
+        }, 25);
+
     }
 
     private focusTitle() {

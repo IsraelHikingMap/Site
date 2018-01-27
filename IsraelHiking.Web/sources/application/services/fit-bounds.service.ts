@@ -17,6 +17,6 @@ export class FitBoundsService {
             : L.point(50, 50);
 
         options.paddingBottomRight = L.point(50, 50);
-        this.mapService.map.fitBounds(bounds, options);
+        this.mapService.map.flyToBounds(bounds, options);
     }
 }
