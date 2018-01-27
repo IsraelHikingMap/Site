@@ -9,9 +9,10 @@ import { PoiService, IPointOfInterestExtended, ICategory, IIconColorLabel } from
 import { ToastService } from "../../services/toast.service";
 import { OsmUserService } from "../../services/osm-user.service";
 
-export interface ICategoryWithIcons extends ICategory {
-    icons: IIconColorLabel[];
+export interface ISelectableCategory extends ICategory {
     selectedIcon: IIconColorLabel;
+    icons: IIconColorLabel[];
+    label: string;
 }
 
 @Component({
@@ -21,7 +22,7 @@ export interface ICategoryWithIcons extends ICategory {
     encapsulation: ViewEncapsulation.None
 })
 export class UpdatePointDialogComponent extends BaseMapComponent {
-    public categories: ICategoryWithIcons[];
+    public categories: ISelectableCategory[];
     public source: string;
     public title: string;
     public description: string;
@@ -30,7 +31,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public identifier: string;
     public elementType: string;
     public location: L.LatLng;
-    public selectedCategory: ICategoryWithIcons;
+    public selectedCategory: ISelectableCategory;
     public icons: IIconColorLabel[];
     public uploading: boolean;
     private currentImageIndex: number;
@@ -51,25 +52,17 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     }
 
     public async initialize(markerIcon: string) {
-        let dictionary = await this.poiService.getCategories("Points of Interest");
-        for (let categoryType in dictionary) {
-            if (!dictionary.hasOwnProperty(categoryType)) {
-                continue;
-            }
+        let categories = await this.poiService.getCategories("Points of Interest");
+        for (let category of categories) {
             this.categories.push({
-                key: categoryType,
+                name: category.name,
                 isSelected: false,
-                label: this.resources.translate(categoryType),
-                icon: dictionary[categoryType][0].icon,
-                color: dictionary[categoryType][0].color,
-                icons: dictionary[categoryType].map(i => {
-                    return {
-                        color: i.color,
-                        icon: i.icon,
-                        label: this.resources.translate(i.label)
-                    } as IIconColorLabel;
-                })
-            } as ICategoryWithIcons);
+                label: category.name,
+                icon: category.icon,
+                color: category.color,
+                icons: category.items.map(i => i.iconColorCategory)
+            } as ISelectableCategory);
+            console.log(this.categories);
         }
         this.selectedCategory = this.categories[0];
         this.categories[0].selectedIcon = this.categories[0].icons[0];
@@ -92,8 +85,8 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
         }
     }
 
-    private getCategory(categoryKey: string): ICategoryWithIcons {
-        return _.find(this.categories, categoryToFind => categoryToFind.key === categoryKey);
+    private getCategory(categoryKey: string): ISelectableCategory {
+        return _.find(this.categories, categoryToFind => categoryToFind.name === categoryKey);
     }
 
     public selectIcon(icon: IIconColorLabel) {

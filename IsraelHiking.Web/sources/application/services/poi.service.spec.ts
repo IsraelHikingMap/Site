@@ -28,12 +28,10 @@ describe("Poi Service", () => {
 
         poiService.getCategories("Points of Interest").then((resutls) => {
             expect(resutls).not.toBeNull();
-            expect(resutls["category"].length).toBe(1);
+            expect(resutls.length).toBe(1);
         }, fail);
 
-        mockBackend.match(() => true)[0].flush({
-            "category": [{ icon: "icon", category: "category" }],
-        });
+        mockBackend.match(() => true)[0].flush([{ icon: "icon", name: "category" }]);
     })));
 
     it("Should get available categories types", (inject([PoiService], (poiService: PoiService) => {

@@ -54,9 +54,9 @@ namespace IsraelHiking.API.Controllers
         /// <returns></returns>
         [Route("categories/{categoriesType}")]
         [HttpGet]
-        public Dictionary<string, IEnumerable<IconColorCategory>> GetCategoriesByType(string categoriesType)
+        public IEnumerable<Category> GetCategoriesByType(string categoriesType)
         {
-            return _tagsHelper.GetIconsPerCategoryByType(categoriesType);
+            return _tagsHelper.GetCategoriesByType(categoriesType);
         }
 
         /// <summary>

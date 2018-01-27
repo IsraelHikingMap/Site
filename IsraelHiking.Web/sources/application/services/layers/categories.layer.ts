@@ -17,8 +17,8 @@ import * as Common from "../../common/IsraelHiking";
 
 export class CategoriesLayer extends BasePoiMarkerLayer {
 
-    private static readonly VISIBILITY_PREFIX = "_visibility";
-    private static readonly SELECTED_PREFIX = "_selected";
+    private static readonly VISIBILITY_POSTFIX = "_visibility";
+    private static readonly SELECTED_POSTFIX = "_selected";
 
     private requestsNumber: number;
     private markersLoaded: Subject<void>;
@@ -39,21 +39,15 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         this.searchResultsMarker = null;
         this.markersLoaded = new Subject<void>();
         this.requestsNumber = 0;
-        this.visible = this.localStorageService.get(this.categoriesType + CategoriesLayer.VISIBILITY_PREFIX) || false;
+        this.visible = this.localStorageService.get(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX) || false;
         this.markerIcon = IconsService.createPoiIcon("icon-star", "orange");
-        this.poiService.getCategories(this.categoriesType).then((response: {}) => {
-            for (let categoryType in response) {
-                if (response.hasOwnProperty(categoryType)) {
-                    let selected = this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX) == null
-                        ? this.visible
-                        : this.localStorageService.get(categoryType + CategoriesLayer.SELECTED_PREFIX);
-                    this.categories.push({
-                        key: categoryType,
-                        isSelected: selected,
-                        label: categoryType,
-                        icon: response[categoryType][0].icon
-                    } as ICategory);
-                }
+        this.poiService.getCategories(this.categoriesType).then((categories) => {
+            for (let category of categories) {
+                let selected = this.localStorageService.get(category.name + CategoriesLayer.SELECTED_POSTFIX) == null
+                    ? this.visible
+                    : this.localStorageService.get(category.name + CategoriesLayer.SELECTED_POSTFIX);
+                category.isSelected = selected;
+                this.categories.push(category);
             }
             this.updateMarkers();
         });
@@ -69,14 +63,14 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             this.categories.forEach(c => this.changeCategorySelectedState(c, true));
         }
         super.onAdd(map);
-        this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_PREFIX, this.visible);
+        this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX, this.visible);
         return this;
     }
 
     onRemove(map: L.Map): this {
         this.categories.forEach(c => this.changeCategorySelectedState(c, false));
         super.onRemove(map);
-        this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_PREFIX, this.visible);
+        this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX, this.visible);
         return this;
     }
 
@@ -95,7 +89,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
     }
 
     private changeCategorySelectedState(category: ICategory, newState: boolean) {
-        this.localStorageService.set(category.key + CategoriesLayer.SELECTED_PREFIX, newState);
+        this.localStorageService.set(category.name + CategoriesLayer.SELECTED_POSTFIX, newState);
         category.isSelected = newState;
     }
 
@@ -108,7 +102,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         let southWest = this.mapService.map.getBounds().pad(0.2).getSouthWest();
         this.requestsNumber++;
         this.poiService
-            .getPoints(northEast, southWest, this.categories.filter(f => f.isSelected).map(f => f.key))
+            .getPoints(northEast, southWest, this.categories.filter(f => f.isSelected).map(f => f.name))
             .then((pointsOfInterest) => {
                 this.requestArrieved();
                 if (this.requestsNumber !== 0) {

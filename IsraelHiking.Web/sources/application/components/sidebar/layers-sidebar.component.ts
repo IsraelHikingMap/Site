@@ -1,6 +1,6 @@
 ﻿import { Component, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import { LocalStorage } from "ngx-store";
+import { LocalStorage, LocalStorageService } from "ngx-store";
 import * as _ from "lodash";
 
 import { MapService } from "../../services/map.service";
@@ -32,6 +32,8 @@ interface ICategoriesContainer {
     encapsulation: ViewEncapsulation.None
 })
 export class LayersSidebarComponent extends BaseMapComponent implements OnDestroy {
+    private static readonly EXPANDED_POSTFIX = "_expanded";
+
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public routes: IRouteLayer[];
@@ -43,14 +45,15 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     public isAdvanced: boolean = false;
 
     constructor(resources: ResourcesService,
-        private dialog: MatDialog,
-        private mapService: MapService,
-        private layersService: LayersService,
-        private routesService: RoutesService,
-        private categoriesLayerFactory: CategoriesLayerFactory,
-        private fileService: FileService,
-        private sidebarService: SidebarService,
-        private poiService: PoiService) {
+        private readonly dialog: MatDialog,
+        private readonly mapService: MapService,
+        private readonly layersService: LayersService,
+        private readonly routesService: RoutesService,
+        private readonly categoriesLayerFactory: CategoriesLayerFactory,
+        private readonly fileService: FileService,
+        private readonly sidebarService: SidebarService,
+        private readonly poiService: PoiService,
+        private readonly localStorageService: LocalStorageService) {
         super(resources);
         this.baseLayers = layersService.baseLayers;
         this.overlays = layersService.overlays;
@@ -60,8 +63,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         for (let categoriesType of this.categoriesTypes) {
             this.categoriesMap.set(categoriesType, {
                 categories: this.categoriesLayerFactory.get(categoriesType).categories,
-                // HM TODO: store in local storage?
-                isExpanded: false
+                isExpanded: this.localStorageService.get(categoriesType + LayersSidebarComponent.EXPANDED_POSTFIX) || false
             });
         }
     }
@@ -109,7 +111,8 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
 
     public toggleCategories(categoriesType: CategoriesType, e: Event) {
         this.suppressEvents(e);
-        this.categoriesMap.get(categoriesType).isExpanded = ! this.categoriesMap.get(categoriesType).isExpanded;
+        this.categoriesMap.get(categoriesType).isExpanded = !this.categoriesMap.get(categoriesType).isExpanded;
+        this.localStorageService.set(categoriesType + LayersSidebarComponent.EXPANDED_POSTFIX, this.categoriesMap.get(categoriesType).isExpanded);
     }
 
     public toggleCategory(categoriesType: CategoriesType, category: ICategory, e: Event) {

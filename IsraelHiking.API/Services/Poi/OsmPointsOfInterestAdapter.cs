@@ -158,6 +158,7 @@ namespace IsraelHiking.API.Services.Poi
             osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
             RemoveKklRoutes(osmNamesDictionary);
             var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
+            ChangeLwnHikingRoutesToNoneCategory(geoJsonNamesDictionary);
             return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
         }
 
@@ -182,6 +183,22 @@ namespace IsraelHiking.API.Services.Poi
             foreach (var key in listOfKeysToRemove)
             {
                 osmNamesDictionary.Remove(key);
+            }
+        }
+
+        private static void ChangeLwnHikingRoutesToNoneCategory(Dictionary<string, List<Feature>> geoJsonNamesDictionary)
+        {
+            foreach (var key in geoJsonNamesDictionary.Keys)
+            {
+                var list = geoJsonNamesDictionary[key];
+                var itemsToUpdate = list.Where(feature => feature.Attributes.Exists("network") &&
+                                                          feature.Attributes["network"].ToString() == "lwn" &&
+                                                          feature.Attributes.Exists("route") &&
+                                                          feature.Attributes["route"].ToString() == "hiking");
+                foreach (var feature in itemsToUpdate)
+                {
+                    feature.Attributes[FeatureAttributes.POI_CATEGORY] = Categories.NONE;
+                }
             }
         }
 

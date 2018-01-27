@@ -49,39 +49,40 @@ export interface IIconColorLabel {
     label: string;
 }
 
-export interface ICategory extends IIconColorLabel {
-    key: string,
+export interface ICategory {
+    name: string,
+    icon: string,
+    color: string,
     isSelected: boolean;
+    items: { iconColorCategory: IIconColorLabel, tags: any[]}[];
 }
 
 @Injectable()
 export class PoiService {
-    private categoriesToIconsMap: Map<CategoriesType, {}>;
+    private categoriesMap: Map<CategoriesType, ICategory[]>;
 
     constructor(private resources: ResourcesService,
         private httpClient: HttpClient) {
 
-        this.categoriesToIconsMap = new Map<CategoriesType, {}>();
-        this.categoriesToIconsMap.set("Points of Interest", {});
-        this.categoriesToIconsMap.set("Routes", {});
+        this.categoriesMap = new Map<CategoriesType, ICategory[]>();
+        this.categoriesMap.set("Points of Interest", []);
+        this.categoriesMap.set("Routes", []);
     }
 
-    public async getCategories(categoriesType: CategoriesType): Promise<{}> {
-            let categories = this.categoriesToIconsMap.get(categoriesType);
-            if (Object.keys(categories).length > 0) {
-                return categories;
-            }
-        let responseDictionary = await this.httpClient.get(Urls.poiCategories + categoriesType).toPromise() as {};
-        for (let property in responseDictionary) {
-            if (responseDictionary.hasOwnProperty(property)) {
-                categories[property] = responseDictionary[property];
-            }
+    public async getCategories(categoriesType: CategoriesType): Promise<ICategory[]> {
+        let categories = this.categoriesMap.get(categoriesType);
+        if (Object.keys(categories).length > 0) {
+            return categories;
+        }
+        let categoriesArray = await this.httpClient.get(Urls.poiCategories + categoriesType).toPromise() as ICategory[];
+        for (let category of categoriesArray) {
+            categories.push(category);
         }
         return categories;
     }
 
     public getCategoriesTypes(): CategoriesType[] {
-        return Array.from(this.categoriesToIconsMap.keys());
+        return Array.from(this.categoriesMap.keys());
     }
 
     public getPoints(northEast: L.LatLng, southWest: L.LatLng, categoriesTypes: string[]): Promise<IPointOfInterest[]> {

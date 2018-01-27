@@ -22,7 +22,7 @@ namespace IsraelHiking.DataAccess
             {
                 _logger.LogDebug("Getting file from: " + url);
                 UpdateHeaders(client, url);
-                client.Timeout = TimeSpan.FromMinutes(10);
+                client.Timeout = TimeSpan.FromMinutes(20);
                 var response = await client.GetAsync(url);
                 var fileName = response.Content.Headers.ContentDisposition?.FileName.Trim('"') ??
                     url.Substring(url.LastIndexOf("/", StringComparison.Ordinal) + 1);

@@ -194,7 +194,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             {
                 Location = new LatLng(),
                 ImagesUrls = new string[0],
-                Icon = _tagsHelper.GetIconsPerCategoryByType(Categories.POINTS_OF_INTEREST).Values.First().First().Icon,
+                Icon = _tagsHelper.GetCategoriesByType(Categories.POINTS_OF_INTEREST).First().Icon,
                 Url = "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D"
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});

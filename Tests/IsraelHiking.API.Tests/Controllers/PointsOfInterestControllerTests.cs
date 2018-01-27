@@ -46,7 +46,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _controller.GetCategoriesByType(category);
 
-            _tagHelper.Received(1).GetIconsPerCategoryByType(category);
+            _tagHelper.Received(1).GetCategoriesByType(category);
         }
 
         [TestMethod]

@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Services
         /// Returns all the icons grouped by their category for a specific categories' type
         /// </summary>
         /// <returns></returns>
-        Dictionary<string, IEnumerable<IconColorCategory>> GetIconsPerCategoryByType(string categoriesType);
+        IEnumerable<Category> GetCategoriesByType(string categoriesType);
 
         /// <summary>
         /// Gets all the tags that this helper is using.
