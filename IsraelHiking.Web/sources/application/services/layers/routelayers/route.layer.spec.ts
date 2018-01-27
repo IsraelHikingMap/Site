@@ -7,11 +7,13 @@ import { MapServiceMockCreator } from "../../map.service.spec";
 import { IRoute, IRouteProperties, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { RouteData, MarkerData, RouteSegmentData } from "../../../common/IsraelHiking";
 import { ResourcesService } from "../../resources.service";
+import { GeoLocationService } from "../../geo-location.service";
 
 describe("RouteLayer", () => {
     var routeLayer: RouteLayer;
     var snappingService;
     var routerService;
+    var geoLocationService;
     var elevationProvider;
     var route: IRoute;
     var mapServiceMock: MapServiceMockCreator;
@@ -42,7 +44,7 @@ describe("RouteLayer", () => {
         var componentFactoryResolverMock = {
             resolveComponentFactory: () => { return factory }
         };
-        
+        var geoLocationService = {} as GeoLocationService;
         TestBed.configureTestingModule({
             imports: [],
             providers: [
@@ -55,6 +57,7 @@ describe("RouteLayer", () => {
         routeLayer = new RouteLayer(mapServiceMock.mapService,
             snappingService,
             routerService,
+            geoLocationService,
             elevationProvider,
             TestBed.get(Injector),
             TestBed.get(ComponentFactoryResolver),

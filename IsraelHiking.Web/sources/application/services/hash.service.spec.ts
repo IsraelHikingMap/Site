@@ -117,7 +117,7 @@ describe("HashService", () => {
         mapServiceMock.mapService.map.panTo(L.latLng(1, 2));
 
         expect(router.navigateByUrl).toHaveBeenCalledWith("/#!/10/1.0000/2.0000", { replaceUrl: true });
-        expect(windowMock.location.hash)
+        expect(windowMock.location.hash);
     }));
 
     it("changes the map location when addressbar changes to another geolocation", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {

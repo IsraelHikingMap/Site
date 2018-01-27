@@ -25,7 +25,6 @@ describe("HoverHandler", () => {
                 markers: []
             },
             mapService: mapServiceMockCreator.mapService,
-            snappingService: {}
         };
         hoverHandlerPoi = new HoverHandlerPoi(context);
         hoverHandlerRoute = new HoverHandlerRoute(context, middleMarker);
@@ -72,7 +71,7 @@ describe("HoverHandler", () => {
 
     it("Should transition to add point state when using hover for point", () => {
         hoverHandlerPoi.setState(HoverHandlerState.NONE);
-        context.snappingService.snapToPoint = () => {
+        context.getSnappingForPoint = () => {
             return {
                 latlng: L.latLng([0, 0])
             }
@@ -85,7 +84,7 @@ describe("HoverHandler", () => {
 
     it("Should not snap to exiting POI if there's already a point there", () => {
         hoverHandlerPoi.setState(HoverHandlerState.NONE);
-        context.snappingService.snapToPoint = () => {
+        context.getSnappingForPoint = () => {
             return {
                 latlng: L.latLng([1, 1])
                 

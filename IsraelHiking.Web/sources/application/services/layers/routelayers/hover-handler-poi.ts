@@ -19,7 +19,7 @@ export class HoverHandlerPoi extends HoverHandlerBase {
         }
 
         this.setState(HoverHandlerState.ADD_POINT);
-        let snapToPointResponse = this.context.snappingService.snapToPoint(e.latlng);
+        let snapToPointResponse = this.context.getSnappingForPoint(e.latlng);
         for(let marker of this.context.route.markers) {
             if (marker.marker != null && marker.marker.getLatLng().equals(snapToPointResponse.latlng)) {
                 // do not snap to self points

@@ -1,15 +1,18 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { LocalStorage } from "ngx-store";
+import "rxjs/add/operator/toPromise";
+
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { SnappingService } from "../../snapping.service";
+import { GeoLocationService } from "../../geo-location.service";
 import { ElevationProvider } from "../../elevation.provider";
 import { IRouteLayer, IRoute, IRouteProperties, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { RouteLayer } from "./route.layer";
 import { Urls } from "../../../common/Urls";
 import * as Common from "../../../common/IsraelHiking";
-import "rxjs/add/operator/toPromise";
+
 
 @Injectable()
 export class RouteLayerFactory {
@@ -38,13 +41,14 @@ export class RouteLayerFactory {
     @LocalStorage()
     public routeOpacity = 0.5;
 
-    constructor(private httpClient: HttpClient,
-        private mapService: MapService,
-        private routerService: RouterService,
-        private snappingService: SnappingService,
-        private elevationProvider: ElevationProvider,
-        private injector: Injector,
-        private componentFactoryResolver: ComponentFactoryResolver) {
+    constructor(private readonly httpClient: HttpClient,
+        private readonly mapService: MapService,
+        private readonly routerService: RouterService,
+        private readonly snappingService: SnappingService,
+        private readonly elevationProvider: ElevationProvider,
+        private readonly geoLocationService: GeoLocationService,
+        private readonly injector: Injector,
+        private readonly componentFactoryResolver: ComponentFactoryResolver) {
         httpClient.get(Urls.colors).toPromise().then((colors: string[]) => {
             this.colors.splice(0, this.colors.length, ...colors);
         });
@@ -58,6 +62,7 @@ export class RouteLayerFactory {
         return new RouteLayer(this.mapService,
             this.snappingService,
             this.routerService,
+            this.geoLocationService,
             this.elevationProvider,
             this.injector,
             this.componentFactoryResolver,

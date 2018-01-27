@@ -2,9 +2,10 @@ import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { Subject } from "rxjs/Subject";
 import * as L from "leaflet";
 
-import { SnappingService, ISnappingRouteOptions, ISnappingRouteResponse } from "../../snapping.service";
+import { SnappingService, ISnappingRouteOptions, ISnappingRouteResponse, ISnappingPointResponse } from "../../snapping.service";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
+import { GeoLocationService } from "../../geo-location.service";
 import { ElevationProvider } from "../../elevation.provider";
 import { IRouteState, EditMode } from "./iroute-state";
 import { IRouteLayer, IRoute, IRouteProperties, IRouteSegment, IMarkerWithData, EditModeString, ISnappingForRouteResponse } from "./iroute.layer";
@@ -27,6 +28,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     constructor(public mapService: MapService,
         public snappingService: SnappingService,
         public routerService: RouterService,
+        public geoLocationService: GeoLocationService,
         public elevationProvider: ElevationProvider,
         public injector: Injector,
         public componentFactoryResolver: ComponentFactoryResolver,
@@ -97,11 +99,44 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         } as ISnappingRouteOptions);
     }
 
+    public getSnappingForPoint(latlng: L.LatLng): ISnappingPointResponse {
+        if (this.geoLocationService.getState() === "tracking") {
+            let snappingPointResponse = this.snappingService.snapToPoint(latlng,
+                {
+                    points: [
+                        {
+                            latlng: this.geoLocationService.currentLocation,
+                            type: "star",
+                            urls: [],
+                            title: "",
+                            description: "",
+                        } as Common.MarkerData
+                    ],
+                    sensitivity: 30
+                });
+            if (snappingPointResponse.markerData != null) {
+                return snappingPointResponse;
+            }
+        }
+        return this.snappingService.snapToPoint(latlng);
+    }
+
     public getSnappingForRoute(latlng: L.LatLng, isSnapToSelf: boolean = true): ISnappingForRouteResponse {
-        // private POIs
+
+        let geoLocationPoint = [] as Common.MarkerData[];
+        if (this.geoLocationService.getState() === "tracking") {
+            geoLocationPoint.push({
+                latlng: this.geoLocationService.currentLocation,
+                type: "star",
+                urls: [],
+                title: "",
+                description: "",
+            } as Common.MarkerData);
+        }
+        // private POIs + Geo Location
         let snappingPointResponse = this.snappingService.snapToPoint(latlng,
             {
-                points: this.route.markers,
+                points: geoLocationPoint.concat(this.route.markers),
                 sensitivity: 30
             });
         if (snappingPointResponse.markerData != null) {

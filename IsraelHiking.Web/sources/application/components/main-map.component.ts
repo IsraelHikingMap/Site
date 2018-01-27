@@ -1,8 +1,6 @@
 ﻿import { Component, Injector, Type, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
 import { Location, LocationStrategy, PathLocationStrategy } from "@angular/common";
-import { Angulartics2 } from "angulartics2";
 import * as L from "leaflet";
-import "leaflet.locatecontrol";
 
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
@@ -12,7 +10,7 @@ import { ToastService } from "../services/toast.service";
 import { DragAndDropService } from "../services/drag-and-drop.service";
 import { BaseMapComponent } from "./base-map.component";
 import { ZoomComponent } from "./zoom.component";
-import { LocationButtonComponent } from "./location-button.component";
+import { LocationComponent } from "./location.component";
 import { LayersComponent } from "./layers.component";
 import { FileComponent } from "./file.component";
 import { FileSaveAsComponent } from "./file-save-as.component";
@@ -34,14 +32,14 @@ import { IhmLinkComponent } from "./ihm-link.component";
 export class MainMapComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
-        private location: Location,
-        private injector: Injector,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private mapService: MapService,
-        private sidebarService: SidebarService,
-        private routeStatisticsService: RouteStatisticsService,
-        private applicationRef: ApplicationRef,
-        private toastService: ToastService,
+        private readonly location: Location,
+        private readonly injector: Injector,
+        private readonly componentFactoryResolver: ComponentFactoryResolver,
+        private readonly mapService: MapService,
+        private readonly sidebarService: SidebarService,
+        private readonly routeStatisticsService: RouteStatisticsService,
+        private readonly applicationRef: ApplicationRef,
+        private readonly toastService: ToastService,
         // needed for initialization
         dragAndDropService: DragAndDropService,
     ) {
@@ -59,25 +57,7 @@ export class MainMapComponent extends BaseMapComponent {
 
     private createControls() {
         this.createContorl("zoom-control", ZoomComponent, "topleft", true);
-
-        L.control.locate({
-            icon: "fa fa-lg icon-crosshairs",
-            keepCurrentZoomLevel: true,
-            follow: true,
-            createButtonCallback: (contianer: HTMLElement) => {
-                let componentFactory = this.componentFactoryResolver.resolveComponentFactory(LocationButtonComponent);
-                let componentRef = componentFactory.create(this.injector, [], contianer);
-                this.applicationRef.attachView(componentRef.hostView);
-                return {
-                    link: componentRef.instance.elemnt.nativeElement,
-                    icon: componentRef.instance.elemnt.nativeElement.querySelector("i")
-                }
-            },
-            onLocationError: () => {
-                this.toastService.warning(this.resources.unableToFindYourLocation);
-            }
-        } as L.LocateOptions).addTo(this.mapService.map);
-
+        this.createContorl("location-control", LocationComponent);
         this.createContorl("layer-control", LayersComponent);
         this.createContorl("file-control", FileComponent);
         this.createContorl("save-as-control", FileSaveAsComponent);

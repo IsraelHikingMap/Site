@@ -57,6 +57,7 @@ import { GeoJsonParser } from "./services/geojson.parser";
 import { CategoriesLayerFactory } from "./services/layers/categories-layers.factory";
 import { DragAndDropService } from "./services/drag-and-drop.service";
 import { PoiService } from "./services/poi.service";
+import { GeoLocationService } from "./services/geo-location.service";
 // directives
 import { GoogleChartDirective } from "./directives/google-chart.directive";
 import { DraggableResizableDirective } from "./directives/draggable-resizable.directive";
@@ -64,7 +65,7 @@ import { DraggableResizableDirective } from "./directives/draggable-resizable.di
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { MainMapComponent } from "./components/main-map.component";
 import { ZoomComponent } from "./components/zoom.component";
-import { LocationButtonComponent } from "./components/location-button.component";
+import { LocationComponent } from "./components/location.component";
 import { LayersComponent } from "./components/layers.component";
 import { LayersSidebarComponent } from "./components/sidebar/layers-sidebar.component";
 import { BaseLayerAddDialogComponent } from "./components/dialogs/layers/base-layer-add-dialog.component";
@@ -90,6 +91,7 @@ import { PoiMarkerPopupComponent } from "./components/markerpopup/poi-marker-pop
 import { CoordinatesMarkerPopupComponent } from "./components/markerpopup/coordinates-marker-popup.component";
 import { SearchResultsMarkerPopupComponent } from "./components/markerpopup/search-results-marker-popup.component";
 import { MissingPartMarkerPopupComponent } from "./components/markerpopup/missing-part-marker-popup.component";
+import { GpsLocationMarkerPopupComponent } from "./components/markerpopup/gps-location-marker-popup.component";
 import { SearchComponent } from "./components/search.component";
 import { InfoComponent } from "./components/info.component";
 import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
@@ -139,7 +141,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DndModule.forRoot()
     ],
     entryComponents: [ZoomComponent,
-        LocationButtonComponent,
+        LocationComponent,
         LayersComponent,
         LayersSidebarComponent,
         BaseLayerAddDialogComponent,
@@ -164,6 +166,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,
+        GpsLocationMarkerPopupComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,
@@ -211,14 +214,15 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         GeoJsonParser,
         CategoriesLayerFactory,
         DragAndDropService,
-        PoiService
+        PoiService,
+        GeoLocationService
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
         RouteStatisticsChartComponent,
         LayersSidebarComponent,
         ZoomComponent,
-        LocationButtonComponent,
+        LocationComponent,
         LayersComponent,
         BaseLayerAddDialogComponent,
         BaseLayerEditDialogComponent,
@@ -242,6 +246,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,
+        GpsLocationMarkerPopupComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,

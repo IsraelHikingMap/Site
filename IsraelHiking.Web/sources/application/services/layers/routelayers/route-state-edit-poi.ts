@@ -39,7 +39,7 @@ export class RouteStateEditPoi extends RouteStateEditBase {
     }
 
     protected addPoint(e: L.LeafletMouseEvent) {
-        let snappingPointResponse = this.context.snappingService.snapToPoint(e.latlng);
+        let snappingPointResponse = this.context.getSnappingForPoint(e.latlng);
         let markerData = {
             latlng: snappingPointResponse.latlng,
             title: "",
@@ -79,13 +79,13 @@ export class RouteStateEditPoi extends RouteStateEditBase {
             this.hoverHandler.setState(HoverHandlerState.DRAGGING);
         });
         marker.on("drag", () => {
-            let snappingResponse = this.context.snappingService.snapToPoint(marker.getLatLng());
+            let snappingResponse = this.context.getSnappingForPoint(marker.getLatLng());
             marker.setLatLng(snappingResponse.latlng);
         });
         marker.on("dragend", () => {
             let markerInArray = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker) as IMarkerWithData;
             markerInArray.latlng = marker.getLatLng();
-            let snappingPointResponse = this.context.snappingService.snapToPoint(markerInArray.latlng);
+            let snappingPointResponse = this.context.getSnappingForPoint(markerInArray.latlng);
             if (snappingPointResponse.markerData != null &&
                 !markerInArray.title &&
                 markerInArray.type === IconsService.getAvailableIconTypes()[0]) {

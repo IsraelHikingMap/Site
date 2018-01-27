@@ -29,6 +29,8 @@ export class IconsService {
     "<i class='fa icon-circle fa-stack-1x' style='color:white'></i>" +
     "</span>";
 
+    private static LOCATION_MARKER_HTML = "<i class='fa icon-crosshairs' style='color:blue;font-size:32px'></i>";
+
     private static TRACE_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
     IconsService.BACKGROUND +
     "<i class='fa icon-cog fa-stack-1x stack-icon-top' style='color:blue;'></i>" +
@@ -63,6 +65,16 @@ export class IconsService {
             iconSize: L.point(16, 16),
             iconAnchor: L.point(8, 10),
             className: "round-marker"
+        } as L.DivIconOptions);
+    }
+
+    public static createLocationIcon(): L.DivIcon {
+        return L.divIcon({
+            html: IconsService.LOCATION_MARKER_HTML,
+            iconSize: L.point(28, 32),
+            iconAnchor: L.point(14, 16),
+            popupAnchor: L.point(0, -10),
+            className: "location-marker"
         } as L.DivIconOptions);
     }
 

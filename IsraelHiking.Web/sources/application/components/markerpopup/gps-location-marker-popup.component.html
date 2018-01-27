@@ -1,0 +1,13 @@
+﻿<div class="marker-popup" [dir]="resources.direction">
+    <div fxLayout="row">
+        <div fxFlex>
+            <button mat-button fxFill (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Convert location to point"><i class="fa icon-plus"></i></button>
+        </div>
+        <div fxFlex>
+            <button mat-button type="button" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
+        </div>
+    </div>
+    <div *ngIf="!hideCoordinates">
+        <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates"></coordinates>
+    </div>
+</div>
