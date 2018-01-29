@@ -14,8 +14,11 @@ namespace IsraelHiking.API.Services.Poi
     /// </summary>
     public abstract class BasePointsOfInterestAdapter
     {
+        /// <summary>
+        /// Elasticsearch gateway to be used in derived classes
+        /// </summary>
+        protected readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
-        private readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IDataContainerConverterService _dataContainerConverterService;
 
         /// <summary>
@@ -100,7 +103,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 coordinate.Alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(coordinate));
             }
-            poiItem.Url = GetWebsiteUrl(feature);
+            poiItem.Url = GetWebsiteUrl(feature, language);
             poiItem.ImagesUrls = feature.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                 .Select(n => feature.Attributes[n].ToString())
@@ -117,8 +120,9 @@ namespace IsraelHiking.API.Services.Poi
         /// This function is used to get the website Url from the feature
         /// </summary>
         /// <param name="feature"></param>
+        /// <param name="language"></param>
         /// <returns></returns>
-        protected virtual string GetWebsiteUrl(IFeature feature)
+        protected virtual string GetWebsiteUrl(IFeature feature, string language)
         {
             return feature.Attributes.GetNames().Contains(FeatureAttributes.WEBSITE)
                 ? feature.Attributes[FeatureAttributes.WEBSITE].ToString()

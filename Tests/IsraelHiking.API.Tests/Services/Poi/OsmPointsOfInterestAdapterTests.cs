@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using IsraelHiking.API.Converters;
@@ -29,6 +30,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private IOsmRepository _osmRepository;
         private IDataContainerConverterService _dataContainerConverterService;
+        private IWikipediaGateway _wikipediaGateway;
         private ITagsHelper _tagsHelper;
 
         [TestInitialize]
@@ -41,7 +43,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), _tagsHelper);
             _osmRepository = Substitute.For<IOsmRepository>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _tagsHelper);
+            _wikipediaGateway = Substitute.For<IWikipediaGateway>();
+            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _tagsHelper);
         }
 
         private IOsmGateway SetupHttpFactory()
@@ -103,7 +106,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL, FeatureAttributes.IMAGE_URL);
             feature.Attributes.AddAttribute(FeatureAttributes.IMAGE_URL + "1", FeatureAttributes.IMAGE_URL + "1");
             feature.Attributes.AddAttribute(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
-            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA, "en: page with space");
+            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA + ":en", "page with space");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source, Arg.Any<string>()).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer
@@ -121,7 +124,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     }
                 });
 
-            var result = _adapter.GetPointOfInterestById(poiId, null).Result;
+            var result = _adapter.GetPointOfInterestById(poiId, "en").Result;
 
             Assert.IsNotNull(result);
             Assert.AreEqual(string.Empty, result.Title);
@@ -143,6 +146,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source, Arg.Any<string>()).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });
+            _wikipediaGateway.GetByPageTitle(Arg.Any<string>(), Arg.Any<string>()).Returns(
+                new FeatureCollection(new Collection<IFeature> {new Feature(new Point(0, 0), new AttributesTable())}));
 
             var result = _adapter.GetPointOfInterestById(poiId, null).Result;
 
@@ -171,24 +176,51 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void GetPointsOfInterestById_PreferWikipediaOverWebsite_ShouldReturnIt()
         {
             var poiId = "poiId";
+            var language = "he";
             var feature = GetValidFeature(poiId, _adapter.Source);
-            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA, "he:page");
+            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA + ":" + language, "page");
             feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE, "website");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source, Arg.Any<string>()).Returns(feature);
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer { Routes = new List<RouteData>() });
+            _wikipediaGateway.GetByPageTitle(Arg.Any<string>(), Arg.Any<string>()).Returns(
+                new FeatureCollection(new Collection<IFeature> {new Feature(new Point(0, 0), new AttributesTable())}));
 
-            var result = _adapter.GetPointOfInterestById(poiId, null).Result;
+            var result = _adapter.GetPointOfInterestById(poiId, language).Result;
 
             Assert.IsNotNull(result);
             Assert.IsTrue(result.Url.Contains("page"));
         }
 
+        [TestMethod]
+        public void GetPointsOfInterestById_HasWikipediaTag_ShouldGetItFromWikipedia()
+        {
+            var poiId = "poiId";
+            var language = "he";
+            var feature = GetValidFeature(poiId, _adapter.Source);
+            feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA + ":" + language, "page");
+            _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source, Arg.Any<string>()).Returns(feature);
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
+                new DataContainer { Routes = new List<RouteData>() });
+            _wikipediaGateway.GetByPageTitle("page", language).Returns(new FeatureCollection(new Collection<IFeature>
+            {
+                new Feature(new Point(0, 0),
+                    new AttributesTable {{FeatureAttributes.IMAGE_URL, "imageUrl"}}
+                )
+            }));
+
+            var result = _adapter.GetPointOfInterestById(poiId, language).Result;
+
+            Assert.IsNotNull(result);
+            Assert.IsTrue(result.Url.Contains("page"));
+            Assert.AreEqual(1, result.ImagesUrls.Length);
+        }
 
         [TestMethod]
         public void AddPointOfInterest_ShouldUpdateOsmAndElasticSearch()
         {
             var gateway = SetupHttpFactory();
+            var language = "he";
             gateway.CreateElement(Arg.Any<string>(), Arg.Any<Node>()).Returns("42");
             var pointOfInterestToAdd = new PointOfInterestExtended
             {
@@ -199,11 +231,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
 
-            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, null, "he").Result;
+            var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, null, language).Result;
 
             Assert.IsNotNull(resutls);
             _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
-            gateway.Received().CreateElement(Arg.Any<string>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA].Contains("תל שלם")));
+            gateway.Received().CreateElement(Arg.Any<string>(), Arg.Is<OsmGeo>(x => x.Tags[FeatureAttributes.WIKIPEDIA + ":" + language].Contains("תל שלם")));
         }
 
         [TestMethod]
@@ -257,7 +289,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
             _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Wait();
 
-            gateway.Received().UpdateElement(Arg.Any<string>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA)));
+            gateway.Received().UpdateElement(Arg.Any<string>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en")));
         }
 
         [TestMethod]

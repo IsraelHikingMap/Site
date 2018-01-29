@@ -30,10 +30,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            var factory = Substitute.For<IHttpGatewayFactory>();
             _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
-            factory.CreateRemoteFileFetcherGateway(null).Returns(_remoteFileFetcherGateway);
-            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, factory, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
+            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
         }
 
         [TestMethod]

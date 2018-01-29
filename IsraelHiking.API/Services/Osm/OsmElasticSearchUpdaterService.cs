@@ -7,6 +7,7 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using NetTopologySuite.Features;
 using OsmSharp;
 using OsmSharp.Changesets;
 using OsmSharp.Complete;
@@ -127,10 +128,37 @@ namespace IsraelHiking.API.Services.Osm
             {
                 _logger.LogInformation("Starting rebuilding POIs database.");
                 var fetchTask = _adapters.Select(a => a.GetPointsForIndexing(stream)).ToArray();
-                var features = await Task.WhenAll(fetchTask);
-                await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features.SelectMany(v => v).ToList());
+                var features = (await Task.WhenAll(fetchTask)).SelectMany(v => v).ToList();
+                JoinWikipediaAndOsmPoint(features);
+                await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);
                 _logger.LogInformation("Finished rebuilding POIs database.");
             }
+        }
+
+        private void JoinWikipediaAndOsmPoint(List<Feature> features)
+        {
+            _logger.LogInformation("Starting joining wikipedia markers. Initial list size: " + features.Count);
+            var wikiFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() == Sources.WIKIPEDIA).ToList();
+            var osmWikiFeatures = features.Where(f =>
+                    f.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.WIKIPEDIA)) &&
+                    f.Attributes[FeatureAttributes.POI_SOURCE].ToString() == Sources.OSM)
+                .ToList();
+            foreach (var osmWikiFeature in osmWikiFeatures)
+            {
+                var wikiAttributeKeys = osmWikiFeature.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WIKIPEDIA));
+                foreach (var key in wikiAttributeKeys)
+                {
+                    var title = osmWikiFeature.Attributes[key].ToString();
+                    var wikiFeatureToRemove = wikiFeatures.FirstOrDefault(f =>
+                        f.Attributes.Exists(key) && f.Attributes[key].ToString() == title);
+                    if (wikiFeatureToRemove != null)
+                    {
+                        wikiFeatures.Remove(wikiFeatureToRemove);
+                        features.Remove(wikiFeatureToRemove);
+                    }
+                }
+            }
+            _logger.LogInformation("Finished joining wikipedia markers. Final list size: " + features.Count);
         }
     }
 }

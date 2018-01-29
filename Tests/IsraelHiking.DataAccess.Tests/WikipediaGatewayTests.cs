@@ -25,5 +25,15 @@ namespace IsraelHiking.DataAccess.Tests
             var results = wikiGateway.GetByLocation(new Coordinate(35.12, 31.773), "he").Result;
             Assert.IsTrue(results.Count > 0);
         }
+
+        [TestMethod]
+        [Ignore]
+        public void GetWikiPageByTitle()
+        {
+            var wikiGateway = new WikipediaGateway(new TraceLogger());
+            wikiGateway.Initialize().Wait();
+            var results = wikiGateway.GetByPageTitle("aaaaaaaaa", "he").Result;
+            Assert.IsNull(results);
+        }
     }
 }

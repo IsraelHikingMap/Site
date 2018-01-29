@@ -307,6 +307,10 @@ namespace IsraelHiking.API.Services
             {
                 return (1, iconTags.IconColorCategory);
             }
+            if (attributesTable.GetNames().Any(k => k.StartsWith(FeatureAttributes.WIKIPEDIA)))
+            {
+                return (1, new IconColorCategory("icon-wikipedia-w", Categories.WIKIPEDIA));
+            }
             if (attributesTable.GetNames().Any(k => k.Equals("highway", StringComparison.OrdinalIgnoreCase)))
             {
                 var icon = attributesTable["highway"].ToString() == "bus_stop"

@@ -49,6 +49,13 @@ namespace IsraelHiking.DataAccess
             throw new NotImplementedException("Please use GetByLocation instead");
         }
 
+        public Task<FeatureCollection> GetByPageTitle(string title, string language)
+        {
+            var site = _wikiSites[language];
+            var page = new WikiPage(site, title);
+            return ConvertPageToFeatureCollection(page, language);
+        }
+
         public async Task<List<Feature>> GetByLocation(Coordinate center, string language)
         {
             for (int retryIndex = 0; retryIndex < 3; retryIndex++)
@@ -88,21 +95,29 @@ namespace IsraelHiking.DataAccess
             var site = _wikiSites[language];
             var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).First();
             var page = new WikiPage(site, stub.Title);
+            return await ConvertPageToFeatureCollection(page, language);
+        }
+
+        private async Task<FeatureCollection> ConvertPageToFeatureCollection(WikiPage page, string language)
+        {
             await page.RefreshAsync(new WikiPageQueryProvider
             {
                 Properties =
                 {
-                    new ExtractsPropertyProvider { AsPlainText = true, IntroductionOnly = true, MaxSentences = 1},
+                    new ExtractsPropertyProvider {AsPlainText = true, IntroductionOnly = true, MaxSentences = 1},
                     new PageImagesPropertyProvider {QueryOriginalImage = true},
                     new GeoCoordinatesPropertyProvider {QueryPrimaryCoordinate = true}
                 }
             });
+            if (page.Exists == false)
+            {
+                return null;
+            }
             var geoCoordinate = page.GetPropertyGroup<GeoCoordinatesPropertyGroup>().PrimaryCoordinate;
             var coordinate = new Coordinate(geoCoordinate.Longitude, geoCoordinate.Latitude);
-            var attributes = GetAttributes(coordinate, page.Title, id, language);
-            attributes.Add(FeatureAttributes.DESCRIPTION, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
+            var attributes = GetAttributes(coordinate, page.Title, page.Id.ToString(), language);
+            attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
             attributes.Add(FeatureAttributes.IMAGE_URL, page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url);
-            attributes.Add(FeatureAttributes.WEBSITE, $"https://{language}.wikipedia.org/?curid={page.Id}");
 
             return new FeatureCollection(new Collection<IFeature> { new Feature(new Point(coordinate), attributes) });
         }
@@ -118,6 +133,9 @@ namespace IsraelHiking.DataAccess
             {
                 {FeatureAttributes.ID, id},
                 {FeatureAttributes.NAME, title},
+                {FeatureAttributes.NAME + ":" + language, title},
+                {FeatureAttributes.WIKIPEDIA + ":" + language, title},
+                {FeatureAttributes.WIKIPEDIA, language + ":" + title},
                 {FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA},
                 {FeatureAttributes.POI_CATEGORY, Categories.WIKIPEDIA},
                 {FeatureAttributes.POI_LANGUAGE, language},

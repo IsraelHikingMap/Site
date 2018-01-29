@@ -19,7 +19,6 @@ namespace IsraelHiking.API.Services.Poi
     {
         private readonly IWikipediaGateway _wikipediaGateway;
         private readonly ILogger _logger;
-        private readonly IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private readonly IItmWgs84MathTransfromFactory _itmWgs84MathTransfromFactory;
 
         /// <inheritdoc />
@@ -27,7 +26,6 @@ namespace IsraelHiking.API.Services.Poi
             IElasticSearchGateway elasticSearchGateway,
             IDataContainerConverterService dataContainerConverterService,
             IWikipediaGateway wikipediaGateway,
-            IHttpGatewayFactory httpGatewayFactory,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger) :
             base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
@@ -35,7 +33,6 @@ namespace IsraelHiking.API.Services.Poi
             _wikipediaGateway = wikipediaGateway;
             _logger = logger;
             _itmWgs84MathTransfromFactory = itmWgs84MathTransfromFactory;
-            _remoteFileFetcherGateway = httpGatewayFactory.CreateRemoteFileFetcherGateway(null);
         }
 
         /// <inheritdoc />
