@@ -20,8 +20,8 @@ namespace IsraelHiking.API.Executors
             var coordinateSystemFactory = new CoordinateSystemFactory();
             var itmParameters = new List<ProjectionParameter>
             {
-                new ProjectionParameter("latitude_of_origin", 31.734393611111109123611111111111),
-                new ProjectionParameter("central_meridian", 35.204516944444442572222222222222),
+                new ProjectionParameter("latitude_of_origin", 31 + (44 + 03.8170/60)/60),
+                new ProjectionParameter("central_meridian", 35 + (12 + 16.2610/60)/60),
                 new ProjectionParameter("false_northing", 626907.390),
                 new ProjectionParameter("false_easting", 219529.584),
                 new ProjectionParameter("scale_factor", 1.0000067)
