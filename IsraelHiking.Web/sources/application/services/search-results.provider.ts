@@ -31,6 +31,7 @@ export class SearchResultsProvider {
         for (let feature of data.features) {
             // HM TODO: change search results to POIs?
             let properties = feature.properties as any;
+            let isArea = feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon";
             try {
                 let singleResult = {
                     title: this.getName(properties, language),
@@ -40,7 +41,9 @@ export class SearchResultsProvider {
                     id: properties.identifier,
                     type: properties.osmType,
                     location: L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.geolocation.alt),
-                    isRoute: feature.geometry.type !== "Point"
+                    isRoute: !isArea && feature.geometry.type !== "Point",
+                    isArea: isArea,
+                    isEditable: properties.poiSource === "OSM",
                 } as ISearchResults;
                 let geo = L.geoJSON(feature);
                 singleResult.bounds = geo.getBounds();

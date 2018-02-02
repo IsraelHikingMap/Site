@@ -58,6 +58,22 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var a = gateway.GetUrlById("123").Result;
             gateway.Delete(new ShareUrl {Id = "123", OsmUserId = "456"});
         }
+
+        [TestMethod]
+        [Ignore]
+        public void DeleteThenGet_ShouldReturnEmpty()
+        {
+            var gateway = new ElasticSearchGateway(new TraceLogger());
+            gateway.Initialize();
+            var id = "he_22216";
+            var feature = gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA, string.Empty).Result;
+            Assert.IsNotNull(feature);
+
+            gateway.DeletePointOfInterestById(id, Sources.WIKIPEDIA).Wait();
+
+            feature = gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA, string.Empty).Result;
+            Assert.IsNull(feature);
+        }
     }
 }
 

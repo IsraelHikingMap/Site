@@ -78,8 +78,8 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         });
     }
 
-    public selectRoutes = (routesData: Common.RouteData[]): void => {
-        throw new Error(`This function must be assigned by containing layer! ${routesData[0].name}`);
+    public selectRoutes = (routesData: Common.RouteData[], isArea: boolean): void => {
+        throw new Error(`This function must be assigned by containing layer! ${routesData[0].name}, Area?: ${isArea}`);
     };
     public clear = (): void => { throw new Error("This function must be assigned by the containing layer!") };
 
@@ -239,14 +239,14 @@ export class PoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         if (this.poiExtended &&
             this.extendedDataArrivedTimeStamp != null &&
             Date.now() - this.extendedDataArrivedTimeStamp.getTime() < PoiMarkerPopupComponent.THREE_HOURES) {
-            this.selectRoutes(this.poiExtended.dataContainer.routes);
+            this.selectRoutes(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
             return;
         }
         this.isLoading = true;
         this.poiService.getPoint(this.marker.identifier, this.source, this.type).then((poiExtended) => {
             this.extendedDataArrivedTimeStamp = new Date();
             this.initFromPointOfInterestExtended(poiExtended);
-            this.selectRoutes(this.poiExtended.dataContainer.routes);
+            this.selectRoutes(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
             this.isLoading = false;
         }, () => {
             this.isLoading = false;

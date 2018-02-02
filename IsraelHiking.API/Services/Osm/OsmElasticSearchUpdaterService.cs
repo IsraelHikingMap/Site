@@ -89,7 +89,7 @@ namespace IsraelHiking.API.Services.Osm
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             foreach (var poiToRemove in changes.Delete)
             {
-                var task = _elasticSearchGateway.DeletePointOfInterestById(poiToRemove.Id.ToString(), poiToRemove.Type.ToString().ToLower());
+                var task = _elasticSearchGateway.DeleteOsmPointOfInterestById(poiToRemove.Id.ToString(), poiToRemove.Type.ToString().ToLower());
                 deleteTasks.Add(task);
             }
             await Task.WhenAll(deleteTasks);

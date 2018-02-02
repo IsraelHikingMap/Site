@@ -53,7 +53,7 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public Dictionary<string, List<Feature>> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary)
         {
-            _logger.LogInformation("Preprocessing OSM data to GeoJson, total distict names: " + osmNamesDictionary.Keys.Count);
+            _logger.LogInformation("Preprocessing OSM data to GeoJson, total distinct names: " + osmNamesDictionary.Keys.Count);
             var geoJsonNamesDictionary = new Dictionary<string, List<Feature>>();
             foreach (var pair in osmNamesDictionary)
             {
@@ -73,6 +73,10 @@ namespace IsraelHiking.API.Executors
                 if (!isValidOp.IsValid)
                 {
                     _logger.LogError($"{g.Geometry.GeometryType} with ID: {g.Attributes[FeatureAttributes.ID]} {isValidOp.ValidationError.Message} ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
+                }
+                if (g.Geometry.IsEmpty)
+                {
+                    _logger.LogError($"{g.Geometry.GeometryType} with ID: {g.Attributes[FeatureAttributes.ID]} is an empty geometry - check for non-closed relations.");
                 }
             });
             
@@ -132,15 +136,10 @@ namespace IsraelHiking.API.Executors
                     {FeatureAttributes.LAT, placePoint.Geometry.Coordinate.Y},
                     {FeatureAttributes.LON, placePoint.Geometry.Coordinate.X}
                 };
-                feature.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, table);
-                foreach (var placePointAttributeName in placePoint.Attributes.GetNames())
-                {
-                    if (feature.Attributes.GetNames().Contains(placePointAttributeName) == false)
-                    {
-                        feature.Attributes.AddAttribute(placePointAttributeName, placePoint.Attributes[placePointAttributeName]);
-                    }
-                }
-                list.Remove(placePoint);
+                // setting the geometry of the area to the point to facilitate for updaing the place point.
+                placePoint.Geometry = feature.Geometry;
+                placePoint.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, table);
+                list.Remove(feature);
                 placesPoints.Remove(placePoint);
             }
         }
@@ -371,14 +370,24 @@ namespace IsraelHiking.API.Executors
             {
                 return;
             }
-            if (feature.Geometry.Coordinate == null)
+            if ((feature.Geometry is LineString || feature.Geometry is MultiLineString) && feature.Geometry.Coordinate != null)
+            {
+                var geoLocationTable = new AttributesTable
+                {
+                    {FeatureAttributes.LAT, feature.Geometry.Coordinate.Y},
+                    {FeatureAttributes.LON, feature.Geometry.Coordinate.X}
+                };
+                feature.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, geoLocationTable);
+                return;
+            }
+            if (feature.Geometry.Centroid == null || feature.Geometry.Centroid.IsEmpty)
             {
                 return;
             }
             var table = new AttributesTable
             {
-                {FeatureAttributes.LAT, feature.Geometry.Coordinate.Y},
-                {FeatureAttributes.LON, feature.Geometry.Coordinate.X}
+                {FeatureAttributes.LAT, feature.Geometry.Centroid.Y},
+                {FeatureAttributes.LON, feature.Geometry.Centroid.X}
             };
             feature.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, table);
         }

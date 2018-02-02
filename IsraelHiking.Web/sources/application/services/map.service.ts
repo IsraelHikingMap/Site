@@ -52,6 +52,11 @@ export class MapService {
         marker.bindTooltip(controlDiv, { permanent: true, direction: "bottom" } as L.TooltipOptions);
     }
 
+    public addAreaToReadOnlyLayer(readOnlyLayer: L.LayerGroup, routesData: Common.RouteData[]) {
+        let groupedLatLngs = this.getGroupedLatLngForAntPath(routesData[0].segments);
+        readOnlyLayer.addLayer(L.polygon(groupedLatLngs));
+    }
+
     public updateReadOnlyLayer = (readOnlyLayer: L.LayerGroup, routesData: Common.RouteData[]) => {
         readOnlyLayer.clearLayers();
 

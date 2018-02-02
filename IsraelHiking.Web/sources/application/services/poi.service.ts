@@ -34,6 +34,7 @@ export interface IPointOfInterest {
 export interface IPointOfInterestExtended extends IPointOfInterest {
     isEditable: boolean;
     isRoute: boolean;
+    isArea: boolean;
     imagesUrls: string[];
     description: string;
     url: string;

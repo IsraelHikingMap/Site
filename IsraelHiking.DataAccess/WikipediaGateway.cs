@@ -90,8 +90,9 @@ namespace IsraelHiking.DataAccess
 
         public async Task<FeatureCollection> GetById(string id)
         {
-            var language = id.Split('_').First();
-            var pageId = id.Split('_').Last();
+            var splitId = id.Split('_');
+            var language = splitId.First();
+            var pageId = splitId.Last();
             var site = _wikiSites[language];
             var stub = await WikiPageStub.FromPageIds(site, new[] { int.Parse(pageId) }).First();
             var page = new WikiPage(site, stub.Title);
@@ -131,7 +132,7 @@ namespace IsraelHiking.DataAccess
             };
             var attributes = new AttributesTable
             {
-                {FeatureAttributes.ID, id},
+                {FeatureAttributes.ID, language + "_" + id},
                 {FeatureAttributes.NAME, title},
                 {FeatureAttributes.NAME + ":" + language, title},
                 {FeatureAttributes.WIKIPEDIA + ":" + language, title},

@@ -66,6 +66,97 @@ namespace IsraelHiking.API.Tests.Services.Osm
         }
 
         [TestMethod]
+        public void PreprocessArea_ShouldGetGeoLocationCenter()
+        {
+            var node1 = CreateNode(1, 0, 0);
+            var node2 = CreateNode(1, 0, 1);
+            var node3 = CreateNode(1, 1, 1);
+            var node4 = CreateNode(1, 1, 0);
+            var way = new CompleteWay
+            {
+                Nodes = new[] { node1, node2, node3, node4, node1 },
+                Tags = new TagsCollection
+                {
+                    {FeatureAttributes.NAME, "name"}
+                }
+            };
+            var osmElements = new List<ICompleteOsmGeo> { way };
+            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { FeatureAttributes.NAME, osmElements } };
+
+            var results = _preprocessorExecutor.Preprocess(dictionary);
+
+            Assert.AreEqual(1, results.Keys.Count);
+            Assert.AreEqual(1, results[results.Keys.First()].Count);
+            var geoLocation = results[results.Keys.First()].First().Attributes[FeatureAttributes.GEOLOCATION] as IAttributesTable;
+            Assert.IsNotNull(geoLocation);
+            Assert.AreEqual(0.5, geoLocation[FeatureAttributes.LAT]);
+            Assert.AreEqual(0.5, geoLocation[FeatureAttributes.LAT]);
+        }
+
+        [TestMethod]
+        public void PreprocessOneWay_ShouldGetGeoLocationAtStart()
+        {
+            var node1 = CreateNode(1);
+            var node2 = CreateNode(2);
+            var way = new CompleteWay
+            {
+                Nodes = new[] {node1, node2},
+                Tags = new TagsCollection
+                {
+                    {FeatureAttributes.NAME, "name"}
+                }
+            };
+            var osmElements = new List<ICompleteOsmGeo> { way };
+            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { FeatureAttributes.NAME, osmElements } };
+
+            var results = _preprocessorExecutor.Preprocess(dictionary);
+
+            Assert.AreEqual(1, results.Keys.Count);
+            Assert.AreEqual(1, results[results.Keys.First()].Count);
+            var geoLocation = results[results.Keys.First()].First().Attributes[FeatureAttributes.GEOLOCATION] as IAttributesTable;
+            Assert.IsNotNull(geoLocation);
+            Assert.AreEqual(node1.Latitude, geoLocation[FeatureAttributes.LAT]);
+        }
+
+        [TestMethod]
+        public void PreprocessAreaRelationRoute_ShouldGetGeoLocationAtStart()
+        {
+            var node1 = CreateNode(1, 0, 0);
+            var node2 = CreateNode(2, 1, 1);
+            var node3 = CreateNode(2, 1, 0);
+            var way1 = new CompleteWay
+            {
+                Nodes = new[] { node1, node2, node3 },
+            };
+            var way2 = new CompleteWay
+            {
+                Nodes = new[] { node3, node1 },
+            };
+            var relaction = new CompleteRelation
+            {
+                Members = new []
+                {
+                    new CompleteRelationMember { Member = way1, Role = "" },
+                    new CompleteRelationMember { Member = way2, Role = "" },
+                },
+                Tags = new TagsCollection
+                {
+                    {"route", "bike"}
+                }
+            };
+            var osmElements = new List<ICompleteOsmGeo> { relaction };
+            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>> { { FeatureAttributes.NAME, osmElements } };
+
+            var results = _preprocessorExecutor.Preprocess(dictionary);
+
+            Assert.AreEqual(1, results.Keys.Count);
+            Assert.AreEqual(1, results[results.Keys.First()].Count);
+            var geoLocation = results[results.Keys.First()].First().Attributes[FeatureAttributes.GEOLOCATION] as IAttributesTable;
+            Assert.IsNotNull(geoLocation);
+            Assert.AreEqual(node1.Latitude, geoLocation[FeatureAttributes.LAT]);
+        }
+
+        [TestMethod]
         public void PreprocessOneWayAndOneRelation_ShouldRemoveWayAndAddItToRelation()
         {
             var node1 = CreateNode(1);

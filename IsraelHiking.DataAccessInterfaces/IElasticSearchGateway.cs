@@ -21,6 +21,7 @@ namespace IsraelHiking.DataAccessInterfaces
         Task UpdatePointsOfInterestData(List<Feature> features);
         Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language);
         Task<Feature> GetPointOfInterestById(string id, string source, string type);
-        Task DeletePointOfInterestById(string id, string type);
+        Task DeleteOsmPointOfInterestById(string id, string type);
+        Task DeletePointOfInterestById(string id, string source);
     }
 }

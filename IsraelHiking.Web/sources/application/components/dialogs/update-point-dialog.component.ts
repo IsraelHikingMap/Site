@@ -64,8 +64,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             } as ISelectableCategory);
             console.log(this.categories);
         }
-        this.selectedCategory = this.categories[0];
-        this.categories[0].selectedIcon = this.categories[0].icons[0];
+        this.selectedCategory = null;
 
         for (let category of this.categories) {
             let icon = _.find(category.icons, iconToFind => iconToFind.icon === markerIcon);
@@ -73,6 +72,13 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
                 this.selectCategory({ value: category } as MatSelectChange);
                 this.selectIcon(icon);
             }
+        }
+        if (this.selectedCategory == null) {
+            let category = _.find(this.categories, categoryToFind => categoryToFind.name === "Other");
+            let icon = { icon: markerIcon, color: "black", label: this.resources.other } as IIconColorLabel;
+            category.icons.push(icon);
+            this.selectCategory({ value: category } as MatSelectChange);
+            this.selectIcon(icon);
         }
     }
 

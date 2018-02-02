@@ -333,9 +333,15 @@ namespace IsraelHiking.DataAccess
             return response.Documents.FirstOrDefault();
         }
 
-        public Task DeletePointOfInterestById(string id, string type)
+        public Task DeleteOsmPointOfInterestById(string id, string type)
         {
             var fullId = GetId(type, id, Sources.OSM);
+            return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
+        }
+
+        public Task DeletePointOfInterestById(string id, string source)
+        {
+            var fullId = GetId(string.Empty, source, id);
             return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
         }
 

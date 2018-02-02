@@ -9,6 +9,7 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using OsmSharp;
 using OsmSharp.Complete;
 using OsmSharp.Tags;
@@ -57,14 +58,14 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = null)
         {
             IFeature feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM, type);
-            if (GetWikipediaTitle(feature.Attributes, language) == string.Empty ||
+            if (feature.Attributes.GetWikipediaTitle(language) == string.Empty ||
                 GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language) != string.Empty ||
                 feature.Attributes.GetNames().Contains(FeatureAttributes.IMAGE_URL))
             {
                 return await FeatureToExtendedPoi(feature, language);
             }
             // OSM+Wikipedia POI
-            var title = GetWikipediaTitle(feature.Attributes, language);
+            var title = feature.Attributes.GetWikipediaTitle(language);
             var featureCollection = await _wikipediaGateway.GetByPageTitle(title, language);
             if (featureCollection == null)
             {
@@ -87,10 +88,9 @@ namespace IsraelHiking.API.Services.Poi
         {
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
             await AddExtendedData(poiItem, feature, language);
-            poiItem.IsRoute = poiItem.DataContainer.Routes.Any(r => r.Segments.Count > 1);
-            // Advance edit requires the relevant icon to be available - so only the known tags are supported.
-            poiItem.IsEditable = _tagsHelper.GetAllTags()
-                .Any(t => feature.Attributes.GetNames().Contains(t.Key) && feature.Attributes[t.Key].Equals(t.Value));
+            poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
+            poiItem.IsRoute = !poiItem.IsArea && poiItem.DataContainer.Routes.Any(r => r.Segments.Count > 1);
+            poiItem.IsEditable = true;
             return poiItem;
         }
 
@@ -267,6 +267,20 @@ namespace IsraelHiking.API.Services.Poi
             if (feature != null)
             {
                 await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> {feature});
+                foreach (var language in Languages.Array)
+                {
+                    var title = feature.Attributes.GetWikipediaTitle(language);
+                    if (string.IsNullOrWhiteSpace(title))
+                    {
+                        continue;
+                    }
+                    var pageFetaure = await _wikipediaGateway.GetByPageTitle(title, language);
+                    if (pageFetaure == null)
+                    {
+                        continue;
+                    }
+                    await _elasticSearchGateway.DeletePointOfInterestById(pageFetaure.Features.First().Attributes[FeatureAttributes.ID].ToString(), Sources.WIKIPEDIA);
+                }
             }
             return feature;
         }
@@ -297,11 +311,10 @@ namespace IsraelHiking.API.Services.Poi
         private void AddTagsByIcon(TagsCollectionBase tags, string icon)
         {
             var tagsList = _tagsHelper.FindTagsForIcon(icon);
-            if (tagsList.Any() == false)
+            if (tagsList.Any())
             {
-                return;
+                tags.Add(tagsList.First().Key, tagsList.First().Value);
             }
-            tags.Add(tagsList.First().Key, tagsList.First().Value);
         }
 
         private void RemoveTagsByIcon(TagsCollectionBase tags, string icon)
@@ -342,17 +355,6 @@ namespace IsraelHiking.API.Services.Poi
                    feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL));
         }
 
-        /// <inheritdoc />
-        protected override string GetWebsiteUrl(IFeature feature, string language)
-        {
-            var title = GetWikipediaTitle(feature.Attributes, language);
-            if (string.IsNullOrWhiteSpace(title))
-            {
-                return base.GetWebsiteUrl(feature, language);
-            }
-            return $"https://{language}.wikipedia.org/wiki/{title.Trim().Replace(" ", "_")}";
-        }
-
         private void SetWebsiteUrl(TagsCollectionBase tags, PointOfInterestExtended pointOfInterest)
         {
             var regexp = new Regex("((https?://)|^)([a-z]+).wikipedia.org/wiki/(.*)");
@@ -370,28 +372,10 @@ namespace IsraelHiking.API.Services.Poi
             }
         }
 
-        private string GetWikipediaTitle(IAttributesTable attributes, string language)
+        /// <inheritdoc />
+        protected override string GetWebsiteUrl(IFeature feature, string language)
         {
-            if (!attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.WIKIPEDIA)))
-            {
-                return string.Empty;
-            }
-            var wikiWithLanguage = FeatureAttributes.WIKIPEDIA + ":" + language;
-            if (attributes.Exists(wikiWithLanguage))
-            {
-                return attributes[wikiWithLanguage].ToString();
-            }
-            if (!attributes.Exists(FeatureAttributes.WIKIPEDIA))
-            {
-                return string.Empty;
-            }
-            var titleWithLanguage = attributes[FeatureAttributes.WIKIPEDIA].ToString();
-            var languagePrefix = language + ":";
-            if (titleWithLanguage.StartsWith(languagePrefix))
-            {
-                return titleWithLanguage.Substring(languagePrefix.Length);
-            }
-            return string.Empty;
+            return WebsiteUrlFeatureHelper.GetWikipediaUrl(feature, language);
         }
     }
 }

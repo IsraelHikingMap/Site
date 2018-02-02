@@ -124,9 +124,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns></returns>
         protected virtual string GetWebsiteUrl(IFeature feature, string language)
         {
-            return feature.Attributes.GetNames().Contains(FeatureAttributes.WEBSITE)
-                ? feature.Attributes[FeatureAttributes.WEBSITE].ToString()
-                : string.Empty;
+            return WebsiteUrlFeatureHelper.GetWebsiteUrl(feature, language);
         }
     }
 }
