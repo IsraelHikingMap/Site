@@ -11,7 +11,6 @@ namespace IsraelHiking.API.Services
     public class TagsHelper : ITagsHelper
     {
         private readonly ConfigurationData _options;
-        //private readonly Dictionary<string, IconTags> _iconsToTags;
         private readonly List<Category> _categories;
 
         /// <summary>
@@ -298,7 +297,10 @@ namespace IsraelHiking.API.Services
         {
             if (attributesTable.GetNames().Any(k => k.Equals("place", StringComparison.OrdinalIgnoreCase)))
             {
-                return (1, new IconColorCategory("icon-home"));
+                var category = attributesTable.GetNames().Any(k => k.StartsWith(FeatureAttributes.WIKIPEDIA))
+                    ? Categories.WIKIPEDIA
+                    : Categories.NONE;
+                return (1, new IconColorCategory("icon-home", category));
             }
             var iconTags = _categories.SelectMany(c => c.Items)
                 .FirstOrDefault(i => i.Tags
