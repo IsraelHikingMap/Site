@@ -53,6 +53,7 @@ export class MapService {
     }
 
     public addAreaToReadOnlyLayer(readOnlyLayer: L.LayerGroup, routesData: Common.RouteData[]) {
+        readOnlyLayer.clearLayers();
         let groupedLatLngs = this.getGroupedLatLngForAntPath(routesData[0].segments);
         readOnlyLayer.addLayer(L.polygon(groupedLatLngs));
     }

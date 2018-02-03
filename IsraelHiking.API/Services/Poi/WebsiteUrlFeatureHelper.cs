@@ -1,6 +1,7 @@
 ﻿
 using System.Linq;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Services.Poi
@@ -18,7 +19,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns></returns>
         public static string GetWebsiteUrl(IFeature feature, string language)
         {
-            return feature.Attributes.GetNames().Contains(FeatureAttributes.WEBSITE)
+            return feature.Attributes.Exists(FeatureAttributes.WEBSITE)
                 ? feature.Attributes[FeatureAttributes.WEBSITE].ToString()
                 : string.Empty;
         }
@@ -31,7 +32,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns>A url, empty string if none were found</returns>
         public static string GetWikipediaUrl(IFeature feature, string language)
         {
-            var title = GetWikipediaTitle(feature.Attributes, language);
+            var title = feature.Attributes.GetWikipediaTitle(language);
             if (string.IsNullOrWhiteSpace(title))
             {
                 return GetWebsiteUrl(feature, language);
@@ -39,34 +40,6 @@ namespace IsraelHiking.API.Services.Poi
             return $"https://{language}.wikipedia.org/wiki/{title.Trim().Replace(" ", "_")}";
         }
 
-        /// <summary>
-        /// This is an extention method to attribute table to get the wikipedia page title by language
-        /// </summary>
-        /// <param name="attributes">The attributes table</param>
-        /// <param name="language">The required language</param>
-        /// <returns>The page title, empty if none exist</returns>
-        public static string GetWikipediaTitle(this IAttributesTable attributes, string language)
-        {
-            if (!attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.WIKIPEDIA)))
-            {
-                return string.Empty;
-            }
-            var wikiWithLanguage = FeatureAttributes.WIKIPEDIA + ":" + language;
-            if (attributes.Exists(wikiWithLanguage))
-            {
-                return attributes[wikiWithLanguage].ToString();
-            }
-            if (!attributes.Exists(FeatureAttributes.WIKIPEDIA))
-            {
-                return string.Empty;
-            }
-            var titleWithLanguage = attributes[FeatureAttributes.WIKIPEDIA].ToString();
-            var languagePrefix = language + ":";
-            if (titleWithLanguage.StartsWith(languagePrefix))
-            {
-                return titleWithLanguage.Substring(languagePrefix.Length);
-            }
-            return string.Empty;
-        }
+        
     }
 }

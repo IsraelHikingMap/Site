@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -60,7 +61,7 @@ namespace IsraelHiking.API.Services.Poi
             IFeature feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM, type);
             if (feature.Attributes.GetWikipediaTitle(language) == string.Empty ||
                 GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language) != string.Empty ||
-                feature.Attributes.GetNames().Contains(FeatureAttributes.IMAGE_URL))
+                feature.Attributes.Exists(FeatureAttributes.IMAGE_URL))
             {
                 return await FeatureToExtendedPoi(feature, language);
             }
@@ -75,7 +76,7 @@ namespace IsraelHiking.API.Services.Poi
             var wikiFeature = featureCollection.Features.First();
             foreach (var wikiFeatureAttributeKey in wikiFeature.Attributes.GetNames())
             {
-                if (feature.Attributes.GetNames().Contains(wikiFeatureAttributeKey))
+                if (feature.Attributes.Exists(wikiFeatureAttributeKey))
                 {
                     continue;
                 }
@@ -181,50 +182,10 @@ namespace IsraelHiking.API.Services.Poi
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(memoryStream, relevantTagsDictionary);
             osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
-            RemoveKklRoutes(osmNamesDictionary);
-            var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-            ChangeLwnHikingRoutesToNoneCategory(geoJsonNamesDictionary);
-            return geoJsonNamesDictionary.Values.SelectMany(v => v).ToList();
-        }
-
-        private static void RemoveKklRoutes(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary)
-        {
-            var listOfKeysToRemove = new List<string>();
-            foreach (var key in osmNamesDictionary.Keys)
-            {
-                var list = osmNamesDictionary[key];
-                var itemsToRemove = list.Where(osm => osm.Type == OsmGeoType.Relation &&
-                                                      osm.Tags.Contains("operator", "kkl") &&
-                                                      osm.Tags.Contains("route", "mtb")).ToArray();
-                foreach (var itemToRemove in itemsToRemove)
-                {
-                    list.Remove(itemToRemove);
-                }
-                if (!list.Any())
-                {
-                    listOfKeysToRemove.Add(key);
-                }
-            }
-            foreach (var key in listOfKeysToRemove)
-            {
-                osmNamesDictionary.Remove(key);
-            }
-        }
-
-        private static void ChangeLwnHikingRoutesToNoneCategory(Dictionary<string, List<Feature>> geoJsonNamesDictionary)
-        {
-            foreach (var key in geoJsonNamesDictionary.Keys)
-            {
-                var list = geoJsonNamesDictionary[key];
-                var itemsToUpdate = list.Where(feature => feature.Attributes.Exists("network") &&
-                                                          feature.Attributes["network"].ToString() == "lwn" &&
-                                                          feature.Attributes.Exists("route") &&
-                                                          feature.Attributes["route"].ToString() == "hiking");
-                foreach (var feature in itemsToUpdate)
-                {
-                    feature.Attributes[FeatureAttributes.POI_CATEGORY] = Categories.NONE;
-                }
-            }
+            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
+            var containers = features.Where(f => f.IsValidContainer())
+                .OrderBy(f => f.Geometry.Area).ToList();
+            return _osmGeoJsonPreprocessorExecutor.AddAddress(features, containers);
         }
 
         private void SyncImages(TagsCollectionBase tags, string[] images)
@@ -258,7 +219,7 @@ namespace IsraelHiking.API.Services.Poi
                 {
                     {name ?? string.Empty, new List<ICompleteOsmGeo> {osm}}
                 });
-            return features.Values.FirstOrDefault()?.FirstOrDefault();
+            return features.FirstOrDefault();
         }
 
         private async Task<Feature> UpdateElasticSearch(ICompleteOsmGeo osm, string name)

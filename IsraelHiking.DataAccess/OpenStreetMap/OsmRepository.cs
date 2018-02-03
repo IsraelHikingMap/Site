@@ -7,7 +7,7 @@ using OsmSharp.Streams;
 using OsmSharp.Streams.Complete;
 using Microsoft.Extensions.Logging;
 using System.IO;
-using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using OsmSharp;
 
 namespace IsraelHiking.DataAccess.OpenStreetMap

@@ -196,6 +196,21 @@ namespace IsraelHiking.DataAccess
             return response.Documents.ToList();
         }
 
+        public async Task<List<Feature>> GetContainers(Coordinate coordinate)
+        {
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Index(OSM_POIS_ALIAS)
+                    .Size(100)
+                    .Query(q =>
+                        q.GeoShapePoint(g =>
+                            g.Coordinates(ConvertCoordinate(coordinate))
+                                .Field(f => f.Geometry)
+                                .Relation(GeoShapeRelation.Contains))
+                    )
+            );
+            return response.Documents.ToList();
+        }
+
         private async Task UpdateZeroDownTime(string index1, string index2, string alias, Func<string, Task> createIndexDelegate, List<Feature> features)
         {
             var currentIndex = index1;
@@ -362,12 +377,13 @@ namespace IsraelHiking.DataAccess
         private Task CreateHighwaysIndex(string highwaysIndexName)
         {
             return _elasticClient.CreateIndexAsync(highwaysIndexName,
-                c => c.Mappings(
-                    ms => ms.Map<Feature>(m =>
-                        m.Properties(ps => ps.GeoShape(g => g.Name(f => f.Geometry)
-                            .Tree(GeoTree.Geohash)
-                            .TreeLevels(10)
-                            .DistanceErrorPercentage(0.2)))
+                c => c.Mappings(ms =>
+                    ms.Map<Feature>(m =>
+                        m.Properties(ps =>
+                            ps.GeoShape(g => g.Name(f => f.Geometry)
+                                .Tree(GeoTree.Geohash)
+                                .TreeLevels(10)
+                                .DistanceErrorPercentage(0.2)))
                     )
                 )
             );
@@ -376,13 +392,16 @@ namespace IsraelHiking.DataAccess
         private Task CreatePointsOfInterestIndex(string poisIndexName)
         {
             return _elasticClient.CreateIndexAsync(poisIndexName,
-                f => f.Mappings(ms => ms
-                    .Map<Feature>(m => m
-                        .Properties(ps => ps
-                            .Object<AttributesTable>(o => o
+                c => c.Mappings(ms =>
+                    ms.Map<Feature>(m =>
+                        m.Properties(ps =>
+                            ps.Object<AttributesTable>(o => o
                                 .Name(PROPERTIES)
                                 .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.GEOLOCATION)))
-                            )
+                            ).GeoShape(g => g.Name(f => f.Geometry)
+                                .Tree(GeoTree.Geohash)
+                                .TreeLevels(10)
+                                .DistanceErrorPercentage(0.2))
                         )
                     )
                 ).Settings(s => s.Setting("index.mapping.total_fields.limit", 10000))

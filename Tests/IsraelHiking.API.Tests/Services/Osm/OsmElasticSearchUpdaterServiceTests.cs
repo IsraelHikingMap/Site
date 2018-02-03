@@ -55,7 +55,10 @@ namespace IsraelHiking.API.Tests.Services.Osm
             var changes = new OsmChange {Create = new OsmGeo[0], Modify = new OsmGeo[0], Delete = new OsmGeo[0]};
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<Dictionary<string, List<ICompleteOsmGeo>>>(x => x.Values.Count == 0))
-                .Returns(new Dictionary<string, List<Feature>>());
+                .Returns(new List<Feature>());
+            _geoJsonPreprocessorExecutor
+                .AddAddress(Arg.Is<List<Feature>>(x => x.Count == 0), Arg.Any<List<Feature>>())
+                .Returns(new List<Feature>());
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
                 .Returns(new List<Feature>());

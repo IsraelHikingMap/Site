@@ -71,11 +71,11 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns></returns>
         protected string GetAttributeByLanguage(IAttributesTable attributes, string key, string language)
         {
-            if (attributes.GetNames().Contains(key + ":" + language))
+            if (attributes.Exists(key + ":" + language))
             {
                 return attributes[key + ":" + language].ToString();
             }
-            if (attributes.GetNames().Contains(key))
+            if (attributes.Exists(key))
             {
                 return attributes[key].ToString();
             }
@@ -108,7 +108,7 @@ namespace IsraelHiking.API.Services.Poi
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                 .Select(n => feature.Attributes[n].ToString())
                 .ToArray();
-            poiItem.SourceImageUrl = feature.Attributes.GetNames().Contains(FeatureAttributes.SOURCE_IMAGE_URL)
+            poiItem.SourceImageUrl = feature.Attributes.Exists(FeatureAttributes.SOURCE_IMAGE_URL)
                 ? feature.Attributes[FeatureAttributes.SOURCE_IMAGE_URL].ToString()
                 : string.Empty;
             poiItem.Description = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language);

@@ -46,7 +46,7 @@ namespace IsraelHiking.API.Converters
         {
             return new gpxType
             {
-                creator = collection.Features.FirstOrDefault(f => f.Attributes.GetNames().Contains(CREATOR))?.Attributes[CREATOR]?.ToString() ?? string.Empty,
+                creator = collection.Features.FirstOrDefault(f => f.Attributes.Exists(CREATOR))?.Attributes[CREATOR]?.ToString() ?? string.Empty,
                 wpt = collection.Features.Where(f => f.Geometry is Point)
                     .Select(CreateWayPoint)
                     .Union(collection.Features.Where(f => f.Geometry is MultiPoint)
@@ -195,12 +195,12 @@ namespace IsraelHiking.API.Converters
 
         private string GetFeatureName(IFeature feature)
         {
-            return feature.Attributes.GetNames().Contains(NAME) ? feature.Attributes[NAME]?.ToString() : string.Empty;
+            return feature.Attributes.Exists(NAME) ? feature.Attributes[NAME]?.ToString() : string.Empty;
         }
 
         private string GetFeatureDescription(IFeature feature)
         {
-            return feature.Attributes.GetNames().Contains(DESCRIPTIOM) ? feature.Attributes[DESCRIPTIOM]?.ToString() : string.Empty;
+            return feature.Attributes.Exists(DESCRIPTIOM) ? feature.Attributes[DESCRIPTIOM]?.ToString() : string.Empty;
         }
     }
 }

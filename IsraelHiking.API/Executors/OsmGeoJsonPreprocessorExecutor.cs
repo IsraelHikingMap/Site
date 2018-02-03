@@ -4,6 +4,7 @@ using System.Linq;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Microsoft.Extensions.Logging;
@@ -51,20 +52,22 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc />
-        public Dictionary<string, List<Feature>> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary)
+        public List<Feature> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary)
         {
             _logger.LogInformation("Preprocessing OSM data to GeoJson, total distinct names: " + osmNamesDictionary.Keys.Count);
             var geoJsonNamesDictionary = new Dictionary<string, List<Feature>>();
             foreach (var pair in osmNamesDictionary)
             {
-                var osmList = MergeOsmElements(pair.Value)
+                var features = MergeOsmElements(pair.Value)
                         .Select(e => _osmGeoJsonConverter.ToGeoJson(e))
                         .Where(f => f != null)
                         .ToList();
-                if (osmList.Any())
+                if (!features.Any())
                 {
-                    geoJsonNamesDictionary[pair.Key] = osmList;
+                    continue;
                 }
+                AddAttributes(features);
+                geoJsonNamesDictionary[pair.Key] = features;
             }
 
             geoJsonNamesDictionary.Values.SelectMany(v => v).ToList().ForEach(g =>
@@ -79,33 +82,18 @@ namespace IsraelHiking.API.Executors
                     _logger.LogError($"{g.Geometry.GeometryType} with ID: {g.Attributes[FeatureAttributes.ID]} is an empty geometry - check for non-closed relations.");
                 }
             });
-            
-            _logger.LogInformation("Finished converting OSM data to GeoJson, Starting GeoJson preprocessing");
-            var containers = geoJsonNamesDictionary.Values
-                .SelectMany(v => v)
-                .Where(IsValidContainer)
-                .OrderBy(f => f.Geometry.Area).ToList();
-            _logger.LogInformation("Total possible containers: " + containers.Count);
-            var counter = 0;
-            foreach (var features in geoJsonNamesDictionary.Values)
-            {
-                PreprocessGeoJson(features, containers);
-                counter++;
-                if (counter % 5000 == 0)
-                {
-                    _logger.LogInformation($"Finished processing {counter} names of {geoJsonNamesDictionary.Values.Count}");
-                }
-            }
-            _logger.LogInformation("Finished GeoJson preprocessing");
-            return geoJsonNamesDictionary;
+            _logger.LogInformation("Finished GeoJson conversion");
+            var featuresToReturn = geoJsonNamesDictionary.SelectMany(v => v.Value);
+            featuresToReturn = RemoveKklRoutes(featuresToReturn);
+            var list = featuresToReturn.ToList();
+            ChangeLwnHikingRoutesToNoneCategory(list);
+            return list;
         }
 
-        private void PreprocessGeoJson(List<Feature> features, List<Feature> containers)
+        private void AddAttributes(List<Feature> features)
         {
-            MergePlacesPoints(features);
             foreach (var feature in features)
             {
-                AddAddressField(feature, containers);
                 (var searchFactor, var iconColorCategory) = _tagsHelper.GetInfo(feature.Attributes);
                 feature.Attributes.AddAttribute(FeatureAttributes.SEARCH_FACTOR, searchFactor);
                 feature.Attributes.AddAttribute(FeatureAttributes.ICON, iconColorCategory.Icon);
@@ -117,31 +105,73 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private void MergePlacesPoints(List<Feature> list)
+        private IEnumerable<Feature> RemoveKklRoutes(IEnumerable<Feature> features)
         {
-            var placesPoints = list.Where(f => f.Geometry is Point && f.Attributes.GetNames().Contains(PLACE)).ToList();
-            var nonPlacesPoints = list.Except(placesPoints)
-                .Where(f => f.Geometry is Polygon || f.Geometry is MultiPolygon)
-                .OrderByDescending(f => f.Attributes.GetNames().Contains(PLACE))
-                .ToList();
-            foreach (var feature in nonPlacesPoints)
+            return features.Where(f => f.Attributes[FeatureAttributes.OSM_TYPE].ToString() !=
+                                       OsmGeoType.Relation.ToString().ToLower() ||
+                                       f.Attributes.Has("operator", "kkl") == false ||
+                                       f.Attributes.Has("route", "mtb") == false);
+        }
+
+        /// <summary>
+        /// This function removed the geometries that are places and not points.
+        /// It should be used after the containers are fetcehd and not before!
+        /// </summary>
+        /// <param name="features"></param>
+        /// <returns></returns>
+        private List<Feature> RemovePlacesBoundary(List<Feature> features)
+        {
+            return features.Where(f => f.Attributes[FeatureAttributes.OSM_TYPE].ToString() ==
+                                       OsmGeoType.Node.ToString().ToLower() ||
+                                       f.Attributes.Exists(PLACE) == false).ToList();
+        }
+
+        private void ChangeLwnHikingRoutesToNoneCategory(List<Feature> features)
+        {
+            foreach (var feature in features.Where(feature => feature.Attributes.Has("network", "lwn") &&
+                                                              feature.Attributes.Has("route", "hiking")))
             {
-                var placePoint = placesPoints.FirstOrDefault(p => p.Geometry.Within(feature.Geometry));
-                if (placePoint == null)
-                {
-                    continue;
-                }
-                var table = new AttributesTable
-                {
-                    {FeatureAttributes.LAT, placePoint.Geometry.Coordinate.Y},
-                    {FeatureAttributes.LON, placePoint.Geometry.Coordinate.X}
-                };
-                // setting the geometry of the area to the point to facilitate for updaing the place point.
-                placePoint.Geometry = feature.Geometry;
-                placePoint.Attributes.AddAttribute(FeatureAttributes.GEOLOCATION, table);
-                list.Remove(feature);
-                placesPoints.Remove(placePoint);
+                feature.Attributes[FeatureAttributes.POI_CATEGORY] = Categories.NONE;
             }
+        }
+
+        private void UpdatePlacesGeometry(Feature feature, List<Feature> containers)
+        {
+            if (feature.Attributes.Exists(PLACE) == false || feature.Attributes.Exists(FeatureAttributes.NAME) == false)
+            {
+                return;
+            }
+
+            var placeContainer = containers.FirstOrDefault(c => c.Attributes.Exists(FeatureAttributes.NAME) &&
+                                                                 c.Attributes.Exists(PLACE) &&
+                                                                 c.Attributes[FeatureAttributes.NAME] ==
+                                                                 feature.Attributes[FeatureAttributes.NAME]);
+            if (placeContainer == null)
+            {
+                return;
+            }
+            // setting the geometry of the area to the point to facilitate for updating the place point while showing the area
+            feature.Geometry = feature.Geometry;
+        }
+
+        /// <inheritdoc />
+        public List<Feature> AddAddress(List<Feature> features, List<Feature> containers)
+        {
+            var counter = 0;
+            _logger.LogInformation($"Starting adding address to features: {features.Count}, containers: {containers.Count}");
+            features = RemovePlacesBoundary(features);
+            foreach (var feature in features)
+            {
+                AddAddressField(feature, containers);
+                UpdatePlacesGeometry(feature, containers);
+                counter++;
+                if (counter % 5000 == 0)
+                {
+                    _logger.LogInformation($"Finished adding address to {counter} names of {features.Count}");
+                }
+            }
+            _logger.LogInformation($"Finished adding address to features: {features.Count}");
+            return features;
         }
 
         private void AddAddressField(Feature feature, List<Feature> containers)
@@ -172,9 +202,9 @@ namespace IsraelHiking.API.Executors
             {
                 return;
             }
-            foreach (var attributeName in containingGeoJson.Attributes.GetNames().Where(n => n.StartsWith("name")))
+            foreach (var attributeName in containingGeoJson.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.NAME)))
             {
-                var addressName = attributeName.Replace("name", "address");
+                var addressName = attributeName.Replace(FeatureAttributes.NAME, "address");
                 if (feature.Attributes.Exists(addressName))
                 {
                     feature.Attributes[addressName] = containingGeoJson.Attributes[attributeName];
@@ -225,43 +255,6 @@ namespace IsraelHiking.API.Executors
                 }
             }
             return waysToKeep;
-        }
-
-        private bool IsValidContainer(Feature feature)
-        {
-            if (feature.Geometry is Point)
-            {
-                return false;
-            }
-            if (feature.Geometry is LineString)
-            {
-                return false;
-            }
-            if (feature.Geometry is MultiLineString)
-            {
-                return false;
-            }
-            if (feature.Geometry is MultiPoint)
-            {
-                return false;
-            }
-            var isFeatureADecentCity = feature.Attributes.GetNames().Contains("boundary") &&
-                                       feature.Attributes["boundary"].ToString() == "administrative" &&
-                                       feature.Attributes.GetNames().Contains("admin_level") &&
-                                       int.TryParse(feature.Attributes["admin_level"].ToString(), out int adminLevel) &&
-                                       adminLevel <= 8;
-            if (isFeatureADecentCity)
-            {
-                return true;
-            }
-            var isFeatureAForset = feature.Attributes.GetNames().Contains("landuse") &&
-                                   feature.Attributes["landuse"].ToString() == "forest";
-            if (isFeatureAForset)
-            {
-                return true;
-            }
-            (var _, var icon) = _tagsHelper.GetInfo(feature.Attributes);
-            return icon.Icon == "icon-nature-reserve" || icon.Icon == "icon-home";
         }
 
         /// <summary>
@@ -366,10 +359,6 @@ namespace IsraelHiking.API.Executors
         /// <param name="feature"></param>
         public static void UpdateLocation(Feature feature)
         {
-            if (feature.Attributes.GetNames().FirstOrDefault(n => n == FeatureAttributes.GEOLOCATION) != null)
-            {
-                return;
-            }
             if ((feature.Geometry is LineString || feature.Geometry is MultiLineString) && feature.Geometry.Coordinate != null)
             {
                 var geoLocationTable = new AttributesTable

@@ -2,7 +2,7 @@
 using System.Linq;
 using OsmSharp.Tags;
 
-namespace IsraelHiking.Common
+namespace IsraelHiking.Common.Extensions
 {
     public static class OsmExtensions
     {

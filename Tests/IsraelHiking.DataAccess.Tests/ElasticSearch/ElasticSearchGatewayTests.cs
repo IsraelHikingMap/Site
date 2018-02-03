@@ -74,6 +74,18 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             feature = gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA, string.Empty).Result;
             Assert.IsNull(feature);
         }
+
+        [TestMethod]
+        [Ignore]
+        public void GetContainers_ShouldGetSome()
+        {
+            var gateway = new ElasticSearchGateway(new TraceLogger());
+            gateway.Initialize();
+
+            var features = gateway.GetContainers(new Coordinate(35.225306, 32.703806)).Result;
+
+            Assert.IsTrue(features.Count > 0);
+        }
     }
 }
 

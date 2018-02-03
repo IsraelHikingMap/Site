@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
@@ -103,9 +104,21 @@ namespace IsraelHiking.API.Services.Osm
             }
             var allElemets = await Task.WhenAll(updateTasks);
             var osmNamesDictionary = allElemets.GroupBy(e => e.Tags.GetName()).ToDictionary(g => g.Key, g => g.ToList());
-            var geoJsonNamesDictionary = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-
-            await _elasticSearchGateway.UpdatePointsOfInterestData(geoJsonNamesDictionary.Values.SelectMany(v => v).ToList());
+            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
+            var containers = new List<Feature>();
+            foreach (var feature in features)
+            {
+                var currentContainers = await _elasticSearchGateway.GetContainers(feature.Geometry.Coordinate);
+                currentContainers = currentContainers.Where(cc => cc.IsValidContainer() &&
+                                                                  containers.FirstOrDefault(c =>
+                                                                      c.Attributes[FeatureAttributes.ID] ==
+                                                                      cc.Attributes[FeatureAttributes.ID]) == null)
+                    .OrderBy(c => c.Geometry.Area)
+                    .ToList();
+                containers.AddRange(currentContainers);
+            }
+            features = _osmGeoJsonPreprocessorExecutor.AddAddress(features, containers);
+            await _elasticSearchGateway.UpdatePointsOfInterestData(features);
         }
 
         private bool IsRelevantPointOfInterest(OsmGeo osm, List<KeyValuePair<string, string>> relevantTagsDictionary)
@@ -149,8 +162,7 @@ namespace IsraelHiking.API.Services.Osm
                 foreach (var key in wikiAttributeKeys)
                 {
                     var title = osmWikiFeature.Attributes[key].ToString();
-                    var wikiFeatureToRemove = wikiFeatures.FirstOrDefault(f =>
-                        f.Attributes.Exists(key) && f.Attributes[key].ToString() == title);
+                    var wikiFeatureToRemove = wikiFeatures.FirstOrDefault(f => f.Attributes.Has(key, title));
                     if (wikiFeatureToRemove != null)
                     {
                         wikiFeatures.Remove(wikiFeatureToRemove);

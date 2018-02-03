@@ -348,7 +348,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
                             },
                             Members = new[]
                             {
-                                new CompleteRelationMember {Member = new CompleteWay(), Role = "outer"}
+                                new CompleteRelationMember {Member = new CompleteWay {Nodes = new []
+                                {
+                                    new Node {  Latitude = 0, Longitude = 0 },
+                                    new Node {  Latitude = 1, Longitude = 1 },
+                                    new Node {  Latitude = 2, Longitude = 2 }
+                                }}, Role = "outer"}
                             }
                         }
                     }
