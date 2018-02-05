@@ -31,7 +31,7 @@ export class LayersService {
     public static ESRI = "ESRI";
     public static MIN_ZOOM = 7;
     public static MAX_NATIVE_ZOOM = 16;
-    public static MIM_ESRI_ZOOM = 0;
+    public static MIN_ESRI_ZOOM = 0;
     public static MAX_ESRI_ZOOM = 16;
 
     private static MAX_ZOOM = 20;
@@ -101,7 +101,7 @@ export class LayersService {
             key: LayersService.ESRI,
             address: LayersService.ESRI_ADDRESS,
             isEditable: false,
-            minZoom: MIM_ESRI_ZOOM,
+            minZoom: LayersService.MIN_ESRI_ZOOM,
             maxZoom: LayersService.MAX_ESRI_ZOOM
         } as ILayer, LayersService.ESRI_ATTRIBUTION);
 
