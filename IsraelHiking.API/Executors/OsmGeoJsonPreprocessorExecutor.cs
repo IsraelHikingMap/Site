@@ -113,19 +113,6 @@ namespace IsraelHiking.API.Executors
                                        f.Attributes.Has("route", "mtb") == false);
         }
 
-        /// <summary>
-        /// This function removed the geometries that are places and not points.
-        /// It should be used after the containers are fetcehd and not before!
-        /// </summary>
-        /// <param name="features"></param>
-        /// <returns></returns>
-        private List<Feature> RemovePlacesBoundary(List<Feature> features)
-        {
-            return features.Where(f => f.Attributes[FeatureAttributes.OSM_TYPE].ToString() ==
-                                       OsmGeoType.Node.ToString().ToLower() ||
-                                       f.Attributes.Exists(PLACE) == false).ToList();
-        }
-
         private void ChangeLwnHikingRoutesToNoneCategory(List<Feature> features)
         {
             foreach (var feature in features.Where(feature => feature.Attributes.Has("network", "lwn") &&
@@ -135,35 +122,37 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private void UpdatePlacesGeometry(Feature feature, List<Feature> containers)
+        private Feature UpdatePlacesGeometry(Feature feature, List<Feature> containers)
         {
-            if (feature.Attributes.Exists(PLACE) == false || feature.Attributes.Exists(FeatureAttributes.NAME) == false)
+            if (feature.Geometry is Point == false ||
+                feature.Attributes.Exists(PLACE) == false || 
+                feature.Attributes.Exists(FeatureAttributes.NAME) == false)
             {
-                return;
+                return null;
             }
 
             var placeContainer = containers.FirstOrDefault(c => c.Attributes.Exists(FeatureAttributes.NAME) &&
-                                                                 c.Attributes.Exists(PLACE) &&
-                                                                 c.Attributes[FeatureAttributes.NAME] ==
-                                                                 feature.Attributes[FeatureAttributes.NAME]);
+                                                                c.Attributes.Exists(PLACE) &&
+                                                                c.Attributes[FeatureAttributes.NAME].ToString() ==
+                                                                feature.Attributes[FeatureAttributes.NAME].ToString());
             if (placeContainer == null)
             {
-                return;
+                return null;
             }
             // setting the geometry of the area to the point to facilitate for updating the place point while showing the area
-            feature.Geometry = feature.Geometry;
+            feature.Geometry = placeContainer.Geometry;
+            return placeContainer;
         }
 
         /// <inheritdoc />
         public List<Feature> AddAddress(List<Feature> features, List<Feature> containers)
         {
             var counter = 0;
+            features = HandlePlaces(features, containers);
             _logger.LogInformation($"Starting adding address to features: {features.Count}, containers: {containers.Count}");
-            features = RemovePlacesBoundary(features);
             foreach (var feature in features)
             {
                 AddAddressField(feature, containers);
-                UpdatePlacesGeometry(feature, containers);
                 counter++;
                 if (counter % 5000 == 0)
                 {
@@ -174,6 +163,31 @@ namespace IsraelHiking.API.Executors
             return features;
         }
 
+        private List<Feature> HandlePlaces(List<Feature> features, List<Feature> containers)
+        {
+            var places = containers.Where(f => f.Attributes.Exists(PLACE)).ToList();
+            _logger.LogInformation($"Starting places handling: {features.Count}, places: {places.Count}");
+            var featuresToRemove = new List<Feature>();
+            foreach (var feature in features)
+            {
+                var placeToRemove = UpdatePlacesGeometry(feature, places);
+                if (placeToRemove != null)
+                {
+                    featuresToRemove.Add(placeToRemove);
+                }
+            }
+            var results = features.Except(
+                features.Where(f =>
+                    featuresToRemove.Any(ftr =>
+                        ftr.Attributes[FeatureAttributes.ID].Equals(f.Attributes[FeatureAttributes.ID]) &&
+                        ftr.Attributes[FeatureAttributes.OSM_TYPE].Equals(OsmGeoType.Node.ToString().ToLower()) == false
+                    )
+                )
+            ).ToList();
+            _logger.LogInformation($"Finished places handling: {results.Count}");
+            return results;
+        }
+
         private void AddAddressField(Feature feature, List<Feature> containers)
         {
             Feature invalidFeature = null;
@@ -181,7 +195,9 @@ namespace IsraelHiking.API.Executors
             {
                 try
                 {
-                    return f != feature && f.Geometry.Contains(feature.Geometry);
+                    return f != feature && 
+                           f.Geometry.EqualsTopologically(feature.Geometry) == false && 
+                           f.Geometry.Contains(feature.Geometry);
                 }
                 catch (Exception)
                 {

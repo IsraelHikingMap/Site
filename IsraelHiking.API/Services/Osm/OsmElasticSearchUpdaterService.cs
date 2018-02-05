@@ -111,8 +111,9 @@ namespace IsraelHiking.API.Services.Osm
                 var currentContainers = await _elasticSearchGateway.GetContainers(feature.Geometry.Coordinate);
                 currentContainers = currentContainers.Where(cc => cc.IsValidContainer() &&
                                                                   containers.FirstOrDefault(c =>
-                                                                      c.Attributes[FeatureAttributes.ID] ==
-                                                                      cc.Attributes[FeatureAttributes.ID]) == null)
+                                                                      c.Attributes[FeatureAttributes.ID]
+                                                                          .Equals(cc.Attributes[FeatureAttributes.ID])
+                                                                  ) == null)
                     .OrderBy(c => c.Geometry.Area)
                     .ToList();
                 containers.AddRange(currentContainers);

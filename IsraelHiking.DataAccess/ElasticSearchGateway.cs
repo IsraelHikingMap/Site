@@ -282,7 +282,7 @@ namespace IsraelHiking.DataAccess
             });
             if (result.IsValid == false)
             {
-                result.ItemsWithErrors.ToList().ForEach(i => _logger.LogError($"Inserting {i.Id} falied with error: {i.Error?.Reason ?? string.Empty} caused by: {i.Error?.CausedBy?.Reason ?? string.Empty}"));
+                result.ItemsWithErrors.ToList().ForEach(i => _logger.LogError($"Inserting {i.Id} failed with error: {i.Error?.Reason ?? string.Empty} caused by: {i.Error?.CausedBy?.Reason ?? string.Empty}"));
             }
         }
 

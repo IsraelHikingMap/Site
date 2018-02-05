@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
@@ -230,6 +231,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Url = "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D"
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
+            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
             var resutls = _adapter.AddPointOfInterest(pointOfInterestToAdd, null, language).Result;
 
@@ -259,6 +261,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     new Tag("image1", "imageurl3"),
                 }
             });
+            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
             var results = _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Result;
 
@@ -286,10 +289,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     { FeatureAttributes.DESCRIPTION, "description" }
                 }
             });
+            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
             _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Wait();
 
-            gateway.Received().UpdateElement(Arg.Any<string>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en")));
+            gateway.Received().UpdateElement(Arg.Any<string>(), Arg.Is<ICompleteOsmGeo>(x => x.Tags.ContainsKey(FeatureAttributes.WIKIPEDIA + ":en") && x.Tags.Contains(FeatureAttributes.WIKIPEDIA, "en:Literary Hall")));
         }
 
         [TestMethod]
@@ -313,6 +317,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     new Tag("image1", "imageurl1"),
                 }
             });
+            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
 
             _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Wait();
 
