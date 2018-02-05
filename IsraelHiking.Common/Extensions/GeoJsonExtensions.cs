@@ -68,8 +68,17 @@ namespace IsraelHiking.Common.Extensions
             {
                 return true;
             }
-            var isFeatureAForset = feature.Attributes.Has("landuse", "forest");
-            if (isFeatureAForset)
+            if (feature.Attributes.Exists("place") && 
+                !feature.Attributes.Has("place", "suburb") &&
+                !feature.Attributes.Has("place", "neighbourhood") &&
+                !feature.Attributes.Has("place", "quarter") &&
+                !feature.Attributes.Has("place", "city_block") &&
+                !feature.Attributes.Has("place", "borough")
+                )
+            {
+                return true;
+            }
+            if (feature.Attributes.Has("landuse", "forest"))
             {
                 return true;
             }
