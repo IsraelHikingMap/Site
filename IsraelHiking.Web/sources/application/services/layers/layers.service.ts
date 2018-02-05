@@ -31,6 +31,8 @@ export class LayersService {
     public static ESRI = "ESRI";
     public static MIN_ZOOM = 7;
     public static MAX_NATIVE_ZOOM = 16;
+    public static MIM_ESRI_ZOOM = 0;
+    public static MAX_ESRI_ZOOM = 16;
 
     private static MAX_ZOOM = 20;
     private static HIKING_TRAILS = "Hiking Trails";
@@ -98,7 +100,9 @@ export class LayersService {
         this.addNewBaseLayer({
             key: LayersService.ESRI,
             address: LayersService.ESRI_ADDRESS,
-            isEditable: false
+            isEditable: false,
+            minZoom: MIM_ESRI_ZOOM,
+            maxZoom: LayersService.MAX_ESRI_ZOOM
         } as ILayer, LayersService.ESRI_ATTRIBUTION);
 
         let hikingTrailsOverlay = this.addNewOverlay({
