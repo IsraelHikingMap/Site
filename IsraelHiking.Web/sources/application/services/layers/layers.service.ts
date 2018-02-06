@@ -31,9 +31,9 @@ export class LayersService {
     public static ESRI = "ESRI";
     public static MIN_ZOOM = 7;
     public static MAX_NATIVE_ZOOM = 16;
-    public static MIN_ESRI_ZOOM = 0;
-    public static MAX_ESRI_ZOOM = 16;
 
+    private static MIN_ESRI_ZOOM = 0;
+    private static MAX_ESRI_ZOOM = 16;
     private static MAX_ZOOM = 20;
     private static HIKING_TRAILS = "Hiking Trails";
     private static BICYCLE_TRAILS = "Bicycle Trails";
