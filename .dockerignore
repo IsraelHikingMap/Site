@@ -1,0 +1,8 @@
+.git/
+.github/
+.idea/
+docs/
+**/bin/
+**/obj/
+**/node_modules/
+**/wwwroot/
