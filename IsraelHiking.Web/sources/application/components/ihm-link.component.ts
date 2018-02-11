@@ -3,8 +3,8 @@ import {HashService} from "../services/hash.service";
 
 @Component({
     selector: "ihm-link",
-    templateUrl: "./Ihm-link.component.html",
-    styleUrls: ["./Ihm-link.component.css"]
+    templateUrl: "./ihm-link.component.html",
+    styleUrls: ["./ihm-link.component.css"]
 })
 export class IhmLinkComponent {
     public link: string;

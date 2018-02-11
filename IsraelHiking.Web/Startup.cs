@@ -96,7 +96,7 @@ namespace IsraelHiking.Web
                 c.SchemaFilter<FeatureExampleFilter>();
                 c.SchemaFilter<FeatureCollectionExampleFilter>();
                 c.OperationFilter<AssignOAuthSecurityRequirements>();
-                c.IncludeXmlComments(Path.Combine(binariesFolder, "israelhiking.API.xml"));
+                c.IncludeXmlComments(Path.Combine(binariesFolder, "IsraelHiking.API.xml"));
             });
             services.AddDirectoryBrowser();
         }
