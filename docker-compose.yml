@@ -2,7 +2,7 @@ version: '3.4'
 
 services:
   website:
-    image: israeli-hiking-map
+    image: israel-hiking
     build: .
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
