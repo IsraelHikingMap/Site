@@ -13,7 +13,6 @@ install:
 
 before_build:
 - ps: dotnet restore
-- ps: (Get-Content $env:appdata\npm\npm.cmd).Replace("node ", "node --max-old-space-size=4096 ") | Set-Content $env:appdata\npm\npm.cmd
 build:
   project: IsraelHiking.sln
   parallel: true
