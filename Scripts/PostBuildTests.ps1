@@ -31,8 +31,8 @@ Invoke-Expression $OpenCoverCmd
 # Run tests using Karma and export results as JUnit and Lcov format
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
-Write-Host "ng test --no-progress --code-coverage"
-ng test --no-progress --code-coverage
+Write-Host "npm run-script test -- --no-progress --code-coverage"
+npm run-script test -- --no-progress --code-coverage
 
 # Locate JUnit XML results file
 
