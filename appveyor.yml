@@ -11,8 +11,6 @@ install:
 
     npm install -g npm@5.2.0 --loglevel=error
 
-    npm install -g @angular/cli@1.5.5 --loglevel=error
-
 before_build:
 - ps: dotnet restore
 - ps: (Get-Content $env:appdata\npm\ng.cmd).Replace("node ", "node --max-old-space-size=2048 ") | Set-Content $env:appdata\npm\ng.cmd

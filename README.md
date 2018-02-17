@@ -57,8 +57,8 @@ In order to be able to build this site you'll need some tools:
 * Download and install [Visual Studio community 2017](https://www.visualstudio.com/downloads) or later. Select:
   * ASP.NET and web development
   * .NET cross-platform development
-* [.Net core SDK 2.0 ](https://www.microsoft.com/net/download/core)
-* Install [node.js](https://nodejs.org/en/) for windows (6.10+). Use the recommended 64-bit installer on modern Windows versions.
+* [.Net core SDK 2.1 ](https://www.microsoft.com/net/download/core)
+* Install [node.js](https://nodejs.org/en/) for windows (8.9+). Use the recommended 64-bit installer on modern Windows versions.
 * Open Visual Studio
 * Follow [these steps](http://stackoverflow.com/questions/43849585/update-node-version-in-visual-studio-2017) to update the version of node.js Visual Studio uses
 * If asked, and you don't have any other preference, choose "General" development settings
@@ -84,12 +84,7 @@ In order to be able to build this site you'll need some tools:
     "imgurClientId": "your imgur clinet ID"
   }
   ```
-* In Visual Studio, _View &rarr; Other Windows... &rarr; Package Manager Console_
-  * Select IsraelHiking.DataAccess from the Default project dropdown
-  * Type the following commands at the `PM>` prompt. Most of the commands may take a while. Ignore all _WARN_ messsages.
-    ```
-    npm install -g @angular/cli@1.5.5 --loglevel error
-    ```
+
 # Starting a debug session
 [See the relevant page in our wiki](https://github.com/IsraelHikingMap/Site/wiki/Debug-Environment-Setup)
 
