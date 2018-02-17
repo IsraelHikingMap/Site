@@ -75,14 +75,14 @@
     <PackageReference Include="IsraelHiking.GraphHopper" Version="0.10.0" />
     <PackageReference Include="IsraelHiking.OsmCTools" Version="0.8.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="2.0.1" />
-    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="2.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Physical" Version="2.0.1-rtm-215" />
     <PackageReference Include="Microsoft.Extensions.Logging" Version="2.0.0" />
     <PackageReference Include="NEST" Version="5.5.0" />
     <PackageReference Include="NetTopologySuite" Version="1.15.0-pre032" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="1.15.0-pre032" />
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="OAuth.DotNetCore" Version="2.0.0" />
-    <PackageReference Include="OsmSharp" Version="6.0.0" />
+    <PackageReference Include="OsmSharp" Version="6.0.0-pre08" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
   </ItemGroup>
