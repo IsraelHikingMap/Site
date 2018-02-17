@@ -24,6 +24,7 @@ using NLog.Web;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.StaticFiles;
 
 namespace IsraelHiking.Web
@@ -56,7 +57,7 @@ namespace IsraelHiking.Web
             services.AddIHMApi();
             services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
             services.AddSingleton<IGeometryFactory, GeometryFactory>(serviceProvider => new GeometryFactory(new PrecisionModel(100000000)));
-            //services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>(); // .net core 2.0
+            services.AddSingleton<IPostConfigureOptions<JwtBearerOptions>, JwtBearerOptionsValidatorConfigureOptions>(); // .net core 2.0
             services.AddMvc(options =>
             {
                 options.ModelMetadataDetailsProviders.Add(new SuppressChildValidationMetadataProvider(typeof(Feature)));
@@ -72,7 +73,7 @@ namespace IsraelHiking.Web
                 options.SerializerSettings.Converters.Add(new GeometryArrayConverter());
                 options.SerializerSettings.Converters.Add(new EnvelopeConverter());
             });
-            services.AddAuthentication();//JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(); // .net core 2.0
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer();
             services.AddCors();
             services.AddOptions();
 
@@ -124,11 +125,7 @@ namespace IsraelHiking.Web
             {
                 builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials();
             });
-            //app.UseAuthentication(); // .net core 2.0
-            var jwtBearerOptions = new JwtBearerOptions();
-            jwtBearerOptions.SecurityTokenValidators.Clear();
-            jwtBearerOptions.SecurityTokenValidators.Add(app.ApplicationServices.GetRequiredService<ISecurityTokenValidator>());
-            app.UseJwtBearerAuthentication(jwtBearerOptions);
+            app.UseAuthentication();
             app.UseMvc();
             SetupStaticFiles(app);
 
