@@ -74,8 +74,8 @@
   "private": true,
   "scripts": {
     "ng": "ng",
-    "start": "ng serve",
     "build": "ng build",
+    "test": "ng test",
     "lint": "ng lint"
   },
   "version": "5.3.0"
