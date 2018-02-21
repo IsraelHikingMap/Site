@@ -205,7 +205,7 @@ describe("OSM User Service", () => {
     }));
 
     it("Should get image preview by sending a request to server", inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
-        osmUserService.getImagePreview({ id: "12345", dataContainer: {} } as Common.ShareUrl);
+        osmUserService.getImagePreview({} as Common.DataContainer);
 
         mockBackend.expectOne(Urls.images);
     }));

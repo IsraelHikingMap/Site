@@ -326,8 +326,8 @@ export class OsmUserService {
         return background;
     }
 
-    public async getImagePreview(shareUrl: Common.ShareUrl) {
-        let image = await this.httpClient.post(Urls.images, shareUrl.dataContainer, { responseType: "blob" }).toPromise();
+    public async getImagePreview(dataContainer: Common.DataContainer) {
+        let image = await this.httpClient.post(Urls.images, dataContainer, { responseType: "blob" }).toPromise();
         return window.URL.createObjectURL(image);
     }
 }

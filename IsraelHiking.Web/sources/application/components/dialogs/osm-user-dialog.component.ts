@@ -373,6 +373,5 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public async convertShareUrlToRoute(shareUrl: Common.ShareUrl) {
         let shareUrlWithData = await this.userService.getShareUrl(shareUrl.id);
         this.dataContainerService.setData(shareUrlWithData.dataContainer);
-        this.dataContainerService.shareUrlId = shareUrl.id;
     }
 }

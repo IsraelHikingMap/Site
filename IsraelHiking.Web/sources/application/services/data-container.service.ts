@@ -14,7 +14,7 @@ import * as Common from "../common/IsraelHiking";
 
 @Injectable()
 export class DataContainerService {
-    public shareUrlId: string;
+    public shareUrl: Common.ShareUrl;
 
     constructor(
         private readonly osmUserService: OsmUserService,
@@ -26,7 +26,7 @@ export class DataContainerService {
         private readonly resourcesService: ResourcesService,
         private readonly toastService: ToastService) {
 
-        this.shareUrlId = "";
+        this.shareUrl = null;
     }
 
     public setData(dataContainer: Common.DataContainer) {
@@ -86,7 +86,7 @@ export class DataContainerService {
                     this.layersService.toggleOverlay(overlay);
                 }
             }
-            this.shareUrlId = shareUrl.id;
+            this.shareUrl = shareUrl;
             this.toastService.info(shareUrl.description, shareUrl.title);
         } catch (ex) {
             this.hashService.shareUrl = "";
