@@ -1,7 +1,8 @@
-﻿import { Component, Injector, ComponentFactoryResolver, OnInit, OnDestroy, ViewChild, ElementRef, ViewEncapsulation } from "@angular/core";
+﻿import { Component, Injector, ComponentFactoryResolver, OnInit, OnDestroy, ViewChild, ElementRef, ViewEncapsulation, AfterViewInit } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material";
 import { SharedStorageService } from "ngx-store";
+import { ScrollToService, ScrollToConfigOptions } from "@nicky-lenaers/ngx-scroll-to";
 import { Subscription } from "rxjs/Subscription";
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -19,7 +20,6 @@ import { GeoJsonParser } from "../../services/geojson.parser";
 import { BaseMapComponent } from "../base-map.component";
 import { SearchResultsMarkerPopupComponent } from "../markerpopup/search-results-marker-popup.component";
 import { MissingPartMarkerPopupComponent } from "../markerpopup/missing-part-marker-popup.component";
-import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
 
 interface IRank {
@@ -41,7 +41,8 @@ interface IOsmUserDialogState {
     styleUrls: ["./osm-user-dialog.component.css"],
     encapsulation: ViewEncapsulation.None
 })
-export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
+export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, OnDestroy, AfterViewInit {
+
     private static OSM_USER_DIALOG_STATE_KEY = "OsmUserDialogState";
 
     public ranks: IRank[];
@@ -60,20 +61,21 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     private shareUrlChangedSubscription: Subscription;
 
     @ViewChild("dialogContentForScroll") dialogContent: ElementRef;
-    
+
     constructor(resources: ResourcesService,
-        private injector: Injector,
-        private sharedStorageService: SharedStorageService,
-        private matDialogRef: MatDialogRef<OsmUserDialogComponent>,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private mapService: MapService,
-        private fileService: FileService,
-        private dataContainerService: DataContainerService,
-        private layersService: LayersService,
-        private fitBoundsService: FitBoundsService,
-        private toastService: ToastService,
-        private geoJsonParser: GeoJsonParser,
-        public userService: OsmUserService,
+        private readonly injector: Injector,
+        private readonly sharedStorageService: SharedStorageService,
+        private readonly matDialogRef: MatDialogRef<OsmUserDialogComponent>,
+        private readonly componentFactoryResolver: ComponentFactoryResolver,
+        private readonly mapService: MapService,
+        private readonly fileService: FileService,
+        private readonly dataContainerService: DataContainerService,
+        private readonly layersService: LayersService,
+        private readonly fitBoundsService: FitBoundsService,
+        private readonly toastService: ToastService,
+        private readonly geoJsonParser: GeoJsonParser,
+        private readonly scrollToService: ScrollToService,
+        public readonly userService: OsmUserService,
     ) {
         super(resources);
         this.loadingTraces = false;
@@ -110,11 +112,19 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.loadingShareUrls = true;
         this.userService.refreshDetails();
         let dialogElement = this.dialogContent.nativeElement as HTMLElement;
-        setTimeout(() => dialogElement.scrollTop = this.state.scrollPosition, 700);
         dialogElement.onscroll = () => {
             this.state.scrollPosition = dialogElement.scrollTop;
             this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
         }
+    }
+
+    ngAfterViewInit(): void {
+        let dialogElement = this.dialogContent.nativeElement as HTMLElement;
+        this.scrollToService.scrollTo(
+            {
+                offset: this.state.scrollPosition + dialogElement.offsetTop, // should be removed after fix https://github.com/nicky-lenaers/ngx-scroll-to/issues/68
+                container: dialogElement
+            } as ScrollToConfigOptions);
     }
 
     public ngOnDestroy() {
@@ -188,7 +198,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         });
         return promise;
     }
-    
+
     public editTrace(trace: ITrace) {
         trace.isInEditMode = true;
     }
@@ -201,7 +211,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public deleteTrace(trace: ITrace) {
         trace.isInEditMode = false;
         let message = `${this.resources.deletionOf} ${trace.name}, ${this.resources.areYouSure}`;
-        this.toastService.confirm(message, () => this.userService.deleteOsmTrace(trace), () => {}, true);
+        this.toastService.confirm(message, () => this.userService.deleteOsmTrace(trace), () => { }, true);
     }
 
     public editInOsm(trace: ITrace) {
@@ -238,8 +248,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         };
     }
 
-    private updateFilteredLists(searchTerm: string)
-    {
+    private updateFilteredLists(searchTerm: string) {
         searchTerm = searchTerm.trim();
         this.state.searchTerm = searchTerm;
         this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
@@ -306,8 +315,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     }
 
     private findInShareUrl(shareUrl: Common.ShareUrl, searchTerm: string) {
-        if (!searchTerm)
-        {
+        if (!searchTerm) {
             return true;
         }
         let lowerSearchTerm = searchTerm.toLowerCase();
