@@ -888,7 +888,8 @@ export class ResourcesService {
             return imageUrl;
         }
         if (imageUrl.includes("//upload.wikimedia.org/wikipedia/commons/")) {
-            return imageUrl.replace(/(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)/, `$1thumb/$2$3/${size}px-$3`);;
+            let url = imageUrl.replace(/(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)/, `$1thumb/$2$3/${size}px-$3`);
+            return url.endsWith(".svg") ? url + ".png" : url;
         }
         if (imageUrl.includes("//i.imgur.com/")) {
             var split = imageUrl.split(".");
