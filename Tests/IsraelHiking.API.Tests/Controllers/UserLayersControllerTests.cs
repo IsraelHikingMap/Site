@@ -30,46 +30,156 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetLayers_ShouldGetThem()
         {
-            var userLayers = new UserMapLayers {Layers = new List<MapLayerData> {new MapLayerData()}};
+            var layers = new List<MapLayerData> {new MapLayerData()};
             var osmUser = "osmUser";
             _controller.SetupIdentity(osmUser);
-            _repository.GetUserLayers(osmUser).Returns(userLayers);
+            _repository.GetUserLayers(osmUser).Returns(layers);
             
             var result = _controller.GetUserLayers().Result as OkObjectResult;
             
             Assert.IsNotNull(result);
-            var returnedUserLayers = result.Value as UserMapLayers;
+            var returnedUserLayers = result.Value as List<MapLayerData>;
             Assert.IsNotNull(returnedUserLayers);
-            Assert.AreEqual(returnedUserLayers.Layers.Count, userLayers.Layers.Count);
+            Assert.AreEqual(layers.Count, returnedUserLayers.Count);
         }
 
         [TestMethod]
-        public void PostUserLayers_EmptyUser_ShouldReturnUnauthorized()
+        public void PostUserLayer_EmptyKey_ShouldReturnBadRequest()
         {
-            var results = _controller.PostUserLayers(string.Empty, null).Result;
-            
-            Assert.IsNotNull(results as BadRequestResult);
+            var results = _controller.PostUserLayer(new MapLayerData()).Result;
+
+            Assert.IsNotNull(results as BadRequestObjectResult);
         }
 
         [TestMethod]
-        public void PostUserLayers_UnauthorizedUser_ShouldReturnUnauthorized()
+        public void PostUserLayer_EmptyAddress_ShouldReturnBadRequest()
         {
-            _controller.SetupIdentity("123");
-            var results = _controller.PostUserLayers("456", null).Result;
+            var results = _controller.PostUserLayer(new MapLayerData { Key = "key"}).Result;
 
-            Assert.IsNotNull(results as BadRequestResult);
+            Assert.IsNotNull(results as BadRequestObjectResult);
         }
 
         [TestMethod]
-        public void PostUserLayers_AuthorizedUser_ShouldUpdateUserLayers()
+        public void PostUserLayer_AuthorizedUser_ShouldUpdateUserLayers()
         {
+            var id = "id";
+            var osmUserId = "osmUserId";
+            var layer = new MapLayerData {Key = "key", Address = "address"};
+            _controller.SetupIdentity(osmUserId);
+            _repository.AddUserLayer(layer).Returns(layer).AndDoes(l => (l[0] as MapLayerData).Id = id);
+
+            var results = _controller.PostUserLayer(layer).Result as OkObjectResult;
+
+            Assert.IsNotNull(results);
+            Assert.AreEqual(id, (results.Value as MapLayerData).Id);
+        }
+
+        [TestMethod]
+        public void PutUserLayer_InvalidId_ShouldReturnBadRequest()
+        {
+            var id = "id";
+            var layer = new MapLayerData { Key = "key", Address = "address", Id = id};
+
+            var results = _controller.PutUserLayer("42", layer).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void PutUserLayer_InvalidUser_ShouldReturnBadRequest()
+        {
+            var id = "id";
+            _controller.SetupIdentity("456");
+            var layer = new MapLayerData { Key = "key", Address = "address", Id = id, OsmUserId = "123"};
+
+            var results = _controller.PutUserLayer(id, layer).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void PutUserLayer_InvalidLayer_ShouldReturnBadRequest()
+        {
+            var id = "id";
             var osmUserId = "osmUserId";
             _controller.SetupIdentity(osmUserId);
+            var layer = new MapLayerData { Id = id, OsmUserId = osmUserId };
 
-            var results = _controller.PostUserLayers(osmUserId, new UserMapLayers()).Result;
+            var results = _controller.PutUserLayer(id, layer).Result as BadRequestObjectResult;
 
-            Assert.IsNotNull(results as OkObjectResult);
-            _repository.Received(1).UpdateUserLayers(osmUserId, Arg.Any<UserMapLayers>());
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void PutUserLayer_LayerDoesNotBelongToUser_ShouldReturnBadRequest()
+        {
+            var id = "id";
+            var osmUserId = "osmUserId";
+            _controller.SetupIdentity(osmUserId);
+            _repository.GetUserLayers(osmUserId).Returns(new List<MapLayerData>());
+            var layer = new MapLayerData { Key = "key", Address = "address", Id = id, OsmUserId = osmUserId };
+
+            var results = _controller.PutUserLayer(id, layer).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void PutUserLayer_ValidRequest_ShouldUpdateRepository()
+        {
+            var id = "id";
+            var osmUserId = "osmUserId";
+            var layer = new MapLayerData { Key = "key", Address = "address", Id = id, OsmUserId = osmUserId };
+            _controller.SetupIdentity(osmUserId);
+            _repository.GetUserLayers(osmUserId).Returns(new List<MapLayerData> { layer });
+            
+
+            var results = _controller.PutUserLayer(id, layer).Result as OkObjectResult;
+
+            Assert.IsNotNull(results);
+            _repository.Received(1).UpdateUserLayer(layer);
+        }
+
+        [TestMethod]
+        public void DeleteUserLayer_LayerNotInRepository_ShouldReturnNotFound()
+        {
+            var id = "id";
+            _repository.GetUserLayerById(id).Returns(null as MapLayerData);
+
+            var results = _controller.DeleteUserLayer(id).Result as NotFoundResult;
+
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void DeleteUserLayer_InvalidRequest_ShouldReturnBadRequest()
+        {
+            var id = "id";
+            var osmUserId = "osmUserId";
+            var layer = new MapLayerData { Id = id, OsmUserId = osmUserId };
+            _controller.SetupIdentity(osmUserId);
+            _repository.GetUserLayerById(id).Returns(layer);
+            _repository.GetUserLayers(osmUserId).Returns(new List<MapLayerData> { layer });
+
+            var results = _controller.DeleteUserLayer(id).Result as BadRequestObjectResult;
+
+            Assert.IsNotNull(results);
+        }
+
+        [TestMethod]
+        public void DeleteUserLayer_ValidRequest_ShouldDeleteFromRepository()
+        {
+            var id = "id";
+            var osmUserId = "osmUserId";
+            var layer = new MapLayerData { Key = "key", Address = "address", Id = id, OsmUserId = osmUserId };
+            _controller.SetupIdentity(osmUserId);
+            _repository.GetUserLayerById(id).Returns(layer);
+            _repository.GetUserLayers(osmUserId).Returns(new List<MapLayerData> { layer });
+
+            var results = _controller.DeleteUserLayer(id).Result as OkObjectResult;
+
+            Assert.IsNotNull(results);
+            _repository.Received(1).DeleteUserLayer(layer);
         }
     }
 }

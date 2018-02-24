@@ -24,14 +24,6 @@ export interface ITrace {
     isInEditMode: boolean;
 }
 
-interface IUserLayer extends Common.LayerData {
-    isOverlay: boolean;
-}
-
-interface IUserLayers {
-    layers: IUserLayer[];
-}
-
 interface IOsmConfiguration {
     baseAddress: string;
     consumerKey: string;
@@ -54,15 +46,12 @@ export class OsmUserService {
 
     public tracesChanged: Subject<any>;
     public shareUrlsChanged: Subject<any>;
-    public userLayersChanged: Subject<any>;
 
     public displayName: string;
     public imageUrl: string;
     public changeSets: number;
     public traces: ITrace[];
     public shareUrls: Common.ShareUrl[];
-    public baseLayers: Common.LayerData[];
-    public overlays: Common.LayerData[];
     public userId: string;
 
     constructor(private httpClient: HttpClient,
@@ -70,11 +59,8 @@ export class OsmUserService {
         this.x2Js = new X2JS();
         this.traces = [];
         this.shareUrls = [];
-        this.baseLayers = [];
-        this.overlays = [];
         this.tracesChanged = new Subject();
         this.shareUrlsChanged = new Subject();
-        this.userLayersChanged = new Subject();
     }
 
     public async initialize() {
@@ -167,9 +153,7 @@ export class OsmUserService {
         this.changeSets = detailJson.osm.user.changesets._count;
         this.userId = detailJson.osm.user._id;
 
-        let refreshDetailsPromise = this.refreshDetails();
-        let userLayersPromise = this.getUserLayers();
-        await Promise.all([userLayersPromise, refreshDetailsPromise]);
+        await this.refreshDetails();
     }
 
     private getTraces = (): Promise<any> => {
@@ -261,42 +245,6 @@ export class OsmUserService {
 
     public addAMissingPart(feature: GeoJSON.Feature<GeoJSON.LineString>): Promise<any> {
         return this.httpClient.put(Urls.osm, feature, { responseType: "text" }).toPromise();
-    }
-
-    private getUserLayers = async (): Promise<any> => {
-        try {
-            let data = await this.httpClient.get(Urls.userLayers).toPromise() as IUserLayers;
-            this.baseLayers.splice(0);
-            this.overlays.splice(0);
-            if (data == null || data.layers == null) {
-                this.userLayersChanged.next();
-                return;
-            }
-            for (let layer of data.layers) {
-                if (layer.isOverlay) {
-                    this.overlays.push(layer);
-                } else {
-                    this.baseLayers.push(layer);
-                }
-            }
-            this.userLayersChanged.next();
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    public updateUserLayers = async (baseLayersToStore: Common.LayerData[], overlaysToStore: Common.LayerData[]): Promise<IUserLayer> => {
-        if (!this.isLoggedIn()) {
-            return {} as IUserLayer;
-        }
-
-        let layers = [...baseLayersToStore];
-        for (let overlayToStore of overlaysToStore) {
-            (overlayToStore as IUserLayer).isOverlay = true;
-            layers.push(overlayToStore);
-        }
-
-        return await this.httpClient.post(Urls.userLayers + this.userId, { layers: layers } as IUserLayers).toPromise() as IUserLayer;
     }
 
     public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, center: L.LatLng): string {

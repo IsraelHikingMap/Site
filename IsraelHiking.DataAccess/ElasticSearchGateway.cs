@@ -61,7 +61,7 @@ namespace IsraelHiking.DataAccess
         private const string OSM_HIGHWAYS_ALIAS = "osm_highways";
         private const string RATINGS = "ratings";
         private const string SHARES = "shares";
-        private const string USER_LAYERS = "user_layers";
+        private const string CUSTOM_USER_LAYERS = "custom_user_layers";
 
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
@@ -112,9 +112,9 @@ namespace IsraelHiking.DataAccess
             {
                 _elasticClient.CreateIndex(SHARES);
             }
-            if (_elasticClient.IndexExists(USER_LAYERS).Exists == false)
+            if (_elasticClient.IndexExists(CUSTOM_USER_LAYERS).Exists == false)
             {
-                _elasticClient.CreateIndex(SHARES);
+                _elasticClient.CreateIndex(CUSTOM_USER_LAYERS);
             }
             _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
@@ -478,15 +478,40 @@ namespace IsraelHiking.DataAccess
             return AddUrl(shareUrl);
         }
 
-        public async Task<UserMapLayers> GetUserLayers(string osmUserId)
+        public async Task<List<MapLayerData>> GetUserLayers(string osmUserId)
         {
-            var response = await _elasticClient.GetAsync<UserMapLayers>(osmUserId, r => r.Index(USER_LAYERS));
-            return response.Source ?? new UserMapLayers { OsmUserId = osmUserId };
+            var response = await _elasticClient.SearchAsync<MapLayerData>(s => s.Index(CUSTOM_USER_LAYERS).Size(1000)
+                .Query(q => q.Term(t => t.OsmUserId, osmUserId)));
+            var layers = response.Documents.ToList();
+            return response.Hits.Select((h, i) =>
+            {
+                layers[i].Id = h.Id;
+                return layers[i];
+            }).ToList();
         }
 
-        public Task UpdateUserLayers(string osmUserId, UserMapLayers userLayers)
+        public async Task<MapLayerData> GetUserLayerById(string id)
         {
-            return _elasticClient.IndexAsync(userLayers, r => r.Index(USER_LAYERS).Id(osmUserId));
+            var response = await _elasticClient.GetAsync<MapLayerData>(id, r => r.Index(CUSTOM_USER_LAYERS));
+            response.Source.Id = id;
+            return response.Source;
+        }
+
+        public async Task<MapLayerData> AddUserLayer(MapLayerData layerData)
+        {
+            var response = await _elasticClient.IndexAsync(layerData, r => r.Index(CUSTOM_USER_LAYERS));
+            layerData.Id = response.Id;
+            return layerData;
+        }
+
+        public Task UpdateUserLayer(MapLayerData layerData)
+        {
+            return _elasticClient.IndexAsync(layerData, r => r.Index(CUSTOM_USER_LAYERS).Id(layerData.Id));
+        }
+
+        public Task DeleteUserLayer(MapLayerData layerData)
+        {
+            return _elasticClient.DeleteAsync<MapLayerData>(layerData.Id, d => d.Index(CUSTOM_USER_LAYERS));
         }
     }
 }
