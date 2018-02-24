@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+﻿import { Injectable, EventEmitter } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Subject } from "rxjs/Subject";
 import * as X2JS from "x2js";
@@ -46,6 +46,7 @@ export class OsmUserService {
 
     public tracesChanged: Subject<any>;
     public shareUrlsChanged: Subject<any>;
+    public loginStatusChanged: EventEmitter<any>;
 
     public displayName: string;
     public imageUrl: string;
@@ -61,6 +62,7 @@ export class OsmUserService {
         this.shareUrls = [];
         this.tracesChanged = new Subject();
         this.shareUrlsChanged = new Subject();
+        this.loginStatusChanged = new EventEmitter();
     }
 
     public async initialize() {
@@ -90,14 +92,16 @@ export class OsmUserService {
             this.oauth.logout();
         }
         this.authorizationService.osmToken = null;
+        this.loginStatusChanged.next();
     }
 
     public isLoggedIn = (): boolean => {
         return this.oauth && this.oauth.authenticated() && this.authorizationService.osmToken != null;
     }
 
-    public login = (): Promise<any> => {
-        return this.getUserDetails();
+    public login = async () => {
+        await this.getUserDetails();
+        this.loginStatusChanged.next();
     }
 
     public getShareUrlPostfix(id: string) {

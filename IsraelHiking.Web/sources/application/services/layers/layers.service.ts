@@ -57,10 +57,6 @@ export class LayersService {
     private static CUSTOM_LAYER = "Custom Layer";
 
     @LocalStorage()
-    private storedBaseLayers: Common.LayerData[] = [];
-    @LocalStorage()
-    private storedOverlays: Common.LayerData[] = [];
-    @LocalStorage()
     private activeOverlayKeys: string[] = [];
     @LocalStorage()
     private selectedBaseLayerKey: string = LayersService.ISRAEL_HIKING_MAP;
@@ -142,27 +138,30 @@ export class LayersService {
     }
 
     private getUserLayers = async (): Promise<any> => {
-        if (this.osmUserService.isLoggedIn()) {
-            try {
-                let data = await this.httpClient.get(Urls.userLayers).toPromise() as IUserLayer[];
-                if (data == null) {
-                    return;
-                }
-                for (let layer of data) {
-                    if (layer.isOverlay) {
-                        let overlay = this.addOverlayFromData(layer);
-                        overlay.isEditable = true;
-                    } else {
-                        let baselayer = this.addBaseLayerFromData(layer);
-                        baselayer.isEditable = true;
-                    }
-                }
-            } catch (error) {
-                // HM TODO: toast?
-                console.error(error);
+        try {
+            let data = await this.httpClient.get(Urls.userLayers).toPromise() as IUserLayer[];
+            if (data == null) {
+                return;
             }
-        } else {
-            // HM TODO: get from local storage?
+            for (let layer of data) {
+                if (layer.isOverlay) {
+                    let existingOverlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
+                    if (existingOverlay) {
+                        continue;
+                    }
+                    let overlay = this.addOverlayFromData(layer);
+                    overlay.isEditable = true;
+                } else {
+                    let existingBaselayer = _.find(this.baseLayers, (baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
+                    if (existingBaselayer) {
+                        continue;
+                    }
+                    let baselayer = this.addBaseLayerFromData(layer);
+                    baselayer.isEditable = true;
+                }
+            }
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -184,9 +183,7 @@ export class LayersService {
             layerToStore.osmUserId = this.osmUserService.userId;
             let response = await this.httpClient.post(Urls.userLayers, layerToStore).toPromise() as IUserLayer;
             layer.id = response.id;
-        } else {
-            // HM TODO: set local storage?
-        }
+        } 
     }
 
     private async updateUserLayerInStorage(isOverlay: boolean, layer: ILayer) {
@@ -197,8 +194,6 @@ export class LayersService {
             layerToStore.id = layer.id;
             let response = await this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore).toPromise() as IUserLayer;
             layer.id = response.id;
-        } else {
-            // HM TODO: set local storage?
         }
     }
 
@@ -206,8 +201,6 @@ export class LayersService {
         if (this.osmUserService.isLoggedIn()) {
             let layerToStore = Object.assign({ isOverlay: isOverlay, osmUserId: this.osmUserService.userId }, layer) as IUserLayer;
             await this.httpClient.delete(Urls.userLayers + layerToStore.id).toPromise();
-        } else {
-            // HM TODO: set local storage?
         }
     }
 
@@ -367,6 +360,7 @@ export class LayersService {
         // must be after using local storage values.
         this.onLanguageChange();
         this.resourcesService.languageChanged.subscribe(this.onLanguageChange);
+        this.osmUserService.loginStatusChanged.subscribe(() => this.getUserLayers());
     }
 
     public addExternalBaseLayer = (layerData: Common.LayerData) => {
