@@ -53,7 +53,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         });
 
         this.resources.languageChanged.subscribe(() => {
-            this.markers.clearLayers();
+            this.clearMarkersLayer();
             this.updateMarkers();
         });
     }
