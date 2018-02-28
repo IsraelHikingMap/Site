@@ -93,13 +93,13 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.offroadRequest.userMail = this.storedUserEmail;
         this.offroadRequest.activityType = "OffRoading";
         this.offroadRequest.difficultyLevel = "3";
-        if (this.canUpdate) {
+        if (this.dataContainerService.shareUrl != null) {
             this.title = this.dataContainerService.shareUrl.title;
             this.description = this.dataContainerService.shareUrl.description;
         }
         if (this.routesService.selectedRoute != null) {
             let route = routesService.selectedRoute.getData();
-            if (!this.canUpdate) {
+            if (this.dataContainerService.shareUrl == null || (!this.title && !this.description)) {
                 this.title = route.name;
                 this.description = route.description;
             }
