@@ -48,6 +48,8 @@ namespace IsraelHiking.API.Tests.Converters.CoordinatesParsers
         {
             var results = _parser.TryParse("120000,200000");
             Assert.IsNotNull(results);
+            Assert.AreEqual(34.6788, results.X, 1e-4);
+            Assert.AreEqual(32.3928, results.Y, 1e-4);
         }
 
         [TestMethod]
