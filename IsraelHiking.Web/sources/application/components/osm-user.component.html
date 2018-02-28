@@ -1,28 +1,26 @@
 ﻿<div class="leaflet-bar" *ngIf="!userService.isLoggedIn()" [dir]="resources.direction">
     <div class="control-container">
-        <a class="control-icon-first" (click)="login($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM login - sign-in icon"><i class="fa icon-sign-in"></i></a>
+        <a class="control-icon-first" (click)="login($event)" matTooltip="{{resources.login}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM login - sign-in icon"><i class="fa icon-sign-in"></i></a>
         <div class="pull-right">
-            <div class="control-container-item gutters cursor-pointer" (click)="login($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM login - face and text">
+            <div class="control-container-item gutters cursor-pointer" (click)="login($event)" matTooltip="{{resources.osmLoginExplenation}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM login - face and text">
                 <span class="pull-right space-after"><i class="fa icon-frown-o fa-lg"></i></span>
                 <span class="pull-right hidden-xs"> {{resources.unknownUser}}</span>
             </div>
         </div>
-        <a class="cursor-pointer control-icon-last" matTooltip="{{resources.osmLoginExplenation}}" matTooltipPosition="below"><i class="fa icon-question"></i></a>
     </div>
 </div>
 
 <div class="leaflet-bar" *ngIf="userService.isLoggedIn()">
     <div class="control-container">
-        <a class="control-icon-first" (click)="userService.logout()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout"><i class="fa icon-sign-out"></i></a>
+        <a class="control-icon-first" (click)="userService.logout()" matTooltip="{{resources.logout}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout"><i class="fa icon-sign-out"></i></a>
         <div class="pull-right">
-            <div class="control-container-item gutters table">
-                <div class="table-cell" (click)="openUserDetails($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user details open">
+            <div class="control-container-item gutters table cursor-pointer" (click)="openUserDetails($event)" matTooltip="{{resources.myProfile}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user details open">
+                <div class="table-cell">
                     <img *ngIf="userService.imageUrl" class="pull-right space-after" [src]="userService.imageUrl" alt="" width="16" height="16"/>
                     <span class="pull-right space-after" *ngIf="!userService.imageUrl"><i class="fa icon-user fa-lg"></i> </span>
                     <span class="pull-right hidden-xs"> {{userService.displayName}}</span>
                 </div>
             </div>
         </div>
-        <a class="cursor-pointer control-icon-last" (click)="openUserDetails($event)" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user details open"><i class="fa icon-wrench"></i></a>
     </div>
 </div>
