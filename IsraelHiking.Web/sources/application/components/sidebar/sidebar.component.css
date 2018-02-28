@@ -21,7 +21,7 @@
     -ms-transform: translateX(-100%);
     -webkit-transform: translateX(-100%);
     transform: translateX(-100%);
-    max-width: 400px;
+    max-width: 500px;
 }
 
     #sidebar-wrapper:not(.toggled) {

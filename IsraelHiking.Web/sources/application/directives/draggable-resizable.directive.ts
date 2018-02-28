@@ -158,20 +158,40 @@ export class DraggableResizableDirective implements OnInit {
             ? this.getClientX(event) - this.initialClientX
             : this.getClientY(event) - this.initialClientY;
         let style = this.element.nativeElement.style;
+        let minWidth = parseInt(this.style.getPropertyValue("min-width"));
+        let maxWidth = parseInt(this.style.getPropertyValue("max-width"));
+        let paddingLeft = parseInt(this.style.getPropertyValue("padding-left"));
+        let paddingRight = parseInt(this.style.getPropertyValue("padding-right"));
+        let relevantSize = window.innerWidth - paddingLeft - paddingRight;
         switch (this.dragDirection) {
             case "top":
                 style.top = this.getTop(this.initialTop + offset) + "px";
                 break;
             case "left":
-                style.left = (this.initialLeft + offset) + "px";
+                let left = this.initialLeft + offset;
+                let right = parseInt(this.style.getPropertyValue("left"));
+                if (minWidth && relevantSize - left - right < minWidth) {
+                    left = relevantSize - right - minWidth;
+                }
+                if (maxWidth && relevantSize - left - right > maxWidth) {
+                    left = relevantSize - right - maxWidth;
+                }
+                style.left = left + "px";
                 break;
             case "bottom":
                 style.bottom = (this.initialBottom - offset) + "px";
                 break;
             case "right":
-                style.right = (this.initialRight - offset) + "px";
+                right = this.initialRight - offset;
+                left = parseInt(this.style.getPropertyValue("left"));
+                if (minWidth && relevantSize - left - right < minWidth) {
+                    right = relevantSize - left - minWidth;
+                }
+                if (maxWidth && relevantSize - left - right > maxWidth) {
+                    right = relevantSize - left - maxWidth;
+                }
+                style.right = right + "px";
                 break;
-
         }
         this.throttle(() => { this.onResize.emit(this.createResizeEventArgs()); });
     };
