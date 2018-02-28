@@ -85,21 +85,21 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.facebookShareAddress = "";
         this.nakebCreateHikeAddress = "";
         this.lastShareUrl = null;
-        this.canUpdate = this.dataContainerService.shareUrl != null &&
-            this.osmUserService.shareUrls.find(s => s.id === this.dataContainerService.shareUrl.id) != null;
+        let shareUrl = this.dataContainerService.getShareUrl();
+        this.canUpdate = shareUrl != null && this.osmUserService.shareUrls.find(s => s.id === shareUrl.id) != null;
         this.updateCurrentShare = false;
         this.offroadPublicTrack = false;
         this.offroadRequest = {} as IOffroadPostRequest;
         this.offroadRequest.userMail = this.storedUserEmail;
         this.offroadRequest.activityType = "OffRoading";
         this.offroadRequest.difficultyLevel = "3";
-        if (this.dataContainerService.shareUrl != null) {
-            this.title = this.dataContainerService.shareUrl.title;
-            this.description = this.dataContainerService.shareUrl.description;
+        if (shareUrl != null) {
+            this.title = shareUrl.title;
+            this.description = shareUrl.description;
         }
         if (this.routesService.selectedRoute != null) {
             let route = routesService.selectedRoute.getData();
-            if (this.dataContainerService.shareUrl == null || (!this.title && !this.description)) {
+            if (shareUrl == null || (!this.title && !this.description)) {
                 this.title = route.name;
                 this.description = route.description;
             }
@@ -136,7 +136,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 : await this.osmUserService.createShareUrl(shareUrlToSend);
 
             this.lastShareUrl = shareUrl;
-            this.dataContainerService.shareUrl = shareUrl;
+            this.dataContainerService.setShareUrl(shareUrl);
             this.imageUrl = this.osmUserService.getImageFromShareId(shareUrl);
             let links = this.osmUserService.getShareSocialLinks(shareUrl);
             this.shareAddress = links.ihm;
@@ -166,7 +166,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             this.routesService.routes[0].route.properties.description = this.description;
         }
         
-        let id = this.dataContainerService.shareUrl ? this.dataContainerService.shareUrl.id : "";
+        let id = this.dataContainerService.getShareUrl() ? this.dataContainerService.getShareUrl().id : "";
         var shareUrl = {
             id: id,
             title: this.title,

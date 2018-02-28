@@ -4,6 +4,7 @@ import { Router, NavigationEnd } from "@angular/router";
 import * as L from "leaflet";
 
 import { MapService } from "./map.service";
+import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
 @Injectable()
@@ -15,15 +16,17 @@ export class HashService {
     private static readonly DOWNLOAD = "download";
     private static readonly SITE_SHARE = "s";
     private static readonly SEARCH_QUERY = "q";
+    private static readonly HASH = "/#!";
+    private static readonly LOCATION_REGEXP = /\/(\d+)\/(\d+\.\d+)\/(\d+\.\d+)/;
 
     private window: Window;
     private baseLayer: Common.LayerData;
+    private shareUrlId: string;
+    private internalUpdate: boolean;
 
     public searchTerm: string;
     public externalUrl: string;
-    public shareUrl: string;
     public download: boolean;
-    private internalUpdate: boolean;
 
     constructor(private router: Router,
         @Inject("Window") window: any, // bug in angular aot
@@ -44,7 +47,7 @@ export class HashService {
                     return;
                 }
                 if (this.internalUpdate === false) {
-                    this.mapService.map.setView(latLng, latLng.alt);
+                    this.addDataFromUrl();
                 }
                 this.internalUpdate = false;
             }
@@ -61,9 +64,13 @@ export class HashService {
     }
 
     private updateUrl = () => {
-        var path = "/#!/" + this.mapService.map.getZoom() +
+        var path = HashService.HASH +
+            "/" + this.mapService.map.getZoom() +
             "/" + this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION) +
             "/" + this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION);
+        if (this.shareUrlId) {
+            path += HashService.getShareUrlPostfix(this.shareUrlId);
+        }
         this.router.navigateByUrl(path, { replaceUrl: true });
     }
 
@@ -81,10 +88,11 @@ export class HashService {
     }
 
     private addDataFromUrl() {
-        let searchParams = new HttpParams({ fromString: this.window.location.hash.replace("#!/?", "") });
+        let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace("#!/?", "");
+        let searchParams = new HttpParams({ fromString: simplifiedHash });
         this.searchTerm = decodeURIComponent(searchParams.get(HashService.SEARCH_QUERY) || "");
         this.externalUrl = searchParams.get(HashService.URL) || "";
-        this.shareUrl = searchParams.get(HashService.SITE_SHARE) || "";
+        this.shareUrlId = searchParams.get(HashService.SITE_SHARE) || "";
         this.download = searchParams.has(HashService.DOWNLOAD);
         this.baseLayer = this.stringToBaseLayer(searchParams.get(HashService.BASE_LAYER) || "");
         let latLng = this.parsePathToGeoLocation();
@@ -94,26 +102,45 @@ export class HashService {
     }
 
     private parsePathToGeoLocation(): L.LatLng {
-        var path = this.window.location.hash;
-        var splittedpath = path.split("/");
-        if (splittedpath.length !== 4) {
+        let path = this.window.location.hash;
+        if (!HashService.LOCATION_REGEXP.test(path)) {
             return null;
         }
+        let array = HashService.LOCATION_REGEXP.exec(path);
         return L.latLng(
-            parseFloat(splittedpath[splittedpath.length - 2]),
-            parseFloat(splittedpath[splittedpath.length - 1]),
-            parseInt(splittedpath[splittedpath.length - 3])
+            parseFloat(array[2]),
+            parseFloat(array[3]),
+            parseInt(array[1])
         );
     }
 
     public getLinkBackToSite() {
-        let link = "https://israelhiking.osm.org.il/";
+        if (!this.window.frameElement) {
+            return Urls.baseAddress;
+        }
         if (this.externalUrl) {
-            link += `#!/?${HashService.URL}=${this.externalUrl}`;
+            return `${Urls.baseAddress}${HashService.HASH}/?${HashService.URL}=${this.externalUrl}`;
         }
-        else if (this.shareUrl) {
-            link += `#!/?${HashService.SITE_SHARE}=${this.shareUrl}`;
+        if (this.shareUrlId) {
+            return HashService.getFullUrlFromShareId(this.shareUrlId);
         }
-        return link;
+        return Urls.baseAddress;
+    }
+
+    public getShareUrlId(): string {
+        return this.shareUrlId;
+    }
+
+    public setShareUrlId(shareUrlId: string) {
+        this.shareUrlId = shareUrlId;
+        this.updateUrl();
+    }
+
+    public static getShareUrlPostfix(id: string) {
+        return `/?${HashService.SITE_SHARE}=${id}`;
+    }
+
+    public static getFullUrlFromShareId(id: string) {
+        return `${Urls.baseAddress}${HashService.HASH}${HashService.getShareUrlPostfix(id)}`;
     }
 } 

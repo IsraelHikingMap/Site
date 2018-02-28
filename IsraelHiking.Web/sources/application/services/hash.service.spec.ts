@@ -11,8 +11,6 @@ import { MapServiceMockCreator } from "./map.service.spec";
 describe("HashService", () => {
     var hashService: HashService;
     var mapServiceMock: MapServiceMockCreator;
-    //var routerMock: any;
-    //var windowMock: any;
 
     beforeEach(() => {
         mapServiceMock = new MapServiceMockCreator();
@@ -89,7 +87,7 @@ describe("HashService", () => {
 
         hashService = new HashService(router, windowMock, mapService);
 
-        expect(hashService.shareUrl).toBe("shareUrl");
+        expect(hashService.getShareUrlId()).toBe("shareUrl");
     }));
 
     it("Should get url for external file", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {

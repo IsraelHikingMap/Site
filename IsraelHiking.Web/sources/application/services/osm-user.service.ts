@@ -5,6 +5,7 @@ import * as X2JS from "x2js";
 import * as _ from "lodash";
 
 import { AuthorizationService } from "./authorization.service";
+import { HashService } from "./hash.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -102,10 +103,6 @@ export class OsmUserService {
     public login = async () => {
         await this.getUserDetails();
         this.loginStatusChanged.next();
-    }
-
-    public getShareUrlPostfix(id: string) {
-        return `/#!/?s=${id}`;
     }
 
     public getShareUrlDisplayName(shareUrl: Common.ShareUrl): string {
@@ -240,7 +237,7 @@ export class OsmUserService {
     }
 
     public getUrlFromShareId = (shareUrl: Common.ShareUrl) => {
-        return Urls.baseAddress + this.getShareUrlPostfix(shareUrl.id);
+        return HashService.getFullUrlFromShareId(shareUrl.id);
     }
 
     public getMissingParts(trace: ITrace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
