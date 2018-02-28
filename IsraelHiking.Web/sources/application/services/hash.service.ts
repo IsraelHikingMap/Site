@@ -36,7 +36,7 @@ export class HashService {
         this.searchTerm = "";
         this.window = window;
         this.internalUpdate = false;
-        this.addDataFromUrl();
+        this.initialLoad();
         this.updateUrl();
 
         this.router.events.subscribe((event) => {
@@ -47,7 +47,7 @@ export class HashService {
                     return;
                 }
                 if (this.internalUpdate === false) {
-                    this.addDataFromUrl();
+                    this.onExternalUpdate();
                 }
                 this.internalUpdate = false;
             }
@@ -86,15 +86,26 @@ export class HashService {
             address: ""
         } as Common.LayerData;
     }
-
-    private addDataFromUrl() {
-        let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace("#!/?", "");
-        let searchParams = new HttpParams({ fromString: simplifiedHash });
+    
+    private initialLoad() {
+        let searchParams = this.getSearchParams();
         this.searchTerm = decodeURIComponent(searchParams.get(HashService.SEARCH_QUERY) || "");
         this.externalUrl = searchParams.get(HashService.URL) || "";
-        this.shareUrlId = searchParams.get(HashService.SITE_SHARE) || "";
         this.download = searchParams.has(HashService.DOWNLOAD);
         this.baseLayer = this.stringToBaseLayer(searchParams.get(HashService.BASE_LAYER) || "");
+        this.onExternalUpdate(searchParams);
+    }
+
+    private getSearchParams() {
+        let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace("#!/?", "");
+        return new HttpParams({ fromString: simplifiedHash });
+    }
+
+    private onExternalUpdate(searchParams?) {
+        if (!searchParams) {
+            searchParams = this.getSearchParams();
+        }
+        this.shareUrlId = searchParams.get(HashService.SITE_SHARE) || "";
         let latLng = this.parsePathToGeoLocation();
         if (latLng != null) {
             this.mapService.map.setView(latLng, latLng.alt);
