@@ -39,12 +39,12 @@ describe("HashService", () => {
     });
 
     it("Should initialize location data from hash", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "#!/1/2/3";
+        windowMock.location.hash = "#!/1/2.2/3.3";
 
         hashService = new HashService(router, windowMock, mapService);
         
-        expect(mapServiceMock.mapService.map.getCenter().lat).toBe(2);
-        expect(mapServiceMock.mapService.map.getCenter().lng).toBe(3);
+        expect(mapServiceMock.mapService.map.getCenter().lat).toBe(2.2);
+        expect(mapServiceMock.mapService.map.getCenter().lng).toBe(3.3);
         expect(mapServiceMock.mapService.map.getZoom()).toBe(1);
     }));
     
@@ -107,9 +107,7 @@ describe("HashService", () => {
     }));
 
     it("Should update url with location", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        //spyOn($rootScope, "$$phase").and.returnValue(false);
-        //spyOn($location, "path").and.returnValue("#/10/20/30");
-        windowMock.location.hash = "#!/10/20/30";
+        windowMock.location.hash = "#!/10/20.0/30.0";
 
         hashService = new HashService(router, windowMock, mapService);
         mapServiceMock.mapService.map.panTo(L.latLng(1, 2));
@@ -121,13 +119,13 @@ describe("HashService", () => {
     it("changes the map location when addressbar changes to another geolocation", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
         windowMock.location.hash = "/#!/";
         hashService = new HashService(router, windowMock, mapService);
-        windowMock.location.hash = "#!/1/2/3";
+        windowMock.location.hash = "#!/1/2.2/3.3";
 
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 
         expect(mapServiceMock.mapService.map.getZoom()).toBe(1);
-        expect(mapServiceMock.mapService.map.getCenter().lat).toBe(2);
-        expect(mapServiceMock.mapService.map.getCenter().lng).toBe(3);
+        expect(mapServiceMock.mapService.map.getCenter().lat).toBe(2.2);
+        expect(mapServiceMock.mapService.map.getCenter().lng).toBe(3.3);
     }));
 
     it("reload page when address is not a geolocation", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
