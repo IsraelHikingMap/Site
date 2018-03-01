@@ -64,7 +64,7 @@ export class HashService {
     }
 
     private updateUrl = () => {
-        var path = HashService.HASH
+        var path = HashService.HASH;
         if (this.shareUrlId) {
             path += HashService.getShareUrlPostfix(this.shareUrlId);
         }
