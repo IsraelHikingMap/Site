@@ -64,12 +64,15 @@ export class HashService {
     }
 
     private updateUrl = () => {
-        var path = HashService.HASH +
-            "/" + this.mapService.map.getZoom() +
-            "/" + this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION) +
-            "/" + this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION);
+        var path = HashService.HASH
         if (this.shareUrlId) {
             path += HashService.getShareUrlPostfix(this.shareUrlId);
+        }
+        else
+        {
+            path += "/" + this.mapService.map.getZoom() +
+            "/" + this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION) +
+            "/" + this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION);
         }
         this.router.navigateByUrl(path, { replaceUrl: true });
     }
