@@ -128,6 +128,26 @@ describe("HashService", () => {
         expect(mapServiceMock.mapService.map.getCenter().lng).toBe(3.3);
     }));
 
+    it("should remove share url if deleted from addressbar", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/1/2.2/3.3/?s=1234";
+        hashService = new HashService(router, windowMock, mapService);
+        windowMock.location.hash = "#!/1/2.2/3.3";
+
+        (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
+
+        expect(hashService.getShareUrlId()).toBe("");
+    }));
+
+    it("should not delete external url when a change is made to the addressbar", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/1/2.2/3.3/?url=1234";
+        hashService = new HashService(router, windowMock, mapService);
+        windowMock.location.hash = "#!/1/2.2/3.3";
+
+        (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
+
+        expect(hashService.externalUrl).toBe("1234");
+    }));
+
     it("reload page when address is not a geolocation", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
         windowMock.location.hash = "/#!/";
         hashService = new HashService(router, windowMock, mapService);
