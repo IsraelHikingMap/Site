@@ -117,7 +117,7 @@ export class HashService {
     }
 
     public getLinkBackToSite() {
-        if (!this.window.frameElement) {
+        if (this.window.self === this.window.top) {
             return Urls.baseAddress;
         }
         if (this.externalUrl) {

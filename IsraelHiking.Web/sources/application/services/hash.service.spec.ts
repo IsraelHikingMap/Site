@@ -7,6 +7,7 @@ import * as L from "leaflet";
 import { HashService } from "./hash.service";
 import { MapService } from "./map.service";
 import { MapServiceMockCreator } from "./map.service.spec";
+import { Urls } from "../common/Urls";
 
 describe("HashService", () => {
     var hashService: HashService;
@@ -136,7 +137,7 @@ describe("HashService", () => {
     }));
 
     it("Should reload page when user changes the addressbar to an invalid geolocation", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "/#!/1/2/3";
+        windowMock.location.hash = "#!/1/2/3";
         hashService = new HashService(router, windowMock, mapService);
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
         
@@ -147,7 +148,7 @@ describe("HashService", () => {
     }));
 
     it("Should reload page when user changes share url in addressbar", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "/#!/?s=1234";
+        windowMock.location.hash = "#!/?s=1234";
         hashService = new HashService(router, windowMock, mapService);
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 
@@ -155,5 +156,35 @@ describe("HashService", () => {
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 
         expect(windowMock.location.reload).toHaveBeenCalled();
+    }));
+
+    it("Should return base address when not inside iFrame", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/?s=1234";
+        (windowMock as any).self = windowMock.top;
+
+        hashService = new HashService(router, windowMock, mapService);
+        let link = hashService.getLinkBackToSite();
+
+        expect(link).toBe(Urls.baseAddress);
+    }));
+
+    it("Should return share url when inside iFrame with share url", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/?s=1234";
+        (windowMock as any).self = {};
+        hashService = new HashService(router, windowMock, mapService);
+
+        let link = hashService.getLinkBackToSite();
+
+        expect(link).toContain("?s=1234");
+    }));
+
+    it("Should return external url when inside iFrame with external url", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/?url=1234";
+        hashService = new HashService(router, windowMock, mapService);
+        (windowMock as any).self = {};
+
+        let link = hashService.getLinkBackToSite();
+
+        expect(link).toContain("?url=1234");
     }));
 });
