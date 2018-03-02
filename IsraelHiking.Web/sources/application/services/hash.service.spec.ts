@@ -39,15 +39,14 @@ describe("HashService", () => {
     });
 
     it("Should initialize location data from hash", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "#!/1/2.2/3.3";
+        windowMock.location.hash = "#!/1/2.2/3";
 
         hashService = new HashService(router, windowMock, mapService);
         
         expect(mapServiceMock.mapService.map.getCenter().lat).toBe(2.2);
-        expect(mapServiceMock.mapService.map.getCenter().lng).toBe(3.3);
+        expect(mapServiceMock.mapService.map.getCenter().lng).toBe(3);
         expect(mapServiceMock.mapService.map.getZoom()).toBe(1);
     }));
-    
 
     it("Should initialize a baselayer address from hash", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
         windowMock.location.hash = "#!/?baselayer=www.layer.com";
@@ -59,8 +58,6 @@ describe("HashService", () => {
         expect(baseLayer.key).toBe("");
     }));
 
-    
-
     it("Should initialize a baselayer key from hash", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
         windowMock.location.hash = "#!/?baselayer=Israel_Hiking_Map";
 
@@ -70,8 +67,6 @@ describe("HashService", () => {
         expect(baseLayer.key).toBe("Israel Hiking Map");
         expect(baseLayer.address).toBe("");
     }));
-
-    
 
     it("Should handle empty object in hash", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
         windowMock.location.hash = "#!/";
@@ -106,8 +101,8 @@ describe("HashService", () => {
         expect(hashService.download).toBeTruthy();
     }));
 
-    it("Should update url with location", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "#!/10/20.0/30.0";
+    it("Should update url with location when panning the map", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/10/20/30.0";
 
         hashService = new HashService(router, windowMock, mapService);
         mapServiceMock.mapService.map.panTo(L.latLng(1, 2));
@@ -116,43 +111,47 @@ describe("HashService", () => {
         expect(windowMock.location.hash);
     }));
 
-    it("changes the map location when addressbar changes to another geolocation", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "/#!/";
+    it("Should changes to another geolocation when user changes the addressbar", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/";
         hashService = new HashService(router, windowMock, mapService);
-        windowMock.location.hash = "#!/1/2.2/3.3";
+        (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
+        let flyTo = spyOn(mapServiceMock.mapService.map, "flyTo");
 
+        windowMock.location.hash = "#!/1/2.2/3.3";
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 
-        expect(mapServiceMock.mapService.map.getZoom()).toBe(1);
-        expect(mapServiceMock.mapService.map.getCenter().lat).toBe(2.2);
-        expect(mapServiceMock.mapService.map.getCenter().lng).toBe(3.3);
+        expect(flyTo).toHaveBeenCalled();
+        expect(windowMock.location.reload).not.toHaveBeenCalled();
     }));
 
-    it("should remove share url if deleted from addressbar", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "#!/1/2.2/3.3/?s=1234";
+    it("Should remove share url if deleted from addressbar", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/?s=1234";
         hashService = new HashService(router, windowMock, mapService);
+        (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
+        
         windowMock.location.hash = "#!/1/2.2/3.3";
-
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 
         expect(hashService.getShareUrlId()).toBe("");
     }));
 
-    it("should not delete external url when a change is made to the addressbar", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "#!/1/2.2/3.3/?url=1234";
+    it("Should reload page when user changes the addressbar to an invalid geolocation", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "/#!/1/2/3";
         hashService = new HashService(router, windowMock, mapService);
-        windowMock.location.hash = "#!/1/2.2/3.3";
-
+        (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
+        
+        windowMock.location.hash = "#!/42";
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 
-        expect(hashService.externalUrl).toBe("1234");
+        expect(windowMock.location.reload).toHaveBeenCalled();
     }));
 
-    it("reload page when address is not a geolocation", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "/#!/";
+    it("Should reload page when user changes share url in addressbar", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "/#!/?s=1234";
         hashService = new HashService(router, windowMock, mapService);
-        windowMock.location.hash = "#!/42";
+        (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 
+        windowMock.location.hash = "#!/?s=5678";
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 
         expect(windowMock.location.reload).toHaveBeenCalled();

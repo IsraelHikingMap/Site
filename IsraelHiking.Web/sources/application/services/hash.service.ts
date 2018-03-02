@@ -17,7 +17,7 @@ export class HashService {
     private static readonly SITE_SHARE = "s";
     private static readonly SEARCH_QUERY = "q";
     private static readonly HASH = "/#!";
-    private static readonly LOCATION_REGEXP = /\/(\d+)\/(\d+\.\d+)\/(\d+\.\d+)/;
+    private static readonly LOCATION_REGEXP = /\/(\d+)\/([-+]?[0-9]*\.?[0-9]+)\/([-+]?[0-9]*\.?[0-9]+)/;
 
     private window: Window;
     private baseLayer: Common.LayerData;
@@ -35,26 +35,28 @@ export class HashService {
         this.baseLayer = null;
         this.searchTerm = "";
         this.window = window;
-        this.internalUpdate = false;
+        this.internalUpdate = true; // this is due to the fact that nviagtion end is called once the site finishes loading.
         this.initialLoad();
         this.updateUrl();
 
         this.router.events.subscribe((event) => {
             if (event instanceof NavigationEnd) {
-                let latLng = this.parsePathToGeoLocation();
-                if (latLng == null) {
-                    this.window.location.reload();
+                if (this.internalUpdate) {
+                    this.internalUpdate = false;
                     return;
                 }
-                if (this.internalUpdate === false) {
-                    this.onExternalUpdate();
+                let latLng = this.parsePathToGeoLocation();
+                if (latLng != null) {
+                    this.externalUrl = "";
+                    this.shareUrlId = "";
+                    this.mapService.map.flyTo(latLng, latLng.alt);
+                } else {
+                    this.window.location.reload();
                 }
-                this.internalUpdate = false;
             }
         });
 
         this.mapService.map.on("moveend", () => {
-            this.internalUpdate = true;
             this.updateUrl();
         });
     }
@@ -64,16 +66,13 @@ export class HashService {
     }
 
     private updateUrl = () => {
-        var path = HashService.HASH;
-        if (this.shareUrlId) {
-            path += HashService.getShareUrlPostfix(this.shareUrlId);
+        if (this.shareUrlId || this.externalUrl) {
+            return;
         }
-        else
-        {
-            path += "/" + this.mapService.map.getZoom() +
-            "/" + this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION) +
-            "/" + this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION);
-        }
+        let path = HashService.HASH + "/" + this.mapService.map.getZoom() +
+        "/" + this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION) +
+        "/" + this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION);
+        this.internalUpdate = true;
         this.router.navigateByUrl(path, { replaceUrl: true });
     }
 
@@ -91,23 +90,12 @@ export class HashService {
     }
     
     private initialLoad() {
-        let searchParams = this.getSearchParams();
+        let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace("#!/?", "");
+        let searchParams = new HttpParams({ fromString: simplifiedHash });
         this.searchTerm = decodeURIComponent(searchParams.get(HashService.SEARCH_QUERY) || "");
         this.externalUrl = searchParams.get(HashService.URL) || "";
         this.download = searchParams.has(HashService.DOWNLOAD);
         this.baseLayer = this.stringToBaseLayer(searchParams.get(HashService.BASE_LAYER) || "");
-        this.onExternalUpdate(searchParams);
-    }
-
-    private getSearchParams() {
-        let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace("#!/?", "");
-        return new HttpParams({ fromString: simplifiedHash });
-    }
-
-    private onExternalUpdate(searchParams?) {
-        if (!searchParams) {
-            searchParams = this.getSearchParams();
-        }
         this.shareUrlId = searchParams.get(HashService.SITE_SHARE) || "";
         let latLng = this.parsePathToGeoLocation();
         if (latLng != null) {
@@ -147,7 +135,8 @@ export class HashService {
 
     public setShareUrlId(shareUrlId: string) {
         this.shareUrlId = shareUrlId;
-        this.updateUrl();
+        this.internalUpdate = true;
+        this.router.navigateByUrl(`${HashService.HASH}${HashService.getShareUrlPostfix(this.shareUrlId)}`, { replaceUrl: true });
     }
 
     public static getShareUrlPostfix(id: string) {
