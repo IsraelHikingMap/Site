@@ -118,7 +118,8 @@ namespace IsraelHiking.DataAccess
             var coordinate = new Coordinate(geoCoordinate.Longitude, geoCoordinate.Latitude);
             var attributes = GetAttributes(coordinate, page.Title, page.Id.ToString(), language);
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
-            attributes.Add(FeatureAttributes.IMAGE_URL, page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url);
+            var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url;
+            attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl.EndsWith(".svg") ? string.Empty : imageUrl);
 
             return new FeatureCollection(new Collection<IFeature> { new Feature(new Point(coordinate), attributes) });
         }
