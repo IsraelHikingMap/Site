@@ -20,6 +20,7 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
         super(resources, mapService, layersService, toastService);
         this.title = this.resources.baseLayerProperties;
         this.isNew = false;
+        this.isOverlay = false;
     }
 
     public setBaseLayer(layer: IBaseLayer) {
@@ -35,7 +36,7 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
         this.suppressEvents(e);
     }
 
-    protected internalSave(layerData: Common.LayerData) {
-        return this.layersService.updateBaseLayer(this.layer, layerData);
+    protected internalSave(layerData: Common.LayerData): void {
+        this.layersService.updateBaseLayer(this.layer, layerData);
     }
 }

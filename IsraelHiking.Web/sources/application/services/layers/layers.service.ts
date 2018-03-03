@@ -8,6 +8,7 @@ import { MapService } from "../map.service";
 import { ResourcesService } from "../resources.service";
 import { OsmUserService } from "../osm-user.service";
 import { PoiService } from "../poi.service";
+import { ToastService } from "../toast.service";
 import { CategoriesLayerFactory } from "./categories-layers.factory";
 import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
@@ -71,6 +72,7 @@ export class LayersService {
         private readonly resourcesService: ResourcesService,
         private readonly osmUserService: OsmUserService,
         private readonly httpClient: HttpClient,
+        private readonly toastService: ToastService,
         categoriesLayersFactory: CategoriesLayerFactory,
         poiService: PoiService,
     ) {
@@ -235,33 +237,32 @@ export class LayersService {
         return overlay;
     }
 
-    public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: Common.LayerData): string => {
-        if (oldLayer.key !== newLayer.key &&
-            _.find(this.baseLayers, bl => this.compareKeys(bl.key, newLayer.key)) != null) {
-            // HM TODO: this needs translation.
-            return `The name: '${newLayer.key}' is already in use.`;
+    public isNameAvailable(key: string, newName: string, isOverlay: boolean): boolean {
+        let layers: ILayer[] = isOverlay ? this.overlays : this.baseLayers;
+        if (newName === key) {
+            return true;
         }
+        if (!newName) {
+            return false;
+        }
+        return _.find(layers, l => this.compareKeys(l.key, newName)) == null;
+    }
+
+    public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: Common.LayerData): void => {
         let position = this.baseLayers.indexOf(_.find(this.baseLayers, bl => bl.key === oldLayer.key));
         this.removeBaseLayerNoStore(oldLayer);
         var layer = this.addBaseLayerFromData(newLayer, null, position);
         layer.id = oldLayer.id;
         this.selectBaseLayer(layer);
         this.updateUserLayerInStorage(false, layer);
-        return "";
     }
 
-    public updateOverlay = (oldLayer: IOverlay, newLayer: Common.LayerData) => {
-        if (oldLayer.key !== newLayer.key &&
-            _.find(this.overlays, o => this.compareKeys(o.key, newLayer.key)) != null) {
-            // HM TODO: this needs translation.
-            return `The name: '${newLayer.key}' is already in use.`;
-        }
+    public updateOverlay = (oldLayer: IOverlay, newLayer: Common.LayerData): void => {
         this.removeOverlayNoStore(oldLayer);
         var overlay = this.addOverlayFromData(newLayer);
         this.toggleOverlay(overlay);
         overlay.id = oldLayer.id;
         this.updateUserLayerInStorage(true, overlay);
-        return "";
     }
 
     public removeBaseLayer = (baseLayer: IBaseLayer) => {
@@ -320,6 +321,12 @@ export class LayersService {
             this.mapService.map.addLayer(overlay.layer);
             if (this.activeOverlayKeys.indexOf(overlay.key) === -1) {
                 this.activeOverlayKeys.push(overlay.key);
+            }
+            if ((overlay.key === LayersService.HIKING_TRAILS &&
+                this.selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP) ||
+                (overlay.key === LayersService.BICYCLE_TRAILS &&
+                this.selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP)) {
+                this.toastService.warning(this.resourcesService.baseLayerAndOverlayAreOverlapping);
             }
         } else {
             this.mapService.map.removeLayer(overlay.layer);

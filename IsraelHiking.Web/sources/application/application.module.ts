@@ -61,6 +61,7 @@ import { GeoLocationService } from "./services/geo-location.service";
 // directives
 import { GoogleChartDirective } from "./directives/google-chart.directive";
 import { DraggableResizableDirective } from "./directives/draggable-resizable.directive";
+import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 // components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { MainMapComponent } from "./components/main-map.component";
@@ -255,6 +256,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ShareDialogComponent,
         GoogleChartDirective,
         DraggableResizableDirective,
+        NameInUseValidatorDirective,
         UpdatePointDialogComponent,
         ImageDialogCompnent,
         TermsOfServiceDialogComponent,

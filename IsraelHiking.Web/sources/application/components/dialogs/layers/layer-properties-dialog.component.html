@@ -10,12 +10,13 @@
     <div mat-dialog-content>
         <div fxLayout="row">
             <mat-form-field hintLabel="{{resources.layerNamePlaceHolder}}" fxFill>
-                <input matInput type="text" [(ngModel)]="key" name="key" placeholder="{{resources.name}}" required="" fxFill />
+                <input matInput #keyInput="ngModel" type="text" [(ngModel)]="key" placeholder="{{resources.name}}" required="" [nameInUse]="key" [isOverlay]="isOverlay" fxFill />
+                <mat-error *ngIf="keyInput.errors && keyInput.errors.nameInUse">{{resources.nameIsAlreadyInUse}}</mat-error>
             </mat-form-field>
         </div>
         <div fxLayout="row">
             <mat-form-field hintLabel="http://www.somemap.com/{z}/{x}/{y}.png" fxFill dir="ltr">
-                <input matInput type="text" [ngModel]="address" (ngModelChange)="onAddressChanged($event)" name="address" placeholder="{{resources.address}}" required="" fxFill />
+                <input matInput type="text" [ngModel]="address" (ngModelChange)="onAddressChanged($event)" placeholder="{{resources.address}}" required="" fxFill />
             </mat-form-field>
         </div>
         <div fxLayout="row">
@@ -24,10 +25,10 @@
         <div class="input-wrapper-spacer"></div>
         <div fxLayout="row">
             <mat-form-field fxFlex>
-                <input matInput type="number" [(ngModel)]="minZoom" name="minZoom" placeholder="{{resources.minZoom}}" required="" />
+                <input matInput type="number" [(ngModel)]="minZoom" placeholder="{{resources.minZoom}}" required="" />
             </mat-form-field>
             <mat-form-field fxFlex class="margin-10">
-                <input matInput type="number" [(ngModel)]="maxZoom" name="maxZoom" placeholder="{{resources.maxZoom}}" required="" />
+                <input matInput type="number" [(ngModel)]="maxZoom" placeholder="{{resources.maxZoom}}" required="" />
             </mat-form-field>
         </div>
         <div fxLayeout="row" *ngIf="isAdvanced">
@@ -41,6 +42,6 @@
     </div>
     <div mat-dialog-actions fxLayoutAlign="end">
         <button matDialogClose type="button" mat-button *ngIf="!isNew" (click)="removeLayer($event)" matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
-        <button matDialogClose type="button" mat-button (click)="saveLayer($event)" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Save layer"><i class="fa icon-check"></i></button>
+        <button matDialogClose type="button" mat-button (click)="saveLayer($event)" [disabled]="keyInput.errors" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Save layer"><i class="fa icon-check"></i></button>
     </div>
 </div>

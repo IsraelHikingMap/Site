@@ -17,6 +17,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public opacity: number;
     public isNew: boolean;
     public isAdvanced: boolean;
+    public isOverlay: boolean;
     
     private mapPreview: L.Map;
     private tileLayer: L.TileLayer;
@@ -74,14 +75,11 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
             maxZoom: parseInt(this.maxZoom as any),
             opacity: this.opacity
         } as Common.LayerData;
-        var message = this.internalSave(layerData);
-        if (message !== "") {
-            this.toastService.error(message);
-        }
+        this.internalSave(layerData);
         this.suppressEvents(e);
     }
 
-    protected abstract internalSave(layerData: Common.LayerData): string;
+    protected abstract internalSave(layerData: Common.LayerData): void;
 
     public removeLayer(e: Event) { } // should be derived if needed.
 

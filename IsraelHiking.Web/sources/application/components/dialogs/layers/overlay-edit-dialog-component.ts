@@ -20,6 +20,7 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
         super(resources, mapService, layersService, toastService);
         this.title = this.resources.overlayProperties;
         this.isNew = false;
+        this.isOverlay = true;
     }
 
     public setOverlay(layer: IOverlay) {
@@ -36,7 +37,7 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
         this.suppressEvents(e);
     }
 
-    protected internalSave(layerData: Common.LayerData) {
-        return this.layersService.updateOverlay(this.layer, layerData);
+    protected internalSave(layerData: Common.LayerData): void {
+        this.layersService.updateOverlay(this.layer, layerData);
     }
 }

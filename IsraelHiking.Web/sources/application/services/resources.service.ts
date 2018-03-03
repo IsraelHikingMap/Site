@@ -255,6 +255,8 @@ export class ResourcesService {
     public nameInLanguage: string;
     public descriptionInLanguage: string;
     public unableToSaveData: string;
+    public nameIsAlreadyInUse: string;
+    public baseLayerAndOverlayAreOverlapping: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -691,6 +693,8 @@ export class ResourcesService {
         this.nameInLanguage = this.gettextCatalog.getString("Name in {{translation language}}");
         this.descriptionInLanguage = this.gettextCatalog.getString("Description in {{translation language}}");
         this.unableToSaveData = this.gettextCatalog.getString("Unable to save data, please try again later...");
+        this.nameIsAlreadyInUse = this.gettextCatalog.getString("This name is already in use");
+        this.baseLayerAndOverlayAreOverlapping = this.gettextCatalog.getString("Base layer and overlay are overlapping.");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
