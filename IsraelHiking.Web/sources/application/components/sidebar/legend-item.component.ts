@@ -55,6 +55,6 @@ export class LegendItemComponent extends BaseMapComponent implements AfterViewIn
     };
 
     public moveToLocation(item: ILegendItem) {
-        this.mapService.map.setView(item.latlng, item.zoom);
+        this.mapService.map.flyTo(item.latlng, item.zoom);
     }
 }
