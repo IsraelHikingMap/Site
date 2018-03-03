@@ -136,7 +136,7 @@ export class HashService {
     public setShareUrlId(shareUrlId: string) {
         this.shareUrlId = shareUrlId;
         this.internalUpdate = true;
-        this.router.navigateByUrl(`${HashService.HASH}${HashService.getShareUrlPostfix(this.shareUrlId)}`, { replaceUrl: true });
+        this.router.navigateByUrl(`${HashService.HASH}${HashService.getShareUrlPostfix(this.shareUrlId)}`);
     }
 
     public static getShareUrlPostfix(id: string) {
