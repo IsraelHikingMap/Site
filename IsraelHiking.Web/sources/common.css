@@ -30,6 +30,10 @@ body {
     z-index: 1020 !important;
 }
 
+.leaflet-bottom.leaflet-left {
+    z-index: 1000 !important;
+}
+
 .active {
     outline: 2px solid orange !important;
 }
