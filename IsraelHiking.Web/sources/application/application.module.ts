@@ -21,7 +21,8 @@ import {
     MatProgressSpinnerModule,
     MatTabsModule,
     MatRadioModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatToolbarModule,
 } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
@@ -88,7 +89,6 @@ import { LanguageDialogComponent } from "./components/dialogs/language-dialog.co
 import { DrawingComponent } from "./components/drawing.component";
 import { RouteMarkerPopupComponent } from "./components/markerpopup/route-marker-popup.component";
 import { DrawingPoiMarkerPopupComponent } from "./components/markerpopup/drawing-poi-marker-popup.component";
-import { PoiMarkerPopupComponent } from "./components/markerpopup/poi-marker-popup.component";
 import { CoordinatesMarkerPopupComponent } from "./components/markerpopup/coordinates-marker-popup.component";
 import { SearchResultsMarkerPopupComponent } from "./components/markerpopup/search-results-marker-popup.component";
 import { MissingPartMarkerPopupComponent } from "./components/markerpopup/missing-part-marker-popup.component";
@@ -105,6 +105,8 @@ import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-ser
 import { IhmLinkComponent } from "./components/ihm-link.component";
 import { ConfirmDialogComponent } from "./components/dialogs/confirm-dialog.component";
 import { LegendItemComponent } from "./components/sidebar/legend-item.component";
+import { PublicPoiSidebarComponent } from "./components/sidebar/public-poi-sidebar.component";
+import { PoiMainInfoComponent } from "./components/sidebar/poi-main-info.component";
 
 export function getWindow() { return window; }
 export function getRoutesService(routesService: RoutesService) { return routesService; }
@@ -130,6 +132,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         MatTabsModule,
         MatRadioModule,
         MatCheckboxModule,
+        MatToolbarModule,
         FormsModule,
         ReactiveFormsModule,
         FlexLayoutModule,
@@ -163,7 +166,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DrawingComponent,
         RouteMarkerPopupComponent,
         DrawingPoiMarkerPopupComponent,
-        PoiMarkerPopupComponent,
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,
@@ -179,7 +181,9 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         TermsOfServiceDialogComponent,
         IhmLinkComponent,
         ConfirmDialogComponent,
-        LegendItemComponent
+        LegendItemComponent,
+        PublicPoiSidebarComponent,
+        PoiMainInfoComponent
     ],
     providers: [
         GestureConfig,
@@ -243,7 +247,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DrawingComponent,
         RouteMarkerPopupComponent,
         DrawingPoiMarkerPopupComponent,
-        PoiMarkerPopupComponent,
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,
@@ -262,7 +265,9 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         TermsOfServiceDialogComponent,
         IhmLinkComponent,
         ConfirmDialogComponent,
-        LegendItemComponent
+        LegendItemComponent,
+        PublicPoiSidebarComponent,
+        PoiMainInfoComponent
     ],
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })

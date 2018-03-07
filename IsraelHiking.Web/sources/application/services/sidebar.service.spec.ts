@@ -12,22 +12,22 @@ describe("SidebarService", () => {
     });
 
     it("Should show when toggled", () => {
-        service.toggle("name");
+        service.toggle("info");
 
         expect(service.isVisible).toBeTruthy();
-        expect(service.viewName).toBe("name");
+        expect(service.viewName).toBe("info");
     });
 
     it("Should hide when double toggled", () => {
-        service.toggle("name");
-        service.toggle("name");
+        service.toggle("info");
+        service.toggle("info");
 
         expect(service.isVisible).toBeFalsy();
         expect(service.viewName).toBe("");
     });
 
     it("Should hide when toggled and then hide", () => {
-        service.toggle("name");
+        service.toggle("info");
         service.hide();
 
         expect(service.isVisible).toBeFalsy();
@@ -35,17 +35,17 @@ describe("SidebarService", () => {
     });
 
     it("Should switch views when toggled with two different views", () => {
-        service.toggle("view1");
-        service.toggle("view2");
+        service.toggle("info");
+        service.toggle("layers");
 
         expect(service.isVisible).toBeTruthy();
-        expect(service.viewName).toBe("view2");
+        expect(service.viewName).toBe("layers");
     });
 
     it("Should hide when toggled with two different views, last view twice", () => {
-        service.toggle("view1");
-        service.toggle("view2");
-        service.toggle("view2");
+        service.toggle("info");
+        service.toggle("layers");
+        service.toggle("layers");
 
         expect(service.isVisible).toBeFalsy();
         expect(service.viewName).toBe("");

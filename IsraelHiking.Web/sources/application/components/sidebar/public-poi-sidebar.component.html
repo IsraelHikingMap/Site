@@ -1,0 +1,74 @@
+﻿<div [dir]="resources.direction">
+    <div fxLayout="row">
+        <div fxFlex *ngIf="!isHideEditMode()">
+            <button mat-button fxFill (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
+        </div>
+        <div fxFlex *ngIf="isEditMode()">
+            <button mat-button fxFill (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
+        </div>
+        <div fxFlex *ngIf="isRoute()">
+            <button mat-button fxFill (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
+        </div>
+        <div fxFlex *ngIf="!isRoute()">
+            <button mat-button fxFill (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
+        </div>
+        <div fxFlex>
+            <button mat-button fxFill (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
+        </div>
+        <div fxFlex>
+            <button mat-button fxFill (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
+        </div>
+        <div fxFlex>
+            <h3 fxFill class="flex-center"><span dir="ltr">{{rating || 0}}</span></h3>
+        </div>
+        <div fxFlex>
+            <button mat-button fxFill (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
+        </div>
+        <div fxFlex>
+            <button mat-button fxFill (click)="close()" matTooltipPosition="below"><i class="fa icon-close"></i></button>
+        </div>
+    </div>
+    <mat-spinner *ngIf="isLoading"></mat-spinner>
+    <poi-main-info [info]="info" [isEditMode]="isEditMode()"></poi-main-info>
+    <div fxLayout="row" *ngIf="isEditMode() && !isRoute()">
+        <a class="cursor-pointer" (click)="isAdvanced = true">{{resources.more}}</a>
+    </div>
+    <div *ngIf="isEditMode() && isAdvanced">
+        <div fxLayout="row">
+            <mat-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
+                <input matInput type="text" [dir]="'ltr'" [(ngModel)]="info.url" placeholder="{{resources.website}}" fxFill />
+            </mat-form-field>
+        </div>
+        <br />
+        <div fxLayout="row">
+            <mat-form-field fxFill>
+                <mat-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (change)="selectCategory($event)" fxFill>
+                    <mat-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.label)}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <br />
+        <br />
+        <div fxLayout="row" fxLayoutWrap>
+            <button mat-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
+                <i class="fa" [ngClass]="icon.icon" [style.color]="icon.color"></i>
+                <br />
+                {{resources.translate(icon.label)}}
+            </button>
+        </div>
+    </div>
+    <div fxLayout="row">
+        <a *ngIf="info.url" [href]="info.url" target="_blank" class="margin-10-reverse">
+            <img *ngIf="sourceImageUrl" [src]="sourceImageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
+        </a>
+        <a *ngIf="getOffRoadUrl()" [href]="getOffRoadUrl()" target="_blank" class="margin-10-reverse" matTooltip="{{resources.shareWithOffroad}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="POI" angularticsAction="Open in off-road">
+            <!--<i class="fa icon-off-road"></i>-->
+            <img src="https://blog.off-road.io/wp-content/images/ic_offroad.png" width="32" height="32"/>
+        </a>
+        <a *ngIf="getEditElementOsmAddress()" [href]="getEditElementOsmAddress()" target="_blank" class="margin-10-reverse" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit element in OSM">
+            <!--<i class="fa icon-map-editing fa-lg"></i>-->
+            <img [src]="resources.getResizedImageUrl('https://upload.wikimedia.org/wikipedia/commons/b/b0/Openstreetmap_logo.svg', 32)" height="32" width="32" />
+        </a>
+    </div>
+    
+</div>

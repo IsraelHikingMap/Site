@@ -18,7 +18,6 @@ export interface ISelectableCategory extends ICategory {
 @Component({
     selector: "update-point-dialog",
     templateUrl: "./update-point-dialog.component.html",
-    styleUrls: ["./update-point-dialog.component.css"],
     encapsulation: ViewEncapsulation.None
 })
 export class UpdatePointDialogComponent extends BaseMapComponent {
@@ -62,7 +61,6 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
                 color: category.color,
                 icons: category.items.map(i => i.iconColorCategory)
             } as ISelectableCategory);
-            console.log(this.categories);
         }
         this.selectedCategory = null;
 

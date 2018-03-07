@@ -1,6 +1,7 @@
 ﻿import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import * as L from "leaflet";
+import * as _ from "lodash";
 
 import { ResourcesService } from "./resources.service";
 import { Urls } from "../common/Urls";
@@ -61,10 +62,12 @@ export interface ICategory {
 @Injectable()
 export class PoiService {
     private categoriesMap: Map<CategoriesType, ICategory[]>;
+    private poiCache: IPointOfInterestExtended[];
 
     constructor(private resources: ResourcesService,
         private httpClient: HttpClient) {
 
+        this.poiCache = [];
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
         this.categoriesMap.set("Points of Interest", []);
         this.categoriesMap.set("Routes", []);
@@ -95,11 +98,17 @@ export class PoiService {
         return this.httpClient.get(Urls.poi, { params: params }).toPromise() as Promise<IPointOfInterest[]>;
     }
 
-    public getPoint(id: string, source: string, type: string): Promise<IPointOfInterestExtended> {
+    public async getPoint(id: string, source: string, type: string): Promise<IPointOfInterestExtended> {
+        let itemInCache = _.find(this.poiCache, p => p.id === id && p.source === source && p.type === type);
+        if (itemInCache) {
+            return itemInCache;
+        }
         let params = new HttpParams()
             .set("language", this.resources.getCurrentLanguageCodeSimplified())
             .set("type", type);
-        return this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as Promise<IPointOfInterestExtended>;
+        let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as IPointOfInterestExtended;
+        this.poiCache.splice(0, 0, poi);
+        return poi;
     }
     
     public uploadPoint(poiExtended: IPointOfInterestExtended, files: File[]): Promise<IPointOfInterestExtended> {
@@ -109,6 +118,7 @@ export class PoiService {
         }
         formData.append("poiData", JSON.stringify(poiExtended));
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
+        this.poiCache = [];
         return this.httpClient.post(uploadAddress, formData).toPromise() as Promise<IPointOfInterestExtended>;
     }
 
