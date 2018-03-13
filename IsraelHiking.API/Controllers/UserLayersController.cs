@@ -83,7 +83,6 @@ namespace IsraelHiking.API.Controllers
         /// Deletes a custom user layer
         /// </summary>
         /// <param name="id"></param>
-        /// <param name="mapLayer">The layer to delete</param>
         /// <returns></returns>
         [Authorize]
         [HttpDelete]

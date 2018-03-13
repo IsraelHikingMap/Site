@@ -24,19 +24,21 @@ namespace IsraelHiking.API.Tests.Controllers
         private PointsOfInterestController _controller;
         private ITagsHelper _tagHelper;
         private IPointsOfInterestAdapter _adapter;
+        private IPointsOfInterestProvider _pointsOfInterestProvider;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _adapter = Substitute.For<IPointsOfInterestAdapter>();
             _adapter.Source.Returns("source");
+            _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
             _tagHelper = Substitute.For<ITagsHelper>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             _osmGateway = Substitute.For<IOsmGateway>();
             var cache = new LruCache<string, TokenAndSecret>(Substitute.For<IOptions<ConfigurationData>>(), Substitute.For<ILogger>());
             var factory = Substitute.For<IHttpGatewayFactory>();
             factory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(_osmGateway);
-            _controller = new PointsOfInterestController(new [] { _adapter }, factory, _tagHelper, _wikimediaCommonGateway, cache);
+            _controller = new PointsOfInterestController(new [] { _adapter }, factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, cache);
         }
 
         [TestMethod]
@@ -55,13 +57,13 @@ namespace IsraelHiking.API.Tests.Controllers
             var result = _controller.GetPointsOfInterest(string.Empty, string.Empty, string.Empty).Result;
 
             Assert.AreEqual(0, result.Length);
-            _adapter.DidNotReceive().GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>());
+            _pointsOfInterestProvider.DidNotReceive().GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>());
         }
 
         [TestMethod]
         public void GetPointsOfIntereset_OneAdapter_ShouldReturnPoi()
         {
-            _adapter.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(),
+            _pointsOfInterestProvider.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(),
                 Arg.Any<string>()).Returns(new[] {new PointOfInterest()});
 
             var result = _controller.GetPointsOfInterest(string.Empty, string.Empty, "category", "language").Result;

@@ -20,7 +20,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IWikipediaGateway _wikipediaGateway;
         private IElevationDataStorage _elevationDataStorage;
         private IElasticSearchGateway _elasticSearchGateway;
-        private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private IDataContainerConverterService _dataContainerConverterService;
 
         [TestInitialize]
@@ -30,14 +29,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
             _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
-        }
-
-        [TestMethod]
-        public void GetPointsOfInterest_ShouldReturnEmptyList()
-        {
-            Assert.AreEqual(0, _adapter.GetPointsOfInterest(null, null, null, null).Result.Length);
         }
 
         [TestMethod]

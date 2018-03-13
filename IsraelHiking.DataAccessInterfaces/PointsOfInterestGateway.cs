@@ -20,11 +20,15 @@ namespace IsraelHiking.DataAccessInterfaces
     {
     }
 
+    public interface IINatureGateway : IPointsOfInterestGateway
+    {
+        Task Initialize();
+    }
+
     public interface IWikipediaGateway : IPointsOfInterestGateway
     {
         Task Initialize();
         Task<FeatureCollection> GetByPageTitle(string title, string language);
         Task<List<Feature>> GetByLocation(Coordinate center, string language);
-        
     }
 }

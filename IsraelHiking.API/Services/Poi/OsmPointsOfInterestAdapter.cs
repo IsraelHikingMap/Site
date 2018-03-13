@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Points of interest adapter for OSM data
     /// </summary>
-    public class OsmPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestAdapter
+    public class OsmPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestAdapter, IPointsOfInterestProvider
     {
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;

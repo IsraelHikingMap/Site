@@ -12,11 +12,23 @@ namespace IsraelHiking.DataAccess.Tests
         [TestMethod]
         public void GetImageUrl()
         {
-            var options = new NonPublicConfigurationData();
+            var options = new NonPublicConfigurationData
+            {
+                WikiMediaUserName = "WikiMediaUserName",
+                WikiMediaPassword = "WikiMediaPassword"
+            };
             var optionsContainer = Substitute.For<IOptions<NonPublicConfigurationData>>();
             var logger = Substitute.For<ILogger>();
             optionsContainer.Value.Returns(options);
             var gateway = new WikimediaCommonGateway(optionsContainer, logger);
+            try
+            {
+                gateway.Initialize().Wait();
+            }
+            catch
+            {
+                // login will fail but we still want to proceed...
+            }
             var results = gateway.GetImageUrl("File:Israel_Hiking_Map_עין_מחוללים.jpeg").Result;
 
             Assert.IsNotNull(results);

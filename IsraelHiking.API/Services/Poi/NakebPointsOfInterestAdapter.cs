@@ -42,13 +42,6 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
-        {
-            // points are stored in elastic search
-            return Task.Run(() => new PointOfInterest[0]);
-        }
-
-        /// <inheritdoc />
         public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = "")
         {
             var featureCollection = await _nakebGateway.GetById(id);

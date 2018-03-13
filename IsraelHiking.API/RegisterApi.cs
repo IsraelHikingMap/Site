@@ -36,10 +36,12 @@ namespace IsraelHiking.API
             services.AddTransient<IImageCreationService, ImageCreationService>();
             services.AddTransient<IOsmLineAdderService, OsmLineAdderService>();
             services.AddTransient<ITagsHelper, TagsHelper>();
+            services.AddTransient<IPointsOfInterestProvider, OsmPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, OsmPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, NakebPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, OffRoadPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, WikipediaPointsOfInterestAdapter>();
+            services.AddTransient<IPointsOfInterestAdapter, INaturePointsOfInterestAdapter>();
             services.AddSingleton<IItmWgs84MathTransfromFactory, ItmWgs84MathTransfromFactory>();
             services.AddTransient<IOsmElasticSearchUpdaterService, OsmElasticSearchUpdaterService>();
             services.AddTransient<IConverterFlowItem, GeoJsonGpxConverterFlow>();
