@@ -5,8 +5,7 @@ import { IPoiMainInfoData } from "./poi-main-info.component";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SidebarService } from "../../services/sidebar.service";
-import { IPointOfInterestExtended, PoiService, IRating, IRater, IIconColorLabel, IIconColorLabel as IIconColorLabel1,
-    IRating as IRating1 } from "../../services/poi.service";
+import { IPointOfInterestExtended, PoiService, IRating, IRater, IIconColorLabel } from "../../services/poi.service";
 import { MapService } from "../../services/map.service";
 import { IPublicPoiData, IPublicPoiData as IPublicPoiData1 } from "../../services/layers/categories.layer";
 import { OsmUserService } from "../../services/osm-user.service";
@@ -118,11 +117,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         }
     }
 
-    public selectIcon(icon: IIconColorLabel1) {
+    public selectIcon(icon: IIconColorLabel) {
         this.selectedCategory.selectedIcon = icon;
     }
 
-    private getRatingNumber(rating: IRating1): number {
+    private getRatingNumber(rating: IRating): number {
         return _.sum(rating.raters.map(r => r.value));
     }
 

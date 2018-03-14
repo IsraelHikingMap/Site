@@ -1,5 +1,5 @@
-﻿import { Component, Injector, Type, ComponentFactoryResolver, ApplicationRef } from "@angular/core";
-import { Location, LocationStrategy, PathLocationStrategy } from "@angular/common";
+﻿import { Component, Injector, Type, ComponentFactoryResolver, ApplicationRef, ViewChild, AfterViewInit } from "@angular/core";
+import { NgxImageGalleryComponent } from "ngx-image-gallery";
 import * as L from "leaflet";
 
 import { ResourcesService } from "../services/resources.service";
@@ -7,7 +7,6 @@ import { MapService } from "../services/map.service";
 import { SidebarService } from "../services/sidebar.service";
 import { RouteStatisticsService } from "../services/route-statistics.service";
 import { ToastService } from "../services/toast.service";
-import { DragAndDropService } from "../services/drag-and-drop.service";
 import { BaseMapComponent } from "./base-map.component";
 import { ZoomComponent } from "./zoom.component";
 import { LocationComponent } from "./location.component";
@@ -23,16 +22,19 @@ import { SearchComponent } from "./search.component";
 import { InfoComponent } from "./info.component";
 import { ShareComponent } from "./share.component";
 import { IhmLinkComponent } from "./ihm-link.component";
+import { ImageGalleryService } from "../services/image-gallery.service";
 
 @Component({
-    template: `<ng-progress [ngStyle]="{'z-index':1500}"></ng-progress>`,
     selector: "main-map",
-    providers: [Location, { provide: LocationStrategy, useClass: PathLocationStrategy }],
+    templateUrl: "./main-map.component.html",
 })
-export class MainMapComponent extends BaseMapComponent {
+export class MainMapComponent extends BaseMapComponent implements AfterViewInit {
+
+    @ViewChild(NgxImageGalleryComponent)
+    public ngxImageGallery: NgxImageGalleryComponent;
+
 
     constructor(resources: ResourcesService,
-        private readonly location: Location,
         private readonly injector: Injector,
         private readonly componentFactoryResolver: ComponentFactoryResolver,
         private readonly mapService: MapService,
@@ -40,11 +42,14 @@ export class MainMapComponent extends BaseMapComponent {
         private readonly routeStatisticsService: RouteStatisticsService,
         private readonly applicationRef: ApplicationRef,
         private readonly toastService: ToastService,
-        // needed for initialization
-        dragAndDropService: DragAndDropService,
+        public readonly imageGalleryService: ImageGalleryService
     ) {
         super(resources);
         this.createControls();
+    }
+
+    public ngAfterViewInit(): void {
+        this.imageGalleryService.setGalleryComponent(this.ngxImageGallery);
     }
 
     public getIsSidebarVisible() {

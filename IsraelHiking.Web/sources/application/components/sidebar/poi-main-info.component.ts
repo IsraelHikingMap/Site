@@ -1,10 +1,9 @@
 ﻿import { Component, Input, ViewEncapsulation } from "@angular/core";
-import { MatDialog } from "@angular/material";
 
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { BaseMapComponent } from "../base-map.component";
-import { ImageDialogCompnent } from "../dialogs/image-dialog.component";
+import { ImageGalleryService } from "../../services/image-gallery.service";
 
 export interface IPoiMainInfoData {
     title: string;
@@ -31,8 +30,8 @@ export class PoiMainInfoComponent extends BaseMapComponent {
     private currentImageIndex: number;
 
     constructor(resources: ResourcesService,
-        private readonly matDialog: MatDialog,
-        private readonly fileService: FileService) {
+        private readonly fileService: FileService,
+        private readonly imageGalleryService: ImageGalleryService) {
         super(resources);
         this.currentImageIndex = 0;
     }
@@ -53,9 +52,7 @@ export class PoiMainInfoComponent extends BaseMapComponent {
     }
 
     public showImage() {
-        let dialog = this.matDialog.open(ImageDialogCompnent);
-        dialog.componentInstance.title = this.info.title;
-        dialog.componentInstance.imagesUrls = [...this.info.imagesUrls];
+        this.imageGalleryService.setImages(this.info.imagesUrls);
     }
 
     public getCurrentImage() {

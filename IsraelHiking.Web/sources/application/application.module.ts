@@ -33,6 +33,7 @@ import { NgProgressModule, NgProgressInterceptor } from "ngx-progressbar";
 import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { DndModule } from "ng2-dnd";
+import { NgxImageGalleryModule } from "ngx-image-gallery";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -59,6 +60,7 @@ import { CategoriesLayerFactory } from "./services/layers/categories-layers.fact
 import { DragAndDropService } from "./services/drag-and-drop.service";
 import { PoiService } from "./services/poi.service";
 import { GeoLocationService } from "./services/geo-location.service";
+import { ImageGalleryService } from "./services/image-gallery.service";
 // directives
 import { GoogleChartDirective } from "./directives/google-chart.directive";
 import { DraggableResizableDirective } from "./directives/draggable-resizable.directive";
@@ -100,7 +102,6 @@ import { DownloadDialogComponent } from "./components/dialogs/download-dialog.co
 import { ShareComponent } from "./components/share.component";
 import { ShareDialogComponent } from "./components/dialogs/share-dialog.component";
 import { UpdatePointDialogComponent } from "./components/dialogs/update-point-dialog.component";
-import { ImageDialogCompnent } from "./components/dialogs/image-dialog.component";
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
 import { IhmLinkComponent } from "./components/ihm-link.component";
 import { ConfirmDialogComponent } from "./components/dialogs/confirm-dialog.component";
@@ -142,7 +143,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         NgProgressModule,
         NgxPaginationModule,
         ScrollToModule.forRoot(),
-        DndModule.forRoot()
+        DndModule.forRoot(),
+        NgxImageGalleryModule
     ],
     entryComponents: [ZoomComponent,
         LocationComponent,
@@ -177,7 +179,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ShareComponent,
         ShareDialogComponent,
         UpdatePointDialogComponent,
-        ImageDialogCompnent,
         TermsOfServiceDialogComponent,
         IhmLinkComponent,
         ConfirmDialogComponent,
@@ -220,7 +221,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         CategoriesLayerFactory,
         DragAndDropService,
         PoiService,
-        GeoLocationService
+        GeoLocationService,
+        ImageGalleryService
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
@@ -261,7 +263,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DraggableResizableDirective,
         NameInUseValidatorDirective,
         UpdatePointDialogComponent,
-        ImageDialogCompnent,
         TermsOfServiceDialogComponent,
         IhmLinkComponent,
         ConfirmDialogComponent,
@@ -273,7 +274,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
 })
 export class ApplicationModule {
     constructor(dataContainerService: DataContainerService,
-        angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics) {
+        angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
+        dragAndDropService: DragAndDropService) {
         console.log("Starting IHM Application Initialization");
         dataContainerService.initialize().then(() => {
             console.log("Finished IHM Application Initialization");
