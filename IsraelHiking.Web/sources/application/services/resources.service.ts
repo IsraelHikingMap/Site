@@ -222,6 +222,7 @@ export class ResourcesService {
     public myProfile: string;
     public login: string;
     public logout: string;
+    public openInANewWindow: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -660,6 +661,7 @@ export class ResourcesService {
         this.myProfile = this.gettextCatalog.getString("My profile");
         this.login = this.gettextCatalog.getString("Login");
         this.logout = this.gettextCatalog.getString("Logout");
+        this.openInANewWindow = this.gettextCatalog.getString("Open in a new window");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
