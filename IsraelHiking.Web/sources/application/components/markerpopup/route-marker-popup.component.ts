@@ -1,5 +1,6 @@
-﻿import { Component, Injector, ApplicationRef, Inject } from "@angular/core";
+﻿import { Component, Injector, ApplicationRef, Inject, HostListener } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { DELETE } from "@angular/cdk/keycodes";
 import * as _ from "lodash";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -59,5 +60,16 @@ export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
     
     private isFirst(): boolean {
         return this.routesService.selectedRoute.route.segments[0] === this.routeSegment;
+    }
+
+    @HostListener("window:keydown", ["$event"])
+    public onEnterPress($event: KeyboardEvent) {
+        if ($event.keyCode !== DELETE) {
+            return true;
+        }
+        if (this.marker.isPopupOpen()) {
+            this.remove();
+        }
+        return false;
     }
 }
