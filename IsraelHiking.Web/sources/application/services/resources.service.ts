@@ -617,7 +617,7 @@ export class ResourcesService {
         this.noTags = this.gettextCatalog.getString("No Tags");
         this.moreMapAddresses = this.gettextCatalog.getString("More map addresses can be found here, look for TMS");
         this.categories = this.gettextCatalog.getString("Categories");
-        this.emptyPoiDescription = this.gettextCatalog.getString("You should add your description here! Click the edit button below.");
+        this.emptyPoiDescription = this.gettextCatalog.getString("You should add your description here! Click the edit button above.");
         this.comingSoon = this.gettextCatalog.getString("Coming Soon!");
         this.itsYourTimeToShine = this.gettextCatalog.getString("Its your time to shine!");
         this.worthIt = this.gettextCatalog.getString("Worth it!");

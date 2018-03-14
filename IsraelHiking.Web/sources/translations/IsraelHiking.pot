@@ -1554,7 +1554,7 @@ msgid "You need to login to OSM first, please use the button in the upper right 
 msgstr ""
 
 #: application\services\resources.service.ts:620
-msgid "You should add your description here! Click the edit button below."
+msgid "You should add your description here! Click the edit button above."
 msgstr ""
 
 #: application\services\resources.service.ts:499
