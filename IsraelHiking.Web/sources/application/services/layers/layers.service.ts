@@ -1,4 +1,5 @@
 ﻿import { Injectable } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
 import * as L from "leaflet";
@@ -7,6 +8,7 @@ import { MapService } from "../map.service";
 import { ResourcesService } from "../resources.service";
 import { OsmUserService } from "../osm-user.service";
 import { PoiService } from "../poi.service";
+import { ToastService } from "../toast.service";
 import { CategoriesLayerFactory } from "./categories-layers.factory";
 import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
@@ -14,6 +16,7 @@ import * as Common from "../../common/IsraelHiking";
 export interface ILayer extends Common.LayerData {
     layer: L.Layer;
     isEditable: boolean;
+    id: string;
 }
 
 export interface IBaseLayer extends ILayer {
@@ -22,6 +25,12 @@ export interface IBaseLayer extends ILayer {
 
 export interface IOverlay extends ILayer {
     visible: boolean;
+}
+
+interface IUserLayer extends Common.LayerData {
+    isOverlay: boolean;
+    osmUserId: string;
+    id: string;
 }
 
 @Injectable()
@@ -49,14 +58,9 @@ export class LayersService {
     private static CUSTOM_LAYER = "Custom Layer";
 
     @LocalStorage()
-    private storedBaseLayers: Common.LayerData[] = [];
-    @LocalStorage()
-    private storedOverlays: Common.LayerData[] = [];
-    @LocalStorage()
     private activeOverlayKeys: string[] = [];
     @LocalStorage()
     private selectedBaseLayerKey: string = LayersService.ISRAEL_HIKING_MAP;
-    
 
     private overlayZIndex: any;
 
@@ -67,6 +71,8 @@ export class LayersService {
     constructor(private readonly mapService: MapService,
         private readonly resourcesService: ResourcesService,
         private readonly osmUserService: OsmUserService,
+        private readonly httpClient: HttpClient,
+        private readonly toastService: ToastService,
         categoriesLayersFactory: CategoriesLayerFactory,
         poiService: PoiService,
     ) {
@@ -85,19 +91,19 @@ export class LayersService {
     }
 
     private initializeDefaultLayers() {
-        this.addNewBaseLayer({
+        this.addBaseLayerFromData({
             key: LayersService.ISRAEL_HIKING_MAP,
             address: this.resourcesService.currentLanguage.tilesFolder + Urls.DEFAULT_TILES_ADDRESS,
             isEditable: false
         } as ILayer, LayersService.ATTRIBUTION);
 
-        this.addNewBaseLayer({
+        this.addBaseLayerFromData({
             key: LayersService.ISRAEL_MTB_MAP,
             address: this.resourcesService.currentLanguage.tilesFolder + Urls.MTB_TILES_ADDRESS,
             isEditable: false
         } as ILayer, LayersService.MTB_ATTRIBUTION);
 
-        this.addNewBaseLayer({
+        this.addBaseLayerFromData({
             key: LayersService.ESRI,
             address: LayersService.ESRI_ADDRESS,
             isEditable: false,
@@ -105,7 +111,7 @@ export class LayersService {
             maxZoom: LayersService.MAX_ESRI_ZOOM
         } as ILayer, LayersService.ESRI_ATTRIBUTION);
 
-        let hikingTrailsOverlay = this.addNewOverlay({
+        let hikingTrailsOverlay = this.addOverlayFromData({
             key: LayersService.HIKING_TRAILS,
             address: Urls.OVERLAY_TILES_ADDRESS,
             minZoom: LayersService.MIN_ZOOM,
@@ -113,7 +119,7 @@ export class LayersService {
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
         hikingTrailsOverlay.isEditable = false;
 
-        let bicycleTrailsOverlay = this.addNewOverlay({
+        let bicycleTrailsOverlay = this.addOverlayFromData({
             key: LayersService.BICYCLE_TRAILS,
             address: Urls.OVERLAY_MTB_ADDRESS,
             minZoom: LayersService.MIN_ZOOM,
@@ -128,42 +134,79 @@ export class LayersService {
         if (layer != null) {
             return layer; // layer exists
         }
-        layer = this.addNewBaseLayer(layerData, attribution, position);
-        this.storeLayers();
+        layer = this.addBaseLayerFromData(layerData, attribution, position);
+        this.addUserLayerToStorage(false, layer);
         return layer;
     }
 
-    private storeLayers() {
-        let baseLayersToStore = [] as Common.LayerData[];
-        for (let baseLayer of this.baseLayers) {
-            if (baseLayer.key === LayersService.ISRAEL_HIKING_MAP ||
-                baseLayer.key === LayersService.ISRAEL_MTB_MAP ||
-                baseLayer.key === LayersService.ESRI) {
-                continue;
+    private getUserLayers = async (): Promise<any> => {
+        try {
+            let data = await this.httpClient.get(Urls.userLayers).toPromise() as IUserLayer[];
+            if (data == null) {
+                return;
             }
-            baseLayersToStore.push(this.extractDataFromLayer(baseLayer));
-        }
-        
-        let overlaysToStore = [] as Common.LayerData[];
-        for (let overlay of this.overlays) {
-            if (overlay.key === LayersService.HIKING_TRAILS ||
-                overlay.key === LayersService.BICYCLE_TRAILS) {
-                continue;
+            for (let layer of data) {
+                if (layer.isOverlay) {
+                    let existingOverlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
+                    if (existingOverlay) {
+                        continue;
+                    }
+                    let overlay = this.addOverlayFromData(layer);
+                    overlay.isEditable = true;
+                } else {
+                    let existingBaselayer = _.find(this.baseLayers, (baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
+                    if (existingBaselayer) {
+                        continue;
+                    }
+                    let baselayer = this.addBaseLayerFromData(layer);
+                    baselayer.isEditable = true;
+                }
             }
-            overlaysToStore.push(this.extractDataFromLayer(overlay));
+        } catch (error) {
+            console.error(error);
         }
-        if (this.osmUserService.isLoggedIn()) {
-            this.storedBaseLayers = [];
-            this.storedOverlays = [];
-        } else {
-            this.storedBaseLayers = baseLayersToStore;
-            this.storedOverlays = overlaysToStore;
-        }
-        
-        this.osmUserService.updateUserLayers(baseLayersToStore, overlaysToStore);
     }
 
-    private addNewBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
+    private async addUserLayerToStorage(isOverlay: boolean, layer: ILayer) {
+        if (isOverlay === false &&
+            (layer.key === LayersService.ISRAEL_HIKING_MAP ||
+                layer.key === LayersService.ISRAEL_MTB_MAP ||
+                layer.key === LayersService.ESRI)) {
+            return;
+        }
+        if (isOverlay &&
+            (layer.key === LayersService.HIKING_TRAILS ||
+                layer.key === LayersService.BICYCLE_TRAILS)) {
+            return;
+        }
+        if (this.osmUserService.isLoggedIn()) {
+            let layerToStore = this.extractDataFromLayer(layer) as IUserLayer;
+            layerToStore.isOverlay = isOverlay;
+            layerToStore.osmUserId = this.osmUserService.userId;
+            let response = await this.httpClient.post(Urls.userLayers, layerToStore).toPromise() as IUserLayer;
+            layer.id = response.id;
+        } 
+    }
+
+    private async updateUserLayerInStorage(isOverlay: boolean, layer: ILayer) {
+        if (this.osmUserService.isLoggedIn()) {
+            let layerToStore = this.extractDataFromLayer(layer) as IUserLayer;
+            layerToStore.isOverlay = isOverlay;
+            layerToStore.osmUserId = this.osmUserService.userId;
+            layerToStore.id = layer.id;
+            let response = await this.httpClient.put(Urls.userLayers + layerToStore.id, layerToStore).toPromise() as IUserLayer;
+            layer.id = response.id;
+        }
+    }
+
+    private async deleteUserLayerInStorage(isOverlay: boolean, layer: ILayer) {
+        if (this.osmUserService.isLoggedIn()) {
+            let layerToStore = Object.assign({ isOverlay: isOverlay, osmUserId: this.osmUserService.userId }, layer) as IUserLayer;
+            await this.httpClient.delete(Urls.userLayers + layerToStore.id).toPromise();
+        }
+    }
+
+    private addBaseLayerFromData = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
         let layer = { ...layerData } as IBaseLayer;
         layer.layer = L.tileLayer(layerData.address, this.createOptionsFromLayerData(layerData, attribution));
         if (position != undefined) {
@@ -179,12 +222,12 @@ export class LayersService {
         if (overlay != null) {
             return overlay; // overlay exists
         }
-        overlay = this.addNewOverlay(layerData, attribution);
-        this.storeLayers();
+        overlay = this.addOverlayFromData(layerData, attribution);
+        this.addUserLayerToStorage(true, overlay);
         return overlay;
     }
 
-    private addNewOverlay = (layerData: Common.LayerData, attribution?: string): IOverlay => {
+    private addOverlayFromData = (layerData: Common.LayerData, attribution?: string): IOverlay => {
         let overlay = { ...layerData } as IOverlay;
         overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData, attribution))
             .setZIndex(this.overlayZIndex++);
@@ -194,34 +237,37 @@ export class LayersService {
         return overlay;
     }
 
-    public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: Common.LayerData): string => {
-        if (oldLayer.key !== newLayer.key &&
-            _.find(this.baseLayers, bl => this.compareKeys(bl.key, newLayer.key)) != null) {
-            return `The name: '${newLayer.key}' is already in use.`;
+    public isNameAvailable(key: string, newName: string, isOverlay: boolean): boolean {
+        let layers: ILayer[] = isOverlay ? this.overlays : this.baseLayers;
+        if (newName === key) {
+            return true;
         }
-        let position = this.baseLayers.indexOf(_.find(this.baseLayers, bl => bl.key === oldLayer.key));
-        this.removeBaseLayerNoStore(oldLayer);
-        var layer = this.addNewBaseLayer(newLayer, null, position);
-        this.selectBaseLayer(layer);
-        this.storeLayers();
-        return "";
+        if (!newName) {
+            return false;
+        }
+        return _.find(layers, l => this.compareKeys(l.key, newName)) == null;
     }
 
-    public updateOverlay = (oldLayer: IOverlay, newLayer: Common.LayerData) => {
-        if (oldLayer.key !== newLayer.key &&
-            _.find(this.overlays, o => this.compareKeys(o.key, newLayer.key)) != null) {
-            return `The name: '${newLayer.key}' is already in use.`;
-        }
+    public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: Common.LayerData): void => {
+        let position = this.baseLayers.indexOf(_.find(this.baseLayers, bl => bl.key === oldLayer.key));
+        this.removeBaseLayerNoStore(oldLayer);
+        var layer = this.addBaseLayerFromData(newLayer, null, position);
+        layer.id = oldLayer.id;
+        this.selectBaseLayer(layer);
+        this.updateUserLayerInStorage(false, layer);
+    }
+
+    public updateOverlay = (oldLayer: IOverlay, newLayer: Common.LayerData): void => {
         this.removeOverlayNoStore(oldLayer);
-        var overlay = this.addNewOverlay(newLayer);
+        var overlay = this.addOverlayFromData(newLayer);
         this.toggleOverlay(overlay);
-        this.storeLayers();
-        return "";
+        overlay.id = oldLayer.id;
+        this.updateUserLayerInStorage(true, overlay);
     }
 
     public removeBaseLayer = (baseLayer: IBaseLayer) => {
         this.removeBaseLayerNoStore(baseLayer);
-        this.storeLayers();
+        this.deleteUserLayerInStorage(false, baseLayer);
     }
 
     private removeBaseLayerNoStore = (baseLayer: IBaseLayer) => {
@@ -238,10 +284,10 @@ export class LayersService {
             this.selectedBaseLayer = null;
         }
     }
-    
+
     public removeOverlay = (overlay: IOverlay) => {
         this.removeOverlayNoStore(overlay);
-        this.storeLayers();
+        this.deleteUserLayerInStorage(true, overlay);
     }
 
     private removeOverlayNoStore = (overlay: IOverlay) => {
@@ -276,33 +322,18 @@ export class LayersService {
             if (this.activeOverlayKeys.indexOf(overlay.key) === -1) {
                 this.activeOverlayKeys.push(overlay.key);
             }
+            if ((overlay.key === LayersService.HIKING_TRAILS &&
+                this.selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP) ||
+                (overlay.key === LayersService.BICYCLE_TRAILS &&
+                this.selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP)) {
+                this.toastService.warning(this.resourcesService.baseLayerAndOverlayAreOverlapping);
+            }
         } else {
             this.mapService.map.removeLayer(overlay.layer);
             if (this.activeOverlayKeys.indexOf(overlay.key) !== -1) {
                 this.activeOverlayKeys = this.activeOverlayKeys.filter((keyToFind) => keyToFind !== overlay.key);
             }
         }
-    }
-
-    private onUserLayersChanged = () => {
-        for (let baseLayer of this.unique(this.osmUserService.baseLayers.concat(this.storedBaseLayers))) {
-            (baseLayer as ILayer).isEditable = true;
-            var layer = _.find(this.baseLayers, (layerToFind) => this.compareKeys(layerToFind.key, baseLayer.key));
-            if (layer != null) {
-                continue; // layer exists
-            }
-            this.addNewBaseLayer(baseLayer);
-        }
-
-        for (let overlayData of this.unique(this.osmUserService.overlays.concat(this.storedOverlays))) {
-            (overlayData as ILayer).isEditable = true;
-            var overlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, overlayData.key));
-            if (overlay != null) {
-                continue; // overlay exists
-            }
-            this.addNewOverlay(overlayData);
-        }
-        this.storeLayers();
     }
 
     private selectBaseLayerAccordingToStorage = (updateLocalStorage: boolean) => {
@@ -319,28 +350,26 @@ export class LayersService {
             }
         }
     }
-    
+
     public initialize = async () => {
         await this.osmUserService.initialize();
-
-        this.onUserLayersChanged();
+        await this.getUserLayers();
 
         this.selectBaseLayerAccordingToStorage(true);
-        
+
         for (let overlayKey of this.activeOverlayKeys) {
             let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
             if (overlay && overlay.visible === false) {
                 this.toggleOverlay(overlay);
             }
         }
-        
+
         // must be after using local storage values.
         this.onLanguageChange();
-        
         this.resourcesService.languageChanged.subscribe(this.onLanguageChange);
-        this.osmUserService.userLayersChanged.subscribe(this.onUserLayersChanged);
+        this.osmUserService.loginStatusChanged.subscribe(() => this.getUserLayers());
     }
-    
+
     public addExternalBaseLayer = (layerData: Common.LayerData) => {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
             return;
@@ -455,7 +484,7 @@ export class LayersService {
         layer.layer = null;
         layer.address = newAddress;
         layer.selected = false;
-        let newLayer = this.addNewBaseLayer(layer, attribution, position);
+        let newLayer = this.addBaseLayerFromData(layer, attribution, position);
         if (this.selectedBaseLayer != null && this.selectedBaseLayer.key === layer.key) {
             this.selectedBaseLayer = null;
             this.selectBaseLayer(newLayer);

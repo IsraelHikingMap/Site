@@ -36,7 +36,7 @@ namespace IsraelHiking.DataAccess
                 ClientUserAgent = "IsraelHikingMapSite/5.x",
                 Timeout = new TimeSpan(0, 1, 0)
             };
-            foreach (var language in new [] { "he", "en"})
+            foreach (var language in Languages.Array)
             {
                 _wikiSites[language] = new WikiSite(wikiClient, new SiteOptions($"https://{language}.wikipedia.org/w/api.php"));
                 await _wikiSites[language].Initialization;
@@ -115,10 +115,15 @@ namespace IsraelHiking.DataAccess
                 return null;
             }
             var geoCoordinate = page.GetPropertyGroup<GeoCoordinatesPropertyGroup>().PrimaryCoordinate;
+            if (geoCoordinate.IsEmpty)
+            {
+                return null;
+            }
             var coordinate = new Coordinate(geoCoordinate.Longitude, geoCoordinate.Latitude);
             var attributes = GetAttributes(coordinate, page.Title, page.Id.ToString(), language);
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
-            attributes.Add(FeatureAttributes.IMAGE_URL, page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url);
+            var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url;
+            attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl.EndsWith(".svg") ? string.Empty : imageUrl);
 
             return new FeatureCollection(new Collection<IFeature> { new Feature(new Point(coordinate), attributes) });
         }

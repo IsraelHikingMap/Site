@@ -10,7 +10,6 @@ import { ToastService } from "../../services/toast.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
-import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
 
 export interface IIOffroadCoordinates {
@@ -54,7 +53,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public facebookShareAddress: string;
     public nakebCreateHikeAddress: string;
     public isLoading: boolean;
-    public shareUrlId: string;
+    public lastShareUrl: Common.ShareUrl;
     public offroadRequest: IOffroadPostRequest;
     public showOffroadForm: boolean;
     public offroadPublicTrack: boolean;
@@ -85,19 +84,25 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.whatappShareAddress = null;
         this.facebookShareAddress = "";
         this.nakebCreateHikeAddress = "";
-        this.shareUrlId = "";
-        this.canUpdate = this.dataContainerService.shareUrlId &&
-            this.osmUserService.shareUrls.find(s => s.id === this.dataContainerService.shareUrlId) != null;
+        this.lastShareUrl = null;
+        let shareUrl = this.dataContainerService.getShareUrl();
+        this.canUpdate = shareUrl != null && this.osmUserService.shareUrls.find(s => s.id === shareUrl.id) != null;
         this.updateCurrentShare = false;
         this.offroadPublicTrack = false;
         this.offroadRequest = {} as IOffroadPostRequest;
         this.offroadRequest.userMail = this.storedUserEmail;
         this.offroadRequest.activityType = "OffRoading";
         this.offroadRequest.difficultyLevel = "3";
+        if (shareUrl != null) {
+            this.title = shareUrl.title;
+            this.description = shareUrl.description;
+        }
         if (this.routesService.selectedRoute != null) {
             let route = routesService.selectedRoute.getData();
-            this.title = route.name;
-            this.description = route.description;
+            if (shareUrl == null || (!this.title && !this.description)) {
+                this.title = route.name;
+                this.description = route.description;
+            }
             if (route.segments.length > 0) {
                 switch (route.segments[route.segments.length - 1].routingType) {
                     case "Hike":
@@ -112,8 +117,8 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     }
 
     public async ngAfterViewInit(): Promise<any> {
-        let shareUrl = this.createShareUrlObject();
-        let imageUrl = await this.osmUserService.getImagePreview(shareUrl);
+        let dataToPreview = this.getDataFiltered();
+        let imageUrl = await this.osmUserService.getImagePreview(dataToPreview);
         this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(imageUrl) as string;
     }
 
@@ -130,8 +135,8 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
                 ? await this.osmUserService.updateShareUrl(shareUrlToSend)
                 : await this.osmUserService.createShareUrl(shareUrlToSend);
 
-            this.shareUrlId = shareUrl.id;
-            this.dataContainerService.shareUrlId = this.shareUrlId;
+            this.lastShareUrl = shareUrl;
+            this.dataContainerService.setShareUrl(shareUrl);
             this.imageUrl = this.osmUserService.getImageFromShareId(shareUrl);
             let links = this.osmUserService.getShareSocialLinks(shareUrl);
             this.shareAddress = links.ihm;
@@ -145,23 +150,28 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         }
     }
 
+    private getDataFiltered(): Common.DataContainer {
+        var filteredData = this.dataContainerService.getData();
+        for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
+            let route = filteredData.routes[routeIndex];
+            if (route.segments.length === 0 && route.markers.length === 0) {
+                filteredData.routes.splice(routeIndex, 1);
+            }
+        }
+        return filteredData;
+    }
+
     private createShareUrlObject = (): Common.ShareUrl => {
         if (this.routesService.routes.length === 1 && !this.routesService.routes[0].route.properties.description) {
             this.routesService.routes[0].route.properties.description = this.description;
         }
-        var dataToSave = this.dataContainerService.getData();
-        for (let routeIndex = dataToSave.routes.length - 1; routeIndex >= 0; routeIndex--) {
-            let route = dataToSave.routes[routeIndex];
-            if (route.segments.length === 0 && route.markers.length === 0) {
-                dataToSave.routes.splice(routeIndex, 1);
-            }
-        }
-
+        
+        let id = this.dataContainerService.getShareUrl() ? this.dataContainerService.getShareUrl().id : "";
         var shareUrl = {
-            id: this.dataContainerService.shareUrlId,
+            id: id,
             title: this.title,
             description: this.description,
-            dataContainer: dataToSave,
+            dataContainer: this.getDataFiltered(),
             osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
         } as Common.ShareUrl;
         return shareUrl;
@@ -184,7 +194,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.offroadRequest.path = [];
         this.offroadRequest.mapItems = [];
         this.offroadRequest.externalUrl = this.shareAddress;
-        this.offroadRequest.backgroundServeUrl = Urls.images + this.shareUrlId;
+        this.offroadRequest.backgroundServeUrl = this.osmUserService.getImageFromShareId(this.lastShareUrl);
 
         for (let segment of route.segments) {
             for (let latlng of segment.latlngs) {

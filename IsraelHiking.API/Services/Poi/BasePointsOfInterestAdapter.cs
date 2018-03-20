@@ -107,6 +107,7 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.ImagesUrls = feature.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                 .Select(n => feature.Attributes[n].ToString())
+                .Where(n => !string.IsNullOrWhiteSpace(n))
                 .ToArray();
             poiItem.SourceImageUrl = feature.Attributes.Exists(FeatureAttributes.SOURCE_IMAGE_URL)
                 ? feature.Attributes[FeatureAttributes.SOURCE_IMAGE_URL].ToString()

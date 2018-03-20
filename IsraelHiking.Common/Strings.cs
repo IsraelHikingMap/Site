@@ -12,6 +12,7 @@
         public const string WIKIPEDIA = "Wikipedia";
         public const string OTHER = "Other";
         public const string NONE = "None";
+        public const string INATURE = "iNature"; // HM TODO: Temp - remove me?
         public static readonly string[] Points = {
             WATER,
             VIEWPOINT,
@@ -19,7 +20,8 @@
             CAMPING,
             NATURAL,
             WIKIPEDIA,
-            OTHER
+            OTHER,
+            INATURE
         };
 
         public const string ROUTES = "Routes";
@@ -65,6 +67,7 @@
         public const string NAKEB = "Nakeb";
         public const string OFFROAD = "Off-road";
         public const string WIKIPEDIA = "Wikipedia";
+        public const string INATURE = "iNature";
     }
 
     public static class Languages

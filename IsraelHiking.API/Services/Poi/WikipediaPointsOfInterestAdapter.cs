@@ -39,12 +39,6 @@ namespace IsraelHiking.API.Services.Poi
         public string Source => Sources.WIKIPEDIA;
 
         /// <inheritdoc />
-        public Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
-        {
-            return Task.FromResult(new PointOfInterest[0]);
-        }
-
-        /// <inheritdoc />
         public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = null)
         {
             var feature = await _wikipediaGateway.GetById(id);

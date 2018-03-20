@@ -30,6 +30,7 @@ namespace IsraelHiking.API.Services
             _categories.Add(CreateNaturalCategory());
             _categories.Add(CreateOthersCategory());
             _categories.Add(CreateWikipediaCategory());
+            _categories.Add(CreateINatureCategory());
             _categories.AddRange(CreateRoutesCategories());
 
             // For search but not as POI
@@ -230,6 +231,19 @@ namespace IsraelHiking.API.Services
             var wikipediaIcon = new IconColorCategory("icon-wikipedia-w", Categories.WIKIPEDIA);
             wikipediaCategory.Items.Add(new IconAndTags(wikipediaIcon));
             return wikipediaCategory;
+        }
+
+        private Category CreateINatureCategory()
+        {
+            var iNatureCategory = new Category
+            {
+                Color = "#116C00",
+                Icon = "icon-inature",
+                Name = Categories.INATURE
+            };
+            var iNatureIcon = new IconColorCategory("icon-inature", Categories.INATURE);
+            iNatureCategory.Items.Add(new IconAndTags(iNatureIcon));
+            return iNatureCategory;
         }
 
         private Category CreateNoneCategory()

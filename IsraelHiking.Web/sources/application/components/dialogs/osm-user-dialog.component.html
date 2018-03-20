@@ -36,6 +36,44 @@
     </div>
     <div mat-dialog-content #dialogContentForScroll id="dialogContentForScroll">
         <mat-tab-group [(selectedIndex)]="state.selectedTabIndex" [dynamicHeight]="'true'" (selectChange)="setSelectedTab()">
+            <mat-tab label="{{resources.myShares}}">
+                <br />
+                <div *ngFor="let shareUrl of filteredShareUrls | paginate: { itemsPerPage: 5, currentPage: state.sharesPage, id: 'sharesPaging' }" class="item">
+                    <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row">
+                        <div fxFlex="34" class="item-image">
+                            <img [src]="userService.getImageFromShareId(shareUrl)" fxFill />
+                        </div>
+                        <div fxFlex="66" class="margin-10">
+                            <div class="item-content">
+                                <div *ngIf="!isShareUrlInEditMode(shareUrl)">
+                                    <h4>{{userService.getShareUrlDisplayName(shareUrl)}}</h4>
+                                    <a href="{{userService.getUrlFromShareId(shareUrl)}}" target="_blank">{{userService.getUrlFromShareId(shareUrl)}}</a><br />
+                                    {{resources.views}}: {{shareUrl.viewsCount}}<br />
+                                    {{resources.lastViewed}}: {{shareUrl.lastViewed | date:'dd/MM/yyyy'}}
+                                </div>
+                                <div *ngIf="isShareUrlInEditMode(shareUrl)">
+                                    <mat-form-field>
+                                        <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
+                                    </mat-form-field>
+                                    <br />
+                                    <mat-form-field>
+                                        <input matInput type="text" [(ngModel)]="shareUrl.description" placeholder="{{resources.descriptionPlaceHolder}}" />
+                                    </mat-form-field>
+                                </div>
+                                <div class="action-buttons">
+                                    <button mat-button *ngIf="!isShareUrlInEditMode(shareUrl)" (click)="shareUrlInEditMode = shareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
+                                    <button mat-button *ngIf="isShareUrlInEditMode(shareUrl)" (click)="updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
+                                    <button mat-button ngxClipboard [cbContent]="userService.getUrlFromShareId(shareUrl)" matTooltip="{{resources.copyUrl}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-clipboard"></i></button>
+                                    <button mat-button matDialogClose (click)="convertShareUrlToRoute(shareUrl)" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-plus"></i></button>
+                                    <button mat-button (click)="deleteShareUrl(shareUrl)" matTooltip="{{resources.delete}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-trash"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <mat-spinner *ngIf="loadingShareUrls"></mat-spinner>
+                <p *ngIf="userService.shareUrls.length === 0 && !loadingShareUrls">{{resources.noShares}}</p>
+            </mat-tab>
             <mat-tab label="{{resources.myTraces}}">
                 <br />
                 <div *ngFor="let trace of filteredTraces | paginate: { itemsPerPage: 5, currentPage: state.tracesPage, id: 'tracesPaging' }" class="item">
@@ -83,65 +121,10 @@
                 <mat-spinner *ngIf="loadingTraces"></mat-spinner>
                 <p *ngIf="userService.traces.length === 0 && !loadingTraces">{{resources.noTraces}}</p>
             </mat-tab>
-            <mat-tab label="{{resources.myShares}}">
-                <br />
-                <div *ngFor="let shareUrl of filteredShareUrls | paginate: { itemsPerPage: 5, currentPage: state.sharesPage, id: 'sharesPaging' }" class="item">
-                    <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row">
-                        <div fxFlex="34" class="item-image">
-                            <img [src]="userService.getImageFromShareId(shareUrl)" fxFill />
-                        </div>
-                        <div fxFlex="66" class="margin-10">
-                            <div class="item-content">
-                                <div *ngIf="!isShareUrlInEditMode(shareUrl)">
-                                    <h4>{{userService.getShareUrlDisplayName(shareUrl)}}</h4>
-                                    <a href="{{userService.getUrlFromShareId(shareUrl)}}" target="_blank">{{userService.getUrlFromShareId(shareUrl)}}</a><br />
-                                    {{resources.views}}: {{shareUrl.viewsCount}}<br />
-                                    {{resources.lastViewed}}: {{shareUrl.lastViewed | date:'dd/MM/yyyy'}}
-                                </div>
-                                <div *ngIf="isShareUrlInEditMode(shareUrl)">
-                                    <mat-form-field>
-                                        <input matInput type="text" [(ngModel)]="shareUrl.title" placeholder="{{resources.titlePlaceHolder}}" />
-                                    </mat-form-field>
-                                    <br />
-                                    <mat-form-field>
-                                        <input matInput type="text" [(ngModel)]="shareUrl.description" placeholder="{{resources.descriptionPlaceHolder}}" />
-                                    </mat-form-field>
-                                </div>
-                                <div class="action-buttons">
-                                    <button mat-button *ngIf="!isShareUrlInEditMode(shareUrl)" (click)="shareUrlInEditMode = shareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
-                                    <button mat-button *ngIf="isShareUrlInEditMode(shareUrl)" (click)="updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
-                                    <button mat-button ngxClipboard [cbContent]="userService.getUrlFromShareId(shareUrl)" matTooltip="{{resources.copyUrl}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-clipboard"></i></button>
-                                    <button mat-button matDialogClose (click)="convertShareUrlToRoute(shareUrl)" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-plus"></i></button>
-                                    <button mat-button (click)="deleteShareUrl(shareUrl)" matTooltip="{{resources.delete}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-trash"></i></button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <mat-spinner *ngIf="loadingShareUrls"></mat-spinner>
-                <p *ngIf="userService.shareUrls.length === 0 && !loadingShareUrls">{{resources.noShares}}</p>
-            </mat-tab>
         </mat-tab-group>
     </div>
     <div mat-dialog-actions>
         <div *ngIf="state.selectedTabIndex === 0">
-            <pagination-template #paginationTraces="paginationApi"
-                                 id="tracesPaging"
-                                 (pageChange)="state.tracesPage = $event">
-                <div fxLayout="row">
-                    <div fxFlex>
-                        <button mat-button fxFill [disabled]="paginationTraces.isFirstPage()" (click)="paginationTraces.previous()"><i class="fa icon-chevron-{{resources.start}}"></i></button>
-                    </div>
-                    <div fxFlex *ngFor="let page of paginationTraces.pages">
-                        <button fxFill mat-button [class.active]="paginationTraces.getCurrent() === page.value" (click)="paginationTraces.setCurrent(page.value)">{{ page.label }}</button>    
-                    </div>
-                    <div fxFlex>
-                        <button mat-button fxFill [disabled]="paginationTraces.isLastPage()" (click)="paginationTraces.next()"><i class="fa icon-chevron-{{resources.end}}"></i></button>    
-                    </div>
-                </div>
-            </pagination-template>
-        </div>
-        <div *ngIf="state.selectedTabIndex === 1">
             <pagination-template #paginationShares="paginationApi"
                                  id="sharesPaging"
                                  (pageChange)="state.sharesPage = $event">
@@ -154,6 +137,23 @@
                     </div>
                     <div fxFlex>
                         <button mat-button fxFill [disabled]="paginationShares.isLastPage()" (click)="paginationShares.next()"><i class="fa icon-chevron-{{resources.end}}"></i></button>
+                    </div>
+                </div>
+            </pagination-template>
+        </div>
+        <div *ngIf="state.selectedTabIndex === 1">
+            <pagination-template #paginationTraces="paginationApi"
+                                 id="tracesPaging"
+                                 (pageChange)="state.tracesPage = $event">
+                <div fxLayout="row">
+                    <div fxFlex>
+                        <button mat-button fxFill [disabled]="paginationTraces.isFirstPage()" (click)="paginationTraces.previous()"><i class="fa icon-chevron-{{resources.start}}"></i></button>
+                    </div>
+                    <div fxFlex *ngFor="let page of paginationTraces.pages">
+                        <button fxFill mat-button [class.active]="paginationTraces.getCurrent() === page.value" (click)="paginationTraces.setCurrent(page.value)">{{ page.label }}</button>
+                    </div>
+                    <div fxFlex>
+                        <button mat-button fxFill [disabled]="paginationTraces.isLastPage()" (click)="paginationTraces.next()"><i class="fa icon-chevron-{{resources.end}}"></i></button>
                     </div>
                 </div>
             </pagination-template>

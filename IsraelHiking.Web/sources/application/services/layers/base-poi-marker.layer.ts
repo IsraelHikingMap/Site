@@ -60,9 +60,20 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
 
     protected updateMarkers() {
         if (this.mapService.map.getZoom() < this.getMinimalZoom() || this.visible === false) {
-            this.markers.clearLayers();
+            this.clearMarkersLayer();
             return;
         }
         this.updateMarkersInternal();
+    }
+
+    /**
+     * This is a temprorary fix until the following issue is resolved:
+     * https://github.com/Leaflet/Leaflet.markercluster/issues/860
+     * this method can be replaced with this.markers.clearLayers();
+     */
+    protected clearMarkersLayer() {
+        this.markers.eachLayer((m) => {
+            this.markers.removeLayer(m);
+        });
     }
 }

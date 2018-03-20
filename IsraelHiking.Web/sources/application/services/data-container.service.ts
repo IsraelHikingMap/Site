@@ -14,7 +14,7 @@ import * as Common from "../common/IsraelHiking";
 
 @Injectable()
 export class DataContainerService {
-    public shareUrlId: string;
+    private shareUrl: Common.ShareUrl;
 
     constructor(
         private readonly osmUserService: OsmUserService,
@@ -26,7 +26,7 @@ export class DataContainerService {
         private readonly resourcesService: ResourcesService,
         private readonly toastService: ToastService) {
 
-        this.shareUrlId = "";
+        this.shareUrl = null;
     }
 
     public setData(dataContainer: Common.DataContainer) {
@@ -63,10 +63,9 @@ export class DataContainerService {
 
     public initialize = async () => {
         await this.layersService.initialize();
-        if (this.hashService.shareUrl) {
-            this.setShareUrl();
-        }
-        else if (this.hashService.externalUrl) {
+        if (this.hashService.getShareUrlId()) {
+            this.initializeShareUrl();
+        } else if (this.hashService.externalUrl) {
             let data = await this.fileService.openFromUrl(this.hashService.externalUrl);
             data.baseLayer = this.hashService.getBaseLayer();
             this.setData(data);
@@ -75,22 +74,32 @@ export class DataContainerService {
         }
     }
 
-    private setShareUrl = async () => {
+    private initializeShareUrl = async () => {
         try {
-            let shareUrl = await this.osmUserService.getShareUrl(this.hashService.shareUrl);
+            let shareUrl = await this.osmUserService.getShareUrl(this.hashService.getShareUrlId());
             this.setData(shareUrl.dataContainer);
             // hide overlays that are not part of the share:
             for (let overlay of this.layersService.overlays) {
-                let overlayInShare = _.find(shareUrl.dataContainer.overlays || [], o => o.key === overlay.key || o.address === overlay.address)
+                let overlayInShare = _.find(shareUrl.dataContainer.overlays || [],
+                    o => o.key === overlay.key || o.address === overlay.address);
                 if (overlayInShare == null && overlay.visible) {
                     this.layersService.toggleOverlay(overlay);
                 }
             }
-            this.shareUrlId = shareUrl.id;
+            this.shareUrl = shareUrl;
             this.toastService.info(shareUrl.description, shareUrl.title);
         } catch (ex) {
-            this.hashService.shareUrl = "";
+            this.hashService.setShareUrlId("");
             this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
         }
+    }
+
+    public getShareUrl(): Common.ShareUrl {
+        return this.shareUrl;
+    }
+
+    public setShareUrl(shareUrl: Common.ShareUrl) {
+        this.shareUrl = shareUrl;
+        this.hashService.setShareUrlId(this.shareUrl.id);
     }
 }

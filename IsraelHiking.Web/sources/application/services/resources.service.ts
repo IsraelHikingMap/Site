@@ -219,6 +219,10 @@ export class ResourcesService {
     public cancel: string;
     public areYouSure: string;
     public deletionOf: string;
+    public myProfile: string;
+    public login: string;
+    public logout: string;
+    public openInANewWindow: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -252,6 +256,8 @@ export class ResourcesService {
     public nameInLanguage: string;
     public descriptionInLanguage: string;
     public unableToSaveData: string;
+    public nameIsAlreadyInUse: string;
+    public baseLayerAndOverlayAreOverlapping: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -612,7 +618,7 @@ export class ResourcesService {
         this.noTags = this.gettextCatalog.getString("No Tags");
         this.moreMapAddresses = this.gettextCatalog.getString("More map addresses can be found here, look for TMS");
         this.categories = this.gettextCatalog.getString("Categories");
-        this.emptyPoiDescription = this.gettextCatalog.getString("You should add your description here! Click the edit button below.");
+        this.emptyPoiDescription = this.gettextCatalog.getString("You should add your description here! Click the edit button above.");
         this.comingSoon = this.gettextCatalog.getString("Coming Soon!");
         this.itsYourTimeToShine = this.gettextCatalog.getString("Its your time to shine!");
         this.worthIt = this.gettextCatalog.getString("Worth it!");
@@ -652,6 +658,10 @@ export class ResourcesService {
         this.cancel = this.gettextCatalog.getString("Cancel");
         this.areYouSure = this.gettextCatalog.getString("Are you sure?");
         this.deletionOf = this.gettextCatalog.getString("Deletion of");
+        this.myProfile = this.gettextCatalog.getString("My profile");
+        this.login = this.gettextCatalog.getString("Login");
+        this.logout = this.gettextCatalog.getString("Logout");
+        this.openInANewWindow = this.gettextCatalog.getString("Open in a new window");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -685,6 +695,8 @@ export class ResourcesService {
         this.nameInLanguage = this.gettextCatalog.getString("Name in {{translation language}}");
         this.descriptionInLanguage = this.gettextCatalog.getString("Description in {{translation language}}");
         this.unableToSaveData = this.gettextCatalog.getString("Unable to save data, please try again later...");
+        this.nameIsAlreadyInUse = this.gettextCatalog.getString("This name is already in use");
+        this.baseLayerAndOverlayAreOverlapping = this.gettextCatalog.getString("Base layer and overlay are overlapping.");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
@@ -888,7 +900,8 @@ export class ResourcesService {
             return imageUrl;
         }
         if (imageUrl.includes("//upload.wikimedia.org/wikipedia/commons/")) {
-            return imageUrl.replace(/(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)/, `$1thumb/$2$3/${size}px-$3`);;
+            let url = imageUrl.replace(/(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)/, `$1thumb/$2$3/${size}px-$3`);
+            return url.endsWith(".svg") ? url + ".png" : url;
         }
         if (imageUrl.includes("//i.imgur.com/")) {
             var split = imageUrl.split(".");

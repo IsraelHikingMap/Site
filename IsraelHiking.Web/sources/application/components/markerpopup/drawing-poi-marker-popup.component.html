@@ -29,11 +29,13 @@
         <p fxFill [ngClass]="resources.getTextAlignment(description)" [dir]="resources.getDirection(description)">
             <img *ngIf="imageUrl"
                  [src]="resources.getResizedImageUrl(imageUrl, 300)"
-                 class="img-placeholder"
-                 [style.float]="resources.getImageFloat(description)" />
+                 class="img-placeholder cursor-zoom-in"
+                 [style.float]="resources.getImageFloat(description)" 
+                 (click)="showImage()"/>
             <i *ngIf="!imageUrl"
                class="fa fa-5x img-placeholder icon-camera flex-center"
-               [style.float]="resources.getImageFloat(description)"></i>
+               [style.float]="resources.getImageFloat(description)">
+            </i>
             <ng-container>
                 {{description}}<br />
             </ng-container>

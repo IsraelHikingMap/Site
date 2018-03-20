@@ -23,6 +23,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly ITagsHelper _tagsHelper;
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
+        private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
         /// <summary>
@@ -32,11 +33,13 @@ namespace IsraelHiking.API.Controllers
         /// <param name="httpGatewayFactory"></param>
         /// <param name="tagsHelper"></param>
         /// <param name="wikimediaCommonGateway"></param>
+        /// <param name="pointsOfInterestProvider"></param>
         /// <param name="cache"></param>
         public PointsOfInterestController(IEnumerable<IPointsOfInterestAdapter> adapters,
             IHttpGatewayFactory httpGatewayFactory,
             ITagsHelper tagsHelper,
             IWikimediaCommonGateway wikimediaCommonGateway,
+            IPointsOfInterestProvider pointsOfInterestProvider,
             LruCache<string, TokenAndSecret> cache)
         {
             _adapters = adapters.ToDictionary(a => a.Source, a => a);
@@ -44,6 +47,7 @@ namespace IsraelHiking.API.Controllers
             _httpGatewayFactory = httpGatewayFactory;
             _tagsHelper = tagsHelper;
             _cache = cache;
+            _pointsOfInterestProvider = pointsOfInterestProvider;
             _wikimediaCommonGateway = wikimediaCommonGateway;
         }
 
@@ -79,14 +83,7 @@ namespace IsraelHiking.API.Controllers
             var categoriesArray = categories.Split(',').Select(f => f.Trim()).ToArray();
             var northEastCoordinate = new Coordinate().FromLatLng(northEast);
             var southWestCoordinate = new Coordinate().FromLatLng(southWest);
-            var poiList = new List<PointOfInterest>();
-            foreach (var adapter in _adapters.Values)
-            {
-                poiList.AddRange(await adapter.GetPointsOfInterest(northEastCoordinate, southWestCoordinate,
-                    categoriesArray, language));
-            }
-
-            return poiList.ToArray();
+            return await _pointsOfInterestProvider.GetPointsOfInterest(northEastCoordinate, southWestCoordinate, categoriesArray, language);
         }
 
         /// <summary>

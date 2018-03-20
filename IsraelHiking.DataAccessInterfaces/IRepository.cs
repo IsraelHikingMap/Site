@@ -12,8 +12,11 @@ namespace IsraelHiking.DataAccessInterfaces
         Task Delete(ShareUrl shareUrl);
         Task Update(ShareUrl obj);
 
-        Task<UserMapLayers> GetUserLayers(string osmUserId);
-        Task UpdateUserLayers(string osmUserId, UserMapLayers userLayers);
+        Task<List<MapLayerData>> GetUserLayers(string osmUserId);
+        Task<MapLayerData> GetUserLayerById(string id);
+        Task<MapLayerData> AddUserLayer(MapLayerData layerData);
+        Task UpdateUserLayer(MapLayerData layerData);
+        Task DeleteUserLayer(MapLayerData layerData);
 
         Task<Rating> GetRating(string id, string source);
         Task UpdateRating(Rating rating);

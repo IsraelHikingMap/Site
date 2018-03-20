@@ -10,7 +10,6 @@ namespace IsraelHiking.API.Executors
     public class ItmWgs84MathTransfromFactory : IItmWgs84MathTransfromFactory
     {
         private readonly IProjectedCoordinateSystem _itm;
-        private readonly IGeographicCoordinateSystem _wgs84;
 
         /// <summary>
         /// Factory's constructor
@@ -36,22 +35,20 @@ namespace IsraelHiking.API.Executors
             var itmProjection = coordinateSystemFactory.CreateProjection("Transverse_Mercator", "Transverse_Mercator", itmParameters);
             _itm = coordinateSystemFactory.CreateProjectedCoordinateSystem("ITM", itmGeo, itmProjection, LinearUnit.Metre,
                 new AxisInfo("East", AxisOrientationEnum.East), new AxisInfo("North", AxisOrientationEnum.North));
-
-            _wgs84 = ProjectedCoordinateSystem.WGS84_UTM(36, true).GeographicCoordinateSystem;
         }
 
         /// <inheritdoc />
         public IMathTransform Create()
         {
             var coordinateTransformFactory = new CoordinateTransformationFactory();
-            return coordinateTransformFactory.CreateFromCoordinateSystems(_itm, _wgs84).MathTransform;
+            return coordinateTransformFactory.CreateFromCoordinateSystems(_itm, GeographicCoordinateSystem.WGS84).MathTransform;
         }
 
         /// <inheritdoc />
         public IMathTransform CreateInverse()
         {
             var coordinateTransformFactory = new CoordinateTransformationFactory();
-            return coordinateTransformFactory.CreateFromCoordinateSystems(_wgs84, _itm).MathTransform;
+            return coordinateTransformFactory.CreateFromCoordinateSystems(GeographicCoordinateSystem.WGS84, _itm).MathTransform;
         }
     }
 }

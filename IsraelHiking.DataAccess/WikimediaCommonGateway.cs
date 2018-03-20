@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -9,7 +8,6 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Newtonsoft.Json.Linq;
 using WikiClientLibrary.Client;
 using WikiClientLibrary.Files;
 using WikiClientLibrary.Pages;
@@ -95,14 +93,15 @@ namespace IsraelHiking.DataAccess
 
         public async Task<string> GetImageUrl(string pageName)
         {
-            using (var client = new HttpClient())
-            {
-                var address = $"{BASE_API_ADDRESS}?action=query&titles={pageName}&prop=imageinfo&iiprop=url&iimetadataversion=latest&format=json";
-                var response = await client.GetAsync(address);
-                var contentString = await response.Content.ReadAsStringAsync();
-                var jObject = JObject.Parse(contentString);
-                return jObject.SelectToken("$..url")?.Value<string>();
-            }
+            var imagePage = new WikiPage(_site, pageName);
+            await imagePage.RefreshAsync(PageQueryOptions.None);
+            return imagePage.LastFileRevision?.Url;
+        }
+
+        public static string GetWikiName(string name)
+        {
+            var invalidCharacterReularExpression = new Regex(@"[\\#<>\[\]\?|:{}/~\s+]");
+            return invalidCharacterReularExpression.Replace(name, "_");
         }
 
         private string GetNonExistingFilePageName(string title, string fileName)
@@ -113,9 +112,7 @@ namespace IsraelHiking.DataAccess
                 name += Path.GetExtension(fileName);
             }
             name = name.Replace(".jpg", ".jpeg");
-            var invalidCharacterReularExpression = new Regex(@"[\\#<>\[\]|:{}/~\s+]");
-            var wikiFileName = "Israel_Hiking_Map_" + invalidCharacterReularExpression.Replace(name, "_");
-
+            var wikiFileName = "Israel_Hiking_Map_" + GetWikiName(name);
             var countingFileName = Path.GetFileNameWithoutExtension(wikiFileName);
             var extension = Path.GetExtension(wikiFileName);
             ParallelLoopResult results;
@@ -125,18 +122,12 @@ namespace IsraelHiking.DataAccess
             {
                 results = Parallel.For(loopIndex, loopIndex + loopRange, (index, options) =>
                 {
-                    using (var client = new HttpClient())
+                    var pageNameToTest = GetWikiPageFileNameFromIndex(index, countingFileName, extension);
+                    var pageToTest = new WikiPage(_site, pageNameToTest);
+                    pageToTest.RefreshAsync(PageQueryOptions.None);
+                    if (!pageToTest.Exists)
                     {
-                        var pageNameToTest = GetWikiPageFileNameFromIndex(index, countingFileName, extension);
-                        var address =
-                            $"{BASE_API_ADDRESS}?action=query&titles={pageNameToTest}&prop=imageinfo&iiprop=url&iimetadataversion=latest&format=json";
-                        var response = client.GetAsync(address).Result;
-                        var contentString = response.Content.ReadAsStringAsync().Result;
-                        var jObject = JObject.Parse(contentString);
-                        if (jObject.SelectToken("$..pages")["-1"] != null)
-                        {
-                            options.Break();
-                        }
+                        options.Break();
                     }
                 });
                 loopIndex += loopRange;

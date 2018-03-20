@@ -1,10 +1,11 @@
-﻿import { Injectable } from "@angular/core";
+﻿import { Injectable, EventEmitter } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Subject } from "rxjs/Subject";
 import * as X2JS from "x2js";
 import * as _ from "lodash";
 
 import { AuthorizationService } from "./authorization.service";
+import { HashService } from "./hash.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -22,14 +23,6 @@ export interface ITrace {
     tagsString: string;
     visibility: Visibility;
     isInEditMode: boolean;
-}
-
-interface IUserLayer extends Common.LayerData {
-    isOverlay: boolean;
-}
-
-interface IUserLayers {
-    layers: IUserLayer[];
 }
 
 interface IOsmConfiguration {
@@ -54,15 +47,13 @@ export class OsmUserService {
 
     public tracesChanged: Subject<any>;
     public shareUrlsChanged: Subject<any>;
-    public userLayersChanged: Subject<any>;
+    public loginStatusChanged: EventEmitter<any>;
 
     public displayName: string;
     public imageUrl: string;
     public changeSets: number;
     public traces: ITrace[];
     public shareUrls: Common.ShareUrl[];
-    public baseLayers: Common.LayerData[];
-    public overlays: Common.LayerData[];
     public userId: string;
 
     constructor(private httpClient: HttpClient,
@@ -70,11 +61,9 @@ export class OsmUserService {
         this.x2Js = new X2JS();
         this.traces = [];
         this.shareUrls = [];
-        this.baseLayers = [];
-        this.overlays = [];
         this.tracesChanged = new Subject();
         this.shareUrlsChanged = new Subject();
-        this.userLayersChanged = new Subject();
+        this.loginStatusChanged = new EventEmitter();
     }
 
     public async initialize() {
@@ -104,18 +93,16 @@ export class OsmUserService {
             this.oauth.logout();
         }
         this.authorizationService.osmToken = null;
+        this.loginStatusChanged.next();
     }
 
     public isLoggedIn = (): boolean => {
         return this.oauth && this.oauth.authenticated() && this.authorizationService.osmToken != null;
     }
 
-    public login = (): Promise<any> => {
-        return this.getUserDetails();
-    }
-
-    public getShareUrlPostfix(id: string) {
-        return `/#!/?s=${id}`;
+    public login = async () => {
+        await this.getUserDetails();
+        this.loginStatusChanged.next();
     }
 
     public getShareUrlDisplayName(shareUrl: Common.ShareUrl): string {
@@ -167,9 +154,7 @@ export class OsmUserService {
         this.changeSets = detailJson.osm.user.changesets._count;
         this.userId = detailJson.osm.user._id;
 
-        let refreshDetailsPromise = this.refreshDetails();
-        let userLayersPromise = this.getUserLayers();
-        await Promise.all([userLayersPromise, refreshDetailsPromise]);
+        await this.refreshDetails();
     }
 
     private getTraces = (): Promise<any> => {
@@ -252,7 +237,7 @@ export class OsmUserService {
     }
 
     public getUrlFromShareId = (shareUrl: Common.ShareUrl) => {
-        return Urls.baseAddress + this.getShareUrlPostfix(shareUrl.id);
+        return HashService.getFullUrlFromShareId(shareUrl.id);
     }
 
     public getMissingParts(trace: ITrace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {
@@ -261,42 +246,6 @@ export class OsmUserService {
 
     public addAMissingPart(feature: GeoJSON.Feature<GeoJSON.LineString>): Promise<any> {
         return this.httpClient.put(Urls.osm, feature, { responseType: "text" }).toPromise();
-    }
-
-    private getUserLayers = async (): Promise<any> => {
-        try {
-            let data = await this.httpClient.get(Urls.userLayers).toPromise() as IUserLayers;
-            this.baseLayers.splice(0);
-            this.overlays.splice(0);
-            if (data == null || data.layers == null) {
-                this.userLayersChanged.next();
-                return;
-            }
-            for (let layer of data.layers) {
-                if (layer.isOverlay) {
-                    this.overlays.push(layer);
-                } else {
-                    this.baseLayers.push(layer);
-                }
-            }
-            this.userLayersChanged.next();
-        } catch (error) {
-            console.error(error);
-        }
-    }
-
-    public updateUserLayers = async (baseLayersToStore: Common.LayerData[], overlaysToStore: Common.LayerData[]): Promise<IUserLayer> => {
-        if (!this.isLoggedIn()) {
-            return {} as IUserLayer;
-        }
-
-        let layers = [...baseLayersToStore];
-        for (let overlayToStore of overlaysToStore) {
-            (overlayToStore as IUserLayer).isOverlay = true;
-            layers.push(overlayToStore);
-        }
-
-        return await this.httpClient.post(Urls.userLayers + this.userId, { layers: layers } as IUserLayers).toPromise() as IUserLayer;
     }
 
     public getEditOsmLocationAddress(baseLayerAddress: string, zoom: number, center: L.LatLng): string {
@@ -326,8 +275,8 @@ export class OsmUserService {
         return background;
     }
 
-    public async getImagePreview(shareUrl: Common.ShareUrl) {
-        let image = await this.httpClient.post(Urls.images, shareUrl.dataContainer, { responseType: "blob" }).toPromise();
+    public async getImagePreview(dataContainer: Common.DataContainer) {
+        let image = await this.httpClient.post(Urls.images, dataContainer, { responseType: "blob" }).toPromise();
         return window.URL.createObjectURL(image);
     }
 }

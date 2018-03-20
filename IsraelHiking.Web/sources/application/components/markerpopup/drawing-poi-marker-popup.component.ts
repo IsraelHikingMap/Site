@@ -12,6 +12,7 @@ import { IRouteLayer, IMarkerWithData } from "../../services/layers/routelayers/
 import { IconsService } from "../../services/icons.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { FileService } from "../../services/file.service";
+import { ImageGalleryService } from "../../services/image-gallery.service";
 import { UpdatePointDialogComponent } from "../dialogs/update-point-dialog.component";
 import * as Common from "../../common/IsraelHiking";
 
@@ -39,12 +40,13 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
 
     constructor(resources: ResourcesService,
         httpClient: HttpClient,
-        private matDialog: MatDialog,
+        private readonly matDialog: MatDialog,
         elevationProvider: ElevationProvider,
         applicationRef: ApplicationRef,
-        private mapService: MapService,
-        private osmUserService: OsmUserService,
-        private fileService: FileService) {
+        private readonly mapService: MapService,
+        private readonly osmUserService: OsmUserService,
+        private readonly fileService: FileService,
+        private readonly imageGalleryService: ImageGalleryService) {
         super(resources, httpClient, applicationRef, elevationProvider);
 
         this.showIcons = false;
@@ -164,6 +166,10 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         }
         let link = await this.fileService.uploadAnonymousImage(file);
         this.imageUrl = link;
+    }
+
+    public showImage() {
+        this.imageGalleryService.setImages([this.imageUrl]);
     }
 
     public changeToEditMode = (): void => { throw new Error("Callback needs to be set by the creating class...")}

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Diagnostics;
+using System.Linq;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Internal;
 
 namespace IsraelHiking.DataAccess.Tests
 {
@@ -8,7 +10,6 @@ namespace IsraelHiking.DataAccess.Tests
     {
         public IDisposable BeginScope<TState>(TState state)
         {
-            //throw new NotImplementedException();
             return null;
         }
 
@@ -19,7 +20,8 @@ namespace IsraelHiking.DataAccess.Tests
 
         public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception exception, Func<TState, Exception, string> formatter)
         {
-            //throw new NotImplementedException();
+            var format = state as FormattedLogValues;
+            Trace.WriteLine(format.First().Value);
         }
 
         public void LogDebug(string message)

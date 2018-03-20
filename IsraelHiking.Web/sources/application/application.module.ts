@@ -21,7 +21,8 @@ import {
     MatProgressSpinnerModule,
     MatTabsModule,
     MatRadioModule,
-    MatCheckboxModule
+    MatCheckboxModule,
+    MatToolbarModule,
 } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
@@ -32,6 +33,7 @@ import { NgProgressModule, NgProgressInterceptor } from "ngx-progressbar";
 import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { DndModule } from "ng2-dnd";
+import { NgxImageGalleryModule } from "ngx-image-gallery";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -58,9 +60,11 @@ import { CategoriesLayerFactory } from "./services/layers/categories-layers.fact
 import { DragAndDropService } from "./services/drag-and-drop.service";
 import { PoiService } from "./services/poi.service";
 import { GeoLocationService } from "./services/geo-location.service";
+import { ImageGalleryService } from "./services/image-gallery.service";
 // directives
 import { GoogleChartDirective } from "./directives/google-chart.directive";
 import { DraggableResizableDirective } from "./directives/draggable-resizable.directive";
+import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 // components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { MainMapComponent } from "./components/main-map.component";
@@ -87,7 +91,6 @@ import { LanguageDialogComponent } from "./components/dialogs/language-dialog.co
 import { DrawingComponent } from "./components/drawing.component";
 import { RouteMarkerPopupComponent } from "./components/markerpopup/route-marker-popup.component";
 import { DrawingPoiMarkerPopupComponent } from "./components/markerpopup/drawing-poi-marker-popup.component";
-import { PoiMarkerPopupComponent } from "./components/markerpopup/poi-marker-popup.component";
 import { CoordinatesMarkerPopupComponent } from "./components/markerpopup/coordinates-marker-popup.component";
 import { SearchResultsMarkerPopupComponent } from "./components/markerpopup/search-results-marker-popup.component";
 import { MissingPartMarkerPopupComponent } from "./components/markerpopup/missing-part-marker-popup.component";
@@ -99,11 +102,12 @@ import { DownloadDialogComponent } from "./components/dialogs/download-dialog.co
 import { ShareComponent } from "./components/share.component";
 import { ShareDialogComponent } from "./components/dialogs/share-dialog.component";
 import { UpdatePointDialogComponent } from "./components/dialogs/update-point-dialog.component";
-import { ImageDialogCompnent } from "./components/dialogs/image-dialog.component";
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
 import { IhmLinkComponent } from "./components/ihm-link.component";
 import { ConfirmDialogComponent } from "./components/dialogs/confirm-dialog.component";
 import { LegendItemComponent } from "./components/sidebar/legend-item.component";
+import { PublicPoiSidebarComponent } from "./components/sidebar/public-poi-sidebar.component";
+import { PoiMainInfoComponent } from "./components/sidebar/poi-main-info.component";
 
 export function getWindow() { return window; }
 export function getRoutesService(routesService: RoutesService) { return routesService; }
@@ -129,6 +133,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         MatTabsModule,
         MatRadioModule,
         MatCheckboxModule,
+        MatToolbarModule,
         FormsModule,
         ReactiveFormsModule,
         FlexLayoutModule,
@@ -138,7 +143,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         NgProgressModule,
         NgxPaginationModule,
         ScrollToModule.forRoot(),
-        DndModule.forRoot()
+        DndModule.forRoot(),
+        NgxImageGalleryModule
     ],
     entryComponents: [ZoomComponent,
         LocationComponent,
@@ -162,7 +168,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DrawingComponent,
         RouteMarkerPopupComponent,
         DrawingPoiMarkerPopupComponent,
-        PoiMarkerPopupComponent,
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,
@@ -174,11 +179,12 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ShareComponent,
         ShareDialogComponent,
         UpdatePointDialogComponent,
-        ImageDialogCompnent,
         TermsOfServiceDialogComponent,
         IhmLinkComponent,
         ConfirmDialogComponent,
-        LegendItemComponent
+        LegendItemComponent,
+        PublicPoiSidebarComponent,
+        PoiMainInfoComponent
     ],
     providers: [
         GestureConfig,
@@ -215,7 +221,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         CategoriesLayerFactory,
         DragAndDropService,
         PoiService,
-        GeoLocationService
+        GeoLocationService,
+        ImageGalleryService
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
@@ -242,7 +249,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DrawingComponent,
         RouteMarkerPopupComponent,
         DrawingPoiMarkerPopupComponent,
-        PoiMarkerPopupComponent,
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,
@@ -255,18 +261,21 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ShareDialogComponent,
         GoogleChartDirective,
         DraggableResizableDirective,
+        NameInUseValidatorDirective,
         UpdatePointDialogComponent,
-        ImageDialogCompnent,
         TermsOfServiceDialogComponent,
         IhmLinkComponent,
         ConfirmDialogComponent,
-        LegendItemComponent
+        LegendItemComponent,
+        PublicPoiSidebarComponent,
+        PoiMainInfoComponent
     ],
     bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
 })
 export class ApplicationModule {
     constructor(dataContainerService: DataContainerService,
-        angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics) {
+        angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
+        dragAndDropService: DragAndDropService) {
         console.log("Starting IHM Application Initialization");
         dataContainerService.initialize().then(() => {
             console.log("Finished IHM Application Initialization");

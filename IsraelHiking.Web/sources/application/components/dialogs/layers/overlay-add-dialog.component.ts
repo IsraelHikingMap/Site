@@ -18,11 +18,11 @@ export class OverlayAddDialogComponent extends LayerBaseDialogComponent {
         super(resources, mapService, layersService, toastService);
         this.title = this.resources.addOverlay;
         this.isNew = true;
+        this.isOverlay = true;
     }
 
-    protected internalSave(layerData: Common.LayerData) {
+    protected internalSave(layerData: Common.LayerData): void {
         var overlay = this.layersService.addOverlay(layerData);
         this.layersService.toggleOverlay(overlay);
-        return "";
     }
 }

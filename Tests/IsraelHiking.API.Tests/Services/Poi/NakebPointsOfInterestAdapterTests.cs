@@ -32,12 +32,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void GetPointsOfInterest_ShouldReturnEmptyList()
-        {
-            Assert.AreEqual(0, _adapter.GetPointsOfInterest(null, null, null, null).Result.Length);
-        }
-
-        [TestMethod]
         public void GetPointOfInterestById_ShouldGetIt()
         {
             var poiId = "42";

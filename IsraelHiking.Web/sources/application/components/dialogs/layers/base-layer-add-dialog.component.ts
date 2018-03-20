@@ -19,11 +19,11 @@ export class BaseLayerAddDialogComponent extends LayerBaseDialogComponent {
         super(resources, mapService, layersService, toastService);
         this.title = this.resources.addBaseLayer;
         this.isNew = true;
+        this.isOverlay = false;
     }
 
-    protected internalSave(layerData: Common.LayerData): string {
+    protected internalSave(layerData: Common.LayerData): void {
         let layer = this.layersService.addBaseLayer(layerData);
         this.layersService.selectBaseLayer(layer);
-        return "";
     };
 }
