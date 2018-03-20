@@ -2,6 +2,7 @@
 import { HashService } from "../services/hash.service";
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
+import { Urls } from "../common/Urls";
 
 
 @Component({
@@ -10,11 +11,25 @@ import { BaseMapComponent } from "./base-map.component";
     styleUrls: ["./ihm-link.component.css"]
 })
 export class IhmLinkComponent extends BaseMapComponent {
-    public link: string;
     
     constructor(resources: ResourcesService,
-        hashService: HashService) {
+        private readonly hashService: HashService) {
         super(resources);
-        this.link = hashService.getLinkBackToSite();
+    }
+
+    public navigate() {
+        if (window.self === window.top) {
+            window.location.href = Urls.baseAddress;
+            return;
+        }
+        this.hashService.openNewTab();
+    }
+
+    public getTooltipText() {
+        if (window.self === window.top) {
+            return "";
+        } else {
+            return this.resources.openInANewWindow;
+        }
     }
 }

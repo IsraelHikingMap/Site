@@ -116,17 +116,15 @@ export class HashService {
         );
     }
 
-    public getLinkBackToSite() {
-        if (this.window.self === this.window.top) {
-            return Urls.baseAddress;
-        }
+    public openNewTab() {
+        let url = Urls.baseAddress;
         if (this.externalUrl) {
-            return `${Urls.baseAddress}${HashService.HASH}/?${HashService.URL}=${this.externalUrl}`;
+            url = `${Urls.baseAddress}${HashService.HASH}/?${HashService.URL}=${this.externalUrl}`;
         }
         if (this.shareUrlId) {
-            return HashService.getFullUrlFromShareId(this.shareUrlId);
+            url = HashService.getFullUrlFromShareId(this.shareUrlId);
         }
-        return Urls.baseAddress;
+        this.window.open(url);
     }
 
     public getShareUrlId(): string {
