@@ -83,8 +83,7 @@ namespace IsraelHiking.API.Controllers
                     };
                     _logger.LogInformation("No specific filters were applied, updating all databases.");
                 }
-                _logger.LogInformation("Updating site's databases according to request: " +
-                                       JsonConvert.SerializeObject(request));
+                _logger.LogInformation("Updating site's databases according to request: " + JsonConvert.SerializeObject(request));
                 var memoryStream = new MemoryStream();
                 using (var stream = await _osmLatestFileFetcher.Get(request.OsmFile))
                 {
@@ -106,8 +105,6 @@ namespace IsraelHiking.API.Controllers
                 RebuildSemaphore.Release();
             }
         }
-
-        
 
         /// <summary>
         /// This operation will only update the data since last full update
