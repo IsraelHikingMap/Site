@@ -23,7 +23,8 @@ describe("HashService", () => {
             location: {
                 href: "href",
                 reload: jasmine.createSpy("reload"),
-            }
+            },
+            open: () => {}
         }
         TestBed.configureTestingModule({
             imports: [RouterTestingModule],
@@ -158,33 +159,33 @@ describe("HashService", () => {
         expect(windowMock.location.reload).toHaveBeenCalled();
     }));
 
-    it("Should return base address when not inside iFrame", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
-        windowMock.location.hash = "#!/?s=1234";
-        (windowMock as any).self = windowMock.top;
+    it("Should return open new tab with base url", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+        windowMock.location.hash = "#!/";
+        spyOn(windowMock, "open");
 
         hashService = new HashService(router, windowMock, mapService);
-        let link = hashService.getLinkBackToSite();
+        hashService.openNewTab();
 
-        expect(link).toBe(Urls.baseAddress);
+        expect(windowMock.open).toHaveBeenCalledWith(Urls.baseAddress);
     }));
 
-    it("Should return share url when inside iFrame with share url", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+    it("Should return open new tab with share url", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
         windowMock.location.hash = "#!/?s=1234";
-        (windowMock as any).self = {};
+        spyOn(windowMock, "open");
+
         hashService = new HashService(router, windowMock, mapService);
+        hashService.openNewTab();
 
-        let link = hashService.getLinkBackToSite();
-
-        expect(link).toContain("?s=1234");
+        expect(windowMock.open).toHaveBeenCalled();
     }));
 
-    it("Should return external url when inside iFrame with external url", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
+    it("Should return open new tab with external url", inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
         windowMock.location.hash = "#!/?url=1234";
+        spyOn(windowMock, "open");
+
         hashService = new HashService(router, windowMock, mapService);
-        (windowMock as any).self = {};
+        hashService.openNewTab();
 
-        let link = hashService.getLinkBackToSite();
-
-        expect(link).toContain("?url=1234");
+        expect(windowMock.open).toHaveBeenCalled();
     }));
 });
