@@ -398,6 +398,7 @@ namespace IsraelHiking.DataAccess
                             ps.Object<AttributesTable>(o => o
                                 .Name(PROPERTIES)
                                 .Properties(p => p.GeoPoint(s => s.Name(FeatureAttributes.GEOLOCATION)))
+                                .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
                             ).GeoShape(g => g.Name(f => f.Geometry)
                                 .Tree(GeoTree.Geohash)
                                 .TreeLevels(10)
