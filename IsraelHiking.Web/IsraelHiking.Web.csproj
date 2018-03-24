@@ -54,7 +54,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Codecov" Version="1.0.3" />
-    <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.6.0-intX3" />
+    <PackageReference Include="CXuesong.MW.WikiClientLibrary" Version="0.6.0-intX7a" />
     <PackageReference Include="GeoAPI" Version="1.7.5-pre010" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="2.0.3" />

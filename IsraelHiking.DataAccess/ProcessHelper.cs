@@ -47,11 +47,11 @@ namespace IsraelHiking.DataAccess
                 StandardOutput = StandardOutput.Replace("\0", string.Empty).Trim();
                 if (process.ExitCode == 0)
                 {
-                    _logger.LogDebug($"Process {fileName} finished succesfully");
+                    _logger.LogDebug($"Process {fileName} finished successfully");
                 }
                 else
                 {
-                    _logger.LogError($"Process {processToRun} {cmdArguments} did not finished succesfully");
+                    _logger.LogError($"Process {processToRun} {cmdArguments} did not finished successfully");
                 }
             }
         }

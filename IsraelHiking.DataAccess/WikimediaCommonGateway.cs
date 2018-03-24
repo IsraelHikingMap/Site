@@ -59,7 +59,7 @@ namespace IsraelHiking.DataAccess
                     : fileName;
             var comment = CreateWikipediaComment(location, description, author);
             await _site.GetTokenAsync("edit", true);
-            var results = await _site.UploadAsync(wikiFileName, new StreamUploadSource(contentStream), comment, true);
+            var results = await _site.UploadAsync(wikiFileName, new StreamUploadSource(contentStream), comment, true).ConfigureAwait(false);
             if (results.ResultCode != UploadResultCode.Success)
             {
                 throw new Exception("Unable to upload the file\n" + string.Join("\n", results.Warnings.Select(kvp => kvp.Key + ": " + kvp.Value)));
@@ -70,7 +70,7 @@ namespace IsraelHiking.DataAccess
                 _logger.LogWarning($"Received bad file name from wikipedia. old: {wikiFileName}, correct: File:{correctWikiFileName}");
                 wikiFileName = "File:" + correctWikiFileName;
             }
-            _logger.LogInformation($"Finished uploading image succesfully. title: {title}, fileName: {fileName}, wikipage: {wikiFileName}");
+            _logger.LogInformation($"Finished uploading image successfully. title: {title}, fileName: {fileName}, wikipage: {wikiFileName}");
             return wikiFileName;
         }
 
@@ -124,7 +124,7 @@ namespace IsraelHiking.DataAccess
                 {
                     var pageNameToTest = GetWikiPageFileNameFromIndex(index, countingFileName, extension);
                     var pageToTest = new WikiPage(_site, pageNameToTest);
-                    pageToTest.RefreshAsync(PageQueryOptions.None);
+                    pageToTest.RefreshAsync(PageQueryOptions.None).Wait();
                     if (!pageToTest.Exists)
                     {
                         options.Break();

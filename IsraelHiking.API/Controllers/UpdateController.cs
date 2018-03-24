@@ -128,14 +128,14 @@ namespace IsraelHiking.API.Controllers
             await UpdateSemaphore.WaitAsync();
             try
             {
-                _logger.LogInformation("Starting incrementail site's databases update");
+                _logger.LogInformation("Starting incremental site's databases update");
                 using (var updatesStream = await _osmLatestFileFetcher.GetUpdates())
                 {
                     XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
                     var changes = (OsmChange) serializer.Deserialize(updatesStream);
                     await _osmElasticSearchUpdaterService.Update(changes);
                 }
-                _logger.LogInformation("Finished Incrementail site's databases update");
+                _logger.LogInformation("Finished incremental site's databases update");
                 return Ok();
             }
             finally
