@@ -121,14 +121,22 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="feature"></param>
         /// <param name="language"></param>
         /// <returns>A list of references including reference logo</returns>
-        protected Reference[] GetReferences(IFeature feature, string language)
+        protected virtual Reference[] GetReferences(IFeature feature, string language)
         {
             var references = new List<Reference>();
             foreach (var websiteUrl in feature.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)))
             {
                 var url = feature.Attributes[websiteUrl].ToString();
                 var indexString = websiteUrl.Substring(FeatureAttributes.WEBSITE.Length);
-                var sourceImageUrl = feature.Attributes[FeatureAttributes.SOURCE_IMAGE_URL + indexString].ToString();
+                var sourceImageUrl = string.Empty;
+                if (feature.Attributes.Exists(FeatureAttributes.SOURCE_IMAGE_URL + indexString))
+                {
+                    sourceImageUrl = feature.Attributes[FeatureAttributes.SOURCE_IMAGE_URL + indexString].ToString();
+                }
+                else if (feature.Attributes.Exists(FeatureAttributes.SOURCE_IMAGE_URL))
+                {
+                    sourceImageUrl = feature.Attributes[FeatureAttributes.SOURCE_IMAGE_URL].ToString();
+                }
                 references.Add(new Reference
                 {
                     Url = url,

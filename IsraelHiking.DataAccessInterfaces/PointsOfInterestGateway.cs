@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using IsraelHiking.Common;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccessInterfaces
@@ -30,5 +31,6 @@ namespace IsraelHiking.DataAccessInterfaces
         Task Initialize();
         Task<FeatureCollection> GetByPageTitle(string title, string language);
         Task<List<Feature>> GetByLocation(Coordinate center, string language);
+        Reference GetReference(string title, string language);
     }
 }

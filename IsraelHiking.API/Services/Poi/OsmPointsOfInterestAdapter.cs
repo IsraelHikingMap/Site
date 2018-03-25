@@ -321,6 +321,19 @@ namespace IsraelHiking.API.Services.Poi
                    feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL));
         }
 
+        /// <inheritdoc />
+        protected override Reference[] GetReferences(IFeature feature, string language)
+        {
+            var references = base.GetReferences(feature, language);
+            var title = feature.Attributes.GetWikipediaTitle(language);
+            if (string.IsNullOrWhiteSpace(title))
+            {
+                return references;
+            }
+            var wikipediaReference = _wikipediaGateway.GetReference(title, language);
+            return references.Concat(new[] {wikipediaReference}).ToArray();
+        }
+
         private void SetWebsiteUrl(TagsCollectionBase tags, PointOfInterestExtended pointOfInterest)
         {
             var regexp = new Regex("((https?://)|^)([a-z]+).wikipedia.org/wiki/(.*)");

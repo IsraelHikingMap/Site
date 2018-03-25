@@ -46,7 +46,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var results = _adapter.GetPointOfInterestById(poiId, language).Result;
 
             Assert.IsNotNull(results);
-            Assert.IsNotNull(results.SourceImageUrl);
+            Assert.AreEqual(0, results.References.Length);
             Assert.IsFalse(results.IsEditable);
             _elevationDataStorage.Received().GetElevation(Arg.Any<Coordinate>());
             _elasticSearchGateway.Received().GetRating(poiId, Arg.Any<string>());

@@ -109,6 +109,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             feature.Attributes.AddAttribute(FeatureAttributes.DESCRIPTION, FeatureAttributes.DESCRIPTION);
             feature.Attributes.AddAttribute(FeatureAttributes.WIKIPEDIA + ":en", "page with space");
             _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source, Arg.Any<string>()).Returns(feature);
+            _wikipediaGateway.GetReference("page with space", "en").Returns(new Reference { Url = "page_with_space" });
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
                 new DataContainer
                 {
@@ -132,8 +133,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             Assert.AreEqual(FeatureAttributes.DESCRIPTION, result.Description);
             Assert.AreEqual(2, result.ImagesUrls.Length);
             Assert.AreEqual(FeatureAttributes.IMAGE_URL, result.ImagesUrls.First());
-            Assert.IsTrue(result.Url.Contains("wikipedia"));
-            Assert.IsTrue(result.Url.Contains("page_with_space"));
+            Assert.IsTrue(result.References.First().Url.Contains("page_with_space"));
             Assert.IsTrue(result.IsRoute);
         }
 
@@ -153,7 +153,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var result = _adapter.GetPointOfInterestById(poiId, null).Result;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("website", result.Url);
+            Assert.AreEqual("website", result.References.First().Url);
         }
 
         [TestMethod]
@@ -170,11 +170,11 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var result = _adapter.GetPointOfInterestById(poiId, null).Result;
 
             Assert.IsNotNull(result);
-            Assert.AreEqual("website", result.Url);
+            Assert.AreEqual("website", result.References.First().Url);
         }
 
         [TestMethod]
-        public void GetPointsOfInterestById_PreferWikipediaOverWebsite_ShouldReturnIt()
+        public void GetPointsOfInterestById_WithTwoReferences_ShouldReturnIt()
         {
             var poiId = "poiId";
             var language = "he";
@@ -186,11 +186,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 new DataContainer { Routes = new List<RouteData>() });
             _wikipediaGateway.GetByPageTitle(Arg.Any<string>(), Arg.Any<string>()).Returns(
                 new FeatureCollection(new Collection<IFeature> {new Feature(new Point(0, 0), new AttributesTable())}));
+            _wikipediaGateway.GetReference("page", language).Returns(new Reference { Url = "page" });
 
             var result = _adapter.GetPointOfInterestById(poiId, language).Result;
 
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Url.Contains("page"));
+            Assert.AreEqual(2, result.References.Length);
         }
 
         [TestMethod]
@@ -209,12 +210,36 @@ namespace IsraelHiking.API.Tests.Services.Poi
                     new AttributesTable {{FeatureAttributes.IMAGE_URL, "imageUrl"}}
                 )
             }));
+            _wikipediaGateway.GetReference("page", language).Returns(new Reference {Url = "page"});
 
             var result = _adapter.GetPointOfInterestById(poiId, language).Result;
 
             Assert.IsNotNull(result);
-            Assert.IsTrue(result.Url.Contains("page"));
+            Assert.IsTrue(result.References.First().Url.Contains("page"));
             Assert.AreEqual(1, result.ImagesUrls.Length);
+        }
+
+        [TestMethod]
+        public void GetPointsOfInterestById_WithMultipleWebsiteAndSourceImages_ShouldNotFail()
+        {
+            var poiId = "poiId";
+            var language = "he";
+            var feature = GetValidFeature(poiId, _adapter.Source);
+            feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE, "website");
+            feature.Attributes.AddAttribute(FeatureAttributes.SOURCE_IMAGE_URL, "sourceimage");
+            feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE + "1", "website1");
+            feature.Attributes.AddAttribute(FeatureAttributes.SOURCE_IMAGE_URL + "1", "sourceimage1");
+            feature.Attributes.AddAttribute(FeatureAttributes.WEBSITE + "2", "website2");
+            _elasticSearchGateway.GetPointOfInterestById(poiId, _adapter.Source, Arg.Any<string>()).Returns(feature);
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(
+                new DataContainer { Routes = new List<RouteData>() });
+
+            var result = _adapter.GetPointOfInterestById(poiId, language).Result;
+
+            Assert.IsNotNull(result);
+            Assert.AreEqual(3, result.References.Length);
+            Assert.AreEqual("sourceimage", result.References.Last().SourceImageUrl);
+            Assert.AreEqual("sourceimage1", result.References[1].SourceImageUrl);
         }
 
         [TestMethod]
@@ -226,9 +251,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var pointOfInterestToAdd = new PointOfInterestExtended
             {
                 Location = new LatLng(),
-                ImagesUrls = new string[0],
+                ImagesUrls = new [] { "image1", "image2" },
                 Icon = _tagsHelper.GetCategoriesByType(Categories.POINTS_OF_INTEREST).First().Icon,
-                Url = "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D"
+                References = new[]
+                {
+                    new Reference {Url = "he.wikipedia.org/wiki/%D7%AA%D7%9C_%D7%A9%D7%9C%D7%9D"}
+                }
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
             _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
@@ -249,7 +277,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 ImagesUrls = new[] { "imageurl2", "imageurl1", "imageurl4" },
                 Id = "1",
                 Icon = "oldIcon",
-                Type = OsmGeoType.Node.ToString().ToLower()
+                Type = OsmGeoType.Node.ToString().ToLower(),
+                References = new Reference[0]
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
             gateway.GetElement(pointOfInterest.Id, OsmGeoType.Node.ToString().ToLower()).Returns(new Node
@@ -278,7 +307,13 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 Id = "1",
                 Icon = "oldIcon",
                 Type = OsmGeoType.Node.ToString().ToLower(),
-                Url = "http://en.wikipedia.org/wiki/Literary_Hall"
+                References = new[]
+                {
+                    new Reference
+                    {
+                        Url = "http://en.wikipedia.org/wiki/Literary_Hall"
+                    }
+                }
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
             gateway.GetElement(pointOfInterest.Id, OsmGeoType.Node.ToString().ToLower()).Returns(new Node
@@ -305,7 +340,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 ImagesUrls = new[] { "imageurl2", "imageurl1" },
                 Id = "1",
                 Icon = "oldIcon",
-                Type = OsmGeoType.Node.ToString().ToLower()
+                Type = OsmGeoType.Node.ToString().ToLower(),
+                References = new Reference[0]
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
             gateway.GetElement(pointOfInterest.Id, OsmGeoType.Node.ToString().ToLower()).Returns(new Node

@@ -21,6 +21,7 @@ namespace IsraelHiking.DataAccess
 {
     public class WikipediaGateway : IWikipediaGateway
     {
+        private const string WIKI_LOGO = "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png";
         private readonly ILogger _logger;
         private readonly Dictionary<string, WikiSite> _wikiSites;
         public WikipediaGateway(ILogger logger)
@@ -88,6 +89,15 @@ namespace IsraelHiking.DataAccess
             return new List<Feature>();
         }
 
+        public Reference GetReference(string title, string language)
+        {
+            return new Reference
+            {
+                Url = _wikiSites[language].SiteInfo.MakeArticleUrl(title),
+                SourceImageUrl = WIKI_LOGO
+            };
+        }
+
         public async Task<FeatureCollection> GetById(string id)
         {
             var splitId = id.Split('_');
@@ -151,7 +161,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.SEARCH_FACTOR, 1},
                 {FeatureAttributes.GEOLOCATION, geoLocation},
                 {FeatureAttributes.WEBSITE, _wikiSites[language].SiteInfo.MakeArticleUrl(title)},
-                {FeatureAttributes.SOURCE_IMAGE_URL, "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png" }
+                {FeatureAttributes.SOURCE_IMAGE_URL, WIKI_LOGO }
             };
             return attributes;
         }
