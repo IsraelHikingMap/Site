@@ -32,14 +32,18 @@ export interface IPointOfInterest {
     iconColor: string;
 }
 
+export interface IReference {
+    url: string;
+    sourceImageUrl: string;
+}
+
 export interface IPointOfInterestExtended extends IPointOfInterest {
     isEditable: boolean;
     isRoute: boolean;
     isArea: boolean;
     imagesUrls: string[];
     description: string;
-    url: string;
-    sourceImageUrl: string;
+    references: IReference[];
 
     rating: IRating;
     dataContainer: Common.DataContainer;

@@ -5,7 +5,7 @@ import * as _ from "lodash";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { PoiService, IPointOfInterestExtended, ICategory, IIconColorLabel } from "../../services/poi.service";
+import { PoiService, IPointOfInterestExtended, ICategory, IIconColorLabel, IReference } from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
 import { OsmUserService } from "../../services/osm-user.service";
 
@@ -123,7 +123,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             id: this.identifier,
             imagesUrls: imageUrls,
             title: this.title,
-            url: this.websiteUrl,
+            references: this.websiteUrl ? [{ url: this.websiteUrl } as IReference] : [],
             source: this.source,
             type: this.elementType,
             location: this.location

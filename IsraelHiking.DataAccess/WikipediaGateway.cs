@@ -150,6 +150,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.ICON_COLOR, "black"},
                 {FeatureAttributes.SEARCH_FACTOR, 1},
                 {FeatureAttributes.GEOLOCATION, geoLocation},
+                {FeatureAttributes.WEBSITE, _wikiSites[language].SiteInfo.MakeArticleUrl(title)},
                 {FeatureAttributes.SOURCE_IMAGE_URL, "https://upload.wikimedia.org/wikipedia/en/thumb/8/80/Wikipedia-logo-v2.svg/128px-Wikipedia-logo-v2.svg.png" }
             };
             return attributes;

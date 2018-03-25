@@ -13,16 +13,21 @@
         public LatLng Location { get; set; }
     }
 
+    public class Reference
+    {
+        public string Url { get; set; }
+        public string SourceImageUrl { get; set; }
+    }
+
     public class PointOfInterestExtended : PointOfInterest
     {
         public bool IsEditable { get; set; }
         public bool IsRoute { get; set; }
         public bool IsArea { get; set; }
-        public string Url { get; set; }
         public string Description { get; set; }
-        public string SourceImageUrl { get; set; }
         public string[] ImagesUrls { get; set; }
 
+        public Reference[] References { get; set; }
         public Rating Rating { get; set; }
         public DataContainer DataContainer { get; set; }
     }

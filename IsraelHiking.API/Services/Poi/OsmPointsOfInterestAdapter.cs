@@ -58,6 +58,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = null)
         {
+            // HM TODO: remove the need to fetch wikipedia data - store it in ES
             IFeature feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM, type);
             if (feature.Attributes.GetWikipediaTitle(language) == string.Empty ||
                 GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language) != string.Empty ||
@@ -107,12 +108,7 @@ namespace IsraelHiking.API.Services.Poi
                 Tags = new TagsCollection()
             };
             SetWebsiteUrl(node.Tags, pointOfInterest);
-            for (var imageIndex = 0; imageIndex < pointOfInterest.ImagesUrls.Length; imageIndex++)
-            {
-                var imageUrl = pointOfInterest.ImagesUrls[imageIndex];
-                var tagName = imageIndex == 0 ? FeatureAttributes.IMAGE_URL : FeatureAttributes.IMAGE_URL + imageIndex;
-                node.Tags.Add(tagName, imageUrl);
-            }
+            SetMultipleValuesForTag(node.Tags, FeatureAttributes.IMAGE_URL, pointOfInterest.ImagesUrls);
             SetTagByLanguage(node.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(node.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             AddTagsByIcon(node.Tags, pointOfInterest.Icon);
@@ -328,9 +324,15 @@ namespace IsraelHiking.API.Services.Poi
         private void SetWebsiteUrl(TagsCollectionBase tags, PointOfInterestExtended pointOfInterest)
         {
             var regexp = new Regex("((https?://)|^)([a-z]+).wikipedia.org/wiki/(.*)");
-            var match = regexp.Match(pointOfInterest.Url ?? string.Empty);
-            if (match.Success)
+            var nonWikipediaUrls = new List<string>();
+            foreach (var url in pointOfInterest.References.Select(r => r.Url))
             {
+                var match = regexp.Match(url ?? string.Empty);
+                if (!match.Success)
+                {
+                    nonWikipediaUrls.Add(url);
+                    continue;
+                }
                 var language = match.Groups[3].Value;
                 var pageTitle = Uri.UnescapeDataString(match.Groups[4].Value.Replace("_", " "));
                 var key = FeatureAttributes.WIKIPEDIA + ":" + language;
@@ -342,16 +344,17 @@ namespace IsraelHiking.API.Services.Poi
                     tags.Add(key, pageTitle);
                 }
             }
-            else
-            {
-                tags.Add(FeatureAttributes.WEBSITE, pointOfInterest.Url);
-            }
+            SetMultipleValuesForTag(tags, FeatureAttributes.WEBSITE, nonWikipediaUrls.ToArray());
         }
 
-        /// <inheritdoc />
-        protected override string GetWebsiteUrl(IFeature feature, string language)
+        private void SetMultipleValuesForTag(TagsCollectionBase tags, string tagKey, string[] values)
         {
-            return WebsiteUrlFeatureHelper.GetWikipediaUrl(feature, language);
+            for (var imageIndex = 0; imageIndex < values.Length; imageIndex++)
+            {
+                var imageUrl = values[imageIndex];
+                var tagName = imageIndex == 0 ? tagKey : tagKey + imageIndex;
+                tags.Add(tagName, imageUrl);
+            }
         }
     }
 }

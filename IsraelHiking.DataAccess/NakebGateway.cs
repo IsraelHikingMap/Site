@@ -59,8 +59,7 @@ namespace IsraelHiking.DataAccess
                 attributes.Add(FeatureAttributes.IMAGE_URL, nakebItem.picture);
                 attributes.Add(FeatureAttributes.WEBSITE, nakebItem.link);
                 attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://www.nakeb.co.il/static/images/hikes/logo_1000x667.jpg");
-                var lineString =
-                    new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
+                var lineString = new LineString(nakebItem.latlngs.Select(l => new Coordinate().FromLatLng(l)).ToArray());
                 var features = new List<IFeature> {new Feature(lineString, attributes)};
                 features.AddRange(nakebItem.markers.Select(ConvertToPointFeature).ToList());
                 return new FeatureCollection(new Collection<IFeature>(features));

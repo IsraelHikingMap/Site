@@ -40,10 +40,10 @@
         </div>
     </div>
     <div *ngIf="!isEditMode">
-        <a *ngIf="info.url" [href]="info.url" [target]="'_blank'">
+        <a *ngIf="info.urls.length > 0 && info.urls[0]" [href]="info.urls[0]" [target]="'_blank'">
             <h4 [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">{{info.title}}</h4>
         </a>
-        <h4 *ngIf="!info.url" [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">{{info.title}}</h4>
+        <h4 *ngIf="info.urls.length === 0 || !info.urls[0]" [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">{{info.title}}</h4>
         <div *ngIf="info.imagesUrls.length > 0">
             <div fxLayout="row">
                 <div class="img-container-small" *ngIf="info.imagesUrls.length > 0">

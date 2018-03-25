@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -95,7 +96,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
             }
-            poiItem.DataContainer = await  _dataContainerConverterService.ToDataContainer(new FeatureCollection(new Collection<IFeature> { feature }).ToBytes(), poiItem.Title + ".geojson");
+            poiItem.DataContainer = await _dataContainerConverterService.ToDataContainer(new FeatureCollection(new Collection<IFeature> { feature }).ToBytes(), poiItem.Title + ".geojson");
             foreach (var coordinate in poiItem.DataContainer.Routes
                 .SelectMany(r => r.Segments)
                 .SelectMany(s => s.Latlngs)
@@ -103,29 +104,38 @@ namespace IsraelHiking.API.Services.Poi
             {
                 coordinate.Alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(coordinate));
             }
-            poiItem.Url = GetWebsiteUrl(feature, language);
+            poiItem.References = GetReferences(feature, language);
             poiItem.ImagesUrls = feature.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
                 .Select(n => feature.Attributes[n].ToString())
                 .Where(n => !string.IsNullOrWhiteSpace(n))
                 .ToArray();
-            poiItem.SourceImageUrl = feature.Attributes.Exists(FeatureAttributes.SOURCE_IMAGE_URL)
-                ? feature.Attributes[FeatureAttributes.SOURCE_IMAGE_URL].ToString()
-                : string.Empty;
             poiItem.Description = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language);
             poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
             poiItem.IsEditable = false;
         }
 
         /// <summary>
-        /// This function is used to get the website Url from the feature
+        /// This function is used to get the website Urls from the feature
         /// </summary>
         /// <param name="feature"></param>
         /// <param name="language"></param>
-        /// <returns></returns>
-        protected virtual string GetWebsiteUrl(IFeature feature, string language)
+        /// <returns>A list of references including reference logo</returns>
+        protected Reference[] GetReferences(IFeature feature, string language)
         {
-            return WebsiteUrlFeatureHelper.GetWebsiteUrl(feature, language);
+            var references = new List<Reference>();
+            foreach (var websiteUrl in feature.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.WEBSITE)))
+            {
+                var url = feature.Attributes[websiteUrl].ToString();
+                var indexString = websiteUrl.Substring(FeatureAttributes.WEBSITE.Length);
+                var sourceImageUrl = feature.Attributes[FeatureAttributes.SOURCE_IMAGE_URL + indexString].ToString();
+                references.Add(new Reference
+                {
+                    Url = url,
+                    SourceImageUrl = sourceImageUrl
+                });
+            }
+            return references.ToArray();
         }
     }
 }

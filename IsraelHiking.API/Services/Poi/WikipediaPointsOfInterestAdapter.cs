@@ -100,11 +100,5 @@ namespace IsraelHiking.API.Services.Poi
             _logger.LogInformation($"Finished getting wikipedia pages for indexing, got {wikiFeatures.Count} pages.");
             return wikiFeatures;
         }
-
-        /// <inheritdoc />
-        protected override string GetWebsiteUrl(IFeature feature, string language)
-        {
-            return WebsiteUrlFeatureHelper.GetWikipediaUrl(feature, language);
-        }
     }
 }

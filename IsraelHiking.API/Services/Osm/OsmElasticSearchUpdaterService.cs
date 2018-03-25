@@ -141,8 +141,8 @@ namespace IsraelHiking.API.Services.Osm
             if (request.PointsOfInterest)
             {
                 _logger.LogInformation("Starting rebuilding POIs database.");
-                var fetchTask = _adapters.Select(a => a.GetPointsForIndexing(stream)).ToArray();
-                var features = (await Task.WhenAll(fetchTask)).SelectMany(v => v).ToList();
+                var fetchTasks = _adapters.Select(a => a.GetPointsForIndexing(stream)).ToArray();
+                var features = (await Task.WhenAll(fetchTasks)).SelectMany(v => v).ToList();
                 JoinWikipediaAndOsmPoint(features);
                 await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);
                 _logger.LogInformation("Finished rebuilding POIs database.");

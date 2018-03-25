@@ -5,7 +5,7 @@ import { IPoiMainInfoData } from "./poi-main-info.component";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SidebarService } from "../../services/sidebar.service";
-import { IPointOfInterestExtended, PoiService, IRating, IRater, IIconColorLabel } from "../../services/poi.service";
+import { IPointOfInterestExtended, PoiService, IRating, IRater, IIconColorLabel, IReference } from "../../services/poi.service";
 import { MapService } from "../../services/map.service";
 import { IPublicPoiData, IPublicPoiData as IPublicPoiData1 } from "../../services/layers/categories.layer";
 import { OsmUserService } from "../../services/osm-user.service";
@@ -26,7 +26,7 @@ import * as Common from "../../common/IsraelHiking";
 export class PublicPoiSidebarComponent extends BaseMapComponent {
     public info: IPoiMainInfoData;
     public isLoading: boolean;
-    public sourceImageUrl: string;
+    public sourceImageUrls: string[];
     public rating: number;
     public latLng: L.LatLng;
     public categories: ISelectableCategory[];
@@ -50,7 +50,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.isLoading = true;
         this.isAdvanced = false;
         this.categories = [];
-        this.info = { imagesFiles: [], imagesUrls: [] } as IPoiMainInfoData;
+        this.info = { imagesFiles: [], imagesUrls: [], urls: [] } as IPoiMainInfoData;
         this.latLng = data.latLng;
         this.poiService.getPoint(data.id, data.source, data.type).then((poiExtended) => {
             this.initFromPointOfInterestExtended(poiExtended);
@@ -71,9 +71,12 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.info.title = poiExtended.title;
         this.info.description = poiExtended.description;
         this.info.readOnlyDescription = this.getReadOnlyDescrition();
-        this.info.url = poiExtended.url;
+        this.info.urls = poiExtended.references.map(r => r.url);
+        if (this.info.urls.length === 0) {
+            this.addEmptyUrl();
+        }
         this.info.imagesUrls = [...poiExtended.imagesUrls];
-        this.sourceImageUrl = poiExtended.sourceImageUrl;
+        this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
         this.rating = this.getRatingNumber(this.poiExtended.rating);
         this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
     }
@@ -170,7 +173,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.poiExtended.description = this.info.description;
         this.poiExtended.icon = this.selectedCategory.selectedIcon.icon,
         this.poiExtended.iconColor = this.selectedCategory.selectedIcon.color;
-        this.poiExtended.url = this.info.url;
+        this.poiExtended.references = this.info.urls.filter(u => u).map(u => {
+            return { url: u } as IReference;
+        });
         this.isLoading = true;
         try {
             let poiExtended = await this.poiService.uploadPoint(this.poiExtended, this.info.imagesFiles);
@@ -266,11 +271,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
 
     private getUrls(): Common.LinkData[] {
         let urls = [] as Common.LinkData[];
-        if (this.info.url) {
+        for (let url of this.info.urls) {
             urls.push({
                 mimeType: "text/html",
                 text: this.info.title,
-                url: this.info.url
+                url: url
             });
         }
         if (this.poiExtended && this.poiExtended.imagesUrls.length > 0) {
@@ -298,11 +303,15 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         return this.osmUserService.getEditElementOsmAddress(baseLayerAddress, data.type, data.id);
     }
 
-    public getOffRoadUrl() {
-        let data = this.getData();
-        if (data.source === "Off-road" && this.sourceImageUrl !== "https://blog.off-road.io/wp-content/images/ic_offroad.png") {
-            return `http://off-road.io/track/${data.id}`;
-        }
-        return null;
+    public addEmptyUrl() {
+        this.info.urls.push("");
+    }
+
+    public removeUrl(i: number) {
+        this.info.urls.splice(i, 1);
+    }
+
+    public trackByIndex(index) {
+        return index;
     }
 }

@@ -192,12 +192,14 @@ namespace IsraelHiking.DataAccess
             var attributes = GetAttributes(track);
             attributes.Add(FeatureAttributes.DESCRIPTION, track.shortDescription ?? string.Empty);
             attributes.Add(FeatureAttributes.IMAGE_URL, track.galleryImages?.FirstOrDefault()?.url ?? string.Empty);
-            var externalUrl = track.externalUrl != null && track.externalUrl.Contains("internal.off-road.io") == false
-                ? track.externalUrl
-                : string.Empty;
-            attributes.Add(FeatureAttributes.WEBSITE, externalUrl);
-            var imageSourceUrl = track.iconUrl ?? string.Empty;
-            attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, imageSourceUrl);
+            attributes.Add(FeatureAttributes.WEBSITE, $"http://off-road.io/track/{id}");
+            attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://blog.off-road.io/wp-content/images/ic_offroad.png");
+            if (track.externalUrl != null && track.externalUrl.Contains("internal.off-road.io") == false)
+            {
+                attributes.Add(FeatureAttributes.WEBSITE + "1", track.externalUrl);
+                var imageSourceUrl = track.iconUrl ?? string.Empty;
+                attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL + "1", imageSourceUrl);
+            }
             var trackLayerKey = track.trackLayerKey;
             using (var client = new HttpClient())
             {
