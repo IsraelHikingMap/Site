@@ -28,6 +28,7 @@ export class ImageGalleryService
         for (let url of urls) {
             this.images.push({ url: url });
         }
+        this.galleryComponent.conf.showThumbnails = this.images.length > 1;
         this.galleryComponent.open();
     }
 }
