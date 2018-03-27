@@ -1,5 +1,6 @@
 ﻿import { Component } from "@angular/core";
 import { MatSelectChange } from "@angular/material";
+import * as _ from "lodash";
 
 import { IPoiMainInfoData } from "./poi-main-info.component";
 import { BaseMapComponent } from "../base-map.component";
