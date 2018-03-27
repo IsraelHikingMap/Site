@@ -155,7 +155,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         compoent.componentInstance.location = this.marker.getLatLng();
         compoent.componentInstance.identifier = this.marker.identifier;
         compoent.componentInstance.description = this.description;
-        compoent.componentInstance.imagesUrls = [this.imageUrl];
+        compoent.componentInstance.imagesUrls = this.imageUrl ? [this.imageUrl] : [];
         compoent.componentInstance.initialize(`icon-${this.markerType}`);
     }
 
