@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 
@@ -85,6 +87,121 @@ namespace IsraelHiking.Common.Extensions
             return feature.Attributes.Has("leisure", "nature_reserve") ||
                    feature.Attributes.Has("boundary", "national_park") ||
                    feature.Attributes.Has("boundary", "protected_area");
+        }
+
+        /// <summary>
+        /// This function will search the feature attributes for all relevant names and place them in an object 
+        /// to allow database search and a single place to look for a feature names.
+        /// </summary>
+        /// <param name="feature"></param>
+        public static void SetTitles(this IFeature feature)
+        {
+            var table = new AttributesTable();
+            var names = feature.Attributes.GetNames().OrderBy(n => n.Length).Where(a => a.Contains(FeatureAttributes.NAME)).ToArray();
+            foreach (var language in Languages.Array)
+            {
+                var namesByLanguage = names.Where(n => n.EndsWith(":" + language)).Select(a => feature.Attributes[a].ToString()).ToArray();
+                names = names.Except(names.Where(n => n.EndsWith(":" + language))).ToArray();
+                table.Add(language, namesByLanguage);
+            }
+            // names with no specific language
+            table.Add(Languages.ALL, names.Select(n => feature.Attributes[n].ToString()).ToArray());
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_NAMES, table);
+        }
+
+        public static string GetTitle(this IFeature feature, string language)
+        {
+            if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
+            {
+                return string.Empty;
+            }
+            if (!titleByLanguage.Exists(language))
+            {
+                language = Languages.ALL;
+            }
+
+            return GetStringListFromAttributeValue(titleByLanguage[language]).FirstOrDefault() ?? string.Empty;
+
+        }
+
+        public static string[] GetTitles(this IFeature feature)
+        {
+            if (!(feature.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable titleByLanguage))
+            {
+                return new string[0];
+            }
+            
+            return titleByLanguage.GetValues().Select(GetStringListFromAttributeValue).SelectMany(v => v).Distinct().ToArray();
+        }
+
+        private static List<string> GetStringListFromAttributeValue(object value)
+        {
+            var titles = new List<string>();
+            switch (value)
+            {
+                case List<object> objectsList:
+                    titles.AddRange(objectsList.Cast<string>());
+                    break;
+                case List<string> stringsList:
+                    titles.AddRange(stringsList);
+                    break;
+                case string[] array:
+                    titles.AddRange(array);
+                    break;
+                case string str:
+                    titles.Add(str);
+                    break;
+            }
+            return titles;
+        }
+
+        public static void MergeTitles(this IFeature target, IFeature source)
+        {
+            if (!(target.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable targetTitlesByLanguage))
+            {
+                return;
+            }
+            if (!(source.Attributes[FeatureAttributes.POI_NAMES] is AttributesTable sourceTitlesByLanguage))
+            {
+                return;
+            }
+
+            foreach (var attributeName in sourceTitlesByLanguage.GetNames())
+            {
+                if (targetTitlesByLanguage.Exists(attributeName))
+                {
+                    targetTitlesByLanguage[attributeName] = GetStringListFromAttributeValue(targetTitlesByLanguage[attributeName])
+                        .Concat(GetStringListFromAttributeValue(sourceTitlesByLanguage[attributeName])).Distinct().ToArray();
+                }
+                else
+                {
+                    targetTitlesByLanguage.Add(attributeName, GetStringListFromAttributeValue(sourceTitlesByLanguage[attributeName]));
+                }
+            }
+        }
+
+        public static void AddIdToCombinedPoi(this IFeature feature, string id, string source)
+        {
+            if (!feature.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
+            {
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_COMBINED_IDS, new string[0]);
+            }
+            var list = GetStringListFromAttributeValue(feature.Attributes[FeatureAttributes.POI_COMBINED_IDS]);
+            list.Add(source + "__" + id);
+            feature.Attributes[FeatureAttributes.POI_COMBINED_IDS] = list.Distinct().ToList();
+        }
+
+        public static Dictionary<string, List<string>> GetIdsFromCombinedPoi(this IFeature feature)
+        {
+            if (!feature.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
+            {
+                return new Dictionary<string, List<string>>();
+            }
+            var list = GetStringListFromAttributeValue(feature.Attributes[FeatureAttributes.POI_COMBINED_IDS]);
+            return list.Where(l => l.Contains("__"))
+                .Distinct()
+                .GroupBy(l => l.Split("__").First())
+                .ToDictionary(g => g.Key, g => g.Select(l => l.Split("__").Last()).ToList());
         }
     }
 }

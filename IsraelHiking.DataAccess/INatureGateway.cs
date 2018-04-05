@@ -18,7 +18,7 @@ namespace IsraelHiking.DataAccess
 {
     public class INatureGateway : IINatureGateway
     {
-        private const string BASE_API_ADDRESS = "http://inature.info/w/api.php";
+        private const string BASE_API_ADDRESS = "https://inature.info/w/api.php";
 
         private readonly ILogger _logger;
         private WikiSite _wikiSite;
@@ -36,7 +36,16 @@ namespace IsraelHiking.DataAccess
                 Timeout = TimeSpan.FromMinutes(1)
             };
             _wikiSite = new WikiSite(wikiClient, new SiteOptions(BASE_API_ADDRESS));
-            await _wikiSite.Initialization;
+            try
+            {
+                // HM TODO: remove this!!!
+                await _wikiSite.Initialization;
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+            }
+            
         }
 
         public async Task<List<Feature>> GetAll()
@@ -89,17 +98,16 @@ namespace IsraelHiking.DataAccess
                     {FeatureAttributes.GEOLOCATION, geoLocationTable},
                     {FeatureAttributes.DESCRIPTION, description},
                     {FeatureAttributes.NAME, page.Title},
-                    {FeatureAttributes.NAME + ":" + Languages.HEBREW, page.Title},
                     {FeatureAttributes.ID, page.Id},
                     {FeatureAttributes.IMAGE_URL, await GetPageImageUrl(page).ConfigureAwait(false)},
                     {FeatureAttributes.POI_SOURCE, Sources.INATURE},
                     {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                     {FeatureAttributes.POI_CATEGORY, Categories.INATURE},
-                    {FeatureAttributes.OSM_TYPE, string.Empty},
+                    {FeatureAttributes.POI_NAMES, new AttributesTable {{Languages.HEBREW, page.Title}}},
                     {FeatureAttributes.ICON, "icon-inature"},
                     {FeatureAttributes.ICON_COLOR, "#116C00"},
                     {FeatureAttributes.SEARCH_FACTOR, 1},
-                    {FeatureAttributes.WEBSITE, _wikiSite.SiteInfo.MakeArticleUrl(page.Title).Replace("https://", "http://")},
+                    {FeatureAttributes.WEBSITE, _wikiSite.SiteInfo.MakeArticleUrl(page.Title)},
                     {FeatureAttributes.SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" }
                 });
             });

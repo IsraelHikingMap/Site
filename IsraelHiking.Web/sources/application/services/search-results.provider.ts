@@ -7,10 +7,10 @@ import { GeoJsonParser } from "../services/geojson.parser";
 import { IPointOfInterestExtended } from "./poi.service";
 import { Urls } from "../common/Urls";
 
-
-export interface ISearchResults extends IPointOfInterestExtended {
-    bounds: L.LatLngBounds;
+export interface ISearchResultsPointOfInterest extends IPointOfInterestExtended {
     displayName: string;
+    northEast: L.LatLng;
+    southWest: L.LatLng;
 }
 
 @Injectable()
@@ -19,54 +19,14 @@ export class SearchResultsProvider {
     constructor(private httpClient: HttpClient) {
     }
 
-    public getResults = async (searchTerm: string, isHebrew: boolean): Promise<ISearchResults[]> => {
+    public getResults = async (searchTerm: string, isHebrew: boolean): Promise<ISearchResultsPointOfInterest[]> => {
         let params = new HttpParams();
-        params = isHebrew ? params : params.set("language", "en");
-        let searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
-        let data = await this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
-            params: params
-        }).toPromise() as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
-        let results = [] as ISearchResults[];
         let language = isHebrew ? "he" : "en";
-        for (let feature of data.features) {
-            // HM TODO: change search results to POIs?
-            let properties = feature.properties as any;
-            let isArea = feature.geometry.type === "Polygon" || feature.geometry.type === "MultiPolygon";
-            try {
-                let singleResult = {
-                    title: this.getName(properties, language),
-                    icon: properties.icon,
-                    iconColor: properties.iconColor,
-                    source: properties.poiSource,
-                    id: properties.identifier,
-                    type: properties.osmType,
-                    location: L.latLng(properties.geolocation.lat, properties.geolocation.lon, properties.geolocation.alt),
-                    isRoute: !isArea && feature.geometry.type !== "Point",
-                    isArea: isArea,
-                    isEditable: properties.poiSource === "OSM",
-                } as ISearchResults;
-                let geo = L.geoJSON(feature);
-                singleResult.bounds = geo.getBounds();
-                let address = GeoJsonParser.getPropertyValue(properties, "address", language);
-                singleResult.displayName = singleResult.title + (address ? `, ${address}` : "");
-                results.push(singleResult);
-            }
-            catch (error) {
-                console.error(error + " feature: " + JSON.stringify(feature));
-            }
-        }
-        return results;
-    }
-
-    private getName(properties: {}, language: string): string {
-        if (!properties) {
-            return "";
-        }
-        let name = GeoJsonParser.getPropertyValue(properties, "name", language);
-        if (name) {
-            return name;
-        }
-        let resultsArray = _.pickBy(properties, (value: string, key: string) => key.includes("name"));
-        return resultsArray[0];
-    }
+        params = params.set("language", language);
+        let searchWithoutBadCharacters = searchTerm.replace("/", " ").replace("\t", " ");
+        let response = await this.httpClient.get(Urls.search + encodeURIComponent(searchWithoutBadCharacters), {
+            params: params
+        }).toPromise() as ISearchResultsPointOfInterest[];
+        return response;
+    }    
 }

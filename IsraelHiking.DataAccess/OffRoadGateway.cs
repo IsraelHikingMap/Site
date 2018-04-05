@@ -142,13 +142,14 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.NAME, offroadTrack.title},
                 {FeatureAttributes.POI_SOURCE, Sources.OFFROAD},
                 {FeatureAttributes.POI_CATEGORY, category},
-                {FeatureAttributes.POI_LANGUAGE, Languages.ALL},
-                {FeatureAttributes.OSM_TYPE, string.Empty},
+                {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
+                {FeatureAttributes.POI_NAMES, new AttributesTable {{Languages.HEBREW, offroadTrack.title}}},
                 {FeatureAttributes.ICON, GetIconByCategory(category)},
                 {FeatureAttributes.ICON_COLOR, "black"},
                 {FeatureAttributes.SEARCH_FACTOR, 1},
-                {FeatureAttributes.GEOLOCATION, geoLocation}
-            };
+                {FeatureAttributes.GEOLOCATION, geoLocation},
+                {FeatureAttributes.WEBSITE, $"http://off-road.io/track/{offroadTrack.id}"}
+        };
             return attributes;
         }
 
@@ -192,7 +193,6 @@ namespace IsraelHiking.DataAccess
             var attributes = GetAttributes(track);
             attributes.Add(FeatureAttributes.DESCRIPTION, track.shortDescription ?? string.Empty);
             attributes.Add(FeatureAttributes.IMAGE_URL, track.galleryImages?.FirstOrDefault()?.url ?? string.Empty);
-            attributes.Add(FeatureAttributes.WEBSITE, $"http://off-road.io/track/{id}");
             attributes.Add(FeatureAttributes.SOURCE_IMAGE_URL, "https://blog.off-road.io/wp-content/images/ic_offroad.png");
             if (track.externalUrl != null && track.externalUrl.Contains("internal.off-road.io") == false)
             {

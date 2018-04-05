@@ -62,6 +62,7 @@ namespace IsraelHiking.DataAccess
         private const string RATINGS = "ratings";
         private const string SHARES = "shares";
         private const string CUSTOM_USER_LAYERS = "custom_user_layers";
+        private const string CACHE = "cache";
 
         private const int NUMBER_OF_RESULTS = 10;
         private readonly ILogger _logger;
@@ -119,22 +120,22 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
 
-        private QueryContainer FeatureNameSearchQuery(QueryContainerDescriptor<Feature> q, string searchTerm, string field)
+        private QueryContainer FeatureNameSearchQuery(QueryContainerDescriptor<Feature> q, string searchTerm, string language)
         {
             return q.FunctionScore(
                 fs => fs.Query(
                     iq => iq.DisMax(
                         dm => dm.Queries(
-                            dmq => dmq.MultiMatch(
+                            dmq => dmq.Match(
                                 mm => mm.Query(searchTerm)
-                                    .Fields(f => f.Fields(field, $"{PROPERTIES}.name*", $"{PROPERTIES}._name"))
-                                    .Type(TextQueryType.BestFields)
+                                    .Field($"{PROPERTIES}.{FeatureAttributes.POI_NAMES}.{Languages.ALL}")
                                     .Fuzziness(Fuzziness.Auto)
                             ),
                             dmq => dmq.Match(
                                 m => m.Query(searchTerm)
                                     .Boost(1.2)
-                                    .Field(field)
+                                    .Field($"{PROPERTIES}.{FeatureAttributes.POI_NAMES}.{language}")
+                                    .Fuzziness(Fuzziness.Auto)
                             )
                         )
                     )
@@ -142,54 +143,46 @@ namespace IsraelHiking.DataAccess
             );
         }
 
-        public async Task<List<Feature>> Search(string searchTerm, string fieldName)
+        public async Task<List<Feature>> Search(string searchTerm, string language)
         {
             if (string.IsNullOrWhiteSpace(searchTerm))
             {
                 return new List<Feature>();
             }
-            var field = $"{PROPERTIES}.{fieldName}";
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(NUMBER_OF_RESULTS)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
-                    .Query(q => FeatureNameSearchQuery(q, searchTerm, field))
+                    .Query(q => FeatureNameSearchQuery(q, searchTerm, language))
             );
             return response.Documents.ToList();
         }
 
-        public async Task<List<Feature>> SearchPlaces(string place, string fieldName)
+        public async Task<List<Feature>> SearchPlaces(string place, string language)
         {
-            var field = $"{PROPERTIES}.{fieldName}";
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(5)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
                     .Query(
-                        q => FeatureNameSearchQuery(q, place, field)
-                             && (q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ICON}").Value("reserve")) ||
-                                 q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ICON}").Value("home")) ||
-                                 q.Term(t => t.Field($"{PROPERTIES}.boundary").Value("administrative")) ||
-                                 q.Term(t => t.Field($"{PROPERTIES}.landuse").Value("residental")) ||
-                                 q.Term(t => t.Field($"{PROPERTIES}.landuse").Value("forest"))
-                             )
+                        q => FeatureNameSearchQuery(q, place, language)
+                             && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true))
                     )
             );
             return response.Documents.ToList();
         }
 
-        public async Task<List<Feature>> SearchByLocation(Coordinate nortEast, Coordinate southWest, string searchTerm, string fieldName)
+        public async Task<List<Feature>> SearchByLocation(Coordinate nortEast, Coordinate southWest, string searchTerm, string language)
         {
-            var field = $"{PROPERTIES}.{fieldName}";
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(NUMBER_OF_RESULTS)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
                     .Query(
-                        q => FeatureNameSearchQuery(q, searchTerm, field) &&
+                        q => FeatureNameSearchQuery(q, searchTerm, language) &&
                              q.GeoBoundingBox(b => ConvertToGeoBoundingBox(b, nortEast, southWest))
                     )
             );
@@ -206,7 +199,7 @@ namespace IsraelHiking.DataAccess
                             g.Coordinates(ConvertCoordinate(coordinate))
                                 .Field(f => f.Geometry)
                                 .Relation(GeoShapeRelation.Contains))
-                    )
+                        && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true)))
             );
             return response.Documents.ToList();
         }
@@ -242,7 +235,7 @@ namespace IsraelHiking.DataAccess
 
         public async Task DeleteHighwaysById(string id)
         {
-            var fullId = GetId("way", Sources.OSM, id);
+            var fullId = GetId(Sources.OSM, id);
             await _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_HIGHWAYS_ALIAS));
         }
 
@@ -335,29 +328,51 @@ namespace IsraelHiking.DataAccess
             ).Field($"{PROPERTIES}.{FeatureAttributes.GEOLOCATION}");
         }
 
-        public async Task<Feature> GetPointOfInterestById(string id, string source, string type)
+        public async Task<Feature> GetPointOfInterestById(string id, string source)
         {
             var response = await _elasticClient.SearchAsync<Feature>(
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(1).Query(
                         q => q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
                              && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.ID}").Value(id))
-                             && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.OSM_TYPE}").Value(type))
                     )
             );
             return response.Documents.FirstOrDefault();
         }
 
-        public Task DeleteOsmPointOfInterestById(string id, string type)
+        public Task DeleteOsmPointOfInterestById(string id)
         {
-            var fullId = GetId(type, id, Sources.OSM);
+            var fullId = GetId(id, Sources.OSM);
             return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
         }
 
         public Task DeletePointOfInterestById(string id, string source)
         {
-            var fullId = GetId(string.Empty, source, id);
+            var fullId = GetId(source, id);
             return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
+        }
+
+        public async Task<List<Feature>> GetCachedItems(string source)
+        {
+            var response = await _elasticClient.SearchAsync<Feature>(
+                s => s.Index(CACHE)
+                    .Size(10000)
+                    .Query(q =>
+                        q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_SOURCE}").Value(source.ToLower()))
+                    )
+            );
+            return response.Documents.ToList();
+        }
+
+        public async Task<Feature> GetCachedItemById(string id, string source)
+        {
+            var response = await _elasticClient.GetAsync<Feature>(GetId(source, id), r => r.Index(CACHE));
+            return response.Source;
+        }
+
+        public Task CacheItems(List<Feature> features)
+        {
+            return UpdateData(features, CACHE);
         }
 
         public Task<Rating> GetRating(string id, string source)
@@ -432,17 +447,12 @@ namespace IsraelHiking.DataAccess
 
         private string GetId(Feature feature)
         {
-            return GetId(feature.Attributes[FeatureAttributes.OSM_TYPE].ToString(), feature.Attributes[FeatureAttributes.POI_SOURCE]?.ToString() ?? string.Empty, feature.Attributes[FeatureAttributes.ID]?.ToString() ?? string.Empty);
+            return GetId(feature.Attributes[FeatureAttributes.POI_SOURCE]?.ToString() ?? string.Empty, feature.Attributes[FeatureAttributes.ID]?.ToString() ?? string.Empty);
         }
 
         private string GetId(Rating rating)
         {
             return GetId(rating.Source, rating.Id);
-        }
-
-        private string GetId(string elementType, string source, string id)
-        {
-            return elementType + "_" + GetId(source, id);
         }
 
         private string GetId(string source, string id)

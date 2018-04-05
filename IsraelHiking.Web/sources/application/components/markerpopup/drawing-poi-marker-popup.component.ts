@@ -151,7 +151,6 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         let compoent = this.matDialog.open(UpdatePointDialogComponent);
         compoent.componentInstance.title = this.title;
         compoent.componentInstance.source = "OSM";
-        compoent.componentInstance.elementType = "node";
         compoent.componentInstance.location = this.marker.getLatLng();
         compoent.componentInstance.identifier = this.marker.identifier;
         compoent.componentInstance.description = this.description;

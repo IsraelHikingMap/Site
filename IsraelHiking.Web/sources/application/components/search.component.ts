@@ -16,7 +16,7 @@ import { RouterService } from "../services/routers/router.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { IconsService } from "../services/icons.service";
 import { ToastService } from "../services/toast.service";
-import { SearchResultsProvider, ISearchResults } from "../services/search-results.provider";
+import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../services/search-results.provider";
 import { BaseMapComponent } from "./base-map.component";
 import { SearchResultsMarkerPopupComponent } from "./markerpopup/search-results-marker-popup.component";
 import { CategoriesLayerFactory } from "../services/layers/categories-layers.factory";
@@ -25,8 +25,8 @@ import * as Common from "../common/IsraelHiking";
 
 export interface ISearchContext {
     searchTerm: string;
-    searchResults: ISearchResults[];
-    selectedSearchResults: ISearchResults;
+    searchResults: ISearchResultsPointOfInterest[];
+    selectedSearchResults: ISearchResultsPointOfInterest;
 }
 
 interface ISearchRequestQueueItem {
@@ -92,7 +92,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             selectedSearchResults: null
         } as ISearchContext;
         this.isVisible = this.fromContext.searchTerm ? true : false;
-        this.searchFrom = new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResults);
+        this.searchFrom = new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResultsPointOfInterest);
         this.searchTo = new FormControl();
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
@@ -153,20 +153,21 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.internalSearch(searchContext);
     }
 
-    public displayResults(results: ISearchResults) {
+    public displayResults(results: ISearchResultsPointOfInterest) {
         return results ? results.displayName : "";
     }
 
-    public moveToResults = (searchResults: ISearchResults, e: Event) => {
+    public moveToResults = (searchResults: ISearchResultsPointOfInterest, e: Event) => {
         this.toggleVisibility(e);
+        let bounds = L.latLngBounds(searchResults.southWest, searchResults.northEast);
         if (searchResults.isRoute) {
-            this.categoriesLayerFactory.get("Routes").moveToSearchResults(searchResults, searchResults.bounds);
+            this.categoriesLayerFactory.get("Routes").moveToSearchResults(searchResults, bounds);
         } else {
-            this.categoriesLayerFactory.get("Points of Interest").moveToSearchResults(searchResults, searchResults.bounds);
+            this.categoriesLayerFactory.get("Points of Interest").moveToSearchResults(searchResults, bounds);
         }
     }
 
-    private selectResults = (searchContext: ISearchContext, searchResult: ISearchResults) => {
+    private selectResults = (searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) => {
         searchContext.selectedSearchResults = searchResult;
         if (!this.isDirectional) {
             this.moveToResults(searchResult, new Event("click"));
@@ -278,31 +279,31 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         return false;
     }
 
-    private internalSearch = (searchContext: ISearchContext) => {
+    private internalSearch = async (searchContext: ISearchContext) => {
         let searchTerm = searchContext.searchTerm;
         this.requestsQueue.push({
             searchTerm: searchTerm
         } as ISearchRequestQueueItem);
-        this.searchResultsProvider.getResults(searchTerm, this.resources.hasHebrewCharacters(searchTerm))
-            .then((results: ISearchResults[]) => {
-                let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
-                if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
-                    this.requestsQueue.splice(0, this.requestsQueue.length - 1);
-                    return;
-                }
-                if (searchContext.searchTerm !== searchTerm) {
-                    // search term changed since it was requested.
-                    _.remove(this.requestsQueue, queueItem);
-                    return;
-                }
-                searchContext.searchResults = results;
-                this.requestsQueue.splice(0);
-                if (this.selectFirstSearchResults && searchContext.searchResults.length > 0) {
-                    this.selectResults(searchContext, searchContext.searchResults[0]);
-                }
-                this.selectFirstSearchResults = false;
-            }, () => {
-                this.toastService.warning(this.resources.unableToGetSearchResults);
-            });
+        try {
+            let results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasHebrewCharacters(searchTerm));
+            let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
+            if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
+                this.requestsQueue.splice(0, this.requestsQueue.length - 1);
+                return;
+            }
+            if (searchContext.searchTerm !== searchTerm) {
+                // search term changed since it was requested.
+                _.remove(this.requestsQueue, queueItem);
+                return;
+            }
+            searchContext.searchResults = results;
+            this.requestsQueue.splice(0);
+            if (this.selectFirstSearchResults && searchContext.searchResults.length > 0) {
+                this.selectResults(searchContext, searchContext.searchResults[0]);
+            }
+            this.selectFirstSearchResults = false;
+        } catch (ex) {
+            this.toastService.warning(this.resources.unableToGetSearchResults);
+        }
     }
 }

@@ -8,9 +8,9 @@ namespace IsraelHiking.DataAccessInterfaces
     public interface IElasticSearchGateway : IRepository
     {
         void Initialize(string uri = "http://localhost:9200/");
-        Task<List<Feature>> Search(string searchTerm, string fieldName);
-        Task<List<Feature>> SearchPlaces(string place, string fieldName);
-        Task<List<Feature>> SearchByLocation(Coordinate nortEast, Coordinate southWest, string searchTerm, string fieldName);
+        Task<List<Feature>> Search(string searchTerm, string language);
+        Task<List<Feature>> SearchPlaces(string place, string language);
+        Task<List<Feature>> SearchByLocation(Coordinate nortEast, Coordinate southWest, string searchTerm, string language);
         Task<List<Feature>> GetContainers(Coordinate coordinate);
 
         Task UpdateHighwaysZeroDownTime(List<Feature> highways);
@@ -21,8 +21,12 @@ namespace IsraelHiking.DataAccessInterfaces
         Task UpdatePointsOfInterestZeroDownTime(List<Feature> pointsOfInterest);
         Task UpdatePointsOfInterestData(List<Feature> features);
         Task<List<Feature>> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language);
-        Task<Feature> GetPointOfInterestById(string id, string source, string type);
-        Task DeleteOsmPointOfInterestById(string id, string type);
+        Task<Feature> GetPointOfInterestById(string id, string source);
+        Task DeleteOsmPointOfInterestById(string id);
         Task DeletePointOfInterestById(string id, string source);
+
+        Task<List<Feature>> GetCachedItems(string source);
+        Task<Feature> GetCachedItemById(string id, string source);
+        Task CacheItems(List<Feature> features);
     }
 }

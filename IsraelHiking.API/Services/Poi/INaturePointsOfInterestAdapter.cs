@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -40,9 +41,9 @@ namespace IsraelHiking.API.Services.Poi
         public string Source => Sources.INATURE;
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = null)
+        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
-            IFeature feature = await _elasticSearchGateway.GetPointOfInterestById(id, Source, type);
+            IFeature feature = await _elasticSearchGateway.GetCachedItemById(id, Source);
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
             await AddExtendedData(poiItem, feature, language);
             poiItem.IsEditable = false;
@@ -67,7 +68,12 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
         {
             _logger.LogInformation("Getting data from iNature.");
+            //var features = await _elasticSearchGateway.GetCachedItems(Source);
+            //if (!features.Any())
+            //{
             var features = await _iNatureGateway.GetAll();
+            //}
+            await _elasticSearchGateway.CacheItems(features);
             _logger.LogInformation($"Got {features.Count} points from iNature.");
             return features;
         }

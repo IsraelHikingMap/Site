@@ -16,14 +16,12 @@ namespace IsraelHiking.API.Executors
         /// <returns>a list of preprocessed features</returns>
         List<Feature> Preprocess(Dictionary<string, List<ICompleteOsmGeo>> osmNamesDictionary);
         /// <summary>
-        /// This part is responsible for adding the address field to features.
-        /// It is not part of the preprocess as the containers can be fetched from different sources.
-        /// It also remove the place containers
+        /// Merges places geometry into their relevant nodes
         /// </summary>
-        /// <param name="features">The features to update</param>
-        /// <param name="containers">The containers</param>
-        /// <returns>A list a features without place containers</returns>
-        List<Feature> AddAddress(List<Feature> features, List<Feature> containers);
+        /// <param name="features"></param>
+        /// <param name="containers"></param>
+        /// <returns>A merged list</returns>
+        List<Feature> MergePlaceNodes(List<Feature> features, List<Feature> containers);
         /// <summary>
         /// Preprocess highways into features - line strings
         /// </summary>

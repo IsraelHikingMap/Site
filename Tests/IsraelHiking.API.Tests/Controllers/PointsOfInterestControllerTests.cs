@@ -74,7 +74,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointOfIntereset_WrongSource_ShouldReturnBadRequest()
         {
-            var result = _controller.GetPointOfInterest("wrong source", string.Empty, "category", "language").Result as BadRequestObjectResult;
+            var result = _controller.GetPointOfInterest("wrong source", string.Empty, "language").Result as BadRequestObjectResult;
 
             Assert.IsNotNull(result);
         }
@@ -82,7 +82,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointOfIntereset_WrongId_ShouldReturnNotFound()
         {
-            var result = _controller.GetPointOfInterest("source", string.Empty, "language", string.Empty).Result as NotFoundResult;
+            var result = _controller.GetPointOfInterest("source", string.Empty, "language").Result as NotFoundResult;
 
             Assert.IsNotNull(result);
         }
@@ -90,13 +90,12 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointOfIntereset_BySourceAndId_ShouldReturnIt()
         {
-            var id = "1";
+            var id = "way_1";
             var source = "source";
             var language = "language";
-            var type = "way";
-            _adapter.GetPointOfInterestById(id, language, type).Returns(new PointOfInterestExtended());
+            _adapter.GetPointOfInterestById(id, language).Returns(new PointOfInterestExtended());
 
-            var result = _controller.GetPointOfInterest(source, id, language, type).Result as OkObjectResult;
+            var result = _controller.GetPointOfInterest(source, id, language).Result as OkObjectResult;
 
             Assert.IsNotNull(result);
         }

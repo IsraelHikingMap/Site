@@ -16,7 +16,6 @@ import * as Common from "../../common/IsraelHiking";
 export interface IPublicPoiData {
     id: string;
     source: string;
-    type: string;
     latLng: L.LatLng;
     markerIcon: string;
     selectRoutes: Function;
@@ -193,7 +192,6 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             let data = {
                 id: pointOfInterest.id,
                 source: pointOfInterest.source,
-                type: pointOfInterest.type,
                 latLng: latLng,
                 markerIcon: pointOfInterest.icon,
                 selectRoutes: (routes, isArea) => {

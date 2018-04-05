@@ -92,21 +92,38 @@ namespace IsraelHiking.API.Controllers
         /// <param name="source">The source</param>
         /// <param name="id">The ID</param>
         /// <param name="language">The required language</param>
-        /// <param name="type"></param>
         /// <returns></returns>
         [Route("{source}/{id}")]
         [HttpGet]
-        public async Task<IActionResult> GetPointOfInterest(string source, string id, string language = "", string type = "")
+        public async Task<IActionResult> GetPointOfInterest(string source, string id, string language = "")
         {
             if (_adapters.ContainsKey(source) == false)
             {
                 return BadRequest($"{source} is not a know POIs source...");
             }
             var adapter = _adapters[source];
-            var poiItem = await adapter.GetPointOfInterestById(id, language, type);
+            var poiItem = await adapter.GetPointOfInterestById(id, language);
             if (poiItem == null)
             {
                 return NotFound();
+            }
+            if (poiItem.CombinedIds == null)
+            {
+                return Ok(poiItem);
+            }
+            foreach (var poiItemCombinedIdKey in poiItem.CombinedIds.Keys)
+            {
+                adapter = _adapters[poiItemCombinedIdKey];
+                foreach (var currentId in poiItem.CombinedIds[poiItemCombinedIdKey])
+                {
+                    var currentPoiItem = await adapter.GetPointOfInterestById(currentId, language);
+                    if (string.IsNullOrWhiteSpace(poiItem.Description))
+                    {
+                        poiItem.Description = currentPoiItem.Description;
+                    }
+                    poiItem.ImagesUrls = poiItem.ImagesUrls.Concat(currentPoiItem.ImagesUrls).Distinct().ToArray();
+                    poiItem.References = poiItem.References.Concat(currentPoiItem.References).ToArray();
+                }
             }
             return Ok(poiItem);
         }

@@ -1,4 +1,6 @@
-﻿namespace IsraelHiking.Common
+﻿using System.Collections.Generic;
+
+namespace IsraelHiking.Common
 {
     public class PointOfInterest
     {
@@ -30,5 +32,13 @@
         public Reference[] References { get; set; }
         public Rating Rating { get; set; }
         public DataContainer DataContainer { get; set; }
+        public Dictionary<string, List<string>> CombinedIds { get; set; }
+    }
+
+    public class SearchResultsPointOfInterest : PointOfInterestExtended
+    {
+        public string DisplayName { get; set; }
+        public LatLng NorthEast { get; set; }
+        public LatLng SouthWest { get; set; }
     }
 }

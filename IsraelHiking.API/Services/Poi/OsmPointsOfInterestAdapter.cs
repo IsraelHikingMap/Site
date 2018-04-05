@@ -56,33 +56,9 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = null)
+        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
-            // HM TODO: remove the need to fetch wikipedia data - store it in ES
-            IFeature feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM, type);
-            if (feature.Attributes.GetWikipediaTitle(language) == string.Empty ||
-                GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language) != string.Empty ||
-                feature.Attributes.Exists(FeatureAttributes.IMAGE_URL))
-            {
-                return await FeatureToExtendedPoi(feature, language);
-            }
-            // OSM+Wikipedia POI
-            var title = feature.Attributes.GetWikipediaTitle(language);
-            var featureCollection = await _wikipediaGateway.GetByPageTitle(title, language);
-            if (featureCollection == null)
-            {
-                // Invalid page
-                return await FeatureToExtendedPoi(feature, language);
-            }
-            var wikiFeature = featureCollection.Features.First();
-            foreach (var wikiFeatureAttributeKey in wikiFeature.Attributes.GetNames())
-            {
-                if (feature.Attributes.Exists(wikiFeatureAttributeKey))
-                {
-                    continue;
-                }
-                feature.Attributes.AddAttribute(wikiFeatureAttributeKey, wikiFeature.Attributes[wikiFeatureAttributeKey]);
-            }
+            IFeature feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM);
             return await FeatureToExtendedPoi(feature, language);
         }
 
@@ -93,6 +69,7 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
             poiItem.IsRoute = !poiItem.IsArea && poiItem.DataContainer.Routes.Any(r => r.Segments.Count > 1);
             poiItem.IsEditable = true;
+            poiItem.CombinedIds = feature.GetIdsFromCombinedPoi();
             return poiItem;
         }
 
@@ -127,7 +104,7 @@ namespace IsraelHiking.API.Services.Poi
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
             var id = pointOfInterest.Id;
             ICompleteOsmGeo completeOsmGeo = await osmGateway.GetElement(id, pointOfInterest.Type);
-            var featureBeforeUpdate = await ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title, false);
+            var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
             var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.ICON].ToString();
             var oldTags = completeOsmGeo.Tags.ToArray();
 
@@ -143,8 +120,7 @@ namespace IsraelHiking.API.Services.Poi
             RemoveEmptyTags(completeOsmGeo.Tags);
             if (AreTagsCollectionEqual(oldTags, completeOsmGeo.Tags.ToArray()))
             {
-                var feature = await ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title, true);
-                return await FeatureToExtendedPoi(feature, language);
+                return pointOfInterest;
             }
 
             var changesetId = await osmGateway.CreateChangeset("Update POI interface from IHM site.");
@@ -179,9 +155,9 @@ namespace IsraelHiking.API.Services.Poi
             var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(memoryStream, relevantTagsDictionary);
             osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-            var containers = features.Where(f => f.IsValidContainer())
-                .OrderBy(f => f.Geometry.Area).ToList();
-            return _osmGeoJsonPreprocessorExecutor.AddAddress(features, containers);
+            var containers = features.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
+            features = _osmGeoJsonPreprocessorExecutor.MergePlaceNodes(features, containers);
+            return features;
         }
 
         private void SyncImages(TagsCollectionBase tags, string[] images)
@@ -208,45 +184,37 @@ namespace IsraelHiking.API.Services.Poi
             }
         }
 
-        private async Task<Feature> ConvertOsmToFeature(ICompleteOsmGeo osm, string name, bool withAddress)
+        private Feature ConvertOsmToFeature(ICompleteOsmGeo osm, string name)
         {
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(
                 new Dictionary<string, List<ICompleteOsmGeo>>
                 {
                     {name ?? string.Empty, new List<ICompleteOsmGeo> {osm}}
                 });
-            if (!features.Any())
-            {
-                return null;
-            }
-            if (withAddress)
-            {
-                var containers = await _elasticSearchGateway.GetContainers(features.First().Geometry.Coordinate);
-                features = _osmGeoJsonPreprocessorExecutor.AddAddress(features, containers);
-            }
-            return features.First();
+            return features.Any() ? features.First() : null;
         }
 
         private async Task<Feature> UpdateElasticSearch(ICompleteOsmGeo osm, string name)
         {
-            var feature = await ConvertOsmToFeature(osm, name, true);
-            if (feature != null)
+            var feature = ConvertOsmToFeature(osm, name);
+            if (feature == null)
             {
-                await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> {feature});
-                foreach (var language in Languages.Array)
+                return null;
+            }
+            await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> {feature});
+            foreach (var language in Languages.Array)
+            {
+                var title = feature.Attributes.GetWikipediaTitle(language);
+                if (string.IsNullOrWhiteSpace(title))
                 {
-                    var title = feature.Attributes.GetWikipediaTitle(language);
-                    if (string.IsNullOrWhiteSpace(title))
-                    {
-                        continue;
-                    }
-                    var pageFetaure = await _wikipediaGateway.GetByPageTitle(title, language);
-                    if (pageFetaure == null)
-                    {
-                        continue;
-                    }
-                    await _elasticSearchGateway.DeletePointOfInterestById(pageFetaure.Features.First().Attributes[FeatureAttributes.ID].ToString(), Sources.WIKIPEDIA);
+                    continue;
                 }
+                var pageFetaure = await _wikipediaGateway.GetByPageTitle(title, language);
+                if (pageFetaure == null)
+                {
+                    continue;
+                }
+                await _elasticSearchGateway.DeletePointOfInterestById(pageFetaure.Features.First().Attributes[FeatureAttributes.ID].ToString(), Sources.WIKIPEDIA);
             }
             return feature;
         }

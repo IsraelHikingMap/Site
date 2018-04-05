@@ -54,14 +54,12 @@ describe("Poi Service", () => {
     it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController], async (poiService: PoiService, mockBackend: HttpTestingController) => {
         let id = "42";
         let source = "source";
-        let type = "type";
             
-        poiService.getPoint(id, source, type);
+        poiService.getPoint(id, source);
 
         mockBackend.expectOne((request: HttpRequest<any>) => {
             return request.url.includes(id) &&
-                request.url.includes(source) &&
-                request.params.toString().includes(type);
+                request.url.includes(source)
         });
     })));
 

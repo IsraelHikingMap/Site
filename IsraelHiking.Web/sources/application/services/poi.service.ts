@@ -23,7 +23,6 @@ export interface IRating {
 
 export interface IPointOfInterest {
     id: string;
-    type: string;
     category: string;
     title: string;
     location: L.LatLng;
@@ -102,14 +101,13 @@ export class PoiService {
         return this.httpClient.get(Urls.poi, { params: params }).toPromise() as Promise<IPointOfInterest[]>;
     }
 
-    public async getPoint(id: string, source: string, type: string): Promise<IPointOfInterestExtended> {
-        let itemInCache = _.find(this.poiCache, p => p.id === id && p.source === source && p.type === type);
+    public async getPoint(id: string, source: string): Promise<IPointOfInterestExtended> {
+        let itemInCache = _.find(this.poiCache, p => p.id === id && p.source === source);
         if (itemInCache) {
             return itemInCache;
         }
         let params = new HttpParams()
-            .set("language", this.resources.getCurrentLanguageCodeSimplified())
-            .set("type", type);
+            .set("language", this.resources.getCurrentLanguageCodeSimplified());
         let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as IPointOfInterestExtended;
         this.poiCache.splice(0, 0, poi);
         return poi;

@@ -56,9 +56,9 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<Dictionary<string, List<ICompleteOsmGeo>>>(x => x.Values.Count == 0))
                 .Returns(new List<Feature>());
-            _geoJsonPreprocessorExecutor
-                .AddAddress(Arg.Is<List<Feature>>(x => x.Count == 0), Arg.Any<List<Feature>>())
-                .Returns(new List<Feature>());
+            //_geoJsonPreprocessorExecutor
+            //    .AddAddress(Arg.Is<List<Feature>>(x => x.Count == 0), Arg.Any<List<Feature>>())
+            //    .Returns(new List<Feature>());
             _geoJsonPreprocessorExecutor
                 .Preprocess(Arg.Is<List<CompleteWay>>(x => x.Count == 0))
                 .Returns(new List<Feature>());
@@ -68,5 +68,104 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _elasticSearchGateway.Received(1).UpdatePointsOfInterestData(Arg.Is<List<Feature>>(x => x.Count == 0));
             _elasticSearchGateway.Received(1).UpdateHighwaysData(Arg.Is<List<Feature>>(x => x.Count == 0));
         }
+
+        /* HM TODO: bring this back
+        [TestMethod]
+        public void MergeFeatures_HasSameTitle_ShouldMerge()
+        {
+            var description = "description";
+            var node1 = CreateNode(1, 0, 0);
+            node1.Tags[FeatureAttributes.NAME] = "1";
+            node1.Tags[FeatureAttributes.NAME + ":he"] = "11";
+            var node2 = CreateNode(2, 0, 0);
+            node2.Tags[FeatureAttributes.NAME] = "2";
+            node2.Tags[FeatureAttributes.NAME + ":en"] = "11";
+            node2.Tags[FeatureAttributes.DESCRIPTION] = description;
+            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>>
+            {
+                { "1", new List<ICompleteOsmGeo> {node1} },
+                { "2", new List<ICompleteOsmGeo> {node2} },
+            };
+            var results = _preprocessorExecutor.Preprocess(dictionary);
+            results = _preprocessorExecutor.MergeByTitle(results);
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(description, results.First().Attributes[FeatureAttributes.DESCRIPTION].ToString());
+        }
+
+        [TestMethod]
+        public void MergeFeatures_HasSameTitleButFarAway_ShouldNotMerge()
+        {
+            var node1 = CreateNode(1, 0, 0);
+            node1.Tags[FeatureAttributes.NAME] = "1";
+            node1.Tags[FeatureAttributes.NAME + ":he"] = "11";
+            var node2 = CreateNode(2, 1, 1);
+            node2.Tags[FeatureAttributes.NAME] = "2";
+            node2.Tags[FeatureAttributes.NAME + ":en"] = "11";
+            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>>
+            {
+                { "1", new List<ICompleteOsmGeo> {node1} },
+                { "2", new List<ICompleteOsmGeo> {node2} },
+            };
+            var results = _preprocessorExecutor.Preprocess(dictionary);
+            results = _preprocessorExecutor.MergeByTitle(results);
+
+            Assert.AreEqual(2, results.Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_HasSameTitleBetweenEveryTwo_ShouldMergeToASingleFeature()
+        {
+            var node1 = CreateNode(1, 0, 0);
+            node1.Tags[FeatureAttributes.NAME] = "1";
+            node1.Tags[FeatureAttributes.NAME + ":he"] = "11";
+            var node2 = CreateNode(2, 0, 0);
+            node2.Tags[FeatureAttributes.NAME] = "2";
+            node2.Tags[FeatureAttributes.NAME + ":en"] = "11";
+            var node3 = CreateNode(3, 0, 0);
+            node3.Tags[FeatureAttributes.NAME] = "2";
+            node3.Tags[FeatureAttributes.NAME + ":en"] = "3";
+            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>>
+            {
+                { "1", new List<ICompleteOsmGeo> {node1} },
+                { "2", new List<ICompleteOsmGeo> {node2, node3} },
+            };
+            var results = _preprocessorExecutor.Preprocess(dictionary);
+            results = _preprocessorExecutor.MergeByTitle(results);
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(2, results.First().GetIdsFromCombinedPoi().Values.First().Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_AreaAndPoint_ShouldMergeGeometryOfAreaToPoint()
+        {
+            var node1 = CreateNode(1, 0, 0);
+            var node2 = CreateNode(2, 0, 1);
+            var node3 = CreateNode(3, 1, 1);
+            var node4 = CreateNode(4, 1, 0);
+            var node5 = CreateNode(5, 0.5, 0.6);
+            node5.Tags.Add("historic", "ruins");
+            var way1 = new CompleteWay
+            {
+                Id = 6,
+                Tags = new TagsCollection
+                {
+                    {FeatureAttributes.NAME, FeatureAttributes.NAME},
+                    {"historic", "ruins"}
+                },
+                Nodes = new[] { node1, node2, node3, node4, node1 }
+            };
+            var dictionary = new Dictionary<string, List<ICompleteOsmGeo>>
+            {
+                { FeatureAttributes.NAME, new List<ICompleteOsmGeo> {way1, node5 } },
+            };
+            var results = _preprocessorExecutor.Preprocess(dictionary);
+            results = _preprocessorExecutor.MergeByTitle(results);
+
+            Assert.AreEqual(1, results.Count);
+            Assert.IsTrue(results.First().Geometry is Polygon);
+        }
+        */
     }
 }

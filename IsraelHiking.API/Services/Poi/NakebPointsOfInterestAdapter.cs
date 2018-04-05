@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
@@ -42,7 +41,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = "")
+        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
             var featureCollection = await _nakebGateway.GetById(id);
             var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);

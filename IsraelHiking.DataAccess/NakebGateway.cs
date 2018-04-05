@@ -85,14 +85,13 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.NAME, nakebItem.title},
                 {FeatureAttributes.POI_SOURCE, Sources.NAKEB},
                 {FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE},
-                {FeatureAttributes.POI_LANGUAGE, Languages.ALL},
-                {FeatureAttributes.OSM_TYPE, string.Empty},
+                {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
+                {FeatureAttributes.POI_NAMES, new AttributesTable {{Languages.HEBREW, nakebItem.title }}},
                 {FeatureAttributes.ICON, "icon-hike"},
                 {FeatureAttributes.ICON_COLOR, "black"},
                 {FeatureAttributes.SEARCH_FACTOR, 1},
                 {FeatureAttributes.GEOLOCATION, geoLocation},
             };
-
 
             return attributes;
         }

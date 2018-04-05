@@ -9,6 +9,7 @@ using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 using OsmSharp;
 using OsmSharp.Changesets;
 using OsmSharp.Complete;
@@ -90,7 +91,7 @@ namespace IsraelHiking.API.Services.Osm
             var relevantTagsDictionary = _tagsHelper.GetAllTags();
             foreach (var poiToRemove in changes.Delete)
             {
-                var task = _elasticSearchGateway.DeleteOsmPointOfInterestById(poiToRemove.Id.ToString(), poiToRemove.Type.ToString().ToLower());
+                var task = _elasticSearchGateway.DeleteOsmPointOfInterestById(poiToRemove.Type.ToString().ToLower() + "_" + poiToRemove.Id);
                 deleteTasks.Add(task);
             }
             await Task.WhenAll(deleteTasks);
@@ -105,20 +106,8 @@ namespace IsraelHiking.API.Services.Osm
             var allElemets = await Task.WhenAll(updateTasks);
             var osmNamesDictionary = allElemets.GroupBy(e => e.Tags.GetName()).ToDictionary(g => g.Key, g => g.ToList());
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-            var containers = new List<Feature>();
-            foreach (var feature in features)
-            {
-                var currentContainers = await _elasticSearchGateway.GetContainers(feature.Geometry.Coordinate);
-                currentContainers = currentContainers.Where(cc => cc.IsValidContainer() &&
-                                                                  containers.FirstOrDefault(c =>
-                                                                      c.Attributes[FeatureAttributes.ID]
-                                                                          .Equals(cc.Attributes[FeatureAttributes.ID])
-                                                                  ) == null)
-                    .OrderBy(c => c.Geometry.Area)
-                    .ToList();
-                containers.AddRange(currentContainers);
-            }
-            features = _osmGeoJsonPreprocessorExecutor.AddAddress(features, containers);
+            // HM TODO: update only added/removed tags.
+            // HM TODO: on create do not do any thing
             await _elasticSearchGateway.UpdatePointsOfInterestData(features);
         }
 
@@ -144,9 +133,134 @@ namespace IsraelHiking.API.Services.Osm
                 var fetchTasks = _adapters.Select(a => a.GetPointsForIndexing(stream)).ToArray();
                 var features = (await Task.WhenAll(fetchTasks)).SelectMany(v => v).ToList();
                 JoinWikipediaAndOsmPoint(features);
+                features = MergeByTitle(features);
                 await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);
                 _logger.LogInformation("Finished rebuilding POIs database.");
             }
+        }
+
+        private List<Feature> MergeByTitle(List<Feature> features)
+        {
+            _logger.LogInformation("Starting features merging.");
+
+            var featureIdsToRemove = new List<string>();
+            var mergingDictionary = new Dictionary<string, List<Feature>>();
+            var osmFeaturesWithIcon = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() == Sources.OSM &&
+                                                          !string.IsNullOrWhiteSpace(f.Attributes[FeatureAttributes.ICON].ToString()))
+                .OrderBy(f => f.Attributes[FeatureAttributes.ID])
+                .ToArray();
+            var nonOsmFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() != Sources.OSM);
+            var orderedFeatures = osmFeaturesWithIcon.Concat(nonOsmFeatures).ToArray();
+            _logger.LogInformation($"Total features to merge: {orderedFeatures.Length}");
+            foreach (var feature in orderedFeatures)
+            {
+                var titles = feature.GetTitles();
+                bool wasMerged = false;
+                foreach (var title in titles)
+                {
+                    if (!mergingDictionary.ContainsKey(title))
+                    {
+                        continue;
+                    }
+                    foreach (var featureToMergeTo in mergingDictionary[title])
+                    {
+                        if (!CanMerge(featureToMergeTo, feature))
+                        {
+                            continue;
+                        }
+                        wasMerged = true;
+                        featureIdsToRemove.Add(feature.Attributes[FeatureAttributes.ID].ToString());
+                        var titlesBeforeMerge = featureToMergeTo.GetTitles();
+                        MergeFeatures(featureToMergeTo, feature);
+
+                        var titlesToAddToDictionary = featureToMergeTo.GetTitles().Except(titlesBeforeMerge);
+                        foreach (var titleToAdd in titlesToAddToDictionary)
+                        {
+                            AddToDictionaryWithList(mergingDictionary, titleToAdd, featureToMergeTo);
+                        }
+                        featureToMergeTo.AddIdToCombinedPoi(feature.Attributes[FeatureAttributes.ID].ToString(), feature.Attributes[FeatureAttributes.POI_SOURCE].ToString());
+                    }
+                }
+                if (wasMerged)
+                {
+                    continue;
+                }
+                foreach (var title in titles)
+                {
+                    AddToDictionaryWithList(mergingDictionary, title, feature);
+                }
+            }
+
+            featureIdsToRemove = featureIdsToRemove.Distinct().ToList();
+            var results = features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
+            _logger.LogInformation($"Finished feature merging: {results.Count}");
+            return results;
+        }
+
+        private void MergeFeatures(IFeature featureToMergeTo, IFeature feature)
+        {
+            if (featureToMergeTo.Geometry is Point && !(feature.Geometry is Point))
+            {
+                featureToMergeTo.Geometry = feature.Geometry;
+            }
+
+            if (featureToMergeTo.Attributes[FeatureAttributes.POI_CATEGORY].Equals(Categories.NONE))
+            {
+                featureToMergeTo.Attributes[FeatureAttributes.POI_CATEGORY] =
+                    feature.Attributes[FeatureAttributes.POI_CATEGORY];
+            }
+
+            if (double.Parse(featureToMergeTo.Attributes[FeatureAttributes.SEARCH_FACTOR].ToString()) <
+                double.Parse(feature.Attributes[FeatureAttributes.SEARCH_FACTOR].ToString()))
+            {
+                featureToMergeTo.Attributes[FeatureAttributes.SEARCH_FACTOR] =
+                    feature.Attributes[FeatureAttributes.SEARCH_FACTOR];
+            }
+
+            if (string.IsNullOrWhiteSpace(featureToMergeTo.Attributes[FeatureAttributes.ICON].ToString()))
+            {
+                featureToMergeTo.Attributes[FeatureAttributes.ICON] =
+                    feature.Attributes[FeatureAttributes.ICON];
+                featureToMergeTo.Attributes[FeatureAttributes.ICON_COLOR] =
+                    feature.Attributes[FeatureAttributes.ICON_COLOR];
+            }
+
+            // adding names of merged feature
+            featureToMergeTo.MergeTitles(feature);
+        }
+
+        private void AddToDictionaryWithList(Dictionary<string, List<Feature>> dictionary, string title, Feature feature)
+        {
+            if (dictionary.ContainsKey(title))
+            {
+                dictionary[title].Add(feature);
+            }
+            else
+            {
+                dictionary[title] = new List<Feature> { feature };
+            }
+        }
+
+        private bool CanMerge(Feature target, Feature source)
+        {
+            if (!source.Geometry.Contains(target.Geometry) &&
+                source.Geometry.Distance(target.Geometry) > 0.001)
+            {
+                // too far away to be merged
+                return false;
+            }
+            // points have the same title and are close enough
+            if (source.Attributes[FeatureAttributes.ICON].Equals(target.Attributes[FeatureAttributes.ICON]))
+            {
+                return true;
+            }
+            // different icon
+            if (!source.Attributes[FeatureAttributes.POI_SOURCE].Equals(target.Attributes[FeatureAttributes.POI_SOURCE]))
+            {
+                return true;
+            }
+            // different icon but same source
+            return false;
         }
 
         private void JoinWikipediaAndOsmPoint(List<Feature> features)

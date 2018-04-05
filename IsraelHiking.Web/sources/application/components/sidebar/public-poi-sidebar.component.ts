@@ -8,7 +8,7 @@ import { ResourcesService } from "../../services/resources.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { IPointOfInterestExtended, PoiService, IRating, IRater, IIconColorLabel, IReference } from "../../services/poi.service";
 import { MapService } from "../../services/map.service";
-import { IPublicPoiData, IPublicPoiData as IPublicPoiData1 } from "../../services/layers/categories.layer";
+import { IPublicPoiData } from "../../services/layers/categories.layer";
 import { OsmUserService } from "../../services/osm-user.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { ToastService } from "../../services/toast.service";
@@ -53,7 +53,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.categories = [];
         this.info = { imagesFiles: [], imagesUrls: [], urls: [] } as IPoiMainInfoData;
         this.latLng = data.latLng;
-        this.poiService.getPoint(data.id, data.source, data.type).then((poiExtended) => {
+        this.poiService.getPoint(data.id, data.source).then((poiExtended) => {
             this.initFromPointOfInterestExtended(poiExtended);
             data.selectRoutes(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
             this.isLoading = false;
@@ -63,7 +63,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.initializeCategories(data.markerIcon);
     }
 
-    private getData(): IPublicPoiData1 {
+    private getData(): IPublicPoiData {
         return this.sidebarService.poiData as IPublicPoiData;
     }
 
@@ -297,11 +297,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
 
     public getEditElementOsmAddress(): string {
         let data = this.getData();
-        if (!data.type) {
+        if (data.source.toLocaleLowerCase() !== "osm") {
             return null;
         }
         let baseLayerAddress = this.layersService.selectedBaseLayer.address;
-        return this.osmUserService.getEditElementOsmAddress(baseLayerAddress, data.type, data.id);
+        return this.osmUserService.getEditElementOsmAddress(baseLayerAddress, data.id);
     }
 
     public addEmptyUrl() {

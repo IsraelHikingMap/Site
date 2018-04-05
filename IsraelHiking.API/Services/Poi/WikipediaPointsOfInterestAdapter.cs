@@ -39,7 +39,7 @@ namespace IsraelHiking.API.Services.Poi
         public string Source => Sources.WIKIPEDIA;
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = null)
+        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
             var feature = await _wikipediaGateway.GetById(id);
             var mainFeature = feature.Features.First();

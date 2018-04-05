@@ -258,9 +258,11 @@ export class OsmUserService {
         return `${this.baseUrl}/edit?gpx=${gpxId}#${background}`;
     }
 
-    public getEditElementOsmAddress(baseLayerAddress: string, elementType: string, id: string) {
+    public getEditElementOsmAddress(baseLayerAddress: string, id: string) {
+        let elementType = id.split("_")[0];
+        let elementId = id.split("_")[1];
         let background = this.getBackgroundStringForOsmAddress(baseLayerAddress);
-        return `${this.baseUrl}/edit?${elementType}=${id}#${background}`;
+        return `${this.baseUrl}/edit?${elementType}=${elementId}#${background}`;
     }
 
     private getBackgroundStringForOsmAddress(baseLayerAddress: string): string {

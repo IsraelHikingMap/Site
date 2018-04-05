@@ -17,7 +17,6 @@ import * as Common from "../../common/IsraelHiking";
 export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent {
     public id: string;
     public source: string;
-    public type: string;
 
     private poiExtended: IPointOfInterestExtended;
 
@@ -36,11 +35,10 @@ export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent 
     };
     public convertToRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
 
-    public setIdSourceAndType(id: string, source: string, type: string) {
+    public setIdSourceAndType(id: string, source: string) {
         this.id = id;
         this.source = source;
-        this.type = type;
-        this.poiService.getPoint(this.id, this.source, this.type).then((poiExtended) => {
+        this.poiService.getPoint(this.id, this.source).then((poiExtended) => {
             this.poiExtended = poiExtended;
             this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
             this.selectRoute(this.poiExtended.dataContainer.routes[0]);

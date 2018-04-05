@@ -1,6 +1,7 @@
 ﻿using IsraelHiking.Common;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccessInterfaces
 {

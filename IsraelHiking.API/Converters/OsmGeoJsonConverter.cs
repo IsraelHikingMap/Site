@@ -49,8 +49,7 @@ namespace IsraelHiking.API.Converters
         private IAttributesTable ConvertTags(ICompleteOsmGeo osmObject)
         {
             var properties = osmObject.Tags.ToDictionary(t => t.Key, t => t.Value);
-            properties.Add(FeatureAttributes.ID, osmObject.Id.ToString());
-            properties.Add(FeatureAttributes.OSM_TYPE, osmObject.Type.ToString().ToLower());
+            properties.Add(FeatureAttributes.ID, osmObject.Type.ToString().ToLower() + "_" + osmObject.Id);
             var table = new AttributesTable();
             foreach (var key in properties.Keys)
             {

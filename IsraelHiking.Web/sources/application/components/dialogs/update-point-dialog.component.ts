@@ -28,7 +28,6 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     public imagesUrls: string[];
     public websiteUrl: string;
     public identifier: string;
-    public elementType: string;
     public location: L.LatLng;
     public selectedCategory: ISelectableCategory;
     public icons: IIconColorLabel[];
@@ -125,7 +124,6 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             title: this.title,
             references: this.websiteUrl ? [{ url: this.websiteUrl } as IReference] : [],
             source: this.source,
-            type: this.elementType,
             location: this.location
         } as IPointOfInterestExtended;
         try {
@@ -141,7 +139,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     }
 
     public getEditElementOsmAddress(): string {
-        return this.osmUserService.getEditElementOsmAddress("", this.elementType, this.identifier);
+        return this.osmUserService.getEditElementOsmAddress("", this.identifier);
     }
 
     public getCurrentImage() {

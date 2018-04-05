@@ -24,7 +24,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="language">The relevant language</param>
         /// <param name="type">The type of the POI is needed</param>
         /// <returns>A POI with more data</returns>
-        Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language, string type = null);
+        Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language);
 
         /// <summary>
         /// Adds a POI

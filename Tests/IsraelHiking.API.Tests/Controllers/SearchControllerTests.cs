@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
@@ -25,19 +27,19 @@ namespace IsraelHiking.API.Tests.Controllers
         public void GetSearchResults_ShouldPassRequestToGateway_NoResultsFound()
         {
             var list = new List<Feature>();
+            var searchTerm = "searchTerm";
+            _elasticSearchGateway.Search(searchTerm, Languages.ENGLISH).Returns(list);
 
-            _elasticSearchGateway.Search("searchTerm", "name:en").Returns(list);
-
-            var results = _controller.GetSearchResults("searchTerm", "en").Result;
+            var results = _controller.GetSearchResults(searchTerm, Languages.ENGLISH).Result;
 
             Assert.IsNotNull(results);
-            Assert.AreEqual(list.Count, results.Features.Count);
+            Assert.AreEqual(list.Count, results.Count());
         }
 
         [TestMethod]
         public void GetSearchResultsForSingleNumber_ShouldFail()
         {
-            var results = _controller.GetSearchResults("+32, 35").Result;
+            var results = _controller.GetSearchResults("+32, 35", Languages.HEBREW).Result;
             Assert.IsNotNull(results);
         }
 

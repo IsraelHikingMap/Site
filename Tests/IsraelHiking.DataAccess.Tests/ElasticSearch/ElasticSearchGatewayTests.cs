@@ -66,12 +66,12 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
             var gateway = new ElasticSearchGateway(new TraceLogger());
             gateway.Initialize();
             var id = "he_22216";
-            var feature = gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA, string.Empty).Result;
+            var feature = gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA).Result;
             Assert.IsNotNull(feature);
 
             gateway.DeletePointOfInterestById(id, Sources.WIKIPEDIA).Wait();
 
-            feature = gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA, string.Empty).Result;
+            feature = gateway.GetPointOfInterestById(id, Sources.WIKIPEDIA).Result;
             Assert.IsNull(feature);
         }
 

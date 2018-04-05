@@ -101,16 +101,15 @@ namespace IsraelHiking.API.Executors
                 feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, iconColorCategory.Category);
                 feature.Attributes.AddAttribute(FeatureAttributes.POI_SOURCE, Sources.OSM);
                 feature.Attributes.AddAttribute(FeatureAttributes.POI_LANGUAGE, Languages.ALL);
+                feature.Attributes.AddAttribute(FeatureAttributes.POI_CONTAINER, feature.IsValidContainer());
+                feature.SetTitles();
                 UpdateLocation(feature);
             }
         }
 
         private IEnumerable<Feature> RemoveKklRoutes(IEnumerable<Feature> features)
         {
-            return features.Where(f => f.Attributes[FeatureAttributes.OSM_TYPE].ToString() !=
-                                       OsmGeoType.Relation.ToString().ToLower() ||
-                                       f.Attributes.Has("operator", "kkl") == false ||
-                                       f.Attributes.Has("route", "mtb") == false);
+            return features.Where(f => f.Attributes.Has("operator", "kkl") == false || f.Attributes.Has("route", "mtb") == false);
         }
 
         private void ChangeLwnHikingRoutesToNoneCategory(List<Feature> features)
@@ -122,114 +121,53 @@ namespace IsraelHiking.API.Executors
             }
         }
 
-        private Feature UpdatePlacesGeometry(Feature feature, List<Feature> containers)
+        private List<Feature> UpdatePlacesGeometry(Feature feature, List<Feature> places)
         {
             if (feature.Geometry is Point == false ||
                 feature.Attributes.Exists(PLACE) == false || 
                 feature.Attributes.Exists(FeatureAttributes.NAME) == false)
             {
-                return null;
+                return new List<Feature>();
             }
 
-            var placeContainer = containers.FirstOrDefault(c => c.Attributes.Exists(FeatureAttributes.NAME) &&
-                                                                c.Attributes.Exists(PLACE) &&
-                                                                c.Attributes[FeatureAttributes.NAME].ToString() ==
-                                                                feature.Attributes[FeatureAttributes.NAME].ToString());
-            if (placeContainer == null)
+            var placeContainers = places.Where(c => c.Attributes.Exists(FeatureAttributes.NAME) &&
+                                                    c.Attributes[FeatureAttributes.NAME]
+                                                        .Equals(feature.Attributes[FeatureAttributes.NAME]) &&
+                                                    c.Geometry.Contains(feature.Geometry) &&
+                                                    !c.Geometry.EqualsTopologically(feature.Geometry) &&
+                                                    !c.Attributes[FeatureAttributes.ID]
+                                                        .Equals(feature.Attributes[FeatureAttributes.ID])
+                )
+                .OrderBy(f => f.Geometry.Area)
+                .ToList();
+            if (!placeContainers.Any())
             {
-                return null;
+                return placeContainers;
             }
             // setting the geometry of the area to the point to facilitate for updating the place point while showing the area
-            feature.Geometry = placeContainer.Geometry;
-            return placeContainer;
+            feature.Geometry = placeContainers.First().Geometry;
+            return placeContainers;
         }
 
         /// <inheritdoc />
-        public List<Feature> AddAddress(List<Feature> features, List<Feature> containers)
+        public List<Feature> MergePlaceNodes(List<Feature> features, List<Feature> containers)
         {
-            var counter = 0;
-            features = HandlePlaces(features, containers);
-            _logger.LogInformation($"Starting adding address to features: {features.Count}, containers: {containers.Count}");
+            _logger.LogInformation($"Starting places merging: {features.Count}, places: {containers.Count}");
+            var featureIdsToRemove = new List<string>();
             foreach (var feature in features)
             {
-                AddAddressField(feature, containers);
-                counter++;
-                if (counter % 5000 == 0)
+                var placesToRemove = UpdatePlacesGeometry(feature, containers);
+                if (placesToRemove.Any())
                 {
-                    _logger.LogInformation($"Finished adding address to {counter} names of {features.Count}");
+                    // database places are nodes that should not be removed.
+                    var ids = placesToRemove.Select(p => p.Attributes[FeatureAttributes.ID].ToString()).ToList();
+                    featureIdsToRemove.AddRange(ids);
                 }
             }
-            _logger.LogInformation($"Finished adding address to features: {features.Count}");
-            return features;
-        }
 
-        private List<Feature> HandlePlaces(List<Feature> features, List<Feature> containers)
-        {
-            var places = containers.Where(f => f.Attributes.Exists(PLACE)).ToList();
-            _logger.LogInformation($"Starting places handling: {features.Count}, places: {places.Count}");
-            var featuresToRemove = new List<Feature>();
-            foreach (var feature in features)
-            {
-                var placeToRemove = UpdatePlacesGeometry(feature, places);
-                if (placeToRemove != null)
-                {
-                    featuresToRemove.Add(placeToRemove);
-                }
-            }
-            var results = features.Except(
-                features.Where(f =>
-                    featuresToRemove.Any(ftr =>
-                        ftr.Attributes[FeatureAttributes.ID].Equals(f.Attributes[FeatureAttributes.ID]) &&
-                        ftr.Attributes[FeatureAttributes.OSM_TYPE].Equals(OsmGeoType.Node.ToString().ToLower()) == false
-                    )
-                )
-            ).ToList();
-            _logger.LogInformation($"Finished places handling: {results.Count}");
+            var results = features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID]) == false).ToList();
+            _logger.LogInformation($"Finished places merging: {results.Count}");
             return results;
-        }
-
-        private void AddAddressField(Feature feature, List<Feature> containers)
-        {
-            Feature invalidFeature = null;
-            var containingGeoJson = containers.FirstOrDefault(f =>
-            {
-                try
-                {
-                    return f != feature && 
-                           f.Geometry.EqualsTopologically(feature.Geometry) == false && 
-                           f.Geometry.Contains(feature.Geometry);
-                }
-                catch (Exception)
-                {
-                    var isValidOp = new NetTopologySuite.Operation.Valid.IsValidOp(f.Geometry);
-                    if (!isValidOp.IsValid)
-                    {
-                        _logger.LogError($"Issue with contains test for: {f.Geometry.GeometryType}_{f.Attributes[FeatureAttributes.ID]}: feature.Geometry is not valid: {isValidOp.ValidationError.Message} at: ({isValidOp.ValidationError.Coordinate.X},{isValidOp.ValidationError.Coordinate.Y})");
-                    }
-                    invalidFeature = f;
-                    return false;
-                }
-            });
-            if (invalidFeature != null)
-            {
-                containers.Remove(invalidFeature);
-            }
-            if (containingGeoJson == null)
-            {
-                return;
-            }
-            foreach (var attributeName in containingGeoJson.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.NAME)))
-            {
-                var addressName = attributeName.Replace(FeatureAttributes.NAME, "address");
-                if (feature.Attributes.Exists(addressName))
-                {
-                    feature.Attributes[addressName] = containingGeoJson.Attributes[attributeName];
-                }
-                else
-                { 
-                    feature.Attributes.AddAttribute(addressName, containingGeoJson.Attributes[attributeName]);
-                }
-            }
         }
 
         private IEnumerable<ICompleteOsmGeo> MergeOsmElements(IReadOnlyCollection<ICompleteOsmGeo> elements)
