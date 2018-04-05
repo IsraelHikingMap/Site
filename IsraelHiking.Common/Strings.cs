@@ -40,14 +40,15 @@
     public static class FeatureAttributes
     {
         public const string ID = "identifier";
-        public const string POI_COMBINED_IDS = "poiCombinedIds";
         public const string NAME = "name";
         public const string DESCRIPTION = "description";
-        public const string POI_SOURCE = "poiSource";
-        public const string POI_CATEGORY = "poiCategory";
-        public const string POI_LANGUAGE = "poiLanguage";
-        public const string POI_NAMES = "poiNames";
-        public const string POI_CONTAINER = "poiContainer";
+        public const string POI_PREFIX = "poi";
+        public const string POI_COMBINED_IDS = POI_PREFIX + "CombinedIds";
+        public const string POI_SOURCE = POI_PREFIX + "Source";
+        public const string POI_CATEGORY = POI_PREFIX + "Category";
+        public const string POI_LANGUAGE = POI_PREFIX + "Language";
+        public const string POI_NAMES = POI_PREFIX + "Names";
+        public const string POI_CONTAINER = POI_PREFIX + "Container";
         public const string OSM_NODES = "osmNodes";
         public const string WEBSITE = "website";
         public const string WIKIPEDIA = "wikipedia";

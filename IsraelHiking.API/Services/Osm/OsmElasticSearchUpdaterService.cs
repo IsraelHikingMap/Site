@@ -106,8 +106,33 @@ namespace IsraelHiking.API.Services.Osm
             var allElemets = await Task.WhenAll(updateTasks);
             var osmNamesDictionary = allElemets.GroupBy(e => e.Tags.GetName()).ToDictionary(g => g.Key, g => g.ToList());
             var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-            // HM TODO: update only added/removed tags.
-            // HM TODO: on create do not do any thing
+
+            foreach (var poiToUpdate in changes.Modify
+                .Where(o => IsRelevantPointOfInterest(o, relevantTagsDictionary)))
+            {
+                var featureFromDb = await _elasticSearchGateway.GetPointOfInterestById(poiToUpdate.Type.ToString().ToLower() + "_" + poiToUpdate.Id, Sources.OSM);
+                if (featureFromDb == null)
+                {
+                    continue;
+                }
+                var featureToUpdate = features.FirstOrDefault(f =>
+                    f.Attributes[FeatureAttributes.ID].Equals(featureFromDb.Attributes[FeatureAttributes.ID]));
+                if (featureToUpdate == null)
+                {
+                    continue;
+                }
+                foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
+                {
+                    if (!featureToUpdate.Attributes.Exists(attributeKey))
+                    {
+                        featureToUpdate.Attributes.AddAttribute(attributeKey, featureFromDb.Attributes[attributeKey]);
+                    }
+                    else
+                    {
+                        featureToUpdate.Attributes[attributeKey] = featureFromDb.Attributes[attributeKey];
+                    }
+                }
+            }
             await _elasticSearchGateway.UpdatePointsOfInterestData(features);
         }
 
