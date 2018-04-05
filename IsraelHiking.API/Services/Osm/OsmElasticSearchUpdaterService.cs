@@ -123,14 +123,7 @@ namespace IsraelHiking.API.Services.Osm
                 }
                 foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
                 {
-                    if (!featureToUpdate.Attributes.Exists(attributeKey))
-                    {
-                        featureToUpdate.Attributes.AddAttribute(attributeKey, featureFromDb.Attributes[attributeKey]);
-                    }
-                    else
-                    {
-                        featureToUpdate.Attributes[attributeKey] = featureFromDb.Attributes[attributeKey];
-                    }
+                    featureToUpdate.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);   
                 }
             }
             await _elasticSearchGateway.UpdatePointsOfInterestData(features);

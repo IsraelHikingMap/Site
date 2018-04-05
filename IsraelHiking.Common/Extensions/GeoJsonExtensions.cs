@@ -8,6 +8,18 @@ namespace IsraelHiking.Common.Extensions
 {
     public static class GeoJsonExtensions
     {
+        public static void AddOrUpdate(this IAttributesTable attributes, string key, object value)
+        {
+            if (!attributes.Exists(key))
+            {
+                attributes.AddAttribute(key, value);
+            }
+            else
+            {
+                attributes[key] = value;
+            }
+        }
+
         /// <summary>
         /// This is an extention method to attribute table to get the wikipedia page title by language
         /// </summary>

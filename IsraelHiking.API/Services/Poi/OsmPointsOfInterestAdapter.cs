@@ -201,6 +201,15 @@ namespace IsraelHiking.API.Services.Poi
             {
                 return null;
             }
+            var featureFromDb = await _elasticSearchGateway.GetPointOfInterestById(feature.Attributes[FeatureAttributes.ID].ToString(), Sources.OSM);
+            if (featureFromDb != null)
+            {
+                foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
+                {
+                    feature.Attributes.AddAttribute(attributeKey, featureFromDb.Attributes[attributeKey]);
+                }
+            }
+            
             await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> {feature});
             foreach (var language in Languages.Array)
             {
