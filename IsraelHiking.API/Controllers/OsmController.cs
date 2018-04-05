@@ -87,10 +87,7 @@ namespace IsraelHiking.API.Controllers
             var southWestCoordinate = new Coordinate().FromLatLng(southWest);
             var highways = await _elasticSearchGateway.GetHighways(northEastCooridnate, southWestCoordinate);
             var points = await _elasticSearchGateway.GetPointsOfInterest(northEastCooridnate, southWestCoordinate, Categories.Points.Concat(new[] { Categories.NONE}).ToArray(), Languages.ALL);
-            return highways.Concat(points.Where(p =>
-                Sources.OSM.Equals(p.Attributes[FeatureAttributes.POI_SOURCE]) ||
-                Sources.WIKIPEDIA.Equals(p.Attributes[FeatureAttributes.POI_SOURCE])
-            )).ToList();
+            return highways.Concat(points).ToList();
         }
 
         /// <summary>
