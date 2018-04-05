@@ -180,15 +180,15 @@ namespace IsraelHiking.Common.Extensions
             }
         }
 
-        public static void AddIdToCombinedPoi(this IFeature feature, string id, string source)
+        public static void AddIdToCombinedPoi(this IFeature featureToMergeTo, IFeature feature)
         {
-            if (!feature.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
+            if (!featureToMergeTo.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
             {
-                feature.Attributes.AddAttribute(FeatureAttributes.POI_COMBINED_IDS, new string[0]);
+                featureToMergeTo.Attributes.AddAttribute(FeatureAttributes.POI_COMBINED_IDS, new string[0]);
             }
-            var list = GetStringListFromAttributeValue(feature.Attributes[FeatureAttributes.POI_COMBINED_IDS]);
-            list.Add(source + "__" + id);
-            feature.Attributes[FeatureAttributes.POI_COMBINED_IDS] = list.Distinct().ToList();
+            var list = GetStringListFromAttributeValue(featureToMergeTo.Attributes[FeatureAttributes.POI_COMBINED_IDS]);
+            list.Add(feature.Attributes[FeatureAttributes.POI_SOURCE] + "__" + feature.Attributes[FeatureAttributes.ID]);
+            featureToMergeTo.Attributes[FeatureAttributes.POI_COMBINED_IDS] = list.Distinct().ToList();
         }
 
         public static Dictionary<string, List<string>> GetIdsFromCombinedPoi(this IFeature feature)

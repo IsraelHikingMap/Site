@@ -121,8 +121,13 @@ namespace IsraelHiking.API.Controllers
                     {
                         poiItem.Description = currentPoiItem.Description;
                     }
-                    poiItem.ImagesUrls = poiItem.ImagesUrls.Concat(currentPoiItem.ImagesUrls).Distinct().ToArray();
-                    poiItem.References = poiItem.References.Concat(currentPoiItem.References).ToArray();
+                    poiItem.ImagesUrls = poiItem.ImagesUrls.Concat(currentPoiItem.ImagesUrls)
+                        .Distinct()
+                        .ToArray();
+                    poiItem.References = poiItem.References.Concat(currentPoiItem.References)
+                        .GroupBy(r => r.Url)
+                        .Select(r => r.FirstOrDefault())
+                        .ToArray();
                 }
             }
             return Ok(poiItem);

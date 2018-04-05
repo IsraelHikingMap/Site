@@ -145,7 +145,9 @@ namespace IsraelHiking.API.Executors
                 return placeContainers;
             }
             // setting the geometry of the area to the point to facilitate for updating the place point while showing the area
-            feature.Geometry = placeContainers.First().Geometry;
+            var container = placeContainers.First();
+            feature.Geometry = container.Geometry;
+            feature.Attributes[FeatureAttributes.POI_CONTAINER] = container.Attributes[FeatureAttributes.POI_CONTAINER];
             return placeContainers;
         }
 

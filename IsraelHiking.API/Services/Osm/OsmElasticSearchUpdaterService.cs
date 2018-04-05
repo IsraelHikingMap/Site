@@ -178,7 +178,6 @@ namespace IsraelHiking.API.Services.Osm
                         {
                             AddToDictionaryWithList(mergingDictionary, titleToAdd, featureToMergeTo);
                         }
-                        featureToMergeTo.AddIdToCombinedPoi(feature.Attributes[FeatureAttributes.ID].ToString(), feature.Attributes[FeatureAttributes.POI_SOURCE].ToString());
                     }
                 }
                 if (wasMerged)
@@ -227,6 +226,15 @@ namespace IsraelHiking.API.Services.Osm
 
             // adding names of merged feature
             featureToMergeTo.MergeTitles(feature);
+
+            if (!featureToMergeTo.Attributes[FeatureAttributes.POI_SOURCE]
+                    .Equals(feature.Attributes[FeatureAttributes.POI_SOURCE]) ||
+                !feature.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
+            {
+                // do not merge OSM elements to each other since they won't exists in the database for fetching
+                featureToMergeTo.AddIdToCombinedPoi(feature);
+            }
+            
         }
 
         private void AddToDictionaryWithList(Dictionary<string, List<Feature>> dictionary, string title, Feature feature)
@@ -282,6 +290,7 @@ namespace IsraelHiking.API.Services.Osm
                     {
                         wikiFeatures.Remove(wikiFeatureToRemove);
                         features.Remove(wikiFeatureToRemove);
+                        osmWikiFeature.AddIdToCombinedPoi(wikiFeatureToRemove);
                     }
                 }
             }

@@ -120,26 +120,31 @@ namespace IsraelHiking.DataAccess
             _logger.LogInformation("Finished initialing elasticsearch with uri: " + uri);
         }
 
-        private QueryContainer FeatureNameSearchQuery(QueryContainerDescriptor<Feature> q, string searchTerm, string language)
+        private QueryContainer FeatureNameSearchQueryWithFactor(QueryContainerDescriptor<Feature> q, string searchTerm, string language)
         {
             return q.FunctionScore(
                 fs => fs.Query(
-                    iq => iq.DisMax(
-                        dm => dm.Queries(
-                            dmq => dmq.Match(
-                                mm => mm.Query(searchTerm)
-                                    .Field($"{PROPERTIES}.{FeatureAttributes.POI_NAMES}.{Languages.ALL}")
-                                    .Fuzziness(Fuzziness.Auto)
-                            ),
-                            dmq => dmq.Match(
-                                m => m.Query(searchTerm)
-                                    .Boost(1.2)
-                                    .Field($"{PROPERTIES}.{FeatureAttributes.POI_NAMES}.{language}")
-                                    .Fuzziness(Fuzziness.Auto)
-                            )
-                        )
-                    )
+                    qi => FeatureNameSearchQuery(qi, searchTerm, language)
                 ).Functions(fn => fn.FieldValueFactor(f => f.Field($"{PROPERTIES}.{FeatureAttributes.SEARCH_FACTOR}")))
+            );
+        }
+
+        private QueryContainer FeatureNameSearchQuery(QueryContainerDescriptor<Feature> q, string searchTerm, string language)
+        {
+            return q.DisMax(
+                dm => dm.Queries(
+                    dmq => dmq.Match(
+                        mm => mm.Query(searchTerm)
+                            .Field($"{PROPERTIES}.{FeatureAttributes.POI_NAMES}.{Languages.ALL}")
+                            .Fuzziness(Fuzziness.Auto)
+                    ),
+                    dmq => dmq.Match(
+                        m => m.Query(searchTerm)
+                            .Boost(1.2)
+                            .Field($"{PROPERTIES}.{FeatureAttributes.POI_NAMES}.{language}")
+                            .Fuzziness(Fuzziness.Auto)
+                    )
+                )
             );
         }
 
@@ -154,7 +159,7 @@ namespace IsraelHiking.DataAccess
                     .Size(NUMBER_OF_RESULTS)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
-                    .Query(q => FeatureNameSearchQuery(q, searchTerm, language))
+                    .Query(q => FeatureNameSearchQueryWithFactor(q, searchTerm, language))
             );
             return response.Documents.ToList();
         }
@@ -166,9 +171,8 @@ namespace IsraelHiking.DataAccess
                     .Size(5)
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
-                    .Query(
-                        q => FeatureNameSearchQuery(q, place, language)
-                             && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true))
+                    .Query(q => FeatureNameSearchQuery(q, place, language)
+                                && q.Term(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CONTAINER}").Value(true))
                     )
             );
             return response.Documents.ToList();
@@ -182,7 +186,7 @@ namespace IsraelHiking.DataAccess
                     .TrackScores()
                     .Sort(f => f.Descending("_score"))
                     .Query(
-                        q => FeatureNameSearchQuery(q, searchTerm, language) &&
+                        q => FeatureNameSearchQueryWithFactor(q, searchTerm, language) &&
                              q.GeoBoundingBox(b => ConvertToGeoBoundingBox(b, nortEast, southWest))
                     )
             );

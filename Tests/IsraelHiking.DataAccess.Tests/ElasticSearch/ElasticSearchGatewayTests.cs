@@ -25,11 +25,11 @@ namespace IsraelHiking.DataAccess.Tests.ElasticSearch
         {
             var gateway = new ElasticSearchGateway(new TraceLogger());
             gateway.Initialize();
-            var placesFeatures = gateway.SearchPlaces("תמרת", "name").Result;
+            var placesFeatures = gateway.SearchPlaces("תמרת", Languages.HEBREW).Result;
             Assert.AreEqual(5, placesFeatures.Count);
             var envolope = placesFeatures.First().Geometry.EnvelopeInternal;
             var results = gateway.SearchByLocation(
-                new Coordinate(envolope.MaxX, envolope.MaxY), new Coordinate(envolope.MinX, envolope.MinY), "מורן", "name").Result;
+                new Coordinate(envolope.MaxX, envolope.MaxY), new Coordinate(envolope.MinX, envolope.MinY), "מורן", Languages.HEBREW).Result;
             Assert.AreEqual(1, results.Count);
         }
 
