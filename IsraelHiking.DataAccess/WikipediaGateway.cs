@@ -46,7 +46,6 @@ namespace IsraelHiking.DataAccess
 
         public Task<List<Feature>> GetAll()
         {
-            // HM TODO: read from cached file here intead?
             throw new NotImplementedException("Please use GetByLocation instead");
         }
 

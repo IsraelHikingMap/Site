@@ -56,6 +56,9 @@ body {
 
 .stack-icon-top {
     top: -2px;
+}
+
+.stack-icon-small {
     font-size: 0.75em !important;
 }
 

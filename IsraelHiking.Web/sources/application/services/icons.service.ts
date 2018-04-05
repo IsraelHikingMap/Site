@@ -16,12 +16,12 @@ export class IconsService {
 
     private static START_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
     IconsService.BACKGROUND +
-    "<i class='fa icon-play-circle fa-stack-1x stack-icon-top' style='color:green;'></i>" +
+    "<i class='fa icon-play-circle fa-stack-1x stack-icon-top stack-icon-small' style='color:green;'></i>" +
     "</span>";
 
     private static END_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
     IconsService.BACKGROUND +
-    "<i class='fa icon-stop fa-stack-1x stack-icon-top' style='color:red;'></i>" +
+    "<i class='fa icon-stop fa-stack-1x stack-icon-top stack-icon-small' style='color:red;'></i>" +
     "</span>";
 
     private static ROUND_MARKER_HTML = "<span class='fa-stack' style='font-size: 8px;'>" +

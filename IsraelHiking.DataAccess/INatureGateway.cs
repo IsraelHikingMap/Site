@@ -36,16 +36,7 @@ namespace IsraelHiking.DataAccess
                 Timeout = TimeSpan.FromMinutes(1)
             };
             _wikiSite = new WikiSite(wikiClient, new SiteOptions(BASE_API_ADDRESS));
-            try
-            {
-                // HM TODO: remove this!!!
-                await _wikiSite.Initialization;
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-            }
-            
+            await _wikiSite.Initialization;
         }
 
         public async Task<List<Feature>> GetAll()
