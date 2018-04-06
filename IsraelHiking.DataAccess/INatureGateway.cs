@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -72,7 +73,9 @@ namespace IsraelHiking.DataAccess
                     return null;
                 }
                 var description = descriptionLine.Replace("<meta name=\"description\" content=\"", string.Empty)
-                    .Replace("\"></meta>", string.Empty);
+                    .Replace("\"></meta>", string.Empty)
+                    .Replace("&nbsp", "\"");
+                description = WebUtility.HtmlDecode(description);
                 var match = Regex.Match(page.Content, @"נצ=(\d+\.\d+)\s*,\s*(\d+\.\d+)");
                 if (!match.Success)
                 {
