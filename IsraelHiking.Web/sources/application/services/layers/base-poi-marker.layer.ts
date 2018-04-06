@@ -1,10 +1,11 @@
 ﻿import * as L from "leaflet";
+import { MarkerClusterGroup } from "leaflet.markercluster";
 
 import { MapService } from "../map.service";
 
 export abstract class BasePoiMarkerLayer extends L.Layer {
     protected visible: boolean;
-    protected markers: L.MarkerClusterGroup;
+    protected markers: MarkerClusterGroup;
     protected readOnlyLayer: L.LayerGroup;
     protected markerIcon: L.DivIcon;
 
@@ -13,7 +14,7 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
         this.visible = false;
         this.readOnlyLayer = L.layerGroup([]);
         this.mapService.map.addLayer(this.readOnlyLayer);
-        this.markers = L.markerClusterGroup({
+        this.markers = new MarkerClusterGroup({
             iconCreateFunction: (cluster) => {
                 let childCount = cluster.getChildCount();
                 let className = "marker-cluster marker-cluster-";
