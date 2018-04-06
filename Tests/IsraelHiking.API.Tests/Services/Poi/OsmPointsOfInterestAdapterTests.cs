@@ -250,13 +250,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var pointOfInterest = new PointOfInterestExtended
             {
                 ImagesUrls = new[] { "imageurl2", "imageurl1", "imageurl4" },
-                Id = "1",
+                Id = "Node_1",
                 Icon = "oldIcon",
-                Type = OsmGeoType.Node.ToString().ToLower(),
                 References = new Reference[0]
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer {Routes = new List<RouteData>()});
-            gateway.GetElement(pointOfInterest.Id, OsmGeoType.Node.ToString().ToLower()).Returns(new Node
+            gateway.GetElement("1", OsmGeoType.Node.ToString()).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -279,9 +278,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var pointOfInterest = new PointOfInterestExtended
             {
                 ImagesUrls = new string[0],
-                Id = "1",
+                Id = "Node_1",
                 Icon = "oldIcon",
-                Type = OsmGeoType.Node.ToString().ToLower(),
                 References = new[]
                 {
                     new Reference
@@ -291,7 +289,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
                 }
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
-            gateway.GetElement(pointOfInterest.Id, OsmGeoType.Node.ToString().ToLower()).Returns(new Node
+            gateway.GetElement("1", OsmGeoType.Node.ToString()).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection
@@ -313,13 +311,12 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var pointOfInterest = new PointOfInterestExtended
             {
                 ImagesUrls = new[] { "imageurl2", "imageurl1" },
-                Id = "1",
+                Id = "Node_1",
                 Icon = "oldIcon",
-                Type = OsmGeoType.Node.ToString().ToLower(),
                 References = new Reference[0]
             };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
-            gateway.GetElement(pointOfInterest.Id, OsmGeoType.Node.ToString().ToLower()).Returns(new Node
+            gateway.GetElement("1", OsmGeoType.Node.ToString()).Returns(new Node
             {
                 Id = 1,
                 Tags = new TagsCollection

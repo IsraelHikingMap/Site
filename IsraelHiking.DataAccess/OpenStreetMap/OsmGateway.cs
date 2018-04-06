@@ -145,15 +145,15 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
 
         public async Task<ICompleteOsmGeo> GetElement(string elementId, string type)
         {
-            if (type == OsmGeoType.Node.ToString().ToLower())
+            if (type.Equals(OsmGeoType.Node.ToString(), StringComparison.InvariantCultureIgnoreCase))
             {
                 return await GetNode(elementId);
             }
-            if (type == OsmGeoType.Way.ToString().ToLower())
+            if (type.Equals(OsmGeoType.Way.ToString(), StringComparison.InvariantCultureIgnoreCase))
             {
                 return await GetCompleteWay(elementId);
             }
-            if (type == OsmGeoType.Relation.ToString().ToLower())
+            if (type.Equals(OsmGeoType.Relation.ToString(), StringComparison.InvariantCultureIgnoreCase))
             {
                 return await GetCompleteRelation(elementId);
             }

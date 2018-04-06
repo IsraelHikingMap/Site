@@ -103,7 +103,7 @@ namespace IsraelHiking.API.Services.Poi
         {
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
             var id = pointOfInterest.Id;
-            ICompleteOsmGeo completeOsmGeo = await osmGateway.GetElement(id, pointOfInterest.Type);
+            ICompleteOsmGeo completeOsmGeo = await osmGateway.GetElement(id.Split("_")[1], id.Split("_")[0]);
             var featureBeforeUpdate = ConvertOsmToFeature(completeOsmGeo, pointOfInterest.Title);
             var oldIcon = featureBeforeUpdate.Attributes[FeatureAttributes.ICON].ToString();
             var oldTags = completeOsmGeo.Tags.ToArray();

@@ -95,6 +95,7 @@ namespace IsraelHiking.API.Controllers
                 Id = string.Empty,
                 DisplayName = name,
                 Title = name,
+                Source = "None",
                 Icon = "icon-search",
                 IconColor = "black",
                 IsArea = false,
@@ -102,7 +103,12 @@ namespace IsraelHiking.API.Controllers
                 IsEditable = false,
                 Location = latLang,
                 SouthWest = latLang,
-                NorthEast = latLang
+                NorthEast = latLang,
+                Category = Categories.NONE,
+                Rating = new Rating {  Raters = new List<Rater>()},
+                Description = string.Empty,
+                ImagesUrls = new string[0],
+                
             };
         }
 
