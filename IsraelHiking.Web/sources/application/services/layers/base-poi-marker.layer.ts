@@ -7,7 +7,6 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
     protected visible: boolean;
     protected markers: MarkerClusterGroup;
     protected readOnlyLayer: L.LayerGroup;
-    protected markerIcon: L.DivIcon;
 
     constructor(protected mapService: MapService) {
         super();

@@ -101,6 +101,7 @@ namespace IsraelHiking.API.Controllers
                 IsArea = false,
                 IsRoute = false,
                 IsEditable = false,
+                HasExtraData = false,
                 Location = latLang,
                 SouthWest = latLang,
                 NorthEast = latLang,
@@ -127,6 +128,7 @@ namespace IsraelHiking.API.Controllers
                 IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString(),
                 Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
                 Location = latLng,
+                HasExtraData = feature.HasExtraData(language),
                 NorthEast = new LatLng(feature.Geometry.EnvelopeInternal.MaxY, feature.Geometry.EnvelopeInternal.MaxX),
                 SouthWest = new LatLng(feature.Geometry.EnvelopeInternal.MinY, feature.Geometry.EnvelopeInternal.MinX)
             };

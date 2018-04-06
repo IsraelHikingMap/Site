@@ -13,11 +13,7 @@ import { FitBoundsService } from "../fit-bounds.service";
 import { SidebarService } from "../sidebar.service";
 import * as Common from "../../common/IsraelHiking";
 
-export interface IPublicPoiData {
-    id: string;
-    source: string;
-    latLng: L.LatLng;
-    markerIcon: string;
+export interface IPublicPoiData extends IPointOfInterest {
     selectRoutes: Function;
     clear: Function;
 }
@@ -45,7 +41,6 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         this.markersLoaded = new Subject<void>();
         this.requestsNumber = 0;
         this.visible = this.localStorageService.get(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX) || false;
-        this.markerIcon = IconsService.createPoiIcon("icon-star", "orange");
         this.poiService.getCategories(this.categoriesType).then((categories) => {
             for (let category of categories) {
                 let selected = this.localStorageService.get(category.name + CategoriesLayer.SELECTED_POSTFIX) == null
@@ -183,32 +178,35 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
 
     private pointOfInterestToMarker(pointOfInterest: IPointOfInterest): Common.IMarkerWithTitle {
         let latLng = L.latLng(pointOfInterest.location.lat, pointOfInterest.location.lng, pointOfInterest.location.alt);
-        let marker = L.marker(latLng, { draggable: false, clickable: true, icon: IconsService.createPoiIcon(pointOfInterest.icon, pointOfInterest.iconColor), title: pointOfInterest.title } as L.MarkerOptions) as Common.IMarkerWithTitle;
+        let icon = IconsService.createPoiIcon(pointOfInterest.icon, pointOfInterest.iconColor, pointOfInterest.hasExtraData);
+        let marker = L.marker(latLng,
+            {
+                draggable: false,
+                clickable: true,
+                icon: icon,
+                title: pointOfInterest.title
+            } as L.MarkerOptions) as Common.IMarkerWithTitle;
         marker.title = pointOfInterest.title;
         marker.identifier = pointOfInterest.id;
         let clickLambda = () => {
-            // for performance
-
-            let data = {
-                id: pointOfInterest.id,
-                source: pointOfInterest.source,
-                latLng: latLng,
-                markerIcon: pointOfInterest.icon,
-                selectRoutes: (routes, isArea) => {
-                    if (isArea) {
-                        this.mapService.addAreaToReadOnlyLayer(this.readOnlyLayer, routes);
-                    } else {
-                        this.mapService.updateReadOnlyLayer(this.readOnlyLayer, routes);
+            let data = Object.assign({
+                    selectRoutes: (routes, isArea) => {
+                        if (isArea) {
+                            this.mapService.addAreaToReadOnlyLayer(this.readOnlyLayer, routes);
+                        } else {
+                            this.mapService.updateReadOnlyLayer(this.readOnlyLayer, routes);
+                        }
+                    },
+                    clear: () => {
+                        this.readOnlyLayer.clearLayers();
+                        marker.closePopup();
+                        if (this.searchResultsMarker === marker) {
+                            this.clearSearchResultsMarker();
+                        }
                     }
                 },
-                clear: () => {
-                    this.readOnlyLayer.clearLayers();
-                    marker.closePopup();
-                    if (this.searchResultsMarker === marker) {
-                        this.clearSearchResultsMarker();
-                    }
-                }
-            } as IPublicPoiData;
+                pointOfInterest) as IPublicPoiData;
+            data.location = latLng;
             this.sidebarService.poiData = data;
         };
         marker.on("click", clickLambda);

@@ -10,6 +10,7 @@ namespace IsraelHiking.Common
         public string Source { get; set; }
         public string Icon { get; set; }
         public string IconColor { get; set; }
+        public bool HasExtraData { get; set; }
 
         public LatLng Location { get; set; }
     }

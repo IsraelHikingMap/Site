@@ -46,7 +46,7 @@ export class IconsService {
     "<i class='fa icon-{{type}} fa-stack-1x stack-icon-top' style='color:white;'></i>" +
     "</span>";
 
-    private static POI_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
+    private static POI_MARKER_HTML = "<span class='fa-stack fa-lg'>{{has-extra-data}}" +
         IconsService.POI_BACKGROUND +
         "<i class='fa {{icon}} fa-stack-1x stack-icon-top' style='color:{{color}};'></i>" +
         "</span>";
@@ -121,12 +121,11 @@ export class IconsService {
         return L.divIcon(IconsService.getDefaultMarkerOptions(IconsService.END_MARKER_HTML));
     }
 
-    public static createWikipediaIcon(): L.DivIcon {
-        return IconsService.createPoiIcon("icon-wikipedia-w", "black");
-    }
-
-    public static createPoiIcon(icon: string, color: string): L.DivIcon {
-        let html = IconsService.POI_MARKER_HTML.replace("{{icon}}", icon).replace("{{color}}", color);
+    public static createPoiIcon(icon: string, color: string, hasExtraData): L.DivIcon {
+        let html = IconsService.POI_MARKER_HTML
+            .replace("{{icon}}", icon)
+            .replace("{{color}}", color)
+            .replace("{{has-extra-data}}", hasExtraData ? `<span class="has-extra-data" style="background:${color}"></span>` : "");
         return L.divIcon(IconsService.getDefaultMarkerOptions(html));
     }
 

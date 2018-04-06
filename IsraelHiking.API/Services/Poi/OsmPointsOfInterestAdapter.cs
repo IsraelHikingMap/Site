@@ -51,7 +51,7 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
         {
             var features = await _elasticSearchGateway.GetPointsOfInterest(northEast, southWest, categories, language);
-            var tasks = features.Where(f => IsFeatureAProperPoi(f,language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language));
+            var tasks = features.Where(f => f.IsProperPoi(language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language));
             return await Task.WhenAll(tasks);
         }
 
@@ -206,7 +206,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 foreach (var attributeKey in featureFromDb.Attributes.GetNames().Where(n => n.StartsWith(FeatureAttributes.POI_PREFIX)))
                 {
-                    feature.Attributes.AddAttribute(attributeKey, featureFromDb.Attributes[attributeKey]);
+                    feature.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);
                 }
             }
             
@@ -291,13 +291,6 @@ namespace IsraelHiking.API.Services.Poi
             }
         }
 
-        private bool IsFeatureAProperPoi(IFeature feature, string language)
-        {
-            return GetAttributeByLanguage(feature.Attributes, FeatureAttributes.NAME, language) != string.Empty ||
-                   GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language) != string.Empty ||
-                   feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL));
-        }
-
         /// <inheritdoc />
         protected override Reference[] GetReferences(IFeature feature, string language)
         {
@@ -339,11 +332,11 @@ namespace IsraelHiking.API.Services.Poi
 
         private void SetMultipleValuesForTag(TagsCollectionBase tags, string tagKey, string[] values)
         {
-            for (var imageIndex = 0; imageIndex < values.Length; imageIndex++)
+            for (var index = 0; index < values.Length; index++)
             {
-                var imageUrl = values[imageIndex];
-                var tagName = imageIndex == 0 ? tagKey : tagKey + imageIndex;
-                tags.Add(tagName, imageUrl);
+                var value = values[index];
+                var tagName = index == 0 ? tagKey : tagKey + index;
+                tags.AddOrReplace(tagName, value);
             }
         }
     }

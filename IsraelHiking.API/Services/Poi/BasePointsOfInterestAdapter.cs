@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 
@@ -54,32 +55,13 @@ namespace IsraelHiking.API.Services.Poi
                 poiItem.Location.Alt = alt;
             }
             poiItem.Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString();
-            poiItem.Title = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.NAME, language);
+            poiItem.Title = feature.Attributes.GetByLanguage(FeatureAttributes.NAME, language);
             poiItem.Id = feature.Attributes[FeatureAttributes.ID].ToString();
             poiItem.Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString();
             poiItem.Icon = feature.Attributes[FeatureAttributes.ICON].ToString();
             poiItem.IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString();
+            poiItem.HasExtraData = feature.HasExtraData(language) || poiItem.Source != Sources.OSM;
             return poiItem;
-        }
-
-        /// <summary>
-        /// Get an attribute by language, this is relevant to OSM attributes convetion
-        /// </summary>
-        /// <param name="attributes">The attributes table</param>
-        /// <param name="key">The attribute name</param>
-        /// <param name="language">The user interface language</param>
-        /// <returns></returns>
-        protected string GetAttributeByLanguage(IAttributesTable attributes, string key, string language)
-        {
-            if (attributes.Exists(key + ":" + language))
-            {
-                return attributes[key + ":" + language].ToString();
-            }
-            if (attributes.Exists(key))
-            {
-                return attributes[key].ToString();
-            }
-            return string.Empty;
         }
 
         /// <summary>
@@ -109,7 +91,7 @@ namespace IsraelHiking.API.Services.Poi
                 .Select(n => feature.Attributes[n].ToString())
                 .Where(n => !string.IsNullOrWhiteSpace(n))
                 .ToArray();
-            poiItem.Description = GetAttributeByLanguage(feature.Attributes, FeatureAttributes.DESCRIPTION, language);
+            poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
             poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
             poiItem.IsEditable = false;
         }

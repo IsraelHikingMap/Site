@@ -52,15 +52,24 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.isAdvanced = false;
         this.categories = [];
         this.info = { imagesFiles: [], imagesUrls: [], urls: [] } as IPoiMainInfoData;
-        this.latLng = data.latLng;
-        this.poiService.getPoint(data.id, data.source).then((poiExtended) => {
+        this.latLng = data.location;
+        this.getExtendedData(data);
+        this.initializeCategories(data.icon);
+    }
+
+    private async getExtendedData(data: IPublicPoiData) {
+        if (!data.id) {
+            this.info.title = data.title;
+            this.isLoading = false;
+            return;
+        }
+        try {
+            let poiExtended = await this.poiService.getPoint(data.id, data.source);
             this.initFromPointOfInterestExtended(poiExtended);
             data.selectRoutes(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
+        } finally {
             this.isLoading = false;
-        }, () => {
-            this.isLoading = false;
-        });
-        this.initializeCategories(data.markerIcon);
+        }
     }
 
     private getData(): IPublicPoiData {

@@ -25,10 +25,12 @@ export interface IPointOfInterest {
     id: string;
     category: string;
     title: string;
-    location: L.LatLng;
     source: string;
     icon: string;
     iconColor: string;
+    hasExtraData: boolean;
+
+    location: L.LatLng;
 }
 
 export interface IReference {

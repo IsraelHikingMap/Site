@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -54,6 +53,26 @@ namespace IsraelHiking.Common.Extensions
         {
             return table.Exists(key) &&
                    table[key]?.ToString() == value;
+        }
+
+        /// <summary>
+        /// Get an attribute by language, this is relevant to OSM attributes convetion
+        /// </summary>
+        /// <param name="attributes">The attributes table</param>
+        /// <param name="key">The attribute name</param>
+        /// <param name="language">The user interface language</param>
+        /// <returns></returns>
+        public static string GetByLanguage(this IAttributesTable attributes, string key, string language)
+        {
+            if (attributes.Exists(key + ":" + language))
+            {
+                return attributes[key + ":" + language].ToString();
+            }
+            if (attributes.Exists(key))
+            {
+                return attributes[key].ToString();
+            }
+            return string.Empty;
         }
 
         public static bool IsValidContainer(this IFeature feature)
@@ -214,6 +233,26 @@ namespace IsraelHiking.Common.Extensions
                 .Distinct()
                 .GroupBy(l => l.Split("__").First())
                 .ToDictionary(g => g.Key, g => g.Select(l => l.Split("__").Last()).ToList());
+        }
+
+        /// <summary>
+        /// This function checks if a feature is a valid point of interest:
+        /// Either has a name, description, image or related points of interest.
+        /// </summary>
+        /// <param name="feature"></param>
+        /// <param name="language"></param>
+        /// <returns></returns>
+        public static bool IsProperPoi(this IFeature feature, string language)
+        {
+            return feature.Attributes.GetByLanguage(FeatureAttributes.NAME, language) != string.Empty ||
+                   feature.HasExtraData(language);
+        }
+
+        public static bool HasExtraData(this IFeature feature, string language)
+        {
+            return feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language) != string.Empty ||
+                   feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL)) ||
+                   feature.GetIdsFromCombinedPoi().Any();
         }
     }
 }
