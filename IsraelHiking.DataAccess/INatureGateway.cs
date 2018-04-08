@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -62,20 +61,24 @@ namespace IsraelHiking.DataAccess
                 if (!page.Content.Contains("{{נקודת עניין") && 
                     !page.Content.Contains("{{שמורת טבע") &&
                     !page.Content.Contains("{{גן לאומי") &&
-                    !page.Content.Contains("{{אתר לאומי"))
+                    !page.Content.Contains("{{אתר לאומי") &&
+                    !page.Content.Contains("{{מסלולי טיול"))
                 {
                     // non-POI
                     return null;
                 }
-                var descriptionLine = page.Content.Split('\n').FirstOrDefault(l => l.StartsWith("<meta name=\"description\""));
-                if (descriptionLine == null)
+
+                var shareMatch = Regex.Match(page.Content, @"israelhiking\.osm\.org\.il\/.*s=(.*?)[""']", RegexOptions.IgnoreCase);
+                if (page.Content.Contains("{{מסלולי טיול") && !shareMatch.Success)
                 {
                     return null;
                 }
-                var description = descriptionLine.Replace("<meta name=\"description\" content=\"", string.Empty)
-                    .Replace("\"></meta>", string.Empty)
-                    .Replace("&nbsp", "\"");
-                description = WebUtility.HtmlDecode(description);
+                var descriptionMatch = Regex.Match(page.Content, @"סקירה=(.*)");
+                if (!descriptionMatch.Success)
+                {
+                    return null;
+                }
+                var description = descriptionMatch.Groups[1].Value;
                 var match = Regex.Match(page.Content, @"נצ=(\d+\.\d+)\s*,\s*(\d+\.\d+)");
                 if (!match.Success)
                 {
@@ -87,7 +90,7 @@ namespace IsraelHiking.DataAccess
                     {FeatureAttributes.LAT, geoLocation.Lat},
                     {FeatureAttributes.LON, geoLocation.Lng}
                 };
-                return new Feature(new Point(new Coordinate().FromLatLng(geoLocation)), new AttributesTable
+                var feature = new Feature(new Point(new Coordinate().FromLatLng(geoLocation)), new AttributesTable
                 {
                     {FeatureAttributes.GEOLOCATION, geoLocationTable},
                     {FeatureAttributes.DESCRIPTION, description},
@@ -96,14 +99,25 @@ namespace IsraelHiking.DataAccess
                     {FeatureAttributes.IMAGE_URL, await GetPageImageUrl(page).ConfigureAwait(false)},
                     {FeatureAttributes.POI_SOURCE, Sources.INATURE},
                     {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
-                    {FeatureAttributes.POI_CATEGORY, Categories.INATURE},
                     {FeatureAttributes.POI_NAMES, new AttributesTable {{Languages.HEBREW, page.Title}}},
-                    {FeatureAttributes.ICON, "icon-inature"},
-                    {FeatureAttributes.ICON_COLOR, "#116C00"},
                     {FeatureAttributes.SEARCH_FACTOR, 1},
                     {FeatureAttributes.WEBSITE, _wikiSite.SiteInfo.MakeArticleUrl(page.Title)},
                     {FeatureAttributes.SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" }
                 });
+                if (shareMatch.Success)
+                {
+                    feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, Categories.ROUTE_HIKE);
+                    feature.Attributes.AddAttribute(FeatureAttributes.ICON, "icon-hike");
+                    feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, "black");
+                    feature.Attributes.AddAttribute(FeatureAttributes.POI_SHARE_REFERENCE, shareMatch.Groups[1].Value);
+                }
+                else
+                {
+                    feature.Attributes.AddAttribute(FeatureAttributes.ICON, "icon-inature");
+                    feature.Attributes.AddAttribute(FeatureAttributes.ICON_COLOR, "#116C00");
+                    feature.Attributes.AddAttribute(FeatureAttributes.POI_CATEGORY, Categories.INATURE);
+                }
+                return feature;
             });
             var features = await Task.WhenAll(list).ConfigureAwait(false);
             return features.Where(f => f != null).ToList();

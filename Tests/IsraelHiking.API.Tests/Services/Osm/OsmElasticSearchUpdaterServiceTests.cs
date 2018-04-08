@@ -37,7 +37,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _osmRepository = Substitute.For<IOsmRepository>();
             _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
             
-            _service = new OsmElasticSearchUpdaterService(_httpGatewayFactory, _elasticSearchGateway, _geoJsonPreprocessorExecutor, new TagsHelper(optionsProvider), _osmRepository, new IPointsOfInterestAdapter[0], Substitute.For<ILogger>());    
+            _service = new OsmElasticSearchUpdaterService(_httpGatewayFactory, _elasticSearchGateway, _geoJsonPreprocessorExecutor, new TagsHelper(optionsProvider), _osmRepository, new IPointsOfInterestAdapter[0], Substitute.For<ILogger>(), Substitute.For<ILogger<OsmElasticSearchUpdaterService>>());    
         }
 
         [TestMethod]

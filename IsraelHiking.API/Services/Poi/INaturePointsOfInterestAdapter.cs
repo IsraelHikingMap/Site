@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -16,6 +15,7 @@ namespace IsraelHiking.API.Services.Poi
     public class INaturePointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestAdapter
     {
         private readonly IINatureGateway _iNatureGateway;
+        private readonly IRepository _repository;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -25,15 +25,18 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="elasticSearchGateway"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="iNatureGateway"></param>
+        /// <param name="repository"></param>
         /// <param name="logger"></param>
         public INaturePointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
             IElasticSearchGateway elasticSearchGateway, 
             IDataContainerConverterService dataContainerConverterService, 
-            IINatureGateway iNatureGateway, 
+            IINatureGateway iNatureGateway,
+            IRepository repository,
             ILogger logger) : 
             base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
         {
             _iNatureGateway = iNatureGateway;
+            _repository = repository;
             _logger = logger;
         }
 
@@ -48,7 +51,16 @@ namespace IsraelHiking.API.Services.Poi
             await AddExtendedData(poiItem, feature, language);
             poiItem.IsEditable = false;
             poiItem.IsArea = false;
-            poiItem.IsRoute = false; // for now...
+            if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE))
+            {
+                var share = await _repository.GetUrlById(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
+                poiItem.DataContainer = share.DataContainer;
+                poiItem.IsRoute = true;
+            }
+            else
+            {
+                poiItem.IsRoute = false;
+            }
             return poiItem;
         }
 

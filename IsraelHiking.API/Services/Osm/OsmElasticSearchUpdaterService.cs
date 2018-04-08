@@ -26,6 +26,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IOsmRepository _osmRepository;
         private readonly IEnumerable<IPointsOfInterestAdapter> _adapters;
         private readonly ILogger _logger;
+        private readonly ILogger<OsmElasticSearchUpdaterService> _reportLogger;
 
         /// <summary>
         /// Service's constructor
@@ -37,12 +38,14 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="osmRepository"></param>
         /// <param name="adapters"></param>
         /// <param name="logger"></param>
+        /// <param name="reportLogger"></param>
         public OsmElasticSearchUpdaterService(IHttpGatewayFactory factory, 
             IElasticSearchGateway elasticSearchGateway, 
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
             ITagsHelper tagsHelper, IOsmRepository osmRepository, 
             IEnumerable<IPointsOfInterestAdapter> adapters,
-            ILogger logger)
+            ILogger logger,
+            ILogger<OsmElasticSearchUpdaterService> reportLogger)
         {
             _elasticSearchGateway = elasticSearchGateway;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
@@ -50,6 +53,7 @@ namespace IsraelHiking.API.Services.Osm
             _osmRepository = osmRepository;
             _adapters = adapters;
             _logger = logger;
+            _reportLogger = reportLogger;
             _osmGateway = factory.CreateOsmGateway(new TokenAndSecret("", ""));
         }
 
@@ -190,7 +194,7 @@ namespace IsraelHiking.API.Services.Osm
                         featureIdsToRemove.Add(feature.Attributes[FeatureAttributes.ID].ToString());
                         var titlesBeforeMerge = featureToMergeTo.GetTitles();
                         MergeFeatures(featureToMergeTo, feature);
-
+                        WriteToReport(featureToMergeTo, feature);
                         var titlesToAddToDictionary = featureToMergeTo.GetTitles().Except(titlesBeforeMerge);
                         foreach (var titleToAdd in titlesToAddToDictionary)
                         {
@@ -213,6 +217,32 @@ namespace IsraelHiking.API.Services.Osm
             _logger.LogInformation($"Finished feature merging: {results.Count}");
             return results;
         }
+
+        private void WriteToReport(Feature featureToMergeTo, Feature feature)
+        {
+            var site = GetWebsite(feature);
+            var from = "<a href='" + site + "' target='_blank'>From: " + feature.Attributes[FeatureAttributes.ID] + "</a>";
+            site = GetWebsite(featureToMergeTo);
+            var to = "<a href='" + site + "' target='_blank'>To: " + featureToMergeTo.Attributes[FeatureAttributes.ID] + "</a><br/>\n";
+            _reportLogger.LogInformation(from + " " + to);
+        }
+
+        private string GetWebsite(Feature feature)
+        {
+            if (feature.Attributes.Exists(FeatureAttributes.WEBSITE))
+            {
+                return feature.Attributes[FeatureAttributes.WEBSITE].ToString();
+            }
+
+            var id = feature.Attributes[FeatureAttributes.ID].ToString();
+            if (id.Split("_").Length == 2)
+            {
+                return "https://www.openstreetmap.org/" + id.Split("_")[0] + "/" + id.Split("_")[1];
+            }
+
+            return string.Empty;
+        }
+
 
         private void MergeFeatures(IFeature featureToMergeTo, IFeature feature)
         {
