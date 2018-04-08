@@ -52,7 +52,11 @@ export class PoiMainInfoComponent extends BaseMapComponent {
     }
 
     public showImage() {
-        this.imageGalleryService.setImages(this.info.imagesUrls);
+        let imagesUrls = [];
+        for (let imageUrl of this.info.imagesUrls) {
+            imagesUrls.push(this.resources.getResizedImageUrl(imageUrl, 1600));
+        }
+        this.imageGalleryService.setImages(imagesUrls);
     }
 
     public getCurrentImage() {

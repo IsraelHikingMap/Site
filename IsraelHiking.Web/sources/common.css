@@ -38,6 +38,10 @@ body {
     outline: 2px solid orange !important;
 }
 
+ngx-image-gallery .image {
+    outline: none !important;
+}
+
 .cdk-overlay-container {
     z-index: 1500 !important;
 }
