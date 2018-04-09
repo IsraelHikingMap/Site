@@ -3,7 +3,6 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
-import { GeoJsonParser } from "../services/geojson.parser";
 import { IPointOfInterestExtended } from "./poi.service";
 import { Urls } from "../common/Urls";
 
@@ -16,7 +15,7 @@ export interface ISearchResultsPointOfInterest extends IPointOfInterestExtended 
 @Injectable()
 export class SearchResultsProvider {
 
-    constructor(private httpClient: HttpClient) {
+    constructor(private readonly httpClient: HttpClient) {
     }
 
     public getResults = async (searchTerm: string, isHebrew: boolean): Promise<ISearchResultsPointOfInterest[]> => {

@@ -1,4 +1,4 @@
-﻿<div id="sidebar-wrapper" [ngClass]="{toggled: getIsSidebarVisible()}" draggable-resizable [directions]="['right']">
+﻿<div id="sidebar-wrapper" [ngClass]="{toggled: getIsSidebarVisible()}">
     <div [ngSwitch]="getViewName()">
         <div *ngSwitchCase="'layers'">
             <layers-sidebar></layers-sidebar>

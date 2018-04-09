@@ -4,7 +4,7 @@
     top: 0;
     bottom: 0;
     left: 0;
-    min-width: 250px;
+    min-width: 350px;
     line-height: 24px;
     overflow-x: hidden;
     overflow-y: auto;
@@ -21,12 +21,8 @@
     -ms-transform: translateX(-100%);
     -webkit-transform: translateX(-100%);
     transform: translateX(-100%);
-    max-width: 500px;
+    max-width: 400px;
 }
-
-    #sidebar-wrapper:not(.toggled) {
-        width: 295px;
-    }
 
     #sidebar-wrapper.toggled {
         transform: translateX(0);
@@ -37,3 +33,12 @@
         border-width: 0 1px;
         width: 4px;
     }
+
+
+@media (max-width:500px) {
+    #sidebar-wrapper {
+        min-width: unset;
+        width: 100%;
+        box-sizing: border-box;
+    }
+}

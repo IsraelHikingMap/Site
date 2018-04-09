@@ -1,31 +1,31 @@
 ﻿<div [dir]="resources.direction">
     <div fxLayout="row">
         <div fxFlex *ngIf="!isHideEditMode()">
-            <button mat-button fxFill (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
+            <button mat-button fxFill class="no-padding" (click)="setEditMode()" matTooltip="{{resources.edit}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Edit POI"><i class="fa icon-pencil"></i></button>
         </div>
         <div fxFlex *ngIf="isEditMode()">
-            <button mat-button fxFill (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
+            <button mat-button fxFill class="no-padding" (click)="save()" [disabled]="isLoading" matTooltip="{{resources.save}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Save POI"><i class="fa icon-check"></i></button>
         </div>
         <div fxFlex *ngIf="isRoute()">
-            <button mat-button fxFill (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
+            <button mat-button fxFill class="no-padding" (click)="convertToRoute()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to route"><i class="fa icon-plus"></i></button>
         </div>
         <div fxFlex *ngIf="!isRoute()">
-            <button mat-button fxFill (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
+            <button mat-button fxFill class="no-padding" (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Convert POI to point"><i class="fa icon-plus"></i></button>
         </div>
         <div fxFlex>
-            <button mat-button fxFill (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
+            <button mat-button fxFill class="no-padding" (click)="clear()" matTooltip="{{resources.clear}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="POI" angularticsAction="Clear and close"><i class="fa icon-eye-slash"></i></button>
         </div>
         <div fxFlex>
-            <button mat-button fxFill (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
+            <button mat-button fxFill class="no-padding" (click)="voteUp()" matTooltip="{{resources.worthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-up" [style.color]="canVote('up') ? 'green' : 'grey'"></i></button>
         </div>
         <div fxFlex>
             <h3 fxFill class="flex-center"><span dir="ltr">{{rating || 0}}</span></h3>
         </div>
         <div fxFlex>
-            <button mat-button fxFill (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
+            <button mat-button fxFill class="no-padding" (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
         </div>
         <div fxFlex>
-            <button mat-button fxFill (click)="close()" matTooltipPosition="below"><i class="fa icon-close"></i></button>
+            <button mat-button fxFill class="no-padding" (click)="close()" matTooltipPosition="below"><i class="fa icon-close"></i></button>
         </div>
     </div>
     <mat-spinner *ngIf="isLoading"></mat-spinner>
