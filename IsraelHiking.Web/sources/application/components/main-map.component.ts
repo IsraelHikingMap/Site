@@ -61,33 +61,35 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     }
 
     private createControls() {
-        this.createContorl("zoom-control", ZoomComponent, "topleft", true);
-        this.createContorl("location-control", LocationComponent);
-        this.createContorl("layer-control", LayersComponent);
-        this.createContorl("file-control", FileComponent);
-        this.createContorl("save-as-control", FileSaveAsComponent);
-        this.createContorl("edit-osm-control", EditOSMComponent, "topleft", true);
-        this.createContorl("info-control", InfoComponent);
-        this.createContorl("osm-user-control", OsmUserComponent, "topright");
-        this.createContorl("search-control", SearchComponent, "topright");
-        this.createContorl("drawing-control", DrawingComponent, "topright");
-        this.createContorl("share-control", ShareComponent, "topright");
-        this.createContorl("language-control", LanguageComponent, "topright");
-        this.createContorl("ihm-link-control", IhmLinkComponent, "bottomleft");
-        this.createContorl("route-statistics-control", RouteStatisticsComponent, "bottomright");
+        let isIFrame = window.self !== window.top;
+
+        this.createContorl("zoom-control", ZoomComponent, "topleft", L.Browser.mobile);
+        this.createContorl("location-control", LocationComponent, "topleft", !L.Browser.mobile && isIFrame);
+        this.createContorl("layer-control", LayersComponent, "topleft", false);
+        this.createContorl("file-control", FileComponent, "topleft", false);
+        this.createContorl("save-as-control", FileSaveAsComponent, "topleft", isIFrame);
+        this.createContorl("edit-osm-control", EditOSMComponent, "topleft", L.Browser.mobile || isIFrame);
+        this.createContorl("info-control", InfoComponent, "topleft", false);
+        this.createContorl("osm-user-control", OsmUserComponent, "topright", isIFrame);
+        this.createContorl("search-control", SearchComponent, "topright", isIFrame);
+        this.createContorl("drawing-control", DrawingComponent, "topright", isIFrame);
+        this.createContorl("share-control", ShareComponent, "topright", false);
+        this.createContorl("language-control", LanguageComponent, "topright", false);
+        this.createContorl("ihm-link-control", IhmLinkComponent, "bottomleft", false);
+        this.createContorl("route-statistics-control", RouteStatisticsComponent, "bottomright", false);
 
         L.control.scale({ imperial: false, position: "bottomright" } as L.Control.ScaleOptions).addTo(this.mapService.map);
     }
 
-    private createContorl<T>(directiveHtmlName: string, component: Type<T>, position: L.ControlPosition = "topleft", hiddenOnMoblie = false) {
+    private createContorl<T>(directiveHtmlName: string, component: Type<T>, position: L.ControlPosition, hidden: boolean) {
         var control = L.Control.extend({
             options: {
                 position: position
             } as L.ControlOptions,
             onAdd: (): HTMLElement => {
                 let classString = directiveHtmlName + "-container";
-                if (hiddenOnMoblie) {
-                    classString += " hidden-xs";
+                if (hidden) {
+                    classString += " hidden";
                 }
                 let controlDiv = L.DomUtil.create("div", classString);
                 let componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);

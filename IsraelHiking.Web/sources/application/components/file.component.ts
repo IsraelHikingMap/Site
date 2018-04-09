@@ -1,11 +1,13 @@
 ﻿import { Component, HostListener, ViewChild, ElementRef } from "@angular/core";
+import * as L from "leaflet";
+import * as _ from "lodash";
+
 import { MapService } from "../services/map.service";
 import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
 import { FileService } from "../services/file.service";
 import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
-import * as _ from "lodash";
 import * as Common from "../common/IsraelHiking";
 
 @Component({
@@ -36,6 +38,10 @@ export class FileComponent extends BaseMapComponent {
         } catch(ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
         }
+    }
+
+    public showOpen(): boolean {
+        return window.top === window.self;
     }
 
     public save(e: Event) {
@@ -73,6 +79,10 @@ export class FileComponent extends BaseMapComponent {
     public print(e: Event) {
         window.print();
         this.suppressEvents(e);
+    }
+
+    public showPrint(): boolean {
+        return window.top === window.self && !L.Browser.mobile;
     }
 
     @HostListener("window:keydown", ["$event"])
