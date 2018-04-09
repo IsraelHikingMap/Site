@@ -1,4 +1,14 @@
-﻿html {
+﻿@import "leaflet/dist/leaflet.css";
+@import "font-awesome/css/font-awesome.css";
+@import "leaflet.markercluster/dist/MarkerCluster.css";
+@import "@angular/material/prebuilt-themes/deeppurple-amber.css";
+@import "ng2-dnd/bundles/style.css";
+
+@import "fonts/icons.css";
+@import "./application/components/dialogs/dialogs.css";
+
+
+html {
     height: 100%;
 }
 
