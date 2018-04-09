@@ -11,6 +11,7 @@ import { RouteStatisticsService, IRouteStatisticsPoint, IRouteStatistics } from 
 import { IconsService } from "../services/icons.service"
 import { BaseMapComponent } from "./base-map.component";
 import { RouteStatisticsChartTooltipComponent } from "./route-statistics-chart-tooltip.component";
+import * as Common from "../common/IsraelHiking";
 
 @Component({
     selector: "route-statistics-chart",
@@ -193,22 +194,47 @@ export class RouteStatisticsChartComponent extends BaseMapComponent implements O
         if (routeData.segments.length <= 0) {
             return;
         }
-        let markerNumber = 0;
+
+        let points = this.getKmPoints(routeData);
+        for (let i=0; i < points.length; i++) {
+            this.kmMarkersGroup.addLayer(this.createKmMarker(points[i], i));
+        }
+    }
+
+    private getKmPoints(routeData: Common.RouteData): L.LatLng[] {
+        
         let length = 0;
         let start = routeData.segments[0].routePoint;
-        this.kmMarkersGroup.addLayer(this.createKmMarker(start, markerNumber));
+        let results = [start];
         let previousPoint = start;
         for (let segment of routeData.segments) {
             for (let latlng of segment.latlngs) {
-                length += previousPoint.distanceTo(latlng);
-                previousPoint = latlng;
-                if (length < (markerNumber + 1) * 1000) {
+                let currentDistance = previousPoint.distanceTo(latlng);
+                length += currentDistance;
+                if (length < 1000) {
+                    previousPoint = latlng;
                     continue;
                 }
-                markerNumber++;
-                this.kmMarkersGroup.addLayer(this.createKmMarker(latlng, markerNumber));
+                let markersToAdd = -1;
+                while (length > 1000) {
+                    length -= 1000;
+                    markersToAdd++;
+                }
+                let ratio = (currentDistance - length - 1000 * markersToAdd) / currentDistance;
+                results.push(this.interpolatePoint(previousPoint, latlng, ratio));
+                for (let i = 1; i <= markersToAdd; i++) {
+                    let currentRatio = (i * 1000) / currentDistance + ratio;
+                    results.push(this.interpolatePoint(previousPoint, latlng, currentRatio));
+                }
+                previousPoint = latlng;
             }
         }
+        return results;
+    }
+
+    private interpolatePoint(previousPoint: L.LatLng, currentPoint: L.LatLng, ratio: number):L.LatLng {
+        return L.latLng(previousPoint.lat + (currentPoint.lat - previousPoint.lat) * ratio,
+            previousPoint.lng + (currentPoint.lng - previousPoint.lng) * ratio);
     }
 
     private updateChart() {
