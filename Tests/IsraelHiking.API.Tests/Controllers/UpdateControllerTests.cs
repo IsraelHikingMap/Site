@@ -22,17 +22,17 @@ namespace IsraelHiking.API.Tests.Controllers
     {
         private UpdateController _controller;
         private IGraphHopperGateway _graphHopperGateway;
-        private IOsmLatestFileFetcher _osmLatestFileFetcher;
+        private IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
         private IOsmElasticSearchUpdaterService _osmElasticSearchUpdaterService;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
-            _osmLatestFileFetcher = Substitute.For<IOsmLatestFileFetcher>();
+            _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
             var logger = Substitute.For<ILogger>();
             _osmElasticSearchUpdaterService = Substitute.For<IOsmElasticSearchUpdaterService>();
-            _controller = new UpdateController(_graphHopperGateway, _osmLatestFileFetcher, _osmElasticSearchUpdaterService, logger);
+            _controller = new UpdateController(_graphHopperGateway, _osmLatestFileFetcherExecutor, _osmElasticSearchUpdaterService, logger);
         }
 
         private void SetupContext(IPAddress localIp, IPAddress remoteIp)
@@ -64,7 +64,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostUpdateData_RequestIsNull_ShouldUpdateAllGateways()
         {
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
-            _osmLatestFileFetcher.Get().Returns(new MemoryStream(new byte[] { 1 }));
+            _osmLatestFileFetcherExecutor.Get().Returns(new MemoryStream(new byte[] { 1 }));
 
             _controller.PostUpdateData(null).Wait();
 
@@ -77,7 +77,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PostUpdateData_RemoteIs10101010Defaultrequest_ShouldUpdateAllGateways()
         {
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Parse("10.10.10.10"));
-            _osmLatestFileFetcher.Get().Returns(new MemoryStream(new byte[] {1}));
+            _osmLatestFileFetcherExecutor.Get().Returns(new MemoryStream(new byte[] {1}));
             
             _controller.PostUpdateData(new UpdateRequest()).Wait();
 
@@ -99,7 +99,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PutUpdateData_Local_ShouldUpdate()
         {
             var changes = new OsmChange {Create = new OsmGeo[] {new Node()}};
-            _osmLatestFileFetcher.GetUpdates().Returns(CreateStream(changes));
+            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
 
             _controller.PutUpdateData().Wait();
@@ -112,7 +112,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var changes = new OsmChange {Create = new OsmGeo[] {new Node()}};
             
-            _osmLatestFileFetcher.GetUpdates().Returns(CreateStream(changes), CreateStream(changes));
+            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes), CreateStream(changes));
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
 
             _controller.PutUpdateData().ContinueWith((t) => { });
@@ -125,8 +125,8 @@ namespace IsraelHiking.API.Tests.Controllers
         public void PutUpdateData_WhileRebuildIsRunning_ShouldNotUpdate()
         {
             var changes = new OsmChange { Create = new OsmGeo[] { new Node() } };
-            _osmLatestFileFetcher.Get().Returns(CreateStream(changes));
-            _osmLatestFileFetcher.GetUpdates().Returns(CreateStream(changes));
+            _osmLatestFileFetcherExecutor.Get().Returns(CreateStream(changes));
+            _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
 
             _controller.PostUpdateData(new UpdateRequest()).ContinueWith((t) => { });

@@ -25,23 +25,23 @@ namespace IsraelHiking.API.Controllers
 
         private readonly ILogger _logger;
         private readonly IGraphHopperGateway _graphHopperGateway;
-        private readonly IOsmLatestFileFetcher _osmLatestFileFetcher;
+        private readonly IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
         private readonly IOsmElasticSearchUpdaterService _osmElasticSearchUpdaterService;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="graphHopperGateway"></param>
-        /// <param name="osmLatestFileFetcher"></param>
+        /// <param name="osmLatestFileFetcherExecutor"></param>
         /// <param name="osmElasticSearchUpdaterService"></param>
         /// <param name="logger"></param>
         public UpdateController(IGraphHopperGateway graphHopperGateway,
-            IOsmLatestFileFetcher osmLatestFileFetcher,
+            IOsmLatestFileFetcherExecutor osmLatestFileFetcherExecutor,
             IOsmElasticSearchUpdaterService osmElasticSearchUpdaterService,
             ILogger logger)
         {
             _graphHopperGateway = graphHopperGateway;
-            _osmLatestFileFetcher = osmLatestFileFetcher;
+            _osmLatestFileFetcherExecutor = osmLatestFileFetcherExecutor;
             _osmElasticSearchUpdaterService = osmElasticSearchUpdaterService;
             _logger = logger;
             
@@ -85,7 +85,7 @@ namespace IsraelHiking.API.Controllers
                 }
                 _logger.LogInformation("Updating site's databases according to request: " + JsonConvert.SerializeObject(request));
                 var memoryStream = new MemoryStream();
-                using (var stream = await _osmLatestFileFetcher.Get(request.OsmFile))
+                using (var stream = await _osmLatestFileFetcherExecutor.Get(request.OsmFile))
                 {
                     stream.CopyTo(memoryStream);
                 }
@@ -129,7 +129,7 @@ namespace IsraelHiking.API.Controllers
             try
             {
                 _logger.LogInformation("Starting incremental site's databases update");
-                using (var updatesStream = await _osmLatestFileFetcher.GetUpdates())
+                using (var updatesStream = await _osmLatestFileFetcherExecutor.GetUpdates())
                 {
                     XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
                     var changes = (OsmChange) serializer.Deserialize(updatesStream);

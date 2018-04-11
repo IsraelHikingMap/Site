@@ -10,9 +10,9 @@ using NSubstitute;
 namespace IsraelHiking.API.Tests.Executors
 {
     [TestClass]
-    public class OsmLatestFileFetcherTests
+    public class OsmLatestFileFetcherExecutorTests
     {
-        private IOsmLatestFileFetcher _fetcher;
+        private IOsmLatestFileFetcherExecutor _fetcher;
         private IFileSystemHelper _fileSystemHelper;
         private IFileProvider _fileProvider;
         private IRemoteFileSizeFetcherGateway _remoteFileSizeFetcherGateway;
@@ -27,7 +27,7 @@ namespace IsraelHiking.API.Tests.Executors
             _remoteFileSizeFetcherGateway = Substitute.For<IRemoteFileSizeFetcherGateway>();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
-            _fetcher = new OsmLatestFileFetcher(_fileSystemHelper, _processHelper, _fileProvider, options, _remoteFileSizeFetcherGateway);
+            _fetcher = new OsmLatestFileFetcherExecutor(_fileSystemHelper, _processHelper, _fileProvider, options, _remoteFileSizeFetcherGateway);
         }
 
         [TestMethod]

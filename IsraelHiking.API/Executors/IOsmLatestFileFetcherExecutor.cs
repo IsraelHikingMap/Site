@@ -6,7 +6,7 @@ namespace IsraelHiking.API.Executors
     /// <summary>
     /// this fetcher will make sure the latest OSM file is in cache
     /// </summary>
-    public interface IOsmLatestFileFetcher
+    public interface IOsmLatestFileFetcherExecutor
     {
         /// <summary>
         /// Gets a stream to the latest OSM file

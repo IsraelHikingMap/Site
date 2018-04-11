@@ -10,7 +10,7 @@ using Microsoft.Extensions.Options;
 namespace IsraelHiking.API.Executors
 {
     /// <inheritdoc />
-    public class OsmLatestFileFetcher : IOsmLatestFileFetcher
+    public class OsmLatestFileFetcherExecutor : IOsmLatestFileFetcherExecutor
     {
         private const string OSM_C_TOOLS_FOLDER = "OsmCTools";
         private const string OSM_FILE_ADDRESS = "http://download.openstreetmap.fr/extracts/asia/israel_and_palestine-latest.osm.pbf";
@@ -35,7 +35,7 @@ namespace IsraelHiking.API.Executors
         /// <param name="fileProvider"></param>
         /// <param name="options"></param>
         /// <param name="remoteFileFetcherGateway"></param>
-        public OsmLatestFileFetcher(IFileSystemHelper fileSystemHelper, 
+        public OsmLatestFileFetcherExecutor(IFileSystemHelper fileSystemHelper, 
             IProcessHelper processHelper,
             IFileProvider fileProvider,
             IOptions<ConfigurationData> options, IRemoteFileSizeFetcherGateway remoteFileFetcherGateway)
