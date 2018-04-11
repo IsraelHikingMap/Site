@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
+using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -23,7 +24,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            _controller = new RoutingController(_graphHopperGateway, _elevationDataStorage);
+            _controller = new RoutingController(_graphHopperGateway, _elevationDataStorage, new ItmWgs84MathTransfromFactory());
         }
 
         [TestMethod]
@@ -56,6 +57,7 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.AreEqual(1, points.First().Y);
             Assert.AreEqual(2, points.Last().X);
             Assert.AreEqual(2, points.Last().Y);
+            Assert.AreEqual(31, points.Count());
         }
 
         [TestMethod]

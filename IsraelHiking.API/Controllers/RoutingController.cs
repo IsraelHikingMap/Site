@@ -1,9 +1,12 @@
-﻿using IsraelHiking.Common;
+﻿using System;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using Microsoft.AspNetCore.Mvc;
@@ -18,17 +21,21 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IMathTransform _wgs84ItmMathTransform;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="graphHopperGateway"></param>
         /// <param name="elevationDataStorage"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
         public RoutingController(IGraphHopperGateway graphHopperGateway,
-            IElevationDataStorage elevationDataStorage)
+            IElevationDataStorage elevationDataStorage,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory)
         {
             _graphHopperGateway = graphHopperGateway;
             _elevationDataStorage = elevationDataStorage;
+            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
         }
 
         /// <summary>
@@ -53,7 +60,7 @@ namespace IsraelHiking.API.Controllers
             }
             if (profile == ProfileType.None)
             {   
-                lineString = new LineString(new[] { pointFrom, pointTo });
+                lineString = GetDenseStraightLine(pointFrom, pointTo);
             }
             else
             {
@@ -67,10 +74,10 @@ namespace IsraelHiking.API.Controllers
                 {
                     lineString = new LineString(new[] { pointFrom, pointTo });
                 }
-                foreach (var coordinate in lineString.Coordinates)
-                {
-                    coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
-                }
+            }
+            foreach (var coordinate in lineString.Coordinates)
+            {
+                coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
             }
             var table = new AttributesTable
             {
@@ -114,6 +121,26 @@ namespace IsraelHiking.API.Controllers
             var lng = double.Parse(splitted.Last());
             var elevation = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(position));
             return new Coordinate(lng, lat, elevation);
+        }
+
+        /// <summary>
+        /// Getting a straight line between two points.
+        /// Since the elevation resultion is 30 meters there's no need to sample distances that are
+        /// less than 30 meters. Maximal total points is 30 to limit the response size.
+        /// </summary>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns></returns>
+        private LineString GetDenseStraightLine(Coordinate from, Coordinate to)
+        {
+            var itmFrom = _wgs84ItmMathTransform.Transform(from);
+            var itmTo = _wgs84ItmMathTransform.Transform(to);
+            var samples = (int)Math.Min(itmFrom.Distance(itmTo) / 30, 30);
+            var coordinates = Enumerable.Range(0, samples + 1).Select(s => new Coordinate(
+                (to.X - from.X) * s / samples + from.X,
+                (to.Y - from.Y) * s / samples + from.Y)
+            );
+            return new LineString(coordinates.ToArray());
         }
     }
 }
