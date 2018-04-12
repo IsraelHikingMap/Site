@@ -36,7 +36,7 @@
 
   <rules>
     <!--Log merge report-->
-    <logger name="*.OsmElasticSearchUpdaterService" minlevel="Trace" writeTo="mergereport" final="true" />
+    <logger name="*.FeaturesMergeExecutor" minlevel="Trace" writeTo="mergereport" final="true" />
 
     <!--All error logs-->
     <logger name="*" minlevel="Error" writeTo="error" />
