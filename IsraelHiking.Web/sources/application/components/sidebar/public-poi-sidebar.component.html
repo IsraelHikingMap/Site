@@ -30,7 +30,7 @@
     </div>
     <mat-spinner *ngIf="isLoading"></mat-spinner>
     <poi-main-info [info]="info" [isEditMode]="isEditMode()"></poi-main-info>
-    <div *ngIf="isEditMode() && isAdvanced">
+    <div *ngIf="isEditMode()">
         <div *ngFor="let url of info.urls; let i = index; trackBy:trackByIndex" fxLayout="row">
             <div fxFlex="90">
                 <mat-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
@@ -50,6 +50,8 @@
                 <button mat-button fxFill><i class="fa icon-plus"></i></button>
             </div>
         </div>
+    </div>
+    <div *ngIf="isEditMode() && isAdvanced">
         <div fxLayout="row">
             <div fxFlex="90">
                 <mat-form-field fxFill>

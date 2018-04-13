@@ -22,6 +22,11 @@ namespace IsraelHiking.API.Services.Poi
     /// </summary>
     public class OsmPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestProvider
     {
+        /// <summary>
+        /// This icon is the default icon when no icon was used
+        /// </summary>
+        public const string SEARCH_ICON = "icon-search";
+
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly IOsmRepository _osmRepository;
@@ -52,7 +57,12 @@ namespace IsraelHiking.API.Services.Poi
         {
             var features = await _elasticSearchGateway.GetPointsOfInterest(northEast, southWest, categories, language);
             var tasks = features.Where(f => f.IsProperPoi(language)).Select(f => ConvertToPoiItem<PointOfInterest>(f, language));
-            return await Task.WhenAll(tasks);
+            var points = await Task.WhenAll(tasks);
+            foreach (var pointOfInterest in points.Where(p => string.IsNullOrWhiteSpace(p.Icon)))
+            {
+                pointOfInterest.Icon = SEARCH_ICON;
+            }
+            return points;
         }
 
         /// <inheritdoc />
@@ -69,6 +79,10 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
             poiItem.IsRoute = !poiItem.IsArea && poiItem.DataContainer.Routes.Any(r => r.Segments.Count > 1);
             poiItem.IsEditable = true;
+            if (string.IsNullOrWhiteSpace(poiItem.Icon))
+            {
+                poiItem.Icon = SEARCH_ICON;
+            }
             return poiItem;
         }
 
@@ -111,7 +125,7 @@ namespace IsraelHiking.API.Services.Poi
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.NAME, pointOfInterest.Title, language);
             SetTagByLanguage(completeOsmGeo.Tags, FeatureAttributes.DESCRIPTION, pointOfInterest.Description, language);
             SyncImages(completeOsmGeo.Tags, pointOfInterest.ImagesUrls);
-            if (pointOfInterest.Icon != oldIcon)
+            if (pointOfInterest.Icon != oldIcon && pointOfInterest.Icon != SEARCH_ICON)
             {
                 RemoveTagsByIcon(completeOsmGeo.Tags, oldIcon);
                 AddTagsByIcon(completeOsmGeo.Tags, pointOfInterest.Icon);

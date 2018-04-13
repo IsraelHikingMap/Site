@@ -164,7 +164,6 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             if (foundMarker) {
                 return;
             }
-            pointOfInterest.icon = pointOfInterest.icon || "icon-search";
             this.searchResultsMarker = this.pointOfInterestToMarker(pointOfInterest);
             this.mapService.map.addLayer(this.searchResultsMarker);
             this.searchResultsMarker.fireEvent("click");

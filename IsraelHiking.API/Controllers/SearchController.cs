@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.API.Executors;
+using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 
@@ -118,13 +119,18 @@ namespace IsraelHiking.API.Controllers
             var title = feature.GetTitle(language);
             var geoLocation = (AttributesTable)feature.Attributes[FeatureAttributes.GEOLOCATION];
             var latLng = new LatLng((double)geoLocation[FeatureAttributes.LAT], (double)geoLocation[FeatureAttributes.LON]);
+            var icon = feature.Attributes[FeatureAttributes.ICON].ToString();
+            if (string.IsNullOrWhiteSpace(icon))
+            {
+                icon = OsmPointsOfInterestAdapter.SEARCH_ICON;
+            }
             return new SearchResultsPointOfInterest
             {
                 Id = feature.Attributes[FeatureAttributes.ID].ToString(),
                 Title = title,
                 DisplayName = await GetDisplaName(feature, language, title),
                 Category = feature.Attributes[FeatureAttributes.POI_CATEGORY].ToString(),
-                Icon = feature.Attributes[FeatureAttributes.ICON].ToString(),
+                Icon = icon,
                 IconColor = feature.Attributes[FeatureAttributes.ICON_COLOR].ToString(),
                 Source = feature.Attributes[FeatureAttributes.POI_SOURCE].ToString(),
                 Location = latLng,

@@ -9,11 +9,6 @@ export class IconsService {
     "<strong class='fa-stack-1x'>{{number}}</strong>" +
     "</span>";
 
-    private static SEARCH_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
-    IconsService.BACKGROUND +
-    "<i class='fa {{icon}} fa-stack-1x stack-icon-top' style='color:{{color}};'></i>" +
-    "</span>";
-
     private static START_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
     IconsService.BACKGROUND +
     "<i class='fa icon-play-circle fa-stack-1x stack-icon-top stack-icon-small' style='color:green;'></i>" +
@@ -97,11 +92,6 @@ export class IconsService {
 
     public static createKmMarkerIcon(markerNumber: number): L.DivIcon {
         let html = IconsService.KM_MARKER_HTML.replace("{{number}}", markerNumber.toString());
-        return L.divIcon(IconsService.getDefaultMarkerOptions(html));
-    }
-
-    public static createSearchMarkerIcon(icon?: string, color?: string): L.DivIcon {
-        let html = IconsService.SEARCH_MARKER_HTML.replace("{{icon}}", icon || "icon-search").replace("{{color}}", color || "black");
         return L.divIcon(IconsService.getDefaultMarkerOptions(html));
     }
 

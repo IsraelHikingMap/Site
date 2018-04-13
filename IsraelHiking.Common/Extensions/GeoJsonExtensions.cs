@@ -150,8 +150,12 @@ namespace IsraelHiking.Common.Extensions
             {
                 language = Languages.ALL;
             }
-
-            return GetStringListFromAttributeValue(titleByLanguage[language]).FirstOrDefault() ?? string.Empty;
+            var title = GetStringListFromAttributeValue(titleByLanguage[language]).FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(title) && language != Languages.ALL)
+            {
+                title = GetStringListFromAttributeValue(titleByLanguage[Languages.ALL]).FirstOrDefault();
+            }
+            return title ?? string.Empty;
 
         }
 
