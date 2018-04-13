@@ -12,7 +12,7 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Converts points from INature to site's POIs
     /// </summary>
-    public class INaturePointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestAdapter
+    public class INaturePointsOfInterestAdapter : BasePointsOfInterestAdapter
     {
         private readonly IINatureGateway _iNatureGateway;
         private readonly IRepository _repository;
@@ -41,10 +41,10 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public string Source => Sources.INATURE;
+        public override string Source => Sources.INATURE;
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
+        public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
             IFeature feature = await _elasticSearchGateway.GetCachedItemById(id, Source);
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
@@ -65,26 +65,22 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public override Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             throw new Exception("iNature does not support adding.");
         }
 
         /// <inheritdoc />
-        public Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public override Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             throw new Exception("iNature does not support updating.");
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
         {
             _logger.LogInformation("Getting data from iNature.");
-            //var features = await _elasticSearchGateway.GetCachedItems(Source);
-            //if (!features.Any())
-            //{
             var features = await _iNatureGateway.GetAll();
-            //}
             await _elasticSearchGateway.CacheItems(features);
             _logger.LogInformation($"Got {features.Count} points from iNature.");
             return features;

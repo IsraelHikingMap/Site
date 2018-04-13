@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Points of interest adapter for OSM data
     /// </summary>
-    public class OsmPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestAdapter, IPointsOfInterestProvider
+    public class OsmPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestProvider
     {
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Services.Poi
             _tagsHelper = tagsHelper;
         }
         /// <inheritdoc />
-        public string Source => Sources.OSM;
+        public override string Source => Sources.OSM;
 
         /// <inheritdoc />
         public async Task<PointOfInterest[]> GetPointsOfInterest(Coordinate northEast, Coordinate southWest, string[] categories, string language)
@@ -56,9 +56,9 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
+        public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
-            IFeature feature = await _elasticSearchGateway.GetPointOfInterestById(id, Sources.OSM);
+            IFeature feature = await _elasticSearchGateway.GetPointOfInterestById(id, Source);
             return await FeatureToExtendedPoi(feature, language);
         }
 
@@ -69,12 +69,11 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
             poiItem.IsRoute = !poiItem.IsArea && poiItem.DataContainer.Routes.Any(r => r.Segments.Count > 1);
             poiItem.IsEditable = true;
-            poiItem.CombinedIds = feature.GetIdsFromCombinedPoi();
             return poiItem;
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public override async Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
             var changesetId = await osmGateway.CreateChangeset("Add POI interface from IHM site.");
@@ -99,7 +98,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public override async Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
             var id = pointOfInterest.Id;
@@ -148,7 +147,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
         {
             var osmNamesDictionary = await _osmRepository.GetElementsWithName(memoryStream);
             var relevantTagsDictionary = _tagsHelper.GetAllTags();

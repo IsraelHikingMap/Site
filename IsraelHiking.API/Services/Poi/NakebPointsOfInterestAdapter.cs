@@ -14,10 +14,10 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Adapts from nakeb interface to business logic point of interest
     /// </summary>
-    public class NakebPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestAdapter
+    public class NakebPointsOfInterestAdapter : BasePointsOfInterestAdapter
     {
         /// <inheritdoc />
-        public string Source => Sources.NAKEB;
+        public override string Source => Sources.NAKEB;
 
         private readonly INakebGateway _nakebGateway;
         private readonly ILogger _logger;
@@ -41,7 +41,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
+        public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
             var featureCollection = await _nakebGateway.GetById(id);
             var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);
@@ -52,19 +52,19 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public override Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             throw new Exception("Nakeb does not support adding.");
         }
 
         /// <inheritdoc />
-        public Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public override Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             throw new Exception("Nakeb does not support updating.");
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
         {
             _logger.LogInformation("Getting data from Nakeb.");
             var features = await _nakebGateway.GetAll();

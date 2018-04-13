@@ -189,5 +189,46 @@ namespace IsraelHiking.API.Tests.Executors
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(1, results.First().GetIdsFromCombinedPoi().Count);
         }
+
+        [TestMethod]
+        public void MergeFeatures_TwoPolygonsAndPoint_ShouldMerge()
+        {
+            var feature1 = CreateFeature("1", 0, 0);
+            feature1.Geometry = new Polygon(new LinearRing(new []
+            {
+                new Coordinate(0, 0),
+                new Coordinate(0, 1),
+                new Coordinate(1, 1),
+                new Coordinate(1, 0),
+                new Coordinate(0, 0)
+            }));
+            feature1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature1.SetTitles();
+            var feature2 = CreateFeature("2", 0, 0);
+            feature2.Geometry = new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(-0.0001, -0.0001),
+                new Coordinate(0, 0.5),
+                new Coordinate(0.5, 0.5),
+                new Coordinate(0.5, 0),
+                new Coordinate(-0.0001, -0.0001)
+            }));
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature2.SetTitles();
+            var feature3 = CreateFeature("3", 0.75, 0.75);
+            feature3.Geometry = new Polygon(new LinearRing(new[]
+            {
+                new Coordinate(-1, -1),
+                new Coordinate(-1, 0.75),
+                new Coordinate(0.75, 0.75),
+                new Coordinate(0.75, -1),
+                new Coordinate(-1, -1)
+            }));
+            feature3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            feature3.SetTitles();
+            var results = _executor.Merge(new List<Feature> { feature1, feature2, feature3 });
+
+            Assert.AreEqual(1, results.Count);
+        }
     }
 }

@@ -86,6 +86,13 @@ namespace IsraelHiking.API.Executors
 
             featureIdsToRemove = featureIdsToRemove.Distinct().ToList();
             var results = features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
+            SimplifyGeometriesCollection(results);
+            _logger.LogInformation($"Finished feature merging: {results.Count}");
+            return results;
+        }
+
+        private void SimplifyGeometriesCollection(List<Feature> results)
+        {
             foreach (var feature in results)
             {
                 if (!(feature.Geometry is GeometryCollection geometryCollection))
@@ -93,19 +100,27 @@ namespace IsraelHiking.API.Executors
                     continue;
                 }
 
-                var nonPointGeometry = geometryCollection.Geometries.FirstOrDefault(g => g.OgcGeometryType != OgcGeometryType.Point);
+                if (geometryCollection.Geometries.All(g => g is LineString))
+                {
+                    feature.Geometry = new MultiLineString(geometryCollection.Geometries.Cast<ILineString>().ToArray());
+                    continue;
+                }
+                var nonPointGeometry = geometryCollection.Geometries.FirstOrDefault(g => !(g is Point));
                 feature.Geometry = nonPointGeometry ?? geometryCollection.First();
             }
-            _logger.LogInformation($"Finished feature merging: {results.Count}");
-            return results;
         }
 
         private void WriteToReport(Feature featureToMergeTo, Feature feature)
         {
+            if (!feature.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
+                !featureToMergeTo.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
+            {
+                _reportLogger.LogInformation("There's probably a need to add an OSM point here: ");
+            }
             var site = GetWebsite(feature);
             var from = "<a href='" + site + "' target='_blank'>From: " + feature.Attributes[FeatureAttributes.ID] + "</a>";
             site = GetWebsite(featureToMergeTo);
-            var to = "<a href='" + site + "' target='_blank'>To: " + featureToMergeTo.Attributes[FeatureAttributes.ID] + "</a><br/>\n";
+            var to = "<a href='" + site + "' target='_blank'>To: " + featureToMergeTo.Attributes[FeatureAttributes.ID] + "</a><br/>";
             _reportLogger.LogInformation(from + " " + to);
         }
 
@@ -184,8 +199,16 @@ namespace IsraelHiking.API.Executors
 
         private bool CanMerge(Feature target, Feature source)
         {
-            if (!source.Geometry.Contains(target.Geometry) &&
-                source.Geometry.Distance(target.Geometry) > 0.001)
+            bool geometryContains;
+            if (target.Geometry is GeometryCollection geometryCollection)
+            {
+                geometryContains = geometryCollection.Geometries.Any(g => source.Geometry.Contains(g));
+            }
+            else
+            {
+                geometryContains = source.Geometry.Contains(target.Geometry);
+            }
+            if (!geometryContains && source.Geometry.Distance(target.Geometry) > 0.001)
             {
                 // too far away to be merged
                 return false;

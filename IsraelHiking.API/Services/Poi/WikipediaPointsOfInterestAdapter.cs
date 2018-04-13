@@ -15,7 +15,7 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Points of interest adapter for Wikipedia data
     /// </summary>
-    public class WikipediaPointsOfInterestAdapter : BasePointsOfInterestAdapter, IPointsOfInterestAdapter
+    public class WikipediaPointsOfInterestAdapter : BasePointsOfInterestAdapter
     {
         private readonly IWikipediaGateway _wikipediaGateway;
         private readonly ILogger _logger;
@@ -36,10 +36,10 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public string Source => Sources.WIKIPEDIA;
+        public override string Source => Sources.WIKIPEDIA;
 
         /// <inheritdoc />
-        public async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
+        public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
             var feature = await _wikipediaGateway.GetById(id);
             var mainFeature = feature.Features.First();
@@ -50,19 +50,19 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public override Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             throw new Exception("Wikipedia does not support adding from this site.");
         }
 
         /// <inheritdoc />
-        public Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
+        public override Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             throw new Exception("Wikipedia does not support updating from this site.");
         }
 
         /// <inheritdoc />
-        public async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
         {
             _logger.LogInformation("Start getting wikipedia pages for indexing");
             var startCoordinate = new Coordinate(34, 29);

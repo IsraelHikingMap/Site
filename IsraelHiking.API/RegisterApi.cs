@@ -39,11 +39,15 @@ namespace IsraelHiking.API
             services.AddTransient<IOsmLineAdderService, OsmLineAdderService>();
             services.AddTransient<ITagsHelper, TagsHelper>();
             services.AddTransient<IPointsOfInterestProvider, OsmPointsOfInterestAdapter>();
+
+            // registration here is what determines the order of which to merge points:
             services.AddTransient<IPointsOfInterestAdapter, OsmPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, NakebPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, OffRoadPointsOfInterestAdapter>();
-            services.AddTransient<IPointsOfInterestAdapter, WikipediaPointsOfInterestAdapter>();
             services.AddTransient<IPointsOfInterestAdapter, INaturePointsOfInterestAdapter>();
+            services.AddTransient<IPointsOfInterestAdapter, WikipediaPointsOfInterestAdapter>();
+            // last one is the least important
+
             services.AddSingleton<IItmWgs84MathTransfromFactory, ItmWgs84MathTransfromFactory>();
             services.AddTransient<IOsmElasticSearchUpdaterService, OsmElasticSearchUpdaterService>();
             services.AddTransient<IConverterFlowItem, GeoJsonGpxConverterFlow>();

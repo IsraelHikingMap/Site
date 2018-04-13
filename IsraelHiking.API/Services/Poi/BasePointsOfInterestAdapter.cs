@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -14,7 +15,7 @@ namespace IsraelHiking.API.Services.Poi
     /// <summary>
     /// Base class for points of interest adapter
     /// </summary>
-    public abstract class BasePointsOfInterestAdapter
+    public abstract class BasePointsOfInterestAdapter : IPointsOfInterestAdapter
     {
         /// <summary>
         /// Elasticsearch gateway to be used in derived classes
@@ -22,6 +23,17 @@ namespace IsraelHiking.API.Services.Poi
         protected readonly IElasticSearchGateway _elasticSearchGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IDataContainerConverterService _dataContainerConverterService;
+
+        /// <inheritdoc />
+        public abstract string Source { get; }
+        /// <inheritdoc />
+        public abstract Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language);
+        /// <inheritdoc />
+        public abstract Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
+        /// <inheritdoc />
+        public abstract Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
+        /// <inheritdoc />
+        public abstract Task<List<Feature>> GetPointsForIndexing(Stream memoryStream);
 
         /// <summary>
         /// Adapter's constructor
@@ -94,6 +106,12 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
             poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
             poiItem.IsEditable = false;
+            var featureFromDatabase = await _elasticSearchGateway.GetPointOfInterestById(feature.Attributes[FeatureAttributes.ID].ToString(), Source);
+            if (featureFromDatabase != null)
+            {
+                poiItem.CombinedIds = featureFromDatabase.GetIdsFromCombinedPoi();
+            }
+
         }
 
         /// <summary>
