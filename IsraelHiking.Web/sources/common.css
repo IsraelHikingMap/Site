@@ -206,6 +206,10 @@ ngx-image-gallery .image {
     width: 300px;
 }
 
+.hidden {
+    display: none !important;
+}
+
 @media (max-width:767px) {
     .hidden-xs {
         display: none !important

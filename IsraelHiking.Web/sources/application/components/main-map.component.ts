@@ -66,7 +66,7 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         this.createContorl("zoom-control", ZoomComponent, "topleft", L.Browser.mobile);
         this.createContorl("location-control", LocationComponent, "topleft", !L.Browser.mobile && isIFrame);
         this.createContorl("layer-control", LayersComponent, "topleft", false);
-        this.createContorl("file-control", FileComponent, "topleft", false);
+        this.createContorl("file-control", FileComponent, "topleft", isIFrame);
         this.createContorl("save-as-control", FileSaveAsComponent, "topleft", isIFrame);
         this.createContorl("edit-osm-control", EditOSMComponent, "topleft", L.Browser.mobile || isIFrame);
         this.createContorl("info-control", InfoComponent, "topleft", false);

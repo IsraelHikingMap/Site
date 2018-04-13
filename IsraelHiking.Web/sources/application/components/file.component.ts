@@ -40,10 +40,6 @@ export class FileComponent extends BaseMapComponent {
         }
     }
 
-    public showOpen(): boolean {
-        return window.top === window.self;
-    }
-
     public save(e: Event) {
         let data = this.dataContainerService.getDataForFileExport();
         if (!this.isDataSaveable(data)) {
@@ -82,7 +78,7 @@ export class FileComponent extends BaseMapComponent {
     }
 
     public showPrint(): boolean {
-        return window.top === window.self && !L.Browser.mobile;
+        return !L.Browser.mobile;
     }
 
     @HostListener("window:keydown", ["$event"])
