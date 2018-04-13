@@ -146,7 +146,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_NAMES, new AttributesTable {{Languages.HEBREW, offroadTrack.title}}},
                 {FeatureAttributes.ICON, GetIconByCategory(category)},
                 {FeatureAttributes.ICON_COLOR, "black"},
-                {FeatureAttributes.SEARCH_FACTOR, 1},
+                {FeatureAttributes.SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.GEOLOCATION, geoLocation},
                 {FeatureAttributes.WEBSITE, $"http://off-road.io/track/{offroadTrack.id}"}
         };

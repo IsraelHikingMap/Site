@@ -100,7 +100,7 @@ namespace IsraelHiking.DataAccess
                     {FeatureAttributes.POI_SOURCE, Sources.INATURE},
                     {FeatureAttributes.POI_LANGUAGE, Languages.HEBREW},
                     {FeatureAttributes.POI_NAMES, new AttributesTable {{Languages.HEBREW, page.Title}}},
-                    {FeatureAttributes.SEARCH_FACTOR, 1},
+                    {FeatureAttributes.SEARCH_FACTOR, 1.0},
                     {FeatureAttributes.WEBSITE, _wikiSite.SiteInfo.MakeArticleUrl(page.Title)},
                     {FeatureAttributes.SOURCE_IMAGE_URL, "https://user-images.githubusercontent.com/3269297/37312048-2d6e7488-2652-11e8-9dbe-c1465ff2e197.png" }
                 });

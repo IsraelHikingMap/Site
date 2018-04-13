@@ -156,7 +156,7 @@ namespace IsraelHiking.DataAccess
                 {FeatureAttributes.POI_NAMES, new AttributesTable {{Languages.HEBREW, title}}},
                 {FeatureAttributes.ICON, "icon-wikipedia-w"},
                 {FeatureAttributes.ICON_COLOR, "black"},
-                {FeatureAttributes.SEARCH_FACTOR, 1},
+                {FeatureAttributes.SEARCH_FACTOR, 1.0},
                 {FeatureAttributes.GEOLOCATION, geoLocation},
                 {FeatureAttributes.WEBSITE, _wikiSites[language].SiteInfo.MakeArticleUrl(title)},
                 {FeatureAttributes.SOURCE_IMAGE_URL, WIKI_LOGO }

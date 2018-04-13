@@ -55,38 +55,43 @@ namespace IsraelHiking.API.Executors
             foreach (var feature in orderedFeatures)
             {
                 var titles = feature.GetTitles();
-                bool wasMerged = false;
+                var needsToBeMergedTo = new Dictionary<string, Feature>();
                 foreach (var title in titles)
                 {
                     if (!mergingDictionary.ContainsKey(title))
                     {
                         continue;
                     }
-                    foreach (var featureToMergeTo in mergingDictionary[title])
+                    var featureToMergeTo = mergingDictionary[title].FirstOrDefault(f => CanMerge(f, feature));
+                    if (featureToMergeTo != null)
                     {
-                        if (!CanMerge(featureToMergeTo, feature))
-                        {
-                            continue;
-                        }
-                        wasMerged = true;
-                        featureIdsToRemove.Add(feature.Attributes[FeatureAttributes.ID].ToString());
-                        var titlesBeforeMerge = featureToMergeTo.GetTitles();
-                        MergeFeatures(featureToMergeTo, feature);
-                        WriteToReport(featureToMergeTo, feature);
-                        var titlesToAddToDictionary = featureToMergeTo.GetTitles().Except(titlesBeforeMerge);
-                        foreach (var titleToAdd in titlesToAddToDictionary)
-                        {
-                            AddToDictionaryWithList(mergingDictionary, titleToAdd, featureToMergeTo);
-                        }
+                        needsToBeMergedTo[title] = featureToMergeTo;
                     }
                 }
-                if (wasMerged)
+
+                if (!needsToBeMergedTo.Keys.Any())
                 {
-                    continue;
+                    foreach (var title in titles)
+                    {
+                        AddToDictionaryWithList(mergingDictionary, title, feature);
+                    }
                 }
-                foreach (var title in titles)
+                else
                 {
-                    AddToDictionaryWithList(mergingDictionary, title, feature);
+                    bool isFirst = true;
+                    var featureToMergeTo = needsToBeMergedTo.First().Value;
+                    HandleMergingDictionary(mergingDictionary, featureIdsToRemove, featureToMergeTo, feature);
+                    foreach (var pair in needsToBeMergedTo)
+                    {
+                        if (isFirst)
+                        {
+                            isFirst = false;
+                            continue;
+                        }
+
+                        HandleMergingDictionary(mergingDictionary, featureIdsToRemove, featureToMergeTo, pair.Value);
+                        mergingDictionary[pair.Key].Remove(pair.Value);
+                    }
                 }
             }
 
@@ -150,6 +155,19 @@ namespace IsraelHiking.API.Executors
             }
 
             return string.Empty;
+        }
+
+        private void HandleMergingDictionary(Dictionary<string, List<Feature>> mergingDictionary, List<string> featureIdsToRemove, Feature featureToMergeTo, Feature feature)
+        {
+            featureIdsToRemove.Add(feature.Attributes[FeatureAttributes.ID].ToString());
+            var titlesBeforeMerge = featureToMergeTo.GetTitles();
+            MergeFeatures(featureToMergeTo, feature);
+            WriteToReport(featureToMergeTo, feature);
+            var titlesToAddToDictionary = featureToMergeTo.GetTitles().Except(titlesBeforeMerge);
+            foreach (var titleToAdd in titlesToAddToDictionary)
+            {
+                AddToDictionaryWithList(mergingDictionary, titleToAdd, featureToMergeTo);
+            }
         }
 
         private void MergeFeatures(IFeature featureToMergeTo, IFeature feature)

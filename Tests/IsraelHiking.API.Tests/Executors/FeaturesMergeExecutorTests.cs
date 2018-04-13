@@ -26,7 +26,7 @@ namespace IsraelHiking.API.Tests.Executors
                 {FeatureAttributes.POI_SOURCE, Sources.OSM },
                 {FeatureAttributes.ICON, "icon" },
                 {FeatureAttributes.POI_CATEGORY, Categories.OTHER },
-                {FeatureAttributes.SEARCH_FACTOR, 1 },
+                {FeatureAttributes.SEARCH_FACTOR, 1.0 },
                 {FeatureAttributes.DESCRIPTION, string.Empty }
             });
             return feature;
@@ -55,6 +55,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
             feature2.SetTitles();
+
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(1, results.Count);
@@ -78,9 +79,10 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.INATURE);
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_CATEGORY, Categories.INATURE);
             feature2.Attributes.AddOrUpdate(FeatureAttributes.ICON, "icon-inature");
-            feature2.Attributes.AddOrUpdate(FeatureAttributes.SEARCH_FACTOR, 2);
+            feature2.Attributes.AddOrUpdate(FeatureAttributes.SEARCH_FACTOR, 2.0);
             feature2.Attributes.AddOrUpdate(FeatureAttributes.ICON_COLOR, "green");
             feature2.SetTitles();
+
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(1, results.Count);
@@ -88,7 +90,7 @@ namespace IsraelHiking.API.Tests.Executors
             Assert.AreEqual(Categories.INATURE, results.First().Attributes[FeatureAttributes.POI_CATEGORY]);
             Assert.AreEqual("1", results.First().Attributes[FeatureAttributes.ID]);
             Assert.AreEqual("icon-inature", results.First().Attributes[FeatureAttributes.ICON]);
-            Assert.AreEqual(2, results.First().Attributes[FeatureAttributes.SEARCH_FACTOR]);
+            Assert.AreEqual(2.0, results.First().Attributes[FeatureAttributes.SEARCH_FACTOR]);
             Assert.AreEqual("green", results.First().Attributes[FeatureAttributes.ICON_COLOR]);
         }
 
@@ -104,6 +106,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
             feature2.SetTitles();
+
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(2, results.Count);
@@ -125,6 +128,7 @@ namespace IsraelHiking.API.Tests.Executors
             node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
             node3.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "3");
             node3.SetTitles();
+
             var results = _executor.Merge(new List<Feature> { node1, node2, node3 });
 
             Assert.AreEqual(1, results.Count);
@@ -145,6 +149,28 @@ namespace IsraelHiking.API.Tests.Executors
             node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
             node3.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "3");
             node3.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { node1, node2, node3 });
+
+            Assert.AreEqual(1, results.Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_HasSameTitleBetweenEveryTwoOrderedAsBadlyAsPossible_ShouldMergeToASingleFeature()
+        {
+            var node1 = CreateFeature("1", -0.0008, 0);
+            node1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
+            node1.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":he", "11");
+            node1.SetTitles();
+            var node2 = CreateFeature("2", 0.0008, 0);
+            node2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
+            node2.SetTitles();
+            var node3 = CreateFeature("3", 0, 0);
+            node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "2");
+            node3.Attributes.AddOrUpdate(FeatureAttributes.NAME + ":en", "11");
+            node3.SetTitles();
+
             var results = _executor.Merge(new List<Feature> { node1, node2, node3 });
 
             Assert.AreEqual(1, results.Count);
@@ -169,6 +195,7 @@ namespace IsraelHiking.API.Tests.Executors
             point.Attributes.AddOrUpdate("historic", "ruins");
             point.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             point.SetTitles();
+
             var results = _executor.Merge(new List<Feature> {point, area});
 
             Assert.AreEqual(1, results.Count);
@@ -187,6 +214,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.WIKIPEDIA, "page");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA);
             feature2.SetTitles();
+
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(1, results.Count);
@@ -229,6 +257,7 @@ namespace IsraelHiking.API.Tests.Executors
             }));
             feature3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature3.SetTitles();
+
             var results = _executor.Merge(new List<Feature> { feature1, feature2, feature3 });
 
             Assert.AreEqual(1, results.Count);
@@ -267,6 +296,7 @@ namespace IsraelHiking.API.Tests.Executors
             );
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1");
             feature2.SetTitles();
+
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(1, results.Count);
@@ -301,6 +331,7 @@ namespace IsraelHiking.API.Tests.Executors
             feature2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "1_offroad");
             feature2.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.OFFROAD);
             feature2.SetTitles();
+
             var results = _executor.Merge(new List<Feature> { feature1, feature2 });
 
             Assert.AreEqual(1, results.Count);
