@@ -83,11 +83,9 @@ namespace IsraelHiking.API.Executors
                 }
             });
             _logger.LogInformation("Finished GeoJson conversion");
-            var featuresToReturn = geoJsonNamesDictionary.SelectMany(v => v.Value);
-            featuresToReturn = RemoveKklRoutes(featuresToReturn);
-            var list = featuresToReturn.ToList();
-            ChangeLwnHikingRoutesToNoneCategory(list);
-            return list;
+            var featuresToReturn = geoJsonNamesDictionary.SelectMany(v => v.Value).ToList();
+            ChangeLwnHikingRoutesToNoneCategory(featuresToReturn);
+            return featuresToReturn;
         }
 
         private void AddAttributes(List<Feature> features)
@@ -105,11 +103,6 @@ namespace IsraelHiking.API.Executors
                 feature.SetTitles();
                 UpdateLocation(feature);
             }
-        }
-
-        private IEnumerable<Feature> RemoveKklRoutes(IEnumerable<Feature> features)
-        {
-            return features.Where(f => f.Attributes.Has("operator", "kkl") == false || f.Attributes.Has("route", "mtb") == false);
         }
 
         private void ChangeLwnHikingRoutesToNoneCategory(List<Feature> features)
@@ -167,9 +160,8 @@ namespace IsraelHiking.API.Executors
                 }
             }
 
-            var results = features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID]) == false).ToList();
-            _logger.LogInformation($"Finished places merging: {results.Count}");
-            return results;
+            _logger.LogInformation($"Finished places merging. Merged places: {featureIdsToRemove.Count}");
+            return features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID]) == false).ToList();
         }
 
         private IEnumerable<ICompleteOsmGeo> MergeOsmElements(IReadOnlyCollection<ICompleteOsmGeo> elements)

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
@@ -332,52 +331,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _elasticSearchGateway.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.DidNotReceive().CreateChangeset(Arg.Any<string>());
             gateway.DidNotReceive().CloseChangeset(Arg.Any<string>());
-        }
-
-        [TestMethod]
-        public void GetPointsForIndexing_ShouldRemoveKklRoutes()
-        {
-            var memoryStream = new MemoryStream();
-            var osmNamesDictionary = new Dictionary<string, List<ICompleteOsmGeo>>
-            {
-                {
-                    "name",
-                    new List<ICompleteOsmGeo>
-                    {
-                        new Node
-                        {
-                            Id = 10,
-                            Tags = new TagsCollection
-                            {
-                                {"natural", "spring"},
-                            }
-                        },
-                        new CompleteRelation
-                        {
-                            Tags = new TagsCollection
-                            {
-                                {"operator", "kkl"},
-                                {"route", "mtb"}
-                            },
-                            Members = new[]
-                            {
-                                new CompleteRelationMember {Member = new CompleteWay {Nodes = new []
-                                {
-                                    new Node {  Latitude = 0, Longitude = 0 },
-                                    new Node {  Latitude = 1, Longitude = 1 },
-                                    new Node {  Latitude = 2, Longitude = 2 }
-                                }}, Role = "outer"}
-                            }
-                        }
-                    }
-                },
-            };
-            _osmRepository.GetElementsWithName(memoryStream).Returns(osmNamesDictionary);
-            _osmRepository.GetPointsWithNoNameByTags(memoryStream, Arg.Any<List<KeyValuePair<string, string>>>()).Returns(new List<Node>());
-
-            var results = _adapter.GetPointsForIndexing(memoryStream).Result;
-
-            Assert.AreEqual(1, results.Count);
         }
     }
 }

@@ -36,13 +36,14 @@ namespace IsraelHiking.API.Executors
         public List<Feature> Merge(List<Feature> features)
         {
             features = MergeWikipediaToOsmByWikipediaTags(features);
+            features = MergeOffRoadKklRoutesToOsm(features);
             features = MergeByTitle(features);
             return features;
         }
 
         private List<Feature> MergeByTitle(List<Feature> features)
         {
-            _logger.LogInformation("Starting features merging.");
+            _logger.LogInformation("Starting features merging by title.");
 
             var featureIdsToRemove = new List<string>();
             var mergingDictionary = new Dictionary<string, List<Feature>>();
@@ -51,7 +52,6 @@ namespace IsraelHiking.API.Executors
                 .ToArray();
             var nonOsmFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() != Sources.OSM);
             var orderedFeatures = osmFeatures.Concat(nonOsmFeatures).ToArray();
-            _logger.LogInformation($"Total features to merge: {orderedFeatures.Length}");
             foreach (var feature in orderedFeatures)
             {
                 var titles = feature.GetTitles();
@@ -93,7 +93,7 @@ namespace IsraelHiking.API.Executors
             featureIdsToRemove = featureIdsToRemove.Distinct().ToList();
             var results = features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
             SimplifyGeometriesCollection(results);
-            _logger.LogInformation($"Finished feature merging: {results.Count}");
+            _logger.LogInformation($"Finished feature merging by title. merged features: {featureIdsToRemove.Count}");
             return results;
         }
 
@@ -241,7 +241,7 @@ namespace IsraelHiking.API.Executors
 
         private List<Feature> MergeWikipediaToOsmByWikipediaTags(List<Feature> features)
         {
-            _logger.LogInformation("Starting joining wikipedia markers. Initial list size: " + features.Count);
+            WriteToBothLoggers("Starting joining wikipedia markers.");
             var featureIdsToRemove = new List<string>();
             var wikiFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.WIKIPEDIA)).ToList();
             var osmWikiFeatures = features.Where(f =>
@@ -255,18 +255,49 @@ namespace IsraelHiking.API.Executors
                 {
                     var title = osmWikiFeature.Attributes[key].ToString();
                     var wikiFeatureToRemove = wikiFeatures.FirstOrDefault(f => f.Attributes.Has(key, title));
-                    if (wikiFeatureToRemove == null)
+                    if (wikiFeatureToRemove != null)
                     {
-                        continue;
+                        WriteToReport(osmWikiFeature, wikiFeatureToRemove);
+                        wikiFeatures.Remove(wikiFeatureToRemove);
+                        featureIdsToRemove.Add(wikiFeatureToRemove.Attributes[FeatureAttributes.ID].ToString());
+                        osmWikiFeature.AddIdToCombinedPoi(wikiFeatureToRemove);
                     }
-                    wikiFeatures.Remove(wikiFeatureToRemove);
-                    featureIdsToRemove.Add(wikiFeatureToRemove.Attributes[FeatureAttributes.ID].ToString());
-                    osmWikiFeature.AddIdToCombinedPoi(wikiFeatureToRemove);
                 }
             }
-            var results = features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
-            _logger.LogInformation("Finished joining wikipedia markers. Final list size: " + results.Count);
-            return results;
+            WriteToBothLoggers($"Finished joining wikipedia markers. Merged features: {featureIdsToRemove.Count}");
+            return features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
+        }
+
+        private List<Feature> MergeOffRoadKklRoutesToOsm(List<Feature> features)
+        {
+            var featureIdsToRemove = new List<string>();
+            var osmKklRoutes = features.Where(f => f.Attributes.Has("operator", "kkl") && f.Attributes.Has("route", "mtb")).ToArray();
+            var offRoadRoutes = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OFFROAD)).ToList();
+            WriteToBothLoggers("Starting joining off-road-kkl routes.");
+            foreach (var osmKklRoute in osmKklRoutes)
+            {
+                var titles = osmKklRoute.GetTitles();
+                var offRoadRoutesToMerge = offRoadRoutes.Where(r =>
+                    titles.Any(t => t.Contains(r.Attributes[FeatureAttributes.NAME].ToString()) ||
+                                    r.Attributes[FeatureAttributes.NAME].ToString().Contains(t)) &&
+                    r.Geometry.Distance(osmKklRoute.Geometry) < _options.MergePointsOfInterestThreshold).ToArray();
+                foreach (var offRoadRoute in offRoadRoutesToMerge)
+                {
+                    WriteToReport(osmKklRoute, offRoadRoute);
+                    offRoadRoutes.Remove(offRoadRoute);
+                    osmKklRoute.AddIdToCombinedPoi(offRoadRoute);
+                    featureIdsToRemove.Add(offRoadRoute.Attributes[FeatureAttributes.ID].ToString());
+                }
+            }
+            WriteToBothLoggers($"Finished joining off-road-kkl routes. Merged features: {featureIdsToRemove.Count}");
+            return features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
+        }
+
+        private void WriteToBothLoggers(string message)
+        {
+            _logger.LogInformation(message);
+            _reportLogger.LogInformation(message + "<br/>");
         }
     }
 }
+
