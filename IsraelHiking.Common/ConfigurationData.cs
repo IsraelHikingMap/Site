@@ -65,6 +65,10 @@ namespace IsraelHiking.Common
         /// </summary>
         public double SearchFactor { get; set; }
         /// <summary>
+        /// This threshold is used to determine if two points of interest are close enough
+        /// </summary>
+        public double MergePointsOfInterestThreshold { get; set; }
+        /// <summary>
         /// The folder where the binary files are at
         /// </summary>
         public string BinariesFolder { get; set; }
@@ -98,6 +102,7 @@ namespace IsraelHiking.Common
             MaxLengthPerLine = 3000;
             RadialSimplificationAngle = 90;
             SearchFactor = 0.5;
+            MergePointsOfInterestThreshold = 0.0015;
             BinariesFolder = string.Empty;
             OsmConfiguraion = new OsmConfiguraionData
             {

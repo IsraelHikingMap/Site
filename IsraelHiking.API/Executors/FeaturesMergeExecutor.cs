@@ -4,6 +4,7 @@ using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 
@@ -12,16 +13,21 @@ namespace IsraelHiking.API.Executors
     /// <inheritdoc />
     public class FeaturesMergeExecutor : IFeaturesMergeExecutor
     {
+        private readonly ConfigurationData _options;
         private readonly ILogger<FeaturesMergeExecutor> _reportLogger;
         private readonly ILogger _logger;
 
         /// <summary>
         /// Class's constructor
         /// </summary>
+        /// <param name="options"></param>
         /// <param name="reportLogger"></param>
         /// <param name="logger"></param>
-        public FeaturesMergeExecutor(ILogger<FeaturesMergeExecutor> reportLogger, ILogger logger)
+        public FeaturesMergeExecutor(IOptions<ConfigurationData> options,
+            ILogger<FeaturesMergeExecutor> reportLogger, 
+            ILogger logger)
         {
+            _options = options.Value;
             _reportLogger = reportLogger;
             _logger = logger;
         }
@@ -99,10 +105,16 @@ namespace IsraelHiking.API.Executors
                 {
                     continue;
                 }
-
-                if (geometryCollection.Geometries.All(g => g is LineString))
+                
+                if (geometryCollection.Geometries.All(g => g is LineString || g is MultiLineString))
                 {
-                    feature.Geometry = new MultiLineString(geometryCollection.Geometries.Cast<ILineString>().ToArray());
+                    var lines = geometryCollection.Geometries
+                        .OfType<MultiLineString>()
+                        .SelectMany(mls => mls.Geometries.OfType<LineString>())
+                        .Concat(geometryCollection.Geometries.OfType<LineString>())
+                        .Cast<ILineString>()
+                        .ToArray();
+                    feature.Geometry = new MultiLineString(lines);
                     continue;
                 }
                 var nonPointGeometry = geometryCollection.Geometries.FirstOrDefault(g => !(g is Point));
@@ -208,7 +220,7 @@ namespace IsraelHiking.API.Executors
             {
                 geometryContains = source.Geometry.Contains(target.Geometry);
             }
-            if (!geometryContains && source.Geometry.Distance(target.Geometry) > 0.001)
+            if (!geometryContains && source.Geometry.Distance(target.Geometry) > _options.MergePointsOfInterestThreshold)
             {
                 // too far away to be merged
                 return false;
