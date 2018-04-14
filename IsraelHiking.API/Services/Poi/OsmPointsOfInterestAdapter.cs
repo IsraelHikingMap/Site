@@ -33,7 +33,18 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IWikipediaGateway _wikipediaGateway;
         private readonly ITagsHelper _tagsHelper;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        /// <param name="elasticSearchGateway"></param>
+        /// <param name="elevationDataStorage"></param>
+        /// <param name="httpGatewayFactory"></param>
+        /// <param name="osmGeoJsonPreprocessorExecutor"></param>
+        /// <param name="osmRepository"></param>
+        /// <param name="dataContainerConverterService"></param>
+        /// <param name="wikipediaGateway"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="tagsHelper"></param>
         public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway,
             IElevationDataStorage elevationDataStorage,
             IHttpGatewayFactory httpGatewayFactory,
@@ -41,7 +52,8 @@ namespace IsraelHiking.API.Services.Poi
             IOsmRepository osmRepository,
             IDataContainerConverterService dataContainerConverterService,
             IWikipediaGateway wikipediaGateway,
-            ITagsHelper tagsHelper) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            ITagsHelper tagsHelper) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
         {
             _httpGatewayFactory = httpGatewayFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;

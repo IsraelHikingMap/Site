@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
@@ -26,14 +27,16 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="dataContainerConverterService"></param>
         /// <param name="iNatureGateway"></param>
         /// <param name="repository"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="logger"></param>
         public INaturePointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
             IElasticSearchGateway elasticSearchGateway, 
             IDataContainerConverterService dataContainerConverterService, 
             IINatureGateway iNatureGateway,
             IRepository repository,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger) : 
-            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
+            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
         {
             _iNatureGateway = iNatureGateway;
             _repository = repository;

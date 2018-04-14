@@ -42,6 +42,7 @@ export interface IPointOfInterestExtended extends IPointOfInterest {
     isEditable: boolean;
     isRoute: boolean;
     isArea: boolean;
+    lengthInKm: number;
     imagesUrls: string[];
     description: string;
     references: IReference[];

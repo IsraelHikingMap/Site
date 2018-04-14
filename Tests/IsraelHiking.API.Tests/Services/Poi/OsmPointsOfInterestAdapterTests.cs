@@ -44,7 +44,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _osmRepository = Substitute.For<IOsmRepository>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
-            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _tagsHelper);
+            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, new ItmWgs84MathTransfromFactory(), _tagsHelper);
         }
 
         private IOsmGateway SetupHttpFactory()
@@ -118,7 +118,14 @@ namespace IsraelHiking.API.Tests.Services.Poi
                         {
                             Segments = new List<RouteSegmentData>
                             {
-                                new RouteSegmentData(),
+                                new RouteSegmentData
+                                {
+                                    Latlngs = new List<LatLng>
+                                    {
+                                        new LatLng(0,0),
+                                        new LatLng(0.1,0.1)
+                                    }
+                                },
                                 new RouteSegmentData()
                             }
                         }
@@ -134,6 +141,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             Assert.AreEqual(FeatureAttributes.IMAGE_URL, result.ImagesUrls.First());
             Assert.IsTrue(result.References.First().Url.Contains("page_with_space"));
             Assert.IsTrue(result.IsRoute);
+            Assert.IsTrue(result.LengthInKm > 0);
         }
 
         [TestMethod]

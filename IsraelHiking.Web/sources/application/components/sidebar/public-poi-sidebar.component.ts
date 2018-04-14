@@ -81,6 +81,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.info.title = poiExtended.title;
         this.info.description = poiExtended.description;
         this.info.readOnlyDescription = this.getReadOnlyDescrition();
+        this.info.lengthInKm = poiExtended.lengthInKm;
         this.info.urls = poiExtended.references.map(r => r.url);
         if (this.info.urls.length === 0) {
             this.addEmptyUrl();

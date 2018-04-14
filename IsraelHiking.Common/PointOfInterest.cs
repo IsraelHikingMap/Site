@@ -26,6 +26,7 @@ namespace IsraelHiking.Common
         public bool IsEditable { get; set; }
         public bool IsRoute { get; set; }
         public bool IsArea { get; set; }
+        public double LengthInKm { get; set; }
         public string Description { get; set; }
         public string[] ImagesUrls { get; set; }
 

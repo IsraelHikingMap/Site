@@ -21,14 +21,22 @@ namespace IsraelHiking.API.Services.Poi
         private readonly ILogger _logger;
         private readonly IItmWgs84MathTransfromFactory _itmWgs84MathTransfromFactory;
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        /// <param name="elevationDataStorage"></param>
+        /// <param name="elasticSearchGateway"></param>
+        /// <param name="dataContainerConverterService"></param>
+        /// <param name="wikipediaGateway"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="logger"></param>
         public WikipediaPointsOfInterestAdapter(IElevationDataStorage elevationDataStorage,
             IElasticSearchGateway elasticSearchGateway,
             IDataContainerConverterService dataContainerConverterService,
             IWikipediaGateway wikipediaGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger) :
-            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
+            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
         {
             _wikipediaGateway = wikipediaGateway;
             _logger = logger;

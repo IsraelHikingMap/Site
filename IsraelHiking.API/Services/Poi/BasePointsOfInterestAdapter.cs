@@ -3,7 +3,9 @@ using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -21,8 +23,10 @@ namespace IsraelHiking.API.Services.Poi
         /// Elasticsearch gateway to be used in derived classes
         /// </summary>
         protected readonly IElasticSearchGateway _elasticSearchGateway;
+
         private readonly IElevationDataStorage _elevationDataStorage;
         private readonly IDataContainerConverterService _dataContainerConverterService;
+        private readonly IMathTransform _wgs84ItmMathTransform;
 
         /// <inheritdoc />
         public abstract string Source { get; }
@@ -41,13 +45,16 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="elevationDataStorage"></param>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="dataContainerConverterService"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
         protected BasePointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
             IElasticSearchGateway elasticSearchGateway, 
-            IDataContainerConverterService dataContainerConverterService)
+            IDataContainerConverterService dataContainerConverterService,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory)
         {
             _elevationDataStorage = elevationDataStorage;
             _elasticSearchGateway = elasticSearchGateway;
             _dataContainerConverterService = dataContainerConverterService;
+            _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
         }
 
         /// <summary>
@@ -85,18 +92,8 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns></returns>
         protected async Task AddExtendedData(PointOfInterestExtended poiItem, IFeature feature, string language)
         {
-            foreach (var coordinate in feature.Geometry.Coordinates)
-            {
-                coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
-            }
-            poiItem.DataContainer = await _dataContainerConverterService.ToDataContainer(new FeatureCollection(new Collection<IFeature> { feature }).ToBytes(), poiItem.Title + ".geojson");
-            foreach (var coordinate in poiItem.DataContainer.Routes
-                .SelectMany(r => r.Segments)
-                .SelectMany(s => s.Latlngs)
-                .Where(l => l.Alt == null || l.Alt.Value == 0))
-            {
-                coordinate.Alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(coordinate));
-            }
+            await SetDataContainerAndLength(poiItem, feature);
+
             poiItem.References = GetReferences(feature, language);
             poiItem.ImagesUrls = feature.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
@@ -112,6 +109,32 @@ namespace IsraelHiking.API.Services.Poi
                 poiItem.CombinedIds = featureFromDatabase.GetIdsFromCombinedPoi();
             }
 
+        }
+
+        private async Task SetDataContainerAndLength(PointOfInterestExtended poiItem, IFeature feature)
+        {
+            foreach (var coordinate in feature.Geometry.Coordinates)
+            {
+                coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
+            }
+            poiItem.DataContainer = await _dataContainerConverterService.ToDataContainer(
+                new FeatureCollection(new Collection<IFeature> {feature}).ToBytes(), poiItem.Title + ".geojson");
+            foreach (var coordinate in poiItem.DataContainer.Routes
+                .SelectMany(r => r.Segments)
+                .SelectMany(s => s.Latlngs)
+                .Where(l => l.Alt == null || l.Alt.Value == 0))
+            {
+                coordinate.Alt = await _elevationDataStorage.GetElevation(new Coordinate().FromLatLng(coordinate));
+            }
+
+            foreach (var route in poiItem.DataContainer.Routes)
+            {
+                var itmRoute = route.Segments.SelectMany(s => s.Latlngs)
+                    .Select(l => _wgs84ItmMathTransform.Transform(new Coordinate().FromLatLng(l))).ToArray();
+                var skip1 = itmRoute.Skip(1);
+                poiItem.LengthInKm += itmRoute.Zip(skip1, (curr, prev) => curr.Distance(prev)).Sum() / 1000;
+            }
+            
         }
 
         /// <summary>

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
@@ -29,12 +30,14 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="elevationDataStorage"></param>
         /// <param name="elasticSearchGateway"></param>
         /// <param name="dataContainerConverterService"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="logger"></param>
         public NakebPointsOfInterestAdapter(INakebGateway nakebGateway,
             IElevationDataStorage elevationDataStorage,
             IElasticSearchGateway elasticSearchGateway,
             IDataContainerConverterService dataContainerConverterService,
-            ILogger logger) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            ILogger logger) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
         {
             _nakebGateway = nakebGateway;
             _logger = logger;

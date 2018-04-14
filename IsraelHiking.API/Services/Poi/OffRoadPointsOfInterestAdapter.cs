@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
@@ -23,8 +24,9 @@ namespace IsraelHiking.API.Services.Poi
             IElasticSearchGateway elasticSearchGateway, 
             IOffRoadGateway offRoadGateway,
             IDataContainerConverterService dataContainerConverterService,
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger) : 
-            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService)
+            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
         {
             _offRoadGateway = offRoadGateway;
             _logger = logger;

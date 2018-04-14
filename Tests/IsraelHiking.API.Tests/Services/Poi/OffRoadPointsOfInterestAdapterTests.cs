@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -28,7 +29,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _adapter = new OffRoadPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _offRoadGateway, _dataContainerConverterService, Substitute.For<ILogger>());
+            _adapter = new OffRoadPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _offRoadGateway, _dataContainerConverterService, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
         }
 
         [TestMethod]

@@ -9,6 +9,7 @@ export interface IPoiMainInfoData {
     title: string;
     description: string;
     readOnlyDescription: string;
+    lengthInKm: number;
     urls: string[];
     imagesUrls: string[];
     noImageIcon: string;
