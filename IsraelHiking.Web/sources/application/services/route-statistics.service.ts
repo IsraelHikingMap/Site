@@ -17,7 +17,7 @@ export interface IRouteStatistics {
 
 export class RouteStatisticsService {
     private visible: boolean;
-    public visibilityChanged: Subject<any>
+    public visibilityChanged: Subject<any>;
 
     constructor() {
         this.visibilityChanged = new Subject<{}>();
@@ -93,7 +93,10 @@ export class RouteStatisticsService {
 
             let distance = x - previousPoint.x;
             point.slope = distance === 0 ? 0 : (point.y - previousPoint.y) * 100 / (distance * 1000);
-            let ratio = distance / (currentPoint.x - previousPoint.x)
+            let ratio = distance / (currentPoint.x - previousPoint.x);
+            if (currentPoint.x === previousPoint.x) {
+                ratio = 0;
+            }
             point.latlng = this.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio, point.y);
             return point;
         }
@@ -157,7 +160,7 @@ export class RouteStatisticsService {
         }
         let previousPoint = statistics.points[0];
         for (let currentPoint of statistics.points) {
-            if (this.isOnSegment(previousPoint.latlng, currentPoint.latlng, latLng) == false) {
+            if (this.isOnSegment(previousPoint.latlng, currentPoint.latlng, latLng) === false) {
                 previousPoint = currentPoint;
                 continue;
             }

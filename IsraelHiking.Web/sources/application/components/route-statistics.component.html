@@ -1,12 +1,35 @@
 ﻿<div class="control-container leaflet-bar" [dir]="resources.direction">
-    <a class="cursor-pointer control-icon-first" (click)="toggle($event)" [ngClass]="{active: isVisible()}" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Route statistics toggle"><i class="fa icon-area-chart fa-lg"></i></a>
-    <div class="pull-right" matTooltip="{{resources.length}}" matTooltipPosition="above">
-        <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>
+    <div *ngIf="isVisible()" [@animateChart]>
+        <div class="chart-container" dir="ltr">
+            <button mat-button class="chart-close-button" (click)="toggle($event)"><i class="fa icon-close"></i></button>
+            <svg #lineChartContainer width="500" height="200"></svg>
+            <route-statistics-chart-tooltip #tooltip class="chart-container-tooltip"></route-statistics-chart-tooltip>
+        </div>
+        <div fxLayout="row" class="chart-buttons">
+            <div fxFlex>
+                <span fxFill class="mat-button cursor-default"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>
+            </div>
+            <div fxFlex>
+                <span fxFill class="mat-button cursor-default"><span><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} {{getUnits(gain)}}</span></span>
+            </div>
+            <div fxFlex>
+                <span fxFill class="mat-button cursor-default"><span><i class="fa icon-arrow-down"></i><span dir="ltr"> {{toShortNumber(loss)}}</span> {{getUnits(loss)}}</span></span>
+            </div>
+            <div fxFlex>
+                <button mat-button fxFill (click)="toggleKmMarker($event)" [ngClass]="{active: isKmMarkersOn}" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Toggle KM markers"><i class="fa icon-map-marker"></i> {{resources.kmPoi}}</button>
+            </div>
+        </div>
     </div>
-    <div class="pull-right" matTooltip="{{resources.gain}}" matTooltipPosition="above">
-        <span class="control-container-item gutters"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} {{getUnits(gain)}}</span>
-    </div>
-    <div class="pull-right" matTooltip="{{resources.loss}}" matTooltipPosition="above">
-        <span class="control-container-item gutters"><i class="fa icon-arrow-down"></i> <span dir="ltr">{{toShortNumber(loss)}}</span> {{getUnits(loss)}}</span>
+    <div *ngIf="!isVisible()">
+        <a class="cursor-pointer control-icon-first" (click)="toggle($event)" [ngClass]="{active: isVisible()}" matTooltip="{{resources.routeStatistics}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route statistics" angularticsAction="Route statistics toggle"><i class="fa icon-area-chart fa-lg"></i></a>
+        <div class="pull-right" matTooltip="{{resources.length}}" matTooltipPosition="above">
+            <span class="control-container-item gutters"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>
+        </div>
+        <div class="pull-right" matTooltip="{{resources.gain}}" matTooltipPosition="above">
+            <span class="control-container-item gutters"><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} {{getUnits(gain)}}</span>
+        </div>
+        <div class="pull-right" matTooltip="{{resources.loss}}" matTooltipPosition="above">
+            <span class="control-container-item gutters"><i class="fa icon-arrow-down"></i> <span dir="ltr">{{toShortNumber(loss)}}</span> {{getUnits(loss)}}</span>
+        </div>
     </div>
 </div>

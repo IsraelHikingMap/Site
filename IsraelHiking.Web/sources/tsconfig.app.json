@@ -4,9 +4,7 @@
     "outDir": "../out-tsc/app",
     "module": "esnext",
     "baseUrl": "",
-    "types": [
-      "google.visualization"
-    ]
+    "types": []
   },
   "exclude": [
     "test.ts",

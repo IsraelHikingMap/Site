@@ -16,15 +16,15 @@ export class RouteStatisticsChartTooltipComponent extends BaseMapComponent {
     
     constructor(resources: ResourcesService, private element: ElementRef) {
         super(resources);
-        this.hidden = false;
+        this.hidden = true;
         this.point = { x: 0, y: 0, slope: 0 } as IRouteStatisticsPoint;
     }
 
     public setPosition(end: number) {
-        if (this.resources.direction === "rtl") {
-            // hack... :-(
-            end -= 20;
-        }
         this.element.nativeElement.children[0].style.left = end + "px";
+    }
+
+    public getWidth(): number {
+        return +this.element.nativeElement.children[0].getBoundingClientRect().width;
     }
 }

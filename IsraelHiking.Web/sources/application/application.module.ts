@@ -1,4 +1,4 @@
-// angular
+// 3rd party
 import { NgModule } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { BrowserModule } from "@angular/platform-browser"
@@ -34,6 +34,7 @@ import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { DndModule } from "ng2-dnd";
 import { NgxImageGalleryModule } from "ngx-image-gallery";
+import { D3Service } from "d3-ng2-service";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -62,8 +63,6 @@ import { PoiService } from "./services/poi.service";
 import { GeoLocationService } from "./services/geo-location.service";
 import { ImageGalleryService } from "./services/image-gallery.service";
 // directives
-import { GoogleChartDirective } from "./directives/google-chart.directive";
-import { DraggableResizableDirective } from "./directives/draggable-resizable.directive";
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 // components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
@@ -79,7 +78,6 @@ import { OverlayEditDialogComponent } from "./components/dialogs/layers/overlay-
 import { RouteAddDialogComponent } from "./components/dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "./components/dialogs/routes/route-edit-dialog.component";
 import { RouteStatisticsComponent } from "./components/route-statistics.component";
-import { RouteStatisticsChartComponent } from "./components/route-statistics-chart.component";
 import { RouteStatisticsChartTooltipComponent } from "./components/route-statistics-chart-tooltip.component";
 import { FileComponent } from "./components/file.component";
 import { FileSaveAsComponent } from "./components/file-save-as.component";
@@ -194,6 +192,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         { provide: HTTP_INTERCEPTORS, useClass: NgProgressInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
         { provide: "Window", useFactory: getWindow },
+        D3Service,
         GetTextCatalogService,
         MapService,
         ResourcesService,
@@ -226,7 +225,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
-        RouteStatisticsChartComponent,
         LayersSidebarComponent,
         ZoomComponent,
         LocationComponent,
@@ -259,8 +257,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DownloadDialogComponent,
         ShareComponent,
         ShareDialogComponent,
-        GoogleChartDirective,
-        DraggableResizableDirective,
         NameInUseValidatorDirective,
         UpdatePointDialogComponent,
         TermsOfServiceDialogComponent,
@@ -270,7 +266,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         PublicPoiSidebarComponent,
         PoiMainInfoComponent
     ],
-    bootstrap: [MainMapComponent, SidebarComponent, RouteStatisticsChartComponent]
+    bootstrap: [MainMapComponent, SidebarComponent]
 })
 export class ApplicationModule {
     constructor(dataContainerService: DataContainerService,

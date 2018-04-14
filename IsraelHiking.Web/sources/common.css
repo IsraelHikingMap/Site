@@ -45,6 +45,10 @@ body {
     z-index: 1000 !important;
 }
 
+.leaflet-bottom.leaflet-right {
+    z-index: 980 !important;
+}
+
 .active {
     outline: 2px solid orange !important;
 }
@@ -55,6 +59,10 @@ ngx-image-gallery .image {
 
 .cdk-overlay-container {
     z-index: 1500 !important;
+}
+
+.cursor-default {
+    cursor: default !important;
 }
 
 .cursor-pointer {
@@ -199,6 +207,9 @@ ngx-image-gallery .image {
     .mat-tooltip, 
     .leaflet-bar {
         display: none !important;
+    }
+    .route-statistics-control-container .leaflet-bar {
+        display: unset !important;
     }
 }
 

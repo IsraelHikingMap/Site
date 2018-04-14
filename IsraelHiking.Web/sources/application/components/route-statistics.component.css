@@ -1,0 +1,20 @@
+﻿.chart-container {
+    background: white;
+    position: relative;
+}
+
+.chart-close-button {
+    position: absolute !important;
+    top: 5px;
+    left: 5px;
+    min-width: unset !important;
+}
+
+.chart-container-tooltip {
+    top: 20px;
+    position: absolute
+}
+
+.chart-buttons {
+    background: white;
+}
