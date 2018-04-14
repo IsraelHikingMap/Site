@@ -72,7 +72,8 @@ namespace IsraelHiking.API.Gpx
             using (var outputStream = new MemoryStream())
             {
                 var xmlSerializer = new XmlSerializer(typeof(gpxType));
-                xmlSerializer.Serialize(outputStream, gpx);
+                var streamWriter = new StreamWriter(outputStream, System.Text.Encoding.UTF8);
+                xmlSerializer.Serialize(streamWriter, gpx);
                 return outputStream.ToArray();
             }
         }
