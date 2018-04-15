@@ -78,7 +78,6 @@ import { OverlayEditDialogComponent } from "./components/dialogs/layers/overlay-
 import { RouteAddDialogComponent } from "./components/dialogs/routes/route-add-dialog.component";
 import { RouteEditDialogComponent } from "./components/dialogs/routes/route-edit-dialog.component";
 import { RouteStatisticsComponent } from "./components/route-statistics.component";
-import { RouteStatisticsChartTooltipComponent } from "./components/route-statistics-chart-tooltip.component";
 import { FileComponent } from "./components/file.component";
 import { FileSaveAsComponent } from "./components/file-save-as.component";
 import { EditOSMComponent } from "./components/edit-osm.component";
@@ -155,7 +154,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         RouteAddDialogComponent,
         RouteEditDialogComponent,
         RouteStatisticsComponent,
-        RouteStatisticsChartTooltipComponent,
         FileComponent,
         FileSaveAsComponent,
         EditOSMComponent,
@@ -236,7 +234,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         RouteAddDialogComponent,
         RouteEditDialogComponent,
         RouteStatisticsComponent,
-        RouteStatisticsChartTooltipComponent,
         FileComponent,
         FileSaveAsComponent,
         EditOSMComponent,

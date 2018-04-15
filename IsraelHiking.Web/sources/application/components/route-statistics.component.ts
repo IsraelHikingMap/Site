@@ -8,7 +8,6 @@ import { RoutesService } from "../services/layers/routelayers/routes.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "../services/route-statistics.service";
 import { BaseMapComponent } from "./base-map.component";
-import { RouteStatisticsChartTooltipComponent } from "./route-statistics-chart-tooltip.component";
 import { IRouteLayer } from "../services/layers/routelayers/iroute.layer";
 import { MapService } from "../services/map.service";
 import { IconsService } from "../services/icons.service";
@@ -25,6 +24,7 @@ interface IChartElements {
     svg: Selection<any, {}, null, undefined>;
     chartArea: Selection<BaseType, {}, null, undefined>;
     hoverLine: Selection<BaseType, {}, null, undefined>;
+    hoverBox: Selection<BaseType, {}, null, undefined>;
     xScale: ScaleContinuousNumeric<number, number>;
     yScale: ScaleContinuousNumeric<number, number>;
     hoverChartMarker: L.Marker;
@@ -67,8 +67,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
 
-    @ViewChild("tooltip")
-    public tooltip: RouteStatisticsChartTooltipComponent;
+    private static readonly HOVER_BOX_WIDTH = 140;
 
     private routeLayer: IRouteLayer;
     private statistics: IRouteStatistics;
@@ -214,8 +213,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private hideChartHover() {
-        this.tooltip.hidden = true;
         this.chartElements.hoverLine.style("display", "none");
+        this.chartElements.hoverBox.style("display", "none");
         this.chartElements.hoverChartMarker.setOpacity(0.0);
     }
 
@@ -227,15 +226,16 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let chartXCoordinate = this.chartElements.xScale(point.x);
         this.chartElements.hoverLine.style("display", null);
         this.chartElements.hoverLine.attr("x", chartXCoordinate);
-        this.tooltip.point = point;
-        this.tooltip.hidden = false;
-        this.changeDetectorRef.detectChanges();
-        if (chartXCoordinate < +this.chartElements.svg.attr("width") / 2) {
-            this.tooltip.setPosition(chartXCoordinate + this.chartElements.margin.left + 20);
-        } else {
-            let tooltipWidth = this.tooltip.getWidth();
-            this.tooltip.setPosition(chartXCoordinate + this.chartElements.margin.left - tooltipWidth - 20);
+        let safeDistance = 20;
+        let boxPosition = chartXCoordinate + safeDistance;
+        if (chartXCoordinate > +this.chartElements.svg.attr("width") / 2)
+        {
+            boxPosition = chartXCoordinate - RouteStatisticsComponent.HOVER_BOX_WIDTH - safeDistance;
         }
+        this.chartElements.hoverBox.style("display", null)
+            .attr("transform", `translate(${boxPosition}, 0)`);
+        this.buildAllTextInHoverBox(point);
+        
         this.chartElements.hoverChartMarker.setLatLng(point.latlng);
         this.chartElements.hoverChartMarker.setOpacity(1.0);
     }
@@ -322,6 +322,17 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("stroke", "black")
             .style("display", "none");
 
+        this.chartElements.hoverBox = this.chartElements.chartArea.append("g")
+            .style("display", "none");
+        this.chartElements.hoverBox.append("rect")
+            .attr("x", 0)
+            .attr("y", 0)
+            .attr("height", 70)
+            .attr("width", RouteStatisticsComponent.HOVER_BOX_WIDTH)
+            .attr("stroke", "black")
+            .attr("fill", "white")
+            .attr("fill-opacity", "0.9");
+
         this.chartElements.chartArea.append("rect")
             .attr("width", this.chartElements.width)
             .attr("height", this.chartElements.height)
@@ -341,6 +352,32 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .on("mouseout", () => {
                 this.hideChartHover();
             });
+    }
+
+    private buildAllTextInHoverBox(point: IRouteStatisticsPoint) {
+        this.chartElements.hoverBox.selectAll("text").remove();
+        this.createHoverBoxText(this.resources.distance, point.x.toFixed(2), " " + this.resources.kmUnit, 20);
+        this.createHoverBoxText(this.resources.height, point.y.toFixed(0), " " + this.resources.meterUnit, 40);
+        // the following is a hack due to cross browser issues...
+        this.createHoverBoxText(this.resources.slope, Math.abs(point.slope).toFixed(0) + "%", point.slope < 0 ? "-" : "" , 60);
+    }
+
+    private createHoverBoxText(title: string, value: string, units: string, y: number) {
+        let x = 10;
+        if (this.resources.direction === "rtl") {
+            x = RouteStatisticsComponent.HOVER_BOX_WIDTH - x;
+        }
+        let text = this.chartElements.hoverBox.append("text")
+            .attr("fill", "black")
+            .attr("transform", `translate(${x}, ${y})`)
+            .attr("text-anchor", "start")
+            .attr("direction", this.resources.direction);
+        text.append("tspan")
+            .text(`${title}: `);
+        text.append("tspan")
+            .text(value);
+        text.append("tspan")
+            .text(units);
     }
 
     public toggleKmMarker($event: Event) {
