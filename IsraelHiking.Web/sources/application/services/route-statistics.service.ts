@@ -79,7 +79,7 @@ export class RouteStatisticsService {
     }
 
     public interpolateStatistics(statistics: IRouteStatistics, x: number) {
-        if (statistics.points.length < 2) {
+        if (statistics == null || statistics.points.length < 2) {
             return null;
         }
         let previousPoint = statistics.points[0];

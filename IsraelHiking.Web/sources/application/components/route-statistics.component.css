@@ -1,4 +1,11 @@
-﻿.chart-container {
+﻿.chart-control-container {
+    width: 500px;
+    height: 200px;
+}
+
+.chart-container {
+    width: 100%;
+    height: 164px;
     background: white;
     position: relative;
 }
@@ -17,4 +24,19 @@
 
 .chart-buttons {
     background: white;
+}
+
+@media (max-width: 550px) {
+    .chart-control-container {
+        width: 100vw;
+        height: 130px;
+    }
+
+    .chart-container {
+        height: 94px;
+    }
+
+    .chart-buttons .mat-button {
+        padding: 0 !important;
+    }
 }

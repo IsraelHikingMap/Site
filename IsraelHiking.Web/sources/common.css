@@ -49,6 +49,17 @@ body {
     z-index: 980 !important;
 }
 
+@media (max-width: 550px) {
+    .leaflet-bottom.leaflet-right {
+        z-index: 1030 !important;
+    }
+
+    .route-statistics-control-container {
+        margin-bottom: 0 !important;
+        margin-right: 0 !important;
+    }
+}
+
 .active {
     outline: 2px solid orange !important;
 }

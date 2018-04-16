@@ -1,9 +1,9 @@
-﻿<div class="control-container leaflet-bar" [dir]="resources.direction">
-    <div *ngIf="isVisible()" [@animateChart]>
-        <div class="chart-container" dir="ltr">
-            <button mat-button class="chart-close-button" (click)="toggle($event)"><i class="fa icon-close"></i></button>
-            <svg #lineChartContainer width="500" height="200"></svg>
+﻿<div class="control-container leaflet-bar" [dir]="resources.direction" (window:resize)="drawChart()">
+    <div *ngIf="isVisible()" [@animateChart] class="chart-control-container">
+        <div class="chart-container" #lineChartContainer>
+            <svg direction="ltr"></svg>
         </div>
+        <button mat-button class="chart-close-button" (click)="toggle($event)"><i class="fa icon-close"></i></button>
         <div fxLayout="row" class="chart-buttons">
             <div fxFlex>
                 <span fxFill class="mat-button cursor-default"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>

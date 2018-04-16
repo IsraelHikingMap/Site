@@ -93,7 +93,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions = [];
         this.kmMarkersGroup = L.layerGroup([] as L.Marker[]);
         this.chartElements = {
-            margin: { top: 20, right: 20, bottom: 40, left: 70 },
+            margin: { top: 20, right: 50, bottom: 40, left: 70 },
             hoverChartMarker: L.marker(mapService.map.getCenter(), { opacity: 0.0, draggable: false, clickable: false } as L.MarkerOptions)
         } as IChartElements;
         this.mapService.map.addLayer(this.chartElements.hoverChartMarker);
@@ -188,21 +188,22 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.showChartHover(point);
     }
 
-    private drawChart = () => {
+    public drawChart = () => {
         if (!this.isVisible()) {
             return;
         }
         if (!this.lineChartContainer.nativeElement) {
             return;
         }
-        if (this.statistics == null) {
-            return;
-        }
         let data = [];
-        for (let point of this.statistics.points) {
-            data.push([point.x, point.y]);
+        let routeColor = "black";
+        if (this.statistics != null) {
+            for (let point of this.statistics.points) {
+                data.push([point.x, point.y]);
+            }
+            routeColor = this.routeLayer.route.properties.pathOptions.color;
         }
-        let routeColor = this.routeLayer.route.properties.pathOptions.color;
+        
         var icon = IconsService.createRoundIcon(routeColor);
         this.chartElements.hoverChartMarker.setIcon(icon);
 
@@ -252,16 +253,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private initChart(data: number[][]) {
         let d3 = this.d3Service.getD3();
-        this.chartElements.svg = d3.select(this.lineChartContainer.nativeElement);
+        this.chartElements.svg = d3.select(this.lineChartContainer.nativeElement).select("svg");
         this.chartElements.svg.html("");
-        let width = +this.chartElements.svg.attr("width");
-        let height = +this.chartElements.svg.attr("height");
-        if (window.innerWidth - 50 < width) {
-            width = window.innerWidth - 50;
-            this.chartElements.svg.attr("width", width);
-            height = 100;
-            this.chartElements.svg.attr("height", height);
-        }
+        let style = window.getComputedStyle(this.lineChartContainer.nativeElement);
+        let width = +style.width.replace("px", "");
+        let height = +style.height.replace("px", "");
+        this.chartElements.svg.attr("height", height);
+        this.chartElements.svg.attr("width", width);
         this.chartElements.width = width - this.chartElements.margin.left - this.chartElements.margin.right;
         this.chartElements.height = height - this.chartElements.margin.top - this.chartElements.margin.bottom;
         this.chartElements.chartArea = this.chartElements.svg.append("g").attr("transform", `translate(${this.chartElements.margin.left},${this.chartElements.margin.top})`);
