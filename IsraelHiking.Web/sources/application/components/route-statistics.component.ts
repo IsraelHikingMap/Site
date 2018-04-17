@@ -23,8 +23,8 @@ interface IMargin {
 interface IChartElements {
     svg: Selection<any, {}, null, undefined>;
     chartArea: Selection<BaseType, {}, null, undefined>;
-    hoverLine: Selection<BaseType, {}, null, undefined>;
-    hoverBox: Selection<BaseType, {}, null, undefined>;
+    path: Selection<SVGPathElement, {}, null, undefined>;
+    hoverGroup: Selection<BaseType, {}, null, undefined>;
     xScale: ScaleContinuousNumeric<number, number>;
     yScale: ScaleContinuousNumeric<number, number>;
     hoverChartMarker: L.Marker;
@@ -198,9 +198,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let data = [];
         let routeColor = "black";
         if (this.statistics != null) {
-            for (let point of this.statistics.points) {
-                data.push([point.x, point.y]);
-            }
+            data = this.statistics.points.map(p => [p.x, p.y]);
             routeColor = this.routeLayer.route.properties.pathOptions.color;
         }
         
@@ -210,12 +208,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.initChart(data);
         this.createChartAxis();
         this.drawChartLine(data, routeColor);
-        this.addChartHoverSupport();
+        this.addChartHoverSupport(routeColor);
     }
 
     private hideChartHover() {
-        this.chartElements.hoverLine.style("display", "none");
-        this.chartElements.hoverBox.style("display", "none");
+        this.chartElements.hoverGroup.style("display", "none");
         this.chartElements.hoverChartMarker.setOpacity(0.0);
     }
 
@@ -225,20 +222,43 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             return;
         }
         let chartXCoordinate = this.chartElements.xScale(point.x);
-        this.chartElements.hoverLine.style("display", null);
-        this.chartElements.hoverLine.attr("x", chartXCoordinate);
+        this.chartElements.hoverGroup.style("display", null);
+        this.chartElements.hoverGroup.attr("transform", `translate(${chartXCoordinate}, 0)`);
+        this.chartElements.hoverGroup.selectAll("circle").attr("cy", this.getYPositionOnPath(chartXCoordinate).y);
         let safeDistance = 20;
-        let boxPosition = chartXCoordinate + safeDistance;
+        let boxPosition = safeDistance;
         if (chartXCoordinate > +this.chartElements.svg.attr("width") / 2)
         {
-            boxPosition = chartXCoordinate - RouteStatisticsComponent.HOVER_BOX_WIDTH - safeDistance;
+            boxPosition = -RouteStatisticsComponent.HOVER_BOX_WIDTH - safeDistance;
         }
-        this.chartElements.hoverBox.style("display", null)
-            .attr("transform", `translate(${boxPosition}, 0)`);
+        this.chartElements.hoverGroup.select("g").attr("transform", `translate(${boxPosition}, 0)`);
         this.buildAllTextInHoverBox(point);
         
         this.chartElements.hoverChartMarker.setLatLng(point.latlng);
         this.chartElements.hoverChartMarker.setOpacity(1.0);
+    }
+
+    private getYPositionOnPath(x: number) {
+        var beginning = x;
+        let end = this.chartElements.width + this.chartElements.margin.left;
+        let target;
+        let position: SVGPoint;
+        while (true) {
+            target = Math.floor((beginning + end) / 2);
+            position = this.chartElements.path.node().getPointAtLength(target);
+            if ((target === end || target === beginning) && position.x !== x) {
+                break;
+            }
+            if (position.x > x) {
+                end = target;
+            }
+            else if (position.x < x) {
+                beginning = target;
+            } else {
+                break;
+            } //position found
+        }
+        return position;
     }
 
     public onMuoseMoveOrClick = () => {
@@ -301,7 +321,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .x(d => this.chartElements.xScale(d[0]))
             .y(d => this.chartElements.yScale(d[1]));
 
-        this.chartElements.chartArea.append("path")
+        this.chartElements.path = this.chartElements.chartArea.append<SVGPathElement>("path")
             .datum(data)
             .attr("fill", "none")
             .attr("stroke", routeColor)
@@ -311,18 +331,33 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("d", line);
     }
 
-    private addChartHoverSupport() {
-        this.chartElements.hoverLine = this.chartElements.chartArea.append("rect");
-        this.chartElements.hoverLine.attr("y", 0)
-            .attr("x", 0)
-            .attr("width", "0.1")
-            .attr("height", this.chartElements.height)
+    private addChartHoverSupport(routeColor: string) {
+        this.chartElements.hoverGroup = this.chartElements.chartArea.append("g")
+            .style("display", "none");
+        this.chartElements.hoverGroup.append("line")
+            .attr("y1", 0)
+            .attr("x1", 0)
+            .attr("x2", 0)
+            .attr("y2", this.chartElements.height)
             .attr("stroke", "black")
-            .style("display", "none");
+            .attr("stroke-width", 1);
+        
+        this.chartElements.hoverGroup.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .attr("r", 3)
+            .attr("fill", routeColor);
 
-        this.chartElements.hoverBox = this.chartElements.chartArea.append("g")
-            .style("display", "none");
-        this.chartElements.hoverBox.append("rect")
+        this.chartElements.hoverGroup.append("circle")
+            .attr("cx", 0)
+            .attr("cy", 0)
+            .attr("r", 5)
+            .attr("fill", "none")
+            .attr("stroke", routeColor)
+            .attr("stroke-width", 1);
+
+        this.chartElements.hoverGroup.append("g")
+            .append("rect")
             .attr("x", 0)
             .attr("y", 0)
             .attr("height", 70)
@@ -331,6 +366,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("fill", "white")
             .attr("fill-opacity", "0.9");
 
+        // responsive background
         this.chartElements.chartArea.append("rect")
             .attr("width", this.chartElements.width)
             .attr("height", this.chartElements.height)
@@ -345,7 +381,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 setTimeout(() => {
                         this.hideChartHover();
                     },
-                    2000);
+                    5000);
             })
             .on("mouseout", () => {
                 this.hideChartHover();
@@ -353,7 +389,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private buildAllTextInHoverBox(point: IRouteStatisticsPoint) {
-        this.chartElements.hoverBox.selectAll("text").remove();
+        this.chartElements.hoverGroup.selectAll("text").remove();
         this.createHoverBoxText(this.resources.distance, point.x.toFixed(2), " " + this.resources.kmUnit, 20);
         this.createHoverBoxText(this.resources.height, point.y.toFixed(0), " " + this.resources.meterUnit, 40);
         // the following is a hack due to cross browser issues...
@@ -365,7 +401,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.resources.direction === "rtl") {
             x = RouteStatisticsComponent.HOVER_BOX_WIDTH - x;
         }
-        let text = this.chartElements.hoverBox.append("text")
+        let text = this.chartElements.hoverGroup.select("g")
+            .append("text")
             .attr("fill", "black")
             .attr("transform", `translate(${x}, ${y})`)
             .attr("text-anchor", "start")
