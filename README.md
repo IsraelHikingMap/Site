@@ -60,7 +60,7 @@ In order to be able to build this site you'll need some tools:
 * [.Net core SDK 2.1 ](https://www.microsoft.com/net/download/core)
 * Install [node.js](https://nodejs.org/en/) for windows (8.9+). Use the recommended 64-bit installer on modern Windows versions.
 * Open Visual Studio
-* Follow [these steps](http://stackoverflow.com/questions/43849585/update-node-version-in-visual-studio-2017) to update the version of node.js Visual Studio uses
+* Follow [these steps](https://stackoverflow.com/a/43850262/368683) to update the version of node.js Visual Studio uses
 * If asked, and you don't have any other preference, choose "General" development settings
 * In Visual Studio, _File &rarr; Open &rarr; Project/Solution..._ and choose the `IsraelHiking.sln` solution from the Site reposotory location.
 * From Visual Studio's _Tools &rarr; Extensions and Updates..._ 
