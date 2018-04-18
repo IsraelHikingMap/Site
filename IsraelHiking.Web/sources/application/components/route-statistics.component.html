@@ -1,9 +1,10 @@
-﻿<div class="control-container leaflet-bar" [dir]="resources.direction" (window:resize)="drawChart()">
-    <div *ngIf="isVisible()" [@animateChart] class="chart-control-container">
+﻿<div class="control-container leaflet-bar" [dir]="resources.direction" (window:resize)="redrawChart()">
+    <div *ngIf="isVisible()" [@animateChart] class="chart-control-container" [ngClass]="{'expanded' : isExpanded }">
         <div class="chart-container" #lineChartContainer>
             <svg direction="ltr"></svg>
         </div>
         <button mat-button class="chart-close-button" (click)="toggle($event)"><i class="fa icon-close"></i></button>
+        <button mat-button class="chart-expand-button hidden-xs" (click)="toggleExpand($event)"><i class="fa" [ngClass]="{ 'icon-chevron-right' : isExpanded, 'icon-chevron-left' : !isExpanded }"></i></button>
         <div fxLayout="row" class="chart-buttons">
             <div fxFlex>
                 <span fxFill class="mat-button cursor-default"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>

@@ -2,6 +2,10 @@
     width: 500px;
     height: 200px;
 }
+    .chart-control-container.expanded {
+        width: 800px;
+        height: 300px;
+    }
 
 .chart-container {
     width: 100%;
@@ -10,9 +14,20 @@
     position: relative;
 }
 
+.chart-control-container.expanded .chart-container {
+    height: 264px;
+}
+
 .chart-close-button {
     position: absolute !important;
     top: 5px;
+    left: 5px;
+    min-width: unset !important;
+}
+
+.chart-expand-button {
+    position: absolute !important;
+    top: 41px;
     left: 5px;
     min-width: unset !important;
 }

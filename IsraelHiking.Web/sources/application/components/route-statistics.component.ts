@@ -63,6 +63,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public gain: number;
     public loss: number;
     public isKmMarkersOn: boolean;
+    public isExpanded: boolean;
 
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
@@ -86,6 +87,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         super(resources);
 
         this.isKmMarkersOn = false;
+        this.isExpanded = false;
         this.routeLayer = null;
         this.statistics = null;
         this.initalizeStatistics();
@@ -111,7 +113,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.routeChanged();
         }));
         this.componentSubscriptions.push(this.resources.languageChanged.subscribe(() => {
-            this.drawChart();
+            this.redrawChart();
         }));
         this.routeChanged();
     }
@@ -141,7 +143,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.routeStatisticsService.toggle();
         if (this.routeStatisticsService.isVisible()) {
             this.changeDetectorRef.detectChanges();
-            this.drawChart();
+            this.redrawChart();
         }
     }
 
@@ -167,7 +169,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.length = this.statistics.length;
         this.gain = this.statistics.gain;
         this.loss = this.statistics.loss;
-        this.drawChart();
+        if (this.isVisible()) {
+            this.setRouteColorToChart(this.routeLayer.route.properties.pathOptions.color);
+            this.setDataToChart(this.statistics.points.map(p => [p.x, p.y] as [number,number]));
+        }
         this.updateKmMarkers();
     }
 
@@ -188,7 +193,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.showChartHover(point);
     }
 
-    public drawChart = () => {
+    public redrawChart = () => {
         if (!this.isVisible()) {
             return;
         }
@@ -201,14 +206,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             data = this.statistics.points.map(p => [p.x, p.y]);
             routeColor = this.routeLayer.route.properties.pathOptions.color;
         }
-        
-        var icon = IconsService.createRoundIcon(routeColor);
-        this.chartElements.hoverChartMarker.setIcon(icon);
 
-        this.initChart(data);
+        this.initChart();
         this.createChartAxis();
-        this.drawChartLine(data, routeColor);
-        this.addChartHoverSupport(routeColor);
+        this.addChartPath();
+        this.addChartHoverSupport();
+        // must be last
+        this.setRouteColorToChart(routeColor);
+        this.setDataToChart(data);
     }
 
     private hideChartHover() {
@@ -222,9 +227,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             return;
         }
         let chartXCoordinate = this.chartElements.xScale(point.x);
+        let chartYCoordinate = this.chartElements.yScale(point.y);
         this.chartElements.hoverGroup.style("display", null);
         this.chartElements.hoverGroup.attr("transform", `translate(${chartXCoordinate}, 0)`);
-        this.chartElements.hoverGroup.selectAll("circle").attr("cy", this.getYPositionOnPath(chartXCoordinate).y);
+        this.chartElements.hoverGroup.selectAll("circle").attr("cy", chartYCoordinate);
         let safeDistance = 20;
         let boxPosition = safeDistance;
         if (chartXCoordinate > +this.chartElements.svg.attr("width") / 2)
@@ -238,29 +244,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.chartElements.hoverChartMarker.setOpacity(1.0);
     }
 
-    private getYPositionOnPath(x: number) {
-        var beginning = x;
-        let end = this.chartElements.width + this.chartElements.margin.left;
-        let target;
-        let position: SVGPoint;
-        while (true) {
-            target = Math.floor((beginning + end) / 2);
-            position = this.chartElements.path.node().getPointAtLength(target);
-            if ((target === end || target === beginning) && position.x !== x) {
-                break;
-            }
-            if (position.x > x) {
-                end = target;
-            }
-            else if (position.x < x) {
-                beginning = target;
-            } else {
-                break;
-            } //position found
-        }
-        return position;
-    }
-
     public onMuoseMoveOrClick = () => {
         let d3 = this.d3Service.getD3();
         d3.event.stopPropagation();
@@ -271,7 +254,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.showChartHover(point);
     }
 
-    private initChart(data: number[][]) {
+    private initChart() {
         let d3 = this.d3Service.getD3();
         this.chartElements.svg = d3.select(this.lineChartContainer.nativeElement).select("svg");
         this.chartElements.svg.html("");
@@ -282,15 +265,18 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.chartElements.svg.attr("width", width);
         this.chartElements.width = width - this.chartElements.margin.left - this.chartElements.margin.right;
         this.chartElements.height = height - this.chartElements.margin.top - this.chartElements.margin.bottom;
-        this.chartElements.chartArea = this.chartElements.svg.append("g").attr("transform", `translate(${this.chartElements.margin.left},${this.chartElements.margin.top})`);
-        this.chartElements.xScale = d3.scaleLinear().domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]).range([0, this.chartElements.width]);
-        this.chartElements.yScale = d3.scaleLinear().domain([d3.min(data, d => d[1]), d3.max(data, d => d[1])]).range([this.chartElements.height, 0]);
+        this.chartElements.chartArea = this.chartElements.svg.append("g")
+            .attr("class", "chart-area")
+            .attr("transform", `translate(${this.chartElements.margin.left},${this.chartElements.margin.top})`);
+        this.chartElements.xScale = d3.scaleLinear().range([0, this.chartElements.width]);
+        this.chartElements.yScale = d3.scaleLinear().range([this.chartElements.height, 0]);
+
     }
 
     private createChartAxis() {
         let d3 = this.d3Service.getD3();
-        // X Axis
         this.chartElements.chartArea.append("g")
+            .attr("class", "x axis")
             .attr("transform", `translate(0,${this.chartElements.height})`)
             .call(d3.axisBottom(this.chartElements.xScale))
             .append("text")
@@ -302,8 +288,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .select(".domain")
             .remove();
 
-        // Y Axis
         this.chartElements.chartArea.append("g")
+            .attr("class", "y axis")
             .call(d3.axisLeft(this.chartElements.yScale).ticks(5))
             .append("text")
             .attr("fill", "#000")
@@ -313,26 +299,18 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .text(this.resources.heightInMeters);
     }
 
-    private drawChartLine(data: number[][], routeColor: string) {
-        // Line
-        let d3 = this.d3Service.getD3();
-        let line = d3.line()
-            .curve(d3.curveCatmullRom)
-            .x(d => this.chartElements.xScale(d[0]))
-            .y(d => this.chartElements.yScale(d[1]));
-
+    private addChartPath() {
         this.chartElements.path = this.chartElements.chartArea.append<SVGPathElement>("path")
-            .datum(data)
+            .attr("class", "line")
             .attr("fill", "none")
-            .attr("stroke", routeColor)
             .attr("stroke-linejoin", "round")
             .attr("stroke-linecap", "round")
-            .attr("stroke-width", 2)
-            .attr("d", line);
+            .attr("stroke-width", 2);
     }
 
-    private addChartHoverSupport(routeColor: string) {
+    private addChartHoverSupport() {
         this.chartElements.hoverGroup = this.chartElements.chartArea.append("g")
+            .attr("class", "hover-group")
             .style("display", "none");
         this.chartElements.hoverGroup.append("line")
             .attr("y1", 0)
@@ -343,17 +321,18 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("stroke-width", 1);
         
         this.chartElements.hoverGroup.append("circle")
+            .attr("class", "circle-point")
             .attr("cx", 0)
             .attr("cy", 0)
             .attr("r", 3)
-            .attr("fill", routeColor);
+            .attr("fill", "black");
 
         this.chartElements.hoverGroup.append("circle")
+            .attr("class", "circle-point-aura")
             .attr("cx", 0)
             .attr("cy", 0)
             .attr("r", 5)
             .attr("fill", "none")
-            .attr("stroke", routeColor)
             .attr("stroke-width", 1);
 
         this.chartElements.hoverGroup.append("g")
@@ -413,6 +392,33 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .text(value);
         text.append("tspan")
             .text(units);
+    }
+
+    private setRouteColorToChart(routeColor: string) {
+        var icon = IconsService.createRoundIcon(routeColor);
+        this.chartElements.hoverChartMarker.setIcon(icon);
+        this.chartElements.path.attr("stroke", routeColor);
+        this.chartElements.hoverGroup.select(".circle-point").attr("fill", routeColor);
+        this.chartElements.hoverGroup.select(".circle-point-aura").attr("stroke", routeColor);
+    }
+    
+    private setDataToChart(data: [number,number][]) {
+        let d3 = this.d3Service.getD3();
+        let duration = 1000;
+        this.chartElements.xScale.domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);
+        this.chartElements.yScale.domain([d3.min(data, d => d[1]), d3.max(data, d => d[1])]);
+        let line = d3.line()
+            .curve(d3.curveCatmullRom)
+            .x(d => this.chartElements.xScale(d[0]))
+            .y(d => this.chartElements.yScale(d[1]));
+        let chartTransition = this.chartElements.chartArea.transition();
+        chartTransition.select(".line").duration(duration).attr("d", line(data));
+        chartTransition.select(".x.axis")
+            .duration(duration)
+            .call(d3.axisBottom(this.chartElements.xScale) as any);
+        chartTransition.select(".y.axis")
+            .call(d3.axisLeft(this.chartElements.yScale) as any)
+            .duration(duration);
     }
 
     public toggleKmMarker($event: Event) {
@@ -481,5 +487,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             draggable: false,
             icon: IconsService.createKmMarkerIcon(markerNumber)
         } as L.MarkerOptions);
+    }
+
+    public toggleExpand() {
+        this.isExpanded = !this.isExpanded;
+        this.changeDetectorRef.detectChanges();
+        this.redrawChart();
     }
 }
