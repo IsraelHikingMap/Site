@@ -62,6 +62,7 @@ import { DragAndDropService } from "./services/drag-and-drop.service";
 import { PoiService } from "./services/poi.service";
 import { GeoLocationService } from "./services/geo-location.service";
 import { ImageGalleryService } from "./services/image-gallery.service";
+import { CancelableTimeoutService } from "./services/cancelable-timeout.service";
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 // components
@@ -219,7 +220,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DragAndDropService,
         PoiService,
         GeoLocationService,
-        ImageGalleryService
+        ImageGalleryService,
+        CancelableTimeoutService
     ],
     declarations: [MainMapComponent,
         SidebarComponent,

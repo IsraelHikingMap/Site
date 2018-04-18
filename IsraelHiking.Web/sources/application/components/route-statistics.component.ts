@@ -11,6 +11,7 @@ import { BaseMapComponent } from "./base-map.component";
 import { IRouteLayer } from "../services/layers/routelayers/iroute.layer";
 import { MapService } from "../services/map.service";
 import { IconsService } from "../services/icons.service";
+import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import * as Common from "../common/IsraelHiking";
 
 interface IMargin {
@@ -83,6 +84,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         private readonly mapService: MapService,
         private readonly routesService: RoutesService,
         private readonly routeStatisticsService: RouteStatisticsService,
+        private readonly cancelableTimeoutService: CancelableTimeoutService
         ) {
         super(resources);
 
@@ -357,10 +359,12 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             })
             .on("click", () => {
                 this.onMuoseMoveOrClick();
-                setTimeout(() => {
+                const timeoutGroupName = "clickOnChart";
+                this.cancelableTimeoutService.clearTimeoutByGroup(timeoutGroupName);
+                this.cancelableTimeoutService.setTimeoutByGroup(() => {
                         this.hideChartHover();
                     },
-                    5000);
+                    5000, timeoutGroupName);
             })
             .on("mouseout", () => {
                 this.hideChartHover();
