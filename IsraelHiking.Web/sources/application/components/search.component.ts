@@ -61,17 +61,17 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
 
     constructor(resources: ResourcesService,
-        private mapService: MapService,
-        private hashService: HashService,
-        private dataContainerService: DataContainerService,
-        private elevationProvider: ElevationProvider,
-        private searchResultsProvider: SearchResultsProvider,
-        private routerService: RouterService,
-        private fitBoundsService: FitBoundsService,
-        private injector: Injector,
-        private componentFactoryResolver: ComponentFactoryResolver,
-        private toastService: ToastService,
-        private categoriesLayerFactory: CategoriesLayerFactory
+        private readonly mapService: MapService,
+        private readonly hashService: HashService,
+        private readonly dataContainerService: DataContainerService,
+        private readonly elevationProvider: ElevationProvider,
+        private readonly searchResultsProvider: SearchResultsProvider,
+        private readonly routerService: RouterService,
+        private readonly fitBoundsService: FitBoundsService,
+        private readonly injector: Injector,
+        private readonly componentFactoryResolver: ComponentFactoryResolver,
+        private readonly toastService: ToastService,
+        private readonly categoriesLayerFactory: CategoriesLayerFactory
     ) {
         super(resources);
         this.requestsQueue = [];
@@ -219,9 +219,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
             this.fitBoundsService.fitBounds(this.readonlyLayer.getBounds());
 
-            setTimeout(() => {
-                markerTo.openPopup();
-            }, 500);
+            setTimeout(() => markerTo.openPopup(), 500);
         });
     }
     
