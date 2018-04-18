@@ -278,6 +278,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
 
     public clear() {
         this.getData().clear();
+        this.close();
     }
 
     private getUrls(): Common.LinkData[] {
