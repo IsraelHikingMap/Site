@@ -280,7 +280,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.chartElements.chartArea.append("g")
             .attr("class", "x axis")
             .attr("transform", `translate(0,${this.chartElements.height})`)
-            .call(d3.axisBottom(this.chartElements.xScale))
+            .call(d3.axisBottom(this.chartElements.xScale).ticks(5))
             .append("text")
             .attr("fill", "#000")
             .attr("text-anchor", "middle")
@@ -419,9 +419,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         chartTransition.select(".line").duration(duration).attr("d", line(data));
         chartTransition.select(".x.axis")
             .duration(duration)
-            .call(d3.axisBottom(this.chartElements.xScale) as any);
+            .call(d3.axisBottom(this.chartElements.xScale).ticks(5) as any);
         chartTransition.select(".y.axis")
-            .call(d3.axisLeft(this.chartElements.yScale) as any)
+            .call(d3.axisLeft(this.chartElements.yScale).ticks(5) as any)
             .duration(duration);
     }
 
