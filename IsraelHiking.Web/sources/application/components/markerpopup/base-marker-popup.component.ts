@@ -1,7 +1,10 @@
 ﻿import { ApplicationRef, ViewRef, ViewChildren, QueryList } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { MatTooltip } from "@angular/material";
+import { Observable } from "rxjs";
 import * as L from "leaflet";
+import "rxjs/add/observable/forkJoin";
+import "rxjs/add/operator/first";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ElevationProvider } from "../../services/elevation.provider";
@@ -28,7 +31,7 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         protected httpClient: HttpClient,
-        private applicationRef:ApplicationRef,
+        private readonly applicationRef: ApplicationRef,
         protected elevationProvider: ElevationProvider) {
         super(resources);
         this.hideCoordinates = true;
@@ -73,18 +76,25 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
             this.applicationRef.attachView(hostView);
         });
         this.marker.on("popupclose", () => {
-            setTimeout(() => {
-                if (this.tooltips) {
-                    this.tooltips.forEach(tooltip => tooltip.hide());
-                }
-                setTimeout(() => {
-                    if (this.tooltips) {
-                        this.tooltips.forEach(tooltip => tooltip.hide());
+            let subscriptions = [];
+            if (!this.tooltips) {
+                this.applicationRef.detachView(hostView);
+                return;
+            } else {
+                this.tooltips.forEach((tooltip) => {
+                    if (tooltip._tooltipInstance != null && tooltip._tooltipInstance.isVisible()) {
+                        subscriptions.push(tooltip._tooltipInstance.afterHidden().first());
+                        tooltip._tooltipInstance.hide(0);
                     }
-                    // Allow time for tooltips to close.
+                });
+            }
+            if (subscriptions.length === 0) {
+                this.applicationRef.detachView(hostView);
+            } else {
+                Observable.forkJoin(...subscriptions).subscribe(() => {
                     this.applicationRef.detachView(hostView);
-                }, 1000);
-            }, 100);
+                });
+            }
         });
     }
 } 
