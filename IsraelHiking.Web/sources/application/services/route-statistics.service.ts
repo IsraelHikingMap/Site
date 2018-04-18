@@ -57,7 +57,7 @@ export class RouteStatisticsService {
                     continue;
                 }
                 routeStatistics.length += distance;
-                let point = L.point((routeStatistics.length / 1000), latlng.alt) as IRouteStatisticsPoint;
+                point = L.point((routeStatistics.length / 1000), latlng.alt) as IRouteStatisticsPoint;
                 point.latlng = latlng;
                 point.slope = distance === 0 ? 0 : (latlng.alt - previousPoint.alt) * 100 / distance;
                 routeStatistics.points.push(point);
@@ -83,28 +83,30 @@ export class RouteStatisticsService {
             return null;
         }
         let previousPoint = statistics.points[0];
+        if (x <= 0) {
+            return previousPoint;
+        }
         for (let currentPoint of statistics.points) {
             if (currentPoint.x < x) {
                 previousPoint = currentPoint;
                 continue;
             }
-            let point = { x: x } as IRouteStatisticsPoint;
-            point.y = this.getInterpolatedValue(previousPoint, currentPoint, x);
-
-            let distance = x - previousPoint.x;
-            point.slope = distance === 0 ? 0 : (point.y - previousPoint.y) * 100 / (distance * 1000);
-            let ratio = distance / (currentPoint.x - previousPoint.x);
-            if (currentPoint.x === previousPoint.x) {
-                ratio = 0;
+            if (currentPoint.x - previousPoint.x === 0) {
+                previousPoint = currentPoint;
+                continue;
             }
+            let ratio = (x - previousPoint.x) / (currentPoint.x - previousPoint.x);
+            let point = { x: x } as IRouteStatisticsPoint;
+            point.y = this.getInterpolatedValue(previousPoint.y, currentPoint.y, ratio);
+            point.slope = this.getInterpolatedValue(previousPoint.slope, currentPoint.slope, ratio);
             point.latlng = this.getLatlngInterpolatedValue(previousPoint.latlng, currentPoint.latlng, ratio, point.y);
             return point;
         }
         return previousPoint;
     }
 
-    private getInterpolatedValue(point1: L.Point, point2: L.Point, x: number): number {
-        return (point2.y - point1.y) / (point2.x - point1.x) * (x - point1.x) + point1.y;
+    private getInterpolatedValue(value1: number, value2: number, ratio: number) {
+        return (value2 - value1) * ratio + value1;
     }
 
     private getLatlngInterpolatedValue(latlng1: L.LatLng, latlng2: L.LatLng, ratio: number, alt: number): L.LatLng {
