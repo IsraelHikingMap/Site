@@ -1,7 +1,6 @@
 ﻿using IsraelHiking.Common;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccessInterfaces
 {
@@ -19,6 +18,7 @@ namespace IsraelHiking.DataAccessInterfaces
         Task UpdateUserLayer(MapLayerData layerData);
         Task DeleteUserLayer(MapLayerData layerData);
 
+        Task<List<Rating>> GetRatings();
         Task<Rating> GetRating(string id, string source);
         Task UpdateRating(Rating rating);
     }
