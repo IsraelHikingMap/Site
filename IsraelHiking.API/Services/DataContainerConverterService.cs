@@ -77,7 +77,7 @@ namespace IsraelHiking.API.Services
             }
             foreach (var route in container.Routes.Where(r => r.Segments.SelectMany(s => s.Latlngs).Any()))
             {
-                route.Segments = _routeDataSplitterService.Split(route, RoutingType.HIKE).Segments;
+                route.Segments = _routeDataSplitterService.Split(route).Segments;
             }
             foreach (var route in container.Routes.Where(r => string.IsNullOrWhiteSpace(r.Name)))
             {

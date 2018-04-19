@@ -11,8 +11,7 @@ namespace IsraelHiking.API.Services
         /// Splits the route using Douglas-peucker algorithm to keep the important points
         /// </summary>
         /// <param name="routeData">The <see cref="RouteData"/> to split</param>
-        /// <param name="routingType">The routing type to use for each segment</param>
         /// <returns>A split route</returns>
-        RouteData Split(RouteData routeData, string routingType);
+        RouteData Split(RouteData routeData);
     }
 }

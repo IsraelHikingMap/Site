@@ -216,7 +216,7 @@ namespace IsraelHiking.API.Tests.Services
                     new RouteSegmentData()
                 }
             };
-            _routeDataSplitterService.Split(Arg.Any<RouteData>(), Arg.Any<string>()).Returns(newRouteData);
+            _routeDataSplitterService.Split(Arg.Any<RouteData>()).Returns(newRouteData);
 
             var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), FlowFormats.GPX).Result;
 
@@ -258,7 +258,7 @@ namespace IsraelHiking.API.Tests.Services
                     new RouteSegmentData()
                 }
             };
-            _routeDataSplitterService.Split(Arg.Any<RouteData>(), Arg.Any<string>()).Returns(newRouteData);
+            _routeDataSplitterService.Split(Arg.Any<RouteData>()).Returns(newRouteData);
 
             var dataContainer = _converterService.ToDataContainer(gpxToConvert.ToBytes(), FlowFormats.GPX).Result;
 

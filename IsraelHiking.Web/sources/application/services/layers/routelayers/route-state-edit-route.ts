@@ -296,7 +296,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
             startLatLng = startSegmentEndPoint;
         }
         endSegment.polyline.setLatLngs([]);
-        let data = await this.context.routerService.getRoute(startLatLng, endSegment.routePoint, endSegment.routingType);
+        let data = await this.context.routerService.getRoute(startLatLng, endSegment.routePoint, endSegment.routingType || this.context.route.properties.currentRoutingType);
 
         this.context.mapService.map.removeLayer(loadingPolyline);
         var latlngs = data[data.length - 1].latlngs;

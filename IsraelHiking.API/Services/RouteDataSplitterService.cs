@@ -30,7 +30,7 @@ namespace IsraelHiking.API.Services
         }
 
         ///<inheritdoc/>
-        public RouteData Split(RouteData routeData, string routingType)
+        public RouteData Split(RouteData routeData)
         {
             var allRoutePoints = routeData.Segments.SelectMany(s => s.Latlngs).ToList();
             var coordinates = ToWgs84Coordinates(allRoutePoints);
@@ -63,8 +63,7 @@ namespace IsraelHiking.API.Services
                 manipulatedRouteData.Segments.Add(new RouteSegmentData
                 {
                     Latlngs = latLngs,
-                    RoutePoint = latLngs.Last(),
-                    RoutingType = routingType
+                    RoutePoint = latLngs.Last()
                 });
             }
 
