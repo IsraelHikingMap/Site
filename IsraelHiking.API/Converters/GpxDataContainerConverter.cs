@@ -6,22 +6,42 @@ using System.Xml;
 
 namespace IsraelHiking.API.Converters
 {
-    internal static class RoutingTypeConverter
-    {
-        private const string ROUTING_TYPE = "RoutingType";
+    internal abstract class XmlExtensionConverter {
 
-        public static string FromXml(extensionsType extensions)
+        protected abstract string ElementName { get; }
+
+        public string FromXml(extensionsType extensions)
         {
-            return extensions?.Any.FirstOrDefault(a => a.LocalName == ROUTING_TYPE)?.InnerText;
+            return extensions?.Any.FirstOrDefault(a => a.LocalName == ElementName)?.InnerText;
         }
 
-        public static XmlElement ToXml(string type)
+        public XmlElement ToXml(string value)
         {
             var doc = new XmlDocument();
-            var element = doc.CreateElement(ROUTING_TYPE);
-            element.InnerText = type;
+            var element = doc.CreateElement(ElementName);
+            element.InnerText = value;
             return element;
         }
+    }
+
+    internal class RoutingTypeConverter : XmlExtensionConverter
+    {
+        protected override string ElementName => "RoutingType";
+    }
+
+    internal class ColorConverter : XmlExtensionConverter
+    {
+        protected override string ElementName => "Color";
+    }
+
+    internal class OpacityConverter : XmlExtensionConverter
+    {
+        protected override string ElementName => "Opacity";
+    }
+
+    internal class WeightConverter : XmlExtensionConverter
+    {
+        protected override string ElementName => "Weight";
     }
 
     ///<inheritdoc />
@@ -40,7 +60,16 @@ namespace IsraelHiking.API.Converters
                 {
                     name = r.Name,
                     desc = r.Description,
-                    trkseg = r.Segments.Select(ToTrksegType).ToArray()
+                    trkseg = r.Segments.Select(ToTrksegType).ToArray(),
+                    extensions = new extensionsType
+                    {
+                        Any = new[]
+                        {
+                            new ColorConverter().ToXml(r.Color),
+                            new OpacityConverter().ToXml(r.Opacity.ToString()),
+                            new WeightConverter().ToXml(r.Weight.ToString())
+                        }
+                    }
                 }).ToArray()
             }.UpdateBounds();
         }
@@ -97,11 +126,18 @@ namespace IsraelHiking.API.Converters
             {
                 Name = t.name,
                 Description = t.desc,
+                Color = new ColorConverter().FromXml(t.extensions),
+                Opacity = string.IsNullOrWhiteSpace(new OpacityConverter().FromXml(t.extensions)) 
+                    ? (double?)null 
+                    : double.Parse(new OpacityConverter().FromXml(t.extensions)),
+                Weight = string.IsNullOrWhiteSpace(new WeightConverter().FromXml(t.extensions))
+                    ? (int?)null
+                    : int.Parse(new WeightConverter().FromXml(t.extensions)),
                 Segments = t.trkseg.Where(seg => seg?.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
                 {
                     Latlngs = seg.trkpt.Select(ToLatLng).ToList(),
                     RoutePoint = ToLatLng(seg.trkpt.Last()),
-                    RoutingType = RoutingTypeConverter.FromXml(seg.extensions)
+                    RoutingType = new RoutingTypeConverter().FromXml(seg.extensions)
                 }).ToList(),
             });
             return tracks;
@@ -176,7 +212,7 @@ namespace IsraelHiking.API.Converters
             return new trksegType
             {
                 trkpt = segmentData.Latlngs.Select(ToWptType).ToArray(),
-                extensions = new extensionsType { Any = new[] { RoutingTypeConverter.ToXml(segmentData.RoutingType) } }
+                extensions = new extensionsType { Any = new[] { new RoutingTypeConverter().ToXml(segmentData.RoutingType) } }
             };
         }
     }

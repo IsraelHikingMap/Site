@@ -145,6 +145,9 @@ namespace IsraelHiking.API.Tests.Gpx
                     new RouteData
                     {
                         Name = "name1",
+                        Color = "color",
+                        Opacity = 0.5,
+                        Weight = 7,
                         Markers = new List<MarkerData> { new MarkerData { Latlng = new LatLng { Lat = 1, Lng = 2 } } },
                         Segments = new List<RouteSegmentData>
                         {
@@ -178,9 +181,15 @@ namespace IsraelHiking.API.Tests.Gpx
 
             Assert.AreEqual(dataContainer.Routes.Count, newDataContainer.Routes.Count);
             Assert.AreEqual(dataContainer.Routes.First().Name, newDataContainer.Routes.First().Name);
+            Assert.AreEqual(dataContainer.Routes.First().Opacity, newDataContainer.Routes.First().Opacity);
+            Assert.AreEqual(dataContainer.Routes.First().Color, newDataContainer.Routes.First().Color);
+            Assert.AreEqual(dataContainer.Routes.First().Weight, newDataContainer.Routes.First().Weight);
             CollectionAssert.AreEqual(dataContainer.Routes.First().Segments.First().Latlngs, newDataContainer.Routes.First().Segments.First().Latlngs);
             Assert.AreEqual(dataContainer.Routes.First().Markers.First().Latlng, newDataContainer.Routes.First().Markers.First().Latlng);
             Assert.AreEqual(dataContainer.Routes.Last().Name, newDataContainer.Routes.Last().Name);
+            Assert.IsNull(newDataContainer.Routes.Last().Opacity);
+            Assert.IsTrue(string.IsNullOrWhiteSpace(newDataContainer.Routes.Last().Color));
+            Assert.IsNull(newDataContainer.Routes.Last().Weight);
         }
     }
 }
