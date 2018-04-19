@@ -68,6 +68,12 @@ namespace IsraelHiking.DataAccess
                     return null;
                 }
 
+                if (page.Content.Contains("{{מסלולי טיול למפרסמים"))
+                {
+                    // Remove advertised routes
+                    return null;
+                }
+
                 var shareMatch = Regex.Match(page.Content, @"israelhiking\.osm\.org\.il\/.*s=(.*?)[""']", RegexOptions.IgnoreCase);
                 if (page.Content.Contains("{{מסלולי טיול") && !shareMatch.Success)
                 {
