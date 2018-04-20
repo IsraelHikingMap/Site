@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +6,9 @@ using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.API.Controllers
 {
+    /// <summary>
+    /// Fixes ratings - temporary.
+    /// </summary>
     [Route("api/[controller]")]
     public class FixRatingsController : Controller
     {
@@ -16,6 +16,12 @@ namespace IsraelHiking.API.Controllers
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly ILogger _logger;
 
+        /// <summary>
+        /// Class constructor
+        /// </summary>
+        /// <param name="elasticSearchGateway"></param>
+        /// <param name="httpGatewayFactory"></param>
+        /// <param name="logger"></param>
         public FixRatingsController(IElasticSearchGateway elasticSearchGateway,
             IHttpGatewayFactory httpGatewayFactory,
             ILogger logger)
@@ -25,6 +31,11 @@ namespace IsraelHiking.API.Controllers
             _logger = logger;
         }
 
+        /// <summary>
+        /// Main function to call to fix ratings database
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
         public async Task<IActionResult> GetFixRatings()
         {
             _logger.LogInformation("Starting rating fixing");
