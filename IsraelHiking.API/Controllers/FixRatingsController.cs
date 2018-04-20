@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
@@ -49,18 +50,29 @@ namespace IsraelHiking.API.Controllers
                     continue;
                 }
 
-                foreach (var type in new [] { "relation", "node", "way" })
+                if (!rating.Id.StartsWith("node"))
                 {
-                    var node = await osmGateway.GetElement(rating.Id, type);
-                    if (node != null)
-                    {
-                        _logger.LogInformation("https://www.openstreetmap.org/" + type + "/" + rating.Id);
-                        rating.Id = type + "_" + rating.Id;
-                        await _elasticSearchGateway.UpdateRating(rating);
-                        break;
-                    }
+                    continue;
                 }
+                var id = rating.Id.Split("_").Last();
                 
+                var node = await osmGateway.GetNode(id);
+                if (node == null)
+                {
+                    continue;
+                }
+
+                if (node.Latitude >= 28 &&
+                    node.Latitude <= 32 &&
+                    node.Longitude >= 33 &&
+                    node.Longitude <= 35)
+                {
+                    continue;
+                }
+
+                _logger.LogInformation("https://www.openstreetmap.org/way/" + id);
+                rating.Id = "way_" + id;
+                await _elasticSearchGateway.UpdateRating(rating);
             }
             _logger.LogInformation("Finished rating fixing");
             return Ok();
