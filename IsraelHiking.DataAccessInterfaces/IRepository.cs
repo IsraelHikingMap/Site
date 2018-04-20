@@ -21,5 +21,6 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<List<Rating>> GetRatings();
         Task<Rating> GetRating(string id, string source);
         Task UpdateRating(Rating rating);
+        Task DeleteRating(Rating rating);
     }
 }

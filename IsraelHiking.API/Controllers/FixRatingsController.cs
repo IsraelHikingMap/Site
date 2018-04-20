@@ -42,37 +42,66 @@ namespace IsraelHiking.API.Controllers
             _logger.LogInformation("Starting rating fixing");
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(null);
             var ratings = await _elasticSearchGateway.GetRatings();
+            _logger.LogInformation("Total rating: " + ratings.Count);
+            ratings = ratings.Where(r => r.Source.Equals(Sources.OSM)).ToList();
             _logger.LogInformation("Rating to fix: " + ratings.Count);
             foreach (var rating in ratings)
             {
-                if (rating.Source != Sources.OSM)
+                if (!rating.Id.Contains("_"))
                 {
+                    _logger.LogInformation("Deleteing for id: " + rating.Id);
+                    await _elasticSearchGateway.DeleteRating(rating);
                     continue;
                 }
-
-                if (!rating.Id.StartsWith("node"))
-                {
-                    continue;
-                }
+                var type = rating.Id.Split("_").First();
                 var id = rating.Id.Split("_").Last();
                 
-                var node = await osmGateway.GetNode(id);
-                if (node == null)
+                var element = await osmGateway.GetElement(id, type);
+                if (element == null)
                 {
-                    continue;
+                    _logger.LogInformation("Deleteing for id: " + rating.Id);
+                    await _elasticSearchGateway.DeleteRating(rating);
                 }
-
-                if (node.Latitude >= 28 &&
-                    node.Latitude <= 32 &&
-                    node.Longitude >= 33 &&
-                    node.Longitude <= 35)
+                foreach (var typeToCheck in new [] { "node", "way", "relation"})
                 {
-                    continue;
+                    var latLng = new LatLng();
+                    switch (typeToCheck)
+                    {
+                        case "node":
+                            var node = await osmGateway.GetNode(id);
+                            if (node != null)
+                            {
+                                latLng.Lat = node.Latitude.Value;
+                                latLng.Lng = node.Longitude.Value;
+                            }
+                            break;
+                        case "way":
+                            var way = await osmGateway.GetCompleteWay(id);
+                            if (way != null)
+                            {
+                                latLng.Lat = way.Nodes.First().Latitude.Value;
+                                latLng.Lng = way.Nodes.First().Longitude.Value;
+                            }
+                            break;
+                        case "relation":
+                            continue;
+                    }
+                    if (latLng.Lat >= 28 &&
+                        latLng.Lat <= 32 &&
+                        latLng.Lng >= 33 &&
+                        latLng.Lng <= 35)
+                    {
+                        _logger.LogInformation("Update: https://www.openstreetmap.org/" + typeToCheck + "/" + id);
+                        rating.Id = typeToCheck + "_" + id;
+                        await _elasticSearchGateway.UpdateRating(rating);
+                    }
+                    else
+                    {
+                        rating.Id = typeToCheck + "_" + id;
+                        _logger.LogInformation("Deleteing for id: " + rating.Id);
+                        await _elasticSearchGateway.DeleteRating(rating);
+                    }
                 }
-
-                _logger.LogInformation("https://www.openstreetmap.org/way/" + id);
-                rating.Id = "way_" + id;
-                await _elasticSearchGateway.UpdateRating(rating);
             }
             _logger.LogInformation("Finished rating fixing");
             return Ok();

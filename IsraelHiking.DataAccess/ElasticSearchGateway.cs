@@ -267,6 +267,11 @@ namespace IsraelHiking.DataAccess
             return _elasticClient.IndexAsync(rating, r => r.Index(RATINGS).Id(GetId(rating)));
         }
 
+        public Task DeleteRating(Rating rating)
+        {
+            return _elasticClient.DeleteAsync<Rating>(GetId(rating), r => r.Index(RATINGS));
+        }
+
         private async Task UpdateData(List<Feature> features, string alias)
         {
             var result = await _elasticClient.BulkAsync(bulk =>
