@@ -384,12 +384,6 @@ namespace IsraelHiking.DataAccess
             return UpdateData(features, CACHE);
         }
 
-        public async Task<List<Rating>> GetRatings()
-        {
-            var response = await _elasticClient.SearchAsync<Rating>(q => q.Index(RATINGS).Size(1000));
-            return response.Documents.ToList();
-        }
-
         public Task<Rating> GetRating(string id, string source)
         {
             return Task.Run(() =>
