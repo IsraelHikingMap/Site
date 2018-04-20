@@ -239,6 +239,23 @@ namespace IsraelHiking.Common.Extensions
                 .ToDictionary(g => g.Key, g => g.Select(l => l.Split("__").Last()).ToList());
         }
 
+        public static void MergeCombinedPoiIds(this IFeature featureToMergeTo, IFeature feature)
+        {
+            if (!feature.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
+            {
+                return;
+            }
+            var list = new List<string>();
+            if (featureToMergeTo.Attributes.Exists(FeatureAttributes.POI_COMBINED_IDS))
+            {
+                list = GetStringListFromAttributeValue(featureToMergeTo.Attributes[FeatureAttributes.POI_COMBINED_IDS]);
+            }
+            var updatedList = list
+                .Concat(GetStringListFromAttributeValue(feature.Attributes[FeatureAttributes.POI_COMBINED_IDS]))
+                .Distinct().ToList();
+            featureToMergeTo.Attributes.AddOrUpdate(FeatureAttributes.POI_COMBINED_IDS, updatedList);
+        }
+
         /// <summary>
         /// This function checks if a feature is a valid point of interest:
         /// Either has a name, description, image or related points of interest.

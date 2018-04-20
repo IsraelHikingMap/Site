@@ -337,5 +337,83 @@ namespace IsraelHiking.API.Tests.Executors
             Assert.AreEqual(1, results.Count);
             Assert.AreEqual(1, results.First().GetIdsFromCombinedPoi().Count);
         }
+
+        [TestMethod]
+        public void MergeFeatures_TwoBusStopsAndWikipedia_ShouldMergeOnlyBusStops()
+        {
+            var node1 = CreateFeature("1", 0, 0);
+            node1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "bus");
+            node1.Attributes.AddOrUpdate(FeatureAttributes.ICON, "icon-bus-stop");
+            node1.SetTitles();
+            var node2 = CreateFeature("2", 0, 0);
+            node2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "bus");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.ICON, "icon-bus-stop");
+            node2.SetTitles();
+            var node3 = CreateFeature("3", 0, 0);
+            node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "bus");
+            node3.Attributes.AddOrUpdate(FeatureAttributes.ICON, "icon-wikipedia");
+            node3.Attributes.AddOrUpdate(FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA);
+            node3.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { node1, node2, node3 });
+
+            Assert.AreEqual(2, results.Count);
+            Assert.AreEqual(0, results.First().GetIdsFromCombinedPoi().Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_WayAndNodeAreSortedBackwards_ShouldMergeWayToNode()
+        {
+            var way = CreateFeature("way_1", 0, 0);
+            way.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            way.Geometry = new LineString(new[]
+            {
+                new Coordinate(0,0),
+                new Coordinate(1,1)
+            });
+            way.SetTitles();
+            var node = CreateFeature("node_2", 0, 0);
+            node.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { way, node });
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(0, results.First().GetIdsFromCombinedPoi().Count);
+        }
+
+        [TestMethod]
+        public void MergeFeatures_MultiplteMerges_ShouldMergeGeometriesRight()
+        {
+            var node1 = CreateFeature("node_1", -0.0008, 0);
+            node1.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node1.Attributes.AddOrUpdate(FeatureAttributes.NAME + "1", "name1");
+            node1.Attributes.AddOrUpdate(FeatureAttributes.NAME + "2", "name2");
+            node1.Attributes.AddOrUpdate(FeatureAttributes.NAME + "3", "name3");
+            node1.SetTitles();
+
+            var node2 = CreateFeature("node_2", 0.0008, 0);
+            node2.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.NAME + "1", "name1");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.NAME + "2", "name2");
+            node2.Attributes.AddOrUpdate(FeatureAttributes.NAME + "3", "name3");
+            node2.SetTitles();
+
+            var node3 = CreateFeature("node_3", 0.0008, 0);
+            node3.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node3.SetTitles();
+
+            var node4 = CreateFeature("node_4", 0, 0);
+            node4.Attributes.AddOrUpdate(FeatureAttributes.NAME, "name");
+            node4.SetTitles();
+
+            var results = _executor.Merge(new List<Feature> { node1, node2, node3, node4 });
+
+            Assert.AreEqual(1, results.Count);
+            var geometryCollection = results.First().Geometry as GeometryCollection;
+            Assert.IsNotNull(geometryCollection);
+            Assert.AreEqual(0, geometryCollection.Geometries.OfType<GeometryCollection>().Count());
+            Assert.AreEqual(4, geometryCollection.Geometries.Length);
+        }
     }
 }

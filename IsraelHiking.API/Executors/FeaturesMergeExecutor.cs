@@ -10,6 +10,33 @@ using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Executors
 {
+    /// <summary>
+    /// This comparer handles the order of which features are merged.
+    /// Features that are ordered first will be the target of the merge 
+    /// while features that are ordered last will be the source of the merge.
+    /// </summary>
+    internal class FeatureComparer : IComparer<Feature>
+    {
+        public int Compare(Feature x, Feature y)
+        {
+            var results = x.Geometry.Area.CompareTo(y.Geometry.Area);
+            if (results != 0)
+            {
+                return results;
+            }
+            if (x.Geometry is Point && y.Geometry is Point)
+            {
+                return 0;
+            }
+    
+            if (x.Geometry is Point)
+            {
+                return -1;
+            }
+            return 1;
+        }
+    }
+    
     /// <inheritdoc />
     public class FeaturesMergeExecutor : IFeaturesMergeExecutor
     {
@@ -48,24 +75,31 @@ namespace IsraelHiking.API.Executors
             var featureIdsToRemove = new List<string>();
             var mergingDictionary = new Dictionary<string, List<Feature>>();
             var osmFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() == Sources.OSM)
-                .OrderBy(f => f.Attributes[FeatureAttributes.ID])
+                .OrderBy(f => f, new FeatureComparer())
                 .ToArray();
+            _logger.LogInformation($"Sorted features by importance: {osmFeatures.Length}");
             var nonOsmFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() != Sources.OSM);
             var orderedFeatures = osmFeatures.Concat(nonOsmFeatures).ToArray();
-            foreach (var feature in orderedFeatures)
+            for (var featureIndex = 0; featureIndex < orderedFeatures.Length; featureIndex++)
             {
+                var feature = orderedFeatures[featureIndex];
+                if (featureIndex % 10000 == 0)
+                {
+                    _logger.LogInformation($"Processed {featureIndex} of {features.Count}");
+                }
                 var titles = feature.GetTitles();
-                var needsToBeMergedTo = new Dictionary<string, Feature>();
+                var needsToBeMergedTo = new Dictionary<string, List<Feature>>();
                 foreach (var title in titles)
                 {
                     if (!mergingDictionary.ContainsKey(title))
                     {
                         continue;
                     }
-                    var featureToMergeTo = mergingDictionary[title].FirstOrDefault(f => CanMerge(f, feature));
-                    if (featureToMergeTo != null)
+
+                    var featuresToMergeTo = mergingDictionary[title].Where(f => CanMerge(f, feature)).ToList();
+                    if (featuresToMergeTo.Any())
                     {
-                        needsToBeMergedTo[title] = featureToMergeTo;
+                        needsToBeMergedTo[title] = featuresToMergeTo;
                     }
                 }
 
@@ -78,19 +112,21 @@ namespace IsraelHiking.API.Executors
                 }
                 else
                 {
-                    bool isFirst = true;
-                    var featureToMergeTo = needsToBeMergedTo.First().Value;
+                    var featureToMergeTo = needsToBeMergedTo.Values.First().First();
                     HandleMergingDictionary(mergingDictionary, featureIdsToRemove, featureToMergeTo, feature);
+                    var whereMerged = new List<Feature> { featureToMergeTo, feature };
                     foreach (var pair in needsToBeMergedTo)
                     {
-                        if (isFirst)
+                        foreach (var featureToMerge in pair.Value)
                         {
-                            isFirst = false;
-                            continue;
+                            if (whereMerged.Contains(featureToMerge))
+                            {
+                                continue;
+                            }
+                            whereMerged.Add(featureToMerge);
+                            HandleMergingDictionary(mergingDictionary, featureIdsToRemove, featureToMergeTo, featureToMerge);
+                            mergingDictionary[pair.Key].Remove(featureToMerge);
                         }
-
-                        HandleMergingDictionary(mergingDictionary, featureIdsToRemove, featureToMergeTo, pair.Value);
-                        mergingDictionary[pair.Key].Remove(pair.Value);
                     }
                 }
             }
@@ -135,9 +171,11 @@ namespace IsraelHiking.API.Executors
                 _reportLogger.LogInformation("There's probably a need to add an OSM point here: ");
             }
             var site = GetWebsite(feature);
-            var from = "<a href='" + site + "' target='_blank'>From: " + feature.Attributes[FeatureAttributes.ID] + "</a>";
+            var from =
+                $"<a href='{site}' target='_blank'>From {feature.GetTitles().First()}: {feature.Attributes[FeatureAttributes.ID]}</a>";
             site = GetWebsite(featureToMergeTo);
-            var to = "<a href='" + site + "' target='_blank'>To: " + featureToMergeTo.Attributes[FeatureAttributes.ID] + "</a><br/>";
+            var to = 
+                $"<a href='{site}' target='_blank'>To {featureToMergeTo.GetTitles().First()}: {featureToMergeTo.Attributes[FeatureAttributes.ID]}</a><br/>";
             _reportLogger.LogInformation(from + " " + to);
         }
 
@@ -172,9 +210,20 @@ namespace IsraelHiking.API.Executors
 
         private void MergeFeatures(IFeature featureToMergeTo, IFeature feature)
         {
+            if (featureToMergeTo.Attributes[FeatureAttributes.ID].Equals(feature.Attributes[FeatureAttributes.ID]))
+            {
+                return;
+            }
             if (featureToMergeTo.Geometry is GeometryCollection geometryCollection)
             {
-                featureToMergeTo.Geometry = new GeometryCollection(geometryCollection.Geometries.Concat(new [] { feature.Geometry}).ToArray());
+                if (feature.Geometry is GeometryCollection geometryCollectionSource)
+                {
+                    featureToMergeTo.Geometry = new GeometryCollection(geometryCollection.Geometries.Concat(geometryCollectionSource.Geometries).ToArray());
+                }
+                else
+                {
+                    featureToMergeTo.Geometry = new GeometryCollection(geometryCollection.Geometries.Concat(new[] { feature.Geometry }).ToArray());
+                }
             }
             else
             {
@@ -212,7 +261,7 @@ namespace IsraelHiking.API.Executors
                 // do not merge OSM elements to each other since they won't exists in the database for fetching
                 featureToMergeTo.AddIdToCombinedPoi(feature);
             }
-
+            featureToMergeTo.MergeCombinedPoiIds(feature);
         }
 
         private void AddToDictionaryWithList(Dictionary<string, List<Feature>> dictionary, string title, Feature feature)
@@ -229,6 +278,10 @@ namespace IsraelHiking.API.Executors
 
         private bool CanMerge(Feature target, Feature source)
         {
+            if (target.Attributes[FeatureAttributes.ID].Equals(source.Attributes[FeatureAttributes.ID]))
+            {
+                return false;
+            }
             bool geometryContains;
             if (target.Geometry is GeometryCollection geometryCollection)
             {
@@ -247,6 +300,14 @@ namespace IsraelHiking.API.Executors
             if (source.Attributes[FeatureAttributes.ICON].Equals(target.Attributes[FeatureAttributes.ICON]))
             {
                 return true;
+            }
+
+            if (target.Attributes[FeatureAttributes.ICON].Equals("icon-bus-stop") &&
+                target.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM) &&
+                !source.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
+            {
+                // do not merge non-osm info into bus stops
+                return false;
             }
             // different icon
             if (!source.Attributes[FeatureAttributes.POI_SOURCE].Equals(target.Attributes[FeatureAttributes.POI_SOURCE]))
