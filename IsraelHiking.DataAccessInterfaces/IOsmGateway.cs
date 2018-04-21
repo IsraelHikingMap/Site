@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using IsraelHiking.Common;
 using OsmSharp;
 using OsmSharp.API;
+using OsmSharp.Changesets;
 using OsmSharp.Complete;
 
 namespace IsraelHiking.DataAccessInterfaces
@@ -12,6 +13,7 @@ namespace IsraelHiking.DataAccessInterfaces
     {
         Task<User> GetUser();
         Task<string> CreateChangeset(string comment);
+        Task<DiffResult> UploadChangeset(string changesetId, OsmChange osmChange);
         Task CloseChangeset(string changesetId);
 
         Task<string> CreateElement(string changesetId, OsmGeo osmGeo);

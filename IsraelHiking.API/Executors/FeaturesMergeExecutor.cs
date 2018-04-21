@@ -189,7 +189,7 @@ namespace IsraelHiking.API.Executors
             var id = feature.Attributes[FeatureAttributes.ID].ToString();
             if (id.Split("_").Length == 2)
             {
-                return "https://www.openstreetmap.org/" + id.Split("_")[0] + "/" + id.Split("_")[1];
+                return "https://www.openstreetmap.org/" + feature.GetOsmType() + "/" + feature.GetOsmId();
             }
 
             return string.Empty;

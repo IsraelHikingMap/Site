@@ -7,6 +7,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using OAuth;
@@ -32,6 +33,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         private readonly string _baseAddressWithoutProtocol;
         private readonly string _userDetailsAddress;
         private readonly string _createChangesetAddress;
+        private readonly string _uploadChangesetAddress;
         private readonly string _closeChangesetAddress;
         private readonly string _createElementAddress;
         private readonly string _elementAddress;
@@ -49,6 +51,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _baseAddressWithoutProtocol = _options.OsmConfiguraion.BaseAddress.Replace("http://", "").Replace("https://", "");
             _userDetailsAddress = osmApiBaseAddress + "user/details";
             _createChangesetAddress = osmApiBaseAddress + "changeset/create";
+            _uploadChangesetAddress = osmApiBaseAddress + "changeset/:id/upload";
             _closeChangesetAddress = osmApiBaseAddress + "changeset/:id/close";
             _createElementAddress = osmApiBaseAddress + ":type/create";
             _elementAddress = osmApiBaseAddress + ":type/:id";
@@ -124,6 +127,26 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                     throw new Exception($"Unable to create changeset: {message}");
                 }
                 return await response.Content.ReadAsStringAsync();
+            }
+        }
+
+        public async Task<DiffResult> UploadChangeset(string changesetId, OsmChange osmChange)
+        {
+            using (var client = new HttpClient())
+            {
+                foreach (var osmGeo in osmChange.Create.Concat(osmChange.Modify).Concat(osmChange.Delete))
+                {
+                    osmGeo.ChangeSetId = long.Parse(changesetId);
+                }
+                var address = _uploadChangesetAddress.Replace(":id", changesetId);
+                UpdateHeaders(client, address, "POST");
+                var response = await client.PostAsync(address, new StringContent(osmChange.SerializeToXml()));
+                if (response.StatusCode != HttpStatusCode.OK)
+                {
+                    var message = await response.Content.ReadAsStringAsync();
+                    throw new Exception($"Unable to upload changeset: {message}");
+                }
+                return GetDiffResultWithFix(await response.Content.ReadAsStringAsync());
             }
         }
 
@@ -383,6 +406,36 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
         {
             var serializer = new XmlSerializer(typeof(Osm));
             return serializer.Deserialize(stream) as Osm;
+        }
+
+        /// <summary>
+        /// HM TODO: remove this when fixed.
+        /// This is a temporary fix until issue https://github.com/OsmSharp/core/issues/54 is resolved
+        /// </summary>
+        /// <returns></returns>
+        private DiffResult GetDiffResultWithFix(string xmlContent)
+        {
+            var serializer = new XmlSerializer(typeof(DiffResult));
+            var diffResult = serializer.Deserialize(new StringReader(xmlContent)) as DiffResult;
+            // results is null, remove this after the fix is made to OsmSharp.core:
+            diffResult.Results = new OsmGeoResult[0];
+            var doc = XDocument.Parse(xmlContent);
+            var elements = doc.Descendants().Where(x =>
+                x.Name.LocalName == "node" ||
+                x.Name.LocalName == "way" ||
+                x.Name.LocalName == "relation");
+            var results = new List<OsmGeoResult>();
+            foreach (var xElement in elements)
+            {
+                results.Add(new NodeResult
+                {
+                    OldId = long.Parse(xElement.Attributes().First(x => x.Name.LocalName.ToLower() == "old_id").Value),
+                    NewId = long.Parse(xElement.Attributes().First(x => x.Name.LocalName.ToLower() == "new_id").Value),
+                    NewVersion = int.Parse(xElement.Attributes().First(x => x.Name.LocalName.ToLower() == "new_version").Value)
+                });
+            }
+            diffResult.Results = results.ToArray();
+            return diffResult;
         }
     }
 }

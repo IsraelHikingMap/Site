@@ -275,5 +275,25 @@ namespace IsraelHiking.Common.Extensions
                    feature.Attributes.GetNames().Any(n => n.StartsWith(FeatureAttributes.IMAGE_URL)) ||
                    feature.GetIdsFromCombinedPoi().Any();
         }
+
+        public static string GetOsmId(this IFeature feature)
+        {
+            return GetOsmId(feature.Attributes[FeatureAttributes.ID].ToString());
+        }
+
+        public static string GetOsmType(this IFeature feature)
+        {
+            return GetOsmType(feature.Attributes[FeatureAttributes.ID].ToString());
+        }
+
+        public static string GetOsmId(string id)
+        {
+            return id.Split("_").Last();
+        }
+
+        public static string GetOsmType(string id)
+        {
+            return id.Split("_").First();
+        }
     }
 }
