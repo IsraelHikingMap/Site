@@ -36,11 +36,11 @@
         /// <summary>
         /// KML alias in GPSBabel
         /// </summary>
-        public const string KML_BABEL_FORMAT = "kml,points=0";
+        public const string KML_BABEL_FORMAT = "kml,points=0,deficon=\"http://maps.google.com/mapfiles/kml/pal4/icon61.png\"";
         /// <summary>
         /// Naviguide alias in GPSBabel
         /// </summary>
-        public const string TWL_BABEL_FORMAT = "naviguide";
+        public const string TWL_BABEL_FORMAT = "naviguide,input=trw";
         /// <summary>
         /// CSV alias in GPSBabel
         /// </summary>

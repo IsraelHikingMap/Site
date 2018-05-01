@@ -35,7 +35,7 @@ namespace IsraelHiking.DataAccess
                 var outputTempfileName = Path.GetTempFileName();
                 File.WriteAllBytes(inputTempfileName, content);
                 var workingDirectory = Path.Combine(_options.BinariesFolder, GPSBABEL_DIRECTORY);
-                var arguments = "-N -i " + inputFormat + " -f \"" + inputTempfileName + "\" -o " + outputFormat + " -F \"" +
+                var arguments = "-i " + inputFormat + " -f \"" + inputTempfileName + "\" -o " + outputFormat + " -F \"" +
                                 outputTempfileName + "\"";
                 _processHelper.Start(GPS_BABEL_EXE, arguments, workingDirectory);
                 File.Delete(inputTempfileName);
