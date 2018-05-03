@@ -18,7 +18,7 @@
         /// </summary>
         public const string KML = "kml";
         /// <summary>
-        /// Navigude - TWL
+        /// Naviguide - TWL
         /// </summary>
         public const string TWL = "twl";
         /// <summary>

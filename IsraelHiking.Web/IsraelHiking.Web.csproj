@@ -8,6 +8,7 @@
     <DebugType>full</DebugType>
     <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
     <UserSecretsId>a21e53dc-017c-42f4-be3d-5dbe7eaf9433</UserSecretsId>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>

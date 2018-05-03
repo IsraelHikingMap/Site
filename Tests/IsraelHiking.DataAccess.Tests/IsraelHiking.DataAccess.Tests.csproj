@@ -2,6 +2,7 @@
 
   <PropertyGroup>    
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
   </PropertyGroup>
 
   <ItemGroup>
@@ -28,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\IsraelHiking.API\IsraelHiking.API.csproj" />
     <ProjectReference Include="..\..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
   </ItemGroup>
 
