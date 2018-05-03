@@ -13,7 +13,7 @@ namespace IsraelHiking.DataAccess
         private readonly IProcessHelper _processHelper;
         private readonly ConfigurationData _options;
         private const string GPS_BABEL_EXE = "gpsbabel.exe";
-        private const string GPSBABEL_DIRECTORY = "GPSBabel";
+        private const string GPSBABEL_DIRECTORY = "runtimes/win/native";
 
         public GpsBabelGateway(ILogger logger, IProcessHelper processHelper, IOptions<ConfigurationData> options)
         {
