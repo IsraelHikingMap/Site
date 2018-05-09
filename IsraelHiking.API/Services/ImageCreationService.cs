@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -400,17 +399,12 @@ namespace IsraelHiking.API.Services
         /// <returns></returns>
         private Color FromColorString(string colorString, double? opacity = null)
         {
-            if (colorString.StartsWith("#"))
+            var color = ColorTranslator.FromHtml(colorString);
+            if (color.A == 255 && opacity.HasValue)
             {
-                var hexNumberString = colorString.Replace("#", "");
-                if (hexNumberString.Length == 6)
-                {
-                    var alpha = ((int)Math.Round((opacity ?? 1.0) * 255)).ToString("X2");
-                    hexNumberString = alpha + hexNumberString;
-                }
-                return Color.FromArgb(int.Parse(hexNumberString, NumberStyles.HexNumber));
+                color = Color.FromArgb((int)(opacity * 255), color.R, color.G, color.B);
             }
-            return Color.FromName(colorString);
+            return color;
         }
 
         /// <summary>
