@@ -257,7 +257,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         let editMode = this.routesService.selectedRoute.getEditMode();
         this.routesService.selectedRoute.setHiddenState();
         var icon = "icon-star";
-        var id = this.info.title;
+        var id = "";
         if (this.poiExtended) {
             icon = this.poiExtended.icon;
             id = this.poiExtended.id;
