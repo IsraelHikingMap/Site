@@ -122,7 +122,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         let dialogElement = this.dialogContent.nativeElement as HTMLElement;
         this.scrollToService.scrollTo(
             {
-                offset: this.state.scrollPosition + dialogElement.offsetTop, // should be removed after fix https://github.com/nicky-lenaers/ngx-scroll-to/issues/68
+                offset: this.state.scrollPosition,
                 container: dialogElement
             } as ScrollToConfigOptions);
     }
