@@ -51,7 +51,9 @@ describe("RouterService", () => {
                 } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
         })));
 
-    it("Should use none router when reponse is not a geojson", inject([RouterService, HttpTestingController], async (router: RouterService, mockBackend: HttpTestingController) => {
+    it("Should use none router when reponse is not a geojson", inject([RouterService, HttpTestingController],
+        async (router: RouterService, mockBackend: HttpTestingController) => {
+
         router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
             expect(data.length).toBe(1);
             expect(data[0].latlngs.length).toBe(2);

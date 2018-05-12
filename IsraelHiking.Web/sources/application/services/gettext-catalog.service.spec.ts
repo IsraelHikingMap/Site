@@ -22,7 +22,9 @@ describe("GetTextCatalogService", () => {
         expect(service.getCurrentLanguage()).toBe("he");
     }));
 
-    it("Should load language file from server", (inject([GetTextCatalogService, HttpTestingController], async (service: GetTextCatalogService, mockBackend: HttpTestingController) => {
+    it("Should load language file from server", (inject([GetTextCatalogService, HttpTestingController],
+        async (service: GetTextCatalogService, mockBackend: HttpTestingController) => {
+
         service.setCurrentLanguage("he");
 
         service.loadRemote("url").then(() => {
@@ -32,7 +34,9 @@ describe("GetTextCatalogService", () => {
         mockBackend.match(() => true)[0].flush({ he: { "word": "word's translation" } });
     })));
 
-    it("Should return original word when translation is missing", (inject([GetTextCatalogService, HttpTestingController], async (service: GetTextCatalogService, mockBackend: HttpTestingController) => {
+    it("Should return original word when translation is missing", (inject([GetTextCatalogService, HttpTestingController],
+        async (service: GetTextCatalogService, mockBackend: HttpTestingController) => {
+
         service.setCurrentLanguage("he");
 
         service.loadRemote("url").then(() => {

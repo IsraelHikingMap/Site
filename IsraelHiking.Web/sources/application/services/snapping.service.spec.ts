@@ -50,7 +50,9 @@ describe("SnappingService", () => {
         expect(snap.polyline).toBeNull();
     }));
 
-    it("Should add one snappings linestring when zoom is 14", inject([SnappingService, HttpTestingController], fakeAsync((snappingService: SnappingService, mockBackend: HttpTestingController) => {
+    it("Should add one snappings linestring when zoom is 14", inject([SnappingService, HttpTestingController],
+        fakeAsync((snappingService: SnappingService, mockBackend: HttpTestingController) => {
+
         snappingService.enable(true);
 
         let features = [
@@ -72,7 +74,9 @@ describe("SnappingService", () => {
         expect(snap.polyline).not.toBeNull();
     })));
 
-    it("Should add one snappings polygon when zoom is 14", fakeAsync(inject([SnappingService, HttpTestingController], (snappingService: SnappingService, mockBackend: HttpTestingController) => {
+    it("Should add one snappings polygon when zoom is 14", fakeAsync(inject([SnappingService, HttpTestingController],
+        (snappingService: SnappingService, mockBackend: HttpTestingController) => {
+
         snappingService.enable(true);
 
         let features = [
@@ -94,7 +98,9 @@ describe("SnappingService", () => {
         expect(snap.polyline).not.toBeNull();
     })));
 
-    it("Should add one snappings point when zoom is 14", inject([SnappingService, HttpTestingController], fakeAsync((snappingService: SnappingService, mockBackend: HttpTestingController) => {
+    it("Should add one snappings point when zoom is 14", inject([SnappingService, HttpTestingController],
+        fakeAsync((snappingService: SnappingService, mockBackend: HttpTestingController) => {
+
         snappingService.enable(true);
 
         let features = [
@@ -117,7 +123,9 @@ describe("SnappingService", () => {
         expect(snap.markerData).not.toBeNull();
     })));
 
-    it("Should clear layer upon http error", fakeAsync(inject([SnappingService, HttpTestingController], (snappingService: SnappingService, mockBackend: HttpTestingController) => {
+    it("Should clear layer upon http error", fakeAsync(inject([SnappingService, HttpTestingController],
+        (snappingService: SnappingService, mockBackend: HttpTestingController) => {
+
         snappingService.enable(true);
 
         mapServiceMock.mapService.map.setView(L.latLng(2, 2), 14);
@@ -157,7 +165,9 @@ describe("SnappingService", () => {
         expect(snap.latlng.lng).toBeGreaterThan(1.0);
     }));
 
-    it("Should snap to its own layers but ignore a line with single point", inject([SnappingService], (snappingService: SnappingService) => {
+    it("Should snap to its own layers but ignore a line with single point",
+        inject([SnappingService], (snappingService: SnappingService) => {
+
         snappingService.enable(true);
         let polylines = [L.polyline([L.latLng(1, 1)]), L.polyline([L.latLng(1, 1), L.latLng(1, 2)])];
 

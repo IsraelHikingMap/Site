@@ -58,7 +58,12 @@ describe("MapService", () => {
         let service = mapMock.mapService;
         let marker = L.marker(L.latLng(0, 0));
 
-        service.setMarkerTitle(marker as Common.IMarkerWithTitle, { title: "title", urls: [{ mimeType: "image/png" }] } as Common.MarkerData, "#ffff00");
+        service.setMarkerTitle(marker as Common.IMarkerWithTitle,
+            {
+                title: "title",
+                urls: [{ mimeType: "image/png" }]
+            } as Common.MarkerData,
+            "#ffff00");
 
         expect(marker.getTooltip).not.toBeNull();
     });

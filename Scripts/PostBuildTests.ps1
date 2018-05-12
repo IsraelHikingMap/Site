@@ -35,7 +35,7 @@ Write-Host "npm run-script test -- --no-progress --code-coverage"
 npm run-script test -- --no-progress --code-coverage
 
 Write-Host "run-script lint"
-npm run-script lint | Select-String -Pattern 'ERROR:' | ForEach-Object { Add-AppveyorMessage -Message $_.line -Category Warning; }
+npm run-script lint | Select-String -Pattern 'ERROR:' | ForEach-Object { Add-AppveyorCompilationMessage -Message $_.line -Category Warning; }
 
 # Locate JUnit XML results file
 

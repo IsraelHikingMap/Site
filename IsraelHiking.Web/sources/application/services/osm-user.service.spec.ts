@@ -53,13 +53,17 @@ describe("OSM User Service", () => {
         });
     }
 
-    it("Should initialize on demand", inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+    it("Should initialize on demand", inject([OsmUserService, HttpTestingController],
+        async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+
         osmUserService.initialize();
         setupInit(mockBackend);
         expect(osmUserService.isLoggedIn()).toBeFalsy();
     }));
 
-    it("Should not refresh details when not logged in", inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+    it("Should not refresh details when not logged in", inject([OsmUserService, HttpTestingController],
+        async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+
         spyOn(oauth, "logout");
 
         osmUserService.initialize().then(() => {
@@ -69,7 +73,8 @@ describe("OSM User Service", () => {
         setupInit(mockBackend);
     }));
 
-    it("Should login and get data", inject([OsmUserService, HttpTestingController], fakeAsync((osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+    it("Should login and get data", inject([OsmUserService, HttpTestingController],
+        fakeAsync((osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
 
         oauth.authenticated = () => { return true; };
         oauth.xhr = (addressObject, callback: Function) => {
@@ -90,7 +95,9 @@ describe("OSM User Service", () => {
         expect(osmUserService.traces.length).toBe(1);
     })));
 
-    it("Should login even if requests for data fails", inject([OsmUserService, HttpTestingController], fakeAsync((osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+    it("Should login even if requests for data fails",
+        inject([OsmUserService, HttpTestingController], fakeAsync((osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+
         oauth.authenticated = () => { return true; };
         oauth.xhr = (addressObject, callback: Function) => {
             if (addressObject.path.includes("details")) {
@@ -112,14 +119,18 @@ describe("OSM User Service", () => {
     })));
 
 
-    it("Should logout", inject([OsmUserService, AuthorizationService], (osmUserService: OsmUserService, authorizationService: AuthorizationService) => {
+    it("Should logout", inject([OsmUserService, AuthorizationService],
+        (osmUserService: OsmUserService, authorizationService: AuthorizationService) => {
+
         authorizationService.osmToken = "42";
         osmUserService.logout();
         expect(authorizationService.osmToken).toBeNull();
     }));
 
 
-    it("Should update site url", inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+    it("Should update site url", inject([OsmUserService, HttpTestingController],
+        async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+
         let shareUrl = { id: "42" } as Common.ShareUrl;
 
         osmUserService.updateShareUrl(shareUrl);
@@ -127,7 +138,9 @@ describe("OSM User Service", () => {
         mockBackend.expectOne(Urls.urls + shareUrl.id);
     }));
 
-    it("Should delete site url", inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+    it("Should delete site url", inject([OsmUserService, HttpTestingController],
+        async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+
         let shareUrl = { id: "42" } as Common.ShareUrl;
         osmUserService.shareUrls = [shareUrl];
 
@@ -139,7 +152,9 @@ describe("OSM User Service", () => {
     }));
 
 
-    it("Should get missing parts", inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+    it("Should get missing parts", inject([OsmUserService, HttpTestingController],
+        async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+
         let trace = { dataUrl: "123" } as ITrace;
 
         osmUserService.getMissingParts(trace);
@@ -147,7 +162,9 @@ describe("OSM User Service", () => {
         mockBackend.expectOne(Urls.osm + "?url=" + trace.dataUrl);
     }));
 
-    it("Should add missing parts", inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+    it("Should add missing parts", inject([OsmUserService, HttpTestingController],
+        async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+
         osmUserService.addAMissingPart({} as GeoJSON.Feature<GeoJSON.LineString>);
 
         mockBackend.expectOne(Urls.osm);
@@ -204,7 +221,9 @@ describe("OSM User Service", () => {
         expect(links.nakeb).toContain("nakeb");
     }));
 
-    it("Should get image preview by sending a request to server", inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+    it("Should get image preview by sending a request to server",
+        inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
+
         osmUserService.getImagePreview({} as Common.DataContainer);
 
         mockBackend.expectOne(Urls.images);
