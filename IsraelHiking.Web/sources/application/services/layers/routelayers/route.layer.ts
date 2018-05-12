@@ -8,7 +8,15 @@ import { RouterService } from "../../routers/router.service";
 import { GeoLocationService } from "../../geo-location.service";
 import { ElevationProvider } from "../../elevation.provider";
 import { IRouteState, EditMode } from "./iroute-state";
-import { IRouteLayer, IRoute, IRouteProperties, IRouteSegment, IMarkerWithData, EditModeString, ISnappingForRouteResponse } from "./iroute.layer";
+import {
+    IRouteLayer,
+    IRoute,
+    IRouteProperties,
+    IRouteSegment,
+    IMarkerWithData,
+    EditModeString,
+    ISnappingForRouteResponse
+} from "./iroute.layer";
 import { RouteStateReadOnly } from "./route-state-read-only";
 import { RouteStateHidden } from "./route-state-hidden";
 import { RouteStateEditPoi } from "./route-state-edit-poi";

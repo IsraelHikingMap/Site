@@ -151,7 +151,10 @@ export class RouteStatisticsService {
                 return false;
             }
         }
-        let distance = L.LineUtil.pointToSegmentDistance(L.point(latlng1.lng, latlng1.lat), L.point(latlng2.lng, latlng2.lat), L.point(latlng.lng, latlng.lat));
+        let distance = L.LineUtil.pointToSegmentDistance(
+            L.point(latlng1.lng, latlng1.lat),
+            L.point(latlng2.lng, latlng2.lat),
+            L.point(latlng.lng, latlng.lat));
         if (distance < 0.1) {
             return true;
         }

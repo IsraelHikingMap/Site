@@ -153,7 +153,8 @@ export class RouteStateEditRoute extends RouteStateEditBase {
     }
 
     private dragRouteMarkerStart = (point: L.Marker) => {
-        let pointSegmentToDrag = _.find(this.context.route.segments, (pointSegmentTofind) => pointSegmentTofind.routePointMarker.getLatLng().equals(point.getLatLng()));
+        let pointSegmentToDrag = _.find(this.context.route.segments,
+            (pointSegmentTofind) => pointSegmentTofind.routePointMarker.getLatLng().equals(point.getLatLng()));
         this.selectedRouteSegmentIndex = pointSegmentToDrag == null ? -1 : this.context.route.segments.indexOf(pointSegmentToDrag);
     }
 
@@ -164,10 +165,15 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         let snappingResponse = this.context.getSnappingForRoute(marker.getLatLng(), false);
         marker.setLatLng(snappingResponse.latlng);
         this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
-        let segmentStartLatlng = this.selectedRouteSegmentIndex === 0 ? [snappingResponse.latlng] : [this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng(), snappingResponse.latlng];
+        let segmentStartLatlng = this.selectedRouteSegmentIndex === 0
+            ? [snappingResponse.latlng]
+            : [this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng(), snappingResponse.latlng];
         this.context.route.segments[this.selectedRouteSegmentIndex].polyline.setLatLngs(segmentStartLatlng);
         if (this.selectedRouteSegmentIndex < this.context.route.segments.length - 1) {
-            this.context.route.segments[this.selectedRouteSegmentIndex + 1].polyline.setLatLngs([snappingResponse.latlng, this.context.route.segments[this.selectedRouteSegmentIndex + 1].routePointMarker.getLatLng()]);
+            this.context.route.segments[this.selectedRouteSegmentIndex + 1].polyline.setLatLngs([
+                snappingResponse.latlng,
+                this.context.route.segments[this.selectedRouteSegmentIndex + 1].routePointMarker.getLatLng()
+            ]);
         }
     }
 
@@ -179,7 +185,8 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         marker.setLatLng(snappingResponse.latlng);
         this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
         this.context.route.segments[this.selectedRouteSegmentIndex].routingType = this.context.route.properties.currentRoutingType;
-        this.context.route.segments[this.selectedRouteSegmentIndex].latlngs[this.context.route.segments[this.selectedRouteSegmentIndex].latlngs.length - 1] = snappingResponse.latlng;
+        let selectedRouteSegmentLatlngs = this.context.route.segments[this.selectedRouteSegmentIndex].latlngs;
+        selectedRouteSegmentLatlngs[selectedRouteSegmentLatlngs.length - 1] = snappingResponse.latlng;
         let chain = Promise.resolve({});
         let selectedRouteSegmentIndex = this.selectedRouteSegmentIndex; // closure
         if (this.selectedRouteSegmentIndex === 0) {
@@ -198,8 +205,12 @@ export class RouteStateEditRoute extends RouteStateEditBase {
     private middleMarkerDragStart = (middleMarker: L.Marker) => {
         this.hoverHandler.setState(HoverHandlerState.DRAGGING);
         let snappingResponse = this.context.snapToSelf(middleMarker.getLatLng());
-        this.selectedRouteSegmentIndex = _.findIndex(this.context.route.segments, (segment) => segment.polyline === snappingResponse.polyline);
-        let latlngs = [this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng(), snappingResponse.latlng];
+        this.selectedRouteSegmentIndex = _.findIndex(this.context.route.segments,
+            (segment) => segment.polyline === snappingResponse.polyline);
+        let latlngs = [
+            this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng(),
+            snappingResponse.latlng
+        ];
         let newSegment = this.createRouteSegment(snappingResponse.latlng, latlngs, this.context.route.properties.currentRoutingType);
         this.context.route.segments.splice(this.selectedRouteSegmentIndex, 0, newSegment);
     }
@@ -210,15 +221,20 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         }
         let snappingResponse = this.context.getSnappingForRoute(middleMarker.getLatLng(), false);
         middleMarker.setLatLng(snappingResponse.latlng);
-        this.context.route.segments[this.selectedRouteSegmentIndex + 1].polyline.setLatLngs([snappingResponse.latlng, this.context.route.segments[this.selectedRouteSegmentIndex + 1].routePointMarker.getLatLng()]);
-        this.context.route.segments[this.selectedRouteSegmentIndex].polyline.setLatLngs([this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng(), snappingResponse.latlng]);
+        this.context.route.segments[this.selectedRouteSegmentIndex + 1].polyline.setLatLngs(
+            [snappingResponse.latlng, this.context.route.segments[this.selectedRouteSegmentIndex + 1].routePointMarker.getLatLng()]
+        );
+        this.context.route.segments[this.selectedRouteSegmentIndex].polyline.setLatLngs(
+            [this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng(), snappingResponse.latlng]
+        );
     }
 
     private middleMarkerDragEnd = (middleMarker: L.Marker) => {
         let snappingResponse = this.context.getSnappingForRoute(middleMarker.getLatLng(), false);
         this.context.route.segments[this.selectedRouteSegmentIndex].routePointMarker = this.createRouteMarker(snappingResponse.latlng);
         this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
-        this.context.route.segments[this.selectedRouteSegmentIndex].latlngs[this.context.route.segments[this.selectedRouteSegmentIndex].latlngs.length - 1] = snappingResponse.latlng;
+        let selectedSegmentLatlngs = this.context.route.segments[this.selectedRouteSegmentIndex].latlngs;
+        selectedSegmentLatlngs[selectedSegmentLatlngs.length - 1] = snappingResponse.latlng;
         let selectedRouteSegmentIndex = this.selectedRouteSegmentIndex; // closure;
         this.runRouting(selectedRouteSegmentIndex - 1, selectedRouteSegmentIndex)
             .then(() => this.runRouting(selectedRouteSegmentIndex, selectedRouteSegmentIndex + 1))
@@ -266,7 +282,8 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         let segmentlatlngs = segment.latlngs;
         let indexOfSegment = this.context.route.segments.indexOf(segment);
         let newSegmentLatlngs = segmentlatlngs.splice(0, snappingResponse.beforeIndex + 1);
-        let newRouteSegment = this.createRouteSegment(snappingResponse.latlng, newSegmentLatlngs, this.context.route.properties.currentRoutingType);
+        let newRouteSegment = this.createRouteSegment(snappingResponse.latlng, newSegmentLatlngs,
+            this.context.route.properties.currentRoutingType);
         segment.polyline.setLatLngs(segmentlatlngs);
         this.context.route.segments.splice(indexOfSegment, 0, newRouteSegment);
     }
@@ -295,7 +312,8 @@ export class RouteStateEditRoute extends RouteStateEditBase {
             startLatLng = startSegmentEndPoint;
         }
         endSegment.polyline.setLatLngs([]);
-        let data = await this.context.routerService.getRoute(startLatLng, endSegment.routePoint, endSegment.routingType || this.context.route.properties.currentRoutingType);
+        let routingType = endSegment.routingType || this.context.route.properties.currentRoutingType;
+        let data = await this.context.routerService.getRoute(startLatLng, endSegment.routePoint, routingType);
 
         this.context.mapService.map.removeLayer(loadingPolyline);
         let latlngs = data[data.length - 1].latlngs;

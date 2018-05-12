@@ -1,4 +1,16 @@
-﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ViewChildren, ElementRef, ComponentFactory, QueryList } from "@angular/core";
+﻿import {
+    Component,
+    Injector,
+    ComponentFactoryResolver,
+    HostListener,
+    ViewEncapsulation,
+    AfterViewInit,
+    ViewChild,
+    ViewChildren,
+    ElementRef,
+    ComponentFactory,
+    QueryList
+} from "@angular/core";
 import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { Observable } from "rxjs/Observable";
@@ -179,7 +191,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.suppressEvents(e);
     }
 
-    public searchRoute = (e: Event) => {
+    public searchRoute = async (e: Event) => {
         this.suppressEvents(e);
         if (!this.fromContext.selectedSearchResults) {
             this.toastService.warning(this.resources.pleaseSelectFrom);
@@ -189,41 +201,53 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             this.toastService.warning(this.resources.pleaseSelectTo);
             return;
         }
-        this.routerService.getRoute(this.fromContext.selectedSearchResults.location, this.toContext.selectedSearchResults.location, this.routingType).then((routeSegments: Common.RouteSegmentData[]) => {
+        let routeSegments = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
+            this.toContext.selectedSearchResults.location,
+            this.routingType);
+        this.readonlyLayer.clearLayers();
+        this.mapService.updateReadOnlyLayer(this.readonlyLayer, [{ segments: routeSegments, markers: [] } as Common.RouteData]);
+        let markerFrom = L.marker(this.fromContext.selectedSearchResults.location,
+            {
+                icon: IconsService.createStartIcon(),
+                draggable: false
+            }) as Common.IMarkerWithTitle;
+        markerFrom.title = this.fromContext.selectedSearchResults.displayName;
+        let markerTo = L.marker(this.toContext.selectedSearchResults.location,
+            {
+                icon: IconsService.createEndIcon(),
+                draggable: false
+            }) as Common.IMarkerWithTitle;
+        markerTo.title = this.toContext.selectedSearchResults.displayName;
+
+        let convertToRoute = () => {
+            this.dataContainerService.setData({
+                routes: [
+                    {
+                        name: markerFrom.title + "-" + markerTo.title,
+                        markers: [
+                            { latlng: markerFrom.getLatLng(), title: markerFrom.title },
+                            { latlng: markerTo.getLatLng(), title: markerTo.title }
+                        ],
+                        segments: routeSegments
+                    }
+                ]
+            } as Common.DataContainer);
             this.readonlyLayer.clearLayers();
-            this.mapService.updateReadOnlyLayer(this.readonlyLayer, [{ segments: routeSegments, markers: [] } as Common.RouteData]);
-            let markerFrom = L.marker(this.fromContext.selectedSearchResults.location, { icon: IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
-            markerFrom.title = this.fromContext.selectedSearchResults.displayName;
-            let markerTo = L.marker(this.toContext.selectedSearchResults.location, { icon: IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;
-            markerTo.title = this.toContext.selectedSearchResults.displayName;
+        }
 
-            let convertToRoute = () => {
-                this.dataContainerService.setData({
-                    routes: [
-                        {
-                            name: markerFrom.title + "-" + markerTo.title,
-                            markers: [
-                                { latlng: markerFrom.getLatLng(), title: markerFrom.title },
-                                { latlng: markerTo.getLatLng(), title: markerTo.title }
-                            ],
-                            segments: routeSegments
-                        }
-                    ]
-                } as Common.DataContainer);
-                this.readonlyLayer.clearLayers();
-            }
+        let componentFactory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
+        this.createSearchRouteMarkerPopup(markerFrom, componentFactory, convertToRoute);
+        this.createSearchRouteMarkerPopup(markerTo, componentFactory, convertToRoute);
 
-            let componentFactory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
-            this.createSearchRouteMarkerPopup(markerFrom, componentFactory, convertToRoute);
-            this.createSearchRouteMarkerPopup(markerTo, componentFactory, convertToRoute);
+        this.fitBoundsService.fitBounds(this.readonlyLayer.getBounds());
 
-            this.fitBoundsService.fitBounds(this.readonlyLayer.getBounds());
-
-            setTimeout(() => markerTo.openPopup(), 500);
-        });
+        setTimeout(() => markerTo.openPopup(), 500);
     }
 
-    private createSearchRouteMarkerPopup(marker: Common.IMarkerWithTitle, componentFactory: ComponentFactory<SearchResultsMarkerPopupComponent>, convertToRoute: () => void) {
+    private createSearchRouteMarkerPopup(marker: Common.IMarkerWithTitle,
+        componentFactory: ComponentFactory<SearchResultsMarkerPopupComponent>,
+        convertToRoute: () => void) {
+
         let markerPopupDiv = L.DomUtil.create("div");
         let componentRef = componentFactory.create(this.injector, [], markerPopupDiv);
         componentRef.instance.setMarker(marker);

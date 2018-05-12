@@ -23,7 +23,8 @@ export class TermsOfServiceDialogComponent extends BaseMapComponent {
 
         this.iAgree = false;
         this.osmTermsOfServiceUrl = "http://wiki.osmfoundation.org/wiki/Privacy_Policy";
-        this.wikimediaTermsOfServiceUrl = `https://wikimediafoundation.org/wiki/Terms_of_Use/${this.resources.getCurrentLanguageCodeSimplified()}`;
+        this.wikimediaTermsOfServiceUrl =
+            `https://wikimediafoundation.org/wiki/Terms_of_Use/${this.resources.getCurrentLanguageCodeSimplified()}`;
     }
 
     public submit() {

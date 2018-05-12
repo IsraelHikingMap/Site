@@ -1,4 +1,14 @@
-﻿import { Component, Injector, ComponentFactoryResolver, OnInit, OnDestroy, ViewChild, ElementRef, ViewEncapsulation, AfterViewInit } from "@angular/core";
+﻿import {
+    Component,
+    Injector,
+    ComponentFactoryResolver,
+    OnInit,
+    OnDestroy,
+    ViewChild,
+    ElementRef,
+    ViewEncapsulation,
+    AfterViewInit
+} from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material";
 import { SharedStorageService } from "ngx-store";
@@ -170,14 +180,25 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 }
                 for (let markerData of route.markers) {
                     let icon = IconsService.createPoiDefaultMarkerIcon(this.getPathOprtions().color);
-                    let marker = L.marker(markerData.latlng, { draggable: false, clickable: false, riseOnHover: true, icon: icon, opacity: this.getPathOprtions().opacity } as L.MarkerOptions) as Common.IMarkerWithTitle;
+                    let marker = L.marker(markerData.latlng,
+                        {
+                            draggable: false,
+                            clickable: false,
+                            riseOnHover: true,
+                            icon: icon,
+                            opacity: this.getPathOprtions().opacity
+                        } as L.MarkerOptions) as Common.IMarkerWithTitle;
                     this.mapService.setMarkerTitle(marker, markerData);
                     this.osmTraceLayer.addLayer(marker);
                 }
             }
             let bounds = L.latLngBounds(data.southWest, data.northEast);
             // marker to allow remove of this layer:
-            let mainMarker = L.marker(bounds.getCenter(), { icon: IconsService.createTraceMarkerIcon(), draggable: false }) as Common.IMarkerWithTitle;
+            let mainMarker = L.marker(bounds.getCenter(),
+                {
+                    icon: IconsService.createTraceMarkerIcon(),
+                    draggable: false
+                }) as Common.IMarkerWithTitle;
             mainMarker.title = trace.name;
 
             let markerPopupDiv = L.DomUtil.create("div");
@@ -288,7 +309,12 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             let unselectedPathOptions = { color: "red", weight: 3, opacity: 1 } as L.PathOptions;
             let polyline = L.polyline(latLngs, unselectedPathOptions);
             this.osmTraceLayer.addLayer(polyline);
-            let marker = L.marker(latLngs[0], { draggable: false, clickable: true, icon: IconsService.createMissingPartMarkerIcon() } as L.MarkerOptions) as Common.IMarkerWithTitle;
+            let marker = L.marker(latLngs[0],
+                {
+                    draggable: false,
+                    clickable: true,
+                    icon: IconsService.createMissingPartMarkerIcon()
+                } as L.MarkerOptions) as Common.IMarkerWithTitle;
             let markerPopupDiv = L.DomUtil.create("div");
             let factory = this.componentFactoryResolver.resolveComponentFactory(MissingPartMarkerPopupComponent);
             let componentRef = factory.create(this.injector, null, markerPopupDiv);

@@ -37,7 +37,9 @@ describe("ResourcesService", () => {
         });
     })));
 
-    it("Should faciliate translation", inject([ResourcesService, GetTextCatalogService], (service: ResourcesService, getText: GetTextCatalogService) => {
+    it("Should faciliate translation", inject([ResourcesService, GetTextCatalogService],
+        (service: ResourcesService, getText: GetTextCatalogService) => {
+
         spyOn(getText, "getString").and.returnValue("word's translation");
 
         expect(service.translate("word")).toBe("word's translation");

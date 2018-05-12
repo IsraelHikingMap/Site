@@ -25,7 +25,9 @@ describe("ElevationProvider", () => {
         });
     });
 
-    it("Should update height data", inject([ElevationProvider, HttpTestingController], async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
+    it("Should update height data", inject([ElevationProvider, HttpTestingController],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
+
         let latlngs = [L.latLng(0, 0, 0)];
 
         elevationProvider.updateHeights(latlngs).then((lls) => {
@@ -35,7 +37,9 @@ describe("ElevationProvider", () => {
         mockBackend.match(() => true)[0].flush([1]);
     }));
 
-    it("Should not call provider bacause all coordinates has elevation", inject([ElevationProvider], async (elevationProvider: ElevationProvider) => {
+    it("Should not call provider bacause all coordinates has elevation", inject([ElevationProvider],
+        async (elevationProvider: ElevationProvider) => {
+
         let latlngs = [L.latLng(0, 0, 1)];
 
         elevationProvider.updateHeights(latlngs).then((lls => {
@@ -43,7 +47,9 @@ describe("ElevationProvider", () => {
         }));
     }));
 
-    it("Should raise toast when error occurs", inject([ElevationProvider, HttpTestingController, ToastService], async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, toastService: ToastService) => {
+    it("Should raise toast when error occurs", inject([ElevationProvider, HttpTestingController, ToastService],
+        async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, toastService: ToastService) => {
+
         let latlngs = [L.latLng(0, 0, 0)];
         spyOn(toastService, "error");
 

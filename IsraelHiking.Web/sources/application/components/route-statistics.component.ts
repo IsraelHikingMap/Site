@@ -162,7 +162,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         if (this.routeLayer) {
             this.onRouteDataChanged();
             this.routeLayerSubscriptions.push(this.routeLayer.dataChanged.subscribe(this.onRouteDataChanged));
-            this.routeLayerSubscriptions.push(this.routeLayer.polylineHovered.subscribe((latlng: L.LatLng) => this.onPolylineHover(latlng)));
+            this.routeLayerSubscriptions.push(this.routeLayer.polylineHovered.subscribe(
+                (latlng: L.LatLng) => this.onPolylineHover(latlng))
+            );
         }
     }
 

@@ -112,7 +112,8 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     public toggleCategories(categoriesType: CategoriesType, e: Event) {
         this.suppressEvents(e);
         this.categoriesMap.get(categoriesType).isExpanded = !this.categoriesMap.get(categoriesType).isExpanded;
-        this.localStorageService.set(categoriesType + LayersSidebarComponent.EXPANDED_POSTFIX, this.categoriesMap.get(categoriesType).isExpanded);
+        this.localStorageService.set(categoriesType + LayersSidebarComponent.EXPANDED_POSTFIX,
+            this.categoriesMap.get(categoriesType).isExpanded);
     }
 
     public toggleCategory(categoriesType: CategoriesType, category: ICategory, e: Event) {
