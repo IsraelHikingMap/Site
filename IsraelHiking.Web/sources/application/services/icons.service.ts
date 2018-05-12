@@ -2,7 +2,8 @@
 
 export class IconsService {
     private static BACKGROUND = "<i class='fa icon-map-marker fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>";
-    private static POI_BACKGROUND = "<i class='fa icon-map-marker-rect fa-stack-2x' style='color:white;text-shadow: 3px 3px 3px #000;'></i>";
+    private static POI_BACKGROUND = "<i class='fa icon-map-marker-rect fa-stack-2x' " +
+        "style='color:white;text-shadow: 3px 3px 3px #000;'></i>";
 
     private static KM_MARKER_HTML = "<span class='fa-stack fa-lg'>" +
     IconsService.BACKGROUND +
@@ -85,7 +86,8 @@ export class IconsService {
     }
 
     public static createMarkerIconWithColorAndType(color: string, type: string): L.DivIcon {
-        let html = IconsService.COLOR_AND_TYPE_MARKER_HTML.replace("{{color}}", color).replace("{{type}}", type || IconsService.getAvailableIconTypes()[0]);
+        let html = IconsService.COLOR_AND_TYPE_MARKER_HTML.replace("{{color}}", color)
+            .replace("{{type}}", type || IconsService.getAvailableIconTypes()[0]);
         return L.divIcon(IconsService.getDefaultMarkerOptions(html));
     }
 

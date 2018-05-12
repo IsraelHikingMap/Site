@@ -77,7 +77,13 @@ export class SnappingService {
         }
 
         let bounds = this.mapService.map.getBounds();
-        let boundsString = [bounds.getSouthWest().lat, bounds.getSouthWest().lng, bounds.getNorthEast().lat, bounds.getNorthEast().lng].join(",");
+        let boundsString = [
+                bounds.getSouthWest().lat,
+                bounds.getSouthWest().lng,
+                bounds.getNorthEast().lat,
+                bounds.getNorthEast().lng
+            ]
+            .join(",");
         this.requestsQueue.push({
             boundsString: boundsString
         } as ISnappingRequestQueueItem);
@@ -99,7 +105,11 @@ export class SnappingService {
                     if (latlngsArray.length > 1) {
                         this.highwaySnappings.push(L.polyline(latlngsArray, { opacity: 0 } as L.PolylineOptions));
                     } else {
-                        let dataContainer = this.geoJsonParser.toDataContainer({ features: [feature], type: "FeatureCollection" }, this.resources.getCurrentLanguageCodeSimplified());
+                        let dataContainer = this.geoJsonParser.toDataContainer({
+                                features: [feature],
+                                type: "FeatureCollection"
+                            },
+                            this.resources.getCurrentLanguageCodeSimplified());
                         let markerData = dataContainer.routes[0].markers[0];
                         this.pointsSnappings.push(markerData);
                     }
@@ -149,7 +159,8 @@ export class SnappingService {
                 let currentDistance = L.LineUtil.pointToSegmentDistance(snapPoint, prevPoint, currentPoint);
                 if (currentDistance < minDistance && currentDistance <= options.sensitivity) {
                     minDistance = currentDistance;
-                    response.latlng = this.mapService.map.layerPointToLatLng(L.LineUtil.closestPointOnSegment(snapPoint, prevPoint, currentPoint));
+                    let closestPointSegment = L.LineUtil.closestPointOnSegment(snapPoint, prevPoint, currentPoint);
+                    response.latlng = this.mapService.map.layerPointToLatLng(closestPointSegment);
                     response.polyline = polyline;
                     response.beforeIndex = latlngIndex - 1;
                 }
@@ -178,7 +189,8 @@ export class SnappingService {
             if (markerPointOnScreen.distanceTo(pointOnScreen) < options.sensitivity && response.markerData == null) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
-            } else if (response.markerData != null && response.markerData.latlng.distanceTo(latlng) > markerData.latlng.distanceTo(latlng)) {
+            } else if (response.markerData != null
+                && response.markerData.latlng.distanceTo(latlng) > markerData.latlng.distanceTo(latlng)) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
             }

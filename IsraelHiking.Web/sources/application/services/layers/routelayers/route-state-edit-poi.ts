@@ -30,10 +30,24 @@ export class RouteStateEditPoi extends RouteStateEditBase {
             return;
         }
         let pathOptions = this.context.route.properties.pathOptions;
-        let marker = L.marker(this.context.route.segments[0].latlngs[0], { draggable: false, clickable: false, riseOnHover: false, icon: IconsService.createRoundIcon("green"), opacity: pathOptions.opacity } as L.MarkerOptions);
+        let marker = L.marker(this.context.route.segments[0].latlngs[0],
+            {
+                draggable: false,
+                clickable: false,
+                riseOnHover: false,
+                icon: IconsService.createRoundIcon("green"),
+                opacity: pathOptions.opacity
+            } as L.MarkerOptions);
         this.context.route.segments[0].routePointMarker = marker;
         marker.addTo(this.context.mapService.map);
-        marker = L.marker(this.context.getLastLatLng(), { draggable: false, clickable: false, riseOnHover: false, icon: IconsService.createRoundIcon("red"), opacity: pathOptions.opacity } as L.MarkerOptions);
+        marker = L.marker(this.context.getLastLatLng(),
+            {
+                draggable: false,
+                clickable: false,
+                riseOnHover: false,
+                icon: IconsService.createRoundIcon("red"),
+                opacity: pathOptions.opacity
+            } as L.MarkerOptions);
         marker.addTo(this.context.mapService.map);
         this.context.getLastSegment().routePointMarker = marker;
     }

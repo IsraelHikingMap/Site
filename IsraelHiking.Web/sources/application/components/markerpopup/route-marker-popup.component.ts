@@ -36,7 +36,8 @@ export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
     public setMarker(marker: Common.IMarkerWithTitle) {
         this.setMarkerInternal(marker);
         marker.on("popupopen", () => {
-            this.routeSegment = _.find(this.routesService.selectedRoute.route.segments, segmentToFind => this.marker === segmentToFind.routePointMarker);
+            this.routeSegment = _.find(this.routesService.selectedRoute.route.segments,
+                segmentToFind => this.marker === segmentToFind.routePointMarker);
             this.isMiddle = this.isFirst() === false && this.routesService.selectedRoute.getLastSegment() !== this.routeSegment;
             if (this.isMiddle) {
                 this.canMerge = false;

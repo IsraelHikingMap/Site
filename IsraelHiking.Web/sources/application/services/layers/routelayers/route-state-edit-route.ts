@@ -38,7 +38,8 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         this.context.getLastSegment().routePointMarker.setIcon(IconsService.createEndIcon());
         this.context.route.segments[0].routePointMarker.setIcon(IconsService.createStartIcon());
         for (let routeSegmentIndex = 1; routeSegmentIndex < this.context.route.segments.length - 1; routeSegmentIndex++) {
-            this.context.route.segments[routeSegmentIndex].routePointMarker.setIcon(IconsService.createRouteMarkerIcon(this.context.route.properties.pathOptions.color));
+            let routeMarkerIcon = IconsService.createRouteMarkerIcon(this.context.route.properties.pathOptions.color);
+            this.context.route.segments[routeSegmentIndex].routePointMarker.setIcon(routeMarkerIcon);
         }
     }
 
@@ -101,8 +102,9 @@ export class RouteStateEditRoute extends RouteStateEditBase {
 
         if (this.context.route.segments.length > 0 && segmentIndex === 0) {
             // first point is being removed
-            this.context.route.segments[0].latlngs = [this.context.route.segments[0].latlngs[this.context.route.segments[0].latlngs.length - 1]];
-            this.context.route.segments[0].polyline.setLatLngs([this.context.route.segments[0].routePoint, this.context.route.segments[0].routePoint]);
+            this.context.route.segments[0].latlngs = [_.last(this.context.route.segments[0].latlngs)];
+            let routePoint = this.context.route.segments[0].routePoint;
+            this.context.route.segments[0].polyline.setLatLngs([routePoint, routePoint]);
             this.context.raiseDataChanged();
         } else if (segmentIndex !== 0 && segmentIndex < this.context.route.segments.length) {
             // middle point is being removed...

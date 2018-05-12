@@ -19,7 +19,11 @@ export abstract class HoverHandlerBase {
 
     constructor(protected context: IRouteLayer) {
         let pathOptions = this.context.route.properties.pathOptions;
-        this.hoverMarker = L.marker(this.context.mapService.map.getCenter(), { clickable: false, opacity: pathOptions.opacity } as L.MarkerOptions);
+        this.hoverMarker = L.marker(this.context.mapService.map.getCenter(),
+            {
+                clickable: false,
+                opacity: pathOptions.opacity
+            } as L.MarkerOptions);
     }
 
     protected abstract getHoverIcon(color: string): L.DivIcon;

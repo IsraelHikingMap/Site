@@ -533,7 +533,8 @@ export class ResourcesService {
         this.medium = this.gettextCatalog.getString("Medium");
         this.large = this.gettextCatalog.getString("Large");
         this.custom = this.gettextCatalog.getString("Custom");
-        this.copyPasteEmbdExplenation = this.gettextCatalog.getString("Copy and paste the code below in order to show this map on your webpage.");
+        this.copyPasteEmbdExplenation = this.gettextCatalog
+            .getString("Copy and paste the code below in order to show this map on your webpage.");
         this.html = this.gettextCatalog.getString("HTML");
         this.close = this.gettextCatalog.getString("Close");
         this.northAbbreviation = this.gettextCatalog.getString("N");
@@ -567,7 +568,8 @@ export class ResourcesService {
         this.titlePlaceHolder = this.gettextCatalog.getString("The title for your share.");
         this.description = this.gettextCatalog.getString("Description");
         this.descriptionPlaceHolder = this.gettextCatalog.getString("A few words about what you are sharing.");
-        this.osmLoginExplenation = this.gettextCatalog.getString("Click on the frowny-face to login to OSM. We'll make it worth your while!");
+        this.osmLoginExplenation = this.gettextCatalog
+            .getString("Click on the frowny-face to login to OSM. We'll make it worth your while!");
         this.application = this.gettextCatalog.getString("Application");
         this.map = this.gettextCatalog.getString("Map");
         this.startDownload = this.gettextCatalog.getString("Start Download");
@@ -576,13 +578,21 @@ export class ResourcesService {
         this.detailsLevel = this.gettextCatalog.getString("Details Level");
         this.upToZoom = this.gettextCatalog.getString("Up to zoom");
         this.installationInstructions = this.gettextCatalog.getString("Installation Instructions");
-        this.offlineMapBenifits = this.gettextCatalog.getString("The download may take several minutes, and afterwards you can enjoy the map with no need for a network connection.");
-        this.installationInstructionsMobileOruxMaps = this.gettextCatalog.getString("Installation instructions for OruxMaps on mobile - surround each new line with <li></li>");
-        this.installationInstructionsMobileLocus = this.gettextCatalog.getString("Installation instructions for Locus on mobile - surround each new line with <li></li>");
-        this.installationInstructionsMobileOffroad = this.gettextCatalog.getString("Installation instructions for Offroad on mobile - surround each new line with <li></li>");
-        this.installationInstructionsDesktopOruxMaps = this.gettextCatalog.getString("Installation instructions for OruxMaps on desktop - surround each new line with <li></li>");
-        this.installationInstructionsDesktopLocus = this.gettextCatalog.getString("Installation instructions for Locus on desktop - surround each new line with <li></li>");
-        this.installationInstructionsDesktopOffroad = this.gettextCatalog.getString("Installation instructions for Offroad on desktop - surround each new line with <li></li>");
+        this.offlineMapBenifits = this.gettextCatalog
+            .getString("The download may take several minutes, " +
+                "and afterwards you can enjoy the map with no need for a network connection.");
+        this.installationInstructionsMobileOruxMaps = this.gettextCatalog
+            .getString("Installation instructions for OruxMaps on mobile - surround each new line with <li></li>");
+        this.installationInstructionsMobileLocus = this.gettextCatalog
+            .getString("Installation instructions for Locus on mobile - surround each new line with <li></li>");
+        this.installationInstructionsMobileOffroad = this.gettextCatalog
+            .getString("Installation instructions for Offroad on mobile - surround each new line with <li></li>");
+        this.installationInstructionsDesktopOruxMaps = this.gettextCatalog
+            .getString("Installation instructions for OruxMaps on desktop - surround each new line with <li></li>");
+        this.installationInstructionsDesktopLocus = this.gettextCatalog
+            .getString("Installation instructions for Locus on desktop - surround each new line with <li></li>");
+        this.installationInstructionsDesktopOffroad = this.gettextCatalog
+            .getString("Installation instructions for Offroad on desktop - surround each new line with <li></li>");
         // end
         this.mapsAreUpdatedEveryTwoDays = this.gettextCatalog.getString("Maps are updated every two days");
         this.junior = this.gettextCatalog.getString("Junior");
@@ -688,14 +698,21 @@ export class ResourcesService {
         this.noUnmappedRoutes = this.gettextCatalog.getString("No unmapped routes! :-)");
         this.unableToFindYourLocation = this.gettextCatalog.getString("Unable to find your location...");
         this.redirectingToSecuredSite = this.gettextCatalog.getString("Redirecting to secure site.");
-        this.routeAddedSuccessfullyItWillTakeTime = this.gettextCatalog.getString("Route added successfully, It will take some time for the map to update.");
-        this.fileUploadedSuccefullyItWillTakeTime = this.gettextCatalog.getString("File uploaded successfully, It will take some time to add it to OSM database.");
+        this.routeAddedSuccessfullyItWillTakeTime = this.gettextCatalog
+            .getString("Route added successfully, It will take some time for the map to update.");
+        this.fileUploadedSuccefullyItWillTakeTime = this.gettextCatalog
+            .getString("File uploaded successfully, It will take some time to add it to OSM database.");
         this.unableToUploadFile = this.gettextCatalog.getString("Unable to upload the file...");
-        this.unableToSaveAnEmptyRoute = this.gettextCatalog.getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
-        this.closeWhileInEditMode = this.gettextCatalog.getString("Please note that you did not save your work before closing the popup...");
+        this.unableToSaveAnEmptyRoute = this.gettextCatalog
+            .getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
+        this.closeWhileInEditMode = this.gettextCatalog
+            .getString("Please note that you did not save your work before closing the popup...");
         this.dataUpdatedSuccefully = this.gettextCatalog.getString("The data was updated successfully!");
-        this.loginRequired = this.gettextCatalog.getString("You need to login to OSM first, please use the button in the upper right corner to login.");
-        this.noDescriptionLoginRequired = this.gettextCatalog.getString("There's no description :-(. To add one you'll need to login to OSM first, please use the button in the upper right corner to login.");
+        this.loginRequired = this.gettextCatalog
+            .getString("You need to login to OSM first, please use the button in the upper right corner to login.");
+        this.noDescriptionLoginRequired = this.gettextCatalog
+            .getString("There's no description :-(. To add one you'll need to login to OSM first, " +
+                "please use the button in the upper right corner to login.");
         this.nameInLanguage = this.gettextCatalog.getString("Name in {{translation language}}");
         this.descriptionInLanguage = this.gettextCatalog.getString("Description in {{translation language}}");
         this.unableToSaveData = this.gettextCatalog.getString("Unable to save data, please try again later...");
@@ -725,21 +742,26 @@ export class ResourcesService {
         this.helpLinksExplenation = this.gettextCatalog.getString("You can use the following links");
         this.helpLanguage = this.gettextCatalog.getString("Change language");
         this.helpDragDrop = this.gettextCatalog.getString("You can drag-and-drop files or URLs onto the map to load them.");
-        this.helpYoutubeLink = this.gettextCatalog.getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}.")
+        this.helpYoutubeLink = this.gettextCatalog
+            .getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}.")
             .replace("{{link}}", "<a href='https://www.youtube.com/playlist?list=PL8pYDecWd7EjQIyJpPAwSH3UbeZzzQpNo' target='_blank'>")
             .replace("{{linkend}}", "</a>");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
-        this.infoSubheader = this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.")
+        this.infoSubheader = this.gettextCatalog
+            .getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.")
             .replace("{{link}}", "<a dir='ltr' href='https://www.openstreetmap.org/' target='_blank'>")
             .replace("{{linkend}}", "</a>");
-        this.infoFacebookLink = this.gettextCatalog.getString("Interact with other users in our {{link}}Facebook group{{linkend}}")
+        this.infoFacebookLink = this.gettextCatalog
+            .getString("Interact with other users in our {{link}}Facebook group{{linkend}}")
             .replace("{{link}}", "<a href='https://www.facebook.com/groups/994960670559126/' target='_blank'>")
             .replace("{{linkend}}", "</a>");
-        this.infoGithubLink = this.gettextCatalog.getString("Request features and report bugs on our {{link}}Github project{{linkend}} page")
+        this.infoGithubLink = this.gettextCatalog
+            .getString("Request features and report bugs on our {{link}}Github project{{linkend}} page")
             .replace("{{link}}", "<a href='http://www.github.com/IsraelHikingMap' target='_blank'>")
             .replace("{{linkend}}", "</a>");
-        this.infoOsmWikiLink = this.gettextCatalog.getString("Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}")
+        this.infoOsmWikiLink = this.gettextCatalog
+            .getString("Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}")
             .replace("{{link}}", "<a href='http://wiki.openstreetmap.org/wiki/WikiProject_Israel' target='_blank'>")
             .replace("{{linkend}}", "</a>");
         // end

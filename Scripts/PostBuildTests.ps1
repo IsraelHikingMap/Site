@@ -34,6 +34,9 @@ Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
 Write-Host "npm run-script test -- --no-progress --code-coverage"
 npm run-script test -- --no-progress --code-coverage
 
+Write-Host "run-script lint"
+npm run-script lint
+
 # Locate JUnit XML results file
 
 $JUnitFile = Get-ChildItem tests-chrome*.xml -recurse | select-object -first 1 | select -expand FullName
