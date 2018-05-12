@@ -19,13 +19,13 @@ export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
     public canMerge: boolean;
     public isMiddle: boolean;
     private routeSegment: IRouteSegment;
-    private routesService: IRoutesService;
+    private readonly routesService: IRoutesService;
 
     constructor(resources: ResourcesService,
         httpClient: HttpClient,
         applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider,
-        private injector: Injector,
+        private readonly injector: Injector,
         @Inject("RoutesService") routesService: IRoutesService) {
         super(resources, httpClient, applicationRef, elevationProvider);
         this.canMerge = false;
@@ -45,11 +45,11 @@ export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
             this.canMerge = this.routesService.getClosestRoute(this.isFirst()) != null;
         });
     }
-    
+
     public split(): void {
         this.routesService.splitSelectedRouteAt(this.routeSegment);
     }
-    
+
     public merge() {
         this.routesService.mergeSelectedRouteToClosest(this.isFirst());
     }
@@ -57,7 +57,7 @@ export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
     public reverse() {
         this.routesService.selectedRoute.reverse();
     }
-    
+
     private isFirst(): boolean {
         return this.routesService.selectedRoute.route.segments[0] === this.routeSegment;
     }

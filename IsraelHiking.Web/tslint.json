@@ -10,7 +10,7 @@
       "check-space"
     ],
     "curly": true,
-    "eofline": true,
+    "eofline": false,
     "forin": true,
     "import-blacklist": [
       true,
@@ -25,7 +25,7 @@
     "label-position": true,
     "max-line-length": [
       true,
-      140
+      400
     ],
     "member-access": false,
     "member-ordering": [
@@ -68,7 +68,7 @@
       "check-else",
       "check-whitespace"
     ],
-    "prefer-const": true,
+    "prefer-const": false,
     "quotemark": [
       true,
       "double"
@@ -105,14 +105,8 @@
     "directive-selector": [
       true,
       "attribute",
-      "app",
+      "",
       "camelCase"
-    ],
-    "component-selector": [
-      true,
-      "element",
-      "app",
-      "kebab-case"
     ],
     "use-input-property-decorator": true,
     "use-output-property-decorator": true,

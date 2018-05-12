@@ -16,14 +16,15 @@ import * as Common from "../common/IsraelHiking";
 })
 export class FileComponent extends BaseMapComponent {
 
-    @ViewChild("openFile") openFileElement: ElementRef;
-    
+    @ViewChild("openFile")
+    public openFileElement: ElementRef;
+
     constructor(resources: ResourcesService,
-        private mapService: MapService,
-        private dataContainerService: DataContainerService,
-        private fileService: FileService,
-        private toastService: ToastService,
-        ) {
+        private readonly mapService: MapService,
+        private readonly dataContainerService: DataContainerService,
+        private readonly fileService: FileService,
+        private readonly toastService: ToastService,
+    ) {
         super(resources);
     }
 
@@ -35,7 +36,7 @@ export class FileComponent extends BaseMapComponent {
         try {
             let dataContainer = await this.fileService.openFromFile(file);
             this.dataContainerService.setData(dataContainer);
-        } catch(ex) {
+        } catch (ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
         }
     }
@@ -96,6 +97,7 @@ export class FileComponent extends BaseMapComponent {
                 break;
             case "p":
                 this.print($event);
+                break;
             default:
                 return true;
         }

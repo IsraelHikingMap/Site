@@ -56,7 +56,7 @@ export class HoverHandlerRoute extends HoverHandlerBase {
         this.middleMarker.setOpacity(0.0);
         this.setState(HoverHandlerState.ADD_POINT);
         this.hoverMarker.setLatLng(latlng);
-        var hoverStartPoint = this.context.route.segments.length > 0
+        let hoverStartPoint = this.context.route.segments.length > 0
             ? this.context.getLastSegment().routePoint
             : latlng;
         this.hoverPolyline.setLatLngs([hoverStartPoint, latlng]);

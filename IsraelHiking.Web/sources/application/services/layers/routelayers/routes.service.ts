@@ -1,6 +1,5 @@
 ﻿import { Injectable } from "@angular/core";
 import { Subject } from "rxjs/Subject";
-import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { IRouteLayer, IRoute, IRouteSegment, IMarkerWithData } from "./iroute.layer";
@@ -16,14 +15,14 @@ import * as Common from "../../../common/IsraelHiking";
 @Injectable()
 export class RoutesService implements IRoutesService {
     private static MERGE_THRESHOLD = 50; // meter.
-    
+
     public routes: IRouteLayer[];
     public routeChanged: Subject<any>;
     public selectedRoute: IRouteLayer;
 
-    constructor(private resourcesService: ResourcesService,
-        private mapService: MapService,
-        private routeLayerFactory: RouteLayerFactory) {
+    constructor(private readonly resourcesService: ResourcesService,
+        private readonly mapService: MapService,
+        private readonly routeLayerFactory: RouteLayerFactory) {
         this.routes = [];
         this.selectedRoute = null;
         this.routeChanged = new Subject<any>();
@@ -50,10 +49,10 @@ export class RoutesService implements IRoutesService {
     }
 
     public isNameAvailable = (name: string) => {
-        var route = this.getRouteByName(name);
+        let route = this.getRouteByName(name);
         return route == null && name != null && name !== "";
     }
-    
+
     public changeRouteState = (routeLayer: IRouteLayer) => {
         if (routeLayer === this.selectedRoute && routeLayer.route.properties.isVisible) {
             this.selectRoute(null);
@@ -75,9 +74,9 @@ export class RoutesService implements IRoutesService {
     }
 
     public createRouteName = (routeName: string = this.resourcesService.route) => {
-        var index = 1;
+        let index = 1;
         routeName = routeName.replace(/(.*) \d+/, "$1");
-        var availableRouteName = `${routeName} ${index}`;
+        let availableRouteName = `${routeName} ${index}`;
         while (_.some(this.routes, (routeLayer) => routeLayer.route.properties.name === availableRouteName)) {
             index++;
             availableRouteName = `${routeName} ${index}`;
@@ -98,7 +97,7 @@ export class RoutesService implements IRoutesService {
         }
         return routesData;
     }
-    
+
     public setData = (routes: Common.RouteData[]) => {
         if (!routes || routes.length === 0) {
             return;
@@ -156,7 +155,7 @@ export class RoutesService implements IRoutesService {
             segments: postFixSegments,
             name: currentRoute.properties.name + this.resourcesService.split,
         } as Common.RouteData;
-        
+
         this.setData([routePostFix]);
         this.selectedRoute.setEditRouteState();
         this.selectedRoute.raiseDataChanged();
@@ -168,8 +167,8 @@ export class RoutesService implements IRoutesService {
      */
     public getClosestRoute(isFirst: boolean) {
         let latLngToCheck = isFirst
-                ? this.selectedRoute.route.segments[0].latlngs[0]
-                : this.selectedRoute.getLastLatLng();
+            ? this.selectedRoute.route.segments[0].latlngs[0]
+            : this.selectedRoute.getLastLatLng();
         for (let routeLayer of this.routes) {
             if (routeLayer === this.selectedRoute || routeLayer.route.segments.length <= 0) {
                 continue;

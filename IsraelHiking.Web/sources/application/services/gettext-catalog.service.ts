@@ -5,12 +5,12 @@ import "rxjs/add/operator/toPromise";
 @Injectable()
 export class GetTextCatalogService {
 
-    constructor(private httpClient: HttpClient) {
-        this.strings = {};
-    }
-
     private strings: {};
     private baseLanguage: string;
+
+    constructor(private readonly httpClient: HttpClient) {
+        this.strings = {};
+    }
 
     public setCurrentLanguage(lang: string): void {
         this.baseLanguage = lang;
@@ -20,13 +20,11 @@ export class GetTextCatalogService {
         return this.baseLanguage;
     }
 
-    public getString(word: string, scope?: any, context?: string): string
-    {
+    public getString(word: string, scope?: any, context?: string): string {
         return this.strings[word] as string || word || "";
     }
 
-    public async loadRemote(url: string): Promise<any>
-    {
+    public async loadRemote(url: string): Promise<any> {
         let response = await this.httpClient.get(url).toPromise();
         this.strings = response[this.getCurrentLanguage()];
     }

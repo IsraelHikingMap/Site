@@ -34,7 +34,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
     public wikiCoordinatesString: string;
     public iconsGroups: IIconsGroup[];
     public isEditMode: boolean;
-    
+
     @ViewChild("titleInput")
     public titleInput: ElementRef;
 
@@ -171,7 +171,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         this.imageGalleryService.setImages([this.imageUrl]);
     }
 
-    public changeToEditMode = (): void => { throw new Error("Callback needs to be set by the creating class...")}
+    public changeToEditMode = (): void => { throw new Error("Callback needs to be set by the creating class...") }
 
     @HostListener("window:keydown", ["$event"])
     public onEnterPress($event: KeyboardEvent) {

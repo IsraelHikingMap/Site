@@ -18,11 +18,11 @@ export class DownloadDialogComponent extends BaseMapComponent {
     public zoom: number;
 
     constructor(resources: ResourcesService,
-        private sanitizer: DomSanitizer) {
+        private readonly sanitizer: DomSanitizer) {
         super(resources);
 
-        this.app = 'Locus';
-        this.mapType = 'IHM';
+        this.app = "Locus";
+        this.mapType = "IHM";
         this.zoom = 15;
     }
 

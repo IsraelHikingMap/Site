@@ -11,7 +11,7 @@ import { Urls } from "../common/Urls";
     styleUrls: ["./ihm-link.component.css"]
 })
 export class IhmLinkComponent extends BaseMapComponent {
-    
+
     constructor(resources: ResourcesService,
         private readonly hashService: HashService) {
         super(resources);

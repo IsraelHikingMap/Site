@@ -11,9 +11,9 @@ import * as Common from "../common/IsraelHiking";
 
 
 describe("OSM User Service", () => {
-    var oauth: OSMAuth.OSMAuthInstance;
-    var x2Js = new X2JS();
-    var userDetailsResponse = x2Js.xml2dom(
+    let oauth: OSMAuth.OSMAuthInstance;
+    let x2Js = new X2JS();
+    let userDetailsResponse = x2Js.xml2dom(
         "<?xml version='1.0' encoding='UTF-8'?>" +
         "<osm version='0.6' generator='OpenStreetMap server'>" +
         "  <user id='123' display_name='IHM Test' account_created='2013-03-09T17:55:56Z'>" +

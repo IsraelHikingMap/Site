@@ -511,7 +511,9 @@ export class ResourcesService {
         this.color = this.gettextCatalog.getString("Color");
         this.deletePoi = this.gettextCatalog.getString("Delete POI");
         this.showCoordinates = this.gettextCatalog.getString("Show Coordinates");
-        this.coordinatesForWikipedia = this.gettextCatalog.getString("Coordinates for {{link}}Wikipedia{{linkend}}").replace("{{link}}", `<a href="https://${this.currentLanguage.code.split("-")[0]}.wikipedia.org/" target="_blank">`).replace("{{linkend}}", "</a>");
+        this.coordinatesForWikipedia = this.gettextCatalog.getString("Coordinates for {{link}}Wikipedia{{linkend}}")
+            .replace("{{link}}", `<a href="https://${this.currentLanguage.code.split("-")[0]}.wikipedia.org/" target="_blank">`)
+            .replace("{{linkend}}", "</a>");
         // end
         this.wikipedia = this.gettextCatalog.getString("Wikipedia");
         this.length = this.gettextCatalog.getString("Length");
@@ -635,7 +637,7 @@ export class ResourcesService {
         this.historic = this.gettextCatalog.getString("Historic");
         this.website = this.gettextCatalog.getString("Website");
         this.aLinkToAWebsite = this.gettextCatalog.getString("A link to a website");
-        this.clickToUpload = this.gettextCatalog.getString("Click to Upload");;
+        this.clickToUpload = this.gettextCatalog.getString("Click to Upload");
         this.clickToEdit = this.gettextCatalog.getString("Click to Edit");
         this.more = this.gettextCatalog.getString("More...");
         this.routes = this.gettextCatalog.getString("Routes");
@@ -723,13 +725,23 @@ export class ResourcesService {
         this.helpLinksExplenation = this.gettextCatalog.getString("You can use the following links");
         this.helpLanguage = this.gettextCatalog.getString("Change language");
         this.helpDragDrop = this.gettextCatalog.getString("You can drag-and-drop files or URLs onto the map to load them.");
-        this.helpYoutubeLink = this.gettextCatalog.getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}.").replace("{{link}}", "<a href='https://www.youtube.com/playlist?list=PL8pYDecWd7EjQIyJpPAwSH3UbeZzzQpNo' target='_blank'>").replace("{{linkend}}", "</a>");
+        this.helpYoutubeLink = this.gettextCatalog.getString("Learn how to add and edit OpenStreetMap maps with our {{link}}YouTube tutorials{{linkend}}.")
+            .replace("{{link}}", "<a href='https://www.youtube.com/playlist?list=PL8pYDecWd7EjQIyJpPAwSH3UbeZzzQpNo' target='_blank'>")
+            .replace("{{linkend}}", "</a>");
         // Info
         this.infoHelpfulLinks = this.gettextCatalog.getString("Helpful links:");
-        this.infoSubheader = this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.").replace("{{link}}", "<a dir='ltr' href='https://www.openstreetmap.org/' target='_blank'>").replace("{{linkend}}", "</a>");
-        this.infoFacebookLink = this.gettextCatalog.getString("Interact with other users in our {{link}}Facebook group{{linkend}}").replace("{{link}}", "<a href='https://www.facebook.com/groups/994960670559126/' target='_blank'>").replace("{{linkend}}", "</a>");
-        this.infoGithubLink = this.gettextCatalog.getString("Request features and report bugs on our {{link}}Github project{{linkend}} page").replace("{{link}}", "<a href='http://www.github.com/IsraelHikingMap' target='_blank'>").replace("{{linkend}}", "</a>");
-        this.infoOsmWikiLink = this.gettextCatalog.getString("Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}").replace("{{link}}", "<a href='http://wiki.openstreetmap.org/wiki/WikiProject_Israel' target='_blank'>").replace("{{linkend}}", "</a>");
+        this.infoSubheader = this.gettextCatalog.getString("This map was generated from {{link}}Open Street Map (OSM){{linkend}} data which is free for all to use and edit.")
+            .replace("{{link}}", "<a dir='ltr' href='https://www.openstreetmap.org/' target='_blank'>")
+            .replace("{{linkend}}", "</a>");
+        this.infoFacebookLink = this.gettextCatalog.getString("Interact with other users in our {{link}}Facebook group{{linkend}}")
+            .replace("{{link}}", "<a href='https://www.facebook.com/groups/994960670559126/' target='_blank'>")
+            .replace("{{linkend}}", "</a>");
+        this.infoGithubLink = this.gettextCatalog.getString("Request features and report bugs on our {{link}}Github project{{linkend}} page")
+            .replace("{{link}}", "<a href='http://www.github.com/IsraelHikingMap' target='_blank'>")
+            .replace("{{linkend}}", "</a>");
+        this.infoOsmWikiLink = this.gettextCatalog.getString("Learn Israel-specific mapping rules at the {{link}}Israel OSM Wiki Project{{linkend}}")
+            .replace("{{link}}", "<a href='http://wiki.openstreetmap.org/wiki/WikiProject_Israel' target='_blank'>")
+            .replace("{{linkend}}", "</a>");
         // end
         this.infoDownloadMapForOfflineUse = this.gettextCatalog.getString("Download Map for Offline Use");
         this.infoFooterThanks = this.gettextCatalog.getString("Thank you for your support!");
@@ -906,9 +918,9 @@ export class ResourcesService {
             return url.endsWith(".svg") ? url + ".png" : url;
         }
         if (imageUrl.includes("//i.imgur.com/")) {
-            var split = imageUrl.split(".");
-            var extenstion = split.pop();
-            var prefix = split.join(".");
+            let split = imageUrl.split(".");
+            let extenstion = split.pop();
+            let prefix = split.join(".");
             return prefix + this.getImgurPostfix(size) + "." + extenstion;
         }
         return imageUrl;

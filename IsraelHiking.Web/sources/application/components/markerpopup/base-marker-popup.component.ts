@@ -1,7 +1,7 @@
 ﻿import { ApplicationRef, ViewRef, ViewChildren, QueryList } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { MatTooltip } from "@angular/material";
-import { Observable } from "rxjs";
+import { Observable } from "rxjs/Observable";
 import * as L from "leaflet";
 import "rxjs/add/observable/forkJoin";
 import "rxjs/add/operator/first";
@@ -65,7 +65,7 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     }
 
     private updateHeights = () => {
-        var array = [this.latLng];
+        let array = [this.latLng];
         this.elevationProvider.updateHeights(array).then(() => {
             this.latLng = array[0];
         });
@@ -97,4 +97,4 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
             }
         });
     }
-} 
+}

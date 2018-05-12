@@ -18,10 +18,10 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public isNew: boolean;
     public isAdvanced: boolean;
     public isOverlay: boolean;
-    
+
     private mapPreview: L.Map;
     private tileLayer: L.TileLayer;
-    
+
     protected constructor(resources: ResourcesService,
         protected mapService: MapService,
         protected layersService: LayersService,
@@ -37,14 +37,14 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
         this.tileLayer = null;
     }
 
-    ngAfterViewInit(): void {
+    public ngAfterViewInit(): void {
         this.mapPreview = L.map("mapPreview",
             {
                 center: this.mapService.map.getCenter(),
                 zoomControl: false,
-                minZoom: this.minZoom,
-                maxZoom: this.maxZoom,
-                zoom: (parseInt(this.maxZoom as any) + parseInt(this.minZoom as any)) / 2
+                minZoom: +this.minZoom,
+                maxZoom: +this.maxZoom,
+                zoom: (+this.maxZoom + +this.minZoom) / 2
             });
         this.tileLayer = L.tileLayer(this.getTilesAddress());
         this.mapPreview.addLayer(this.tileLayer);
@@ -67,12 +67,12 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     }
 
     public saveLayer = (e: Event) => {
-        var layerData = {
+        let layerData = {
             key: this.key,
             address: this.getTilesAddress(),
             isEditable: true,
-            minZoom: parseInt(this.minZoom as any), // fix issue with variable saved as string...
-            maxZoom: parseInt(this.maxZoom as any),
+            minZoom: +this.minZoom, // fix issue with variable saved as string...
+            maxZoom: +this.maxZoom,
             opacity: this.opacity
         } as Common.LayerData;
         this.internalSave(layerData);

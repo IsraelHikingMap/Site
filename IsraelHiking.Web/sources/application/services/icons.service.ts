@@ -42,12 +42,11 @@ export class IconsService {
     "</span>";
 
     private static POI_MARKER_HTML = "<span class='fa-stack fa-lg'>{{has-extra-data}}" +
-        IconsService.POI_BACKGROUND +
-        "<i class='fa {{icon}} fa-stack-1x stack-icon-top' style='color:{{color}};'></i>" +
-        "</span>";
+    IconsService.POI_BACKGROUND +
+    "<i class='fa {{icon}} fa-stack-1x stack-icon-top' style='color:{{color}};'></i>" +
+    "</span>";
 
-    public static getAvailableIconTypes() : string[]
-    {
+    public static getAvailableIconTypes(): string[] {
         return ["star", "arrow-left", "arrow-right", "tint",
             "automobile", "bike", "hike", "four-by-four",
             "bed", "viewpoint", "fire", "flag",

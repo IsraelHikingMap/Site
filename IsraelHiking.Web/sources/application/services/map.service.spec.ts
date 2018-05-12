@@ -2,8 +2,8 @@
 
 import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
-import * as Common from "../common/IsraelHiking";
 import { GetTextCatalogMockCreator } from "./resources.service.spec";
+import * as Common from "../common/IsraelHiking";
 
 export class MapServiceMockCreator {
     private mapDiv: HTMLElement;
@@ -31,18 +31,20 @@ export class MapServiceMockCreator {
 }
 
 describe("MapService", () => {
-    var mapMock: MapServiceMockCreator;
+    let mapMock: MapServiceMockCreator;
     beforeEach(() => {
         mapMock = new MapServiceMockCreator();
     });
 
     afterEach(() => {
         mapMock.destructor();
-    })
+    });
 
     it("should initialize leafelt map", () => {
         for (let prop in localStorage) {
-            delete localStorage[prop];
+            if (localStorage.hasOwnProperty(prop)) {
+                delete localStorage[prop];
+            }
         }
         mapMock.destructor();
         mapMock = new MapServiceMockCreator();
@@ -56,7 +58,7 @@ describe("MapService", () => {
         let service = mapMock.mapService;
         let marker = L.marker(L.latLng(0, 0));
 
-        service.setMarkerTitle(marker as Common.IMarkerWithTitle, { title: "title", urls: [{mimeType: "image/png"}]} as Common.MarkerData, "#ffff00");
+        service.setMarkerTitle(marker as Common.IMarkerWithTitle, { title: "title", urls: [{ mimeType: "image/png" }] } as Common.MarkerData, "#ffff00");
 
         expect(marker.getTooltip).not.toBeNull();
     });

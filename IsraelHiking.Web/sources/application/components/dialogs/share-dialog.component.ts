@@ -61,16 +61,16 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public updateCurrentShare: boolean;
 
     @LocalStorage()
-    public storedUserEmail: string = "";
+    public storedUserEmail = "";
 
     constructor(resources: ResourcesService,
-        private httpClient: HttpClient,
-        private sanitizer: DomSanitizer,
-        private mapService: MapService,
-        private routesService: RoutesService,
-        private dataContainerService: DataContainerService,
-        private osmUserService: OsmUserService,
-        private toastService: ToastService,
+        private readonly httpClient: HttpClient,
+        private readonly sanitizer: DomSanitizer,
+        private readonly mapService: MapService,
+        private readonly routesService: RoutesService,
+        private readonly dataContainerService: DataContainerService,
+        private readonly osmUserService: OsmUserService,
+        private readonly toastService: ToastService,
     ) {
         super(resources);
 
@@ -151,7 +151,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     }
 
     private getDataFiltered(): Common.DataContainer {
-        var filteredData = this.dataContainerService.getData();
+        let filteredData = this.dataContainerService.getData();
         for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
             let route = filteredData.routes[routeIndex];
             if (route.segments.length === 0 && route.markers.length === 0) {
@@ -165,9 +165,9 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         if (this.routesService.routes.length === 1 && !this.routesService.routes[0].route.properties.description) {
             this.routesService.routes[0].route.properties.description = this.description;
         }
-        
+
         let id = this.dataContainerService.getShareUrl() ? this.dataContainerService.getShareUrl().id : "";
-        var shareUrl = {
+        let shareUrl = {
             id: id,
             title: this.title,
             description: this.description,

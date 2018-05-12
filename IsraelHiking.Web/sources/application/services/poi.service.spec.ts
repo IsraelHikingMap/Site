@@ -11,7 +11,7 @@ import { Urls } from "../common/Urls";
 describe("Poi Service", () => {
 
     beforeEach(() => {
-        var toastMock = new ToastServiceMockCreator();
+        let toastMock = new ToastServiceMockCreator();
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -54,7 +54,7 @@ describe("Poi Service", () => {
     it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController], async (poiService: PoiService, mockBackend: HttpTestingController) => {
         let id = "42";
         let source = "source";
-            
+
         poiService.getPoint(id, source);
 
         mockBackend.expectOne((request: HttpRequest<any>) => {
@@ -64,7 +64,7 @@ describe("Poi Service", () => {
     })));
 
     it("Should update point using the server", inject([PoiService, HttpTestingController], async (poiService: PoiService, mockBackend: HttpTestingController) => {
-        poiService.uploadPoint({} as IPointOfInterestExtended, [{name: "file.name"} as File]);
+        poiService.uploadPoint({} as IPointOfInterestExtended, [{ name: "file.name" } as File]);
 
         mockBackend.expectOne((request) => request.url.includes(Urls.poi));
     }));

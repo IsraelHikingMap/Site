@@ -10,13 +10,12 @@ import { ResourcesService } from "../../resources.service";
 import { GeoLocationService } from "../../geo-location.service";
 
 describe("RouteLayer", () => {
-    var routeLayer: RouteLayer;
-    var snappingService;
-    var routerService;
-    var geoLocationService;
-    var elevationProvider;
-    var route: IRoute;
-    var mapServiceMock: MapServiceMockCreator;
+    let routeLayer: RouteLayer;
+    let snappingService;
+    let routerService;
+    let elevationProvider;
+    let route: IRoute;
+    let mapServiceMock: MapServiceMockCreator;
 
     beforeEach(() => {
         mapServiceMock = new MapServiceMockCreator();
@@ -41,10 +40,10 @@ describe("RouteLayer", () => {
         let factory = {
             create: () => { return componentRefMock }
         };
-        var componentFactoryResolverMock = {
+        let componentFactoryResolverMock = {
             resolveComponentFactory: () => { return factory }
         };
-        var geoLocationService = {} as GeoLocationService;
+        let geoLocationService = {} as GeoLocationService;
         TestBed.configureTestingModule({
             imports: [],
             providers: [
@@ -53,7 +52,7 @@ describe("RouteLayer", () => {
                 { provide: ComponentFactoryResolver, useValue: componentFactoryResolverMock }
             ],
         });
-        
+
         routeLayer = new RouteLayer(mapServiceMock.mapService,
             snappingService,
             routerService,

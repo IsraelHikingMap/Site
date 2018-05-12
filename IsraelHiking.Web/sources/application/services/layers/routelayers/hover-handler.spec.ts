@@ -6,12 +6,12 @@ import { HoverHandlerState } from "./hover-handler-base";
 import { MapServiceMockCreator } from "../../map.service.spec";
 
 describe("HoverHandler", () => {
-    var context;
-    var hoverHandlerPoi: HoverHandlerPoi;
-    var hoverHandlerRoute: HoverHandlerRoute;
-    var mapServiceMockCreator: MapServiceMockCreator;
-    var middleMarker: L.Marker;
-    
+    let context;
+    let hoverHandlerPoi: HoverHandlerPoi;
+    let hoverHandlerRoute: HoverHandlerRoute;
+    let mapServiceMockCreator: MapServiceMockCreator;
+    let middleMarker: L.Marker;
+
     beforeEach(() => {
         mapServiceMockCreator = new MapServiceMockCreator();
         middleMarker = L.marker([0, 0]);
@@ -33,7 +33,7 @@ describe("HoverHandler", () => {
     afterEach(() => {
         mapServiceMockCreator.destructor();
     });
-    
+
     it("Should initialize with None state", () => {
         expect(hoverHandlerPoi.getState()).toBe(HoverHandlerState.NONE);
         expect(hoverHandlerRoute.getState()).toBe(HoverHandlerState.NONE);
@@ -64,7 +64,7 @@ describe("HoverHandler", () => {
 
         hoverHandlerPoi.onMouseMove(null);
         hoverHandlerRoute.onMouseMove(null);
-        
+
         expect(hoverHandlerPoi.getState()).toBe(HoverHandlerState.DRAGGING);
         expect(hoverHandlerRoute.getState()).toBe(HoverHandlerState.DRAGGING);
     });
@@ -87,7 +87,6 @@ describe("HoverHandler", () => {
         context.getSnappingForPoint = () => {
             return {
                 latlng: L.latLng([1, 1])
-                
             }
         }
         context.route.markers.push({ marker: L.marker([1, 1]) });

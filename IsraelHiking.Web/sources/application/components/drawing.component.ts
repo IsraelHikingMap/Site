@@ -17,9 +17,9 @@ import * as Common from "../common/IsraelHiking";
 export class DrawingComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
-        private mapService: MapService,
-        private routesService: RoutesService,
-        private routeLayerFactory: RouteLayerFactory) {
+        private readonly mapService: MapService,
+        private readonly routesService: RoutesService,
+        private readonly routeLayerFactory: RouteLayerFactory) {
         super(resources);
     }
 
@@ -27,7 +27,7 @@ export class DrawingComponent extends BaseMapComponent {
     public onDrawingShortcutKeys($event: KeyboardEvent) {
         if (this.routesService.selectedRoute == null) {
             return;
-        }   
+        }
         if ($event.ctrlKey && String.fromCharCode($event.which).toLowerCase() === "z") {
             this.undo($event);
         } else if ($event.keyCode === ESCAPE) {
@@ -105,7 +105,7 @@ export class DrawingComponent extends BaseMapComponent {
     public isEditDisabled = (): boolean => {
         return this.routesService.selectedRoute == null;
     }
-    
+
     public getRouteColor = (): string => {
         if (this.routesService.selectedRoute == null) {
             return "black";

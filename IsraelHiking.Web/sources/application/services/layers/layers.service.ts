@@ -130,7 +130,7 @@ export class LayersService {
     }
 
     public addBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
-        var layer = _.find(this.baseLayers, (layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
+        let layer = _.find(this.baseLayers, (layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
         if (layer != null) {
             return layer; // layer exists
         }
@@ -185,7 +185,7 @@ export class LayersService {
             layerToStore.osmUserId = this.osmUserService.userId;
             let response = await this.httpClient.post(Urls.userLayers, layerToStore).toPromise() as IUserLayer;
             layer.id = response.id;
-        } 
+        }
     }
 
     private async updateUserLayerInStorage(isOverlay: boolean, layer: ILayer) {
@@ -209,7 +209,7 @@ export class LayersService {
     private addBaseLayerFromData = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
         let layer = { ...layerData } as IBaseLayer;
         layer.layer = L.tileLayer(layerData.address, this.createOptionsFromLayerData(layerData, attribution));
-        if (position != undefined) {
+        if (position !== undefined) {
             this.baseLayers.splice(position, 0, layer);
         } else {
             this.baseLayers.push(layer);
@@ -218,7 +218,7 @@ export class LayersService {
     }
 
     public addOverlay = (layerData: Common.LayerData, attribution?: string): IOverlay => {
-        var overlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
+        let overlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
         if (overlay != null) {
             return overlay; // overlay exists
         }
@@ -251,7 +251,7 @@ export class LayersService {
     public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: Common.LayerData): void => {
         let position = this.baseLayers.indexOf(_.find(this.baseLayers, bl => bl.key === oldLayer.key));
         this.removeBaseLayerNoStore(oldLayer);
-        var layer = this.addBaseLayerFromData(newLayer, null, position);
+        let layer = this.addBaseLayerFromData(newLayer, null, position);
         layer.id = oldLayer.id;
         this.selectBaseLayer(layer);
         this.updateUserLayerInStorage(false, layer);
@@ -259,7 +259,7 @@ export class LayersService {
 
     public updateOverlay = (oldLayer: IOverlay, newLayer: Common.LayerData): void => {
         this.removeOverlayNoStore(oldLayer);
-        var overlay = this.addOverlayFromData(newLayer);
+        let overlay = this.addOverlayFromData(newLayer);
         this.toggleOverlay(overlay);
         overlay.id = oldLayer.id;
         this.updateUserLayerInStorage(true, overlay);
@@ -275,7 +275,7 @@ export class LayersService {
             _.remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
             return;
         }
-        var index = this.baseLayers.indexOf(this.selectedBaseLayer);
+        let index = this.baseLayers.indexOf(this.selectedBaseLayer);
         index = (index + 1) % this.baseLayers.length;
         this.selectBaseLayer(this.baseLayers[index]);
         _.remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
@@ -302,7 +302,7 @@ export class LayersService {
             return;
         }
         let previousLayer = this.selectedBaseLayer;
-        var newSelectedLayer = _.find(this.baseLayers, (layer) => layer.key === baseLayer.key);
+        let newSelectedLayer = _.find(this.baseLayers, (layer) => layer.key === baseLayer.key);
         this.mapService.map.addLayer(newSelectedLayer.layer);
         newSelectedLayer.selected = true;
         this.selectedBaseLayer = newSelectedLayer;
@@ -315,7 +315,7 @@ export class LayersService {
     }
 
     public toggleOverlay = (overlay: IOverlay) => {
-        var overlayFromArray = _.find(this.overlays, (overlayToFind) => overlayToFind.key === overlay.key);
+        let overlayFromArray = _.find(this.overlays, (overlayToFind) => overlayToFind.key === overlay.key);
         overlayFromArray.visible = !overlayFromArray.visible;
         if (overlayFromArray.visible) {
             this.mapService.map.addLayer(overlay.layer);
@@ -374,14 +374,14 @@ export class LayersService {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
             return;
         }
-        var baseLayer = _.find(this.baseLayers, (baseLayerToFind) =>
+        let baseLayer = _.find(this.baseLayers, (baseLayerToFind) =>
             baseLayerToFind.address.toLocaleLowerCase() === layerData.address.toLocaleLowerCase() ||
             this.compareKeys(baseLayerToFind.key, layerData.key));
         if (baseLayer != null) {
             this.selectBaseLayer(baseLayer);
             return;
         }
-        var key = layerData.key;
+        let key = layerData.key;
         if (key === "") {
             key = LayersService.CUSTOM_LAYER + " ";
             let index = 0;
@@ -397,7 +397,7 @@ export class LayersService {
             layerData.maxZoom = LayersService.MAX_NATIVE_ZOOM;
         }
 
-        var newLayer = this.addBaseLayer({
+        let newLayer = this.addBaseLayer({
             key: key,
             address: layerData.address,
             minZoom: layerData.minZoom,
@@ -420,7 +420,7 @@ export class LayersService {
     }
 
     private unique(layers: Common.LayerData[]): Common.LayerData[] {
-        var layersMap = {};
+        let layersMap = {};
         return layers.reverse().filter((layer) => {
             if (layersMap[layer.key.trim().toLowerCase()]) {
                 return false;
@@ -442,13 +442,13 @@ export class LayersService {
     }
 
     public getData = (): Common.DataContainer => {
-        var container = {
+        let container = {
             baseLayer: null,
             overlays: []
         } as Common.DataContainer;
 
         container.baseLayer = this.extractDataFromLayer(this.selectedBaseLayer);
-        var visibaleOverlays = this.overlays.filter(overlay => overlay.visible);
+        let visibaleOverlays = this.overlays.filter(overlay => overlay.visible);
         for (let overlayIndex = 0; overlayIndex < visibaleOverlays.length; overlayIndex++) {
             container.overlays.push(this.extractDataFromLayer(visibaleOverlays[overlayIndex]));
         }

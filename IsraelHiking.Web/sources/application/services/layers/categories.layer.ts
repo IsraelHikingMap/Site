@@ -116,7 +116,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                     } else if (pointOfInterestMarker != null) {
                         pointsOfInterest.splice(pointsOfInterest.indexOf(pointOfInterestMarker), 1);
                     }
-                    if (this.searchResultsMarker != null && 
+                    if (this.searchResultsMarker != null &&
                         this.searchResultsMarker.identifier === markerWithTitle.identifier &&
                         this.markers.getVisibleParent(markerWithTitle) === markerWithTitle) {
                         this.clearSearchResultsMarker();
@@ -151,7 +151,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                 }
                 foundMarker = true;
                 setTimeout(() => {
-                    var parent = this.markers.getVisibleParent(markerWithTitle);
+                    let parent = this.markers.getVisibleParent(markerWithTitle);
                     if (parent !== markerWithTitle) {
                         this.searchResultsMarker = this.pointOfInterestToMarker(pointOfInterest);
                         this.mapService.map.addLayer(this.searchResultsMarker);

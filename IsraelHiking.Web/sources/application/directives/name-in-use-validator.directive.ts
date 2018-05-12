@@ -11,13 +11,13 @@ export class NameInUseValidatorDirective implements Validator, AfterViewInit {
 
     @Input()
     public nameInUse: string;
-	
-	@Input()
-	public isOverlay: boolean;
+
+    @Input()
+    public isOverlay: boolean;
 
     private initialKey: string;
 
-	public constructor(private readonly layersService: LayersService) {}
+    public constructor(private readonly layersService: LayersService) { }
 
     public ngAfterViewInit(): void {
         this.initialKey = this.nameInUse;

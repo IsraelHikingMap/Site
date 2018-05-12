@@ -53,11 +53,11 @@ export class SnappingService {
     private enabled: boolean;
     private requestsQueue: ISnappingRequestQueueItem[];
 
-    constructor(private httpClient: HttpClient,
-        private resources: ResourcesService,
-        private mapService: MapService,
-        private toastService: ToastService,
-        private geoJsonParser: GeoJsonParser
+    constructor(private readonly httpClient: HttpClient,
+        private readonly resources: ResourcesService,
+        private readonly mapService: MapService,
+        private readonly toastService: ToastService,
+        private readonly geoJsonParser: GeoJsonParser
     ) {
         this.resources = resources;
         this.highwaySnappings = [];
@@ -76,8 +76,8 @@ export class SnappingService {
             return;
         }
 
-        var bounds = this.mapService.map.getBounds();
-        var boundsString = [bounds.getSouthWest().lat, bounds.getSouthWest().lng, bounds.getNorthEast().lat, bounds.getNorthEast().lng].join(",");
+        let bounds = this.mapService.map.getBounds();
+        let boundsString = [bounds.getSouthWest().lat, bounds.getSouthWest().lng, bounds.getNorthEast().lat, bounds.getNorthEast().lng].join(",");
         this.requestsQueue.push({
             boundsString: boundsString
         } as ISnappingRequestQueueItem);
@@ -120,8 +120,8 @@ export class SnappingService {
                 sensitivity: SnappingService.DEFAULT_SENSITIVITY
             } as ISnappingRouteOptions;
         }
-        var minDistance = Infinity;
-        var response = {
+        let minDistance = Infinity;
+        let response = {
             latlng: latlng,
             polyline: null
         } as ISnappingRouteResponse;
@@ -132,9 +132,9 @@ export class SnappingService {
                 continue;
             }
 
-            var snapPoint = this.mapService.map.latLngToLayerPoint(latlng);
-            var prevPoint = this.mapService.map.latLngToLayerPoint(latlngs[0]);
-            var startDistance = snapPoint.distanceTo(prevPoint);
+            let snapPoint = this.mapService.map.latLngToLayerPoint(latlng);
+            let prevPoint = this.mapService.map.latLngToLayerPoint(latlngs[0]);
+            let startDistance = snapPoint.distanceTo(prevPoint);
 
             if (startDistance <= options.sensitivity && startDistance < minDistance) {
                 minDistance = startDistance;
@@ -178,8 +178,7 @@ export class SnappingService {
             if (markerPointOnScreen.distanceTo(pointOnScreen) < options.sensitivity && response.markerData == null) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
-            }
-            else if (response.markerData != null && response.markerData.latlng.distanceTo(latlng) > markerData.latlng.distanceTo(latlng)) {
+            } else if (response.markerData != null && response.markerData.latlng.distanceTo(latlng) > markerData.latlng.distanceTo(latlng)) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
             }

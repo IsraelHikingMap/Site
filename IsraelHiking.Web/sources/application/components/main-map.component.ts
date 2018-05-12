@@ -33,7 +33,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     @ViewChild(NgxImageGalleryComponent)
     public ngxImageGallery: NgxImageGalleryComponent;
 
-
     constructor(resources: ResourcesService,
         private readonly injector: Injector,
         private readonly componentFactoryResolver: ComponentFactoryResolver,
@@ -82,7 +81,7 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     }
 
     private createContorl<T>(directiveHtmlName: string, component: Type<T>, position: L.ControlPosition, hidden: boolean) {
-        var control = L.Control.extend({
+        let control = L.Control.extend({
             options: {
                 position: position
             } as L.ControlOptions,
@@ -102,4 +101,4 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         } as L.ControlOptions);
         new control().addTo(this.mapService.map);
     }
-} 
+}

@@ -2,9 +2,9 @@
 import { MapServiceMockCreator } from "../../map.service.spec";
 
 describe("RouteStateEditPoi", () => {
-    var context;
-    var routeStateEditPoi: RouteStateEditPoi;
-    var mapServiceMockCreator: MapServiceMockCreator;
+    let context;
+    let routeStateEditPoi: RouteStateEditPoi;
+    let mapServiceMockCreator: MapServiceMockCreator;
 
     beforeEach(() => {
         mapServiceMockCreator = new MapServiceMockCreator();
@@ -18,10 +18,9 @@ describe("RouteStateEditPoi", () => {
             },
             mapService: mapServiceMockCreator.mapService,
             snappingService: {
-                enable: () => {}
+                enable: () => { }
             }
         };
-        
     });
 
     afterEach(() => {
@@ -31,7 +30,7 @@ describe("RouteStateEditPoi", () => {
     it("Should initialize empty route", () => {
         context.route.segments = [];
         context.route.markers = [];
-        
+
         routeStateEditPoi = new RouteStateEditPoi(context);
 
         expect(mapServiceMockCreator.getNumberOfLayers()).toBe(0);

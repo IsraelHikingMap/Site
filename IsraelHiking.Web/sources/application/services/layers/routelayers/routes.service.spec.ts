@@ -5,10 +5,10 @@ import { MapServiceMockCreator } from "../../map.service.spec";
 import { IRouteLayer, IRoute, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 
 describe("RoutesService", () => {
-    var routesService: RoutesService;
-    var mapServiceMock: MapServiceMockCreator;
-    var routeLayerFactory;
-    var initialRouteLayer: IRouteLayer;
+    let routesService: RoutesService;
+    let mapServiceMock: MapServiceMockCreator;
+    let routeLayerFactory;
+    let initialRouteLayer: IRouteLayer;
 
     beforeEach(() => {
         mapServiceMock = new MapServiceMockCreator();

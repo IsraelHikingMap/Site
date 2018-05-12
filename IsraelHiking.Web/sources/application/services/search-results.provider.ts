@@ -27,5 +27,5 @@ export class SearchResultsProvider {
             params: params
         }).toPromise() as ISearchResultsPointOfInterest[];
         return response;
-    }    
+    }
 }

@@ -34,7 +34,7 @@ export class RouteStatisticsService {
     }
 
     public getStatistics = (route: Common.RouteData): IRouteStatistics => {
-        var routeStatistics = {
+        let routeStatistics = {
             points: [] as IRouteStatisticsPoint[],
             length: 0,
             gain: 0,
@@ -66,14 +66,16 @@ export class RouteStatisticsService {
         }
         let simplified = L.LineUtil.simplify(routeStatistics.points, 1);
         let previousSimplifiedPoint = simplified[0];
-        for (let point of simplified) {
-            routeStatistics.gain += ((point.y - previousSimplifiedPoint.y) > 0 && point.y !== 0 && previousSimplifiedPoint.y !== 0) ?
-                (point.y - previousSimplifiedPoint.y) :
-                0;
-            routeStatistics.loss += ((point.y - previousSimplifiedPoint.y) < 0 && point.y !== 0 && previousSimplifiedPoint.y !== 0) ?
-                (point.y - previousSimplifiedPoint.y) :
-                0;
-            previousSimplifiedPoint = point;
+        for (let simplifiedPoint of simplified) {
+            routeStatistics.gain += ((simplifiedPoint.y - previousSimplifiedPoint.y) > 0 && simplifiedPoint.y !== 0
+                    && previousSimplifiedPoint.y !== 0)
+                ? (simplifiedPoint.y - previousSimplifiedPoint.y)
+                : 0;
+            routeStatistics.loss += ((simplifiedPoint.y - previousSimplifiedPoint.y) < 0 && simplifiedPoint.y !== 0
+                    && previousSimplifiedPoint.y !== 0)
+                ? (simplifiedPoint.y - previousSimplifiedPoint.y)
+                : 0;
+            previousSimplifiedPoint = simplifiedPoint;
         }
         return routeStatistics;
     }

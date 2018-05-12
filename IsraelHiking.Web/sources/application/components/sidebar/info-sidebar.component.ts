@@ -28,10 +28,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
     public selectedTabIndex: number;
 
     constructor(resources: ResourcesService,
-        private dialog: MatDialog,
-        private sidebarService: SidebarService,
-        private mapService: MapService,
-        private layersService: LayersService) {
+        private readonly dialog: MatDialog,
+        private readonly sidebarService: SidebarService,
+        private readonly mapService: MapService,
+        private readonly layersService: LayersService) {
         super(resources);
 
         this.visibleSectionId = null;
@@ -118,7 +118,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(31.1862, 34.7866),
                         zoom: 16,
                         type: "Way",
-                        osmTags: ['no "colour" tag'],
+                        osmTags: [`no "colour" tag`],
                         link: ""
                     },
                     {
@@ -126,7 +126,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(31.5386, 34.8068),
                         zoom: 15,
                         type: "Way",
-                        osmTags: ['Relation "שביל ישראל"'],
+                        osmTags: [`Relation "שביל ישראל"`],
                         link: ""
                     },
                     {
@@ -156,7 +156,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(31.7681051, 35.229898),
                         zoom: 16,
                         type: "Way",
-                        osmTags: ['Relation "שביל ירושלים"'],
+                        osmTags: [`Relation "שביל ירושלים"`],
                         link: ""
                     },
                     {
@@ -164,7 +164,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(33.0039669, 35.384796),
                         zoom: 15,
                         type: "Way",
-                        osmTags: ['Relation "מים אל ים"'],
+                        osmTags: [`Relation "מים אל ים"`],
                         link: ""
                     },
                     {
@@ -172,7 +172,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(32.9979383, 35.816524),
                         zoom: 16,
                         type: "Way",
-                        osmTags: ['Relation "שביל הגולן"'],
+                        osmTags: [`Relation "שביל הגולן"`],
                         link: ""
                     },
                     {
@@ -180,7 +180,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(32.8935159, 35.629950),
                         zoom: 16,
                         type: "Way",
-                        osmTags: ['Relation "שביל סובב כינרת"'],
+                        osmTags: [`Relation "שביל סובב כינרת"`],
                         link: ""
                     },
                     {
@@ -188,7 +188,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(32.7684757, 35.020230),
                         zoom: 16,
                         type: "Way",
-                        osmTags: ['Relation "שביל ואדיות חיפה"'],
+                        osmTags: [`Relation "שביל ואדיות חיפה"`],
                         link: ""
                     },
                     {
@@ -196,7 +196,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(32.8664313, 35.524077),
                         zoom: 16,
                         type: "Way",
-                        osmTags: ['Relation "שביל אופניים צופה כינרת"'],
+                        osmTags: [`Relation "שביל אופניים צופה כינרת"`],
                         link: ""
                     }
                 ]
@@ -210,7 +210,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(31.7181377, 35.074078),
                         zoom: 16,
                         type: "Way",
-                        osmTags: ['no "mtb:scale" tag'],
+                        osmTags: [`no "mtb:scale" tag`],
                         link: ""
                     },
                     {
@@ -842,7 +842,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(32.275980, 35.3625011),
                         zoom: 16,
                         type: "Way",
-                        osmTags: ["boundary=administrative", "admin_level=4", 'Relation "שטח A"'],
+                        osmTags: ["boundary=administrative", "admin_level=4", `Relation "שטח A"`],
                         link: ""
                     },
                     {
@@ -850,7 +850,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(31.3971, 35.0136),
                         zoom: 15,
                         type: "Way",
-                        osmTags: ["boundary=administrative", "admin_level=4", 'Relation "שטח B"'],
+                        osmTags: ["boundary=administrative", "admin_level=4", `Relation "שטח B"`],
                         link: ""
                     },
                     {

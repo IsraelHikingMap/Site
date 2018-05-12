@@ -7,8 +7,8 @@ import { BaseMapComponent } from "../base-map.component";
     selector: "coordinates",
     templateUrl: "./coordinates-marker-popup.component.html"
 })
-export class CoordinatesMarkerPopupComponent extends BaseMapComponent
-{
+export class CoordinatesMarkerPopupComponent extends BaseMapComponent {
+
     @Input()
     public latLng: L.LatLng;
     @Input()

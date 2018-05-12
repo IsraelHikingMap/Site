@@ -25,13 +25,13 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     private undoHandler: UndoHandler<Common.RouteData>;
     public map: L.Map;
 
-    constructor(public mapService: MapService,
-        public snappingService: SnappingService,
-        public routerService: RouterService,
-        public geoLocationService: GeoLocationService,
-        public elevationProvider: ElevationProvider,
-        public injector: Injector,
-        public componentFactoryResolver: ComponentFactoryResolver,
+    constructor(public readonly mapService: MapService,
+        public readonly snappingService: SnappingService,
+        public readonly routerService: RouterService,
+        public readonly geoLocationService: GeoLocationService,
+        public readonly elevationProvider: ElevationProvider,
+        public readonly injector: Injector,
+        public readonly componentFactoryResolver: ComponentFactoryResolver,
         route: IRoute) {
         super();
         this.map = mapService.map;
@@ -85,10 +85,10 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     }
 
     public snapToSelf(latlng: L.LatLng): ISnappingRouteResponse {
-        var polylines = [];
+        let polylines = [];
         for (let segment of this.route.segments) {
             if (segment.polyline) {
-                polylines.push(segment.polyline);    
+                polylines.push(segment.polyline);
             } else {
                 polylines.push(L.polyline(segment.latlngs));
             }
@@ -235,7 +235,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     }
 
     public raiseDataChanged = () => {
-        var data = this.getData();
+        let data = this.getData();
         this.undoHandler.addDataToUndoStack(data);
         this.dataChanged.next();
     }
@@ -262,13 +262,13 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         let data = this.getData();
 
         for (let segmentIndex = 0; segmentIndex < data.segments.length - 1; segmentIndex++) {
-            var currentSegment = data.segments[segmentIndex];
-            var nextSegment = data.segments[segmentIndex + 1];
+            let currentSegment = data.segments[segmentIndex];
+            let nextSegment = data.segments[segmentIndex + 1];
             currentSegment.latlngs = nextSegment.latlngs.reverse();
             currentSegment.routingType = nextSegment.routingType;
         }
-        var lastSegment = data.segments[data.segments.length - 1];
-        var lastPoint = lastSegment.latlngs[0]; // this is becuase we already reversed that segment's points
+        let lastSegment = data.segments[data.segments.length - 1];
+        let lastPoint = lastSegment.latlngs[0]; // this is becuase we already reversed that segment's points
         lastSegment.latlngs = [lastPoint, lastPoint];
         data.segments.reverse();
         this.setData(data);

@@ -24,8 +24,8 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         routesService: RoutesService,
         routeLayerFactory: RouteLayerFactory,
         toastService: ToastService,
-        private fileService: FileService,
-        private fitBoundsService: FitBoundsService
+        private readonly fileService: FileService,
+        private readonly fitBoundsService: FitBoundsService
     ) {
         super(resources, mapService, routesService, routeLayerFactory, toastService);
 
@@ -55,7 +55,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     public saveRouteToFile(e: Event): void {
-        var data = {
+        let data = {
             routes: [this.routeLayer.getData()]
         } as Common.DataContainer;
         this.fileService.saveToFile(this.routeProperties.name + ".gpx", "gpx", data)

@@ -10,21 +10,21 @@ import { MapServiceMockCreator } from "./map.service.spec";
 import { Urls } from "../common/Urls";
 
 describe("HashService", () => {
-    var hashService: HashService;
-    var mapServiceMock: MapServiceMockCreator;
+    let hashService: HashService;
+    let mapServiceMock: MapServiceMockCreator;
 
     beforeEach(() => {
         mapServiceMock = new MapServiceMockCreator();
-        var routerMock = {
+        let routerMock = {
             navigateByUrl: jasmine.createSpy("navigateByUrl"),
             events: new Subject<any>()
         }
-        var windowMock = {
+        let windowMock = {
             location: {
                 href: "href",
                 reload: jasmine.createSpy("reload"),
             },
-            open: () => {}
+            open: () => { }
         }
         TestBed.configureTestingModule({
             imports: [RouterTestingModule],
@@ -44,7 +44,7 @@ describe("HashService", () => {
         windowMock.location.hash = "#!/1/2.2/3";
 
         hashService = new HashService(router, windowMock, mapService);
-        
+
         expect(mapServiceMock.mapService.map.getCenter().lat).toBe(2.2);
         expect(mapServiceMock.mapService.map.getCenter().lng).toBe(3);
         expect(mapServiceMock.mapService.map.getZoom()).toBe(1);
@@ -130,7 +130,7 @@ describe("HashService", () => {
         windowMock.location.hash = "#!/?s=1234";
         hashService = new HashService(router, windowMock, mapService);
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
-        
+
         windowMock.location.hash = "#!/1/2.2/3.3";
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 
@@ -141,7 +141,7 @@ describe("HashService", () => {
         windowMock.location.hash = "#!/1/2/3";
         hashService = new HashService(router, windowMock, mapService);
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
-        
+
         windowMock.location.hash = "#!/42";
         (router.events as Subject<any>).next(new NavigationEnd(1, "", ""));
 

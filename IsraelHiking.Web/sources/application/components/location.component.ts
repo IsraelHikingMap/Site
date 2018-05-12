@@ -82,13 +82,14 @@ export class LocationComponent extends BaseMapComponent {
             componentRef.instance.setMarker(this.locationMarker);
             componentRef.instance.angularBinding(componentRef.hostView);
             componentRef.instance.remove = () => {
-                //this.removeLocationMarker();
-                //this.geoLocationService.disable();
+                // HM TODO: do we need this?
+                // this.removeLocationMarker();
+                // this.geoLocationService.disable();
             };
             this.locationMarker.bindPopup(controlDiv);
             this.mapService.map.addLayer(this.accuracyCircle);
             this.mapService.map.addLayer(this.locationMarker);
-            
+
             this.mapService.map.flyTo(latLng);
         } else {
             this.locationMarker.setLatLng(latLng);
@@ -103,18 +104,4 @@ export class LocationComponent extends BaseMapComponent {
         this.locationMarker = null;
         this.accuracyCircle = null;
     }
-    /*
-     * this.locationMarker = L.circleMarker(latLng,
-                {
-                    clickable: true,
-                    draggable: false,
-                    //icon: IconsService.createRoundIcon("blue"),
-                    color: "#136AEC",
-                    fillColor: "#2A93EE",
-                    fillOpacity: 0.7,
-                    weight: 2,
-                    opacity: 0.9,
-                    radius: 10
-                } as L.CircleMarkerOptions) as any as Common.IMarkerWithTitle;
-     */
 }

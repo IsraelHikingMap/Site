@@ -33,7 +33,7 @@ describe("FileService", () => {
         });
     });
 
-    
+
 
     it("Should Initialize with file formats", inject([FileService], (fileService: FileService) => {
         expect(fileService.formats.length).toBe(2);
@@ -41,10 +41,9 @@ describe("FileService", () => {
 
     it("Should save to file", inject([FileService, HttpTestingController], async (fileService: FileService, mockBackend: HttpTestingController) => {
         spyOn(FileSaverFunctions, "saveAs");
-        
 
         fileService.saveToFile("file.name", "format", {} as Common.DataContainer).then(() => {
-            expect(FileSaverFunctions.saveAs).toHaveBeenCalled();    
+            expect(FileSaverFunctions.saveAs).toHaveBeenCalled();
         });
 
         mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
@@ -60,7 +59,7 @@ describe("FileService", () => {
     }));
 
     it("Should open from url by uploading", inject([FileService, HttpTestingController], async (fileService: FileService, mockBackend: HttpTestingController) => {
-        fileService.openFromFile(new Blob([""]) as File).then(() => {}, fail);
+        fileService.openFromFile(new Blob([""]) as File).then(() => { }, fail);
 
         mockBackend.expectOne(Urls.openFile);
     }));

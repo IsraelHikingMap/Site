@@ -1,13 +1,13 @@
 ﻿import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import { LocalStorage } from "ngx-store"; 
+import { LocalStorage } from "ngx-store";
 
 import { ResourcesService } from "../services/resources.service";
 import { OsmUserService } from "../services/osm-user.service";
 import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
 import { OsmUserDialogComponent } from "./dialogs/osm-user-dialog.component";
-import {TermsOfServiceDialogComponent} from "./dialogs/terms-of-service-dialog.component";
+import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
 
 @Component({
     selector: "osm-user",
@@ -17,12 +17,12 @@ import {TermsOfServiceDialogComponent} from "./dialogs/terms-of-service-dialog.c
 export class OsmUserComponent extends BaseMapComponent {
 
     @LocalStorage()
-    public agreedToTheTermsOfService: boolean = false;
+    public agreedToTheTermsOfService = false;
 
     constructor(resources: ResourcesService,
-        public userService: OsmUserService,
-        private dialog: MatDialog,
-        private toastService: ToastService) {
+        public readonly userService: OsmUserService,
+        private readonly dialog: MatDialog,
+        private readonly toastService: ToastService) {
         super(resources);
     }
 

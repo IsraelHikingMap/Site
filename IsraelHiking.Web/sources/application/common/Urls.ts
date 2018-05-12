@@ -21,7 +21,7 @@
     public static readonly poi = Urls.apiBase + "poi/";
     public static readonly poiCategories = Urls.poi + "categories/";
     public static readonly rating = Urls.apiBase + "rating/";
-    
+
     public static readonly DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
     public static readonly MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
     public static readonly OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";

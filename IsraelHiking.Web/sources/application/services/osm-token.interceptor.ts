@@ -14,7 +14,7 @@ export class OsmTokenInterceptor implements HttpInterceptor {
                 setHeaders: {
                     Authorization: `Bearer ${this.authorizationService.osmToken}`
                 }
-            });    
+            });
         }
         return next.handle(request);
     }

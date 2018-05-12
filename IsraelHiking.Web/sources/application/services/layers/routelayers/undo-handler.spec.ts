@@ -18,7 +18,7 @@ describe("UndoHandler", () => {
 
         undoHandler.addDataToUndoStack(42);
         undoHandler.addDataToUndoStack(7);
-        
+
         expect(undoHandler.isUndoDisbaled()).toBeFalsy();
         expect(undoHandler.top()).toBe(7);
     });

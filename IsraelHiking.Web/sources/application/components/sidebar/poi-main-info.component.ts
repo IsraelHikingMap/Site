@@ -48,7 +48,7 @@ export class PoiMainInfoComponent extends BaseMapComponent {
                 this.currentImageIndex = this.info.imagesUrls.length - 1;
             }
 
-            reader.readAsDataURL(file);    
+            reader.readAsDataURL(file);
         }
     }
 
@@ -80,7 +80,7 @@ export class PoiMainInfoComponent extends BaseMapComponent {
             this.currentImageIndex = 0;
         }
     }
-    
+
     public hasNext(): boolean {
         return this.currentImageIndex < this.info.imagesUrls.length - 1;
     }

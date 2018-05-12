@@ -282,7 +282,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     }
 
     private addMissingPartsToMap = (geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
-        var geoJsonLayer = L.geoJSON(geoJson);
+        let geoJsonLayer = L.geoJSON(geoJson);
         for (let feature of geoJson.features) {
             let latLngs = this.geoJsonParser.toLatLngsArray(feature)[0];
             let unselectedPathOptions = { color: "red", weight: 3, opacity: 1 } as L.PathOptions;

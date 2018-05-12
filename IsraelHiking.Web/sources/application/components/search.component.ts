@@ -1,7 +1,7 @@
 ﻿import { Component, Injector, ComponentFactoryResolver, HostListener, ViewEncapsulation, AfterViewInit, ViewChild, ViewChildren, ElementRef, ComponentFactory, QueryList } from "@angular/core";
 import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
-import { Observable } from "rxjs";
+import { Observable } from "rxjs/Observable";
 import { ENTER } from "@angular/cdk/keycodes";
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -53,7 +53,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     private requestsQueue: ISearchRequestQueueItem[];
     private readonlyLayer: L.FeatureGroup;
     private selectFirstSearchResults: boolean;
-    
+
     @ViewChild("searchFromInput")
     public searchFromInput: ElementRef;
 
@@ -101,10 +101,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     private configureInputFormControl(input: FormControl, context: ISearchContext) {
         input.valueChanges
             .do(x => {
-                if (typeof x != "string") {
+                if (typeof x !== "string") {
                     this.selectResults(context, x);
                 } else {
-                    this.selectFirstSearchResults = false;    
+                    this.selectFirstSearchResults = false;
                 }
             })
             .filter(x => typeof x === "string")
@@ -114,7 +114,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 context.selectedSearchResults = null;
                 this.search(context);
             });
-        }
+    }
 
     public ngAfterViewInit() {
         if (this.isVisible) {
@@ -130,9 +130,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         if (this.isVisible) {
             // allow DOM make the input visible
             setTimeout(() => {
-                    this.searchFromInput.nativeElement.focus();
-                    this.searchFromInput.nativeElement.select();
-                },
+                this.searchFromInput.nativeElement.focus();
+                this.searchFromInput.nativeElement.select();
+            },
                 100);
         } else {
             this.matAutocompleteTriggers.forEach(trigger => trigger.closePanel());
@@ -192,9 +192,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.routerService.getRoute(this.fromContext.selectedSearchResults.location, this.toContext.selectedSearchResults.location, this.routingType).then((routeSegments: Common.RouteSegmentData[]) => {
             this.readonlyLayer.clearLayers();
             this.mapService.updateReadOnlyLayer(this.readonlyLayer, [{ segments: routeSegments, markers: [] } as Common.RouteData]);
-            var markerFrom = L.marker(this.fromContext.selectedSearchResults.location, { icon: IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
+            let markerFrom = L.marker(this.fromContext.selectedSearchResults.location, { icon: IconsService.createStartIcon(), draggable: false }) as Common.IMarkerWithTitle;
             markerFrom.title = this.fromContext.selectedSearchResults.displayName;
-            var markerTo = L.marker(this.toContext.selectedSearchResults.location, { icon: IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;
+            let markerTo = L.marker(this.toContext.selectedSearchResults.location, { icon: IconsService.createEndIcon(), draggable: false }) as Common.IMarkerWithTitle;
             markerTo.title = this.toContext.selectedSearchResults.displayName;
 
             let convertToRoute = () => {
@@ -222,7 +222,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             setTimeout(() => markerTo.openPopup(), 500);
         });
     }
-    
+
     private createSearchRouteMarkerPopup(marker: Common.IMarkerWithTitle, componentFactory: ComponentFactory<SearchResultsMarkerPopupComponent>, convertToRoute: () => void) {
         let markerPopupDiv = L.DomUtil.create("div");
         let componentRef = componentFactory.create(this.injector, [], markerPopupDiv);

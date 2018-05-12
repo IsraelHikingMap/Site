@@ -15,13 +15,14 @@ export abstract class HoverHandlerBase {
     public hoverMarker: L.Marker;
     protected hoverState: string;
 
+    public abstract onMouseMove: (e: L.LeafletMouseEvent) => void;
+
     constructor(protected context: IRouteLayer) {
         let pathOptions = this.context.route.properties.pathOptions;
         this.hoverMarker = L.marker(this.context.mapService.map.getCenter(), { clickable: false, opacity: pathOptions.opacity } as L.MarkerOptions);
     }
 
     protected abstract getHoverIcon(color: string): L.DivIcon;
-    public abstract onMouseMove: (e: L.LeafletMouseEvent) => void;
 
     public getState = (): string => {
         return this.hoverState;

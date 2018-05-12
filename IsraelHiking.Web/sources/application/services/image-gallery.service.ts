@@ -5,8 +5,7 @@ import { MapService } from "./map.service";
 
 
 @Injectable()
-export class ImageGalleryService
-{
+export class ImageGalleryService {
     public config: GALLERY_CONF;
     public images: GALLERY_IMAGE[] = [];
 

@@ -42,7 +42,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     private categoriesMap: Map<CategoriesType, ICategoriesContainer>;
 
     @LocalStorage()
-    public isAdvanced: boolean = false;
+    public isAdvanced = false;
 
     constructor(resources: ResourcesService,
         private readonly dialog: MatDialog,
@@ -164,7 +164,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         this.suppressEvents(e);
     }
 
-    public selectRoute (routeLayer: IRouteLayer, e: Event) {
+    public selectRoute(routeLayer: IRouteLayer, e: Event) {
         this.routesService.changeRouteState(routeLayer);
         this.suppressEvents(e);
     }
@@ -197,4 +197,4 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     public isRouteSelected(routeLayer: IRouteLayer) {
         return this.routesService.selectedRoute === routeLayer;
     }
-} 
+}

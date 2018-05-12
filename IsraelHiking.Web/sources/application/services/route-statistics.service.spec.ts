@@ -4,7 +4,7 @@ import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from 
 import * as Common from "../common/IsraelHiking";
 
 describe("RouteStatisticsService", () => {
-    var service: RouteStatisticsService;
+    let service: RouteStatisticsService;
 
     beforeEach(() => {
         service = new RouteStatisticsService();
@@ -68,7 +68,7 @@ describe("RouteStatisticsService", () => {
                 {
                     x: 0,
                     y: 0,
-                    latlng: L.latLng(0,0)
+                    latlng: L.latLng(0, 0)
                 } as IRouteStatisticsPoint,
                 {
                     x: 1,
@@ -104,7 +104,7 @@ describe("RouteStatisticsService", () => {
             points: [
                 {
                     x: 0,
-                    latlng: L.latLng(0,0)
+                    latlng: L.latLng(0, 0)
                 },
                 {
                     x: 1,

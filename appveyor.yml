@@ -20,6 +20,7 @@ build:
   verbosity: minimal
 after_test:
 - ps: >-
+    npm run-script lint
 
     $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
 

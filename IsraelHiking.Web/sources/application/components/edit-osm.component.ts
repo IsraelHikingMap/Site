@@ -3,7 +3,7 @@ import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
 import { LayersService } from "../services/layers/layers.service";
 import { OsmUserService } from "../services/osm-user.service";
-import { BaseMapComponent } from "./base-map.component"; 
+import { BaseMapComponent } from "./base-map.component";
 
 @Component({
     selector: "edit-osm",
@@ -12,9 +12,9 @@ import { BaseMapComponent } from "./base-map.component";
 export class EditOSMComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
-        private mapService: MapService,
-        private layersService: LayersService,
-        private osmUserService: OsmUserService) {
+        private readonly mapService: MapService,
+        private readonly layersService: LayersService,
+        private readonly osmUserService: OsmUserService) {
         super(resources);
     }
 

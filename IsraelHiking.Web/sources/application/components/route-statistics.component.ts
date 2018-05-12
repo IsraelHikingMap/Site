@@ -60,6 +60,8 @@ interface IChartElements {
 
 })
 export class RouteStatisticsComponent extends BaseMapComponent implements OnInit, OnDestroy {
+    private static readonly HOVER_BOX_WIDTH = 140;
+
     public length: number;
     public gain: number;
     public loss: number;
@@ -68,8 +70,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
-
-    private static readonly HOVER_BOX_WIDTH = 140;
 
     private routeLayer: IRouteLayer;
     private statistics: IRouteStatistics;
@@ -85,7 +85,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         private readonly routesService: RoutesService,
         private readonly routeStatisticsService: RouteStatisticsService,
         private readonly cancelableTimeoutService: CancelableTimeoutService
-        ) {
+    ) {
         super(resources);
 
         this.isKmMarkersOn = false;
@@ -173,7 +173,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.loss = this.statistics.loss;
         if (this.isVisible()) {
             this.setRouteColorToChart(this.routeLayer.route.properties.pathOptions.color);
-            this.setDataToChart(this.statistics.points.map(p => [p.x, p.y] as [number,number]));
+            this.setDataToChart(this.statistics.points.map(p => [p.x, p.y] as [number, number]));
         }
         this.updateKmMarkers();
     }
@@ -235,13 +235,12 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.chartElements.hoverGroup.selectAll("circle").attr("cy", chartYCoordinate);
         let safeDistance = 20;
         let boxPosition = safeDistance;
-        if (chartXCoordinate > +this.chartElements.svg.attr("width") / 2)
-        {
+        if (chartXCoordinate > +this.chartElements.svg.attr("width") / 2) {
             boxPosition = -RouteStatisticsComponent.HOVER_BOX_WIDTH - safeDistance;
         }
         this.chartElements.hoverGroup.select("g").attr("transform", `translate(${boxPosition}, 0)`);
         this.buildAllTextInHoverBox(point);
-        
+
         this.chartElements.hoverChartMarker.setLatLng(point.latlng);
         this.chartElements.hoverChartMarker.setOpacity(1.0);
     }
@@ -260,9 +259,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let d3 = this.d3Service.getD3();
         this.chartElements.svg = d3.select(this.lineChartContainer.nativeElement).select("svg");
         this.chartElements.svg.html("");
-        let style = window.getComputedStyle(this.lineChartContainer.nativeElement);
-        let width = +style.width.replace("px", "");
-        let height = +style.height.replace("px", "");
+        let windowStyle = window.getComputedStyle(this.lineChartContainer.nativeElement);
+        let width = +windowStyle.width.replace("px", "");
+        let height = +windowStyle.height.replace("px", "");
         this.chartElements.svg.attr("height", height);
         this.chartElements.svg.attr("width", width);
         this.chartElements.width = width - this.chartElements.margin.left - this.chartElements.margin.right;
@@ -321,7 +320,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("y2", this.chartElements.height)
             .attr("stroke", "black")
             .attr("stroke-width", 1);
-        
+
         this.chartElements.hoverGroup.append("circle")
             .attr("class", "circle-point")
             .attr("cx", 0)
@@ -362,8 +361,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                 const timeoutGroupName = "clickOnChart";
                 this.cancelableTimeoutService.clearTimeoutByGroup(timeoutGroupName);
                 this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                        this.hideChartHover();
-                    },
+                    this.hideChartHover();
+                },
                     5000, timeoutGroupName);
             })
             .on("mouseout", () => {
@@ -376,7 +375,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.createHoverBoxText(this.resources.distance, point.x.toFixed(2), " " + this.resources.kmUnit, 20);
         this.createHoverBoxText(this.resources.height, point.y.toFixed(0), " " + this.resources.meterUnit, 40);
         // the following is a hack due to cross browser issues...
-        this.createHoverBoxText(this.resources.slope, Math.abs(point.slope).toFixed(0) + "%", point.slope < 0 ? "-" : "" , 60);
+        this.createHoverBoxText(this.resources.slope, Math.abs(point.slope).toFixed(0) + "%", point.slope < 0 ? "-" : "", 60);
     }
 
     private createHoverBoxText(title: string, value: string, units: string, y: number) {
@@ -399,14 +398,14 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private setRouteColorToChart(routeColor: string) {
-        var icon = IconsService.createRoundIcon(routeColor);
+        let icon = IconsService.createRoundIcon(routeColor);
         this.chartElements.hoverChartMarker.setIcon(icon);
         this.chartElements.path.attr("stroke", routeColor);
         this.chartElements.hoverGroup.select(".circle-point").attr("fill", routeColor);
         this.chartElements.hoverGroup.select(".circle-point-aura").attr("stroke", routeColor);
     }
-    
-    private setDataToChart(data: [number,number][]) {
+
+    private setDataToChart(data: [number, number][]) {
         let d3 = this.d3Service.getD3();
         let duration = 1000;
         this.chartElements.xScale.domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);

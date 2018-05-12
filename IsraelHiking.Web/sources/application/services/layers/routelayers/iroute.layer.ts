@@ -72,7 +72,7 @@ export interface IRouteLayer {
 
     getLastSegment(): IRouteSegment;
     getLastLatLng(): L.LatLng;
-    
+
     setHiddenState(): void;
     setReadOnlyState(): void;
     setEditRouteState(): void;

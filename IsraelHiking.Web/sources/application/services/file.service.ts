@@ -16,7 +16,7 @@ export interface IFormatViewModel {
 export class FileService {
     public formats: IFormatViewModel[];
 
-    constructor(private httpClient: HttpClient) {
+    constructor(private readonly httpClient: HttpClient) {
         this.formats = [];
         this.httpClient.get(Urls.fileFormats).toPromise().then((response: IFormatViewModel[]) => {
             this.formats.splice(0);
@@ -90,14 +90,14 @@ export class FileService {
     }
 
     private saveBytesResponseToFile = (data: any, fileName: string) => {
-        var byteCharacters = atob(data);
-        var byteNumbers = new Array(byteCharacters.length);
+        let byteCharacters = atob(data);
+        let byteNumbers = new Array(byteCharacters.length);
         for (let i = 0; i < byteCharacters.length; i++) {
             byteNumbers[i] = byteCharacters.charCodeAt(i);
         }
-        var byteArray = new Uint8Array(byteNumbers);
-        var blobToSave = new Blob([byteArray], { type: "application/octet-stream" });
-        //saveAs(blobToSave, fileName);
+        let byteArray = new Uint8Array(byteNumbers);
+        let blobToSave = new Blob([byteArray], { type: "application/octet-stream" });
+        // saveAs(blobToSave, fileName);
         this.saveAsWorkAround(blobToSave, fileName);
     }
 
@@ -111,8 +111,8 @@ export class FileService {
         if (L.Browser.mobile) {
             let reader = new FileReader();
             reader.onload = () => {
-                // If chrome android
                 if (L.Browser.chrome) {
+                    // If chrome android
                     let save = document.createElement("a");
 
                     save.href = reader.result;
@@ -122,27 +122,23 @@ export class FileService {
                     save.click();
                     document.body.removeChild(save);
                     window.URL.revokeObjectURL(save.href);
-                }
-                // If iPhone etc
-                else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
+                } else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
+                    // If iPhone etc
                     let url = window.URL.createObjectURL(blob);
                     window.location.href = url;
-                }
-                else {
+                } else {
                     // Any other browser
                     saveAs(blob, fileName);
                 }
             };
 
             reader.readAsDataURL(blob);
-        }
-        else {
-            //Desktop if safari
+        } else {
+            // Desktop if safari
             if (L.Browser.safari) {
                 let url = window.URL.createObjectURL(blob);
                 window.location.href = url;
-            }
-            else {
+            } else {
                 // If normal browser use package Filesaver.js
                 saveAs(blob, fileName);
             }

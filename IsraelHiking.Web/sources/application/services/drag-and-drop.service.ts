@@ -6,7 +6,7 @@ import { ToastService } from "./toast.service";
 import { DataContainerService } from "./data-container.service";
 
 @Injectable()
-export class DragAndDropService  {
+export class DragAndDropService {
 
     constructor(private resourcesService: ResourcesService,
         private mapService: MapService,
@@ -14,8 +14,8 @@ export class DragAndDropService  {
         private dataContainerService: DataContainerService,
         private toastService: ToastService) {
 
-        var dropbox = this.mapService.map.getContainer();
-        
+        let dropbox = this.mapService.map.getContainer();
+
         dropbox.addEventListener("dragenter", () => { this.mapService.map.scrollWheelZoom.disable(); });
         dropbox.addEventListener("dragleave", () => { this.mapService.map.scrollWheelZoom.enable(); });
         dropbox.addEventListener("dragover", (e: DragEvent) => {
@@ -33,7 +33,7 @@ export class DragAndDropService  {
                         try {
                             let dataContainer = await fileService.openFromFile(file);
                             dataContainerService.setData(dataContainer);
-                        } catch(ex) {
+                        } catch (ex) {
                             toastService.error(resourcesService.unableToLoadFromFile + `: ${file.name}`);
                         };
                     }

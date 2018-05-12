@@ -15,16 +15,16 @@ export class MapService {
     @LocalStorage()
     private center = L.latLng(31.773, 35.12);
     @LocalStorage()
-    private zoom: number = 13;
+    private zoom = 13;
 
-    constructor(private resources: ResourcesService) {
+    constructor(private readonly resources: ResourcesService) {
         this.map = L.map("map", {
             center: this.center,
             zoom: this.zoom,
             doubleClickZoom: false,
             zoomControl: false,
         } as L.MapOptions);
-        
+
         this.map.on("moveend", () => {
             this.center = this.map.getCenter();
             this.zoom = this.map.getZoom();
@@ -120,7 +120,7 @@ export class MapService {
      * @returns {} - an array of array of coordinates
      */
     public getGroupedLatLngForAntPath(segments: Common.RouteSegmentData[]): L.LatLng[][] {
-        let groupedLatLngs = [] as L.LatLng[][]; 
+        let groupedLatLngs = [] as L.LatLng[][];
         let currentGroup = [] as L.LatLng[];
         for (let segment of segments) {
             if (currentGroup.length === 0) {
@@ -143,7 +143,7 @@ export class MapService {
             for (let segment of route.segments) {
                 let latlngs = [] as L.LatLng[];
                 for (let latlng of segment.latlngs) {
-                    var fullLatLng = L.latLng(latlng.lat, latlng.lng, latlng.alt);
+                    let fullLatLng = L.latLng(latlng.lat, latlng.lng, latlng.alt);
                     latlngs.push(fullLatLng);
                 }
                 segment.latlngs = latlngs;

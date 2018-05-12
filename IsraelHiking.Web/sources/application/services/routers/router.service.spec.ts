@@ -30,7 +30,7 @@ describe("RouterService", () => {
         async (router: RouterService, mockBackend: HttpTestingController) => {
             router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
                 expect(data.length).toBe(2);
-                expect(data[1].latlngs.length).toBe(3);    
+                expect(data[1].latlngs.length).toBe(3);
             }, fail);
 
             mockBackend.expectOne(() => true).flush(
@@ -59,7 +59,7 @@ describe("RouterService", () => {
 
         mockBackend.expectOne(() => true).flush({});
     }));
-    
+
     it("Should use none router when getting error response from server", inject([RouterService, HttpTestingController], async (router: RouterService, mockBackend: HttpTestingController) => {
         router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
             expect(data.length).toBe(1);

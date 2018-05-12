@@ -62,7 +62,7 @@ export interface ICategory {
     icon: string,
     color: string,
     isSelected: boolean;
-    items: { iconColorCategory: IIconColorLabel, tags: any[]}[];
+    items: { iconColorCategory: IIconColorLabel, tags: any[] }[];
 }
 
 @Injectable()
@@ -115,7 +115,7 @@ export class PoiService {
         this.poiCache.splice(0, 0, poi);
         return poi;
     }
-    
+
     public uploadPoint(poiExtended: IPointOfInterestExtended, files: File[]): Promise<IPointOfInterestExtended> {
         let formData = new FormData();
         for (let file of files) {

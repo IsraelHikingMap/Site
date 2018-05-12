@@ -107,7 +107,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
                 this.currentImageIndex = this.imagesUrls.length - 1;
             }
 
-            reader.readAsDataURL(file);    
+            reader.readAsDataURL(file);
         }
     }
 

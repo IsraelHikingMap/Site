@@ -28,9 +28,17 @@ export class HashService {
     public externalUrl: string;
     public download: boolean;
 
-    constructor(private router: Router,
+    public static getShareUrlPostfix(id: string) {
+        return `/?${HashService.SITE_SHARE}=${id}`;
+    }
+
+    public static getFullUrlFromShareId(id: string) {
+        return `${Urls.baseAddress}${HashService.HASH}${HashService.getShareUrlPostfix(id)}`;
+    }
+
+    constructor(private readonly router: Router,
         @Inject("Window") window: any, // bug in angular aot
-        private mapService: MapService) {
+        private readonly mapService: MapService) {
 
         this.baseLayer = null;
         this.searchTerm = "";
@@ -70,8 +78,8 @@ export class HashService {
             return;
         }
         let path = HashService.HASH + "/" + this.mapService.map.getZoom() +
-        "/" + this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION) +
-        "/" + this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION);
+            "/" + this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION) +
+            "/" + this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION);
         this.internalUpdate = true;
         this.router.navigateByUrl(path, { replaceUrl: true });
     }
@@ -88,7 +96,7 @@ export class HashService {
             address: ""
         } as Common.LayerData;
     }
-    
+
     private initialLoad() {
         let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace("#!/?", "");
         let searchParams = new HttpParams({ fromString: simplifiedHash });
@@ -110,9 +118,9 @@ export class HashService {
         }
         let array = HashService.LOCATION_REGEXP.exec(path);
         return L.latLng(
-            parseFloat(array[2]),
-            parseFloat(array[3]),
-            parseInt(array[1])
+            +array[2],
+            +array[3],
+            +array[1]
         );
     }
 
@@ -136,12 +144,4 @@ export class HashService {
         this.internalUpdate = true;
         this.router.navigateByUrl(`${HashService.HASH}${HashService.getShareUrlPostfix(this.shareUrlId)}`);
     }
-
-    public static getShareUrlPostfix(id: string) {
-        return `/?${HashService.SITE_SHARE}=${id}`;
-    }
-
-    public static getFullUrlFromShareId(id: string) {
-        return `${Urls.baseAddress}${HashService.HASH}${HashService.getShareUrlPostfix(id)}`;
-    }
-} 
+}

@@ -1,7 +1,7 @@
 ﻿import { SidebarService } from "./sidebar.service";
 
 describe("SidebarService", () => {
-    var service: SidebarService;
+    let service: SidebarService;
 
     beforeEach(() => {
         service = new SidebarService;

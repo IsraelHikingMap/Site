@@ -12,7 +12,7 @@ import { ToastServiceMockCreator } from "./toast.service.spec";
 import { GeoJsonParser } from "./geojson.parser";
 
 describe("SnappingService", () => {
-    var mapServiceMock: MapServiceMockCreator;
+    let mapServiceMock: MapServiceMockCreator;
 
     beforeEach(() => {
         mapServiceMock = new MapServiceMockCreator();

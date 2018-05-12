@@ -22,7 +22,7 @@ export class OverlayAddDialogComponent extends LayerBaseDialogComponent {
     }
 
     protected internalSave(layerData: Common.LayerData): void {
-        var overlay = this.layersService.addOverlay(layerData);
+        let overlay = this.layersService.addOverlay(layerData);
         this.layersService.toggleOverlay(overlay);
     }
 }

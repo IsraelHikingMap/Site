@@ -40,9 +40,9 @@ export class DataContainerService {
     }
 
     public getData = (): Common.DataContainer => {
-        var layersContainer = this.layersService.getData();
+        let layersContainer = this.layersService.getData();
 
-        var container = {
+        let container = {
             routes: this.routesService.getData(),
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,

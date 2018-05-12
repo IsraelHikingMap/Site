@@ -16,13 +16,25 @@ namespace GeoJson {
 export class GeoJsonParser {
     private static MARKERS = "markers";
 
+    public static getPropertyValue(properties: {}, key: string, language?: string): string {
+        let value = "";
+        if (language) {
+            value = properties[key + ":" + language];
+        }
+        return value || properties[key];
+    }
+
+    public static createLatlng(coordinates: GeoJSON.Position): L.LatLng {
+        return L.latLng(coordinates[1], coordinates[0], coordinates[2] || 0);
+    }
+
     public parse(content: string): Common.DataContainer {
         let geojson = JSON.parse(content);
         return this.toDataContainer(geojson);
     }
 
     public toString(data: Common.DataContainer): string {
-        var geoJson = this.toGeoJson(data);
+        let geoJson = this.toGeoJson(data);
         return JSON.stringify(geoJson);
     }
 
@@ -59,8 +71,8 @@ export class GeoJsonParser {
                     case GeoJson.multiPoint:
                         let points = feature.geometry as GeoJSON.MultiPoint;
                         for (let pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
-                            let marker = this.createMarker(points.coordinates[pointIndex], id, name, null, description);
-                            markers.push(marker);
+                            let multiMarker = this.createMarker(points.coordinates[pointIndex], id, name, null, description);
+                            markers.push(multiMarker);
                         }
                         break;
                     case GeoJson.lineString:
@@ -111,10 +123,6 @@ export class GeoJsonParser {
             description: description,
             urls: []
         };
-    }
-
-    public static createLatlng(coordinates: GeoJSON.Position): L.LatLng {
-        return L.latLng(coordinates[1], coordinates[0], coordinates[2] || 0);
     }
 
     private createLatlngArray(coordinates: GeoJSON.Position[]): L.LatLng[] {
@@ -251,13 +259,5 @@ export class GeoJsonParser {
                 }
         }
         return latlngsArray;
-    }
-
-    public static getPropertyValue(properties: {}, key: string, language?: string): string {
-        let value = "";
-        if (language) {
-            value = properties[key + ":" + language];
-        }
-        return value || properties[key];
     }
 }

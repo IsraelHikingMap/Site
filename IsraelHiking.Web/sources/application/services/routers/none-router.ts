@@ -4,7 +4,7 @@ export class NoneRouter {
 
     public getRoute(latlngStart: L.LatLng, latlngEnd: L.LatLng): Promise<Common.RouteSegmentData[]> {
         return new Promise<Common.RouteSegmentData[]>((resolve) => {
-            var emptyReturn = [] as Common.RouteSegmentData[];
+            let emptyReturn = [] as Common.RouteSegmentData[];
             latlngStart.alt = 0;
             latlngEnd.alt = 0;
             emptyReturn.push({
@@ -14,6 +14,5 @@ export class NoneRouter {
             } as Common.RouteSegmentData);
             resolve(emptyReturn);
         });
-        
     }
-} 
+}

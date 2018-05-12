@@ -22,16 +22,16 @@ export class FileSaveAsComponent extends BaseMapComponent {
     public selectedFormat: IFormatViewModel;
 
     constructor(resources: ResourcesService,
-        private mapService: MapService,
-        private dataContainerService: DataContainerService,
-        private fileService: FileService,
-        private toastService: ToastService) {
+        private readonly mapService: MapService,
+        private readonly dataContainerService: DataContainerService,
+        private readonly fileService: FileService,
+        private readonly toastService: ToastService) {
         super(resources);
 
         this.isOpen = false;
         this.isFromatsDropdownOpen = false;
         this.formats = this.fileService.formats;
-        this.selectedFormat = this.formats[0];  
+        this.selectedFormat = this.formats[0];
     }
 
     public toggleSaveAs(e: Event) {
