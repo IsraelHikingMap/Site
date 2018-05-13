@@ -6,13 +6,13 @@
         <button mat-button class="chart-close-button" (click)="toggle($event)"><i class="fa icon-close"></i></button>
         <button mat-button class="chart-expand-button hidden-xs" (click)="toggleExpand($event)"><i class="fa" [ngClass]="{ 'icon-chevron-right' : isExpanded, 'icon-chevron-left' : !isExpanded }"></i></button>
         <div fxLayout="row" class="chart-buttons">
-            <div fxFlex>
+            <div fxFlex matTooltip="{{resources.length}}" matTooltipPosition="above">
                 <span fxFill class="mat-button cursor-default"><i class="fa icon-arrow-right"></i> {{toShortNumber(length)}} {{getUnits(length)}}</span>
             </div>
-            <div fxFlex>
+            <div fxFlex matTooltip="{{resources.gain}}" matTooltipPosition="above">
                 <span fxFill class="mat-button cursor-default"><span><i class="fa icon-arrow-up"></i> {{toShortNumber(gain)}} {{getUnits(gain)}}</span></span>
             </div>
-            <div fxFlex>
+            <div fxFlex matTooltip="{{resources.loss}}" matTooltipPosition="above">
                 <span fxFill class="mat-button cursor-default"><span><i class="fa icon-arrow-down"></i><span dir="ltr"> {{toShortNumber(loss)}}</span> {{getUnits(loss)}}</span></span>
             </div>
             <div fxFlex>

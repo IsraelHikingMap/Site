@@ -23,15 +23,18 @@ interface IMargin {
 
 interface IChartElements {
     svg: Selection<any, {}, null, undefined>;
-    chartArea: Selection<BaseType, {}, null, undefined>;
+    chartArea: Selection<SVGGElement, {}, null, undefined>;
     path: Selection<SVGPathElement, {}, null, undefined>;
     hoverGroup: Selection<BaseType, {}, null, undefined>;
+    dragRect: Selection<BaseType, {}, null, undefined>;
     xScale: ScaleContinuousNumeric<number, number>;
     yScale: ScaleContinuousNumeric<number, number>;
     hoverChartMarker: L.Marker;
     margin: IMargin;
     width: number;
     height: number;
+    dragStartXCoordinate: number;
+    isDragging: boolean;
 }
 
 @Component({
@@ -92,7 +95,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.isExpanded = false;
         this.routeLayer = null;
         this.statistics = null;
-        this.initalizeStatistics();
+        this.initalizeStatistics(null);
         this.routeLayerSubscriptions = [];
         this.componentSubscriptions = [];
         this.kmMarkersGroup = L.layerGroup([] as L.Marker[]);
@@ -104,10 +107,16 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.mapService.map.addLayer(this.kmMarkersGroup);
     }
 
-    private initalizeStatistics(): void {
-        this.length = 0;
-        this.gain = 0;
-        this.loss = 0;
+    private initalizeStatistics(statistics: IRouteStatistics): void {
+        if (statistics == null) {
+            this.length = 0;
+            this.gain = 0;
+            this.loss = 0;
+        } else {
+            this.length = statistics.length;
+            this.gain = statistics.gain;
+            this.loss = statistics.loss;
+        }
     }
 
     public ngOnInit() {
@@ -158,7 +167,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             subscription.unsubscribe();
         }
         this.routeLayer = this.routesService.selectedRoute;
-        this.initalizeStatistics();
+        this.initalizeStatistics(null);
         if (this.routeLayer) {
             this.onRouteDataChanged();
             this.routeLayerSubscriptions.push(this.routeLayer.dataChanged.subscribe(this.onRouteDataChanged));
@@ -170,10 +179,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private onRouteDataChanged = () => {
         this.statistics = this.routeStatisticsService.getStatistics(this.routesService.selectedRoute.getData());
-        this.length = this.statistics.length;
-        this.gain = this.statistics.gain;
-        this.loss = this.statistics.loss;
+        this.initalizeStatistics(this.statistics);
         if (this.isVisible()) {
+            this.hideSubRouteSelection();
             this.setRouteColorToChart(this.routeLayer.route.properties.pathOptions.color);
             this.setDataToChart(this.statistics.points.map(p => [p.x, p.y] as [number, number]));
         }
@@ -214,7 +222,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.initChart();
         this.createChartAxis();
         this.addChartPath();
-        this.addChartHoverSupport();
+        this.addChartDragGroup();
+        this.addChartHoverGroup();
+        this.addEventsSupport();
         // must be last
         this.setRouteColorToChart(routeColor);
         this.setDataToChart(data);
@@ -242,19 +252,45 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         this.chartElements.hoverGroup.select("g").attr("transform", `translate(${boxPosition}, 0)`);
         this.buildAllTextInHoverBox(point);
-
         this.chartElements.hoverChartMarker.setLatLng(point.latlng);
         this.chartElements.hoverChartMarker.setOpacity(1.0);
     }
 
-    public onMuoseMoveOrClick = () => {
+    private dragStart = () => {
+        let d3 = this.d3Service.getD3();
+        this.chartElements.dragStartXCoordinate = d3.mouse(this.chartElements.chartArea.node())[0];
+    }
+
+    private onMouseMove = () => {
         let d3 = this.d3Service.getD3();
         d3.event.stopPropagation();
-        let coordinates = d3.mouse(this.chartElements.svg.node());
-        let chartXCoordinate = coordinates[0] - this.chartElements.margin.left;
+        let chartXCoordinate = d3.mouse(this.chartElements.chartArea.node())[0];
         let xPosition = this.chartElements.xScale.invert(chartXCoordinate);
         let point = this.routeStatisticsService.interpolateStatistics(this.statistics, xPosition);
         this.showChartHover(point);
+        if (this.chartElements.dragStartXCoordinate != null) {
+            // selecting subroute state
+            this.chartElements.isDragging = true;
+            this.showSubRouteSelection(point);
+        }
+    }
+
+    private dragEnd() {
+        if (this.chartElements.isDragging) {
+            this.chartElements.isDragging = false;
+            this.chartElements.dragStartXCoordinate = null;
+            return;
+        }
+        // no draggging - as in click
+        this.hideSubRouteSelection();
+        this.onMouseMove();
+        const timeoutGroupName = "clickOnChart";
+        this.cancelableTimeoutService.clearTimeoutByGroup(timeoutGroupName);
+        this.cancelableTimeoutService.setTimeoutByGroup(() => {
+                this.hideChartHover();
+            },
+            5000,
+            timeoutGroupName);
     }
 
     private initChart() {
@@ -268,12 +304,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.chartElements.svg.attr("width", width);
         this.chartElements.width = width - this.chartElements.margin.left - this.chartElements.margin.right;
         this.chartElements.height = height - this.chartElements.margin.top - this.chartElements.margin.bottom;
-        this.chartElements.chartArea = this.chartElements.svg.append("g")
+        this.chartElements.chartArea = this.chartElements.svg.append<SVGGElement>("g")
             .attr("class", "chart-area")
             .attr("transform", `translate(${this.chartElements.margin.left},${this.chartElements.margin.top})`);
         this.chartElements.xScale = d3.scaleLinear().range([0, this.chartElements.width]);
         this.chartElements.yScale = d3.scaleLinear().range([this.chartElements.height, 0]);
-
+        this.chartElements.dragStartXCoordinate = null;
+        this.chartElements.isDragging = false;
     }
 
     private createChartAxis() {
@@ -311,7 +348,21 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("stroke-width", 2);
     }
 
-    private addChartHoverSupport() {
+    private addChartDragGroup() {
+        let dragGroup = this.chartElements.chartArea.append("g")
+            .attr("class", "drag-group");
+
+        this.chartElements.dragRect = dragGroup.append("rect")
+            .attr("height", this.chartElements.height)
+            .attr("width", 0)
+            .attr("x", 0)
+            .attr("fill", "gray")
+            .attr("opacity", 0.4)
+            .style("pointer-events", "none")
+            .style("display", "none");
+    }
+
+    private addChartHoverGroup() {
         this.chartElements.hoverGroup = this.chartElements.chartArea.append("g")
             .attr("class", "hover-group")
             .style("display", "none");
@@ -347,25 +398,24 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("stroke", "black")
             .attr("fill", "white")
             .attr("fill-opacity", "0.9");
+    }
 
-        // responsive background
+    private addEventsSupport() {
+    // responsive background
         this.chartElements.chartArea.append("rect")
             .attr("width", this.chartElements.width)
             .attr("height", this.chartElements.height)
             .style("fill", "none")
             .style("stroke", "none")
             .style("pointer-events", "all")
-            .on("mousemove", () => {
-                this.onMuoseMoveOrClick();
+            .on("touchstart mousedown", () => {
+                this.dragStart();
             })
-            .on("click", () => {
-                this.onMuoseMoveOrClick();
-                const timeoutGroupName = "clickOnChart";
-                this.cancelableTimeoutService.clearTimeoutByGroup(timeoutGroupName);
-                this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                    this.hideChartHover();
-                },
-                    5000, timeoutGroupName);
+            .on("mousemove touchmove", () => {
+                this.onMouseMove();
+            })
+            .on("mouseup touchend", () => {
+                this.dragEnd();
             })
             .on("mouseout", () => {
                 this.hideChartHover();
@@ -390,7 +440,11 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("fill", "black")
             .attr("transform", `translate(${x}, ${y})`)
             .attr("text-anchor", "start")
-            .attr("direction", this.resources.direction);
+            .attr("direction", this.resources.direction)
+            .style("-webkit-user-select", "none")
+            .style("-moz-user-select", "none")
+            .style("-ms-user-select", "none")
+            .style("pointer-events", "none");
         text.append("tspan")
             .text(`${title}: `);
         text.append("tspan")
@@ -498,5 +552,25 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.isExpanded = !this.isExpanded;
         this.changeDetectorRef.detectChanges();
         this.redrawChart();
+    }
+
+    private showSubRouteSelection = (point: IRouteStatisticsPoint) => {
+        let dragEndXCoordinate = this.chartElements.xScale(point.x);
+        let xStart = Math.min(this.chartElements.dragStartXCoordinate, dragEndXCoordinate);
+        let xEnd = Math.max(this.chartElements.dragStartXCoordinate, dragEndXCoordinate);
+        this.chartElements.dragRect.style("display", null)
+            .attr("width", xEnd - xStart)
+            .attr("x", xStart);
+
+        let start = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xStart));
+        let end = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xEnd));
+        let statistics = this.routeStatisticsService.getStatisticsByRange(this.routesService.selectedRoute.getData(), start, end);
+        this.initalizeStatistics(statistics);
+    }
+
+    private hideSubRouteSelection() {
+        this.chartElements.dragRect.style("display", "none");
+        this.chartElements.dragStartXCoordinate = null;
+        this.initalizeStatistics(this.statistics);
     }
 }

@@ -33,7 +33,7 @@ export class RouteStatisticsService {
         this.visibilityChanged.next();
     }
 
-    public getStatistics = (route: Common.RouteData): IRouteStatistics => {
+    public getStatisticsByRange = (route: Common.RouteData, start: IRouteStatisticsPoint, end: IRouteStatisticsPoint) => {
         let routeStatistics = {
             points: [] as IRouteStatisticsPoint[],
             length: 0,
@@ -48,7 +48,7 @@ export class RouteStatisticsService {
         let point = L.point(0, previousPoint.alt) as IRouteStatisticsPoint;
         point.latlng = previousPoint;
         point.slope = 0;
-        routeStatistics.points.push(point);
+        routeStatistics.points.push(start || point);
 
         for (let segment of route.segments) {
             for (let latlng of segment.latlngs) {
@@ -60,9 +60,15 @@ export class RouteStatisticsService {
                 point = L.point((routeStatistics.length / 1000), latlng.alt) as IRouteStatisticsPoint;
                 point.latlng = latlng;
                 point.slope = distance === 0 ? 0 : (latlng.alt - previousPoint.alt) * 100 / distance;
-                routeStatistics.points.push(point);
+                if (start == null || (point.x > start.x && point.x < end.x)) {
+                    routeStatistics.points.push(point);
+                }
                 previousPoint = latlng;
             }
+        }
+        if (start != null && end != null) {
+            routeStatistics.points.push(end);
+            routeStatistics.length = (end.x - start.x) * 1000;
         }
         let simplified = L.LineUtil.simplify(routeStatistics.points, 1);
         let previousSimplifiedPoint = simplified[0];
@@ -78,6 +84,10 @@ export class RouteStatisticsService {
             previousSimplifiedPoint = simplifiedPoint;
         }
         return routeStatistics;
+    }
+
+    public getStatistics = (route: Common.RouteData): IRouteStatistics => {
+        return this.getStatisticsByRange(route, null, null);
     }
 
     public interpolateStatistics(statistics: IRouteStatistics, x: number) {

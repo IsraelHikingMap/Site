@@ -56,6 +56,25 @@ describe("RouteStatisticsService", () => {
         expect(statistics.points.length).toBe(5);
     });
 
+    it("Should get statistics on part of route", () => {
+        let routeData = {
+            segments: [
+                {
+                    latlngs: [L.latLng(0, 0, 0), L.latLng(0, 0.01, 2), L.latLng(0, 0.02, 1)]
+                }
+            ]
+        } as Common.RouteData;
+        let statistics = service.getStatistics(routeData);
+        let start = service.interpolateStatistics(statistics, 0.5);
+        let end = service.interpolateStatistics(statistics, 1);
+        statistics = service.getStatisticsByRange(routeData, start, end);
+
+        expect(statistics.gain).toBeCloseTo(0.9, 2);
+        expect(statistics.loss).toBe(0);
+        expect(statistics.length).not.toBe(0);
+        expect(statistics.points.length).toBe(2);
+    });
+
     it("Should not interpolate statistics with less than 2 points", () => {
         let interpolated = service.interpolateStatistics({ points: [] } as IRouteStatistics, null);
 
