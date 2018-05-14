@@ -407,6 +407,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .attr("height", this.chartElements.height)
             .style("fill", "none")
             .style("stroke", "none")
+            .style("-moz-user-select", "none")
             .style("pointer-events", "all")
             .on("touchstart mousedown", () => {
                 this.dragStart();
