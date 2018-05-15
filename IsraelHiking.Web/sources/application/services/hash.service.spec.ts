@@ -183,39 +183,36 @@ describe("HashService", () => {
         expect(windowMock.location.reload).toHaveBeenCalled();
     }));
 
-    it("Should return open new tab with base url",
+    it("Should return base url",
         inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
 
         windowMock.location.hash = "#!/";
-        spyOn(windowMock, "open");
 
         hashService = new HashService(router, windowMock, mapService);
-        hashService.openNewTab();
+        let href = hashService.getHref();
 
-        expect(windowMock.open).toHaveBeenCalledWith(Urls.baseAddress);
+        expect(href).toBe(Urls.baseAddress);
     }));
 
-    it("Should return open new tab with share url",
+    it("Should return share url",
         inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
 
         windowMock.location.hash = "#!/?s=1234";
-        spyOn(windowMock, "open");
 
         hashService = new HashService(router, windowMock, mapService);
-        hashService.openNewTab();
+        let href = hashService.getHref();
 
-        expect(windowMock.open).toHaveBeenCalled();
+        expect(href).toBe(Urls.baseAddress + "/" + windowMock.location.hash);
     }));
 
-    it("Should return open new tab with external url",
+    it("Should return external url",
         inject([Router, Window, MapService], (router: Router, windowMock: Window, mapService: MapService) => {
 
         windowMock.location.hash = "#!/?url=1234";
-        spyOn(windowMock, "open");
 
         hashService = new HashService(router, windowMock, mapService);
-        hashService.openNewTab();
+        let href = hashService.getHref();
 
-        expect(windowMock.open).toHaveBeenCalled();
+        expect(href).toBe(Urls.baseAddress + "/" + windowMock.location.hash);
     }));
 });

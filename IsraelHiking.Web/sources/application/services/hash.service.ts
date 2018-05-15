@@ -124,7 +124,7 @@ export class HashService {
         );
     }
 
-    public openNewTab() {
+    public getHref(): string {
         let url = Urls.baseAddress;
         if (this.externalUrl) {
             url = `${Urls.baseAddress}${HashService.HASH}/?${HashService.URL}=${this.externalUrl}`;
@@ -132,7 +132,7 @@ export class HashService {
         if (this.shareUrlId) {
             url = HashService.getFullUrlFromShareId(this.shareUrlId);
         }
-        this.window.open(url);
+        return url;
     }
 
     public getShareUrlId(): string {

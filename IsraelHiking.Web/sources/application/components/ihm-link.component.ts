@@ -12,17 +12,20 @@ import { Urls } from "../common/Urls";
 })
 export class IhmLinkComponent extends BaseMapComponent {
 
+    public href: string;
+    public target: string;
+
     constructor(resources: ResourcesService,
         private readonly hashService: HashService) {
         super(resources);
-    }
 
-    public navigate() {
         if (window.self === window.top) {
-            window.location.href = Urls.baseAddress;
-            return;
+            this.href = Urls.baseAddress;
+            this.target = "";
+        } else {
+            this.href = this.hashService.getHref();
+            this.target = "_blank";
         }
-        this.hashService.openNewTab();
     }
 
     public getTooltipText() {
