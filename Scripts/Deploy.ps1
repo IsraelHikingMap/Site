@@ -1,42 +1,52 @@
 $apiUrl = 'https://ci.appveyor.com/api'
 $staging = "Staging"
 
-Write-Host Geting project details
+Set-Location (Split-Path -Path $MyInvocation.MyCommand.Definition -Parent)
+"Setting location to script directory"
+pwd
+
+"Getting project details"
 $project = Invoke-RestMethod -Method Get -Uri "$apiUrl/projects/israelhikinghost/site"
 $jobId = $project.build.jobs[0].jobId
-Write-Host Got job id: $jobId
+"Got job id: $jobId"
 
-Write-Host Geting job artifacts
+"Getting job artifacts"
 $artifacts = Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobId/artifacts"
 $artifactFileName = $artifacts[0].fileName
-Write-Host Got the artifact file name: $artifactFileName
+"Got the artifact file name: $artifactFileName"
 
-Write-Host Cleaning staging folder
+"Cleaning staging folder"
 Remove-Item -Path $staging -Recurse
 New-Item -Path $staging -ItemType directory
 
 $localArtifactPath = "$staging\$artifactFileName"
-Write-Host Downloading artifact to: $localArtifactPath
+"Downloading artifact to: $localArtifactPath"
 Invoke-RestMethod -Method Get -Uri "$apiUrl/buildjobs/$jobId/artifacts/$artifactFileName" -OutFile $localArtifactPath
 
 Set-Location -Path $staging
-Write-Host Finished downloading, extracting file
-7z x $artifactFileName
+"Finished downloading, extracting file"
+& "C:\Program Files\7-zip\7z.exe" x $artifactFileName
 
-Write-Host Deleting zip file
+"Deleting zip file"
 Remove-Item $artifactFileName
 
-Set-Location -Path "..\"
-Write-Host Copy app_offline.htm to bring the site down
-Copy-Item "app_offline.htm" -Destination "israelhiking.osm.org.il\app_offline.htm"
+Set-Location (Split-Path -Path $MyInvocation.MyCommand.Definition -Parent)
+"Bringing the site down"
+Stop-WebAppPool -Name "IsraelHiking.osm.org.il"
 
-Write-Host Deleting old wwwroot folder
+while ((Get-WebAppPoolState -Name "IsraelHiking.osm.org.il").Value -ne "Stopped") {
+  "Waiting 1 second for site to stop..."
+  Start-Sleep -s 1
+}
+
+"Deleting old wwwroot folder"
 Remove-Item -Path "israelhiking.osm.org.il\wwwroot" -Recurse  
 
-Start-Sleep -s 5
-
-Write-Host Deploying site files
+"Deploying site files"
 Copy-Item "$staging\*" -Destination "israelhiking.osm.org.il" -Force -Recurse
 
-Write-Host Delete app_offline.htm to bring the site up
-Remove-Item "israelhiking.osm.org.il\app_offline.htm"
+"Bringing the site up"
+Start-WebAppPool -Name "IsraelHiking.osm.org.il"
+
+"Site deploy finished! Press any key to continue..."
+cmd /c Pause | Out-Null
