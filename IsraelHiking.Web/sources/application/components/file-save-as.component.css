@@ -13,6 +13,10 @@
     border-left: 1px solid #ccc;
 }
 
+    .save-as-dropdown .mat-form-field-infix {
+        padding: 0.25em !important;
+    }
+
 .leaflet-touch .save-as-dropdown {
     height: 30px;
 }

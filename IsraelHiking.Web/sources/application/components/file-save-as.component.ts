@@ -1,11 +1,13 @@
-﻿import { Component, ViewEncapsulation } from "@angular/core";
+﻿import { Component, ViewEncapsulation, ViewChild } from "@angular/core";
+import { MatSelect } from "@angular/material";
+import * as _ from "lodash";
+
 import { MapService } from "../services/map.service";
 import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
 import { FileService, IFormatViewModel } from "../services/file.service";
 import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
-import * as _ from "lodash";
 import * as Common from "../common/IsraelHiking";
 
 @Component({
@@ -15,11 +17,14 @@ import * as Common from "../common/IsraelHiking";
     encapsulation: ViewEncapsulation.None
 })
 export class FileSaveAsComponent extends BaseMapComponent {
-
+    
     public isOpen: boolean;
     public isFromatsDropdownOpen: boolean;
     public formats: IFormatViewModel[];
     public selectedFormat: IFormatViewModel;
+
+    @ViewChild("dropdown")
+    public dropdown: MatSelect;
 
     constructor(resources: ResourcesService,
         private readonly mapService: MapService,
@@ -34,9 +39,13 @@ export class FileSaveAsComponent extends BaseMapComponent {
         this.selectedFormat = this.formats[0];
     }
 
+
     public toggleSaveAs(e: Event) {
         this.isOpen = !this.isOpen;
         this.suppressEvents(e);
+        if (this.isOpen) {
+            setTimeout(() => this.dropdown.open(), 500);
+        }
     };
 
     public saveAs = (format: IFormatViewModel, e: Event) => {

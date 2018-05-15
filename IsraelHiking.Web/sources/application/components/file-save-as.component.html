@@ -4,7 +4,7 @@
 <div class="leaflet-bar" *ngIf="isOpen" [dir]="resources.direction">
     <div class="save-as-dropdown">
         <mat-form-field fxFill>
-            <mat-select placeholder="{{resources.saveAs}}" fxFill>
+            <mat-select placeholder="{{resources.saveAs}}" fxFill #dropdown="matSelect">
                 <mat-option *ngFor="let format of formats" [value]="format" (click)="saveAs(format, $event)" [dir]="'ltr'">
                     {{format.label}}
                 </mat-option>
