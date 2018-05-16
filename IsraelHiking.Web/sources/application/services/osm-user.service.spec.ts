@@ -6,6 +6,7 @@ import * as X2JS from "x2js";
 
 import { OsmUserService, ITrace } from "./osm-user.service";
 import { AuthorizationService } from "./authorization.service";
+import { WhatsAppService } from "./whatsapp.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -40,6 +41,7 @@ describe("OSM User Service", () => {
             ],
             providers: [
                 { provide: AuthorizationService, useValue: authService },
+                WhatsAppService,
                 OsmUserService
             ]
         });

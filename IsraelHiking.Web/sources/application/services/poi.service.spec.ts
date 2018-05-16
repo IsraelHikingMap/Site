@@ -5,6 +5,7 @@ import * as L from "leaflet";
 
 import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
+import { WhatsAppService } from "./whatsapp.service";
 import { PoiService, IPointOfInterestExtended, IRating } from "./poi.service";
 import { Urls } from "../common/Urls";
 
@@ -19,6 +20,7 @@ describe("Poi Service", () => {
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
+                WhatsAppService,
                 PoiService
             ]
         });
