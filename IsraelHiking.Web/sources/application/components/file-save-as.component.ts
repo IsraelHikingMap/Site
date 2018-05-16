@@ -17,7 +17,7 @@ import * as Common from "../common/IsraelHiking";
     encapsulation: ViewEncapsulation.None
 })
 export class FileSaveAsComponent extends BaseMapComponent {
-    
+
     public isOpen: boolean;
     public isFromatsDropdownOpen: boolean;
     public formats: IFormatViewModel[];
