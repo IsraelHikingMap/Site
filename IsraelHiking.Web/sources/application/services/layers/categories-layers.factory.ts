@@ -35,4 +35,10 @@ export class CategoriesLayerFactory {
     public get(categoriesType: CategoriesType): CategoriesLayer {
         return this.categoryLayers.get(categoriesType);
     }
+
+    public getByPoiType(isRoute: boolean) {
+        return isRoute
+            ? this.get("Routes")
+            : this.get("Points of Interest");
+    }
 }

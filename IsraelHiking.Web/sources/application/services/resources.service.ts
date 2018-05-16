@@ -163,6 +163,7 @@ export class ResourcesService {
     public delete: string;
     public editRouteDetails: string;
     public shareWithFacebook: string;
+    public shareWithWhatsapp: string;
     public shareWithOffroad: string;
     public findUnmappedRoutes: string;
     public nonMarkedTrail: string;
@@ -259,6 +260,7 @@ export class ResourcesService {
     public unableToSaveData: string;
     public nameIsAlreadyInUse: string;
     public baseLayerAndOverlayAreOverlapping: string;
+    public unableToFindPoi: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -615,6 +617,7 @@ export class ResourcesService {
         this.delete = this.gettextCatalog.getString("Delete");
         this.editRouteDetails = this.gettextCatalog.getString("Edit Route Details");
         this.shareWithFacebook = this.gettextCatalog.getString("Share With Facebook");
+        this.shareWithWhatsapp = this.gettextCatalog.getString("Share With WhatsApp");
         this.shareWithOffroad = this.gettextCatalog.getString("Share With off-road");
         this.findUnmappedRoutes = this.gettextCatalog.getString("Find Unmapped Routes");
         this.nonMarkedTrail = this.gettextCatalog.getString("Non-Marked Trail");
@@ -718,6 +721,7 @@ export class ResourcesService {
         this.unableToSaveData = this.gettextCatalog.getString("Unable to save data, please try again later...");
         this.nameIsAlreadyInUse = this.gettextCatalog.getString("This name is already in use");
         this.baseLayerAndOverlayAreOverlapping = this.gettextCatalog.getString("Base layer and overlay are overlapping.");
+        this.unableToFindPoi = this.gettextCatalog.getString("Unable to find the required point of interest...");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

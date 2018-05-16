@@ -172,11 +172,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     public moveToResults = (searchResults: ISearchResultsPointOfInterest, e: Event) => {
         this.toggleVisibility(e);
         let bounds = L.latLngBounds(searchResults.southWest, searchResults.northEast);
-        if (searchResults.isRoute) {
-            this.categoriesLayerFactory.get("Routes").moveToSearchResults(searchResults, bounds);
-        } else {
-            this.categoriesLayerFactory.get("Points of Interest").moveToSearchResults(searchResults, bounds);
-        }
+        this.categoriesLayerFactory.getByPoiType(searchResults.isRoute).moveToSearchResults(searchResults, bounds);
     }
 
     private selectResults = (searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) => {

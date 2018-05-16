@@ -4,6 +4,7 @@ import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { ResourcesService } from "./resources.service";
+import { HashService } from "./hash.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -63,6 +64,12 @@ export interface ICategory {
     color: string,
     isSelected: boolean;
     items: { iconColorCategory: IIconColorLabel, tags: any[] }[];
+}
+
+export interface IPoiSocialLinks {
+    poiLink: string;
+    facebook: string;
+    whatsapp: string;
 }
 
 @Injectable()
@@ -129,5 +136,15 @@ export class PoiService {
 
     public uploadRating(rating: IRating): Promise<IRating> {
         return this.httpClient.post(Urls.rating, rating).toPromise() as Promise<IRating>;
+    }
+
+    public getPoiSocialLinks(poiExtended: IPointOfInterestExtended): IPoiSocialLinks {
+        let poiLink = HashService.getFullUrlFromPoiId({ source: poiExtended.source, id: poiExtended.id });
+        let escaped = encodeURIComponent(poiLink);
+        return {
+            poiLink: poiLink,
+            facebook: `${Urls.facebook}${escaped}`,
+            whatsapp: `${Urls.whatsapp}${poiExtended.title}: ${escaped}`,
+        }
     }
 }

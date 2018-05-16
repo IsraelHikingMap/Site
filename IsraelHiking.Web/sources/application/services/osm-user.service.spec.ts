@@ -217,7 +217,7 @@ describe("OSM User Service", () => {
         expect(links.ihm).toContain(Urls.baseAddress);
         expect(links.ihm).toContain(shareUrl.id);
         expect(links.facebook).toContain("facebook");
-        expect(links.whatsapp).toContain("whatsapp://");
+        expect(links.whatsapp).toContain("whatsapp");
         expect(links.nakeb).toContain("nakeb");
     }));
 

@@ -22,6 +22,11 @@
     public static readonly poiCategories = Urls.poi + "categories/";
     public static readonly rating = Urls.apiBase + "rating/";
 
+    public static readonly facebook = "http://www.facebook.com/sharer/sharer.php?u=";
+    public static readonly whatsapp = "https://web.whatsapp.com/send?text=";
+    // HM TODO: test if this work on mobile too
+    // public static readonly whatsapp = "whatsapp://send?text=";
+
     public static readonly DEFAULT_TILES_ADDRESS = "/Tiles/{z}/{x}/{y}.png";
     public static readonly MTB_TILES_ADDRESS = "/mtbTiles/{z}/{x}/{y}.png";
     public static readonly OVERLAY_TILES_ADDRESS = "/OverlayTiles/{z}/{x}/{y}.png";

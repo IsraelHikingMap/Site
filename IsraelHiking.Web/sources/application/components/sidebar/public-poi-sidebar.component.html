@@ -24,6 +24,18 @@
         <div fxFlex>
             <button mat-button fxFill class="no-padding" (click)="voteDown()" matTooltip="{{resources.notWorthIt}}" matTooltipPosition="below"><i class="fa-2x icon-thumbs-down" [style.color]="canVote('down') ? 'red' : 'grey'"></i></button>
         </div>
+        <div fxFlex *ngIf="shareAddress">
+            <mat-menu #appMenu="matMenu" [dir]="resources.direction">
+                <div mat-menu-item disableRipple="true">
+                    <div fxLayout="row">
+                        <div fxFlex><a [href]="facebookShareAddress" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook poi"><i class="fa icon-facebook"></i></a></div>
+                        <div fxFlex><a [href]="whatsappShareAddress" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp poi"><i class="fa icon-whatsapp"></i></a></div>
+                        <div fxFlex><button fxFill mat-button ngxClipboard [cbContent]="shareAddress" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard poi"><i class="fa icon-clipboard"></i></button></div>
+                    </div>
+                </div>
+            </mat-menu>
+            <button mat-button fxFill class="no-padding" [matMenuTriggerFor]="appMenu"><i class="fa icon-share-alt"></i></button>
+        </div>
         <div fxFlex>
             <button mat-button fxFill class="no-padding" (click)="close()" matTooltipPosition="below"><i class="fa icon-close"></i></button>
         </div>

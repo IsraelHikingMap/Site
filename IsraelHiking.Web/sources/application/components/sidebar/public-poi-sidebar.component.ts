@@ -33,6 +33,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
     public categories: ISelectableCategory[];
     public selectedCategory: ISelectableCategory;
     public isAdvanced: boolean;
+    public shareAddress: string;
+    public facebookShareAddress: string;
+    public whatsappShareAddress: string;
 
     private editMode: boolean;
     private poiExtended: IPointOfInterestExtended;
@@ -50,6 +53,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         let data = this.getData();
         this.isLoading = true;
         this.isAdvanced = false;
+        this.shareAddress = "";
+        this.facebookShareAddress = "";
+        this.whatsappShareAddress = "";
         this.categories = [];
         this.info = { imagesFiles: [], imagesUrls: [], urls: [] } as IPoiMainInfoData;
         this.latLng = data.location;
@@ -90,6 +96,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
         this.rating = this.getRatingNumber(this.poiExtended.rating);
         this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
+        let links = this.poiService.getPoiSocialLinks(poiExtended);
+        this.shareAddress = links.poiLink;
+        this.facebookShareAddress = links.facebook;
+        this.whatsappShareAddress = links.whatsapp;
     }
 
     private async initializeCategories(markerIcon: string) {

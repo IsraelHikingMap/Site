@@ -10,6 +10,8 @@ import { FileService } from "./file.service";
 import { HashService } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { OsmUserService } from "./osm-user.service";
+import { CategoriesLayerFactory } from "./layers/categories-layers.factory";
+import { PoiService } from "./poi.service";
 import * as Common from "../common/IsraelHiking";
 
 @Injectable()
@@ -24,6 +26,8 @@ export class DataContainerService {
         private readonly hashService: HashService,
         private readonly fileService: FileService,
         private readonly resourcesService: ResourcesService,
+        private readonly categoriesLayerFactory: CategoriesLayerFactory,
+        private readonly poiService: PoiService,
         private readonly toastService: ToastService) {
 
         this.shareUrl = null;
@@ -69,6 +73,16 @@ export class DataContainerService {
             let data = await this.fileService.openFromUrl(this.hashService.externalUrl);
             data.baseLayer = this.hashService.getBaseLayer();
             this.setData(data);
+        } else if (this.hashService.getPoiSourceAndId()) {
+            let poiSrouceAndId = this.hashService.getPoiSourceAndId();
+            try {
+                let poi = await this.poiService.getPoint(poiSrouceAndId.id, poiSrouceAndId.source);
+                let latLng = L.latLng(poi.location.lat, poi.location.lng);
+                let bounds = L.latLngBounds([latLng, latLng]);
+                this.categoriesLayerFactory.getByPoiType(poi.isRoute).moveToSearchResults(poi, bounds);
+            } catch (ex) {
+                this.toastService.error(this.resourcesService.unableToFindPoi);
+            }
         } else {
             this.layersService.addExternalBaseLayer(this.hashService.getBaseLayer());
         }

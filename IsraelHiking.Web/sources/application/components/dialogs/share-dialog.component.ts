@@ -49,7 +49,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public description: string;
     public imageUrl: string;
     public shareAddress: string;
-    public whatappShareAddress: SafeUrl;
+    public whatsappShareAddress: SafeUrl;
     public facebookShareAddress: string;
     public nakebCreateHikeAddress: string;
     public isLoading: boolean;
@@ -81,7 +81,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.isLoading = false;
         this.showOffroadForm = false;
         this.shareAddress = "";
-        this.whatappShareAddress = null;
+        this.whatsappShareAddress = null;
         this.facebookShareAddress = "";
         this.nakebCreateHikeAddress = "";
         this.lastShareUrl = null;
@@ -140,7 +140,8 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             this.imageUrl = this.osmUserService.getImageFromShareId(shareUrl);
             let links = this.osmUserService.getShareSocialLinks(shareUrl);
             this.shareAddress = links.ihm;
-            this.whatappShareAddress = this.sanitizer.bypassSecurityTrustUrl(links.whatsapp);
+            // HM TODO: make sure this works.
+            this.whatsappShareAddress = links.whatsapp; // this.sanitizer.bypassSecurityTrustUrl(links.whatsapp);
             this.facebookShareAddress = links.facebook;
             this.nakebCreateHikeAddress = links.nakeb;
         } catch (ex) {

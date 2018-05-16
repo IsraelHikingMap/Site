@@ -23,6 +23,7 @@ import {
     MatRadioModule,
     MatCheckboxModule,
     MatToolbarModule,
+    MatMenuModule
 } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
@@ -132,6 +133,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         MatRadioModule,
         MatCheckboxModule,
         MatToolbarModule,
+        MatMenuModule,
         FormsModule,
         ReactiveFormsModule,
         FlexLayoutModule,

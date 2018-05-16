@@ -117,8 +117,8 @@ export class OsmUserService {
         let escaped = encodeURIComponent(ihm);
         return {
             ihm: ihm,
-            facebook: `http://www.facebook.com/sharer/sharer.php?u=${escaped}`,
-            whatsapp: `whatsapp://send?text=${this.getShareUrlDisplayName(shareUrl)}: ${escaped}`,
+            facebook: `${Urls.facebook}${escaped}`,
+            whatsapp: `${Urls.whatsapp}${this.getShareUrlDisplayName(shareUrl)}: ${escaped}`,
             nakeb: `https://www.nakeb.co.il/add_new_hike?ihm_link=${shareUrl.id}`
         }
     }

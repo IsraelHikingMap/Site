@@ -7,6 +7,11 @@ import { MapService } from "./map.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
+export interface IPoiSourceAndId {
+    source: string;
+    id: string;
+}
+
 @Injectable()
 export class HashService {
 
@@ -16,6 +21,7 @@ export class HashService {
     private static readonly DOWNLOAD = "download";
     private static readonly SITE_SHARE = "s";
     private static readonly SEARCH_QUERY = "q";
+    private static readonly POINT_OF_INTEREST = "p";
     private static readonly HASH = "/#!";
     private static readonly LOCATION_REGEXP = /\/(\d+)\/([-+]?[0-9]*\.?[0-9]+)\/([-+]?[0-9]*\.?[0-9]+)/;
 
@@ -23,6 +29,7 @@ export class HashService {
     private baseLayer: Common.LayerData;
     private shareUrlId: string;
     private internalUpdate: boolean;
+    private poiSourceAndId: IPoiSourceAndId;
 
     public searchTerm: string;
     public externalUrl: string;
@@ -36,11 +43,16 @@ export class HashService {
         return `${Urls.baseAddress}${HashService.HASH}${HashService.getShareUrlPostfix(id)}`;
     }
 
+    public static getFullUrlFromPoiId(poiSourceAndId: IPoiSourceAndId) {
+        return `${Urls.baseAddress}${HashService.HASH}/?${HashService.POINT_OF_INTEREST}=${poiSourceAndId.source}__${poiSourceAndId.id}`;
+    }
+
     constructor(private readonly router: Router,
         @Inject("Window") window: any, // bug in angular aot
         private readonly mapService: MapService) {
 
         this.baseLayer = null;
+        this.poiSourceAndId = null;
         this.searchTerm = "";
         this.window = window;
         this.internalUpdate = true; // this is due to the fact that nviagtion end is called once the site finishes loading.
@@ -71,6 +83,10 @@ export class HashService {
 
     public getBaseLayer(): Common.LayerData {
         return this.baseLayer;
+    }
+
+    public getPoiSourceAndId(): IPoiSourceAndId {
+        return this.poiSourceAndId;
     }
 
     private updateUrl = () => {
@@ -105,6 +121,13 @@ export class HashService {
         this.download = searchParams.has(HashService.DOWNLOAD);
         this.baseLayer = this.stringToBaseLayer(searchParams.get(HashService.BASE_LAYER) || "");
         this.shareUrlId = searchParams.get(HashService.SITE_SHARE) || "";
+        let poiSourceAndIdString = searchParams.get(HashService.POINT_OF_INTEREST) || "";
+        if (poiSourceAndIdString) {
+            this.poiSourceAndId = {
+                source: poiSourceAndIdString.split("__")[0],
+                id: poiSourceAndIdString.split("__")[1]
+            };
+        }
         let latLng = this.parsePathToGeoLocation();
         if (latLng != null) {
             this.mapService.map.setView(latLng, latLng.alt);
