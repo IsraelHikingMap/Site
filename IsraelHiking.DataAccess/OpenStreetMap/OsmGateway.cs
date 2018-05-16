@@ -307,7 +307,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             }
         }
 
-        public async Task<List<OsmTrace>> GetTraces()
+        public async Task<List<GpxFile>> GetTraces()
         {
             using (var client = new HttpClient())
             {
@@ -315,17 +315,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 var response = await client.GetAsync(_getTracesAddress);
                 var stream = await response.Content.ReadAsStreamAsync();
                 var osm = FromContent(stream);
-                return (osm.GpxFiles ?? new GpxFile[0]).Select(g => new OsmTrace
-                {
-                    Name = g.Name,
-                    LatLng = new LatLng(g.Lat ?? 0, g.Lon ?? 0),
-                    Tags = g.Tags.ToList(),
-                    Description = g.Description,
-                    Visibility = g.Visibility,
-                    Id = g.Id.ToString(),
-                    UserName = g.User,
-                    Date = g.TimeStamp
-                }).ToList();
+                return (osm.GpxFiles ?? new GpxFile[0]).ToList();
             }
         }
 
@@ -357,28 +347,16 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             }
         }
 
-        public async Task UpdateTrace(OsmTrace trace)
+        public async Task UpdateTrace(GpxFile trace)
         {
             using (var client = new HttpClient())
             {
-                var traceAddress = _traceAddress.Replace(":id", trace.Id);
+                var traceAddress = _traceAddress.Replace(":id", trace.Id.ToString());
                 UpdateHeaders(client, traceAddress, "PUT");
 
                 var osmRequest = new Osm
                 {
-                    GpxFiles = new[]
-                    {
-                        new GpxFile
-                        {
-                            Name = trace.Name,
-                            Description = trace.Description,
-                            Visibility = trace.Visibility,
-                            Id = int.Parse(trace.Id),
-                            Lat = trace.LatLng.Lat,
-                            Lon = trace.LatLng.Lng,
-                            Tags = trace.Tags.ToArray()
-                        }
-                    }
+                    GpxFiles = new[] { trace }
                 };
                 var response = await client.PutAsync(traceAddress, new StringContent(osmRequest.SerializeToXml()));
                 if (response.StatusCode != HttpStatusCode.OK)

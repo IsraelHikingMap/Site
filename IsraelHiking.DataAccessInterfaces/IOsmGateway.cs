@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
-using IsraelHiking.Common;
 using OsmSharp;
 using OsmSharp.API;
 using OsmSharp.Changesets;
@@ -29,8 +28,8 @@ namespace IsraelHiking.DataAccessInterfaces
         Task<CompleteRelation> GetCompleteRelation(string relationId);
 
         Task CreateTrace(string fileName, MemoryStream fileStream);
-        Task<List<OsmTrace>> GetTraces();
-        Task UpdateTrace(OsmTrace trace);
+        Task<List<GpxFile>> GetTraces();
+        Task UpdateTrace(GpxFile trace);
         Task DeleteTrace(string traceId);
     }
 }

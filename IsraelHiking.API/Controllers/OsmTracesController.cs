@@ -8,6 +8,7 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using OsmSharp.API;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace IsraelHiking.API.Controllers
@@ -39,7 +40,7 @@ namespace IsraelHiking.API.Controllers
         /// <returns>A list of traces</returns>
         [Authorize]
         [HttpGet]
-        public Task<List<OsmTrace>> GetTraces()
+        public Task<List<GpxFile>> GetTraces()
         {
             var gateway = _httpGatewayFactory.CreateOsmGateway(_cache.Get(User.Identity.Name));
             return gateway.GetTraces();
@@ -77,7 +78,7 @@ namespace IsraelHiking.API.Controllers
         [Authorize]
         [Route("{id}")]
         [HttpPut]
-        public async Task<IActionResult> PutGpsTrace(string id, [FromBody]OsmTrace trace)
+        public async Task<IActionResult> PutGpsTrace(string id, [FromBody]GpxFile trace)
         {
             var gateway = _httpGatewayFactory.CreateOsmGateway(_cache.Get(User.Identity.Name));
             await gateway.UpdateTrace(trace);

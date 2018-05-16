@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
+using OsmSharp.API;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -70,9 +71,9 @@ namespace IsraelHiking.API.Tests.Controllers
             var osmGateWay = Substitute.For<IOsmGateway>();
             _httpGatewayFactory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(osmGateWay);
 
-            _controller.PutGpsTrace("42", new OsmTrace()).Wait();
+            _controller.PutGpsTrace("42", new GpxFile()).Wait();
 
-            osmGateWay.Received(1).UpdateTrace(Arg.Any<OsmTrace>());
+            osmGateWay.Received(1).UpdateTrace(Arg.Any<GpxFile>());
         }
 
         [TestMethod]

@@ -12,7 +12,7 @@
         public const string WIKIPEDIA = "Wikipedia";
         public const string OTHER = "Other";
         public const string NONE = "None";
-        public const string INATURE = "iNature"; // HM TODO: Temp - remove me?
+        public const string INATURE = "iNature";
         public static readonly string[] Points = {
             WATER,
             VIEWPOINT,
