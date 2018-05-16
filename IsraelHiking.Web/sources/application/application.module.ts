@@ -64,6 +64,7 @@ import { PoiService } from "./services/poi.service";
 import { GeoLocationService } from "./services/geo-location.service";
 import { ImageGalleryService } from "./services/image-gallery.service";
 import { CancelableTimeoutService } from "./services/cancelable-timeout.service";
+import { WhatsAppService } from "./services/whatsapp.service";
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 // components
@@ -223,7 +224,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         PoiService,
         GeoLocationService,
         ImageGalleryService,
-        CancelableTimeoutService
+        CancelableTimeoutService,
+        WhatsAppService
     ],
     declarations: [MainMapComponent,
         SidebarComponent,

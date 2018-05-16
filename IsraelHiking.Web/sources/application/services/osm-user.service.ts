@@ -6,6 +6,7 @@ import * as _ from "lodash";
 
 import { AuthorizationService } from "./authorization.service";
 import { HashService } from "./hash.service";
+import { WhatsAppService } from "./whatsapp.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -56,8 +57,9 @@ export class OsmUserService {
     public shareUrls: Common.ShareUrl[];
     public userId: string;
 
-    constructor(private httpClient: HttpClient,
-        private authorizationService: AuthorizationService) {
+    constructor(private readonly httpClient: HttpClient,
+        private readonly authorizationService: AuthorizationService,
+        private readonly whatsAppService: WhatsAppService) {
         this.x2Js = new X2JS();
         this.traces = [];
         this.shareUrls = [];
@@ -118,7 +120,7 @@ export class OsmUserService {
         return {
             ihm: ihm,
             facebook: `${Urls.facebook}${escaped}`,
-            whatsapp: `${Urls.whatsapp}${this.getShareUrlDisplayName(shareUrl)}: ${escaped}`,
+            whatsapp: this.whatsAppService.getUrl(this.getShareUrlDisplayName(shareUrl), escaped) as string,
             nakeb: `https://www.nakeb.co.il/add_new_hike?ihm_link=${shareUrl.id}`
         }
     }

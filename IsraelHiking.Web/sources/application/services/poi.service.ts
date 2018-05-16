@@ -5,6 +5,7 @@ import * as _ from "lodash";
 
 import { ResourcesService } from "./resources.service";
 import { HashService } from "./hash.service";
+import { WhatsAppService } from "./whatsapp.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -77,8 +78,9 @@ export class PoiService {
     private categoriesMap: Map<CategoriesType, ICategory[]>;
     private poiCache: IPointOfInterestExtended[];
 
-    constructor(private resources: ResourcesService,
-        private httpClient: HttpClient) {
+    constructor(private readonly resources: ResourcesService,
+        private readonly httpClient: HttpClient,
+        private readonly whatsappService: WhatsAppService) {
 
         this.poiCache = [];
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
@@ -144,7 +146,7 @@ export class PoiService {
         return {
             poiLink: poiLink,
             facebook: `${Urls.facebook}${escaped}`,
-            whatsapp: `${Urls.whatsapp}${poiExtended.title}: ${escaped}`,
+            whatsapp: this.whatsappService.getUrl(poiExtended.title, escaped) as string,
         }
     }
 }
