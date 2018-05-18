@@ -14,12 +14,13 @@ export type Visibility = "private" | "public";
 
 export interface ITrace {
     name: string;
+    user: string;
     description: string;
     url: string;
     imageUrl: string;
     dataUrl: string;
     id: string;
-    date: Date;
+    timeStamp: Date;
     tags: string[];
     tagsString: string;
     visibility: Visibility;
@@ -160,17 +161,17 @@ export class OsmUserService {
 
     private getTraces = (): Promise<any> => {
         let promise = this.httpClient.get(Urls.osmTrace).toPromise();
-        promise.then((response: any[]) => {
+        promise.then((response: ITrace[]) => {
             this.traces.splice(0);
-            let files = [].concat(response || []);
+            let files = ([] as ITrace[]).concat(response || []);
             for (let traceJson of files) {
-                let url = `${this.baseUrl}/user/${traceJson.userName}/traces/${traceJson.id}`;
+                let url = `${this.baseUrl}/user/${traceJson.user}/traces/${traceJson.id}`;
                 let dataUrl = `${this.baseUrl}/api/0.6/gpx/${traceJson.id}/data`;
                 traceJson.url = url;
                 traceJson.tagsString = traceJson.tags && traceJson.tags.length > 0 ? traceJson.tags.join(", ") : "";
                 traceJson.imageUrl = url + "/picture";
                 traceJson.dataUrl = dataUrl;
-                traceJson.date = new Date(traceJson.date);
+                traceJson.timeStamp = new Date(traceJson.timeStamp);
                 traceJson.isInEditMode = false;
                 this.traces.push(traceJson);
             }

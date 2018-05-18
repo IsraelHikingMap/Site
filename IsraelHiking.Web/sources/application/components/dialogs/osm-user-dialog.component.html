@@ -86,7 +86,7 @@
                                 <div *ngIf="!trace.isInEditMode">
                                     <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.name}}</a><br />
                                     {{trace.description}}<br />
-                                    {{trace.date | date:'dd/MM/yyyy'}}<br />
+                                    {{trace.timeStamp | date:'dd/MM/yyyy'}}<br />
                                     {{resources.translate(trace.visibility === 'private' ? 'Private' : 'Public')}}<br />
                                     {{trace.tagsString || resources.noTags}}
                                 </div>
