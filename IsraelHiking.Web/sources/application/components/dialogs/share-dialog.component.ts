@@ -140,7 +140,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             this.imageUrl = this.osmUserService.getImageFromShareId(shareUrl);
             let links = this.osmUserService.getShareSocialLinks(shareUrl);
             this.shareAddress = links.ihm;
-            this.whatsappShareAddress = links.whatsapp; 
+            this.whatsappShareAddress = links.whatsapp;
             this.facebookShareAddress = links.facebook;
             this.nakebCreateHikeAddress = links.nakeb;
         } catch (ex) {
