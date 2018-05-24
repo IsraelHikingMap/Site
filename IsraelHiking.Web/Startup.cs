@@ -24,6 +24,7 @@ using NLog.Web;
 using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
+using IsraelHiking.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.StaticFiles;
 
@@ -53,6 +54,8 @@ namespace IsraelHiking.Web
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddDetectionCore()
+                .AddBrowser();
             services.AddIHMDataAccess();
             services.AddIHMApi();
             services.AddSingleton<ISecurityTokenValidator, OsmAccessTokenValidator>();
@@ -134,15 +137,8 @@ namespace IsraelHiking.Web
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Israel Hiking API V1");
             });
-
-            app.Run(context =>
-            {
-                context.Response.StatusCode = 404;
-                context.Response.ContentType = "text/html";
-                var file = env.WebRootFileProvider.GetFileInfo("/resource-not-found.html");
-                context.Response.ContentLength = file.Length;
-                return context.Response.SendFileAsync(file);
-            });
+            // This should be the last middleware
+            app.UseMiddleware<NonApiMiddleware>();
             InitializeServices(app.ApplicationServices);
         }
 

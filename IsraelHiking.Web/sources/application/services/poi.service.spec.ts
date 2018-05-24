@@ -7,12 +7,14 @@ import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { PoiService, IPointOfInterestExtended, IRating } from "./poi.service";
+import { HashService } from "./hash.service";
 import { Urls } from "../common/Urls";
 
 describe("Poi Service", () => {
 
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
+        let hashService = {};
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -20,6 +22,7 @@ describe("Poi Service", () => {
             ],
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
+                { provide: HashService, useValue: hashService },
                 WhatsAppService,
                 PoiService
             ]

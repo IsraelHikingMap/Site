@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 
 export type SidebarView = "info" | "layers" | "public-poi" | "";
 
@@ -7,24 +7,6 @@ export class SidebarService {
 
     public viewName: SidebarView;
     public isVisible: boolean;
-
-    private data: any;
-
-    public get poiData(): any {
-        return this.data;
-    }
-
-    public set poiData(data: any) {
-        if (!this.data || data["id"] === this.data["id"]) {
-            this.data = data;
-            this.toggle("public-poi");
-        } else {
-            this.hide();
-            this.data = data;
-            // HM TODO: make this look good - refresh or something
-            setTimeout(() => this.toggle("public-poi"), 0);
-        }
-    };
 
     constructor() {
         this.hide();

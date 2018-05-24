@@ -83,6 +83,7 @@
     <PackageReference Include="System.ValueTuple" Version="4.4.0" />
     <PackageReference Include="System.Xml.XmlDocument" Version="4.3.0" />
     <PackageReference Include="System.Xml.XmlSerializer" Version="4.3.0" />
+    <PackageReference Include="Wangkanai.Detection.Browser" Version="2.0.0-beta8" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\IsraelHiking.API\IsraelHiking.API.csproj" />

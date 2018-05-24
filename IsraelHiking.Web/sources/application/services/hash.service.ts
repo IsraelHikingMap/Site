@@ -1,15 +1,48 @@
 ﻿import { Injectable, Inject } from "@angular/core";
 import { HttpParams } from "@angular/common/http";
-import { Router, NavigationEnd } from "@angular/router";
+import { Router } from "@angular/router";
+import { Subject } from "rxjs/Subject";
 import * as L from "leaflet";
 
 import { MapService } from "./map.service";
+import { ResourcesService } from "./resources.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
+
+export type ApplicationStateType = "download" | "search" | "share" | "url" | "baseLayer" | "poi";
+
+export interface IApplicationStateChangedEventArgs {
+    type: ApplicationStateType;
+    value: any;
+}
 
 export interface IPoiSourceAndId {
     source: string;
     id: string;
+}
+
+export class RouteStrings {
+    public static MAP = "map";
+    public static SHARE = "share";
+    public static URL = "url";
+    public static POI = "poi";
+    public static DOWNLOAD = "download";
+    public static SEARCH = "search";
+    public static ROUTE_ROOT = "/";
+    public static ROUTE_MAP = `/${RouteStrings.MAP}`;
+    public static ROUTE_SHARE = `/${RouteStrings.SHARE}`;
+    public static ROUTE_URL = `/${RouteStrings.URL}`;
+    public static ROUTE_POI = `/${RouteStrings.POI}`;
+    public static ROUTE_DOWNLOAD = `/${RouteStrings.DOWNLOAD}`;
+    public static ROUTE_SEARCH = `/${RouteStrings.SEARCH}`;
+
+    public static LAT = "lat";
+    public static LON = "lon";
+    public static ZOOM = "zoom";
+    public static ID = "id";
+    public static SOURCE = "source";
+    public static TERM = "term";
+    public static BASE_LAYER = "baselayer";
 }
 
 @Injectable()
@@ -21,117 +54,71 @@ export class HashService {
     private static readonly DOWNLOAD = "download";
     private static readonly SITE_SHARE = "s";
     private static readonly SEARCH_QUERY = "q";
-    private static readonly POINT_OF_INTEREST = "p";
-    private static readonly HASH = "/#!";
+    private static readonly HASH = "#!/";
     private static readonly LOCATION_REGEXP = /\/(\d+)\/([-+]?[0-9]*\.?[0-9]+)\/([-+]?[0-9]*\.?[0-9]+)/;
 
-    private window: Window;
-    private baseLayer: Common.LayerData;
-    private shareUrlId: string;
-    private internalUpdate: boolean;
-    private poiSourceAndId: IPoiSourceAndId;
+    private readonly window: Window;
+    private readonly stateMap: Map<ApplicationStateType, any>;
 
-    public searchTerm: string;
-    public externalUrl: string;
-    public download: boolean;
-
-    public static getShareUrlPostfix(id: string) {
-        return `/?${HashService.SITE_SHARE}=${id}`;
-    }
-
-    public static getFullUrlFromShareId(id: string) {
-        return `${Urls.baseAddress}${HashService.HASH}${HashService.getShareUrlPostfix(id)}`;
-    }
-
-    public static getFullUrlFromPoiId(poiSourceAndId: IPoiSourceAndId) {
-        return `${Urls.baseAddress}${HashService.HASH}/?${HashService.POINT_OF_INTEREST}=${poiSourceAndId.source}__${poiSourceAndId.id}`;
-    }
+    public applicationStateChanged: Subject<IApplicationStateChangedEventArgs>;
 
     constructor(private readonly router: Router,
         @Inject("Window") window: any, // bug in angular aot
+        private readonly resources: ResourcesService,
         private readonly mapService: MapService) {
 
-        this.baseLayer = null;
-        this.poiSourceAndId = null;
-        this.searchTerm = "";
         this.window = window;
-        this.internalUpdate = true; // this is due to the fact that nviagtion end is called once the site finishes loading.
-        this.initialLoad();
-        this.updateUrl();
-
-        this.router.events.subscribe((event) => {
-            if (event instanceof NavigationEnd) {
-                if (this.internalUpdate) {
-                    this.internalUpdate = false;
-                    return;
-                }
-                let latLng = this.parsePathToGeoLocation();
-                if (latLng != null) {
-                    this.externalUrl = "";
-                    this.shareUrlId = "";
-                    this.mapService.map.flyTo(latLng, latLng.alt);
-                } else {
-                    this.window.location.reload();
-                }
-            }
-        });
-
+        this.applicationStateChanged = new Subject();
+        this.stateMap = new Map();
+        this.backwardCompatibilitySupport();
         this.mapService.map.on("moveend", () => {
-            this.updateUrl();
+            if (this.stateMap.get("share") || this.stateMap.get("url") || this.stateMap.get("poi")) {
+                return;
+            }
+            this.router.navigate([
+                    RouteStrings.ROUTE_MAP,
+                    this.mapService.map.getZoom(),
+                    this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION),
+                    this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION)
+                ],
+                { replaceUrl: true });
         });
     }
 
-    public getBaseLayer(): Common.LayerData {
-        return this.baseLayer;
-    }
-
-    public getPoiSourceAndId(): IPoiSourceAndId {
-        return this.poiSourceAndId;
-    }
-
-    private updateUrl = () => {
-        if (this.shareUrlId || this.externalUrl) {
+    private backwardCompatibilitySupport() {
+        if (this.window.location.hash.indexOf(HashService.HASH) < 0) {
             return;
         }
-        let path = HashService.HASH + "/" + this.mapService.map.getZoom() +
-            "/" + this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION) +
-            "/" + this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION);
-        this.internalUpdate = true;
-        this.router.navigateByUrl(path, { replaceUrl: true });
-    }
-
-    private stringToBaseLayer(addressOrKey: string): Common.LayerData {
-        if (addressOrKey.includes("www") || addressOrKey.includes("http")) {
-            return {
-                key: "",
-                address: addressOrKey
-            } as Common.LayerData;
-        }
-        return {
-            key: addressOrKey.split("_").join(" "),
-            address: ""
-        } as Common.LayerData;
-    }
-
-    private initialLoad() {
-        let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace("#!/?", "");
+        let simplifiedHash = this.window.location.hash.replace(HashService.LOCATION_REGEXP, "").replace(`${HashService.HASH}?`, "");
         let searchParams = new HttpParams({ fromString: simplifiedHash });
-        this.searchTerm = decodeURIComponent(searchParams.get(HashService.SEARCH_QUERY) || "");
-        this.externalUrl = searchParams.get(HashService.URL) || "";
-        this.download = searchParams.has(HashService.DOWNLOAD);
-        this.baseLayer = this.stringToBaseLayer(searchParams.get(HashService.BASE_LAYER) || "");
-        this.shareUrlId = searchParams.get(HashService.SITE_SHARE) || "";
-        let poiSourceAndIdString = searchParams.get(HashService.POINT_OF_INTEREST) || "";
-        if (poiSourceAndIdString) {
-            this.poiSourceAndId = {
-                source: poiSourceAndIdString.split("__")[0],
-                id: poiSourceAndIdString.split("__")[1]
-            };
+        let baseLayer = searchParams.get(HashService.BASE_LAYER);
+        let searchTerm = searchParams.get(HashService.SEARCH_QUERY);
+        if (searchTerm) {
+            this.router.navigate([RouteStrings.ROUTE_SEARCH, searchTerm], { queryParams: { baselayer: baseLayer }, replaceUrl: true });
+            return;
+        }
+        let externalUrl = searchParams.get(HashService.URL);
+        if (externalUrl) {
+            this.router.navigate([RouteStrings.ROUTE_URL, externalUrl], { queryParams: { baselayer: baseLayer }, replaceUrl: true });
+            return;
+        }
+        let download = searchParams.has(HashService.DOWNLOAD);
+        if (download) {
+            this.router.navigate([RouteStrings.ROUTE_DOWNLOAD], { replaceUrl: true });
+            return;
+        }
+        let shareUrlId = searchParams.get(HashService.SITE_SHARE);
+        if (shareUrlId) {
+            this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrlId], { replaceUrl: true });
+            return;
         }
         let latLng = this.parsePathToGeoLocation();
         if (latLng != null) {
-            this.mapService.map.setView(latLng, latLng.alt);
+            this.router.navigate([RouteStrings.ROUTE_MAP, latLng.alt, latLng.lat, latLng.lng], { replaceUrl: true });
+            return;
         }
+        // no flags - navigate to root
+        this.router.navigate([RouteStrings.ROUTE_ROOT], { replaceUrl: true });
     }
 
     private parsePathToGeoLocation(): L.LatLng {
@@ -148,23 +135,45 @@ export class HashService {
     }
 
     public getHref(): string {
-        let url = Urls.baseAddress;
-        if (this.externalUrl) {
-            url = `${Urls.baseAddress}${HashService.HASH}/?${HashService.URL}=${this.externalUrl}`;
+        if (this.getUrl() != null) {
+            let urlTree = this.router.createUrlTree([RouteStrings.URL, this.stateMap.get("url")]);
+            return this.window.location.origin + urlTree.toString();
         }
-        if (this.shareUrlId) {
-            url = HashService.getFullUrlFromShareId(this.shareUrlId);
+        if (this.getShareUrlId() != null) {
+            return this.getFullUrlFromShareId(this.stateMap.get("share"));
         }
-        return url;
+        return Urls.baseAddress;
     }
 
     public getShareUrlId(): string {
-        return this.shareUrlId;
+        return this.stateMap.get("share");
     }
 
-    public setShareUrlId(shareUrlId: string) {
-        this.shareUrlId = shareUrlId;
-        this.internalUpdate = true;
-        this.router.navigateByUrl(`${HashService.HASH}${HashService.getShareUrlPostfix(this.shareUrlId)}`);
+    public getUrl(): string {
+        return this.stateMap.get("url");
+    }
+
+    public getBaselayer(): Common.LayerData {
+        return this.stateMap.get("baseLayer");
+    }
+
+    public getPoiSourceAndId(): IPoiSourceAndId {
+        return this.stateMap.get("poi");
+    }
+
+    public getFullUrlFromPoiId(poiSourceAndId: IPoiSourceAndId) {
+        let urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
+            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+        return this.window.location.origin + urlTree.toString();
+    }
+
+    public getFullUrlFromShareId(id: string) {
+        let urlTree = this.router.createUrlTree([RouteStrings.SHARE, id]);
+        return this.window.location.origin + urlTree.toString();
+    }
+
+    public setApplicationState(type: ApplicationStateType, value: any) {
+        this.stateMap.set(type, value);
+        this.applicationStateChanged.next({ type: type, value: value });
     }
 }

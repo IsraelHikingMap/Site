@@ -4,7 +4,7 @@ import { CommonModule } from "@angular/common";
 import { BrowserModule } from "@angular/platform-browser"
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
-import { RouterModule } from "@angular/router";
+import { RouterModule, Routes } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
     GestureConfig,
@@ -44,7 +44,7 @@ import { MapService } from "./services/map.service";
 import { ResourcesService } from "./services/resources.service";
 import { FileService } from "./services/file.service";
 import { SidebarService } from "./services/sidebar.service";
-import { HashService } from "./services/hash.service";
+import { HashService, RouteStrings } from "./services/hash.service";
 import { LayersService } from "./services/layers/layers.service";
 import { RoutesService } from "./services/layers/routelayers/routes.service";
 import { DataContainerService } from "./services/data-container.service";
@@ -108,9 +108,42 @@ import { ConfirmDialogComponent } from "./components/dialogs/confirm-dialog.comp
 import { LegendItemComponent } from "./components/sidebar/legend-item.component";
 import { PublicPoiSidebarComponent } from "./components/sidebar/public-poi-sidebar.component";
 import { PoiMainInfoComponent } from "./components/sidebar/poi-main-info.component";
+import { ApplicationStateComponent } from "./components/application-state.component";
 
 export function getWindow() { return window; }
 export function getRoutesService(routesService: RoutesService) { return routesService; }
+
+const routes: Routes = [
+    {
+        path: `${RouteStrings.MAP}/:${RouteStrings.ZOOM}/:${RouteStrings.LAT}/:${RouteStrings.LON}`,
+        component: ApplicationStateComponent
+    },
+    {
+        path: `${RouteStrings.SHARE}/:${RouteStrings.ID}`,
+        component: ApplicationStateComponent
+    },
+    {
+        path: `${RouteStrings.URL}/:${RouteStrings.ID}`,
+        component: ApplicationStateComponent
+    },
+    {
+        path: `${RouteStrings.POI}/:${RouteStrings.SOURCE}/:${RouteStrings.ID}`,
+        component: ApplicationStateComponent
+    },
+    {
+        path: `${RouteStrings.DOWNLOAD}`,
+        component: ApplicationStateComponent
+    },
+    {
+        path: `${RouteStrings.SEARCH}/:${RouteStrings.TERM}`,
+        component: ApplicationStateComponent
+    },
+    {
+        path: "",
+        component: ApplicationStateComponent,
+        pathMatch: "full"
+    }
+];
 
 @NgModule({
     imports: [
@@ -139,7 +172,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ReactiveFormsModule,
         FlexLayoutModule,
         ClipboardModule,
-        RouterModule.forRoot([]),
+        RouterModule.forRoot(routes),
         Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
         NgProgressModule,
         NgxPaginationModule,
@@ -184,7 +217,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ConfirmDialogComponent,
         LegendItemComponent,
         PublicPoiSidebarComponent,
-        PoiMainInfoComponent
+        PoiMainInfoComponent,
+        ApplicationStateComponent
     ],
     providers: [
         GestureConfig,
@@ -267,7 +301,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ConfirmDialogComponent,
         LegendItemComponent,
         PublicPoiSidebarComponent,
-        PoiMainInfoComponent
+        PoiMainInfoComponent,
+        ApplicationStateComponent
     ],
     bootstrap: [MainMapComponent, SidebarComponent]
 })

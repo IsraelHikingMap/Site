@@ -1,5 +1,5 @@
 ﻿import { Component } from "@angular/core";
-import { MatDialog } from "@angular/material";
+import { Router } from "@angular/router";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
@@ -8,8 +8,8 @@ import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { BaseMapComponent } from "../base-map.component";
-import { DownloadDialogComponent } from "../dialogs/download-dialog.component";
 import { ILegendItem } from "./legend-item.component";
+import { RouteStrings } from "../../services/hash.service";
 
 export interface ILegendSection {
     items: ILegendItem[];
@@ -28,7 +28,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     public selectedTabIndex: number;
 
     constructor(resources: ResourcesService,
-        private readonly dialog: MatDialog,
+        private readonly router: Router,
         private readonly sidebarService: SidebarService,
         private readonly mapService: MapService,
         private readonly layersService: LayersService) {
@@ -44,7 +44,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     public openDownloadDialog = () => {
-        this.dialog.open(DownloadDialogComponent, { width: "600px" });
+        this.router.navigate([RouteStrings.DOWNLOAD]);
     }
 
     public toggleInfo = (e: Event) => {

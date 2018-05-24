@@ -1,4 +1,5 @@
 ﻿import { Injectable } from "@angular/core";
+import { Router } from "@angular/router";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
@@ -7,7 +8,7 @@ import { RoutesService } from "./layers/routelayers/routes.service";
 import { MapService } from "./map.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
-import { HashService } from "./hash.service";
+import { HashService, RouteStrings } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { OsmUserService } from "./osm-user.service";
 import { CategoriesLayerFactory } from "./layers/categories-layers.factory";
@@ -19,6 +20,7 @@ export class DataContainerService {
     private shareUrl: Common.ShareUrl;
 
     constructor(
+        private readonly router: Router,
         private readonly osmUserService: OsmUserService,
         private readonly layersService: LayersService,
         private readonly routesService: RoutesService,
@@ -67,11 +69,12 @@ export class DataContainerService {
 
     public initialize = async () => {
         await this.layersService.initialize();
+        // This assumes hashservice has already finished initialization, this assumtion can cause bugs...
         if (this.hashService.getShareUrlId()) {
             this.initializeShareUrl();
-        } else if (this.hashService.externalUrl) {
-            let data = await this.fileService.openFromUrl(this.hashService.externalUrl);
-            data.baseLayer = this.hashService.getBaseLayer();
+        } else if (this.hashService.getUrl()) {
+            let data = await this.fileService.openFromUrl(this.hashService.getUrl());
+            data.baseLayer = this.hashService.getBaselayer();
             this.setData(data);
         } else if (this.hashService.getPoiSourceAndId()) {
             let poiSrouceAndId = this.hashService.getPoiSourceAndId();
@@ -84,7 +87,7 @@ export class DataContainerService {
                 this.toastService.error(this.resourcesService.unableToFindPoi);
             }
         } else {
-            this.layersService.addExternalBaseLayer(this.hashService.getBaseLayer());
+            this.layersService.addExternalBaseLayer(this.hashService.getBaselayer());
         }
     }
 
@@ -103,7 +106,7 @@ export class DataContainerService {
             this.shareUrl = shareUrl;
             this.toastService.info(shareUrl.description, shareUrl.title);
         } catch (ex) {
-            this.hashService.setShareUrlId("");
+            this.hashService.setApplicationState("share", "");
             this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
         }
     }
@@ -114,6 +117,6 @@ export class DataContainerService {
 
     public setShareUrl(shareUrl: Common.ShareUrl) {
         this.shareUrl = shareUrl;
-        this.hashService.setShareUrlId(this.shareUrl.id);
+        this.router.navigate([RouteStrings.ROUTE_SHARE, this.shareUrl.id]);
     }
 }

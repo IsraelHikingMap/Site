@@ -51,14 +51,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         this.imageGalleryService.setGalleryComponent(this.ngxImageGallery);
     }
 
-    public getIsSidebarVisible() {
-        return this.sidebarService.isVisible;
-    }
-
-    public closeSidebar() {
-        this.sidebarService.hide();
-    }
-
     private createControls() {
         let isIFrame = window.self !== window.top;
 

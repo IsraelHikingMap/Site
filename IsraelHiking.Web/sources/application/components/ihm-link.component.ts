@@ -12,7 +12,6 @@ import { Urls } from "../common/Urls";
 })
 export class IhmLinkComponent extends BaseMapComponent {
 
-    public href: string;
     public target: string;
 
     constructor(resources: ResourcesService,
@@ -20,11 +19,17 @@ export class IhmLinkComponent extends BaseMapComponent {
         super(resources);
 
         if (window.self === window.top) {
-            this.href = Urls.baseAddress;
             this.target = "";
         } else {
-            this.href = this.hashService.getHref();
             this.target = "_blank";
+        }
+    }
+
+    public getHref() {
+        if (window.self === window.top) {
+            return Urls.baseAddress;
+        } else {
+            return this.hashService.getHref();
         }
     }
 

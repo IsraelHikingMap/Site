@@ -7,9 +7,9 @@ import * as X2JS from "x2js";
 import { OsmUserService, ITrace } from "./osm-user.service";
 import { AuthorizationService } from "./authorization.service";
 import { WhatsAppService } from "./whatsapp.service";
+import { HashService } from "./hash.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
-
 
 describe("OSM User Service", () => {
     let oauth: OSMAuth.OSMAuthInstance;
@@ -34,6 +34,9 @@ describe("OSM User Service", () => {
             osmToken: null,
             createOSMAuth: () => oauth
         } as AuthorizationService;
+        let hashService = {
+            getFullUrlFromShareId: jasmine.createSpy("getFullUrlFromShareId")
+        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -41,6 +44,7 @@ describe("OSM User Service", () => {
             ],
             providers: [
                 { provide: AuthorizationService, useValue: authService },
+                { provide: HashService, useValue: hashService },
                 WhatsAppService,
                 OsmUserService
             ]
@@ -200,24 +204,21 @@ describe("OSM User Service", () => {
     }));
 
 
-    it("Should return full address of shared route", inject([OsmUserService], (osmUserService: OsmUserService) => {
+    it("Should return full address of shared route", inject([OsmUserService, HashService],
+        (osmUserService: OsmUserService, hashService: HashService) => {
         let shareUrl = { id: "12345" } as Common.ShareUrl;
 
-        let address = osmUserService.getUrlFromShareId(shareUrl);
+        osmUserService.getUrlFromShareId(shareUrl);
 
-        expect(address).toContain("/#!/");
-        expect(address).toContain(Urls.baseAddress);
-        expect(address).toContain(shareUrl.id);
+        expect(hashService.getFullUrlFromShareId).toHaveBeenCalled();
     }));
 
-    it("Should return social links", inject([OsmUserService], (osmUserService: OsmUserService) => {
+    it("Should return social links", inject([OsmUserService, HashService], (osmUserService: OsmUserService, hashService: HashService) => {
         let shareUrl = { id: "12345" } as Common.ShareUrl;
 
         let links = osmUserService.getShareSocialLinks(shareUrl);
 
-        expect(links.ihm).toContain("/#!/");
-        expect(links.ihm).toContain(Urls.baseAddress);
-        expect(links.ihm).toContain(shareUrl.id);
+        expect(hashService.getFullUrlFromShareId).toHaveBeenCalled();
         expect(links.facebook).toContain("facebook");
         expect(links.whatsapp).toContain("whatsapp");
         expect(links.nakeb).toContain("nakeb");

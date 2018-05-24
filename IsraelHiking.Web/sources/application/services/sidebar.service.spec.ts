@@ -4,7 +4,7 @@ describe("SidebarService", () => {
     let service: SidebarService;
 
     beforeEach(() => {
-        service = new SidebarService;
+        service = new SidebarService();
     });
 
     it("Should initialize hidden", () => {

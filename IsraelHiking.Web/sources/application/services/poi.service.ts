@@ -80,7 +80,8 @@ export class PoiService {
 
     constructor(private readonly resources: ResourcesService,
         private readonly httpClient: HttpClient,
-        private readonly whatsappService: WhatsAppService) {
+        private readonly whatsappService: WhatsAppService,
+        private readonly hashService: HashService) {
 
         this.poiCache = [];
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
@@ -141,7 +142,7 @@ export class PoiService {
     }
 
     public getPoiSocialLinks(poiExtended: IPointOfInterestExtended): IPoiSocialLinks {
-        let poiLink = HashService.getFullUrlFromPoiId({ source: poiExtended.source, id: poiExtended.id });
+        let poiLink = this.hashService.getFullUrlFromPoiId({ source: poiExtended.source, id: poiExtended.id });
         let escaped = encodeURIComponent(poiLink);
         return {
             poiLink: poiLink,

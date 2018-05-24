@@ -19,12 +19,13 @@ namespace IsraelHiking.API.Tests.Controllers
     [TestClass]
     public class PointsOfInterestControllerTests
     {
+        private PointsOfInterestController _controller;
         private IWikimediaCommonGateway _wikimediaCommonGateway;
         private IOsmGateway _osmGateway;
-        private PointsOfInterestController _controller;
         private ITagsHelper _tagHelper;
         private IPointsOfInterestAdapter _adapter;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
+        private IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
 
         [TestInitialize]
         public void TestInitialize()
@@ -32,13 +33,14 @@ namespace IsraelHiking.API.Tests.Controllers
             _adapter = Substitute.For<IPointsOfInterestAdapter>();
             _adapter.Source.Returns("source");
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
+            _pointsOfInterestAggregatorService = Substitute.For<IPointsOfInterestAggregatorService>();
             _tagHelper = Substitute.For<ITagsHelper>();
             _wikimediaCommonGateway = Substitute.For<IWikimediaCommonGateway>();
             _osmGateway = Substitute.For<IOsmGateway>();
             var cache = new LruCache<string, TokenAndSecret>(Substitute.For<IOptions<ConfigurationData>>(), Substitute.For<ILogger>());
             var factory = Substitute.For<IHttpGatewayFactory>();
             factory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(_osmGateway);
-            _controller = new PointsOfInterestController(new [] { _adapter }, factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, cache);
+            _controller = new PointsOfInterestController(new [] { _adapter }, factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, _pointsOfInterestAggregatorService, cache);
         }
 
         [TestMethod]
@@ -88,12 +90,27 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
+        public void GetPointOfInteresetCoordinates_BySourceAndId_ShouldReturnIt()
+        {
+            var id = "32-35";
+            var source = Categories.COORDINATES;
+            var language = "language";
+
+            var result = _controller.GetPointOfInterest(source, id, language).Result as OkObjectResult;
+
+            Assert.IsNotNull(result);
+            var poi = result.Value as SearchResultsPointOfInterest;
+            Assert.IsNotNull(poi);
+            Assert.AreEqual(32, poi.Location.Lat);
+        }
+
+        [TestMethod]
         public void GetPointOfIntereset_BySourceAndId_ShouldReturnIt()
         {
             var id = "way_1";
             var source = "source";
             var language = "language";
-            _adapter.GetPointOfInterestById(id, language).Returns(new PointOfInterestExtended());
+            _pointsOfInterestAggregatorService.Get(source, id, language).Returns(new PointOfInterestExtended());
 
             var result = _controller.GetPointOfInterest(source, id, language).Result as OkObjectResult;
 

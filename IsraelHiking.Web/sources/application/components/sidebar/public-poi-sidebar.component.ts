@@ -1,4 +1,5 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
+import { Router } from "@angular/router";
 import { MatSelectChange } from "@angular/material";
 import * as _ from "lodash";
 
@@ -8,7 +9,6 @@ import { ResourcesService } from "../../services/resources.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { IPointOfInterestExtended, PoiService, IRating, IRater, IIconColorLabel, IReference } from "../../services/poi.service";
 import { MapService } from "../../services/map.service";
-import { IPublicPoiData } from "../../services/layers/categories.layer";
 import { OsmUserService } from "../../services/osm-user.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { ToastService } from "../../services/toast.service";
@@ -16,8 +16,9 @@ import { LayersService } from "../../services/layers/layers.service";
 import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
 import { RouteLayerFactory } from "../../services/layers/routelayers/route-layer.factory";
 import { ISelectableCategory } from "../dialogs/update-point-dialog.component";
+import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
+import { HashService, IPoiSourceAndId, RouteStrings } from "../../services/hash.service";
 import * as Common from "../../common/IsraelHiking";
-
 
 @Component({
     selector: "public-poi-sidebar",
@@ -41,6 +42,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
     private poiExtended: IPointOfInterestExtended;
 
     constructor(resources: ResourcesService,
+        private readonly router: Router,
         private readonly mapService: MapService,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
@@ -48,9 +50,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         private readonly routesService: RoutesService,
         private readonly toastService: ToastService,
         private readonly routeLayerFactory: RouteLayerFactory,
-        private readonly layersService: LayersService) {
+        private readonly layersService: LayersService,
+        private readonly categoriesLayerFactory: CategoriesLayerFactory,
+        private readonly hashService: HashService, ) {
         super(resources);
-        let data = this.getData();
+        let sourceAndId = this.hashService.getPoiSourceAndId();
         this.isLoading = true;
         this.isAdvanced = false;
         this.shareAddress = "";
@@ -58,28 +62,19 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.whatsappShareAddress = "";
         this.categories = [];
         this.info = { imagesFiles: [], imagesUrls: [], urls: [] } as IPoiMainInfoData;
-        this.latLng = data.location;
-        this.getExtendedData(data);
-        this.initializeCategories(data.icon);
+        this.getExtendedData(sourceAndId);
     }
 
-    private async getExtendedData(data: IPublicPoiData) {
-        if (!data.id) {
-            this.info.title = data.title;
-            this.isLoading = false;
-            return;
-        }
+    private async getExtendedData(data: IPoiSourceAndId) {
         try {
             let poiExtended = await this.poiService.getPoint(data.id, data.source);
             this.initFromPointOfInterestExtended(poiExtended);
-            data.selectRoutes(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
+            let categoriesLayer = this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute);
+            categoriesLayer.selectRoute(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
+            this.initializeCategories(poiExtended.icon);
         } finally {
             this.isLoading = false;
         }
-    }
-
-    private getData(): IPublicPoiData {
-        return this.sidebarService.poiData as IPublicPoiData;
     }
 
     private initFromPointOfInterestExtended = (poiExtended: IPointOfInterestExtended) => {
@@ -287,7 +282,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
     }
 
     public clear() {
-        this.getData().clear();
+        if (this.poiExtended) {
+            this.categoriesLayerFactory.getByPoiType(this.poiExtended.isRoute).clearSelected(this.poiExtended.id);
+        }
         this.close();
     }
 
@@ -314,15 +311,18 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
 
     public close() {
         this.sidebarService.hide();
+        this.router.navigate([RouteStrings.ROUTE_ROOT]);
     }
 
     public getEditElementOsmAddress(): string {
-        let data = this.getData();
-        if (data.source.toLocaleLowerCase() !== "osm") {
+        if (!this.poiExtended) {
+            return null;
+        }
+        if (this.poiExtended.source.toLocaleLowerCase() !== "osm") {
             return null;
         }
         let baseLayerAddress = this.layersService.selectedBaseLayer.address;
-        return this.osmUserService.getEditElementOsmAddress(baseLayerAddress, data.id);
+        return this.osmUserService.getEditElementOsmAddress(baseLayerAddress, this.poiExtended.id);
     }
 
     public addEmptyUrl() {

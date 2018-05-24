@@ -41,8 +41,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var results = _controller.GetSearchResults("+32, 35", Languages.HEBREW).Result;
             Assert.IsNotNull(results);
+            Assert.AreEqual(Categories.COORDINATES, results.First().Category);
         }
-
-        
     }
 }

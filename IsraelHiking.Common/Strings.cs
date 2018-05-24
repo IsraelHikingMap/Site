@@ -72,6 +72,7 @@
         public const string OFFROAD = "Off-road";
         public const string WIKIPEDIA = "Wikipedia";
         public const string INATURE = "iNature";
+        public const string COORDINATES = "Coordinates";
     }
 
     public static class Languages

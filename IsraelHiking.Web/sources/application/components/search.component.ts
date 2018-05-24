@@ -11,6 +11,7 @@
     ComponentFactory,
     QueryList
 } from "@angular/core";
+import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { Observable } from "rxjs/Observable";
@@ -21,7 +22,7 @@ import "rxjs/add/operator/debounce";
 
 import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
-import { HashService } from "../services/hash.service";
+import { HashService, RouteStrings } from "../services/hash.service";
 import { DataContainerService } from "../services/data-container.service";
 import { ElevationProvider } from "../services/elevation.provider";
 import { RouterService } from "../services/routers/router.service";
@@ -83,7 +84,8 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         private readonly injector: Injector,
         private readonly componentFactoryResolver: ComponentFactoryResolver,
         private readonly toastService: ToastService,
-        private readonly categoriesLayerFactory: CategoriesLayerFactory
+        private readonly categoriesLayerFactory: CategoriesLayerFactory,
+        private readonly router: Router
     ) {
         super(resources);
         this.requestsQueue = [];
@@ -92,9 +94,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.isVisible = false;
         this.isDirectional = false;
         this.routingType = "Hike";
-        this.selectFirstSearchResults = hashService.searchTerm != null;
+        this.selectFirstSearchResults = false;
         this.fromContext = {
-            searchTerm: hashService.searchTerm || "",
+            searchTerm: "",
             searchResults: [],
             selectedSearchResults: null
         } as ISearchContext;
@@ -103,11 +105,18 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             searchResults: [],
             selectedSearchResults: null
         } as ISearchContext;
-        this.isVisible = this.fromContext.searchTerm ? true : false;
-        this.searchFrom = new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResultsPointOfInterest);
+        this.isVisible = false;
+        this.searchFrom = new FormControl();
         this.searchTo = new FormControl();
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
+
+        this.hashService.applicationStateChanged.filter(f => f.type === "search").subscribe(args => {
+            this.fromContext.searchTerm = args.value;
+            this.searchFrom = new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResultsPointOfInterest);
+            this.selectFirstSearchResults = true;
+            this.search(this.fromContext);
+        });
     }
 
     private configureInputFormControl(input: FormControl, context: ISearchContext) {
@@ -170,9 +179,13 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     public moveToResults = (searchResults: ISearchResultsPointOfInterest, e: Event) => {
-        this.toggleVisibility(e);
+        if (this.isVisible) {
+            this.toggleVisibility(e);
+        }
         let bounds = L.latLngBounds(searchResults.southWest, searchResults.northEast);
         this.categoriesLayerFactory.getByPoiType(searchResults.isRoute).moveToSearchResults(searchResults, bounds);
+        this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id],
+            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
 
     private selectResults = (searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) => {

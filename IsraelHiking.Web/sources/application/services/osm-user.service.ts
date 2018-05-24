@@ -60,7 +60,8 @@ export class OsmUserService {
 
     constructor(private readonly httpClient: HttpClient,
         private readonly authorizationService: AuthorizationService,
-        private readonly whatsAppService: WhatsAppService) {
+        private readonly whatsAppService: WhatsAppService,
+        private readonly hashService: HashService) {
         this.x2Js = new X2JS();
         this.traces = [];
         this.shareUrls = [];
@@ -239,7 +240,7 @@ export class OsmUserService {
     }
 
     public getUrlFromShareId = (shareUrl: Common.ShareUrl) => {
-        return HashService.getFullUrlFromShareId(shareUrl.id);
+        return this.hashService.getFullUrlFromShareId(shareUrl.id);
     }
 
     public getMissingParts(trace: ITrace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {

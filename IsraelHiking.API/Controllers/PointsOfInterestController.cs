@@ -1,7 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -24,6 +26,7 @@ namespace IsraelHiking.API.Controllers
         private readonly ITagsHelper _tagsHelper;
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
+        private readonly IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
         /// <summary>
@@ -34,12 +37,14 @@ namespace IsraelHiking.API.Controllers
         /// <param name="tagsHelper"></param>
         /// <param name="wikimediaCommonGateway"></param>
         /// <param name="pointsOfInterestProvider"></param>
+        /// <param name="pointsOfInterestAggregatorService"></param>
         /// <param name="cache"></param>
         public PointsOfInterestController(IEnumerable<IPointsOfInterestAdapter> adapters,
             IHttpGatewayFactory httpGatewayFactory,
             ITagsHelper tagsHelper,
             IWikimediaCommonGateway wikimediaCommonGateway,
             IPointsOfInterestProvider pointsOfInterestProvider,
+            IPointsOfInterestAggregatorService pointsOfInterestAggregatorService,
             LruCache<string, TokenAndSecret> cache)
         {
             _adapters = adapters.ToDictionary(a => a.Source, a => a);
@@ -47,6 +52,7 @@ namespace IsraelHiking.API.Controllers
             _httpGatewayFactory = httpGatewayFactory;
             _tagsHelper = tagsHelper;
             _cache = cache;
+            _pointsOfInterestAggregatorService = pointsOfInterestAggregatorService;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _wikimediaCommonGateway = wikimediaCommonGateway;
         }
@@ -97,38 +103,19 @@ namespace IsraelHiking.API.Controllers
         [HttpGet]
         public async Task<IActionResult> GetPointOfInterest(string source, string id, string language = "")
         {
+            if (source.Equals(Sources.COORDINATES, StringComparison.InvariantCultureIgnoreCase))
+            {
+                var latLng = CoordinatesToPointOfInterestConverter.GetLatLngFromId(id);
+                return Ok(CoordinatesToPointOfInterestConverter.Convert(latLng, id));
+            }
             if (_adapters.ContainsKey(source) == false)
             {
                 return BadRequest($"{source} is not a know POIs source...");
             }
-            var adapter = _adapters[source];
-            var poiItem = await adapter.GetPointOfInterestById(id, language);
+            var poiItem = await _pointsOfInterestAggregatorService.Get(source, id, language);
             if (poiItem == null)
             {
                 return NotFound();
-            }
-            if (poiItem.CombinedIds == null)
-            {
-                return Ok(poiItem);
-            }
-            foreach (var poiItemCombinedIdKey in poiItem.CombinedIds.Keys)
-            {
-                adapter = _adapters[poiItemCombinedIdKey];
-                foreach (var currentId in poiItem.CombinedIds[poiItemCombinedIdKey])
-                {
-                    var currentPoiItem = await adapter.GetPointOfInterestById(currentId, language);
-                    if (string.IsNullOrWhiteSpace(poiItem.Description))
-                    {
-                        poiItem.Description = currentPoiItem.Description;
-                    }
-                    poiItem.ImagesUrls = poiItem.ImagesUrls.Concat(currentPoiItem.ImagesUrls)
-                        .Distinct()
-                        .ToArray();
-                    poiItem.References = poiItem.References.Concat(currentPoiItem.References)
-                        .GroupBy(r => r.Url)
-                        .Select(r => r.FirstOrDefault())
-                        .ToArray();
-                }
             }
             return Ok(poiItem);
         }

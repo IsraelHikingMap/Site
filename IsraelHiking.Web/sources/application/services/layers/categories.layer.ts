@@ -1,4 +1,5 @@
-﻿import { LocalStorageService } from "ngx-store"
+﻿import { Router } from "@angular/router";
+import { LocalStorageService } from "ngx-store"
 import { Subject } from "rxjs/Subject";
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -11,12 +12,8 @@ import { ResourcesService } from "../resources.service";
 import { IPointOfInterest, PoiService, CategoriesType, ICategory } from "../poi.service";
 import { FitBoundsService } from "../fit-bounds.service";
 import { SidebarService } from "../sidebar.service";
+import { HashService, RouteStrings } from "../hash.service";
 import * as Common from "../../common/IsraelHiking";
-
-export interface IPublicPoiData extends IPointOfInterest {
-    selectRoutes: Function;
-    clear: Function;
-}
 
 export class CategoriesLayer extends BasePoiMarkerLayer {
 
@@ -28,12 +25,14 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
     private searchResultsMarker: Common.IMarkerWithTitle;
     public categories: ICategory[];
 
-    constructor(mapService: MapService,
+    constructor(private readonly router: Router,
+        mapService: MapService,
         private readonly resources: ResourcesService,
         private readonly localStorageService: LocalStorageService,
         private readonly poiService: PoiService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly sidebarService: SidebarService,
+        private readonly hashService: HashService,
         private readonly categoriesType: CategoriesType) {
         super(mapService);
         this.categories = [];
@@ -157,8 +156,6 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                         this.mapService.map.addLayer(this.searchResultsMarker);
                         markerWithTitle = this.searchResultsMarker;
                     }
-                    markerWithTitle.fireEvent("click");
-                    markerWithTitle.openPopup();
                 }, 1000);
             });
             if (foundMarker) {
@@ -166,8 +163,6 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             }
             this.searchResultsMarker = this.pointOfInterestToMarker(pointOfInterest);
             this.mapService.map.addLayer(this.searchResultsMarker);
-            this.searchResultsMarker.fireEvent("click");
-            this.searchResultsMarker.openPopup();
         });
 
         // triggers the subscription
@@ -187,28 +182,15 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             } as L.MarkerOptions) as Common.IMarkerWithTitle;
         marker.title = pointOfInterest.title;
         marker.identifier = pointOfInterest.id;
-        let clickLambda = () => {
-            let data = Object.assign({
-                    selectRoutes: (routes, isArea) => {
-                        if (isArea) {
-                            this.mapService.addAreaToReadOnlyLayer(this.readOnlyLayer, routes);
-                        } else {
-                            this.mapService.updateReadOnlyLayer(this.readOnlyLayer, routes);
-                        }
-                    },
-                    clear: () => {
-                        this.readOnlyLayer.clearLayers();
-                        marker.closePopup();
-                        if (this.searchResultsMarker === marker) {
-                            this.clearSearchResultsMarker();
-                        }
-                    }
-                },
-                pointOfInterest) as IPublicPoiData;
-            data.location = latLng;
-            this.sidebarService.poiData = data;
-        };
-        marker.on("click", clickLambda);
+        marker.on("click", () => {
+            if (this.hashService.getPoiSourceAndId() != null &&
+                this.hashService.getPoiSourceAndId().id === pointOfInterest.id) {
+                this.router.navigate([RouteStrings.ROUTE_ROOT]);
+            } else {
+                this.router.navigate([RouteStrings.ROUTE_POI, pointOfInterest.source, pointOfInterest.id],
+                    { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+            }
+        });
         return marker;
     }
 
@@ -216,6 +198,21 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         if (this.searchResultsMarker != null) {
             this.mapService.map.removeLayer(this.searchResultsMarker);
             this.searchResultsMarker = null;
+        }
+    }
+
+    public selectRoute(routes, isArea) {
+        if (isArea) {
+            this.mapService.addAreaToReadOnlyLayer(this.readOnlyLayer, routes);
+        } else {
+            this.mapService.updateReadOnlyLayer(this.readOnlyLayer, routes);
+        }
+    }
+
+    public clearSelected(id: string) {
+        this.readOnlyLayer.clearLayers();
+        if (this.searchResultsMarker.identifier === id) {
+            this.clearSearchResultsMarker();
         }
     }
 }

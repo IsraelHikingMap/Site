@@ -5,6 +5,7 @@ using IsraelHiking.DataAccessInterfaces;
 using NetTopologySuite.Features;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Poi;
@@ -90,28 +91,8 @@ namespace IsraelHiking.API.Controllers
 
         private SearchResultsPointOfInterest ConvertFromCoordinates(string name, Coordinate coordinates)
         {
-            var latLang = new LatLng(coordinates.Y, coordinates.X, coordinates.Z);
-            return new SearchResultsPointOfInterest
-            {
-                Id = string.Empty,
-                DisplayName = name,
-                Title = name,
-                Source = "None",
-                Icon = "icon-search",
-                IconColor = "black",
-                IsArea = false,
-                IsRoute = false,
-                IsEditable = false,
-                HasExtraData = false,
-                Location = latLang,
-                SouthWest = latLang,
-                NorthEast = latLang,
-                Category = Categories.NONE,
-                Rating = new Rating {  Raters = new List<Rater>()},
-                Description = string.Empty,
-                ImagesUrls = new string[0],
-                
-            };
+            var latLng = new LatLng(coordinates.Y, coordinates.X, coordinates.Z);
+            return CoordinatesToPointOfInterestConverter.Convert(latLng, name);
         }
 
         private async Task<SearchResultsPointOfInterest> ConvertFromFeature(IFeature feature, string language)
