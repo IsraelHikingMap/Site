@@ -37,11 +37,11 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
-        public void GetSearchResultsForSingleNumber_ShouldFail()
+        public void GetSearchResultsForSingleNumber_ShouldReturnCoordinatesPoi()
         {
             var results = _controller.GetSearchResults("+32, 35", Languages.HEBREW).Result;
             Assert.IsNotNull(results);
-            Assert.AreEqual(Categories.COORDINATES, results.First().Category);
+            Assert.AreEqual(Sources.COORDINATES, results.First().Source);
         }
     }
 }
