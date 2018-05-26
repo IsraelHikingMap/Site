@@ -1,6 +1,7 @@
 ﻿using System.Text.RegularExpressions;
 using GeoAPI.Geometries;
 using GeoAPI.CoordinateSystems.Transformations;
+using IsraelHiking.API.Executors;
 
 namespace IsraelHiking.API.Converters.CoordinatesParsers
 {
@@ -17,10 +18,10 @@ namespace IsraelHiking.API.Converters.CoordinatesParsers
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="itmWgs84MathTransform"></param>
-        public UtmParser(IMathTransform itmWgs84MathTransform)
+        /// <param name="itmWgs84MathTransformFactory"></param>
+        public UtmParser(IItmWgs84MathTransfromFactory itmWgs84MathTransformFactory)
         {
-            _itmWgs84MathTransform = itmWgs84MathTransform;
+            _itmWgs84MathTransform = itmWgs84MathTransformFactory.Create();
         }
 
         /// <inheritdoc/>

@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Converters.ConverterFlows;
+using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Osm;
@@ -60,6 +61,11 @@ namespace IsraelHiking.API
             services.AddTransient<IConverterFlowItem, GpxVersion1ToGpxVersion11ConverterFlow>();
             services.AddTransient<IConverterFlowItem, GpxBz2ToGpxConverterFlow>();
             services.AddTransient<IConverterFlowItem, JpgToGpxConverterFlow>();
+            services.AddTransient<ICoordinatesParser, ReverseDegreesMinutesSecondsLatLonParser>();
+            services.AddTransient<ICoordinatesParser, DegreesMinutesSecondsLatLonParser>();
+            services.AddTransient<ICoordinatesParser, DecimalLatLonParser>();
+            services.AddTransient<ICoordinatesParser, UtmParser>();
+            services.AddTransient<ICoordinatesParser, SixNumbersCoordinatesParser>();
             return services;
         }
     }

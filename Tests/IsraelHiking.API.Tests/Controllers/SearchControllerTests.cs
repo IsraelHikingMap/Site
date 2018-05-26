@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using IsraelHiking.API.Controllers;
-using IsraelHiking.API.Executors;
+using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -20,7 +20,7 @@ namespace IsraelHiking.API.Tests.Controllers
         public void TestInitialize()
         {
             _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _controller = new SearchController(_elasticSearchGateway, new ItmWgs84MathTransfromFactory());
+            _controller = new SearchController(_elasticSearchGateway, new List<ICoordinatesParser> { new DecimalLatLonParser() });
         }
 
         [TestMethod]

@@ -7,7 +7,6 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Converters.CoordinatesParsers;
-using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
@@ -21,24 +20,18 @@ namespace IsraelHiking.API.Controllers
     public class SearchController : Controller
     {
         private readonly IElasticSearchGateway _elasticSearchGateway;
-        private readonly List<ICoordinatesParser> _coordinatesParsers;
+        private readonly IEnumerable<ICoordinatesParser> _coordinatesParsers;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="elasticSearchGateway"></param>
-        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="coordinatesParsers"></param>
         public SearchController(IElasticSearchGateway elasticSearchGateway,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory)
+            IEnumerable<ICoordinatesParser> coordinatesParsers)
         {
             _elasticSearchGateway = elasticSearchGateway;
-            _coordinatesParsers = new List<ICoordinatesParser>
-            {
-                new ReverseDegreesMinutesSecondsLatLonParser(),
-                new DegreesMinutesSecondsLatLonParser(),
-                new DecimalLatLonParser(),
-                new UtmParser(itmWgs84MathTransfromFactory.Create())
-            };
+            _coordinatesParsers = coordinatesParsers;
         }
 
         /// <summary>
@@ -78,15 +71,8 @@ namespace IsraelHiking.API.Controllers
 
         private Coordinate GetCoordinates(string term)
         {
-            foreach (var parser in _coordinatesParsers)
-            {
-                var coordinates = parser.TryParse(term);
-                if (coordinates != null)
-                {
-                    return coordinates;
-                }
-            }
-            return null;
+            return _coordinatesParsers.Select(parser => parser.TryParse(term))
+                .FirstOrDefault(coordinates => coordinates != null);
         }
 
         private SearchResultsPointOfInterest ConvertFromCoordinates(string name, Coordinate coordinates)
