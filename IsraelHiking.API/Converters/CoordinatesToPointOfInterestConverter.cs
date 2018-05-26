@@ -17,11 +17,12 @@ namespace IsraelHiking.API.Converters
         /// <returns></returns>
         public static SearchResultsPointOfInterest Convert(LatLng latLng, string displayName)
         {
+            var id = GetIdFromLatLng(latLng);
             return new SearchResultsPointOfInterest
             {
-                Id = GetIdFromLatLng(latLng),
-                DisplayName = displayName,
-                Title = latLng.Lat.ToString("F4") + "-" + latLng.Lng.ToString("F4"),
+                Id = id,
+                DisplayName = string.IsNullOrWhiteSpace(displayName) ? id : displayName,
+                Title = id,
                 Source = Sources.COORDINATES,
                 Icon = "icon-search",
                 IconColor = "black",
@@ -36,7 +37,8 @@ namespace IsraelHiking.API.Converters
                 Rating = new Rating { Raters = new List<Rater>() },
                 Description = string.Empty,
                 ImagesUrls = new string[0],
-                References = new Reference[0]
+                References = new Reference[0],
+                DataContainer = new DataContainer()
             };
         }
 
@@ -47,7 +49,7 @@ namespace IsraelHiking.API.Converters
         /// <returns></returns>
         public static LatLng GetLatLngFromId(string id)
         {
-            return new LatLng(double.Parse(id.Split("-").First()), double.Parse(id.Split("-").Last()));
+            return new LatLng(double.Parse(id.Split("_").First()), double.Parse(id.Split("-").Last()));
         }
 
         /// <summary>
@@ -57,7 +59,7 @@ namespace IsraelHiking.API.Converters
         /// <returns></returns>
         private static string GetIdFromLatLng(LatLng latLng)
         {
-            return latLng.Lat + "-" + latLng.Lng;
+            return latLng.Lat.ToString("F4") + "_" + latLng.Lng.ToString("F4");
         }
     }
 }
