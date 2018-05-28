@@ -63,7 +63,16 @@
                                 <div class="action-buttons">
                                     <button mat-button *ngIf="!isShareUrlInEditMode(shareUrl)" (click)="shareUrlInEditMode = shareUrl" matTooltip="{{resources.editRouteDetails}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-pencil"></i></button>
                                     <button mat-button *ngIf="isShareUrlInEditMode(shareUrl)" (click)="updateShareUrl(shareUrl)" matTooltip="{{resources.update}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-check"></i></button>
-                                    <button mat-button ngxClipboard [cbContent]="userService.getUrlFromShareId(shareUrl)" matTooltip="{{resources.copyUrl}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-clipboard"></i></button>
+                                    <mat-menu #appMenu="matMenu" [dir]="resources.direction">
+                                        <div mat-menu-item disableRipple="true">
+                                            <div fxLayout="row">
+                                                <div fxFlex><a [href]="userService.getShareSocialLinks(shareUrl).facebook" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook share"><i class="fa icon-facebook"></i></a></div>
+                                                <div fxFlex><a [href]="userService.getShareSocialLinks(shareUrl).whatsapp" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp share"><i class="fa icon-whatsapp"></i></a></div>
+                                                <div fxFlex><button fxFill mat-button ngxClipboard [cbContent]="userService.getShareSocialLinks(shareUrl).ihm" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard share"><i class="fa icon-clipboard"></i></button></div>
+                                            </div>
+                                        </div>
+                                    </mat-menu>
+                                    <button mat-button class="no-padding" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share open menu for share"><i class="fa icon-share-alt"></i></button>
                                     <button mat-button matDialogClose (click)="convertShareUrlToRoute(shareUrl)" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-plus"></i></button>
                                     <button mat-button (click)="deleteShareUrl(shareUrl)" matTooltip="{{resources.delete}}" matTooltipPosition="{{resources.start}}"><i class="fa icon-trash"></i></button>
                                 </div>
