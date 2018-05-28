@@ -92,7 +92,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointOfInteresetCoordinates_BySourceAndId_ShouldReturnIt()
         {
-            var id = "32-35";
+            var id = "32_35";
             var source = Sources.COORDINATES;
             var language = "language";
 

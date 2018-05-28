@@ -9,6 +9,8 @@ namespace IsraelHiking.API.Converters
     /// </summary>
     public class CoordinatesToPointOfInterestConverter
     {
+        private const string ID_SEPARATOR = "_";
+
         /// <summary>
         /// Main method to covert latitude-longitude coordinate to point of interest
         /// </summary>
@@ -49,7 +51,7 @@ namespace IsraelHiking.API.Converters
         /// <returns></returns>
         public static LatLng GetLatLngFromId(string id)
         {
-            return new LatLng(double.Parse(id.Split("_").First()), double.Parse(id.Split("-").Last()));
+            return new LatLng(double.Parse(id.Split(ID_SEPARATOR).First()), double.Parse(id.Split(ID_SEPARATOR).Last()));
         }
 
         /// <summary>
@@ -59,7 +61,7 @@ namespace IsraelHiking.API.Converters
         /// <returns></returns>
         private static string GetIdFromLatLng(LatLng latLng)
         {
-            return latLng.Lat.ToString("F4") + "_" + latLng.Lng.ToString("F4");
+            return latLng.Lat.ToString("F4") + ID_SEPARATOR + latLng.Lng.ToString("F4");
         }
     }
 }
