@@ -33,17 +33,33 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
+        public void GetPointOfInterestById_WrongLanguage_ShouldReturnNull()
+        {
+            var poiId = "42";
+            var language = "en";
+            var feature = GetValidFeature(poiId, _adapter.Source);
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_LANGUAGE, "he");
+            var featureCollection = new FeatureCollection { Features = { feature } };
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
+
+            _wikipediaGateway.GetById(poiId).Returns(featureCollection);
+
+            var results = _adapter.GetPointOfInterestById(poiId, language).Result;
+
+            Assert.IsNull(results);
+        }
+
+        [TestMethod]
         public void GetPointOfInterestById_ShouldGetIt()
         {
             var poiId = "42";
             var language = "en";
-            var featureCollection = new FeatureCollection
-            {
-                Features = { GetValidFeature(poiId, _adapter.Source) }
-            };
+            var feature = GetValidFeature(poiId, _adapter.Source);
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_LANGUAGE, language);
+            var featureCollection = new FeatureCollection { Features = { feature } };
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
 
-            _wikipediaGateway.GetById("42").Returns(featureCollection);
+            _wikipediaGateway.GetById(poiId).Returns(featureCollection);
 
             var results = _adapter.GetPointOfInterestById(poiId, language).Result;
 

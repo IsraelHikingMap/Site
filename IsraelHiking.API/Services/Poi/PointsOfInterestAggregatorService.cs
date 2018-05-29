@@ -38,6 +38,10 @@ namespace IsraelHiking.API.Services.Poi
                 foreach (var currentId in poiItem.CombinedIds[poiItemCombinedIdKey])
                 {
                     var currentPoiItem = await adapter.GetPointOfInterestById(currentId, language);
+                    if (currentPoiItem == null)
+                    {
+                        continue;
+                    }
                     if (string.IsNullOrWhiteSpace(poiItem.Description))
                     {
                         poiItem.Description = currentPoiItem.Description;

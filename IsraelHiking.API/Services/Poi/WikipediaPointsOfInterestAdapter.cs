@@ -51,6 +51,10 @@ namespace IsraelHiking.API.Services.Poi
         {
             var feature = await _wikipediaGateway.GetById(id);
             var mainFeature = feature.Features.First();
+            if (!mainFeature.Attributes[FeatureAttributes.POI_LANGUAGE].Equals(language))
+            {
+                return null;
+            }
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, language);
             await AddExtendedData(poiItem, mainFeature, language);
             poiItem.IsRoute = false;
