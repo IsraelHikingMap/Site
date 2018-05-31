@@ -46,7 +46,7 @@
         <h4 *ngIf="info.urls.length === 0 || !info.urls[0]" [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">{{info.title}}</h4>
         <div *ngIf="info.imagesUrls.length > 0">
             <div fxLayout="row">
-                <div class="img-container-small" *ngIf="info.imagesUrls.length > 0">
+                <div class="img-container-small">
                     <img [src]="getCurrentImage()"
                          class="img-responsive cursor-zoom-in img-center"
                          (click)="showImage()" />
@@ -58,6 +58,13 @@
                 </div>
                 <div fxFlex>
                     <button mat-button (click)="nextImage()" [disabled]="!hasNext()" fxFill><i class="fa icon-chevron-{{resources.end}}"></i></button>
+                </div>
+            </div>
+        </div>
+        <div *ngIf="info.imagesUrls.length === 0">
+            <div fxLayout="row">
+                <div class="img-container-small">
+                    <img src="https://user-images.githubusercontent.com/3269297/40793601-826a5834-6505-11e8-92a3-1727f35f70b4.png" class="img-responsive img-center" />
                 </div>
             </div>
         </div>
