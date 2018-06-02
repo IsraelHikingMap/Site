@@ -22,27 +22,27 @@ export interface IPoiSourceAndId {
 }
 
 export class RouteStrings {
-    public static MAP = "map";
-    public static SHARE = "share";
-    public static URL = "url";
-    public static POI = "poi";
-    public static DOWNLOAD = "download";
-    public static SEARCH = "search";
-    public static ROUTE_ROOT = "/";
-    public static ROUTE_MAP = `/${RouteStrings.MAP}`;
-    public static ROUTE_SHARE = `/${RouteStrings.SHARE}`;
-    public static ROUTE_URL = `/${RouteStrings.URL}`;
-    public static ROUTE_POI = `/${RouteStrings.POI}`;
-    public static ROUTE_DOWNLOAD = `/${RouteStrings.DOWNLOAD}`;
-    public static ROUTE_SEARCH = `/${RouteStrings.SEARCH}`;
+    public static readonly MAP = "map";
+    public static readonly SHARE = "share";
+    public static readonly URL = "url";
+    public static readonly POI = "poi";
+    public static readonly DOWNLOAD = "download";
+    public static readonly SEARCH = "search";
+    public static readonly ROUTE_ROOT = "/";
+    public static readonly ROUTE_MAP = `/${RouteStrings.MAP}`;
+    public static readonly ROUTE_SHARE = `/${RouteStrings.SHARE}`;
+    public static readonly ROUTE_URL = `/${RouteStrings.URL}`;
+    public static readonly ROUTE_POI = `/${RouteStrings.POI}`;
+    public static readonly ROUTE_DOWNLOAD = `/${RouteStrings.DOWNLOAD}`;
+    public static readonly ROUTE_SEARCH = `/${RouteStrings.SEARCH}`;
 
-    public static LAT = "lat";
-    public static LON = "lon";
-    public static ZOOM = "zoom";
-    public static ID = "id";
-    public static SOURCE = "source";
-    public static TERM = "term";
-    public static BASE_LAYER = "baselayer";
+    public static readonly LAT = "lat";
+    public static readonly LON = "lon";
+    public static readonly ZOOM = "zoom";
+    public static readonly ID = "id";
+    public static readonly SOURCE = "source";
+    public static readonly TERM = "term";
+    public static readonly BASE_LAYER = "baselayer";
 }
 
 @Injectable()
@@ -72,17 +72,30 @@ export class HashService {
         this.stateMap = new Map();
         this.backwardCompatibilitySupport();
         this.mapService.map.on("moveend", () => {
-            if (this.stateMap.get("share") || this.stateMap.get("url") || this.stateMap.get("poi")) {
+            if (this.getShareUrlId() || this.getUrl() || this.stateMap.get("poi")) {
                 return;
             }
-            this.router.navigate([
-                    RouteStrings.ROUTE_MAP,
-                    this.mapService.map.getZoom(),
-                    this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION),
-                    this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION)
-                ],
-                { replaceUrl: true });
+            this.resetAddressbar();
         });
+    }
+
+    public resetAddressbar(): void {
+        if (this.getShareUrlId()) {
+            this.router.navigate([RouteStrings.ROUTE_SHARE, this.getShareUrlId()], { replaceUrl: true });
+            return;
+        }
+        if (this.getUrl()) {
+            this.router.navigate([RouteStrings.ROUTE_URL, this.getUrl()],
+                { queryParams: { baselayer: this.getBaselayer() }, replaceUrl: true });
+            return;
+        }
+        this.router.navigate([
+                RouteStrings.ROUTE_MAP,
+                this.mapService.map.getZoom(),
+                this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION),
+                this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION)
+            ],
+            { replaceUrl: true });
     }
 
     private backwardCompatibilitySupport() {

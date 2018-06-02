@@ -185,10 +185,11 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         marker.on("click", () => {
             if (this.hashService.getPoiSourceAndId() != null &&
                 this.hashService.getPoiSourceAndId().id === pointOfInterest.id) {
-                this.router.navigate([RouteStrings.ROUTE_ROOT]);
+                this.sidebarService.hide();
+                this.hashService.setApplicationState("poi", null);
+                this.hashService.resetAddressbar();
             } else {
-                this.router.navigate([RouteStrings.ROUTE_POI, pointOfInterest.source, pointOfInterest.id],
-                    { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+                this.router.navigate([RouteStrings.ROUTE_POI, pointOfInterest.source, pointOfInterest.id]);
             }
         });
         return marker;

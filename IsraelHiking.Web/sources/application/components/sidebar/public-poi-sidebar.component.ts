@@ -1,5 +1,4 @@
 import { Component } from "@angular/core";
-import { Router } from "@angular/router";
 import { MatSelectChange } from "@angular/material";
 import * as _ from "lodash";
 
@@ -17,7 +16,7 @@ import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer"
 import { RouteLayerFactory } from "../../services/layers/routelayers/route-layer.factory";
 import { ISelectableCategory } from "../dialogs/update-point-dialog.component";
 import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
-import { HashService, IPoiSourceAndId, RouteStrings } from "../../services/hash.service";
+import { HashService, IPoiSourceAndId } from "../../services/hash.service";
 import * as Common from "../../common/IsraelHiking";
 
 @Component({
@@ -42,7 +41,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
     private poiExtended: IPointOfInterestExtended;
 
     constructor(resources: ResourcesService,
-        private readonly router: Router,
         private readonly mapService: MapService,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
@@ -311,7 +309,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
 
     public close() {
         this.sidebarService.hide();
-        this.router.navigate([RouteStrings.ROUTE_ROOT]);
+        this.hashService.setApplicationState("poi", null);
+        this.hashService.resetAddressbar();
     }
 
     public getEditElementOsmAddress(): string {
