@@ -1,7 +1,6 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { LocalStorage } from "ngx-store";
-import "rxjs/add/operator/toPromise";
 
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";

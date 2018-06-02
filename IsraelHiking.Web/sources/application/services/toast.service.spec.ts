@@ -7,8 +7,7 @@ export class ToastServiceMockCreator {
     public toastService: ToastService;
     public resourcesService: ResourcesService;
     constructor() {
-        let snackBar = new MatSnackBar(null, null, null, null, null);
-        spyOn(snackBar, "open").and.returnValue(null);
+        let snackBar = { open: () => null } as any as MatSnackBar;
         this.resourcesService = new ResourcesService(new GetTextCatalogMockCreator().getTextCatalogService);
         this.toastService = new ToastService(this.resourcesService, snackBar);
     }

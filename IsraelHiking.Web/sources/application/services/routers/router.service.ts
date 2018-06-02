@@ -1,5 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { timeout } from "rxjs/operators";
 import * as L from "leaflet";
 
 import { ResourcesService } from "../resources.service";
@@ -8,8 +9,6 @@ import { NoneRouter } from "./none-router";
 import { GeoJsonParser } from "../geojson.parser";
 import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
-import "rxjs/add/operator/timeout";
-import "rxjs/add/operator/toPromise";
 
 @Injectable()
 export class RouterService {
@@ -27,7 +26,7 @@ export class RouterService {
         let address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {
-            let geojson = await this.httpClient.get(address).timeout(4500).toPromise();
+            let geojson = await this.httpClient.get(address).pipe(timeout(4500)).toPromise();
             let data = this.geoJsonParser.toDataContainer(geojson as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>,
                 this.resourcesService.getCurrentLanguageCodeSimplified());
             if (!data || data.routes.length === 0 || data.routes[0].segments.length < 2) {

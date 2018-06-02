@@ -137,7 +137,7 @@ export class SnappingService {
         } as ISnappingRouteResponse;
 
         for (let polyline of options.polylines) {
-            let latlngs = polyline.getLatLngs();
+            let latlngs = polyline.getLatLngs() as L.LatLng[];
             if (latlngs.length <= 1) {
                 continue;
             }

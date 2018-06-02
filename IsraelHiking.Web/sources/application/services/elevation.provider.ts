@@ -1,16 +1,16 @@
 ﻿import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
+
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { Urls } from "../common/Urls";
-import "rxjs/add/operator/toPromise";
 
 @Injectable()
 export class ElevationProvider {
 
-    constructor(private httpClient: HttpClient,
-        private resourcesService: ResourcesService,
-        private toastService: ToastService,
+    constructor(private readonly httpClient: HttpClient,
+        private readonly resourcesService: ResourcesService,
+        private readonly toastService: ToastService,
     ) { }
 
     public updateHeights = async (latlngs: L.LatLng[]): Promise<L.LatLng[]> => {

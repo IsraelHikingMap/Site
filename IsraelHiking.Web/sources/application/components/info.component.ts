@@ -1,6 +1,6 @@
 ﻿import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import "rxjs/add/operator/take";
+import { take, filter } from "rxjs/operators";
 
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
@@ -20,7 +20,7 @@ export class InfoComponent extends BaseMapComponent {
         private readonly dialog: MatDialog) {
         super(resources);
 
-        this.hashService.applicationStateChanged.filter(f => f.type === "download")
+        this.hashService.applicationStateChanged.pipe(filter(f => f.type === "download"))
             .subscribe(() => {
                 if (!this.isActive()) {
                     this.sidebarService.toggle("info");
@@ -40,7 +40,7 @@ export class InfoComponent extends BaseMapComponent {
 
     private openDownloadDialog = () => {
         let dialog = this.dialog.open(DownloadDialogComponent, { width: "600px" });
-        dialog.afterClosed().take(1).subscribe(() => {
+        dialog.afterClosed().pipe(take(1)).subscribe(() => {
             this.hashService.resetAddressbar();
         });
     }

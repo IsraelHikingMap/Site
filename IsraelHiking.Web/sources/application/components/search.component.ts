@@ -14,15 +14,14 @@
 import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
+import { debounceTime, filter, tap } from "rxjs/operators";
 import { ENTER } from "@angular/cdk/keycodes";
 import * as L from "leaflet";
 import * as _ from "lodash";
-import "rxjs/add/operator/debounceTime";
-import "rxjs/add/operator/do";
 
 import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
-import { HashService, RouteStrings } from "../services/hash.service";
+import { HashService, RouteStrings, IApplicationStateChangedEventArgs } from "../services/hash.service";
 import { DataContainerService } from "../services/data-container.service";
 import { ElevationProvider } from "../services/elevation.provider";
 import { RouterService } from "../services/routers/router.service";
@@ -111,7 +110,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
 
-        this.hashService.applicationStateChanged.filter(f => f.type === "search").subscribe(args => {
+        this.hashService.applicationStateChanged.pipe(filter((f: IApplicationStateChangedEventArgs) => f.type === "search")).subscribe(args => {
             this.fromContext.searchTerm = args.value;
             this.searchFrom = new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResultsPointOfInterest);
             this.selectFirstSearchResults = true;
@@ -120,16 +119,16 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     }
 
     private configureInputFormControl(input: FormControl, context: ISearchContext) {
-        input.valueChanges
-            .do(x => {
+        input.valueChanges.pipe(
+            tap(x => {
                 if (typeof x !== "string") {
                     this.selectResults(context, x);
                 } else {
                     this.selectFirstSearchResults = false;
                 }
-            })
-            .filter(x => typeof x === "string")
-            .debounceTime(500)
+            }),
+            filter(x => typeof x === "string"),
+            debounceTime(500))
             .subscribe((x: string) => {
                 context.searchTerm = x;
                 context.selectedSearchResults = null;
