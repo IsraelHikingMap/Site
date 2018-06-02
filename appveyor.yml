@@ -4,14 +4,9 @@ image: Visual Studio 2017
 configuration: Release
 install:
 - ps: >-
-    Install-Product node 8.9
-
     node -v
 
     npm -v
-
-    npm install -g npm@5.2.0 --loglevel=error
-
 before_build:
 - ps: dotnet restore
 build:
