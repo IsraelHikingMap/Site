@@ -175,8 +175,7 @@ export class HashService {
     }
 
     public getFullUrlFromPoiId(poiSourceAndId: IPoiSourceAndId) {
-        let urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
-            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+        let urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id]);
         return this.window.location.origin + urlTree.toString();
     }
 
