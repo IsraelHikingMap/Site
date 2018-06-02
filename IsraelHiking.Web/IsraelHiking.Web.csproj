@@ -104,7 +104,7 @@
 
   <Target Name="ReleaseRunNgBuild" BeforeTargets="Build" DependsOnTargets="NodeInitialize" Condition=" '$(Configuration)' == 'Release' and '$(DeployOnBuild)' != 'true'">
     <Message Importance="high" Text="Starting Ng Build for production" />
-    <Exec Command="npm run-script build -- --target=production --environment=prod --no-progress --sourcemaps" />
+    <Exec Command="npm run-script build -- --prod --no-progress --sourcemaps" />
     <Message Importance="high" Text="Ng Build for production ended" />
   </Target>
 </Project>

@@ -30,7 +30,8 @@ import { SessionStorageService, LocalStorageService, WebStorageModule } from "ng
 import { ClipboardModule } from "ngx-clipboard";
 import { Angulartics2Module } from "angulartics2";
 import { Angulartics2GoogleAnalytics } from "angulartics2/ga";
-import { NgProgressModule, NgProgressInterceptor } from "ngx-progressbar";
+import { NgProgressModule } from "@ngx-progressbar/core";
+import { NgProgressHttpModule } from "@ngx-progressbar/http";
 import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { DndModule } from "ng2-dnd";
@@ -174,7 +175,8 @@ const routes: Routes = [
         ClipboardModule,
         RouterModule.forRoot(routes),
         Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
-        NgProgressModule,
+        NgProgressModule.forRoot(),
+        NgProgressHttpModule,
         NgxPaginationModule,
         ScrollToModule.forRoot(),
         DndModule.forRoot(),
@@ -225,7 +227,6 @@ const routes: Routes = [
         SessionStorageService,
         LocalStorageService,
         AuthorizationService,
-        { provide: HTTP_INTERCEPTORS, useClass: NgProgressInterceptor, multi: true },
         { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
         { provide: "Window", useFactory: getWindow },
         D3Service,

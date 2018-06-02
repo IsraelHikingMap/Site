@@ -14,11 +14,11 @@
 import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
-import { Observable } from "rxjs/Observable";
 import { ENTER } from "@angular/cdk/keycodes";
 import * as L from "leaflet";
 import * as _ from "lodash";
-import "rxjs/add/operator/debounce";
+import "rxjs/add/operator/debounceTime";
+import "rxjs/add/operator/do";
 
 import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
@@ -129,7 +129,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 }
             })
             .filter(x => typeof x === "string")
-            .debounce(() => Observable.timer(500))
+            .debounceTime(500)
             .subscribe((x: string) => {
                 context.searchTerm = x;
                 context.selectedSearchResults = null;
