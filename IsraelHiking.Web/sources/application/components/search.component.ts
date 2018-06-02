@@ -110,12 +110,15 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.configureInputFormControl(this.searchFrom, this.fromContext);
         this.configureInputFormControl(this.searchTo, this.toContext);
 
-        this.hashService.applicationStateChanged.pipe(filter((f: IApplicationStateChangedEventArgs) => f.type === "search")).subscribe(args => {
-            this.fromContext.searchTerm = args.value;
-            this.searchFrom = new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResultsPointOfInterest);
-            this.selectFirstSearchResults = true;
-            this.search(this.fromContext);
-        });
+        this.hashService.applicationStateChanged
+            .pipe(filter((f: IApplicationStateChangedEventArgs) => f.type === "search"))
+            .subscribe(args => {
+                this.fromContext.searchTerm = args.value;
+                this.searchFrom =
+                    new FormControl({ displayName: this.fromContext.searchTerm } as ISearchResultsPointOfInterest);
+                this.selectFirstSearchResults = true;
+                this.search(this.fromContext);
+            });
     }
 
     private configureInputFormControl(input: FormControl, context: ISearchContext) {
