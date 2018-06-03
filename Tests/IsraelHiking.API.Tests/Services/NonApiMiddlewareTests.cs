@@ -85,7 +85,7 @@ namespace IsraelHiking.API.Tests.Services
             _middleware.InvokeAsync(context).Wait();
             var bodyString = Encoding.UTF8.GetString(stream.ToArray());
 
-            Assert.IsTrue(bodyString.Contains("?width=128&height=128"));
+            Assert.IsTrue(bodyString.Contains("?width=256&height=256"));
         }
     }
 }
