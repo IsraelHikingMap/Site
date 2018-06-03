@@ -46,7 +46,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             _tokenAndSecret = tokenAndSecret;
             _options = options.Value;
 
-            var osmApiBaseAddress = _options.OsmConfiguraion.BaseAddress.Replace("https", "http") + "/api/0.6/";
+            var osmApiBaseAddress = _options.OsmConfiguraion.BaseAddress + "/api/0.6/";
             _baseAddressWithoutProtocol = _options.OsmConfiguraion.BaseAddress.Replace("http://", "").Replace("https://", "");
             _userDetailsAddress = osmApiBaseAddress + "user/details";
             _createChangesetAddress = osmApiBaseAddress + "changeset/create";
