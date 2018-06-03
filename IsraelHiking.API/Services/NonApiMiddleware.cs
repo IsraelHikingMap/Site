@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -64,11 +65,17 @@ namespace IsraelHiking.API.Services
                 return;
             }
             var isCrawler = IsCrawler();
+            var isWhatsApp = IsWhatsApp();
             if (isCrawler && context.Request.Path.StartsWithSegments("/share"))
             {
                 var url = await _repository.GetUrlById(context.Request.Path.Value.Split("/").Last());
                 var title = string.IsNullOrWhiteSpace(url.Title) ? "Israel Hiking Map Route Share" : url.Title;
-                await Write(context, GetPage(title, context.Request.GetDisplayUrl().Replace("/share/", "/api/images/"), url.Description));
+                var thumbnailUrl = context.Request.GetDisplayUrl().Replace("/share/", "/api/images/");
+                if (isWhatsApp)
+                {
+                    thumbnailUrl += "?width=256&height=256";
+                }
+                await Write(context, GetPage(title, thumbnailUrl, url.Description));
                 return;
             }
             if (isCrawler && context.Request.Path.StartsWithSegments("/poi"))
@@ -76,7 +83,12 @@ namespace IsraelHiking.API.Services
                 var split = context.Request.Path.Value.Split("/");
                 context.Request.Query.TryGetValue("language", out var language);
                 var point = await _pointsOfInterestAggregatorService.Get(split[split.Length - 2], split.Last(), language.FirstOrDefault());
-                await Write(context, GetPage(point.Title, point.ImagesUrls.FirstOrDefault(), point.Description));
+                var thumbnailUrl = point.ImagesUrls.FirstOrDefault() ?? string.Empty;
+                if (isWhatsApp)
+                {
+                    thumbnailUrl = Regex.Replace(thumbnailUrl, @"(http.*\/\/upload\.wikimedia\.org\/wikipedia\/commons\/)(.*\/)(.*)", "$1thumb/$2$3/200px-$3");
+                }
+                await Write(context, GetPage(point.Title, thumbnailUrl, point.Description));
                 return;
             }
             var defaultFile = _environment.WebRootFileProvider.GetFileInfo("/index.html");
@@ -150,6 +162,12 @@ namespace IsraelHiking.API.Services
         {
             var browserResolver = _serviceProvider.GetRequiredService<IBrowserResolver>();
             return browserResolver.Browser == null || browserResolver.Browser.Type == BrowserType.Generic;
+        }
+
+        private bool IsWhatsApp()
+        {
+            var userAgent = _serviceProvider.GetRequiredService<IUserAgentService>();
+            return userAgent.UserAgent.ToString().ToLowerInvariant().Contains("whatsapp");
         }
     }
 }
