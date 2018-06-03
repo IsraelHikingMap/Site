@@ -13,22 +13,18 @@ import * as Common from "../common/IsraelHiking";
 })
 export class ApplicationStateComponent implements OnInit, OnDestroy {
 
-    private subscriptions: any[];
+    private subscription: any;
 
     constructor(private readonly router: Router,
         private readonly route: ActivatedRoute,
         private readonly hashService: HashService,
         private readonly mapService: MapService,
         private readonly sidebarService: SidebarService) {
-        this.subscriptions = [];
+        this.subscription = null;
     }
 
     public ngOnInit() {
-        let subscription = this.route.queryParams.subscribe((queryParams) => {
-            this.hashService.setApplicationState("baseLayer", this.stringToBaseLayer(queryParams[RouteStrings.BASE_LAYER]));
-        });
-        this.subscriptions.push(subscription);
-        subscription = this.route.params.subscribe(params => {
+        this.subscription = this.route.params.subscribe(params => {
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
                 this.mapService.map.setView(L.latLng(+params[RouteStrings.LAT], +params[RouteStrings.LON]), +params[RouteStrings.ZOOM]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SEARCH)) {
@@ -36,6 +32,8 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
                 this.hashService.setApplicationState("share", params[RouteStrings.ID]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {
+                let baseLayer = this.stringToBaseLayer(this.route.snapshot.queryParamMap[RouteStrings.BASE_LAYER]);
+                this.hashService.setApplicationState("baseLayer", baseLayer);
                 this.hashService.setApplicationState("url", params[RouteStrings.ID]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_DOWNLOAD)) {
                 this.hashService.setApplicationState("download", true);
@@ -43,6 +41,7 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 let poiSourceAndId = {
                     id: params[RouteStrings.ID],
                     source: params[RouteStrings.SOURCE],
+                    language: this.route.snapshot.queryParamMap.get(RouteStrings.LANGUAGE)
                 };
                 if (this.hashService.getPoiSourceAndId() != null &&
                     this.hashService.getPoiSourceAndId().id !== poiSourceAndId.id) {
@@ -59,12 +58,11 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 this.sidebarService.hide();
             }
         });
-        this.subscriptions.push(subscription);
     }
 
     public ngOnDestroy() {
-        for (let subscription of this.subscriptions) {
-            subscription.unsubscribe();
+        if (this.subscription) {
+            this.subscription.unsubscribe();
         }
     }
 

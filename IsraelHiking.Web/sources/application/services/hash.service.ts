@@ -19,6 +19,7 @@ export interface IApplicationStateChangedEventArgs {
 export interface IPoiSourceAndId {
     source: string;
     id: string;
+    language: string;
 }
 
 export class RouteStrings {
@@ -43,6 +44,7 @@ export class RouteStrings {
     public static readonly SOURCE = "source";
     public static readonly TERM = "term";
     public static readonly BASE_LAYER = "baselayer";
+    public static readonly LANGUAGE = "language";
 }
 
 @Injectable()
@@ -175,7 +177,8 @@ export class HashService {
     }
 
     public getFullUrlFromPoiId(poiSourceAndId: IPoiSourceAndId) {
-        let urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id]);
+        let urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
+            { queryParams: { language: poiSourceAndId.language } });
         return this.window.location.origin + urlTree.toString();
     }
 

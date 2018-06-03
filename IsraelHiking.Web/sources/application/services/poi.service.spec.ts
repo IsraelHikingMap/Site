@@ -69,7 +69,7 @@ describe("Poi Service", () => {
 
         mockBackend.expectOne((request: HttpRequest<any>) => {
             return request.url.includes(id) &&
-                request.url.includes(source)
+                request.url.includes(source);
         });
     })));
 

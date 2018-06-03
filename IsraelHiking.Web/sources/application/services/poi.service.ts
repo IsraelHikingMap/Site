@@ -87,6 +87,10 @@ export class PoiService {
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
         this.categoriesMap.set("Points of Interest", []);
         this.categoriesMap.set("Routes", []);
+
+        this.resources.languageChanged.subscribe(() => {
+            this.poiCache = [];
+        });
     }
 
     public async getCategories(categoriesType: CategoriesType): Promise<ICategory[]> {
@@ -114,13 +118,13 @@ export class PoiService {
         return this.httpClient.get(Urls.poi, { params: params }).toPromise() as Promise<IPointOfInterest[]>;
     }
 
-    public async getPoint(id: string, source: string): Promise<IPointOfInterestExtended> {
+    public async getPoint(id: string, source: string, language?: string): Promise<IPointOfInterestExtended> {
         let itemInCache = _.find(this.poiCache, p => p.id === id && p.source === source);
         if (itemInCache) {
             return itemInCache;
         }
         let params = new HttpParams()
-            .set("language", this.resources.getCurrentLanguageCodeSimplified());
+            .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
         let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as IPointOfInterestExtended;
         this.poiCache.splice(0, 0, poi);
         return poi;
@@ -142,7 +146,11 @@ export class PoiService {
     }
 
     public getPoiSocialLinks(poiExtended: IPointOfInterestExtended): IPoiSocialLinks {
-        let poiLink = this.hashService.getFullUrlFromPoiId({ source: poiExtended.source, id: poiExtended.id });
+        let poiLink = this.hashService.getFullUrlFromPoiId({
+            source: poiExtended.source,
+            id: poiExtended.id,
+            language: this.resources.getCurrentLanguageCodeSimplified()
+        });
         let escaped = encodeURIComponent(poiLink);
         return {
             poiLink: poiLink,

@@ -65,7 +65,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
 
     private async getExtendedData(data: IPoiSourceAndId) {
         try {
-            let poiExtended = await this.poiService.getPoint(data.id, data.source);
+            let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
             this.initFromPointOfInterestExtended(poiExtended);
             let categoriesLayer = this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute);
             categoriesLayer.selectRoute(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
