@@ -26,6 +26,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             return Task.Run(() =>
             {
                 _logger.LogInformation("Extracting elements with name from OSM stream.");
+                osmFileStream.Seek(0, SeekOrigin.Begin);
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var namesDictionary = completeSource
@@ -42,6 +43,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             return Task.Run(() =>
             {
                 _logger.LogInformation("Extracting highways from OSM stream.");
+                osmFileStream.Seek(0, SeekOrigin.Begin);
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var higways = completeSource
@@ -58,6 +60,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
             return Task.Run(() =>
             {
                 _logger.LogInformation("Extracting nodes by tags from OSM stream.");
+                osmFileStream.Seek(0, SeekOrigin.Begin);
                 var source = new PBFOsmStreamSource(osmFileStream);
                 var completeSource = new OsmSimpleCompleteStreamSource(source);
                 var nodes = completeSource
