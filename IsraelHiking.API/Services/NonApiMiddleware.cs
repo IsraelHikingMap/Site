@@ -135,11 +135,9 @@ namespace IsraelHiking.API.Services
                     <meta property='og:site_name' content='IsraelHiking.OSM.org.il' />
                     <meta property='og:type' content='website' />
                     <meta property='og:title' content='{title}' />
-                    <meta property='og:image' content='{thumbnailUrl.Replace("https://", "http://")}' />
-                    <meta property='og:image:url' content='{thumbnailUrl.Replace("https://", "http://")}' />
+                    <meta property='og:image' content='{thumbnailUrl}' />
+                    <meta property='og:image:url' content='{thumbnailUrl}' />
                     <meta property='og:image:secure_url' content='{thumbnailUrl.Replace("http://", "https://")}' />
-	                <meta property='og:image:width' content='600' />
-                    <meta property='og:image:height' content='315' />
                     <meta property='og:description' content='{description}' />
                     <meta name='title' content='{title}' />
                     <meta name='description' content='{description}' />
