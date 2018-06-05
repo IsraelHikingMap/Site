@@ -9,11 +9,17 @@ namespace IsraelHiking.API.Executors
     public interface IOsmLatestFileFetcherExecutor
     {
         /// <summary>
-        /// Gets a stream to the latest OSM file
+        /// Updates the osm file to latest version
         /// </summary>
         /// <param name="updateFile">Should the operation download updates for daily OSM file</param>
+        /// <returns></returns>
+        Task Update(bool updateFile = true);
+
+        /// <summary>
+        /// Gets a stream to the OSM file
+        /// </summary>
         /// <returns>The OSM file stream</returns>
-        Task<Stream> Get(bool updateFile = true);
+        Stream Get();
 
         /// <summary>
         /// This method returns a stream with the updates

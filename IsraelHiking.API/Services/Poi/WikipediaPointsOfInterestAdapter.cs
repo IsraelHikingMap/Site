@@ -62,7 +62,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        public override async Task<List<Feature>> GetPointsForIndexing()
         {
             _logger.LogInformation("Start getting wikipedia pages for indexing");
             var startCoordinate = new Coordinate(34, 29);

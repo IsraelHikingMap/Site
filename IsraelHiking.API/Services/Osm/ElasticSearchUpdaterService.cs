@@ -15,7 +15,7 @@ using OsmSharp.Complete;
 namespace IsraelHiking.API.Services.Osm
 {
     /// <inheritdoc />
-    public class OsmElasticSearchUpdaterService : IOsmElasticSearchUpdaterService
+    public class ElasticSearchUpdaterService : IElasticSearchUpdaterService
     {
         private readonly IOsmGateway _osmGateway;
         private readonly IElasticSearchGateway _elasticSearchGateway;
@@ -24,6 +24,8 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IOsmRepository _osmRepository;
         private readonly IEnumerable<IPointsOfInterestAdapter> _adapters;
         private readonly IFeaturesMergeExecutor _featuresMergeExecutor;
+        private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
+        private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly ILogger _logger;
 
         /// <summary>
@@ -36,13 +38,17 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="osmRepository"></param>
         /// <param name="adapters"></param>
         /// <param name="featuresMergeExecutor"></param>
+        /// <param name="latestFileFetcherExecutor"></param>
+        /// <param name="graphHopperGateway"></param>
         /// <param name="logger"></param>
-        public OsmElasticSearchUpdaterService(IHttpGatewayFactory factory, 
+        public ElasticSearchUpdaterService(IHttpGatewayFactory factory, 
             IElasticSearchGateway elasticSearchGateway, 
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
             ITagsHelper tagsHelper, IOsmRepository osmRepository, 
             IEnumerable<IPointsOfInterestAdapter> adapters,
             IFeaturesMergeExecutor featuresMergeExecutor,
+            IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
+            IGraphHopperGateway graphHopperGateway,
             ILogger logger)
         {
             _elasticSearchGateway = elasticSearchGateway;
@@ -52,6 +58,8 @@ namespace IsraelHiking.API.Services.Osm
             _adapters = adapters;
             _logger = logger;
             _featuresMergeExecutor = featuresMergeExecutor;
+            _latestFileFetcherExecutor = latestFileFetcherExecutor;
+            _graphHopperGateway = graphHopperGateway;
             _osmGateway = factory.CreateOsmGateway(new TokenAndSecret("", ""));
         }
 
@@ -137,25 +145,58 @@ namespace IsraelHiking.API.Services.Osm
         }
 
         /// <inheritdoc />
-        public async Task Rebuild(UpdateRequest request, Stream stream)
+        public async Task Rebuild(UpdateRequest request)
         {
+            var rebuildRoutingTask = Task.CompletedTask;
+            if (request.Routing)
+            {
+                rebuildRoutingTask = RebuildRouting();
+            } 
             if (request.Highways)
             {
-                _logger.LogInformation("Starting rebuilding highways database.");
-                var osmHighways = await _osmRepository.GetAllHighways(stream);
-                var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
-                await _elasticSearchGateway.UpdateHighwaysZeroDownTime(geoJsonHighways);
-                _logger.LogInformation("Finished rebuilding highways database.");
+                await RebuildHighways();
             }
             if (request.PointsOfInterest)
             {
-                _logger.LogInformation("Starting rebuilding POIs database.");
-                var fetchTasks = _adapters.Select(a => a.GetPointsForIndexing(stream)).ToArray();
-                var features = (await Task.WhenAll(fetchTasks)).SelectMany(v => v).ToList();
-                features = _featuresMergeExecutor.Merge(features);
-                await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);
-                _logger.LogInformation("Finished rebuilding POIs database.");
+                await RebuildPointsOfInterest();
             }
+            await rebuildRoutingTask;
+        }
+
+        private async Task RebuildRouting()
+        {
+            _logger.LogInformation("Starting rebuilding routing database.");
+            using (var stream = _latestFileFetcherExecutor.Get())
+            using (var memoryStream = new MemoryStream())
+            {
+                stream.CopyTo(memoryStream);
+                await _graphHopperGateway.Rebuild(memoryStream);
+            }
+            _logger.LogInformation("Finished rebuilding POIs database.");
+        }
+
+
+        private async Task RebuildPointsOfInterest()
+        {
+            _logger.LogInformation("Starting rebuilding POIs database.");
+            var fetchTasks = _adapters.Select(a => a.GetPointsForIndexing()).ToArray();
+            var features = (await Task.WhenAll(fetchTasks)).SelectMany(v => v).ToList();
+            features = _featuresMergeExecutor.Merge(features);
+            await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);
+            _logger.LogInformation("Finished rebuilding POIs database.");
+        }
+
+        private async Task RebuildHighways()
+        {
+            _logger.LogInformation("Starting rebuilding highways database.");
+            using (var stream = _latestFileFetcherExecutor.Get())
+            {
+                var osmHighways = await _osmRepository.GetAllHighways(stream);
+                var geoJsonHighways = _osmGeoJsonPreprocessorExecutor.Preprocess(osmHighways);
+                await _elasticSearchGateway.UpdateHighwaysZeroDownTime(geoJsonHighways);
+            }
+
+            _logger.LogInformation("Finished rebuilding highways database.");
         }
     }
 }

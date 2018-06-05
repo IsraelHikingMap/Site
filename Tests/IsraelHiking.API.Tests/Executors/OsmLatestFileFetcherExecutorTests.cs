@@ -31,13 +31,13 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
         [TestMethod]
-        public void Get_EmptyDirectory_ShouldFetchFileAndUpdateIt()
+        public void Update_EmptyDirectory_ShouldFetchFileAndUpdateIt()
         {
             _fileProvider.GetDirectoryContents(Arg.Any<string>()).Returns(Substitute.For<IDirectoryContents>());
             _remoteFileSizeFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse());
             _remoteFileSizeFetcherGateway.GetFileContent(Arg.Is<string>(x => x.EndsWith("txt"))).Returns(new RemoteFileFetcherGatewayResponse { Content = Encoding.UTF8.GetBytes("a=b")});
 
-            _fetcher.Get().Wait();
+            _fetcher.Update().Wait();
 
             _processHelper.Received(3).Start(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         }

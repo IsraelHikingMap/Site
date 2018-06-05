@@ -68,7 +68,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        public override async Task<List<Feature>> GetPointsForIndexing()
         {
             _logger.LogInformation("Getting data from iNature.");
             var features = await _iNatureGateway.GetAll();

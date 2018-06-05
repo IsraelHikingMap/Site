@@ -20,12 +20,14 @@ namespace IsraelHiking.API.Tests.Services.Osm
     [TestClass]
     public class OsmElasticSearchUpdaterServiceTests
     {
-        private IOsmElasticSearchUpdaterService _service;
+        private IElasticSearchUpdaterService _service;
         private IHttpGatewayFactory _httpGatewayFactory;
         private IOsmRepository _osmRepository;
         private IElasticSearchGateway _elasticSearchGateway;
         private IOsmGeoJsonPreprocessorExecutor _geoJsonPreprocessorExecutor;
         private IFeaturesMergeExecutor _featuresMergeExecutor;
+        private IGraphHopperGateway _graphHopperGateway;
+        private IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
 
         [TestInitialize]
         public void TestInitialize()
@@ -38,13 +40,15 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _osmRepository = Substitute.For<IOsmRepository>();
             _geoJsonPreprocessorExecutor = Substitute.For<IOsmGeoJsonPreprocessorExecutor>();
             _featuresMergeExecutor = Substitute.For<IFeaturesMergeExecutor>();
-            _service = new OsmElasticSearchUpdaterService(_httpGatewayFactory, _elasticSearchGateway, _geoJsonPreprocessorExecutor, new TagsHelper(optionsProvider), _osmRepository, new IPointsOfInterestAdapter[0], _featuresMergeExecutor, Substitute.For<ILogger>());
+            _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
+            _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
+            _service = new ElasticSearchUpdaterService(_httpGatewayFactory, _elasticSearchGateway, _geoJsonPreprocessorExecutor, new TagsHelper(optionsProvider), _osmRepository, new IPointsOfInterestAdapter[0], _featuresMergeExecutor, _osmLatestFileFetcherExecutor, _graphHopperGateway, Substitute.For<ILogger>());
         }
 
         [TestMethod]
         public void TestRebuild_ShouldRebuildHighwaysAndPoints()
         {
-            _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true }, new MemoryStream()).Wait();
+            _service.Rebuild(new UpdateRequest { Highways = true, PointsOfInterest = true }).Wait();
 
             _elasticSearchGateway.Received(1).UpdateHighwaysZeroDownTime(Arg.Any<List<Feature>>());
             _elasticSearchGateway.Received(1).UpdatePointsOfInterestZeroDownTime(Arg.Any<List<Feature>>());

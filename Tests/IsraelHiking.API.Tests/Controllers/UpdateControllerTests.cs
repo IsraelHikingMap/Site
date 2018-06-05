@@ -6,7 +6,6 @@ using IsraelHiking.API.Controllers;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services.Osm;
 using IsraelHiking.Common;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -21,18 +20,16 @@ namespace IsraelHiking.API.Tests.Controllers
     public class UpdateControllerTests
     {
         private UpdateController _controller;
-        private IGraphHopperGateway _graphHopperGateway;
         private IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
-        private IOsmElasticSearchUpdaterService _osmElasticSearchUpdaterService;
+        private IElasticSearchUpdaterService _elasticSearchUpdaterService;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
             var logger = Substitute.For<ILogger>();
-            _osmElasticSearchUpdaterService = Substitute.For<IOsmElasticSearchUpdaterService>();
-            _controller = new UpdateController(_graphHopperGateway, _osmLatestFileFetcherExecutor, _osmElasticSearchUpdaterService, logger);
+            _elasticSearchUpdaterService = Substitute.For<IElasticSearchUpdaterService>();
+            _controller = new UpdateController(_osmLatestFileFetcherExecutor, _elasticSearchUpdaterService, logger);
         }
 
         private void SetupContext(IPAddress localIp, IPAddress remoteIp)
@@ -68,8 +65,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _controller.PostUpdateData(null).Wait();
 
-            _graphHopperGateway.Received(1).Rebuild(Arg.Any<MemoryStream>(), Arg.Any<string>());
-            _osmElasticSearchUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>(), Arg.Any<Stream>());
+            _elasticSearchUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
             
         }
 
@@ -81,8 +77,7 @@ namespace IsraelHiking.API.Tests.Controllers
             
             _controller.PostUpdateData(new UpdateRequest()).Wait();
 
-            _graphHopperGateway.Received(1).Rebuild(Arg.Any<MemoryStream>(), Arg.Any<string>());
-            _osmElasticSearchUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>(), Arg.Any<Stream>());
+            _elasticSearchUpdaterService.Received(1).Rebuild(Arg.Any<UpdateRequest>());
         }
 
         [TestMethod]
@@ -104,7 +99,7 @@ namespace IsraelHiking.API.Tests.Controllers
 
             _controller.PutUpdateData().Wait();
 
-            _osmElasticSearchUpdaterService.Received(1).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
+            _elasticSearchUpdaterService.Received(1).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
         }
 
         [TestMethod]
@@ -118,21 +113,21 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.PutUpdateData().ContinueWith((t) => { });
             _controller.PutUpdateData().Wait();
 
-            _osmElasticSearchUpdaterService.Received(2).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
+            _elasticSearchUpdaterService.Received(2).Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
         }
 
         [TestMethod]
         public void PutUpdateData_WhileRebuildIsRunning_ShouldNotUpdate()
         {
             var changes = new OsmChange { Create = new OsmGeo[] { new Node() } };
-            _osmLatestFileFetcherExecutor.Get().Returns(CreateStream(changes));
+            _osmLatestFileFetcherExecutor.Update().Returns(Task.Delay(100));
             _osmLatestFileFetcherExecutor.GetUpdates().Returns(CreateStream(changes));
             SetupContext(IPAddress.Parse("1.2.3.4"), IPAddress.Loopback);
 
             _controller.PostUpdateData(new UpdateRequest()).ContinueWith((t) => { });
             var results = _controller.PutUpdateData().Result as BadRequestObjectResult;
 
-            _osmElasticSearchUpdaterService.DidNotReceive().Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
+            _elasticSearchUpdaterService.DidNotReceive().Update(Arg.Is<OsmChange>(x => x.Create.Length == changes.Create.Length));
             Assert.IsNotNull(results);
         }
 

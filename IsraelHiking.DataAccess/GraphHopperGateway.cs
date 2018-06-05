@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Geometries;
 using Newtonsoft.Json;
@@ -16,17 +15,13 @@ namespace IsraelHiking.DataAccess
     public class GraphHopperGateway : IGraphHopperGateway
     {
         private const string BASE_ADDRESS = "http://localhost:8989/";
-        private const string GRAPHHOPPER = "GraphHopper";
-        private const int HOUR = 60 * 60 * 1000;
 
         private readonly ILogger _logger;
-        private readonly IFileProvider _fileProvider;
 
 
-        public GraphHopperGateway(ILogger logger, IFileProvider fileProvider)
+        public GraphHopperGateway(ILogger logger)
         {
             _logger = logger;
-            _fileProvider = fileProvider;
         }
 
         public async Task<LineString> GetRouting(RoutingGatewayRequest request)
@@ -64,19 +59,19 @@ namespace IsraelHiking.DataAccess
             }
         }
 
-        public async Task Rebuild(MemoryStream osmFileStream, string osmFileName)
+        public async Task Rebuild(MemoryStream osmFileStream)
         {
-            _logger.LogInformation($"Starting creating graph hopper cache based on latest pbf file: {osmFileName}");
+            _logger.LogInformation($"Starting creating graph hopper cache based on latest pbf file: {Sources.OSM_FILE_NAME}");
             using (var httpClient = new HttpClient())
             {
                 httpClient.Timeout = TimeSpan.FromMinutes(30);
                 var requestAddress = $"{BASE_ADDRESS}rebuild";
                 ByteArrayContent bytes = new ByteArrayContent(osmFileStream.ToArray());
                 MultipartFormDataContent multiContent = new MultipartFormDataContent();
-                multiContent.Add(bytes, "file", osmFileName);
+                multiContent.Add(bytes, "file", Sources.OSM_FILE_NAME);
                 await httpClient.PostAsync(requestAddress, multiContent);
             }
-            _logger.LogInformation($"Finished creating graph hopper cache based on latest pbf file: {osmFileName}");
+            _logger.LogInformation($"Finished creating graph hopper cache based on latest pbf file: {Sources.OSM_FILE_NAME}");
         }
     }
 }

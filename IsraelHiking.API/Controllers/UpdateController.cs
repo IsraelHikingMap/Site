@@ -1,8 +1,6 @@
 ﻿using IsraelHiking.API.Executors;
-using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,25 +22,22 @@ namespace IsraelHiking.API.Controllers
         private static readonly SemaphoreSlim UpdateSemaphore = new SemaphoreSlim(1, 1);
 
         private readonly ILogger _logger;
-        private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly IOsmLatestFileFetcherExecutor _osmLatestFileFetcherExecutor;
-        private readonly IOsmElasticSearchUpdaterService _osmElasticSearchUpdaterService;
+        private readonly IElasticSearchUpdaterService _elasticSearchUpdaterService;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="graphHopperGateway"></param>
         /// <param name="osmLatestFileFetcherExecutor"></param>
-        /// <param name="osmElasticSearchUpdaterService"></param>
+        /// <param name="elasticSearchUpdaterService"></param>
         /// <param name="logger"></param>
-        public UpdateController(IGraphHopperGateway graphHopperGateway,
+        public UpdateController(
             IOsmLatestFileFetcherExecutor osmLatestFileFetcherExecutor,
-            IOsmElasticSearchUpdaterService osmElasticSearchUpdaterService,
+            IElasticSearchUpdaterService elasticSearchUpdaterService,
             ILogger logger)
         {
-            _graphHopperGateway = graphHopperGateway;
             _osmLatestFileFetcherExecutor = osmLatestFileFetcherExecutor;
-            _osmElasticSearchUpdaterService = osmElasticSearchUpdaterService;
+            _elasticSearchUpdaterService = elasticSearchUpdaterService;
             _logger = logger;
             
         }
@@ -84,20 +79,10 @@ namespace IsraelHiking.API.Controllers
                     _logger.LogInformation("No specific filters were applied, updating all databases.");
                 }
                 _logger.LogInformation("Updating site's databases according to request: " + JsonConvert.SerializeObject(request));
-                var memoryStream = new MemoryStream();
-                using (var stream = await _osmLatestFileFetcherExecutor.Get(request.OsmFile))
-                {
-                    stream.CopyTo(memoryStream);
-                }
-                _logger.LogInformation("Copy osm data completed.");
+                await _osmLatestFileFetcherExecutor.Update(request.OsmFile);
+                _logger.LogInformation("Update osm file completed.");
 
-                var elasticSearchTask = _osmElasticSearchUpdaterService.Rebuild(request, memoryStream);
-
-                var graphHopperTask = request.Routing
-                    ? _graphHopperGateway.Rebuild(memoryStream, Sources.OSM_FILE_NAME)
-                    : Task.CompletedTask;
-
-                await Task.WhenAll(elasticSearchTask, graphHopperTask);
+                await _elasticSearchUpdaterService.Rebuild(request);
                 return Ok();
             }
             finally
@@ -133,7 +118,7 @@ namespace IsraelHiking.API.Controllers
                 {
                     XmlSerializer serializer = new XmlSerializer(typeof(OsmChange));
                     var changes = (OsmChange) serializer.Deserialize(updatesStream);
-                    await _osmElasticSearchUpdaterService.Update(changes);
+                    await _elasticSearchUpdaterService.Update(changes);
                 }
                 _logger.LogInformation("Finished incremental site's databases update");
                 return Ok();

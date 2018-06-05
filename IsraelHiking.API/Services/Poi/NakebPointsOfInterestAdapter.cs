@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        public override async Task<List<Feature>> GetPointsForIndexing()
         {
             _logger.LogInformation("Getting data from Nakeb.");
             var features = await _nakebGateway.GetAll();

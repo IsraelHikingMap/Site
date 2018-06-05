@@ -28,8 +28,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Get all the points from the adapter in order to index them in a database
         /// </summary>
-        /// <param name="memoryStream"></param>
         /// <returns></returns>
-        Task<List<Feature>> GetPointsForIndexing(Stream memoryStream);
+        Task<List<Feature>> GetPointsForIndexing();
     }
 }

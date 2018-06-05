@@ -31,6 +31,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IOsmRepository _osmRepository;
         private IDataContainerConverterService _dataContainerConverterService;
         private IWikipediaGateway _wikipediaGateway;
+        private IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private ITagsHelper _tagsHelper;
 
         [TestInitialize]
@@ -44,7 +45,8 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _osmRepository = Substitute.For<IOsmRepository>();
             _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
-            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, new ItmWgs84MathTransfromFactory(), _tagsHelper);
+            _latestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
+            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, new ItmWgs84MathTransfromFactory(), _latestFileFetcherExecutor, _tagsHelper);
         }
 
         private IOsmGateway SetupHttpFactory()

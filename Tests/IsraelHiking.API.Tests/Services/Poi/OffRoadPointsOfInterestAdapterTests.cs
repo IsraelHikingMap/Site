@@ -59,7 +59,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var featuresList = new List<Feature> { new Feature(null, null) };
             _offRoadGateway.GetAll().Returns(featuresList);
 
-            var points = _adapter.GetPointsForIndexing(null).Result;
+            var points = _adapter.GetPointsForIndexing().Result;
 
             Assert.AreEqual(featuresList.Count, points.Count);
         }

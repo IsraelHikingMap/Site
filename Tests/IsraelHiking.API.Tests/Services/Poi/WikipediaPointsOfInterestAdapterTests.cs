@@ -74,7 +74,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         public void GetPointsForIndexing_ShouldGetAllPointsFromGateway()
         {
             _wikipediaGateway.GetByLocation(Arg.Any<Coordinate>(), Arg.Any<string>()).Returns(new List<Feature> {GetValidFeature("1", Sources.WIKIPEDIA)});
-            var points = _adapter.GetPointsForIndexing(null).Result;
+            var points = _adapter.GetPointsForIndexing().Result;
 
             _wikipediaGateway.Received(1092).GetByLocation(Arg.Any<Coordinate>(), Arg.Any<string>());
             Assert.AreEqual(1, points.Count); // only 1 distinct

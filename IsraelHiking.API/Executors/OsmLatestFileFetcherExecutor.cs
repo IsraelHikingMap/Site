@@ -48,7 +48,7 @@ namespace IsraelHiking.API.Executors
         }
 
         /// <inheritdoc />
-        public async Task<Stream> Get(bool updateFile = true)
+        public async Task Update(bool updateFile = true)
         {
             var workingDirectory = Path.Combine(_options.BinariesFolder, OSM_C_TOOLS_FOLDER);
             var directoryContents = _fileProvider.GetDirectoryContents(OSM_C_TOOLS_FOLDER);
@@ -61,6 +61,12 @@ namespace IsraelHiking.API.Executors
             {
                 UpdateFileToLatestVersion(workingDirectory);
             }
+        }
+
+        /// <inheritdoc />
+        public Stream Get()
+        {
+            
             var fileInfo = _fileProvider.GetFileInfo(Path.Combine(OSM_C_TOOLS_FOLDER, Sources.OSM_FILE_NAME));
             return fileInfo.CreateReadStream();
         }

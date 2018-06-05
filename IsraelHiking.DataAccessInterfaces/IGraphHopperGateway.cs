@@ -8,6 +8,6 @@ namespace IsraelHiking.DataAccessInterfaces
     public interface IGraphHopperGateway
     {
         Task<LineString> GetRouting(RoutingGatewayRequest request);
-        Task Rebuild(MemoryStream osmFileStream, string osmFileName);
+        Task Rebuild(MemoryStream osmFileStream);
     }
 }

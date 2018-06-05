@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -32,6 +31,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmRepository _osmRepository;
         private readonly IWikipediaGateway _wikipediaGateway;
         private readonly ITagsHelper _tagsHelper;
+        private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
 
         /// <summary>
         /// Class constructor
@@ -44,6 +44,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="dataContainerConverterService"></param>
         /// <param name="wikipediaGateway"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="latestFileFetcherExecutor"></param>
         /// <param name="tagsHelper"></param>
         public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway,
             IElevationDataStorage elevationDataStorage,
@@ -53,13 +54,16 @@ namespace IsraelHiking.API.Services.Poi
             IDataContainerConverterService dataContainerConverterService,
             IWikipediaGateway wikipediaGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
-            ITagsHelper tagsHelper) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
+            IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
+            ITagsHelper tagsHelper
+            ) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
         {
             _httpGatewayFactory = httpGatewayFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
             _wikipediaGateway = wikipediaGateway;
             _tagsHelper = tagsHelper;
+            _latestFileFetcherExecutor = latestFileFetcherExecutor;
         }
         /// <inheritdoc />
         public override string Source => Sources.OSM;
@@ -173,16 +177,19 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
+        public override async Task<List<Feature>> GetPointsForIndexing()
         {
-            var osmNamesDictionary = await _osmRepository.GetElementsWithName(memoryStream);
-            var relevantTagsDictionary = _tagsHelper.GetAllTags();
-            var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(memoryStream, relevantTagsDictionary);
-            osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
-            var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
-            var containers = features.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
-            features = _osmGeoJsonPreprocessorExecutor.MergePlaceNodes(features, containers);
-            return features;
+            using (var stream = _latestFileFetcherExecutor.Get())
+            {
+                var osmNamesDictionary = await _osmRepository.GetElementsWithName(stream);
+                var relevantTagsDictionary = _tagsHelper.GetAllTags();
+                var namelessNodes = await _osmRepository.GetPointsWithNoNameByTags(stream, relevantTagsDictionary);
+                osmNamesDictionary.Add(string.Empty, namelessNodes.Cast<ICompleteOsmGeo>().ToList());
+                var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
+                var containers = features.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
+                features = _osmGeoJsonPreprocessorExecutor.MergePlaceNodes(features, containers);
+                return features;
+            }
         }
 
         private void SyncImages(TagsCollectionBase tags, string[] images)
@@ -234,8 +241,8 @@ namespace IsraelHiking.API.Services.Poi
                     feature.Attributes.AddOrUpdate(attributeKey, featureFromDb.Attributes[attributeKey]);
                 }
             }
-            
-            await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> {feature});
+
+            await _elasticSearchGateway.UpdatePointsOfInterestData(new List<Feature> { feature });
             foreach (var language in Languages.Array)
             {
                 var title = feature.Attributes.GetWikipediaTitle(language);
@@ -326,7 +333,7 @@ namespace IsraelHiking.API.Services.Poi
                 return references;
             }
             var wikipediaReference = _wikipediaGateway.GetReference(title, language);
-            return references.Concat(new[] {wikipediaReference}).ToArray();
+            return references.Concat(new[] { wikipediaReference }).ToArray();
         }
 
         private void SetWebsiteUrl(TagsCollectionBase tags, PointOfInterestExtended pointOfInterest)
