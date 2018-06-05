@@ -23,15 +23,12 @@ namespace IsraelHiking.API.Tests.Controllers
         private IWikimediaCommonGateway _wikimediaCommonGateway;
         private IOsmGateway _osmGateway;
         private ITagsHelper _tagHelper;
-        private IPointsOfInterestAdapter _adapter;
         private IPointsOfInterestProvider _pointsOfInterestProvider;
         private IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
 
         [TestInitialize]
         public void TestInitialize()
         {
-            _adapter = Substitute.For<IPointsOfInterestAdapter>();
-            _adapter.Source.Returns("source");
             _pointsOfInterestProvider = Substitute.For<IPointsOfInterestProvider>();
             _pointsOfInterestAggregatorService = Substitute.For<IPointsOfInterestAggregatorService>();
             _tagHelper = Substitute.For<ITagsHelper>();
@@ -40,7 +37,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var cache = new LruCache<string, TokenAndSecret>(Substitute.For<IOptions<ConfigurationData>>(), Substitute.For<ILogger>());
             var factory = Substitute.For<IHttpGatewayFactory>();
             factory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(_osmGateway);
-            _controller = new PointsOfInterestController(new [] { _adapter }, factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, _pointsOfInterestAggregatorService, cache);
+            _controller = new PointsOfInterestController(factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, _pointsOfInterestAggregatorService, cache);
         }
 
         [TestMethod]
@@ -76,15 +73,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetPointOfIntereset_WrongSource_ShouldReturnBadRequest()
         {
-            var result = _controller.GetPointOfInterest("wrong source", string.Empty, "language").Result as BadRequestObjectResult;
-
-            Assert.IsNotNull(result);
-        }
-
-        [TestMethod]
-        public void GetPointOfIntereset_WrongId_ShouldReturnNotFound()
-        {
-            var result = _controller.GetPointOfInterest("source", string.Empty, "language").Result as NotFoundResult;
+            var result = _controller.GetPointOfInterest("wrong source", string.Empty, "language").Result as NotFoundResult;
 
             Assert.IsNotNull(result);
         }
@@ -131,24 +120,24 @@ namespace IsraelHiking.API.Tests.Controllers
         public void UploadPointOfInterest_IdDoesNotExists_ShouldAdd()
         {
             _controller.SetupIdentity();
-            var poi = new PointOfInterestExtended { Source = "source", Id = "" };
+            var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "" };
 
             var result = _controller.UploadPointOfInterest(null, JsonConvert.SerializeObject(poi), "he").Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            _adapter.Received(1).AddPointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
+            _pointsOfInterestProvider.Received(1).AddPointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
         }
 
         [TestMethod]
         public void UploadPointOfInterest_IdExists_ShouldUpdate()
         {
             _controller.SetupIdentity();
-            var poi = new PointOfInterestExtended { Source = "source", Id = "1" };
+            var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "1" };
 
             var result = _controller.UploadPointOfInterest(null, JsonConvert.SerializeObject(poi), "he").Result as OkObjectResult;
 
             Assert.IsNotNull(result);
-            _adapter.Received(1).UpdatePointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
+            _pointsOfInterestProvider.Received(1).UpdatePointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
         }
 
         [TestMethod]
@@ -160,7 +149,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var formFile = Substitute.For<IFormFile>();
             formFile.OpenReadStream().Returns(new MemoryStream());
             formFile.FileName.Returns("file.jpg");
-            var poi = new PointOfInterestExtended { Title = "title", Source = "source", Id = "1", Location = new LatLng(5,6), ImagesUrls = new string[0]};
+            var poi = new PointOfInterestExtended { Title = "title", Source = Sources.OSM, Id = "1", Location = new LatLng(5,6), ImagesUrls = new string[0]};
             _controller.UploadPointOfInterest(new [] {formFile}, JsonConvert.SerializeObject(poi), "he").Wait();
 
             _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, poi.Description, user.DisplayName, formFile.FileName, Arg.Any<Stream>(), Arg.Any<Coordinate>());

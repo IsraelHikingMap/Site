@@ -33,10 +33,6 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public abstract Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language);
         /// <inheritdoc />
-        public abstract Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
-        /// <inheritdoc />
-        public abstract Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
-        /// <inheritdoc />
         public abstract Task<List<Feature>> GetPointsForIndexing(Stream memoryStream);
 
         /// <summary>

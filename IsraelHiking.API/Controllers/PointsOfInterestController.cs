@@ -21,7 +21,6 @@ namespace IsraelHiking.API.Controllers
     [Route("api/poi")]
     public class PointsOfInterestController : Controller
     {
-        private readonly Dictionary<string, IPointsOfInterestAdapter> _adapters;
         private readonly IHttpGatewayFactory _httpGatewayFactory;
         private readonly ITagsHelper _tagsHelper;
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
@@ -32,23 +31,19 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Controller's constructor
         /// </summary>
-        /// <param name="adapters"></param>
         /// <param name="httpGatewayFactory"></param>
         /// <param name="tagsHelper"></param>
         /// <param name="wikimediaCommonGateway"></param>
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="pointsOfInterestAggregatorService"></param>
         /// <param name="cache"></param>
-        public PointsOfInterestController(IEnumerable<IPointsOfInterestAdapter> adapters,
-            IHttpGatewayFactory httpGatewayFactory,
+        public PointsOfInterestController(IHttpGatewayFactory httpGatewayFactory,
             ITagsHelper tagsHelper,
             IWikimediaCommonGateway wikimediaCommonGateway,
             IPointsOfInterestProvider pointsOfInterestProvider,
             IPointsOfInterestAggregatorService pointsOfInterestAggregatorService,
             LruCache<string, TokenAndSecret> cache)
         {
-            _adapters = adapters.ToDictionary(a => a.Source, a => a);
-
             _httpGatewayFactory = httpGatewayFactory;
             _tagsHelper = tagsHelper;
             _cache = cache;
@@ -108,10 +103,6 @@ namespace IsraelHiking.API.Controllers
                 var latLng = CoordinatesToPointOfInterestConverter.GetLatLngFromId(id);
                 return Ok(CoordinatesToPointOfInterestConverter.Convert(latLng, id));
             }
-            if (_adapters.ContainsKey(source) == false)
-            {
-                return BadRequest($"{source} is not a know POIs source...");
-            }
             var poiItem = await _pointsOfInterestAggregatorService.Get(source, id, language);
             if (poiItem == null)
             {
@@ -135,9 +126,9 @@ namespace IsraelHiking.API.Controllers
             [FromQuery] string language)
         {
             var pointOfInterest = JsonConvert.DeserializeObject<PointOfInterestExtended>(poiData);
-            if (_adapters.ContainsKey(pointOfInterest.Source) == false)
+            if (!pointOfInterest.Source.Equals(Sources.OSM, StringComparison.InvariantCultureIgnoreCase))
             {
-                return BadRequest($"{pointOfInterest.Source} is not a know POIs source...");
+                return BadRequest("OSM is the only supported source for this action...");
             }
             var tokenAndSecret = _cache.Get(User.Identity.Name);
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
@@ -151,12 +142,11 @@ namespace IsraelHiking.API.Controllers
                 pointOfInterest.ImagesUrls = imageUrls.ToArray();
             }
 
-            var adapter = _adapters[pointOfInterest.Source];
             if (string.IsNullOrWhiteSpace(pointOfInterest.Id))
             {
-                return Ok(await adapter.AddPointOfInterest(pointOfInterest, tokenAndSecret, language));
+                return Ok(await _pointsOfInterestProvider.AddPointOfInterest(pointOfInterest, tokenAndSecret, language));
             }
-            return Ok(await adapter.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language));
+            return Ok(await _pointsOfInterestProvider.UpdatePointOfInterest(pointOfInterest, tokenAndSecret, language));
         }
     }
 }

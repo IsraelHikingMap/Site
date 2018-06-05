@@ -22,6 +22,10 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public async Task<PointOfInterestExtended> Get(string source, string id, string language = "")
         {
+            if (_adapters.ContainsKey(source) == false)
+            {
+                return null;
+            }
             var adapter = _adapters[source];
             var poiItem = await adapter.GetPointOfInterestById(id, language);
             if (poiItem == null)

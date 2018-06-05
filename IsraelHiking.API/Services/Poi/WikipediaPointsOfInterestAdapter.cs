@@ -62,18 +62,6 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
-        {
-            throw new Exception("Wikipedia does not support adding from this site.");
-        }
-
-        /// <inheritdoc />
-        public override Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
-        {
-            throw new Exception("Wikipedia does not support updating from this site.");
-        }
-
-        /// <inheritdoc />
         public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
         {
             _logger.LogInformation("Start getting wikipedia pages for indexing");

@@ -26,24 +26,6 @@ namespace IsraelHiking.API.Services.Poi
         Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language);
 
         /// <summary>
-        /// Adds a POI
-        /// </summary>
-        /// <param name="pointOfInterest"></param>
-        /// <param name="tokenAndSecret"></param>
-        /// <param name="language"></param>
-        /// <returns></returns>
-        Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
-
-        /// <summary>
-        /// Updates a POI
-        /// </summary>
-        /// <param name="pointOfInterest">The POI's new data</param>
-        /// <param name="tokenAndSecret">Credentials</param>
-        /// <param name="language">The relevant language</param>
-        /// <returns></returns>
-        Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language);
-
-        /// <summary>
         /// Get all the points from the adapter in order to index them in a database
         /// </summary>
         /// <param name="memoryStream"></param>

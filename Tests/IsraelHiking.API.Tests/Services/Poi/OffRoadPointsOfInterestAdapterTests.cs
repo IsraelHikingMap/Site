@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
@@ -52,18 +51,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
             Assert.IsFalse(results.IsEditable);
             _elevationDataStorage.Received().GetElevation(Arg.Any<Coordinate>());
             _elasticSearchGateway.Received().GetRating(poiId, Arg.Any<string>());
-        }
-
-        [TestMethod]
-        public void AddPointOfInterest_ShouldThrow()
-        {
-            Assert.ThrowsException<Exception>(() => _adapter.AddPointOfInterest(null, null, null).Result);
-        }
-
-        [TestMethod]
-        public void UpdatePointOfInterest_ShouldThrow()
-        {
-            Assert.ThrowsException<Exception>(() => _adapter.UpdatePointOfInterest(null, null, null).Result);
         }
 
         [TestMethod]

@@ -71,18 +71,6 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
-        public void AddPointOfInterest_ShouldThrow()
-        {
-            Assert.ThrowsException<Exception>(() => _adapter.AddPointOfInterest(null, null, null).Result);
-        }
-
-        [TestMethod]
-        public void UpdatePointOfInterest_ShouldThrow()
-        {
-            Assert.ThrowsException<Exception>(() => _adapter.UpdatePointOfInterest(null, null, null).Result);
-        }
-
-        [TestMethod]
         public void GetPointsForIndexing_ShouldGetAllPointsFromGateway()
         {
             _wikipediaGateway.GetByLocation(Arg.Any<Coordinate>(), Arg.Any<string>()).Returns(new List<Feature> {GetValidFeature("1", Sources.WIKIPEDIA)});

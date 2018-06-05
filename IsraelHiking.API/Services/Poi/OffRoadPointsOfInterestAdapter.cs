@@ -47,18 +47,6 @@ namespace IsraelHiking.API.Services.Poi
         }
 
         /// <inheritdoc />
-        public override Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
-        {
-            throw new Exception("OffRoad does not support adding.");
-        }
-
-        /// <inheritdoc />
-        public override Task<PointOfInterestExtended> UpdatePointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
-        {
-            throw new Exception("OffRoad does not support updating.");
-        }
-
-        /// <inheritdoc />
         public override async Task<List<Feature>> GetPointsForIndexing(Stream memoryStream)
         {
             _logger.LogInformation("Getting data from Off-road.");
