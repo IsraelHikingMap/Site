@@ -47,6 +47,9 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                     this.hashService.getPoiSourceAndId().id !== poiSourceAndId.id) {
                     this.sidebarService.hide();
                 }
+                if (this.hashService.getPoiSourceAndId() == null && this.sidebarService.isVisible) {
+                    this.sidebarService.toggle("public-poi");
+                }
                 this.hashService.setApplicationState("poi", poiSourceAndId);
                 if (!this.sidebarService.isVisible) {
                     setTimeout(() => this.sidebarService.toggle("public-poi"), 0);
