@@ -22,7 +22,7 @@ namespace IsraelHiking.API.Services.Poi
     public class CsvPointOfInterestRow
     {
         /// <summary>
-        /// The ID of the POI, should be related to the website somehow
+        /// The ID of the POI, should be related to the website's link somehow
         /// </summary>
         public string Id { get; set; }
         /// <summary>
@@ -131,18 +131,21 @@ namespace IsraelHiking.API.Services.Poi
         public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
             IFeature feature = await _elasticSearchGateway.GetCachedItemById(id, Source);
+            var isRoute = false;
             if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE) &&
                 !string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString()))
             {
                 var content = await _remoteFileFetcherGateway.GetFileContent(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
                 var convertedBytes = await _dataContainerConverterService.Convert(content.Content, content.FileName, FlowFormats.GEOJSON);
                 feature.Geometry = convertedBytes.ToFeatureCollection().Features.FirstOrDefault()?.Geometry ?? feature.Geometry;
+                isRoute = true;
             }
 
             var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
             await AddExtendedData(poiItem, feature, language);
             poiItem.IsEditable = false;
             poiItem.IsArea = false;
+            poiItem.IsRoute = isRoute;
             
             return poiItem;
         }
