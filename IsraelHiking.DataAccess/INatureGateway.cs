@@ -74,7 +74,7 @@ namespace IsraelHiking.DataAccess
                     return null;
                 }
 
-                var shareMatch = Regex.Match(page.Content, @"israelhiking\.osm\.org\.il\/.*s=(.*?)[""']", RegexOptions.IgnoreCase);
+                var shareMatch = Regex.Match(page.Content, @"israelhiking\.osm\.org\.il/share/(.*?)[""']", RegexOptions.IgnoreCase);
                 if (page.Content.Contains("{{מסלולי טיול") && !shareMatch.Success)
                 {
                     return null;
