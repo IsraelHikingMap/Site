@@ -8,25 +8,25 @@ namespace IsraelHiking.API.Services.Poi
     /// <inheritdoc />
     public class PointsOfInterestAggregatorService : IPointsOfInterestAggregatorService
     {
-        private readonly Dictionary<string, IPointsOfInterestAdapter> _adapters;
+        private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
 
         /// <summary>
         /// Constructor
         /// </summary>
-        /// <param name="adapters"></param>
-        public PointsOfInterestAggregatorService(IEnumerable<IPointsOfInterestAdapter> adapters)
+        /// <param name="pointsOfInterestAdapterFactory"></param>
+        public PointsOfInterestAggregatorService(IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory)
         {
-            _adapters = adapters.ToDictionary(a => a.Source, a => a);
+            _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
         }
 
         /// <inheritdoc />
         public async Task<PointOfInterestExtended> Get(string source, string id, string language = "")
         {
-            if (_adapters.ContainsKey(source) == false)
+            var adapter = _pointsOfInterestAdapterFactory.GetBySource(source);
+            if (adapter == null)
             {
                 return null;
             }
-            var adapter = _adapters[source];
             var poiItem = await adapter.GetPointOfInterestById(id, language);
             if (poiItem == null)
             {
@@ -38,7 +38,7 @@ namespace IsraelHiking.API.Services.Poi
             }
             foreach (var poiItemCombinedIdKey in poiItem.CombinedIds.Keys)
             {
-                adapter = _adapters[poiItemCombinedIdKey];
+                adapter = _pointsOfInterestAdapterFactory.GetBySource(poiItemCombinedIdKey);
                 foreach (var currentId in poiItem.CombinedIds[poiItemCombinedIdKey])
                 {
                     var currentPoiItem = await adapter.GetPointOfInterestById(currentId, language);

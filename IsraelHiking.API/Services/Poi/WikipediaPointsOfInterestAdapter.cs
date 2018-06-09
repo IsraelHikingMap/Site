@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
@@ -18,7 +17,6 @@ namespace IsraelHiking.API.Services.Poi
     public class WikipediaPointsOfInterestAdapter : BasePointsOfInterestAdapter
     {
         private readonly IWikipediaGateway _wikipediaGateway;
-        private readonly ILogger _logger;
         private readonly IItmWgs84MathTransfromFactory _itmWgs84MathTransfromFactory;
 
         /// <summary>
@@ -36,10 +34,9 @@ namespace IsraelHiking.API.Services.Poi
             IWikipediaGateway wikipediaGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger) :
-            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
+            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
         {
             _wikipediaGateway = wikipediaGateway;
-            _logger = logger;
             _itmWgs84MathTransfromFactory = itmWgs84MathTransfromFactory;
         }
 

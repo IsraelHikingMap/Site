@@ -22,7 +22,7 @@ namespace IsraelHiking.API.Services.Osm
         private readonly IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private readonly ITagsHelper _tagsHelper;
         private readonly IOsmRepository _osmRepository;
-        private readonly IEnumerable<IPointsOfInterestAdapter> _adapters;
+        private readonly IPointsOfInterestAdapterFactory _pointsOfInterestAdapterFactory;
         private readonly IFeaturesMergeExecutor _featuresMergeExecutor;
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private readonly IGraphHopperGateway _graphHopperGateway;
@@ -36,7 +36,7 @@ namespace IsraelHiking.API.Services.Osm
         /// <param name="osmGeoJsonPreprocessorExecutor"></param>
         /// <param name="tagsHelper"></param>
         /// <param name="osmRepository"></param>
-        /// <param name="adapters"></param>
+        /// <param name="pointsOfInterestAdapterFactory"></param>
         /// <param name="featuresMergeExecutor"></param>
         /// <param name="latestFileFetcherExecutor"></param>
         /// <param name="graphHopperGateway"></param>
@@ -44,8 +44,8 @@ namespace IsraelHiking.API.Services.Osm
         public ElasticSearchUpdaterService(IHttpGatewayFactory factory, 
             IElasticSearchGateway elasticSearchGateway, 
             IOsmGeoJsonPreprocessorExecutor osmGeoJsonPreprocessorExecutor, 
-            ITagsHelper tagsHelper, IOsmRepository osmRepository, 
-            IEnumerable<IPointsOfInterestAdapter> adapters,
+            ITagsHelper tagsHelper, IOsmRepository osmRepository,
+            IPointsOfInterestAdapterFactory pointsOfInterestAdapterFactory,
             IFeaturesMergeExecutor featuresMergeExecutor,
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
             IGraphHopperGateway graphHopperGateway,
@@ -55,7 +55,7 @@ namespace IsraelHiking.API.Services.Osm
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _tagsHelper = tagsHelper;
             _osmRepository = osmRepository;
-            _adapters = adapters;
+            _pointsOfInterestAdapterFactory = pointsOfInterestAdapterFactory;
             _logger = logger;
             _featuresMergeExecutor = featuresMergeExecutor;
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
@@ -179,7 +179,7 @@ namespace IsraelHiking.API.Services.Osm
         private async Task RebuildPointsOfInterest()
         {
             _logger.LogInformation("Starting rebuilding POIs database.");
-            var fetchTasks = _adapters.Select(a => a.GetPointsForIndexing()).ToArray();
+            var fetchTasks = _pointsOfInterestAdapterFactory.GetAll().Select(a => a.GetPointsForIndexing()).ToArray();
             var features = (await Task.WhenAll(fetchTasks)).SelectMany(v => v).ToList();
             features = _featuresMergeExecutor.Merge(features);
             await _elasticSearchGateway.UpdatePointsOfInterestZeroDownTime(features);

@@ -19,14 +19,14 @@ namespace IsraelHiking.API.Executors
     {
         public int Compare(Feature x, Feature y)
         {
+            if (x.Geometry is Point && y.Geometry is Point)
+            {
+                return 0;
+            }
             var results = x.Geometry.Area.CompareTo(y.Geometry.Area);
             if (results != 0)
             {
                 return results;
-            }
-            if (x.Geometry is Point && y.Geometry is Point)
-            {
-                return 0;
             }
     
             if (x.Geometry is Point)
@@ -74,11 +74,11 @@ namespace IsraelHiking.API.Executors
 
             var featureIdsToRemove = new List<string>();
             var mergingDictionary = new Dictionary<string, List<Feature>>();
-            var osmFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() == Sources.OSM)
+            var osmFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM))
                 .OrderBy(f => f, new FeatureComparer())
                 .ToArray();
             _logger.LogInformation($"Sorted features by importance: {osmFeatures.Length}");
-            var nonOsmFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].ToString() != Sources.OSM);
+            var nonOsmFeatures = features.Where(f => !f.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.OSM));
             var orderedFeatures = osmFeatures.Concat(nonOsmFeatures).ToArray();
             for (var featureIndex = 0; featureIndex < orderedFeatures.Length; featureIndex++)
             {

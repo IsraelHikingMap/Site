@@ -8,6 +8,7 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
@@ -46,6 +47,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="latestFileFetcherExecutor"></param>
         /// <param name="tagsHelper"></param>
+        /// <param name="logger"></param>
         public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway,
             IElevationDataStorage elevationDataStorage,
             IHttpGatewayFactory httpGatewayFactory,
@@ -55,8 +57,9 @@ namespace IsraelHiking.API.Services.Poi
             IWikipediaGateway wikipediaGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
-            ITagsHelper tagsHelper
-            ) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
+            ITagsHelper tagsHelper,
+            ILogger logger
+            ) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
         {
             _httpGatewayFactory = httpGatewayFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
@@ -179,6 +182,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<List<Feature>> GetPointsForIndexing()
         {
+            _logger.LogInformation("Starting getting OSM points of interetes");
             using (var stream = _latestFileFetcherExecutor.Get())
             {
                 var osmNamesDictionary = await _osmRepository.GetElementsWithName(stream);
@@ -188,6 +192,7 @@ namespace IsraelHiking.API.Services.Poi
                 var features = _osmGeoJsonPreprocessorExecutor.Preprocess(osmNamesDictionary);
                 var containers = features.Where(f => f.IsValidContainer()).OrderBy(f => f.Geometry.Area).ToList();
                 features = _osmGeoJsonPreprocessorExecutor.MergePlaceNodes(features, containers);
+                _logger.LogInformation("Finsihed getting OSM points of interetes: " + features.Count);
                 return features;
             }
         }

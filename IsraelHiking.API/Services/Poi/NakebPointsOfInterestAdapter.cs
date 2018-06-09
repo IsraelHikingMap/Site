@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.API.Executors;
@@ -21,7 +19,6 @@ namespace IsraelHiking.API.Services.Poi
         public override string Source => Sources.NAKEB;
 
         private readonly INakebGateway _nakebGateway;
-        private readonly ILogger _logger;
 
         /// <summary>
         /// Constructor
@@ -37,10 +34,9 @@ namespace IsraelHiking.API.Services.Poi
             IElasticSearchGateway elasticSearchGateway,
             IDataContainerConverterService dataContainerConverterService,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
-            ILogger logger) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
+            ILogger logger) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
         {
             _nakebGateway = nakebGateway;
-            _logger = logger;
         }
 
         /// <inheritdoc />

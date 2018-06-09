@@ -17,7 +17,6 @@ namespace IsraelHiking.API.Services.Poi
     {
         private readonly IINatureGateway _iNatureGateway;
         private readonly IRepository _repository;
-        private readonly ILogger _logger;
 
         /// <summary>
         /// Class constructor
@@ -36,11 +35,10 @@ namespace IsraelHiking.API.Services.Poi
             IRepository repository,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger) : 
-            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
+            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
         {
             _iNatureGateway = iNatureGateway;
             _repository = repository;
-            _logger = logger;
         }
 
         /// <inheritdoc />

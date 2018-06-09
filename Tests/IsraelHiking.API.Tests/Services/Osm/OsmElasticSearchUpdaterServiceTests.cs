@@ -42,7 +42,7 @@ namespace IsraelHiking.API.Tests.Services.Osm
             _featuresMergeExecutor = Substitute.For<IFeaturesMergeExecutor>();
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _osmLatestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
-            _service = new ElasticSearchUpdaterService(_httpGatewayFactory, _elasticSearchGateway, _geoJsonPreprocessorExecutor, new TagsHelper(optionsProvider), _osmRepository, new IPointsOfInterestAdapter[0], _featuresMergeExecutor, _osmLatestFileFetcherExecutor, _graphHopperGateway, Substitute.For<ILogger>());
+            _service = new ElasticSearchUpdaterService(_httpGatewayFactory, _elasticSearchGateway, _geoJsonPreprocessorExecutor, new TagsHelper(optionsProvider), _osmRepository, Substitute.For<IPointsOfInterestAdapterFactory>(), _featuresMergeExecutor, _osmLatestFileFetcherExecutor, _graphHopperGateway, Substitute.For<ILogger>());
         }
 
         [TestMethod]

@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.CoordinateSystems.Transformations;
@@ -10,10 +9,12 @@ using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Services.Poi
 {
+    /// <inheritdoc />
     /// <summary>
     /// Base class for points of interest adapter
     /// </summary>
@@ -23,9 +24,17 @@ namespace IsraelHiking.API.Services.Poi
         /// Elasticsearch gateway to be used in derived classes
         /// </summary>
         protected readonly IElasticSearchGateway _elasticSearchGateway;
+        /// <summary>
+        /// Logger
+        /// </summary>
+        protected readonly ILogger _logger;
+        /// <summary>
+        /// Data container service used to convert the data
+        /// </summary>
+        protected readonly IDataContainerConverterService _dataContainerConverterService;
 
         private readonly IElevationDataStorage _elevationDataStorage;
-        private readonly IDataContainerConverterService _dataContainerConverterService;
+        
         private readonly IMathTransform _wgs84ItmMathTransform;
 
         /// <inheritdoc />
@@ -42,15 +51,18 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="elasticSearchGateway"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="logger"></param>
         protected BasePointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
             IElasticSearchGateway elasticSearchGateway, 
             IDataContainerConverterService dataContainerConverterService,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory)
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory, 
+            ILogger logger)
         {
             _elevationDataStorage = elevationDataStorage;
             _elasticSearchGateway = elasticSearchGateway;
             _dataContainerConverterService = dataContainerConverterService;
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _logger = logger;
         }
 
         /// <summary>

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.API.Executors;
@@ -18,7 +16,6 @@ namespace IsraelHiking.API.Services.Poi
     public class OffRoadPointsOfInterestAdapter: BasePointsOfInterestAdapter
     {
         private readonly IOffRoadGateway _offRoadGateway;
-        private readonly ILogger _logger;
         /// <inheritdoc />
         public OffRoadPointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
             IElasticSearchGateway elasticSearchGateway, 
@@ -26,10 +23,9 @@ namespace IsraelHiking.API.Services.Poi
             IDataContainerConverterService dataContainerConverterService,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             ILogger logger) : 
-            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory)
+            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
         {
             _offRoadGateway = offRoadGateway;
-            _logger = logger;
         }
 
         /// <inheritdoc />
