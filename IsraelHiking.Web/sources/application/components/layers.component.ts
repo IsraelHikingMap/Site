@@ -8,7 +8,8 @@ import { ResourcesService } from "../services/resources.service";
     templateUrl: "./layers.component.html"
 })
 export class LayersComponent extends BaseMapComponent {
-    constructor(private sidebarService: SidebarService, resources: ResourcesService) {
+    constructor(resources: ResourcesService,
+        private readonly sidebarService: SidebarService) {
         super(resources);
     }
 
@@ -17,7 +18,7 @@ export class LayersComponent extends BaseMapComponent {
         this.suppressEvents(e);
     }
 
-    public isVisisble(): boolean {
+    public isActive(): boolean {
         return this.sidebarService.viewName === "layers";
     }
 }
