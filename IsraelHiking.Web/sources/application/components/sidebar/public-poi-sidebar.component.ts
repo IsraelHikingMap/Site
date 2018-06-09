@@ -1,6 +1,7 @@
 import { Component } from "@angular/core";
 import { MatSelectChange } from "@angular/material";
 import * as _ from "lodash";
+import * as L from "leaflet";
 
 import { IPoiMainInfoData } from "./poi-main-info.component";
 import { BaseMapComponent } from "../base-map.component";
@@ -77,6 +78,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
 
     private initFromPointOfInterestExtended = (poiExtended: IPointOfInterestExtended) => {
         this.poiExtended = poiExtended;
+        this.latLng = L.latLng(poiExtended.location.lat, poiExtended.location.lng, poiExtended.location.alt);
         this.info.title = poiExtended.title;
         this.info.description = poiExtended.description;
         this.info.readOnlyDescription = this.getReadOnlyDescrition();
