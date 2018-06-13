@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Text.RegularExpressions;
-using CsvHelper;
-using GeoAPI.Geometries;
+using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Executors;
+using IsraelHiking.API.Gpx;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -14,19 +12,14 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using NetTopologySuite.Features;
 using NSubstitute;
 
 namespace IsraelHiking.API.Tests.Services.Poi
 {
-    internal class CsvRow : CsvPointOfInterestRow
-    {
-        public int ITMwest { get; set; }
-        public int ITMnorth { get; set; }
-    }
-
 
     [TestClass]
-    public class CsvPointsOfInterestAdapterTests
+    public class CsvPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
     {
         private CsvPointsOfInterestAdapter _adapter;
         private IElevationDataStorage _elevationDataStorage;
@@ -34,6 +27,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
         private IDataContainerConverterService _dataContainerConverterService;
         private IFileProvider _fileProvider;
         private IHttpGatewayFactory _httpGatewayFactory;
+        private IRemoteFileFetcherGateway _remoteFileFetcherGateway;
         private IItmWgs84MathTransfromFactory _itmWgs84MathTransfromFactory;
 
         [TestInitialize]
@@ -41,42 +35,49 @@ namespace IsraelHiking.API.Tests.Services.Poi
         {
             _itmWgs84MathTransfromFactory = new ItmWgs84MathTransfromFactory();
             _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
+            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
+            _fileProvider = Substitute.For<IFileProvider>();
+            _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
+            _remoteFileFetcherGateway = Substitute.For<IRemoteFileFetcherGateway>();
+            _elevationDataStorage = Substitute.For<IElevationDataStorage>();
+            _httpGatewayFactory.CreateRemoteFileFetcherGateway(null).Returns(_remoteFileFetcherGateway);
             _adapter = new CsvPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _itmWgs84MathTransfromFactory, _fileProvider, _httpGatewayFactory, Substitute.For<ILogger>());
+            _adapter.SetFileName("csv.csv");
         }
 
         [TestMethod]
-        [Ignore]
-        public void ConvertEMaayanot()
+        public void GetPointsForIndexing_ShouldReturnOnePoint()
         {
-            var inputStream = File.OpenRead(@"C:\Users\harel\Desktop\Mapping\eMaayanot.csv");
-            var reader = new StreamReader(inputStream);
-            var csvReader = new CsvReader(reader);
-            csvReader.Configuration.HeaderValidated = null;
-            csvReader.Configuration.MissingFieldFound = null;
-            var pointsOfInterest = csvReader.GetRecords<CsvRow>().ToList();
+            var file = Substitute.For<IFileInfo>();
+            file.CreateReadStream().Returns(new MemoryStream(Encoding.UTF8.GetBytes(
+                "Id,Title,Description,Website,ImageUrl,SourceImageUrl,Category,FileUrl,Icon,IconColor,Latitude,Longitude\r\n1,2,3,4,5,6,7,8,9,0,1,2")));
+            _fileProvider.GetFileInfo(Arg.Any<string>()).Returns(file);
 
-            TextWriter writer = File.CreateText(@"C:\Users\harel\Desktop\Mapping\eMaayanot2.csv");
-            var csvWriter = new CsvWriter(writer);
-            csvWriter.Configuration.HasHeaderRecord = true;
-            csvWriter.WriteHeader<CsvPointOfInterestRow>();
-            csvWriter.NextRecord();
-            var transform = _itmWgs84MathTransfromFactory.Create();
-            foreach (var csvRow in pointsOfInterest)
-            {
-                var coordinates = transform.Transform(new Coordinate(csvRow.ITMwest, csvRow.ITMnorth));
-                csvRow.Latitude = coordinates.Y;
-                csvRow.Longitude = coordinates.X;
-                csvRow.Website = csvRow.Website.Substring(0, csvRow.Website.IndexOf("&T="));
-                csvRow.Icon = "icon-tint";
-                csvRow.IconColor = "blue";
-                csvRow.Category = Categories.WATER;
-                csvRow.Id = Regex.Match(csvRow.Website, @"&mayan=(\d+)").Groups[1].Value;
-                csvWriter.WriteRecord<CsvPointOfInterestRow>(csvRow);
-                csvWriter.NextRecord();
-            }
-            csvWriter.Flush();
-            writer.Flush();
-            writer.Dispose();
+            var features = _adapter.GetPointsForIndexing().Result;
+
+            Assert.AreEqual(1, features.Count);
+            _elasticSearchGateway.Received(1).CacheItems(Arg.Any<List<Feature>>());
+        }
+
+        [TestMethod]
+        public void GetPointById_WithUrl_ShouldGetItFromCacheAndFetchFile()
+        {
+            var id = "42";
+            var source = "csv";
+            var fileUrl = "fileUrl";
+            var dataContainer = new DataContainer {Routes = new List<RouteData> {new RouteData {Name = "name"}}};
+            var feature = GetValidFeature(id, source);
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_SHARE_REFERENCE, fileUrl);
+            _elasticSearchGateway.GetCachedItemById(id, source).Returns(feature);
+            _remoteFileFetcherGateway.GetFileContent(Arg.Any<string>()).Returns(new RemoteFileFetcherGatewayResponse { FileName = fileUrl, Content = new byte[0] });
+            _dataContainerConverterService.Convert(Arg.Any<byte[]>(), fileUrl, FlowFormats.GEOJSON).Returns(new FeatureCollection(new Collection<IFeature> {feature}).ToBytes());
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(dataContainer);
+
+            var point = _adapter.GetPointOfInterestById(id, Languages.HEBREW).Result;
+
+            Assert.IsNotNull(point);
+            Assert.IsNotNull(point.DataContainer);
+            Assert.AreEqual(dataContainer.Routes.Count, point.DataContainer.Routes.Count);
         }
     }
 }

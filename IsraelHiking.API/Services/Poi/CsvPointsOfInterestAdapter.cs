@@ -76,6 +76,9 @@ namespace IsraelHiking.API.Services.Poi
     /// </summary>
     public class CsvPointsOfInterestAdapter : BasePointsOfInterestAdapter
     {
+        /// <summary>
+        /// The directory where to look for the csv files
+        /// </summary>
         public const string CSV_DIRECTORY = "CSV";
 
         private readonly IFileProvider _fileProvider;

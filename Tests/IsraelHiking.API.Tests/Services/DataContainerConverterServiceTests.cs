@@ -380,5 +380,23 @@ namespace IsraelHiking.API.Tests.Services
             Assert.AreEqual(1, dataContainer.Routes.First().Markers.First().Urls.Count);
             Assert.AreEqual(url, dataContainer.Routes.First().Markers.First().Urls.First().Url);
         }
+
+        [TestMethod]
+        public void ConvertKmzToGeoJson_ShouldConvert()
+        {
+            var zipfileStream = new MemoryStream();
+            using (var zipOutputStream = new ZipOutputStream(zipfileStream))
+            {
+                ZipEntry entry = new ZipEntry("file.kml");
+                zipOutputStream.PutNextEntry(entry);
+                new MemoryStream(_randomBytes).CopyTo(zipOutputStream);
+                zipOutputStream.CloseEntry();
+            }
+            _gpsBabelGateway.ConvertFileFromat(Arg.Any<byte[]>(), FlowFormats.KML_BABEL_FORMAT, FlowFormats.GPX_BABEL_FORMAT).Returns(_simpleGpx.ToBytes());
+
+            var converterd = _converterService.Convert(zipfileStream.ToArray(), "file.kmz", FlowFormats.GEOJSON).Result;
+
+            Assert.AreNotEqual(0, converterd.Length);
+        }
     }
 }

@@ -108,7 +108,7 @@ namespace IsraelHiking.API.Services
 
         /// <summary>
         /// This method created a list containig the converters needed in order to get from input to output.
-        /// The algorithm used here is simple and assumes maximum 2 converters.
+        /// It uses recursive calls to find them.
         /// </summary>
         /// <param name="inputFormat"></param>
         /// <param name="outputFormat"></param>
@@ -116,20 +116,24 @@ namespace IsraelHiking.API.Services
         private List<IConverterFlowItem> GetConvertersList(string inputFormat, string outputFormat)
         {
             var inputConverters = _converterFlowItems.Where(c => c.Input == inputFormat).ToList();
-            var outputConverters = _converterFlowItems.Where(c => c.Output == outputFormat).ToList();
+            var inputOutputConverter = inputConverters.FirstOrDefault(i => i.Output == outputFormat);
+            if (inputOutputConverter != null)
+            {
+                return new List<IConverterFlowItem> { inputOutputConverter };
+            }
 
-            var singleConverter = inputConverters.Intersect(outputConverters).FirstOrDefault();
-            if (singleConverter != null)
+            foreach (var converterFlowItem in inputConverters)
             {
-                return new List<IConverterFlowItem> { singleConverter };
+                var converters = GetConvertersList(converterFlowItem.Output, outputFormat);
+                if (!converters.Any())
+                {
+                    continue;
+                }
+                var list = new List<IConverterFlowItem> {converterFlowItem};
+                list.AddRange(converters);
+                return list;
             }
-            var firstConverter = inputConverters.FirstOrDefault(ci => outputConverters.Any(co => co.Input == ci.Output));
-            if (firstConverter == null)
-            {
-                return new List<IConverterFlowItem>();
-            }
-            var lastConverter = outputConverters.FirstOrDefault(c => c.Input == firstConverter.Output && c.Output == outputFormat);
-            return new List<IConverterFlowItem> { firstConverter, lastConverter };
+            return new List<IConverterFlowItem>();
         }
 
         private string GetGpsBabelFormat(string fileNameOrFormat, byte[] content = null)

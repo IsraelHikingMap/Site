@@ -1,5 +1,6 @@
 ﻿using Swashbuckle.AspNetCore.SwaggerGen;
 using System.Collections.Generic;
+using System.Linq;
 using Swashbuckle.AspNetCore.Swagger;
 
 namespace IsraelHiking.API.Swagger
@@ -20,7 +21,12 @@ namespace IsraelHiking.API.Swagger
             {
                 operation.Parameters = new List<IParameter>();
             }
+            var queryParameters = operation.Parameters.OfType<NonBodyParameter>().Where(p => p.In == "query").ToArray();
             operation.Parameters.Clear();
+            foreach (var queryParameter in queryParameters)
+            {
+                operation.Parameters.Add(queryParameter);
+            }
             operation.Parameters.Add(new NonBodyParameter
             {
                 Name = "file", // must match parameter name from controller method
