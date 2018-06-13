@@ -45,6 +45,7 @@ namespace IsraelHiking.API.Controllers
         /// <param name="idRegExPattern">The regular expersion for the id field to fill - for example &amp;id=(\d+)</param>
         /// <param name="icon">icon to add - for example icon-tint or icon-waterfall</param>
         /// <param name="iconColor">The color for the icon</param>
+        /// <param name="sourceImageUrl">A url to a small image representing this source</param>
         /// <returns></returns>
         [HttpPost]
         [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
