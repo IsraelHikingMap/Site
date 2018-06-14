@@ -78,7 +78,7 @@ export class OsmUserService {
                 oauth_consumer_key: data.consumerKey,
                 oauth_secret: data.consumerSecret,
                 auto: true, // show a login form if the user is not authenticated and you try to do a call
-                landing: "oauth-close-window.html",
+                landing: Urls.baseAddress + "/oauth-close-window.html",
                 url: this.baseUrl
             } as OSMAuth.OSMAuthOptions);
             if (this.authorizationService.osmToken == null) {
