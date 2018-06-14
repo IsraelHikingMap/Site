@@ -45,7 +45,7 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 };
                 if (this.hashService.getPoiSourceAndId() != null &&
                     this.hashService.getPoiSourceAndId().id !== poiSourceAndId.id) {
-                    this.sidebarService.hide();
+                    this.sidebarService.hideWithoutChangingAddressbar();
                 }
                 if (this.hashService.getPoiSourceAndId() == null && this.sidebarService.isVisible) {
                     this.sidebarService.toggle("public-poi");
@@ -58,7 +58,7 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 this.hashService.setApplicationState("poi", null);
                 this.hashService.setApplicationState("url", null);
                 this.hashService.setApplicationState("share", null);
-                this.sidebarService.hide();
+                this.sidebarService.hideWithoutChangingAddressbar();
             }
         });
     }

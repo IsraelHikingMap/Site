@@ -11,8 +11,7 @@ export class SidebarService {
     public isVisible: boolean;
 
     constructor(private readonly hashService: HashService) {
-        this.isVisible = false;
-        this.viewName = "";
+        this.hideWithoutChangingAddressbar();
     }
 
     public toggle = (viewName: SidebarView) => {
@@ -28,9 +27,13 @@ export class SidebarService {
     }
 
     public hide = () => {
-        this.isVisible = false;
-        this.viewName = "";
+        this.hideWithoutChangingAddressbar();
         this.hashService.setApplicationState("poi", null);
         this.hashService.resetAddressbar();
+    }
+
+    public hideWithoutChangingAddressbar() {
+        this.isVisible = false;
+        this.viewName = "";
     }
 }
