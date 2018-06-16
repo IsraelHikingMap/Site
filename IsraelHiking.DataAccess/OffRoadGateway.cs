@@ -212,10 +212,9 @@ namespace IsraelHiking.DataAccess
                 }
                 var coordinates = trackLayers.layers.First().path.Select(p => new Coordinate(p.longitude, p.latitude)).ToArray();
                 var lineString = new LineString(coordinates);
-                var features = new List<IFeature> { new Feature(lineString, attributes) };
-                return new FeatureCollection(new Collection<IFeature>(features));
+                var feature = new Feature(lineString, attributes);
+                return new FeatureCollection(new Collection<IFeature> { feature });
             }
-
         }
     }
 }

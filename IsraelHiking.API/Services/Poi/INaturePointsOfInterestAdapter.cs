@@ -1,11 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Services.Poi
@@ -27,6 +27,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="iNatureGateway"></param>
         /// <param name="repository"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="options"></param>
         /// <param name="logger"></param>
         public INaturePointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
             IElasticSearchGateway elasticSearchGateway, 
@@ -34,8 +35,14 @@ namespace IsraelHiking.API.Services.Poi
             IINatureGateway iNatureGateway,
             IRepository repository,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IOptions<ConfigurationData> options,
             ILogger logger) : 
-            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
+            base(elevationDataStorage, 
+                elasticSearchGateway, 
+                dataContainerConverterService, 
+                itmWgs84MathTransfromFactory,
+                options,
+                logger)
         {
             _iNatureGateway = iNatureGateway;
             _repository = repository;
@@ -47,14 +54,19 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
-            IFeature feature = await _elasticSearchGateway.GetCachedItemById(id, Source);
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
-            await AddExtendedData(poiItem, feature, language);
+            var featureCollection = await GetFromCacheIfExists(id);
+            if (featureCollection == null)
+            {
+                featureCollection = await _iNatureGateway.GetById(id);
+                SetToCache(featureCollection);
+            }
+            var poiItem = await ConvertToPoiExtended(featureCollection, language);
             poiItem.IsEditable = false;
             poiItem.IsArea = false;
-            if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE))
+            var mainFeature = featureCollection.Features.First();
+            if (mainFeature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE))
             {
-                var share = await _repository.GetUrlById(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
+                var share = await _repository.GetUrlById(mainFeature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
                 poiItem.DataContainer = share.DataContainer;
                 poiItem.IsRoute = true;
             }
@@ -70,7 +82,6 @@ namespace IsraelHiking.API.Services.Poi
         {
             _logger.LogInformation("Getting data from iNature.");
             var features = await _iNatureGateway.GetAll();
-            await _elasticSearchGateway.CacheItems(features);
             _logger.LogInformation($"Got {features.Count} points from iNature.");
             return features;
         }

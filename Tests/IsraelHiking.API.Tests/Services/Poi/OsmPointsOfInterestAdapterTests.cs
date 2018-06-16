@@ -24,12 +24,9 @@ namespace IsraelHiking.API.Tests.Services.Poi
     public class OsmPointsOfInterestAdapterTests : BasePointsOfInterestAdapterTestsHelper
     {
         private OsmPointsOfInterestAdapter _adapter;
-        private IElasticSearchGateway _elasticSearchGateway;
-        private IElevationDataStorage _elevationDataStorage;
         private IHttpGatewayFactory _httpGatewayFactory;
         private IOsmGeoJsonPreprocessorExecutor _osmGeoJsonPreprocessorExecutor;
         private IOsmRepository _osmRepository;
-        private IDataContainerConverterService _dataContainerConverterService;
         private IWikipediaGateway _wikipediaGateway;
         private IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
         private ITagsHelper _tagsHelper;
@@ -37,16 +34,14 @@ namespace IsraelHiking.API.Tests.Services.Poi
         [TestInitialize]
         public void TestInitialize()
         {
-            _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _elevationDataStorage = Substitute.For<IElevationDataStorage>();
+            InitializeSubstitues();
             _httpGatewayFactory = Substitute.For<IHttpGatewayFactory>();
-            _tagsHelper = new TagsHelper(new OptionsWrapper<ConfigurationData>(new ConfigurationData()));
+            _tagsHelper = new TagsHelper(_options);
             _osmGeoJsonPreprocessorExecutor = new OsmGeoJsonPreprocessorExecutor(Substitute.For<ILogger>(), new OsmGeoJsonConverter(), _tagsHelper);
             _osmRepository = Substitute.For<IOsmRepository>();
-            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
             _latestFileFetcherExecutor = Substitute.For<IOsmLatestFileFetcherExecutor>();
-            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, new ItmWgs84MathTransfromFactory(), _latestFileFetcherExecutor, _tagsHelper, Substitute.For<ILogger>());
+            _adapter = new OsmPointsOfInterestAdapter(_elasticSearchGateway, _elevationDataStorage, _httpGatewayFactory, _osmGeoJsonPreprocessorExecutor, _osmRepository, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _latestFileFetcherExecutor, _tagsHelper, _options, Substitute.For<ILogger>());
         }
 
         private IOsmGateway SetupHttpFactory()

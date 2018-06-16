@@ -7,6 +7,7 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.API.Services.Poi
@@ -27,14 +28,21 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="dataContainerConverterService"></param>
         /// <param name="wikipediaGateway"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="options"></param>
         /// <param name="logger"></param>
         public WikipediaPointsOfInterestAdapter(IElevationDataStorage elevationDataStorage,
             IElasticSearchGateway elasticSearchGateway,
             IDataContainerConverterService dataContainerConverterService,
             IWikipediaGateway wikipediaGateway,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IOptions<ConfigurationData> options,
             ILogger logger) :
-            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
+            base(elevationDataStorage, 
+                elasticSearchGateway, 
+                dataContainerConverterService, 
+                itmWgs84MathTransfromFactory,
+                options,
+                logger)
         {
             _wikipediaGateway = wikipediaGateway;
             _itmWgs84MathTransfromFactory = itmWgs84MathTransfromFactory;
@@ -46,14 +54,19 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
-            var feature = await _wikipediaGateway.GetById(id);
-            var mainFeature = feature.Features.First();
+            var featureCollection = await GetFromCacheIfExists(id);
+            if (featureCollection == null)
+            {
+                featureCollection = await _wikipediaGateway.GetById(id);
+                SetToCache(featureCollection);
+            }
+            
+            var mainFeature = featureCollection.Features.First();
             if (!mainFeature.Attributes[FeatureAttributes.POI_LANGUAGE].Equals(language))
             {
                 return null;
             }
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, language);
-            await AddExtendedData(poiItem, mainFeature, language);
+            var poiItem = await ConvertToPoiExtended(featureCollection, language);
             poiItem.IsRoute = false;
             return poiItem;
         }

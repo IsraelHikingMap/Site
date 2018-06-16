@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 using OsmSharp;
@@ -32,6 +34,7 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmRepository _osmRepository;
         private readonly IWikipediaGateway _wikipediaGateway;
         private readonly ITagsHelper _tagsHelper;
+        private readonly IOptions<ConfigurationData> _options;
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="latestFileFetcherExecutor"></param>
         /// <param name="tagsHelper"></param>
+        /// <param name="options"></param>
         /// <param name="logger"></param>
         public OsmPointsOfInterestAdapter(IElasticSearchGateway elasticSearchGateway,
             IElevationDataStorage elevationDataStorage,
@@ -58,16 +62,24 @@ namespace IsraelHiking.API.Services.Poi
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IOsmLatestFileFetcherExecutor latestFileFetcherExecutor,
             ITagsHelper tagsHelper,
-            ILogger logger
-            ) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
+            IOptions<ConfigurationData> options,
+            ILogger logger) :
+            base(elevationDataStorage,
+                elasticSearchGateway,
+                dataContainerConverterService,
+                itmWgs84MathTransfromFactory,
+                options,
+                logger)
         {
             _httpGatewayFactory = httpGatewayFactory;
             _osmGeoJsonPreprocessorExecutor = osmGeoJsonPreprocessorExecutor;
             _osmRepository = osmRepository;
             _wikipediaGateway = wikipediaGateway;
             _tagsHelper = tagsHelper;
+            _options = options;
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
         }
+
         /// <inheritdoc />
         public override string Source => Sources.OSM;
 
@@ -93,8 +105,7 @@ namespace IsraelHiking.API.Services.Poi
 
         private async Task<PointOfInterestExtended> FeatureToExtendedPoi(IFeature feature, string language)
         {
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
-            await AddExtendedData(poiItem, feature, language);
+            var poiItem = await ConvertToPoiExtended(new FeatureCollection(new Collection<IFeature> {feature}), language);
             poiItem.IsArea = feature.Geometry is Polygon || feature.Geometry is MultiPolygon;
             poiItem.IsRoute = !poiItem.IsArea && poiItem.DataContainer.Routes.Any(r => r.Segments.Count > 1);
             poiItem.IsEditable = true;

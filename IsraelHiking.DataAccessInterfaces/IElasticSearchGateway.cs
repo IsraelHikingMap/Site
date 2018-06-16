@@ -25,8 +25,8 @@ namespace IsraelHiking.DataAccessInterfaces
         Task DeleteOsmPointOfInterestById(string id);
         Task DeletePointOfInterestById(string id, string source);
 
-        Task<List<Feature>> GetCachedItems(string source);
-        Task<Feature> GetCachedItemById(string id, string source);
-        Task CacheItems(List<Feature> features);
+        Task<List<FeatureCollection>> GetCachedItems(string source);
+        Task<FeatureCollection> GetCachedItemById(string id, string source);
+        Task CacheItem(FeatureCollection featureCollection);
     }
 }

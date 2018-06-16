@@ -21,6 +21,10 @@ namespace IsraelHiking.Common
         /// </summary>
         public int MaxSegmentsNumber { get; set; }
         /// <summary>
+        /// The number of days to keep a point of interest in the cache.
+        /// </summary>
+        public int DaysToKeepPoiInCache { get; set; }
+        /// <summary>
         /// The minimal segment legth when splitting a route for D-P in meters
         /// </summary>
         public double MinimalSegmentLength { get; set; }

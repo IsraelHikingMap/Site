@@ -361,9 +361,9 @@ namespace IsraelHiking.DataAccess
             return _elasticClient.DeleteAsync<Feature>(fullId, d => d.Index(OSM_POIS_ALIAS));
         }
 
-        public async Task<List<Feature>> GetCachedItems(string source)
+        public async Task<List<FeatureCollection>> GetCachedItems(string source)
         {
-            var response = await _elasticClient.SearchAsync<Feature>(
+            var response = await _elasticClient.SearchAsync<FeatureCollection>(
                 s => s.Index(CACHE)
                     .Size(10000)
                     .Query(q =>
@@ -373,15 +373,15 @@ namespace IsraelHiking.DataAccess
             return response.Documents.ToList();
         }
 
-        public async Task<Feature> GetCachedItemById(string id, string source)
+        public async Task<FeatureCollection> GetCachedItemById(string id, string source)
         {
-            var response = await _elasticClient.GetAsync<Feature>(GetId(source, id), r => r.Index(CACHE));
+            var response = await _elasticClient.GetAsync<FeatureCollection>(GetId(source, id), r => r.Index(CACHE));
             return response.Source;
         }
 
-        public Task CacheItems(List<Feature> features)
+        public Task CacheItem(FeatureCollection featureCollection)
         {
-            return UpdateData(features, CACHE);
+            return _elasticClient.IndexAsync(featureCollection, r => r.Index(CACHE).Id(GetId(featureCollection.Features.First() as Feature)));
         }
 
         public Task<Rating> GetRating(string id, string source)

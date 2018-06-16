@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -28,13 +27,21 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="elasticSearchGateway"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="options"></param>
         /// <param name="logger"></param>
         public NakebPointsOfInterestAdapter(INakebGateway nakebGateway,
             IElevationDataStorage elevationDataStorage,
             IElasticSearchGateway elasticSearchGateway,
             IDataContainerConverterService dataContainerConverterService,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
-            ILogger logger) : base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
+            IOptions<ConfigurationData> options,
+            ILogger logger) :
+            base(elevationDataStorage,
+                elasticSearchGateway,
+                dataContainerConverterService,
+                itmWgs84MathTransfromFactory,
+                options,
+                logger)
         {
             _nakebGateway = nakebGateway;
         }
@@ -42,10 +49,13 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
-            var featureCollection = await _nakebGateway.GetById(id);
-            var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, language);
-            await AddExtendedData(poiItem, mainFeature, language);
+            var featureCollection = await GetFromCacheIfExists(id);
+            if (featureCollection == null)
+            {
+                featureCollection = await _nakebGateway.GetById(id);
+                SetToCache(featureCollection);
+            }
+            var poiItem = await ConvertToPoiExtended(featureCollection, language);
             poiItem.IsRoute = true;
             return poiItem;
         }

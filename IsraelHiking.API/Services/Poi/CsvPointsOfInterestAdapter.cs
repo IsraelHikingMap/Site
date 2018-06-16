@@ -11,6 +11,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
 
@@ -101,6 +102,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="itmWgs84MathTransfromFactory"></param>
         /// <param name="fileProvider"></param>
         /// <param name="httpGatewayFactory"></param>
+        /// <param name="options"></param>
         /// <param name="logger"></param>
         public CsvPointsOfInterestAdapter(
             IElevationDataStorage elevationDataStorage,
@@ -109,12 +111,14 @@ namespace IsraelHiking.API.Services.Poi
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
             IFileProvider fileProvider,
             IHttpGatewayFactory httpGatewayFactory,
+            IOptions<ConfigurationData> options,
             ILogger logger
         ) :
             base(elevationDataStorage,
                 elasticSearchGateway,
                 dataContainerConverterService,
                 itmWgs84MathTransfromFactory,
+                options,
                 logger)
         {
             _fileProvider = fileProvider;
@@ -133,43 +137,41 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
-            IFeature feature = await _elasticSearchGateway.GetCachedItemById(id, Source);
-            var isRoute = false;
-            if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE) &&
-                !string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString()))
+            var featureCollection = await GetFromCacheIfExists(id);
+            if (featureCollection == null)
             {
-                var content = await _remoteFileFetcherGateway.GetFileContent(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
-                var convertedBytes = await _dataContainerConverterService.Convert(content.Content, content.FileName, FlowFormats.GEOJSON);
-                feature.Geometry = convertedBytes.ToFeatureCollection().Features.FirstOrDefault()?.Geometry ?? feature.Geometry;
-                isRoute = true;
+                var feature = GetRecords().Where(r => r.Id == id).Select(ConvertCsvRowToFeature).First();
+                if (feature.Attributes.Exists(FeatureAttributes.POI_SHARE_REFERENCE) &&
+                    !string.IsNullOrWhiteSpace(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString()))
+                {
+                    var content = await _remoteFileFetcherGateway.GetFileContent(feature.Attributes[FeatureAttributes.POI_SHARE_REFERENCE].ToString());
+                    var convertedBytes = await _dataContainerConverterService.Convert(content.Content, content.FileName, FlowFormats.GEOJSON);
+                    feature.Geometry = convertedBytes.ToFeatureCollection().Features.FirstOrDefault()?.Geometry ?? feature.Geometry;
+                }
+                featureCollection = SetToCache(feature);
             }
-
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(feature, language);
-            await AddExtendedData(poiItem, feature, language);
+            var poiItem = await ConvertToPoiExtended(featureCollection, language);
             poiItem.IsEditable = false;
             poiItem.IsArea = false;
-            poiItem.IsRoute = isRoute;
+            poiItem.IsRoute = !(featureCollection.Features.First().Geometry is Point);
             
             return poiItem;
         }
 
         /// <inheritdoc />
-        public override async Task<List<Feature>> GetPointsForIndexing()
+        public override Task<List<Feature>> GetPointsForIndexing()
         {
-            _logger.LogInformation("Getting records from csv file: " + FileName);
-            var fileInfo = _fileProvider.GetFileInfo(Path.Combine(CSV_DIRECTORY, FileName));
-            var stream = fileInfo.CreateReadStream();
-            var reader = new StreamReader(stream);
-            var csv = new CsvReader(reader);
-            csv.Configuration.MissingFieldFound = null;
-            var pointsOfInterest = csv.GetRecords<CsvPointOfInterestRow>();
-            var features = pointsOfInterest.Select(ConvertCsvRowToFeature).Cast<Feature>().ToList();
-            await _elasticSearchGateway.CacheItems(features);
-            _logger.LogInformation($"Got {features.Count} records from csv file: {FileName}");
-            return features;
+            return Task.Run(() =>
+            {
+                _logger.LogInformation("Getting records from csv file: " + FileName);
+                var pointsOfInterest = GetRecords();
+                var features = pointsOfInterest.Select(ConvertCsvRowToFeature).ToList();
+                _logger.LogInformation($"Got {features.Count} records from csv file: {FileName}");
+                return features;
+            });
         }
 
-        private IFeature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest)
+        private Feature ConvertCsvRowToFeature(CsvPointOfInterestRow pointOfInterest)
         {
             var geoLocation = new AttributesTable
             {
@@ -195,6 +197,16 @@ namespace IsraelHiking.API.Services.Poi
                 {FeatureAttributes.WEBSITE, pointOfInterest.Website}
             };
             return new Feature(new Point(new Coordinate(pointOfInterest.Longitude, pointOfInterest.Latitude)), table);
+        }
+
+        private IEnumerable<CsvPointOfInterestRow> GetRecords()
+        {
+            var fileInfo = _fileProvider.GetFileInfo(Path.Combine(CSV_DIRECTORY, FileName));
+            var stream = fileInfo.CreateReadStream();
+            var reader = new StreamReader(stream);
+            var csv = new CsvReader(reader);
+            csv.Configuration.MissingFieldFound = null;
+            return csv.GetRecords<CsvPointOfInterestRow>();
         }
     }
 }

@@ -18,18 +18,13 @@ namespace IsraelHiking.API.Tests.Services.Poi
     {
         private NakebPointsOfInterestAdapter _adapter;
         private INakebGateway _nakebGateway;
-        private IElevationDataStorage _elevationDataStorage;
-        private IElasticSearchGateway _elasticSearchGateway;
-        private IDataContainerConverterService _dataContainerConverterService;
 
         [TestInitialize]
         public void TestInitialize()
         {
+            InitializeSubstitues();
             _nakebGateway = Substitute.For<INakebGateway>();
-            _elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
+            _adapter = new NakebPointsOfInterestAdapter(_nakebGateway, _elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _itmWgs84MathTransfromFactory, _options, Substitute.For<ILogger>());
         }
 
         [TestMethod]

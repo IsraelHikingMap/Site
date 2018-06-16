@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -10,7 +11,9 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
+using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -37,6 +40,8 @@ namespace IsraelHiking.API.Services.Poi
         
         private readonly IMathTransform _wgs84ItmMathTransform;
 
+        private readonly ConfigurationData _options;
+
         /// <inheritdoc />
         public abstract string Source { get; }
         /// <inheritdoc />
@@ -51,17 +56,20 @@ namespace IsraelHiking.API.Services.Poi
         /// <param name="elasticSearchGateway"></param>
         /// <param name="dataContainerConverterService"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="options"></param>
         /// <param name="logger"></param>
         protected BasePointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
             IElasticSearchGateway elasticSearchGateway, 
             IDataContainerConverterService dataContainerConverterService,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory, 
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IOptions<ConfigurationData> options,
             ILogger logger)
         {
             _elevationDataStorage = elevationDataStorage;
             _elasticSearchGateway = elasticSearchGateway;
             _dataContainerConverterService = dataContainerConverterService;
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
+            _options = options.Value;
             _logger = logger;
         }
 
@@ -94,39 +102,42 @@ namespace IsraelHiking.API.Services.Poi
         /// <summary>
         /// Adds extended data to point of interest object
         /// </summary>
-        /// <param name="poiItem">The object to add properties to</param>
-        /// <param name="feature">The feature for reference</param>
-        /// <param name="language">he user interface language</param>
+        /// <param name="featureCollection">The features to convert</param>
+        /// <param name="language">the user interface language</param>
         /// <returns></returns>
-        protected async Task AddExtendedData(PointOfInterestExtended poiItem, IFeature feature, string language)
+        protected async Task<PointOfInterestExtended> ConvertToPoiExtended(FeatureCollection featureCollection, string language)
         {
-            await SetDataContainerAndLength(poiItem, feature);
+            var mainFeature = featureCollection.Features.Count == 1
+                ? featureCollection.Features.First()
+                : featureCollection.Features.First(f => f.Geometry is LineString);
+            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, language);
+            await SetDataContainerAndLength(poiItem, featureCollection);
 
-            poiItem.References = GetReferences(feature, language);
-            poiItem.ImagesUrls = feature.Attributes.GetNames()
+            poiItem.References = GetReferences(mainFeature, language);
+            poiItem.ImagesUrls = mainFeature.Attributes.GetNames()
                 .Where(n => n.StartsWith(FeatureAttributes.IMAGE_URL))
-                .Select(n => feature.Attributes[n].ToString())
+                .Select(n => mainFeature.Attributes[n].ToString())
                 .Where(n => !string.IsNullOrWhiteSpace(n))
                 .ToArray();
-            poiItem.Description = feature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
+            poiItem.Description = mainFeature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
             poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
             poiItem.IsEditable = false;
-            var featureFromDatabase = await _elasticSearchGateway.GetPointOfInterestById(feature.Attributes[FeatureAttributes.ID].ToString(), Source);
+            var featureFromDatabase = await _elasticSearchGateway.GetPointOfInterestById(mainFeature.Attributes[FeatureAttributes.ID].ToString(), Source);
             if (featureFromDatabase != null)
             {
                 poiItem.CombinedIds = featureFromDatabase.GetIdsFromCombinedPoi();
             }
-
+            return poiItem;
         }
 
-        private async Task SetDataContainerAndLength(PointOfInterestExtended poiItem, IFeature feature)
+        private async Task SetDataContainerAndLength(PointOfInterestExtended poiItem, FeatureCollection featureCollection)
         {
-            foreach (var coordinate in feature.Geometry.Coordinates)
+            foreach (var coordinate in featureCollection.Features.SelectMany(f => f.Geometry.Coordinates))
             {
                 coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
             }
             poiItem.DataContainer = await _dataContainerConverterService.ToDataContainer(
-                new FeatureCollection(new Collection<IFeature> {feature}).ToBytes(), poiItem.Title + ".geojson");
+                featureCollection.ToBytes(), poiItem.Title + ".geojson");
             foreach (var coordinate in poiItem.DataContainer.Routes
                 .SelectMany(r => r.Segments)
                 .SelectMany(s => s.Latlngs)
@@ -174,6 +185,51 @@ namespace IsraelHiking.API.Services.Poi
                 });
             }
             return references.ToArray();
+        }
+
+        /// <summary>
+        /// This method will get from cahce if the items was stored there.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
+        protected async Task<FeatureCollection> GetFromCacheIfExists(string id)
+        {
+            var featureCollection = await _elasticSearchGateway.GetCachedItemById(id, Source);
+            if (featureCollection == null)
+            {
+                return null;
+            }
+            var feature = featureCollection.Features.First();
+            if (!feature.Attributes.Exists(FeatureAttributes.POI_CACHE_DATE))
+            {
+                return null;
+            }
+            var date = DateTime.Parse(feature.Attributes[FeatureAttributes.POI_CACHE_DATE].ToString());
+            return (date - DateTime.Now).TotalDays <= _options.DaysToKeepPoiInCache 
+                ? featureCollection 
+                : null;
+        }
+
+        /// <summary>
+        /// This method saves a complete feature to cache.
+        /// </summary>
+        /// <param name="feature"></param>
+        protected FeatureCollection SetToCache(Feature feature)
+        {
+            var featureCollection = new FeatureCollection(new Collection<IFeature> { feature });
+            SetToCache(featureCollection);
+            return featureCollection;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="featureCollection"></param>
+        /// <returns></returns>
+        protected void SetToCache(FeatureCollection featureCollection)
+        {
+            featureCollection.Features.First().Attributes.AddOrUpdate(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.ToLongDateString());
+            _elasticSearchGateway.CacheItem(featureCollection);
         }
     }
 }

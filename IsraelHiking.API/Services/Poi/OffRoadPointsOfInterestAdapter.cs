@@ -1,12 +1,11 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -16,14 +15,30 @@ namespace IsraelHiking.API.Services.Poi
     public class OffRoadPointsOfInterestAdapter: BasePointsOfInterestAdapter
     {
         private readonly IOffRoadGateway _offRoadGateway;
-        /// <inheritdoc />
-        public OffRoadPointsOfInterestAdapter(IElevationDataStorage elevationDataStorage, 
-            IElasticSearchGateway elasticSearchGateway, 
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="elevationDataStorage"></param>
+        /// <param name="elasticSearchGateway"></param>
+        /// <param name="offRoadGateway"></param>
+        /// <param name="dataContainerConverterService"></param>
+        /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="options"></param>
+        /// <param name="logger"></param>
+        public OffRoadPointsOfInterestAdapter(IElevationDataStorage elevationDataStorage,
+            IElasticSearchGateway elasticSearchGateway,
             IOffRoadGateway offRoadGateway,
             IDataContainerConverterService dataContainerConverterService,
             IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
-            ILogger logger) : 
-            base(elevationDataStorage, elasticSearchGateway, dataContainerConverterService, itmWgs84MathTransfromFactory, logger)
+            IOptions<ConfigurationData> options,
+            ILogger logger) :
+            base(elevationDataStorage,
+                elasticSearchGateway,
+                dataContainerConverterService,
+                itmWgs84MathTransfromFactory,
+                options,
+                logger)
         {
             _offRoadGateway = offRoadGateway;
         }
@@ -34,10 +49,14 @@ namespace IsraelHiking.API.Services.Poi
         /// <inheritdoc />
         public override async Task<PointOfInterestExtended> GetPointOfInterestById(string id, string language)
         {
-            var featureCollection = await _offRoadGateway.GetById(id);
-            var mainFeature = featureCollection.Features.FirstOrDefault(f => f.Geometry is LineString);
-            var poiItem = await ConvertToPoiItem<PointOfInterestExtended>(mainFeature, language);
-            await AddExtendedData(poiItem, mainFeature, language);
+
+            var featureCollection = await GetFromCacheIfExists(id);
+            if (featureCollection == null)
+            {
+                featureCollection = await _offRoadGateway.GetById(id);
+                SetToCache(featureCollection);
+            }  
+            var poiItem = await ConvertToPoiExtended(featureCollection, language);
             poiItem.IsRoute = true;
             return poiItem;
         }

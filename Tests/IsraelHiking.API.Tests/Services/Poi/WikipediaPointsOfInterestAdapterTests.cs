@@ -18,18 +18,13 @@ namespace IsraelHiking.API.Tests.Services.Poi
     {
         private WikipediaPointsOfInterestAdapter _adapter;
         private IWikipediaGateway _wikipediaGateway;
-        private IElevationDataStorage _elevationDataStorage;
-        private IElasticSearchGateway _elasticSearchGateway;
-        private IDataContainerConverterService _dataContainerConverterService;
 
         [TestInitialize]
         public void TestInialize()
         {
+            InitializeSubstitues();
             _wikipediaGateway = Substitute.For<IWikipediaGateway>();
-            _elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
+            _adapter = new WikipediaPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _dataContainerConverterService, _wikipediaGateway, _itmWgs84MathTransfromFactory, _options, Substitute.For<ILogger>());
         }
 
         [TestMethod]

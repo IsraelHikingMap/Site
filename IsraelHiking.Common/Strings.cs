@@ -50,6 +50,7 @@
         public const string POI_NAMES = POI_PREFIX + "Names";
         public const string POI_CONTAINER = POI_PREFIX + "Container";
         public const string POI_SHARE_REFERENCE = POI_PREFIX + "ShareReference";
+        public const string POI_CACHE_DATE = POI_PREFIX + "CacheDate";
         public const string OSM_NODES = "osmNodes";
         public const string WEBSITE = "website";
         public const string WIKIPEDIA = "wikipedia";

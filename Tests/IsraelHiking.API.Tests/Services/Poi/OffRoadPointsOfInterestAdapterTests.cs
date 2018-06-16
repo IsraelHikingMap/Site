@@ -17,18 +17,13 @@ namespace IsraelHiking.API.Tests.Services.Poi
     {
         private OffRoadPointsOfInterestAdapter _adapter;
         private IOffRoadGateway _offRoadGateway;
-        private IElevationDataStorage _elevationDataStorage;
-        private IElasticSearchGateway _elasticSearchGateway;
-        private IDataContainerConverterService _dataContainerConverterService;
 
         [TestInitialize]
         public void TestInialize()
         {
+            InitializeSubstitues();
             _offRoadGateway = Substitute.For<IOffRoadGateway>();
-            _elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            _elasticSearchGateway = Substitute.For<IElasticSearchGateway>();
-            _dataContainerConverterService = Substitute.For<IDataContainerConverterService>();
-            _adapter = new OffRoadPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _offRoadGateway, _dataContainerConverterService, new ItmWgs84MathTransfromFactory(), Substitute.For<ILogger>());
+            _adapter = new OffRoadPointsOfInterestAdapter(_elevationDataStorage, _elasticSearchGateway, _offRoadGateway, _dataContainerConverterService, _itmWgs84MathTransfromFactory, _options, Substitute.For<ILogger>());
         }
 
         [TestMethod]
