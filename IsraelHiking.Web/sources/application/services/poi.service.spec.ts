@@ -32,12 +32,13 @@ describe("Poi Service", () => {
     it("Should get categories from server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-        poiService.getCategories("Points of Interest").then((resutls) => {
+        let promise = poiService.getCategories("Points of Interest").then((resutls) => {
             expect(resutls).not.toBeNull();
             expect(resutls.length).toBe(1);
         }, fail);
 
         mockBackend.match(() => true)[0].flush([{ icon: "icon", name: "category" }]);
+        return promise;
     })));
 
     it("Should get available categories types", (inject([PoiService], (poiService: PoiService) => {
@@ -50,13 +51,16 @@ describe("Poi Service", () => {
         let northEast = L.latLng(1, 2);
         let southWest = L.latLng(3, 4);
 
-        poiService.getPoints(northEast, southWest, []);
+        let promise = poiService.getPoints(northEast, southWest, []).then((res) => {
+            expect(res).not.toBeNull();
+        });
 
         mockBackend.expectOne((request) => {
             let paramsString = request.params.toString();
             return paramsString.includes(northEast.lat + "," + northEast.lng) &&
                 paramsString.includes(southWest.lat + "," + southWest.lng);
-        });
+        }).flush({});
+        return promise;
     })));
 
     it("Should get a point by id and source from the server", (inject([PoiService, HttpTestingController],
@@ -65,27 +69,36 @@ describe("Poi Service", () => {
         let id = "42";
         let source = "source";
 
-        poiService.getPoint(id, source);
+        let promise = poiService.getPoint(id, source).then((res) => {
+            expect(res).not.toBeNull();
+        });
 
         mockBackend.expectOne((request: HttpRequest<any>) => {
             return request.url.includes(id) &&
                 request.url.includes(source);
-        });
+        }).flush({});
+        return promise;
     })));
 
     it("Should update point using the server", inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-        poiService.uploadPoint({} as IPointOfInterestExtended, [{ name: "file.name" } as File]);
+        let promise = poiService.uploadPoint({} as IPointOfInterestExtended, [{ name: "file.name" } as File]).then((res) => {
+            expect(res).not.toBeNull();
+        });
 
-        mockBackend.expectOne((request) => request.url.includes(Urls.poi));
+        mockBackend.expectOne((request) => request.url.includes(Urls.poi)).flush({});
+        return promise;
     }));
 
     it("Should update rating using the server", inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-        poiService.uploadRating({} as IRating);
+        let promise = poiService.uploadRating({} as IRating).then((res) => {
+            expect(res).not.toBeNull();
+        });
 
-        mockBackend.expectOne((req: HttpRequest<any>) => req.method === "POST");
+        mockBackend.expectOne((req: HttpRequest<any>) => req.method === "POST").flush({});
+        return promise;
     }));
 });

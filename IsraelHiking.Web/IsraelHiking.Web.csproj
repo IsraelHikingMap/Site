@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Content Remove=".angular-cli.json" />
+    <Content Remove="angular.json" />
     <Content Remove="package-lock.json" />
     <Content Remove="package.json" />
     <Content Remove="tsconfig.json" />
@@ -39,10 +40,10 @@
     <Content Include="IsraelHiking.Web.nlog">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+    <None Include="angular.json" />
     <None Include="package-lock.json" />
     <None Include="sources\tsconfig.app.json" />
     <None Include="sources\tsconfig.spec.json" />
-    <None Include=".angular-cli.json" />
     <None Include="package.json" />
     <None Include="tsconfig.json" />
     <None Include="tslint.json" />

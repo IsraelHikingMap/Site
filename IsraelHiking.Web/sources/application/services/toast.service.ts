@@ -16,7 +16,7 @@ export class ToastService {
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
             duration: this.duration,
-            extraClasses: ["mat-toolbar", "mat-warn"] // for some reason warn is red
+            panelClass: ["mat-toolbar", "mat-warn"] // for some reason warn is red
         });
     }
 
@@ -24,7 +24,7 @@ export class ToastService {
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
             duration: this.duration,
-            extraClasses: ["mat-toolbar", "mat-accent"] // for some reason accent is yellow
+            panelClass: ["mat-toolbar", "mat-accent"] // for some reason accent is yellow
         });
     }
 
@@ -32,7 +32,7 @@ export class ToastService {
         this.snackbar.open(message, title, {
             direction: this.resources.direction,
             duration: this.duration,
-            extraClasses: ["mat-toolbar", "mat-primary"]
+            panelClass: ["mat-toolbar", "mat-primary"]
         });
     }
 

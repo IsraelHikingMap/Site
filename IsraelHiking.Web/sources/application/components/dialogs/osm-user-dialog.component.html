@@ -35,7 +35,7 @@
         </label>
     </div>
     <div mat-dialog-content #dialogContentForScroll id="dialogContentForScroll">
-        <mat-tab-group [(selectedIndex)]="state.selectedTabIndex" [dynamicHeight]="'true'" (selectChange)="setSelectedTab()">
+        <mat-tab-group [(selectedIndex)]="state.selectedTabIndex" [dynamicHeight]="'true'" (selectedTabChange)="setSelectedTab()">
             <mat-tab label="{{resources.myShares}}">
                 <br />
                 <div *ngFor="let shareUrl of filteredShareUrls | paginate: { itemsPerPage: 5, currentPage: state.sharesPage, id: 'sharesPaging' }" class="item">

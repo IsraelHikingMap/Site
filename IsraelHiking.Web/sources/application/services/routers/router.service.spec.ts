@@ -28,7 +28,7 @@ describe("RouterService", () => {
 
     it("Should route between two points", (inject([RouterService, HttpTestingController],
         async (router: RouterService, mockBackend: HttpTestingController) => {
-            router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
+            let promise = router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
                 expect(data.length).toBe(2);
                 expect(data[1].latlngs.length).toBe(3);
             }, fail);
@@ -49,27 +49,30 @@ describe("RouterService", () => {
                         } as GeoJSON.Feature<GeoJSON.LineString>
                     ]
                 } as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>);
+            return promise;
         })));
 
     it("Should use none router when reponse is not a geojson", inject([RouterService, HttpTestingController],
         async (router: RouterService, mockBackend: HttpTestingController) => {
 
-        router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
+        let promise = router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
             expect(data.length).toBe(1);
             expect(data[0].latlngs.length).toBe(2);
         }, fail);
 
         mockBackend.expectOne(() => true).flush({});
+        return promise;
     }));
 
     it("Should use none router when getting error response from server", inject([RouterService, HttpTestingController],
         async (router: RouterService, mockBackend: HttpTestingController) => {
 
-        router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
+        let promise = router.getRoute(L.latLng(1, 1), L.latLng(2, 2), "Hike").then((data) => {
             expect(data.length).toBe(1);
             expect(data[0].latlngs.length).toBe(2);
         }, fail);
 
         mockBackend.expectOne(() => true).flush(null, { status: 500, statusText: "Server error" });
+        return promise;
     }));
 });

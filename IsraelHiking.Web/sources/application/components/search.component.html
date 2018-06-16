@@ -17,7 +17,7 @@
         </div>
         <a class="cursor-pointer control-icon-first" (click)="toggleVisibility($event)"><i class="fa icon-search fa-lg"></i></a>
     </div>
-    <br *ngIf="isDirectional"/>
+    <br *ngIf="isDirectional" />
     <div fxLayout="row" *ngIf="isDirectional">
         <div class="pull-left leaflet-bar">
             <a class="cursor-pointer pull-left" (click)="setRouting('Hike', $event)" [ngClass]="{'leaflet-active' : routingType == 'Hike' }" matTooltip="{{resources.hikeRouting}}" matTooltipPosition="below"><i class="fa icon-hike fa-lg"></i></a>
@@ -26,7 +26,7 @@
             <a class="cursor-pointer pull-left" (click)="setRouting('None', $event)" [ngClass]="{'leaflet-active' : routingType == 'None' }" matTooltip="{{resources.straightLines}}" matTooltipPosition="below"><i class="fa icon-none fa-lg"></i></a>
         </div>
     </div>
-    <br *ngIf="isDirectional"/>
+    <br *ngIf="isDirectional" />
     <div class="leaflet-bar" *ngIf="isDirectional" fxLayout="row">
         <a class="cursor-pointer control-icon-last" (click)="searchRoute($event)"><i class="fa icon-arrow-left fa-lg"></i></a>
         <div [dir]="resources.direction">

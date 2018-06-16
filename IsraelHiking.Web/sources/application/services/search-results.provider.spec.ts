@@ -21,10 +21,11 @@ describe("SearchResultsProvider", () => {
 
     it("Should get all kind of features in results", (inject([SearchResultsProvider, HttpTestingController],
         async (provider: SearchResultsProvider, mockBackend: HttpTestingController) => {
-            provider.getResults("searchTerm", true).then((results: ISearchResultsPointOfInterest[]) => {
+            let promise = provider.getResults("searchTerm", true).then((results: ISearchResultsPointOfInterest[]) => {
                 expect(results.length).toBe(1);
             }, fail);
 
-            mockBackend.match(() => true)[0].flush([{id: "42"} as ISearchResultsPointOfInterest]);
+            mockBackend.match(() => true)[0].flush([{ id: "42" } as ISearchResultsPointOfInterest]);
+            return promise;
         })));
 });

@@ -57,17 +57,23 @@ describe("FileService", () => {
 
         spyOn(FileSaverFunctions, "saveAs");
 
-        fileService.openFromUrl("someurl").then(() => { }, fail);
+        let promise = fileService.openFromUrl("someurl").then((res) => {
+            expect(res).not.toBeNull();
+        }, fail);
 
         mockBackend.expectOne(Urls.files + "?url=someurl").flush(btoa("bytes"));
+        return promise;
     }));
 
     it("Should open from url by uploading", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-        fileService.openFromFile(new Blob([""]) as File).then(() => { }, fail);
+        let promise = fileService.openFromFile(new Blob([""]) as File).then((res) => {
+            expect(res).not.toBeNull();
+        }, fail);
 
-        mockBackend.expectOne(Urls.openFile);
+        mockBackend.expectOne(Urls.openFile).flush({});
+        return promise;
     }));
 
     it("Should not get a file from event when there's no files", inject([FileService], (fileService: FileService) => {

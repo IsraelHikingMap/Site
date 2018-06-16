@@ -1,10 +1,15 @@
 ﻿import { SidebarService } from "./sidebar.service";
+import { HashService } from "./hash.service";
 
 describe("SidebarService", () => {
     let service: SidebarService;
 
     beforeEach(() => {
-        service = new SidebarService();
+        let hashService = {
+            setApplicationState: () => { },
+            resetAddressbar: () => { }
+        } as any as HashService;
+        service = new SidebarService(hashService);
     });
 
     it("Should initialize hidden", () => {
