@@ -139,7 +139,7 @@ namespace IsraelHiking.API.Services
                 Color = "black",
                 Name = Categories.VIEWPOINT
             };
-            var viewpointIcon = new IconColorCategory("icon-viewpoint", Categories.VIEWPOINT, "black", "Viewpoint");
+            var viewpointIcon = new IconColorCategory("icon-viewpoint", Categories.VIEWPOINT, "brown", "Viewpoint");
             viewPointCategory.Items.Add(new IconAndTags(viewpointIcon, "tourism", "viewpoint"));
 
             return viewPointCategory;
@@ -166,7 +166,7 @@ namespace IsraelHiking.API.Services
                 new KeyValuePair<string, string>("leisure", "picnic"),
                 new KeyValuePair<string, string>("leisure", "picnic_table"),
             }));
-            var campsiteIcon = new IconColorCategory("icon-campsite", Categories.CAMPING, "black", "Campsite");
+            var campsiteIcon = new IconColorCategory("icon-campsite", Categories.CAMPING, "brown", "Campsite");
             campingCategory.Items.Add(new IconAndTags(campsiteIcon, "tourism", "camp_site"));
             return campingCategory;
         }

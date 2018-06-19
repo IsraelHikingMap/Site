@@ -96,6 +96,10 @@ ngx-image-gallery .image {
     font-size: 0.75em !important;
 }
 
+.stack-icon-large {
+    font-size: 1.25em !important;
+}
+
 .has-extra-data {
     width: 4px;
     height: 4px;

@@ -44,7 +44,7 @@ export class IconsService {
 
     private static POI_MARKER_HTML = "<span class='fa-stack fa-lg'>{{has-extra-data}}" +
     IconsService.POI_BACKGROUND +
-    "<i class='fa {{icon}} fa-stack-1x stack-icon-top' style='color:{{color}};'></i>" +
+    "<i class='fa {{icon}} fa-stack-1x stack-icon-top stack-icon-large' style='color:{{color}};'></i>" +
     "</span>";
 
     public static getAvailableIconTypes(): string[] {
