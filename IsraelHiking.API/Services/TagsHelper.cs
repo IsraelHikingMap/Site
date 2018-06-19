@@ -136,7 +136,7 @@ namespace IsraelHiking.API.Services
             var viewPointCategory = new Category
             {
                 Icon = "icon-viewpoint",
-                Color = "black",
+                Color = "brown",
                 Name = Categories.VIEWPOINT
             };
             var viewpointIcon = new IconColorCategory("icon-viewpoint", Categories.VIEWPOINT, "brown", "Viewpoint");
