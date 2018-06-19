@@ -7,7 +7,10 @@ import { IPoiMainInfoData } from "./poi-main-info.component";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { SidebarService } from "../../services/sidebar.service";
-import { IPointOfInterestExtended, PoiService, IRating, IRater, IIconColorLabel, IReference } from "../../services/poi.service";
+import {
+    IPointOfInterestExtended, PoiService, IRating, IRater,
+    IIconColorLabel, IReference, ISelectableCategory
+} from "../../services/poi.service";
 import { MapService } from "../../services/map.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
@@ -15,7 +18,6 @@ import { ToastService } from "../../services/toast.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
 import { RouteLayerFactory } from "../../services/layers/routelayers/route-layer.factory";
-import { ISelectableCategory } from "../dialogs/update-point-dialog.component";
 import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
 import { HashService, IPoiSourceAndId } from "../../services/hash.service";
 import * as Common from "../../common/IsraelHiking";
@@ -98,16 +100,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
     }
 
     private async initializeCategories(markerIcon: string) {
-        let categories = await this.poiService.getCategories("Points of Interest");
+        let categories = await this.poiService.getSelectableCategories();
         for (let category of categories) {
-            this.categories.push({
-                name: category.name,
-                isSelected: false,
-                label: category.name,
-                icon: category.icon,
-                color: category.color,
-                icons: category.items.map(i => i.iconColorCategory)
-            } as ISelectableCategory);
+            this.categories.push(category);
         }
         this.selectedCategory = null;
 

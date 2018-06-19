@@ -73,6 +73,12 @@ export interface IPoiSocialLinks {
     whatsapp: string;
 }
 
+export interface ISelectableCategory extends ICategory {
+    selectedIcon: IIconColorLabel;
+    icons: IIconColorLabel[];
+    label: string;
+}
+
 @Injectable()
 export class PoiService {
     private categoriesMap: Map<CategoriesType, ICategory[]>;
@@ -107,6 +113,25 @@ export class PoiService {
 
     public getCategoriesTypes(): CategoriesType[] {
         return Array.from(this.categoriesMap.keys());
+    }
+
+    public getSelectableCategories = async (): Promise<ISelectableCategory[]> => {
+        let categories = await this.getCategories("Points of Interest");
+        let selectableCategories = [] as ISelectableCategory[];
+        for (let category of categories) {
+            if (category.name === "Wikipedia" || category.name === "iNature") {
+                continue;
+            }
+            selectableCategories.push({
+                name: category.name,
+                isSelected: false,
+                label: category.name,
+                icon: category.icon,
+                color: category.color,
+                icons: category.items.map(i => i.iconColorCategory)
+            } as ISelectableCategory);
+        }
+        return selectableCategories;
     }
 
     public getPoints(northEast: L.LatLng, southWest: L.LatLng, categoriesTypes: string[]): Promise<IPointOfInterest[]> {

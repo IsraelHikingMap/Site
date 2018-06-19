@@ -67,7 +67,7 @@
         <div fxLayout="row">
             <div fxFlex="90">
                 <mat-form-field fxFill>
-                    <mat-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (change)="selectCategory($event)" fxFill>
+                    <mat-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)" fxFill>
                         <mat-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.label)}}</mat-option>
                     </mat-select>
                 </mat-form-field>

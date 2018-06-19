@@ -5,15 +5,12 @@ import * as _ from "lodash";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { PoiService, IPointOfInterestExtended, ICategory, IIconColorLabel, IReference } from "../../services/poi.service";
+import {
+    PoiService, IPointOfInterestExtended, IIconColorLabel,
+    IReference, ISelectableCategory
+} from "../../services/poi.service";
 import { ToastService } from "../../services/toast.service";
 import { OsmUserService } from "../../services/osm-user.service";
-
-export interface ISelectableCategory extends ICategory {
-    selectedIcon: IIconColorLabel;
-    icons: IIconColorLabel[];
-    label: string;
-}
 
 @Component({
     selector: "update-point-dialog",
@@ -50,16 +47,9 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
     }
 
     public async initialize(markerIcon: string) {
-        let categories = await this.poiService.getCategories("Points of Interest");
+        let categories = await this.poiService.getSelectableCategories();
         for (let category of categories) {
-            this.categories.push({
-                name: category.name,
-                isSelected: false,
-                label: category.name,
-                icon: category.icon,
-                color: category.color,
-                icons: category.items.map(i => i.iconColorCategory)
-            } as ISelectableCategory);
+            this.categories.push(category);
         }
         this.selectedCategory = null;
 
