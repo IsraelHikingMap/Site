@@ -5,7 +5,6 @@ import * as L from "leaflet";
 import { HashService, RouteStrings } from "../services/hash.service";
 import { MapService } from "../services/map.service";
 import { SidebarService } from "../services/sidebar.service";
-import * as Common from "../common/IsraelHiking";
 
 @Component({
     selector: "application-state",
@@ -32,7 +31,7 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
                 this.hashService.setApplicationState("share", params[RouteStrings.ID]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {
-                let baseLayer = this.stringToBaseLayer(this.route.snapshot.queryParamMap[RouteStrings.BASE_LAYER]);
+                let baseLayer = this.hashService.stringToBaseLayer(this.route.snapshot.queryParamMap.get(RouteStrings.BASE_LAYER));
                 this.hashService.setApplicationState("baseLayer", baseLayer);
                 this.hashService.setApplicationState("url", params[RouteStrings.ID]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_DOWNLOAD)) {
@@ -67,21 +66,5 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
         if (this.subscription) {
             this.subscription.unsubscribe();
         }
-    }
-
-    private stringToBaseLayer(addressOrKey: string): Common.LayerData {
-        if (!addressOrKey) {
-            return null;
-        }
-        if (addressOrKey.includes("www") || addressOrKey.includes("http")) {
-            return {
-                key: "",
-                address: addressOrKey
-            } as Common.LayerData;
-        }
-        return {
-            key: addressOrKey.split("_").join(" "),
-            address: ""
-        } as Common.LayerData;
     }
 }

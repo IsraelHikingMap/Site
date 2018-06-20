@@ -87,8 +87,13 @@ export class HashService {
             return;
         }
         if (this.getUrl()) {
+            var queryParams = {} as any;
+            let baseLayer = this.baseLayerToString(this.getBaselayer());
+            if (baseLayer) {
+                queryParams.baselayer = baseLayer;
+            }
             this.router.navigate([RouteStrings.ROUTE_URL, this.getUrl()],
-                { queryParams: { baselayer: this.getBaselayer() }, replaceUrl: true });
+                { queryParams: queryParams, replaceUrl: true });
             return;
         }
         this.router.navigate([
@@ -190,5 +195,31 @@ export class HashService {
     public setApplicationState(type: ApplicationStateType, value: any) {
         this.stateMap.set(type, value);
         this.applicationStateChanged.next({ type: type, value: value });
+    }
+
+    public stringToBaseLayer(addressOrKey: string): Common.LayerData {
+        if (!addressOrKey) {
+            return null;
+        }
+        if (addressOrKey.includes("www") || addressOrKey.includes("http")) {
+            return {
+                key: "",
+                address: addressOrKey
+            } as Common.LayerData;
+        }
+        return {
+            key: addressOrKey.split("_").join(" "),
+            address: ""
+        } as Common.LayerData;
+    }
+
+    private baseLayerToString(baeLayer: Common.LayerData): string {
+        if (baeLayer == null) {
+            return null;
+        }
+        if (baeLayer.address) {
+            return baeLayer.address;
+        }
+        return baeLayer.key.split(" ").join("_");
     }
 }
