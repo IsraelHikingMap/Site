@@ -87,7 +87,7 @@ export class HashService {
             return;
         }
         if (this.getUrl()) {
-            var queryParams = {} as any;
+            let queryParams = {} as any;
             let baseLayer = this.baseLayerToString(this.getBaselayer());
             if (baseLayer) {
                 queryParams.baselayer = baseLayer;
