@@ -5,6 +5,7 @@ import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers/layers.service";
+import { MapLayersFactory } from "../../../services/map-layers.factory";
 import { BaseMapComponent } from "../../base-map.component";
 import * as Common from "../../../common/IsraelHiking";
 
@@ -20,7 +21,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public isOverlay: boolean;
 
     private mapPreview: L.Map;
-    private tileLayer: L.TileLayer;
+    private layer: L.Layer;
 
     protected constructor(resources: ResourcesService,
         protected mapService: MapService,
@@ -28,13 +29,13 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
         protected toastService: ToastService
     ) {
         super(resources);
-        this.minZoom = LayersService.MIN_ZOOM;
-        this.maxZoom = LayersService.MAX_NATIVE_ZOOM;
+        this.minZoom = MapLayersFactory.MIN_ZOOM;
+        this.maxZoom = MapLayersFactory.MAX_NATIVE_ZOOM;
         this.key = "";
         this.address = "";
         this.opacity = 1.0;
 
-        this.tileLayer = null;
+        this.layer = null;
     }
 
     public ngAfterViewInit(): void {
@@ -46,8 +47,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
                 maxZoom: +this.maxZoom,
                 zoom: (+this.maxZoom + +this.minZoom) / 2
             });
-        this.tileLayer = L.tileLayer(this.getTilesAddress());
-        this.mapPreview.addLayer(this.tileLayer);
+        this.layer = MapLayersFactory.createLayer({ address: this.getTilesAddress() } as Common.LayerData);
+        this.mapPreview.addLayer(this.layer);
     }
 
     public onAddressChanged(address: string) {
@@ -61,9 +62,9 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     }
 
     protected refreshPreviewLayer() {
-        this.mapPreview.removeLayer(this.tileLayer);
-        this.tileLayer = L.tileLayer(this.getTilesAddress(), { opacity: this.opacity });
-        this.mapPreview.addLayer(this.tileLayer);
+        this.mapPreview.removeLayer(this.layer);
+        this.layer = MapLayersFactory.createLayer({ address: this.getTilesAddress() } as Common.LayerData);
+        this.mapPreview.addLayer(this.layer);
     }
 
     public saveLayer = (e: Event) => {

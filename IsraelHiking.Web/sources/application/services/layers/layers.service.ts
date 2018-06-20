@@ -10,6 +10,7 @@ import { OsmUserService } from "../osm-user.service";
 import { PoiService } from "../poi.service";
 import { ToastService } from "../toast.service";
 import { CategoriesLayerFactory } from "./categories-layers.factory";
+import { MapLayersFactory } from "../map-layers.factory";
 import { Urls } from "../../common/Urls";
 import * as Common from "../../common/IsraelHiking";
 
@@ -38,12 +39,9 @@ export class LayersService {
     public static ISRAEL_MTB_MAP = "Israel MTB Map";
     public static ISRAEL_HIKING_MAP = "Israel Hiking Map";
     public static ESRI = "ESRI";
-    public static MIN_ZOOM = 7;
-    public static MAX_NATIVE_ZOOM = 16;
 
     private static MIN_ESRI_ZOOM = 0;
     private static MAX_ESRI_ZOOM = 16;
-    private static MAX_ZOOM = 20;
     private static HIKING_TRAILS = "Hiking Trails";
     private static BICYCLE_TRAILS = "Bicycle Trails";
     private static ATTRIBUTION = "Tiles © <a href='https://IsraelHiking.osm.org.il' target='_blank'>Israel Hiking</a>, " +
@@ -118,16 +116,16 @@ export class LayersService {
         let hikingTrailsOverlay = this.addOverlayFromData({
             key: LayersService.HIKING_TRAILS,
             address: Urls.OVERLAY_TILES_ADDRESS,
-            minZoom: LayersService.MIN_ZOOM,
-            maxZoom: LayersService.MAX_NATIVE_ZOOM
+            minZoom: MapLayersFactory.MIN_ZOOM,
+            maxZoom: MapLayersFactory.MAX_NATIVE_ZOOM
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
         hikingTrailsOverlay.isEditable = false;
 
         let bicycleTrailsOverlay = this.addOverlayFromData({
             key: LayersService.BICYCLE_TRAILS,
             address: Urls.OVERLAY_MTB_ADDRESS,
-            minZoom: LayersService.MIN_ZOOM,
-            maxZoom: LayersService.MAX_NATIVE_ZOOM
+            minZoom: MapLayersFactory.MIN_ZOOM,
+            maxZoom: MapLayersFactory.MAX_NATIVE_ZOOM
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
         bicycleTrailsOverlay.isEditable = false;
         this.selectBaseLayerAccordingToStorage(false);
@@ -212,7 +210,7 @@ export class LayersService {
 
     private addBaseLayerFromData = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
         let layer = { ...layerData } as IBaseLayer;
-        layer.layer = L.tileLayer(layerData.address, this.createOptionsFromLayerData(layerData, attribution));
+        layer.layer = MapLayersFactory.createLayer(layerData, attribution);
         if (position !== undefined) {
             this.baseLayers.splice(position, 0, layer);
         } else {
@@ -233,8 +231,7 @@ export class LayersService {
 
     private addOverlayFromData = (layerData: Common.LayerData, attribution?: string): IOverlay => {
         let overlay = { ...layerData } as IOverlay;
-        overlay.layer = L.tileLayer(overlay.address, this.createOptionsFromLayerData(layerData, attribution))
-            .setZIndex(this.overlayZIndex++);
+        overlay.layer = MapLayersFactory.createLayer(layerData, attribution, this.overlayZIndex++);
         overlay.visible = false;
         overlay.isEditable = true;
         this.overlays.push(overlay);
@@ -397,8 +394,8 @@ export class LayersService {
                 layer = _.find(this.baseLayers, (baseLayerToFind) => baseLayerToFind.key === customName);
             } while (layer != null);
             key = customName;
-            layerData.minZoom = LayersService.MIN_ZOOM;
-            layerData.maxZoom = LayersService.MAX_NATIVE_ZOOM;
+            layerData.minZoom = MapLayersFactory.MIN_ZOOM;
+            layerData.maxZoom = MapLayersFactory.MAX_NATIVE_ZOOM;
         }
 
         let newLayer = this.addBaseLayer({
@@ -432,17 +429,6 @@ export class LayersService {
             layersMap[layer.key.trim().toLowerCase()] = true;
             return true;
         });
-    }
-
-    private createOptionsFromLayerData = (layerData: Common.LayerData, attribution?: string): L.TileLayerOptions => {
-        let maxNativeZoom = (layerData.maxZoom == null) ? LayersService.MAX_NATIVE_ZOOM : layerData.maxZoom;
-        return {
-            minZoom: (layerData.minZoom == null) ? LayersService.MIN_ZOOM : layerData.minZoom,
-            maxNativeZoom: maxNativeZoom,
-            maxZoom: Math.max(LayersService.MAX_ZOOM, maxNativeZoom),
-            opacity: layerData.opacity || 1.0,
-            attribution: attribution
-        } as L.TileLayerOptions;
     }
 
     public getData = (): Common.DataContainer => {

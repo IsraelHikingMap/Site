@@ -11,7 +11,7 @@ import * as Common from "../../../common/IsraelHiking";
     templateUrl: "./layer-properties-dialog.component.html"
 })
 export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
-    private layer: IOverlay;
+    private overlay: IOverlay;
 
     constructor(resources: ResourcesService,
         mapService: MapService,
@@ -24,20 +24,20 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
     }
 
     public setOverlay(layer: IOverlay) {
-        this.layer = layer;
-        this.key = this.layer.key;
-        this.maxZoom = this.layer.maxZoom;
-        this.minZoom = this.layer.minZoom;
-        this.address = this.layer.address;
-        this.opacity = this.layer.opacity || 1.0;
+        this.overlay = layer;
+        this.key = this.overlay.key;
+        this.maxZoom = this.overlay.maxZoom;
+        this.minZoom = this.overlay.minZoom;
+        this.address = this.overlay.address;
+        this.opacity = this.overlay.opacity || 1.0;
     }
 
     public removeLayer(e: Event) {
-        this.layersService.removeOverlay(this.layer);
+        this.layersService.removeOverlay(this.overlay);
         this.suppressEvents(e);
     }
 
     protected internalSave(layerData: Common.LayerData): void {
-        this.layersService.updateOverlay(this.layer, layerData);
+        this.layersService.updateOverlay(this.overlay, layerData);
     }
 }

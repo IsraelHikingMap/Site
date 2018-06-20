@@ -19,6 +19,7 @@
     "angulartics2": "^6.1.0",
     "core-js": "^2.5.7",
     "d3-ng2-service": "2.2.0",
+    "esri-leaflet": "2.1.4",
     "file-saver": "1.3.8",
     "font-awesome": "4.7.0",
     "hammerjs": "2.0.8",

@@ -11,7 +11,7 @@ import * as Common from "../../../common/IsraelHiking";
     templateUrl: "./layer-properties-dialog.component.html"
 })
 export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
-    private layer: IBaseLayer;
+    private baseLayer: IBaseLayer;
 
     constructor(resources: ResourcesService,
         mapService: MapService,
@@ -24,19 +24,19 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
     }
 
     public setBaseLayer(layer: IBaseLayer) {
-        this.layer = layer;
-        this.key = this.layer.key;
-        this.maxZoom = this.layer.maxZoom;
-        this.minZoom = this.layer.minZoom;
-        this.address = this.layer.address;
+        this.baseLayer = layer;
+        this.key = this.baseLayer.key;
+        this.maxZoom = this.baseLayer.maxZoom;
+        this.minZoom = this.baseLayer.minZoom;
+        this.address = this.baseLayer.address;
     }
 
     public removeLayer(e: Event) {
-        this.layersService.removeBaseLayer(this.layer);
+        this.layersService.removeBaseLayer(this.baseLayer);
         this.suppressEvents(e);
     }
 
     protected internalSave(layerData: Common.LayerData): void {
-        this.layersService.updateBaseLayer(this.layer, layerData);
+        this.layersService.updateBaseLayer(this.baseLayer, layerData);
     }
 }

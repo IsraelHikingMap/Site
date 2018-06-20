@@ -5,6 +5,8 @@ import { LayersService } from "../../services/layers/layers.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { MapService } from "../../services/map.service";
+import { MapLayersFactory } from "../../services/map-layers.factory";
+import * as Common from "../../common/IsraelHiking";
 
 type LegendItemType = "POI" | "Way";
 
@@ -50,7 +52,7 @@ export class LegendItemComponent extends BaseMapComponent implements AfterViewIn
                 tap: false,
                 keyboard: false,
                 inertia: false,
-                layers: [L.tileLayer(this.layersService.selectedBaseLayer.address)]
+                layers: [MapLayersFactory.createLayer({ address: this.layersService.selectedBaseLayer.address } as Common.LayerData)]
             } as L.MapOptions);
     };
 
