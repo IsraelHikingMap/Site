@@ -1,4 +1,4 @@
-﻿import { Component, ViewEncapsulation } from "@angular/core";
+import { Component, ViewEncapsulation } from "@angular/core";
 import { MatDialogRef, MatSelectChange } from "@angular/material";
 import * as _ from "lodash";
 
@@ -95,7 +95,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             reader.onload = (event: any) => {
                 this.imagesUrls.push(event.target.result);
                 this.currentImageIndex = this.imagesUrls.length - 1;
-            }
+            };
 
             reader.readAsDataURL(file);
         }
@@ -125,7 +125,7 @@ export class UpdatePointDialogComponent extends BaseMapComponent {
             this.dialogRef.close(null);
         } finally {
             this.uploading = false;
-        };
+        }
     }
 
     public getEditElementOsmAddress(): string {

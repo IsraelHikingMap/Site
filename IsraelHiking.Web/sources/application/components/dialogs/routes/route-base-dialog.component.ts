@@ -1,4 +1,4 @@
-﻿import { ResourcesService } from "../../../services/resources.service";
+import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { RoutesService } from "../../../services/layers/routelayers/routes.service";
@@ -54,7 +54,7 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     }
 
     public saveRouteToFile(e: Event) { }
-    public moveToRoute = (e: Event) => { }
+    public moveToRoute = (e: Event) => { };
     public deleteRoute(e: Event) { }
-    public makeAllPointsEditable = () => { }
+    public makeAllPointsEditable = () => { };
 }

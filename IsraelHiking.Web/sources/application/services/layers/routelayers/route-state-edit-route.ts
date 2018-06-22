@@ -1,4 +1,4 @@
-﻿import * as L from "leaflet";
+import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { EditMode } from "./iroute-state";
@@ -89,7 +89,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         routeMarkerPopupComponentRef.instance.remove = () => {
             let segment = _.find(this.context.route.segments, segmentToFind => marker === segmentToFind.routePointMarker);
             this.removeRouteSegment(segment);
-        }
+        };
         routeMarkerPopupComponentRef.instance.angularBinding(routeMarkerPopupComponentRef.hostView);
         marker.bindPopup(containerDiv);
         return marker;

@@ -1,4 +1,4 @@
-﻿import { Subject } from "rxjs/Subject";
+﻿import { Subject } from "rxjs";
 import * as L from "leaflet";
 
 import * as Common from "../common/IsraelHiking";

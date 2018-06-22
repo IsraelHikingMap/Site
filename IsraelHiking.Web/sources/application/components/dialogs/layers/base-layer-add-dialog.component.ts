@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
@@ -25,5 +25,5 @@ export class BaseLayerAddDialogComponent extends LayerBaseDialogComponent {
     protected internalSave(layerData: Common.LayerData): void {
         let layer = this.layersService.addBaseLayer(layerData);
         this.layersService.selectBaseLayer(layer);
-    };
+    }
 }

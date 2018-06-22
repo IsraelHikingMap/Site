@@ -1,4 +1,4 @@
-﻿import {
+import {
     Component,
     Injector,
     ComponentFactoryResolver,
@@ -195,7 +195,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         if (!this.isDirectional) {
             this.moveToResults(searchResult, new Event("click"));
         }
-    };
+    }
 
     public setRouting = (routingType: Common.RoutingType, e: Event) => {
         this.routingType = routingType;
@@ -244,7 +244,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 ]
             } as Common.DataContainer);
             this.readonlyLayer.clearLayers();
-        }
+        };
 
         let componentFactory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
         this.createSearchRouteMarkerPopup(markerFrom, componentFactory, convertToRoute);
@@ -264,7 +264,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         componentRef.instance.setMarker(marker);
         componentRef.instance.remove = () => {
             this.readonlyLayer.clearLayers();
-        }
+        };
         componentRef.instance.convertToRoute = convertToRoute;
         componentRef.instance.angularBinding(componentRef.hostView);
         marker.bindPopup(markerPopupDiv);

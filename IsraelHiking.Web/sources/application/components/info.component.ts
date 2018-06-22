@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { MatDialog } from "@angular/material";
 import { take, filter } from "rxjs/operators";
 
@@ -32,7 +32,7 @@ export class InfoComponent extends BaseMapComponent {
     public toggleInfo = (e: Event) => {
         this.sidebarService.toggle("info");
         this.suppressEvents(e);
-    };
+    }
 
     public isActive = (): boolean => {
         return this.sidebarService.viewName === "info";

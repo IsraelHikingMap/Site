@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { MatSnackBar } from "@angular/material";
 import { ResourcesService } from "./resources.service";
 import { ConfirmDialogComponent } from "../components/dialogs/confirm-dialog.component";
@@ -53,7 +53,7 @@ export class ToastService {
         componentRef.instance.declineAction = () => {
             declineAction();
             this.snackbar.dismiss();
-        }
+        };
         componentRef.instance.confirmType = isYesNo ? "YesNo" : "OkCancel";
     }
 }

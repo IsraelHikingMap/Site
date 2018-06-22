@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
 import { LayersService } from "../services/layers/layers.service";
@@ -24,5 +24,5 @@ export class EditOSMComponent extends BaseMapComponent {
         let baseLayerAddress = this.layersService.selectedBaseLayer.address;
         window.open(this.osmUserService.getEditOsmLocationAddress(baseLayerAddress, zoom, center));
         this.suppressEvents(e);
-    };
+    }
 }

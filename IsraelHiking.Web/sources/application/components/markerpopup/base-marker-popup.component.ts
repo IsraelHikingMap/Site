@@ -1,7 +1,7 @@
 ﻿import { ApplicationRef, ViewRef, ViewChildren, QueryList } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { MatTooltip } from "@angular/material";
-import { forkJoin } from "rxjs/observable/forkJoin";
+import { forkJoin } from "rxjs";
 import { take } from "rxjs/operators";
 import * as L from "leaflet";
 
@@ -90,7 +90,7 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
             if (subscriptions.length === 0) {
                 this.applicationRef.detachView(hostView);
             } else {
-                forkJoin(...subscriptions).subscribe(() => {
+                forkJoin<void>(...subscriptions).subscribe(() => {
                     this.applicationRef.detachView(hostView);
                 });
             }

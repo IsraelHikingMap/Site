@@ -1,6 +1,6 @@
-﻿import { Injectable, EventEmitter } from "@angular/core";
+import { Injectable, EventEmitter } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import * as X2JS from "x2js";
 import * as _ from "lodash";
 
@@ -124,7 +124,7 @@ export class OsmUserService {
             facebook: `${Urls.facebook}${escaped}`,
             whatsapp: this.whatsAppService.getUrl(this.getShareUrlDisplayName(shareUrl), escaped) as string,
             nakeb: `https://www.nakeb.co.il/add_new_hike?ihm_link=${shareUrl.id}`
-        }
+        };
     }
 
     public refreshDetails = (): Promise<any> => {

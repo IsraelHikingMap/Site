@@ -1,6 +1,6 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import { LocalStorageService } from "ngx-store"
+import { LocalStorageService } from "ngx-store";
 
 import { CategoriesLayer } from "./categories.layer";
 import { MapService } from "../map.service";

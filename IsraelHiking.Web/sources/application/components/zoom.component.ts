@@ -1,5 +1,5 @@
-﻿import { Component } from "@angular/core";
-import { BaseMapComponent } from "./base-map.component"
+import { Component } from "@angular/core";
+import { BaseMapComponent } from "./base-map.component";
 import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
 

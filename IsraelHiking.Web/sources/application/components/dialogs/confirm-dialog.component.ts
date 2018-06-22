@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 
@@ -16,8 +16,8 @@ export class ConfirmDialogComponent {
 
     public constructor(public resources: ResourcesService) {
         this.confirmType = "YesNo";
-        this.confirmAction = () => { throw new Error("Confirm action method must be provided!") }
-        this.declineAction = () => { throw new Error("Decline action method must be provided!") }
+        this.confirmAction = () => { throw new Error("Confirm action method must be provided!"); };
+        this.declineAction = () => { throw new Error("Decline action method must be provided!"); };
     }
 
     public getConfirmButtonText() {

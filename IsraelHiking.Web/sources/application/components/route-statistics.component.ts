@@ -1,6 +1,6 @@
 ﻿import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
-import { Subscription } from "rxjs/Subscription";
+import { Subscription } from "rxjs";
 import { D3Service, Selection, BaseType, ScaleContinuousNumeric } from "d3-ng2-service";
 import * as L from "leaflet";
 

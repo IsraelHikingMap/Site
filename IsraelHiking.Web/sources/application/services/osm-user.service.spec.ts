@@ -1,4 +1,4 @@
-﻿import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
+import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import * as L from "leaflet";
@@ -28,7 +28,7 @@ describe("OSM User Service", () => {
     beforeEach(() => {
         oauth = {
             authenticated: () => false,
-            logout: () => { return oauth }
+            logout: () => oauth
         } as OSMAuth.OSMAuthInstance;
         let authService = {
             osmToken: null,
@@ -57,7 +57,7 @@ describe("OSM User Service", () => {
             consumerKey: "ConsumerKey",
             consumerSecret: "ConsumerSecret"
         });
-    }
+    };
 
     it("Should initialize on demand", inject([OsmUserService, HttpTestingController],
         async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
@@ -83,12 +83,12 @@ describe("OSM User Service", () => {
     it("Should login and get data", inject([OsmUserService, HttpTestingController],
         fakeAsync((osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
 
-        oauth.authenticated = () => { return true; };
+        oauth.authenticated = () => true;
         oauth.xhr = (addressObject, callback: Function) => {
             if (addressObject.path.includes("details")) {
                 callback(null, userDetailsResponse);
             }
-        }
+        };
         osmUserService.initialize();
         setupInit(mockBackend);
         flushMicrotasks();
@@ -105,12 +105,12 @@ describe("OSM User Service", () => {
     it("Should login even if requests for data fails",
         inject([OsmUserService, HttpTestingController], fakeAsync((osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
 
-        oauth.authenticated = () => { return true; };
+        oauth.authenticated = () => true;
         oauth.xhr = (addressObject, callback: Function) => {
             if (addressObject.path.includes("details")) {
                 callback(null, userDetailsResponse);
             }
-        }
+        };
         osmUserService.initialize();
         setupInit(mockBackend);
         flushMicrotasks();

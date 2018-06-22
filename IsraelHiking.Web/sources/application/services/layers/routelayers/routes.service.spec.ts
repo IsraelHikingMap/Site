@@ -1,4 +1,4 @@
-﻿import * as L from "leaflet";
+import * as L from "leaflet";
 
 import { RoutesService } from "./routes.service";
 import { MapServiceMockCreator } from "../../map.service.spec";
@@ -166,7 +166,7 @@ describe("RoutesService", () => {
         initialRouteLayer.reverse = () => {
             initialRouteLayer.route.segments.reverse();
             initialRouteLayer.route.segments.forEach(s => s.latlngs.reverse());
-        }
+        };
         routesService.addRoute(null);
 
         let secondRoute = {

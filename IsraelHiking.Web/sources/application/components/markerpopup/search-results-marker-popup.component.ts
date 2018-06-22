@@ -1,4 +1,4 @@
-﻿import { Component, ApplicationRef } from "@angular/core";
+import { Component, ApplicationRef } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
 import { ResourcesService } from "../../services/resources.service";
@@ -22,6 +22,6 @@ export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent 
 
     public selectRoute = (routeData: Common.RouteData): void => {
         throw new Error(`This function must be assigned by containing layer! Route: ${routeData.name}`);
-    };
-    public convertToRoute = (): void => { throw new Error("This function must be assigned by the containing layer!") };
+    }
+    public convertToRoute = (): void => { throw new Error("This function must be assigned by the containing layer!"); };
 }

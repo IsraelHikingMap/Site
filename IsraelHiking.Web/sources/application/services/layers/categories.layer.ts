@@ -1,6 +1,6 @@
-﻿import { Router } from "@angular/router";
-import { LocalStorageService } from "ngx-store"
-import { Subject } from "rxjs/Subject";
+import { Router } from "@angular/router";
+import { LocalStorageService } from "ngx-store";
+import { Subject } from "rxjs";
 import * as L from "leaflet";
 import * as _ from "lodash";
 import "leaflet.markercluster";

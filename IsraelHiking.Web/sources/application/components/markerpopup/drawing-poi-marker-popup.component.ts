@@ -1,4 +1,4 @@
-﻿import { Component, ApplicationRef, HostListener, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
+import { Component, ApplicationRef, HostListener, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { MatDialog } from "@angular/material";
 import { ENTER } from "@angular/cdk/keycodes";
@@ -108,7 +108,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
 
     public updateWikiCoordinates() {
         this.wikiCoordinatesString = this.getWikiCoordString(this.latLng, this.title);
-    };
+    }
 
     public setRouteLayer(routeLayer: IRouteLayer) {
         this.routeLayer = routeLayer;
@@ -171,7 +171,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         this.imageGalleryService.setImages([this.imageUrl]);
     }
 
-    public changeToEditMode = (): void => { throw new Error("Callback needs to be set by the creating class...") }
+    public changeToEditMode = (): void => { throw new Error("Callback needs to be set by the creating class..."); };
 
     @HostListener("window:keydown", ["$event"])
     public onEnterPress($event: KeyboardEvent) {

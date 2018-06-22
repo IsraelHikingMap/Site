@@ -1,4 +1,4 @@
-﻿import { Component, Input, ViewEncapsulation } from "@angular/core";
+import { Component, Input, ViewEncapsulation } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
@@ -46,7 +46,7 @@ export class PoiMainInfoComponent extends BaseMapComponent {
             reader.onload = (event: any) => {
                 this.info.imagesUrls.push(event.target.result);
                 this.currentImageIndex = this.info.imagesUrls.length - 1;
-            }
+            };
 
             reader.readAsDataURL(file);
         }

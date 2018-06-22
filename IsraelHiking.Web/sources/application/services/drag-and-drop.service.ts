@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { MapService } from "./map.service";
@@ -35,7 +35,7 @@ export class DragAndDropService {
                             dataContainerService.setData(dataContainer);
                         } catch (ex) {
                             toastService.error(resourcesService.unableToLoadFromFile + `: ${file.name}`);
-                        };
+                        }
                     }
                 }, 25);
                 return;

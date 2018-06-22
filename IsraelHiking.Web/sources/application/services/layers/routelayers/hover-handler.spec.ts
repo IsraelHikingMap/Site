@@ -1,4 +1,4 @@
-﻿import * as L from "leaflet";
+import * as L from "leaflet";
 
 import { HoverHandlerPoi } from "./hover-handler-poi";
 import { HoverHandlerRoute } from "./hover-handler-route";
@@ -74,8 +74,8 @@ describe("HoverHandler", () => {
         context.getSnappingForPoint = () => {
             return {
                 latlng: L.latLng([0, 0])
-            }
-        }
+            };
+        };
 
         hoverHandlerPoi.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
 
@@ -87,8 +87,8 @@ describe("HoverHandler", () => {
         context.getSnappingForPoint = () => {
             return {
                 latlng: L.latLng([1, 1])
-            }
-        }
+            };
+        };
         context.route.markers.push({ marker: L.marker([1, 1]) });
 
         hoverHandlerPoi.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
@@ -103,7 +103,7 @@ describe("HoverHandler", () => {
                 latlng: L.latLng([0, 0]),
                 isSnapToSelfRoute: true,
             };
-        }
+        };
 
         hoverHandlerRoute.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);
 
@@ -118,7 +118,7 @@ describe("HoverHandler", () => {
                 latlng: L.latLng([0, 0]),
                 isSnapToSelfRoute: false,
             };
-        }
+        };
         context.route.segments = [];
 
         hoverHandlerRoute.onMouseMove({ latlng: L.latLng([0, 0]) } as L.LeafletMouseEvent);

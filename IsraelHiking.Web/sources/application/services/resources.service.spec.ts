@@ -1,4 +1,4 @@
-﻿import { TestBed, async, inject } from "@angular/core/testing";
+import { TestBed, async, inject } from "@angular/core/testing";
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 
@@ -7,7 +7,7 @@ export class GetTextCatalogMockCreator {
 
     public constructor() {
         this.getTextCatalogService = new GetTextCatalogService(null);
-        spyOn(this.getTextCatalogService, "loadRemote").and.returnValue(new Promise((resolve) => { resolve() }));
+        spyOn(this.getTextCatalogService, "loadRemote").and.returnValue(new Promise((resolve) => { resolve(); }));
     }
 }
 

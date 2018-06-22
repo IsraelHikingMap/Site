@@ -1,4 +1,4 @@
-﻿import { Component, HostListener } from "@angular/core";
+import { Component, HostListener } from "@angular/core";
 import { ESCAPE } from "@angular/cdk/keycodes";
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
@@ -71,7 +71,7 @@ export class DrawingComponent extends BaseMapComponent {
             return;
         }
         this.routesService.selectedRoute.setEditMode(editMode);
-    };
+    }
 
     public setRouting(routingType: Common.RoutingType, e: Event) {
         this.suppressEvents(e);
@@ -80,7 +80,7 @@ export class DrawingComponent extends BaseMapComponent {
         }
         this.routeLayerFactory.routingType = routingType;
         this.routesService.selectedRoute.setRoutingType(routingType);
-    };
+    }
 
     public undo = (e: Event) => {
         this.suppressEvents(e);
@@ -88,19 +88,19 @@ export class DrawingComponent extends BaseMapComponent {
         if (layer != null) {
             layer.undo();
         }
-    };
+    }
 
     public getRoutingType = (): Common.RoutingType => {
         if (this.routesService.selectedRoute == null) {
             return "None";
         }
         return this.routesService.selectedRoute.route.properties.currentRoutingType;
-    };
+    }
 
     public isUndoDisabled = (): boolean => {
         let layer = this.routesService.selectedRoute;
         return layer != null ? layer.isUndoDisbaled() : true;
-    };
+    }
 
     public isEditDisabled = (): boolean => {
         return this.routesService.selectedRoute == null;

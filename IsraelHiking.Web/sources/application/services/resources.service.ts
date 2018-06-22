@@ -1,10 +1,10 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Direction } from "@angular/cdk/bidi";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { LocalStorage } from "ngx-store";
 import { GetTextCatalogService } from "./gettext-catalog.service";
 import { Urls } from "../common/Urls";
-export type LanguageCode = "en-US" | "he"
+export type LanguageCode = "en-US" | "he";
 
 export interface ILanguage {
     code: LanguageCode;

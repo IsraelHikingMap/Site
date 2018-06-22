@@ -1,4 +1,4 @@
-﻿import { Component } from "@angular/core";
+import { Component } from "@angular/core";
 import { Router } from "@angular/router";
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -50,7 +50,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     public toggleInfo = (e: Event) => {
         this.sidebarService.toggle("info");
         this.suppressEvents(e);
-    };
+    }
 
     public isActive = (): boolean => {
         return this.sidebarService.viewName === "info";
@@ -66,7 +66,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
             return;
         }
         this.visibleSectionId = section.id;
-    };
+    }
 
     public selectedTabChanged(tabIndex: number) {
         if (tabIndex === 1) {

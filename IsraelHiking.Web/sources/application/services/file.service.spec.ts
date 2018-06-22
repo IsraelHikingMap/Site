@@ -1,4 +1,4 @@
-﻿import { TestBed, inject, fakeAsync } from "@angular/core/testing";
+import { TestBed, inject, fakeAsync } from "@angular/core/testing";
 import { HttpClientModule, HttpClient } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import * as FileSaverFunctions from "file-saver";
@@ -85,7 +85,7 @@ describe("FileService", () => {
     it("Should get a file from event and clear input", inject([FileService], (fileService: FileService) => {
         let event = {
             target: { files: [{}], value: "123" },
-        }
+        };
         let file = fileService.getFileFromEvent(event);
 
         expect(file).not.toBe(null);
@@ -95,7 +95,7 @@ describe("FileService", () => {
     it("Should not get a files from event", inject([FileService], (fileService: FileService) => {
         let event = {
             target: { dataTransfer: [] },
-        }
+        };
         let files = fileService.getFilesFromEvent(event);
 
         expect(files.length).toBe(0);
@@ -104,7 +104,7 @@ describe("FileService", () => {
     it("Should get a files from event and clear input", inject([FileService], (fileService: FileService) => {
         let event = {
             target: { files: [{}], value: "123" },
-        }
+        };
         let files = fileService.getFilesFromEvent(event);
 
         expect(files.length).toBe(1);

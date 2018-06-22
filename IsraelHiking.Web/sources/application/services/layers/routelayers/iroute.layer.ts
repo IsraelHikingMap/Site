@@ -1,5 +1,5 @@
 ﻿import { Injector, ComponentFactoryResolver } from "@angular/core";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import { EditMode } from "./iroute-state";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";

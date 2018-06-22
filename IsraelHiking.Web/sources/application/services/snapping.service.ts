@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -120,7 +120,7 @@ export class SnappingService {
             this.toastService.warning(this.resources.unableToGetDataForSnapping);
             this.highwaySnappings.splice(0);
             this.pointsSnappings.splice(0);
-        };
+        }
     }
 
     public snapToRoute = (latlng: L.LatLng, options?: ISnappingRouteOptions): ISnappingRouteResponse => {

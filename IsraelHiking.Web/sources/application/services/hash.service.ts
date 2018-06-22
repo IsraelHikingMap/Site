@@ -1,7 +1,7 @@
 ﻿import { Injectable, Inject } from "@angular/core";
 import { HttpParams } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import * as L from "leaflet";
 
 import { MapService } from "./map.service";

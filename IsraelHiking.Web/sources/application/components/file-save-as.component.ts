@@ -1,4 +1,4 @@
-﻿import { Component, ViewEncapsulation, ViewChild } from "@angular/core";
+import { Component, ViewEncapsulation, ViewChild } from "@angular/core";
 import { MatSelect } from "@angular/material";
 import * as _ from "lodash";
 
@@ -46,7 +46,7 @@ export class FileSaveAsComponent extends BaseMapComponent {
         if (this.isOpen) {
             setTimeout(() => this.dropdown.open(), 500);
         }
-    };
+    }
 
     public saveAs = (format: IFormatViewModel, e: Event) => {
         this.selectedFormat = format;

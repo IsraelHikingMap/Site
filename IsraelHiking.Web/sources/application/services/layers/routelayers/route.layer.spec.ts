@@ -1,4 +1,4 @@
-﻿import { Injector, ComponentFactoryResolver } from "@angular/core";
+import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { TestBed } from "@angular/core/testing";
 import * as L from "leaflet";
 
@@ -38,10 +38,10 @@ describe("RouteLayer", () => {
             }
         };
         let factory = {
-            create: () => { return componentRefMock }
+            create: () => componentRefMock
         };
         let componentFactoryResolverMock = {
-            resolveComponentFactory: () => { return factory }
+            resolveComponentFactory: () => factory
         };
         let geoLocationService = {} as GeoLocationService;
         TestBed.configureTestingModule({

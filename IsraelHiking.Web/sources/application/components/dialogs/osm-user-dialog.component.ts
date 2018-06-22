@@ -1,4 +1,4 @@
-﻿import {
+import {
     Component,
     Injector,
     ComponentFactoryResolver,
@@ -13,7 +13,7 @@ import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material";
 import { SharedStorageService } from "ngx-store";
 import { ScrollToService, ScrollToConfigOptions } from "@nicky-lenaers/ngx-scroll-to";
-import { Subscription } from "rxjs/Subscription";
+import { Subscription } from "rxjs";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
@@ -125,7 +125,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         dialogElement.onscroll = () => {
             this.state.scrollPosition = dialogElement.scrollTop;
             this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
-        }
+        };
     }
 
     ngAfterViewInit(): void {
@@ -207,11 +207,11 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             componentRef.instance.setMarker(mainMarker);
             componentRef.instance.remove = () => {
                 this.osmTraceLayer.clearLayers();
-            }
+            };
             componentRef.instance.convertToRoute = () => {
                 this.dataContainerService.setData(data);
                 this.osmTraceLayer.clearLayers();
-            }
+            };
             componentRef.instance.angularBinding(componentRef.hostView);
             mainMarker.bindPopup(markerPopupDiv);
             this.osmTraceLayer.addLayer(mainMarker);
@@ -266,7 +266,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             this.userService.refreshDetails();
         } catch (ex) {
             this.toastService.error(this.resources.unableToUploadFile);
-        };
+        }
     }
 
     private updateFilteredLists(searchTerm: string) {
@@ -326,14 +326,14 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 polyline.off("click");
                 this.osmTraceLayer.removeLayer(polyline);
                 this.osmTraceLayer.removeLayer(marker);
-            }
+            };
             componentRef.instance.setFeature(feature);
             componentRef.instance.angularBinding(componentRef.hostView);
 
             marker.bindPopup(markerPopupDiv);
             marker.on("popupopen", () => { polyline.setStyle({ color: "DarkRed", weight: 5, opacity: 1 } as L.PathOptions); });
             marker.on("popupclose", () => { polyline.setStyle(unselectedPathOptions); });
-            polyline.on("click", () => { marker.openPopup() });
+            polyline.on("click", () => { marker.openPopup(); });
             this.osmTraceLayer.addLayer(marker);
         }
 

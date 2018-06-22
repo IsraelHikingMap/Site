@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { saveAs } from "file-saver";
 import * as L from "leaflet";
@@ -7,9 +7,9 @@ import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
 export interface IFormatViewModel {
-    label: string,
-    outputFormat: string,
-    extension: string,
+    label: string;
+    outputFormat: string;
+    extension: string;
 }
 
 @Injectable()

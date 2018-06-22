@@ -1,4 +1,4 @@
-﻿import * as L from "leaflet";
+import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { RouteStateEditBase } from "./route-state-edit-base";
@@ -83,7 +83,7 @@ export class RouteStateEditPoi extends RouteStateEditBase {
             let routeMarker = _.find(this.context.route.markers, markerToFind => markerToFind.marker === marker);
             routeMarker.marker.closePopup();
             this.removePoi(routeMarker);
-        }
+        };
         this.setPoiMarkerEvents(marker);
     }
 

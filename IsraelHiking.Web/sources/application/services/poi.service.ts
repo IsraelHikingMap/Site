@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -60,9 +60,9 @@ export interface IIconColorLabel {
 }
 
 export interface ICategory {
-    name: string,
-    icon: string,
-    color: string,
+    name: string;
+    icon: string;
+    color: string;
     isSelected: boolean;
     items: { iconColorCategory: IIconColorLabel, tags: any[] }[];
 }
@@ -181,6 +181,6 @@ export class PoiService {
             poiLink: poiLink,
             facebook: `${Urls.facebook}${escaped}`,
             whatsapp: this.whatsappService.getUrl(poiExtended.title, escaped) as string,
-        }
+        };
     }
 }

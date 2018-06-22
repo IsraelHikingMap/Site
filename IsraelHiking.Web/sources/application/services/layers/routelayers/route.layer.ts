@@ -1,5 +1,5 @@
 import { Injector, ComponentFactoryResolver } from "@angular/core";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import * as L from "leaflet";
 
 import { SnappingService, ISnappingRouteOptions, ISnappingRouteResponse, ISnappingPointResponse } from "../../snapping.service";

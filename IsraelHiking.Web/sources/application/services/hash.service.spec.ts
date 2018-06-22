@@ -1,7 +1,7 @@
-﻿import { Router } from "@angular/router";
+import { Router } from "@angular/router";
 import { TestBed, inject } from "@angular/core/testing";
 import { RouterTestingModule } from "@angular/router/testing";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import * as L from "leaflet";
 
 import { HashService, RouteStrings } from "./hash.service";
@@ -20,14 +20,14 @@ describe("HashService", () => {
             navigate: jasmine.createSpy("navigate"),
             events: new Subject<any>(),
             createUrlTree: () => { }
-        }
+        };
         let windowMock = {
             location: {
                 href: "href",
                 reload: jasmine.createSpy("reload"),
             },
             open: () => { }
-        }
+        };
         TestBed.configureTestingModule({
             imports: [RouterTestingModule],
             providers: [
@@ -130,7 +130,7 @@ describe("HashService", () => {
             (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
 
                 windowMock.location.hash = "/";
-                (router as any).createUrlTree = () => { return "address" };
+                (router as any).createUrlTree = () => "address";
                 hashService = new HashService(router, windowMock, resources, mapService);
                 hashService.setApplicationState("share", "share");
                 let href = hashService.getHref();
@@ -143,7 +143,7 @@ describe("HashService", () => {
             (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
 
                 windowMock.location.hash = "/";
-                (router as any).createUrlTree = () => { return "address" };
+                (router as any).createUrlTree = () => "address";
                 hashService = new HashService(router, windowMock, resources, mapService);
                 hashService.setApplicationState("url", "url");
                 let href = hashService.getHref();

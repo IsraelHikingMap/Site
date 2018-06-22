@@ -1,4 +1,4 @@
-﻿import { RouteStateEditPoi } from "./route-state-edit-poi";
+import { RouteStateEditPoi } from "./route-state-edit-poi";
 import { MapServiceMockCreator } from "../../map.service.spec";
 
 describe("RouteStateEditPoi", () => {
@@ -35,4 +35,4 @@ describe("RouteStateEditPoi", () => {
 
         expect(mapServiceMockCreator.getNumberOfLayers()).toBe(0);
     });
-})
+});

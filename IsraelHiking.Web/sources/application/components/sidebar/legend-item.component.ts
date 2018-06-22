@@ -1,4 +1,4 @@
-﻿import { Component, ViewChild, ElementRef, AfterViewInit, Input } from "@angular/core";
+import { Component, ViewChild, ElementRef, AfterViewInit, Input } from "@angular/core";
 import * as L from "leaflet";
 
 import { LayersService } from "../../services/layers/layers.service";
@@ -54,7 +54,7 @@ export class LegendItemComponent extends BaseMapComponent implements AfterViewIn
                 inertia: false,
                 layers: [MapLayersFactory.createLayer({ address: this.layersService.selectedBaseLayer.address } as Common.LayerData)]
             } as L.MapOptions);
-    };
+    }
 
     public moveToLocation(item: ILegendItem) {
         this.mapService.map.flyTo(item.latlng, item.zoom);

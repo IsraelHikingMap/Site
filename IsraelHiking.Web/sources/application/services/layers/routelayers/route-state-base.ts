@@ -17,7 +17,7 @@ export abstract class RouteStateBase implements IRouteState {
     public abstract clear(): void;
     public abstract getEditMode(): EditMode;
 
-    public reRoute = (): void => { } // does nothing if not overriden
+    public reRoute = (): void => { }; // does nothing if not overriden
 
     protected createPoiMarker = (markerData: Common.MarkerData, isEditable: boolean): Common.IMarkerWithTitle => {
         let pathOptions = this.context.route.properties.pathOptions;

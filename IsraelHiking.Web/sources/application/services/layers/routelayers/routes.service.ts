@@ -1,5 +1,5 @@
 ﻿import { Injectable } from "@angular/core";
-import { Subject } from "rxjs/Subject";
+import { Subject } from "rxjs";
 import * as _ from "lodash";
 
 import { IRouteLayer, IRoute, IRouteSegment, IMarkerWithData } from "./iroute.layer";
