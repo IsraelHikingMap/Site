@@ -34,7 +34,6 @@ namespace IsraelHiking.API.Services.Poi
         private readonly IOsmRepository _osmRepository;
         private readonly IWikipediaGateway _wikipediaGateway;
         private readonly ITagsHelper _tagsHelper;
-        private readonly IOptions<ConfigurationData> _options;
         private readonly IOsmLatestFileFetcherExecutor _latestFileFetcherExecutor;
 
         /// <summary>
@@ -76,7 +75,6 @@ namespace IsraelHiking.API.Services.Poi
             _osmRepository = osmRepository;
             _wikipediaGateway = wikipediaGateway;
             _tagsHelper = tagsHelper;
-            _options = options;
             _latestFileFetcherExecutor = latestFileFetcherExecutor;
         }
 

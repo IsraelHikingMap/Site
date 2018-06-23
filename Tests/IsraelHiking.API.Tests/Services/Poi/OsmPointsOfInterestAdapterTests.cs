@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
@@ -7,9 +8,9 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Extensions;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
@@ -92,6 +93,19 @@ namespace IsraelHiking.API.Tests.Services.Poi
 
             Assert.AreEqual(1, result.Length);
             Assert.AreEqual(string.Empty, result.First().Title);
+        }
+
+        [TestMethod]
+        public void GetPointsOfInterest_NoIcon_ShouldReturnItWithSearchIcon()
+        {
+            var feature = GetValidFeature("poiId", _adapter.Source);
+            feature.Attributes.AddOrUpdate(FeatureAttributes.ICON, string.Empty);
+            _elasticSearchGateway.GetPointsOfInterest(null, null, null, "he").Returns(new List<Feature> { feature });
+
+            var result = _adapter.GetPointsOfInterest(null, null, null, "he").Result;
+
+            Assert.AreEqual(1, result.Length);
+            Assert.AreEqual(OsmPointsOfInterestAdapter.SEARCH_ICON, result.First().Icon);
         }
 
         [TestMethod]
@@ -336,6 +350,20 @@ namespace IsraelHiking.API.Tests.Services.Poi
             _elasticSearchGateway.DidNotReceive().UpdatePointsOfInterestData(Arg.Any<List<Feature>>());
             gateway.DidNotReceive().CreateChangeset(Arg.Any<string>());
             gateway.DidNotReceive().CloseChangeset(Arg.Any<string>());
+        }
+
+        [TestMethod]
+        public void GetPointsForIndexing_ShouldGetThem()
+        {
+            var features = new List<Feature>();
+            _latestFileFetcherExecutor.Get().Returns(new MemoryStream());
+            _osmRepository.GetElementsWithName(Arg.Any<Stream>()).Returns(new Dictionary<string, List<ICompleteOsmGeo>>());
+            _osmRepository.GetPointsWithNoNameByTags(Arg.Any<Stream>(), Arg.Any<List<KeyValuePair<string, string>>>())
+                .Returns(new List<Node>());
+
+            var results = _adapter.GetPointsForIndexing().Result;
+
+            Assert.AreEqual(features.Count, results.Count);
         }
     }
 }
