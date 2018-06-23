@@ -43,13 +43,14 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="file">The file to preprocess</param>
         /// <param name="idRegExPattern">The regular expersion for the id field to fill - for example &amp;id=(\d+)</param>
+        /// /// <param name="sourceImageUrl">A url to a small image representing this source</param>
         /// <param name="icon">icon to add - for example icon-tint or icon-waterfall</param>
-        /// <param name="iconColor">The color for the icon</param>
-        /// <param name="sourceImageUrl">A url to a small image representing this source</param>
+        /// <param name="iconColor">The color for the icon - with # or just a name</param>
+        /// <param name="category">the relevant category <see cref="Categories"/></param>
         /// <returns></returns>
         [HttpPost]
         [SwaggerOperationFilter(typeof(RequiredFileUploadParams))]
-        public async Task<IActionResult> UploadCsv([FromForm]IFormFile file, [FromQuery]string idRegExPattern, [FromQuery]string icon, [FromQuery]string iconColor, [FromQuery]string sourceImageUrl)
+        public async Task<IActionResult> UploadCsv([FromForm]IFormFile file, [FromQuery]string idRegExPattern, [FromQuery]string sourceImageUrl, [FromQuery]string icon = "icon-bike", [FromQuery]string iconColor = "black", [FromQuery]string category = Categories.ROUTE_BIKE)
         {
             var reader = new StreamReader(file.OpenReadStream());
             var csvReader = new CsvReader(reader);
@@ -81,7 +82,7 @@ namespace IsraelHiking.API.Controllers
                     csvRow.Website = csvRow.Website;
                     csvRow.Icon = icon;
                     csvRow.IconColor = iconColor;
-                    csvRow.Category = Categories.ROUTE_BIKE;
+                    csvRow.Category = category;
                     csvRow.Id = Regex.Match(csvRow.Website, idRegExPattern).Groups[1].Value;
                     csvWriter.WriteRecord(csvRow);
                     csvWriter.NextRecord();
