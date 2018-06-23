@@ -81,9 +81,10 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
                 return;
             } else {
                 this.tooltips.forEach((tooltip) => {
+                    tooltip.disabled = true;
                     if (tooltip._tooltipInstance != null && tooltip._tooltipInstance.isVisible()) {
                         subscriptions.push(tooltip._tooltipInstance.afterHidden().pipe(take(1)));
-                        tooltip._tooltipInstance.hide(0);
+                        tooltip.hide(0);
                     }
                 });
             }
