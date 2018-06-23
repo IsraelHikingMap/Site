@@ -161,7 +161,7 @@ namespace IsraelHiking.API.Services
         /// <param name="context"></param>
         private void UpdateAddressesTemplates(ImageCreationContext context)
         {
-            var address = string.IsNullOrWhiteSpace(context.DataContainer.BaseLayer.Address)
+            var address = IsValidAddress(context.DataContainer.BaseLayer.Address) == false
                 ? "https://israelhiking.osm.org.il/Hebrew/tiles/{z}/{x}/{y}.png"
                 : context.DataContainer.BaseLayer.Address;
 
@@ -171,7 +171,7 @@ namespace IsraelHiking.API.Services
             };
             foreach (var layerData in context.DataContainer.Overlays ?? new List<LayerData>())
             {
-                if (string.IsNullOrWhiteSpace(layerData.Address))
+                if (IsValidAddress(layerData.Address) == false)
                 {
                     continue;
                 }
@@ -183,6 +183,11 @@ namespace IsraelHiking.API.Services
                 addressTemplates.Add(addressAndOpacity);
             }
             context.AddressesTemplates = addressTemplates.ToArray();
+        }
+
+        private bool IsValidAddress(string address)
+        {
+            return !string.IsNullOrWhiteSpace(address) && address.Contains("{x}");
         }
 
         /// <summary>

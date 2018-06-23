@@ -188,12 +188,28 @@ namespace IsraelHiking.API.Tests.Services
                 new LatLng {Lat = 0.1, Lng = 0.1},
                 new LatLng {Lat = 0.15, Lng = 0.1}
             });
-            dataContainer.Overlays = new List<LayerData>{ new LayerData { Address = "overlay" } };
+            dataContainer.Overlays = new List<LayerData>{ new LayerData { Address = "http://www.overlay.com/{z}/{y}/{x}" } };
 
             var ressults = _imageCreationService.Create(dataContainer, 600, 255).Result;
 
             Assert.IsTrue(ressults.Length > 0);
             _remoteFileFetcherGateway.Received(16).GetFileContent(Arg.Any<string>());
+        }
+
+        [TestMethod]
+        public void Zoom13_OverlayIsNotInAValidFormat_ShouldFetchOnlyBaseLayer()
+        {
+            var dataContainer = GetDataContainer(new List<LatLng>
+            {
+                new LatLng {Lat = 0.1, Lng = 0.1},
+                new LatLng {Lat = 0.15, Lng = 0.1}
+            });
+            dataContainer.Overlays = new List<LayerData> { new LayerData { Address = "overlay" } };
+
+            var ressults = _imageCreationService.Create(dataContainer, 600, 255).Result;
+
+            Assert.IsTrue(ressults.Length > 0);
+            _remoteFileFetcherGateway.Received(8).GetFileContent(Arg.Any<string>());
         }
 
         [TestMethod]
@@ -222,7 +238,7 @@ namespace IsraelHiking.API.Tests.Services
                 Overlays = new List<LayerData>
                 {
                     new LayerData(), // should be ignored
-                    new LayerData { Address = "address", Opacity = 0.5 }
+                    new LayerData { Address = "www.address.com/{z}/{y}/{x}.png", Opacity = 0.5 }
                 },
                 Routes = new List<RouteData> { new RouteData
                 {
