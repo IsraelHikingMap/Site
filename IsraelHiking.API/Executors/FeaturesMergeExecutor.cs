@@ -320,7 +320,7 @@ namespace IsraelHiking.API.Executors
 
         private List<Feature> MergeWikipediaToOsmByWikipediaTags(List<Feature> features)
         {
-            WriteToBothLoggers("Starting joining wikipedia markers.");
+            WriteToBothLoggers("Starting joining Wikipedia markers.");
             var featureIdsToRemove = new List<string>();
             var wikiFeatures = features.Where(f => f.Attributes[FeatureAttributes.POI_SOURCE].Equals(Sources.WIKIPEDIA)).ToList();
             var osmWikiFeatures = features.Where(f =>
@@ -343,7 +343,7 @@ namespace IsraelHiking.API.Executors
                     }
                 }
             }
-            WriteToBothLoggers($"Finished joining wikipedia markers. Merged features: {featureIdsToRemove.Count}");
+            WriteToBothLoggers($"Finished joining Wikipedia markers. Merged features: {featureIdsToRemove.Count}");
             return features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
         }
 

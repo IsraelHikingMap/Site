@@ -80,7 +80,7 @@ namespace IsraelHiking.API.Controllers
                 }
                 _logger.LogInformation("Updating site's databases according to request: " + JsonConvert.SerializeObject(request));
                 await _osmLatestFileFetcherExecutor.Update(request.OsmFile);
-                _logger.LogInformation("Update osm file completed.");
+                _logger.LogInformation("Update OSM file completed.");
 
                 await _elasticSearchUpdaterService.Rebuild(request);
                 return Ok();

@@ -107,7 +107,7 @@ namespace IsraelHiking.API.Services.Poi
                 .GroupBy(f => f.Attributes[FeatureAttributes.ID])
                 .Select(g => g.First())
                 .ToList();
-            _logger.LogInformation($"Finished getting wikipedia pages for indexing, got {wikiFeatures.Count} pages.");
+            _logger.LogInformation($"Finished getting Wikipedia pages for indexing, got {wikiFeatures.Count} pages.");
             return wikiFeatures;
         }
     }
