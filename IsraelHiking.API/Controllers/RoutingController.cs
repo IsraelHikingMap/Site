@@ -8,7 +8,6 @@ using GeoAPI.CoordinateSystems.Transformations;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Executors;
 using NetTopologySuite.Features;
-using NetTopologySuite.Geometries;
 using Microsoft.AspNetCore.Mvc;
 
 namespace IsraelHiking.API.Controllers
@@ -21,6 +20,7 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly IGraphHopperGateway _graphHopperGateway;
         private readonly IElevationDataStorage _elevationDataStorage;
+        private readonly IGeometryFactory _geometryFactory;
         private readonly IMathTransform _wgs84ItmMathTransform;
 
         /// <summary>
@@ -29,12 +29,15 @@ namespace IsraelHiking.API.Controllers
         /// <param name="graphHopperGateway"></param>
         /// <param name="elevationDataStorage"></param>
         /// <param name="itmWgs84MathTransfromFactory"></param>
+        /// <param name="geometryFactory"></param>
         public RoutingController(IGraphHopperGateway graphHopperGateway,
             IElevationDataStorage elevationDataStorage,
-            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory)
+            IItmWgs84MathTransfromFactory itmWgs84MathTransfromFactory,
+            IGeometryFactory geometryFactory)
         {
             _graphHopperGateway = graphHopperGateway;
             _elevationDataStorage = elevationDataStorage;
+            _geometryFactory = geometryFactory;
             _wgs84ItmMathTransform = itmWgs84MathTransfromFactory.CreateInverse();
         }
 
@@ -50,7 +53,7 @@ namespace IsraelHiking.API.Controllers
         [ProducesResponseType(typeof(FeatureCollection), 200)]
         public async Task<IActionResult> GetRouting(string from, string to, string type)
         {
-            LineString lineString;
+            ILineString lineString;
             var profile = ConvertProfile(type);
             var pointFrom = await GetGeographicPosition(from);
             var pointTo = await GetGeographicPosition(to);
@@ -72,7 +75,7 @@ namespace IsraelHiking.API.Controllers
                 });
                 if (!lineString.Coordinates.Any())
                 {
-                    lineString = new LineString(new[] { pointFrom, pointTo });
+                    lineString = _geometryFactory.CreateLineString(new[] { pointFrom, pointTo });
                 }
             }
             foreach (var coordinate in lineString.Coordinates)
@@ -131,16 +134,20 @@ namespace IsraelHiking.API.Controllers
         /// <param name="from"></param>
         /// <param name="to"></param>
         /// <returns></returns>
-        private LineString GetDenseStraightLine(Coordinate from, Coordinate to)
+        private ILineString GetDenseStraightLine(Coordinate from, Coordinate to)
         {
             var itmFrom = _wgs84ItmMathTransform.Transform(from);
             var itmTo = _wgs84ItmMathTransform.Transform(to);
             var samples = (int)Math.Min(itmFrom.Distance(itmTo) / 30, 30);
+            if (samples == 0)
+            {
+                return _geometryFactory.CreateLineString(new[] {from, to});
+            }
             var coordinates = Enumerable.Range(0, samples + 1).Select(s => new Coordinate(
                 (to.X - from.X) * s / samples + from.X,
                 (to.Y - from.Y) * s / samples + from.Y)
             );
-            return new LineString(coordinates.ToArray());
+            return _geometryFactory.CreateLineString(coordinates.ToArray());
         }
     }
 }

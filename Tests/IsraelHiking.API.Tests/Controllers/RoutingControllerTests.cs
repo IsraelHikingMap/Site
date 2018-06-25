@@ -24,7 +24,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             _graphHopperGateway = Substitute.For<IGraphHopperGateway>();
             _elevationDataStorage = Substitute.For<IElevationDataStorage>();
-            _controller = new RoutingController(_graphHopperGateway, _elevationDataStorage, new ItmWgs84MathTransfromFactory());
+            _controller = new RoutingController(_graphHopperGateway, _elevationDataStorage, new ItmWgs84MathTransfromFactory(), new GeometryFactory());
         }
 
         [TestMethod]
@@ -46,9 +46,26 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void GetRouting_None_ShouldReturnLineStringWithTwoPoints()
         {
+            var results = _controller.GetRouting("0.00001,0.00001", "0.00002,0.00002", RoutingType.NONE).Result as OkObjectResult;
+            var content = results.Value as FeatureCollection;
+
+            Assert.AreEqual(1, content.Features.Count);
+            var lineString = content.Features.First().Geometry as LineString;
+            Assert.IsNotNull(lineString);
+            var points = lineString.Coordinates.OfType<Coordinate>();
+            Assert.AreEqual(0.00001, points.First().X);
+            Assert.AreEqual(0.00001, points.First().Y);
+            Assert.AreEqual(0.00002, points.Last().X);
+            Assert.AreEqual(0.00002, points.Last().Y);
+            Assert.AreEqual(2, points.Count());
+        }
+
+        [TestMethod]
+        public void GetRouting_None_ShouldReturnLineStringWithManyPoints()
+        {
             var results = _controller.GetRouting("1,1", "2,2", RoutingType.NONE).Result as OkObjectResult;
             var content = results.Value as FeatureCollection;
-            
+
             Assert.AreEqual(1, content.Features.Count);
             var lineString = content.Features.First().Geometry as LineString;
             Assert.IsNotNull(lineString);
