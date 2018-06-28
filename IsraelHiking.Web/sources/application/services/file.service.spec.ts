@@ -1,15 +1,25 @@
 import { TestBed, inject, fakeAsync } from "@angular/core/testing";
 import { HttpClientModule, HttpClient } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import * as FileSaverFunctions from "file-saver";
 
 import { FileService, IFormatViewModel } from "./file.service";
+import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
+import { ImageResizeService } from "./image-resize.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
 describe("FileService", () => {
 
+    let imageResizeService: ImageResizeService;
+    let nonAngularObjectsFactory: NonAngularObjectsFactory;
     beforeEach(() => {
+        imageResizeService = {
+            resizeImageAndConvert: jasmine.createSpy("resizeImageAndConvert")
+        } as any as ImageResizeService;
+        nonAngularObjectsFactory = {
+            saveAs: jasmine.createSpy("saveAs"),
+            b64ToBlob: jasmine.createSpy("b64ToBlob"),
+        } as any as NonAngularObjectsFactory;
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -19,7 +29,7 @@ describe("FileService", () => {
                 {
                     provide: FileService,
                     useFactory: fakeAsync((http, mockBackend: HttpTestingController) => {
-                        let fileService = new FileService(http);
+                        let fileService = new FileService(http, imageResizeService, nonAngularObjectsFactory);
                         mockBackend.expectOne(Urls.fileFormats).flush([{
                             extension: "ex",
                             label: "label",
@@ -42,10 +52,9 @@ describe("FileService", () => {
     it("Should save to file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-        spyOn(FileSaverFunctions, "saveAs");
-
         fileService.saveToFile("file.name", "format", {} as Common.DataContainer).then(() => {
-            expect(FileSaverFunctions.saveAs).toHaveBeenCalled();
+            expect(nonAngularObjectsFactory.saveAs).toHaveBeenCalled();
+            expect(nonAngularObjectsFactory.b64ToBlob).toHaveBeenCalled();
         });
 
         mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
@@ -54,8 +63,6 @@ describe("FileService", () => {
 
     it("Should open from file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
-
-        spyOn(FileSaverFunctions, "saveAs");
 
         let promise = fileService.openFromUrl("someurl").then((res) => {
             expect(res).not.toBeNull();
@@ -75,6 +82,16 @@ describe("FileService", () => {
         mockBackend.expectOne(Urls.openFile).flush({});
         return promise;
     }));
+
+    it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
+        async (fileService: FileService) => {
+            let file = new Blob([""], {type: "image/jpeg" }) as File;
+            let promise = fileService.openFromFile(file).then(() => {
+                expect(imageResizeService.resizeImageAndConvert).toHaveBeenCalled();
+            }, fail);
+
+            return promise;
+        }));
 
     it("Should not get a file from event when there's no files", inject([FileService], (fileService: FileService) => {
         let file = fileService.getFileFromEvent({ target: { files: [] } });

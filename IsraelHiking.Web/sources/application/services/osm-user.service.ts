@@ -7,6 +7,7 @@ import * as _ from "lodash";
 import { AuthorizationService } from "./authorization.service";
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
+import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -61,7 +62,8 @@ export class OsmUserService {
     constructor(private readonly httpClient: HttpClient,
         private readonly authorizationService: AuthorizationService,
         private readonly whatsAppService: WhatsAppService,
-        private readonly hashService: HashService) {
+        private readonly hashService: HashService,
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory) {
         this.x2Js = new X2JS();
         this.traces = [];
         this.shareUrls = [];
@@ -74,7 +76,7 @@ export class OsmUserService {
         try {
             let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as IOsmConfiguration;
             this.baseUrl = data.baseAddress;
-            this.oauth = this.authorizationService.createOSMAuth({
+            this.oauth = this.nonAngularObjectsFactory.createOsmAuth({
                 oauth_consumer_key: data.consumerKey,
                 oauth_secret: data.consumerSecret,
                 auto: true, // show a login form if the user is not authenticated and you try to do a call

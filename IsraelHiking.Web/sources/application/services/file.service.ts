@@ -1,8 +1,9 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { saveAs } from "file-saver";
 import * as L from "leaflet";
 
+import { ImageResizeService } from "./image-resize.service";
+import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -16,7 +17,9 @@ export interface IFormatViewModel {
 export class FileService {
     public formats: IFormatViewModel[];
 
-    constructor(private readonly httpClient: HttpClient) {
+    constructor(private readonly httpClient: HttpClient,
+        private readonly imageResizeService: ImageResizeService,
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory) {
         this.formats = [];
         this.httpClient.get(Urls.fileFormats).toPromise().then((response: IFormatViewModel[]) => {
             this.formats.splice(0);
@@ -61,13 +64,16 @@ export class FileService {
 
     public saveToFile = (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<{}> => {
         let promise = this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise();
-        promise.then((responseData) => {
+        promise.then((responseData: string) => {
             this.saveBytesResponseToFile(responseData, fileName);
         });
         return promise;
     }
 
-    public openFromFile(file: File): Promise<Common.DataContainer> {
+    public async openFromFile(file: File): Promise<Common.DataContainer> {
+        if (file.type === ImageResizeService.JPEG) {
+            return await this.imageResizeService.resizeImageAndConvert(file);
+        }
         let formData = new FormData();
         formData.append("file", file, file.name);
         return this.httpClient.post(Urls.openFile, formData).toPromise() as Promise<Common.DataContainer>;
@@ -89,15 +95,8 @@ export class FileService {
         return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<Common.DataContainer>;
     }
 
-    private saveBytesResponseToFile = (data: any, fileName: string) => {
-        let byteCharacters = atob(data);
-        let byteNumbers = new Array(byteCharacters.length);
-        for (let i = 0; i < byteCharacters.length; i++) {
-            byteNumbers[i] = byteCharacters.charCodeAt(i);
-        }
-        let byteArray = new Uint8Array(byteNumbers);
-        let blobToSave = new Blob([byteArray], { type: "application/octet-stream" });
-        // saveAs(blobToSave, fileName);
+    private saveBytesResponseToFile = (data: string, fileName: string) => {
+        let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(data, "application/octet-stream");
         this.saveAsWorkAround(blobToSave, fileName);
     }
 
@@ -128,7 +127,7 @@ export class FileService {
                     window.location.href = url;
                 } else {
                     // Any other browser
-                    saveAs(blob, fileName);
+                    this.nonAngularObjectsFactory.saveAs(blob, fileName);
                 }
             };
 
@@ -140,7 +139,7 @@ export class FileService {
                 window.location.href = url;
             } else {
                 // If normal browser use package Filesaver.js
-                saveAs(blob, fileName);
+                this.nonAngularObjectsFactory.saveAs(blob, fileName);
             }
         }
     }

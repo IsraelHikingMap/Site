@@ -66,6 +66,8 @@ import { GeoLocationService } from "./services/geo-location.service";
 import { ImageGalleryService } from "./services/image-gallery.service";
 import { CancelableTimeoutService } from "./services/cancelable-timeout.service";
 import { WhatsAppService } from "./services/whatsapp.service";
+import { ImageResizeService } from "./services/image-resize.service";
+import { NonAngularObjectsFactory } from "./services/non-angular-objects.factory";
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 // components
@@ -260,7 +262,9 @@ const routes: Routes = [
         GeoLocationService,
         ImageGalleryService,
         CancelableTimeoutService,
-        WhatsAppService
+        WhatsAppService,
+        ImageResizeService,
+        NonAngularObjectsFactory
     ],
     declarations: [MainMapComponent,
         SidebarComponent,

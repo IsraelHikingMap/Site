@@ -7,6 +7,7 @@ import * as X2JS from "x2js";
 import { OsmUserService, ITrace } from "./osm-user.service";
 import { AuthorizationService } from "./authorization.service";
 import { WhatsAppService } from "./whatsapp.service";
+import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { HashService } from "./hash.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
@@ -30,9 +31,11 @@ describe("OSM User Service", () => {
             authenticated: () => false,
             logout: () => oauth
         } as OSMAuth.OSMAuthInstance;
+        let nonAngularObjectsFactory = {
+            createOsmAuth: () => oauth
+        };
         let authService = {
             osmToken: null,
-            createOSMAuth: () => oauth
         } as AuthorizationService;
         let hashService = {
             getFullUrlFromShareId: jasmine.createSpy("getFullUrlFromShareId")
@@ -45,6 +48,7 @@ describe("OSM User Service", () => {
             providers: [
                 { provide: AuthorizationService, useValue: authService },
                 { provide: HashService, useValue: hashService },
+                { provide: NonAngularObjectsFactory, useValue: nonAngularObjectsFactory },
                 WhatsAppService,
                 OsmUserService
             ]
