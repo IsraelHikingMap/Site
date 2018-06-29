@@ -73,6 +73,11 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     public angularBinding(hostView: ViewRef) {
         this.marker.on("popupopen", () => {
             this.applicationRef.attachView(hostView);
+            if (this.tooltips) {
+                this.tooltips.forEach((tooltip) => {
+                    tooltip.disabled = false;
+                });
+            }
         });
         this.marker.on("popupclose", () => {
             let subscriptions = [];
