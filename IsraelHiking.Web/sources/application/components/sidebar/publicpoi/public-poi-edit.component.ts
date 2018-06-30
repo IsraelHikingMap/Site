@@ -69,6 +69,7 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
 
     public selectIcon(icon: IIconColorLabel) {
         this.selectedCategory.selectedIcon = icon;
+        this.info.icon = icon.icon;
     }
 
     public addEmptyUrl() {

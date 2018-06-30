@@ -156,7 +156,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         this.suppressEvents(e);
         // HM TODO: make this a regular call - get only OSM points
         await this.snappingService.enable(true);
-        let results = this.snappingService.snapToPoint(this.marker.getLatLng(), { sensitivity: 100 } as ISnappingPointOptions);
+        let results = this.snappingService.snapToPoint(this.marker.getLatLng(), { sensitivity: 200 } as ISnappingPointOptions);
         let urls = [];
         if (this.imageLink) {
             urls = [this.imageLink];
