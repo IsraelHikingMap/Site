@@ -214,7 +214,8 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
 
     public clearSelected(id: string) {
         this.readOnlyLayer.clearLayers();
-        if (this.searchResultsMarker.identifier === id) {
+        if (this.searchResultsMarker != null && 
+            this.searchResultsMarker.identifier === id) {
             this.clearSearchResultsMarker();
         }
     }
