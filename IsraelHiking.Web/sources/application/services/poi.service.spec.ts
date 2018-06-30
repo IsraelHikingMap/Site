@@ -1,4 +1,4 @@
-﻿import { TestBed, inject } from "@angular/core/testing";
+import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule, HttpRequest } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import * as L from "leaflet";
@@ -9,12 +9,16 @@ import { WhatsAppService } from "./whatsapp.service";
 import { PoiService, IPointOfInterestExtended, IRating } from "./poi.service";
 import { HashService } from "./hash.service";
 import { Urls } from "../common/Urls";
+import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 
 describe("Poi Service", () => {
 
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
         let hashService = {};
+        let nonAngularObjectsFactory = {
+            b64ToBlob: jasmine.createSpy("b64ToBlob")
+        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -23,6 +27,7 @@ describe("Poi Service", () => {
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: HashService, useValue: hashService },
+                { provide: NonAngularObjectsFactory, useValue: nonAngularObjectsFactory },
                 WhatsAppService,
                 PoiService
             ]
@@ -80,16 +85,24 @@ describe("Poi Service", () => {
         return promise;
     })));
 
-    it("Should update point using the server", inject([PoiService, HttpTestingController],
-        async (poiService: PoiService, mockBackend: HttpTestingController) => {
+    it("Should update point using the server and convert images to files",
+        inject([PoiService, HttpTestingController, NonAngularObjectsFactory],
+            async (poiService: PoiService, mockBackend: HttpTestingController, nonAngularObjectsFactoryMock: NonAngularObjectsFactory) => {
 
-        let promise = poiService.uploadPoint({} as IPointOfInterestExtended, [{ name: "file.name" } as File]).then((res) => {
-            expect(res).not.toBeNull();
-        });
+                let poiExtended = {
+                    imagesUrls: [
+                        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                        "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+                    ]
+                } as IPointOfInterestExtended;
+                let promise = poiService.uploadPoint(poiExtended).then((res) => {
+                    expect(nonAngularObjectsFactoryMock.b64ToBlob).toHaveBeenCalled();
+                    expect(res).not.toBeNull();
+                });
 
-        mockBackend.expectOne((request) => request.url.includes(Urls.poi)).flush({});
-        return promise;
-    }));
+                mockBackend.expectOne((request) => request.url.includes(Urls.poi)).flush({});
+                return promise;
+            }));
 
     it("Should update rating using the server", inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {

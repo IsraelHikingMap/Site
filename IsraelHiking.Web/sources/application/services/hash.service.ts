@@ -16,10 +16,11 @@ export interface IApplicationStateChangedEventArgs {
     value: any;
 }
 
-export interface IPoiSourceAndId {
+export interface IPoiRouterData {
     source: string;
     id: string;
     language: string;
+    edit: boolean;
 }
 
 export class RouteStrings {
@@ -45,6 +46,7 @@ export class RouteStrings {
     public static readonly TERM = "term";
     public static readonly BASE_LAYER = "baselayer";
     public static readonly LANGUAGE = "language";
+    public static readonly EDIT = "edit";
 }
 
 @Injectable()
@@ -177,11 +179,11 @@ export class HashService {
         return this.stateMap.get("baseLayer");
     }
 
-    public getPoiSourceAndId(): IPoiSourceAndId {
+    public getPoiRouterData(): IPoiRouterData {
         return this.stateMap.get("poi");
     }
 
-    public getFullUrlFromPoiId(poiSourceAndId: IPoiSourceAndId) {
+    public getFullUrlFromPoiId(poiSourceAndId: IPoiRouterData) {
         let urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
             { queryParams: { language: poiSourceAndId.language } });
         return this.window.location.origin + urlTree.toString();

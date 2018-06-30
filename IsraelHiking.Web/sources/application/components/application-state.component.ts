@@ -2,7 +2,7 @@
 import { Router, ActivatedRoute } from "@angular/router";
 import * as L from "leaflet";
 
-import { HashService, RouteStrings } from "../services/hash.service";
+import { HashService, RouteStrings, IPoiRouterData } from "../services/hash.service";
 import { MapService } from "../services/map.service";
 import { SidebarService } from "../services/sidebar.service";
 
@@ -37,16 +37,19 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_DOWNLOAD)) {
                 this.hashService.setApplicationState("download", true);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_POI)) {
+                let snapshotMap = this.route.snapshot.queryParamMap;
                 let poiSourceAndId = {
                     id: params[RouteStrings.ID],
                     source: params[RouteStrings.SOURCE],
-                    language: this.route.snapshot.queryParamMap.get(RouteStrings.LANGUAGE)
-                };
-                if (this.hashService.getPoiSourceAndId() != null &&
-                    this.hashService.getPoiSourceAndId().id !== poiSourceAndId.id) {
+                    language: snapshotMap.get(RouteStrings.LANGUAGE),
+                    edit: snapshotMap.get(RouteStrings.EDIT) === "true"
+                } as IPoiRouterData;
+                let previousData = this.hashService.getPoiRouterData();
+                if (previousData != null &&
+                    previousData.id !== poiSourceAndId.id) {
                     this.sidebarService.hideWithoutChangingAddressbar();
                 }
-                if (this.hashService.getPoiSourceAndId() == null && this.sidebarService.isVisible) {
+                if (previousData == null && this.sidebarService.isVisible) {
                     this.sidebarService.toggle("public-poi");
                 }
                 this.hashService.setApplicationState("poi", poiSourceAndId);

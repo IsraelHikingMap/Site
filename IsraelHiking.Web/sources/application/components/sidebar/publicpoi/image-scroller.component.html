@@ -1,0 +1,33 @@
+﻿<div fxLayout="row" *ngIf="images.length === 0">
+    <div class="img-container-small" *ngIf="!canEdit">
+        <img src="https://user-images.githubusercontent.com/3269297/40793601-826a5834-6505-11e8-92a3-1727f35f70b4.png" class="img-responsive img-center" />
+    </div>
+    <label fxFill *ngIf="canEdit">
+        <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
+        <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*" multiple />
+    </label>
+</div>
+<div fxLayout="row" *ngIf="images.length > 0">
+    <div class="img-container-small">
+        <img [src]="getCurrentImage()"
+             class="img-responsive cursor-zoom-in img-center"
+             (click)="showImage()" />
+    </div>
+</div>
+<div fxLayout="row" *ngIf="hasNext() || hasPrevious() || canEdit">
+    <div fxFlex>
+        <button mat-button (click)="previous()" [disabled]="!hasPrevious()" fxFill><i class="fa icon-chevron-{{resources.start}}"></i></button>
+    </div>
+    <div fxFlex *ngIf="canEdit">
+        <label fxFill>
+            <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload non first image"><i class="fa icon-plus"></i></a>
+            <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*" multiple />
+        </label>
+    </div>
+    <div fxFlex *ngIf="canEdit">
+        <button mat-button (click)="remove()" fxFill><i class="fa icon-trash"></i></button>
+    </div>
+    <div fxFlex>
+        <button mat-button (click)="next()" [disabled]="!hasNext()" fxFill><i class="fa icon-chevron-{{resources.end}}"></i></button>
+    </div>
+</div>

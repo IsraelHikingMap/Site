@@ -104,13 +104,13 @@ import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.componen
 import { DownloadDialogComponent } from "./components/dialogs/download-dialog.component";
 import { ShareComponent } from "./components/share.component";
 import { ShareDialogComponent } from "./components/dialogs/share-dialog.component";
-import { UpdatePointDialogComponent } from "./components/dialogs/update-point-dialog.component";
 import { TermsOfServiceDialogComponent } from "./components/dialogs/terms-of-service-dialog.component";
 import { IhmLinkComponent } from "./components/ihm-link.component";
 import { ConfirmDialogComponent } from "./components/dialogs/confirm-dialog.component";
 import { LegendItemComponent } from "./components/sidebar/legend-item.component";
-import { PublicPoiSidebarComponent } from "./components/sidebar/public-poi-sidebar.component";
-import { PoiMainInfoComponent } from "./components/sidebar/poi-main-info.component";
+import { PublicPoiSidebarComponent } from "./components/sidebar/publicpoi/public-poi-sidebar.component";
+import { PublicPointOfInterestEditComponent } from "./components/sidebar/publicpoi/public-poi-edit.component";
+import { ImageScrollerComponent } from "./components/sidebar/publicpoi/image-scroller.component";
 import { ApplicationStateComponent } from "./components/application-state.component";
 
 export function getWindow() { return window; }
@@ -215,13 +215,13 @@ const routes: Routes = [
         DownloadDialogComponent,
         ShareComponent,
         ShareDialogComponent,
-        UpdatePointDialogComponent,
         TermsOfServiceDialogComponent,
         IhmLinkComponent,
         ConfirmDialogComponent,
         LegendItemComponent,
         PublicPoiSidebarComponent,
-        PoiMainInfoComponent,
+        PublicPointOfInterestEditComponent,
+        ImageScrollerComponent,
         ApplicationStateComponent
     ],
     providers: [
@@ -300,13 +300,13 @@ const routes: Routes = [
         ShareComponent,
         ShareDialogComponent,
         NameInUseValidatorDirective,
-        UpdatePointDialogComponent,
         TermsOfServiceDialogComponent,
         IhmLinkComponent,
         ConfirmDialogComponent,
         LegendItemComponent,
         PublicPoiSidebarComponent,
-        PoiMainInfoComponent,
+        PublicPointOfInterestEditComponent,
+        ImageScrollerComponent,
         ApplicationStateComponent
     ],
     bootstrap: [MainMapComponent, SidebarComponent]

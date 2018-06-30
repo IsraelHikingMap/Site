@@ -261,6 +261,7 @@ export class ResourcesService {
     public nameIsAlreadyInUse: string;
     public baseLayerAndOverlayAreOverlapping: string;
     public unableToFindPoi: string;
+    public wouldYouLikeToUpdate: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -722,6 +723,7 @@ export class ResourcesService {
         this.nameIsAlreadyInUse = this.gettextCatalog.getString("This name is already in use");
         this.baseLayerAndOverlayAreOverlapping = this.gettextCatalog.getString("Base layer and overlay are overlapping.");
         this.unableToFindPoi = this.gettextCatalog.getString("Unable to find the required point of interest...");
+        this.wouldYouLikeToUpdate = this.gettextCatalog.getString("Would you like to update:");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

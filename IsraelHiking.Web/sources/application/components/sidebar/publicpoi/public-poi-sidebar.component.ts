@@ -1,26 +1,29 @@
 import { Component } from "@angular/core";
-import { MatSelectChange } from "@angular/material";
 import * as _ from "lodash";
 import * as L from "leaflet";
 
-import { IPoiMainInfoData } from "./poi-main-info.component";
-import { BaseMapComponent } from "../base-map.component";
-import { ResourcesService } from "../../services/resources.service";
-import { SidebarService } from "../../services/sidebar.service";
+import { BaseMapComponent } from "../../base-map.component";
+import { ResourcesService } from "../../../services/resources.service";
+import { SidebarService } from "../../../services/sidebar.service";
 import {
-    IPointOfInterestExtended, PoiService, IRating, IRater,
-    IIconColorLabel, IReference, ISelectableCategory
-} from "../../services/poi.service";
-import { MapService } from "../../services/map.service";
-import { OsmUserService } from "../../services/osm-user.service";
-import { RoutesService } from "../../services/layers/routelayers/routes.service";
-import { ToastService } from "../../services/toast.service";
-import { LayersService } from "../../services/layers/layers.service";
-import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
-import { RouteLayerFactory } from "../../services/layers/routelayers/route-layer.factory";
-import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
-import { HashService, IPoiSourceAndId } from "../../services/hash.service";
-import * as Common from "../../common/IsraelHiking";
+    PoiService,
+    IPointOfInterestExtended,
+    IRater,
+    IReference,
+    IRating,
+    ISelectableCategory,
+    IPoiSocialLinks
+} from "../../../services/poi.service";
+import { MapService } from "../../../services/map.service";
+import { OsmUserService } from "../../../services/osm-user.service";
+import { RoutesService } from "../../../services/layers/routelayers/routes.service";
+import { ToastService } from "../../../services/toast.service";
+import { LayersService } from "../../../services/layers/layers.service";
+import { IMarkerWithData } from "../../../services/layers/routelayers/iroute.layer";
+import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
+import { CategoriesLayerFactory } from "../../../services/layers/categories-layers.factory";
+import { HashService, IPoiRouterData } from "../../../services/hash.service";
+import * as Common from "../../../common/IsraelHiking";
 
 @Component({
     selector: "public-poi-sidebar",
@@ -28,17 +31,12 @@ import * as Common from "../../common/IsraelHiking";
     styleUrls: ["./public-poi-sidebar.component.css"]
 })
 export class PublicPoiSidebarComponent extends BaseMapComponent {
-    public info: IPoiMainInfoData;
+    public info: IPointOfInterestExtended;
     public isLoading: boolean;
     public sourceImageUrls: string[];
     public rating: number;
     public latLng: L.LatLng;
-    public categories: ISelectableCategory[];
-    public selectedCategory: ISelectableCategory;
-    public isAdvanced: boolean;
-    public shareAddress: string;
-    public facebookShareAddress: string;
-    public whatsappShareAddress: string;
+    public shareLinks: IPoiSocialLinks;
 
     private editMode: boolean;
     private poiExtended: IPointOfInterestExtended;
@@ -53,26 +51,22 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly layersService: LayersService,
         private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly hashService: HashService, ) {
+        private readonly hashService: HashService) {
         super(resources);
-        let sourceAndId = this.hashService.getPoiSourceAndId();
+        let poiRouterData = this.hashService.getPoiRouterData();
         this.isLoading = true;
-        this.isAdvanced = false;
-        this.shareAddress = "";
-        this.facebookShareAddress = "";
-        this.whatsappShareAddress = "";
-        this.categories = [];
-        this.info = { imagesFiles: [], imagesUrls: [], urls: [] } as IPoiMainInfoData;
-        this.getExtendedData(sourceAndId);
+        this.shareLinks = {} as IPoiSocialLinks;
+        this.info = { imagesUrls: [], references: [] } as IPointOfInterestExtended;
+        this.getExtendedData(poiRouterData);
     }
 
-    private async getExtendedData(data: IPoiSourceAndId) {
+    private async getExtendedData(data: IPoiRouterData) {
         try {
             let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
             this.initFromPointOfInterestExtended(poiExtended);
             let categoriesLayer = this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute);
             categoriesLayer.selectRoute(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
-            this.initializeCategories(poiExtended.icon);
+            this.editMode = data.edit;
         } finally {
             this.isLoading = false;
         }
@@ -81,58 +75,12 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
     private initFromPointOfInterestExtended = (poiExtended: IPointOfInterestExtended) => {
         this.poiExtended = poiExtended;
         this.latLng = L.latLng(poiExtended.location.lat, poiExtended.location.lng, poiExtended.location.alt);
-        this.info.title = poiExtended.title;
-        this.info.description = poiExtended.description;
-        this.info.readOnlyDescription = this.getReadOnlyDescrition();
-        this.info.lengthInKm = poiExtended.lengthInKm;
-        this.info.urls = poiExtended.references.map(r => r.url);
-        if (this.info.urls.length === 0) {
-            this.addEmptyUrl();
-        }
-        this.info.imagesUrls = [...poiExtended.imagesUrls];
         this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
         this.rating = this.getRatingNumber(this.poiExtended.rating);
         this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
-        let links = this.poiService.getPoiSocialLinks(poiExtended);
-        this.shareAddress = links.poiLink;
-        this.facebookShareAddress = links.facebook;
-        this.whatsappShareAddress = links.whatsapp;
-    }
-
-    private async initializeCategories(markerIcon: string) {
-        let categories = await this.poiService.getSelectableCategories();
-        for (let category of categories) {
-            this.categories.push(category);
-        }
-        this.selectedCategory = null;
-
-        for (let category of this.categories) {
-            let icon = _.find(category.icons, iconToFind => iconToFind.icon === markerIcon);
-            if (icon) {
-                this.selectCategory({ value: category } as MatSelectChange);
-                this.selectIcon(icon);
-            }
-        }
-        if (this.selectedCategory == null) {
-            let category = _.find(this.categories, categoryToFind => categoryToFind.name === "Other");
-            let icon = { icon: markerIcon, color: "black", label: this.resources.other } as IIconColorLabel;
-            category.icons.push(icon);
-            this.selectCategory({ value: category } as MatSelectChange);
-            this.selectIcon(icon);
-        }
-    }
-
-    public selectCategory(e: MatSelectChange) {
-        this.categories.forEach(c => c.isSelected = false);
-        this.selectedCategory = e.value;
-        this.selectedCategory.isSelected = true;
-        if (this.selectedCategory.selectedIcon == null) {
-            this.selectedCategory.selectedIcon = this.selectedCategory.icons[0];
-        }
-    }
-
-    public selectIcon(icon: IIconColorLabel) {
-        this.selectedCategory.selectedIcon = icon;
+        this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
+        // clone:
+        this.info = JSON.parse(JSON.stringify(this.poiExtended));
     }
 
     private getRatingNumber(rating: IRating): number {
@@ -146,9 +94,15 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
             this.editMode;
     }
 
-    private getReadOnlyDescrition(): string {
-        if (!this.poiExtended.isEditable) {
+    public getDescrition(): string {
+        if (!this.poiExtended) {
             return "";
+        }
+        if (!this.poiExtended.isEditable) {
+            return this.poiExtended.description;
+        }
+        if (this.poiExtended.description) {
+            return this.poiExtended.description;
         }
         if (this.osmUserService.isLoggedIn() === false) {
             return this.resources.noDescriptionLoginRequired;
@@ -180,16 +134,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
     }
 
     public async save() {
-        this.poiExtended.title = this.info.title;
-        this.poiExtended.description = this.info.description;
-        this.poiExtended.icon = this.selectedCategory.selectedIcon.icon,
-        this.poiExtended.iconColor = this.selectedCategory.selectedIcon.color;
-        this.poiExtended.references = this.info.urls.filter(u => u).map(u => {
-            return { url: u } as IReference;
-        });
         this.isLoading = true;
         try {
-            let poiExtended = await this.poiService.uploadPoint(this.poiExtended, this.info.imagesFiles);
+            let poiExtended = await this.poiService.uploadPoint(this.info);
             this.initFromPointOfInterestExtended(poiExtended);
             this.toastService.info(this.resources.dataUpdatedSuccefully);
             this.editMode = false;
@@ -245,7 +192,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.clear();
     }
 
-    public addPointToRoute() {
+    public async addPointToRoute() {
         if (this.routesService.selectedRoute == null && this.routesService.routes.length > 0) {
             this.routesService.changeRouteState(this.routesService.routes[0]);
         }
@@ -262,13 +209,14 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
             icon = this.poiExtended.icon;
             id = this.poiExtended.id;
         }
+        let urls = await this.getUrls();
         this.routesService.selectedRoute.route.markers.push({
             latlng: this.latLng,
             title: this.info.title,
             description: this.info.description,
             type: icon.replace("icon-", ""),
             id: id,
-            urls: this.getUrls(),
+            urls: urls,
             marker: null
         } as IMarkerWithData);
         this.routesService.selectedRoute.setEditMode(editMode);
@@ -283,19 +231,21 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.close();
     }
 
-    private getUrls(): Common.LinkData[] {
+    private async getUrls(): Promise<Common.LinkData[]> {
         let urls = [] as Common.LinkData[];
-        for (let url of this.info.urls) {
+        for (let reference of this.info.references) {
             urls.push({
                 mimeType: "text/html",
                 text: this.info.title,
-                url: url
+                url: reference.url
             });
         }
         if (this.poiExtended && this.poiExtended.imagesUrls.length > 0) {
             for (let imageUrl of this.poiExtended.imagesUrls) {
+                let res = await fetch(imageUrl);
+                let blob = await res.blob();
                 urls.push({
-                    mimeType: `image/${imageUrl.split(".").pop()}`,
+                    mimeType: blob.type,
                     text: "",
                     url: imageUrl
                 });
@@ -319,17 +269,5 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         }
         let baseLayerAddress = this.layersService.selectedBaseLayer.address;
         return this.osmUserService.getEditElementOsmAddress(baseLayerAddress, this.poiExtended.id);
-    }
-
-    public addEmptyUrl() {
-        this.info.urls.push("");
-    }
-
-    public removeUrl(i: number) {
-        this.info.urls.splice(i, 1);
-    }
-
-    public trackByIndex(index) {
-        return index;
     }
 }

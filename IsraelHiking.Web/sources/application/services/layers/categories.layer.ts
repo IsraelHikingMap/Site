@@ -183,8 +183,9 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         marker.title = pointOfInterest.title;
         marker.identifier = pointOfInterest.id;
         marker.on("click", () => {
-            if (this.hashService.getPoiSourceAndId() != null &&
-                this.hashService.getPoiSourceAndId().id === pointOfInterest.id) {
+            let poiRouterData = this.hashService.getPoiRouterData();
+            if (poiRouterData != null &&
+                poiRouterData.id === pointOfInterest.id) {
                 this.sidebarService.hide();
                 this.hashService.setApplicationState("poi", null);
                 this.hashService.resetAddressbar();

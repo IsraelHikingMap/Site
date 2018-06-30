@@ -76,8 +76,8 @@ export class DataContainerService {
             let data = await this.fileService.openFromUrl(this.hashService.getUrl());
             data.baseLayer = this.hashService.getBaselayer();
             this.setData(data);
-        } else if (this.hashService.getPoiSourceAndId()) {
-            let poiSrouceAndId = this.hashService.getPoiSourceAndId();
+        } else if (this.hashService.getPoiRouterData()) {
+            let poiSrouceAndId = this.hashService.getPoiRouterData();
             try {
                 let poi = await this.poiService.getPoint(poiSrouceAndId.id, poiSrouceAndId.source);
                 let latLng = L.latLng(poi.location.lat, poi.location.lng);

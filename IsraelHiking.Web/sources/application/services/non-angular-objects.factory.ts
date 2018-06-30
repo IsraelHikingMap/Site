@@ -30,8 +30,13 @@ export interface IPiexif {
 @Injectable()
 export class NonAngularObjectsFactory {
 
-    public get b64ToBlob(): (data: string, mimeType: string) => Blob {
-        return b64toBlob as (data: string, mimeType: string) => Blob;
+    public b64ToBlob(data: string, contentType?: string): Blob {
+        if (data.startsWith("data")) {
+            let mime = data.match(/data:([a-zA-Z0-9]+\/[a-zA-Z0-9-.+]+).*,(.*)/);
+            contentType = mime[1];
+            data = mime[2];
+        }
+        return b64toBlob(data, contentType);
     }
 
     public get saveAs(): (data: Blob, filename?: string, disableAutoBOM?: boolean) => void {

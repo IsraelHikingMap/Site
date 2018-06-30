@@ -14,13 +14,13 @@ export class ImageResizeService {
         this.piexif = nonAngualrObjectsFactory.createPiexif();
     }
 
-    public resizeImageAndConvert(file: File): Promise<Common.DataContainer> {
+    public resizeImageAndConvert(file: File, throwIfNoLocation = true): Promise<Common.DataContainer> {
         return new Promise((resolve, reject) => {
             let reader = new FileReader();
             reader.onload = (event: any) => {
                 let exifData = this.piexif.load(event.target.result);
                 let latLng = this.getGeoLocation(exifData);
-                if (latLng == null) {
+                if (latLng == null && throwIfNoLocation) {
                     reject(new Error("Image does not contain geolocation information"));
                 }
                 let image = new Image();

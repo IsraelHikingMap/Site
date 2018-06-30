@@ -170,13 +170,15 @@ export class SnappingService {
         return response;
     }
 
+    /**
+     * This method will snap to the nearest point. markerData will be null in case there were no points near by.
+     */
     public snapToPoint = (latlng: L.LatLng, options?: ISnappingPointOptions): ISnappingPointResponse => {
-        if (!options) {
-            options = {
-                points: this.pointsSnappings,
-                sensitivity: 2 * SnappingService.DEFAULT_SENSITIVITY
-            } as ISnappingPointOptions;
-        }
+        let defaultOptions = {
+            points: this.pointsSnappings,
+            sensitivity: 2 * SnappingService.DEFAULT_SENSITIVITY
+        } as ISnappingPointOptions;
+        options = Object.assign(defaultOptions, options);
 
         let response = {
             latlng: latlng,
@@ -198,10 +200,10 @@ export class SnappingService {
         return response;
     }
 
-    public enable = (enable: boolean) => {
+    public enable = async (enable: boolean) => {
         this.enabled = enable;
         if (this.enabled) {
-            this.generateSnappings();
+            await this.generateSnappings();
         }
     }
 

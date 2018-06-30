@@ -4,10 +4,11 @@ import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { ResourcesService } from "./resources.service";
-import { HashService } from "./hash.service";
+import { HashService, IPoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
+import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 
 export type CategoriesType = "Points of Interest" | "Routes";
 
@@ -83,13 +84,16 @@ export interface ISelectableCategory extends ICategory {
 export class PoiService {
     private categoriesMap: Map<CategoriesType, ICategory[]>;
     private poiCache: IPointOfInterestExtended[];
+    private addOrUpdateMarkerData: Common.MarkerData;
 
     constructor(private readonly resources: ResourcesService,
         private readonly httpClient: HttpClient,
         private readonly whatsappService: WhatsAppService,
-        private readonly hashService: HashService) {
+        private readonly hashService: HashService,
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory) {
 
         this.poiCache = [];
+        this.addOrUpdateMarkerData = null;
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
         this.categoriesMap.set("Points of Interest", []);
         this.categoriesMap.set("Routes", []);
@@ -144,21 +148,36 @@ export class PoiService {
     }
 
     public async getPoint(id: string, source: string, language?: string): Promise<IPointOfInterestExtended> {
+        if (source === "new") {
+            return this.mergeWithPoi({
+                imagesUrls: [],
+                source: "OSM",
+                id: "",
+                rating: { raters: [] },
+                references: [],
+                isEditable: true,
+                dataContainer: { routes: [] }
+            } as IPointOfInterestExtended);
+        }
         let itemInCache = _.find(this.poiCache, p => p.id === id && p.source === source);
         if (itemInCache) {
-            return itemInCache;
+            return this.mergeWithPoi(itemInCache);
         }
         let params = new HttpParams()
             .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
         let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as IPointOfInterestExtended;
         this.poiCache.splice(0, 0, poi);
-        return poi;
+        return this.mergeWithPoi(poi);
     }
 
-    public uploadPoint(poiExtended: IPointOfInterestExtended, files: File[]): Promise<IPointOfInterestExtended> {
+    public async uploadPoint(poiExtended: IPointOfInterestExtended): Promise<IPointOfInterestExtended> {
+
         let formData = new FormData();
-        for (let file of files) {
-            formData.append("files", file, file.name);
+        let imageUrls = poiExtended.imagesUrls.filter(u => u.startsWith("data") || u.startsWith("blob"));
+        for (let imageurl of imageUrls) {
+            _.remove(poiExtended.imagesUrls, u => u === imageurl);
+            let blob = this.nonAngularObjectsFactory.b64ToBlob(imageurl);
+            formData.append("files", new File([blob], poiExtended.title));
         }
         formData.append("poiData", JSON.stringify(poiExtended));
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
@@ -175,12 +194,32 @@ export class PoiService {
             source: poiExtended.source,
             id: poiExtended.id,
             language: this.resources.getCurrentLanguageCodeSimplified()
-        });
+        } as IPoiRouterData);
         let escaped = encodeURIComponent(poiLink);
         return {
             poiLink: poiLink,
             facebook: `${Urls.facebook}${escaped}`,
             whatsapp: this.whatsappService.getUrl(poiExtended.title, escaped) as string,
         };
+    }
+
+    public setAddOrUpdateMarkerData(data: Common.MarkerData) {
+        this.addOrUpdateMarkerData = data;
+    }
+
+    private mergeWithPoi(poiExtended: IPointOfInterestExtended) {
+        if (this.addOrUpdateMarkerData == null) {
+            return poiExtended;
+        }
+        poiExtended.title = poiExtended.title || this.addOrUpdateMarkerData.title;
+        poiExtended.description = poiExtended.description || this.addOrUpdateMarkerData.description;
+        poiExtended.location = poiExtended.location || this.addOrUpdateMarkerData.latlng;
+        poiExtended.icon = poiExtended.icon || `icon-${this.addOrUpdateMarkerData.type}`;
+
+        this.addOrUpdateMarkerData.urls.filter(u => u.mimeType.startsWith("image")).map(u => u.url).forEach(url => {
+            poiExtended.imagesUrls.push(url);
+        });
+        this.addOrUpdateMarkerData = null;
+        return poiExtended;
     }
 }
