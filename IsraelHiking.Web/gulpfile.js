@@ -57,15 +57,14 @@ gulp.task("extract_to_pot", function () {
         .pipe(gulp.dest(paths.traslations));
 });
 
-gulp.task("upload_translation", ["extract_to_pot"], function() {
+gulp.task("upload_translation", gulp.series("extract_to_pot", function() {
     return gulp.src(paths.pot).pipe(upload(uploadOptions));
-});
+}));
 
-gulp.task("1_start_translating", ["upload_translation"], function () { //
+gulp.task("1_start_translating", gulp.series("upload_translation", function () { //
     return gulp.src(__filename)
-        .pipe(open({ uri: "https://translate.zanata.org/webtrans/translate?project=IsraelHiking&iteration=Main&localeId=en-US&locale=en-US&dswid=-5229#view:doc;doc:IsraelHiking;untranslated:show;fuzzy:show;rejected:show" }))
         .pipe(open({ uri: "https://translate.zanata.org/webtrans/translate?project=IsraelHiking&iteration=Main&localeId=he&locale=he&dswid=-5229#view:doc;doc:IsraelHiking;untranslated:show;fuzzy:show;rejected:show" }));
-});
+}));
 
 gulp.task("download_translation", function () {
     return download([
@@ -79,9 +78,9 @@ gulp.task("download_translation", function () {
     ]).pipe(gulp.dest(paths.traslations));
 });
 
-gulp.task("2_after_translation_finished", ["download_translation"], function () {
+gulp.task("2_after_translation_finished", gulp.series("download_translation", function () {
     return gulp.src(paths.traslations + "*.po")
         .pipe(gettext.compile({ format: "json" }))
         .pipe(jsonFormat(4))
         .pipe(gulp.dest(paths.traslations));
-});
+}));
