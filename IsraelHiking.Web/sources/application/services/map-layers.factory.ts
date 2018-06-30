@@ -1,8 +1,8 @@
 ﻿import { Injectable } from "@angular/core";
 import * as L from "leaflet";
 import * as esri from "esri-leaflet";
+import "esri-leaflet-renderers";
 
-import { LayersService } from "./layers/layers.service";
 import * as Common from "../common/IsraelHiking";
 
 @Injectable()
