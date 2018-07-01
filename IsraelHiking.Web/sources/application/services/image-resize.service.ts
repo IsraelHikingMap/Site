@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import * as L from "leaflet";
 
 import * as Common from "../common/IsraelHiking";
@@ -14,8 +14,18 @@ export class ImageResizeService {
         this.piexif = nonAngualrObjectsFactory.createPiexif();
     }
 
+    public resizeImage(file: File): Promise<string> {
+        return this.resizeImageAndConvertToAny<string>(file, data => data, false);
+    }
+
     public resizeImageAndConvert(file: File, throwIfNoLocation = true): Promise<Common.DataContainer> {
-        return new Promise((resolve, reject) => {
+        return this.resizeImageAndConvertToAny<Common.DataContainer>(file, this.createDataContainerFromBinaryString, throwIfNoLocation);
+    }
+
+    private resizeImageAndConvertToAny<TReturn>(file: File,
+        convertMethod: (data: string, name: string, geoLocation: L.LatLng) => TReturn,
+        throwIfNoLocation = true) {
+        return new Promise<TReturn>((resolve, reject) => {
             let reader = new FileReader();
             reader.onload = (event: any) => {
                 let exifData = this.piexif.load(event.target.result);
@@ -25,8 +35,8 @@ export class ImageResizeService {
                 }
                 let image = new Image();
                 image.onload = () => {
-                    let binaryStringData = this.resizeImage(image, exifData);
-                    let data = this.createDataContainerFromBinaryString(file.name, latLng, binaryStringData);
+                    let binaryStringData = this.orientAndResizeImage(image, exifData);
+                    let data = convertMethod(binaryStringData, file.name, latLng);
                     resolve(data);
                 };
                 image.src = event.target.result;
@@ -46,30 +56,78 @@ export class ImageResizeService {
         return L.latLng(lat, lng);
     }
 
-    private resizeImage(image: HTMLImageElement, exifObj): string {
-        let canvas = document.createElement("canvas");
+    private orientAndResizeImage(image: HTMLImageElement, exifObj): string {
+        let orientation = exifObj["0th"][this.piexif.ImageIFD.Orientation];
+        exifObj["0th"][this.piexif.ImageIFD.Orientation] = 1;
+
+        let canvas = document.createElement("canvas") as HTMLCanvasElement;
+        let context = canvas.getContext("2d");
+
         let maxSize = 1600; // in px for both height and width maximal size
         let width = image.naturalWidth;
         let height = image.naturalHeight;
         let ratio = maxSize / Math.max(width, height);
-        if (ratio > 1) {
-            let percentage = (width >= height)
-                ? ((width - maxSize) / width * 100)
-                : ((height - maxSize) / height * 100);
-            canvas.width = (percentage + 100) / 100 * width;
-            canvas.height = (percentage + 100) / 100 * height;
-        } else {
+        if (ratio < 1) {
             canvas.width = width * ratio;
             canvas.height = height * ratio;
         }
-        canvas.getContext("2d").drawImage(image, 0, 0, canvas.width, canvas.height);
+        let x = 0;
+        let y = 0;
+        width = canvas.width;
+        height = canvas.height;
+        if (orientation > 4) {
+            canvas.width = height;
+            canvas.height = width;
+        }
+        context.save();
+        switch (orientation) {
+        case 2:
+            x = -canvas.width;
+            context.scale(-1, 1);
+            break;
+        case 3:
+            x = -canvas.width;
+            y = -canvas.height;
+            context.scale(-1, -1);
+            break;
+        case 4:
+            y = -canvas.height;
+            context.scale(1, -1);
+            break;
+        case 5:
+            context.translate(canvas.width, canvas.height / canvas.width);
+            context.rotate(Math.PI / 2);
+            y = -canvas.width;
+            context.scale(1, -1);
+            break;
+        case 6:
+            context.translate(canvas.width, canvas.height / canvas.width);
+            context.rotate(Math.PI / 2);
+            break;
+        case 7:
+            context.translate(canvas.width, canvas.height / canvas.width);
+            context.rotate(Math.PI / 2);
+            x = -canvas.height;
+            context.scale(-1, 1);
+            break;
+        case 8:
+            context.translate(canvas.width, canvas.height / canvas.width);
+            context.rotate(Math.PI / 2);
+            x = -canvas.height;
+            y = -canvas.width;
+            context.scale(-1, -1);
+            break;
+        }
+        context.drawImage(image, x, y, width, height);
+        context.restore();
+
         let dataUrl = canvas.toDataURL(ImageResizeService.JPEG, 0.92);
         let exifbytes = this.piexif.dump(exifObj);
         dataUrl = this.piexif.insert(exifbytes, dataUrl);
         return dataUrl;
     }
 
-    private createDataContainerFromBinaryString(name: string, latLng: L.LatLng, binaryStringData: string) {
+    private createDataContainerFromBinaryString(binaryStringData: string, name: string, latLng: L.LatLng) {
         return {
             northEast: latLng,
             southWest: latLng,

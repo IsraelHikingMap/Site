@@ -19,9 +19,14 @@ export interface IPiexifObject {
     GPS: any[];
 }
 
+export interface IPiexifImageIFD {
+    Orientation: number;
+}
+
 export interface IPiexif {
     GPSHelper: IPiexifGPSHelper;
     GPSIFD: IPiexifGPSIFD;
+    ImageIFD: IPiexifImageIFD;
     load(binaryStringData: string): IPiexifObject;
     dump(exifObject: IPiexifObject): any[];
     insert(exifBytes: any[], binaryStringData: string): string;

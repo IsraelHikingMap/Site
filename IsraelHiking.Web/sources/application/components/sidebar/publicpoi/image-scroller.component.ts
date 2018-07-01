@@ -4,6 +4,7 @@ import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
 import { ImageGalleryService } from "../../../services/image-gallery.service";
+import { ImageResizeService } from "../../../services/image-resize.service";
 
 @Component({
     selector: "image-scroller",
@@ -23,7 +24,8 @@ export class ImageScrollerComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         private readonly fileService: FileService,
-        private readonly imageGalleryService: ImageGalleryService) {
+        private readonly imageGalleryService: ImageGalleryService,
+        private readonly imageResizeService: ImageResizeService) {
         super(resources);
         this.currentIndex = 0;
         this.currentImageChanged = new EventEmitter();
@@ -58,18 +60,13 @@ export class ImageScrollerComponent extends BaseMapComponent {
         this.previous();
     }
 
-    public add(e: any) {
+    public async add(e: any) {
         let files = this.fileService.getFilesFromEvent(e);
         for (let file of files) {
-            let reader = new FileReader();
-
-            reader.onload = (event: any) => {
-                this.images.push(event.target.result);
-                this.currentIndex = this.images.length - 1;
-                this.currentImageChanged.next(this.getCurrentValue());
-            };
-
-            reader.readAsDataURL(file);
+            let data = await this.imageResizeService.resizeImage(file);
+            this.images.push(data);
+            this.currentIndex = this.images.length - 1;
+            this.currentImageChanged.next(this.getCurrentValue());
         }
     }
 
