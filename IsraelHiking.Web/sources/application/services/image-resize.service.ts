@@ -28,7 +28,10 @@ export class ImageResizeService {
         return new Promise<TReturn>((resolve, reject) => {
             let reader = new FileReader();
             reader.onload = (event: any) => {
-                let exifData = this.piexif.load(event.target.result);
+                let exifData = null;
+                if (file.type === ImageResizeService.JPEG) {
+                    exifData = this.piexif.load(event.target.result);
+                }
                 let latLng = this.getGeoLocation(exifData);
                 if (latLng == null && throwIfNoLocation) {
                     reject(new Error("Image does not contain geolocation information"));
@@ -46,7 +49,7 @@ export class ImageResizeService {
     }
 
     private getGeoLocation(exifData: any) {
-        if (Object.keys(exifData.GPS).length === 0) {
+        if (exifData == null || Object.keys(exifData.GPS).length === 0) {
             return null;
         }
         let lat = this.piexif.GPSHelper.dmsRationalToDeg(exifData.GPS[this.piexif.GPSIFD.GPSLatitude],
@@ -56,9 +59,17 @@ export class ImageResizeService {
         return L.latLng(lat, lng);
     }
 
-    private orientAndResizeImage(image: HTMLImageElement, exifObj): string {
-        let orientation = exifObj["0th"][this.piexif.ImageIFD.Orientation];
-        exifObj["0th"][this.piexif.ImageIFD.Orientation] = 1;
+    private getAndUpdateOrientation(exifData: any) {
+        if (exifData == null) {
+            return 1;
+        }
+        let orientation = exifData["0th"][this.piexif.ImageIFD.Orientation];
+        exifData["0th"][this.piexif.ImageIFD.Orientation] = 1;
+        return orientation;
+    }
+
+    private orientAndResizeImage(image: HTMLImageElement, exifData): string {
+        let orientation = this.getAndUpdateOrientation(exifData);
 
         let canvas = document.createElement("canvas") as HTMLCanvasElement;
         let context = canvas.getContext("2d");
@@ -122,8 +133,10 @@ export class ImageResizeService {
         context.restore();
 
         let dataUrl = canvas.toDataURL(ImageResizeService.JPEG, 0.92);
-        let exifbytes = this.piexif.dump(exifObj);
-        dataUrl = this.piexif.insert(exifbytes, dataUrl);
+        if (exifData != null) {
+            let exifbytes = this.piexif.dump(exifData);
+            dataUrl = this.piexif.insert(exifbytes, dataUrl);
+        }
         return dataUrl;
     }
 
