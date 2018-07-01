@@ -19,7 +19,8 @@ export class MapLayersFactory {
                 layer.setZIndex(zIndex);
             }
             return layer;
-        } else if (layerData.address.toLowerCase().indexOf("/mapserver") !== -1) {
+        } else if (layerData.address.toLowerCase().endsWith("/mapserver") ||
+            layerData.address.toLowerCase().endsWith("/mapserver/")) {
             let options = MapLayersFactory.createOptionsFromLayerData(layerData, attribution);
             options.url = layerData.address;
             return esri.dynamicMapLayer(options);
