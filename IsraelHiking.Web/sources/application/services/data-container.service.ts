@@ -104,7 +104,9 @@ export class DataContainerService {
                 }
             }
             this.shareUrl = shareUrl;
-            this.toastService.info(shareUrl.description, shareUrl.title);
+            if (window.self === window.top) {
+                this.toastService.info(shareUrl.description, shareUrl.title);
+            }
         } catch (ex) {
             this.hashService.setApplicationState("share", "");
             this.toastService.warning(this.resourcesService.unableToLoadFromUrl);
