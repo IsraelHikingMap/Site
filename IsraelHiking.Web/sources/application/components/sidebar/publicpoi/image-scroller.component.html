@@ -2,7 +2,7 @@
     <div class="img-container-small" *ngIf="!canEdit">
         <img src="https://user-images.githubusercontent.com/3269297/40793601-826a5834-6505-11e8-92a3-1727f35f70b4.png" class="img-responsive img-center" />
     </div>
-    <label fxFill *ngIf="canEdit">
+    <label fxFill *ngIf="canEdit" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
         <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
         <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*" multiple />
     </label>
