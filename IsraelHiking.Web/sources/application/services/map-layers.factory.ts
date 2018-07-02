@@ -21,13 +21,12 @@ export class MapLayersFactory {
             return layer;
         } else if (layerData.address.toLowerCase().endsWith("/mapserver") ||
             layerData.address.toLowerCase().endsWith("/mapserver/")) {
-            let options = MapLayersFactory.createOptionsFromLayerData(layerData, attribution);
-            options.url = layerData.address;
+            let options = MapLayersFactory.createEsriLayerOptions(layerData, attribution);
             return esri.dynamicMapLayer(options);
         } else {
-            let options = MapLayersFactory.createOptionsFromLayerData(layerData, attribution);
-            options.url = layerData.address;
-            return esri.featureLayer(options);
+            let options = MapLayersFactory.createEsriLayerOptions(layerData, attribution);
+            let layer = esri.featureLayer(options);
+            return layer;
         }
     }
 
@@ -40,5 +39,14 @@ export class MapLayersFactory {
             opacity: layerData.opacity || 1.0,
             attribution: attribution
         } as L.TileLayerOptions;
+    }
+
+    private static createEsriLayerOptions(layerData: Common.LayerData, attribution?: string) {
+        let options = MapLayersFactory.createOptionsFromLayerData(layerData, attribution);
+        options.url = layerData.address;
+        options.style = () => {
+            return { fillOpacity: options.opacity, opacity: options.opacity }
+        };
+        return options;
     }
 }
