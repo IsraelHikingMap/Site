@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import * as L from "leaflet";
 import * as esri from "esri-leaflet";
 import "esri-leaflet-renderers";
@@ -45,7 +45,7 @@ export class MapLayersFactory {
         let options = MapLayersFactory.createOptionsFromLayerData(layerData, attribution);
         options.url = layerData.address;
         options.style = () => {
-            return { fillOpacity: options.opacity, opacity: options.opacity }
+            return { fillOpacity: options.opacity, opacity: options.opacity };
         };
         return options;
     }
