@@ -725,7 +725,8 @@ export class ResourcesService {
         this.baseLayerAndOverlayAreOverlapping = this.gettextCatalog.getString("Base layer and overlay are overlapping.");
         this.unableToFindPoi = this.gettextCatalog.getString("Unable to find the required point of interest...");
         this.wouldYouLikeToUpdate = this.gettextCatalog.getString("Would you like to update:");
-        this.wouldYouLikeToUpdateThePointWithoutTheTitle = this.gettextCatalog.getString("Would you like to update the point without the title?");
+        this.wouldYouLikeToUpdateThePointWithoutTheTitle = this.gettextCatalog
+            .getString("Would you like to update the point without the title?");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
