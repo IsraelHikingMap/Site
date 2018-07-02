@@ -172,7 +172,10 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         this.poiService.setAddOrUpdateMarkerData(markerData);
 
         if (results.markerData) {
-            this.toastService.confirm(`${this.resources.wouldYouLikeToUpdate} ${results.markerData.title}?`,
+            let message = results.markerData.title
+                ? `${this.resources.wouldYouLikeToUpdate} ${results.markerData.title}?`
+                : this.resources.wouldYouLikeToUpdateThePointWithoutTheTitle;
+            this.toastService.confirm(message,
                 () => {
                     this.router.navigate([RouteStrings.ROUTE_POI, "OSM", results.markerData.id],
                         { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });

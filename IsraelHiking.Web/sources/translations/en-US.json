@@ -1,5 +1,5 @@
 {
-    "en-US": {
+    "en_US": {
         "4x4 Routing": "4x4 Routing",
         "A few words about what you are sharing.": "A few words about what you are sharing.",
         "A link to a website": "A link to a website",
@@ -341,6 +341,7 @@
         "Trunk": "Trunk",
         "Tunnel": "Tunnel",
         "Type to search...": "Type to search...",
+        "Unable to extract geographic information from the file...": "Unable to extract geographic information from the file...",
         "Unable to find the required point of interest...": "Unable to find the required point of interest...",
         "Unable to find your location...": "Unable to find your location...",
         "Unable to generate URL, please try again later...": "Unable to generate URL, please try again later...",
@@ -348,7 +349,6 @@
         "Unable to get elevation data:": "Unable to get elevation data:",
         "Unable to get search results...": "Unable to get search results...",
         "Unable to load from URL...": "Unable to load from URL...",
-        "Unable to load from file...": "Unable to load from file...",
         "Unable to login...": "Unable to login...",
         "Unable to save an empty route, Please try and select a different one from the layers control on your left.": "Unable to save an empty route, Please try and select a different one from the layers control on your left.",
         "Unable to save data, please try again later...": "Unable to save data, please try again later...",
@@ -387,6 +387,7 @@
         "Wikipedia": "Wikipedia",
         "Woods": "Woods",
         "Worth it!": "Worth it!",
+        "Would you like to update the point without the title?": "Would you like to update the point without the title?",
         "Would you like to update:": "Would you like to update:",
         "Yes": "Yes",
         "You can drag-and-drop files or URLs onto the map to load them.": "You can drag-and-drop files or URLs onto the map to load them.",

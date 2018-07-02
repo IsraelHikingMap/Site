@@ -262,6 +262,7 @@ export class ResourcesService {
     public baseLayerAndOverlayAreOverlapping: string;
     public unableToFindPoi: string;
     public wouldYouLikeToUpdate: string;
+    public wouldYouLikeToUpdateThePointWithoutTheTitle: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -687,7 +688,7 @@ export class ResourcesService {
         this.routeIsHidden = this.gettextCatalog.getString("Route is hidden...");
         this.pleaseAddPointsToRoute = this.gettextCatalog.getString("Please add points to route...");
         this.unableToSaveToFile = this.gettextCatalog.getString("Unable to save to file...");
-        this.unableToLoadFromFile = this.gettextCatalog.getString("Unable to load from file...");
+        this.unableToLoadFromFile = this.gettextCatalog.getString("Unable to extract geographic information from the file...");
         this.unableToLoadFromUrl = this.gettextCatalog.getString("Unable to load from URL...");
         this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route's name was altered since it is in use...");
         this.unableToGenerateUrl = this.gettextCatalog.getString("Unable to generate URL, please try again later...");
@@ -724,6 +725,7 @@ export class ResourcesService {
         this.baseLayerAndOverlayAreOverlapping = this.gettextCatalog.getString("Base layer and overlay are overlapping.");
         this.unableToFindPoi = this.gettextCatalog.getString("Unable to find the required point of interest...");
         this.wouldYouLikeToUpdate = this.gettextCatalog.getString("Would you like to update:");
+        this.wouldYouLikeToUpdateThePointWithoutTheTitle = this.gettextCatalog.getString("Would you like to update the point without the title?");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
