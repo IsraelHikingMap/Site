@@ -49,7 +49,10 @@ export class ImageResizeService {
     }
 
     private getGeoLocation(exifData: any) {
-        if (exifData == null || Object.keys(exifData.GPS).length === 0) {
+        if (exifData == null ||
+            Object.keys(exifData.GPS).length === 0 ||
+            !exifData.GPS.hasOwnProperty(this.piexif.GPSIFD.GPSLatitude) ||
+            !exifData.GPS.hasOwnProperty(this.piexif.GPSIFD.GPSLongitude)) {
             return null;
         }
         let lat = this.piexif.GPSHelper.dmsRationalToDeg(exifData.GPS[this.piexif.GPSIFD.GPSLatitude],
