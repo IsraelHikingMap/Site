@@ -177,7 +177,7 @@ export class PoiService {
         for (let imageurl of imageUrls) {
             _.remove(poiExtended.imagesUrls, u => u === imageurl);
             let blob = this.nonAngularObjectsFactory.b64ToBlob(imageurl);
-            formData.append("files", new File([blob], poiExtended.title));
+            formData.append("files", new File([blob], poiExtended.title + blob.type.replace("image/", "")));
         }
         formData.append("poiData", JSON.stringify(poiExtended));
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
