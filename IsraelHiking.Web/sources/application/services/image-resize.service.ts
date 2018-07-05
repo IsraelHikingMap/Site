@@ -81,12 +81,14 @@ export class ImageResizeService {
         let width = image.naturalWidth;
         let height = image.naturalHeight;
         let ratio = maxSize / Math.max(width, height);
-        if (ratio < 1) {
-            canvas.width = width * ratio;
-            canvas.height = height * ratio;
+        if (ratio > 1) {
+            ratio = 1;
         }
+        canvas.width = width * ratio;
+        canvas.height = height * ratio;
         let x = 0;
         let y = 0;
+
         width = canvas.width;
         height = canvas.height;
         if (orientation > 4) {
