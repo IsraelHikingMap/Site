@@ -25,6 +25,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using System;
 using System.IO;
 using IsraelHiking.API.Services;
+using IsraelHiking.Common.Poi;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.StaticFiles;
 

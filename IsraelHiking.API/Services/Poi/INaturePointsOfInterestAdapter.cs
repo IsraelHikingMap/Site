@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

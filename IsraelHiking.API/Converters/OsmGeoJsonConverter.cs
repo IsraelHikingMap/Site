@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
@@ -48,13 +49,36 @@ namespace IsraelHiking.API.Converters
 
         private IAttributesTable ConvertTags(ICompleteOsmGeo osmObject)
         {
-            var properties = osmObject.Tags.ToDictionary(t => t.Key, t => t.Value);
-            properties.Add(FeatureAttributes.ID, osmObject.Type.ToString().ToLower() + "_" + osmObject.Id);
-            var table = new AttributesTable();
-            foreach (var key in properties.Keys)
+            var table = new AttributesTable(osmObject.Tags.ToDictionary(t => t.Key, t => t.Value as object))
             {
-                table.Add(key, properties[key]);
+                {FeatureAttributes.ID, osmObject.Type.ToString().ToLower() + "_" + osmObject.Id}
+            };
+            // HM TODO: Avoid down case, required feature: https://github.com/OsmSharp/core/issues/60
+            if (osmObject is CompleteOsmGeo complete)
+            {
+                if (complete.TimeStamp.HasValue)
+                {
+                    table.Add(FeatureAttributes.POI_LAST_MODIFIED, complete.TimeStamp.Value.ToString("o"));
+                }
+                if (!string.IsNullOrWhiteSpace(complete.UserName))
+                {
+                    table.Add(FeatureAttributes.POI_USER_NAME, complete.UserName);
+                    table.Add(FeatureAttributes.POI_USER_ADDRESS, $"//www.openstreetmap.org/user/{Uri.EscapeUriString(complete.UserName)}");
+                }
             }
+            else if (osmObject is OsmGeo osmGeo)
+            {
+                if (osmGeo.TimeStamp.HasValue)
+                {
+                    table.Add(FeatureAttributes.POI_LAST_MODIFIED, osmGeo.TimeStamp.Value.ToString("o"));
+                }
+                if (!string.IsNullOrWhiteSpace(osmGeo.UserName))
+                {
+                    table.Add(FeatureAttributes.POI_USER_NAME, osmGeo.UserName);
+                    table.Add(FeatureAttributes.POI_USER_ADDRESS, $"//www.openstreetmap.org/user/{Uri.EscapeUriString(osmGeo.UserName)}");
+                }
+            }
+
             return table;
         }
 

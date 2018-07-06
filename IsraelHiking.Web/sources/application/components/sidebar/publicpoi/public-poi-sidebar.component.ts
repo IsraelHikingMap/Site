@@ -9,10 +9,9 @@ import {
     PoiService,
     IPointOfInterestExtended,
     IRater,
-    IReference,
     IRating,
-    ISelectableCategory,
-    IPoiSocialLinks
+    IPoiSocialLinks,
+    IContribution
 } from "../../../services/poi.service";
 import { MapService } from "../../../services/map.service";
 import { OsmUserService } from "../../../services/osm-user.service";
@@ -37,6 +36,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
     public rating: number;
     public latLng: L.LatLng;
     public shareLinks: IPoiSocialLinks;
+    public contribution: IContribution;
 
     private editMode: boolean;
     private poiExtended: IPointOfInterestExtended;
@@ -56,6 +56,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         let poiRouterData = this.hashService.getPoiRouterData();
         this.isLoading = true;
         this.shareLinks = {} as IPoiSocialLinks;
+        this.contribution = {} as IContribution;
         this.info = { imagesUrls: [], references: [] } as IPointOfInterestExtended;
         this.getExtendedData(poiRouterData);
     }
@@ -79,6 +80,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.rating = this.getRatingNumber(this.poiExtended.rating);
         this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
         this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
+        this.contribution = this.poiExtended.contribution;
         // clone:
         this.info = JSON.parse(JSON.stringify(this.poiExtended));
     }

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using NetTopologySuite.Features;
@@ -116,7 +117,8 @@ namespace IsraelHiking.DataAccess
                 {
                     new ExtractsPropertyProvider {AsPlainText = true, IntroductionOnly = true, MaxSentences = 1},
                     new PageImagesPropertyProvider {QueryOriginalImage = true},
-                    new GeoCoordinatesPropertyProvider {QueryPrimaryCoordinate = true}
+                    new GeoCoordinatesPropertyProvider {QueryPrimaryCoordinate = true},
+                    new RevisionsPropertyProvider { FetchContent = false }
                 }
             });
             if (page.Exists == false)
@@ -133,7 +135,9 @@ namespace IsraelHiking.DataAccess
             attributes.Add(FeatureAttributes.DESCRIPTION + ":" + language, page.GetPropertyGroup<ExtractsPropertyGroup>().Extract ?? string.Empty);
             var imageUrl = page.GetPropertyGroup<PageImagesPropertyGroup>().OriginalImage.Url ?? string.Empty;
             attributes.Add(FeatureAttributes.IMAGE_URL, imageUrl.EndsWith(".svg") ? string.Empty : imageUrl);
-
+            attributes.Add(FeatureAttributes.POI_USER_NAME, page.LastRevision.UserName);
+            attributes.Add(FeatureAttributes.POI_USER_ADDRESS, _wikiSites[language].SiteInfo.MakeArticleUrl($"User:{Uri.EscapeUriString(page.LastRevision.UserName)}"));
+            attributes.Add(FeatureAttributes.POI_LAST_MODIFIED, page.LastRevision.TimeStamp.ToString("o"));
             return new FeatureCollection(new Collection<IFeature> { new Feature(new Point(coordinate), attributes) });
         }
 

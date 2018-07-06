@@ -3,6 +3,7 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
@@ -27,7 +28,7 @@ namespace IsraelHiking.API.Tests.Executors
             _remoteFileSizeFetcherGateway = Substitute.For<IRemoteFileSizeFetcherGateway>();
             var options = Substitute.For<IOptions<ConfigurationData>>();
             options.Value.Returns(new ConfigurationData());
-            _fetcher = new OsmLatestFileFetcherExecutor(_fileSystemHelper, _processHelper, _fileProvider, options, _remoteFileSizeFetcherGateway);
+            _fetcher = new OsmLatestFileFetcherExecutor(_fileSystemHelper, _processHelper, _fileProvider, options, _remoteFileSizeFetcherGateway, Substitute.For<ILogger>());
         }
 
         [TestMethod]

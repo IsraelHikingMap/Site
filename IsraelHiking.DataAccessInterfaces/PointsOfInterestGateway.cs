@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
-using IsraelHiking.Common;
+using IsraelHiking.Common.Poi;
 using NetTopologySuite.Features;
 
 namespace IsraelHiking.DataAccessInterfaces

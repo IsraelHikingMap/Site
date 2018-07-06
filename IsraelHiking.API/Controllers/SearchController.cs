@@ -10,6 +10,7 @@ using IsraelHiking.API.Converters.CoordinatesParsers;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
+using IsraelHiking.Common.Poi;
 
 namespace IsraelHiking.API.Controllers
 {

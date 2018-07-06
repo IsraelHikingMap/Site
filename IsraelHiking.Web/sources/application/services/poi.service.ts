@@ -41,6 +41,12 @@ export interface IReference {
     sourceImageUrl: string;
 }
 
+export interface IContribution {
+    userName: string;
+    userAddress: string;
+    lastModifiedDate: Date;
+}
+
 export interface IPointOfInterestExtended extends IPointOfInterest {
     isEditable: boolean;
     isRoute: boolean;
@@ -52,6 +58,7 @@ export interface IPointOfInterestExtended extends IPointOfInterest {
 
     rating: IRating;
     dataContainer: Common.DataContainer;
+    contribution: IContribution;
 }
 
 export interface IIconColorLabel {

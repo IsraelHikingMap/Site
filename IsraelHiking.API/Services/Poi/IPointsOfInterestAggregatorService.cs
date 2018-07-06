@@ -1,5 +1,5 @@
 ﻿using System.Threading.Tasks;
-using IsraelHiking.Common;
+using IsraelHiking.Common.Poi;
 
 namespace IsraelHiking.API.Services.Poi
 {

@@ -65,7 +65,7 @@ namespace IsraelHiking.API.Tests.Services.Poi
             var dataContainer = new DataContainer { Routes = new List<RouteData> { new RouteData { Name = "name" } } };
             var feature = GetValidFeature(id, source);
             feature.Attributes.AddAttribute(FeatureAttributes.POI_SHARE_REFERENCE, fileUrl);
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.AddDays(-1).ToLongDateString());
+            feature.Attributes.AddAttribute(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.AddDays(-1).ToString("o"));
             _elasticSearchGateway.GetCachedItemById(id, source).Returns(new FeatureCollection(new Collection<IFeature> {feature}));
             _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(dataContainer);
 

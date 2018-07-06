@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
 namespace IsraelHiking.API.Executors
@@ -25,6 +26,7 @@ namespace IsraelHiking.API.Executors
         private readonly IProcessHelper _processHelper;
         private readonly IFileProvider _fileProvider;
         private readonly IRemoteFileSizeFetcherGateway _remoteFileFetcherGateway;
+        private readonly ILogger _logger;
         private readonly ConfigurationData _options;
 
         /// <summary>
@@ -35,21 +37,26 @@ namespace IsraelHiking.API.Executors
         /// <param name="fileProvider"></param>
         /// <param name="options"></param>
         /// <param name="remoteFileFetcherGateway"></param>
+        /// <param name="logger"></param>
         public OsmLatestFileFetcherExecutor(IFileSystemHelper fileSystemHelper, 
             IProcessHelper processHelper,
             IFileProvider fileProvider,
-            IOptions<ConfigurationData> options, IRemoteFileSizeFetcherGateway remoteFileFetcherGateway)
+            IOptions<ConfigurationData> options, 
+            IRemoteFileSizeFetcherGateway remoteFileFetcherGateway,
+            ILogger logger)
         {
             _fileSystemHelper = fileSystemHelper;
             _processHelper = processHelper;
             _fileProvider = fileProvider;
             _remoteFileFetcherGateway = remoteFileFetcherGateway;
+            _logger = logger;
             _options = options.Value;
         }
 
         /// <inheritdoc />
         public async Task Update(bool updateFile = true)
         {
+            _logger.LogInformation("Starting updating to latest OSM file.");
             var workingDirectory = Path.Combine(_options.BinariesFolder, OSM_C_TOOLS_FOLDER);
             var directoryContents = _fileProvider.GetDirectoryContents(OSM_C_TOOLS_FOLDER);
             if (!directoryContents.Any())
@@ -61,6 +68,7 @@ namespace IsraelHiking.API.Executors
             {
                 UpdateFileToLatestVersion(workingDirectory);
             }
+            _logger.LogInformation("Finished updating to latest OSM file.");
         }
 
         /// <inheritdoc />

@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using IsraelHiking.API.Converters;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NetTopologySuite.Geometries;
@@ -53,6 +54,8 @@ namespace IsraelHiking.API.Tests.Converters
         {
             var node = CreateNode(1);
             node.Tags = new TagsCollection(new Tag(NAME, NAME));
+            node.UserName = "UserName";
+            node.TimeStamp = DateTime.Now;
 
             var feature = _converter.ToGeoJson(node);
             var point = feature.Geometry as Point;
@@ -69,8 +72,14 @@ namespace IsraelHiking.API.Tests.Converters
         public void ToGeoJson_WayWithOneNode_ShouldReturnNull()
         {
             var node = CreateNode(1);
-            var way = new CompleteWay { Id = 2, Tags = new TagsCollection() };
-            way.Nodes = new[] { node };
+            var way = new CompleteWay
+            {
+                Id = 2,
+                Tags = new TagsCollection(),
+                Nodes = new[] {node},
+                UserName = "UserName",
+                TimeStamp = DateTime.Now
+            };
             way.Tags.Add(NAME, NAME);
 
             var feature = _converter.ToGeoJson(way);
@@ -84,8 +93,12 @@ namespace IsraelHiking.API.Tests.Converters
         {
             var node1 = CreateNode(1);
             var node2 = CreateNode(2);
-            var way = new CompleteWay { Id = 3, Tags = new TagsCollection() };
-            way.Nodes = new[] { node1, node2 };
+            var way = new CompleteWay
+            {
+                Id = 3,
+                Tags = new TagsCollection(),
+                Nodes = new[] {node1, node2}
+            };
             way.Tags.Add(NAME, NAME);
 
             var feature = _converter.ToGeoJson(way);
@@ -104,8 +117,12 @@ namespace IsraelHiking.API.Tests.Converters
             var node2 = CreateNode(2);
             var node3 = CreateNode(3);
             var node4 = CreateNode(1);
-            var way = new CompleteWay { Id = 4, Tags = new TagsCollection() };
-            way.Nodes = new[] { node1, node2, node3, node4 };
+            var way = new CompleteWay
+            {
+                Id = 4,
+                Tags = new TagsCollection(),
+                Nodes = new[] {node1, node2, node3, node4}
+            };
             way.Tags.Add(NAME, NAME);
 
             var feature = _converter.ToGeoJson(way);
@@ -124,8 +141,11 @@ namespace IsraelHiking.API.Tests.Converters
             var node2 = CreateNode(2);
             var node3 = CreateNode(3);
             var node4 = CreateNode(1);
-            var way = new CompleteWay { Id = 4 };
-            way.Nodes = new[] { node1, node2, node3, node4 };
+            var way = new CompleteWay
+            {
+                Id = 4,
+                Nodes = new[] {node1, node2, node3, node4}
+            };
             var relation = new CompleteRelation { Id = 5, Tags = new TagsCollection() };
             relation.Tags.Add("boundary", "true");
             relation.Members = new[] { new CompleteRelationMember { Member = way, Role = "outer" } };
@@ -146,12 +166,21 @@ namespace IsraelHiking.API.Tests.Converters
             var node2 = CreateNode(2);
             var node3 = CreateNode(3);
             var node4 = CreateNode(1);
-            var way = new CompleteWay { Id = 4 };
-            way.Nodes = new[] { node1, node2, node3, node4 };
-            var subRelation1 = new CompleteRelation { Id = 5 };
-            subRelation1.Members = new[] { new CompleteRelationMember { Member = way, Role = "outer" } };
-            var subRelation2 = new CompleteRelation { Id = 5 };
-            subRelation2.Members = new[] { new CompleteRelationMember { Member = way, Role = "outer" } };
+            var way = new CompleteWay
+            {
+                Id = 4,
+                Nodes = new[] {node1, node2, node3, node4}
+            };
+            var subRelation1 = new CompleteRelation
+            {
+                Id = 5,
+                Members = new[] {new CompleteRelationMember {Member = way, Role = "outer"}}
+            };
+            var subRelation2 = new CompleteRelation
+            {
+                Id = 5,
+                Members = new[] {new CompleteRelationMember {Member = way, Role = "outer"}}
+            };
             var relation = new CompleteRelation { Id = 5, Tags = new TagsCollection() };
             relation.Tags.Add("type", "multipolygon");
             relation.Members = new[] {
@@ -266,10 +295,14 @@ namespace IsraelHiking.API.Tests.Converters
             wayPartOfPolygon1.Nodes = new[] { node4, node5, node6 };
             wayPartOfPolygon2.Nodes = new[] { node4, node7, node6 };
 
-            var subRelation = new CompleteRelation { Id = 12 };
-            subRelation.Members = new[] {
-                new CompleteRelationMember { Member = wayPartOfLineString1 },
-                new CompleteRelationMember { Member = wayPartOfLineString2 }
+            var subRelation = new CompleteRelation
+            {
+                Id = 12,
+                Members = new[]
+                {
+                    new CompleteRelationMember {Member = wayPartOfLineString1},
+                    new CompleteRelationMember {Member = wayPartOfLineString2}
+                }
             };
             var relation = new CompleteRelation { Id = 13, Tags = new TagsCollection() };
             relation.Tags.Add(NAME, NAME);
@@ -304,14 +337,25 @@ namespace IsraelHiking.API.Tests.Converters
             var node6 = CreateNode(6, 0.5, 0.6);
             var node7 = CreateNode(7, 0.6, 0.6);
             var node8 = CreateNode(8, 0.6, 0.5);
-            var wayOuter = new CompleteWay { Id = 9 };
-            wayOuter.Nodes = new[] { node1, node2, node3, node4, node1 };
-            var wayInner = new CompleteWay { Id = 9 };
-            wayInner.Nodes = new[] { node5, node6, node7, node8, node5 };
-            var relation = new CompleteRelation { Id = 10, Tags = new TagsCollection() };
-            relation.Members = new[] {
-                new CompleteRelationMember { Member = wayInner, Role = "inner" },
-                new CompleteRelationMember { Member = wayOuter, Role = "outer" }
+            var wayOuter = new CompleteWay
+            {
+                Id = 9,
+                Nodes = new[] {node1, node2, node3, node4, node1}
+            };
+            var wayInner = new CompleteWay
+            {
+                Id = 9,
+                Nodes = new[] {node5, node6, node7, node8, node5}
+            };
+            var relation = new CompleteRelation
+            {
+                Id = 10,
+                Tags = new TagsCollection(),
+                Members = new[]
+                {
+                    new CompleteRelationMember {Member = wayInner, Role = "inner"},
+                    new CompleteRelationMember {Member = wayOuter, Role = "outer"}
+                }
             };
             relation.Tags.Add("boundary", "true");
 

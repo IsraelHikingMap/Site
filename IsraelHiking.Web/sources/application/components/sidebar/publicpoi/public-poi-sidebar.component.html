@@ -58,6 +58,9 @@
         </div>
     </div>
     <br />
+    <div fxLayout="row" *ngIf="contribution.userName">
+        <p><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</p>
+    </div>
     <div fxLayout="row">
         <a *ngFor="let reference of info.references;" [href]="reference.url" [target]="'_blank'" class="margin-10-reverse">
             <img *ngIf="reference.sourceImageUrl" [src]="reference.sourceImageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />

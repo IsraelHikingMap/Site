@@ -8,6 +8,7 @@ using IsraelHiking.API.Converters.ConverterFlows;
 using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
+using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;

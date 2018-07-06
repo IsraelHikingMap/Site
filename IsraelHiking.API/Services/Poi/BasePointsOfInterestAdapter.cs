@@ -9,6 +9,7 @@ using IsraelHiking.API.Executors;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Extensions;
+using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -122,12 +123,31 @@ namespace IsraelHiking.API.Services.Poi
             poiItem.Description = mainFeature.Attributes.GetByLanguage(FeatureAttributes.DESCRIPTION, language);
             poiItem.Rating = await _elasticSearchGateway.GetRating(poiItem.Id, poiItem.Source);
             poiItem.IsEditable = false;
+            poiItem.Contribution = GetContribution(mainFeature.Attributes);
             var featureFromDatabase = await _elasticSearchGateway.GetPointOfInterestById(mainFeature.Attributes[FeatureAttributes.ID].ToString(), Source);
             if (featureFromDatabase != null)
             {
                 poiItem.CombinedIds = featureFromDatabase.GetIdsFromCombinedPoi();
             }
             return poiItem;
+        }
+
+        private Contribution GetContribution(IAttributesTable mainFeatureAttributes)
+        {
+            var contribution = new Contribution();
+            if (mainFeatureAttributes.Exists(FeatureAttributes.POI_USER_NAME))
+            {
+                contribution.UserName = mainFeatureAttributes[FeatureAttributes.POI_USER_NAME].ToString();
+            }
+            if (mainFeatureAttributes.Exists(FeatureAttributes.POI_LAST_MODIFIED))
+            {
+                contribution.LastModifiedDate = DateTime.Parse(mainFeatureAttributes[FeatureAttributes.POI_LAST_MODIFIED].ToString());
+            }
+            if (mainFeatureAttributes.Exists(FeatureAttributes.POI_USER_ADDRESS))
+            {
+                contribution.UserAddress = mainFeatureAttributes[FeatureAttributes.POI_USER_ADDRESS].ToString();
+            }
+            return contribution;
         }
 
         private async Task SetDataContainerAndLength(PointOfInterestExtended poiItem, FeatureCollection featureCollection)
@@ -228,7 +248,7 @@ namespace IsraelHiking.API.Services.Poi
         /// <returns></returns>
         protected void SetToCache(FeatureCollection featureCollection)
         {
-            featureCollection.Features.First().Attributes.AddOrUpdate(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.ToLongDateString());
+            featureCollection.Features.First().Attributes.AddOrUpdate(FeatureAttributes.POI_CACHE_DATE, DateTime.Now.ToString("o"));
             _elasticSearchGateway.CacheItem(featureCollection);
         }
     }

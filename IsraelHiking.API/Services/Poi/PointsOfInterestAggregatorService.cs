@@ -1,7 +1,6 @@
-﻿using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using IsraelHiking.Common;
+using IsraelHiking.Common.Poi;
 
 namespace IsraelHiking.API.Services.Poi
 {
@@ -49,6 +48,7 @@ namespace IsraelHiking.API.Services.Poi
                     if (string.IsNullOrWhiteSpace(poiItem.Description))
                     {
                         poiItem.Description = currentPoiItem.Description;
+                        poiItem.Contribution = currentPoiItem.Contribution;
                     }
                     poiItem.ImagesUrls = poiItem.ImagesUrls.Concat(currentPoiItem.ImagesUrls)
                         .Distinct()
