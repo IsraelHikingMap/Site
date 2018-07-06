@@ -33,23 +33,26 @@ export class MapService {
 
     public setMarkerTitle(marker: Common.IMarkerWithTitle, data: Common.MarkerData, color: string = "") {
         marker.unbindTooltip();
-        marker.title = data.title || "";
-        if (!data.title) {
+        let title = data.title || "";
+        marker.title = title;
+        let hasImage = _.some(data.urls, u => u.mimeType.startsWith("image"));
+        if (!title && !hasImage) {
             return;
         }
         let controlDiv = L.DomUtil.create("div");
-        let lines = data.title.split("\n");
+        let lines = title.split("\n");
         let displayLine = lines[0];
         if (lines.length > 1 || data.description) {
             displayLine += "...";
         }
-        let element = _.some(data.urls, u => u.mimeType.startsWith("image"))
+        let element = hasImage
             ? L.DomUtil.create("i", "fa icon-camera", controlDiv) :
             L.DomUtil.create("div", "", controlDiv);
         element.style.color = color;
         element.dir = this.resources.getDirection(displayLine);
         element.innerHTML = ` ${displayLine}`;
-        marker.bindTooltip(controlDiv, { permanent: true, direction: "bottom" } as L.TooltipOptions);
+        L.DomEvent.on(controlDiv, "click", () => marker.openPopup());
+        marker.bindTooltip(controlDiv, { permanent: true, direction: "bottom", interactive: true } as L.TooltipOptions);
     }
 
     public addAreaToReadOnlyLayer(readOnlyLayer: L.LayerGroup, routesData: Common.RouteData[]) {
