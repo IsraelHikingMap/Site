@@ -51,7 +51,6 @@ export class MapService {
         element.style.color = color;
         element.dir = this.resources.getDirection(displayLine);
         element.innerHTML = ` ${displayLine}`;
-        L.DomEvent.on(controlDiv, "click", () => marker.openPopup());
         marker.bindTooltip(controlDiv, { permanent: true, direction: "bottom", interactive: true } as L.TooltipOptions);
     }
 
