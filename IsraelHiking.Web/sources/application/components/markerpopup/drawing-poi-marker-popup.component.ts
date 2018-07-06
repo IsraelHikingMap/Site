@@ -191,7 +191,8 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         }
     }
 
-    public async imageChanged(e: any) {
+    public async addImage(e: any) {
+        this.suppressEvents(e);
         let file = this.fileService.getFileFromEvent(e);
         if (!file) {
             return;
@@ -204,6 +205,10 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         if (this.imageLink && this.imageLink.url) {
             this.imageGalleryService.setImages([this.imageLink.url]);
         }
+    }
+
+    public clearImage() {
+        this.imageLink = null;
     }
 
     public changeToEditMode = (): void => { throw new Error("Callback needs to be set by the creating class..."); };

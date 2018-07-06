@@ -8,7 +8,7 @@
     </label>
 </div>
 <div fxLayout="row" *ngIf="images.length > 0">
-    <div class="img-container-small">
+    <div class="img-container-small" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
         <img [src]="getCurrentImage()"
              class="img-responsive cursor-zoom-in img-center"
              (click)="showImage()" />

@@ -61,6 +61,9 @@ export class ImageScrollerComponent extends BaseMapComponent {
     }
 
     public async add(e: any) {
+        if (this.canEdit === false) {
+            return;
+        }
         let files = this.fileService.getFilesFromEvent(e);
         for (let file of files) {
             let data = await this.imageResizeService.resizeImage(file);
