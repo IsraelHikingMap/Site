@@ -119,7 +119,7 @@ namespace IsraelHiking.API.Services.Poi
         public async Task<PointOfInterestExtended> AddPointOfInterest(PointOfInterestExtended pointOfInterest, TokenAndSecret tokenAndSecret, string language)
         {
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
-            var changesetId = await osmGateway.CreateChangeset("Add POI interface from IHM site.");
+            var changesetId = await osmGateway.CreateChangeset($"Added {pointOfInterest.Title} using IsraelHiking.osm.org.il");
             var node = new Node
             {
                 Latitude = pointOfInterest.Location.Lat,
@@ -165,7 +165,7 @@ namespace IsraelHiking.API.Services.Poi
                 return pointOfInterest;
             }
 
-            var changesetId = await osmGateway.CreateChangeset("Update POI interface from IHM site.");
+            var changesetId = await osmGateway.CreateChangeset($"Updated {pointOfInterest.Title} using IsraelHiking.osm.org.il");
             await osmGateway.UpdateElement(changesetId, completeOsmGeo);
             await osmGateway.CloseChangeset(changesetId);
 
