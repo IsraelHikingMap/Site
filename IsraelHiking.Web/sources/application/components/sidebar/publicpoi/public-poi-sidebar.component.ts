@@ -80,7 +80,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.rating = this.getRatingNumber(this.poiExtended.rating);
         this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
         this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
-        this.contribution = this.poiExtended.contribution;
+        this.contribution = this.poiExtended.contribution || {} as IContribution;
         // clone:
         this.info = JSON.parse(JSON.stringify(this.poiExtended));
     }

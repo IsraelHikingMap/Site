@@ -172,9 +172,21 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         this.poiService.setAddOrUpdateMarkerData(markerData);
 
         if (results.markerData) {
-            let message = results.markerData.title
-                ? `${this.resources.wouldYouLikeToUpdate} ${results.markerData.title}?`
-                : this.resources.wouldYouLikeToUpdateThePointWithoutTheTitle;
+            let message = `${this.resources.wouldYouLikeToUpdate} ${results.markerData.title}?`;
+            if (!results.markerData.title) {
+                let categories = await this.poiService.getSelectableCategories();
+                let iconWithLabel = _.chain(categories)
+                    .map(c => c.icons)
+                    .flatten()
+                    .find(i => i.icon === `icon-${results.markerData.type}`)
+                    .value();
+                if (iconWithLabel) {
+                    let type = this.resources.translate(iconWithLabel.label);
+                    message = `${this.resources.wouldYouLikeToUpdate} ${type}?`;
+                } else {
+                    message = this.resources.wouldYouLikeToUpdateThePointWithoutTheTitle;
+                }
+            }
             this.toastService.confirm(message,
                 () => {
                     this.router.navigate([RouteStrings.ROUTE_POI, "OSM", results.markerData.id],
@@ -189,6 +201,8 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
             this.router.navigate([RouteStrings.ROUTE_POI, "new", ""],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
         }
+
+        this.marker.closePopup();
     }
 
     public async addImage(e: any) {
