@@ -3,9 +3,8 @@ import { LocalStorageService } from "ngx-store";
 import { Subject } from "rxjs";
 import * as L from "leaflet";
 import * as _ from "lodash";
-import "leaflet.markercluster";
 
-import { BasePoiMarkerLayer } from "./base-poi-marker.layer";
+import { BasePoiMarkerLayer, IMarkerWithTitleAndIcon } from "./base-poi-marker.layer";
 import { MapService } from "../map.service";
 import { IconsService } from "../icons.service";
 import { ResourcesService } from "../resources.service";
@@ -13,7 +12,6 @@ import { IPointOfInterest, PoiService, CategoriesType, ICategory } from "../poi.
 import { FitBoundsService } from "../fit-bounds.service";
 import { SidebarService } from "../sidebar.service";
 import { HashService, RouteStrings } from "../hash.service";
-import * as Common from "../../common/IsraelHiking";
 
 export class CategoriesLayer extends BasePoiMarkerLayer {
 
@@ -22,19 +20,19 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
 
     private requestsNumber: number;
     private markersLoaded: Subject<void>;
-    private searchResultsMarker: Common.IMarkerWithTitle;
+    private searchResultsMarker: IMarkerWithTitleAndIcon;
     public categories: ICategory[];
 
     constructor(private readonly router: Router,
         mapService: MapService,
-        private readonly resources: ResourcesService,
+        resources: ResourcesService,
         private readonly localStorageService: LocalStorageService,
         private readonly poiService: PoiService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly sidebarService: SidebarService,
         private readonly hashService: HashService,
         private readonly categoriesType: CategoriesType) {
-        super(mapService);
+        super(resources, mapService);
         this.categories = [];
         this.searchResultsMarker = null;
         this.markersLoaded = new Subject<void>();
@@ -108,7 +106,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                     return;
                 }
                 this.markers.eachLayer(existingMarker => {
-                    let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
+                    let markerWithTitle = existingMarker as IMarkerWithTitleAndIcon;
                     let pointOfInterestMarker = _.find(pointsOfInterest, p => p.id === markerWithTitle.identifier);
                     if (pointOfInterestMarker == null && markerWithTitle.isPopupOpen() === false) {
                         this.markers.removeLayer(existingMarker);
@@ -144,7 +142,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
             subscription.unsubscribe();
             let foundMarker = false;
             this.markers.eachLayer(existingMarker => {
-                let markerWithTitle = existingMarker as Common.IMarkerWithTitle;
+                let markerWithTitle = existingMarker as IMarkerWithTitleAndIcon;
                 if (markerWithTitle.identifier !== pointOfInterest.id || foundMarker) {
                     return;
                 }
@@ -170,7 +168,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         this.updateMarkersInternal();
     }
 
-    private pointOfInterestToMarker(pointOfInterest: IPointOfInterest): Common.IMarkerWithTitle {
+    private pointOfInterestToMarker(pointOfInterest: IPointOfInterest): IMarkerWithTitleAndIcon {
         let latLng = L.latLng(pointOfInterest.location.lat, pointOfInterest.location.lng, pointOfInterest.location.alt);
         let icon = IconsService.createPoiIcon(pointOfInterest.icon, pointOfInterest.iconColor, pointOfInterest.hasExtraData);
         let marker = L.marker(latLng,
@@ -178,9 +176,9 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                 draggable: false,
                 clickable: true,
                 icon: icon,
-                title: pointOfInterest.title
-            } as L.MarkerOptions) as Common.IMarkerWithTitle;
+            } as L.MarkerOptions) as IMarkerWithTitleAndIcon;
         marker.title = pointOfInterest.title;
+        marker.icon = pointOfInterest.icon;
         marker.identifier = pointOfInterest.id;
         marker.on("click", () => {
             let poiRouterData = this.hashService.getPoiRouterData();
@@ -194,6 +192,10 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
                     { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
             }
         });
+        if (pointOfInterest.title) {
+            marker.bindTooltip(pointOfInterest.title, { direction: "bottom"});
+        }
+
         return marker;
     }
 

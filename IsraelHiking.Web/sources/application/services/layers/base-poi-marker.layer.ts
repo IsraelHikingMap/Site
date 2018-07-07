@@ -2,13 +2,20 @@
 import { MarkerClusterGroup } from "leaflet.markercluster";
 
 import { MapService } from "../map.service";
+import { ResourcesService } from "../resources.service";
+import * as Common from "../../common/IsraelHiking";
+
+export interface IMarkerWithTitleAndIcon extends Common.IMarkerWithTitle {
+    icon: string;
+}
 
 export abstract class BasePoiMarkerLayer extends L.Layer {
     protected visible: boolean;
     protected markers: MarkerClusterGroup;
     protected readOnlyLayer: L.LayerGroup;
 
-    constructor(protected mapService: MapService) {
+    constructor(protected readonly resources: ResourcesService,
+        protected readonly mapService: MapService) {
         super();
         this.visible = false;
         this.readOnlyLayer = L.layerGroup([]);
@@ -24,6 +31,15 @@ export abstract class BasePoiMarkerLayer extends L.Layer {
                 } else {
                     className += "large";
                 }
+                let allMarkers = cluster.getAllChildMarkers();
+                let text = allMarkers.slice(0, 10).map(m => `
+                    <div dir="${this.resources.getDirection(m.title)}">
+                        <i class="${m.icon}"></i> ${m.title}
+                    </div>`).join("\n");
+                if (allMarkers.length > 10) {
+                    text += `<div class="text-center">...</div>`;
+                }
+                cluster.bindTooltip(text, { direction: "bottom" });
                 return new L.DivIcon({
                     html: `<div><span><i class="${this.getIconString()}">${childCount}</i></span></div>`,
                     className: className,

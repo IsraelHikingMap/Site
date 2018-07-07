@@ -318,7 +318,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             searchTerm: searchTerm
         } as ISearchRequestQueueItem);
         try {
-            let results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasHebrewCharacters(searchTerm));
+            let results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasRtlCharacters(searchTerm));
             let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
             if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                 this.requestsQueue.splice(0, this.requestsQueue.length - 1);

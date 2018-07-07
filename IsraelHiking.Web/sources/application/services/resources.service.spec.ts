@@ -46,10 +46,11 @@ describe("ResourcesService", () => {
     }));
 
     it("Should be able to test if a text contains hebrew", inject([ResourcesService], (service: ResourcesService) => {
-        expect(service.hasHebrewCharacters("שלום")).toBeTruthy();
-        expect(service.hasHebrewCharacters("1. שלום")).toBeTruthy();
-        expect(service.hasHebrewCharacters("hello")).toBeFalsy();
-        expect(service.hasHebrewCharacters("1. hello")).toBeFalsy();
+        expect(service.hasRtlCharacters("שלום")).toBeTruthy();
+        expect(service.hasRtlCharacters("1. שלום")).toBeTruthy();
+        expect(service.hasRtlCharacters("1. نص عربي")).toBeTruthy();
+        expect(service.hasRtlCharacters("hello")).toBeFalsy();
+        expect(service.hasRtlCharacters("1. hello")).toBeFalsy();
     }));
 
     it("Should be able get the layout direction for titles", inject([ResourcesService], (service: ResourcesService) => {

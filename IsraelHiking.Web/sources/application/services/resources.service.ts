@@ -917,15 +917,15 @@ export class ResourcesService {
         return this.gettextCatalog.getString(word) || word;
     }
 
-    public hasHebrewCharacters(words: string): boolean {
-        return words.match(/^[^a-zA-Z]*[\u0591-\u05F4]/) != null;
+    public hasRtlCharacters(words: string): boolean {
+        return words.match(/^[^a-zA-Z]*[\u0591-\u05F4\u0600-\u06FF]/) != null;
     }
 
     public getDirection = (text?: string): Direction => {
         if (!text) {
             return this.direction;
         }
-        return this.hasHebrewCharacters(text) ? "rtl" : "ltr";
+        return this.hasRtlCharacters(text) ? "rtl" : "ltr";
     }
 
     public getTextAlignment = (text?: string) => {

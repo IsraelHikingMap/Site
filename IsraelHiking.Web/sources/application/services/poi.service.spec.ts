@@ -17,7 +17,7 @@ describe("Poi Service", () => {
         let toastMock = new ToastServiceMockCreator();
         let hashService = {};
         let nonAngularObjectsFactory = {
-            b64ToBlob: jasmine.createSpy("b64ToBlob")
+            b64ToBlob: jasmine.createSpy("b64ToBlob").and.returnValue(new Blob([], {type: "type" }))
         };
         TestBed.configureTestingModule({
             imports: [
