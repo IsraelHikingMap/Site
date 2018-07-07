@@ -196,7 +196,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
                     this.router.navigate([RouteStrings.ROUTE_POI, "new", ""],
                         { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
                 },
-                true);
+                "YesNo");
         } else {
             this.router.navigate([RouteStrings.ROUTE_POI, "new", ""],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });

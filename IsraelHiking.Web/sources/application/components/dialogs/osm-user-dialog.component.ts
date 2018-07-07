@@ -232,7 +232,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public deleteTrace(trace: ITrace) {
         trace.isInEditMode = false;
         let message = `${this.resources.deletionOf} ${trace.name}, ${this.resources.areYouSure}`;
-        this.toastService.confirm(message, () => this.userService.deleteOsmTrace(trace), () => { }, true);
+        this.toastService.confirm(message, () => this.userService.deleteOsmTrace(trace), () => { }, "YesNo");
     }
 
     public editInOsm(trace: ITrace) {
@@ -240,18 +240,21 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         window.open(this.userService.getEditOsmGpxAddress(baseLayerAddress, trace.id));
     }
 
-    public findUnmappedRoutes = (trace: ITrace): void => {
-        this.userService.getMissingParts(trace)
-            .then((geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
-                if (geoJson.features.length === 0) {
-                    this.toastService.success(this.resources.noUnmappedRoutes);
-                    return;
-                }
-                this.showTrace(trace).then(() => {
-                    this.addMissingPartsToMap(geoJson);
-                    this.matDialogRef.close();
-                });
+    public findUnmappedRoutes = async (trace: ITrace): Promise<void> => {
+        try {
+            let geoJson = await this.userService.getMissingParts(trace);
+            if (geoJson.features.length === 0) {
+                this.toastService.confirm(this.resources.noUnmappedRoutes, () => { }, () => { }, "Ok");
+                return;
+            }
+            this.showTrace(trace).then(() => {
+                this.addMissingPartsToMap(geoJson);
+                this.matDialogRef.close();
             });
+        } catch (ex) {
+            this.toastService.confirm(ex, () => {}, () => {}, "Ok");
+        }
+        
     }
 
     public async uploadToOsm(e: any) {
@@ -383,7 +386,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             this.shareUrlInEditMode = null;
         }
         let message = `${this.resources.deletionOf} ${this.userService.getShareUrlDisplayName(shareUrl)}, ${this.resources.areYouSure}`;
-        this.toastService.confirm(message, () => this.userService.deleteShareUrl(shareUrl), () => { }, true);
+        this.toastService.confirm(message, () => this.userService.deleteShareUrl(shareUrl), () => { }, "YesNo");
     }
 
     public isShareUrlInEditMode(shareUrl: Common.ShareUrl) {

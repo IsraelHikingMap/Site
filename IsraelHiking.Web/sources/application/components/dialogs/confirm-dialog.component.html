@@ -5,7 +5,7 @@
         <div fxFlex>
             <button mat-button fxFill (click)="confirmAction()">{{getConfirmButtonText()}}</button>
         </div>
-        <div fxFlex>
+        <div *ngIf="hasTwoButtons()" fxFlex>
             <button mat-button fxFill (click)="declineAction()">{{getDeclineButtonText()}}</button>
         </div>
     </div>

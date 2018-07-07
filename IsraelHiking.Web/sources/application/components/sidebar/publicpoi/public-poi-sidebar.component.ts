@@ -143,7 +143,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
             this.toastService.info(this.resources.dataUpdatedSuccefully);
             this.editMode = false;
         } catch (ex) {
-            this.toastService.error(this.resources.unableToSaveData);
+            this.toastService.confirm(this.resources.unableToSaveData, () => {}, () => {}, "Ok");
         } finally {
             this.isLoading = false;
         }
