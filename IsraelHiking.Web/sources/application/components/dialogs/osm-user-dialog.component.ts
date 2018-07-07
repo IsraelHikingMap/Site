@@ -254,7 +254,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         } catch (ex) {
             this.toastService.confirm(ex, () => {}, () => {}, "Ok");
         }
-        
+
     }
 
     public async uploadToOsm(e: any) {
