@@ -57,9 +57,8 @@
             </p>
         </div>
     </div>
-    <br />
-    <div fxLayout="row" *ngIf="contribution.userName">
-        <p><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</p>
+    <div fxLayout="row" *ngIf="contribution.userName" class="text-small">
+        <span><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</span>
     </div>
     <div fxLayout="row">
         <a *ngFor="let reference of info.references;" [href]="reference.url" [target]="'_blank'" class="margin-10-reverse">
