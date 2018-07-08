@@ -27,3 +27,10 @@ after_test:
     Write-Host $PostBuildPackArtifacts
 
     & "$PostBuildPackArtifacts"
+
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: wRgB5QjivzfFUONQx/GEZHusulU1CTg3GhOJrpav5XR2tSJGtpgZo1M8CIUW2dwjuO0EvrcBySRAi0HltlyMIZQMQnTwBFCLi+zB/2zg1IA=
+  repository: IsraelHikingMap/Site
+  draft: true
