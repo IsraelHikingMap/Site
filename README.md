@@ -26,6 +26,7 @@ The technology stack of this site is base on the following frameworks:
 * [Elastic Search and NEST](https://www.elastic.co/)
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite)
 * [OsmSharp](http://www.osmsharp.com/)
+* [Wiki client library](https://github.com/CXuesong/WikiClientLibrary) Wikipedia and upload images to Wikimedia common
 * [Imgur](https://imgur.com/) - Used for uploadling anonymous images
 
 # Architecture and folder stucture of UI
@@ -94,9 +95,10 @@ In order to be able to make the server work a few prerequisits are needed:
 * Install Java Runtime Environment.
 * Add `curl` to path.
 * `Elasticsearch.bat` and `GraphHopper.cmd` should be processes that run when the server machine starts and never die - use a watchdog or windows service to make sure they do (we use NSSM. for linux, check the java command inside those files and use a deamon to run them).
-* Create a task to update Graph Hopper and Elastic Search:
+* Create a task to rebuild Graph Hopper and Elastic Search:
   * Open Windows' Task Scheduler
   * Create task
-  * Add an action to run `UpdateDB.bat` after you download a new osm.pbf file.
+  * Add an action to run `curl -k -X POST https://israelhiking.osm.org.il/api/update - d ""`
   * Add a "On a schedule" trigger to run once a day or at the frequency of the map updates.
+* Create a task to update elastic search using the above steps with the action `curl -k -X PUT https://israelhiking.osm.org.il/api/update - d ""`
 * Create a task to clean the IIS logs using `Scripts\CleanLogs.cmd`
