@@ -31,7 +31,7 @@ after_test:
 deploy:
 - provider: GitHub
   auth_token:
-    secure: wRgB5QjivzfFUONQx/GEZHusulU1CTg3GhOJrpav5XR2tSJGtpgZo1M8CIUW2dwjuO0EvrcBySRAi0HltlyMIZQMQnTwBFCLi+zB/2zg1IA=
+    secure: UhPMkdOfJ0iYk+ZEJapaimnlsy+yXWXYzwJ7Lgj9aiMq2lj5JcUkN1UI0Q9QZru6
   repository: IsraelHikingMap/Site
   draft: true
   on:
