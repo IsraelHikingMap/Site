@@ -35,5 +35,4 @@ deploy:
   repository: IsraelHikingMap/Site
   draft: true
   on:
-    branch: master
     appveyor_repo_tag: true
