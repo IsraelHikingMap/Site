@@ -34,3 +34,6 @@ deploy:
     secure: wRgB5QjivzfFUONQx/GEZHusulU1CTg3GhOJrpav5XR2tSJGtpgZo1M8CIUW2dwjuO0EvrcBySRAi0HltlyMIZQMQnTwBFCLi+zB/2zg1IA=
   repository: IsraelHikingMap/Site
   draft: true
+  on:
+    branch: master
+    appveyor_repo_tag: true
