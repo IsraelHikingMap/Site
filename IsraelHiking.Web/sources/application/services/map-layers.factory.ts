@@ -22,6 +22,7 @@ export class MapLayersFactory {
         } else if (layerData.address.toLowerCase().endsWith("/mapserver") ||
             layerData.address.toLowerCase().endsWith("/mapserver/")) {
             let options = MapLayersFactory.createEsriLayerOptions(layerData, attribution);
+            options.f = "json";
             return esri.dynamicMapLayer(options);
         } else {
             let options = MapLayersFactory.createEsriLayerOptions(layerData, attribution);
