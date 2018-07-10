@@ -1,5 +1,6 @@
 ﻿import { Component, OnInit, OnDestroy } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
+import { Subscription } from "rxjs";
 import * as L from "leaflet";
 
 import { HashService, RouteStrings, IPoiRouterData } from "../services/hash.service";
@@ -12,7 +13,7 @@ import { SidebarService } from "../services/sidebar.service";
 })
 export class ApplicationStateComponent implements OnInit, OnDestroy {
 
-    private subscription: any;
+    private subscription: Subscription;
 
     constructor(private readonly router: Router,
         private readonly route: ActivatedRoute,
@@ -41,8 +42,7 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
                 let poiSourceAndId = {
                     id: params[RouteStrings.ID],
                     source: params[RouteStrings.SOURCE],
-                    language: snapshotMap.get(RouteStrings.LANGUAGE),
-                    edit: snapshotMap.get(RouteStrings.EDIT) === "true"
+                    language: snapshotMap.get(RouteStrings.LANGUAGE)
                 } as IPoiRouterData;
                 let previousData = this.hashService.getPoiRouterData();
                 if (previousData != null &&

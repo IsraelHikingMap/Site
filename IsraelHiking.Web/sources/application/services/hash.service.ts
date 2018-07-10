@@ -20,7 +20,6 @@ export interface IPoiRouterData {
     source: string;
     id: string;
     language: string;
-    edit: boolean;
 }
 
 export class RouteStrings {

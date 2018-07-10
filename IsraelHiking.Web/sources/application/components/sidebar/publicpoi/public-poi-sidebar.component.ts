@@ -1,4 +1,6 @@
-import { Component } from "@angular/core";
+import { Component, OnDestroy } from "@angular/core";
+import { Router, ActivatedRoute } from "@angular/router";
+import { Subscription } from "rxjs";
 import * as _ from "lodash";
 import * as L from "leaflet";
 
@@ -21,7 +23,7 @@ import { LayersService } from "../../../services/layers/layers.service";
 import { IMarkerWithData } from "../../../services/layers/routelayers/iroute.layer";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { CategoriesLayerFactory } from "../../../services/layers/categories-layers.factory";
-import { HashService, IPoiRouterData } from "../../../services/hash.service";
+import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
 import * as Common from "../../../common/IsraelHiking";
 
 @Component({
@@ -29,7 +31,7 @@ import * as Common from "../../../common/IsraelHiking";
     templateUrl: "./public-poi-sidebar.component.html",
     styleUrls: ["./public-poi-sidebar.component.css"]
 })
-export class PublicPoiSidebarComponent extends BaseMapComponent {
+export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {
     public info: IPointOfInterestExtended;
     public isLoading: boolean;
     public sourceImageUrls: string[];
@@ -40,8 +42,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
 
     private editMode: boolean;
     private poiExtended: IPointOfInterestExtended;
+    private subscription: Subscription; 
 
     constructor(resources: ResourcesService,
+        private readonly route: ActivatedRoute,
+        private readonly router: Router,
         private readonly mapService: MapService,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
@@ -61,13 +66,24 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
         this.getExtendedData(poiRouterData);
     }
 
+    public ngOnDestroy() {
+        if (this.subscription) {
+            this.subscription.unsubscribe();
+        }
+    }
+
     private async getExtendedData(data: IPoiRouterData) {
         try {
             let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
             this.initFromPointOfInterestExtended(poiExtended);
             let categoriesLayer = this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute);
             categoriesLayer.selectRoute(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
-            this.editMode = data.edit;
+            // Change edit mode only after this.info is initialized.
+            this.subscription = this.route.queryParams.subscribe((params) => {
+                if (params[RouteStrings.EDIT]) {
+                    this.editMode = params[RouteStrings.EDIT] === "true";
+                }
+            });
         } finally {
             this.isLoading = false;
         }
@@ -121,7 +137,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent {
             this.toastService.info(this.resources.loginRequired);
             return;
         }
-        this.editMode = true;
+        this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.source, this.poiExtended.id],
+            { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
     }
 
     public isRoute() {
