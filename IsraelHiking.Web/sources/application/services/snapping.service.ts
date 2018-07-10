@@ -210,4 +210,21 @@ export class SnappingService {
     public isEnabled = (): boolean => {
         return this.enabled;
     }
+
+    public async getClosestPoint(location: L.LatLng): Promise<Common.MarkerData> {
+        let params = new HttpParams()
+            .set("location", location.lat + "," + location.lng);
+        let feature = await this.httpClient.get(Urls.osmClosest, { params: params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>;
+        if (feature == null) {
+            return null;
+        }
+        let dataContainer = this.geoJsonParser.toDataContainer({
+                features: [feature],
+                type: "FeatureCollection"
+            },
+            this.resources.getCurrentLanguageCodeSimplified());
+        let markerData = dataContainer.routes[0].markers[0];
+        console.log(feature);
+        return markerData;
+    }
 }

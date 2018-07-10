@@ -15,7 +15,7 @@ import { OsmUserService } from "../../services/osm-user.service";
 import { FileService } from "../../services/file.service";
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { ImageResizeService } from "../../services/image-resize.service";
-import { SnappingService, ISnappingPointOptions } from "../../services/snapping.service";
+import { SnappingService } from "../../services/snapping.service";
 import { ToastService } from "../../services/toast.service";
 import { PoiService } from "../../services/poi.service";
 import { RouteStrings } from "../../services/hash.service";
@@ -154,9 +154,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
 
     public async uploadPoint(e: Event) {
         this.suppressEvents(e);
-        // HM TODO: make this a regular call - get only OSM points
-        await this.snappingService.enable(true);
-        let results = this.snappingService.snapToPoint(this.marker.getLatLng(), { sensitivity: 200 } as ISnappingPointOptions);
+        let results = await this.snappingService.getClosestPoint(this.marker.getLatLng());
         let urls = [];
         if (this.imageLink) {
             urls = [this.imageLink];
@@ -171,14 +169,14 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
 
         this.poiService.setAddOrUpdateMarkerData(markerData);
 
-        if (results.markerData) {
-            let message = `${this.resources.wouldYouLikeToUpdate} ${results.markerData.title}?`;
-            if (!results.markerData.title) {
+        if (results) {
+            let message = `${this.resources.wouldYouLikeToUpdate} ${results.title}?`;
+            if (!results.title) {
                 let categories = await this.poiService.getSelectableCategories();
                 let iconWithLabel = _.chain(categories)
                     .map(c => c.icons)
                     .flatten()
-                    .find(i => i.icon === `icon-${results.markerData.type}`)
+                    .find(i => i.icon === `icon-${results.type}`)
                     .value();
                 if (iconWithLabel) {
                     let type = this.resources.translate(iconWithLabel.label);
@@ -189,7 +187,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
             }
             this.toastService.confirm(message,
                 () => {
-                    this.router.navigate([RouteStrings.ROUTE_POI, "OSM", results.markerData.id],
+                    this.router.navigate([RouteStrings.ROUTE_POI, "OSM", results.id],
                         { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
                 },
                 () => {

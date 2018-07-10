@@ -82,6 +82,31 @@ namespace IsraelHiking.API.Tests.Controllers
         }
 
         [TestMethod]
+        public void GetClosestPoint_ShouldGetTheClosesOsmPoint()
+        {
+            var list = new List<Feature>
+            {
+                new Feature(new LineString(new Coordinate[0]), new AttributesTable
+                {
+                    {FeatureAttributes.POI_SOURCE, Sources.OSM}
+                }),
+                new Feature(new Point(new Coordinate(0, 0)), new AttributesTable
+                {
+                    {FeatureAttributes.POI_SOURCE, Sources.WIKIPEDIA}
+                }),
+                new Feature(new Point(new Coordinate(0.01, 0.01)), new AttributesTable
+                {
+                    {FeatureAttributes.POI_SOURCE, Sources.OSM}
+                })
+            };
+            _elasticSearchGateway.GetPointsOfInterest(Arg.Any<Coordinate>(), Arg.Any<Coordinate>(), Arg.Any<string[]>(), Arg.Any<string>()).Returns(list);
+
+            var results = _controller.GetClosestPoint("0,0").Result;
+
+            Assert.AreEqual(list.Last(), results);
+        }
+
+        [TestMethod]
         public void GetConfiguration_ShouldReturnIt()
         {
             var osmConfiguration = new OsmConfiguraionData {BaseAddress = "baseAddress"};
