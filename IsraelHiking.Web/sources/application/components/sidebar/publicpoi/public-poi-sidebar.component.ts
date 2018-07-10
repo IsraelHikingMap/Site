@@ -42,7 +42,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private editMode: boolean;
     private poiExtended: IPointOfInterestExtended;
-    private subscription: Subscription; 
+    private subscription: Subscription;
 
     constructor(resources: ResourcesService,
         private readonly route: ActivatedRoute,

@@ -6,12 +6,10 @@ using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Newtonsoft.Json;
 using NSubstitute;
 using OsmSharp.API;
 
@@ -112,7 +110,7 @@ namespace IsraelHiking.API.Tests.Controllers
         {
             var poi = new PointOfInterestExtended {Source = "wrong source"};
 
-            var result = _controller.UploadPointOfInterest(null, JsonConvert.SerializeObject(poi), "he").Result as BadRequestObjectResult;
+            var result = _controller.UploadPointOfInterest(poi, "he").Result as BadRequestObjectResult;
 
             Assert.IsNotNull(result);
         }
@@ -123,7 +121,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity();
             var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "" };
 
-            var result = _controller.UploadPointOfInterest(null, JsonConvert.SerializeObject(poi), "he").Result as OkObjectResult;
+            var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
 
             Assert.IsNotNull(result);
             _pointsOfInterestProvider.Received(1).AddPointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
@@ -135,7 +133,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _controller.SetupIdentity();
             var poi = new PointOfInterestExtended { Source = Sources.OSM, Id = "1" };
 
-            var result = _controller.UploadPointOfInterest(null, JsonConvert.SerializeObject(poi), "he").Result as OkObjectResult;
+            var result = _controller.UploadPointOfInterest(poi, "he").Result as OkObjectResult;
 
             Assert.IsNotNull(result);
             _pointsOfInterestProvider.Received(1).UpdatePointOfInterest(Arg.Any<PointOfInterestExtended>(), Arg.Any<TokenAndSecret>(), Arg.Any<string>());
@@ -147,13 +145,18 @@ namespace IsraelHiking.API.Tests.Controllers
             var user = new User {DisplayName = "DisplayName"};
             _controller.SetupIdentity();
             _osmGateway.GetUser().Returns(user);
-            var formFile = Substitute.For<IFormFile>();
-            formFile.OpenReadStream().Returns(new MemoryStream());
-            formFile.FileName.Returns("file.jpg");
-            var poi = new PointOfInterestExtended { Title = "title", Source = Sources.OSM, Id = "1", Location = new LatLng(5,6), ImagesUrls = new string[0]};
-            _controller.UploadPointOfInterest(new [] {formFile}, JsonConvert.SerializeObject(poi), "he").Wait();
+            var poi = new PointOfInterestExtended
+            {
+                Title = "title",
+                Source = Sources.OSM,
+                Id = "1",
+                Location = new LatLng(5, 6),
+                ImagesUrls = new [] { "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                      "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==", "http://link.com"}
+            };
+            _controller.UploadPointOfInterest(poi, "he").Wait();
 
-            _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, poi.Description, user.DisplayName, formFile.FileName, Arg.Any<Stream>(), Arg.Any<Coordinate>());
+            _wikimediaCommonGateway.Received(1).UploadImage(poi.Title, poi.Description, user.DisplayName, "title.png", Arg.Any<Stream>(), Arg.Any<Coordinate>());
             _wikimediaCommonGateway.Received(1).GetImageUrl(Arg.Any<string>());
         }
     }

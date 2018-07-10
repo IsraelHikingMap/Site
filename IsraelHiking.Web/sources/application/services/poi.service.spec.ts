@@ -9,16 +9,12 @@ import { WhatsAppService } from "./whatsapp.service";
 import { PoiService, IPointOfInterestExtended, IRating } from "./poi.service";
 import { HashService } from "./hash.service";
 import { Urls } from "../common/Urls";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 
 describe("Poi Service", () => {
 
     beforeEach(() => {
         let toastMock = new ToastServiceMockCreator();
         let hashService = {};
-        let nonAngularObjectsFactory = {
-            b64ToBlob: jasmine.createSpy("b64ToBlob").and.returnValue(new Blob([], {type: "type" }))
-        };
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -27,7 +23,6 @@ describe("Poi Service", () => {
             providers: [
                 { provide: ResourcesService, useValue: toastMock.resourcesService },
                 { provide: HashService, useValue: hashService },
-                { provide: NonAngularObjectsFactory, useValue: nonAngularObjectsFactory },
                 WhatsAppService,
                 PoiService
             ]
@@ -86,17 +81,11 @@ describe("Poi Service", () => {
     })));
 
     it("Should update point using the server and convert images to files",
-        inject([PoiService, HttpTestingController, NonAngularObjectsFactory],
-            async (poiService: PoiService, mockBackend: HttpTestingController, nonAngularObjectsFactoryMock: NonAngularObjectsFactory) => {
+        inject([PoiService, HttpTestingController],
+            async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-                let poiExtended = {
-                    imagesUrls: [
-                        "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
-                        "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
-                    ]
-                } as IPointOfInterestExtended;
+                let poiExtended = { imagesUrls: ["http://link.com"] } as IPointOfInterestExtended;
                 let promise = poiService.uploadPoint(poiExtended).then((res) => {
-                    expect(nonAngularObjectsFactoryMock.b64ToBlob).toHaveBeenCalled();
                     expect(res).not.toBeNull();
                 });
 

@@ -8,7 +8,6 @@ import { HashService, IPoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 
 export type CategoriesType = "Points of Interest" | "Routes";
 
@@ -96,8 +95,7 @@ export class PoiService {
     constructor(private readonly resources: ResourcesService,
         private readonly httpClient: HttpClient,
         private readonly whatsappService: WhatsAppService,
-        private readonly hashService: HashService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory) {
+        private readonly hashService: HashService) {
 
         this.poiCache = [];
         this.addOrUpdateMarkerData = null;
@@ -178,18 +176,9 @@ export class PoiService {
     }
 
     public async uploadPoint(poiExtended: IPointOfInterestExtended): Promise<IPointOfInterestExtended> {
-
-        let formData = new FormData();
-        let imageUrls = poiExtended.imagesUrls.filter(u => u.startsWith("data") || u.startsWith("blob"));
-        for (let imageurl of imageUrls) {
-            _.remove(poiExtended.imagesUrls, u => u === imageurl);
-            let blob = this.nonAngularObjectsFactory.b64ToBlob(imageurl);
-            formData.append("files", new File([blob], poiExtended.title + blob.type.replace("image/", ".")));
-        }
-        formData.append("poiData", JSON.stringify(poiExtended));
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
         this.poiCache = [];
-        return this.httpClient.post(uploadAddress, formData).toPromise() as Promise<IPointOfInterestExtended>;
+        return this.httpClient.post(uploadAddress, poiExtended).toPromise() as Promise<IPointOfInterestExtended>;
     }
 
     public uploadRating(rating: IRating): Promise<IRating> {

@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
@@ -10,9 +12,7 @@ using IsraelHiking.Common;
 using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -115,18 +115,15 @@ namespace IsraelHiking.API.Controllers
         /// <summary>
         /// Update a POI by id and source, upload the image to wikimedia commons if needed.
         /// </summary>
-        /// <param name="files">Image files to add as a URL</param>
-        /// <param name="poiData">A JSON string of <see cref="PointOfInterestExtended"/> </param>
+        /// <param name="pointOfInterest"></param>
         /// <param name="language">The language code</param>
         /// <returns></returns>
         [Route("")]
         [HttpPost]
         [Authorize]
-        public async Task<IActionResult> UploadPointOfInterest([FromForm] IEnumerable<IFormFile> files, 
-            [FromForm] string poiData,
+        public async Task<IActionResult> UploadPointOfInterest([FromBody]PointOfInterestExtended pointOfInterest,
             [FromQuery] string language)
         {
-            var pointOfInterest = JsonConvert.DeserializeObject<PointOfInterestExtended>(poiData);
             if (!pointOfInterest.Source.Equals(Sources.OSM, StringComparison.InvariantCultureIgnoreCase))
             {
                 return BadRequest("OSM is the only supported source for this action...");
@@ -134,13 +131,29 @@ namespace IsraelHiking.API.Controllers
             var tokenAndSecret = _cache.Get(User.Identity.Name);
             var osmGateway = _httpGatewayFactory.CreateOsmGateway(tokenAndSecret);
             var user = await osmGateway.GetUser();
-            foreach (var file in files ?? new IFormFile[0])
+            var imageUrls = pointOfInterest.ImagesUrls ?? new string[0];
+            for (var urlIndex = 0; urlIndex < imageUrls.Length; urlIndex++)
             {
-                var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title, pointOfInterest.Description, user.DisplayName, file.FileName, file.OpenReadStream(), new Coordinate().FromLatLng(pointOfInterest.Location));
-                var url = await _wikimediaCommonGateway.GetImageUrl(imageName);
-                var imageUrls = pointOfInterest.ImagesUrls.ToList();
-                imageUrls.Insert(0, url);
-                pointOfInterest.ImagesUrls = imageUrls.ToArray();
+                var url = imageUrls[urlIndex];
+                var match = Regex.Match(url, @"data:image/(?<type>.+?);base64,(?<data>.+)");
+                if (!match.Success)
+                {
+                    continue;
+                }
+                var binData = Convert.FromBase64String(match.Groups["data"].Value);
+                using (var memoryStream = new MemoryStream(binData))
+                {
+                    var fileName = string.IsNullOrWhiteSpace(pointOfInterest.Title)
+                        ? pointOfInterest.Icon.Replace("icon-", "")
+                        : pointOfInterest.Title;
+                    fileName += "." + match.Groups["type"].Value;
+                    var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title,
+                        pointOfInterest.Description, user.DisplayName, fileName, memoryStream,
+                        new Coordinate().FromLatLng(pointOfInterest.Location));
+                    url = await _wikimediaCommonGateway.GetImageUrl(imageName);
+                    imageUrls[urlIndex] = url;
+                }
+                    
             }
 
             if (string.IsNullOrWhiteSpace(pointOfInterest.Id))
