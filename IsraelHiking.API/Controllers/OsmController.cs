@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -232,7 +233,8 @@ namespace IsraelHiking.API.Controllers
 
         private ILineString ToItmLineString(IEnumerable<wptType> waypoints)
         {
-            var coordinates = waypoints.Select(wptType => _wgs84ItmMathTransform.Transform(new Coordinate((double)wptType.lon, (double)wptType.lat)));
+            var coordinates = waypoints.Select(wptType => _wgs84ItmMathTransform.Transform(new Coordinate((double)wptType.lon, (double)wptType.lat)))
+                .Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1)));
             var nonDuplicates = new List<Coordinate>();
             foreach (var coordinate in coordinates)
             {
@@ -263,9 +265,9 @@ namespace IsraelHiking.API.Controllers
             return (gpx.rte ?? new rteType[0])
                 .Select(route => ToItmLineString(route.rtept))
                 .Concat((gpx.trk ?? new trkType[0])
-                .Select(track => (track.trkseg ?? new trksegType[0])
-                .SelectMany(s => s.trkpt))
-                .Select(ToItmLineString))
+                    .Select(track => (track.trkseg ?? new trksegType[0])
+                        .SelectMany(s => s.trkpt))
+                    .Select(ToItmLineString))
                 .Where(l => l.Coordinates.Any())
                 .ToList();
         }

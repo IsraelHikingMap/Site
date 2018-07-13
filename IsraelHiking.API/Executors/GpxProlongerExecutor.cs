@@ -12,6 +12,15 @@ namespace IsraelHiking.API.Executors
         public Coordinate Coordinate { get; set; }
     }
 
+    internal class SegmentWithLines
+    {
+        public Coordinate[] OriginalCoordinates { get; set; }
+        public LineAndCoordinate Start { get; set; }
+        public Coordinate StartProjected { get; set; }
+        public LineAndCoordinate End { get; set; }
+        public Coordinate EndProjected { get; set; }
+    }
+
     /// <summary>
     /// This is the required input for the prolong algorithm
     /// </summary>
@@ -74,17 +83,20 @@ namespace IsraelHiking.API.Executors
                 {
                     break;
                 }
+                var endIndex = endTostart.IndexOf(next.Coordinate);
+                var originalBridgingSegment = new [] { current.Coordinate}.Concat(endTostart.Take(endIndex + 1)).ToArray();
+                var segmentWithLines = CreateSegmentWithLines(originalBridgingSegment, current, next);
                 if (next.Line == current.Line && linesToProlong.Contains(current.Line))
                 {
-                    HandleSelfClosingCase(input, current, next, linesToProlong);
+                    HandleSelfClosingCase(input, segmentWithLines, linesToProlong);
                 }
                 else if (current.Line.Intersects(next.Line) || current.Line.Distance(next.Line) < 0.1)
                 {
-                    HandleIntersectionCase(input, current, next, linesToProlong);
+                    HandleIntersectionCase(input, segmentWithLines, linesToProlong);
                 }
                 else
                 {
-                    HandleTwoLinesCase(input, current, next, linesToProlong);
+                    HandleTwoLinesCase(input, segmentWithLines, linesToProlong);
                 }
                 allLines = input.ExistingItmHighways.Concat(linesToProlong).ToList();
                 endTostart = endTostart.Skip(endTostart.IndexOf(next.Coordinate) + 1).ToList();
@@ -94,13 +106,13 @@ namespace IsraelHiking.API.Executors
             return linesToProlong.Select(l => l.Reverse() as ILineString).Reverse().ToList();
         }
 
-        private void HandleSelfClosingCase(GpxProlongerExecutorInput input, LineAndCoordinate current, LineAndCoordinate next, List<ILineString> linesToProlong)
+        private void HandleSelfClosingCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<ILineString> linesToProlong)
         {
-            var lengthIndexedLine = new LengthIndexedLine(current.Line);
-            var closestCoordinateCurrentIndex = lengthIndexedLine.Project(current.Coordinate);
-            var closestCoordinateNextIndex = lengthIndexedLine.Project(next.Coordinate);
-            var segment = lengthIndexedLine.ExtractLine(closestCoordinateCurrentIndex, closestCoordinateNextIndex);
-            var coordinates = segment.Coordinates.Concat(new[] { segment.Coordinates.First() }).ToArray();
+            var lengthIndexedLine = new LengthIndexedLine(segment.Start.Line);
+            var closestCoordinateCurrentIndex = lengthIndexedLine.Project(segment.Start.Coordinate);
+            var closestCoordinateNextIndex = lengthIndexedLine.Project(segment.End.Coordinate);
+            var indexedSegment = lengthIndexedLine.ExtractLine(closestCoordinateCurrentIndex, closestCoordinateNextIndex);
+            var coordinates = indexedSegment.Coordinates.Concat(new[] { indexedSegment.Coordinates.First() }).ToArray();
             if (coordinates.Length < 4)
             {
                 return;
@@ -110,33 +122,31 @@ namespace IsraelHiking.API.Executors
             {
                 return;
             }
-            var currentCoordinate = lengthIndexedLine.ExtractPoint(closestCoordinateCurrentIndex);
-            var nextCoordinate = lengthIndexedLine.ExtractPoint(closestCoordinateNextIndex);
-            if (!AddCoordinate(current.Line, currentCoordinate, nextCoordinate, linesToProlong, input.MinimalDistance))
+            if (!AddSegmentToLine(segment.Start.Line, segment, linesToProlong, input.MinimalDistance))
             {
-                linesToProlong.Add(_geometryFactory.CreateLineString(new[] { currentCoordinate, nextCoordinate }));
+                linesToProlong.Add(CreateLineString(segment.StartProjected, segment.OriginalCoordinates, segment.EndProjected));
             }
         }
 
-        private void HandleIntersectionCase(GpxProlongerExecutorInput input, LineAndCoordinate current, LineAndCoordinate next, List<ILineString> linesToProlong)
+        private void HandleIntersectionCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<ILineString> linesToProlong)
         {
-            var intersection = current.Line.Intersection(next.Line).Coordinates
-                .OrderBy(c => c.Distance(current.Coordinate) + c.Distance(next.Coordinate)).FirstOrDefault();
+            var intersection = segment.Start.Line.Intersection(segment.End.Line).Coordinates
+                .OrderBy(c => c.Distance(segment.Start.Coordinate) + c.Distance(segment.End.Coordinate)).FirstOrDefault();
 
             if (intersection == null)
             {
-                var distance = new DistanceOp(current.Line, next.Line);
+                var distance = new DistanceOp(segment.Start.Line, segment.End.Line);
                 intersection = distance.NearestPoints().First();
             }
 
-            var currentLengthIndexedLine = new LengthIndexedLine(current.Line);
-            var closestCoordinateCurrentIndex = currentLengthIndexedLine.Project(current.Coordinate);
+            var currentLengthIndexedLine = new LengthIndexedLine(segment.Start.Line);
+            var closestCoordinateCurrentIndex = currentLengthIndexedLine.Project(segment.Start.Coordinate);
             var closestCoordinateCurrentIntersectionIndex = currentLengthIndexedLine.Project(intersection);
             var currentSegment =
                 currentLengthIndexedLine.ExtractLine(closestCoordinateCurrentIndex, closestCoordinateCurrentIntersectionIndex);
 
-            var nextLengthIndexedLine = new LengthIndexedLine(next.Line);
-            var closestCoordinateNextIndex = nextLengthIndexedLine.Project(next.Coordinate);
+            var nextLengthIndexedLine = new LengthIndexedLine(segment.End.Line);
+            var closestCoordinateNextIndex = nextLengthIndexedLine.Project(segment.End.Coordinate);
             var closestCoordinateNextIntersectionIndex = nextLengthIndexedLine.Project(intersection);
             var nextSegment =
                 nextLengthIndexedLine.ExtractLine(closestCoordinateNextIntersectionIndex, closestCoordinateNextIndex);
@@ -154,43 +164,42 @@ namespace IsraelHiking.API.Executors
             }
             var currentCoordinate = currentLengthIndexedLine.ExtractPoint(closestCoordinateCurrentIndex);
             var nextCoordinate = nextLengthIndexedLine.ExtractPoint(closestCoordinateNextIndex);
-            linesToProlong.Add(_geometryFactory.CreateLineString(new[] {currentCoordinate, nextCoordinate}));
+            var line = CreateLineString(currentCoordinate, segment.OriginalCoordinates, nextCoordinate);
+            linesToProlong.Add(line);
         }
 
-        private void HandleTwoLinesCase(GpxProlongerExecutorInput input, LineAndCoordinate current, LineAndCoordinate next, List<ILineString> linesToProlong)
+        private void HandleTwoLinesCase(GpxProlongerExecutorInput input, SegmentWithLines segment, List<ILineString> linesToProlong)
         {
-            var currentLengthIndexedLine = new LengthIndexedLine(current.Line);
-            var currentCoordinate = currentLengthIndexedLine.ExtractPoint(currentLengthIndexedLine.Project(current.Coordinate));
-            var nextLengthIndexedLine = new LengthIndexedLine(next.Line);
-            var nextCoordinate = nextLengthIndexedLine.ExtractPoint(nextLengthIndexedLine.Project(next.Coordinate));
-
-            var bothLinesAreInList = linesToProlong.Contains(current.Line) && linesToProlong.Contains(next.Line);
-            if (bothLinesAreInList && current.Line.Coordinates.Last().Distance(current.Coordinate) < input.MinimalDistance &&
-                next.Line.Coordinates.First().Distance(next.Coordinate) < input.MinimalDistance)
+            var bothLinesAreInList = linesToProlong.Contains(segment.Start.Line) && linesToProlong.Contains(segment.End.Line);
+            if (bothLinesAreInList && 
+                segment.Start.Line.Coordinates.Last().Distance(segment.Start.Coordinate) < input.MinimalDistance &&
+                segment.End.Line.Coordinates.First().Distance(segment.End.Coordinate) < input.MinimalDistance)
             {
-                linesToProlong.Remove(current.Line);
-                linesToProlong.Remove(next.Line);
-                linesToProlong.Add(_geometryFactory.CreateLineString(current.Line.Coordinates
-                    .Concat(next.Line.Coordinates).ToArray()));
+                linesToProlong.Remove(segment.Start.Line);
+                linesToProlong.Remove(segment.End.Line);
+                linesToProlong.Add(_geometryFactory.CreateLineString(
+                    segment.Start.Line.Coordinates
+                        .Concat(segment.OriginalCoordinates)
+                        .Concat(segment.End.Line.Coordinates)
+                        .Distinct()
+                        .ToArray()));
             }
-            else if (bothLinesAreInList &&
-                     current.Line.Coordinates.First().Distance(current.Coordinate) < input.MinimalDistance &&
-                     next.Line.Coordinates.Last().Distance(next.Coordinate) < input.MinimalDistance)
+            else if (!AddSegmentToLine(segment.Start.Line, segment, linesToProlong, input.MinimalDistance))
             {
-                linesToProlong.Remove(current.Line);
-                linesToProlong.Remove(next.Line);
-                linesToProlong.Add(_geometryFactory.CreateLineString(next.Line.Coordinates
-                    .Concat(current.Line.Coordinates).ToArray()));
-            }
-            else if (!AddCoordinate(current.Line, currentCoordinate, nextCoordinate, linesToProlong, input.MinimalDistance))
-            {
-                if (!AddCoordinate(next.Line, currentCoordinate, nextCoordinate, linesToProlong, input.MinimalDistance))
+                if (!AddSegmentToLine(segment.End.Line, segment, linesToProlong, input.MinimalDistance))
                 {
-                    linesToProlong.Add(_geometryFactory.CreateLineString(new[] { currentCoordinate, nextCoordinate }));
+                    linesToProlong.Add(CreateLineString(segment.StartProjected, segment.OriginalCoordinates, segment.EndProjected));
                 }
             }
         }
 
+        /// <summary>
+        /// Get the closest line and the coordinate that is close to that line on the original list.
+        /// </summary>
+        /// <param name="endTostart"></param>
+        /// <param name="allLines"></param>
+        /// <param name="input"></param>
+        /// <returns></returns>
         private LineAndCoordinate GetClosest(List<Coordinate> endTostart, List<ILineString> allLines, GpxProlongerExecutorInput input)
         {
             foreach (var coordinate in endTostart)
@@ -210,37 +219,62 @@ namespace IsraelHiking.API.Executors
             return null;
         }
 
-        private bool AddCoordinate(ILineString currentLine, Coordinate currentCoordinate, Coordinate nextCoordinate, List<ILineString> linesToProlong, double minimalDistance)
+        private bool AddSegmentToLine(ILineString line, SegmentWithLines segment, List<ILineString> linesToProlong, double minimalDistance)
         {
-            if (linesToProlong.Contains(currentLine) == false)
+            if (linesToProlong.Contains(line) == false)
             {
                 return false;
             }
-            if (currentLine.Coordinates.Last().Distance(currentCoordinate) < minimalDistance)
+            if (line.Coordinates.Last().Distance(segment.StartProjected) < minimalDistance)
             {
-                linesToProlong.Remove(currentLine);
-                linesToProlong.Add(_geometryFactory.CreateLineString(currentLine.Coordinates.Concat(new[] { nextCoordinate }).ToArray()));
+                linesToProlong.Remove(line);
+                var concatLine = CreateLineString(null,
+                    line.Coordinates.Concat(segment.OriginalCoordinates).ToArray(), 
+                    segment.EndProjected);
+                linesToProlong.Add(concatLine);
                 return true;
             }
-            if (currentLine.Coordinates.Last().Distance(nextCoordinate) < minimalDistance)
+            if (line.Coordinates.First().Distance(segment.EndProjected) < minimalDistance)
             {
-                linesToProlong.Remove(currentLine);
-                linesToProlong.Add(_geometryFactory.CreateLineString(currentLine.Coordinates.Concat(new[] { currentCoordinate }).ToArray()));
-                return true;
-            }
-            if (currentLine.Coordinates.First().Distance(currentCoordinate) < minimalDistance)
-            {
-                linesToProlong.Remove(currentLine);
-                linesToProlong.Add(_geometryFactory.CreateLineString(new[] { nextCoordinate }.Concat(currentLine.Coordinates).ToArray()));
-                return true;
-            }
-            if (currentLine.Coordinates.First().Distance(nextCoordinate) < minimalDistance)
-            {
-                linesToProlong.Remove(currentLine);
-                linesToProlong.Add(_geometryFactory.CreateLineString(new[] { currentCoordinate }.Concat(currentLine.Coordinates).ToArray()));
+                linesToProlong.Remove(line);
+                var concatLine = CreateLineString(segment.StartProjected,
+                    segment.OriginalCoordinates.Concat(line.Coordinates).ToArray(), null);
+                linesToProlong.Add(concatLine);
                 return true;
             }
             return false;
+        }
+
+        private ILineString CreateLineString(Coordinate currentCoordinate, Coordinate[] originalCoordinates, Coordinate nextCoordinate)
+        {
+            var list = originalCoordinates.ToList();
+            if (currentCoordinate != null)
+            {
+                list.Insert(0, currentCoordinate);
+            }
+            if (nextCoordinate != null)
+            {
+                list.Add(nextCoordinate);
+            }
+            return _geometryFactory.CreateLineString(list.ToArray());
+        }
+
+        private SegmentWithLines CreateSegmentWithLines(Coordinate[] segment, LineAndCoordinate current, LineAndCoordinate next)
+        {
+            var currentLengthIndexedLine = new LengthIndexedLine(current.Line);
+            var currentCoordinate = currentLengthIndexedLine.ExtractPoint(currentLengthIndexedLine.Project(current.Coordinate));
+            var nextLengthIndexedLine = new LengthIndexedLine(next.Line);
+            var nextCoordinate = nextLengthIndexedLine.ExtractPoint(nextLengthIndexedLine.Project(next.Coordinate));
+
+            var segmentWithLines = new SegmentWithLines
+            {
+                OriginalCoordinates = segment,
+                Start = current,
+                StartProjected = currentCoordinate,
+                End = next,
+                EndProjected = nextCoordinate
+            };
+            return segmentWithLines;
         }
     }
 }

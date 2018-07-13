@@ -252,7 +252,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
                 this.matDialogRef.close();
             });
         } catch (ex) {
-            this.toastService.confirm(ex, () => {}, () => {}, "Ok");
+            this.toastService.confirm(ex.message, () => {}, () => {}, "Ok");
         }
 
     }
@@ -277,7 +277,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.state.searchTerm = searchTerm;
         this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
         this.filteredShareUrls = this.userService.shareUrls.filter((s) => this.findInShareUrl(s, searchTerm));
-        this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInTrace(t, searchTerm)), ["date"], ["desc"]);
+        this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
     }
 
     private getPathOprtions = (): L.PathOptions => {
@@ -372,6 +372,9 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             return true;
         }
         if ((trace.id || 0).toString().toLowerCase().includes(lowerSearchTerm)) {
+            return true;
+        }
+        if ((trace.tags || []).filter(t => t.toLowerCase().includes(lowerSearchTerm)).length > 0) {
             return true;
         }
         return false;

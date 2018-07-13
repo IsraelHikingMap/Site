@@ -312,6 +312,57 @@ namespace IsraelHiking.API.Tests.Executors
         }
 
 
+        /// <summary>
+        ///    ...
+        /// ___.  .___
+        /// </summary>
+        [TestMethod]
+        public void Prolong_NoneStraightGap_ShouldProlongAccordingToGap()
+        {
+            var linesToProlong = new List<ILineString>
+            {
+                new LineString(new[]
+                {
+                    new Coordinate(0, 0),
+                    new Coordinate(10, 0),
+                    new Coordinate(20, 0),
+                    new Coordinate(30, 0),
+                }),
+                new LineString(new[]
+                {
+                    new Coordinate(50, 0),
+                    new Coordinate(60, 0)
+                })
+            };
+            var originlaCoordinates = new[]
+            {
+                new Coordinate(0, 0),
+                new Coordinate(10, 0),
+                new Coordinate(20, 0),
+                new Coordinate(30, 0),
+                new Coordinate(30, 10),
+                new Coordinate(40, 10),
+                new Coordinate(50, 10),
+                new Coordinate(50, 0),
+                new Coordinate(60, 0)
+            };
+            var existingLines = new List<LineString>();
+            var input = new GpxProlongerExecutorInput
+            {
+                LinesToProlong = linesToProlong,
+                OriginalCoordinates = originlaCoordinates,
+                ExistingItmHighways = existingLines,
+                MinimalDistance = 2,
+                MinimalAreaSize = 1000
+            };
+
+            var results = _executor.Prolong(input);
+
+            Assert.AreEqual(1, results.Count);
+            Assert.AreEqual(0, results.First().Distance(new Point(new Coordinate(40, 10))));
+        }
+
+
         [TestMethod]
         public void Prolong_TLinesVeryClose_ShouldProlongAndMerge()
         {

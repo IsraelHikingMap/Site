@@ -327,7 +327,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 var parameters = new Dictionary<string, string>
                 {
                     { "description", fileName },
-                    { "visibility", "private" },
+                    { "visibility", "public" },
                     { "tags", "" },
                 };
                 var multipartFormDataContent = new MultipartFormDataContent();

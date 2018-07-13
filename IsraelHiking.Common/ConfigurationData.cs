@@ -49,6 +49,10 @@ namespace IsraelHiking.Common
         /// </summary>
         public double MaxProlongLineLength { get; set; }
         /// <summary>
+        /// The maximal distance in meters before a recording is defined as bad and need to be split
+        /// </summary>
+        public double MaxDistanceBetweenGpsRecordings { get; set; }
+        /// <summary>
         /// The radial simplification angle in degrees
         /// </summary>
         public double RadialSimplificationAngle { get; set; }
@@ -96,6 +100,7 @@ namespace IsraelHiking.Common
             InitialSplitSimplificationDistanceTolerace = 50;
             MaxDistanceToExisitngLineForMerge = 5;
             MaxProlongLineLength = 350;
+            MaxDistanceBetweenGpsRecordings = 50;
             MinimalSegmentLength = 500;
             MinimalDistanceToClosestPoint = 30;
             MinimalAreaSize = 1000;
