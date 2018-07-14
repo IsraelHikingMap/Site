@@ -79,9 +79,12 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let categoriesLayer = this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute);
             categoriesLayer.selectRoute(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
             // Change edit mode only after this.info is initialized.
-            this.subscription = this.route.queryParams.subscribe((params) => {
-                if (params[RouteStrings.EDIT]) {
-                    this.editMode = params[RouteStrings.EDIT] === "true";
+            this.subscription = this.route.queryParams.subscribe(async (params) => {
+                this.editMode = params[RouteStrings.EDIT] && params[RouteStrings.EDIT] === "true";
+                if (this.editMode) {
+                    // HM TODO: need to think of a better way to refresh data.
+                    poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
+                    this.initFromPointOfInterestExtended(poiExtended);
                 }
             });
         } finally {
@@ -158,7 +161,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let poiExtended = await this.poiService.uploadPoint(this.info);
             this.initFromPointOfInterestExtended(poiExtended);
             this.toastService.info(this.resources.dataUpdatedSuccefully);
-            this.editMode = false;
+            this.poiService.setAddOrUpdateMarkerData(null);
+            this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.source, this.poiExtended.id],
+                { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
         } catch (ex) {
             this.toastService.confirm(this.resources.unableToSaveData, () => {}, () => {}, "Ok");
         } finally {
@@ -276,6 +281,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public close() {
         this.sidebarService.hide();
         this.hashService.setApplicationState("poi", null);
+        this.poiService.setAddOrUpdateMarkerData(null);
         this.hashService.resetAddressbar();
     }
 
