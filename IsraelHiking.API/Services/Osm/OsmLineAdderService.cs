@@ -142,10 +142,13 @@ namespace IsraelHiking.API.Services.Osm
             return true;
         }
 
-        private void AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<string> nodeIds, List<LineString> itmHighways, List<Feature> highways)
+        private void AddIntersectingNodes(Coordinate previousCoordinate, Coordinate coordinate, List<string> nodeIds,
+            List<LineString> itmHighways, List<Feature> highways)
         {
-            var lineSegment = new LineString(new [] { GetItmCoordinate(previousCoordinate).Coordinate, GetItmCoordinate(coordinate).Coordinate});
-            var closeLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.MaxDistanceToExisitngLineForMerge);
+            var previousItmPoint = GetItmCoordinate(previousCoordinate);
+            var lineSegment = new LineString(new [] { previousItmPoint.Coordinate, GetItmCoordinate(coordinate).Coordinate});
+            var closeLines = itmHighways.Where(hw => hw.Distance(lineSegment) <= _options.MaxDistanceToExisitngLineForMerge &&
+                                                     hw.Distance(previousItmPoint) > _options.MaxDistanceToExisitngLineForMerge);
             foreach (var closeLine in closeLines)
             {
                 var closestPointInExistingLine = closeLine.Coordinates.Select(c => new Point(c)).OrderBy(p => p.Distance(lineSegment)).First();
