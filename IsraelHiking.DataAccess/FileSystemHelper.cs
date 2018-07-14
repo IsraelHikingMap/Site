@@ -13,7 +13,8 @@ namespace IsraelHiking.DataAccess
             }
             if (File.Exists(path))
             {
-                return new FileInfo(path).Attributes.HasFlag(FileAttributes.Hidden) && !path.EndsWith("web.config");
+                return new FileInfo(path).Attributes.HasFlag(FileAttributes.Hidden) 
+                    || path.EndsWith("web.config") || path.EndsWith(".finger");
             }
             return false;
         }
