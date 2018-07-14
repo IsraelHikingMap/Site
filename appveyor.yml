@@ -4,6 +4,8 @@ image: Visual Studio 2017
 configuration: Release
 install:
 - ps: >-
+    npm install -g npm@6.2.0 --loglevel=error
+
     node -v
 
     npm -v
