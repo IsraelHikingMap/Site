@@ -20,7 +20,7 @@
               "sources/content",
               "sources/translations",
               "sources/resource-not-found.html",
-              "sources/oauth-close-window.html"
+              "sources/oauth-close-window.html",
               "sources/robots.txt"
             ],
             "styles": [
