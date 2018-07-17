@@ -1,0 +1,7 @@
+# robots.txt for https://israelhiking.osm.org.il/
+
+User-agent: *
+# Virtual directories
+Disallow: /share
+Disallow: /search
+Disallow: /map
