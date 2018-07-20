@@ -24,7 +24,7 @@
               "sources/robots.txt"
             ],
             "styles": [
-              "sources/common.css"
+              "sources/common.scss"
             ],
             "scripts": [
               "sources/google-analytics.js"
@@ -78,7 +78,7 @@
               "sources/google-analytics.js"
             ],
             "styles": [
-              "sources/common.css"
+              "sources/common.scss"
             ],
             "assets": [
               "sources/content",
@@ -109,7 +109,7 @@
   "schematics": {
     "@schematics/angular:component": {
       "prefix": "app",
-      "styleext": "css"
+      "styleext": "scss"
     },
     "@schematics/angular:directive": {
       "prefix": "app"

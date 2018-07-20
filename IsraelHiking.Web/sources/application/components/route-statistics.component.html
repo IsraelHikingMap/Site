@@ -1,5 +1,5 @@
 ﻿<div class="control-container leaflet-bar" [dir]="resources.direction" (window:resize)="redrawChart()">
-    <div *ngIf="isVisible()" [@animateChart] class="chart-control-container" [ngClass]="{'expanded' : isExpanded }">
+    <div *ngIf="isVisible()" [@animateChart] class="chart-control-container" [ngClass]="{'expanded' : isExpanded, 'sidebar': isSidebarVisible() }">
         <div class="chart-container" #lineChartContainer>
             <svg direction="ltr"></svg>
         </div>

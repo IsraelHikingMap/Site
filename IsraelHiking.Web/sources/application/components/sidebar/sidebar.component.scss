@@ -1,0 +1,27 @@
+﻿@import "~common.scss";
+
+/* added direction to fix issue with scroll bar and legend maps */
+#sidebar-wrapper {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: $app-sidebar-width;
+    line-height: 24px;
+    overflow-x: hidden;
+    overflow-y: auto;
+    color: black;
+    direction: ltr;
+    padding-left: $app-left-buttons;
+    padding-right: 20px;
+    background: mat-color($app-background, background);
+    z-index: 1010;
+}
+
+
+@media (max-width:500px) {
+    #sidebar-wrapper {
+        width: 100vw;
+        box-sizing: border-box;
+    }
+}

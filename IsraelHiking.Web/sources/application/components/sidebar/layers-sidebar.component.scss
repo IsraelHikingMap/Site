@@ -1,0 +1,19 @@
+﻿@import "~common.scss";
+$background: map-get($app-theme, background);
+
+.divider {
+    border-color: black;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+.row-hover {
+    padding: 0 10px;
+    transition: background .2s ease;
+}
+
+.row-hover:hover {
+    text-decoration: none;
+    color: black;
+    background: mat-color($app-background, hover, 0.12);
+}

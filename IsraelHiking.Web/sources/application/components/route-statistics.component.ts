@@ -1,4 +1,4 @@
-﻿import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from "@angular/core";
+﻿import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, AfterViewChecked } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription } from "rxjs";
 import { D3Service, Selection, BaseType, ScaleContinuousNumeric } from "d3-ng2-service";
@@ -12,6 +12,7 @@ import { IRouteLayer } from "../services/layers/routelayers/iroute.layer";
 import { MapService } from "../services/map.service";
 import { IconsService } from "../services/icons.service";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
+import { SidebarService } from "../services/sidebar.service";
 import * as Common from "../common/IsraelHiking";
 
 interface IMargin {
@@ -40,29 +41,27 @@ interface IChartElements {
 @Component({
     selector: "route-statistics",
     templateUrl: "./route-statistics.component.html",
-    styleUrls: ["./route-statistics.component.css"],
+    styleUrls: ["./route-statistics.component.scss"],
     encapsulation: ViewEncapsulation.None,
     animations: [
-        trigger(
-            "animateChart",
-            [
-                transition(
-                    ":enter", [
-                        style({ transform: "scale(0.2)", "transform-origin": "bottom right" }),
-                        animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom right" }))
-                    ]
-                ),
-                transition(
-                    ":leave", [
-                        style({ transform: "scale(1)", "transform-origin": "bottom right" }),
-                        animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom right" }))
-                    ]
-                )]
+        trigger("animateChart", [
+            transition(
+                ":enter", [
+                    style({ transform: "scale(0.2)", "transform-origin": "bottom right" }),
+                    animate("200ms", style({ transform: "scale(1)", "transform-origin": "bottom right" }))
+                ]
+            ),
+            transition(
+                ":leave", [
+                    style({ transform: "scale(1)", "transform-origin": "bottom right" }),
+                    animate("200ms", style({ transform: "scale(0.2)", "transform-origin": "bottom right" }))
+                ]
+            )]
         )
     ],
 
 })
-export class RouteStatisticsComponent extends BaseMapComponent implements OnInit, OnDestroy {
+export class RouteStatisticsComponent extends BaseMapComponent implements OnInit, OnDestroy, AfterViewChecked {
     private static readonly HOVER_BOX_WIDTH = 140;
 
     public length: number;
@@ -87,7 +86,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         private readonly mapService: MapService,
         private readonly routesService: RoutesService,
         private readonly routeStatisticsService: RouteStatisticsService,
-        private readonly cancelableTimeoutService: CancelableTimeoutService
+        private readonly cancelableTimeoutService: CancelableTimeoutService,
+        private readonly sidebarService: SidebarService,
     ) {
         super(resources);
 
@@ -129,6 +129,23 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.routeChanged();
     }
 
+    public ngAfterViewChecked(): void {
+        if (!this.isVisible()) {
+            return;
+        }
+        if (!this.isExpanded) {
+            return;
+        }
+        if (!this.lineChartContainer.nativeElement) {
+            return;
+        }
+        let chartContainerStyle = window.getComputedStyle(this.lineChartContainer.nativeElement.parentElement);
+        if (+this.chartElements.svg.attr("width") !== parseFloat(chartContainerStyle.width)) {
+            // Redraw when width changes due to class style changes (sidebar open)
+            this.redrawChart();
+        }
+    }
+
     public ngOnDestroy() {
         for (let subscription of this.componentSubscriptions) {
             subscription.unsubscribe();
@@ -136,6 +153,10 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         for (let subscription of this.routeLayerSubscriptions) {
             subscription.unsubscribe();
         }
+    }
+
+    public isSidebarVisible() {
+        return this.sidebarService.isVisible;
     }
 
     public getUnits = (number: number): string => {
@@ -287,8 +308,8 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         const timeoutGroupName = "clickOnChart";
         this.cancelableTimeoutService.clearTimeoutByGroup(timeoutGroupName);
         this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                this.hideChartHover();
-            },
+            this.hideChartHover();
+        },
             5000,
             timeoutGroupName);
     }
@@ -401,7 +422,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private addEventsSupport() {
-    // responsive background
+        // responsive background
         this.chartElements.chartArea.append("rect")
             .attr("width", this.chartElements.width)
             .attr("height", this.chartElements.height)

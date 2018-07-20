@@ -4,16 +4,16 @@
     align-items: top;
 }
 
-    [matDialogTitle] [matDialogClose] {
-        min-width: 0;
-        min-height: 0;
-        line-height: initial;
-        padding: 5px;
-    }
+[matDialogTitle] [matDialogClose] {
+    min-width: 0;
+    min-height: 0;
+    line-height: initial;
+    padding: 5px;
+}
 
-        [matDialogTitle] [matDialogClose] i {
-            display: block;
-        }
+[matDialogTitle] [matDialogClose] i {
+    display: block;
+}
 
 .close-wrapper {
     float: left;
@@ -33,7 +33,7 @@
         max-height: 90vh;
     }
 
-        .mat-dialog-container .mat-button {
-            white-space: normal;
-        }
+    .mat-dialog-container .mat-button {
+        white-space: normal;
+    }
 }

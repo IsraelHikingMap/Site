@@ -1,4 +1,4 @@
-﻿<div id="sidebar-wrapper" [ngClass]="{toggled: getIsSidebarVisible()}">
+﻿<div id="sidebar-wrapper" *ngIf="isSidebarVisible()" [@animateSidebar]>
     <div [ngSwitch]="getViewName()">
         <div *ngSwitchCase="'layers'">
             <layers-sidebar></layers-sidebar>

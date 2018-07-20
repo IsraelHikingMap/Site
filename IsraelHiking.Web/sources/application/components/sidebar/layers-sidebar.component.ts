@@ -28,7 +28,7 @@ interface ICategoriesContainer {
 @Component({
     selector: "layers-sidebar",
     templateUrl: "./layers-sidebar.component.html",
-    styleUrls: ["./layers-sidebar.component.css"],
+    styleUrls: ["./layers-sidebar.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
 export class LayersSidebarComponent extends BaseMapComponent implements OnDestroy {
