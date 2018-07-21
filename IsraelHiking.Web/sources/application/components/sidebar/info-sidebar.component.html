@@ -1,23 +1,26 @@
 ﻿<div [dir]="resources.direction">
     <mat-tab-group [selectedIndex]="selectedTabIndex" (selectedIndexChange)="selectedTabChanged($event)" [dynamicHeight]="'true'">
         <mat-tab label="{{resources.about}}" angulartics2On="click" angularticsCategory="Info" angularticsAction="Info about select">
-            <div>
+            <mat-card>
                 <p><span [innerHtml]="resources.infoSubheader"></span></p>
                 <h4>{{resources.infoHelpfulLinks}}</h4>
-                <div fxLayout="row" class="bottom-border">
+                <div fxLayout="row">
                     <div fxFlex="15"><i class="fa icon-facebook" fxFill></i></div>
                     <div fxFlex [innerHtml]="resources.infoFacebookLink"></div>
                 </div>
-                <div fxLayout="row" class="bottom-border">
+                <mat-divider></mat-divider>
+                <div fxLayout="row">
                     <div fxFlex="15"><i class="fa icon-github" fxFill></i></div>
                     <div fxFlex [innerHtml]="resources.infoGithubLink"></div>
                 </div>
-                <div fxLayout="row" class="bottom-border">
+                <mat-divider></mat-divider>
+                <div fxLayout="row">
                     <div fxFlex="15"><i class="fa icon-wikipedia-w" fxFill></i></div>
                     <div fxFlex [innerHtml]="resources.infoOsmWikiLink"></div>
                 </div>
-                <div fxLayout="row" class="bottom-border cursor-pointer" (click)="openDownloadDialog()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download open">
-                    <button mat-raised-button color="primary" fxFill><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
+                <br/>
+                <div fxLayout="row">
+                    <button mat-raised-button color="primary" fxFill (click)="openDownloadDialog()" angulartics2On="click" angularticsCategory="Download" angularticsAction="Download open"><i class="fa icon-download"></i> {{resources.infoDownloadMapForOfflineUse}}</button>
                 </div>
                 <p>
                     <i>
@@ -25,22 +28,22 @@
                         {{resources.infoFooterAuthors}}<br />
                     </i>
                 </p>
-            </div>
+            </mat-card>
         </mat-tab>
         <mat-tab label="{{resources.legend}}" angulartics2On="click" angularticsCategory="Info" angularticsAction="Info legend select">
             <div *ngIf="legendSections.length === 0">
                 <p>{{resources.legendEmpty}}</p>
             </div>
-            <div *ngFor="let section of legendSections" id="{{section.id}}">
-                <div class="legend-section">
-                    <div class="legend-section-header">
-                        <a class="cursor-pointer" (click)="toggleSectionVisibility(section)" [ngx-scroll-to]="section.id"><h4><i class="fa" [ngClass]="{'icon-plus': !isSectionVisible(section), 'icon-minus': isSectionVisible(section) }"></i> {{section.title}}</h4></a>
-                    </div>
-                    <div *ngIf="isSectionVisible(section)">
+            <mat-accordion>
+                <ng-container *ngFor="let section of legendSections">
+                    <mat-expansion-panel [id]="section.id">
+                        <mat-expansion-panel-header [ngx-scroll-to]="section.id">
+                            {{section.title}}
+                        </mat-expansion-panel-header>
                         <legend-item *ngFor="let item of section.items" [item]="item"></legend-item>
-                    </div>
-                </div>
-            </div>
+                    </mat-expansion-panel>
+                </ng-container>
+            </mat-accordion>
         </mat-tab>
     </mat-tab-group>
 </div>

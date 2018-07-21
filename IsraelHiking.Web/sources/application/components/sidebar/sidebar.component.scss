@@ -13,8 +13,7 @@
     color: black;
     direction: ltr;
     padding-left: $app-left-buttons;
-    padding-right: 20px;
-    background: mat-color($app-background, background);
+    background: mat-color($app-background, card);
     z-index: 1010;
 }
 

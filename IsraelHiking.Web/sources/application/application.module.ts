@@ -23,7 +23,10 @@ import {
     MatRadioModule,
     MatCheckboxModule,
     MatToolbarModule,
-    MatMenuModule
+    MatMenuModule,
+    MatExpansionModule,
+    MatDividerModule,
+    MatCardModule
 } from "@angular/material";
 import { FlexLayoutModule } from "@angular/flex-layout";
 import { SessionStorageService, LocalStorageService, WebStorageModule } from "ngx-store";
@@ -171,6 +174,9 @@ const routes: Routes = [
         MatCheckboxModule,
         MatToolbarModule,
         MatMenuModule,
+        MatExpansionModule,
+        MatDividerModule,
+        MatCardModule,
         FormsModule,
         ReactiveFormsModule,
         FlexLayoutModule,
