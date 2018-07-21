@@ -287,7 +287,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         latlng: L.latLng(30.590, 34.824),
                         zoom: 15,
                         type: "Way",
-                        osmTags: ["tracktype=grade4","highway=track"],
+                        osmTags: ["tracktype=grade4", "highway=track"],
                         link: LegendItemComponent.OSM_KEY_LINK
                     },
                     {
