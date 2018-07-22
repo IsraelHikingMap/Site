@@ -225,6 +225,9 @@ export class ResourcesService {
     public logout: string;
     public openInANewWindow: string;
     public addLink: string;
+    public baseLayers: string;
+    public overlays: string;
+    public privateRoutes: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -681,6 +684,9 @@ export class ResourcesService {
         this.logout = this.gettextCatalog.getString("Logout");
         this.openInANewWindow = this.gettextCatalog.getString("Open in a new window");
         this.addLink = this.gettextCatalog.getString("Add link");
+        this.baseLayers = this.gettextCatalog.getString("Base Layers");
+        this.overlays = this.gettextCatalog.getString("Overlays");
+        this.privateRoutes = this.gettextCatalog.getString("Private Routes");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

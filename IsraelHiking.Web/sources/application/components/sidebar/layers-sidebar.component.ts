@@ -1,6 +1,6 @@
 ﻿import { Component, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import { LocalStorage, LocalStorageService } from "ngx-store";
+import { LocalStorage, LocalStorageService, WebstorableArray } from "ngx-store";
 import * as _ from "lodash";
 
 import { MapService } from "../../services/map.service";
@@ -20,8 +20,8 @@ import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.co
 import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
 import { PoiService, CategoriesType, ICategory } from "../../services/poi.service";
 
-interface ICategoriesContainer {
-    categories: ICategory[];
+interface IExpandableItem {
+    name: string;
     isExpanded: boolean;
 }
 
@@ -32,14 +32,17 @@ interface ICategoriesContainer {
     encapsulation: ViewEncapsulation.None
 })
 export class LayersSidebarComponent extends BaseMapComponent implements OnDestroy {
-    private static readonly EXPANDED_POSTFIX = "_expanded";
-
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public routes: IRouteLayer[];
     public categoriesTypes: CategoriesType[];
 
-    private categoriesMap: Map<CategoriesType, ICategoriesContainer>;
+    @LocalStorage()
+    public layersExpandedState: WebstorableArray<IExpandableItem> = [
+        { name: "Base Layers", isExpanded: true },
+        { name: "Overlays", isExpanded: true },
+        { name: "pPrivate Routes", isExpanded: true }
+    ] as any;
 
     @LocalStorage()
     public isAdvanced = false;
@@ -59,13 +62,6 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         this.overlays = layersService.overlays;
         this.routes = routesService.routes;
         this.categoriesTypes = this.poiService.getCategoriesTypes();
-        this.categoriesMap = new Map<CategoriesType, ICategoriesContainer>();
-        for (let categoriesType of this.categoriesTypes) {
-            this.categoriesMap.set(categoriesType, {
-                categories: this.categoriesLayerFactory.get(categoriesType).categories,
-                isExpanded: this.localStorageService.get(categoriesType + LayersSidebarComponent.EXPANDED_POSTFIX) || false
-            });
-        }
     }
 
     public ngOnDestroy() {
@@ -102,18 +98,32 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     }
 
     public getCategories(categoriesType: CategoriesType): ICategory[] {
-        return this.categoriesMap.get(categoriesType).categories;
+        return this.categoriesLayerFactory.get(categoriesType).categories;
     }
 
-    public isCategoriesVisible(categoriesType: CategoriesType) {
-        return this.categoriesMap.get(categoriesType).isExpanded;
+    public expand(group: string) {
+        let state = _.find(this.layersExpandedState, l => l.name === group);
+        if (state) {
+            state.isExpanded = true;
+        } else {
+            this.layersExpandedState.push({ name: group, isExpanded: true });
+        }
+        this.layersExpandedState.save();
     }
 
-    public toggleCategories(categoriesType: CategoriesType, e: Event) {
-        this.suppressEvents(e);
-        this.categoriesMap.get(categoriesType).isExpanded = !this.categoriesMap.get(categoriesType).isExpanded;
-        this.localStorageService.set(categoriesType + LayersSidebarComponent.EXPANDED_POSTFIX,
-            this.categoriesMap.get(categoriesType).isExpanded);
+    public collapse(group: string) {
+        let state = _.find(this.layersExpandedState, l => l.name === group);
+        if (state) {
+            state.isExpanded = false;
+        } else {
+            this.layersExpandedState.push({ name: group, isExpanded: false });
+        }
+        this.layersExpandedState.save();
+    }
+
+    public getExpandState(group: string): boolean {
+        let state = _.find(this.layersExpandedState, l => l.name === group);
+        return state ? state.isExpanded : false;
     }
 
     public toggleCategory(categoriesType: CategoriesType, category: ICategory, e: Event) {
