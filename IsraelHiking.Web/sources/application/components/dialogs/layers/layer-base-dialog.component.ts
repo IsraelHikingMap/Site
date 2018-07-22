@@ -1,4 +1,4 @@
-﻿import { AfterViewInit } from "@angular/core";
+import { AfterViewInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import * as L from "leaflet";
 
@@ -108,6 +108,6 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
             }
         } catch (ex) {
             // ignore error
-        }  
+        }
     }
 }
