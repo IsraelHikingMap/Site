@@ -22,7 +22,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public isOverlay: boolean;
 
     private mapPreview: L.Map;
-    private layer: L.Layer;
+    private previewLayer: L.Layer;
 
     protected constructor(resources: ResourcesService,
         protected mapService: MapService,
@@ -37,7 +37,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
         this.address = "";
         this.opacity = 1.0;
 
-        this.layer = null;
+        this.previewLayer = null;
     }
 
     public ngAfterViewInit(): void {
@@ -49,8 +49,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
                 maxZoom: +this.maxZoom,
                 zoom: (+this.maxZoom + +this.minZoom) / 2
             });
-        this.layer = MapLayersFactory.createLayer({ address: this.getTilesAddress() } as Common.LayerData);
-        this.mapPreview.addLayer(this.layer);
+        this.refreshPreviewLayer();
     }
 
     public onAddressChanged(address: string) {
@@ -65,9 +64,14 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     }
 
     protected refreshPreviewLayer() {
-        this.mapPreview.removeLayer(this.layer);
-        this.layer = MapLayersFactory.createLayer({ address: this.getTilesAddress() } as Common.LayerData);
-        this.mapPreview.addLayer(this.layer);
+        if (this.previewLayer != null) {
+            this.mapPreview.removeLayer(this.previewLayer);
+        }
+        this.previewLayer = MapLayersFactory.createLayer({
+            address: this.getTilesAddress(),
+            opacity: this.opacity
+        } as Common.LayerData);
+        this.mapPreview.addLayer(this.previewLayer);
     }
 
     public saveLayer = (e: Event) => {
