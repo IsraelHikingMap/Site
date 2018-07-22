@@ -7,10 +7,12 @@ import * as Common from "../common/IsraelHiking";
 
 @Injectable()
 export class MapLayersFactory {
-    public static MIN_ZOOM = 7;
-    public static MAX_NATIVE_ZOOM = 16;
+    public static readonly MIN_ZOOM = 7;
+    public static readonly MAX_NATIVE_ZOOM = 16;
 
-    private static MAX_ZOOM = 20;
+    private static readonly MAX_ZOOM = 20;
+    private static readonly MOBILE_ATTRIBUTION = `<a href="https://github.com/IsraelHikingMap/Site/wiki/Attribution" target="_blank">©</a>`;
+
 
     public static createLayer(layerData: Common.LayerData, attribution?: string, zIndex?: number): L.Layer {
         if (layerData.address.toLowerCase().indexOf("{x}") !== -1) {
@@ -38,7 +40,7 @@ export class MapLayersFactory {
             maxNativeZoom: maxNativeZoom,
             maxZoom: Math.max(MapLayersFactory.MAX_ZOOM, maxNativeZoom),
             opacity: layerData.opacity || 1.0,
-            attribution: attribution
+            attribution: L.Browser.mobile ? MapLayersFactory.MOBILE_ATTRIBUTION : attribution
         } as L.TileLayerOptions;
     }
 
