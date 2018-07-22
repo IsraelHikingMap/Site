@@ -1,12 +1,6 @@
 ﻿@import "~common.scss";
 $background: map-get($app-theme, background);
 
-.divider {
-    border-color: black;
-    margin-top: 5px;
-    margin-bottom: 5px;
-}
-
 .row-hover {
     padding: 0 10px;
     transition: background .2s ease;
