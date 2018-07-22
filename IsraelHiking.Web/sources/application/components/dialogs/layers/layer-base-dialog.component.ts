@@ -1,4 +1,5 @@
 ﻿import { AfterViewInit } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 import * as L from "leaflet";
 
 import { ResourcesService } from "../../../services/resources.service";
@@ -26,7 +27,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     protected constructor(resources: ResourcesService,
         protected mapService: MapService,
         protected layersService: LayersService,
-        protected toastService: ToastService
+        protected toastService: ToastService,
+        private http: HttpClient
     ) {
         super(resources);
         this.minZoom = MapLayersFactory.MIN_ZOOM;
@@ -54,6 +56,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public onAddressChanged(address: string) {
         this.address = address.trim();
         this.refreshPreviewLayer();
+        this.updateLayerKeyIfPossible();
     }
 
     public onOpacityChanged(opacity: number) {
@@ -90,5 +93,21 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
 
     public setIsAdvanced(isAdvanced: boolean) {
         this.isAdvanced = isAdvanced;
+    }
+
+    private async updateLayerKeyIfPossible() {
+        if (this.key) {
+            return;
+        }
+        try {
+            let address = `${this.getTilesAddress()}/?f=json`;
+            address = address.replace("//?f", "/?f"); // incase the address the user set ends with "/".
+            let response = await this.http.get(address).toPromise() as any;
+            if (response && response.name) {
+                this.key = response.name;
+            }
+        } catch (ex) {
+            // ignore error
+        }  
     }
 }

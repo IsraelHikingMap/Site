@@ -1,4 +1,6 @@
 ﻿import { Component } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
+
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
@@ -16,8 +18,9 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
     constructor(resources: ResourcesService,
         mapService: MapService,
         layersService: LayersService,
-        toastService: ToastService) {
-        super(resources, mapService, layersService, toastService);
+        toastService: ToastService,
+        http: HttpClient) {
+        super(resources, mapService, layersService, toastService, http);
         this.title = this.resources.baseLayerProperties;
         this.isNew = false;
         this.isOverlay = false;
