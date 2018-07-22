@@ -189,11 +189,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         this.routeLayer = this.routesService.selectedRoute;
         this.initalizeStatistics(null);
+        this.updateKmMarkers();
+        this.setDataToChart([]);
         if (this.routeLayer) {
             this.onRouteDataChanged();
             this.routeLayerSubscriptions.push(this.routeLayer.dataChanged.subscribe(this.onRouteDataChanged));
             this.routeLayerSubscriptions.push(this.routeLayer.polylineHovered.subscribe(
-                (latlng: L.LatLng) => this.onPolylineHover(latlng))
+                    (latlng: L.LatLng) => this.onPolylineHover(latlng))
             );
         }
     }
