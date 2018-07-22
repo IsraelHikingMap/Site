@@ -10,7 +10,7 @@
 
 @include mat-core();
 
-$app-primary: mat-palette($mat-blue, 600);
+$app-primary: mat-palette($mat-green, 600);
 $app-accent: mat-palette($mat-yellow);
 $app-warm: mat-palette($mat-red);
 $app-theme: mat-light-theme($app-primary, $app-accent, $app-warm);
@@ -208,6 +208,21 @@ ngx-image-gallery .image {
     align-items: center;
     justify-content: center;
 }
+
+/* Progressbar override */
+.ng-bar {
+    background-color: mat-color($app-primary) !important;
+}
+
+.ng-spinner-icon {
+    border-top-color: mat-color($app-primary) !important;
+    border-left-color: mat-color($app-primary) !important;
+}
+
+.ng-meteor {
+    box-shadow: 0 0 10px mat-color($app-primary), 0 0 5px mat-color($app-primary) !important
+}
+/* Progressbar override */
 
 /* Margins*/
 .margin-10 {

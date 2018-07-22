@@ -29,7 +29,7 @@ import * as Common from "../../../common/IsraelHiking";
 @Component({
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
-    styleUrls: ["./public-poi-sidebar.component.css"]
+    styleUrls: ["./public-poi-sidebar.component.scss"]
 })
 export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {
     public info: IPointOfInterestExtended;

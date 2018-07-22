@@ -34,10 +34,10 @@
                     </div>
                 </div>
             </mat-menu>
-            <button mat-button fxFill class="no-padding" [matMenuTriggerFor]="appMenu"><i class="fa icon-share-alt"></i></button>
+            <button mat-button fxFill class="no-padding" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.share}}" matTooltipPosition="below"><i class="fa icon-share-alt"></i></button>
         </div>
         <div fxFlex>
-            <button mat-button fxFill class="no-padding" (click)="close()" matTooltipPosition="below"><i class="fa icon-close"></i></button>
+            <button mat-button fxFill class="no-padding" (click)="close()" matTooltip="{{resources.close}}" matTooltipPosition="below"><i class="fa icon-close"></i></button>
         </div>
     </div>
     <mat-spinner *ngIf="isLoading"></mat-spinner>
@@ -45,27 +45,35 @@
         <public-poi-edit [info]="info"></public-poi-edit>
     </div>
     <div *ngIf="!isEditMode()">
-        <a *ngIf="info.references.length > 0 && info.references[0].url" [href]="info.references[0].url" [target]="'_blank'">
-            <h4 [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">{{info.title}}</h4>
-        </a>
-        <h4 *ngIf="info.references.length === 0 || !info.references[0].url" [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">{{info.title}}</h4>
-        <image-scroller [images]="info.imagesUrls" [canEdit]="false"></image-scroller>
-        <p class="text-center" *ngIf="info.lengthInKm">{{resources.length}}: {{info.lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
-        <div fxLayout="row">
-            <p fxFill [ngClass]="resources.getTextAlignment(getDescrition())" [dir]="resources.getDirection(getDescrition())">
-                {{getDescrition()}}
-            </p>
-        </div>
-    </div>
-    <div fxLayout="row" *ngIf="contribution.userName" class="text-small">
-        <span><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</span>
-    </div>
-    <div fxLayout="row">
-        <a *ngFor="let reference of info.references;" [href]="reference.url" [target]="'_blank'" class="margin-10-reverse">
-            <img *ngIf="reference.sourceImageUrl" [src]="reference.sourceImageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
-        </a>
-        <a *ngIf="getEditElementOsmAddress()" [href]="getEditElementOsmAddress()" [target]="'_blank'" class="margin-10-reverse" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit element in OSM">
-            <img [src]="resources.getResizedImageUrl('https://upload.wikimedia.org/wikipedia/commons/b/b0/Openstreetmap_logo.svg', 32)" height="32" width="32" />
-        </a>
+        <mat-card class="mat-elevation-z0">
+            <mat-card-header>
+                <mat-card-title [ngClass]="resources.getTextAlignment(info.title)" [dir]="resources.getDirection(info.title)">
+                    <a *ngIf="info.references.length > 0 && info.references[0].url" [href]="info.references[0].url" [target]="'_blank'">
+                        <span class="text-large">{{info.title}}</span>
+                    </a>
+                    <span *ngIf="info.references.length === 0 || !info.references[0].url" class="text-large">{{info.title}}</span>
+                </mat-card-title>
+            </mat-card-header>
+            <mat-card-content>
+                <image-scroller [images]="info.imagesUrls" [canEdit]="false"></image-scroller>
+                <p class="text-center" *ngIf="info.lengthInKm">{{resources.length}}: {{info.lengthInKm | number : '1.2-2'}} {{resources.kmUnit}}</p>
+                <div fxLayout="row">
+                    <p fxFill [ngClass]="resources.getTextAlignment(getDescrition())" [dir]="resources.getDirection(getDescrition())">
+                        {{getDescrition()}}
+                    </p>
+                </div>
+                <div fxLayout="row" *ngIf="contribution.userName" class="text-small">
+                    <span><a [href]="contribution.userAddress" [target]="'_blank'">{{contribution.userName}}</a> - {{contribution.lastModifiedDate | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div fxLayout="row">
+                    <a *ngFor="let reference of info.references;" [href]="reference.url" [target]="'_blank'" class="margin-10-reverse">
+                        <img *ngIf="reference.sourceImageUrl" [src]="reference.sourceImageUrl" alt="" height="32" width="32" [style.float]="resources.getImageFloat(title)" />
+                    </a>
+                    <a *ngIf="getEditElementOsmAddress()" [href]="getEditElementOsmAddress()" [target]="'_blank'" class="margin-10-reverse" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit element in OSM">
+                        <img [src]="resources.getResizedImageUrl('https://upload.wikimedia.org/wikipedia/commons/b/b0/Openstreetmap_logo.svg', 32)" height="32" width="32" />
+                    </a>
+                </div>
+            </mat-card-content>
+        </mat-card>
     </div>
 </div>

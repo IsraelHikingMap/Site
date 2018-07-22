@@ -1,50 +1,52 @@
 ﻿<div [dir]="resources.direction">
-    <div fxLayout="row">
-        <mat-form-field fxFill>
-            <input matInput #titleInput type="text" [dir]="resources.getDirection(info.title)" [(ngModel)]="info.title" placeholder="{{resources.nameInLanguage}}" fxFill />
-        </mat-form-field>
-    </div>
-
-    <image-scroller [images]="info.imagesUrls" [canEdit]="true"></image-scroller>
-
-    <div fxLayout="row">
-        <mat-form-field fxFill>
-            <textarea rows="4" maxlength="255" matInput [dir]="resources.getDirection(info.description)" [(ngModel)]="info.description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
-        </mat-form-field>
-    </div>
-    <div *ngFor="let url of info.references; let i = index; trackBy:trackByIndex" fxLayout="row">
-        <div fxFlex="90">
-            <mat-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
-                <input matInput type="text" [dir]="'ltr'" [(ngModel)]="info.references[i].url" placeholder="{{resources.website}}" fxFill />
+    <mat-card class="mat-elevation-z0">
+        <div fxLayout="row">
+            <mat-form-field fxFill>
+                <input matInput #titleInput type="text" [dir]="resources.getDirection(info.title)" [(ngModel)]="info.title" placeholder="{{resources.nameInLanguage}}" fxFill />
             </mat-form-field>
         </div>
-        <div fxFlex="10">
-            <button mat-button fxFill (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
+
+        <image-scroller [images]="info.imagesUrls" [canEdit]="true"></image-scroller>
+
+        <div fxLayout="row">
+            <mat-form-field fxFill>
+                <textarea rows="4" maxlength="255" matInput [dir]="resources.getDirection(info.description)" [(ngModel)]="info.description" placeholder="{{resources.descriptionInLanguage}}" fxFill></textarea>
+            </mat-form-field>
         </div>
-    </div>
-    <br />
-    <div fxLayout="row" (click)="addEmptyUrl()" class="cursor-pointer">
-        <div fxFlex="90">
-            {{resources.addLink}}
+        <div *ngFor="let url of info.references; let i = index; trackBy:trackByIndex" fxLayout="row">
+            <div fxFlex="90">
+                <mat-form-field fxFill hintLabel="{{resources.aLinkToAWebsite}}">
+                    <input matInput type="text" [dir]="'ltr'" [(ngModel)]="info.references[i].url" placeholder="{{resources.website}}" fxFill />
+                </mat-form-field>
+            </div>
+            <div fxFlex="10">
+                <button mat-button fxFill (click)="removeUrl(i)"><i class="fa icon-trash"></i></button>
+            </div>
         </div>
-        <div fxFlex="10">
-            <button mat-button fxFill><i class="fa icon-plus"></i></button>
+        <br />
+        <div fxLayout="row" (click)="addEmptyUrl()" class="cursor-pointer">
+            <div fxFlex="90">
+                {{resources.addLink}}
+            </div>
+            <div fxFlex="10">
+                <button mat-button fxFill><i class="fa icon-plus"></i></button>
+            </div>
         </div>
-    </div>
-    <div fxLayout="row">
-        <mat-form-field fxFill>
-            <mat-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)" fxFill>
-                <mat-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.label)}}</mat-option>
-            </mat-select>
-        </mat-form-field>
-    </div>
-    <br />
-    <br />
-    <div fxLayout="row" fxLayoutWrap *ngIf="selectedCategory">
-        <button mat-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
-            <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
-            <br />
-            {{resources.translate(icon.label)}}
-        </button>
-    </div>
+        <div fxLayout="row">
+            <mat-form-field fxFill>
+                <mat-select placeholder="{{resources.categories}}" [ngModel]="selectedCategory" (selectionChange)="selectCategory($event)" fxFill>
+                    <mat-option *ngFor="let category of categories" [value]="category"><i class="fa" [ngClass]="category.icon" [style.color]="category.color"></i> {{resources.translate(category.label)}}</mat-option>
+                </mat-select>
+            </mat-form-field>
+        </div>
+        <br />
+        <br />
+        <div fxLayout="row" fxLayoutWrap *ngIf="selectedCategory">
+            <button mat-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
+                <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
+                <br />
+                {{resources.translate(icon.label)}}
+            </button>
+        </div>
+    </mat-card>
 </div>
