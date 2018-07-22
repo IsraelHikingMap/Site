@@ -20,6 +20,7 @@ $app-background: map-get($app-theme, background);
 
 $app-sidebar-width: 400px;
 $app-left-buttons: 55px;
+$app-left-z-index: 1030;
 
 html {
     height: 100%;
@@ -50,22 +51,22 @@ body {
 }
 
 .leaflet-left {
-    z-index: 1020 !important;
+    z-index: $app-left-z-index !important;
 }
 
-.leaflet-bottom.leaflet-left {
-    z-index: 1000 !important;
+.leaflet-right {
+    z-index: $app-left-z-index - 10 !important;
 }
 
 .leaflet-bottom.leaflet-right {
-    z-index: 980 !important;
+    z-index: $app-left-z-index - 20 !important;
+}
+
+.leaflet-bottom.leaflet-left {
+    z-index: $app-left-z-index - 30 !important;
 }
 
 @media (max-width: 550px) {
-    .leaflet-bottom.leaflet-right {
-        z-index: 1030 !important;
-    }
-
     .route-statistics-control-container {
         margin-bottom: 0 !important;
         margin-right: 0 !important;

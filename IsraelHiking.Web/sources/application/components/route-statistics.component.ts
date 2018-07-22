@@ -100,7 +100,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.componentSubscriptions = [];
         this.kmMarkersGroup = L.layerGroup([] as L.Marker[]);
         this.chartElements = {
-            margin: { top: 20, right: 50, bottom: 40, left: 70 },
+            margin: { top: 20, right: L.Browser.mobile ? 10 : 50, bottom: 40, left: 70 },
             hoverChartMarker: L.marker(mapService.map.getCenter(), { opacity: 0.0, draggable: false, clickable: false } as L.MarkerOptions)
         } as IChartElements;
         this.mapService.map.addLayer(this.chartElements.hoverChartMarker);
