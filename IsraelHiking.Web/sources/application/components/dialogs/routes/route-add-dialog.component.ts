@@ -9,7 +9,7 @@ import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 @Component({
     selector: "route-add-dialog",
     templateUrl: "./route-properties-dialog.component.html",
-    styleUrls: ["./route-properties-dialog.component.css"],
+    styleUrls: ["./route-properties-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None,
 })
 export class RouteAddDialogComponent extends RouteBaseDialogComponent {
