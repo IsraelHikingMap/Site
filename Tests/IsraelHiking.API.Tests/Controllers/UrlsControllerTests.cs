@@ -11,6 +11,7 @@ using IsraelHiking.DataAccessInterfaces;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using NSubstitute;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace IsraelHiking.API.Tests.Controllers
 {
@@ -28,7 +29,7 @@ namespace IsraelHiking.API.Tests.Controllers
             _repository = Substitute.For<IRepository>();
             _containerConverterService = Substitute.For<IDataContainerConverterService>();
             _imgurGateway = Substitute.For<IImgurGateway>();
-            _controller = new UrlsController(_repository, _containerConverterService, new Base64ImageStringToFileConverter(), _imgurGateway);
+            _controller = new UrlsController(_repository, _containerConverterService, new Base64ImageStringToFileConverter(), _imgurGateway, Substitute.For<ILogger>());
         }
 
         [TestMethod]

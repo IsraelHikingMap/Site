@@ -469,6 +469,12 @@ namespace IsraelHiking.DataAccess
             return source + "_" + id;
         }
 
+        public async Task<List<ShareUrl>> GetUrls(int page)
+        {
+            var response = await _elasticClient.SearchAsync<ShareUrl>(s => s.Index(SHARES).Size(1000).Skip(1000 * page));
+            return response.Documents.ToList();
+        }
+
         public Task AddUrl(ShareUrl shareUrl)
         {
             return _elasticClient.IndexAsync(shareUrl, r => r.Index(SHARES).Id(shareUrl.Id));

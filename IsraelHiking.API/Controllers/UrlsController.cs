@@ -4,6 +4,7 @@ using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Net.Http.Headers;
 using System;
 using System.Collections.Generic;
@@ -24,6 +25,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IDataContainerConverterService _dataContainerConverterService;
         private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
         private readonly IImgurGateway _imgurGateway;
+        private readonly ILogger _logger;
 
         /// <summary>
         /// Controller's constructor
@@ -32,15 +34,18 @@ namespace IsraelHiking.API.Controllers
         /// <param name="dataContainerConverterService"></param>
         /// <param name="base64ImageConverter"></param>
         /// <param name="imgurGateway"></param>
+        /// <param name="logger"></param>
         public UrlsController(IRepository repository, 
             IDataContainerConverterService dataContainerConverterService,
             IBase64ImageStringToFileConverter base64ImageConverter,
-            IImgurGateway imgurGateway)
+            IImgurGateway imgurGateway, 
+            ILogger logger)
         {
             _repository = repository;
             _dataContainerConverterService = dataContainerConverterService;
             _base64ImageConverter = base64ImageConverter;
             _imgurGateway = imgurGateway;
+            _logger = logger;
         }
 
         /// <summary>
@@ -123,6 +128,13 @@ namespace IsraelHiking.API.Controllers
             }
             shareUrl.Id = id;
             await _repository.AddUrl(shareUrl);
+            UploadImagesIfNeeded(shareUrl);
+
+            return Ok(shareUrl);
+        }
+
+        private Task UploadImagesIfNeeded(ShareUrl shareUrl)
+        {
             var uploadTasks = new List<Task>();
             var links = shareUrl.DataContainer?.Routes.SelectMany(r => r.Markers.SelectMany(m => m.Urls));
             foreach (var link in links ?? new List<LinkData>())
@@ -132,15 +144,13 @@ namespace IsraelHiking.API.Controllers
                 {
                     continue;
                 }
+                _logger.LogInformation($"Uploading image to imgur for share: {shareUrl.Id}");
                 uploadTasks.Add(UploadToImgurAndUpdateLink(file, link));
             }
 
-            if (uploadTasks.Any())
-            {
-                Task.WhenAll(uploadTasks).ContinueWith((t, a) => _repository.Update(shareUrl), null);
-            }
-
-            return Ok(shareUrl);
+            return uploadTasks.Any()
+                ? Task.WhenAll(uploadTasks).ContinueWith((t, a) => _repository.Update(shareUrl), null)
+                : Task.CompletedTask;
         }
 
         private async Task UploadToImgurAndUpdateLink(RemoteFileFetcherGatewayResponse file, LinkData link)
@@ -214,6 +224,30 @@ namespace IsraelHiking.API.Controllers
         {
             const string chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
             return new string(Enumerable.Repeat(chars, length).Select(s => s[random.Next(s.Length)]).ToArray());
+        }
+
+        /// <summary>
+        /// This is used to update the database and convert data images to imgur urls
+        /// </summary>
+        /// <returns></returns>
+        [HttpPost]
+        [Route("shrink")]
+        public async Task<IActionResult> PostShrinkUrls()
+        {
+            List<ShareUrl> urls;
+            var page = 0;
+            do
+            {
+                urls = await _repository.GetUrls(page);
+                page++;
+                _logger.LogInformation($"page: {page}, got {urls.Count} urls");
+                foreach (var shareUrl in urls)
+                {
+                    await UploadImagesIfNeeded(shareUrl);
+                }
+            } while (urls.Any());
+
+            return Ok();
         }
     }
 }
