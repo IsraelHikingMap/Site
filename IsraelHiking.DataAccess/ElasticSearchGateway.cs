@@ -474,10 +474,10 @@ namespace IsraelHiking.DataAccess
             //The thing to know about scrollTimeout is that it resets after each call to the scroll so it only needs to be big enough to stay alive between calls.
             //when it expires, elastic will delete the entire scroll.
             _logger.LogInformation("Starting to get all shares");
-            ISearchResponse<ShareUrl> initialResponse = await _elasticClient.SearchAsync<ShareUrl>
-            (scr => scr.Index(SHARES)
+            ISearchResponse<ShareUrl> initialResponse = await _elasticClient.SearchAsync<ShareUrl>(s => s
+                .Index(SHARES)
                 .From(0)
-                .Take(10000)
+                .Take(5000)
                 .MatchAll()
                 .Scroll("10m"));
             List<ShareUrl> results = new List<ShareUrl>();
