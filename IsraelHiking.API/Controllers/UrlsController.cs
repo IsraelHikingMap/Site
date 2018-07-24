@@ -1,13 +1,15 @@
-﻿using IsraelHiking.Common;
+﻿using IsraelHiking.API.Converters;
+using IsraelHiking.API.Services;
+using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Net.Http.Headers;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using IsraelHiking.API.Services;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Net.Http.Headers;
-using System.Collections.Generic;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -20,17 +22,25 @@ namespace IsraelHiking.API.Controllers
     {
         private readonly IRepository _repository;
         private readonly IDataContainerConverterService _dataContainerConverterService;
+        private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
+        private readonly IImgurGateway _imgurGateway;
 
         /// <summary>
         /// Controller's constructor
         /// </summary>
         /// <param name="repository"></param>
         /// <param name="dataContainerConverterService"></param>
+        /// <param name="base64ImageConverter"></param>
+        /// <param name="imgurGateway"></param>
         public UrlsController(IRepository repository, 
-            IDataContainerConverterService dataContainerConverterService)
+            IDataContainerConverterService dataContainerConverterService,
+            IBase64ImageStringToFileConverter base64ImageConverter,
+            IImgurGateway imgurGateway)
         {
             _repository = repository;
             _dataContainerConverterService = dataContainerConverterService;
+            _base64ImageConverter = base64ImageConverter;
+            _imgurGateway = imgurGateway;
         }
 
         /// <summary>
@@ -113,7 +123,33 @@ namespace IsraelHiking.API.Controllers
             }
             shareUrl.Id = id;
             await _repository.AddUrl(shareUrl);
+            var uploadTasks = new List<Task>();
+            var links = shareUrl.DataContainer?.Routes.SelectMany(r => r.Markers.SelectMany(m => m.Urls));
+            foreach (var link in links ?? new List<LinkData>())
+            {
+                var file = _base64ImageConverter.ConvertToFile(link.Url);
+                if (file == null)
+                {
+                    continue;
+                }
+                uploadTasks.Add(UploadToImgurAndUpdateLink(file, link));
+            }
+
+            if (uploadTasks.Any())
+            {
+                Task.WhenAll(uploadTasks).ContinueWith((t, a) => _repository.Update(shareUrl), null);
+            }
+
             return Ok(shareUrl);
+        }
+
+        private async Task UploadToImgurAndUpdateLink(RemoteFileFetcherGatewayResponse file, LinkData link)
+        {
+            using (var memoryStream = new MemoryStream(file.Content))
+            {
+                var newUrl = await _imgurGateway.UploadImage(memoryStream);
+                link.Url = newUrl;
+            }
         }
 
         /// <summary>

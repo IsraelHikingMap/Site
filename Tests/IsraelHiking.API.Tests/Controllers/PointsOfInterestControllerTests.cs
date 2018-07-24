@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Controllers;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
 using IsraelHiking.Common;
@@ -36,7 +37,7 @@ namespace IsraelHiking.API.Tests.Controllers
             var cache = new LruCache<string, TokenAndSecret>(Substitute.For<IOptions<ConfigurationData>>(), Substitute.For<ILogger>());
             var factory = Substitute.For<IHttpGatewayFactory>();
             factory.CreateOsmGateway(Arg.Any<TokenAndSecret>()).Returns(_osmGateway);
-            _controller = new PointsOfInterestController(factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, _pointsOfInterestAggregatorService, cache);
+            _controller = new PointsOfInterestController(factory, _tagHelper, _wikimediaCommonGateway, _pointsOfInterestProvider, _pointsOfInterestAggregatorService, new Base64ImageStringToFileConverter(),  cache);
         }
 
         [TestMethod]

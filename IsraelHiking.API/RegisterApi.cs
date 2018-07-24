@@ -54,6 +54,7 @@ namespace IsraelHiking.API
 
             services.AddSingleton<IItmWgs84MathTransfromFactory, ItmWgs84MathTransfromFactory>();
             services.AddTransient<IElasticSearchUpdaterService, ElasticSearchUpdaterService>();
+            services.AddTransient<IBase64ImageStringToFileConverter, Base64ImageStringToFileConverter>();
             services.AddTransient<IConverterFlowItem, GeoJsonGpxConverterFlow>();
             services.AddTransient<IConverterFlowItem, GpxGeoJsonConverterFlow>();
             services.AddTransient<IConverterFlowItem, GpxToSingleTrackGpxConverterFlow>();

@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using IsraelHiking.API.Controllers;
+using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.Common;
 using IsraelHiking.DataAccessInterfaces;
@@ -17,13 +20,15 @@ namespace IsraelHiking.API.Tests.Controllers
         private UrlsController _controller;
         private IRepository _repository;
         private IDataContainerConverterService _containerConverterService;
+        private IImgurGateway _imgurGateway;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _repository = Substitute.For<IRepository>();
             _containerConverterService = Substitute.For<IDataContainerConverterService>();
-            _controller = new UrlsController(_repository, _containerConverterService);
+            _imgurGateway = Substitute.For<IImgurGateway>();
+            _controller = new UrlsController(_repository, _containerConverterService, new Base64ImageStringToFileConverter(), _imgurGateway);
         }
 
         [TestMethod]
@@ -111,6 +116,55 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(results);
             Assert.IsNotNull(content);
             Assert.AreEqual(10, content.Id.Length);
+        }
+
+        [TestMethod]
+        public void PostShareUrl_WithImageDataUrl_ShouldAddShareUrlUploadToImgurAndUpdateIt()
+        {
+            // first fetch from repository returns an item while the second one doesn't
+            _repository.GetUrlById(Arg.Any<string>())
+                .Returns(x => new ShareUrl(), x => null as ShareUrl);
+            var url = "url";
+            var task = Task.Run(() => url);
+            _imgurGateway.UploadImage(Arg.Any<Stream>()).Returns(task);
+
+            var shareUrl = new ShareUrl
+            {
+                DataContainer = new DataContainer
+                {
+                    Routes = new List<RouteData>
+                    {
+                        new RouteData
+                        {
+                            Markers = new List<MarkerData>
+                            {
+                                new MarkerData
+                                {
+                                    Urls = new List<LinkData>
+                                    {
+                                        new LinkData
+                                        {
+                                            Url =
+                                                "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//" +
+                                                "8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg=="
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            var results = _controller.PostShareUrl(shareUrl).Result as OkObjectResult;
+
+            Assert.IsNotNull(results);
+            var content = results.Value as ShareUrl;
+            Assert.IsNotNull(results);
+            Assert.IsNotNull(content);
+            Assert.AreEqual(10, content.Id.Length);
+            task.Wait();
+            _repository.Received(1).Update(Arg.Is<ShareUrl>(x => x.DataContainer.Routes.First().Markers.First().Urls.First().Url == url));
         }
 
         [TestMethod]

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using GeoAPI.Geometries;
+﻿using GeoAPI.Geometries;
 using IsraelHiking.API.Converters;
 using IsraelHiking.API.Services;
 using IsraelHiking.API.Services.Poi;
@@ -13,6 +7,11 @@ using IsraelHiking.Common.Poi;
 using IsraelHiking.DataAccessInterfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -27,6 +26,7 @@ namespace IsraelHiking.API.Controllers
         private readonly IWikimediaCommonGateway _wikimediaCommonGateway;
         private readonly IPointsOfInterestProvider _pointsOfInterestProvider;
         private readonly IPointsOfInterestAggregatorService _pointsOfInterestAggregatorService;
+        private readonly IBase64ImageStringToFileConverter _base64ImageConverter;
         private readonly LruCache<string, TokenAndSecret> _cache;
 
         /// <summary>
@@ -37,17 +37,20 @@ namespace IsraelHiking.API.Controllers
         /// <param name="wikimediaCommonGateway"></param>
         /// <param name="pointsOfInterestProvider"></param>
         /// <param name="pointsOfInterestAggregatorService"></param>
+        /// <param name="base64ImageConverter"></param>
         /// <param name="cache"></param>
         public PointsOfInterestController(IHttpGatewayFactory httpGatewayFactory,
             ITagsHelper tagsHelper,
             IWikimediaCommonGateway wikimediaCommonGateway,
             IPointsOfInterestProvider pointsOfInterestProvider,
             IPointsOfInterestAggregatorService pointsOfInterestAggregatorService,
+            IBase64ImageStringToFileConverter base64ImageConverter,
             LruCache<string, TokenAndSecret> cache)
         {
             _httpGatewayFactory = httpGatewayFactory;
             _tagsHelper = tagsHelper;
             _cache = cache;
+            _base64ImageConverter = base64ImageConverter;
             _pointsOfInterestAggregatorService = pointsOfInterestAggregatorService;
             _pointsOfInterestProvider = pointsOfInterestProvider;
             _wikimediaCommonGateway = wikimediaCommonGateway;
@@ -135,20 +138,18 @@ namespace IsraelHiking.API.Controllers
             for (var urlIndex = 0; urlIndex < imageUrls.Length; urlIndex++)
             {
                 var url = imageUrls[urlIndex];
-                var match = Regex.Match(url, @"data:image/(?<type>.+?);base64,(?<data>.+)");
-                if (!match.Success)
+                var fileName = string.IsNullOrWhiteSpace(pointOfInterest.Title)
+                    ? pointOfInterest.Icon.Replace("icon-", "")
+                    : pointOfInterest.Title;
+                var file = _base64ImageConverter.ConvertToFile(url, fileName);
+                if (file == null)
                 {
                     continue;
                 }
-                var binData = Convert.FromBase64String(match.Groups["data"].Value);
-                using (var memoryStream = new MemoryStream(binData))
+                using (var memoryStream = new MemoryStream(file.Content))
                 {
-                    var fileName = string.IsNullOrWhiteSpace(pointOfInterest.Title)
-                        ? pointOfInterest.Icon.Replace("icon-", "")
-                        : pointOfInterest.Title;
-                    fileName += "." + match.Groups["type"].Value;
                     var imageName = await _wikimediaCommonGateway.UploadImage(pointOfInterest.Title,
-                        pointOfInterest.Description, user.DisplayName, fileName, memoryStream,
+                        pointOfInterest.Description, user.DisplayName, file.FileName, memoryStream,
                         new Coordinate().FromLatLng(pointOfInterest.Location));
                     url = await _wikimediaCommonGateway.GetImageUrl(imageName);
                     imageUrls[urlIndex] = url;
