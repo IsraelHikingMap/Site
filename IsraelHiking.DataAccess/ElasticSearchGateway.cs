@@ -469,10 +469,43 @@ namespace IsraelHiking.DataAccess
             return source + "_" + id;
         }
 
-        public async Task<List<ShareUrl>> GetUrls(int page)
+        public async Task<List<ShareUrl>> GetUrls()
         {
-            var response = await _elasticClient.SearchAsync<ShareUrl>(s => s.Index(SHARES).Size(1000).From(1000 * page));
-            return response.Documents.ToList();
+            //The thing to know about scrollTimeout is that it resets after each call to the scroll so it only needs to be big enough to stay alive between calls.
+            //when it expires, elastic will delete the entire scroll.
+            _logger.LogInformation("Starting to get all shares");
+            ISearchResponse<ShareUrl> initialResponse = await _elasticClient.SearchAsync<ShareUrl>
+            (scr => scr.Index(SHARES)
+                .From(0)
+                .Take(10000)
+                .MatchAll()
+                .Scroll("10m"));
+            List<ShareUrl> results = new List<ShareUrl>();
+            if (!initialResponse.IsValid || string.IsNullOrEmpty(initialResponse.ScrollId))
+            {
+                throw new Exception(initialResponse.ServerError.Error.Reason);
+            }
+            if (initialResponse.Documents.Any())
+                results.AddRange(initialResponse.Documents);
+            string scrollid = initialResponse.ScrollId;
+            bool isScrollSetHasData = true;
+            while (isScrollSetHasData)
+            {
+                _logger.LogInformation("More data needs to be fetched...");
+                ISearchResponse<ShareUrl> loopingResponse = await _elasticClient.ScrollAsync<ShareUrl>("10m", scrollid);
+                if (loopingResponse.IsValid)
+                {
+                    results.AddRange(loopingResponse.Documents);
+                    scrollid = loopingResponse.ScrollId;
+                }
+
+                isScrollSetHasData = loopingResponse.Documents.Any();
+            }
+
+            //This would be garbage collected on it's own after scrollTimeout expired from it's last call but we'll clean up our room when we're done per best practice.
+            _elasticClient.ClearScroll(new ClearScrollRequest(scrollid));
+            _logger.LogInformation("Finished getting all shares: " + results.Count);
+            return results;
         }
 
         public Task AddUrl(ShareUrl shareUrl)

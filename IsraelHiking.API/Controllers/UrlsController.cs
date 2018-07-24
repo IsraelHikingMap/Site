@@ -234,19 +234,19 @@ namespace IsraelHiking.API.Controllers
         [Route("shrink")]
         public async Task<IActionResult> PostShrinkUrls()
         {
-            List<ShareUrl> urls;
-            var page = 0;
-            do
+            _logger.LogInformation("Starting shrinking shares.");
+            var urls = await _repository.GetUrls();
+            for (var shareIndex = 0; shareIndex < urls.Count; shareIndex++)
             {
-                urls = await _repository.GetUrls(page);
-                page++;
-                _logger.LogInformation($"page: {page}, got {urls.Count} urls");
-                foreach (var shareUrl in urls)
+                var shareUrl = urls[shareIndex];
+                if (shareIndex % 5000 == 0)
                 {
-                    await UploadImagesIfNeeded(shareUrl);
+                    _logger.LogInformation($"Processing {shareIndex} out of {urls.Count}");
                 }
-            } while (urls.Any());
+                await UploadImagesIfNeeded(shareUrl);
+            }
 
+            _logger.LogInformation("Finished shrinking shares.");
             return Ok();
         }
     }
