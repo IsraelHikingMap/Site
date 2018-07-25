@@ -1,6 +1,7 @@
 ﻿import { Component, Injector, Type, ComponentFactoryResolver, ApplicationRef, ViewChild, AfterViewInit } from "@angular/core";
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
 import * as L from "leaflet";
+import "leaflet-defaulticon-compatibility";
 
 import { ResourcesService } from "../services/resources.service";
 import { MapService } from "../services/map.service";
