@@ -319,7 +319,7 @@ namespace IsraelHiking.DataAccess
                 s => s.Index(OSM_POIS_ALIAS)
                     .Size(10000).Query(
                         q => q.GeoBoundingBox(
-                            b => ConvertToGeoBoundingBox(b, northEast,southWest)
+                            b => ConvertToGeoBoundingBox(b, northEast, southWest)
                         ) &&
                         q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_CATEGORY}").Terms(categories.Select(c => c.ToLower()).ToArray())) &&
                         q.Terms(t => t.Field($"{PROPERTIES}.{FeatureAttributes.POI_LANGUAGE}").Terms(languages))
@@ -379,9 +379,13 @@ namespace IsraelHiking.DataAccess
             return response.Source;
         }
 
-        public Task CacheItem(FeatureCollection featureCollection)
+        public async Task CacheItem(FeatureCollection featureCollection)
         {
-            return _elasticClient.IndexAsync(featureCollection, r => r.Index(CACHE).Id(GetId(featureCollection.Features.First() as Feature)));
+            if (_elasticClient.IndexExists(CACHE).Exists == false)
+            {
+                await CreateCacheIndex();
+            }
+            await _elasticClient.IndexAsync(featureCollection, r => r.Index(CACHE).Id(GetId(featureCollection.Features.First() as Feature)));
         }
 
         public Task<Rating> GetRating(string id, string source)
@@ -427,6 +431,27 @@ namespace IsraelHiking.DataAccess
                                 .Tree(GeoTree.Geohash)
                                 .TreeLevels(10)
                                 .DistanceErrorPercentage(0.2))
+                        )
+                    )
+                ).Settings(s => s.Setting("index.mapping.total_fields.limit", 10000))
+            );
+        }
+
+        private Task CreateCacheIndex()
+        {
+            return _elasticClient.CreateIndexAsync(CACHE,
+                c => c.Mappings(ms =>
+                    ms.Map<FeatureCollection>(m =>
+                        m.Properties(ps =>
+                            ps.Object<Feature>(o => o
+                                .Name("features")
+                                .Properties(fp =>
+                                    fp.Object<AttributesTable>(a => a
+                                        .Name(PROPERTIES)
+                                        .Properties(p => p.Keyword(s => s.Name(FeatureAttributes.ID)))
+                                    )
+                                )
+                            )
                         )
                     )
                 ).Settings(s => s.Setting("index.mapping.total_fields.limit", 10000))
