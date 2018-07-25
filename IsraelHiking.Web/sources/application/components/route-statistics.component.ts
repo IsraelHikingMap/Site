@@ -486,6 +486,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private setDataToChart(data: [number, number][]) {
+        if (!this.isVisible()) {
+            return;
+        }
         let d3 = this.d3Service.getD3();
         let duration = 1000;
         this.chartElements.xScale.domain([d3.min(data, d => d[0]), d3.max(data, d => d[0])]);
