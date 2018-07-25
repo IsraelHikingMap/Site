@@ -157,8 +157,15 @@ namespace IsraelHiking.API.Controllers
         {
             using (var memoryStream = new MemoryStream(file.Content))
             {
-                var newUrl = await _imgurGateway.UploadImage(memoryStream);
-                link.Url = newUrl;
+                try
+                {
+                    var newUrl = await _imgurGateway.UploadImage(memoryStream);
+                    link.Url = newUrl;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError($"Failed uploading image: {ex.Message}");
+                }
             }
         }
 

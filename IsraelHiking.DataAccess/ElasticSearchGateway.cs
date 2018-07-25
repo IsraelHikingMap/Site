@@ -502,23 +502,24 @@ namespace IsraelHiking.DataAccess
             ISearchResponse<ShareUrl> initialResponse = _elasticClient.Search<ShareUrl>(s => s
                 .Index(SHARES)
                 .From(0)
-                .Take(5000)
+                .Size(1000)
                 .MatchAll()
                 .Scroll("10m"));
             List<ShareUrl> results = new List<ShareUrl>();
-            _logger.LogInformation("Got initial response");
             if (!initialResponse.IsValid || string.IsNullOrEmpty(initialResponse.ScrollId))
             {
-                throw new Exception(initialResponse.ServerError.Error.Reason);
+                throw new Exception(initialResponse.ServerError?.Error?.Reason ?? "Unable to get urls");
             }
 
             if (initialResponse.Documents.Any())
                 results.AddRange(initialResponse.Documents);
             string scrollid = initialResponse.ScrollId;
             bool isScrollSetHasData = true;
+            int page = 0;
             while (isScrollSetHasData)
             {
-                _logger.LogInformation("More data needs to be fetched...");
+                page++;
+                _logger.LogInformation($"More data needs to be fetched, page: {page}");
                 ISearchResponse<ShareUrl> loopingResponse = _elasticClient.Scroll<ShareUrl>("10m", scrollid);
                 if (loopingResponse.IsValid)
                 {
