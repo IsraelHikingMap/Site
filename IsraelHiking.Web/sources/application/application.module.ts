@@ -37,7 +37,7 @@ import { NgProgressModule } from "@ngx-progressbar/core";
 import { NgProgressHttpModule } from "@ngx-progressbar/http";
 import { NgxPaginationModule } from "ngx-pagination";
 import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
-import { DndModule } from "ng2-dnd";
+import { DndModule } from "@beyerleinf/ngx-dnd";
 import { NgxImageGalleryModule } from "ngx-image-gallery";
 import { D3Service } from "d3-ng2-service";
 // services

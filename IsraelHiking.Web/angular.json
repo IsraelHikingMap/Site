@@ -24,7 +24,7 @@
               "sources/robots.txt"
             ],
             "styles": [
-              "sources/common.scss"
+              "sources/scss/common.scss"
             ],
             "scripts": [
               "sources/google-analytics.js"

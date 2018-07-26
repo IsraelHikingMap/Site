@@ -1,0 +1,11 @@
+﻿@import "~@angular/material/theming";
+
+$app-primary: mat-palette($mat-green, 600);
+$app-accent: mat-palette($mat-yellow);
+$app-warm: mat-palette($mat-red);
+$app-theme: mat-light-theme($app-primary, $app-accent, $app-warm);
+$app-background: map-get($app-theme, background);
+
+$app-sidebar-width: 400px;
+$app-left-buttons: 55px;
+$app-left-z-index: 1030;

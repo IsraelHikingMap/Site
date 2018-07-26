@@ -3,24 +3,12 @@
 @import "leaflet/dist/leaflet.css";
 @import "leaflet.markercluster/dist/MarkerCluster.css";
 @import "leaflet.markercluster/dist/MarkerCluster.Default.css";
-@import "ng2-dnd/bundles/style.css";
+@import "~@beyerleinf/ngx-dnd/styles.css";
 @import "./dialogs.scss";
-
-@import "~@angular/material/theming";
+@import "./_variables.scss";
 
 @include mat-core();
-
-$app-primary: mat-palette($mat-green, 600);
-$app-accent: mat-palette($mat-yellow);
-$app-warm: mat-palette($mat-red);
-$app-theme: mat-light-theme($app-primary, $app-accent, $app-warm);
-$app-background: map-get($app-theme, background);
-
 @include angular-material-theme($app-theme);
-
-$app-sidebar-width: 400px;
-$app-left-buttons: 55px;
-$app-left-z-index: 1030;
 
 html {
     height: 100%;
