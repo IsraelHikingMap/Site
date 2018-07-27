@@ -1,6 +1,7 @@
 ﻿import { Component, Injector, Type, ComponentFactoryResolver, ApplicationRef, ViewChild, AfterViewInit } from "@angular/core";
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
 import * as L from "leaflet";
+// HM TODO: see if the following issue is fixed inside leaflet: https://github.com/Leaflet/Leaflet/issues/4968 and remove this plug-in
 import "leaflet-defaulticon-compatibility";
 
 import { ResourcesService } from "../services/resources.service";
