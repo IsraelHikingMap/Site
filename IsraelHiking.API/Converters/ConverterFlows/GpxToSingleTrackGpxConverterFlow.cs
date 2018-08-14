@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.Linq;
 using IsraelHiking.API.Gpx;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters.ConverterFlows
 {
@@ -15,17 +18,20 @@ namespace IsraelHiking.API.Converters.ConverterFlows
         public byte[] Transform(byte[] content)
         {
             var gpx = content.ToGpx();
-            var singleTrackGpx = new gpxType
+            var singleTrackGpx = new GpxMainObject
             {
-                wpt = gpx.wpt,
-                rte = new rteType[0],
-                trk = (gpx.trk ?? new trkType[0]).Select(t => new trkType
-                {
-                    name = t.name,
-                    desc = t.desc,
-                    cmt = t.cmt,
-                    trkseg = new[] { new trksegType { trkpt = (t.trkseg ?? new trksegType[0]).SelectMany(s => s.trkpt).ToArray() } }
-                }).ToArray()
+                Waypoints = gpx.Waypoints,
+                Routes = new List<GpxRoute>(),
+                Tracks = (gpx.Tracks ?? new List<GpxTrack>()).Select(t => new GpxTrack(
+                    name: t.Name,
+                    description: t.Description,
+                    comment: t.Comment,
+                    segments: new [] { new GpxTrackSegment(new ImmutableGpxWaypointTable(t.Segments.SelectMany(s => s.Waypoints)), null) }.ToImmutableArray(),
+                    source: t.Source,
+                    links: t.Links,
+                    number: t.Number,
+                    classification: t.Classification,
+                    extensions: t.Extensions)).ToList()
             };
             return singleTrackGpx.ToBytes();
         }

@@ -1,9 +1,11 @@
 ﻿using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using GeoAPI.Geometries;
 using IsraelHiking.API.Gpx;
 using NetTopologySuite.Features;
 using NetTopologySuite.Geometries;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters
 {
@@ -15,169 +17,199 @@ namespace IsraelHiking.API.Converters
         private const string CREATOR = "Creator";
 
         ///<inheritdoc />
-        public FeatureCollection ToGeoJson(gpxType gpx)
+        public FeatureCollection ToGeoJson(GpxMainObject gpx)
         {
             var collection = new FeatureCollection();
-            var points = gpx.wpt ?? new wptType[0];
-            var pointsFeatures = points.Select(point => new Feature(new Point(CreateGeoPosition(point)), CreateProperties(point.name, point.desc)));
+            var points = gpx.Waypoints ?? new List<GpxWaypoint>();
+            var pointsFeatures = points.Select(point => new Feature(new Point(CreateGeoPosition(point)), CreateProperties(point.Name, point.Description)));
             pointsFeatures.ToList().ForEach(f => collection.Features.Add(f));
 
-            var routes = gpx.rte ?? new rteType[0];
-            var routesFeatures = routes.Select(route => new Feature(new LineString(route.rtept.Select(CreateGeoPosition).ToArray()), CreateProperties(route.name, route.desc)));
+            var routes = gpx.Routes ?? new List<GpxRoute>();
+            var routesFeatures = routes.Select(route => new Feature(new LineString(route.Waypoints.Select(CreateGeoPosition).ToArray()), CreateProperties(route.Name, route.Description)));
             routesFeatures.ToList().ForEach(f => collection.Features.Add(f));
 
-            foreach (var track in gpx.trk ?? new trkType[0])
+            foreach (var track in gpx.Tracks ?? new List<GpxTrack>())
             {
-                if (track.trkseg.Length == 1)
+                if (track.Segments.Length == 1)
                 {
-                    var lineStringFeature = new Feature(new LineString(track.trkseg[0].trkpt.Select(CreateGeoPosition).ToArray()), CreateProperties(track.name, track.desc));
+                    var lineStringFeature = new Feature(new LineString(track.Segments[0].Waypoints.Select(CreateGeoPosition).ToArray()), CreateProperties(track.Name, track.Description));
                     collection.Features.Add(lineStringFeature);
                     continue;
                 }
-                var lineStringList = track.trkseg.Select(segment => new LineString(segment.trkpt.Select(CreateGeoPosition).ToArray()) as ILineString).ToArray();
-                var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.name, gpx.creator, track.desc));
+                var lineStringList = track.Segments.Select(segment => new LineString(segment.Waypoints.Select(CreateGeoPosition).ToArray()) as ILineString).ToArray();
+                var feature = new Feature(new MultiLineString(lineStringList), CreateMultiLineProperties(track.Name, gpx.Metadata.Creator, track.Description));
                 collection.Features.Add(feature);
             }
             return collection;
         }
 
         ///<inheritdoc />   
-        public gpxType ToGpx(FeatureCollection collection)
+        public GpxMainObject ToGpx(FeatureCollection collection)
         {
-            return new gpxType
+            return new GpxMainObject
             {
-                creator = collection.Features.FirstOrDefault(f => f.Attributes.Exists(CREATOR))?.Attributes[CREATOR]?.ToString() ?? string.Empty,
-                wpt = collection.Features.Where(f => f.Geometry is Point)
-                    .Select(CreateWayPoint)
+                Metadata = new GpxMetadata(collection.Features.FirstOrDefault(f => f.Attributes.Exists(CREATOR))?.Attributes[CREATOR]?.ToString() ?? string.Empty),
+                Waypoints = collection.Features.Where(f => f.Geometry is Point)
+                    .Select(CreateWaypoint)
                     .Union(collection.Features.Where(f => f.Geometry is MultiPoint)
                         .SelectMany(CreateWayPointsFromMultiPoint))
-                    .ToArray(),
-                rte = collection.Features.Where(f => f.Geometry is LineString)
+                    .ToList(),
+                Routes = collection.Features.Where(f => f.Geometry is LineString)
                     .Select(CreateRouteFromLineString)
                     .Union(collection.Features.Where(f => f.Geometry is Polygon).Select(CreateRouteFromPolygon))
                     .Union(collection.Features.Where(f => f.Geometry is MultiPolygon).SelectMany(CreateRoutesFromMultiPolygon))
-                    .ToArray(),
-                trk = collection.Features.Where(f => f.Geometry is MultiLineString)
+                    .ToList(),
+                Tracks = collection.Features.Where(f => f.Geometry is MultiLineString)
                     .SelectMany(CreateTracksFromMultiLineString)
-                    .ToArray()
+                    .ToList()
             }.UpdateBounds();
         }
 
-        private Coordinate CreateGeoPosition(wptType wayPoint)
+        private Coordinate CreateGeoPosition(GpxWaypoint waypoint)
         {
-            double lat = (double)wayPoint.lat;
-            double lon = (double)wayPoint.lon;
-            return wayPoint.eleSpecified ? new Coordinate(lon, lat, (double)wayPoint.ele) : new Coordinate(lon, lat);
+            double lat = waypoint.Latitude;
+            double lon = waypoint.Longitude;
+            return waypoint.ElevationInMeters.HasValue 
+                ? new Coordinate(lon, lat, (double)waypoint.ElevationInMeters) 
+                : new Coordinate(lon, lat);
         }
 
-        private wptType CreateWayPoint(IFeature pointFeature)
+        private GpxWaypoint CreateWaypoint(IFeature pointFeature)
         {
             var point = (Point)pointFeature.Geometry;
             var position = point.Coordinate;
-            return CreateWayPoint(position, GetFeatureName(pointFeature), GetFeatureDescription(pointFeature));
+            return CreateWaypoint(position, GetFeatureName(pointFeature), GetFeatureDescription(pointFeature));
         }
 
-        private wptType[] CreateWayPointsFromMultiPoint(IFeature pointFeature)
+        private GpxWaypoint[] CreateWayPointsFromMultiPoint(IFeature pointFeature)
         {
             var multiPoint = (MultiPoint)pointFeature.Geometry;
             var positions = multiPoint.Coordinates;
-            return positions.Select(p => CreateWayPoint(p, GetFeatureName(pointFeature), GetFeatureDescription(pointFeature))).ToArray();
+            return positions.Select(p => CreateWaypoint(p, GetFeatureName(pointFeature), GetFeatureDescription(pointFeature))).ToArray();
         }
 
-        private wptType CreateWayPoint(Coordinate position, string name, string description)
+        private GpxWaypoint CreateWaypoint(Coordinate position, string name, string description)
         {
-            return new wptType
-            {
-                lon = (decimal)position.X,
-                lat = (decimal)position.Y,
-                ele = (decimal)(double.IsNaN(position.Z) ? 0 : position.Z),
-                eleSpecified = double.IsNaN(position.Z),
-                name = name,
-                desc = description
-            };
+            return new GpxWaypoint(
+                longitude: new GpxLongitude(position.X),
+                latitude: new GpxLatitude(position.Y), 
+                elevationInMeters: double.IsNaN(position.Z) ? (double?)null : position.Z,
+                name: name,
+                description: description,
+                links: ImmutableArray<GpxWebLink>.Empty, 
+                classification: null,
+                extensions: null,
+                timestampUtc: null,
+                symbolText: null,
+                magneticVariation: null,
+                geoidHeight: null,
+                comment: null,
+                source: null,
+                fixKind: null,
+                numberOfSatellites: null,
+                horizontalDilutionOfPrecision: null,
+                verticalDilutionOfPrecision: null,
+                positionDilutionOfPrecision: null,
+                secondsSinceLastDgpsUpdate: null,
+                dgpsStationId: null
+            );
         }
 
-        private rteType CreateRouteFromLineString(IFeature lineStringFeature)
+        private GpxRoute CreateRouteFromLineString(IFeature lineStringFeature)
         {
             var lineString = (LineString)lineStringFeature.Geometry;
 
-            return new rteType
-            {
-                name = GetFeatureName(lineStringFeature),
-                desc = GetFeatureDescription(lineStringFeature),
-                rtept = lineString?.Coordinates.Select(p => CreateWayPoint(p, null, null)).ToArray()
-
-            };
+            return new GpxRoute(
+                name: GetFeatureName(lineStringFeature),
+                description: GetFeatureDescription(lineStringFeature),
+                waypoints: new ImmutableGpxWaypointTable(lineString?.Coordinates.Select(p => CreateWaypoint(p, null, null))),
+                comment: null, source: null, links: ImmutableArray<GpxWebLink>.Empty, number: null,
+                classification: null, extensions: null
+            );
         }
-        private rteType CreateRouteFromPolygon(IFeature lineStringFeature)
+        private GpxRoute CreateRouteFromPolygon(IFeature lineStringFeature)
         {
             var polygon = (Polygon)lineStringFeature.Geometry;
 
-            return new rteType
-            {
-                name = GetFeatureName(lineStringFeature),
-                desc = GetFeatureDescription(lineStringFeature),
-                rtept = polygon?.Coordinates.Select(p => CreateWayPoint(p, null, null)).ToArray()
-            };
+            return new GpxRoute(
+                name: GetFeatureName(lineStringFeature),
+                description: GetFeatureDescription(lineStringFeature),
+                waypoints: new ImmutableGpxWaypointTable(polygon?.Coordinates.Select(p => CreateWaypoint(p, null, null))),
+                comment: null, source: null, links: ImmutableArray<GpxWebLink>.Empty, number: null,
+                classification: null, extensions: null
+            );
         }
 
-        private trkType[] CreateTracksFromMultiLineString(IFeature multiLineStringFeature)
+        private GpxTrack[] CreateTracksFromMultiLineString(IFeature multiLineStringFeature)
         {
             var multiLineString = multiLineStringFeature.Geometry as MultiLineString;
             if (multiLineString == null)
             {
-                return new trkType[0];
+                return new GpxTrack[0];
             }
             var name = GetFeatureName(multiLineStringFeature);
             var description = GetFeatureDescription(multiLineStringFeature);
-            var tracks = new List<trkType>();
-            var currentTrack = new trkType { name = name, desc = description, trkseg = new trksegType[0]};
-            var nameIndex = 1;
+            var tracks = new List<GpxTrack>();
+            var nameIndex = 0;
+            var list = new List<GpxTrackSegment>();
             foreach (var lineString in multiLineString.Geometries.OfType<ILineString>().Where(ls => ls.Coordinates.Any()))
             {
-                var currentSegment = new trksegType
+                var currentSegment =
+                    new GpxTrackSegment(
+                        new ImmutableGpxWaypointTable(
+                            lineString.Coordinates.Select(p => CreateWaypoint(p, null, null))), null);
+                if (list.Count == 0)
                 {
-                    trkpt = lineString.Coordinates.Select(p => CreateWayPoint(p, null, null)).ToArray()
-                };
-                if (currentTrack.trkseg.Length == 0)
-                {
-                    currentTrack.trkseg = new[] {currentSegment};
+                    list.Add(currentSegment);
                     continue;
                 }
-                var lastPointInTrack = currentTrack.trkseg.Last().trkpt.Last();
-                var firstPointInSegment = currentSegment.trkpt.First();
-                if (lastPointInTrack.lat == firstPointInSegment.lat && lastPointInTrack.lon == firstPointInSegment.lon)
+                var lastPointInTrack = list.Last().Waypoints.Last();
+                var firstPointInSegment = currentSegment.Waypoints.First();
+                if (lastPointInTrack.Latitude.Equals(firstPointInSegment.Latitude) && 
+                    lastPointInTrack.Longitude.Equals(firstPointInSegment.Longitude))
                 {
-                    var list = currentTrack.trkseg.ToList();
                     list.Add(currentSegment);
-                    currentTrack.trkseg = list.ToArray();
                 }
                 else
                 {
                     // need to start a new track.
-                    tracks.Add(currentTrack);
-                    currentTrack = new trkType {name = name + " " + nameIndex, desc = description, trkseg = new[] {currentSegment}};
+                    var trackName = nameIndex == 0 ? name : name + " " + nameIndex;
+                    var newTrack = new GpxTrack(name: trackName, description: description,
+                        segments: list.ToImmutableArray(), classification: null, comment: null, source: null,
+                        links: ImmutableArray<GpxWebLink>.Empty, extensions: null, number: null);
+                    tracks.Add(newTrack);
+                    list.Clear();
+                    list.Add(currentSegment);
                     nameIndex++;
                 }
             }
-            tracks.Add(currentTrack);
+            var lastTackName = nameIndex == 0 ? name : name + " " + nameIndex;
+            var lastTrack = new GpxTrack(name: lastTackName, description: description,
+                segments: list.ToImmutableArray(), classification: null, comment: null, source: null,
+                links: ImmutableArray<GpxWebLink>.Empty, extensions: null, number: null);
+            tracks.Add(lastTrack);
             return tracks.ToArray();
         }
 
-        private rteType[] CreateRoutesFromMultiPolygon(IFeature multiPolygonFeature)
+        private GpxRoute[] CreateRoutesFromMultiPolygon(IFeature multiPolygonFeature)
         {
             var multiPolygon = multiPolygonFeature.Geometry as MultiPolygon;
             if (multiPolygon == null)
             {
-                return new rteType[0];
+                return new GpxRoute[0];
             }
             return multiPolygon.Geometries.OfType<Polygon>().Select(
-                p => new rteType
-                {
-                    rtept = p.Coordinates.Select(c => CreateWayPoint(c, null, null)).ToArray(),
-                    name = GetFeatureName(multiPolygonFeature),
-                    desc = GetFeatureDescription(multiPolygonFeature)
-                }).ToArray();
+                p => new GpxRoute(
+                    name: GetFeatureName(multiPolygonFeature),
+                    description: GetFeatureDescription(multiPolygonFeature),
+                    waypoints: new ImmutableGpxWaypointTable(p.Coordinates.Select(c => CreateWaypoint(c, null, null))),
+                    extensions: null,
+                    comment: null,
+                    source: null,
+                    links: ImmutableArray<GpxWebLink>.Empty, 
+                    number: null,
+                    classification: null)
+                ).ToArray();
         }
 
         private IAttributesTable CreateProperties(string name, string description)

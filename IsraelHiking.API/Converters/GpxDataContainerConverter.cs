@@ -1,89 +1,59 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.Common;
-using System.Xml;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters
 {
-    internal abstract class XmlExtensionConverter {
-
-        protected abstract string ElementName { get; }
-
-        public string FromXml(extensionsType extensions)
-        {
-            return extensions?.Any.FirstOrDefault(a => a.LocalName == ElementName)?.InnerText;
-        }
-
-        public XmlElement ToXml(string value)
-        {
-            var doc = new XmlDocument();
-            var element = doc.CreateElement(ElementName);
-            element.InnerText = value;
-            return element;
-        }
-    }
-
-    internal class RoutingTypeConverter : XmlExtensionConverter
-    {
-        protected override string ElementName => "RoutingType";
-    }
-
-    internal class ColorConverter : XmlExtensionConverter
-    {
-        protected override string ElementName => "Color";
-    }
-
-    internal class OpacityConverter : XmlExtensionConverter
-    {
-        protected override string ElementName => "Opacity";
-    }
-
-    internal class WeightConverter : XmlExtensionConverter
-    {
-        protected override string ElementName => "Weight";
+    internal class ColorOpacityWeight {
+        public string Color { get; set; }
+        public double? Opacity { get; set; }
+        public int? Weight { get; set; }
     }
 
     ///<inheritdoc />
     public class GpxDataContainerConverter : IGpxDataContainerConverter
     {
+        public const string ISRAEL_HIKING_MAP = "IsraelHikingMap";
+
         ///<inheritdoc />
-        public gpxType ToGpx(DataContainer container)
+        public GpxMainObject ToGpx(DataContainer container)
         {
             var containerRoutes = container.Routes ?? new List<RouteData>();
             var nonEmptyRoutes = containerRoutes.Where(r => r.Segments.SelectMany(s => s.Latlngs).Any());
-            return new gpxType
+            return new GpxMainObject
             {
-                wpt = containerRoutes.SelectMany(r => r.Markers).Select(ToWptType).ToArray(),
-                rte = new rteType[0],
-                trk = nonEmptyRoutes.Select(r => new trkType
-                {
-                    name = r.Name,
-                    desc = r.Description,
-                    trkseg = r.Segments.Select(ToTrksegType).ToArray(),
-                    extensions = new extensionsType
-                    {
-                        Any = new[]
-                        {
-                            new ColorConverter().ToXml(r.Color),
-                            new OpacityConverter().ToXml(r.Opacity.ToString()),
-                            new WeightConverter().ToXml(r.Weight.ToString())
-                        }
-                    }
-                }).ToArray()
+                Metadata = new GpxMetadata(ISRAEL_HIKING_MAP),
+                Waypoints = containerRoutes.SelectMany(r => r.Markers).Select(ToGpxWaypoint).ToList(),
+                Routes = new List<GpxRoute>(),
+                Tracks = nonEmptyRoutes.Select(r => new GpxTrack(
+                        name: r.Name,
+                        comment: null,
+                        description: r.Description,
+                        source: null,
+                        links: ImmutableArray<GpxWebLink>.Empty,
+                        number: null,
+                        classification: null,
+                        segments: r.Segments.Select(ToGpxTraclSegment).ToImmutableArray(),
+                        extensions: new ColorOpacityWeight {Color = r.Color, Opacity = r.Opacity, Weight = r.Weight}
+                    )
+                ).ToList()
             }.UpdateBounds();
         }
 
         ///<inheritdoc />
-        public DataContainer ToDataContainer(gpxType gpx)
+        public DataContainer ToDataContainer(GpxMainObject gpx)
         {
-            gpx.UpdateBounds();
+            //gpx.UpdateBounds();
             var container = new DataContainer
             {
-                Routes = ConvertRoutesToRoutesData(gpx.rte ?? new rteType[0])
+                Routes = ConvertRoutesToRoutesData(gpx.Routes ?? new List<GpxRoute>())
             };
-            container.Routes.AddRange(ConvertTracksToRouteData(gpx.trk ?? new trkType[0]));
-            var nonEmptyWayPoints = gpx.wpt ?? new wptType[0];
+            container.Routes.AddRange(ConvertTracksToRouteData(gpx.Tracks ?? new List<GpxTrack>()));
+            var nonEmptyWayPoints = gpx.Waypoints ?? new List<GpxWaypoint>();
             var markers = nonEmptyWayPoints.Select(ToMarkerData).ToList();
             if (markers.Any())
             {
@@ -91,129 +61,130 @@ namespace IsraelHiking.API.Converters
                 {
                     var title = string.IsNullOrWhiteSpace(markers.First().Title) ? "Markers" : markers.First().Title;
                     var name = markers.Count == 1 ? title : "Markers";
-                    container.Routes.Add(new RouteData {Name = name, Description = nonEmptyWayPoints.First().desc});
+                    container.Routes.Add(new RouteData {Name = name, Description = nonEmptyWayPoints.First().Description});
                 }
                 container.Routes.First().Markers = markers;
             }
-            if (gpx.metadata?.bounds != null)
+            if (gpx.Metadata?.Bounds != null)
             {
-                UpdateBoundingBox(container, gpx.metadata.bounds);
+                UpdateBoundingBox(container, gpx.Metadata.Bounds);
             }
             return container;
         }
 
-        private List<RouteData> ConvertRoutesToRoutesData(rteType[] routes)
+        private List<RouteData> ConvertRoutesToRoutesData(IEnumerable<GpxRoute> routes)
         {
-            var routesData = routes.Where(r => r.rtept != null && r.rtept.Any()).Select(route => new RouteData
+            var routesData = routes.Where(r => r.Waypoints != null && r.Waypoints.Any()).Select(route => new RouteData
             {
-                Name = route.name,
-                Description = route.desc,
+                Name = route.Name,
+                Description = route.Description,
                 Segments = new List<RouteSegmentData>
                 {
                     new RouteSegmentData
                     {
-                        Latlngs = route.rtept.Select(ToLatLng).ToList(),
-                        RoutePoint = ToLatLng(route.rtept.Last())
+                        Latlngs = route.Waypoints.Select(ToLatLng).ToList(),
+                        RoutePoint = ToLatLng(route.Waypoints.Last())
                     }
                 }
             }).ToList();
             return routesData;
         }
 
-        private IEnumerable<RouteData> ConvertTracksToRouteData(trkType[] trks)
+        private IEnumerable<RouteData> ConvertTracksToRouteData(IEnumerable<GpxTrack> trks)
         {
-            var tracks = trks.Where(t => t.trkseg != null && t.trkseg.Any()).Select(t => new RouteData
+            var tracks = trks.Where(t => t.Segments != null && t.Segments.Any()).Select(t => new RouteData
             {
-                Name = t.name,
-                Description = t.desc,
-                Color = new ColorConverter().FromXml(t.extensions),
-                Opacity = string.IsNullOrWhiteSpace(new OpacityConverter().FromXml(t.extensions)) 
-                    ? (double?)null 
-                    : double.Parse(new OpacityConverter().FromXml(t.extensions)),
-                Weight = string.IsNullOrWhiteSpace(new WeightConverter().FromXml(t.extensions))
-                    ? (int?)null
-                    : int.Parse(new WeightConverter().FromXml(t.extensions)),
-                Segments = t.trkseg.Where(seg => seg?.trkpt != null && seg.trkpt.Length > 1).Select(seg => new RouteSegmentData
+                Name = t.Name,
+                Description = t.Description,
+                Color = (t.Extensions as ColorOpacityWeight)?.Color,
+                Opacity = (t.Extensions as ColorOpacityWeight)?.Opacity,
+                Weight = (t.Extensions as ColorOpacityWeight)?.Weight,
+                Segments = t.Segments.Where(seg => seg?.Waypoints != null && seg.Waypoints.Count > 1).Select(seg => new RouteSegmentData
                 {
-                    Latlngs = seg.trkpt.Select(ToLatLng).ToList(),
-                    RoutePoint = ToLatLng(seg.trkpt.Last()),
-                    RoutingType = new RoutingTypeConverter().FromXml(seg.extensions)
+                    Latlngs = seg.Waypoints.Select(ToLatLng).ToList(),
+                    RoutePoint = ToLatLng(seg.Waypoints.Last()),
+                    RoutingType = seg.Extensions as string
                 }).ToList(),
             });
             return tracks;
         }
 
-        private void UpdateBoundingBox(DataContainer container, boundsType bounds)
+        private void UpdateBoundingBox(DataContainer container, GpxBoundingBox bounds)
         {
             container.NorthEast = new LatLng 
             {
-                Lat = (double)bounds.maxlat,
-                Lng = (double)bounds.maxlon
+                Lat = bounds.MaxLatitude,
+                Lng = bounds.MaxLongitude
             };
 
             container.SouthWest = new LatLng
             {
-                Lat = (double)bounds.minlat,
-                Lng = (double)bounds.minlon
+                Lat = bounds.MinLatitude,
+                Lng = bounds.MinLongitude
             };
         }
 
-        private LatLng ToLatLng(wptType point)
+        private LatLng ToLatLng(GpxWaypoint point)
         {
             return new LatLng
             {
-                Lat = (double)point.lat,
-                Lng = (double)point.lon,
-                Alt = (double)point.ele
+                Lat = point.Latitude,
+                Lng = point.Longitude,
+                Alt = point.ElevationInMeters
             };
         }
 
-        private MarkerData ToMarkerData(wptType point)
+        private MarkerData ToMarkerData(GpxWaypoint point)
         {
             return new MarkerData
             {
                 Latlng = ToLatLng(point),
-                Title = point.name,
-                Type = point.type,
-                Description = point.desc,
-                Urls = (point.link ?? new linkType[0])
-                    .Select(l => new LinkData {MimeType = l.type, Url = l.href, Text = l.text})
+                Title = point.Name,
+                Type = point.Classification,
+                Description = point.Description,
+                Urls = point.Links.Select(l => new LinkData {MimeType = l.ContentType, Url = l.Href.ToString(), Text = l.Text})
                     .ToList()
             };
         }
 
-        private wptType ToWptType(MarkerData marker)
+        private GpxWaypoint ToGpxWaypoint(MarkerData marker)
         {
-            return new wptType
-            {
-                lat = (decimal) marker.Latlng.Lat,
-                lon = (decimal) marker.Latlng.Lng,
-                name = marker.Title,
-                desc = marker.Description,
-                type = marker.Type,
-                link = (marker.Urls ?? new List<LinkData>())
-                    .Select(l => new linkType {href = l.Url, text = l.Text, type = l.MimeType}).ToArray()
-            };
+            return new GpxWaypoint(
+                longitude: new GpxLongitude(marker.Latlng.Lng),
+                latitude: new GpxLatitude(marker.Latlng.Lat),
+                name: marker.Title,
+                description: marker.Description,
+                links: (marker.Urls ?? new List<LinkData>()).Select(l => new GpxWebLink(l.Text, l.MimeType, new Uri(l.Url))).ToImmutableArray(),
+                classification: marker.Type,
+                extensions: null,
+                elevationInMeters: null,
+                timestampUtc: null,
+                symbolText: null,
+                magneticVariation: null,
+                geoidHeight: null,
+                comment: null,
+                source: null,
+                fixKind: null,
+                numberOfSatellites: null,
+                horizontalDilutionOfPrecision: null,
+                verticalDilutionOfPrecision: null,
+                positionDilutionOfPrecision: null,
+                secondsSinceLastDgpsUpdate: null,
+                dgpsStationId: null
+            );
         }
 
-        private wptType ToWptType(LatLng latLng)
+        private GpxWaypoint ToGpxWaypoint(LatLng latLng)
         {
-            return new wptType
-            {
-                lat = (decimal)latLng.Lat,
-                lon = (decimal)latLng.Lng,
-                ele = (decimal)(latLng.Alt ?? 0),
-                eleSpecified = latLng.Alt.HasValue
-            };
+            return new GpxWaypoint(new GpxLongitude(latLng.Lng), new GpxLatitude(latLng.Lat), latLng.Alt);
         }
 
-        private trksegType ToTrksegType(RouteSegmentData segmentData)
+        private GpxTrackSegment ToGpxTraclSegment(RouteSegmentData segmentData)
         {
-            return new trksegType
-            {
-                trkpt = segmentData.Latlngs.Select(ToWptType).ToArray(),
-                extensions = new extensionsType { Any = new[] { new RoutingTypeConverter().ToXml(segmentData.RoutingType) } }
-            };
+            return new GpxTrackSegment(
+                waypoints: new ImmutableGpxWaypointTable(segmentData.Latlngs.Select(ToGpxWaypoint)),
+                extensions: segmentData.RoutingType
+            );
         }
     }
 }

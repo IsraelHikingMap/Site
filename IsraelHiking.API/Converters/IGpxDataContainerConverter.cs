@@ -1,23 +1,24 @@
-﻿using IsraelHiking.Common;
+﻿using IsraelHiking.API.Gpx;
+using IsraelHiking.Common;
 
 namespace IsraelHiking.API.Converters
 {
     /// <summary>
-    /// Converts between <see cref="gpxType"/> and <see cref="DataContainer"/>
+    /// Converts between <see cref="GpxMainObject"/> and <see cref="DataContainer"/>
     /// </summary>
     public interface IGpxDataContainerConverter
     {
         /// <summary>
-        /// Converts from <see cref="gpxType"/> to <see cref="DataContainer"/>
+        /// Converts from <see cref="GpxMainObject"/> to <see cref="DataContainer"/>
         /// </summary>
         /// <param name="gpx">The GPX data to convert</param>
         /// <returns>The data container</returns>
-        DataContainer ToDataContainer(gpxType gpx);
+        DataContainer ToDataContainer(GpxMainObject gpx);
         /// <summary>
-        /// Converts from <see cref="DataContainer"/> to <see cref="gpxType"/>
+        /// Converts from <see cref="DataContainer"/> to <see cref="GpxMainObject"/>
         /// </summary>
         /// <param name="container">The data container to convert</param>
         /// <returns>The gpx data</returns>
-        gpxType ToGpx(DataContainer container);
+        GpxMainObject ToGpx(DataContainer container);
     }
 }

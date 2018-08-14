@@ -18,7 +18,7 @@ namespace IsraelHiking.API.Services
         /// </summary>
         public const string GPX = "gpx";
 
-        private const string ISRAEL_HIKING_MAP = "IsraelHikingMap";
+        
         private readonly IGpsBabelGateway _gpsBabelGateway;
         private readonly IGpxDataContainerConverter _gpxDataContainerConverter;
         private readonly IRouteDataSplitterService _routeDataSplitterService;
@@ -62,7 +62,6 @@ namespace IsraelHiking.API.Services
         public Task<byte[]> ToAnyFormat(DataContainer dataContainer, string format)
         {
             var gpx = _gpxDataContainerConverter.ToGpx(dataContainer);
-            gpx.creator = ISRAEL_HIKING_MAP;
             return Convert(gpx.ToBytes(), GPX, format);
         }
 
@@ -71,7 +70,7 @@ namespace IsraelHiking.API.Services
         {
             var gpx = (await Convert(content, fileName, GPX)).ToGpx();
             var container = _gpxDataContainerConverter.ToDataContainer(gpx);
-            if (gpx.creator == ISRAEL_HIKING_MAP)
+            if (gpx.Metadata.Creator == GpxDataContainerConverter.ISRAEL_HIKING_MAP)
             {
                 return container;
             }

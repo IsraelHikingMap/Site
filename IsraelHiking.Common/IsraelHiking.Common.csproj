@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="GeoAPI" Version="1.7.5-pre010" />
+    <PackageReference Include="GeoAPI" Version="1.7.5" />
     <PackageReference Include="Microsoft.Extensions.Configuration.UserSecrets" Version="2.0.1" />
-    <PackageReference Include="NetTopologySuite" Version="1.15.0-pre032" />
+    <PackageReference Include="NetTopologySuite" Version="1.15.0" />
+    <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="1.15.0" />
     <PackageReference Include="Newtonsoft.Json" Version="11.0.1" />
-    <PackageReference Include="OsmSharp" Version="6.0.0-pre14" />
+    <PackageReference Include="OsmSharp" Version="6.0.1" />
+    <PackageReference Include="ProjNET4GeoAPI" Version="1.4.0-pre014" />
   </ItemGroup>
 
 </Project>
