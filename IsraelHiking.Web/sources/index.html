@@ -19,29 +19,29 @@
     <meta name="keyword" content="hike,bike,outdoor,israel hiking,map,navigation,route planning,nominatim,סימון שבילים,אופניים,מפה,ניווט,שטח,טיול,מטיבי לכת,ג'יפים,רכיבה,הליכה,טבע" />
     <meta name="robot" content="index,follow" />
     <meta name="msapplication-TileColor" content="#2b5797">
-    <meta name="msapplication-TileImage" content="/content/favicons/mstile-144x144.png">
-    <meta name="msapplication-config" content="/content/favicons/browserconfig.xml">
+    <meta name="msapplication-TileImage" content="content/favicons/mstile-144x144.png">
+    <meta name="msapplication-config" content="content/favicons/browserconfig.xml">
     <meta name="theme-color" content="#0a42bb">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Israel Hiking Map</title>
     <base href="/">
     <!-- Favicons courtesy of http://realfavicongenerator.net/ -->
-    <link rel="apple-touch-icon" sizes="57x57" href="/content/favicons/apple-touch-icon-57x57.png">
-    <link rel="apple-touch-icon" sizes="60x60" href="/content/favicons/apple-touch-icon-60x60.png">
-    <link rel="apple-touch-icon" sizes="72x72" href="/content/favicons/apple-touch-icon-72x72.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="/content/favicons/apple-touch-icon-76x76.png">
-    <link rel="apple-touch-icon" sizes="114x114" href="/content/favicons/apple-touch-icon-114x114.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="/content/favicons/apple-touch-icon-120x120.png">
-    <link rel="apple-touch-icon" sizes="144x144" href="/content/favicons/apple-touch-icon-144x144.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="/content/favicons/apple-touch-icon-152x152.png">
-    <link rel="apple-touch-icon" sizes="180x180" href="/content/favicons/apple-touch-icon-180x180.png">
-    <link rel="icon" type="image/png" href="/content/favicons/favicon-32x32.png" sizes="32x32">
-    <link rel="icon" type="image/png" href="/content/favicons/android-chrome-192x192.png" sizes="192x192">
-    <link rel="icon" type="image/png" href="/content/favicons/favicon-96x96.png" sizes="96x96">
-    <link rel="icon" type="image/png" href="/content/favicons/favicon-16x16.png" sizes="16x16">
-    <link rel="manifest" href="/content/favicons/manifest.json">
-    <link rel="mask-icon" href="/content/favicons/safari-pinned-tab.svg" color="#0a42bb">
-    <link rel="shortcut icon" href="/content/favicons/favicon.ico" type="image/x-icon">
+    <link rel="apple-touch-icon" sizes="57x57" href="content/favicons/apple-touch-icon-57x57.png">
+    <link rel="apple-touch-icon" sizes="60x60" href="content/favicons/apple-touch-icon-60x60.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="content/favicons/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="76x76" href="content/favicons/apple-touch-icon-76x76.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="content/favicons/apple-touch-icon-114x114.png">
+    <link rel="apple-touch-icon" sizes="120x120" href="content/favicons/apple-touch-icon-120x120.png">
+    <link rel="apple-touch-icon" sizes="144x144" href="content/favicons/apple-touch-icon-144x144.png">
+    <link rel="apple-touch-icon" sizes="152x152" href="content/favicons/apple-touch-icon-152x152.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="content/favicons/apple-touch-icon-180x180.png">
+    <link rel="icon" type="image/png" href="content/favicons/favicon-32x32.png" sizes="32x32">
+    <link rel="icon" type="image/png" href="content/favicons/android-chrome-192x192.png" sizes="192x192">
+    <link rel="icon" type="image/png" href="content/favicons/favicon-96x96.png" sizes="96x96">
+    <link rel="icon" type="image/png" href="content/favicons/favicon-16x16.png" sizes="16x16">
+    <link rel="manifest" href="content/favicons/manifest.json">
+    <link rel="mask-icon" href="content/favicons/safari-pinned-tab.svg" color="#0a42bb">
+    <link rel="shortcut icon" href="content/favicons/favicon.ico" type="image/x-icon">
     <style>
         .preloader {
             position: absolute;
@@ -54,12 +54,13 @@
 </head>
 <body>
     <div class="preloader">
-        <img src="/content/logo.png" />
+        <img src="content/logo.png" />
         <div>Loading site...</div>
     </div>
     <sidebar></sidebar>
     <div id="map" dir="ltr">
         <main-map></main-map>
     </div>
+    <script type="text/javascript" src="cordova.js"></script>
 </body>
 </html>

@@ -13,12 +13,15 @@
     "@angular/platform-browser-dynamic": "^6.0.5",
     "@angular/platform-server": "^6.0.5",
     "@angular/router": "^6.0.5",
+    "@beyerleinf/ngx-dnd": "6.0.0-preview3",
     "@ngx-progressbar/core": "5.0.1",
     "@ngx-progressbar/http": "5.0.1",
-    "@beyerleinf/ngx-dnd": "6.0.0-preview3",
     "@nicky-lenaers/ngx-scroll-to": "1.0.0",
     "angulartics2": "^6.1.0",
     "b64-to-blob": "1.2.19",
+    "cordova-android": "^7.0.0",
+    "cordova-browser": "^5.0.4",
+    "cordova-plugin-whitelist": "^1.3.3",
     "core-js": "^2.5.7",
     "d3-ng2-service": "2.2.0",
     "esri-leaflet": "2.2.1",
@@ -28,8 +31,8 @@
     "hammerjs": "2.0.8",
     "intl": "1.2.5",
     "leaflet": "1.3.1",
-    "leaflet.markercluster": "1.3.0",
     "leaflet-defaulticon-compatibility": "0.1.1",
+    "leaflet.markercluster": "1.3.0",
     "lodash": "4.17.10",
     "ngx-clipboard": "^11.1.1",
     "ngx-image-gallery": "1.3.1",
@@ -55,6 +58,7 @@
     "@types/lodash": "^4.14.109",
     "@types/node": "^10.3.3",
     "codelyzer": "^4.3.0",
+    "cordova": "8.0.0",
     "gulp": "^4.0.0",
     "gulp-angular-gettext": "*",
     "gulp-download": "*",
@@ -80,6 +84,8 @@
   },
   "license": "CC-BY-NC-3.0",
   "name": "israel-hiking",
+  "displayName": "Israel Hiking Map",
+  "description": "A software for outdoor navigation",
   "private": true,
   "scripts": {
     "ng": "ng",
@@ -87,7 +93,17 @@
     "test": "ng test",
     "lint": "ng lint",
     "version": "node -v && npm -v && ng -v",
-    "update": "ng update"
+    "update": "ng update",
+    "android": "cordova run android"
+  },
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-whitelist": {}
+    },
+    "platforms": [
+      "android",
+      "browser"
+    ]
   },
   "version": "7.1.0"
 }

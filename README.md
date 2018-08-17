@@ -28,6 +28,7 @@ The technology stack of this site is base on the following frameworks:
 * [OsmSharp](http://www.osmsharp.com/)
 * [Wiki client library](https://github.com/CXuesong/WikiClientLibrary) Wikipedia and upload images to Wikimedia common
 * [Imgur](https://imgur.com/) - Used for uploadling anonymous images
+* [Cordova](https://cordova.apache.org/) - Used to wrap the site as a mobile application and add some native capabilities
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:

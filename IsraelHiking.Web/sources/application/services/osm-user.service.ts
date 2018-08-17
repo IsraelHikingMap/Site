@@ -275,7 +275,7 @@ export class OsmUserService {
         let background = "background=bing";
         if (baseLayerAddress !== "") {
             if (baseLayerAddress.startsWith("/")) {
-                baseLayerAddress = Urls.baseAddress + baseLayerAddress;
+                baseLayerAddress = Urls.baseTilesAddress + baseLayerAddress;
             }
             let address = baseLayerAddress.replace("{s}", "s");
             background = `background=custom:${address}`;

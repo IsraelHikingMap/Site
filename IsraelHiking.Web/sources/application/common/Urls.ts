@@ -1,7 +1,10 @@
-﻿export class Urls {
-    // api
+﻿import { environment } from "../../environments/environment";
+
+export class Urls {
     public static readonly baseAddress = window.location.protocol + "//" + window.location.host;
-    public static readonly apiBase = Urls.baseAddress + "/api/";
+    public static readonly baseTilesAddress = environment.baseTilesAddress;
+    public static readonly apiBase = environment.baseApiAddress;
+    public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly elevation = Urls.apiBase + "elevation";
     public static readonly routing = Urls.apiBase + "routing";
@@ -13,7 +16,6 @@
     public static readonly images = Urls.apiBase + "images/";
     public static readonly uploadAnonymousImage = Urls.images + "anonymous/";
     public static readonly colors = Urls.images + "colors/";
-    public static readonly translations = Urls.baseAddress + "/translations/";
     public static readonly osm = Urls.apiBase + "osm/";
     public static readonly osmConfiguration = Urls.osm + "configuration";
     public static readonly osmTrace = Urls.osm + "trace/";

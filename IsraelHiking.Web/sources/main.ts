@@ -5,6 +5,14 @@ import { environment } from "./environments/environment";
 import "hammerjs";
 
 if (environment.production) {
-  enableProdMode();
+    enableProdMode();
 }
-platformBrowserDynamic().bootstrapModule(ApplicationModule);
+if (environment.isCordova) {
+    let onDeviceReady = () => {
+        console.log("device ready!");
+        platformBrowserDynamic().bootstrapModule(ApplicationModule);
+    };
+    document.addEventListener("deviceready", onDeviceReady, false);
+} else {
+    platformBrowserDynamic().bootstrapModule(ApplicationModule);
+}

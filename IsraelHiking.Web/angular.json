@@ -47,7 +47,17 @@
                   "with": "sources/environments/environment.prod.ts"
                 }
               ]
-            }
+            },
+            "android": {
+              "outputPath": "www",
+              "baseHref": "./",
+              "fileReplacements": [
+                {
+                  "replace": "sources/environments/environment.ts",
+                  "with": "sources/environments/environment.android.ts"
+                }
+              ]
+            } 
           }
         },
         "serve": {
