@@ -79,7 +79,6 @@ export class AuthorizationService {
     }
 
     public async setOptions(options) {
-        console.log(options);
         this.options = options;
         this.options.url = this.options.url || "https://www.openstreetmap.org";
         this.options.landing = this.options.landing || "land.html";
@@ -91,7 +90,6 @@ export class AuthorizationService {
     }
 
     private refreshAuthorizeUrl = async () => {
-        console.log("refreshing request token");
         let params = this.getParams();
         let requestTokenUrl = this.options.url + "/oauth/request_token";
 
@@ -106,7 +104,6 @@ export class AuthorizationService {
             oauth_token: responseObject.oauth_token,
             oauth_callback: this.options.landing
         });
-        console.log("refreshed: " + this.authorizeUrl);
     }
 
     private getParams(): IOAuthParams {
