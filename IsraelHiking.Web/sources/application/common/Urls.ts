@@ -4,6 +4,7 @@ export class Urls {
     public static readonly baseAddress = window.location.protocol + "//" + window.location.host;
     public static readonly baseTilesAddress = environment.baseTilesAddress;
     public static readonly apiBase = environment.baseApiAddress;
+    public static readonly emptyHtml = "https://israelhiking.osm.org.il/empty-for-oauth.html";
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly elevation = Urls.apiBase + "elevation";
@@ -20,6 +21,7 @@ export class Urls {
     public static readonly osmConfiguration = Urls.osm + "configuration";
     public static readonly osmTrace = Urls.osm + "trace/";
     public static readonly osmClosest = Urls.osm + "closest/";
+    public static readonly osmUser = Urls.osm + "details/";
     public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "poi/";
     public static readonly poiCategories = Urls.poi + "categories/";

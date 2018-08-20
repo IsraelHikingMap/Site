@@ -142,6 +142,9 @@ export class LayersService {
     }
 
     private getUserLayers = async (): Promise<any> => {
+        if (!this.osmUserService.isLoggedIn()) {
+            return;
+        }
         try {
             let data = await this.httpClient.get(Urls.userLayers).toPromise() as IUserLayer[];
             if (data == null) {

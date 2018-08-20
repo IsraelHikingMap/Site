@@ -1,13 +1,11 @@
 import { Injectable, EventEmitter } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Subject } from "rxjs";
-import * as X2JS from "x2js";
 import * as _ from "lodash";
 
-import { AuthorizationService } from "./authorization.service";
+import { AuthorizationService, IAuthorizationServiceOptions } from "./authorization.service";
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
-import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -43,9 +41,6 @@ interface IShareUrlSocialLinks {
 
 @Injectable()
 export class OsmUserService {
-
-    private oauth: OSMAuth.OSMAuthInstance;
-    private x2Js: X2JS;
     private baseUrl: string;
 
     public tracesChanged: Subject<any>;
@@ -62,9 +57,7 @@ export class OsmUserService {
     constructor(private readonly httpClient: HttpClient,
         private readonly authorizationService: AuthorizationService,
         private readonly whatsAppService: WhatsAppService,
-        private readonly hashService: HashService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory) {
-        this.x2Js = new X2JS();
+        private readonly hashService: HashService) {
         this.traces = [];
         this.shareUrls = [];
         this.tracesChanged = new Subject();
@@ -76,16 +69,13 @@ export class OsmUserService {
         try {
             let data = await this.httpClient.get(Urls.osmConfiguration).toPromise() as IOsmConfiguration;
             this.baseUrl = data.baseAddress;
-            this.oauth = this.nonAngularObjectsFactory.createOsmAuth({
-                oauth_consumer_key: data.consumerKey,
-                oauth_secret: data.consumerSecret,
-                auto: true, // show a login form if the user is not authenticated and you try to do a call
-                landing: Urls.baseAddress + "/oauth-close-window.html",
+            this.authorizationService.setOptions({
+                oauthConsumerKey: data.consumerKey,
+                oauthSecret: data.consumerSecret,
+                landing: Urls.emptyHtml,
                 url: this.baseUrl
-            } as OSMAuth.OSMAuthOptions);
-            if (this.authorizationService.osmToken == null) {
-                this.oauth.logout();
-            } else if (this.isLoggedIn()) {
+            } as IAuthorizationServiceOptions);
+            if (this.isLoggedIn()) {
                 await this.getUserDetails();
             }
         } catch (ex) {
@@ -94,18 +84,16 @@ export class OsmUserService {
     }
 
     public logout = () => {
-        if (this.oauth != null) {
-            this.oauth.logout();
-        }
-        this.authorizationService.osmToken = null;
+        this.authorizationService.logout();
         this.loginStatusChanged.next();
     }
 
     public isLoggedIn = (): boolean => {
-        return this.oauth && this.oauth.authenticated() && this.authorizationService.osmToken != null;
+        return this.authorizationService.authenticated();
     }
 
     public login = async () => {
+        await this.authorizationService.authenticate();
         await this.getUserDetails();
         this.loginStatusChanged.next();
     }
@@ -135,30 +123,14 @@ export class OsmUserService {
         return Promise.all([getTracesPromise, getSiteUtlsPromise]);
     }
 
-    private async getUserDetails() {
-        let details = await new Promise<XMLDocument>((resolve, reject) => {
-            this.oauth.xhr({
-                method: "GET",
-                path: "/api/0.6/user/details"
-            },
-                (detailsError: any, detailsResponse: XMLDocument) => {
-                    if (detailsError) {
-                        reject(detailsError);
-                    }
-                    resolve(detailsResponse);
-                });
-        });
-        let authToken = localStorage.getItem(`${this.baseUrl}oauth_token`); // using native storage since it is saved with ohauth
-        let authTokenSecret = localStorage.getItem(`${this.baseUrl}oauth_token_secret`);
-        this.authorizationService.osmToken = authToken + ";" + authTokenSecret;
-        let detailJson = this.x2Js.xml2js(details.documentElement.outerHTML) as any;
-        this.displayName = detailJson.osm.user._display_name;
-        if (detailJson.osm.user.img && detailJson.osm.user.img._href) {
-            this.imageUrl = detailJson.osm.user.img._href;
+    private getUserDetails = async () => {
+        let detailJson = await this.httpClient.get(Urls.osmUser).toPromise() as any;
+        this.displayName = detailJson.displayName;
+        this.userId = detailJson.id;
+        this.changeSets = detailJson.changeSetCount;
+        if (detailJson.image) {
+            this.imageUrl = detailJson.image;
         }
-        this.changeSets = detailJson.osm.user.changesets._count;
-        this.userId = detailJson.osm.user._id;
-
         await this.refreshDetails();
     }
 

@@ -35,6 +35,7 @@
         <icon height="152" src="www/content/favicons/apple-touch-icon-152x152.png" width="152" />
         <icon height="180" src="www/content/favicons/apple-touch-icon-180x180.png" width="180" />
     </platform>
+    <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
     <engine name="android" spec="^7.0.0" />
     <engine name="browser" spec="^5.0.4" />
 </widget>

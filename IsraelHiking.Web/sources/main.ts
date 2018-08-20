@@ -4,12 +4,14 @@ import { ApplicationModule } from "./application/application.module";
 import { environment } from "./environments/environment";
 import "hammerjs";
 
+declare var cordova: any;
+
 if (environment.production) {
     enableProdMode();
 }
 if (environment.isCordova) {
     let onDeviceReady = () => {
-        console.log("device ready!");
+        window.open = cordova.InAppBrowser.open;
         platformBrowserDynamic().bootstrapModule(ApplicationModule);
     };
     document.addEventListener("deviceready", onDeviceReady, false);

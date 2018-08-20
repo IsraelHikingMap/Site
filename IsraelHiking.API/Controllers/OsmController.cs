@@ -19,6 +19,7 @@ using GeoAPI.CoordinateSystems.Transformations;
 using IsraelHiking.API.Executors;
 using Microsoft.Extensions.Options;
 using IsraelHiking.API.Swagger;
+using OsmSharp.API;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
 namespace IsraelHiking.API.Controllers
@@ -120,6 +121,19 @@ namespace IsraelHiking.API.Controllers
         public OsmConfiguraionData GetConfigurations()
         {
             return _options.OsmConfiguraion;
+        }
+
+        /// <summary>
+        /// Used to get user details from OSM
+        /// </summary>
+        /// <returns></returns>
+        [HttpGet]
+        [Route("details")]
+        public Task<User> GetUserDetails()
+        {
+            var token = _cache.Get(User.Identity.Name);
+            var gateway = _httpGatewayFactory.CreateOsmGateway(token);
+            return gateway.GetUser();
         }
 
         /// <summary>
