@@ -3,8 +3,8 @@
     <name>Israel Hiking Map</name>
     <description>An application for outdoor navigation.</description>
     <author email="IsraelHikingMap@gmail.com" href="http://israelhiking.osm.org.il">
-        Israel Hiking Map
-    </author>
+    Israel Hiking Map
+  </author>
     <content src="index.html" />
     <plugin name="cordova-plugin-whitelist" spec="1" />
     <access origin="*" />
@@ -36,6 +36,12 @@
         <icon height="180" src="www/content/favicons/apple-touch-icon-180x180.png" width="180" />
     </platform>
     <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
+    <plugin name="cordova-plugin-mauron85-background-geolocation" spec="^3.0.0-alpha.40">
+        <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="11+" />
+        <variable name="ANDROID_SUPPORT_LIBRARY_VERSION" value="26+" />
+        <variable name="ALWAYS_USAGE_DESCRIPTION" value="App requires background tracking enabled" />
+        <variable name="MOTION_USAGE_DESCRIPTION" value="App requires motion detection" />
+    </plugin>
     <engine name="android" spec="^7.0.0" />
     <engine name="browser" spec="^5.0.4" />
 </widget>

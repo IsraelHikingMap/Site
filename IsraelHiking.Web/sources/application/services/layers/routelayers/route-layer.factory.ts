@@ -48,7 +48,7 @@ export class RouteLayerFactory {
         private readonly geoLocationService: GeoLocationService,
         private readonly injector: Injector,
         private readonly componentFactoryResolver: ComponentFactoryResolver) {
-        httpClient.get(Urls.colors).toPromise().then((colors: string[]) => {
+        this.httpClient.get(Urls.colors).toPromise().then((colors: string[]) => {
             this.colors.splice(0, this.colors.length, ...colors);
         });
     }

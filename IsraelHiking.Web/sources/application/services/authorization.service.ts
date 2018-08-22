@@ -20,8 +20,6 @@ export interface IAuthorizationServiceOptions {
     oauthConsumerKey: string;
 }
 
-declare var window: any;
-
 @Injectable()
 export class AuthorizationService {
 
@@ -167,7 +165,7 @@ export class AuthorizationService {
 
     protected openCordovaDialog() {
         return new Promise((resolve, reject) => {
-            let browserRef = window.cordova.InAppBrowser.open(this.authorizeUrl, "_blank");
+            let browserRef = window.open(this.authorizeUrl, "_blank");
             let exitListener = () => reject(new Error("The OSM sign in flow was canceled"));
 
             browserRef.addEventListener("loaderror",
@@ -178,7 +176,7 @@ export class AuthorizationService {
                 });
 
             browserRef.addEventListener("loadstart",
-                async (event) => {
+                async (event: any) => {
                     if (event.url.indexOf(this.options.landing) !== -1) {
                         browserRef.removeEventListener("exit", exitListener);
                         browserRef.close();

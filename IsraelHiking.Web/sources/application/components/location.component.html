@@ -5,4 +5,8 @@
             <mat-spinner diameter="24"></mat-spinner>
         </div>
     </a>
+    <a *ngIf="canRecord()" (click)="toggleRecording()">
+        <i *ngIf="!isRecording()" class="fa fa-lg icon-circle" [style.color]="'red'"></i>
+        <i *ngIf="isRecording()" class="fa fa-lg icon-square"></i>
+    </a>
 </div>
