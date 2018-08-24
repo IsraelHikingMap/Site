@@ -134,13 +134,13 @@ export class GeoLocationService {
         }
 
         BackgroundGeolocation.configure({
-            locationProvider: BackgroundGeolocation.DISTANCE_FILTER_PROVIDER,
+            locationProvider: BackgroundGeolocation.RAW_PROVIDER,
             desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
             stationaryRadius: 10,
             distanceFilter: 5,
             notificationTitle: "פועל ברקע",
             notificationText: "מקליט מסלול",
-            debug: true,
+            debug: false,
             interval: 1000,
             fastestInterval: 1000,
             activitiesInterval: 10000
