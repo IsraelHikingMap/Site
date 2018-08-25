@@ -2,6 +2,8 @@ version: 7.1.{build}
 clone_depth: 1
 image: Visual Studio 2017
 configuration: Release
+environment:
+  ANDROID_HOME: C:\android-sdk-windows
 install:
 - ps: >-
     npm install -g npm@6.2.0 --loglevel=error
@@ -9,6 +11,12 @@ install:
     node -v
 
     npm -v
+
+    appveyor DownloadFile https://dl.google.com/android/repository/sdk-tools-windows-4333796.zip
+
+    7z x sdk-tools-windows-4333796.zip -oC:\android-sdk-windows
+
+    yes | C:\android-sdk-windows\tools\bin\sdkmanager.bat --licenses
 before_build:
 - ps: dotnet restore
 build:
