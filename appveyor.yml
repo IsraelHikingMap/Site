@@ -18,7 +18,7 @@ install:
 
     7z x sdk-tools-windows-4333796.zip -o$env:ANDROID_HOME
 
-    yes | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --licenses
+    yes | C:\projects\site\android\tools\bin\sdkmanager.bat --licenses
 before_build:
 - ps: dotnet restore
 build:
