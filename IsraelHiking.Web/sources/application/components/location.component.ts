@@ -23,7 +23,8 @@ export class LocationComponent extends BaseMapComponent {
     private locationMarker: Common.IMarkerWithTitle;
     private accuracyCircle: L.Circle;
     private routeLayer: IRouteLayer;
-    private isFollowing: boolean;
+
+    public isFollowing: boolean;
 
     constructor(resources: ResourcesService,
         private readonly injector: Injector,
