@@ -16,9 +16,9 @@ install:
 
     $env:ANDROID_HOME="$env:APPVEYOR_BUILD_FOLDER\android"
 
-    7z x sdk-tools-windows-4333796.zip -o$env:ANDROID_HOME
+    Invoke-Expression "7z x sdk-tools-windows-4333796.zip -o$env:ANDROID_HOME"
 
-    yes | C:\projects\site\android\tools\bin\sdkmanager.bat --licenses
+    Invoke-Expression "yes | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --licenses"
 before_build:
 - ps: dotnet restore
 build:
