@@ -152,14 +152,14 @@ export class AuthorizationService {
         try {
             if (popup.closed) {
                 reject(new Error(`The OSM sign in flow was canceled`));
+                return;
             }
-
             if (popup.location.href.indexOf(this.options.landing) !== -1) {
                 popup.close();
                 resolve(popup.location.href);
+                return;
             }
         } catch (e) { }
-
         setTimeout(() => this.watchPopup(popup, resolve, reject), 100);
     }
 

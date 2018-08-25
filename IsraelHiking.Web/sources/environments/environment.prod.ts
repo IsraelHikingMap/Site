@@ -1,7 +1,8 @@
 export const environment = {
     production: true,
-    baseApiAddress: window.location.protocol + "//" + window.location.host + "/api/",
-    baseTilesAddress: window.location.protocol + "//" + window.location.host,
+    baseAddress: window.location.origin,
+    baseApiAddress: window.location.origin + "/api/",
+    baseTilesAddress: window.location.origin,
     isCordova: false
 };
 

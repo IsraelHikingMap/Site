@@ -5,7 +5,8 @@
 
 export const environment = {
     production: false,
-    baseApiAddress: window.location.protocol + "//" + window.location.host + "/api/",
-    baseTilesAddress: "https://israelhiking.osm.org.il/",
+    baseAddress: window.location.origin,
+    baseApiAddress: window.location.origin + "/api/",
+    baseTilesAddress: "https://israelhiking.osm.org.il",
     isCordova: false
 };

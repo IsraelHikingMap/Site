@@ -158,7 +158,7 @@ export class HashService {
     public getHref(): string {
         if (this.getUrl() != null) {
             let urlTree = this.router.createUrlTree([RouteStrings.URL, this.stateMap.get("url")]);
-            return this.window.location.origin + urlTree.toString();
+            return Urls.baseAddress + urlTree.toString();
         }
         if (this.getShareUrlId() != null) {
             return this.getFullUrlFromShareId(this.stateMap.get("share"));
@@ -185,12 +185,12 @@ export class HashService {
     public getFullUrlFromPoiId(poiSourceAndId: IPoiRouterData) {
         let urlTree = this.router.createUrlTree([RouteStrings.POI, poiSourceAndId.source, poiSourceAndId.id],
             { queryParams: { language: poiSourceAndId.language } });
-        return this.window.location.origin + urlTree.toString();
+        return Urls.baseAddress + urlTree.toString();
     }
 
     public getFullUrlFromShareId(id: string) {
         let urlTree = this.router.createUrlTree([RouteStrings.SHARE, id]);
-        return this.window.location.origin + urlTree.toString();
+        return Urls.baseAddress + urlTree.toString();
     }
 
     public setApplicationState(type: ApplicationStateType, value: any) {

@@ -1,10 +1,10 @@
 ﻿import { environment } from "../../environments/environment";
 
 export class Urls {
-    public static readonly baseAddress = window.location.protocol + "//" + window.location.host;
+    public static readonly baseAddress = environment.baseAddress;
     public static readonly baseTilesAddress = environment.baseTilesAddress;
     public static readonly apiBase = environment.baseApiAddress;
-    public static readonly emptyHtml = "https://israelhiking.osm.org.il/empty-for-oauth.html";
+    public static readonly emptyHtml = Urls.baseAddress + "/empty-for-oauth.html";
     public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly elevation = Urls.apiBase + "elevation";
