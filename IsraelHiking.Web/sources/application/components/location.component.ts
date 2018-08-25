@@ -23,6 +23,7 @@ export class LocationComponent extends BaseMapComponent {
     private locationMarker: Common.IMarkerWithTitle;
     private accuracyCircle: L.Circle;
     private routeLayer: IRouteLayer;
+    private isFollowing: boolean;
 
     constructor(resources: ResourcesService,
         private readonly injector: Injector,
@@ -37,6 +38,12 @@ export class LocationComponent extends BaseMapComponent {
         this.locationMarker = null;
         this.accuracyCircle = null;
         this.routeLayer = null;
+        this.isFollowing = true;
+
+        this.mapService.map.on("dragstart",
+            () => {
+                this.isFollowing = false;
+            });
 
         this.geoLocationService.positionChanged.subscribe(
             (position) => {
@@ -52,10 +59,14 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public toggleTracking() {
-        if (this.isActive()) {
+        if (this.isActive() && this.isFollowing) {
             this.disableGeoLocation();
-        } else {
+        } else if (!this.isActive()) {
             this.geoLocationService.enable();
+            this.isFollowing = true;
+        } else {
+            this.mapService.map.flyTo(this.locationMarker.getLatLng());
+            this.isFollowing = true;
         }
     }
 
@@ -97,6 +108,9 @@ export class LocationComponent extends BaseMapComponent {
         if (this.locationMarker != null) {
             this.locationMarker.setLatLng(latLng);
             this.accuracyCircle.setLatLng(latLng).setRadius(radius);
+            if (this.isFollowing) {
+                this.mapService.map.flyTo(latLng);
+            }
             return;
         }
         this.locationMarker = L.marker(latLng,
