@@ -14,9 +14,11 @@ install:
 
     appveyor DownloadFile https://dl.google.com/android/repository/sdk-tools-windows-4333796.zip
 
-    7z x sdk-tools-windows-4333796.zip -oC:\android-sdk-windows
+    $env:ANDROID_HOME="$env:APPVEYOR_BUILD_FOLDER\android"
 
-    yes | C:\android-sdk-windows\tools\bin\sdkmanager.bat --licenses
+    7z x sdk-tools-windows-4333796.zip -o$env:ANDROID_HOME
+
+    yes | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --licenses
 before_build:
 - ps: dotnet restore
 build:
