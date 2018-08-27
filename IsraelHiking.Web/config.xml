@@ -42,6 +42,7 @@
         <variable name="ALWAYS_USAGE_DESCRIPTION" value="App requires background tracking enabled" />
         <variable name="MOTION_USAGE_DESCRIPTION" value="App requires motion detection" />
     </plugin>
+    <plugin name="cordova-plugin-file" spec="^6.0.1" />
     <engine name="android" spec="^7.0.0" />
     <engine name="browser" spec="^5.0.4" />
 </widget>

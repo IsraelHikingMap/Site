@@ -235,6 +235,7 @@ export class ResourcesService {
     public routeIsHidden: string;
     public pleaseAddPointsToRoute: string;
     public unableToSaveToFile: string;
+    public fileSavedSuccessfully: string;
     public unableToLoadFromFile: string;
     public unableToLoadFromUrl: string;
     public routeNameAlreadyInUse: string;
@@ -694,6 +695,7 @@ export class ResourcesService {
         this.routeIsHidden = this.gettextCatalog.getString("Route is hidden...");
         this.pleaseAddPointsToRoute = this.gettextCatalog.getString("Please add points to route...");
         this.unableToSaveToFile = this.gettextCatalog.getString("Unable to save to file...");
+        this.fileSavedSuccessfully = this.gettextCatalog.getString("File saved successfully");
         this.unableToLoadFromFile = this.gettextCatalog.getString("Unable to extract geographic information from the file...");
         this.unableToLoadFromUrl = this.gettextCatalog.getString("Unable to load from URL...");
         this.routeNameAlreadyInUse = this.gettextCatalog.getString("The route's name was altered since it is in use...");
