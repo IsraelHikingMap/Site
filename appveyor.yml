@@ -25,6 +25,8 @@ install:
     $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin"
 
     gradle -v
+
+    Invoke-Expression """y"" | $env:ANDROID_HOME\tools\android.bat --silent update sdk --no-ui --all --filter platform-tools,tools,build-tools-26.0.0,android-26,android-25,extra-google-m2repository,extra-android-m2repository"
 before_build:
 - ps: dotnet restore
 build:
