@@ -97,7 +97,7 @@
     "version": "node -v && npm -v && ng -v",
     "update": "ng update",
     "add-android": "cordova platform add android",
-    "android": "ng build -c android && cordova build android --release"
+    "build-apk": "cordova build android --release"
   },
   "cordova": {
     "plugins": {
