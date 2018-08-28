@@ -25,7 +25,7 @@ Push-AppveyorArtifact $artifactsFileName
 
 # Building android:
 
-$buildAndroidClient = "npm run build -- -c android"
+$buildAndroidClient = "npm run build -- -c android --no-progress"
 Write-Host $buildAndroidClient
 Invoke-Expression $buildAndroidClient
 

@@ -19,6 +19,12 @@ install:
     for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
     Invoke-Expression """$response"" | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --licenses"
+
+    choco install gradle -version 4.9
+
+    $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin"
+
+    gradle -v
 before_build:
 - ps: dotnet restore
 build:
