@@ -2,8 +2,6 @@ version: 7.1.{build}
 clone_depth: 1
 image: Visual Studio 2017
 configuration: Release
-environment:
-  ANDROID_HOME: C:\android-sdk-windows
 install:
 - ps: >-
     npm install -g npm@6.2.0 --loglevel=error
@@ -16,9 +14,11 @@ install:
 
     $env:ANDROID_HOME="$env:APPVEYOR_BUILD_FOLDER\android"
 
-    Invoke-Expression "7z x sdk-tools-windows-4333796.zip -o$env:ANDROID_HOME > nul"
+    Invoke-Expression "7z x sdk-tools-windows-4333796.zip -o$env:ANDROID_HOME | out-null"
 
-    Invoke-Expression "yes | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --licenses"
+    for($i=0;$i -lt 30;$i++) { $response += "y`n"};
+
+    Invoke-Expression """$response"" | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --licenses"
 before_build:
 - ps: dotnet restore
 build:
