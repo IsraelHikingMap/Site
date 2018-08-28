@@ -25,10 +25,14 @@ Push-AppveyorArtifact $artifactsFileName
 
 # Building android:
 
-#$buildAndroid = "npm run android"
-#Write-Host $buildAndroid
-#Invoke-Expression $buildAndroid
+$addAndroid = "npm run add-android"
+Write-Host $addAndroid
+Invoke-Expression $addAndroid
 
-#Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\debug\app-debug.apk
+$buildAndroid = "npm run android"
+Write-Host $buildAndroid
+Invoke-Expression $buildAndroid
+
+Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\debug\app-debug.apk
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
