@@ -1,7 +1,11 @@
-﻿using System.IO;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.Immutable;
+using System.IO;
 using System.Linq;
 using IsraelHiking.API.Gpx;
 using IsraelHiking.DataAccessInterfaces;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters.ConverterFlows
 {
@@ -34,18 +38,44 @@ namespace IsraelHiking.API.Converters.ConverterFlows
         {
             var gpxBytes = _gpsBabelGateway.ConvertFileFromat(content, Input, Output).Result;
             var gpx = gpxBytes.ToGpx();
-            if (gpx.wpt == null || !gpx.wpt.Any())
+            if (gpx.Waypoints == null || !gpx.Waypoints.Any())
             {
                 return gpx.ToBytes();
             }
             using (var stream = new MemoryStream(content))
             {
                 var link = _imgurGateway.UploadImage(stream).Result;
-                var wayPoint = gpx.wpt.First();
-                wayPoint.link = new[] {new linkType {href = link, text = "", type = "image/jpeg"}};
-                wayPoint.name = string.Empty;
-                wayPoint.desc = string.Empty;
-                return gpx.ToBytes();
+                var wayPoint = gpx.Waypoints.First();
+                var gpxObject = new GpxMainObject
+                {
+                    Waypoints = new List<GpxWaypoint>
+                    {
+                        new GpxWaypoint(
+                            longitude: wayPoint.Longitude,
+                            latitude: wayPoint.Latitude,
+                            name: string.Empty,
+                            description: string.Empty,
+                            links: new[] {new GpxWebLink("", "image/jpeg", new Uri(link))}.ToImmutableArray(),
+                            classification: null,
+                            extensions: null,
+                            elevationInMeters: null,
+                            timestampUtc: null,
+                            symbolText: null,
+                            magneticVariation: null,
+                            geoidHeight: null,
+                            comment: null,
+                            source: null,
+                            fixKind: null,
+                            numberOfSatellites: null,
+                            horizontalDilutionOfPrecision: null,
+                            verticalDilutionOfPrecision: null,
+                            positionDilutionOfPrecision: null,
+                            secondsSinceLastDgpsUpdate: null,
+                            dgpsStationId: null
+                        )
+                    }
+                };
+                return gpxObject.ToBytes();
             }
         }
 

@@ -33,11 +33,11 @@ namespace IsraelHiking.API.Tests.Converters
 
             var gpx = converter.ToGpx(geojson);
 
-            Assert.AreEqual(2, gpx.wpt.Length);
-            Assert.AreEqual(3, gpx.rte.Length);
-            Assert.AreEqual(2, gpx.trk.Length);
-            Assert.AreNotEqual(gpx.trk[0].name, gpx.trk[1].name);
-            Assert.AreEqual(FeatureAttributes.NAME + " 1", gpx.trk[1].name);
+            Assert.AreEqual(2, gpx.Waypoints.Count);
+            Assert.AreEqual(3, gpx.Routes.Count);
+            Assert.AreEqual(2, gpx.Tracks.Count);
+            Assert.AreNotEqual(gpx.Tracks[0].Name, gpx.Tracks[1].Name);
+            Assert.AreEqual(FeatureAttributes.NAME + " 1", gpx.Tracks[1].Name);
         }
     }
 }

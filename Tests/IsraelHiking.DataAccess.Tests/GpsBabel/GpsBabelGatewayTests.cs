@@ -41,8 +41,8 @@ namespace IsraelHiking.DataAccess.Tests.GpsBabel
             var outputContent = _gpsBabelGateway.ConvertFileFromat(content, "gpx", FlowFormats.TWL_BABEL_FORMAT).Result;
             outputContent = _gpsBabelGateway.ConvertFileFromat(outputContent, FlowFormats.TWL_BABEL_FORMAT, FlowFormats.GPX_BABEL_FORMAT).Result;
             var gpx = outputContent.ToGpx();
-            Assert.AreEqual(1, gpx.rte.Length);
-            Assert.AreEqual(referenceGpx.trk.First().trkseg.First().trkpt.Length, gpx.rte.First().rtept.Length);
+            Assert.AreEqual(1, gpx.Routes.Count);
+            Assert.AreEqual(referenceGpx.Tracks.First().Segments.First().Waypoints.Count, gpx.Routes.First().Waypoints.Count);
         }
 
         [TestMethod]

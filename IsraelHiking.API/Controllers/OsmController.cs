@@ -19,6 +19,7 @@ using GeoAPI.CoordinateSystems.Transformations;
 using IsraelHiking.API.Executors;
 using Microsoft.Extensions.Options;
 using IsraelHiking.API.Swagger;
+using NetTopologySuite.IO;
 using OsmSharp.API;
 using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -206,11 +207,11 @@ namespace IsraelHiking.API.Controllers
             }
         }
 
-        private string GetHighwayType(gpxType gpx)
+        private string GetHighwayType(GpxMainObject gpx)
         {
-            var waypointsGroups = new List<wptType[]>();
-            waypointsGroups.AddRange((gpx.rte ?? new rteType[0]).Select(route => route.rtept).Where(ps => ps.All(p => p.timeSpecified)).ToArray());
-            waypointsGroups.AddRange((gpx.trk ?? new trkType[0]).Where(t => t.trkseg != null).Select(track => track.trkseg.SelectMany(s => s.trkpt).ToArray()).Where(ps => ps.All(p => p.timeSpecified)));
+            var waypointsGroups = new List<GpxWaypoint[]>();
+            waypointsGroups.AddRange((gpx.Routes ?? new List<GpxRoute>()).Select(route => route.Waypoints.ToArray()).Where(ps => ps.All(p => p.TimestampUtc.HasValue)).ToArray());
+            waypointsGroups.AddRange((gpx.Tracks ?? new List<GpxTrack>()).Where(t => t.Segments != null).Select(track => track.Segments.SelectMany(s => s.Waypoints).ToArray()).Where(ps => ps.All(p => p.TimestampUtc.HasValue)));
             return GetHighwayTypeFromWaypoints(waypointsGroups);
         }
 
@@ -220,7 +221,7 @@ namespace IsraelHiking.API.Controllers
         /// </summary>
         /// <param name="waypointsGoups">A list of group of points</param>
         /// <returns>The calculated routing type</returns>
-        private string GetHighwayTypeFromWaypoints(IReadOnlyCollection<wptType[]> waypointsGoups)
+        private string GetHighwayTypeFromWaypoints(IReadOnlyCollection<GpxWaypoint[]> waypointsGoups)
         {
             var velocityList = new List<double>();
             if (waypointsGoups.Count == 0)
@@ -230,7 +231,7 @@ namespace IsraelHiking.API.Controllers
             foreach (var waypoints in waypointsGoups.Where(g => g.Length > 1))
             {
                 var lengthInKm = ToItmLineString(waypoints).Length / 1000;
-                var timeInHours = (waypoints.Last().time - waypoints.First().time).TotalHours;
+                var timeInHours = (waypoints.Last().TimestampUtc.Value - waypoints.First().TimestampUtc.Value).TotalHours;
                 velocityList.Add(lengthInKm / timeInHours);
             }
             var averageVelocity = velocityList.Sum() / velocityList.Count;
@@ -245,9 +246,9 @@ namespace IsraelHiking.API.Controllers
             return "track";
         }
 
-        private ILineString ToItmLineString(IEnumerable<wptType> waypoints)
+        private ILineString ToItmLineString(IEnumerable<GpxWaypoint> waypoints)
         {
-            var coordinates = waypoints.Select(wptType => _wgs84ItmMathTransform.Transform(new Coordinate((double)wptType.lon, (double)wptType.lat)))
+            var coordinates = waypoints.Select(waypoint => _wgs84ItmMathTransform.Transform(new Coordinate(waypoint.Longitude, waypoint.Latitude)))
                 .Select(c => new Coordinate(Math.Round(c.X, 1), Math.Round(c.Y, 1)));
             var nonDuplicates = new List<Coordinate>();
             foreach (var coordinate in coordinates)
@@ -274,13 +275,12 @@ namespace IsraelHiking.API.Controllers
             return _geometryFactory.CreateLineString(nonDuplicates.ToArray());
         }
 
-        private List<ILineString> GpxToItmLineStrings(gpxType gpx)
+        private List<ILineString> GpxToItmLineStrings(GpxMainObject gpx)
         {
-            return (gpx.rte ?? new rteType[0])
-                .Select(route => ToItmLineString(route.rtept))
-                .Concat((gpx.trk ?? new trkType[0])
-                    .Select(track => (track.trkseg ?? new trksegType[0])
-                        .SelectMany(s => s.trkpt))
+            return (gpx.Routes ?? new List<GpxRoute>())
+                .Select(route => ToItmLineString(route.Waypoints))
+                .Concat((gpx.Tracks ?? new List<GpxTrack>())
+                    .Select(track => track.Segments.SelectMany(s => s.Waypoints))
                     .Select(ToItmLineString))
                 .Where(l => l.Coordinates.Any())
                 .ToList();

@@ -74,7 +74,6 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public Stream Get()
         {
-            
             var fileInfo = _fileProvider.GetFileInfo(Path.Combine(OSM_C_TOOLS_FOLDER, Sources.OSM_FILE_NAME));
             return fileInfo.CreateReadStream();
         }
