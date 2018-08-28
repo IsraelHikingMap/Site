@@ -22,7 +22,7 @@ install:
 
     Invoke-Expression """$response"" | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --update"
 
-    Invoke-Expression "$env:ANDROID_HOME\tools\bin\sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools-26.0.0"" ""extras;google;m2repository"""
+    Invoke-Expression "$env:ANDROID_HOME\tools\bin\sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"""
 
     choco install gradle -version 4.9
 
