@@ -2,7 +2,7 @@ import { Injectable } from "@angular/core";
 import { saveAs } from "file-saver";
 import b64toBlob from "b64-to-blob";
 import piexif from "piexifjs";
-import * as osmAuth from "osm-auth";
+import * as ohauth from "ohauth";
 
 export interface IPiexifGPSHelper {
     dmsRationalToDeg(dmsArray: number[], ref: string): number;
@@ -52,9 +52,7 @@ export class NonAngularObjectsFactory {
         return piexif;
     }
 
-    public createOsmAuth(options: OSMAuth.OSMAuthOptions): OSMAuth.OSMAuthInstance {
-        return new osmAuth(options);
+    public createOhAuth() {
+        return ohauth;
     }
-
-
 }

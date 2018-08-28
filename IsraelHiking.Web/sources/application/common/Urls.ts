@@ -1,7 +1,11 @@
-﻿export class Urls {
-    // api
-    public static readonly baseAddress = window.location.protocol + "//" + window.location.host;
-    public static readonly apiBase = Urls.baseAddress + "/api/";
+﻿import { environment } from "../../environments/environment";
+
+export class Urls {
+    public static readonly baseAddress = environment.baseAddress;
+    public static readonly baseTilesAddress = environment.baseTilesAddress;
+    public static readonly apiBase = environment.baseApiAddress;
+    public static readonly emptyHtml = Urls.baseAddress + "/empty-for-oauth.html";
+    public static readonly translations = "translations/";
     public static readonly urls = Urls.apiBase + "urls/";
     public static readonly elevation = Urls.apiBase + "elevation";
     public static readonly routing = Urls.apiBase + "routing";
@@ -13,11 +17,11 @@
     public static readonly images = Urls.apiBase + "images/";
     public static readonly uploadAnonymousImage = Urls.images + "anonymous/";
     public static readonly colors = Urls.images + "colors/";
-    public static readonly translations = Urls.baseAddress + "/translations/";
     public static readonly osm = Urls.apiBase + "osm/";
     public static readonly osmConfiguration = Urls.osm + "configuration";
     public static readonly osmTrace = Urls.osm + "trace/";
     public static readonly osmClosest = Urls.osm + "closest/";
+    public static readonly osmUser = Urls.osm + "details/";
     public static readonly userLayers = Urls.apiBase + "userLayers/";
     public static readonly poi = Urls.apiBase + "poi/";
     public static readonly poiCategories = Urls.poi + "categories/";

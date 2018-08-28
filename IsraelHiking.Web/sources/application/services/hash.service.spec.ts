@@ -135,7 +135,7 @@ describe("HashService", () => {
                 hashService.setApplicationState("share", "share");
                 let href = hashService.getHref();
 
-                expect(href).toBe(windowMock.location.origin + "address");
+                expect(href).toBe(Urls.baseAddress + "address");
             }));
 
     it("Should return external url",
@@ -148,6 +148,6 @@ describe("HashService", () => {
                 hashService.setApplicationState("url", "url");
                 let href = hashService.getHref();
 
-                expect(href).toBe(windowMock.location.origin + "address");
+                expect(href).toBe(Urls.baseAddress + "address");
             }));
 });

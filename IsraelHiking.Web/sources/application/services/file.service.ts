@@ -5,7 +5,10 @@ import * as L from "leaflet";
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { Urls } from "../common/Urls";
+import { environment } from "../../environments/environment";
 import * as Common from "../common/IsraelHiking";
+
+declare var cordova: any;
 
 export interface IFormatViewModel {
     label: string;
@@ -62,12 +65,9 @@ export class FileService {
         return filesToReturn;
     }
 
-    public saveToFile = (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<{}> => {
-        let promise = this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise();
-        promise.then((responseData: string) => {
-            this.saveBytesResponseToFile(responseData, fileName);
-        });
-        return promise;
+    public saveToFile = async (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<any> => {
+        let responseData = await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
+        await this.saveBytesResponseToFile(responseData, fileName);
     }
 
     public async openFromFile(file: File): Promise<Common.DataContainer> {
@@ -96,9 +96,9 @@ export class FileService {
         return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<Common.DataContainer>;
     }
 
-    private saveBytesResponseToFile = (data: string, fileName: string) => {
+    private saveBytesResponseToFile = async (data: string, fileName: string) => {
         let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(data, "application/octet-stream");
-        this.saveAsWorkAround(blobToSave, fileName);
+        await this.saveAsWorkAround(blobToSave, fileName);
     }
 
     /**
@@ -107,41 +107,65 @@ export class FileService {
      * @param blob
      * @param fileName
      */
-    private saveAsWorkAround(blob: Blob, fileName: string) {
-        if (L.Browser.mobile) {
-            let reader = new FileReader();
-            reader.onload = () => {
-                if (L.Browser.chrome) {
-                    // If chrome android
-                    let save = document.createElement("a");
+    private saveAsWorkAround(blob: Blob, fileName: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            if (environment.isCordova) {
+                // HM TODO: this is only for android
+                (window as any).resolveLocalFileSystemURL(cordova.file.externalRootDirectory,
+                    (directoryEntry) => {
+                        directoryEntry.getDirectory("IsraelHikingMap",
+                            { create: true },
+                            dir => {
+                                dir.getFile(fileName,
+                                    { create: true },
+                                    fileEntry => {
+                                        fileEntry.createWriter(fileWriter => {
+                                            fileWriter.write(blob);
+                                            resolve();
+                                        });
+                                    }, reject);
+                            }, reject);
+                    }, reject);
+            } else if (L.Browser.mobile) {
+                let reader = new FileReader();
+                reader.onload = () => {
+                    if (L.Browser.chrome) {
+                        // If chrome android
+                        let save = document.createElement("a");
 
-                    save.href = reader.result;
-                    save.download = fileName;
+                        save.href = reader.result;
+                        save.download = fileName;
 
-                    document.body.appendChild(save);
-                    save.click();
-                    document.body.removeChild(save);
-                    window.URL.revokeObjectURL(save.href);
-                } else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
-                    // If iPhone etc
+                        document.body.appendChild(save);
+                        save.click();
+                        document.body.removeChild(save);
+                        window.URL.revokeObjectURL(save.href);
+                        resolve();
+                    } else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
+                        // If iPhone etc
+                        let url = window.URL.createObjectURL(blob);
+                        window.location.href = url;
+                        resolve();
+                    } else {
+                        // Any other browser
+                        this.nonAngularObjectsFactory.saveAs(blob, fileName);
+                        resolve();
+                    }
+                };
+
+                reader.readAsDataURL(blob);
+            } else {
+                // Desktop if safari
+                if (L.Browser.safari) {
                     let url = window.URL.createObjectURL(blob);
                     window.location.href = url;
+                    resolve();
                 } else {
-                    // Any other browser
+                    // If normal browser use package Filesaver.js
                     this.nonAngularObjectsFactory.saveAs(blob, fileName);
+                    resolve();
                 }
-            };
-
-            reader.readAsDataURL(blob);
-        } else {
-            // Desktop if safari
-            if (L.Browser.safari) {
-                let url = window.URL.createObjectURL(blob);
-                window.location.href = url;
-            } else {
-                // If normal browser use package Filesaver.js
-                this.nonAngularObjectsFactory.saveAs(blob, fileName);
             }
-        }
+        });
     }
 }

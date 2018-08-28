@@ -23,4 +23,20 @@ $artifactsFileName = "IsraelHiking_$env:APPVEYOR_BUILD_VERSION.zip"
 7z a $artifactsFileName wwwroot
 Push-AppveyorArtifact $artifactsFileName
 
+# Building android:
+
+$buildAndroidClient = "npm run build -- -c android --no-progress"
+Write-Host $buildAndroidClient
+Invoke-Expression $buildAndroidClient
+
+$AddAndroid = "npm run add-android"
+Write-Host $AddAndroid
+Invoke-Expression $AddAndroid
+
+$buildApk = "npm run build-apk"
+Write-Host $buildApk
+Invoke-Expression $buildApk
+
+Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\release\app-release.apk
+
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER

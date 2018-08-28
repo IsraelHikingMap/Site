@@ -41,16 +41,18 @@ export class FileComponent extends BaseMapComponent {
         }
     }
 
-    public save(e: Event) {
+    public async save(e: Event) {
         let data = this.dataContainerService.getDataForFileExport();
         if (!this.isDataSaveable(data)) {
             return;
         }
-        this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data)
-            .then(() => { }, () => {
-                this.toastService.error(this.resources.unableToSaveToFile);
-            });
         this.suppressEvents(e);
+        try {
+            await this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data);
+            this.toastService.success(this.resources.fileSavedSuccessfully);
+        } catch (ex) {
+            this.toastService.error(this.resources.unableToSaveToFile);
+        }
     }
 
     private getName(data: Common.DataContainer): string {

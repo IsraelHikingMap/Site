@@ -9,6 +9,22 @@ install:
     node -v
 
     npm -v
+
+    appveyor DownloadFile https://dl.google.com/android/repository/sdk-tools-windows-4333796.zip
+
+    $env:ANDROID_HOME="$env:APPVEYOR_BUILD_FOLDER\android"
+
+    Invoke-Expression "7z x sdk-tools-windows-4333796.zip -o$env:ANDROID_HOME | out-null"
+
+    for($i=0;$i -lt 30;$i++) { $response += "y`n"};
+
+    Invoke-Expression """$response"" | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --licenses"
+
+    choco install gradle -version 4.9
+
+    $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin"
+
+    gradle -v
 before_build:
 - ps: dotnet restore
 build:

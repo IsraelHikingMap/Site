@@ -95,13 +95,13 @@ export class LayersService {
     private initializeDefaultLayers() {
         this.addBaseLayerFromData({
             key: LayersService.ISRAEL_HIKING_MAP,
-            address: this.resourcesService.currentLanguage.tilesFolder + Urls.DEFAULT_TILES_ADDRESS,
+            address: this.getTileAddressForCurrentLanguage(Urls.DEFAULT_TILES_ADDRESS),
             isEditable: false
         } as ILayer, LayersService.ATTRIBUTION);
 
         this.addBaseLayerFromData({
             key: LayersService.ISRAEL_MTB_MAP,
-            address: this.resourcesService.currentLanguage.tilesFolder + Urls.MTB_TILES_ADDRESS,
+            address: this.getTileAddressForCurrentLanguage(Urls.MTB_TILES_ADDRESS),
             isEditable: false
         } as ILayer, LayersService.MTB_ATTRIBUTION);
 
@@ -142,6 +142,9 @@ export class LayersService {
     }
 
     private getUserLayers = async (): Promise<any> => {
+        if (!this.osmUserService.isLoggedIn()) {
+            return;
+        }
         try {
             let data = await this.httpClient.get(Urls.userLayers).toPromise() as IUserLayer[];
             if (data == null) {
@@ -458,11 +461,11 @@ export class LayersService {
     private onLanguageChange = () => {
         let ihmLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_HIKING_MAP);
         this.replaceBaseLayerAddress(ihmLayer,
-            this.resourcesService.currentLanguage.tilesFolder + Urls.DEFAULT_TILES_ADDRESS,
+            this.getTileAddressForCurrentLanguage(Urls.DEFAULT_TILES_ADDRESS),
             LayersService.ATTRIBUTION, 0);
         let mtbLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_MTB_MAP);
         this.replaceBaseLayerAddress(mtbLayer,
-            this.resourcesService.currentLanguage.tilesFolder + Urls.MTB_TILES_ADDRESS,
+            this.getTileAddressForCurrentLanguage(Urls.MTB_TILES_ADDRESS),
             LayersService.MTB_ATTRIBUTION, 1);
     }
 
@@ -483,5 +486,9 @@ export class LayersService {
 
     private compareKeys(key1: string, key2: string): boolean {
         return key1.trim().toLowerCase() === key2.trim().toLowerCase();
+    }
+
+    private getTileAddressForCurrentLanguage(addressPostfix: string): string {
+        return Urls.baseTilesAddress + this.resourcesService.currentLanguage.tilesFolder + addressPostfix;
     }
 }

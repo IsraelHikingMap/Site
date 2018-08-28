@@ -197,3 +197,6 @@ ModelManifest.xml
 /IsraelHiking.Web/sources/translations/*.po
 /IsraelHiking.Web/coverage
 /IsraelHiking.Web/TESTS-*
+/IsraelHiking.Web/www
+/IsraelHiking.Web/platforms
+/IsraelHiking.Web/plugins
