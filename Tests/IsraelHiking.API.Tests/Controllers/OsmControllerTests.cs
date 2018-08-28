@@ -33,7 +33,7 @@ namespace IsraelHiking.API.Tests.Controllers
         private IAddibleGpxLinesFinderService _addibleGpxLinesFinderService;
         private ConfigurationData _options;
 
-        private string SetupGpxUrl(GpxMainObject gpx, List<LineString> addibleLines = null)
+        private string SetupGpxUrl(GpxFile gpx, List<LineString> addibleLines = null)
         {
             var url = "url";
             var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
@@ -143,7 +143,7 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostGpsTrace_UrlProvidedForEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
         {
-            var url = SetupGpxUrl(new GpxMainObject(), new List<LineString>());
+            var url = SetupGpxUrl(new GpxFile(), new List<LineString>());
             _controller.SetupIdentity();
 
             var results = _controller.PostGpsTrace(url).Result as BadRequestObjectResult;
@@ -154,14 +154,9 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostGpsTrace_UrlProvidedForSemiEmptyGpxFile_ShouldReturnEmptyFeatureCollection()
         {
-            var url = SetupGpxUrl(new GpxMainObject
-            {
-                Tracks = new[]
-                {
-                    new GpxTrack(null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null,
-                        null, ImmutableArray<GpxTrackSegment>.Empty, null)
-                }.ToList()
-            }, new List<LineString>());
+            var gpx = new GpxFile();
+            gpx.Tracks.Add(new GpxTrack());
+            var url = SetupGpxUrl(gpx, new List<LineString>());
             _controller.SetupIdentity();
 
             var results = _controller.PostGpsTrace(url).Result as BadRequestObjectResult;
@@ -172,37 +167,28 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostGpsTrace_FileProvidedForFootwayGpxFile_ShouldReturnFeatureCollection()
         {
-            var gpx = new GpxMainObject
-            {
-                Routes = new List<GpxRoute>
-                {
-                    new GpxRoute(null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null,
-                        new ImmutableGpxWaypointTable(new[]
-                        {
-                            new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0), null, DateTime.Now.ToUniversalTime(), null, null,
-                                null, null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null, null, null,
-                                null, null, null, null, null),
-                            new GpxWaypoint(new GpxLongitude(0.00001), new GpxLatitude(0.00001), null,
-                                DateTime.Now.AddMinutes(1).ToUniversalTime(), null, null, null, null, null, null, null,
-                                ImmutableArray<GpxWebLink>.Empty, null, null, null, null, null, null, null, null, null),
-                        }.ToImmutableArray()), null)
-                },
-                Tracks = new List<GpxTrack>
-                {
-                    new GpxTrack(null, null,null,null,ImmutableArray<GpxWebLink>.Empty, null,null, new []
+            var gpx = new GpxFile();
+            gpx.Routes.Add(
+                new GpxRoute().WithWaypoints(new[]
                     {
-                        new GpxTrackSegment(new ImmutableGpxWaypointTable(new []
+                        new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0)).WithTimestampUtc(
+                            DateTime.Now.ToUniversalTime()),
+                        new GpxWaypoint(new GpxLongitude(0.00001), new GpxLatitude(0.00001)).WithTimestampUtc(
+                            DateTime.Now.AddMinutes(1).ToUniversalTime())
+                    }));
+            gpx.Tracks.Add(
+                new GpxTrack().WithSegments(
+                    new[]
+                    {
+                        new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
                         {
-                            new GpxWaypoint(new GpxLongitude(0.00002), new GpxLatitude(0.00002), null, DateTime.Now.AddMinutes(2).ToUniversalTime(), null, null,
-                                null, null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null, null, null,
-                                null, null, null, null, null),
-                            new GpxWaypoint(new GpxLongitude(0.00003), new GpxLatitude(0.00003), null,
-                                DateTime.Now.AddMinutes(3).ToUniversalTime(), null, null, null, null, null, null, null,
-                                ImmutableArray<GpxWebLink>.Empty, null, null, null, null, null, null, null, null, null),
+                            new GpxWaypoint(new GpxLongitude(0.00002), new GpxLatitude(0.00002)).WithTimestampUtc(
+                                DateTime.Now.AddMinutes(2).ToUniversalTime()),
+                            new GpxWaypoint(new GpxLongitude(0.00003), new GpxLatitude(0.00003)).WithTimestampUtc(
+                                DateTime.Now.AddMinutes(3).ToUniversalTime())
                         }), null)
-                    }.ToImmutableArray(), null)
-                }
-            };
+                    }.ToImmutableArray())
+            );
             var fetcher = Substitute.For<IRemoteFileFetcherGateway>();
             var file = Substitute.For<IFormFile>();
             file.FileName.Returns("SomeFile.gpx");
@@ -228,22 +214,14 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostGpsTrace_UrlProvidedForCyclewayGpxFile_ShouldReturnFeatureCollection()
         {
-            var gpx = new GpxMainObject
-            {
-                Routes = new[]
+            var gpx = new GpxFile();
+            gpx.Routes.Add(
+                new GpxRoute().WithWaypoints(new[]
                 {
-                    new GpxRoute(null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null,
-                        new ImmutableGpxWaypointTable(new[]
-                        {
-                            new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0), null, DateTime.Now.ToUniversalTime(), null, null,
-                                null, null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null, null, null,
-                                null, null, null, null, null),
-                            new GpxWaypoint(new GpxLongitude(0.001), new GpxLatitude(0.001), null,
-                                DateTime.Now.AddMinutes(1).ToUniversalTime(), null, null, null, null, null, null, null,
-                                ImmutableArray<GpxWebLink>.Empty, null, null, null, null, null, null, null, null, null),
-                        }.ToImmutableArray()), null)
-                }.ToList()
-            };
+                    new GpxWaypoint((GpxLongitude) 0, (GpxLatitude) 0).WithTimestampUtc(DateTime.Now.ToUniversalTime()),
+                    new GpxWaypoint((GpxLongitude) 0.001, (GpxLatitude) 0.001).WithTimestampUtc(DateTime.Now
+                        .AddMinutes(1).ToUniversalTime())
+                }));
             var url = SetupGpxUrl(gpx);
             _controller.SetupIdentity();
 
@@ -259,22 +237,16 @@ namespace IsraelHiking.API.Tests.Controllers
         [TestMethod]
         public void PostGpsTrace_UrlProvidedForTrackGpxFile_ShouldReturnFeatureCollection()
         {
-            var gpx = new GpxMainObject
-            {
-                Routes = new[]
+            var gpx = new GpxFile();
+            gpx.Routes.Add(
+                new GpxRoute().WithWaypoints(new[]
                 {
-                    new GpxRoute(null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null,
-                        new ImmutableGpxWaypointTable(new[]
-                        {
-                            new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0), null, DateTime.Now.ToUniversalTime(), null, null,
-                                null, null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null, null, null,
-                                null, null, null, null, null),
-                            new GpxWaypoint(new GpxLongitude(0.01), new GpxLatitude(0.01), null,
-                                DateTime.Now.AddMinutes(1).ToUniversalTime(), null, null, null, null, null, null, null,
-                                ImmutableArray<GpxWebLink>.Empty, null, null, null, null, null, null, null, null, null),
-                        }.ToImmutableArray()), null)
-                }.ToList()
-            };
+                    new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0)).WithTimestampUtc(
+                        DateTime.Now.ToUniversalTime()),
+                    new GpxWaypoint(new GpxLongitude(0.01), new GpxLatitude(0.01)).WithTimestampUtc(DateTime.Now
+                        .AddMinutes(1).ToUniversalTime())
+                })
+            );
             var url = SetupGpxUrl(gpx);
             _controller.SetupIdentity();
 

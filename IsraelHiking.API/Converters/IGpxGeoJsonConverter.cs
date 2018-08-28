@@ -1,5 +1,6 @@
 using IsraelHiking.API.Gpx;
 using NetTopologySuite.Features;
+using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Converters
 {
@@ -9,16 +10,16 @@ namespace IsraelHiking.API.Converters
     public interface IGpxGeoJsonConverter
     {
         /// <summary>
-        /// Convetrs <see cref="GpxMainObject"/> to <see cref="FeatureCollection"/>
+        /// Convetrs <see cref="GpxFile"/> to <see cref="FeatureCollection"/>
         /// </summary>
         /// <param name="gpx">The GPX data to convert</param>
         /// <returns>The GeoJson data</returns>
-        FeatureCollection ToGeoJson(GpxMainObject gpx);
+        FeatureCollection ToGeoJson(GpxFile gpx);
         /// <summary>
-        /// Converts <see cref="FeatureCollection"/> to <see cref="GpxMainObject"/>
+        /// Converts <see cref="FeatureCollection"/> to <see cref="GpxFile"/>
         /// </summary>
         /// <param name="collection">The GeoJson data to convert</param>
         /// <returns>The GPX data </returns>
-        GpxMainObject ToGpx(FeatureCollection collection);
+        GpxFile ToGpx(FeatureCollection collection);
     }
 }

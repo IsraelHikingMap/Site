@@ -17,35 +17,34 @@ namespace IsraelHiking.API.Converters
     ///<inheritdoc />
     public class GpxDataContainerConverter : IGpxDataContainerConverter
     {
+        /// <summary>
+        /// Gpx creator name
+        /// </summary>
         public const string ISRAEL_HIKING_MAP = "IsraelHikingMap";
 
         ///<inheritdoc />
-        public GpxMainObject ToGpx(DataContainer container)
+        public GpxFile ToGpx(DataContainer container)
         {
             var containerRoutes = container.Routes ?? new List<RouteData>();
             var nonEmptyRoutes = containerRoutes.Where(r => r.Segments.SelectMany(s => s.Latlngs).Any());
-            return new GpxMainObject
+            var gpx = new GpxFile
             {
                 Metadata = new GpxMetadata(ISRAEL_HIKING_MAP),
-                Waypoints = containerRoutes.SelectMany(r => r.Markers).Select(ToGpxWaypoint).ToList(),
-                Routes = new List<GpxRoute>(),
-                Tracks = nonEmptyRoutes.Select(r => new GpxTrack(
-                        name: r.Name,
-                        comment: null,
-                        description: r.Description,
-                        source: null,
-                        links: ImmutableArray<GpxWebLink>.Empty,
-                        number: null,
-                        classification: null,
-                        segments: r.Segments.Select(ToGpxTraclSegment).ToImmutableArray(),
-                        extensions: new ColorOpacityWeight {Color = r.Color, Opacity = r.Opacity, Weight = r.Weight}
-                    )
-                ).ToList()
-            }.UpdateBounds();
+            };
+            gpx.Waypoints.AddRange(containerRoutes.SelectMany(r => r.Markers).Select(ToGpxWaypoint));
+            gpx.Tracks.AddRange(nonEmptyRoutes.Select(r => new GpxTrack()
+                    .WithName(r.Name)
+                    .WithDescription(r.Description)
+                    .WithSegments(r.Segments.Select(ToGpxTraclSegment).ToImmutableArray())
+                    .WithExtensions(new ColorOpacityWeight {Color = r.Color, Opacity = r.Opacity, Weight = r.Weight})
+                )
+            );
+            gpx.UpdateBounds();
+            return gpx;
         }
 
         ///<inheritdoc />
-        public DataContainer ToDataContainer(GpxMainObject gpx)
+        public DataContainer ToDataContainer(GpxFile gpx)
         {
             //gpx.UpdateBounds();
             var container = new DataContainer
@@ -150,28 +149,13 @@ namespace IsraelHiking.API.Converters
         private GpxWaypoint ToGpxWaypoint(MarkerData marker)
         {
             return new GpxWaypoint(
-                longitude: new GpxLongitude(marker.Latlng.Lng),
-                latitude: new GpxLatitude(marker.Latlng.Lat),
-                name: marker.Title,
-                description: marker.Description,
-                links: (marker.Urls ?? new List<LinkData>()).Select(l => new GpxWebLink(l.Text, l.MimeType, new Uri(l.Url))).ToImmutableArray(),
-                classification: marker.Type,
-                extensions: null,
-                elevationInMeters: null,
-                timestampUtc: null,
-                symbolText: null,
-                magneticVariation: null,
-                geoidHeight: null,
-                comment: null,
-                source: null,
-                fixKind: null,
-                numberOfSatellites: null,
-                horizontalDilutionOfPrecision: null,
-                verticalDilutionOfPrecision: null,
-                positionDilutionOfPrecision: null,
-                secondsSinceLastDgpsUpdate: null,
-                dgpsStationId: null
-            );
+                    (GpxLongitude) marker.Latlng.Lng,
+                    (GpxLatitude) marker.Latlng.Lat)
+                .WithName(marker.Title)
+                .WithDescription(marker.Description)
+                .WithLinks((marker.Urls ?? new List<LinkData>())
+                    .Select(l => new GpxWebLink(new Uri(l.Url), l.Text, l.MimeType)).ToImmutableArray())
+                .WithClassification(marker.Type);
         }
 
         private GpxWaypoint ToGpxWaypoint(LatLng latLng)

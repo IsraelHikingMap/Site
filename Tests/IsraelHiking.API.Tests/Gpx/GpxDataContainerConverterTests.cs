@@ -67,7 +67,7 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void ToDataContainer_NoData_ShouldReturnEmptyDataContainer()
         {
-            var gpx = new GpxMainObject();
+            var gpx = new GpxFile();
 
             var dataContainer = _converter.ToDataContainer(gpx);
 
@@ -77,13 +77,8 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void ToDataContainer_RouteWithoutPoints_ShouldReturnRouteWithoutPointsDataContainer()
         {
-            var gpx = new GpxMainObject
-            {
-                Tracks = new[]
-                {
-                    new GpxTrack(null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null, ImmutableArray<GpxTrackSegment>.Empty, null)
-                }.ToList()
-            };
+            var gpx = new GpxFile();
+            gpx.Tracks.Add(new GpxTrack());
             var dataContainer = _converter.ToDataContainer(gpx);
             Assert.AreEqual(0, dataContainer.Routes.Count);
         }
@@ -91,12 +86,10 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void ToDataContainer_RouteWithPoints_ShouldReturnRouteWithPointsDataContainer()
         {
-            var gpx = new GpxMainObject
-            {
-                Waypoints = new [] { new GpxWaypoint(new GpxLongitude(5), new GpxLatitude(4), 6) }.ToList(),
-                Routes = new[] { new GpxRoute(null, null, null, null, ImmutableArray<GpxWebLink>.Empty, 
-                    null, null, new ImmutableGpxWaypointTable(new [] { new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3) }), null) }.ToList()
-            };
+            var gpx = new GpxFile();
+            gpx.Waypoints.Add(new GpxWaypoint(new GpxLongitude(5), new GpxLatitude(4), 6));
+            gpx.Routes.Add(new GpxRoute().WithWaypoints(new[] { new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3) }));
+
             var dataContainer = _converter.ToDataContainer(gpx);
             Assert.AreEqual(1, dataContainer.Routes.Count);
             Assert.AreEqual(1, dataContainer.Routes.First().Markers.Count);
@@ -105,10 +98,8 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void ToDataContainer_PointsOlny_ShouldReturnRouteWithoutPointsOnlyDataContainer()
         {
-            var gpx = new GpxMainObject
-            {
-                Waypoints = new[] { new GpxWaypoint(new GpxLongitude(5), new GpxLatitude(4), 6) }.ToList()
-            };
+            var gpx = new GpxFile();
+            gpx.Waypoints.Add(new GpxWaypoint(new GpxLongitude(5), new GpxLatitude(4), 6));
             var dataContainer = _converter.ToDataContainer(gpx);
             Assert.AreEqual(1, dataContainer.Routes.Count);
             Assert.AreEqual(0, dataContainer.Routes.First().Segments.Count);
@@ -119,10 +110,11 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void ToDataContainer_TrackOnlyWithSinglePoint_ShouldReturnEmptyContainer()
         {
-            var gpx = new GpxMainObject
+            var gpx = new GpxFile();
+            gpx.Tracks.Add(new GpxTrack().WithSegments(new[]
             {
-                Tracks = new[] { new GpxTrack(null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null, new [] { new GpxTrackSegment(new ImmutableGpxWaypointTable(new [] { new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3) }), null) }.ToImmutableArray(), null) }.ToList()
-            };
+                new GpxTrackSegment(new ImmutableGpxWaypointTable(new [] { new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3) }), null)
+            }.ToImmutableArray()));
             var dataContainer = _converter.ToDataContainer(gpx);
             Assert.AreEqual(1, dataContainer.Routes.Count);
             Assert.AreEqual(0, dataContainer.Routes.First().Markers.Count);
@@ -132,14 +124,15 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void ToDataContainer_TrackOnlyWithTwoPoints_ShouldReturnRouteDataContainer()
         {
-            var gpx = new GpxMainObject
+            var gpx = new GpxFile();
+            gpx.Tracks.Add(new GpxTrack().WithSegments(new[]
             {
-                Tracks = new[] { new GpxTrack(null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null, new[] { new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
+                new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
                 {
                     new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3),
                     new GpxWaypoint(new GpxLongitude(4), new GpxLatitude(5), 6)
-                }), null) }.ToImmutableArray(), null) }.ToList()
-            };
+                }), null)
+            }.ToImmutableArray()));
             var dataContainer = _converter.ToDataContainer(gpx);
             Assert.AreEqual(1, dataContainer.Routes.Count);
             Assert.AreEqual(0, dataContainer.Routes.First().Markers.Count);

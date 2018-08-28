@@ -18,21 +18,18 @@ namespace IsraelHiking.API.Converters.ConverterFlows
         public byte[] Transform(byte[] content)
         {
             var gpx = content.ToGpx();
-            var singleTrackGpx = new GpxMainObject
-            {
-                Waypoints = gpx.Waypoints,
-                Routes = new List<GpxRoute>(),
-                Tracks = (gpx.Tracks ?? new List<GpxTrack>()).Select(t => new GpxTrack(
-                    name: t.Name,
-                    description: t.Description,
-                    comment: t.Comment,
-                    segments: new [] { new GpxTrackSegment(new ImmutableGpxWaypointTable(t.Segments.SelectMany(s => s.Waypoints)), null) }.ToImmutableArray(),
-                    source: t.Source,
-                    links: t.Links,
-                    number: t.Number,
-                    classification: t.Classification,
-                    extensions: t.Extensions)).ToList()
-            };
+            var singleTrackGpx = new GpxFile();
+            singleTrackGpx.Waypoints.AddRange(gpx.Waypoints);
+            singleTrackGpx.Tracks.AddRange((gpx.Tracks ?? new List<GpxTrack>()).Select(t => new GpxTrack(
+                name: t.Name,
+                description: t.Description,
+                comment: t.Comment,
+                segments: new[] { new GpxTrackSegment(new ImmutableGpxWaypointTable(t.Segments.SelectMany(s => s.Waypoints)), null) }.ToImmutableArray(),
+                source: t.Source,
+                links: t.Links,
+                number: t.Number,
+                classification: t.Classification,
+                extensions: t.Extensions)));
             return singleTrackGpx.ToBytes();
         }
     }

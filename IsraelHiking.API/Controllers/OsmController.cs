@@ -22,6 +22,7 @@ using IsraelHiking.API.Swagger;
 using NetTopologySuite.IO;
 using OsmSharp.API;
 using Swashbuckle.AspNetCore.SwaggerGen;
+using GpxFile = NetTopologySuite.IO.GpxFile;
 
 namespace IsraelHiking.API.Controllers
 {
@@ -207,7 +208,7 @@ namespace IsraelHiking.API.Controllers
             }
         }
 
-        private string GetHighwayType(GpxMainObject gpx)
+        private string GetHighwayType(GpxFile gpx)
         {
             var waypointsGroups = new List<GpxWaypoint[]>();
             waypointsGroups.AddRange((gpx.Routes ?? new List<GpxRoute>()).Select(route => route.Waypoints.ToArray()).Where(ps => ps.All(p => p.TimestampUtc.HasValue)).ToArray());
@@ -275,7 +276,7 @@ namespace IsraelHiking.API.Controllers
             return _geometryFactory.CreateLineString(nonDuplicates.ToArray());
         }
 
-        private List<ILineString> GpxToItmLineStrings(GpxMainObject gpx)
+        private List<ILineString> GpxToItmLineStrings(GpxFile gpx)
         {
             return (gpx.Routes ?? new List<GpxRoute>())
                 .Select(route => ToItmLineString(route.Waypoints))

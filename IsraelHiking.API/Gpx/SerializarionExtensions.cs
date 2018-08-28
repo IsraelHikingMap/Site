@@ -12,49 +12,6 @@ using NetTopologySuite.IO;
 
 namespace IsraelHiking.API.Gpx
 {
-    /// <summary>
-    /// This class allows reading a GPX file into <see cref="GpxMainObject"/> class
-    /// </summary>
-    internal class GpxVisitor : GpxVisitorBase
-    {
-        public GpxMainObject Gpx { get; }
-
-        /// <summary>
-        /// Constrcutor
-        /// </summary>
-        public GpxVisitor()
-        {
-            Gpx = new GpxMainObject();
-        }
-
-        /// <inheritdoc />
-        public override void VisitMetadata(GpxMetadata metadata)
-        {
-            Gpx.Metadata = metadata;
-        }
-
-        /// <inheritdoc />
-        public override void VisitWaypoint(GpxWaypoint point)
-        {
-            base.VisitWaypoint(point);
-            Gpx.Waypoints.Add(point);
-        }
-
-        /// <inheritdoc />
-        public override void VisitRoute(GpxRoute route)
-        {
-            base.VisitRoute(route);
-            Gpx.Routes.Add(route);
-        }
-
-        /// <inheritdoc />
-        public override void VisitTrack(GpxTrack track)
-        {
-            base.VisitTrack(track);
-            Gpx.Tracks.Add(track);
-        }
-    }
-
     internal class IsraelHikingGpxExtensionReader : GpxExtensionReader
     {
         public string FromXml(IEnumerable<XElement> extensionElements, string elementName)
@@ -149,30 +106,28 @@ namespace IsraelHiking.API.Gpx
         }
 
         /// <summary>
-        /// Converts <see cref="byte"/> array to <see cref="GpxMainObject"/>
+        /// Converts <see cref="byte"/> array to <see cref="GpxFile"/>
         /// </summary>
         /// <param name="gpxContent">The <see cref="byte"/> array</param>
-        /// <returns>The <see cref="GpxMainObject"/></returns>
-        public static GpxMainObject ToGpx(this byte[] gpxContent)
+        /// <returns>The <see cref="GpxFile"/></returns>
+        public static GpxFile ToGpx(this byte[] gpxContent)
         {
             using (var stream = new MemoryStream(gpxContent))
             {
                 var reader = new XmlTextReader(stream);
-                var visitor = new GpxVisitor();
-                GpxReader.Read(reader, new GpxReaderSettings
+                return GpxFile.ReadFrom(reader, new GpxReaderSettings
                 {
                     ExtensionReader = new IsraelHikingGpxExtensionReader()
-                }, visitor);
-                return visitor.Gpx;
+                });
             }
         }
 
         /// <summary>
-        /// Converts <see cref="GpxMainObject"/> to <see cref="byte"/> array
+        /// Converts <see cref="GpxFile"/> to <see cref="byte"/> array
         /// </summary>
-        /// <param name="gpx">The <see cref="GpxMainObject"/></param>
+        /// <param name="gpx">The <see cref="GpxFile"/></param>
         /// <returns>The <see cref="byte"/> array</returns>
-        public static byte[] ToBytes(this GpxMainObject gpx)
+        public static byte[] ToBytes(this GpxFile gpx)
         {
             using (var outputStream = new MemoryStream())
             {
@@ -183,21 +138,21 @@ namespace IsraelHiking.API.Gpx
                     Encoding = Encoding.UTF8
                 };
                 var xmlWriter = XmlWriter.Create(outputStream, xmlWriterSettings);
-                GpxWriter.Write(xmlWriter, new GpxWriterSettings
+                gpx.WriteTo(xmlWriter, new GpxWriterSettings
                 {
                     ExtensionWriter = new IsraelHikingGpxExtensionWriter()
-                }, gpx.Metadata, gpx.Waypoints, gpx.Routes, gpx.Tracks, null);
+                });
                 xmlWriter.Flush();
                 return outputStream.ToArray();
             }
         }
 
         /// <summary>
-        /// Updates the bounds of a <see cref="GpxMainObject"/> object according to internal data
+        /// Updates the bounds of a <see cref="GpxFile"/> object according to internal data
         /// </summary>
-        /// <param name="gpx">The <see cref="GpxMainObject"/></param>
-        /// <returns>An updated <see cref="GpxMainObject"/></returns>
-        public static GpxMainObject UpdateBounds(this GpxMainObject gpx)
+        /// <param name="gpx">The <see cref="GpxFile"/></param>
+        /// <returns>An updated <see cref="GpxFile"/></returns>
+        public static GpxFile UpdateBounds(this GpxFile gpx)
         {
             if (gpx.Metadata?.Bounds != null &&
                 gpx.Metadata.Bounds.MinLatitude.Value != 0.0 &&
@@ -223,7 +178,7 @@ namespace IsraelHiking.API.Gpx
             );
             gpx.Metadata = gpx.Metadata == null 
                 ? new GpxMetadata(null, null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null, boundingBox, null) 
-                : new GpxMetadata(gpx.Metadata.Creator, gpx.Metadata.Name, gpx.Metadata.Description, gpx.Metadata.Author, gpx.Metadata.Copyright, gpx.Metadata.Links, gpx.Metadata.CreationTime, gpx.Metadata.Keywords, boundingBox, gpx.Metadata.Extensions);
+                : new GpxMetadata(gpx.Metadata.Creator, gpx.Metadata.Name, gpx.Metadata.Description, gpx.Metadata.Author, gpx.Metadata.Copyright, gpx.Metadata.Links, gpx.Metadata.CreationTimeUtc, gpx.Metadata.Keywords, boundingBox, gpx.Metadata.Extensions);
             return gpx;
         }
     }

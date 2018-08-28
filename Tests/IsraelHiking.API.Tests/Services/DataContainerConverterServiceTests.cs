@@ -30,13 +30,14 @@ namespace IsraelHiking.API.Tests.Services
         private IGpsBabelGateway _gpsBabelGateway;
         private IImgurGateway _imgurGateway;
         private byte[] _randomBytes;
-        private GpxMainObject _simpleGpx;
+        private GpxFile _simpleGpx;
 
         [TestInitialize]
         public void TestInitialize()
         {
             _randomBytes = new byte[] { 0, 1, 1, 0 };
-            _simpleGpx = new GpxMainObject { Waypoints = new[] { new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0), null) }.ToList() };
+            _simpleGpx = new GpxFile();
+            _simpleGpx.Waypoints.Add(new GpxWaypoint(new GpxLongitude(0), new GpxLatitude(0), null));
             _gpsBabelGateway = Substitute.For<IGpsBabelGateway>();
             _imgurGateway = Substitute.For<IImgurGateway>();
             _routeDataSplitterService = Substitute.For<IRouteDataSplitterService>();
@@ -180,26 +181,21 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertGpxToDataContainer_NonSiteFileWithTwoSegmenetsNoName_ShouldManipulateRouteData()
         {
-            var gpx = new GpxMainObject
-            {
-                Tracks = new List<GpxTrack>
+            var gpx = new GpxFile();
+            gpx.Tracks.Add(new GpxTrack().WithSegments(
+                new[]
                 {
-                    new GpxTrack("", null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null,
-                        new[]
-                        {
-                            new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
-                            {
-                                new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), null),
-                                new GpxWaypoint(new GpxLongitude(3), new GpxLatitude(4), null)
-                            }), null),
-                            new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
-                            {
-                                new GpxWaypoint(new GpxLongitude(5), new GpxLatitude(6), null),
-                                new GpxWaypoint(new GpxLongitude(7), new GpxLatitude(8), null)
-                            }), null)
-                        }.ToImmutableArray(), null)
-                }
-            };
+                    new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
+                    {
+                        new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), null),
+                        new GpxWaypoint(new GpxLongitude(3), new GpxLatitude(4), null)
+                    }), null),
+                    new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
+                    {
+                        new GpxWaypoint(new GpxLongitude(5), new GpxLatitude(6), null),
+                        new GpxWaypoint(new GpxLongitude(7), new GpxLatitude(8), null)
+                    }), null)
+                }.ToImmutableArray()));
             var newRouteData = new RouteData
             {
                 Segments = new List<RouteSegmentData>
@@ -222,23 +218,18 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertGpxToDataContainer_NonSiteFile_ShouldManipulateRouteData()
         {
-            var gpx = new GpxMainObject
-            {
-                Tracks = new List<GpxTrack>
+            var gpx = new GpxFile();
+            gpx.Tracks.Add(new GpxTrack().WithName("track").WithSegments(
+                new[]
                 {
-                    new GpxTrack("track", null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null,
-                        new[]
-                        {
-                            new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
-                            {
-                                new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(1), null),
-                                new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(1.000001), null),
-                                new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(1.000002), null),
-                                new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(1.000003), null),
-                            }), null)
-                        }.ToImmutableArray(), null)
-                }
-            };
+                    new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
+                    {
+                        new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(1), null),
+                        new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(1.000001), null),
+                        new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(1.000002), null),
+                        new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(1.000003), null),
+                    }), null)
+                }.ToImmutableArray()));
 
             var newRouteData = new RouteData
             {
@@ -259,10 +250,8 @@ namespace IsraelHiking.API.Tests.Services
         [TestMethod]
         public void ConvertGpxToDataContainer_NonSiteFileNoPointsInTrack_ShouldManipulateRouteData()
         {
-            var gpx = new GpxMainObject
-            {
-                 Routes = new[] { new GpxRoute(null, null, null, null,ImmutableArray<GpxWebLink>.Empty, null, null,new ImmutableGpxWaypointTable(new GpxWaypoint[0]), null) }.ToList()
-            };
+            var gpx = new GpxFile();
+            gpx.Routes.Add(new GpxRoute());
 
             var dataContainer = _converterService.ToDataContainer(gpx.ToBytes(), FlowFormats.GPX).Result;
 
@@ -274,10 +263,8 @@ namespace IsraelHiking.API.Tests.Services
         {
             string gpxVersion1 = "<?xml version='1.0' encoding='UTF-8'?><gpx version='1.0' creator='GPSBabel - http://www.gpsbabel.org' xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns='http://www.topografix.com/GPX/1/0' xsi:schemaLocation='http://www.topografix.com/GPX/1/0 http://www.topografix.com/GPX/1/0/gpx.xsd'><rte><rtept lat='33.1187173918366' lon='35.6488631636844'><ele>0.000000</ele><name>A001</name><cmt>60963[1] דרך עפר היוצאת מעיקול בכביש 959 - נקודת ההתחלה</cmt><desc>60963[1] דרך עפר היוצאת מעיקול בכביש 959 - נקודת ההתחלה</desc></rtept></rte></gpx>";
             byte[] bytes = Encoding.UTF8.GetBytes(gpxVersion1);
-            var gpx = new GpxMainObject
-            {
-                Routes = new[] { new GpxRoute(null, null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null, new ImmutableGpxWaypointTable(new GpxWaypoint[0]), null) }.ToList()
-            };
+            var gpx = new GpxFile();
+            gpx.Routes.Add(new GpxRoute());
             _gpsBabelGateway.ConvertFileFromat(bytes, Arg.Any<string>(), Arg.Any<string>()).Returns(gpx.ToBytes());
 
             var dataContainer = _converterService.ToDataContainer(bytes, FlowFormats.GPX).Result;

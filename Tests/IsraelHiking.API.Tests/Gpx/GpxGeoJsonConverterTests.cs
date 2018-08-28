@@ -18,15 +18,8 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void CovertGeoJsonToGpx_OnlyOnePoint_ShouldBeConverted()
         {
-            GpxMainObject gpx = new GpxMainObject
-            {
-                Waypoints = new[]
-                {
-                    new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), null, null, "name", null, null, null, null,
-                        null, null, ImmutableArray<GpxWebLink>.Empty, null, null, null, null, null, null, null, null,
-                        null)
-                }.ToList()
-            };
+            GpxFile gpx = new GpxFile();
+            gpx.Waypoints.Add(new GpxWaypoint((GpxLongitude)1, (GpxLatitude)1).WithName("name"));
 
             var featureCollection = _gpxGeoJsonConverter.   ToGeoJson(gpx);
 
@@ -44,10 +37,8 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void CovertTwoWays_OnlyOnePoint_ShouldBeTheSame()
         {
-            var gpx = new GpxMainObject
-            {
-                Waypoints = new[] { new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3) }.ToList()
-            };
+            GpxFile gpx = new GpxFile();
+            gpx.Waypoints.Add(new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3));
 
             var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
             var newGpx = _gpxGeoJsonConverter.ToGpx(featureCollection);
@@ -62,16 +53,12 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void CovertTwoWays_OnlyOneRoute_ShouldBeTheSame()
         {
-            var gpx = new GpxMainObject
+            var gpx = new GpxFile();
+            gpx.Routes.Add(new GpxRoute().WithName("route").WithWaypoints(new[]
             {
-                Routes = new [] { new GpxRoute("route", null, null, null, ImmutableArray<GpxWebLink>.Empty, null,null, 
-                    new ImmutableGpxWaypointTable(new [] {
-                            new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3),
-                        new GpxWaypoint(new GpxLongitude(4), new GpxLatitude(5), null),
-                        })
-                    , null)
-                }.ToList()
-            };
+                new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3),
+                new GpxWaypoint(new GpxLongitude(4), new GpxLatitude(5), null),
+            }));
 
             var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
             var newGpx = _gpxGeoJsonConverter.ToGpx(featureCollection);
@@ -89,27 +76,21 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void CovertTwoWays_OnlyOneTrack_ShouldBeTheSame()
         {
-            var gpx = new GpxMainObject
-            {
-                Tracks = new List<GpxTrack>
+            var gpx = new GpxFile();
+            gpx.Tracks.Add(new GpxTrack().WithName("track").WithSegments(
+                new[]
                 {
-                    new GpxTrack("track", null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null,
-                        new[]
-                        {
-                            new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
-                            {
-                                new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3),
-                                new GpxWaypoint(new GpxLongitude(4), new GpxLatitude(5), 6)
-                            }), null),
-                            new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
-                            {
-                                new GpxWaypoint(new GpxLongitude(4), new GpxLatitude(5), 6),
-                                new GpxWaypoint(new GpxLongitude(14), new GpxLatitude(15), null)
-                            }), null)
-                        }.ToImmutableArray(), null)
-                }
-            };
-            
+                    new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
+                    {
+                        new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3),
+                        new GpxWaypoint(new GpxLongitude(4), new GpxLatitude(5), 6)
+                    }), null),
+                    new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
+                    {
+                        new GpxWaypoint(new GpxLongitude(4), new GpxLatitude(5), 6),
+                        new GpxWaypoint(new GpxLongitude(14), new GpxLatitude(15), null)
+                    }), null)
+                }.ToImmutableArray()));
 
             var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
             var newGpx = _gpxGeoJsonConverter.ToGpx(featureCollection);
@@ -130,20 +111,16 @@ namespace IsraelHiking.API.Tests.Gpx
         [TestMethod]
         public void CovertTwoWays_OnlyOneTrackWithOneSegment_ShouldBeTheSame()
         {
-            var gpx = new GpxMainObject
-            {
-                Tracks = new List<GpxTrack>
+            var gpx = new GpxFile();
+            gpx.Tracks.Add(new GpxTrack().WithName("track").WithSegments(
+                new[]
                 {
-                    new GpxTrack("track", null, null, null, ImmutableArray<GpxWebLink>.Empty, null, null,
-                        new[] {
-                            new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
-                            {
-                                new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3),
-                                new GpxWaypoint(new GpxLongitude(4), new GpxLatitude(5), 6)
-                            }), null)
-                        }.ToImmutableArray(), null)
-                }
-            };
+                    new GpxTrackSegment(new ImmutableGpxWaypointTable(new[]
+                    {
+                        new GpxWaypoint(new GpxLongitude(1), new GpxLatitude(2), 3),
+                        new GpxWaypoint(new GpxLongitude(4), new GpxLatitude(5), 6)
+                    }), null)
+                }.ToImmutableArray()));
 
             var featureCollection = _gpxGeoJsonConverter.ToGeoJson(gpx);
             

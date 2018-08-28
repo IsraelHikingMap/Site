@@ -17,7 +17,7 @@ namespace IsraelHiking.API.Converters
         private const string CREATOR = "Creator";
 
         ///<inheritdoc />
-        public FeatureCollection ToGeoJson(GpxMainObject gpx)
+        public FeatureCollection ToGeoJson(GpxFile gpx)
         {
             var collection = new FeatureCollection();
             var points = gpx.Waypoints ?? new List<GpxWaypoint>();
@@ -44,25 +44,29 @@ namespace IsraelHiking.API.Converters
         }
 
         ///<inheritdoc />   
-        public GpxMainObject ToGpx(FeatureCollection collection)
+        public GpxFile ToGpx(FeatureCollection collection)
         {
-            return new GpxMainObject
+            var gpx = new GpxFile
             {
-                Metadata = new GpxMetadata(collection.Features.FirstOrDefault(f => f.Attributes.Exists(CREATOR))?.Attributes[CREATOR]?.ToString() ?? string.Empty),
-                Waypoints = collection.Features.Where(f => f.Geometry is Point)
-                    .Select(CreateWaypoint)
-                    .Union(collection.Features.Where(f => f.Geometry is MultiPoint)
-                        .SelectMany(CreateWayPointsFromMultiPoint))
-                    .ToList(),
-                Routes = collection.Features.Where(f => f.Geometry is LineString)
-                    .Select(CreateRouteFromLineString)
-                    .Union(collection.Features.Where(f => f.Geometry is Polygon).Select(CreateRouteFromPolygon))
-                    .Union(collection.Features.Where(f => f.Geometry is MultiPolygon).SelectMany(CreateRoutesFromMultiPolygon))
-                    .ToList(),
-                Tracks = collection.Features.Where(f => f.Geometry is MultiLineString)
-                    .SelectMany(CreateTracksFromMultiLineString)
-                    .ToList()
-            }.UpdateBounds();
+                Metadata = new GpxMetadata(collection.Features.FirstOrDefault(f => f.Attributes.Exists(CREATOR))
+                                               ?.Attributes[CREATOR]?.ToString() ?? string.Empty)
+            };
+            gpx.Waypoints.AddRange(collection.Features.Where(f => f.Geometry is Point)
+                .Select(CreateWaypoint)
+                .Union(collection.Features.Where(f => f.Geometry is MultiPoint)
+                    .SelectMany(CreateWayPointsFromMultiPoint))
+                .ToList());
+            gpx.Routes.AddRange(collection.Features.Where(f => f.Geometry is LineString)
+                .Select(CreateRouteFromLineString)
+                .Union(collection.Features.Where(f => f.Geometry is Polygon).Select(CreateRouteFromPolygon))
+                .Union(collection.Features.Where(f => f.Geometry is MultiPolygon)
+                    .SelectMany(CreateRoutesFromMultiPolygon))
+                .ToList());
+            gpx.Tracks.AddRange(collection.Features.Where(f => f.Geometry is MultiLineString)
+                .SelectMany(CreateTracksFromMultiLineString)
+                .ToList());
+            gpx.UpdateBounds();
+            return gpx;
         }
 
         private Coordinate CreateGeoPosition(GpxWaypoint waypoint)

@@ -46,35 +46,11 @@ namespace IsraelHiking.API.Converters.ConverterFlows
             {
                 var link = _imgurGateway.UploadImage(stream).Result;
                 var wayPoint = gpx.Waypoints.First();
-                var gpxObject = new GpxMainObject
-                {
-                    Waypoints = new List<GpxWaypoint>
-                    {
-                        new GpxWaypoint(
-                            longitude: wayPoint.Longitude,
-                            latitude: wayPoint.Latitude,
-                            name: string.Empty,
-                            description: string.Empty,
-                            links: new[] {new GpxWebLink("", "image/jpeg", new Uri(link))}.ToImmutableArray(),
-                            classification: null,
-                            extensions: null,
-                            elevationInMeters: null,
-                            timestampUtc: null,
-                            symbolText: null,
-                            magneticVariation: null,
-                            geoidHeight: null,
-                            comment: null,
-                            source: null,
-                            fixKind: null,
-                            numberOfSatellites: null,
-                            horizontalDilutionOfPrecision: null,
-                            verticalDilutionOfPrecision: null,
-                            positionDilutionOfPrecision: null,
-                            secondsSinceLastDgpsUpdate: null,
-                            dgpsStationId: null
-                        )
-                    }
-                };
+                var gpxObject = new GpxFile();
+                gpxObject.Waypoints.Add(
+                    new GpxWaypoint(wayPoint.Longitude, wayPoint.Latitude)
+                        .WithLinks(new[] {new GpxWebLink(new Uri(link), "", "image/jpeg")}.ToImmutableArray())
+                );
                 return gpxObject.ToBytes();
             }
         }
