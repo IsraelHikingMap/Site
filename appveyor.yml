@@ -20,13 +20,15 @@ install:
 
     Invoke-Expression """$response"" | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --licenses"
 
+    Invoke-Expression """$response"" | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --update"
+
+    Invoke-Expression "$env:ANDROID_HOME\tools\bin\sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools-26.0.0"" ""extras;google;m2repository"""
+
     choco install gradle -version 4.9
 
     $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin"
 
     gradle -v
-
-    Invoke-Expression """y"" | $env:ANDROID_HOME\tools\android.bat --silent update sdk --no-ui --all --filter platform-tools,tools,build-tools-26.0.0,android-26,android-25,extra-google-m2repository,extra-android-m2repository"
 before_build:
 - ps: dotnet restore
 build:
