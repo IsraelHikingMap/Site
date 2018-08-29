@@ -31,11 +31,11 @@ namespace IsraelHiking.Common
         {
             unchecked
             {
-                return (Lat.GetHashCode()*397) ^ Lng.GetHashCode();
+                return (Lat.GetHashCode() * 397) ^ Lng.GetHashCode();
             }
         }
 
-        public LatLng() : this(0,0) { }
+        public LatLng() : this(0, 0) { }
 
         public LatLng(double latitude, double longitude, double? altitude = null)
         {
@@ -54,5 +54,17 @@ namespace IsraelHiking.Common
             Lat = double.Parse(split.First());
             Lng = double.Parse(split.Last());
         }
+    }
+
+    public class LatLngTime : LatLng
+    {
+        [JsonProperty("timestamp")]
+        public DateTime? Timestamp { get; set; }
+
+        public LatLngTime()
+            : this(0, 0) { }
+
+        public LatLngTime(double latitude, double longitude, double? altitude = null)
+            : base(latitude, longitude, altitude) { }
     }
 }

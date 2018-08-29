@@ -35,7 +35,7 @@ namespace IsraelHiking.API.Converters
             gpx.Tracks.AddRange(nonEmptyRoutes.Select(r => new GpxTrack()
                     .WithName(r.Name)
                     .WithDescription(r.Description)
-                    .WithSegments(r.Segments.Select(ToGpxTraclSegment).ToImmutableArray())
+                    .WithSegments(r.Segments.Select(ToGpxTrackSegment).ToImmutableArray())
                     .WithExtensions(new ColorOpacityWeight {Color = r.Color, Opacity = r.Opacity, Weight = r.Weight})
                 )
             );
@@ -81,7 +81,7 @@ namespace IsraelHiking.API.Converters
                 {
                     new RouteSegmentData
                     {
-                        Latlngs = route.Waypoints.Select(ToLatLng).ToList(),
+                        Latlngs = route.Waypoints.Select(ToLatLngTime).ToList(),
                         RoutePoint = ToLatLng(route.Waypoints.Last())
                     }
                 }
@@ -100,7 +100,7 @@ namespace IsraelHiking.API.Converters
                 Weight = (t.Extensions as ColorOpacityWeight)?.Weight,
                 Segments = t.Segments.Where(seg => seg?.Waypoints != null && seg.Waypoints.Count > 1).Select(seg => new RouteSegmentData
                 {
-                    Latlngs = seg.Waypoints.Select(ToLatLng).ToList(),
+                    Latlngs = seg.Waypoints.Select(ToLatLngTime).ToList(),
                     RoutePoint = ToLatLng(seg.Waypoints.Last()),
                     RoutingType = seg.Extensions as string
                 }).ToList(),
@@ -133,6 +133,17 @@ namespace IsraelHiking.API.Converters
             };
         }
 
+        private LatLngTime ToLatLngTime(GpxWaypoint point)
+        {
+            return new LatLngTime
+            {
+                Lat = point.Latitude,
+                Lng = point.Longitude,
+                Alt = point.ElevationInMeters,
+                Timestamp = point.TimestampUtc?.ToLocalTime()
+            };
+        }
+
         private MarkerData ToMarkerData(GpxWaypoint point)
         {
             return new MarkerData
@@ -158,12 +169,15 @@ namespace IsraelHiking.API.Converters
                 .WithClassification(marker.Type);
         }
 
-        private GpxWaypoint ToGpxWaypoint(LatLng latLng)
+        private GpxWaypoint ToGpxWaypoint(LatLngTime latLng)
         {
-            return new GpxWaypoint(new GpxLongitude(latLng.Lng), new GpxLatitude(latLng.Lat), latLng.Alt);
+            var gpxWaypoint = new GpxWaypoint(new GpxLongitude(latLng.Lng), new GpxLatitude(latLng.Lat), latLng.Alt);
+            return latLng.Timestamp.HasValue
+                ? gpxWaypoint.WithTimestampUtc(latLng.Timestamp.Value.ToUniversalTime())
+                : gpxWaypoint;
         }
 
-        private GpxTrackSegment ToGpxTraclSegment(RouteSegmentData segmentData)
+        private GpxTrackSegment ToGpxTrackSegment(RouteSegmentData segmentData)
         {
             return new GpxTrackSegment(
                 waypoints: new ImmutableGpxWaypointTable(segmentData.Latlngs.Select(ToGpxWaypoint)),

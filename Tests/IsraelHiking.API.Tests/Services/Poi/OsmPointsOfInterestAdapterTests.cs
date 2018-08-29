@@ -132,10 +132,10 @@ namespace IsraelHiking.API.Tests.Services.Poi
                             {
                                 new RouteSegmentData
                                 {
-                                    Latlngs = new List<LatLng>
+                                    Latlngs = new List<LatLngTime>
                                     {
-                                        new LatLng(0,0),
-                                        new LatLng(0.1,0.1)
+                                        new LatLngTime(0,0),
+                                        new LatLngTime(0.1,0.1)
                                     }
                                 },
                                 new RouteSegmentData()

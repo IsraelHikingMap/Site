@@ -18,11 +18,11 @@ namespace IsraelHiking.Common
         [JsonProperty("routePoint")]
         public LatLng RoutePoint { get; set; }
         [JsonProperty("latlngs")]
-        public List<LatLng> Latlngs { get; set; }
+        public List<LatLngTime> Latlngs { get; set; }
         
         public RouteSegmentData()
         {
-            Latlngs = new List<LatLng>();
+            Latlngs = new List<LatLngTime>();
         }
     }
 }

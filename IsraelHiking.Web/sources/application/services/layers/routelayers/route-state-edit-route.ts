@@ -186,11 +186,11 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
         this.context.route.segments[this.selectedRouteSegmentIndex].routingType = this.context.route.properties.currentRoutingType;
         let selectedRouteSegmentLatlngs = this.context.route.segments[this.selectedRouteSegmentIndex].latlngs;
-        selectedRouteSegmentLatlngs[selectedRouteSegmentLatlngs.length - 1] = snappingResponse.latlng;
+        selectedRouteSegmentLatlngs[selectedRouteSegmentLatlngs.length - 1] = snappingResponse.latlng as Common.ILatLngTime;
         let chain = Promise.resolve({});
         let selectedRouteSegmentIndex = this.selectedRouteSegmentIndex; // closure
         if (this.selectedRouteSegmentIndex === 0) {
-            this.context.route.segments[0].latlngs = [snappingResponse.latlng, snappingResponse.latlng];
+            this.context.route.segments[0].latlngs = [snappingResponse.latlng, snappingResponse.latlng] as Common.ILatLngTime[];
             chain = chain.then(() => this.context.elevationProvider.updateHeights(this.context.route.segments[0].latlngs));
         } else if (this.selectedRouteSegmentIndex > 0) {
             chain = chain.then(() => this.runRouting(selectedRouteSegmentIndex - 1, selectedRouteSegmentIndex));
@@ -234,7 +234,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         this.context.route.segments[this.selectedRouteSegmentIndex].routePointMarker = this.createRouteMarker(snappingResponse.latlng);
         this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
         let selectedSegmentLatlngs = this.context.route.segments[this.selectedRouteSegmentIndex].latlngs;
-        selectedSegmentLatlngs[selectedSegmentLatlngs.length - 1] = snappingResponse.latlng;
+        selectedSegmentLatlngs[selectedSegmentLatlngs.length - 1] = snappingResponse.latlng as Common.ILatLngTime;
         let selectedRouteSegmentIndex = this.selectedRouteSegmentIndex; // closure;
         this.runRouting(selectedRouteSegmentIndex - 1, selectedRouteSegmentIndex)
             .then(() => this.runRouting(selectedRouteSegmentIndex, selectedRouteSegmentIndex + 1))

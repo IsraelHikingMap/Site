@@ -143,9 +143,10 @@ export class MapService {
     public routesJsonToRoutesObject(routes: Common.RouteData[]) {
         for (let route of routes) {
             for (let segment of route.segments) {
-                let latlngs = [] as L.LatLng[];
+                let latlngs = [] as Common.ILatLngTime[];
                 for (let latlng of segment.latlngs) {
-                    let fullLatLng = L.latLng(latlng.lat, latlng.lng, latlng.alt);
+                    let fullLatLng = L.latLng(latlng.lat, latlng.lng, latlng.alt) as Common.ILatLngTime;
+                    fullLatLng.timestamp = latlng.timestamp;
                     latlngs.push(fullLatLng);
                 }
                 segment.latlngs = latlngs;

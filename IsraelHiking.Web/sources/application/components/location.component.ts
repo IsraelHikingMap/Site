@@ -104,7 +104,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     private updateMarkerPosition(position: Position) {
-        let latLng = L.latLng(position.coords.latitude, position.coords.longitude);
+        let latLng = L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude);
         let radius = position.coords.accuracy;
         if (this.locationMarker != null) {
             this.locationMarker.setLatLng(latLng);
@@ -141,12 +141,13 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     private updateRecordingLine(position: Position) {
-        let latLng = L.latLng(position.coords.latitude, position.coords.longitude);
+        let latLng = L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude) as Common.ILatLngTime;
+        latLng.timestamp = new Date(position.timestamp);
         if (this.routeLayer == null) {
             return;
         }
         if (this.routeLayer.route.segments.length === 0) {
-            this.routeLayer.route.segments.push({ latlngs: [latLng], routePoint: latLng, routingType: "Hike" } as IRouteSegment);
+            this.routeLayer.route.segments.push({ latlngs: [latLng], routePoint: latLng as L.LatLng, routingType: "Hike" } as IRouteSegment);
         } else {
             let segment = this.routeLayer.getLastSegment();
             segment.latlngs.push(latLng);

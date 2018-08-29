@@ -351,7 +351,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         return this.route.segments[this.route.segments.length - 1];
     }
 
-    getLastLatLng(): L.LatLng {
+    getLastLatLng(): Common.ILatLngTime {
         let lastSegmentLatLngs = this.getLastSegment().latlngs;
         return lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
     }

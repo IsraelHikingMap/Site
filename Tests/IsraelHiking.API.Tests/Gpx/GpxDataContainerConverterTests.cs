@@ -45,7 +45,7 @@ namespace IsraelHiking.API.Tests.Gpx
                         Markers = new List<MarkerData> { new MarkerData { Latlng = new LatLng { Lat = 1, Lng = 2 } } },
                         Segments = new List<RouteSegmentData>
                         {
-                            new RouteSegmentData {Latlngs = new List<LatLng> {new LatLng {Lat = 3, Lng = 4, Alt = 5}}}
+                            new RouteSegmentData {Latlngs = new List<LatLngTime> {new LatLngTime { Lat = 3, Lng = 4, Alt = 5}}}
                         }
                     }
                 }
@@ -156,10 +156,10 @@ namespace IsraelHiking.API.Tests.Gpx
                         Segments = new List<RouteSegmentData>
                         {
                             new RouteSegmentData {
-                                Latlngs = new List<LatLng>
+                                Latlngs = new List<LatLngTime>
                                 {
-                                    new LatLng {Lat = 3, Lng = 4, Alt = 5},
-                                    new LatLng {Lat = 6, Lng = 7, Alt = 8}
+                                    new LatLngTime {Lat = 3, Lng = 4, Alt = 5},
+                                    new LatLngTime {Lat = 6, Lng = 7, Alt = 8}
                                 },
                                 RoutePoint = new LatLng { Lat = 6, Lng = 7}
                             }
@@ -170,10 +170,10 @@ namespace IsraelHiking.API.Tests.Gpx
                         Name = "name2",
                         Segments = new List<RouteSegmentData>
                         {
-                            new RouteSegmentData {Latlngs = new List<LatLng>
+                            new RouteSegmentData {Latlngs = new List<LatLngTime>
                             {
-                                new LatLng {Lat = 13, Lng = 14, Alt = 15},
-                                new LatLng {Lat = 16, Lng = 17, Alt = 18}
+                                new LatLngTime {Lat = 13, Lng = 14, Alt = 15},
+                                new LatLngTime {Lat = 16, Lng = 17, Alt = 18}
                             }}
                         }
                     }

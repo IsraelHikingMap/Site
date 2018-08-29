@@ -71,7 +71,7 @@ export interface IRouteLayer {
     makeAllPointsEditable(): void;
 
     getLastSegment(): IRouteSegment;
-    getLastLatLng(): L.LatLng;
+    getLastLatLng(): Common.ILatLngTime;
 
     setHiddenState(): void;
     setReadOnlyState(): void;

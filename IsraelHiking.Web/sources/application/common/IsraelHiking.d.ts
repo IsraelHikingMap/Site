@@ -1,5 +1,9 @@
 ﻿export type RoutingType = "Hike" | "Bike" | "4WD" | "None";
 
+export interface ILatLngTime extends L.LatLng {
+    timestamp: Date;
+}
+
 export interface ShareUrl {
     id: string;
     title: string;
@@ -35,7 +39,7 @@ export interface MarkerData {
 
 export interface RouteSegmentData {
     routePoint: L.LatLng;
-    latlngs: L.LatLng[];
+    latlngs: ILatLngTime[];
     routingType: RoutingType;
 }
 

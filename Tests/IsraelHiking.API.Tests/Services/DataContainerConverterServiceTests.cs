@@ -102,18 +102,18 @@ namespace IsraelHiking.API.Tests.Services
                         {
                             new RouteSegmentData
                             {
-                                Latlngs = new List<LatLng>
+                                Latlngs = new List<LatLngTime>
                                 {
-                                    new LatLng {Lat = 1, Lng = 2},
-                                    new LatLng {Lat = 3, Lng = 4}
+                                    new LatLngTime {Lat = 1, Lng = 2},
+                                    new LatLngTime {Lat = 3, Lng = 4}
                                 }
                             },
                             new RouteSegmentData
                             {
-                                Latlngs = new List<LatLng>
+                                Latlngs = new List<LatLngTime>
                                 {
-                                    new LatLng {Lat = 5, Lng = 6},
-                                    new LatLng {Lat = 7, Lng = 8}
+                                    new LatLngTime {Lat = 5, Lng = 6},
+                                    new LatLngTime {Lat = 7, Lng = 8}
                                 }
                             }
                         }
@@ -143,18 +143,18 @@ namespace IsraelHiking.API.Tests.Services
                         {
                             new RouteSegmentData
                             {
-                                Latlngs = new List<LatLng>
+                                Latlngs = new List<LatLngTime>
                                 {
-                                    new LatLng {Lat = 1, Lng = 2},
-                                    new LatLng {Lat = 3, Lng = 4}
+                                    new LatLngTime {Lat = 1, Lng = 2},
+                                    new LatLngTime {Lat = 3, Lng = 4}
                                 }
                             },
                             new RouteSegmentData
                             {
-                                Latlngs = new List<LatLng>
+                                Latlngs = new List<LatLngTime>
                                 {
-                                    new LatLng {Lat = 5, Lng = 6},
-                                    new LatLng {Lat = 7, Lng = 8}
+                                    new LatLngTime {Lat = 5, Lng = 6},
+                                    new LatLngTime {Lat = 7, Lng = 8}
                                 }
                             }
                         }
