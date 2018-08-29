@@ -65,9 +65,9 @@ export class FileService {
         return filesToReturn;
     }
 
-    public saveToFile = async (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<any> => {
+    public saveToFile = async (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<boolean> => {
         let responseData = await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
-        await this.saveBytesResponseToFile(responseData, fileName);
+        return await this.saveBytesResponseToFile(responseData, fileName);
     }
 
     public async openFromFile(file: File): Promise<Common.DataContainer> {
@@ -96,18 +96,20 @@ export class FileService {
         return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<Common.DataContainer>;
     }
 
-    private saveBytesResponseToFile = async (data: string, fileName: string) => {
+    private saveBytesResponseToFile = async (data: string, fileName: string): Promise<boolean> => {
         let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(data, "application/octet-stream");
-        await this.saveAsWorkAround(blobToSave, fileName);
+        return await this.saveAsWorkAround(blobToSave, fileName);
     }
 
     /**
      * This is an ugly workaround suggested here:
      * https://github.com/eligrey/FileSaver.js/issues/330
+     * Plus cordova file save.
+     * Return true if there's a need to show a toast message.
      * @param blob
      * @param fileName
      */
-    private saveAsWorkAround(blob: Blob, fileName: string): Promise<any> {
+    private saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             if (environment.isCordova) {
                 // HM TODO: this is only for android
@@ -121,7 +123,7 @@ export class FileService {
                                     fileEntry => {
                                         fileEntry.createWriter(fileWriter => {
                                             fileWriter.write(blob);
-                                            resolve();
+                                            resolve(true);
                                         });
                                     }, reject);
                             }, reject);
@@ -140,16 +142,16 @@ export class FileService {
                         save.click();
                         document.body.removeChild(save);
                         window.URL.revokeObjectURL(save.href);
-                        resolve();
+                        resolve(false);
                     } else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
                         // If iPhone etc
                         let url = window.URL.createObjectURL(blob);
                         window.location.href = url;
-                        resolve();
+                        resolve(false);
                     } else {
                         // Any other browser
                         this.nonAngularObjectsFactory.saveAs(blob, fileName);
-                        resolve();
+                        resolve(false);
                     }
                 };
 
@@ -159,11 +161,11 @@ export class FileService {
                 if (L.Browser.safari) {
                     let url = window.URL.createObjectURL(blob);
                     window.location.href = url;
-                    resolve();
+                    resolve(false);
                 } else {
                     // If normal browser use package Filesaver.js
                     this.nonAngularObjectsFactory.saveAs(blob, fileName);
-                    resolve();
+                    resolve(false);
                 }
             }
         });

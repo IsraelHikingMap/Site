@@ -48,8 +48,10 @@ export class FileComponent extends BaseMapComponent {
         }
         this.suppressEvents(e);
         try {
-            await this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data);
-            this.toastService.success(this.resources.fileSavedSuccessfully);
+            let showToast = await this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data);
+            if (showToast) {
+                this.toastService.success(this.resources.fileSavedSuccessfully);
+            }
         } catch (ex) {
             this.toastService.error(this.resources.unableToSaveToFile);
         }
