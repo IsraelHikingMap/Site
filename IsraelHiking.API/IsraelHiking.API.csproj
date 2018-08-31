@@ -22,7 +22,7 @@
     <PackageReference Include="NetTopologySuite.IO" Version="1.15.0-pre032" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="1.15.0" />
     <PackageReference Include="NetTopologySuite.IO.GPX" Version="0.2.0" />
-    <PackageReference Include="ProjNET4GeoAPI" Version="1.4.0" />
+    <PackageReference Include="ProjNET4GeoAPI" Version="1.4.1" />
     <PackageReference Include="SharpZipLib.NETStandard" Version="1.0.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="2.3.0" />
     <PackageReference Include="System.Drawing.Common" Version="4.5.0-preview1-25914-04" />

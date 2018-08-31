@@ -10,7 +10,7 @@
     <PackageReference Include="NetTopologySuite" Version="1.15.0" />
     <PackageReference Include="NetTopologySuite.IO.GeoJSON" Version="1.15.0" />
     <PackageReference Include="OsmSharp" Version="6.0.1" />
-    <PackageReference Include="ProjNET4GeoAPI" Version="1.4.0" />
+    <PackageReference Include="ProjNET4GeoAPI" Version="1.4.1" />
   </ItemGroup>
 
   <ItemGroup>
