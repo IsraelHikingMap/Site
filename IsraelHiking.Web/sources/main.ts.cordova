@@ -1,4 +1,4 @@
-import { enableProdMode } from "@angular/core";
+﻿import { enableProdMode } from "@angular/core";
 import { platformBrowserDynamic } from "@angular/platform-browser-dynamic";
 import { ApplicationModule } from "./application/application.module";
 import { environment } from "./environments/environment";
@@ -9,4 +9,8 @@ declare var cordova: any;
 if (environment.production) {
     enableProdMode();
 }
-platformBrowserDynamic().bootstrapModule(ApplicationModule);
+let onDeviceReady = () => {
+    window.open = cordova.InAppBrowser.open;
+    platformBrowserDynamic().bootstrapModule(ApplicationModule);
+};
+document.addEventListener("deviceready", onDeviceReady, false);
