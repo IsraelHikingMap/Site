@@ -4,6 +4,7 @@ import { EditMode } from "./iroute-state";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { SnappingService, ISnappingRouteResponse, ISnappingPointResponse } from "../../snapping.service";
+import { GeoLocationService } from "../../geo-location.service";
 import { ElevationProvider } from "../../elevation.provider";
 import * as Common from "../../../common/IsraelHiking";
 
@@ -50,6 +51,7 @@ export interface IRouteLayer {
     elevationProvider: ElevationProvider;
     injector: Injector;
     componentFactoryResolver: ComponentFactoryResolver;
+    geoLocationService: GeoLocationService;
 
     dataChanged: Subject<any>;
     polylineHovered: Subject<L.LatLng>;
@@ -77,4 +79,5 @@ export interface IRouteLayer {
     setReadOnlyState(): void;
     setEditRouteState(): void;
     setEditPoiState(): void;
+    setRecordingState(): void;
 }

@@ -93,7 +93,7 @@
     "ng": "ng",
     "build": "ng build",
     "test": "ng test",
-    "lint": "ng lint",
+    "lint": "ng lint --fix",
     "version": "node -v && npm -v && ng -v",
     "update": "ng update",
     "add-android": "cordova platform add android",

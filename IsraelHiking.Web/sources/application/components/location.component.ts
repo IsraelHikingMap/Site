@@ -52,9 +52,6 @@ export class LocationComponent extends BaseMapComponent {
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                 } else {
                     this.updateMarkerPosition(position);
-                    if (this.isRecording()) {
-                        this.updateRecordingLine(position);
-                    }
                 }
             });
     }
@@ -76,7 +73,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public isRecording() {
-        return this.geoLocationService.isRecording;
+        return this.routeLayer != null;
     }
 
     public toggleRecording() {
@@ -84,14 +81,10 @@ export class LocationComponent extends BaseMapComponent {
             let route = this.routeLayerFactory.createRoute(this.resources.route + " " + new Date().toISOString().split("T")[0]);
             this.routesService.addRoute(route);
             this.routeLayer = this.routesService.selectedRoute;
-            this.routeLayer.setReadOnlyState();
-            this.geoLocationService.startRecording();
+            this.routeLayer.setRecordingState();
         } else {
-            this.geoLocationService.stopRecording();
-            if (this.routeLayer) {
-                // HM TODO: change route layer state to editing enabled.
-                this.routeLayer = null;
-            }
+            this.routeLayer.setReadOnlyState();
+            this.routeLayer = null;
         }
     }
 
@@ -140,27 +133,10 @@ export class LocationComponent extends BaseMapComponent {
         this.mapService.map.flyTo(latLng);
     }
 
-    private updateRecordingLine(position: Position) {
-        let latLng = L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude) as Common.ILatLngTime;
-        latLng.timestamp = new Date(position.timestamp);
-        if (this.routeLayer == null) {
-            return;
-        }
-        if (this.routeLayer.route.segments.length === 0) {
-            this.routeLayer.route.segments.push({ latlngs: [latLng], routePoint: latLng as L.LatLng, routingType: "Hike" } as IRouteSegment);
-        } else {
-            let segment = this.routeLayer.getLastSegment();
-            segment.latlngs.push(latLng);
-            segment.routePoint = latLng;
-        }
-        this.routeLayer.setHiddenState();
-        this.routeLayer.setReadOnlyState();
-        this.routeLayer.raiseDataChanged();
-        return;
-    }
-
     private disableGeoLocation() {
-        // HM TODO: handle stop recording as well
+        if (this.isRecording()) {
+            this.toggleRecording();
+        }
         this.geoLocationService.disable();
         if (this.locationMarker != null) {
             this.mapService.map.removeLayer(this.locationMarker);

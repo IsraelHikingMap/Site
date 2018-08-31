@@ -17,10 +17,12 @@ import {
     EditModeString,
     ISnappingForRouteResponse
 } from "./iroute.layer";
+import { RouteStateBase } from "./route-state-base";
 import { RouteStateReadOnly } from "./route-state-read-only";
 import { RouteStateHidden } from "./route-state-hidden";
 import { RouteStateEditPoi } from "./route-state-edit-poi";
 import { RouteStateEditRoute } from "./route-state-edit-route";
+import { RouteStateRecording } from "./route-state-recording";
 import { UndoHandler } from "./undo-handler";
 import * as Common from "../../../common/IsraelHiking";
 
@@ -357,22 +359,27 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     }
 
     public setHiddenState(): void {
-        this.currentState.clear(); // initialize happens in new state constructor
-        this.currentState = new RouteStateHidden(this);
+        this.setState(RouteStateHidden);
     }
 
     public setReadOnlyState(): void {
-        this.currentState.clear(); // initialize happens in new state constructor
-        this.currentState = new RouteStateReadOnly(this);
+        this.setState(RouteStateReadOnly);
     }
 
     public setEditRouteState(): void {
-        this.currentState.clear(); // initialize happens in new state constructor
-        this.currentState = new RouteStateEditRoute(this);
+        this.setState(RouteStateEditRoute);
     }
 
     public setEditPoiState(): void {
+        this.setState(RouteStateEditPoi);
+    }
+
+    public setRecordingState(): void {
+        this.setState(RouteStateRecording);
+    }
+
+    private setState<State extends RouteStateBase>(type: { new(layer: IRouteLayer): State; }): void {
         this.currentState.clear(); // initialize happens in new state constructor
-        this.currentState = new RouteStateEditPoi(this);
+        this.currentState = new type(this);
     }
 }

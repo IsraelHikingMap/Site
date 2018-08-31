@@ -2,6 +2,7 @@ import { Injectable, EventEmitter } from "@angular/core";
 import * as L from "leaflet";
 
 import { environment } from "../../environments/environment";
+import * as Common from "../common/IsraelHiking";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 
@@ -26,16 +27,14 @@ export class GeoLocationService {
     private state: GeoLocationServiceState;
     private watchNumber: number;
 
-    public isRecording: boolean;
     public positionChanged: EventEmitter<Position>;
-    public currentLocation: L.LatLng;
+    public currentLocation: Common.ILatLngTime;
 
     constructor() {
         this.watchNumber = -1;
         this.positionChanged = new EventEmitter<Position>();
         this.state = "disabled";
         this.currentLocation = null;
-        this.isRecording = false;
         this.configureBackgroundService();
     }
 
@@ -66,17 +65,7 @@ export class GeoLocationService {
     }
 
     public canRecord(): boolean {
-        return this.state === "tracking"; // && environment.isCordova;
-    }
-
-    public stopRecording() {
-        console.log("[DEBUG] start recording");
-        this.isRecording = false;
-    }
-
-    public startRecording() {
-        console.log("[DEBUG] stop recording");
-        this.isRecording = true;
+        return this.state === "tracking" && environment.isCordova;
     }
 
     private startWatching() {
@@ -99,7 +88,9 @@ export class GeoLocationService {
             this.watchNumber = window.navigator.geolocation.watchPosition(
                 (position: Position): void => {
                     this.state = "tracking";
-                    this.currentLocation = L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude);
+                    this.currentLocation =
+                        L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude) as Common.ILatLngTime;
+                    this.currentLocation.timestamp = new Date(position.timestamp);
                     this.positionChanged.next(position);
                 },
                 (err) => {
@@ -149,7 +140,8 @@ export class GeoLocationService {
         BackgroundGeolocation.on("location", location => {
             console.log("[INFO] On location", location);
             this.state = "tracking";
-            this.currentLocation = L.latLng(location.latitude, location.longitude, location.altitude);
+            this.currentLocation = L.latLng(location.latitude, location.longitude, location.altitude) as Common.ILatLngTime;
+            this.currentLocation.timestamp = new Date();
             let position = {
                 coords: {
                     accuracy: location.accuracy,
