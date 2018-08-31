@@ -33,10 +33,10 @@ $AddAndroid = "npm run add-android"
 Write-Host $AddAndroid
 Invoke-Expression $AddAndroid
 
-$buildApk = "npm run build-apk"
+$buildApk = "npm run build-apk | out-null"
 Write-Host $buildApk
 Invoke-Expression $buildApk
 
-Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\release\app-release.apk
+Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
