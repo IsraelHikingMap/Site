@@ -57,12 +57,15 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public toggleTracking() {
+        if (this.isLoading()) {
+            this.disableGeoLocation();
+        }
         if (this.isActive() && this.isFollowing) {
             this.disableGeoLocation();
         } else if (!this.isActive()) {
             this.geoLocationService.enable();
             this.isFollowing = true;
-        } else {
+        } else if (this.isActive() && !this.isFollowing) {
             this.mapService.map.flyTo(this.locationMarker.getLatLng());
             this.isFollowing = true;
         }
@@ -88,8 +91,12 @@ export class LocationComponent extends BaseMapComponent {
         }
     }
 
+    public isDisabled() {
+        return this.geoLocationService.getState() === "disabled";
+    }
+
     public isActive() {
-        return this.geoLocationService.getState() !== "disabled";
+        return this.geoLocationService.getState() === "tracking";
     }
 
     public isLoading() {

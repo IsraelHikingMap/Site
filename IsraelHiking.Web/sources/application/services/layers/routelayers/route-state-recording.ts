@@ -11,7 +11,7 @@ export class RouteStateRecording extends RouteStateBase {
 
     constructor(context: IRouteLayer) {
         super(context);
-
+        this.initialize();
     }
 
     public initialize(): void {
