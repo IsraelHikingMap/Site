@@ -115,7 +115,7 @@ export class LayersService {
 
         let hikingTrailsOverlay = this.addOverlayFromData({
             key: LayersService.HIKING_TRAILS,
-            address: Urls.OVERLAY_TILES_ADDRESS,
+            address: Urls.baseTilesAddress + Urls.OVERLAY_TILES_ADDRESS,
             minZoom: MapLayersFactory.MIN_ZOOM,
             maxZoom: MapLayersFactory.MAX_NATIVE_ZOOM
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
@@ -123,7 +123,7 @@ export class LayersService {
 
         let bicycleTrailsOverlay = this.addOverlayFromData({
             key: LayersService.BICYCLE_TRAILS,
-            address: Urls.OVERLAY_MTB_ADDRESS,
+            address: Urls.baseTilesAddress + Urls.OVERLAY_MTB_ADDRESS,
             minZoom: MapLayersFactory.MIN_ZOOM,
             maxZoom: MapLayersFactory.MAX_NATIVE_ZOOM
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
