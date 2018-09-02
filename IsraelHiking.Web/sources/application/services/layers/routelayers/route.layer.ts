@@ -7,14 +7,13 @@ import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { GeoLocationService } from "../../geo-location.service";
 import { ElevationProvider } from "../../elevation.provider";
-import { IRouteState, EditMode } from "./iroute-state";
+import { IRouteState, RouteStateName } from "./iroute-state";
 import {
     IRouteLayer,
     IRoute,
     IRouteProperties,
     IRouteSegment,
     IMarkerWithData,
-    EditModeString,
     ISnappingForRouteResponse
 } from "./iroute.layer";
 import { RouteStateBase } from "./route-state-base";
@@ -23,6 +22,7 @@ import { RouteStateHidden } from "./route-state-hidden";
 import { RouteStateEditPoi } from "./route-state-edit-poi";
 import { RouteStateEditRoute } from "./route-state-edit-route";
 import { RouteStateRecording } from "./route-state-recording";
+import { RouteStateRecordingPoi } from "./route-state-recording-poi";
 import { UndoHandler } from "./undo-handler";
 import * as Common from "../../../common/IsraelHiking";
 
@@ -65,25 +65,32 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         return this;
     }
 
-    public getEditMode(): EditMode {
-        return this.currentState.getEditMode();
+    public getStateName(): RouteStateName {
+        return this.currentState.getStateName();
     }
 
-    public setEditMode(editMode: EditMode) {
-        switch (editMode) {
-            case EditModeString.poi:
+    public setState(stateName: RouteStateName) {
+        switch (stateName) {
+            case "Poi":
                 this.setEditPoiState();
                 break;
-            case EditModeString.route:
+            case "Route":
                 this.setEditRouteState();
                 break;
-            case EditModeString.none:
-                if (this.route.properties.isVisible) {
-                    this.setReadOnlyState();
-                } else {
-                    this.setHiddenState();
-                }
+            case "Hidden":
+                this.setHiddenState();
                 break;
+            case "ReadOnly":
+                this.setReadOnlyState();
+                break;
+            case "Recording":
+                this.setRecordingState();
+                break;
+            case "RecordingPoi":
+                this.setRecordingPoiState();
+                break;
+            default:
+                throw new Error(`Invalid state: ${stateName}`);
         }
     }
 
@@ -264,8 +271,8 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         this.dataChanged.next();
     }
 
-    public isUndoDisbaled = (): boolean => {
-        return this.undoHandler.isUndoDisbaled() || this.currentState.getEditMode() === EditModeString.none;
+    public isUndoDisabled = (): boolean => {
+        return this.undoHandler.isUndoDisabled();
     }
 
     public reverse = () => {
@@ -324,7 +331,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         if (this.route.segments.length === 0) {
             return;
         }
-        let editMode = this.getEditMode();
+        let stateName = this.getStateName();
         this.setHiddenState();
         let segments = [];
         for (let segment of this.route.segments) {
@@ -346,7 +353,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         }
         this.route.segments = segments;
         this.raiseDataChanged();
-        this.setEditMode(editMode);
+        this.setState(stateName);
     }
 
     getLastSegment(): IRouteSegment {
@@ -359,26 +366,30 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
     }
 
     public setHiddenState(): void {
-        this.setState(RouteStateHidden);
+        this.setStateImplementation(RouteStateHidden);
     }
 
     public setReadOnlyState(): void {
-        this.setState(RouteStateReadOnly);
+        this.setStateImplementation(RouteStateReadOnly);
     }
 
     public setEditRouteState(): void {
-        this.setState(RouteStateEditRoute);
+        this.setStateImplementation(RouteStateEditRoute);
     }
 
     public setEditPoiState(): void {
-        this.setState(RouteStateEditPoi);
+        this.setStateImplementation(RouteStateEditPoi);
     }
 
     public setRecordingState(): void {
-        this.setState(RouteStateRecording);
+        this.setStateImplementation(RouteStateRecording);
     }
 
-    private setState<State extends RouteStateBase>(type: { new(layer: IRouteLayer): State; }): void {
+    public setRecordingPoiState(): void {
+        this.setStateImplementation(RouteStateRecordingPoi);
+    }
+
+    private setStateImplementation<State extends RouteStateBase>(type: { new(layer: IRouteLayer): State; }): void {
         this.currentState.clear(); // initialize happens in new state constructor
         this.currentState = new type(this);
     }

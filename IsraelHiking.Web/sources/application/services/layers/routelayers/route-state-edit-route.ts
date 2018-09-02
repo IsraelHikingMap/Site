@@ -1,15 +1,16 @@
 import * as L from "leaflet";
 import * as _ from "lodash";
 
-import { EditMode } from "./iroute-state";
+import { RouteStateName } from "./iroute-state";
 import { RouteStateEditBase } from "./route-state-edit-base";
-import { IRouteLayer, EditModeString, IRouteSegment } from "./iroute.layer";
+import { IRouteLayer, IRouteSegment } from "./iroute.layer";
 import { HoverHandlerState } from "./hover-handler-base";
 import { HoverHandlerRoute } from "./hover-handler-route";
 import { IconsService } from "../../icons.service";
 import { RouteMarkerPopupComponent } from "../../../components/markerpopup/route-marker-popup.component";
+import { RouteStateHelper } from "./route-state-helper";
+import { RouteStatePoiHelper } from "./route-state-poi-helper";
 import * as Common from "../../../common/IsraelHiking";
-
 
 export class RouteStateEditRoute extends RouteStateEditBase {
     private selectedRouteSegmentIndex: number;
@@ -23,7 +24,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
 
     public initialize() {
         for (let routeMarkerWithData of this.context.route.markers) {
-            routeMarkerWithData.marker = this.createPoiMarker(routeMarkerWithData, false);
+            routeMarkerWithData.marker = RouteStatePoiHelper.createPoiMarker(routeMarkerWithData, false, this.context);
         }
         super.initialize();
         for (let segment of this.context.route.segments) {
@@ -65,8 +66,8 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         }
     }
 
-    public getEditMode(): EditMode {
-        return EditModeString.route;
+    public getStateName(): RouteStateName {
+        return "Route";
     }
 
     private createRouteMarker = (latlng: L.LatLng): L.Marker => {
@@ -289,7 +290,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
     }
 
     private removeSegmentLayers = (segment: IRouteSegment) => {
-        this.destoryMarker(segment.routePointMarker);
+        RouteStateHelper.destroyMarker(segment.routePointMarker, this.context);
         this.context.mapService.map.removeLayer(segment.polyline);
         this.context.route.segments.splice(this.context.route.segments.indexOf(segment), 1);
     }

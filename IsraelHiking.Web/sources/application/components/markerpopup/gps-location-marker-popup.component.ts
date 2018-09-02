@@ -5,8 +5,8 @@ import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
-import {RouteLayerFactory} from "../../services/layers/routelayers/route-layer.factory";
-import {IMarkerWithData} from "../../services/layers/routelayers/iroute.layer";
+import { RouteLayerFactory } from "../../services/layers/routelayers/route-layer.factory";
+import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
 
 
 @Component({
@@ -24,15 +24,8 @@ export class GpsLocationMarkerPopupComponent extends BaseMarkerPopupComponent {
     }
 
     public addPointToRoute() {
-        if (this.routesService.selectedRoute == null && this.routesService.routes.length > 0) {
-            this.routesService.changeRouteState(this.routesService.routes[0]);
-        }
-        if (this.routesService.routes.length === 0) {
-            let properties = this.routeLayerFactory.createRoute(this.routesService.createRouteName()).properties;
-            this.routesService.addRoute({ properties: properties, segments: [], markers: [] });
-            this.routesService.selectedRoute.setEditMode("None");
-        }
-        let editMode = this.routesService.selectedRoute.getEditMode();
+        let selectedRoute = this.routesService.getOrCreateSelectedRoute();
+        let stateName = selectedRoute.getStateName();
         this.routesService.selectedRoute.setHiddenState();
         this.routesService.selectedRoute.route.markers.push({
             latlng: this.latLng,
@@ -43,7 +36,7 @@ export class GpsLocationMarkerPopupComponent extends BaseMarkerPopupComponent {
             urls: [],
             marker: null
         } as IMarkerWithData);
-        this.routesService.selectedRoute.setEditMode(editMode);
+        this.routesService.selectedRoute.setState(stateName);
         this.routesService.selectedRoute.raiseDataChanged();
         this.marker.closePopup();
     }

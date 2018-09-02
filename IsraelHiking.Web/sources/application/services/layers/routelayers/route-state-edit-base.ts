@@ -3,6 +3,7 @@
 import { RouteStateBase } from "./route-state-base";
 import { IRouteLayer } from "./iroute.layer";
 import { HoverHandlerBase, HoverHandlerState } from "./hover-handler-base";
+import { RouteStateHelper } from "./route-state-helper";
 
 export abstract class RouteStateEditBase extends RouteStateBase {
     protected hoverHandler: HoverHandlerBase;
@@ -26,13 +27,7 @@ export abstract class RouteStateEditBase extends RouteStateBase {
     }
 
     public clear() {
-        for (let segment of this.context.route.segments) {
-            this.context.mapService.map.removeLayer(segment.polyline);
-            this.destoryMarker(segment.routePointMarker);
-        }
-        for (let marker of this.context.route.markers) {
-            this.destoryMarker(marker.marker);
-        }
+        RouteStateHelper.removeLayersFromMap(this.context);
         this.context.snappingService.enable(false);
         this.context.mapService.map.off("mousemove", this.hoverHandler.onMouseMove, this.hoverHandler);
         this.context.mapService.map.off("click", this.addPoint, this);

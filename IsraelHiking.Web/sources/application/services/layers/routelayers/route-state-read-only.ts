@@ -1,18 +1,19 @@
 import * as L from "leaflet";
 import * as _ from "lodash";
 
-import { EditMode } from "./iroute-state";
+import { RouteStateName } from "./iroute-state";
 import { RouteStateBase } from "./route-state-base";
-import { IRouteLayer, EditModeString } from "./iroute.layer";
-import { IconsService } from "../../icons.service";
+import { IRouteLayer } from "./iroute.layer";
+import { RouteStateHelper } from "./route-state-helper";
+import { RouteStatePoiHelper } from "./route-state-poi-helper";
 import * as Common from "../../../common/IsraelHiking";
 
 export class RouteStateReadOnly extends RouteStateBase {
-    private readOnlyLayers: L.LayerGroup;
+    private polylines: L.LayerGroup;
 
     constructor(context: IRouteLayer) {
         super(context);
-        this.readOnlyLayers = L.layerGroup([]);
+        this.polylines = L.layerGroup([]);
         this.initialize();
     }
 
@@ -21,67 +22,37 @@ export class RouteStateReadOnly extends RouteStateBase {
         routePathOptions.dashArray = "30 10";
         routePathOptions.className = "segment-readonly-indicator";
         let polyline = L.polyline(latlngs, routePathOptions);
-        this.readOnlyLayers.addLayer(polyline);
-    }
-
-    private createStartAndEndMarkers() {
-        if (this.context.route.segments.length <= 0) {
-            return;
-        }
-
-        let startLatLng = this.context.route.segments[0].latlngs[0];
-        let pathOptions = this.context.route.properties.pathOptions;
-        this.readOnlyLayers.addLayer(L.marker(startLatLng,
-            {
-                opacity: pathOptions.opacity,
-                draggable: false,
-                clickable: false,
-                icon: IconsService.createRoundIcon("green")
-            }));
-        let endLatLng = this.context.getLastLatLng();
-        this.readOnlyLayers.addLayer(L.marker(endLatLng,
-            {
-                opacity: pathOptions.opacity,
-                draggable: false,
-                clickable: false,
-                icon: IconsService.createRoundIcon("red")
-            }));
+        this.polylines.addLayer(polyline);
     }
 
     public initialize() {
-        this.context.mapService.map.addLayer(this.readOnlyLayers);
-        this.readOnlyLayers.clearLayers();
+        this.context.mapService.map.addLayer(this.polylines);
+        this.polylines.clearLayers();
         if (this.context.route.segments.length > 0) {
-            for (let segment of this.context.route.segments) {
-                segment.routePointMarker = null;
-                segment.polyline = null;
-            }
             let groupedLatLngs = this.context.mapService.getGroupedLatLngForAntPath(this.context.route.segments);
             for (let group of groupedLatLngs) {
                 this.addPolyline(group);
             }
         }
         for (let marker of this.context.route.markers) {
-            marker.marker = this.createPoiMarker(marker, false);
-            let component = this.addComponentToPoiMarker(marker.marker);
+            marker.marker = RouteStatePoiHelper.createPoiMarker(marker, false, this.context);
+            let component = RouteStatePoiHelper.addComponentToPoiMarker(marker.marker, this.context);
             component.isEditMode = false;
             component.changeToEditMode = () => this.changeStateToEditPoi(marker.marker);
         }
         this.context.mapService.map.on("mousemove", this.onMouseMove);
-        this.createStartAndEndMarkers();
+        RouteStateHelper.createStartAndEndMarkers(this.context);
     }
 
     public clear() {
-        for (let marker of this.context.route.markers) {
-            this.destoryMarker(marker.marker);
-        }
+        RouteStateHelper.removeLayersFromMap(this.context);
         this.context.mapService.map.off("mousemove", this.onMouseMove);
-        this.readOnlyLayers.clearLayers();
-        this.context.mapService.map.removeLayer(this.readOnlyLayers);
+        this.polylines.clearLayers();
+        this.context.mapService.map.removeLayer(this.polylines);
     }
 
-    public getEditMode(): EditMode {
-        return EditModeString.none;
+    public getStateName(): RouteStateName {
+        return "ReadOnly";
     }
 
     private onMouseMove = (e: L.LeafletMouseEvent): void => {

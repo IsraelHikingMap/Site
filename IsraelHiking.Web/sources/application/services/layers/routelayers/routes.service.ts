@@ -119,13 +119,13 @@ export class RoutesService implements IRoutesService {
             if (this.selectedRoute == null) {
                 this.selectedRoute = this.routes[0];
             }
-            let editMode = this.selectedRoute.getEditMode();
+            let stateName = this.selectedRoute.getStateName();
             this.selectedRoute.setHiddenState();
             for (let marker of routes[0].markers) {
                 this.selectedRoute.route.markers.push(marker as IMarkerWithData);
             }
 
-            this.selectedRoute.setEditMode(editMode);
+            this.selectedRoute.setState(stateName);
             return;
         }
         for (let routeData of routes) {
@@ -210,5 +210,17 @@ export class RoutesService implements IRoutesService {
         }
         this.selectedRoute.setEditRouteState();
         this.selectedRoute.raiseDataChanged();
+    }
+
+    public getOrCreateSelectedRoute(): IRouteLayer {
+        if (this.selectedRoute == null && this.routes.length > 0) {
+            this.changeRouteState(this.routes[0]);
+        }
+        if (this.routes.length === 0) {
+            let properties = this.routeLayerFactory.createRoute(this.createRouteName()).properties;
+            this.addRoute({ properties: properties, segments: [], markers: [] });
+            this.selectedRoute.setState("ReadOnly");
+        }
+        return this.selectedRoute;
     }
 }

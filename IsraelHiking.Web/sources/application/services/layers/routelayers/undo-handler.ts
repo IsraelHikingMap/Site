@@ -7,7 +7,7 @@
     }
 
     public pop = () => {
-        if (this.isUndoDisbaled()) {
+        if (this.isUndoDisabled()) {
             return;
         }
         this.undoStack.pop();
@@ -17,7 +17,7 @@
         return this.undoStack[this.undoStack.length - 1];
     }
 
-    public isUndoDisbaled = (): boolean => {
+    public isUndoDisabled = (): boolean => {
         return this.undoStack.length <= 1;
     }
 

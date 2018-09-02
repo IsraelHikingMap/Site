@@ -1,6 +1,6 @@
-import { EditMode } from "./iroute-state";
+import { RouteStateName } from "./iroute-state";
 import { RouteStateBase } from "./route-state-base";
-import { IRouteLayer, EditModeString } from "./iroute.layer";
+import { IRouteLayer } from "./iroute.layer";
 
 export class RouteStateHidden extends RouteStateBase {
     constructor(context: IRouteLayer) {
@@ -15,7 +15,7 @@ export class RouteStateHidden extends RouteStateBase {
         // no need to do anything
     }
 
-    public getEditMode(): EditMode {
-        return EditModeString.none;
+    public getStateName(): RouteStateName {
+        return "Hidden";
     }
 }

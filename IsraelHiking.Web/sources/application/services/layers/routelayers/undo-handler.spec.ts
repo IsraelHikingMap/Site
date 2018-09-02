@@ -4,13 +4,13 @@ describe("UndoHandler", () => {
     it("Should be created disable", () => {
         let undoHandler = new UndoHandler<number>();
 
-        expect(undoHandler.isUndoDisbaled).toBeTruthy();
+        expect(undoHandler.isUndoDisabled).toBeTruthy();
     });
 
     it("Should be created disable", () => {
         let undoHandler = new UndoHandler<number>();
 
-        expect(undoHandler.isUndoDisbaled()).toBeTruthy();
+        expect(undoHandler.isUndoDisabled()).toBeTruthy();
     });
 
     it("Should facilitate adding data", () => {
@@ -19,7 +19,7 @@ describe("UndoHandler", () => {
         undoHandler.addDataToUndoStack(42);
         undoHandler.addDataToUndoStack(7);
 
-        expect(undoHandler.isUndoDisbaled()).toBeFalsy();
+        expect(undoHandler.isUndoDisabled()).toBeFalsy();
         expect(undoHandler.top()).toBe(7);
     });
 

@@ -217,15 +217,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public async addPointToRoute() {
-        if (this.routesService.selectedRoute == null && this.routesService.routes.length > 0) {
-            this.routesService.changeRouteState(this.routesService.routes[0]);
-        }
-        if (this.routesService.routes.length === 0) {
-            let properties = this.routeLayerFactory.createRoute(this.routesService.createRouteName()).properties;
-            this.routesService.addRoute({ properties: properties, segments: [], markers: [] });
-            this.routesService.selectedRoute.setEditMode("None");
-        }
-        let editMode = this.routesService.selectedRoute.getEditMode();
+        let selectedRoute = this.routesService.getOrCreateSelectedRoute();
+        let stateName = selectedRoute.getStateName();
         this.routesService.selectedRoute.setHiddenState();
         let icon = "icon-star";
         let id = "";
@@ -243,8 +236,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             urls: urls,
             marker: null
         } as IMarkerWithData);
-        this.routesService.selectedRoute.setEditMode(editMode);
-        this.routesService.selectedRoute.raiseDataChanged();
+        selectedRoute.setState(stateName);
+        selectedRoute.raiseDataChanged();
         this.clear();
     }
 

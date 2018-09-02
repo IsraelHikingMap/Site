@@ -1,18 +1,12 @@
 ﻿import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { Subject } from "rxjs";
-import { EditMode } from "./iroute-state";
+import { RouteStateName } from "./iroute-state";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { SnappingService, ISnappingRouteResponse, ISnappingPointResponse } from "../../snapping.service";
 import { GeoLocationService } from "../../geo-location.service";
 import { ElevationProvider } from "../../elevation.provider";
 import * as Common from "../../../common/IsraelHiking";
-
-export namespace EditModeString {
-    export const poi: EditMode = "POI";
-    export const none: EditMode = "None";
-    export const route: EditMode = "Route";
-}
 
 export interface IRouteSegment extends Common.RouteSegmentData {
     routePointMarker: L.Marker;
@@ -60,10 +54,10 @@ export interface IRouteLayer {
     setRouteProperties(properties: IRouteProperties): void;
     reverse(): void;
     undo(): void;
-    isUndoDisbaled(): boolean;
+    isUndoDisabled(): boolean;
     clear(): void;
-    getEditMode(): EditMode;
-    setEditMode(editMode: EditMode): void;
+    getStateName(): RouteStateName;
+    setState(stateName: RouteStateName): void;
     snapToSelf(latlng: L.LatLng): ISnappingRouteResponse;
     getSnappingForRoute(latlng: L.LatLng, isSnapToSelf?: boolean): ISnappingForRouteResponse;
     getSnappingForPoint(latlng: L.LatLng): ISnappingPointResponse;
@@ -80,4 +74,5 @@ export interface IRouteLayer {
     setEditRouteState(): void;
     setEditPoiState(): void;
     setRecordingState(): void;
+    setRecordingPoiState(): void;
 }

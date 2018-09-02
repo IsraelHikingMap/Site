@@ -69,7 +69,7 @@ describe("RouteLayer", () => {
 
     it("Should initialize with an empty route data", () => {
         expect(routeLayer.route.segments.length).toBe(0);
-        expect(routeLayer.getEditMode()).toBe("None");
+        expect(routeLayer.getStateName()).toBe("ReadOnly");
     });
 
     it("Can be added to the map", () => {
