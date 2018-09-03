@@ -1,4 +1,5 @@
 import { Component, ComponentFactoryResolver, Injector } from "@angular/core";
+import { LocalStorage } from "ngx-store";
 import * as L from "leaflet";
 
 import { ResourcesService } from "../services/resources.service";
@@ -10,8 +11,9 @@ import { GpsLocationMarkerPopupComponent } from "./markerpopup/gps-location-mark
 import { IconsService } from "../services/icons.service";
 import { RoutesService } from "../services/layers/routelayers/routes.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
-import { IRouteLayer, IRouteSegment } from "../services/layers/routelayers/iroute.layer";
+import { IRouteLayer } from "../services/layers/routelayers/iroute.layer";
 import * as Common from "../common/IsraelHiking";
+import RouteData = Common.RouteData;
 
 @Component({
     selector: "location-control",
@@ -19,6 +21,9 @@ import * as Common from "../common/IsraelHiking";
     styleUrls: ["./location.component.css"]
 })
 export class LocationComponent extends BaseMapComponent {
+
+    @LocalStorage()
+    private lastRecordedRoute: RouteData = null;
 
     private locationMarker: Common.IMarkerWithTitle;
     private accuracyCircle: L.Circle;
@@ -52,8 +57,23 @@ export class LocationComponent extends BaseMapComponent {
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                 } else {
                     this.updateMarkerPosition(position);
+                    if (this.routeLayer != null &&
+                        (this.routeLayer.getStateName() === "Recording" || this.routeLayer.getStateName() === "RecordingPoi")) {
+                        this.lastRecordedRoute = this.routeLayer.getData();
+                    }
                 }
             });
+        if (this.lastRecordedRoute != null) {
+            this.toastService.confirm(this.resources.continueRecording,
+                () => {
+                    this.toggleRecording();
+                    this.routeLayer.setData(this.lastRecordedRoute);
+                    this.toggleTracking();
+                },
+                () => {
+                    this.lastRecordedRoute = null;
+                }, "YesNo");
+        }
     }
 
     public toggleTracking() {
@@ -87,7 +107,9 @@ export class LocationComponent extends BaseMapComponent {
             this.routeLayer.setRecordingState();
         } else {
             this.routeLayer.setReadOnlyState();
+            // HM TODO: save to file?
             this.routeLayer = null;
+            this.lastRecordedRoute = null;
         }
     }
 

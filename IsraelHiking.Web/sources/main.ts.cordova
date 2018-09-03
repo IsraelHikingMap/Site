@@ -5,6 +5,9 @@ import { environment } from "./environments/environment";
 import "hammerjs";
 
 declare var cordova: any;
+declare var device: any;
+declare var navigator: any;
+declare var showShortBottom: (string) => void;
 
 if (environment.production) {
     enableProdMode();
@@ -12,5 +15,21 @@ if (environment.production) {
 let onDeviceReady = () => {
     window.open = cordova.InAppBrowser.open;
     platformBrowserDynamic().bootstrapModule(ApplicationModule);
+
+	var exitApp = false;
+	var interval = setInterval(() => { exitApp = false; }, 1000);
+    document.addEventListener("backbutton", (e) => {
+        e.preventDefault();
+        if (exitApp) {
+            clearInterval(interval);
+            (navigator.app && navigator.app.exitApp()) || (device && device.exitApp());
+        }
+        else {
+            exitApp = true;
+			(window as any).plugins.toast.showShortBottom("Click back again to close the app");
+            history.back();
+        } 
+    }, false);
+
 };
 document.addEventListener("deviceready", onDeviceReady, false);

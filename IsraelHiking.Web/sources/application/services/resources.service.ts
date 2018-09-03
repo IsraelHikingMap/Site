@@ -228,6 +228,7 @@ export class ResourcesService {
     public baseLayers: string;
     public overlays: string;
     public privateRoutes: string;
+    public runningInBackgroundText: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -267,6 +268,7 @@ export class ResourcesService {
     public unableToFindPoi: string;
     public wouldYouLikeToUpdate: string;
     public wouldYouLikeToUpdateThePointWithoutTheTitle: string;
+    public continueRecording: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -688,6 +690,7 @@ export class ResourcesService {
         this.baseLayers = this.gettextCatalog.getString("Base Layers");
         this.overlays = this.gettextCatalog.getString("Overlays");
         this.privateRoutes = this.gettextCatalog.getString("Private Routes");
+        this.runningInBackgroundText = this.gettextCatalog.getString("Running in the background");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -735,6 +738,7 @@ export class ResourcesService {
         this.wouldYouLikeToUpdate = this.gettextCatalog.getString("Would you like to update:");
         this.wouldYouLikeToUpdateThePointWithoutTheTitle = this.gettextCatalog
             .getString("Would you like to update the point without the title?");
+        this.continueRecording = this.gettextCatalog.getString("Last recording did not end well, would you like to continue it?");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");

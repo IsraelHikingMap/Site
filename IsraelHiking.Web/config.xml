@@ -44,6 +44,7 @@
         <variable name="MOTION_USAGE_DESCRIPTION" value="App requires motion detection" />
     </plugin>
     <plugin name="cordova-plugin-file" spec="^6.0.1" />
+    <plugin name="cordova-plugin-x-toast" spec="^2.7.0" />
     <engine name="android" spec="^7.0.0" />
     <engine name="browser" spec="^5.0.4" />
 </widget>

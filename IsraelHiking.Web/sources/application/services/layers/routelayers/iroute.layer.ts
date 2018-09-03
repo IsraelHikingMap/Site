@@ -63,6 +63,7 @@ export interface IRouteLayer {
     getSnappingForPoint(latlng: L.LatLng): ISnappingPointResponse;
     raiseDataChanged(): void;
     getData(): Common.RouteData;
+    setData(data: Common.RouteData): void;
     getBounds(): L.LatLngBounds;
     makeAllPointsEditable(): void;
 

@@ -2,6 +2,7 @@ import { Injectable, EventEmitter } from "@angular/core";
 import * as L from "leaflet";
 
 import { environment } from "../../environments/environment";
+import { ResourcesService } from "./resources.service";
 import * as Common from "../common/IsraelHiking";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
@@ -30,7 +31,7 @@ export class GeoLocationService {
     public positionChanged: EventEmitter<Position>;
     public currentLocation: Common.ILatLngTime;
 
-    constructor() {
+    constructor(private readonly resources: ResourcesService) {
         this.watchNumber = -1;
         this.positionChanged = new EventEmitter<Position>();
         this.state = "disabled";
@@ -72,11 +73,6 @@ export class GeoLocationService {
         if (environment.isCordova) {
             this.state = "searching";
             BackgroundGeolocation.checkStatus(status => {
-                console.log("[INFO] BackgroundGeolocation service is running", status.isRunning);
-                console.log("[INFO] BackgroundGeolocation services enabled", status.locationServicesEnabled);
-                console.log("[INFO] BackgroundGeolocation auth status: " + status.authorization);
-
-                // you don't need to check status before start (this is just the example)
                 if (!status.isRunning) {
                     BackgroundGeolocation.start(); // triggers start on start event
                 }
@@ -95,7 +91,6 @@ export class GeoLocationService {
                 },
                 (err) => {
                     // sending error will terminate the stream
-                    console.log(err);
                     this.positionChanged.next(null);
                     this.disable();
                 },
@@ -110,7 +105,6 @@ export class GeoLocationService {
         this.state = "disabled";
         this.currentLocation = null;
         if (environment.isCordova) {
-            console.log("[DEBUG] stop watching");
             BackgroundGeolocation.stop();
         }
         if (this.watchNumber !== -1) {
@@ -129,16 +123,15 @@ export class GeoLocationService {
             desiredAccuracy: BackgroundGeolocation.HIGH_ACCURACY,
             stationaryRadius: 10,
             distanceFilter: 5,
-            notificationTitle: "פועל ברקע",
-            notificationText: "מקליט מסלול",
+            notificationTitle: this.resources.israelHikingMap,
+            notificationText: this.resources.runningInBackgroundText,
             debug: false,
             interval: 1000,
             fastestInterval: 1000,
             activitiesInterval: 10000
         });
 
-        BackgroundGeolocation.on("location", location => {
-            console.log("[INFO] On location", location);
+        BackgroundGeolocation.on("location", (location: IBackgroundLocation) => {
             this.state = "tracking";
             this.currentLocation = L.latLng(location.latitude, location.longitude, location.altitude) as Common.ILatLngTime;
             this.currentLocation.timestamp = new Date();
@@ -156,20 +149,7 @@ export class GeoLocationService {
             this.positionChanged.next(position);
         });
 
-        BackgroundGeolocation.on("error", error => {
-            console.log("[ERROR] BackgroundGeolocation error:", error.code, error.message);
-        });
-
-        BackgroundGeolocation.on("start", () => {
-            console.log("[INFO] BackgroundGeolocation service has been started");
-        });
-
-        BackgroundGeolocation.on("stop", () => {
-            console.log("[INFO] BackgroundGeolocation service has been stopped");
-        });
-
         BackgroundGeolocation.on("authorization", status => {
-            console.log("[INFO] BackgroundGeolocation authorization status: " + status);
             if (status !== BackgroundGeolocation.AUTHORIZED) {
                 // we need to set delay or otherwise alert may not be shown
                 setTimeout(() => {
@@ -179,14 +159,6 @@ export class GeoLocationService {
                     }
                 }, 1000);
             }
-        });
-
-        BackgroundGeolocation.on("background", () => {
-            console.log("[INFO] App is in background");
-        });
-
-        BackgroundGeolocation.on("foreground", () => {
-            console.log("[INFO] App is in foreground");
         });
     }
 }

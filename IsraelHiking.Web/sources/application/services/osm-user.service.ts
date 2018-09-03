@@ -134,9 +134,9 @@ export class OsmUserService {
         await this.refreshDetails();
     }
 
-    private getTraces = (): Promise<any> => {
-        let promise = this.httpClient.get(Urls.osmTrace).toPromise();
-        promise.then((response: ITrace[]) => {
+    private getTraces = async (): Promise<any> => {
+        try {
+            let response = await this.httpClient.get(Urls.osmTrace).toPromise() as ITrace[];
             this.traces.splice(0);
             let files = ([] as ITrace[]).concat(response || []);
             for (let traceJson of files) {
@@ -151,10 +151,9 @@ export class OsmUserService {
                 this.traces.push(traceJson);
             }
             this.tracesChanged.next();
-        }, () => {
+        } catch (ex) {
             console.error("Unable to get user's traces.");
-        });
-        return promise;
+        }
     }
 
     public updateOsmTrace = (trace: ITrace): Promise<any> => {
