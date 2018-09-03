@@ -86,7 +86,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.nakebCreateHikeAddress = "";
         this.lastShareUrl = null;
         let shareUrl = this.dataContainerService.getShareUrl();
-        this.canUpdate = shareUrl != null && this.osmUserService.shareUrls.find(s => s.id === shareUrl.id) != null;
+        this.canUpdate = shareUrl != null && this.osmUserService.shareUrls.find(s => s.id === shareUrl.id) != null && this.osmUserService.isLoggedIn();
         this.updateCurrentShare = false;
         this.offroadPublicTrack = false;
         this.offroadRequest = {} as IOffroadPostRequest;
