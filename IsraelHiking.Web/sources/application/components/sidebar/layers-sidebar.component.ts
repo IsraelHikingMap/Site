@@ -41,7 +41,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     public layersExpandedState: WebstorableArray<IExpandableItem> = [
         { name: "Base Layers", isExpanded: true },
         { name: "Overlays", isExpanded: true },
-        { name: "pPrivate Routes", isExpanded: true }
+        { name: "Private Routes", isExpanded: true }
     ] as any;
 
     @LocalStorage()

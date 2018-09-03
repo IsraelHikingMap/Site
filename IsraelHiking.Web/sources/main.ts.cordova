@@ -17,7 +17,7 @@ let onDeviceReady = () => {
     platformBrowserDynamic().bootstrapModule(ApplicationModule);
 
 	var exitApp = false;
-	var interval = setInterval(() => { exitApp = false; }, 1000);
+	var interval = setInterval(() => { exitApp = false; }, 5000);
     document.addEventListener("backbutton", (e) => {
         e.preventDefault();
         if (exitApp) {

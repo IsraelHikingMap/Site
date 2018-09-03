@@ -29,9 +29,11 @@ export class RouteStateRecordingPoi extends RouteStateBase {
             RouteStatePoiHelper.addComponentToPoiMarkerAndEvents(routeMarkerWithData.marker, this.context);
         }
 
-        this.context.mapService.map.on("click", (e: L.LeafletMouseEvent) => {
-            RouteStatePoiHelper.addPoint(e, this.context);
-        });
+        this.context.mapService.map.on("click", this.addPoint, this);
+    }
+
+    private addPoint(e: L.LeafletMouseEvent) {
+        RouteStatePoiHelper.addPoint(e, this.context);
     }
 
     private addPosition() {
@@ -45,6 +47,7 @@ export class RouteStateRecordingPoi extends RouteStateBase {
 
     public clear(): void {
         RouteStateHelper.removeLayersFromMap(this.context);
+        this.context.mapService.map.off("click", this.addPoint, this);
         this.subscription.unsubscribe();
     }
 
