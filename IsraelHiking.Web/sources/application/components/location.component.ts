@@ -101,7 +101,14 @@ export class LocationComponent extends BaseMapComponent {
 
     public toggleRecording() {
         if (!this.isRecording()) {
-            let route = this.routeLayerFactory.createRoute(this.resources.route + " " + new Date().toISOString().split("T")[0]);
+            let date = new Date();
+            let name = this.resources.route + " " + date.toISOString().split("T")[0];
+            if (!this.routesService.isNameAvailable(name)) {
+                let dateString =
+                    `${date.toISOString().split("T")[0]} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+                name = this.resources.route + " " + dateString;
+            }
+            let route = this.routeLayerFactory.createRoute(name);
             this.routesService.addRoute(route);
             this.routeLayer = this.routesService.selectedRoute;
             this.routeLayer.setRecordingState();
