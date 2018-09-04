@@ -32,6 +32,7 @@ namespace IsraelHiking.API.Converters.ConverterFlows
             };
             routeGpx.Waypoints.AddRange(gpx.Waypoints);
             routeGpx.Routes.AddRange(routes);
+            routeGpx.UpdateBounds();
             return routeGpx.ToBytes();
         }
     }

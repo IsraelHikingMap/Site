@@ -33,6 +33,7 @@ namespace IsraelHiking.API.Converters.ConverterFlows
                 number: t.Number,
                 classification: t.Classification,
                 extensions: t.Extensions)));
+            singleTrackGpx.UpdateBounds();
             return singleTrackGpx.ToBytes();
         }
     }
