@@ -19,9 +19,12 @@ export interface INorthEast {
 export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     protected marker: Common.IMarkerWithTitle;
     public title: string;
-    public latLng: L.LatLng;
     public itmCoordinates: INorthEast;
     public hideCoordinates: boolean;
+
+    public get latLng(): L.LatLng {
+        return this.marker != null ? this.marker.getLatLng() : L.latLng(0, 0, 0);
+    };
 
     @ViewChildren(MatTooltip)
     public tooltips: QueryList<MatTooltip>;
@@ -34,7 +37,6 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
         protected elevationProvider: ElevationProvider) {
         super(resources);
         this.hideCoordinates = true;
-        this.latLng = L.latLng(0, 0, 0);
         this.itmCoordinates = { north: 0, east: 0 };
     }
 
@@ -45,12 +47,10 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     protected setMarkerInternal = (marker: Common.IMarkerWithTitle) => {
         this.marker = marker;
         this.title = this.marker.title;
-        this.latLng = this.marker.getLatLng();
         this.updateItmCoordinates();
         this.updateHeights();
 
         this.marker.on("dragend", () => {
-            this.latLng = this.marker.getLatLng();
             this.updateItmCoordinates();
             this.updateHeights();
         });
@@ -66,7 +66,9 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
     private updateHeights = () => {
         let array = [this.latLng];
         this.elevationProvider.updateHeights(array).then(() => {
-            this.latLng = array[0];
+            let latlng = this.marker.getLatLng();
+            latlng.alt = array[0].alt;
+            this.marker.setLatLng(latlng);
         });
     }
 
