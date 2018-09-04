@@ -85,6 +85,11 @@
             </mat-tab>
             <mat-tab label="{{resources.myTraces}}">
                 <br />
+                <div *ngFor="let route of localRoutes">
+                    {{route.name}}<br />
+                    {{route.description}}
+                    <!-- HM TODO upload to the cloud-->
+                </div>
                 <div *ngFor="let trace of filteredTraces | paginate: { itemsPerPage: 5, currentPage: state.tracesPage, id: 'tracesPaging' }" class="item">
                     <div [fxLayout]="resources.direction" fxLayout.xs="column" fxLayout.md="row">
                         <div fxFlex="20" class="item-image">

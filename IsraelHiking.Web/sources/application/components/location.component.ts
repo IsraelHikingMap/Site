@@ -107,7 +107,7 @@ export class LocationComponent extends BaseMapComponent {
             this.routeLayer.setRecordingState();
         } else {
             this.routeLayer.setReadOnlyState();
-            // HM TODO: save to file?
+            this.routesService.addRouteToLocalStorage(this.routeLayer.getData());
             this.routeLayer = null;
             this.lastRecordedRoute = null;
         }

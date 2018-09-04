@@ -26,6 +26,7 @@ import { ToastService } from "../../services/toast.service";
 import { IconsService } from "../../services/icons.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { LayersService } from "../../services/layers/layers.service";
+import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { GeoJsonParser } from "../../services/geojson.parser";
 import { BaseMapComponent } from "../base-map.component";
 import { SearchResultsMarkerPopupComponent } from "../markerpopup/search-results-marker-popup.component";
@@ -58,6 +59,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
     public ranks: IRank[];
     public filteredShareUrls: Common.ShareUrl[];
     public filteredTraces: ITrace[];
+    public localRoutes: Common.RouteData[];
     public shareUrlInEditMode: Common.ShareUrl;
     public state: IOsmUserDialogState;
     public file: File;
@@ -85,6 +87,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         private readonly toastService: ToastService,
         private readonly geoJsonParser: GeoJsonParser,
         private readonly scrollToService: ScrollToService,
+        private readonly routesService: RoutesService,
         public readonly userService: OsmUserService,
     ) {
         super(resources);
@@ -95,6 +98,7 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.mapService.map.addLayer(this.osmTraceLayer);
         this.searchTerm = new FormControl();
         this.shareUrlInEditMode = null;
+        this.localRoutes = this.routesService.locallyRecordedRoutes;
         this.state = this.sharedStorageService.get(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY) || {
             scrollPosition: 0,
             searchTerm: "",

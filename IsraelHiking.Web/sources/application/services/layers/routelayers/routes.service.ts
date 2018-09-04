@@ -1,5 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
+import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
 
 import { IRouteLayer, IRoute, IRouteSegment, IMarkerWithData } from "./iroute.layer";
@@ -15,6 +16,9 @@ import * as Common from "../../../common/IsraelHiking";
 @Injectable()
 export class RoutesService implements IRoutesService {
     private static MERGE_THRESHOLD = 50; // meter.
+
+    @LocalStorage()
+    public locallyRecordedRoutes: Common.RouteData[] = [];
 
     public routes: IRouteLayer[];
     public routeChanged: Subject<any>;
@@ -222,5 +226,9 @@ export class RoutesService implements IRoutesService {
             this.selectedRoute.setState("ReadOnly");
         }
         return this.selectedRoute;
+    }
+
+    public addRouteToLocalStorage(route: Common.RouteData) {
+        this.locallyRecordedRoutes.push(route);
     }
 }
