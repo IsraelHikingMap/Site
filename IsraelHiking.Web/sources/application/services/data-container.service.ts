@@ -69,7 +69,7 @@ export class DataContainerService {
 
     public initialize = async () => {
         await this.layersService.initialize();
-        // This assumes hashservice has already finished initialization, this assumtion can cause bugs...
+        // This assumes hashservice has already finished initialization, this assumption can cause bugs...
         if (this.hashService.getShareUrlId()) {
             this.initializeShareUrl();
         } else if (this.hashService.getUrl()) {
@@ -77,9 +77,9 @@ export class DataContainerService {
             data.baseLayer = this.hashService.getBaselayer();
             this.setData(data);
         } else if (this.hashService.getPoiRouterData()) {
-            let poiSrouceAndId = this.hashService.getPoiRouterData();
+            let poiSourceAndId = this.hashService.getPoiRouterData();
             try {
-                let poi = await this.poiService.getPoint(poiSrouceAndId.id, poiSrouceAndId.source);
+                let poi = await this.poiService.getPoint(poiSourceAndId.id, poiSourceAndId.source);
                 let latLng = L.latLng(poi.location.lat, poi.location.lng);
                 let bounds = L.latLngBounds([latLng, latLng]);
                 this.categoriesLayerFactory.getByPoiType(poi.isRoute).moveToSearchResults(poi, bounds);
