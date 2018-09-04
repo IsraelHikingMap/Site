@@ -27,6 +27,7 @@ export class GeoLocationService {
 
     private state: GeoLocationServiceState;
     private watchNumber: number;
+    private isBackground: boolean;
 
     public positionChanged: EventEmitter<Position>;
     public currentLocation: Common.ILatLngTime;
@@ -37,6 +38,7 @@ export class GeoLocationService {
         this.positionChanged = new EventEmitter<Position>();
         this.state = "disabled";
         this.currentLocation = null;
+        this.isBackground = false;
     }
 
     public getState(): GeoLocationServiceState {
@@ -146,6 +148,9 @@ export class GeoLocationService {
         });
 
         BackgroundGeolocation.on("location", (location: IBackgroundLocation) => {
+            if (this.isBackground === false) {
+                return;
+            }
             this.ngZone.run(() => {
                 this.state = "tracking";
                 this.currentLocation =
@@ -187,6 +192,16 @@ export class GeoLocationService {
         BackgroundGeolocation.on("stop",
             () => {
                 this.stopNavigator();
+            });
+
+        BackgroundGeolocation.on("background",
+            () => {
+                this.isBackground = true;
+            });
+
+        BackgroundGeolocation.on("foreground",
+            () => {
+                this.isBackground = false;
             });
     }
 }

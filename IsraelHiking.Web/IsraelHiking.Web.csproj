@@ -12,17 +12,29 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="coverage\**" />
     <Compile Remove="Logs\**" />
+    <Compile Remove="platforms\**" />
+    <Compile Remove="plugins\**" />
     <Compile Remove="wwwroot\Bin\**" />
     <Compile Remove="wwwroot\lib\**" />
+    <Content Remove="coverage\**" />
     <Content Remove="Logs\**" />
+    <Content Remove="platforms\**" />
+    <Content Remove="plugins\**" />
     <Content Remove="wwwroot\Bin\**" />
     <Content Remove="wwwroot\lib\**" />
     <Content Remove="sources\**" />
+    <EmbeddedResource Remove="coverage\**" />
     <EmbeddedResource Remove="Logs\**" />
+    <EmbeddedResource Remove="platforms\**" />
+    <EmbeddedResource Remove="plugins\**" />
     <EmbeddedResource Remove="wwwroot\Bin\**" />
     <EmbeddedResource Remove="wwwroot\lib\**" />
+    <None Remove="coverage\**" />
     <None Remove="Logs\**" />
+    <None Remove="platforms\**" />
+    <None Remove="plugins\**" />
     <None Remove="wwwroot\Bin\**" />
     <None Remove="wwwroot\lib\**" />
   </ItemGroup>
