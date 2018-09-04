@@ -46,7 +46,10 @@ namespace IsraelHiking.API.Converters.ConverterFlows
             {
                 var link = _imgurGateway.UploadImage(stream).Result;
                 var wayPoint = gpx.Waypoints.First();
-                var gpxObject = new GpxFile();
+                var gpxObject = new GpxFile
+                {
+                    Metadata = new GpxMetadata(GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_jpg")
+                };
                 gpxObject.Waypoints.Add(
                     new GpxWaypoint(wayPoint.Longitude, wayPoint.Latitude)
                         .WithLinks(new[] {new GpxWebLink(new Uri(link), "", "image/jpeg")}.ToImmutableArray())

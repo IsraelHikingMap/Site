@@ -26,7 +26,10 @@ namespace IsraelHiking.API.Converters.ConverterFlows
                 waypoints: new ImmutableGpxWaypointTable(t.Segments.SelectMany(s => s.Waypoints)),
                 source: null, links: ImmutableArray<GpxWebLink>.Empty, number: null, classification: null, extensions: null
             )));
-            var routeGpx = new GpxFile();
+            var routeGpx = new GpxFile
+            {
+                Metadata = new GpxMetadata(GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_route")
+            };
             routeGpx.Waypoints.AddRange(gpx.Waypoints);
             routeGpx.Routes.AddRange(routes);
             return routeGpx.ToBytes();

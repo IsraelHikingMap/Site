@@ -49,7 +49,7 @@ namespace IsraelHiking.API.Converters
             var gpx = new GpxFile
             {
                 Metadata = new GpxMetadata(collection.Features.FirstOrDefault(f => f.Attributes.Exists(CREATOR))
-                                               ?.Attributes[CREATOR]?.ToString() ?? string.Empty)
+                                               ?.Attributes[CREATOR]?.ToString() ?? GpxDataContainerConverter.ISRAEL_HIKING_MAP + "_geojson")
             };
             gpx.Waypoints.AddRange(collection.Features.Where(f => f.Geometry is Point)
                 .Select(CreateWaypoint)
