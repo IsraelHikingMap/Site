@@ -85,17 +85,21 @@ namespace IsraelHiking.API.Services
             var splitGpxLines = new List<ILineString>();
             foreach (var lineString in gpxItmLines)
             {
-                var coordiantes = lineString.Coordinates.ToArray();
-                for (int coordinateIndex = 1; coordinateIndex < coordiantes.Length; coordinateIndex++)
+                var coordinates = lineString.Coordinates.ToArray();
+                for (int coordinateIndex = 1; coordinateIndex < coordinates.Length; coordinateIndex++)
                 {
-                    if (coordiantes[coordinateIndex - 1].Distance(coordiantes[coordinateIndex]) > _options.MaxDistanceBetweenGpsRecordings)
+                    if (coordinates[coordinateIndex - 1].Distance(coordinates[coordinateIndex]) > _options.MaxDistanceBetweenGpsRecordings)
                     {
-                        splitGpxLines.Add(_geometryFactory.CreateLineString(coordiantes.Take(coordinateIndex).ToArray()));
-                        coordiantes = coordiantes.Skip(coordinateIndex).ToArray();
+                        if (coordinateIndex > 1)
+                        {
+                            // need to add line only if there's more than 1 coordinate to take.
+                            splitGpxLines.Add(_geometryFactory.CreateLineString(coordinates.Take(coordinateIndex).ToArray()));
+                        }
+                        coordinates = coordinates.Skip(coordinateIndex).ToArray();
                         coordinateIndex = 1;
                     }
                 }
-                splitGpxLines.Add(_geometryFactory.CreateLineString(coordiantes.ToArray()));
+                splitGpxLines.Add(_geometryFactory.CreateLineString(coordinates.ToArray()));
             }
             return splitGpxLines.Where(l => l.Coordinates.Length > 0).ToList();
         }

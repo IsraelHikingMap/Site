@@ -18,7 +18,7 @@ namespace IsraelHiking.API.Services
         /// 5. Merge the lines back if possible
         /// </summary>
         /// <param name="gpxItmLines">The lines to manipulate</param>
-        /// <returns>The lines after manupulation</returns>
+        /// <returns>The lines after manipulation</returns>
         Task<IEnumerable<ILineString>> GetLines(List<ILineString> gpxItmLines);
     }
 }
