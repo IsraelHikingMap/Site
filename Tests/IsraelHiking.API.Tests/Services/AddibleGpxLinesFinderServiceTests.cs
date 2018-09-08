@@ -92,6 +92,30 @@ namespace IsraelHiking.API.Tests.Services
         }
 
         [TestMethod]
+        public void GetLines_GapInRecordingAtStart_ShouldSplit()
+        {
+            var gpxLine = new LineString(new[]
+            {
+                new Coordinate(0, 0),
+                new Coordinate(20, 0),
+                new Coordinate(21, 0),
+                new Coordinate(22, 0),
+            });
+            _options.MaxNumberOfPointsPerLine = 3;
+            _options.MinimalMissingPartLength = 0;
+            _options.MinimalDistanceToClosestPoint = 0;
+            _options.MinimalMissingSelfLoopPartLegth = 0;
+            _options.SimplificationDistanceTolerance = 0;
+            _options.MaxDistanceBetweenGpsRecordings = 10;
+            SetupHighways();
+
+            var results = _service.GetLines(new List<ILineString> { gpxLine }).Result.ToArray();
+
+            Assert.AreEqual(1, results.Length);
+            Assert.AreEqual(2, results.First().Coordinates.Length);
+        }
+
+        [TestMethod]
         public void GetLines_StraightLongLine_ShouldReturnSplitMergeAndSimplified()
         {
             var gpxLine = new LineString(new[]
