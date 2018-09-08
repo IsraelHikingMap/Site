@@ -14,6 +14,7 @@ namespace IsraelHiking.API.Converters
     public class OsmGeoJsonConverter : IOsmGeoJsonConverter
     {
         private const string OUTER = "outer";
+        private const string SUBAREA = "subarea";
         private const string BOUNDARY = "boundary";
         private const string TYPE = "type";
         private const string MULTIPOLYGON = "multipolygon";
@@ -156,9 +157,10 @@ namespace IsraelHiking.API.Converters
 
         private Feature ConvertToMultipolygon(CompleteRelation relation)
         {
-            var outerWays = GetAllWaysGroupedByRole(relation).Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
+            var allWaysInRelationByRole = GetAllWaysGroupedByRole(relation);
+            var outerWays = allWaysInRelationByRole.Where(kvp => kvp.Key == OUTER).SelectMany(kvp => kvp.Value).ToList();
             var outerPolygons = GetGeometriesFromWays(outerWays).OfType<IPolygon>().ToList();
-            var innerWays = GetAllWaysGroupedByRole(relation).Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
+            var innerWays = allWaysInRelationByRole.Where(kvp => kvp.Key != OUTER).SelectMany(kvp => kvp.Value).ToList();
             var innerPolygons = GetGeometriesFromWays(innerWays).OfType<IPolygon>().ToList();
             MergeInnerIntoOuterPolygon(ref outerPolygons, ref innerPolygons);
             var multiPolygon = new MultiPolygon(outerPolygons.Union(innerPolygons).ToArray());
@@ -179,7 +181,7 @@ namespace IsraelHiking.API.Converters
         }
 
         /// <summary>
-        /// A static method that gets all the ways from a relation recursivly
+        /// A static method that gets all the ways from a relation recursively
         /// </summary>
         /// <param name="relation"></param>
         /// <returns></returns>
@@ -190,30 +192,30 @@ namespace IsraelHiking.API.Converters
 
         private static Dictionary<string, List<CompleteWay>> GetAllWaysGroupedByRole(CompleteRelation relation)
         {
-            var dicionary = relation.Members.GroupBy(m => m.Role ?? string.Empty)
+            var dictionary = relation.Members.GroupBy(m => m.Role ?? string.Empty)
                 .ToDictionary(g => g.Key, g => g.Select(k => k.Member)
                 .OfType<CompleteWay>().ToList());
             if (relation.Members.All(m => m.Member.Type != OsmGeoType.Relation))
             {
-                return dicionary;
+                return dictionary;
             }
-            var subRelations = relation.Members.Select(m => m.Member).OfType<CompleteRelation>();
+            var subRelations = relation.Members.Where(m => m.Role != SUBAREA).Select(m => m.Member).OfType<CompleteRelation>();
             foreach (var subRelation in subRelations)
             {
                 var subRelationDictionary = GetAllWaysGroupedByRole(subRelation);
                 foreach (var key in subRelationDictionary.Keys)
                 {
-                    if (dicionary.ContainsKey(key))
+                    if (dictionary.ContainsKey(key))
                     {
-                        dicionary[key].AddRange(subRelationDictionary[key]);
+                        dictionary[key].AddRange(subRelationDictionary[key]);
                     }
                     else
                     {
-                        dicionary[key] = subRelationDictionary[key];
+                        dictionary[key] = subRelationDictionary[key];
                     }
                 }
             }
-            return dicionary;
+            return dictionary;
         }
 
         private bool IsMultipolygon(ICompleteOsmGeo relation)
