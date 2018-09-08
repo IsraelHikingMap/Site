@@ -122,17 +122,10 @@ namespace IsraelHiking.API.Executors
             {
                 return new List<Feature>();
             }
-
-            var placeContainers = places.Where(c => c.Attributes.Exists(FeatureAttributes.NAME) &&
-                                                    c.Attributes[FeatureAttributes.NAME]
-                                                        .Equals(feature.Attributes[FeatureAttributes.NAME]) &&
-                                                    c.Geometry.Contains(feature.Geometry) &&
-                                                    !c.Geometry.EqualsTopologically(feature.Geometry) &&
-                                                    !c.Attributes[FeatureAttributes.ID]
-                                                        .Equals(feature.Attributes[FeatureAttributes.ID])
-                )
+            var placeContainers = places.Where(c => IsPlaceContainer(c, feature))
                 .OrderBy(f => f.Geometry.Area)
                 .ToList();
+
             if (!placeContainers.Any())
             {
                 return placeContainers;
@@ -142,6 +135,23 @@ namespace IsraelHiking.API.Executors
             feature.Geometry = container.Geometry;
             feature.Attributes[FeatureAttributes.POI_CONTAINER] = container.Attributes[FeatureAttributes.POI_CONTAINER];
             return placeContainers;
+        }
+
+        private bool IsPlaceContainer(IFeature container, IFeature feature)
+        {
+            try
+            {
+                return container.Attributes.Exists(FeatureAttributes.NAME) &&
+                       container.Attributes[FeatureAttributes.NAME].Equals(feature.Attributes[FeatureAttributes.NAME]) &&
+                       container.Geometry.Contains(feature.Geometry) &&
+                       !container.Geometry.EqualsTopologically(feature.Geometry) &&
+                       !container.Attributes[FeatureAttributes.ID].Equals(feature.Attributes[FeatureAttributes.ID]);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError($"Problem with places check for container: {container} name: {container.Attributes[FeatureAttributes.NAME]} feature {feature} name: {feature.Attributes[FeatureAttributes.NAME]}\n{ex.Message}");
+            }
+            return false;
         }
 
         /// <inheritdoc />
