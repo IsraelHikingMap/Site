@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from "@angular/core";
+import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
 import * as _ from "lodash";
@@ -29,7 +29,8 @@ import * as Common from "../../../common/IsraelHiking";
 @Component({
     selector: "public-poi-sidebar",
     templateUrl: "./public-poi-sidebar.component.html",
-    styleUrls: ["./public-poi-sidebar.component.scss"]
+    styleUrls: ["./public-poi-sidebar.component.scss"],
+    encapsulation: ViewEncapsulation.None
 })
 export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {
     public info: IPointOfInterestExtended;

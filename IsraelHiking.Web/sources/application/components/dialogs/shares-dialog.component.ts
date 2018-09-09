@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { SharedStorage } from "ngx-store";
 import * as _ from "lodash";
@@ -14,7 +14,8 @@ import { DataContainerService } from "../../services/data-container.service";
 @Component({
     selector: "shares-dialog",
     templateUrl: "shares-dialog.component.html",
-    styleUrls: ["shares-dialog.component.scss"]
+    styleUrls: ["shares-dialog.component.scss"],
+    encapsulation: ViewEncapsulation.None
 })
 export class SharesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
 

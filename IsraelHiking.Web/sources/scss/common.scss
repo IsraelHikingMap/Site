@@ -121,6 +121,10 @@ ngx-image-gallery .image {
     z-index: 1;
 }
 
+.no-padding {
+    padding: 0 !important;
+}
+
 .control-container {
     display: table;
 }
