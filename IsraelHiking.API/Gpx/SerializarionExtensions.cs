@@ -117,7 +117,8 @@ namespace IsraelHiking.API.Gpx
                 var reader = new XmlTextReader(stream);
                 return GpxFile.ReadFrom(reader, new GpxReaderSettings
                 {
-                    ExtensionReader = new IsraelHikingGpxExtensionReader()
+                    ExtensionReader = new IsraelHikingGpxExtensionReader(),
+                    DefaultCreatorIfMissing = "unknown"
                 });
             }
         }
