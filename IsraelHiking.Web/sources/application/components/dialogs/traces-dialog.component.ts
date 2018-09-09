@@ -310,4 +310,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.userService.refreshDetails();
         // HM TODO: remove from the local routes list?
     }
+
+    public hasNoTraces() {
+        return this.userService.traces.length === 0 && !this.loadingTraces;
+    }
 }

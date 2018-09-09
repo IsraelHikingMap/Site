@@ -31,10 +31,9 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     private shareUrlChangedSubscription: Subscription;
 
     constructor(resources: ResourcesService,
-        private readonly userService: OsmUserService,
         private readonly toastService: ToastService,
         private readonly dataContainerService: DataContainerService,
-    ) {
+        public readonly userService: OsmUserService) {
         super(resources);
         this.loadingShareUrls = false;
         this.shareUrlInEditMode = null;

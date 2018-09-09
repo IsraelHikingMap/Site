@@ -53,7 +53,7 @@
             </div>
         </div>
         <mat-spinner *ngIf="loadingTraces"></mat-spinner>
-        <p *ngIf="userService.traces.length === 0 && !loadingTraces">{{resources.noTraces}}</p>
+        <p *ngIf="hasNoTraces()">{{resources.noTraces}}</p>
     </div>
     <div mat-dialog-actions>
         <div fxLayout="row" fxFlex>
