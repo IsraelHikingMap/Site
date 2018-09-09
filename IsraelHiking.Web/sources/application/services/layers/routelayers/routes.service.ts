@@ -231,4 +231,9 @@ export class RoutesService implements IRoutesService {
     public addRouteToLocalStorage(route: Common.RouteData) {
         this.locallyRecordedRoutes.push(route);
     }
+
+    public removeRouteFromLocalStorage(route: Common.RouteData) {
+        let index = this.locallyRecordedRoutes.indexOf(route);
+        this.locallyRecordedRoutes.splice(index, 1);
+    }
 }

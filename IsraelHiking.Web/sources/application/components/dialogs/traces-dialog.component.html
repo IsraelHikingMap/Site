@@ -58,25 +58,25 @@
     <div mat-dialog-actions>
         <div fxLayout="row" fxFlex>
             <div fxFlex>
-                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" (click)="findUnmappedRoutes(selectedTrace)" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Find unmapped trace parts"><i class="fa icon-search"></i></button>
+                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected() || canUploadToOsm()" (click)="findUnmappedRoutes(selectedTrace)" matTooltip="{{resources.findUnmappedRoutes}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Find unmapped trace parts"><i class="fa icon-search"></i></button>
             </div>
             <div fxFlex *ngIf="!isTraceInEditMode()">
-                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected() || canUploadToOsm()" (click)="editTrace(selectedTrace)" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace start"><i class="fa icon-pencil"></i></button>
+                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected() || canUploadToOsm()" (click)="editTrace()" matTooltip="{{resources.edit}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace start"><i class="fa icon-pencil"></i></button>
             </div>
             <div fxFlex *ngIf="isTraceInEditMode()">
-                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" (click)="updateTrace(selectedTrace)" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace end"><i class="fa icon-check"></i></button>
+                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" (click)="updateTrace()" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace end"><i class="fa icon-check"></i></button>
             </div>
             <div fxFlex>
-                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" (click)="deleteTrace(selectedTrace)" matTooltip="{{resources.delete}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-trash"></i></button>
+                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" (click)="deleteTrace()" matTooltip="{{resources.delete}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace"><i class="fa icon-trash"></i></button>
             </div>
             <div fxFlex>
-                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" matDialogClose (click)="showTrace(selectedTrace)" matTooltip="{{resources.view}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View OSM trace"><i class="fa icon-eye"></i></button>
+                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected() || canUploadToOsm()" matDialogClose (click)="showTrace(selectedTrace)" matTooltip="{{resources.view}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="View OSM trace"><i class="fa icon-eye"></i></button>
             </div>
             <div fxFlex *ngIf="canUploadToOsm()">
-                <button mat-button class="no-padding" fxFill (click)="uploadRecordingToOsm()" matTooltip="{{resources.view}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload locally recorded route"><i class="fa icon-cloud-upload"></i></button>
+                <button mat-button class="no-padding" fxFill (click)="uploadRecordingToOsm()" matTooltip="{{resources.uploadFileToOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload locally recorded route"><i class="fa icon-cloud-upload"></i></button>
             </div>
             <div fxFlex *ngIf="!isMobile()">
-                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected()" (click)="editInOsm(selectedTrace)" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace in OSM"><i class="fa icon-map-editing fa-lg"></i></button>
+                <button mat-button class="no-padding" fxFill [disabled]="!hasSelected() || canUploadToOsm()" (click)="editInOsm()" matTooltip="{{resources.editThisMapUsingOsm}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Edit OSM trace in OSM"><i class="fa icon-map-editing fa-lg"></i></button>
             </div>
         </div>
     </div>

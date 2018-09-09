@@ -142,24 +142,31 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         return promise;
     }
 
-    public editTrace(trace: ITrace) {
-        trace.isInEditMode = true;
+    public editTrace() {
+        this.selectedTrace.isInEditMode = true;
     }
 
-    public updateTrace(trace: ITrace) {
-        trace.isInEditMode = false;
-        this.userService.updateOsmTrace(trace);
+    public updateTrace() {
+        this.selectedTrace.isInEditMode = false;
+        this.userService.updateOsmTrace(this.selectedTrace);
     }
 
-    public deleteTrace(trace: ITrace) {
-        trace.isInEditMode = false;
-        let message = `${this.resources.deletionOf} ${trace.name}, ${this.resources.areYouSure}`;
-        this.toastService.confirm(message, () => this.userService.deleteOsmTrace(trace), () => { }, "YesNo");
+    public deleteTrace() {
+        this.selectedTrace.isInEditMode = false;
+        let message = `${this.resources.deletionOf} ${this.selectedTrace.name}, ${this.resources.areYouSure}`;
+        this.toastService.confirm(message, () => {
+            if (this.selectedTrace.id === "") {
+                this.routesService.removeRouteFromLocalStorage(this.getRouteFromTrace());
+                this.updateFilteredLists(this.searchTerm.value);
+            } else {
+                this.userService.deleteOsmTrace(this.selectedTrace);
+            }
+        }, () => { }, "YesNo");
     }
 
-    public editInOsm(trace: ITrace) {
+    public editInOsm() {
         let baseLayerAddress = this.layersService.selectedBaseLayer.address;
-        window.open(this.userService.getEditOsmGpxAddress(baseLayerAddress, trace.id));
+        window.open(this.userService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTrace.id));
     }
 
     public findUnmappedRoutes = async (trace: ITrace): Promise<void> => {
@@ -174,7 +181,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 this.matDialogRef.close();
             });
         } catch (ex) {
-            this.toastService.confirm(ex.message, () => {}, () => {}, "Ok");
+            this.toastService.confirm(ex.message, () => { }, () => { }, "Ok");
         }
     }
 
@@ -200,7 +207,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             return {
                 name: r.name,
                 description: r.description,
-                timeStamp: r.segments[0].latlngs[0].timestamp,
+                timeStamp: new Date(r.segments[0].latlngs[0].timestamp),
                 id: "",
                 visibility: "private"
             } as ITrace;
@@ -305,10 +312,14 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async uploadRecordingToOsm() {
-        let route = this.routesService.locallyRecordedRoutes.filter(r => r.name === this.selectedTrace.name)[0];
+        let route = this.getRouteFromTrace();
         await this.fileService.uploadRouteAsTrace(route);
         this.userService.refreshDetails();
         // HM TODO: remove from the local routes list?
+    }
+
+    private getRouteFromTrace() {
+        return this.routesService.locallyRecordedRoutes.filter(r => r.name === this.selectedTrace.name)[0];
     }
 
     public hasNoTraces() {
