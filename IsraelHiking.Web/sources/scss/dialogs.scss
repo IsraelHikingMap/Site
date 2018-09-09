@@ -27,6 +27,22 @@
     max-width: 360px;
 }
 
+.item {
+    padding: 5px;
+}
+
+.item:nth-child(odd) {
+    background: #f1f1f1;
+}
+
+.item-image {
+    padding: 5px;
+    border: 1px solid #b7b7b7;
+    border-radius: 5px;
+    width: 64px;
+    height: 64px;
+}
+
 @media (max-width:767px) {
     .mat-dialog-container {
         margin: 0 auto;

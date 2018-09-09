@@ -85,6 +85,16 @@ export class FileService {
         return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
     }
 
+    public async uploadRouteAsTrace(route: Common.RouteData): Promise<any> {
+        let data = {
+            routes: [route]
+        } as Common.DataContainer;
+        let responseData = await this.httpClient.post(Urls.files + "?format=gpx", data).toPromise() as string;
+        let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
+        let file = new File([blobToSave], route.name + ".gpx");
+        return this.uploadTrace(file);
+    }
+
     // HM TODO: remove this?
     public uploadAnonymousImage(file: File): Promise<string> {
         let formData = new FormData();

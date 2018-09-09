@@ -107,6 +107,14 @@ export class OsmUserService {
     }
 
     public getShareSocialLinks(shareUrl: Common.ShareUrl): IShareUrlSocialLinks {
+        if (shareUrl == null) {
+            return {
+                ihm: "",
+                facebook: "",
+                whatsapp: "",
+                nakeb: ""
+            };
+        }
         let ihm = this.getUrlFromShareId(shareUrl);
         let escaped = encodeURIComponent(ihm);
         return {
@@ -157,7 +165,7 @@ export class OsmUserService {
     }
 
     public updateOsmTrace = (trace: ITrace): Promise<any> => {
-        trace.tags = trace.tagsString.split(",").map(t => t.trim());
+        trace.tags = trace.tagsString.split(",").map(t => t.trim()).filter(t => t);
         return this.httpClient.put(Urls.osmTrace + trace.id, trace, { responseType: "text" }).toPromise();
     }
 
@@ -208,8 +216,12 @@ export class OsmUserService {
         return promise;
     }
 
-    public getImageFromShareId = (shareUrl: Common.ShareUrl) => {
-        return Urls.images + shareUrl.id;
+    public getImageFromShareId = (shareUrl: Common.ShareUrl, width?: number, height?: number) => {
+        let address = Urls.images + shareUrl.id;
+        if (width && height) {
+            address += `?width=${width}&height=${height}`;
+        }
+        return address;
     }
 
     public getUrlFromShareId = (shareUrl: Common.ShareUrl) => {

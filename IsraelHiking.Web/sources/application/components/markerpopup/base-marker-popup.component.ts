@@ -1,4 +1,4 @@
-﻿import { ApplicationRef, ViewRef, ViewChildren, QueryList } from "@angular/core";
+import { ApplicationRef, ViewRef, ViewChildren, QueryList } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { MatTooltip } from "@angular/material";
 import { forkJoin } from "rxjs";
@@ -24,7 +24,7 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent {
 
     public get latLng(): L.LatLng {
         return this.marker != null ? this.marker.getLatLng() : L.latLng(0, 0, 0);
-    };
+    }
 
     @ViewChildren(MatTooltip)
     public tooltips: QueryList<MatTooltip>;

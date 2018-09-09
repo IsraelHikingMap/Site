@@ -10,7 +10,7 @@ export interface ShareUrl {
     description: string;
     osmUserId: string;
     viewsCount: number;
-
+    creationDate: Date;
     dataContainer: DataContainer;
 }
 

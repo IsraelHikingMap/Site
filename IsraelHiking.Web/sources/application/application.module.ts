@@ -40,6 +40,7 @@ import { ScrollToModule } from "@nicky-lenaers/ngx-scroll-to";
 import { DndModule } from "@beyerleinf/ngx-dnd";
 import { NgxImageGalleryModule } from "ngx-image-gallery";
 import { D3Service } from "d3-ng2-service";
+import { InfiniteScrollModule } from "ngx-infinite-scroll";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -91,7 +92,8 @@ import { FileComponent } from "./components/file.component";
 import { FileSaveAsComponent } from "./components/file-save-as.component";
 import { EditOSMComponent } from "./components/edit-osm.component";
 import { OsmUserComponent } from "./components/osm-user.component";
-import { OsmUserDialogComponent } from "./components/dialogs/osm-user-dialog.component";
+import { TracesDialogComponent } from "./components/dialogs/traces-dialog.component";
+import { SharesDialogComponent } from "./components/dialogs/shares-dialog.component";
 import { LanguageComponent } from "./components/language.component";
 import { LanguageDialogComponent } from "./components/dialogs/language-dialog.component";
 import { DrawingComponent } from "./components/drawing.component";
@@ -188,7 +190,8 @@ const routes: Routes = [
         NgxPaginationModule,
         ScrollToModule.forRoot(),
         DndModule.forRoot(),
-        NgxImageGalleryModule
+        NgxImageGalleryModule,
+        InfiniteScrollModule
     ],
     entryComponents: [ZoomComponent,
         LocationComponent,
@@ -205,7 +208,8 @@ const routes: Routes = [
         FileSaveAsComponent,
         EditOSMComponent,
         OsmUserComponent,
-        OsmUserDialogComponent,
+        TracesDialogComponent,
+        SharesDialogComponent,
         LanguageComponent,
         LanguageDialogComponent,
         DrawingComponent,
@@ -289,7 +293,8 @@ const routes: Routes = [
         FileSaveAsComponent,
         EditOSMComponent,
         OsmUserComponent,
-        OsmUserDialogComponent,
+        TracesDialogComponent,
+        SharesDialogComponent,
         LanguageComponent,
         LanguageDialogComponent,
         DrawingComponent,

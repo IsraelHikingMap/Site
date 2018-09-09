@@ -4,15 +4,11 @@ import {
     ComponentFactoryResolver,
     OnInit,
     OnDestroy,
-    ViewChild,
-    ElementRef,
     ViewEncapsulation,
-    AfterViewInit
 } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material";
-import { SharedStorageService } from "ngx-store";
-import { ScrollToService, ScrollToConfigOptions } from "@nicky-lenaers/ngx-scroll-to";
+import { SharedStorage } from "ngx-store";
 import { Subscription } from "rxjs";
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -33,51 +29,30 @@ import { SearchResultsMarkerPopupComponent } from "../markerpopup/search-results
 import { MissingPartMarkerPopupComponent } from "../markerpopup/missing-part-marker-popup.component";
 import * as Common from "../../common/IsraelHiking";
 
-interface IRank {
-    name: string;
-    points: number;
-}
-
-interface IOsmUserDialogState {
-    selectedTabIndex: number;
-    searchTerm: string;
-    scrollPosition: number;
-    sharesPage: number;
-    tracesPage: number;
-}
-
 @Component({
-    selector: "osm-user-dialog",
-    templateUrl: "./osm-user-dialog.component.html",
-    styleUrls: ["./osm-user-dialog.component.css"],
+    selector: "traces-dialog",
+    templateUrl: "./traces-dialog.component.html",
+    styleUrls: ["./traces-dialog.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
-export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, OnDestroy, AfterViewInit {
+export class TracesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
-    private static OSM_USER_DIALOG_STATE_KEY = "OsmUserDialogState";
-
-    public ranks: IRank[];
-    public filteredShareUrls: Common.ShareUrl[];
     public filteredTraces: ITrace[];
-    public localRoutes: Common.RouteData[];
-    public shareUrlInEditMode: Common.ShareUrl;
-    public state: IOsmUserDialogState;
+    public selectedTrace: ITrace;
     public file: File;
     public loadingTraces: boolean;
-    public loadingShareUrls: boolean;
     public searchTerm: FormControl;
 
-    private osmTraceLayer: L.LayerGroup;
-    private languageChangeSubscription: Subscription;
-    private tracesChangedSubscription: Subscription;
-    private shareUrlChangedSubscription: Subscription;
+    @SharedStorage()
+    private sessionSearchTerm = "";
 
-    @ViewChild("dialogContentForScroll") dialogContent: ElementRef;
+    private page: number;
+    private osmTraceLayer: L.LayerGroup;
+    private tracesChangedSubscription: Subscription;
 
     constructor(resources: ResourcesService,
         private readonly injector: Injector,
-        private readonly sharedStorageService: SharedStorageService,
-        private readonly matDialogRef: MatDialogRef<OsmUserDialogComponent>,
+        private readonly matDialogRef: MatDialogRef<TracesDialogComponent>,
         private readonly componentFactoryResolver: ComponentFactoryResolver,
         private readonly mapService: MapService,
         private readonly fileService: FileService,
@@ -86,91 +61,34 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         private readonly fitBoundsService: FitBoundsService,
         private readonly toastService: ToastService,
         private readonly geoJsonParser: GeoJsonParser,
-        private readonly scrollToService: ScrollToService,
         private readonly routesService: RoutesService,
-        public readonly userService: OsmUserService,
+        private readonly userService: OsmUserService,
     ) {
         super(resources);
         this.loadingTraces = false;
-        this.loadingShareUrls = false;
-        this.initializeRanks();
+        this.selectedTrace = null;
+        this.page = 1;
         this.osmTraceLayer = L.layerGroup([]);
         this.mapService.map.addLayer(this.osmTraceLayer);
         this.searchTerm = new FormControl();
-        this.shareUrlInEditMode = null;
-        this.localRoutes = this.routesService.locallyRecordedRoutes;
-        this.state = this.sharedStorageService.get(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY) || {
-            scrollPosition: 0,
-            searchTerm: "",
-            selectedTabIndex: 0,
-            sharesPage: 1,
-            tracesPage: 1
-        };
+
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
         });
-        this.searchTerm.setValue(this.state.searchTerm);
-        this.languageChangeSubscription = this.resources.languageChanged.subscribe(this.initializeRanks);
+        this.searchTerm.setValue(this.sessionSearchTerm);
         this.tracesChangedSubscription = this.userService.tracesChanged.subscribe(() => {
             this.updateFilteredLists(this.searchTerm.value);
             this.loadingTraces = false;
-        });
-        this.shareUrlChangedSubscription = this.userService.shareUrlsChanged.subscribe(() => {
-            this.updateFilteredLists(this.searchTerm.value);
-            this.loadingShareUrls = false;
         });
     }
 
     public ngOnInit() {
         this.loadingTraces = true;
-        this.loadingShareUrls = true;
         this.userService.refreshDetails();
-        let dialogElement = this.dialogContent.nativeElement as HTMLElement;
-        dialogElement.onscroll = () => {
-            this.state.scrollPosition = dialogElement.scrollTop;
-            this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
-        };
-    }
-
-    ngAfterViewInit(): void {
-        let dialogElement = this.dialogContent.nativeElement as HTMLElement;
-        this.scrollToService.scrollTo(
-            {
-                offset: this.state.scrollPosition,
-                container: dialogElement
-            } as ScrollToConfigOptions);
     }
 
     public ngOnDestroy() {
-        this.languageChangeSubscription.unsubscribe();
         this.tracesChangedSubscription.unsubscribe();
-        this.shareUrlChangedSubscription.unsubscribe();
-    }
-
-    public getRank() {
-        let rankIndex = 0;
-        while (this.userService.changeSets > this.ranks[rankIndex].points) {
-            rankIndex++;
-        }
-        return this.ranks[rankIndex];
-    }
-
-    public getRankPercentage() {
-        let rank = this.getRank();
-        if (rank === this.ranks[this.ranks.length - 1]) {
-            return 100;
-        }
-        return ((this.userService.changeSets / rank.points) * 100);
-    }
-
-    public getProgessbarType() {
-        if (this.getRankPercentage() < 5) {
-            return "Warn";
-        }
-        if (this.getRankPercentage() < 30) {
-            return "Accent";
-        }
-        return "Primary";
     }
 
     public showTrace = (trace: ITrace): Promise<Common.DataContainer> => {
@@ -179,18 +97,18 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
             this.osmTraceLayer.clearLayers();
             for (let route of data.routes) {
                 for (let segment of route.segments) {
-                    let polyLine = L.polyline(segment.latlngs, this.getPathOprtions());
+                    let polyLine = L.polyline(segment.latlngs, this.getPathOptions());
                     this.osmTraceLayer.addLayer(polyLine);
                 }
                 for (let markerData of route.markers) {
-                    let icon = IconsService.createPoiDefaultMarkerIcon(this.getPathOprtions().color);
+                    let icon = IconsService.createPoiDefaultMarkerIcon(this.getPathOptions().color);
                     let marker = L.marker(markerData.latlng,
                         {
                             draggable: false,
                             clickable: false,
                             riseOnHover: true,
                             icon: icon,
-                            opacity: this.getPathOprtions().opacity
+                            opacity: this.getPathOptions().opacity
                         } as L.MarkerOptions) as Common.IMarkerWithTitle;
                     this.mapService.setMarkerTitle(marker, markerData);
                     this.osmTraceLayer.addLayer(marker);
@@ -258,7 +176,6 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         } catch (ex) {
             this.toastService.confirm(ex.message, () => {}, () => {}, "Ok");
         }
-
     }
 
     public async uploadToOsm(e: any) {
@@ -278,35 +195,23 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
 
     private updateFilteredLists(searchTerm: string) {
         searchTerm = searchTerm.trim();
-        this.state.searchTerm = searchTerm;
-        this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
-        this.filteredShareUrls = this.userService.shareUrls.filter((s) => this.findInShareUrl(s, searchTerm));
-        this.filteredTraces = _.orderBy(this.userService.traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
+        this.sessionSearchTerm = searchTerm;
+        let localTraces = this.routesService.locallyRecordedRoutes.map((r) => {
+            return {
+                name: r.name,
+                description: r.description,
+                timeStamp: r.segments[0].latlngs[0].timestamp,
+                id: "",
+                visibility: "private"
+            } as ITrace;
+        });
+        let traces = this.userService.traces.concat(localTraces);
+        let ordered = _.orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
+        this.filteredTraces = _.take(ordered, this.page * 10);
     }
 
-    private getPathOprtions = (): L.PathOptions => {
+    private getPathOptions = (): L.PathOptions => {
         return { opacity: 0.5, color: "blue", weight: 3 } as L.PathOptions;
-    }
-
-    private initializeRanks() {
-        this.ranks = [
-            {
-                name: this.resources.junior,
-                points: 10
-            },
-            {
-                name: this.resources.partner,
-                points: 100
-            },
-            {
-                name: this.resources.master,
-                points: 1000
-            },
-            {
-                name: this.resources.guru,
-                points: Infinity
-            }
-        ];
     }
 
     private addMissingPartsToMap = (geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
@@ -347,23 +252,6 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         this.fitBoundsService.fitBounds(geoJsonLayer.getBounds());
     }
 
-    private findInShareUrl(shareUrl: Common.ShareUrl, searchTerm: string) {
-        if (!searchTerm) {
-            return true;
-        }
-        let lowerSearchTerm = searchTerm.toLowerCase();
-        if ((shareUrl.description || "").toLowerCase().includes(lowerSearchTerm)) {
-            return true;
-        }
-        if ((shareUrl.title || "").toLowerCase().includes(lowerSearchTerm)) {
-            return true;
-        }
-        if ((shareUrl.id || "").toLowerCase().includes(lowerSearchTerm)) {
-            return true;
-        }
-        return false;
-    }
-
     private findInTrace(trace: ITrace, searchTerm: string) {
         if (!searchTerm) {
             return true;
@@ -384,30 +272,42 @@ export class OsmUserDialogComponent extends BaseMapComponent implements OnInit, 
         return false;
     }
 
-    public setSelectedTab() {
-        this.sharedStorageService.set(OsmUserDialogComponent.OSM_USER_DIALOG_STATE_KEY, this.state);
-    }
-
-    public deleteShareUrl(shareUrl: Common.ShareUrl) {
-        if (this.shareUrlInEditMode === shareUrl) {
-            this.shareUrlInEditMode = null;
+    public toggleSelectedTrace(trace: ITrace) {
+        if (this.selectedTrace === trace && this.selectedTrace.isInEditMode) {
+            return;
         }
-        let message = `${this.resources.deletionOf} ${this.userService.getShareUrlDisplayName(shareUrl)}, ${this.resources.areYouSure}`;
-        this.toastService.confirm(message, () => this.userService.deleteShareUrl(shareUrl), () => { }, "YesNo");
+        if (this.selectedTrace === trace) {
+            this.selectedTrace = null;
+        } else {
+            this.selectedTrace = trace;
+        }
     }
 
-    public isShareUrlInEditMode(shareUrl: Common.ShareUrl) {
-        return this.shareUrlInEditMode === shareUrl;
+    public isTraceInEditMode() {
+        return this.selectedTrace != null && this.selectedTrace.isInEditMode && this.filteredTraces.indexOf(this.selectedTrace) !== -1;
     }
 
-    public async updateShareUrl(shareUrl: Common.ShareUrl) {
-        this.shareUrlInEditMode = null;
-        await this.userService.updateShareUrl(shareUrl);
-        this.toastService.success(this.resources.dataUpdatedSuccefully);
+    public hasSelected() {
+        return this.selectedTrace != null && this.filteredTraces.indexOf(this.selectedTrace) !== -1;
     }
 
-    public async convertShareUrlToRoute(shareUrl: Common.ShareUrl) {
-        let shareUrlWithData = await this.userService.getShareUrl(shareUrl.id);
-        this.dataContainerService.setData(shareUrlWithData.dataContainer);
+    public onScrollDown() {
+        this.page++;
+        this.updateFilteredLists(this.searchTerm.value);
+    }
+
+    public isMobile(): boolean {
+        return L.Browser.mobile;
+    }
+
+    public canUploadToOsm(): boolean {
+        return this.selectedTrace != null && this.selectedTrace.id === "";
+    }
+
+    public async uploadRecordingToOsm() {
+        let route = this.routesService.locallyRecordedRoutes.filter(r => r.name === this.selectedTrace.name)[0];
+        await this.fileService.uploadRouteAsTrace(route);
+        this.userService.refreshDetails();
+        // HM TODO: remove from the local routes list?
     }
 }
