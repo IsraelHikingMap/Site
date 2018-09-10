@@ -1,9 +1,13 @@
-version: 7.1.{build}
+version: 7.2.{build}
 clone_depth: 1
 image: Visual Studio 2017
 configuration: Release
+environment:
+    ANDROID_HOME:"C:\Program Files (x86)\Android\android-sdk\"
 install:
 - ps: >-
+    iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
+
     npm install -g npm@6.2.0 --loglevel=error
 
     node -v
@@ -15,12 +19,6 @@ install:
     $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin"
 
     gradle -v
-
-    #appveyor DownloadFile https://dl.google.com/android/repository/sdk-tools-windows-4333796.zip
-
-    $env:ANDROID_HOME="C:\Program Files (x86)\Android\android-sdk\"
-
-    #Invoke-Expression "7z x sdk-tools-windows-4333796.zip -o$env:ANDROID_HOME | out-null"
 
     for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
