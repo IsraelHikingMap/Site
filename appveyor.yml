@@ -4,6 +4,7 @@ image: Visual Studio 2017
 configuration: Release
 environment:
     ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk\
+    GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     STORE_PASSWROD:
         secure: ZF3GiQxQ98B1HGKZOwlnmris5yN68mvx3UF6TVsnpws=
     PASSWROD:
@@ -12,15 +13,15 @@ install:
 - ps: >-
     npm install -g npm@6.2.0 --loglevel=error
 
-    node -v
-
-    npm -v
-
-    choco install gradle -version 4.9 --no-progress
+    choco install gradle --version 4.9 --no-progress
 
     $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin"
 
-    gradle -v
+    node --version
+
+    npm --version
+
+    gradle --version
 
     for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
