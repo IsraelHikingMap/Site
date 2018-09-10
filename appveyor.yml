@@ -5,9 +5,9 @@ configuration: Release
 environment:
     ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk\
     STORE_PASSWROD:
-        secure: unX0srmwvN2mrCRQGcJ+QXynSyBTp6zZbW0QYBRFcOE=
+        secure: ZF3GiQxQ98B1HGKZOwlnmris5yN68mvx3UF6TVsnpws=
     PASSWROD:
-        secure: 9uOeSFnnpnpzujomSeMXrQ==
+        secure: mqbXr4+cn3l9YNyKhOezbA==
 install:
 - ps: >-
     npm install -g npm@6.2.0 --loglevel=error
@@ -16,7 +16,7 @@ install:
 
     npm -v
 
-    choco install gradle -version 4.9
+    choco install gradle -version 4.9 --no-progress
 
     $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin"
 
@@ -29,16 +29,6 @@ install:
     Invoke-Expression """$response"" | $env:ANDROID_HOME\tools\bin\sdkmanager.bat --update | out-null"
 
     Invoke-Expression "$env:ANDROID_HOME\tools\bin\sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
-
-    Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
-
-    npm install
-
-    npm run build -- -c android --no-progress
-
-    npm run add-android
-
-    Invoke-Expression "npm run build-apk -- --storePassword=$env:STORE_PASSWROD --password=$env:PASSWROD"
 
 before_build:
 - ps: dotnet restore
