@@ -5,10 +5,6 @@ configuration: Release
 environment:
     ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk\
     GRADLE_OPTS: "-Dorg.gradle.daemon=false"
-    STORE_PASSWROD:
-        secure: ZF3GiQxQ98B1HGKZOwlnmris5yN68mvx3UF6TVsnpws=
-    PASSWROD:
-        secure: mqbXr4+cn3l9YNyKhOezbA==
 install:
 - ps: >-
     npm install -g npm@6.2.0 --loglevel=error

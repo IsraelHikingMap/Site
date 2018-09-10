@@ -34,8 +34,9 @@ Write-Host $AddAndroid
 Invoke-Expression $AddAndroid
 
 Write-Host "npm run build-apk"
-Invoke-Expression "npm run build-apk -- --storePassword=$env:STORE_PASSWROD --password=$env:PASSWROD | out-null"
+Invoke-Expression "npm run build-apk"
 
 Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\release\app-release.apk
+Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
