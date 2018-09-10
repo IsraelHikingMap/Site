@@ -91,55 +91,57 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.tracesChangedSubscription.unsubscribe();
     }
 
-    public showTrace = (trace: ITrace): Promise<Common.DataContainer> => {
-        let promise = this.fileService.openFromUrl(trace.dataUrl);
-        promise.then((data) => {
-            this.osmTraceLayer.clearLayers();
-            for (let route of data.routes) {
-                for (let segment of route.segments) {
-                    let polyLine = L.polyline(segment.latlngs, this.getPathOptions());
-                    this.osmTraceLayer.addLayer(polyLine);
-                }
-                for (let markerData of route.markers) {
-                    let icon = IconsService.createPoiDefaultMarkerIcon(this.getPathOptions().color);
-                    let marker = L.marker(markerData.latlng,
-                        {
-                            draggable: false,
-                            clickable: false,
-                            riseOnHover: true,
-                            icon: icon,
-                            opacity: this.getPathOptions().opacity
-                        } as L.MarkerOptions) as Common.IMarkerWithTitle;
-                    this.mapService.setMarkerTitle(marker, markerData);
-                    this.osmTraceLayer.addLayer(marker);
-                }
-            }
-            let bounds = L.latLngBounds(data.southWest, data.northEast);
-            // marker to allow remove of this layer:
-            let mainMarker = L.marker(bounds.getCenter(),
-                {
-                    icon: IconsService.createTraceMarkerIcon(),
-                    draggable: false
-                }) as Common.IMarkerWithTitle;
-            mainMarker.title = trace.name;
+    public showTrace = async (trace: ITrace): Promise<Common.DataContainer> => {
+        let data = (trace.id === "")
+            ? { routes: [this.getRouteFromTrace(trace)] } as Common.DataContainer
+            : await this.fileService.openFromUrl(trace.dataUrl);
 
-            let markerPopupDiv = L.DomUtil.create("div");
-            let factory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
-            let componentRef = factory.create(this.injector, null, markerPopupDiv);
-            componentRef.instance.setMarker(mainMarker);
-            componentRef.instance.remove = () => {
-                this.osmTraceLayer.clearLayers();
-            };
-            componentRef.instance.convertToRoute = () => {
-                this.dataContainerService.setData(data);
-                this.osmTraceLayer.clearLayers();
-            };
-            componentRef.instance.angularBinding(componentRef.hostView);
-            mainMarker.bindPopup(markerPopupDiv);
-            this.osmTraceLayer.addLayer(mainMarker);
-            this.fitBoundsService.fitBounds(bounds, { maxZoom: FitBoundsService.DEFAULT_MAX_ZOOM } as L.FitBoundsOptions);
-        });
-        return promise;
+        this.osmTraceLayer.clearLayers();
+        for (let route of data.routes) {
+            for (let segment of route.segments) {
+                let polyLine = L.polyline(segment.latlngs, this.getPathOptions());
+                this.osmTraceLayer.addLayer(polyLine);
+            }
+            for (let markerData of route.markers) {
+                let icon = IconsService.createPoiDefaultMarkerIcon(this.getPathOptions().color);
+                let marker = L.marker(markerData.latlng,
+                    {
+                        draggable: false,
+                        clickable: false,
+                        riseOnHover: true,
+                        icon: icon,
+                        opacity: this.getPathOptions().opacity
+                    } as L.MarkerOptions) as Common.IMarkerWithTitle;
+                this.mapService.setMarkerTitle(marker, markerData);
+                this.osmTraceLayer.addLayer(marker);
+            }
+        }
+        let bounds = L.latLngBounds(data.southWest, data.northEast);
+        // marker to allow remove of this layer:
+        let mainMarker = L.marker(bounds.getCenter(),
+            {
+                icon: IconsService.createTraceMarkerIcon(),
+                draggable: false
+            }) as Common.IMarkerWithTitle;
+        mainMarker.title = trace.name;
+
+        let markerPopupDiv = L.DomUtil.create("div");
+        let factory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
+        let componentRef = factory.create(this.injector, null, markerPopupDiv);
+        componentRef.instance.setMarker(mainMarker);
+        componentRef.instance.remove = () => {
+            this.osmTraceLayer.clearLayers();
+        };
+        componentRef.instance.convertToRoute = () => {
+            this.dataContainerService.setData(data);
+            this.osmTraceLayer.clearLayers();
+        };
+        componentRef.instance.angularBinding(componentRef.hostView);
+        mainMarker.bindPopup(markerPopupDiv);
+        this.osmTraceLayer.addLayer(mainMarker);
+        this.fitBoundsService.fitBounds(bounds, { maxZoom: FitBoundsService.DEFAULT_MAX_ZOOM } as L.FitBoundsOptions);
+
+        return data;
     }
 
     public editTrace() {
@@ -156,7 +158,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         let message = `${this.resources.deletionOf} ${this.selectedTrace.name}, ${this.resources.areYouSure}`;
         this.toastService.confirm(message, () => {
             if (this.selectedTrace.id === "") {
-                this.routesService.removeRouteFromLocalStorage(this.getRouteFromTrace());
+                this.routesService.removeRouteFromLocalStorage(this.getRouteFromTrace(this.selectedTrace));
                 this.updateFilteredLists(this.searchTerm.value);
             } else {
                 this.userService.deleteOsmTrace(this.selectedTrace);
@@ -312,17 +314,23 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async uploadRecordingToOsm() {
-        let route = this.getRouteFromTrace();
-        await this.fileService.uploadRouteAsTrace(route);
-        this.userService.refreshDetails();
-        // HM TODO: remove from the local routes list?
+        let route = this.getRouteFromTrace(this.selectedTrace);
+        try {
+            await this.fileService.uploadRouteAsTrace(route);
+            this.userService.refreshDetails();
+            this.routesService.removeRouteFromLocalStorage(route);
+            this.selectedTrace = null;
+            this.toastService.info(this.resources.fileUploadedSuccefullyItWillTakeTime);
+        } catch (ex) {
+            this.toastService.error(this.resources.unableToUploadFile);
+        }
     }
 
-    private getRouteFromTrace() {
-        return this.routesService.locallyRecordedRoutes.filter(r => r.name === this.selectedTrace.name)[0];
+    private getRouteFromTrace(trace: ITrace): Common.RouteData {
+        return this.routesService.locallyRecordedRoutes.filter(r => r.name === trace.name)[0];
     }
 
-    public hasNoTraces() {
+    public hasNoTraces(): boolean {
         return this.userService.traces.length === 0 && !this.loadingTraces;
     }
 }

@@ -97,7 +97,6 @@ export class GeoLocationService {
                             Common.ILatLngTime;
                         this.currentLocation.timestamp = new Date(position.timestamp);
                         this.positionChanged.next(position);
-                        console.log("navigator position");
                     });
                 },
                 (err) => {
@@ -168,7 +167,6 @@ export class GeoLocationService {
                     timestamp: location.time
                 } as Position;
                 this.positionChanged.next(position);
-                console.log("BG position");
             });
         });
 

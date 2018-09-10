@@ -91,8 +91,9 @@ export class FileService {
         } as Common.DataContainer;
         let responseData = await this.httpClient.post(Urls.files + "?format=gpx", data).toPromise() as string;
         let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
-        let file = new File([blobToSave], route.name + ".gpx");
-        return this.uploadTrace(file);
+        let formData = new FormData();
+        formData.append("file", blobToSave, route.name + ".gpx");
+        return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
     }
 
     // HM TODO: remove this?
