@@ -26,21 +26,17 @@ install:
 
     Invoke-Expression "$env:ANDROID_HOME\tools\bin\sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
 
-before_build:
-- ps: dotnet restore
-build:
-  project: IsraelHiking.sln
-  parallel: true
-  verbosity: minimal
+#before_build:
+#- ps: dotnet restore
+#build:
+#  project: IsraelHiking.sln
+#  parallel: true
+#  verbosity: minimal
 after_test:
 - ps: >-
-
-    $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
-
-    Write-Host $PostBuildTests
-
-    & "$PostBuildTests"
-
+#    $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
+#    Write-Host $PostBuildTests
+#    & "$PostBuildTests"
     $PostBuildPackArtifacts = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildPackArtifacts.ps1"
 
     Write-Host $PostBuildPackArtifacts
