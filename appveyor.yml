@@ -6,8 +6,6 @@ environment:
     ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk\
 install:
 - ps: >-
-    iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
     npm install -g npm@6.2.0 --loglevel=error
 
     node -v

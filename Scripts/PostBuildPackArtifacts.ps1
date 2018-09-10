@@ -33,11 +33,11 @@ $AddAndroid = "npm run add-android"
 Write-Host $AddAndroid
 Invoke-Expression $AddAndroid
 
-$blockRdp = $true; iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
-
-$buildApk = "npm run build-apk | out-null"
+$buildApk = "npm run build-apk"
 Write-Host $buildApk
 Invoke-Expression $buildApk
+
+Write-Host "Finished building apk"
 
 Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk
 
