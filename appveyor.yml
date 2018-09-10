@@ -26,19 +26,29 @@ install:
 
     Invoke-Expression "$env:ANDROID_HOME\tools\bin\sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
 
+    Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
+
+    npm install
+
+    npm run build -- -c android --no-progress
+
+    npm run add-android
+
+    npm run build-apk
+
 before_build:
-- ps: #dotnet restore
+- ps: dotnet restore
 build:
-#  project: IsraelHiking.sln
-#  parallel: true
-#  verbosity: minimal
+  project: IsraelHiking.sln
+  parallel: true
+  verbosity: minimal
 after_test:
 - ps: >-
-    #$PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
+    $PostBuildTests = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildTests.ps1"
 
-    #Write-Host $PostBuildTests
+    Write-Host $PostBuildTests
 
-    #& "$PostBuildTests"
+    & "$PostBuildTests"
 
     $PostBuildPackArtifacts = "$env:APPVEYOR_BUILD_FOLDER\Scripts\PostBuildPackArtifacts.ps1"
 
