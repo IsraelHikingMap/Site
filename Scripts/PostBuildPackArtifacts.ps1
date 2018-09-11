@@ -33,10 +33,18 @@ $AddAndroid = "npm run add-android"
 Write-Host $AddAndroid
 Invoke-Expression $AddAndroid
 
+#Replace version in config.xml file
+
+$filePath = get-ChildItem config.xml | Select-Object -first 1 | select -expand FullName
+$xml = New-Object XML
+$xml.Load($filePath)
+$xml.widget.version = $env:APPVEYOR_BUILD_VERSION
+$xml.Save($filePath)
+
+
 Write-Host "npm run build-apk"
 Invoke-Expression "npm run build-apk"
 
-Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\release\app-release.apk
 Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER

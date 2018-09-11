@@ -63,8 +63,6 @@
     "@types/node": "^10.3.3",
     "codelyzer": "^4.3.0",
     "cordova": "8.0.0",
-    "cordova-set-version-name": "1.0.0",
-    "cross-var": "1.1.0",
     "gulp": "^4.0.0",
     "gulp-angular-gettext": "*",
     "gulp-download": "*",
@@ -101,7 +99,7 @@
     "version": "node -v && npm -v && ng -v",
     "update": "ng update",
     "add-android": "cordova platform add android",
-    "build-apk": "echo %APPVEYOR_BUILD_VERSION% && cordova-set-version-name -f config.xml -n %APPVEYOR_BUILD_VERSION% && cordova build android --release --no-telemetry"
+    "build-apk": "cordova build android --release --no-telemetry"
   },
   "cordova": {
     "plugins": {
