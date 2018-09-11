@@ -101,7 +101,7 @@
     "version": "node -v && npm -v && ng -v",
     "update": "ng update",
     "add-android": "cordova platform add android",
-    "build-apk": "cross-var echo $APPVEYOR_BUILD_VERSION && cross-var cordova-set-version-name -f config.xml -n $APPVEYOR_BUILD_VERSION && cordova build android --release --no-telemetry"
+    "build-apk": "echo %APPVEYOR_BUILD_VERSION% && cordova-set-version-name -f config.xml -n %APPVEYOR_BUILD_VERSION% && cordova build android --release --no-telemetry"
   },
   "cordova": {
     "plugins": {
