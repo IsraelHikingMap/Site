@@ -1,5 +1,6 @@
 import { Component, ComponentFactoryResolver, Injector } from "@angular/core";
 import { LocalStorage } from "ngx-store";
+import { first } from "rxjs/operators";
 import * as L from "leaflet";
 
 import { ResourcesService } from "../services/resources.service";
@@ -64,15 +65,20 @@ export class LocationComponent extends BaseMapComponent {
                 }
             });
         if (this.lastRecordedRoute != null) {
-            this.toastService.confirm(this.resources.continueRecording,
-                () => {
-                    this.toggleRecording();
-                    this.routeLayer.setData(this.lastRecordedRoute);
-                    this.toggleTracking();
-                },
-                () => {
-                    this.lastRecordedRoute = null;
-                }, "YesNo");
+            this.resources.languageChanged.pipe(first()).toPromise().then(() => {
+                // let resources service get the strings   
+                this.toastService.confirm(this.resources.continueRecording,
+                    () => {
+                        this.toggleRecording();
+                        this.routeLayer.setData(this.lastRecordedRoute);
+                        this.toggleTracking();
+                    },
+                    () => {
+                        this.routesService.addRouteToLocalStorage(this.lastRecordedRoute);
+                        this.lastRecordedRoute = null;
+                    },
+                    "YesNo");
+            });
         }
     }
 
