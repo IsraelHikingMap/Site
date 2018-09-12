@@ -45,6 +45,10 @@ $xml.Save($filePath)
 Write-Host "npm run build-apk"
 Invoke-Expression "npm run build-apk"
 
-Push-AppveyorArtifact .\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk
+$apkVersioned = ".\app-release-unsigned_$env:APPVEYOR_BUILD_VERSION.apk"
+
+Move-Item -Path .\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk -Destination $apkVersioned
+
+Push-AppveyorArtifact $apkVersioned
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
