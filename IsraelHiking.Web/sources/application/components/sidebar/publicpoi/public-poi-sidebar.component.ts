@@ -161,7 +161,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         try {
             let poiExtended = await this.poiService.uploadPoint(this.info);
             this.initFromPointOfInterestExtended(poiExtended);
-            this.toastService.info(this.resources.dataUpdatedSuccefully);
+            this.toastService.info(this.resources.dataUpdatedSuccessfully);
             this.poiService.setAddOrUpdateMarkerData(null);
             this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.source, this.poiExtended.id],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });

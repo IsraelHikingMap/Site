@@ -99,7 +99,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     public async updateShareUrl(shareUrl: Common.ShareUrl) {
         this.shareUrlInEditMode = null;
         await this.userService.updateShareUrl(shareUrl);
-        this.toastService.success(this.resources.dataUpdatedSuccefully);
+        this.toastService.success(this.resources.dataUpdatedSuccessfully);
     }
 
     public async convertShareUrlToRoute(shareUrl: Common.ShareUrl) {

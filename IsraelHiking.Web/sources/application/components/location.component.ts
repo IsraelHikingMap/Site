@@ -26,6 +26,9 @@ export class LocationComponent extends BaseMapComponent {
     @LocalStorage()
     private lastRecordedRoute: RouteData = null;
 
+    @LocalStorage()
+    private showBatteryConfirmation = true;
+
     private locationMarker: Common.IMarkerWithTitle;
     private accuracyCircle: L.Circle;
     private routeLayer: IRouteLayer;
@@ -66,7 +69,7 @@ export class LocationComponent extends BaseMapComponent {
             });
         if (this.lastRecordedRoute != null) {
             this.resources.languageChanged.pipe(first()).toPromise().then(() => {
-                // let resources service get the strings   
+                // let resources service get the strings
                 this.toastService.confirm(this.resources.continueRecording,
                     () => {
                         this.toggleRecording();
@@ -107,6 +110,11 @@ export class LocationComponent extends BaseMapComponent {
 
     public toggleRecording() {
         if (!this.isRecording()) {
+            if (this.showBatteryConfirmation) {
+                this.toastService.confirm(this.resources.makeSureBatteryOptimizationIsOff, () => { }, () => {
+                    this.showBatteryConfirmation = false;
+                }, "Custom", this.resources.ok, this.resources.dontShowThisMessageAgain);
+            }
             let date = new Date();
             let name = this.resources.route + " " + date.toISOString().split("T")[0];
             if (!this.routesService.isNameAvailable(name)) {

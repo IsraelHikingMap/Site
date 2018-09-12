@@ -3,10 +3,10 @@
     <br />
     <div fxLayout="row">
         <div fxFlex>
-            <button mat-button fxFill (click)="confirmAction()">{{getConfirmButtonText()}}</button>
+            <button mat-button fxFill (click)="confirmAction()">{{confirmButtonText}}</button>
         </div>
-        <div *ngIf="hasTwoButtons()" fxFlex>
-            <button mat-button fxFill (click)="declineAction()">{{getDeclineButtonText()}}</button>
+        <div *ngIf="hasTwoButtons" fxFlex>
+            <button mat-button fxFill (click)="declineAction()">{{declineButtonText}}</button>
         </div>
     </div>
 </div>

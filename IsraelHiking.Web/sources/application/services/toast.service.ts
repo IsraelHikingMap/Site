@@ -43,7 +43,9 @@ export class ToastService {
         });
     }
 
-    public confirm(message: string, confirmAction: Function, declineAction: Function, type: ConfirmType) {
+    public confirm(message: string, confirmAction: Function, declineAction: Function, type: ConfirmType,
+        customConfirmText?: string, customDeclineText?: string) {
+
         let componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent);
         componentRef.instance.confirmMessage = message;
         componentRef.instance.confirmAction = () => {
@@ -54,6 +56,25 @@ export class ToastService {
             declineAction();
             this.snackbar.dismiss();
         };
-        componentRef.instance.confirmType = type;
+        componentRef.instance.hasTwoButtons = type !== "Ok";
+        switch (type) {
+            case "Ok":
+                componentRef.instance.confirmButtonText = this.resources.ok;
+                break;
+            case "YesNo":
+                componentRef.instance.confirmButtonText = this.resources.yes;
+                componentRef.instance.declineButtonText = this.resources.no;
+                break;
+            case "OkCancel":
+                componentRef.instance.confirmButtonText = this.resources.ok;
+                componentRef.instance.declineButtonText = this.resources.cancel;
+                break;
+            case "Custom":
+                componentRef.instance.confirmButtonText = customConfirmText;
+                componentRef.instance.declineButtonText = customDeclineText;
+                break;
+            default:
+                throw new Error("Invalid confirm type!");
+        }
     }
 }

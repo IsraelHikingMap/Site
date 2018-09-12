@@ -80,6 +80,6 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
 
     public makeAllPointsEditable = () => {
         this.routeLayer.makeAllPointsEditable();
-        this.toastService.info(this.resources.dataUpdatedSuccefully);
+        this.toastService.info(this.resources.dataUpdatedSuccessfully);
     }
 }

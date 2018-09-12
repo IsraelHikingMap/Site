@@ -195,7 +195,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         }
         try {
             await this.fileService.uploadTrace(file);
-            this.toastService.success(this.resources.fileUploadedSuccefullyItWillTakeTime);
+            this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
             this.userService.refreshDetails();
         } catch (ex) {
             this.toastService.error(this.resources.unableToUploadFile);
@@ -320,7 +320,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             this.userService.refreshDetails();
             this.routesService.removeRouteFromLocalStorage(route);
             this.selectedTrace = null;
-            this.toastService.info(this.resources.fileUploadedSuccefullyItWillTakeTime);
+            this.toastService.info(this.resources.fileUploadedSuccessfullyItWillTakeTime);
         } catch (ex) {
             this.toastService.error(this.resources.unableToUploadFile);
         }

@@ -253,11 +253,11 @@ export class ResourcesService {
     public unableToFindYourLocation: string;
     public redirectingToSecuredSite: string;
     public routeAddedSuccessfullyItWillTakeTime: string;
-    public fileUploadedSuccefullyItWillTakeTime: string;
+    public fileUploadedSuccessfullyItWillTakeTime: string;
     public unableToUploadFile: string;
     public unableToSaveAnEmptyRoute: string;
     public closeWhileInEditMode: string;
-    public dataUpdatedSuccefully: string;
+    public dataUpdatedSuccessfully: string;
     public loginRequired: string;
     public noDescriptionLoginRequired: string;
     public nameInLanguage: string;
@@ -269,6 +269,8 @@ export class ResourcesService {
     public wouldYouLikeToUpdate: string;
     public wouldYouLikeToUpdateThePointWithoutTheTitle: string;
     public continueRecording: string;
+    public makeSureBatteryOptimizationIsOff: string;
+    public dontShowThisMessageAgain: string;
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -716,14 +718,14 @@ export class ResourcesService {
         this.redirectingToSecuredSite = this.gettextCatalog.getString("Redirecting to secure site.");
         this.routeAddedSuccessfullyItWillTakeTime = this.gettextCatalog
             .getString("Route added successfully, It will take some time for the map to update.");
-        this.fileUploadedSuccefullyItWillTakeTime = this.gettextCatalog
+        this.fileUploadedSuccessfullyItWillTakeTime = this.gettextCatalog
             .getString("File uploaded successfully, It will take some time to add it to OSM database.");
         this.unableToUploadFile = this.gettextCatalog.getString("Unable to upload the file...");
         this.unableToSaveAnEmptyRoute = this.gettextCatalog
             .getString("Unable to save an empty route, Please try and select a different one from the layers control on your left.");
         this.closeWhileInEditMode = this.gettextCatalog
             .getString("Please note that you did not save your work before closing the popup...");
-        this.dataUpdatedSuccefully = this.gettextCatalog.getString("The data was updated successfully!");
+        this.dataUpdatedSuccessfully = this.gettextCatalog.getString("The data was updated successfully!");
         this.loginRequired = this.gettextCatalog
             .getString("You need to login to OSM first, please use the button in the upper right corner to login.");
         this.noDescriptionLoginRequired = this.gettextCatalog
@@ -739,6 +741,10 @@ export class ResourcesService {
         this.wouldYouLikeToUpdateThePointWithoutTheTitle = this.gettextCatalog
             .getString("Would you like to update the point without the title?");
         this.continueRecording = this.gettextCatalog.getString("Last recording did not end well, would you like to continue it?");
+        this.makeSureBatteryOptimizationIsOff = this.gettextCatalog.getString(
+            "Please make sure the battery optimization is turned off for this application. Go to application setting to do so."
+        );
+        this.dontShowThisMessageAgain = this.gettextCatalog.getString("Don't show this message again");
         // Help
         this.helpSubheader = this.gettextCatalog.getString("Basic instructions on using this site");
         this.helpInfo = this.gettextCatalog.getString("This dialog");
