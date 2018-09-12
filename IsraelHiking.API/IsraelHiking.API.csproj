@@ -3,6 +3,16 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <DebugType>full</DebugType>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <Copyright>© Israel Hiking Map</Copyright>
+    <Authors>HarelM</Authors>
+    <Company>IsraelHikingMap</Company>
+    <Product>IsraelHikingMap</Product>
+    <PackageLicenseUrl>https://github.com/IsraelHikingMap/Site/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/IsraelHikingMap/</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/IsraelHikingMap/site</RepositoryUrl>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
