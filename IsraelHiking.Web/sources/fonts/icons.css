@@ -1,10 +1,10 @@
 @font-face {
     font-family: 'IsraelHikingMap';
-    src: url('IsraelHikingMap.eot?pdk7tn');
-    src: url('IsraelHikingMap.eot?pdk7tn#iefix') format('embedded-opentype'), 
-         url('IsraelHikingMap.ttf?pdk7tn') format('truetype'), 
-         url('IsraelHikingMap.woff?pdk7tn') format('woff'), 
-         url('IsraelHikingMap.svg?pdk7tn#IsraelHikingMap') format('svg');
+    src: url('IsraelHikingMap.eot?rel6eb');
+    src: url('IsraelHikingMap.eot?rel6eb#iefix') format('embedded-opentype'), 
+         url('IsraelHikingMap.ttf?rel6eb') format('truetype'), 
+         url('IsraelHikingMap.woff?rel6eb') format('woff'),
+         url('IsraelHikingMap.svg?rel6eb#IsraelHikingMap') format('svg');
     font-weight: normal;
     font-style: normal;
 }
