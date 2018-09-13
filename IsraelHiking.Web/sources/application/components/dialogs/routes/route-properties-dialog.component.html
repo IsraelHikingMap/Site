@@ -15,7 +15,7 @@
             <textarea matInput rows="2" type="text" [dir]="resources.getDirection(routeProperties.description)" [(ngModel)]="routeProperties.description" placeholder="{{resources.description}}" fxFill></textarea>
         </mat-form-field>
         
-        <div fxLayout="row" fxLayoutAlign="space-between stretch" fxLayoutWrap>
+        <div fxLayout="row wrap" fxLayoutAlign="space-between stretch">
             <div fxFlex="50" fxFlex.xs="100">
                 <div fxLayout="column" fxLayoutGap="5px">
                     <div *ngFor="let rowIndex of [0,1,2]" class="button-row">

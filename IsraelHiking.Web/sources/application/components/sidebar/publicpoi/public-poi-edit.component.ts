@@ -11,7 +11,8 @@ import { IPointOfInterestExtended } from "../../../services/poi.service";
 
 @Component({
     selector: "public-poi-edit",
-    templateUrl: "./public-poi-edit.component.html"
+    templateUrl: "./public-poi-edit.component.html",
+    styleUrls: ["./public-poi-edit.component.scss"]
 })
 export class PublicPointOfInterestEditComponent extends BaseMapComponent implements OnInit {
     @Input()

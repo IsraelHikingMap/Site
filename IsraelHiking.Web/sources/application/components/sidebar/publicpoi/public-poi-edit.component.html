@@ -41,11 +41,11 @@
         </div>
         <br />
         <br />
-        <div fxLayout="row" fxLayoutWrap *ngIf="selectedCategory">
+        <div fxLayout="row wrap" *ngIf="selectedCategory">
             <button mat-button *ngFor="let icon of selectedCategory.icons" (click)="selectIcon(icon)" fxFlex [ngClass]="{active: icon == selectedCategory.selectedIcon}">
                 <i class="fa fa-lg" [ngClass]="icon.icon" [style.color]="icon.color"></i>
                 <br />
-                {{resources.translate(icon.label)}}
+                <span class="chrome-wordwrap-fix category-button-text">{{resources.translate(icon.label)}}</span>
             </button>
         </div>
     </mat-card>
