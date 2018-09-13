@@ -93,7 +93,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public showTrace = async (trace: ITrace): Promise<Common.DataContainer> => {
         let data = (trace.id === "")
-            ? { routes: [this.getRouteFromTrace(trace)] } as Common.DataContainer
+            ? this.getDataContainerFromRecording(trace)
             : await this.fileService.openFromUrl(trace.dataUrl);
 
         this.osmTraceLayer.clearLayers();
@@ -142,6 +142,18 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         this.fitBoundsService.fitBounds(bounds, { maxZoom: FitBoundsService.DEFAULT_MAX_ZOOM } as L.FitBoundsOptions);
 
         return data;
+    }
+
+    private getDataContainerFromRecording(trace) {
+        let routeDate = this.getRouteFromTrace(trace);
+        let latLngs = routeDate.segments[0].latlngs;
+        let northEast = L.latLng(Math.max(...latLngs.map(l => l.lat)), Math.max(...latLngs.map(l => l.lng)));
+        let southWest = L.latLng(Math.min(...latLngs.map(l => l.lat)), Math.min(...latLngs.map(l => l.lng)));
+        return {
+            routes: [],
+            northEast: northEast,
+            southWest: southWest
+        } as Common.DataContainer;
     }
 
     public editTrace() {
