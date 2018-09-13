@@ -10,6 +10,7 @@ import { LayersService } from "../../services/layers/layers.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ILegendItem, LegendItemComponent } from "./legend-item.component";
 import { RouteStrings } from "../../services/hash.service";
+import { environment } from "../../../environments/environment";
 
 export interface ILegendSection {
     items: ILegendItem[];
@@ -38,6 +39,10 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.resources.languageChanged.subscribe(() => {
             this.initalizeLegendSections();
         });
+    }
+
+    public showDownloadDialog(): Boolean {
+        return !environment.isCordova;
     }
 
     public openDownloadDialog = () => {
