@@ -46,7 +46,7 @@ namespace IsraelHiking.API.Converters
         ///<inheritdoc />
         public DataContainer ToDataContainer(GpxFile gpx)
         {
-            //gpx.UpdateBounds();
+            gpx = gpx.UpdateBounds();
             var container = new DataContainer
             {
                 Routes = ConvertRoutesToRoutesData(gpx.Routes ?? new List<GpxRoute>())
