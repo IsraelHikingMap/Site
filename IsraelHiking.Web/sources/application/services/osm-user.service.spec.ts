@@ -189,16 +189,6 @@ describe("OSM User Service", () => {
         expect(address).toContain(gpxId);
     }));
 
-
-    it("Should return full address of shared route", inject([OsmUserService, HashService],
-        (osmUserService: OsmUserService, hashService: HashService) => {
-            let shareUrl = { id: "12345" } as Common.ShareUrl;
-
-            osmUserService.getUrlFromShareId(shareUrl);
-
-            expect(hashService.getFullUrlFromShareId).toHaveBeenCalled();
-        }));
-
     it("Should return social links", inject([OsmUserService, HashService], (osmUserService: OsmUserService, hashService: HashService) => {
         let shareUrl = { id: "12345" } as Common.ShareUrl;
 

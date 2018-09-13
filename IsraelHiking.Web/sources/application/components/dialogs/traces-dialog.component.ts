@@ -333,4 +333,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public hasNoTraces(): boolean {
         return this.userService.traces.length === 0 && !this.loadingTraces;
     }
+
+    public getTraceDisplayName(trace: ITrace) {
+        return (trace.id === "") ? trace.name : trace.description;
+    }
 }

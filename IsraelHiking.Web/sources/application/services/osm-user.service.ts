@@ -115,7 +115,7 @@ export class OsmUserService {
                 nakeb: ""
             };
         }
-        let ihm = this.getUrlFromShareId(shareUrl);
+        let ihm = this.hashService.getFullUrlFromShareId(shareUrl.id);
         let escaped = encodeURIComponent(ihm);
         return {
             ihm: ihm,
@@ -222,10 +222,6 @@ export class OsmUserService {
             address += `?width=${width}&height=${height}`;
         }
         return address;
-    }
-
-    public getUrlFromShareId = (shareUrl: Common.ShareUrl) => {
-        return this.hashService.getFullUrlFromShareId(shareUrl.id);
     }
 
     public getMissingParts(trace: ITrace): Promise<GeoJSON.FeatureCollection<GeoJSON.LineString>> {

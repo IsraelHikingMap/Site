@@ -22,10 +22,7 @@
                 <div class="margin-10">
                     <div class="item-content">
                         <div *ngIf="!isShareUrlInEditMode(shareUrl)">
-                            <a href="{{userService.getUrlFromShareId(shareUrl)}}" target="_blank">
-                                {{shareUrl.title}}
-                            </a>
-                            <br />
+                            {{shareUrl.title}}<br />
                             {{shareUrl.description}}<br />
                             {{shareUrl.creationDate | date:'dd/MM/yyyy'}}
                         </div>

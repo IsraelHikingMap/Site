@@ -27,8 +27,7 @@
                 </div>
                 <div class="margin-10" >
                     <div *ngIf="!trace.isInEditMode">
-                        <a href="{{trace.url}}" target="_blank" class="chrome-wordwrap-fix">{{trace.name}}</a><br />
-                        {{trace.description}}<br />
+                        {{getTraceDisplayName(trace)}}<br />
                         {{trace.timeStamp | date:'dd/MM/yyyy'}}<br />
                         {{resources.translate(trace.visibility === 'private' ? 'Private' : 'Public')}}<br />
                         {{trace.tagsString || resources.noTags}}
