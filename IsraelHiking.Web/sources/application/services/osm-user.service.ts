@@ -250,6 +250,12 @@ export class OsmUserService {
         return `${this.baseUrl}/edit?${elementType}=${elementId}#${background}`;
     }
 
+    public getElementOsmAddress(id: string) {
+        let elementType = id.split("_")[0];
+        let elementId = id.split("_")[1];
+        return `${this.baseUrl}/${elementType}/${elementId}`;
+    }
+
     private getBackgroundStringForOsmAddress(baseLayerAddress: string): string {
         let background = "background=bing";
         if (baseLayerAddress !== "") {

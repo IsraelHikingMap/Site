@@ -279,14 +279,13 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.hashService.resetAddressbar();
     }
 
-    public getEditElementOsmAddress(): string {
+    public getElementOsmAddress(): string {
         if (!this.poiExtended) {
             return null;
         }
         if (this.poiExtended.source.toLocaleLowerCase() !== "osm") {
             return null;
         }
-        let baseLayerAddress = this.layersService.selectedBaseLayer.address;
-        return this.osmUserService.getEditElementOsmAddress(baseLayerAddress, this.poiExtended.id);
+        return this.osmUserService.getElementOsmAddress(this.poiExtended.id);
     }
 }
