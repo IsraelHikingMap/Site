@@ -51,6 +51,9 @@ export class RouteStateHelper {
                 riseOnHover: false,
                 icon: IconsService.createRoundIcon("green")
             }).addTo(context.mapService.map);
+        if (context.route.segments[0].routePointMarker != null) {
+            RouteStateHelper.destroyMarker(context.route.segments[0].routePointMarker, context);
+        }
         context.route.segments[0].routePointMarker = marker;
         let endLatLng = context.getLastLatLng();
         marker = L.marker(endLatLng,
@@ -61,6 +64,9 @@ export class RouteStateHelper {
                 riseOnHover: false,
                 icon: IconsService.createRoundIcon("red")
             }).addTo(context.mapService.map);
+        if (context.getLastSegment().routePointMarker != null) {
+            RouteStateHelper.destroyMarker(context.getLastSegment().routePointMarker, context);
+        }
         context.getLastSegment().routePointMarker = marker;
     }
 }

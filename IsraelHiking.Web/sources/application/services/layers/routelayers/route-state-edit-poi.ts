@@ -54,4 +54,9 @@ export class RouteStateEditPoi extends RouteStateEditBase {
             }
         });
     }
+
+    protected addPosition(): void {
+        super.addPosition();
+        RouteStateHelper.createStartAndEndMarkers(this.context);
+    }
 }

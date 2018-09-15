@@ -12,7 +12,7 @@ import { GpsLocationMarkerPopupComponent } from "./markerpopup/gps-location-mark
 import { IconsService } from "../services/icons.service";
 import { RoutesService } from "../services/layers/routelayers/routes.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
-import { IRouteLayer } from "../services/layers/routelayers/iroute.layer";
+import { IRouteLayer, IRouteSegment } from "../services/layers/routelayers/iroute.layer";
 import * as Common from "../common/IsraelHiking";
 import RouteData = Common.RouteData;
 
@@ -61,8 +61,7 @@ export class LocationComponent extends BaseMapComponent {
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                 } else {
                     this.updateMarkerPosition(position);
-                    if (this.routeLayer != null &&
-                        (this.routeLayer.getStateName() === "Recording" || this.routeLayer.getStateName() === "RecordingPoi")) {
+                    if (this.routeLayer != null && this.routeLayer.route.properties.isRecording) {
                         this.lastRecordedRoute = this.routeLayer.getData();
                     }
                 }
@@ -115,23 +114,43 @@ export class LocationComponent extends BaseMapComponent {
                     this.showBatteryConfirmation = false;
                 }, "Custom", this.resources.ok, this.resources.dontShowThisMessageAgain);
             }
-            let date = new Date();
-            let name = this.resources.route + " " + date.toISOString().split("T")[0];
-            if (!this.routesService.isNameAvailable(name)) {
-                let dateString =
-                    `${date.toISOString().split("T")[0]} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
-                name = this.resources.route + " " + dateString;
-            }
-            let route = this.routeLayerFactory.createRoute(name);
-            this.routesService.addRoute(route);
-            this.routeLayer = this.routesService.selectedRoute;
-            this.routeLayer.setRecordingState();
+            this.createRecordingRoute();
         } else {
             this.routeLayer.setReadOnlyState();
+            this.routeLayer.route.properties.isRecording = false;
             this.routesService.addRouteToLocalStorage(this.routeLayer.getData());
             this.routeLayer = null;
             this.lastRecordedRoute = null;
         }
+    }
+
+    private createRecordingRoute() {
+        let date = new Date();
+        let name = this.resources.route + " " + date.toISOString().split("T")[0];
+        if (!this.routesService.isNameAvailable(name)) {
+            let dateString =
+                `${date.toISOString().split("T")[0]} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
+            name = this.resources.route + " " + dateString;
+        }
+        let route = this.routeLayerFactory.createRoute(name);
+        route.properties.isRecording = true;
+        let latlngs = [];
+        let routePoint = null;
+        let currentLocation = this.geoLocationService.currentLocation;
+        if (currentLocation != null) {
+            latlngs = [currentLocation];
+            routePoint = currentLocation;
+        }
+        route.segments.push({
+            latlngs: latlngs,
+            routePoint: routePoint,
+            routingType: "Hike",
+            polyline: null,
+            routePointMarker: null
+        } as IRouteSegment);
+        this.routesService.addRoute(route);
+        this.routeLayer = this.routesService.selectedRoute;
+        this.routeLayer.setEditPoiState();
     }
 
     public isDisabled() {

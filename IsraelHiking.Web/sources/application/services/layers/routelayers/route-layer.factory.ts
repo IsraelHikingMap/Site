@@ -76,6 +76,7 @@ export class RouteLayerFactory {
                 currentRoutingType: this.routingType,
                 isRoutingPerPoint: this.isRoutingPerPoint,
                 isVisible: true,
+                isRecording: false,
                 pathOptions: {
                     color: pathOptions.color || this.colors[this.nextColorIndex],
                     className: "",

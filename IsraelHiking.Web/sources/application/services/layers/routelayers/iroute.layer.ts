@@ -24,6 +24,7 @@ export interface IRouteProperties {
     currentRoutingType: Common.RoutingType;
     isRoutingPerPoint: boolean;
     isVisible: boolean;
+    isRecording: boolean;
 }
 
 export interface IRoute {
@@ -74,6 +75,4 @@ export interface IRouteLayer {
     setReadOnlyState(): void;
     setEditRouteState(): void;
     setEditPoiState(): void;
-    setRecordingState(): void;
-    setRecordingPoiState(): void;
 }

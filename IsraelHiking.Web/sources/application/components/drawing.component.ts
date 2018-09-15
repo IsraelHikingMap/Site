@@ -46,9 +46,7 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public isPoiEditActive() {
-        return this.routesService.selectedRoute != null &&
-            (this.routesService.selectedRoute.getStateName() === "Poi" ||
-                this.routesService.selectedRoute.getStateName() === "RecordingPoi");
+        return this.routesService.selectedRoute != null && this.routesService.selectedRoute.getStateName() === "Poi";
     }
 
     public isRouteEditActive() {
@@ -60,9 +58,7 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public isRouteEditDisabled() {
-        return this.routesService.selectedRoute != null &&
-        (this.routesService.selectedRoute.getStateName() === "Recording" ||
-            this.routesService.selectedRoute.getStateName() === "RecordingPoi");
+        return this.routesService.selectedRoute != null && this.routesService.selectedRoute.route.properties.isRecording;
     }
 
     public toggleEditRoute(e: Event) {
@@ -72,9 +68,6 @@ export class DrawingComponent extends BaseMapComponent {
         switch (stateName) {
             case "Route":
                 selectedRoute.setReadOnlyState();
-                break;
-            case "Recording":
-            case "RecordingPoi":
                 break;
             default:
                 selectedRoute.setEditRouteState();
@@ -89,12 +82,6 @@ export class DrawingComponent extends BaseMapComponent {
         switch (stateName) {
             case "Poi":
                 selectedRoute.setReadOnlyState();
-                break;
-            case "RecordingPoi":
-                selectedRoute.setRecordingState();
-                break;
-            case "Recording":
-                selectedRoute.setRecordingPoiState();
                 break;
             default:
                 selectedRoute.setEditPoiState();

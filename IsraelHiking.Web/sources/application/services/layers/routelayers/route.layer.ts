@@ -21,8 +21,6 @@ import { RouteStateReadOnly } from "./route-state-read-only";
 import { RouteStateHidden } from "./route-state-hidden";
 import { RouteStateEditPoi } from "./route-state-edit-poi";
 import { RouteStateEditRoute } from "./route-state-edit-route";
-import { RouteStateRecording } from "./route-state-recording";
-import { RouteStateRecordingPoi } from "./route-state-recording-poi";
 import { UndoHandler } from "./undo-handler";
 import * as Common from "../../../common/IsraelHiking";
 
@@ -82,12 +80,6 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
                 break;
             case "ReadOnly":
                 this.setReadOnlyState();
-                break;
-            case "Recording":
-                this.setRecordingState();
-                break;
-            case "RecordingPoi":
-                this.setRecordingPoiState();
                 break;
             default:
                 throw new Error(`Invalid state: ${stateName}`);
@@ -379,14 +371,6 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
 
     public setEditPoiState(): void {
         this.setStateImplementation(RouteStateEditPoi);
-    }
-
-    public setRecordingState(): void {
-        this.setStateImplementation(RouteStateRecording);
-    }
-
-    public setRecordingPoiState(): void {
-        this.setStateImplementation(RouteStateRecordingPoi);
     }
 
     private setStateImplementation<State extends RouteStateBase>(type: { new(layer: IRouteLayer): State; }): void {

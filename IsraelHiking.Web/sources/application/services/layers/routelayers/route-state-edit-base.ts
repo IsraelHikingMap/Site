@@ -15,6 +15,7 @@ export abstract class RouteStateEditBase extends RouteStateBase {
     protected abstract addPoint(e: L.LeafletMouseEvent): void;
 
     public initialize() {
+        super.initialize();
         this.context.mapService.map.on("click", this.addPoint, this);
         this.context.mapService.map.on("mousemove", this.hoverHandler.onMouseMove, this.hoverHandler);
         this.hoverHandler.updateAccordingToRoueProperties();
@@ -32,5 +33,6 @@ export abstract class RouteStateEditBase extends RouteStateBase {
         this.context.mapService.map.off("mousemove", this.hoverHandler.onMouseMove, this.hoverHandler);
         this.context.mapService.map.off("click", this.addPoint, this);
         this.hoverHandler.setState(HoverHandlerState.NONE);
+        super.clear();
     }
 }

@@ -26,6 +26,7 @@ export class RouteStateReadOnly extends RouteStateBase {
     }
 
     public initialize() {
+        super.initialize();
         this.context.mapService.map.addLayer(this.polylines);
         this.polylines.clearLayers();
         if (this.context.route.segments.length > 0) {
@@ -49,6 +50,7 @@ export class RouteStateReadOnly extends RouteStateBase {
         this.context.mapService.map.off("mousemove", this.onMouseMove);
         this.polylines.clearLayers();
         this.context.mapService.map.removeLayer(this.polylines);
+        super.clear();
     }
 
     public getStateName(): RouteStateName {
@@ -72,5 +74,15 @@ export class RouteStateReadOnly extends RouteStateBase {
         if (newMarker != null) {
             newMarker.marker.openPopup();
         }
+    }
+
+    protected addPosition(): void {
+        super.addPosition();
+        let latLng = this.context.geoLocationService.currentLocation;
+        let lastPolyline = this.polylines.getLayers()[this.polylines.getLayers().length - 1] as L.Polyline;
+        let latlngs = lastPolyline.getLatLngs() as L.LatLng[];
+        latlngs.push(latLng);
+        lastPolyline.setLatLngs(latlngs);
+        RouteStateHelper.createStartAndEndMarkers(this.context);
     }
 }

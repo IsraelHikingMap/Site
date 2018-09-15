@@ -1,4 +1,4 @@
-﻿export type RouteStateName = "Poi" | "Route" | "ReadOnly" | "Hidden" | "Recording" | "RecordingPoi";
+﻿export type RouteStateName = "Poi" | "Route" | "ReadOnly" | "Hidden";
 
 export interface IRouteState {
     reRoute: () => void;

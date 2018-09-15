@@ -7,14 +7,6 @@ export class RouteStateHidden extends RouteStateBase {
         super(context);
     }
 
-    public initialize() {
-        // no need to do anything.
-    }
-
-    public clear() {
-        // no need to do anything
-    }
-
     public getStateName(): RouteStateName {
         return "Hidden";
     }
