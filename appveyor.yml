@@ -6,7 +6,7 @@ environment:
     ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
     GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     STORE_PASSWORD:
-        secure: BSNfEghh/l4KAC3jAcwAjgTibl6UHcZ08ppSFBieQ8E=
+        secure: ZF3GiQxQ98B1HGKZOwlnmris5yN68mvx3UF6TVsnpws=
     PASSWORD:
         secure: mqbXr4+cn3l9YNyKhOezbA==
 install:
