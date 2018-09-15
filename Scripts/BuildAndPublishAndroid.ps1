@@ -30,8 +30,8 @@ $apkArmv7Versioned = ".\IHM_signed_armv7_$env:APPVEYOR_BUILD_VERSION.apk"
 $apkx86Versioned = ".\IHM_signed_x86_$env:APPVEYOR_BUILD_VERSION.apk"
 
 Write-Host "Signing apks"
-Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\IHM.jks --out $apkArmv7Versioned .\platforms\android\app\build\outputs\apk\armv7\release\app-armv7-release-unsigned.apk --ks-pass $env:STORE_PASSWORD --key-pass $env:PASSWORD"
-Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\IHM.jks --out $apkx86Versioned .\platforms\android\app\build\outputs\apk\x86\release\app-x86-release-unsigned.apk --ks-pass $env:STORE_PASSWORD --key-pass $env:PASSWORD"
+Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\IHM.jks --ks-pass $env:STORE_PASSWORD --key-pass $env:PASSWORD --out $apkArmv7Versioned .\platforms\android\app\build\outputs\apk\armv7\release\app-armv7-release-unsigned.apk"
+Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\IHM.jks --ks-pass $env:STORE_PASSWORD --key-pass $env:PASSWORD --out $apkx86Versioned .\platforms\android\app\build\outputs\apk\x86\release\app-x86-release-unsigned.apk"
 
 Push-AppveyorArtifact $apkArmv7Versioned
 Push-AppveyorArtifact $apkx86Versioned
