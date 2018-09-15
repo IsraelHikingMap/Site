@@ -4,7 +4,7 @@
     </div>
     <label fxFill *ngIf="canEdit" dnd-droppable (onDropSuccess)="add($event.mouseEvent)">
         <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload image first image"><i class="fa icon-camera fa-5x"></i> <i class="fa icon-plus fa-3x"></i></a>
-        <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*" multiple />
+        <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
     </label>
 </div>
 <div fxLayout="row" *ngIf="images.length > 0">
@@ -21,7 +21,7 @@
     <div fxFlex *ngIf="canEdit">
         <label fxFill>
             <a mat-button fxFill angulartics2On="click" angularticsCategory="OSM" angularticsAction="Upload non first image"><i class="fa icon-plus"></i></a>
-            <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*" multiple />
+            <input type="file" (change)="add($event)" [style.display]="'none'" accept="image/*;capture=camera" multiple />
         </label>
     </div>
     <div fxFlex *ngIf="canEdit">
