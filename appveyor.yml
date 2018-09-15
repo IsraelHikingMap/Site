@@ -15,7 +15,7 @@ install:
 
     choco install gradle --version 4.9 --no-progress
 
-    $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin"
+    $env:Path += ";C:\ProgramData\chocolatey\lib\gradle\tools\gradle-4.9\bin;$env:ANDROID_HOME\tools\bin\"
 
     node --version
 
@@ -25,11 +25,11 @@ install:
 
     for($i=0;$i -lt 30;$i++) { $response += "y`n"};
 
-    Invoke-Expression """$response"" | ""$env:ANDROID_HOME\tools\bin\sdkmanager.bat"" --licenses"
+    Invoke-Expression """$response"" | sdkmanager.bat --licenses"
 
-    Invoke-Expression """$response"" | ""$env:ANDROID_HOME\tools\bin\sdkmanager.bat"" --update | out-null"
+    Invoke-Expression """$response"" | sdkmanager.bat --update | out-null"
 
-    Invoke-Expression """$env:ANDROID_HOME\tools\bin\sdkmanager.bat"" ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
+    Invoke-Expression "sdkmanager.bat ""platform-tools"" ""tools"" ""platforms;android-26"" ""build-tools;28.0.2"" ""extras;google;m2repository"" | out-null"
 
 before_build:
 - ps: dotnet restore
