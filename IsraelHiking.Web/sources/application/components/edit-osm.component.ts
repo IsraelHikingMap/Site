@@ -24,7 +24,7 @@ export class EditOSMComponent extends BaseMapComponent {
         let poiRouterData = this.hashService.getPoiRouterData();
         let baseLayerAddress = this.layersService.selectedBaseLayer.address;
         if (poiRouterData != null && poiRouterData.source.toLocaleLowerCase() === "osm") {
-            
+
             return this.osmUserService.getEditElementOsmAddress(baseLayerAddress, poiRouterData.id);
         }
         let center = this.mapService.map.getCenter();

@@ -18,8 +18,7 @@ export abstract class RouteStateBase implements IRouteState {
                 this.addPosition();
             });
         }
-        
-    };
+    }
     public clear(): void {
         if (this.gpsLocationSubscription != null) {
             this.gpsLocationSubscription.unsubscribe();
