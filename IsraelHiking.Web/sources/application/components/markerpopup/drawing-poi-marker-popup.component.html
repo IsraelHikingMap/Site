@@ -16,7 +16,7 @@
             <div fxLayout="row">
                 <label *ngIf="!imageLink">
                     <a mat-button class="flex-center" [style.color]="'black'" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
-                    <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*" />
+                    <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera"/>
                 </label>
                 <img fxFill *ngIf="imageLink"
                      [src]="resources.getResizedImageUrl(imageLink.url, 300)"

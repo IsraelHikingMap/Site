@@ -5,6 +5,10 @@ configuration: Release
 environment:
     ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk\
     GRADLE_OPTS: "-Dorg.gradle.daemon=false"
+    STORE_PASSWORD:
+        secure: BSNfEghh/l4KAC3jAcwAjgTibl6UHcZ08ppSFBieQ8E=
+    PASSWORD:
+        secure: mqbXr4+cn3l9YNyKhOezbA==
 install:
 - ps: >-
     npm install -g npm@6.2.0 --loglevel=error
@@ -54,6 +58,12 @@ after_test:
     Write-Host $PostBuildPackArtifacts
 
     & "$PostBuildPackArtifacts"
+
+    $BuildAndPublishAndroid = "$env:APPVEYOR_BUILD_FOLDER\Scripts\BuildAndPublishAndroid.ps1"
+
+    Write-Host $BuildAndPublishAndroid
+
+    & "$BuildAndPublishAndroid"
 
 deploy:
 - provider: GitHub

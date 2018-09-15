@@ -23,32 +23,4 @@ $artifactsFileName = "IsraelHiking_$env:APPVEYOR_BUILD_VERSION.zip"
 7z a $artifactsFileName wwwroot
 Push-AppveyorArtifact $artifactsFileName
 
-# Building android:
-
-$buildAndroidClient = "npm run build -- -c android --no-progress"
-Write-Host $buildAndroidClient
-Invoke-Expression $buildAndroidClient
-
-$AddAndroid = "npm run add-android"
-Write-Host $AddAndroid
-Invoke-Expression $AddAndroid
-
-#Replace version in config.xml file
-
-$filePath = get-ChildItem config.xml | Select-Object -first 1 | select -expand FullName
-$xml = New-Object XML
-$xml.Load($filePath)
-$xml.widget.version = $env:APPVEYOR_BUILD_VERSION
-$xml.Save($filePath)
-
-
-Write-Host "npm run build-apk"
-Invoke-Expression "npm run build-apk"
-
-$apkVersioned = ".\app-release-unsigned_$env:APPVEYOR_BUILD_VERSION.apk"
-
-Move-Item -Path .\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk -Destination $apkVersioned
-
-Push-AppveyorArtifact $apkVersioned
-
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
