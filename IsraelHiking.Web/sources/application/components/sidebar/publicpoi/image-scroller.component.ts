@@ -80,14 +80,13 @@ export class ImageScrollerComponent extends BaseMapComponent {
         return this.images[this.currentIndex];
     }
 
-    private getCurrentImage() {
+    public getCurrentImage() {
         let imageUrl = this.getCurrentValue();
         if (imageUrl == null) {
             return null;
         }
         return this.resources.getResizedImageUrl(imageUrl, 800);
     }
-
     public showImage() {
         let imagesUrls = [];
         for (let imageUrl of this.images) {

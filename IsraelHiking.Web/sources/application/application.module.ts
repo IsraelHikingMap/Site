@@ -74,6 +74,7 @@ import { ImageResizeService } from "./services/image-resize.service";
 import { NonAngularObjectsFactory } from "./services/non-angular-objects.factory";
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
+import { ImageCaptureDirective } from "./directives/image-capture.directive";
 // components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
 import { MainMapComponent } from "./components/main-map.component";
@@ -318,7 +319,8 @@ const routes: Routes = [
         PublicPoiSidebarComponent,
         PublicPointOfInterestEditComponent,
         ImageScrollerComponent,
-        ApplicationStateComponent
+        ApplicationStateComponent,
+        ImageCaptureDirective
     ],
     bootstrap: [MainMapComponent, SidebarComponent]
 })

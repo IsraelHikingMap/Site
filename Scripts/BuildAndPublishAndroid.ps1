@@ -26,14 +26,11 @@ $xml.Save($filePath)
 Write-Host "npm run build-apk"
 Invoke-Expression "npm run build-apk"
 
-$apkArmv7Versioned = ".\IHM_signed_armv7_$env:APPVEYOR_BUILD_VERSION.apk"
-$apkx86Versioned = ".\IHM_signed_x86_$env:APPVEYOR_BUILD_VERSION.apk"
+$apkVersioned = ".\IHM_signed_$env:APPVEYOR_BUILD_VERSION.apk"
 
-Write-Host "Signing apks"
-Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\IHM.jks --ks-pass pass:$env:STORE_PASSWORD --key-pass pass:$env:PASSWORD --out $apkArmv7Versioned .\platforms\android\app\build\outputs\apk\armv7\release\app-armv7-release-unsigned.apk"
-Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\IHM.jks --ks-pass pass:$env:STORE_PASSWORD --key-pass pass:$env:PASSWORD --out $apkx86Versioned .\platforms\android\app\build\outputs\apk\x86\release\app-x86-release-unsigned.apk"
+Write-Host "Signing apk"
+Invoke-Expression "& ""$env:ANDROID_HOME\build-tools\28.0.2\apksigner.bat"" sign --ks .\IHM.jks --ks-pass pass:$env:STORE_PASSWORD --key-pass pass:$env:PASSWORD --out $apkVersioned .\platforms\android\app\build\outputs\apk\release\app-release-unsigned.apk"
 
-Push-AppveyorArtifact $apkArmv7Versioned
-Push-AppveyorArtifact $apkx86Versioned
+Push-AppveyorArtifact $apkVersioned
 
 Set-Location -Path $env:APPVEYOR_BUILD_FOLDER
