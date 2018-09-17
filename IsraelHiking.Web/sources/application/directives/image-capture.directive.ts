@@ -2,6 +2,8 @@ import { Directive, Output, ElementRef, Renderer2, OnDestroy, EventEmitter, NgZo
 
 import { environment } from "../../environments/environment";
 import { NonAngularObjectsFactory } from "../services/non-angular-objects.factory";
+import { ResourcesService } from "../services/resources.service";
+import { ToastService } from "../services/toast.service";
 
 declare var navigator: any;
 declare var Camera: any;
@@ -17,39 +19,52 @@ export class ImageCaptureDirective implements OnDestroy {
     private listenFunction: Function;
 
     constructor(elementRef: ElementRef,
-        renderer: Renderer2,
+        private readonly renderer: Renderer2,
         private readonly ngZone: NgZone,
-        nonAngularObjectsFactory: NonAngularObjectsFactory) {
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+        private readonly resources: ResourcesService,
+        private readonly toastService: ToastService) {
 
         this.change = new EventEmitter();
-        this.listenFunction = renderer.listen(elementRef.nativeElement, "click", (event) => {
+        this.listenFunction = this.renderer.listen(elementRef.nativeElement, "click", (event) => {
             if (!environment.isCordova) {
                 return;
             }
             event.preventDefault();
             event.stopPropagation();
-            // HM TODO: allow user to select gallery or camera?
-            navigator.camera.getPicture(
-                (imageUri: string) => {
-                    let blob = nonAngularObjectsFactory.b64ToBlob("data:image/jpeg;base64," + imageUri);
-                    let changeEvent = {
-                        dataTransfer: {
-                            files: [blob]
-                        },
-                        target: {}
-                    };
-                    this.ngZone.run(() => this.change.next(changeEvent));
-                },
-                (err) => {
-                    console.log(err);
-                },
-                {
-                    destinationType: Camera.DestinationType.DATA_URL,
-                    sourceType: Camera.PictureSourceType.CAMERA,
-                    saveToPhotoAlbum: true
-                });
+            this.toastService.confirm({
+                message: "",
+                type: "Custom",
+                customConfirmText: this.resources.camera,
+                customDeclineText: this.resources.gallery,
+                confirmIcon: "camera",
+                declineIcon: "image",
+                confirmAction: () => this.getPicture(Camera.PictureSourceType.CAMERA, true),
+                declineAction: () => this.getPicture(Camera.PictureSourceType.PHOTOLIBRARY, false),
+            });
         });
+    }
 
+    private getPicture(sourceType: number, saveToPhotoAlbum: boolean) {
+        navigator.camera.getPicture(
+            (imageUri: string) => {
+                let blob = this.nonAngularObjectsFactory.b64ToBlob("data:image/jpeg;base64," + imageUri);
+                let changeEvent = {
+                    dataTransfer: {
+                        files: [blob]
+                    },
+                    target: {}
+                };
+                this.ngZone.run(() => this.change.next(changeEvent));
+            },
+            (err) => {
+                console.log(err);
+            },
+            {
+                destinationType: Camera.DestinationType.DATA_URL,
+                sourceType: sourceType,
+                saveToPhotoAlbum: saveToPhotoAlbum
+            });
     }
 
     ngOnDestroy(): void {

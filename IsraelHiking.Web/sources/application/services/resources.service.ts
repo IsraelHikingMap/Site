@@ -228,7 +228,9 @@ export class ResourcesService {
     public baseLayers: string;
     public overlays: string;
     public privateRoutes: string;
-    public runningInBackgroundText: string;
+    public runningInBackground: string;
+    public camera: string;
+    public gallery: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -271,6 +273,7 @@ export class ResourcesService {
     public continueRecording: string;
     public makeSureBatteryOptimizationIsOff: string;
     public dontShowThisMessageAgain: string;
+
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -692,7 +695,9 @@ export class ResourcesService {
         this.baseLayers = this.gettextCatalog.getString("Base Layers");
         this.overlays = this.gettextCatalog.getString("Overlays");
         this.privateRoutes = this.gettextCatalog.getString("Private Routes");
-        this.runningInBackgroundText = this.gettextCatalog.getString("Running in the background");
+        this.runningInBackground = this.gettextCatalog.getString("Running in the background");
+        this.camera = this.gettextCatalog.getString("Camera");
+        this.gallery = this.gettextCatalog.getString("Gallery");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

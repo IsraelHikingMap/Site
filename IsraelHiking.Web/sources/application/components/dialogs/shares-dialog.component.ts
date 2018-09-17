@@ -89,7 +89,11 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
             this.shareUrlInEditMode = null;
         }
         let message = `${this.resources.deletionOf} ${this.userService.getShareUrlDisplayName(shareUrl)}, ${this.resources.areYouSure}`;
-        this.toastService.confirm(message, () => this.userService.deleteShareUrl(shareUrl), () => { }, "YesNo");
+        this.toastService.confirm({
+            message: message,
+            confirmAction: () => this.userService.deleteShareUrl(shareUrl),
+            type: "YesNo"
+        });
     }
 
     public isShareUrlInEditMode(shareUrl: Common.ShareUrl) {

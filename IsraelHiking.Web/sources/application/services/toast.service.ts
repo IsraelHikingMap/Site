@@ -3,6 +3,17 @@ import { MatSnackBar } from "@angular/material";
 import { ResourcesService } from "./resources.service";
 import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confirm-dialog.component";
 
+export interface IConfirmOptions {
+    message: string,
+    type: ConfirmType;
+    confirmAction?: Function;
+    declineAction?: Function;
+    customConfirmText?: string;
+    customDeclineText?: string;
+    confirmIcon?: string;
+    declineIcon?: string;
+}
+
 @Injectable()
 export class ToastService {
     private duration: number;
@@ -43,21 +54,20 @@ export class ToastService {
         });
     }
 
-    public confirm(message: string, confirmAction: Function, declineAction: Function, type: ConfirmType,
-        customConfirmText?: string, customDeclineText?: string) {
+    public confirm(options: IConfirmOptions) {
 
         let componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent);
-        componentRef.instance.confirmMessage = message;
+        componentRef.instance.confirmMessage = options.message;
         componentRef.instance.confirmAction = () => {
-            confirmAction();
+            options.confirmAction ? options.confirmAction() : () => {};
             this.snackbar.dismiss();
         };
         componentRef.instance.declineAction = () => {
-            declineAction();
+            options.declineAction ? options.declineAction() : () => {};
             this.snackbar.dismiss();
         };
-        componentRef.instance.hasTwoButtons = type !== "Ok";
-        switch (type) {
+        componentRef.instance.hasTwoButtons = options.type !== "Ok";
+        switch (options.type) {
             case "Ok":
                 componentRef.instance.confirmButtonText = this.resources.ok;
                 break;
@@ -70,11 +80,13 @@ export class ToastService {
                 componentRef.instance.declineButtonText = this.resources.cancel;
                 break;
             case "Custom":
-                componentRef.instance.confirmButtonText = customConfirmText;
-                componentRef.instance.declineButtonText = customDeclineText;
+                componentRef.instance.confirmButtonText = options.customConfirmText;
+                componentRef.instance.declineButtonText = options.customDeclineText;
                 break;
             default:
                 throw new Error("Invalid confirm type!");
         }
+        componentRef.instance.confirmIcon = options.confirmIcon;
+        componentRef.instance.declineIcon = options.declineIcon;
     }
 }

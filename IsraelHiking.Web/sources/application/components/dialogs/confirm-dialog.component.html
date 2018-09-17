@@ -3,10 +3,10 @@
     <br />
     <div fxLayout="row">
         <div fxFlex>
-            <button mat-button fxFill (click)="confirmAction()">{{confirmButtonText}}</button>
+            <button mat-button fxFill (click)="confirmAction()"><i *ngIf="confirmIcon" class="fa fa-lg icon-{{confirmIcon}}"></i> {{confirmButtonText}}</button>
         </div>
         <div *ngIf="hasTwoButtons" fxFlex>
-            <button mat-button fxFill (click)="declineAction()">{{declineButtonText}}</button>
+            <button mat-button fxFill (click)="declineAction()"><i *ngIf="declineIcon" class="fa fa-lg icon-{{declineIcon}}"></i> {{declineButtonText}}</button>
         </div>
     </div>
 </div>

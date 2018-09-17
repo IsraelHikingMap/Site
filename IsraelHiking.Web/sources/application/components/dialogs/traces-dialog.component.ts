@@ -168,14 +168,18 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public deleteTrace() {
         this.selectedTrace.isInEditMode = false;
         let message = `${this.resources.deletionOf} ${this.selectedTrace.name}, ${this.resources.areYouSure}`;
-        this.toastService.confirm(message, () => {
-            if (this.selectedTrace.id === "") {
-                this.routesService.removeRouteFromLocalStorage(this.getRouteFromTrace(this.selectedTrace));
-                this.updateFilteredLists(this.searchTerm.value);
-            } else {
-                this.userService.deleteOsmTrace(this.selectedTrace);
-            }
-        }, () => { }, "YesNo");
+        this.toastService.confirm({
+            message: message,
+            type: "YesNo",
+            confirmAction: () => {
+                if (this.selectedTrace.id === "") {
+                    this.routesService.removeRouteFromLocalStorage(this.getRouteFromTrace(this.selectedTrace));
+                    this.updateFilteredLists(this.searchTerm.value);
+                } else {
+                    this.userService.deleteOsmTrace(this.selectedTrace);
+                }
+            },
+        });
     }
 
     public editInOsm() {
@@ -187,7 +191,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         try {
             let geoJson = await this.userService.getMissingParts(trace);
             if (geoJson.features.length === 0) {
-                this.toastService.confirm(this.resources.noUnmappedRoutes, () => { }, () => { }, "Ok");
+                this.toastService.confirm({ message: this.resources.noUnmappedRoutes, type: "Ok" });
                 return;
             }
             this.showTrace(trace).then(() => {
@@ -195,7 +199,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 this.matDialogRef.close();
             });
         } catch (ex) {
-            this.toastService.confirm(ex.message, () => { }, () => { }, "Ok");
+            this.toastService.confirm({ message: ex.message, type: "Ok" });
         }
     }
 

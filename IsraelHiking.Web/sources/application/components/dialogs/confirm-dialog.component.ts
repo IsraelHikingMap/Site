@@ -13,7 +13,9 @@ export class ConfirmDialogComponent {
     public declineAction: () => void;
     public hasTwoButtons: boolean;
     public confirmMessage: string;
+    public confirmIcon: string;
     public confirmButtonText: string;
+    public declineIcon: string;
     public declineButtonText: string;
 
     public constructor(public resources: ResourcesService) {

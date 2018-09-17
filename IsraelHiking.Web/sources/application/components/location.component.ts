@@ -69,17 +69,19 @@ export class LocationComponent extends BaseMapComponent {
         if (this.lastRecordedRoute != null) {
             this.resources.languageChanged.pipe(first()).toPromise().then(() => {
                 // let resources service get the strings
-                this.toastService.confirm(this.resources.continueRecording,
-                    () => {
+                this.toastService.confirm({
+                    message: this.resources.continueRecording,
+                    type: "YesNo",
+                    confirmAction: () => {
                         this.toggleRecording();
                         this.routeLayer.setData(this.lastRecordedRoute);
                         this.toggleTracking();
                     },
-                    () => {
+                    declineAction: () => {
                         this.routesService.addRouteToLocalStorage(this.lastRecordedRoute);
                         this.lastRecordedRoute = null;
                     },
-                    "YesNo");
+                });
             });
         }
     }
@@ -110,9 +112,15 @@ export class LocationComponent extends BaseMapComponent {
     public toggleRecording() {
         if (!this.isRecording()) {
             if (this.showBatteryConfirmation) {
-                this.toastService.confirm(this.resources.makeSureBatteryOptimizationIsOff, () => { }, () => {
-                    this.showBatteryConfirmation = false;
-                }, "Custom", this.resources.ok, this.resources.dontShowThisMessageAgain);
+                this.toastService.confirm({
+                    message: this.resources.makeSureBatteryOptimizationIsOff,
+                    type: "Custom",
+                    declineAction: () => {
+                        this.showBatteryConfirmation = false;
+                    },
+                    customConfirmText: this.resources.ok,
+                    customDeclineText: this.resources.dontShowThisMessageAgain
+                });
             }
             this.createRecordingRoute();
         } else {

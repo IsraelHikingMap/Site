@@ -139,7 +139,7 @@ export class GeoLocationService {
             stationaryRadius: 10,
             distanceFilter: 5,
             notificationTitle: this.resources.israelHikingMap,
-            notificationText: this.resources.runningInBackgroundText,
+            notificationText: this.resources.runningInBackground,
             debug: false,
             interval: 1000,
             fastestInterval: 1000,

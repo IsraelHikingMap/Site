@@ -166,7 +166,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.source, this.poiExtended.id],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
         } catch (ex) {
-            this.toastService.confirm(this.resources.unableToSaveData, () => {}, () => {}, "Ok");
+            this.toastService.confirm({ message: this.resources.unableToSaveData, type: "Ok" });
         } finally {
             this.isLoading = false;
         }

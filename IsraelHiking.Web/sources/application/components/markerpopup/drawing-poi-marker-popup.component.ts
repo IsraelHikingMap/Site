@@ -185,16 +185,18 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
                     message = this.resources.wouldYouLikeToUpdateThePointWithoutTheTitle;
                 }
             }
-            this.toastService.confirm(message,
-                () => {
+            this.toastService.confirm({
+                message: message,
+                type: "YesNo",
+                confirmAction: () => {
                     this.router.navigate([RouteStrings.ROUTE_POI, "OSM", results.id],
                         { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
                 },
-                () => {
+                declineAction: () => {
                     this.router.navigate([RouteStrings.ROUTE_POI, "new", ""],
                         { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
-                },
-                "YesNo");
+                }
+            });
         } else {
             this.router.navigate([RouteStrings.ROUTE_POI, "new", ""],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified(), edit: true } });
