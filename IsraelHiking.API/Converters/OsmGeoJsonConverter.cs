@@ -54,32 +54,15 @@ namespace IsraelHiking.API.Converters
             {
                 {FeatureAttributes.ID, osmObject.Type.ToString().ToLower() + "_" + osmObject.Id}
             };
-            // HM TODO: Avoid down case, required feature: https://github.com/OsmSharp/core/issues/60
-            if (osmObject is CompleteOsmGeo complete)
+            if (osmObject.TimeStamp.HasValue)
             {
-                if (complete.TimeStamp.HasValue)
-                {
-                    table.Add(FeatureAttributes.POI_LAST_MODIFIED, complete.TimeStamp.Value.ToString("o"));
-                }
-                if (!string.IsNullOrWhiteSpace(complete.UserName))
-                {
-                    table.Add(FeatureAttributes.POI_USER_NAME, complete.UserName);
-                    table.Add(FeatureAttributes.POI_USER_ADDRESS, $"//www.openstreetmap.org/user/{Uri.EscapeUriString(complete.UserName)}");
-                }
+                table.Add(FeatureAttributes.POI_LAST_MODIFIED, osmObject.TimeStamp.Value.ToString("o"));
             }
-            else if (osmObject is OsmGeo osmGeo)
+            if (!string.IsNullOrWhiteSpace(osmObject.UserName))
             {
-                if (osmGeo.TimeStamp.HasValue)
-                {
-                    table.Add(FeatureAttributes.POI_LAST_MODIFIED, osmGeo.TimeStamp.Value.ToString("o"));
-                }
-                if (!string.IsNullOrWhiteSpace(osmGeo.UserName))
-                {
-                    table.Add(FeatureAttributes.POI_USER_NAME, osmGeo.UserName);
-                    table.Add(FeatureAttributes.POI_USER_ADDRESS, $"//www.openstreetmap.org/user/{Uri.EscapeUriString(osmGeo.UserName)}");
-                }
+                table.Add(FeatureAttributes.POI_USER_NAME, osmObject.UserName);
+                table.Add(FeatureAttributes.POI_USER_ADDRESS, $"//www.openstreetmap.org/user/{Uri.EscapeUriString(osmObject.UserName)}");
             }
-
             return table;
         }
 
