@@ -131,13 +131,13 @@ namespace IsraelHiking.Common.Extensions
             var names = feature.Attributes.GetNames().OrderBy(n => n.Length).Where(a => a.Contains(FeatureAttributes.NAME)).ToArray();
             foreach (var language in Languages.Array)
             {
-                var namesByLanguage = names.Where(n => n.EndsWith(":" + language)).Select(a => feature.Attributes[a].ToString()).ToArray();
-                names = names.Except(names.Where(n => n.EndsWith(":" + language))).ToArray();
+                var namesByLanguage = names.Where(n => n.Contains(":" + language)).Select(a => feature.Attributes[a].ToString()).ToArray();
+                names = names.Except(names.Where(n => n.Contains(":" + language))).ToArray();
                 table.Add(language, namesByLanguage);
             }
             // names with no specific language
             table.Add(Languages.ALL, names.Select(n => feature.Attributes[n].ToString()).ToArray());
-            feature.Attributes.AddAttribute(FeatureAttributes.POI_NAMES, table);
+            feature.Attributes.AddOrUpdate(FeatureAttributes.POI_NAMES, table);
         }
 
         public static string GetTitle(this IFeature feature, string language)

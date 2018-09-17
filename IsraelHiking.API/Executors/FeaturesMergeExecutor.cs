@@ -62,6 +62,7 @@ namespace IsraelHiking.API.Executors
         /// <inheritdoc />
         public List<Feature> Merge(List<Feature> features)
         {
+            AddAlternativeTitleToNatureReserves(features);
             features = MergeWikipediaToOsmByWikipediaTags(features);
             features = MergeOffRoadKklRoutesToOsm(features);
             features = MergeByTitle(features);
@@ -370,6 +371,42 @@ namespace IsraelHiking.API.Executors
             }
             WriteToBothLoggers($"Finished joining off-road-kkl routes. Merged features: {featureIdsToRemove.Count}");
             return features.Where(f => featureIdsToRemove.Contains(f.Attributes[FeatureAttributes.ID].ToString()) == false).ToList();
+        }
+
+        private void AddAlternativeTitleToNatureReserves(List<Feature> features)
+        {
+            WriteToBothLoggers("Starting adding alternative names to nature reserves");
+            var natureReserveFeatures = features.Where(f => f.Attributes[FeatureAttributes.ICON].Equals("icon-nature-reserve")).ToList();
+            WriteToBothLoggers($"Processing {natureReserveFeatures.Count} nature reserves");
+            foreach (var natureReserveFeature in natureReserveFeatures)
+            {
+                _reportLogger.LogInformation(string.Join(",", natureReserveFeature.GetTitles()));
+                var titles = natureReserveFeature.GetTitles().Where(t => t.StartsWith("שמורת")).ToList();
+                if (!titles.Any())
+                {
+                    continue;
+                }
+                foreach (var title in titles)
+                {
+                    var alternativeTitle = title.StartsWith("שמורת טבע") 
+                        ? title.Replace("שמורת טבע", "שמורת")
+                        : title.Replace("שמורת", "שמורת טבע");
+
+                    if (titles.Contains(alternativeTitle))
+                    {
+                        continue;
+                    }
+
+                    int index = 0;
+                    do
+                    {
+                        index++;
+                    } while (natureReserveFeature.Attributes.Exists(FeatureAttributes.NAME + ":he" + index));
+                    natureReserveFeature.Attributes.AddAttribute(FeatureAttributes.NAME + ":he" + index, alternativeTitle);
+                }
+                natureReserveFeature.SetTitles();
+            }
+            WriteToBothLoggers("Finished adding alternative names to nature reserves");
         }
 
         private void WriteToBothLoggers(string message)
