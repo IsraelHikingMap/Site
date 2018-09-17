@@ -4,7 +4,7 @@ import { ResourcesService } from "./resources.service";
 import { ConfirmDialogComponent, ConfirmType } from "../components/dialogs/confirm-dialog.component";
 
 export interface IConfirmOptions {
-    message: string,
+    message: string;
     type: ConfirmType;
     confirmAction?: Function;
     declineAction?: Function;
@@ -59,11 +59,15 @@ export class ToastService {
         let componentRef = this.snackbar.openFromComponent(ConfirmDialogComponent);
         componentRef.instance.confirmMessage = options.message;
         componentRef.instance.confirmAction = () => {
-            options.confirmAction ? options.confirmAction() : () => {};
+            if (options.confirmAction != null) {
+                options.confirmAction();
+            }
             this.snackbar.dismiss();
         };
         componentRef.instance.declineAction = () => {
-            options.declineAction ? options.declineAction() : () => {};
+            if (options.declineAction != null) {
+                options.declineAction();
+            }
             this.snackbar.dismiss();
         };
         componentRef.instance.hasTwoButtons = options.type !== "Ok";
