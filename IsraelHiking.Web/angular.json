@@ -21,13 +21,14 @@
               "sources/translations",
               "sources/resource-not-found.html",
               "sources/empty-for-oauth.html",
-              "sources/robots.txt"
+              "sources/robots.txt",
+              "sources/cordova.js"
             ],
             "styles": [
               "sources/scss/common.scss"
             ],
             "scripts": [
-              "sources/google-analytics.js"
+              "sources/google-analytics.js",
             ]
           },
           "configurations": {
