@@ -75,6 +75,8 @@ export class LocationComponent extends BaseMapComponent {
                     confirmAction: () => {
                         this.toggleRecording();
                         this.routeLayer.setData(this.lastRecordedRoute);
+                        this.routesService.selectedRoute.route.properties.isRecording = true;
+                        this.routesService.selectedRoute.raiseDataChanged();
                         this.toggleTracking();
                     },
                     declineAction: () => {
