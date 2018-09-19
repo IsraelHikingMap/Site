@@ -222,7 +222,8 @@ export class GeoLocationService {
     }
 
     private updatePositionAndRaiseEvent(position: Position) {
-        this.currentLocation = L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude) as Common.ILatLngTime;
+        this.currentLocation =
+            L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude) as Common.ILatLngTime;
         this.currentLocation.timestamp = new Date(position.timestamp);
 
         this.positionChanged.next(position);
