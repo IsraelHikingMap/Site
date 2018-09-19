@@ -75,8 +75,5 @@
     </div>
     <div *ngIf="!hideCoordinates">
         <coordinates [latLng]="latLng" [itmCoordinates]="itmCoordinates"></coordinates>
-        <p class="chrome-wordwrap-fix {{'text-' + resources.start}}">
-            <span [innerHtml]="resources.coordinatesForWikipedia"></span> <span dir="ltr">{{wikiCoordinatesString}}</span>
-        </p>
     </div>
 </div>

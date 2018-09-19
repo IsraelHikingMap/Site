@@ -1,7 +1,6 @@
 import { Component, ApplicationRef, HostListener, ViewChild, ElementRef, AfterViewInit } from "@angular/core";
 import { Router } from "@angular/router";
 import { HttpClient } from "@angular/common/http";
-import { MatDialog } from "@angular/material";
 import { ENTER } from "@angular/cdk/keycodes";
 import * as _ from "lodash";
 
@@ -21,7 +20,6 @@ import { PoiService } from "../../services/poi.service";
 import { RouteStrings } from "../../services/hash.service";
 import * as Common from "../../common/IsraelHiking";
 
-
 interface IIconsGroup {
     icons: string[];
 }
@@ -37,7 +35,6 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
     public markerType: string;
     public description: string;
     public imageLink: Common.LinkData;
-    public wikiCoordinatesString: string;
     public iconsGroups: IIconsGroup[];
     public isEditMode: boolean;
 
@@ -48,7 +45,6 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         httpClient: HttpClient,
         elevationProvider: ElevationProvider,
         applicationRef: ApplicationRef,
-        private readonly matDialog: MatDialog,
         private readonly router: Router,
         private readonly mapService: MapService,
         private readonly osmUserService: OsmUserService,
@@ -61,7 +57,6 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         super(resources, httpClient, applicationRef, elevationProvider);
 
         this.showIcons = false;
-        this.wikiCoordinatesString = "";
         this.iconsGroups = [];
         this.isEditMode = false;
         this.imageLink = null;
@@ -112,10 +107,6 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         this.marker.closePopup();
     }
 
-    public updateWikiCoordinates() {
-        this.wikiCoordinatesString = this.getWikiCoordString(this.latLng, this.title);
-    }
-
     public setRouteLayer(routeLayer: IRouteLayer) {
         this.routeLayer = routeLayer;
         let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker) as IMarkerWithData;
@@ -123,15 +114,10 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         this.description = routeMarker.description;
         let url = _.find(routeMarker.urls, u => u.mimeType.startsWith("image"));
         this.imageLink = url;
-        this.updateWikiCoordinates();
     }
 
     public setMarker(marker: Common.IMarkerWithTitle) {
         this.setMarkerInternal(marker);
-
-        this.marker.on("dragend", () => {
-            this.updateWikiCoordinates();
-        });
 
         this.marker.on("popupclose", () => {
             let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker);
@@ -142,10 +128,6 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent imp
         this.marker.on("popupopen", () => {
             this.focusTitle();
         });
-    }
-
-    private getWikiCoordString(latlng: L.LatLng, title: string): string {
-        return `{{Coord|${latlng.lat.toFixed(4)}|${latlng.lng.toFixed(4)}|display=${title}|type:landmark}}`;
     }
 
     public showOpenDialogButton(): boolean {
