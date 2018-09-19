@@ -24,11 +24,12 @@ interface IBackgroundLocation {
 @Injectable()
 export class GeoLocationService {
     private static readonly TIME_OUT = 30000;
+    private static readonly MAX_TIME_DIFFERENCE = 60 * 1000;
 
     private state: GeoLocationServiceState;
     private watchNumber: number;
     private isBackground: boolean;
-
+    private rejectedPosition: Position;
     public positionChanged: EventEmitter<Position>;
     public currentLocation: Common.ILatLngTime;
 
@@ -39,6 +40,7 @@ export class GeoLocationService {
         this.state = "disabled";
         this.currentLocation = null;
         this.isBackground = false;
+        this.rejectedPosition = null;
     }
 
     public getState(): GeoLocationServiceState {
@@ -92,11 +94,7 @@ export class GeoLocationService {
                 (position: Position): void => {
                     this.ngZone.run(() => {
                         this.state = "tracking";
-                        this.currentLocation =
-                            L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude) as
-                            Common.ILatLngTime;
-                        this.currentLocation.timestamp = new Date(position.timestamp);
-                        this.positionChanged.next(position);
+                        this.validRecordingAndUpdate(position);
                     });
                 },
                 (err) => {
@@ -152,9 +150,6 @@ export class GeoLocationService {
             }
             this.ngZone.run(() => {
                 this.state = "tracking";
-                this.currentLocation =
-                    L.latLng(location.latitude, location.longitude, location.altitude) as Common.ILatLngTime;
-                this.currentLocation.timestamp = new Date(location.time);
                 let position = {
                     coords: {
                         accuracy: location.accuracy,
@@ -166,7 +161,7 @@ export class GeoLocationService {
                     },
                     timestamp: location.time
                 } as Position;
-                this.positionChanged.next(position);
+                this.validRecordingAndUpdate(position);
             });
         });
 
@@ -201,5 +196,35 @@ export class GeoLocationService {
             () => {
                 this.isBackground = false;
             });
+    }
+
+    private validRecordingAndUpdate(position: Position) {
+        if (this.currentLocation == null) {
+            this.updatePositionAndRaiseEvent(position);
+            return;
+        }
+        let timeDifference = Math.abs(position.timestamp - this.currentLocation.timestamp.getTime());
+        if (timeDifference < GeoLocationService.MAX_TIME_DIFFERENCE) {
+            this.updatePositionAndRaiseEvent(position);
+            return;
+        }
+        if (this.rejectedPosition == null) {
+            this.rejectedPosition = position;
+            return;
+        }
+        let rejectedPositionTimeDifference = Math.abs(position.timestamp - this.rejectedPosition.timestamp);
+        if (rejectedPositionTimeDifference > GeoLocationService.MAX_TIME_DIFFERENCE) {
+            this.rejectedPosition = position;
+            return;
+        }
+        this.rejectedPosition = null;
+        this.updatePositionAndRaiseEvent(position);
+    }
+
+    private updatePositionAndRaiseEvent(position: Position) {
+        this.currentLocation = L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude) as Common.ILatLngTime;
+        this.currentLocation.timestamp = new Date(position.timestamp);
+
+        this.positionChanged.next(position);
     }
 }
