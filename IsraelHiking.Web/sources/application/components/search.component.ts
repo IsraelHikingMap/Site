@@ -185,7 +185,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             this.toggleVisibility(e);
         }
         let bounds = L.latLngBounds(searchResults.southWest, searchResults.northEast);
-        this.categoriesLayerFactory.getByPoiType(searchResults.isRoute).moveToSearchResults(searchResults, bounds);
+        this.fitBoundsService.fitBounds(bounds, { maxZoom: FitBoundsService.DEFAULT_MAX_ZOOM } as L.FitBoundsOptions);
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
