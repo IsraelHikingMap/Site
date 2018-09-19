@@ -165,7 +165,8 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         });
 
         // triggers the subscription
-        this.fitBoundsService.fitBounds(bounds, { maxZoom: FitBoundsService.DEFAULT_MAX_ZOOM } as L.FitBoundsOptions);
+        let maxZoom = Math.max(FitBoundsService.DEFAULT_MAX_ZOOM, this.mapService.map.getZoom());
+        this.fitBoundsService.fitBounds(bounds, { maxZoom: maxZoom } as L.FitBoundsOptions);
         this.updateMarkersInternal();
     }
 
