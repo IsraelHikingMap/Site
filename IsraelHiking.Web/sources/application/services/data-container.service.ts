@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
 import * as L from "leaflet";
 import * as _ from "lodash";
@@ -11,13 +11,12 @@ import { FileService } from "./file.service";
 import { HashService, RouteStrings } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { OsmUserService } from "./osm-user.service";
-import { CategoriesLayerFactory } from "./layers/categories-layers.factory";
-import { PoiService } from "./poi.service";
 import * as Common from "../common/IsraelHiking";
 
 @Injectable()
 export class DataContainerService {
     private shareUrl: Common.ShareUrl;
+    private layersInitializationPromise: Promise<any>;
 
     constructor(
         private readonly router: Router,
@@ -28,8 +27,6 @@ export class DataContainerService {
         private readonly hashService: HashService,
         private readonly fileService: FileService,
         private readonly resourcesService: ResourcesService,
-        private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly poiService: PoiService,
         private readonly toastService: ToastService) {
 
         this.shareUrl = null;
@@ -68,32 +65,29 @@ export class DataContainerService {
     }
 
     public initialize = async () => {
-        await this.layersService.initialize();
+        this.layersInitializationPromise = this.layersService.initialize();
+        await this.layersInitializationPromise;
         // This assumes hashservice has already finished initialization, this assumption can cause bugs...
-        if (this.hashService.getShareUrlId()) {
-            this.initializeShareUrl();
-        } else if (this.hashService.getUrl()) {
-            let data = await this.fileService.openFromUrl(this.hashService.getUrl());
-            data.baseLayer = this.hashService.getBaselayer();
-            this.setData(data);
-        } else if (this.hashService.getPoiRouterData()) {
-            let poiSourceAndId = this.hashService.getPoiRouterData();
-            try {
-                let poi = await this.poiService.getPoint(poiSourceAndId.id, poiSourceAndId.source);
-                let latLng = L.latLng(poi.location.lat, poi.location.lng);
-                let bounds = L.latLngBounds([latLng, latLng]);
-                this.categoriesLayerFactory.getByPoiType(poi.isRoute).moveToSearchResults(poi, bounds);
-            } catch (ex) {
-                this.toastService.error(this.resourcesService.unableToFindPoi);
-            }
-        } else {
-            this.layersService.addExternalBaseLayer(this.hashService.getBaselayer());
-        }
+        this.layersService.addExternalBaseLayer(this.hashService.getBaselayer());
     }
 
-    private initializeShareUrl = async () => {
+    public setFileUrlAfterNavigation = async (url: string, baseLayer: string) => {
+        await this.layersInitializationPromise;
+        this.hashService.setApplicationState("baseLayer", baseLayer);
+        this.hashService.setApplicationState("url", url);
+        let data = await this.fileService.openFromUrl(url);
+        data.baseLayer = this.hashService.stringToBaseLayer(baseLayer);
+        this.setData(data);
+    }
+
+    public setShareUrlAfterNavigation = async (shareId) => {
+        if (this.shareUrl && this.shareUrl.id === shareId) {
+            return;
+        }
+        await this.layersInitializationPromise;
         try {
-            let shareUrl = await this.osmUserService.getShareUrl(this.hashService.getShareUrlId());
+            this.hashService.setApplicationState("share", shareId);
+            let shareUrl = await this.osmUserService.getShareUrl(shareId);
             this.setData(shareUrl.dataContainer);
             // hide overlays that are not part of the share:
             for (let overlay of this.layersService.overlays) {

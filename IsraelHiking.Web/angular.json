@@ -64,10 +64,6 @@
                 {
                   "replace": "sources/environments/environment.ts",
                   "with": "sources/environments/environment.android.ts"
-                },
-                {
-                  "replace": "sources/main.ts",
-                  "with": "sources/main.ts.cordova"
                 }
               ]
             } 

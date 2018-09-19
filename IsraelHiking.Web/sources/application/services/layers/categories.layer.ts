@@ -12,6 +12,7 @@ import { IPointOfInterest, PoiService, CategoriesType, ICategory } from "../poi.
 import { FitBoundsService } from "../fit-bounds.service";
 import { SidebarService } from "../sidebar.service";
 import { HashService, RouteStrings } from "../hash.service";
+import * as Common from "../../common/IsraelHiking";
 
 export class CategoriesLayer extends BasePoiMarkerLayer {
 
@@ -206,7 +207,7 @@ export class CategoriesLayer extends BasePoiMarkerLayer {
         }
     }
 
-    public selectRoute(routes, isArea) {
+    public selectRoute(routes: Common.RouteData[], isArea: boolean) {
         if (isArea) {
             this.mapService.addAreaToReadOnlyLayer(this.readOnlyLayer, routes);
         } else {

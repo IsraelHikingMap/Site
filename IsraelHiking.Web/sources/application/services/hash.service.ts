@@ -5,7 +5,6 @@ import { Subject } from "rxjs";
 import * as L from "leaflet";
 
 import { MapService } from "./map.service";
-import { ResourcesService } from "./resources.service";
 import { Urls } from "../common/Urls";
 import * as Common from "../common/IsraelHiking";
 
@@ -67,7 +66,6 @@ export class HashService {
 
     constructor(private readonly router: Router,
         @Inject("Window") window: any, // bug in angular aot
-        private readonly resources: ResourcesService,
         private readonly mapService: MapService) {
 
         this.window = window;

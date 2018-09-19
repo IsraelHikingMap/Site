@@ -7,7 +7,6 @@ import * as L from "leaflet";
 import { HashService, RouteStrings } from "./hash.service";
 import { MapService } from "./map.service";
 import { MapServiceMockCreator } from "./map.service.spec";
-import { ResourcesService } from "./resources.service";
 import { Urls } from "../common/Urls";
 
 describe("HashService", () => {
@@ -33,8 +32,7 @@ describe("HashService", () => {
             providers: [
                 { provide: MapService, useValue: mapServiceMock.mapService },
                 { provide: Router, useValue: routerMock },
-                { provide: Window, useValue: windowMock },
-                { provide: ResourcesService, useValue: mapServiceMock.resourcesService }
+                { provide: Window, useValue: windowMock }
             ]
         });
     });
@@ -44,69 +42,69 @@ describe("HashService", () => {
     });
 
     it("Should initialize location data from hash",
-        inject([Router, Window, ResourcesService, MapService],
-            (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
+        inject([Router, Window, MapService],
+            (router: Router, windowMock: Window, mapService: MapService) => {
 
                 windowMock.location.hash = "#!/1/2.2/3";
 
-                hashService = new HashService(router, windowMock, resources, mapService);
+                hashService = new HashService(router, windowMock, mapService);
 
                 expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_MAP, 1, 2.2, 3], { replaceUrl: true });
             }));
 
     it("Should handle empty object in hash",
-        inject([Router, Window, ResourcesService, MapService],
-            (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
+        inject([Router, Window, MapService],
+            (router: Router, windowMock: Window, mapService: MapService) => {
 
                 windowMock.location.hash = "#!/";
 
-                hashService = new HashService(router, windowMock, resources, mapService);
+                hashService = new HashService(router, windowMock, mapService);
 
                 expect(hashService.getBaselayer()).toEqual(undefined);
                 expect(router.navigate).toHaveBeenCalledWith(["/"], { replaceUrl: true });
             }));
 
     it("Should inialize share from hash",
-        inject([Router, Window, ResourcesService, MapService],
-            (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
+        inject([Router, Window, MapService],
+            (router: Router, windowMock: Window, mapService: MapService) => {
 
                 windowMock.location.hash = "#!/?s=shareUrl";
 
-                hashService = new HashService(router, windowMock, resources, mapService);
+                hashService = new HashService(router, windowMock, mapService);
 
                 expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_SHARE, "shareUrl"], { replaceUrl: true });
             }));
 
     it("Should get url for external file",
-        inject([Router, Window, ResourcesService, MapService],
-            (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
+        inject([Router, Window, MapService],
+            (router: Router, windowMock: Window, mapService: MapService) => {
 
                 windowMock.location.hash = "#!/?url=external.file&baselayer=www.layer.com";
 
-                hashService = new HashService(router, windowMock, resources, mapService);
+                hashService = new HashService(router, windowMock, mapService);
 
                 expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_URL, "external.file"],
                     { queryParams: { baselayer: "www.layer.com" }, replaceUrl: true });
             }));
 
     it("Should allow download parameter in hash",
-        inject([Router, Window, ResourcesService, MapService],
-            (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
+        inject([Router, Window, MapService],
+            (router: Router, windowMock: Window, mapService: MapService) => {
 
                 windowMock.location.hash = "#!/?download";
 
-                hashService = new HashService(router, windowMock, resources, mapService);
+                hashService = new HashService(router, windowMock, mapService);
 
                 expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_DOWNLOAD], { replaceUrl: true });
             }));
 
     it("Should update url with location when panning the map",
-        inject([Router, Window, ResourcesService, MapService],
-            (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
+        inject([Router, Window, MapService],
+            (router: Router, windowMock: Window, mapService: MapService) => {
 
                 windowMock.location.hash = "#!/10/20/30.0";
 
-                hashService = new HashService(router, windowMock, resources, mapService);
+                hashService = new HashService(router, windowMock, mapService);
                 mapServiceMock.mapService.map.panTo(L.latLng(1, 2));
 
                 expect(JSON.stringify((router.navigate as jasmine.Spy).calls.mostRecent().args))
@@ -114,24 +112,24 @@ describe("HashService", () => {
             }));
 
     it("Should return base url",
-        inject([Router, Window, ResourcesService, MapService],
-            (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
+        inject([Router, Window, MapService],
+            (router: Router, windowMock: Window, mapService: MapService) => {
 
                 windowMock.location.hash = "#!/";
 
-                hashService = new HashService(router, windowMock, resources, mapService);
+                hashService = new HashService(router, windowMock, mapService);
                 let href = hashService.getHref();
 
                 expect(href).toBe(Urls.baseAddress);
             }));
 
     it("Should return share url",
-        inject([Router, Window, ResourcesService, MapService],
-            (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
+        inject([Router, Window, MapService],
+            (router: Router, windowMock: Window, mapService: MapService) => {
 
                 windowMock.location.hash = "/";
                 (router as any).createUrlTree = () => "address";
-                hashService = new HashService(router, windowMock, resources, mapService);
+                hashService = new HashService(router, windowMock, mapService);
                 hashService.setApplicationState("share", "share");
                 let href = hashService.getHref();
 
@@ -139,12 +137,12 @@ describe("HashService", () => {
             }));
 
     it("Should return external url",
-        inject([Router, Window, ResourcesService, MapService],
-            (router: Router, windowMock: Window, resources: ResourcesService, mapService: MapService) => {
+        inject([Router, Window, MapService],
+            (router: Router, windowMock: Window, mapService: MapService) => {
 
                 windowMock.location.hash = "/";
                 (router as any).createUrlTree = () => "address";
-                hashService = new HashService(router, windowMock, resources, mapService);
+                hashService = new HashService(router, windowMock, mapService);
                 hashService.setApplicationState("url", "url");
                 let href = hashService.getHref();
 

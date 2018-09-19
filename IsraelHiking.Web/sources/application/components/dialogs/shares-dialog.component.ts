@@ -1,5 +1,6 @@
 import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
+import { Router } from "@angular/router";
 import { SharedStorage } from "ngx-store";
 import * as _ from "lodash";
 
@@ -9,7 +10,7 @@ import { OsmUserService } from "../../services/osm-user.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
-import { DataContainerService } from "../../services/data-container.service";
+import { RouteStrings } from "../../services/hash.service";
 
 @Component({
     selector: "shares-dialog",
@@ -32,8 +33,8 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     private shareUrlChangedSubscription: Subscription;
 
     constructor(resources: ResourcesService,
+        private readonly router: Router,
         private readonly toastService: ToastService,
-        private readonly dataContainerService: DataContainerService,
         public readonly userService: OsmUserService) {
         super(resources);
         this.loadingShareUrls = false;
@@ -107,8 +108,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public async convertShareUrlToRoute(shareUrl: Common.ShareUrl) {
-        let shareUrlWithData = await this.userService.getShareUrl(shareUrl.id);
-        this.dataContainerService.setData(shareUrlWithData.dataContainer);
+        this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrl.id]);
     }
 
     public toggleSelectedShareUrl(shareUrl) {

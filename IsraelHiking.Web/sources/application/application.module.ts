@@ -4,7 +4,7 @@ import { CommonModule } from "@angular/common";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
 import { HttpClientModule, HTTP_INTERCEPTORS } from "@angular/common/http";
-import { RouterModule, Routes } from "@angular/router";
+import { RouterModule } from "@angular/router";
 import { FormsModule, ReactiveFormsModule } from "@angular/forms";
 import {
     GestureConfig,
@@ -49,7 +49,7 @@ import { MapService } from "./services/map.service";
 import { ResourcesService } from "./services/resources.service";
 import { FileService } from "./services/file.service";
 import { SidebarService } from "./services/sidebar.service";
-import { HashService, RouteStrings } from "./services/hash.service";
+import { HashService } from "./services/hash.service";
 import { LayersService } from "./services/layers/layers.service";
 import { RoutesService } from "./services/layers/routelayers/routes.service";
 import { DataContainerService } from "./services/data-container.service";
@@ -72,6 +72,7 @@ import { CancelableTimeoutService } from "./services/cancelable-timeout.service"
 import { WhatsAppService } from "./services/whatsapp.service";
 import { ImageResizeService } from "./services/image-resize.service";
 import { NonAngularObjectsFactory } from "./services/non-angular-objects.factory";
+import { DeepLinksService } from "./services/deep-links.service";
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 import { ImageCaptureDirective } from "./directives/image-capture.directive";
@@ -118,41 +119,10 @@ import { PublicPoiSidebarComponent } from "./components/sidebar/publicpoi/public
 import { PublicPointOfInterestEditComponent } from "./components/sidebar/publicpoi/public-poi-edit.component";
 import { ImageScrollerComponent } from "./components/sidebar/publicpoi/image-scroller.component";
 import { ApplicationStateComponent } from "./components/application-state.component";
+import { routes } from "./routes";
 
 export function getWindow() { return window; }
 export function getRoutesService(routesService: RoutesService) { return routesService; }
-
-const routes: Routes = [
-    {
-        path: `${RouteStrings.MAP}/:${RouteStrings.ZOOM}/:${RouteStrings.LAT}/:${RouteStrings.LON}`,
-        component: ApplicationStateComponent
-    },
-    {
-        path: `${RouteStrings.SHARE}/:${RouteStrings.ID}`,
-        component: ApplicationStateComponent
-    },
-    {
-        path: `${RouteStrings.URL}/:${RouteStrings.ID}`,
-        component: ApplicationStateComponent
-    },
-    {
-        path: `${RouteStrings.POI}/:${RouteStrings.SOURCE}/:${RouteStrings.ID}`,
-        component: ApplicationStateComponent
-    },
-    {
-        path: `${RouteStrings.DOWNLOAD}`,
-        component: ApplicationStateComponent
-    },
-    {
-        path: `${RouteStrings.SEARCH}/:${RouteStrings.TERM}`,
-        component: ApplicationStateComponent
-    },
-    {
-        path: "",
-        component: ApplicationStateComponent,
-        pathMatch: "full"
-    }
-];
 
 @NgModule({
     imports: [
@@ -275,7 +245,8 @@ const routes: Routes = [
         CancelableTimeoutService,
         WhatsAppService,
         ImageResizeService,
-        NonAngularObjectsFactory
+        NonAngularObjectsFactory,
+        DeepLinksService
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
@@ -327,9 +298,11 @@ const routes: Routes = [
 export class ApplicationModule {
     constructor(dataContainerService: DataContainerService,
         angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
-        dragAndDropService: DragAndDropService) {
+        dragAndDropService: DragAndDropService,
+        deepLinksService: DeepLinksService) {
         console.log("Starting IHM Application Initialization");
         dataContainerService.initialize().then(() => {
+            deepLinksService.initialize();
             console.log("Finished IHM Application Initialization");
         }, (error) => {
             console.error("Failed IHM Application Initialization");

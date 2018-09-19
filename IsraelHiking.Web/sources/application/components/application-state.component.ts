@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, OnDestroy } from "@angular/core";
+﻿import { Component, OnInit, OnDestroy, NgZone } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
 import * as L from "leaflet";
@@ -6,6 +6,7 @@ import * as L from "leaflet";
 import { HashService, RouteStrings, IPoiRouterData } from "../services/hash.service";
 import { MapService } from "../services/map.service";
 import { SidebarService } from "../services/sidebar.service";
+import { DataContainerService } from "../services/data-container.service";
 
 @Component({
     selector: "application-state",
@@ -19,7 +20,8 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
         private readonly route: ActivatedRoute,
         private readonly hashService: HashService,
         private readonly mapService: MapService,
-        private readonly sidebarService: SidebarService) {
+        private readonly sidebarService: SidebarService,
+        private readonly dataContainerService: DataContainerService) {
         this.subscription = null;
     }
 
@@ -30,11 +32,10 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SEARCH)) {
                 this.hashService.setApplicationState("search", decodeURIComponent(params[RouteStrings.TERM]));
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
-                this.hashService.setApplicationState("share", params[RouteStrings.ID]);
+                this.dataContainerService.setShareUrlAfterNavigation(params[RouteStrings.ID]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_URL)) {
-                let baseLayer = this.hashService.stringToBaseLayer(this.route.snapshot.queryParamMap.get(RouteStrings.BASE_LAYER));
-                this.hashService.setApplicationState("baseLayer", baseLayer);
-                this.hashService.setApplicationState("url", params[RouteStrings.ID]);
+                this.dataContainerService.setFileUrlAfterNavigation(params[RouteStrings.ID],
+                    this.route.snapshot.queryParamMap.get(RouteStrings.BASE_LAYER));
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_DOWNLOAD)) {
                 this.hashService.setApplicationState("download", true);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_POI)) {

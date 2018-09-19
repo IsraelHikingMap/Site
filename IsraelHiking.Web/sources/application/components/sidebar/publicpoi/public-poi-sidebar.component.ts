@@ -19,9 +19,7 @@ import { MapService } from "../../../services/map.service";
 import { OsmUserService } from "../../../services/osm-user.service";
 import { RoutesService } from "../../../services/layers/routelayers/routes.service";
 import { ToastService } from "../../../services/toast.service";
-import { LayersService } from "../../../services/layers/layers.service";
 import { IMarkerWithData } from "../../../services/layers/routelayers/iroute.layer";
-import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { CategoriesLayerFactory } from "../../../services/layers/categories-layers.factory";
 import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
 import * as Common from "../../../common/IsraelHiking";
@@ -54,8 +52,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         private readonly osmUserService: OsmUserService,
         private readonly routesService: RoutesService,
         private readonly toastService: ToastService,
-        private readonly routeLayerFactory: RouteLayerFactory,
-        private readonly layersService: LayersService,
         private readonly categoriesLayerFactory: CategoriesLayerFactory,
         private readonly hashService: HashService) {
         super(resources);
@@ -77,6 +73,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         try {
             let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
             this.initFromPointOfInterestExtended(poiExtended);
+            let latLng = L.latLng(poiExtended.location.lat, poiExtended.location.lng);
+            let bounds = L.latLngBounds([latLng, latLng]);
+            this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute).moveToSearchResults(poiExtended, bounds);
             let categoriesLayer = this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute);
             categoriesLayer.selectRoute(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
             // Change edit mode only after this.info is initialized.
