@@ -73,11 +73,12 @@ export class LocationComponent extends BaseMapComponent {
                     message: this.resources.continueRecording,
                     type: "YesNo",
                     confirmAction: () => {
-                        this.toggleRecording();
-                        this.routeLayer.setData(this.lastRecordedRoute);
-                        this.routesService.selectedRoute.route.properties.isRecording = true;
-                        this.routesService.selectedRoute.raiseDataChanged();
                         this.toggleTracking();
+                        this.routesService.setData([this.lastRecordedRoute]);
+                        this.routeLayer = this.routesService.selectedRoute;
+                        this.routeLayer.route.properties.isRecording = true;
+                        this.routeLayer.setEditPoiState();
+                        this.routeLayer.raiseDataChanged();
                     },
                     declineAction: () => {
                         this.routesService.addRouteToLocalStorage(this.lastRecordedRoute);
