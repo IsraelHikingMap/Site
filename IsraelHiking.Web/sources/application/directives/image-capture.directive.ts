@@ -1,12 +1,10 @@
+/// <reference types="cordova-plugin-camera" />
 import { Directive, Output, ElementRef, Renderer2, OnDestroy, EventEmitter, NgZone } from "@angular/core";
 
 import { environment } from "../../environments/environment";
 import { NonAngularObjectsFactory } from "../services/non-angular-objects.factory";
 import { ResourcesService } from "../services/resources.service";
 import { ToastService } from "../services/toast.service";
-
-declare var navigator: any;
-declare var Camera: any;
 
 @Directive({
     selector: "[imageCapture]",

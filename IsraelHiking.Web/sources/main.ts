@@ -5,8 +5,12 @@ import { environment } from "./environments/environment";
 import "hammerjs";
 
 declare var cordova: any;
-declare var navigator: any;
-declare var device: any;
+declare var navigator: Navigator;
+
+export interface Navigator {
+    app: any;
+}
+
 if (environment.production) {
     enableProdMode();
 }
@@ -23,8 +27,6 @@ if (environment.isCordova) {
                 clearInterval(interval);
                 if (navigator.app) {
                     navigator.app.exitApp();
-                } else if (device) {
-                    device.exitApp();
                 }
             } else {
                 exitApp = true;
