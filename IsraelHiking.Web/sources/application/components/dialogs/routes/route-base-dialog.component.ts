@@ -19,7 +19,7 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public isReversed: boolean;
 
     @select((state: IApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;;
+    public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
         protected readonly mapService: MapService,

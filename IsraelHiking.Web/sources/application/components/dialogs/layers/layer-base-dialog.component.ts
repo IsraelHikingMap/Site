@@ -24,7 +24,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public isOverlay: boolean;
 
     @select((state: IApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;;
+    public isAdvanced: Observable<boolean>;
 
     private mapPreview: L.Map;
     private previewLayer: L.Layer;
