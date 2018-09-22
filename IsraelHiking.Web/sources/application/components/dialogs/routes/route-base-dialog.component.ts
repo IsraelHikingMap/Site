@@ -1,3 +1,6 @@
+import { select } from "@angular-redux/store";
+import { Observable } from "rxjs";
+
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
@@ -5,27 +8,26 @@ import { RoutesService } from "../../../services/layers/routelayers/routes.servi
 import { IRouteProperties } from "../../../services/layers/routelayers/iroute.layer";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { BaseMapComponent } from "../../base-map.component";
+import { IApplicationState } from "../../../state/models/application-state";
 
 export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public routeProperties: IRouteProperties;
     public pathOptions: L.PathOptions;
     public colors: string[];
     public isNew: boolean;
-    public isAdvanced: boolean;
     public title: string;
     public isReversed: boolean;
 
+    @select((state: IApplicationState) => state.configuration.isAdvanced)
+    public isAdvanced: Observable<boolean>;;
+
     constructor(resources: ResourcesService,
-        protected mapService: MapService,
-        protected routesService: RoutesService,
-        protected routeLayerFactory: RouteLayerFactory,
-        protected toastService: ToastService) {
+        protected readonly mapService: MapService,
+        protected readonly routesService: RoutesService,
+        protected readonly routeLayerFactory: RouteLayerFactory,
+        protected readonly toastService: ToastService) {
         super(resources);
         this.colors = this.routeLayerFactory.colors;
-    }
-
-    public setIsAdvanced(isAdvanced: boolean) {
-        this.isAdvanced = isAdvanced;
     }
 
     protected updateLocalStorage() {

@@ -41,6 +41,7 @@ import { DndModule } from "@beyerleinf/ngx-dnd";
 import { NgxImageGalleryModule } from "ngx-image-gallery";
 import { D3Service } from "d3-ng2-service";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
+import { NgReduxModule, NgRedux } from "@angular-redux/store";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -119,7 +120,10 @@ import { PublicPoiSidebarComponent } from "./components/sidebar/publicpoi/public
 import { PublicPointOfInterestEditComponent } from "./components/sidebar/publicpoi/public-poi-edit.component";
 import { ImageScrollerComponent } from "./components/sidebar/publicpoi/image-scroller.component";
 import { ApplicationStateComponent } from "./components/application-state.component";
+// variables and functions
 import { routes } from "./routes";
+import { IApplicationState, initialState } from "./state/models/application-state";
+import { rootReducer } from "./state/reducres/root.reducer";
 
 export function getWindow() { return window; }
 export function getRoutesService(routesService: RoutesService) { return routesService; }
@@ -162,7 +166,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ScrollToModule.forRoot(),
         DndModule.forRoot(),
         NgxImageGalleryModule,
-        InfiniteScrollModule
+        InfiniteScrollModule,
+        NgReduxModule
     ],
     entryComponents: [ZoomComponent,
         LocationComponent,
@@ -299,8 +304,15 @@ export class ApplicationModule {
     constructor(dataContainerService: DataContainerService,
         angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
         dragAndDropService: DragAndDropService,
-        deepLinksService: DeepLinksService) {
+        deepLinksService: DeepLinksService,
+        ngRedux: NgRedux<IApplicationState>,
+        localStorageService: LocalStorageService) {
         console.log("Starting IHM Application Initialization");
+        let storedState = localStorageService.get("reduxState") || initialState;
+        ngRedux.configureStore(rootReducer, storedState);
+        ngRedux.select().subscribe((state) => {
+            localStorageService.set("reduxState", state);
+        });
         dataContainerService.initialize().then(() => {
             deepLinksService.initialize();
             console.log("Finished IHM Application Initialization");

@@ -1,10 +1,11 @@
 ﻿import { Component, ViewEncapsulation, OnDestroy } from "@angular/core";
 import { MatDialog } from "@angular/material";
-import { LocalStorage, LocalStorageService, WebstorableArray } from "ngx-store";
+import { LocalStorage, WebstorableArray } from "ngx-store";
+import { select, NgRedux } from "@angular-redux/store";
+import { Observable } from "rxjs";
 import * as _ from "lodash";
 
 import { MapService } from "../../services/map.service";
-import { FileService } from "../../services/file.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { LayersService, IBaseLayer, IOverlay } from "../../services/layers/layers.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
@@ -19,6 +20,8 @@ import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.comp
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
 import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
 import { PoiService, CategoriesType, ICategory } from "../../services/poi.service";
+import { IApplicationState } from "../../state/models/application-state";
+import { ConfigurationActions } from "../../state/reducres/configuration.reducer";
 
 interface IExpandableItem {
     name: string;
@@ -44,8 +47,8 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         { name: "Private Routes", isExpanded: true }
     ] as any;
 
-    @LocalStorage()
-    public isAdvanced = false;
+    @select((state: IApplicationState) => state.configuration.isAdvanced)
+    public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
         private readonly dialog: MatDialog,
@@ -53,10 +56,9 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         private readonly layersService: LayersService,
         private readonly routesService: RoutesService,
         private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly fileService: FileService,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
-        private readonly localStorageService: LocalStorageService) {
+        private ngRedux: NgRedux<IApplicationState>) {
         super(resources);
         this.baseLayers = layersService.baseLayers;
         this.overlays = layersService.overlays;
@@ -141,27 +143,23 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
 
     public addOverlay(e: Event) {
         this.suppressEvents(e);
-        let dialogRef = this.dialog.open(OverlayAddDialogComponent);
-        dialogRef.componentInstance.setIsAdvanced(this.isAdvanced);
+        this.dialog.open(OverlayAddDialogComponent);
     }
 
     public editOverlay(layer: IOverlay, e: Event) {
         this.suppressEvents(e);
         let dialogRef = this.dialog.open(OverlayEditDialogComponent);
-        dialogRef.componentInstance.setIsAdvanced(this.isAdvanced);
         dialogRef.componentInstance.setOverlay(layer);
     }
 
     public addRoute(e: Event) {
         this.suppressEvents(e);
-        let dialogRef = this.dialog.open(RouteAddDialogComponent);
-        dialogRef.componentInstance.setIsAdvanced(this.isAdvanced);
+        this.dialog.open(RouteAddDialogComponent);
     }
 
     public editRoute(routeName: string, e: Event) {
         this.suppressEvents(e);
         let dialogRef = this.dialog.open(RouteEditDialogComponent);
-        dialogRef.componentInstance.setIsAdvanced(this.isAdvanced);
         dialogRef.componentInstance.setRouteLayer(routeName);
     }
 
@@ -180,15 +178,6 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         this.suppressEvents(e);
     }
 
-    public toggleShow(e: Event) {
-        this.sidebarService.toggle("layers");
-        this.suppressEvents(e);
-    }
-
-    public isVisisble(): boolean {
-        return this.sidebarService.viewName === "layers";
-    }
-
     public getRouteColor(routeLayer: IRouteLayer) {
         return routeLayer.route.properties.pathOptions.color;
     }
@@ -201,11 +190,15 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         return routeLayer.route.properties.description;
     }
 
-    public isRouteVisisble(routeLayer: IRouteLayer) {
+    public isRouteVisible(routeLayer: IRouteLayer) {
         return routeLayer.route.properties.isVisible;
     }
 
     public isRouteSelected(routeLayer: IRouteLayer) {
         return this.routesService.selectedRoute === routeLayer;
+    }
+
+    public toggleIsAdvanced() {
+        this.ngRedux.dispatch(ConfigurationActions.toggleIsAdvanceAction);
     }
 }

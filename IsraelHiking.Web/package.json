@@ -13,6 +13,7 @@
     "@angular/platform-browser-dynamic": "6.1.6",
     "@angular/platform-server": "6.1.6",
     "@angular/router": "6.1.6",
+    "@angular-redux/store": "9.0.0",
     "@beyerleinf/ngx-dnd": "6.0.0-preview3",
     "@ngx-progressbar/core": "5.0.1",
     "@ngx-progressbar/http": "5.0.1",
@@ -48,6 +49,7 @@
     "ngx-window-token": "1.0.0",
     "ohauth": "1.0.0",
     "piexifjs": "1.0.4",
+    "redux": "4.0.0",
     "rxjs": "6.2.1",
     "rxjs-compat": "6.2.1",
     "zone.js": "0.8.26"

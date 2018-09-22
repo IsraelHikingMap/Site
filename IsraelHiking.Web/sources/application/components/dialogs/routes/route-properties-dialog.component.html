@@ -27,7 +27,7 @@
                     </div>
                 </div>
             </div>
-            <div fxFlex="50" fxFlex.xs="100" *ngIf="isAdvanced">
+            <div fxFlex="50" fxFlex.xs="100" *ngIf="isAdvanced | async">
                 <div fxLayout="column" fxFill>
                     <label class="text-center">{{resources.width}}</label>
                     <mat-slider [(ngModel)]="pathOptions.weight" min="1" max="10" step="1" color="primary"></mat-slider>
@@ -41,16 +41,16 @@
     <div mat-dialog-actions>
         <div fxLayout="row" fxFill>
             <div fxFlex>
-                <button type="button" mat-button *ngIf="!isNew && isAdvanced" (click)="saveRouteToFile($event)" matTooltip="{{resources.saveRouteToFile}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Save route to file" fxFill><i class="fa fa-lg icon-floppy-o"></i></button>
+                <button type="button" mat-button *ngIf="!isNew && (isAdvanced | async)" (click)="saveRouteToFile($event)" matTooltip="{{resources.saveRouteToFile}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Save route to file" fxFill><i class="fa fa-lg icon-floppy-o"></i></button>
             </div>
             <div fxFlex>
-                <button type="button" mat-button *ngIf="!isNew && isAdvanced" (click)="moveToRoute($event)" matTooltip="{{resources.moveToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Move to route" fxFill><i class="fa fa-lg icon-crosshairs"></i></button>
+                <button type="button" mat-button *ngIf="!isNew && (isAdvanced | async)" (click)="moveToRoute($event)" matTooltip="{{resources.moveToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Move to route" fxFill><i class="fa fa-lg icon-crosshairs"></i></button>
             </div>
             <div fxFlex>
-                <button type="button" mat-button *ngIf="!isNew && isAdvanced" (click)="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" matTooltip="{{resources.toggleRoutingPerSegment}}" matTooltipPosition="above" [ngClass]="{'active': routeProperties.isRoutingPerPoint}" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle route per point" fxFill><i class="fa" [ngClass]="getRoutingIcon()"></i></button>
+                <button type="button" mat-button *ngIf="!isNew && (isAdvanced | async)" (click)="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" matTooltip="{{resources.toggleRoutingPerSegment}}" matTooltipPosition="above" [ngClass]="{'active': routeProperties.isRoutingPerPoint}" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle route per point" fxFill><i class="fa" [ngClass]="getRoutingIcon()"></i></button>
             </div>
             <div fxFlex>
-                <button type="button" mat-button *ngIf="!isNew && isAdvanced" (click)="makeAllPointsEditable()" matTooltip="{{resources.generateMarkersForAllPoints}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Make all points editable" fxFill><i class="fa fa-lg icon-map-marker-group"></i></button>
+                <button type="button" mat-button *ngIf="!isNew && (isAdvanced | async)" (click)="makeAllPointsEditable()" matTooltip="{{resources.generateMarkersForAllPoints}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Make all points editable" fxFill><i class="fa fa-lg icon-map-marker-group"></i></button>
             </div>
             <div fxFlex>
                 <button matDialogClose type="button" mat-button *ngIf="!isNew" (click)="deleteRoute($event)" matTooltip="{{resources.deleteRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Delete route" fxFill><i class="fa fa-lg icon-trash"></i></button>

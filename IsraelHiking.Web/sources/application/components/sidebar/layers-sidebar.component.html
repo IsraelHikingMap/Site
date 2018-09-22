@@ -1,10 +1,10 @@
 ﻿<div [dir]="resources.direction">
     <div fxLayout="row" fxLayoutAlign="none none" class="row-hover">
         <div fxFlex="15">
-            <mat-slide-toggle [(ngModel)]="isAdvanced" color="primary" class="cursor-pointer"></mat-slide-toggle>
+            <mat-slide-toggle [ngModel]="isAdvanced | async" (ngModelChange)="toggleIsAdvanced()" color="primary" class="cursor-pointer"></mat-slide-toggle>
         </div>
         <div fxFlex="75">
-            <span (click)="isAdvanced = !isAdvanced" class="cursor-pointer" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle advanced button">{{resources.toggleAdvancedSettings}}</span>
+            <span (click)="toggleIsAdvanced()" class="cursor-pointer" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle advanced button">{{resources.toggleAdvancedSettings}}</span>
         </div>
         <div fxFlex>
             <div fxLayout="column" fxFill>
@@ -29,7 +29,7 @@
                     <div fxFlex>
                         <span>{{resources.translate(baseLayer.key)}}</span>
                     </div>
-                    <div *ngIf="isAdvanced && baseLayer.isEditable" fxFlex="10">
+                    <div *ngIf="(isAdvanced | async) && baseLayer.isEditable" fxFlex="10">
                         <div fxLayout="column" fxFill>
                             <span fxFill fxLayoutAlign="end start" (click)="editBaseLayer(baseLayer, $event)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-wrench"></i></span>
                         </div>
@@ -51,7 +51,7 @@
                     <div fxFlex>
                         <span>{{resources.translate(overlay.key)}}</span>
                     </div>
-                    <div *ngIf="isAdvanced && overlay.isEditable" fxFlex="10">
+                    <div *ngIf="(isAdvanced | async) && overlay.isEditable" fxFlex="10">
                         <div fxLayout="column" fxFill>
                             <span fxFill fxLayoutAlign="end start" (click)="editOverlay(overlay, $event)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-wrench"></i></span>
                         </div>
@@ -95,7 +95,7 @@
                         <div fxFlex="10"></div>
                         <div fxFlex="15">
                             <span [ngStyle]="{'color': getRouteColor(route)}">
-                                <i class="fa" [ngClass]="{'icon-pencil': isRouteSelected(route), 'icon-eye': isRouteVisisble(route) && !isRouteSelected(route), 'icon-eye-slash': !isRouteVisisble(route) }"></i>
+                                <i class="fa" [ngClass]="{'icon-pencil': isRouteSelected(route), 'icon-eye': isRouteVisible(route) && !isRouteSelected(route), 'icon-eye-slash': !isRouteVisible(route) }"></i>
                             </span>
                         </div>
                         <div fxFlex matTooltip="{{getRouteDescription(route)}}" matTooltipPosition="below" class="cursor-move">

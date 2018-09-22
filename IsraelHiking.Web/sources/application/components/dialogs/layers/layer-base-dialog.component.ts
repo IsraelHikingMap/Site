@@ -1,5 +1,7 @@
 import { AfterViewInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { select } from "@angular-redux/store";
+import { Observable } from "rxjs";
 import * as L from "leaflet";
 
 import { ResourcesService } from "../../../services/resources.service";
@@ -8,6 +10,7 @@ import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers/layers.service";
 import { MapLayersFactory } from "../../../services/map-layers.factory";
 import { BaseMapComponent } from "../../base-map.component";
+import { IApplicationState } from "../../../state/models/application-state";
 import * as Common from "../../../common/IsraelHiking";
 
 export abstract class LayerBaseDialogComponent extends BaseMapComponent implements AfterViewInit {
@@ -18,17 +21,19 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public maxZoom: number;
     public opacity: number;
     public isNew: boolean;
-    public isAdvanced: boolean;
     public isOverlay: boolean;
+
+    @select((state: IApplicationState) => state.configuration.isAdvanced)
+    public isAdvanced: Observable<boolean>;;
 
     private mapPreview: L.Map;
     private previewLayer: L.Layer;
 
     protected constructor(resources: ResourcesService,
-        protected mapService: MapService,
-        protected layersService: LayersService,
-        protected toastService: ToastService,
-        private http: HttpClient
+        protected readonly mapService: MapService,
+        protected readonly layersService: LayersService,
+        protected readonly toastService: ToastService,
+        private readonly http: HttpClient
     ) {
         super(resources);
         this.minZoom = MapLayersFactory.MIN_ZOOM;
@@ -93,10 +98,6 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
 
     private getTilesAddress() {
         return decodeURI(this.address).replace("{zoom}", "{z}").trim();
-    }
-
-    public setIsAdvanced(isAdvanced: boolean) {
-        this.isAdvanced = isAdvanced;
     }
 
     private async updateLayerKeyIfPossible() {
