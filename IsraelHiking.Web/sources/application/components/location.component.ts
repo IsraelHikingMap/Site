@@ -13,6 +13,7 @@ import { IconsService } from "../services/icons.service";
 import { RoutesService } from "../services/layers/routelayers/routes.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { IRouteLayer, IRouteSegment } from "../services/layers/routelayers/iroute.layer";
+import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import * as Common from "../common/IsraelHiking";
 import RouteData = Common.RouteData;
 
@@ -22,6 +23,7 @@ import RouteData = Common.RouteData;
     styleUrls: ["./location.component.css"]
 })
 export class LocationComponent extends BaseMapComponent {
+    private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
 
     @LocalStorage()
     private lastRecordedRoute: RouteData = null;
@@ -42,7 +44,8 @@ export class LocationComponent extends BaseMapComponent {
         private readonly geoLocationService: GeoLocationService,
         private readonly toastService: ToastService,
         private readonly routesService: RoutesService,
-        private readonly routeLayerFactory: RouteLayerFactory) {
+        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly cancelableTimeoutService: CancelableTimeoutService) {
         super(resources);
 
         this.locationMarker = null;
@@ -53,6 +56,11 @@ export class LocationComponent extends BaseMapComponent {
         this.mapService.map.on("dragstart",
             () => {
                 this.isFollowing = false;
+                this.cancelableTimeoutService.clearTimeoutByGroup("following");
+                this.cancelableTimeoutService.setTimeoutByGroup(() => {
+                    this.mapService.map.flyTo(this.locationMarker.getLatLng());
+                    this.isFollowing = true;
+                }, LocationComponent.NOT_FOLLOWING_TIMEOUT, "following");
             });
 
         this.geoLocationService.positionChanged.subscribe(
