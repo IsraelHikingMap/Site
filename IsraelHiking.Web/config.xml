@@ -53,6 +53,7 @@
         </host>
     </universal-links>
     <plugin name="cordova-plugin-deeplinks" spec="^1.1.0" />
+    <plugin name="cordova-plugin-insomnia" spec="^4.3.0" />
     <engine name="android" spec="^7.0.0" />
     <engine name="browser" spec="^5.0.4" />
 </widget>

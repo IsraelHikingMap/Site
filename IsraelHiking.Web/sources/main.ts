@@ -18,6 +18,7 @@ if (environment.production) {
 if (environment.isCordova) {
     let onDeviceReady = () => {
         window.open = cordova.InAppBrowser.open;
+        (window as any).plugins.insomnia.keepAwake();
         bootstrapInitializationFunction();
         let exitApp = false;
         let interval = setInterval(() => { exitApp = false; }, 5000);
@@ -36,6 +37,7 @@ if (environment.isCordova) {
         }, false);
     };
     document.addEventListener("deviceready", onDeviceReady, false);
+    document.addEventListener("resume", () => (window as any).plugins.insomnia.keepAwake(), false);
 } else {
     bootstrapInitializationFunction();
 }
