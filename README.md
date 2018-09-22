@@ -74,6 +74,9 @@ In order to be able to build this site you'll need some tools:
   * Open Visual Studio, wait for the installations to complete, and restart when asked
 * Open `IsraelHiking.sln`. You may use _File &rarr; Recent Projects and Solutions_
 * Compile using `Ctrl-Shift-B` - Note: please be patient as it will take time to download all the packages.
+* Go to `IsraelHiking.Web` and run from command line: 
+  * `npm install` to install all npm packages for the client side code
+  * `npm run build` to generate the Angular UI client. It should create `wwwroot` folder on a successful run
 * If you want to update the translations or upload images from your debug environment, right-click on `IsraelHiking.Web` and select `Manage User Secrets`. Otherwise, skip this step.    
   <img width="397" alt="2017-10-22 10_47_32-" src="https://user-images.githubusercontent.com/1304610/31860867-3b283092-b72a-11e7-8119-fe04ecd13852.png">    
   In the `secrets.json` file that opens add the applicable fields and save the file.
