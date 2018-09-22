@@ -150,7 +150,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         let northEast = L.latLng(Math.max(...latLngs.map(l => l.lat)), Math.max(...latLngs.map(l => l.lng)));
         let southWest = L.latLng(Math.min(...latLngs.map(l => l.lat)), Math.min(...latLngs.map(l => l.lng)));
         return {
-            routes: [],
+            routes: [routeDate],
             northEast: northEast,
             southWest: southWest
         } as Common.DataContainer;
