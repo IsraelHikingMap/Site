@@ -55,12 +55,14 @@ export class LocationComponent extends BaseMapComponent {
 
         this.mapService.map.on("dragstart",
             () => {
-                this.isFollowing = false;
-                this.cancelableTimeoutService.clearTimeoutByGroup("following");
-                this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                    this.mapService.map.flyTo(this.locationMarker.getLatLng());
-                    this.isFollowing = true;
-                }, LocationComponent.NOT_FOLLOWING_TIMEOUT, "following");
+                if (this.isActive()) {
+                    this.isFollowing = false;
+                    this.cancelableTimeoutService.clearTimeoutByGroup("following");
+                    this.cancelableTimeoutService.setTimeoutByGroup(() => {
+                        this.mapService.map.flyTo(this.locationMarker.getLatLng());
+                        this.isFollowing = true;
+                    }, LocationComponent.NOT_FOLLOWING_TIMEOUT, "following");
+                }
             });
 
         this.geoLocationService.positionChanged.subscribe(
