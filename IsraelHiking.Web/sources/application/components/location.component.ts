@@ -85,7 +85,7 @@ export class LocationComponent extends BaseMapComponent {
                         this.routesService.setData([this.lastRecordedRoute]);
                         this.routeLayer = this.routesService.selectedRoute;
                         this.routeLayer.route.properties.isRecording = true;
-                        this.routeLayer.setEditPoiState();
+                        this.routeLayer.setReadOnlyState();
                         this.routeLayer.raiseDataChanged();
                     },
                     declineAction: () => {
@@ -135,8 +135,8 @@ export class LocationComponent extends BaseMapComponent {
             }
             this.createRecordingRoute();
         } else {
-            this.routeLayer.setReadOnlyState();
             this.routeLayer.route.properties.isRecording = false;
+            this.routeLayer.setReadOnlyState();
             this.routesService.addRouteToLocalStorage(this.routeLayer.getData());
             this.routeLayer = null;
             this.lastRecordedRoute = null;
@@ -169,7 +169,7 @@ export class LocationComponent extends BaseMapComponent {
         } as IRouteSegment);
         this.routesService.addRoute(route);
         this.routeLayer = this.routesService.selectedRoute;
-        this.routeLayer.setEditPoiState();
+        this.routeLayer.setReadOnlyState();
     }
 
     public isDisabled() {
