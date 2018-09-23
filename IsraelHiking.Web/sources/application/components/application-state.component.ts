@@ -7,6 +7,7 @@ import { HashService, RouteStrings, IPoiRouterData } from "../services/hash.serv
 import { MapService } from "../services/map.service";
 import { SidebarService } from "../services/sidebar.service";
 import { DataContainerService } from "../services/data-container.service";
+import { FitBoundsService } from "../services/fit-bounds.service";
 
 @Component({
     selector: "application-state",
@@ -21,14 +22,17 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
         private readonly hashService: HashService,
         private readonly mapService: MapService,
         private readonly sidebarService: SidebarService,
-        private readonly dataContainerService: DataContainerService) {
+        private readonly dataContainerService: DataContainerService,
+        private readonly fitBoundsService: FitBoundsService) {
         this.subscription = null;
     }
 
     public ngOnInit() {
         this.subscription = this.route.params.subscribe(params => {
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
-                this.mapService.map.setView(L.latLng(+params[RouteStrings.LAT], +params[RouteStrings.LON]), +params[RouteStrings.ZOOM]);
+                if (!this.fitBoundsService.isFlying) {
+                    this.mapService.map.setView(L.latLng(+params[RouteStrings.LAT], +params[RouteStrings.LON]), +params[RouteStrings.ZOOM]);
+                }
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SEARCH)) {
                 this.hashService.setApplicationState("search", decodeURIComponent(params[RouteStrings.TERM]));
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {
