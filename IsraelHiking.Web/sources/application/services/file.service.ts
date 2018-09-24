@@ -123,13 +123,15 @@ export class FileService {
     private saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
             if (environment.isCordova) {
-                // HM TODO: this is only for android
+                // HM TODO: this is only for android, make it for iOS?
                 (window as any).resolveLocalFileSystemURL(cordova.file.externalRootDirectory,
                     (directoryEntry) => {
                         directoryEntry.getDirectory("IsraelHikingMap",
                             { create: true },
                             dir => {
-                                dir.getFile(fileName,
+                                let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") +
+                                    fileName.split(" ").join("_");
+                                dir.getFile(fullFileName,
                                     { create: true },
                                     fileEntry => {
                                         fileEntry.createWriter(fileWriter => {

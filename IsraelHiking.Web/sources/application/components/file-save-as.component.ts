@@ -48,7 +48,7 @@ export class FileSaveAsComponent extends BaseMapComponent {
         }
     }
 
-    public saveAs = (format: IFormatViewModel, e: Event) => {
+    public saveAs = async (format: IFormatViewModel, e: Event) => {
         this.selectedFormat = format;
         this.isFromatsDropdownOpen = false;
         let outputFormat = format.outputFormat;
@@ -61,10 +61,14 @@ export class FileSaveAsComponent extends BaseMapComponent {
             return;
         }
         let name = this.getName(data);
-        this.fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data)
-            .then(() => { }, () => {
-                this.toastService.error(this.resources.unableToSaveToFile);
-            });
+        try {
+            let showToast = await this.fileService.saveToFile(`${name}.${format.extension}`, outputFormat, data);
+            if (showToast) {
+                this.toastService.success(this.resources.fileSavedSuccessfully);
+            }
+        } catch (ex) {
+            this.toastService.error(this.resources.unableToSaveToFile);
+        }
 
         this.isOpen = false;
         this.suppressEvents(e);

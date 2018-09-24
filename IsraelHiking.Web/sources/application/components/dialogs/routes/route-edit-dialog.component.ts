@@ -54,15 +54,19 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         this.suppressEvents(e);
     }
 
-    public saveRouteToFile(e: Event): void {
+    public async saveRouteToFile(e: Event) {
+        this.suppressEvents(e);
         let data = {
             routes: [this.routeLayer.getData()]
         } as Common.DataContainer;
-        this.fileService.saveToFile(this.routeProperties.name + ".gpx", "gpx", data)
-            .then(() => { }, () => {
-                this.toastService.error(this.resources.unableToSaveToFile);
-            });
-        this.suppressEvents(e);
+        try {
+            let showToast = await this.fileService.saveToFile(this.routeProperties.name + ".gpx", "gpx", data);
+            if (showToast) {
+                this.toastService.success(this.resources.fileSavedSuccessfully);
+            }
+        } catch (ex) {
+            this.toastService.error(this.resources.unableToSaveToFile);
+        }
     }
 
     public moveToRoute = (e: Event) => {
