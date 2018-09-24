@@ -19,7 +19,9 @@ export abstract class RouteStateEditBase extends RouteStateBase {
         this.context.mapService.map.on("click", this.addPoint, this);
         this.context.mapService.map.on("mousemove", this.hoverHandler.onMouseMove, this.hoverHandler);
         this.hoverHandler.updateAccordingToRoueProperties();
-        this.context.snappingService.enable(true);
+        if (!this.context.route.properties.isRecording) {
+            this.context.snappingService.enable(true);
+        }
 
         for (let segment of this.context.route.segments) {
             segment.polyline = L.polyline(segment.latlngs, this.context.route.properties.pathOptions);
