@@ -23,7 +23,7 @@ export class PrivatePoiUploaderService {
         imageLink: Common.LinkData,
         title: string,
         description: string,
-        type: string
+        markerType: string
         ) {
         let results = await this.snappingService.getClosestPoint(marker.getLatLng());
         let urls = [];
@@ -34,7 +34,7 @@ export class PrivatePoiUploaderService {
             description: description,
             title: title,
             latlng: marker.getLatLng(),
-            type: type,
+            type: markerType,
             urls: urls
         } as Common.MarkerData;
 
