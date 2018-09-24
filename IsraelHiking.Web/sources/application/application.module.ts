@@ -74,6 +74,7 @@ import { WhatsAppService } from "./services/whatsapp.service";
 import { ImageResizeService } from "./services/image-resize.service";
 import { NonAngularObjectsFactory } from "./services/non-angular-objects.factory";
 import { DeepLinksService } from "./services/deep-links.service";
+import { PrivatePoiUploaderService } from "./services/private-poi-uploader.service";
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 import { ImageCaptureDirective } from "./directives/image-capture.directive";
@@ -120,6 +121,7 @@ import { PublicPoiSidebarComponent } from "./components/sidebar/publicpoi/public
 import { PublicPointOfInterestEditComponent } from "./components/sidebar/publicpoi/public-poi-edit.component";
 import { ImageScrollerComponent } from "./components/sidebar/publicpoi/image-scroller.component";
 import { ApplicationStateComponent } from "./components/application-state.component";
+import { PrivatePoiEditDialogComponent } from "./components/dialogs/private-poi-edit-dialog.component";
 // variables and functions
 import { routes } from "./routes";
 import { IApplicationState, initialState } from "./state/models/application-state";
@@ -208,7 +210,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         PublicPoiSidebarComponent,
         PublicPointOfInterestEditComponent,
         ImageScrollerComponent,
-        ApplicationStateComponent
+        ApplicationStateComponent,
+        PrivatePoiEditDialogComponent
     ],
     providers: [
         GestureConfig,
@@ -251,7 +254,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         WhatsAppService,
         ImageResizeService,
         NonAngularObjectsFactory,
-        DeepLinksService
+        DeepLinksService,
+        PrivatePoiUploaderService
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
@@ -296,6 +300,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         PublicPointOfInterestEditComponent,
         ImageScrollerComponent,
         ApplicationStateComponent,
+        PrivatePoiEditDialogComponent,
         ImageCaptureDirective
     ],
     bootstrap: [MainMapComponent, SidebarComponent]

@@ -22,7 +22,7 @@ export class RouteStateEditPoi extends RouteStateEditBase {
         RouteStateHelper.createStartAndEndMarkers(this.context);
         for (let routeMarkerWithData of this.context.route.markers) {
             routeMarkerWithData.marker = RouteStatePoiHelper.createPoiMarker(routeMarkerWithData, true, this.context);
-            RouteStatePoiHelper.addComponentToPoiMarkerAndEvents(routeMarkerWithData.marker, this.context);
+            RouteStatePoiHelper.setPoiMarkerEvents(routeMarkerWithData.marker, this.context);
             this.setMarkerHoverEvents(routeMarkerWithData.marker);
         }
     }

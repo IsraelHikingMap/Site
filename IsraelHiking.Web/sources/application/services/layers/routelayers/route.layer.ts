@@ -1,5 +1,6 @@
 import { Injector, ComponentFactoryResolver } from "@angular/core";
 import { Subject } from "rxjs";
+import { MatDialog } from "@angular/material";
 import * as L from "leaflet";
 
 import { SnappingService, ISnappingRouteOptions, ISnappingRouteResponse, ISnappingPointResponse } from "../../snapping.service";
@@ -39,6 +40,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         public readonly geoLocationService: GeoLocationService,
         public readonly elevationProvider: ElevationProvider,
         public readonly injector: Injector,
+        public readonly matDialog: MatDialog,
         public readonly componentFactoryResolver: ComponentFactoryResolver,
         route: IRoute) {
         super();

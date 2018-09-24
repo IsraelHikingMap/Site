@@ -1,6 +1,7 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { LocalStorage } from "ngx-store";
+import { MatDialog } from "@angular/material";
 
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
@@ -47,6 +48,7 @@ export class RouteLayerFactory {
         private readonly elevationProvider: ElevationProvider,
         private readonly geoLocationService: GeoLocationService,
         private readonly injector: Injector,
+        private readonly matDialog: MatDialog,
         private readonly componentFactoryResolver: ComponentFactoryResolver) {
         this.httpClient.get(Urls.colors).toPromise().then((colors: string[]) => {
             this.colors.splice(0, this.colors.length, ...colors);
@@ -64,6 +66,7 @@ export class RouteLayerFactory {
             this.geoLocationService,
             this.elevationProvider,
             this.injector,
+            this.matDialog,
             this.componentFactoryResolver,
             route);
     }

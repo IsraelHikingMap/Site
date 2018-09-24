@@ -1,10 +1,12 @@
-﻿import * as L from "leaflet";
+﻿import { MatDialog } from "@angular/material";
+import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { IconsService } from "../../icons.service";
 import { DrawingPoiMarkerPopupComponent } from "../../../components/markerpopup/drawing-poi-marker-popup.component";
 import { IRouteLayer, IMarkerWithData } from "./iroute.layer";
 import { RouteStateHelper } from "./route-state-helper";
+import { PrivatePoiEditDialogComponent } from "../../../components/dialogs/private-poi-edit-dialog.component";
 import * as Common from "../../../common/IsraelHiking";
 
 export class RouteStatePoiHelper {
@@ -26,7 +28,7 @@ export class RouteStatePoiHelper {
         return marker;
     }
 
-    public static addComponentToPoiMarker(marker: Common.IMarkerWithTitle, context: IRouteLayer): DrawingPoiMarkerPopupComponent {
+    public static addReadOnlyComponentToPoiMarker(marker: Common.IMarkerWithTitle, context: IRouteLayer): DrawingPoiMarkerPopupComponent {
         let factory = context.componentFactoryResolver.resolveComponentFactory(DrawingPoiMarkerPopupComponent);
         let containerDiv = L.DomUtil.create("div");
         let poiMarkerPopupComponentRef = factory.create(context.injector, [], containerDiv);
@@ -35,6 +37,15 @@ export class RouteStatePoiHelper {
         poiMarkerPopupComponentRef.instance.angularBinding(poiMarkerPopupComponentRef.hostView);
         marker.bindPopup(containerDiv);
         return poiMarkerPopupComponentRef.instance;
+    }
+
+    private static openEditMarkerDialog(marker: Common.IMarkerWithTitle, context: IRouteLayer) {
+        let dialogRef = context.matDialog.open(PrivatePoiEditDialogComponent);
+        dialogRef.componentInstance.setMarkerAndRoute(marker, context);
+        dialogRef.componentInstance.remove = () => {
+            let routeMarker = _.find(context.route.markers, markerToFind => markerToFind.marker === marker);
+            RouteStatePoiHelper.removePoi(routeMarker, context);
+        };
     }
 
     public static addPoint(e: L.LeafletMouseEvent, context: IRouteLayer): IMarkerWithData {
@@ -52,27 +63,17 @@ export class RouteStatePoiHelper {
         let markerWithData = markerData as IMarkerWithData;
         markerWithData.marker = marker;
         context.route.markers.push(markerWithData);
-        RouteStatePoiHelper.addComponentToPoiMarkerAndEvents(marker, context);
-        setTimeout(() => marker.openPopup(), 200);
+        RouteStatePoiHelper.setPoiMarkerEvents(marker, context);
+        marker.fire("click");
         context.raiseDataChanged();
         return markerWithData;
     }
 
-    public static addComponentToPoiMarkerAndEvents(marker: Common.IMarkerWithTitle, context: IRouteLayer): void {
-        let component = RouteStatePoiHelper.addComponentToPoiMarker(marker, context);
-        component.isEditMode = true;
-        component.remove = () => {
-            let routeMarker = _.find(context.route.markers, markerToFind => markerToFind.marker === marker);
-            routeMarker.marker.closePopup();
-            RouteStatePoiHelper.removePoi(routeMarker, context);
-        };
-        RouteStatePoiHelper.setPoiMarkerEvents(marker, context);
-    }
-
-    private static setPoiMarkerEvents(marker: Common.IMarkerWithTitle, context: IRouteLayer) {
-        marker.on("dragstart", () => {
-            marker.closePopup();
-        });
+    public static setPoiMarkerEvents(marker: Common.IMarkerWithTitle, context: IRouteLayer) {
+        marker.on("click",
+            () => {
+                RouteStatePoiHelper.openEditMarkerDialog(marker, context);
+            });
         marker.on("drag", () => {
             let snappingResponse = context.getSnappingForPoint(marker.getLatLng());
             marker.setLatLng(snappingResponse.latlng);
@@ -92,8 +93,6 @@ export class RouteStatePoiHelper {
                 let color = context.route.properties.pathOptions.color;
                 marker.setIcon(IconsService.createMarkerIconWithColorAndType(color, snappingPointResponse.markerData.type));
                 context.mapService.setMarkerTitle(marker, snappingPointResponse.markerData, color);
-                marker.unbindPopup();
-                RouteStatePoiHelper.addComponentToPoiMarkerAndEvents(marker, context);
             }
             context.raiseDataChanged();
         });

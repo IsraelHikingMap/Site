@@ -37,8 +37,7 @@ export class RouteStateReadOnly extends RouteStateBase {
         }
         for (let marker of this.context.route.markers) {
             marker.marker = RouteStatePoiHelper.createPoiMarker(marker, false, this.context);
-            let component = RouteStatePoiHelper.addComponentToPoiMarker(marker.marker, this.context);
-            component.isEditMode = false;
+            let component = RouteStatePoiHelper.addReadOnlyComponentToPoiMarker(marker.marker, this.context);
             component.changeToEditMode = () => this.changeStateToEditPoi(marker.marker);
         }
         this.context.mapService.map.on("mousemove", this.onMouseMove);
@@ -72,7 +71,7 @@ export class RouteStateReadOnly extends RouteStateBase {
         // old markers are destroyed and new markers are created.
         let newMarker = _.find(this.context.route.markers, m => m.marker != null && m.marker.getLatLng().equals(markerLatLng));
         if (newMarker != null) {
-            newMarker.marker.openPopup();
+            newMarker.marker.fire("click");
         }
     }
 
