@@ -59,6 +59,7 @@ describe("RouteLayer", () => {
             geoLocationService,
             elevationProvider,
             TestBed.get(Injector),
+            null,
             TestBed.get(ComponentFactoryResolver),
             route);
     });
