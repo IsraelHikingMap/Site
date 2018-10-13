@@ -1,4 +1,4 @@
-﻿import { Component, ApplicationRef } from "@angular/core";
+﻿import { Component } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
@@ -15,10 +15,9 @@ import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer"
 export class GpsLocationMarkerPopupComponent extends BaseMarkerPopupComponent {
     constructor(resources: ResourcesService,
         httpClient: HttpClient,
-        applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider,
         private readonly routesService: RoutesService) {
-        super(resources, httpClient, applicationRef, elevationProvider);
+        super(resources, httpClient, elevationProvider);
     }
 
     public addPointToRoute() {
@@ -36,6 +35,7 @@ export class GpsLocationMarkerPopupComponent extends BaseMarkerPopupComponent {
         } as IMarkerWithData);
         selectedRoute.setState(stateName);
         selectedRoute.raiseDataChanged();
-        this.marker.closePopup();
+
+        this.close();
     }
 }

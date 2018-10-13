@@ -2,15 +2,15 @@ import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { Router } from "@angular/router";
 import { SharedStorage } from "ngx-store";
+import { Subscription } from "rxjs";
 import * as _ from "lodash";
 
-import * as Common from "../../common/IsraelHiking";
-import { Subscription } from "rxjs";
 import { OsmUserService } from "../../services/osm-user.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ToastService } from "../../services/toast.service";
 import { RouteStrings } from "../../services/hash.service";
+import { ShareUrl } from "../../models/share-url";
 
 @Component({
     selector: "shares-dialog",
@@ -20,11 +20,11 @@ import { RouteStrings } from "../../services/hash.service";
 })
 export class SharesDialogComponent extends BaseMapComponent implements OnInit, OnDestroy {
 
-    public filteredShareUrls: Common.ShareUrl[];
-    public shareUrlInEditMode: Common.ShareUrl;
+    public filteredShareUrls: ShareUrl[];
+    public shareUrlInEditMode: ShareUrl;
     public loadingShareUrls: boolean;
     public searchTerm: FormControl;
-    public selectedShareUrl: Common.ShareUrl;
+    public selectedShareUrl: ShareUrl;
 
     @SharedStorage()
     private sessionSearchTerm = "";
@@ -68,7 +68,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.filteredShareUrls = _.take(shares, this.page * 10);
     }
 
-    private findInShareUrl(shareUrl: Common.ShareUrl, searchTerm: string) {
+    private findInShareUrl(shareUrl: ShareUrl, searchTerm: string) {
         if (!searchTerm) {
             return true;
         }
@@ -85,7 +85,7 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         return false;
     }
 
-    public deleteShareUrl(shareUrl: Common.ShareUrl) {
+    public deleteShareUrl(shareUrl: ShareUrl) {
         if (this.shareUrlInEditMode === shareUrl) {
             this.shareUrlInEditMode = null;
         }
@@ -97,17 +97,17 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         });
     }
 
-    public isShareUrlInEditMode(shareUrl: Common.ShareUrl) {
+    public isShareUrlInEditMode(shareUrl: ShareUrl) {
         return this.shareUrlInEditMode === shareUrl && this.filteredShareUrls.indexOf(shareUrl) !== -1;
     }
 
-    public async updateShareUrl(shareUrl: Common.ShareUrl) {
+    public async updateShareUrl(shareUrl: ShareUrl) {
         this.shareUrlInEditMode = null;
         await this.userService.updateShareUrl(shareUrl);
         this.toastService.success(this.resources.dataUpdatedSuccessfully);
     }
 
-    public async convertShareUrlToRoute(shareUrl: Common.ShareUrl) {
+    public async convertShareUrlToRoute(shareUrl: ShareUrl) {
         this.router.navigate([RouteStrings.ROUTE_SHARE, shareUrl.id]);
     }
 

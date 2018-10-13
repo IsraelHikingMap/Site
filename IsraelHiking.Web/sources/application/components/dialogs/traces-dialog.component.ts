@@ -14,9 +14,8 @@ import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { ResourcesService } from "../../services/resources.service";
-import { MapService } from "../../services/map.service";
 import { FileService } from "../../services/file.service";
-import { OsmUserService, ITrace } from "../../services/osm-user.service";
+import { OsmUserService } from "../../services/osm-user.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import { ToastService } from "../../services/toast.service";
 import { IconsService } from "../../services/icons.service";
@@ -25,9 +24,10 @@ import { LayersService } from "../../services/layers/layers.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { GeoJsonParser } from "../../services/geojson.parser";
 import { BaseMapComponent } from "../base-map.component";
-import { SearchResultsMarkerPopupComponent } from "../markerpopup/search-results-marker-popup.component";
 import { MissingPartMarkerPopupComponent } from "../markerpopup/missing-part-marker-popup.component";
-import * as Common from "../../common/IsraelHiking";
+import { ITrace, TracesService } from "../../services/traces.service";
+import { DataContainer, IMarkerWithTitle, RouteData } from "../../models/models";
+
 
 @Component({
     selector: "traces-dialog",
@@ -47,14 +47,12 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     private sessionSearchTerm = "";
 
     private page: number;
-    private osmTraceLayer: L.LayerGroup;
     private tracesChangedSubscription: Subscription;
 
     constructor(resources: ResourcesService,
         private readonly injector: Injector,
         private readonly matDialogRef: MatDialogRef<TracesDialogComponent>,
         private readonly componentFactoryResolver: ComponentFactoryResolver,
-        private readonly mapService: MapService,
         private readonly fileService: FileService,
         private readonly dataContainerService: DataContainerService,
         private readonly layersService: LayersService,
@@ -62,21 +60,20 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         private readonly toastService: ToastService,
         private readonly geoJsonParser: GeoJsonParser,
         private readonly routesService: RoutesService,
-        private readonly userService: OsmUserService,
+        private readonly osmUserService: OsmUserService,
+        private readonly tracesService: TracesService
     ) {
         super(resources);
         this.loadingTraces = false;
         this.selectedTrace = null;
         this.page = 1;
-        this.osmTraceLayer = L.layerGroup([]);
-        this.mapService.map.addLayer(this.osmTraceLayer);
         this.searchTerm = new FormControl();
 
         this.searchTerm.valueChanges.subscribe((searchTerm: string) => {
             this.updateFilteredLists(searchTerm);
         });
         this.searchTerm.setValue(this.sessionSearchTerm);
-        this.tracesChangedSubscription = this.userService.tracesChanged.subscribe(() => {
+        this.tracesChangedSubscription = this.tracesService.tracesChanged.subscribe(() => {
             this.updateFilteredLists(this.searchTerm.value);
             this.loadingTraces = false;
         });
@@ -84,76 +81,33 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public ngOnInit() {
         this.loadingTraces = true;
-        this.userService.refreshDetails();
+        this.tracesService.getTraces();
     }
 
     public ngOnDestroy() {
         this.tracesChangedSubscription.unsubscribe();
     }
 
-    public showTrace = async (trace: ITrace): Promise<Common.DataContainer> => {
+    public showTrace = async (trace: ITrace): Promise<DataContainer> => {
         let data = (trace.id === "")
             ? this.getDataContainerFromRecording(trace)
             : await this.fileService.openFromUrl(trace.dataUrl);
 
-        this.osmTraceLayer.clearLayers();
-        for (let route of data.routes) {
-            for (let segment of route.segments) {
-                let polyLine = L.polyline(segment.latlngs, this.getPathOptions());
-                this.osmTraceLayer.addLayer(polyLine);
-            }
-            for (let markerData of route.markers) {
-                let icon = IconsService.createPoiDefaultMarkerIcon(this.getPathOptions().color);
-                let marker = L.marker(markerData.latlng,
-                    {
-                        draggable: false,
-                        clickable: false,
-                        riseOnHover: true,
-                        icon: icon,
-                        opacity: this.getPathOptions().opacity
-                    } as L.MarkerOptions) as Common.IMarkerWithTitle;
-                this.mapService.setMarkerTitle(marker, markerData);
-                this.osmTraceLayer.addLayer(marker);
-            }
-        }
-        let bounds = L.latLngBounds(data.southWest, data.northEast);
-        // marker to allow remove of this layer:
-        let mainMarker = L.marker(bounds.getCenter(),
-            {
-                icon: IconsService.createTraceMarkerIcon(),
-                draggable: false
-            }) as Common.IMarkerWithTitle;
-        mainMarker.title = trace.name;
-
-        let markerPopupDiv = L.DomUtil.create("div");
-        let factory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
-        let componentRef = factory.create(this.injector, null, markerPopupDiv);
-        componentRef.instance.setMarker(mainMarker);
-        componentRef.instance.remove = () => {
-            this.osmTraceLayer.clearLayers();
-        };
-        componentRef.instance.convertToRoute = () => {
-            this.dataContainerService.setData(data);
-            this.osmTraceLayer.clearLayers();
-        };
-        componentRef.instance.angularBinding(componentRef.hostView);
-        mainMarker.bindPopup(markerPopupDiv);
-        this.osmTraceLayer.addLayer(mainMarker);
-        this.fitBoundsService.fitBounds(bounds, { maxZoom: FitBoundsService.DEFAULT_MAX_ZOOM } as L.FitBoundsOptions);
-
+        this.layersService.readOnlyDataContainer = data;
+        // HM TODO: fit bounds, set type?;
         return data;
     }
 
     private getDataContainerFromRecording(trace) {
-        let routeDate = this.getRouteFromTrace(trace);
-        let latLngs = routeDate.segments[0].latlngs;
-        let northEast = L.latLng(Math.max(...latLngs.map(l => l.lat)), Math.max(...latLngs.map(l => l.lng)));
-        let southWest = L.latLng(Math.min(...latLngs.map(l => l.lat)), Math.min(...latLngs.map(l => l.lng)));
+        let routeData = this.getRouteFromTrace(trace);
+        let latLngs = routeData.segments[0].latlngs;
+        let northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
+        let southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
         return {
-            routes: [routeDate],
+            routes: [routeData],
             northEast: northEast,
             southWest: southWest
-        } as Common.DataContainer;
+        } as DataContainer;
     }
 
     public editTrace() {
@@ -162,7 +116,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public updateTrace() {
         this.selectedTrace.isInEditMode = false;
-        this.userService.updateOsmTrace(this.selectedTrace);
+        this.tracesService.updateTrace(this.selectedTrace);
     }
 
     public deleteTrace() {
@@ -176,7 +130,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                     this.routesService.removeRouteFromLocalStorage(this.getRouteFromTrace(this.selectedTrace));
                     this.updateFilteredLists(this.searchTerm.value);
                 } else {
-                    this.userService.deleteOsmTrace(this.selectedTrace);
+                    this.tracesService.deleteTrace(this.selectedTrace);
                 }
             },
         });
@@ -184,20 +138,20 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
 
     public editInOsm() {
         let baseLayerAddress = this.layersService.selectedBaseLayer.address;
-        window.open(this.userService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTrace.id));
+        window.open(this.osmUserService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTrace.id));
     }
 
     public findUnmappedRoutes = async (trace: ITrace): Promise<void> => {
         try {
-            let geoJson = await this.userService.getMissingParts(trace);
+            let geoJson = await this.tracesService.getMissingParts(trace);
             if (geoJson.features.length === 0) {
                 this.toastService.confirm({ message: this.resources.noUnmappedRoutes, type: "Ok" });
                 return;
             }
-            this.showTrace(trace).then(() => {
-                this.addMissingPartsToMap(geoJson);
-                this.matDialogRef.close();
-            });
+            await this.showTrace(trace);
+            this.tracesService.missingParts = geoJson;
+            // HM TODO: fit bounds of missing parts
+            this.matDialogRef.close();
         } catch (ex) {
             this.toastService.confirm({ message: ex.message, type: "Ok" });
         }
@@ -212,7 +166,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         try {
             await this.fileService.uploadTrace(file);
             this.toastService.success(this.resources.fileUploadedSuccessfullyItWillTakeTime);
-            this.userService.refreshDetails();
+            this.tracesService.getTraces();
         } catch (ex) {
             this.toastService.error(this.resources.unableToUploadFile);
         }
@@ -230,51 +184,9 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
                 visibility: "private"
             } as ITrace;
         });
-        let traces = this.userService.traces.concat(localTraces);
+        let traces = this.tracesService.traces.concat(localTraces);
         let ordered = _.orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
         this.filteredTraces = _.take(ordered, this.page * 10);
-    }
-
-    private getPathOptions = (): L.PathOptions => {
-        return { opacity: 0.5, color: "blue", weight: 3 } as L.PathOptions;
-    }
-
-    private addMissingPartsToMap = (geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>) => {
-        let geoJsonLayer = L.geoJSON(geoJson);
-        for (let feature of geoJson.features) {
-            let latLngs = this.geoJsonParser.toLatLngsArray(feature)[0];
-            let unselectedPathOptions = { color: "red", weight: 3, opacity: 1 } as L.PathOptions;
-            let polyline = L.polyline(latLngs, unselectedPathOptions);
-            this.osmTraceLayer.addLayer(polyline);
-            let marker = L.marker(latLngs[0],
-                {
-                    draggable: false,
-                    clickable: true,
-                    icon: IconsService.createMissingPartMarkerIcon()
-                } as L.MarkerOptions) as Common.IMarkerWithTitle;
-            let markerPopupDiv = L.DomUtil.create("div");
-            let factory = this.componentFactoryResolver.resolveComponentFactory(MissingPartMarkerPopupComponent);
-            let componentRef = factory.create(this.injector, null, markerPopupDiv);
-            componentRef.instance.setMarker(marker);
-            componentRef.instance.remove = () => {
-                marker.closePopup();
-                marker.off("popupopen");
-                marker.off("popupclose");
-                polyline.off("click");
-                this.osmTraceLayer.removeLayer(polyline);
-                this.osmTraceLayer.removeLayer(marker);
-            };
-            componentRef.instance.setFeature(feature);
-            componentRef.instance.angularBinding(componentRef.hostView);
-
-            marker.bindPopup(markerPopupDiv);
-            marker.on("popupopen", () => { polyline.setStyle({ color: "DarkRed", weight: 5, opacity: 1 } as L.PathOptions); });
-            marker.on("popupclose", () => { polyline.setStyle(unselectedPathOptions); });
-            polyline.on("click", () => { marker.openPopup(); });
-            this.osmTraceLayer.addLayer(marker);
-        }
-
-        this.fitBoundsService.fitBounds(geoJsonLayer.getBounds());
     }
 
     private findInTrace(trace: ITrace, searchTerm: string) {
@@ -333,7 +245,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         let route = this.getRouteFromTrace(this.selectedTrace);
         try {
             await this.fileService.uploadRouteAsTrace(route);
-            this.userService.refreshDetails();
+            await this.tracesService.getTraces();
             this.routesService.removeRouteFromLocalStorage(route);
             this.selectedTrace = null;
             this.toastService.info(this.resources.fileUploadedSuccessfullyItWillTakeTime);
@@ -342,12 +254,12 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         }
     }
 
-    private getRouteFromTrace(trace: ITrace): Common.RouteData {
+    private getRouteFromTrace(trace: ITrace): RouteData {
         return this.routesService.locallyRecordedRoutes.filter(r => r.name === trace.name)[0];
     }
 
     public hasNoTraces(): boolean {
-        return this.userService.traces.length === 0 && !this.loadingTraces;
+        return this.tracesService.traces.length === 0 && !this.loadingTraces;
     }
 
     public getTraceDisplayName(trace: ITrace) {

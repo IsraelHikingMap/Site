@@ -9,10 +9,10 @@
     </div>
     <div mat-dialog-content>
         <mat-form-field fxFill>
-            <input matInput type="text" [(ngModel)]="routeProperties.name" placeholder="{{resources.name}}" required="" fxFill/>
+            <input matInput type="text" [(ngModel)]="routeData.name" placeholder="{{resources.name}}" required="" fxFill/>
         </mat-form-field>
         <mat-form-field fxFill>
-            <textarea matInput rows="2" type="text" [dir]="resources.getDirection(routeProperties.description)" [(ngModel)]="routeProperties.description" placeholder="{{resources.description}}" fxFill></textarea>
+            <textarea matInput rows="2" type="text" [dir]="resources.getDirection(routeData.description)" [(ngModel)]="routeData.description" placeholder="{{resources.description}}" fxFill></textarea>
         </mat-form-field>
         
         <div fxLayout="row wrap" fxLayoutAlign="space-between stretch">
@@ -21,7 +21,7 @@
                     <div *ngFor="let rowIndex of [0,1,2]" class="button-row">
                         <div fxLayout="row" fxLayoutGap="5px">
                             <div *ngFor="let currentColor of colors; let i = index" fxFlex [hidden]="i % 3 !== rowIndex">
-                                <button mat-mini-fab color="primary" fxFill type="button" [style.backgroundColor]="currentColor" (click)="pathOptions.color = currentColor"> <i *ngIf="currentColor === pathOptions.color" class="fa icon-check"></i>  </button>
+                                <button mat-mini-fab color="primary" fxFill type="button" [style.backgroundColor]="currentColor" (click)="routeData.color = currentColor"> <i *ngIf="currentColor === routeData.color" class="fa icon-check"></i>  </button>
                             </div>
                         </div>
                     </div>
@@ -30,9 +30,9 @@
             <div fxFlex="50" fxFlex.xs="100" *ngIf="isAdvanced | async">
                 <div fxLayout="column" fxFill>
                     <label class="text-center">{{resources.width}}</label>
-                    <mat-slider [(ngModel)]="pathOptions.weight" min="1" max="10" step="1" color="primary"></mat-slider>
-                    <label class="text-center" [style.opacity]="pathOptions.opacity">{{resources.opacity}}</label>
-                    <mat-slider [(ngModel)]="pathOptions.opacity" min="0.1" max="1.0" step="0.1" color="primary"></mat-slider>
+                    <mat-slider [(ngModel)]="routeData.weight" min="1" max="10" step="1" color="primary"></mat-slider>
+                    <label class="text-center" [style.opacity]="routeData.opacity">{{resources.opacity}}</label>
+                    <mat-slider [(ngModel)]="routeData.opacity" min="0.1" max="1.0" step="0.1" color="primary"></mat-slider>
                 </div>
             </div>
         </div>
@@ -45,9 +45,6 @@
             </div>
             <div fxFlex>
                 <button type="button" mat-button *ngIf="!isNew && (isAdvanced | async)" (click)="moveToRoute($event)" matTooltip="{{resources.moveToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Move to route" fxFill><i class="fa fa-lg icon-crosshairs"></i></button>
-            </div>
-            <div fxFlex>
-                <button type="button" mat-button *ngIf="!isNew && (isAdvanced | async)" (click)="routeProperties.isRoutingPerPoint = !routeProperties.isRoutingPerPoint" matTooltip="{{resources.toggleRoutingPerSegment}}" matTooltipPosition="above" [ngClass]="{'active': routeProperties.isRoutingPerPoint}" angulartics2On="click" angularticsCategory="Route" angularticsAction="Toggle route per point" fxFill><i class="fa" [ngClass]="getRoutingIcon()"></i></button>
             </div>
             <div fxFlex>
                 <button type="button" mat-button *ngIf="!isNew && (isAdvanced | async)" (click)="makeAllPointsEditable()" matTooltip="{{resources.generateMarkersForAllPoints}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Route" angularticsAction="Make all points editable" fxFill><i class="fa fa-lg icon-map-marker-group"></i></button>

@@ -1,4 +1,5 @@
 ﻿<div class="marker-popup" [dir]="resources.direction">
+    <div (click)="close()" class="close"><i class="fa icon-close"></i></div>
     <div fxLayour="row">
         <div fxFlex>
             <button mat-button (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>

@@ -10,8 +10,8 @@ import { GeoLocationService } from "../../geo-location.service";
 import { ElevationProvider } from "../../elevation.provider";
 import { IRouteLayer, IRoute, IRouteProperties, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { RouteLayer } from "./route.layer";
-import { Urls } from "../../../common/Urls";
-import * as Common from "../../../common/IsraelHiking";
+import { Urls } from "../../../urls";
+import { RouteData } from "../../../models/models";
 
 
 @Injectable()
@@ -55,7 +55,7 @@ export class RouteLayerFactory {
         });
     }
 
-    public createRouteLayerFromData = (routeData: Common.RouteData): IRouteLayer => {
+    public createRouteLayerFromData = (routeData: RouteData): IRouteLayer => {
         return this.createRouteLayer(this.createRouteFromData(routeData));
     }
 
@@ -98,7 +98,24 @@ export class RouteLayerFactory {
         return this.createRouteImplementation(name, "", { color: "", opacity: null, weight: null } as L.PathOptions);
     }
 
-    public createRouteFromData(routeData: Common.RouteData): IRoute {
+    public createRouteData(name: string): RouteData {
+        let route: RouteData = {
+            id: Math.random().toString(36).substr(2, 9),
+            name: name,
+            description: "",
+            state: "ReadOnly",
+            isRecording: false,
+            color: this.colors[this.nextColorIndex],
+            opacity: 0.5,
+            weight: 4,
+            markers: [],
+            segments: []
+        };
+        this.nextColorIndex = (this.nextColorIndex + 1) % this.colors.length;
+        return route;
+    }
+
+    public createRouteFromData(routeData: RouteData): IRoute {
         let pathOptions = { color: routeData.color, opacity: routeData.opacity, weight: routeData.weight } as L.PathOptions;
         let route = this.createRouteImplementation(routeData.name, routeData.description, pathOptions);
         route.segments = routeData.segments as IRouteSegment[] || [];

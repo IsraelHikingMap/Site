@@ -1,21 +1,23 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import * as L from "leaflet";
 import * as _ from "lodash";
+import { Map, proj } from "openlayers";
 
 import { LayersService } from "./layers/layers.service";
 import { RoutesService } from "./layers/routelayers/routes.service";
-import { MapService } from "./map.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { HashService, RouteStrings } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { OsmUserService } from "./osm-user.service";
-import * as Common from "../common/IsraelHiking";
+import { SpatialService } from "./spatial.service";
+import { ShareUrl, DataContainer } from "../models/models";
 
 @Injectable()
 export class DataContainerService {
-    private shareUrl: Common.ShareUrl;
+
+    private map: Map;
+    private shareUrl: ShareUrl;
     private layersInitializationPromise: Promise<any>;
 
     constructor(
@@ -23,7 +25,6 @@ export class DataContainerService {
         private readonly osmUserService: OsmUserService,
         private readonly layersService: LayersService,
         private readonly routesService: RoutesService,
-        private readonly mapService: MapService,
         private readonly hashService: HashService,
         private readonly fileService: FileService,
         private readonly resourcesService: ResourcesService,
@@ -32,36 +33,43 @@ export class DataContainerService {
         this.shareUrl = null;
     }
 
-    public setData(dataContainer: Common.DataContainer) {
+    public setMap(map: Map) {
+        this.map = map;
+    }
+
+    public setData(dataContainer: DataContainer) {
         this.routesService.setData(dataContainer.routes);
         this.layersService.addExternalOverlays(dataContainer.overlays);
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
-            this.mapService.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));
+            // HM TODO: fit bounds
+            //this.mapService.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));
         }
     }
 
-    public getData = (): Common.DataContainer => {
+    public getData = (): DataContainer => {
         let layersContainer = this.layersService.getData();
+
+        let bounds = SpatialService.getMapBounds(this.map);
 
         let container = {
             routes: this.routesService.getData(),
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,
-            northEast: this.mapService.map.getBounds().getNorthEast(),
-            southWest: this.mapService.map.getBounds().getSouthWest()
-        } as Common.DataContainer;
+            northEast: bounds.northEast,
+            southWest: bounds.southWest
+        } as DataContainer;
         return container;
     }
 
-    public getDataForFileExport(): Common.DataContainer {
+    public getDataForFileExport(): DataContainer {
         if (this.routesService.selectedRoute == null) {
             return this.getData();
         }
         return {
             routes: [this.routesService.selectedRoute.getData()]
-        } as Common.DataContainer;
+        } as DataContainer;
     }
 
     public initialize = async () => {
@@ -107,11 +115,11 @@ export class DataContainerService {
         }
     }
 
-    public getShareUrl(): Common.ShareUrl {
+    public getShareUrl(): ShareUrl {
         return this.shareUrl;
     }
 
-    public setShareUrl(shareUrl: Common.ShareUrl) {
+    public setShareUrl(shareUrl: ShareUrl) {
         this.shareUrl = shareUrl;
         this.router.navigate([RouteStrings.ROUTE_SHARE, this.shareUrl.id]);
     }

@@ -8,7 +8,7 @@ import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { PoiService, IPointOfInterestExtended, IRating } from "./poi.service";
 import { HashService } from "./hash.service";
-import { Urls } from "../common/Urls";
+import { Urls } from "../urls";
 
 describe("Poi Service", () => {
 
@@ -48,8 +48,8 @@ describe("Poi Service", () => {
     it("Should get points from server", (inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-        let northEast = L.latLng(1, 2);
-        let southWest = L.latLng(3, 4);
+        let northEast = LatLngAlt(1, 2);
+        let southWest = LatLngAlt(3, 4);
 
         let promise = poiService.getPoints(northEast, southWest, []).then((res) => {
             expect(res).not.toBeNull();

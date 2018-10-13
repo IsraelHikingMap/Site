@@ -4,9 +4,9 @@ import * as L from "leaflet";
 
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
-import { Urls } from "../common/Urls";
 import { environment } from "../../environments/environment";
-import * as Common from "../common/IsraelHiking";
+import { Urls } from "../urls";
+import { DataContainer, RouteData } from "../models/models";
 
 declare var cordova: any;
 
@@ -65,18 +65,18 @@ export class FileService {
         return filesToReturn;
     }
 
-    public saveToFile = async (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<boolean> => {
+    public saveToFile = async (fileName: string, format: string, dataContainer: DataContainer): Promise<boolean> => {
         let responseData = await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
         return await this.saveBytesResponseToFile(responseData, fileName);
     }
 
-    public async openFromFile(file: File): Promise<Common.DataContainer> {
+    public async openFromFile(file: File): Promise<DataContainer> {
         if (file.type === ImageResizeService.JPEG) {
             return await this.imageResizeService.resizeImageAndConvert(file);
         }
         let formData = new FormData();
         formData.append("file", file, file.name);
-        return this.httpClient.post(Urls.openFile, formData).toPromise() as Promise<Common.DataContainer>;
+        return this.httpClient.post(Urls.openFile, formData).toPromise() as Promise<DataContainer>;
     }
 
     public uploadTrace(file: File): Promise<any> {
@@ -85,10 +85,10 @@ export class FileService {
         return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
     }
 
-    public async uploadRouteAsTrace(route: Common.RouteData): Promise<any> {
+    public async uploadRouteAsTrace(route: RouteData): Promise<any> {
         let data = {
             routes: [route]
-        } as Common.DataContainer;
+        } as DataContainer;
         let responseData = await this.httpClient.post(Urls.files + "?format=gpx", data).toPromise() as string;
         let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
         let formData = new FormData();
@@ -103,8 +103,8 @@ export class FileService {
         return this.httpClient.post(Urls.uploadAnonymousImage, formData, { responseType: "text" }).toPromise();
     }
 
-    public openFromUrl = (url: string): Promise<Common.DataContainer> => {
-        return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<Common.DataContainer>;
+    public openFromUrl = (url: string): Promise<DataContainer> => {
+        return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<DataContainer>;
     }
 
     private saveBytesResponseToFile = async (data: string, fileName: string): Promise<boolean> => {

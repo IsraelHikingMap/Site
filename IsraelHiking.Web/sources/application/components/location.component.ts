@@ -1,26 +1,29 @@
-import { Component, ComponentFactoryResolver, Injector } from "@angular/core";
+import { Component } from "@angular/core";
 import { LocalStorage } from "ngx-store";
 import { first } from "rxjs/operators";
-import * as L from "leaflet";
+import { NgRedux } from "@angular-redux/store";
+import { MapComponent } from "ngx-openlayers";
 
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
-import { MapService } from "../services/map.service";
-import { GpsLocationMarkerPopupComponent } from "./markerpopup/gps-location-marker-popup.component";
-import { IconsService } from "../services/icons.service";
 import { RoutesService } from "../services/layers/routelayers/routes.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
-import { IRouteLayer, IRouteSegment } from "../services/layers/routelayers/iroute.layer";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
-import * as Common from "../common/IsraelHiking";
-import RouteData = Common.RouteData;
+import { SetLocationAction } from "../reducres/location.reducer";
+import { IRouteLayer, IRouteSegment } from "../services/layers/routelayers/iroute.layer";
+import { RouteData, ICoordinate, ApplicationState } from "../models/models";
+import { DragInteraction } from "./intercations/drag.interaction";
+
+interface ILocationInfo extends ICoordinate {
+    radius: number;
+}
 
 @Component({
-    selector: "location-control",
+    selector: "location",
     templateUrl: "./location.component.html",
-    styleUrls: ["./location.component.css"]
+    styleUrls: ["./location.component.scss"]
 })
 export class LocationComponent extends BaseMapComponent {
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
@@ -31,39 +34,38 @@ export class LocationComponent extends BaseMapComponent {
     @LocalStorage()
     private showBatteryConfirmation = true;
 
-    private locationMarker: Common.IMarkerWithTitle;
-    private accuracyCircle: L.Circle;
     private routeLayer: IRouteLayer;
 
+    public locationCoordinate: ILocationInfo;
     public isFollowing: boolean;
 
     constructor(resources: ResourcesService,
-        private readonly injector: Injector,
-        private readonly componentFactoryResolver: ComponentFactoryResolver,
-        private readonly mapService: MapService,
         private readonly geoLocationService: GeoLocationService,
         private readonly toastService: ToastService,
         private readonly routesService: RoutesService,
         private readonly routeLayerFactory: RouteLayerFactory,
-        private readonly cancelableTimeoutService: CancelableTimeoutService) {
+        private readonly cancelableTimeoutService: CancelableTimeoutService,
+        private readonly ngRedux: NgRedux<ApplicationState>,
+        host: MapComponent) {
         super(resources);
 
-        this.locationMarker = null;
-        this.accuracyCircle = null;
+        this.locationCoordinate = null;
         this.routeLayer = null;
         this.isFollowing = true;
 
-        this.mapService.map.on("dragstart",
-            () => {
-                if (this.isActive()) {
-                    this.isFollowing = false;
-                    this.cancelableTimeoutService.clearTimeoutByGroup("following");
-                    this.cancelableTimeoutService.setTimeoutByGroup(() => {
-                        this.mapService.map.flyTo(this.locationMarker.getLatLng());
-                        this.isFollowing = true;
-                    }, LocationComponent.NOT_FOLLOWING_TIMEOUT, "following");
+        host.instance.addInteraction(new DragInteraction(() => {
+            if (!this.isActive()) {
+                return;
+            }
+            this.isFollowing = false;
+            this.cancelableTimeoutService.clearTimeoutByGroup("following");
+            this.cancelableTimeoutService.setTimeoutByGroup(() => {
+                if (this.locationCoordinate != null) {
+                    this.setLocation();
                 }
-            });
+                this.isFollowing = true;
+            }, LocationComponent.NOT_FOLLOWING_TIMEOUT, "following");
+        }) as any);
 
         this.geoLocationService.positionChanged.subscribe(
             (position) => {
@@ -109,7 +111,7 @@ export class LocationComponent extends BaseMapComponent {
             this.geoLocationService.enable();
             this.isFollowing = true;
         } else if (this.isActive() && !this.isFollowing) {
-            this.mapService.map.flyTo(this.locationMarker.getLatLng());
+            this.setLocation();
             this.isFollowing = true;
         }
     }
@@ -187,40 +189,17 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     private updateMarkerPosition(position: Position) {
-        let latLng = L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude);
-        let radius = position.coords.accuracy;
-        if (this.locationMarker != null) {
-            this.locationMarker.setLatLng(latLng);
-            this.accuracyCircle.setLatLng(latLng).setRadius(radius);
-            if (this.isFollowing) {
-                this.mapService.map.flyTo(latLng);
-            }
-            return;
+        if (this.locationCoordinate == null) {
+            this.locationCoordinate = {} as ILocationInfo;
+            this.isFollowing = true;
         }
-        this.locationMarker = L.marker(latLng,
-            {
-                clickable: true,
-                draggable: false,
-                icon: IconsService.createLocationIcon()
-            } as L.MarkerOptions) as Common.IMarkerWithTitle;
-        this.accuracyCircle = L.circle(latLng, radius, {
-            color: "#136AEC",
-            fillColor: "#136AEC",
-            fillOpacity: 0.15,
-            weight: 2,
-            opacity: 0.5,
-            interactive: false,
-        });
-        let controlDiv = L.DomUtil.create("div");
-        let componentFactory = this.componentFactoryResolver.resolveComponentFactory(GpsLocationMarkerPopupComponent);
-        let componentRef = componentFactory.create(this.injector, [], controlDiv);
-        componentRef.instance.setMarker(this.locationMarker);
-        componentRef.instance.angularBinding(componentRef.hostView);
-        this.locationMarker.bindPopup(controlDiv);
-        this.mapService.map.addLayer(this.accuracyCircle);
-        this.mapService.map.addLayer(this.locationMarker);
-
-        this.mapService.map.flyTo(latLng);
+        this.locationCoordinate.x = position.coords.longitude;
+        this.locationCoordinate.y = position.coords.latitude;
+        this.locationCoordinate.radius = position.coords.accuracy;
+        if (this.isFollowing) {
+            this.setLocation();
+        }
+        // HM TODO: accuracy circle? color: #136AEC, fill: #136AE
     }
 
     private disableGeoLocation() {
@@ -228,13 +207,15 @@ export class LocationComponent extends BaseMapComponent {
             this.toggleRecording();
         }
         this.geoLocationService.disable();
-        if (this.locationMarker != null) {
-            this.mapService.map.removeLayer(this.locationMarker);
-            this.locationMarker = null;
+        if (this.locationCoordinate != null) {
+            this.locationCoordinate = null;
         }
-        if (this.accuracyCircle != null) {
-            this.mapService.map.removeLayer(this.accuracyCircle);
-            this.accuracyCircle = null;
-        }
+    }
+
+    private setLocation() {
+        this.ngRedux.dispatch(new SetLocationAction({
+            longitude: this.locationCoordinate.x,
+            latitude: this.locationCoordinate.y
+        }));
     }
 }

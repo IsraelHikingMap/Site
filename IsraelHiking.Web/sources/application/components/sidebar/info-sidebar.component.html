@@ -35,11 +35,13 @@
                 <p>{{resources.legendEmpty}}</p>
             </div>
             <mat-accordion>
-                <mat-expansion-panel *ngFor="let section of legendSections" [id]="section.id">
+                <mat-expansion-panel *ngFor="let section of legendSections" [id]="section.id" (opened)="openSection(section)">
                     <mat-expansion-panel-header [ngx-scroll-to]="section.id">
                         {{section.title}}
                     </mat-expansion-panel-header>
-                    <legend-item *ngFor="let item of section.items" [item]="item"></legend-item>
+                    <div *ngIf="isSectionOpen(section)">
+                        <legend-item *ngFor="let item of section.items" [item]="item"></legend-item>
+                    </div>
                 </mat-expansion-panel>
             </mat-accordion>
         </mat-tab>

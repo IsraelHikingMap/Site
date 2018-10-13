@@ -3,7 +3,7 @@ import * as L from "leaflet";
 import * as esri from "esri-leaflet";
 import "esri-leaflet-renderers";
 
-import * as Common from "../common/IsraelHiking";
+import { LayerData } from "../models/models";
 
 @Injectable()
 export class MapLayersFactory {
@@ -14,7 +14,7 @@ export class MapLayersFactory {
     private static readonly MOBILE_ATTRIBUTION = `<a href="https://github.com/IsraelHikingMap/Site/wiki/Attribution" target="_blank">©</a>`;
 
 
-    public static createLayer(layerData: Common.LayerData, attribution?: string, zIndex?: number): L.Layer {
+    public static createLayer(layerData: LayerData, attribution?: string, zIndex?: number): L.Layer {
         if (layerData.address.toLowerCase().indexOf("{x}") !== -1) {
             let layer = L.tileLayer(layerData.address, MapLayersFactory.createOptionsFromLayerData(layerData, attribution));
             if (zIndex) {
@@ -33,7 +33,7 @@ export class MapLayersFactory {
         }
     }
 
-    private static createOptionsFromLayerData = (layerData: Common.LayerData, attribution?: string): L.TileLayerOptions => {
+    private static createOptionsFromLayerData = (layerData: LayerData, attribution?: string): L.TileLayerOptions => {
         let maxNativeZoom = (layerData.maxZoom == null) ? MapLayersFactory.MAX_NATIVE_ZOOM : layerData.maxZoom;
         return {
             minZoom: (layerData.minZoom == null) ? MapLayersFactory.MIN_ZOOM : layerData.minZoom,
@@ -44,7 +44,7 @@ export class MapLayersFactory {
         } as L.TileLayerOptions;
     }
 
-    private static createEsriLayerOptions(layerData: Common.LayerData, attribution?: string) {
+    private static createEsriLayerOptions(layerData: LayerData, attribution?: string) {
         let options = MapLayersFactory.createOptionsFromLayerData(layerData, attribution);
         options.url = layerData.address;
         options.style = () => {

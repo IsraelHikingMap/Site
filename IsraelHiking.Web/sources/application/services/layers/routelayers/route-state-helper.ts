@@ -18,7 +18,7 @@ export class RouteStateHelper {
         marker.off("dblclick");
         marker.off("popupopen");
         marker.off("popupclose");
-        context.mapService.map.removeLayer(marker);
+        //context.mapService.map.removeLayer(marker);
     }
 
     public static removeLayersFromMap(context: IRouteLayer) {
@@ -26,7 +26,7 @@ export class RouteStateHelper {
             RouteStateHelper.destroyMarker(segment.routePointMarker, context);
             segment.routePointMarker = null;
             if (segment.polyline != null) {
-                context.mapService.map.removeLayer(segment.polyline);
+                //context.mapService.map.removeLayer(segment.polyline);
                 segment.polyline = null;
             }
         }
@@ -50,7 +50,7 @@ export class RouteStateHelper {
                 clickable: false,
                 riseOnHover: false,
                 icon: IconsService.createRoundIcon("green")
-            }).addTo(context.mapService.map);
+            });//.addTo(context.mapService.map);
         if (context.route.segments[0].routePointMarker != null) {
             RouteStateHelper.destroyMarker(context.route.segments[0].routePointMarker, context);
         }
@@ -63,7 +63,7 @@ export class RouteStateHelper {
                 clickable: false,
                 riseOnHover: false,
                 icon: IconsService.createRoundIcon("red")
-            }).addTo(context.mapService.map);
+            });//.addTo(context.mapService.map);
         if (context.getLastSegment().routePointMarker != null) {
             RouteStateHelper.destroyMarker(context.getLastSegment().routePointMarker, context);
         }

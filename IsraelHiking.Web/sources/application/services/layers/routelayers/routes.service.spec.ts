@@ -3,7 +3,7 @@ import * as L from "leaflet";
 import { RoutesService } from "./routes.service";
 import { MapServiceMockCreator } from "../../map.service.spec";
 import { IRouteLayer, IRoute, IRouteSegment, IMarkerWithData } from "./iroute.layer";
-import * as Common from "../../../common/IsraelHiking";
+import { LatLngAlt, ILatLngTime } from "../../../models/models";
 
 describe("RoutesService", () => {
     let routesService: RoutesService;
@@ -111,10 +111,10 @@ describe("RoutesService", () => {
     });
 
     it("Should split a route", () => {
-        let latLng1 = L.latLng([0, 0]) as Common.ILatLngTime;
-        let latLng2 = L.latLng([0.1, 0.1]) as Common.ILatLngTime;
-        let segment1 = { latlngs: [latLng1, latLng1], routePoint: latLng1 as L.LatLng} as IRouteSegment;
-        let segment2 = { latlngs: [latLng1, latLng2], routePoint: latLng2 as L.LatLng} as IRouteSegment;
+        let latLng1 = LatLngAlt([0, 0]) as ILatLngTime;
+        let latLng2 = LatLngAlt([0.1, 0.1]) as ILatLngTime;
+        let segment1 = { latlngs: [latLng1, latLng1], routePoint: latLng1 as LatLngAlt} as IRouteSegment;
+        let segment2 = { latlngs: [latLng1, latLng2], routePoint: latLng2 as LatLngAlt} as IRouteSegment;
         initialRouteLayer.setHiddenState = () => { };
         initialRouteLayer.raiseDataChanged = () => { };
         initialRouteLayer.getLastLatLng = () => latLng2;
@@ -127,10 +127,10 @@ describe("RoutesService", () => {
     });
 
     it("Should merge the selected route as the first route", () => {
-        let latLng1 = L.latLng([0, 0]) as Common.ILatLngTime;
-        let latLng2 = L.latLng([0.1, 0.1]) as Common.ILatLngTime;
-        let segment1 = { latlngs: [latLng1, latLng1], routePoint: latLng1 as L.LatLng} as IRouteSegment;
-        let segment2 = { latlngs: [latLng1, latLng2], routePoint: latLng2 as L.LatLng} as IRouteSegment;
+        let latLng1 = LatLngAlt([0, 0]) as ILatLngTime;
+        let latLng2 = LatLngAlt([0.1, 0.1]) as ILatLngTime;
+        let segment1 = { latlngs: [latLng1, latLng1], routePoint: latLng1 as LatLngAlt} as IRouteSegment;
+        let segment2 = { latlngs: [latLng1, latLng2], routePoint: latLng2 as LatLngAlt} as IRouteSegment;
         initialRouteLayer.setHiddenState = () => { };
         initialRouteLayer.raiseDataChanged = () => { };
         initialRouteLayer.getLastLatLng = () => latLng2;
@@ -144,7 +144,7 @@ describe("RoutesService", () => {
                     name: "name2"
                 },
                 segments: [
-                    { latlngs: [latLng2, latLng1], routePoint: latLng1 as L.LatLng} as IRouteSegment
+                    { latlngs: [latLng2, latLng1], routePoint: latLng1 as LatLngAlt} as IRouteSegment
                 ]
             },
             getLastLatLng: () => latLng1,
@@ -156,12 +156,12 @@ describe("RoutesService", () => {
     });
 
     it("Should merge the selected route as the last route with markers", () => {
-        let latLng1 = L.latLng([0, 0]);
-        let latLng2 = L.latLng([0.1, 0.1]);
-        let latLng3 = L.latLng([0.2, 0.2]);
-        let segment1 = { latlngs: [latLng1, latLng1] as Common.ILatLngTime[], routePoint: latLng1 } as IRouteSegment;
-        let segment2 = { latlngs: [latLng1, latLng2] as Common.ILatLngTime[], routePoint: latLng2 } as IRouteSegment;
-        initialRouteLayer.getLastLatLng = () => latLng2 as Common.ILatLngTime;
+        let latLng1 = LatLngAlt([0, 0]);
+        let latLng2 = LatLngAlt([0.1, 0.1]);
+        let latLng3 = LatLngAlt([0.2, 0.2]);
+        let segment1 = { latlngs: [latLng1, latLng1] as ILatLngTime[], routePoint: latLng1 } as IRouteSegment;
+        let segment2 = { latlngs: [latLng1, latLng2] as ILatLngTime[], routePoint: latLng2 } as IRouteSegment;
+        initialRouteLayer.getLastLatLng = () => latLng2 as ILatLngTime;
         initialRouteLayer.route.segments = [segment1, segment2];
         initialRouteLayer.route.markers = [{ latlng: latLng1 } as IMarkerWithData];
         initialRouteLayer.reverse = () => {

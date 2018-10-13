@@ -3,17 +3,13 @@ import * as _ from "lodash";
 
 import { RouteStateEditBase } from "./route-state-edit-base";
 import { IRouteLayer } from "./iroute.layer";
-import { RouteStateName } from "./iroute-state";
-import { HoverHandlerState } from "./hover-handler-base";
-import { HoverHandlerPoi } from "./hover-handler-poi";
 import { RouteStateHelper } from "./route-state-helper";
 import { RouteStatePoiHelper } from "./route-state-poi-helper";
-import * as Common from "../../../common/IsraelHiking";
+import { IMarkerWithTitle, RouteStateName } from "../../../models/models";
 
 export class RouteStateEditPoi extends RouteStateEditBase {
     constructor(context: IRouteLayer) {
         super(context);
-        this.hoverHandler = new HoverHandlerPoi(context);
         this.initialize();
     }
 
@@ -36,22 +32,22 @@ export class RouteStateEditPoi extends RouteStateEditBase {
         return "Poi";
     }
 
-    private setMarkerHoverEvents(marker: Common.IMarkerWithTitle) {
+    private setMarkerHoverEvents(marker: IMarkerWithTitle) {
         marker.on("dragstart", () => {
-            this.hoverHandler.setState(HoverHandlerState.DRAGGING);
+            //this.hoverHandler.setState(HoverHandlerState.DRAGGING);
         });
         marker.on("dragend", () => {
-            this.hoverHandler.setState(HoverHandlerState.NONE);
+            //this.hoverHandler.setState(HoverHandlerState.NONE);
         });
         marker.on("mouseover", () => {
-            if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
-                this.hoverHandler.setState(HoverHandlerState.ON_MARKER);
-            }
+            //if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
+            //    this.hoverHandler.setState(HoverHandlerState.ON_MARKER);
+            //}
         });
         marker.on("mouseout", () => {
-            if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
-                this.hoverHandler.setState(HoverHandlerState.NONE);
-            }
+            //if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
+            //    this.hoverHandler.setState(HoverHandlerState.NONE);
+            //}
         });
     }
 

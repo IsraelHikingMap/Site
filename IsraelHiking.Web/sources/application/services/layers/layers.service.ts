@@ -2,20 +2,15 @@
 import { HttpClient } from "@angular/common/http";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
-import * as L from "leaflet";
 
-import { MapService } from "../map.service";
 import { ResourcesService } from "../resources.service";
 import { OsmUserService } from "../osm-user.service";
-import { PoiService } from "../poi.service";
 import { ToastService } from "../toast.service";
-import { CategoriesLayerFactory } from "./categories-layers.factory";
 import { MapLayersFactory } from "../map-layers.factory";
-import { Urls } from "../../common/Urls";
-import * as Common from "../../common/IsraelHiking";
+import { Urls } from "../../urls";
+import { DataContainer, LayerData } from "../../models/models";
 
-export interface ILayer extends Common.LayerData {
-    layer: L.Layer;
+export interface ILayer extends LayerData {
     isEditable: boolean;
     id: string;
 }
@@ -28,7 +23,7 @@ export interface IOverlay extends ILayer {
     visible: boolean;
 }
 
-interface IUserLayer extends Common.LayerData {
+interface IUserLayer extends LayerData {
     isOverlay: boolean;
     osmUserId: string;
     id: string;
@@ -64,32 +59,22 @@ export class LayersService {
     @LocalStorage()
     private selectedBaseLayerKey: string = LayersService.ISRAEL_HIKING_MAP;
 
-    private overlayZIndex: any;
-
     public baseLayers: IBaseLayer[];
     public overlays: IOverlay[];
     public selectedBaseLayer: IBaseLayer;
 
-    constructor(private readonly mapService: MapService,
-        private readonly resourcesService: ResourcesService,
+    public readOnlyDataContainer: DataContainer;
+
+    constructor(private readonly resourcesService: ResourcesService,
         private readonly osmUserService: OsmUserService,
         private readonly httpClient: HttpClient,
-        private readonly toastService: ToastService,
-        categoriesLayersFactory: CategoriesLayerFactory,
-        poiService: PoiService,
+        private readonly toastService: ToastService
     ) {
         this.selectedBaseLayer = null;
         this.baseLayers = [];
         this.overlays = [];
-        this.overlayZIndex = 10;
+        this.readOnlyDataContainer = null;
         this.initializeDefaultLayers();
-
-        for (let categoryType of poiService.getCategoriesTypes()) {
-            let layer = categoriesLayersFactory.get(categoryType);
-            if (layer.isVisible()) {
-                this.mapService.map.addLayer(layer);
-            }
-        }
     }
 
     private initializeDefaultLayers() {
@@ -131,7 +116,7 @@ export class LayersService {
         this.selectBaseLayerAccordingToStorage(false);
     }
 
-    public addBaseLayer = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
+    public addBaseLayer = (layerData: LayerData, attribution?: string, position?: number): IBaseLayer => {
         let layer = _.find(this.baseLayers, (layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
         if (layer != null) {
             return layer; // layer exists
@@ -211,9 +196,8 @@ export class LayersService {
         }
     }
 
-    private addBaseLayerFromData = (layerData: Common.LayerData, attribution?: string, position?: number): IBaseLayer => {
+    private addBaseLayerFromData = (layerData: LayerData, attribution?: string, position?: number): IBaseLayer => {
         let layer = { ...layerData } as IBaseLayer;
-        layer.layer = MapLayersFactory.createLayer(layerData, attribution);
         if (position !== undefined) {
             this.baseLayers.splice(position, 0, layer);
         } else {
@@ -222,7 +206,7 @@ export class LayersService {
         return layer;
     }
 
-    public addOverlay = (layerData: Common.LayerData, attribution?: string): IOverlay => {
+    public addOverlay = (layerData: LayerData, attribution?: string): IOverlay => {
         let overlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
         if (overlay != null) {
             return overlay; // overlay exists
@@ -232,9 +216,8 @@ export class LayersService {
         return overlay;
     }
 
-    private addOverlayFromData = (layerData: Common.LayerData, attribution?: string): IOverlay => {
+    private addOverlayFromData = (layerData: LayerData, attribution?: string): IOverlay => {
         let overlay = { ...layerData } as IOverlay;
-        overlay.layer = MapLayersFactory.createLayer(layerData, attribution, this.overlayZIndex++);
         overlay.visible = false;
         overlay.isEditable = true;
         this.overlays.push(overlay);
@@ -252,7 +235,7 @@ export class LayersService {
         return _.find(layers, l => this.compareKeys(l.key, newName)) == null;
     }
 
-    public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: Common.LayerData): void => {
+    public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: LayerData): void => {
         let position = this.baseLayers.indexOf(_.find(this.baseLayers, bl => bl.key === oldLayer.key));
         this.removeBaseLayerNoStore(oldLayer);
         let layer = this.addBaseLayerFromData(newLayer, null, position);
@@ -261,7 +244,7 @@ export class LayersService {
         this.updateUserLayerInStorage(false, layer);
     }
 
-    public updateOverlay = (oldLayer: IOverlay, newLayer: Common.LayerData): void => {
+    public updateOverlay = (oldLayer: IOverlay, newLayer: LayerData): void => {
         this.removeOverlayNoStore(oldLayer);
         let overlay = this.addOverlayFromData(newLayer);
         this.toggleOverlay(overlay);
@@ -284,7 +267,6 @@ export class LayersService {
         this.selectBaseLayer(this.baseLayers[index]);
         _.remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
         if (this.baseLayers.length === 0) {
-            this.mapService.map.removeLayer(baseLayer.layer);
             this.selectedBaseLayer = null;
         }
     }
@@ -307,13 +289,11 @@ export class LayersService {
         }
         let previousLayer = this.selectedBaseLayer;
         let newSelectedLayer = _.find(this.baseLayers, (layer) => layer.key === baseLayer.key);
-        this.mapService.map.addLayer(newSelectedLayer.layer);
         newSelectedLayer.selected = true;
         this.selectedBaseLayer = newSelectedLayer;
 
         this.selectedBaseLayerKey = this.selectedBaseLayer.key;
         if (previousLayer) {
-            this.mapService.map.removeLayer(previousLayer.layer);
             previousLayer.selected = false;
         }
     }
@@ -322,7 +302,6 @@ export class LayersService {
         let overlayFromArray = _.find(this.overlays, (overlayToFind) => overlayToFind.key === overlay.key);
         overlayFromArray.visible = !overlayFromArray.visible;
         if (overlayFromArray.visible) {
-            this.mapService.map.addLayer(overlay.layer);
             if (this.activeOverlayKeys.indexOf(overlay.key) === -1) {
                 this.activeOverlayKeys.push(overlay.key);
             }
@@ -333,7 +312,6 @@ export class LayersService {
                 this.toastService.warning(this.resourcesService.baseLayerAndOverlayAreOverlapping);
             }
         } else {
-            this.mapService.map.removeLayer(overlay.layer);
             if (this.activeOverlayKeys.indexOf(overlay.key) !== -1) {
                 this.activeOverlayKeys = this.activeOverlayKeys.filter((keyToFind) => keyToFind !== overlay.key);
             }
@@ -350,7 +328,6 @@ export class LayersService {
             } else {
                 this.selectedBaseLayer = this.baseLayers[0];
                 this.baseLayers[0].selected = true;
-                this.mapService.map.addLayer(this.selectedBaseLayer.layer);
             }
         }
     }
@@ -374,7 +351,7 @@ export class LayersService {
         this.osmUserService.loginStatusChanged.subscribe(() => this.getUserLayers());
     }
 
-    public addExternalBaseLayer = (layerData: Common.LayerData) => {
+    public addExternalBaseLayer = (layerData: LayerData) => {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
             return;
         }
@@ -411,7 +388,7 @@ export class LayersService {
         this.selectBaseLayer(newLayer);
     }
 
-    public addExternalOverlays = (overlays: Common.LayerData[]) => {
+    public addExternalOverlays = (overlays: LayerData[]) => {
         if (!overlays || overlays.length === 0) {
             return;
         }
@@ -423,7 +400,7 @@ export class LayersService {
         }
     }
 
-    private unique(layers: Common.LayerData[]): Common.LayerData[] {
+    private unique(layers: LayerData[]): LayerData[] {
         let layersMap = {};
         return layers.reverse().filter((layer) => {
             if (layersMap[layer.key.trim().toLowerCase()]) {
@@ -434,28 +411,28 @@ export class LayersService {
         });
     }
 
-    public getData = (): Common.DataContainer => {
+    public getData = (): DataContainer => {
         let container = {
             baseLayer: null,
             overlays: []
-        } as Common.DataContainer;
+        } as DataContainer;
 
         container.baseLayer = this.extractDataFromLayer(this.selectedBaseLayer);
-        let visibaleOverlays = this.overlays.filter(overlay => overlay.visible);
-        for (let overlayIndex = 0; overlayIndex < visibaleOverlays.length; overlayIndex++) {
-            container.overlays.push(this.extractDataFromLayer(visibaleOverlays[overlayIndex]));
+        let visibleOverlays = this.overlays.filter(overlay => overlay.visible);
+        for (let overlayIndex = 0; overlayIndex < visibleOverlays.length; overlayIndex++) {
+            container.overlays.push(this.extractDataFromLayer(visibleOverlays[overlayIndex]));
         }
         return container;
     }
 
-    private extractDataFromLayer = (layer: ILayer): Common.LayerData => {
+    private extractDataFromLayer = (layer: ILayer): LayerData => {
         return {
             key: layer.key,
             address: layer.address,
             minZoom: layer.minZoom,
             maxZoom: layer.maxZoom,
             opacity: layer.opacity || 1.0
-        } as Common.LayerData;
+        } as LayerData;
     }
 
     private onLanguageChange = () => {
@@ -471,10 +448,6 @@ export class LayersService {
 
     private replaceBaseLayerAddress = (layer: IBaseLayer, newAddress: string, attribution: string, position: number) => {
         _.remove(this.baseLayers, (layerToRemove) => layer.key === layerToRemove.key);
-        if (this.selectedBaseLayer != null && this.selectedBaseLayer.key === layer.key) {
-            this.mapService.map.removeLayer(layer.layer);
-        }
-        layer.layer = null;
         layer.address = newAddress;
         layer.selected = false;
         let newLayer = this.addBaseLayerFromData(layer, attribution, position);

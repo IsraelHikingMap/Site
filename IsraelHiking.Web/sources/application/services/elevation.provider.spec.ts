@@ -28,7 +28,7 @@ describe("ElevationProvider", () => {
     it("Should update height data", inject([ElevationProvider, HttpTestingController],
         async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController) => {
 
-        let latlngs = [L.latLng(0, 0, 0)];
+        let latlngs = [LatLngAlt(0, 0, 0)];
 
         let promise = elevationProvider.updateHeights(latlngs).then((lls) => {
             expect(lls[0].alt).toBe(1);
@@ -41,7 +41,7 @@ describe("ElevationProvider", () => {
     it("Should not call provider bacause all coordinates has elevation", inject([ElevationProvider],
         async (elevationProvider: ElevationProvider) => {
 
-        let latlngs = [L.latLng(0, 0, 1)];
+        let latlngs = [LatLngAlt(0, 0, 1)];
 
         elevationProvider.updateHeights(latlngs).then((lls => {
             expect(lls[0].alt).toBe(1);
@@ -51,7 +51,7 @@ describe("ElevationProvider", () => {
     it("Should raise toast when error occurs", inject([ElevationProvider, HttpTestingController, ToastService],
         async (elevationProvider: ElevationProvider, mockBackend: HttpTestingController, toastService: ToastService) => {
 
-        let latlngs = [L.latLng(0, 0, 0)];
+        let latlngs = [LatLngAlt(0, 0, 0)];
         spyOn(toastService, "error");
 
         let promise = elevationProvider.updateHeights(latlngs).then(() => fail(), () => {

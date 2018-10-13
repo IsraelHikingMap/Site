@@ -46,7 +46,7 @@ describe("SnappingService", () => {
 
         mapServiceMock.mapService.map.setZoom(12); // this fires moveend
 
-        let snap = snappingService.snapToRoute(L.latLng(0, 0));
+        let snap = snappingService.snapToRoute(LatLngAlt(0, 0));
         expect(snap.polyline).toBeNull();
     }));
 
@@ -65,12 +65,12 @@ describe("SnappingService", () => {
             } as GeoJSON.Feature<GeoJSON.LineString>
         ];
 
-        mapServiceMock.mapService.map.setView(L.latLng(0, 0), 14);
+        mapServiceMock.mapService.map.setView(LatLngAlt(0, 0), 14);
         flushMicrotasks();
         mockBackend.match(() => true)[0].flush(features);
         tick();
 
-        let snap = snappingService.snapToRoute(L.latLng(2, 1));
+        let snap = snappingService.snapToRoute(LatLngAlt(2, 1));
         expect(snap.polyline).not.toBeNull();
     })));
 
@@ -89,12 +89,12 @@ describe("SnappingService", () => {
             } as GeoJSON.Feature<GeoJSON.Polygon>
         ];
 
-        mapServiceMock.mapService.map.setView(L.latLng(1, 1), 14);
+        mapServiceMock.mapService.map.setView(LatLngAlt(1, 1), 14);
         flushMicrotasks();
         mockBackend.match(() => true)[0].flush(features);
         tick();
 
-        let snap = snappingService.snapToRoute(L.latLng(2, 1));
+        let snap = snappingService.snapToRoute(LatLngAlt(2, 1));
         expect(snap.polyline).not.toBeNull();
     })));
 
@@ -114,12 +114,12 @@ describe("SnappingService", () => {
             } as GeoJSON.Feature<GeoJSON.Point>
         ];
 
-        mapServiceMock.mapService.map.setView(L.latLng(0, 0), 14);
+        mapServiceMock.mapService.map.setView(LatLngAlt(0, 0), 14);
         flushMicrotasks();
         mockBackend.match(() => true)[0].flush(features);
         tick();
 
-        let snap = snappingService.snapToPoint(L.latLng(2, 1));
+        let snap = snappingService.snapToPoint(LatLngAlt(2, 1));
         expect(snap.markerData).not.toBeNull();
     })));
 
@@ -128,21 +128,21 @@ describe("SnappingService", () => {
 
         snappingService.enable(true);
 
-        mapServiceMock.mapService.map.setView(L.latLng(2, 2), 14);
+        mapServiceMock.mapService.map.setView(LatLngAlt(2, 2), 14);
         flushMicrotasks();
         tick();
         mockBackend.match(() => true)[0].flush(null, { status: 500, statusText: "Server Error" });
 
-        let snap = snappingService.snapToRoute(L.latLng(0, 0));
+        let snap = snappingService.snapToRoute(LatLngAlt(0, 0));
         expect(snap.polyline).toBeNull();
     })));
 
 
     it("Should snap to its own layers", inject([SnappingService], (snappingService: SnappingService) => {
         snappingService.enable(true);
-        let polylines = [L.polyline([L.latLng(1, 1), L.latLng(1, 2)])];
+        let polylines = [L.polyline([LatLngAlt(1, 1), LatLngAlt(1, 2)])];
 
-        let snap = snappingService.snapToRoute(L.latLng(1.00001, 1),
+        let snap = snappingService.snapToRoute(LatLngAlt(1.00001, 1),
             {
                 polylines: polylines,
                 sensitivity: 10
@@ -154,9 +154,9 @@ describe("SnappingService", () => {
 
     it("Should snap to closest point", inject([SnappingService], (snappingService: SnappingService) => {
         snappingService.enable(true);
-        let polylines = [L.polyline([L.latLng(1, 1), L.latLng(1, 1.00001), L.latLng(1, 2)])];
+        let polylines = [L.polyline([LatLngAlt(1, 1), LatLngAlt(1, 1.00001), LatLngAlt(1, 2)])];
 
-        let snap = snappingService.snapToRoute(L.latLng(1, 1.0001),
+        let snap = snappingService.snapToRoute(LatLngAlt(1, 1.0001),
             {
                 polylines: polylines,
                 sensitivity: 10
@@ -169,9 +169,9 @@ describe("SnappingService", () => {
         inject([SnappingService], (snappingService: SnappingService) => {
 
         snappingService.enable(true);
-        let polylines = [L.polyline([L.latLng(1, 1)]), L.polyline([L.latLng(1, 1), L.latLng(1, 2)])];
+        let polylines = [L.polyline([LatLngAlt(1, 1)]), L.polyline([LatLngAlt(1, 1), LatLngAlt(1, 2)])];
 
-        let snap = snappingService.snapToRoute(L.latLng(1.00001, 1),
+        let snap = snappingService.snapToRoute(LatLngAlt(1.00001, 1),
             {
                 polylines: polylines,
                 sensitivity: 10
@@ -182,9 +182,9 @@ describe("SnappingService", () => {
     }));
 
     it("Should snap to a given layer", inject([SnappingService], (snappingService: SnappingService) => {
-        let polylines = [L.polyline([L.latLng(1, 1), L.latLng(1, 2)])];
+        let polylines = [L.polyline([LatLngAlt(1, 1), LatLngAlt(1, 2)])];
 
-        let snap = snappingService.snapToRoute(L.latLng(1.01, 1),
+        let snap = snappingService.snapToRoute(LatLngAlt(1.01, 1),
             {
                 polylines: polylines,
                 sensitivity: 1000
@@ -195,15 +195,15 @@ describe("SnappingService", () => {
     }));
 
     it("Should not snap when there are no layers", inject([SnappingService], (snappingService: SnappingService) => {
-        let snap = snappingService.snapToRoute(L.latLng(10, 10));
+        let snap = snappingService.snapToRoute(LatLngAlt(10, 10));
 
         expect(snap.polyline).toBeNull();
     }));
 
     it("Should not snap when point is too far", inject([SnappingService], (snappingService: SnappingService) => {
-        let polylines = [L.polyline([L.latLng(1, 1), L.latLng(2, 2)])];
+        let polylines = [L.polyline([LatLngAlt(1, 1), LatLngAlt(2, 2)])];
 
-        let snap = snappingService.snapToRoute(L.latLng(10, 10),
+        let snap = snappingService.snapToRoute(LatLngAlt(10, 10),
             {
                 polylines: polylines,
                 sensitivity: 10

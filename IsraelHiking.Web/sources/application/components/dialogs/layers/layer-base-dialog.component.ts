@@ -1,8 +1,6 @@
-import { AfterViewInit } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { select } from "@angular-redux/store";
 import { Observable } from "rxjs";
-import * as L from "leaflet";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
@@ -10,10 +8,9 @@ import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers/layers.service";
 import { MapLayersFactory } from "../../../services/map-layers.factory";
 import { BaseMapComponent } from "../../base-map.component";
-import { IApplicationState } from "../../../state/models/application-state";
-import * as Common from "../../../common/IsraelHiking";
+import { LayerData, ApplicationState } from "../../../models/models";
 
-export abstract class LayerBaseDialogComponent extends BaseMapComponent implements AfterViewInit {
+export abstract class LayerBaseDialogComponent extends BaseMapComponent {
     public title: string;
     public key: string;
     public address: string;
@@ -23,11 +20,11 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
     public isNew: boolean;
     public isOverlay: boolean;
 
-    @select((state: IApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
+    @select((state: ApplicationState) => state.location)
+    public location;
 
-    private mapPreview: L.Map;
-    private previewLayer: L.Layer;
+    @select((state: ApplicationState) => state.configuration.isAdvanced)
+    public isAdvanced: Observable<boolean>;
 
     protected constructor(resources: ResourcesService,
         protected readonly mapService: MapService,
@@ -41,42 +38,15 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
         this.key = "";
         this.address = "";
         this.opacity = 1.0;
-
-        this.previewLayer = null;
-    }
-
-    public ngAfterViewInit(): void {
-        this.mapPreview = L.map("mapPreview",
-            {
-                center: this.mapService.map.getCenter(),
-                zoomControl: false,
-                minZoom: +this.minZoom,
-                maxZoom: +this.maxZoom,
-                zoom: (+this.maxZoom + +this.minZoom) / 2
-            });
-        this.refreshPreviewLayer();
     }
 
     public onAddressChanged(address: string) {
         this.address = address.trim();
-        this.refreshPreviewLayer();
         this.updateLayerKeyIfPossible();
     }
 
     public onOpacityChanged(opacity: number) {
         this.opacity = opacity;
-        this.refreshPreviewLayer();
-    }
-
-    protected refreshPreviewLayer() {
-        if (this.previewLayer != null) {
-            this.mapPreview.removeLayer(this.previewLayer);
-        }
-        this.previewLayer = MapLayersFactory.createLayer({
-            address: this.getTilesAddress(),
-            opacity: this.opacity
-        } as Common.LayerData);
-        this.mapPreview.addLayer(this.previewLayer);
     }
 
     public saveLayer = (e: Event) => {
@@ -87,12 +57,12 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
             minZoom: +this.minZoom, // fix issue with variable saved as string...
             maxZoom: +this.maxZoom,
             opacity: this.opacity
-        } as Common.LayerData;
+        } as LayerData;
         this.internalSave(layerData);
         this.suppressEvents(e);
     }
 
-    protected abstract internalSave(layerData: Common.LayerData): void;
+    protected abstract internalSave(layerData: LayerData): void;
 
     public removeLayer(e: Event) { } // should be derived if needed.
 
@@ -106,7 +76,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent implemen
         }
         try {
             let address = `${this.getTilesAddress()}/?f=json`;
-            address = address.replace("//?f", "/?f"); // incase the address the user set ends with "/".
+            address = address.replace("//?f", "/?f"); // in case the address the user set ends with "/".
             let response = await this.http.get(address).toPromise() as any;
             if (response && response.name) {
                 this.key = response.name;

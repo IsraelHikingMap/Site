@@ -1,10 +1,14 @@
 ﻿import { Component, ViewEncapsulation } from "@angular/core";
+import { NgRedux } from "@angular-redux/store"; 
+
 import { ResourcesService } from "../../../services/resources.service";
-import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
-import { RoutesService } from "../../../services/layers/routelayers/routes.service";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { RouteBaseDialogComponent } from "./route-base-dialog.component";
+import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
+import { ApplicationState } from "../../../models/models";
+import { AddRouteAction } from "../../../reducres/routes.reducer";
+import { SetSelectedRouteAction } from "../../../reducres/route-editing-state.reducer";
 
 @Component({
     selector: "route-add-dialog",
@@ -14,20 +18,23 @@ import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 })
 export class RouteAddDialogComponent extends RouteBaseDialogComponent {
     constructor(resources: ResourcesService,
-        mapService: MapService,
-        routesService: RoutesService,
+        selectedRouteService: SelectedRouteService,
         routeLayerFactory: RouteLayerFactory,
-        toastService: ToastService
+        toastService: ToastService,
+        ngRedux: NgRedux<ApplicationState>,
     ) {
-        super(resources, mapService, routesService, routeLayerFactory, toastService);
-        this.routeProperties = routeLayerFactory.createRoute(routesService.createRouteName()).properties;
-        this.pathOptions = this.routeProperties.pathOptions;
+        super(resources, selectedRouteService, routeLayerFactory, toastService, ngRedux);
+        this.routeData = routeLayerFactory.createRouteData(selectedRouteService.createRouteName());
         this.isNew = true;
         this.title = this.resources.addRoute;
     }
 
-    public saveRoute(e: Event) {
-        super.saveRoute(e);
-        this.routesService.addRoute({ properties: this.routeProperties, segments: [], markers: [] });
+    protected saveImplementation() {
+        this.ngRedux.dispatch(new AddRouteAction({
+            routeData: this.routeData
+        }));
+        this.ngRedux.dispatch(new SetSelectedRouteAction({
+            routeId: this.routeData.id
+        }));
     }
 }

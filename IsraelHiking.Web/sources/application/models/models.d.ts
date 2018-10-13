@@ -1,0 +1,19 @@
+﻿export { IBounds } from "./bounds";
+export { ICoordinate } from "./coordinate";
+export { DataContainer } from "./data-container";
+export { LatLngAlt, ILatLngTime } from "./lat-lng";
+export { LayerData } from "./layer-data";
+export { LinkData } from "./link-data";
+export { MarkerData } from "./marker-data";
+export { RouteData, RouteStateName } from "./route-data";
+export { RouteSegmentData, RoutingType } from "./route-segment-data";
+export { ShareUrl } from "./share-url";
+export { Location } from "./location";
+export { ApplicationState } from "./application-state";
+export { Configuration } from "./configuration";
+export { RouteEditingState } from "./route-editing-state";
+
+export interface IMarkerWithTitle extends L.Marker {
+    title: string;
+    identifier: string;
+}

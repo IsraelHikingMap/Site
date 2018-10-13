@@ -1,35 +1,35 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import * as L from "leaflet";
+import { Map } from "openlayers";
 import * as _ from "lodash";
 
-import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
-import { Urls } from "../common/Urls";
-import * as Common from "../common/IsraelHiking";
+import { Urls } from "../urls";
+import { LatLngAlt, MarkerData } from "../models/models";
+import { SpatialService } from "./spatial.service";
 
 
 export interface ISnappingRouteOptions {
-    polylines: L.Polyline[];
+    lines: LatLngAlt[][];
     /**
-     * The sensivitivity of snappings in pixels
+     * The sensitivity of snapping in pixels
      */
     sensitivity: number;
 }
 
 export interface ISnappingBaseResponse {
-    latlng: L.LatLng;
+    latlng: LatLngAlt;
 }
 
 export interface ISnappingRouteResponse extends ISnappingBaseResponse {
-    polyline: L.Polyline;
-    beforeIndex: number;
+    lineIndex: number;
+    line: LatLngAlt[];
 }
 
 export interface ISnappingPointOptions {
-    points: Common.MarkerData[];
+    points: MarkerData[];
     /**
      * The sensivitivity of snappings in pixels
      */
@@ -37,7 +37,7 @@ export interface ISnappingPointOptions {
 }
 
 export interface ISnappingPointResponse extends ISnappingBaseResponse {
-    markerData: Common.MarkerData;
+    markerData: MarkerData;
 }
 
 interface ISnappingRequestQueueItem {
@@ -48,14 +48,14 @@ interface ISnappingRequestQueueItem {
 export class SnappingService {
     private static readonly DEFAULT_SENSITIVITY = 10;
 
-    private highwaySnappings: L.Polyline[];
-    private pointsSnappings: Common.MarkerData[];
+    private highwaySnappings: LatLngAlt[][];
+    private pointsSnappings: MarkerData[];
     private enabled: boolean;
     private requestsQueue: ISnappingRequestQueueItem[];
+    private map: Map;
 
     constructor(private readonly httpClient: HttpClient,
         private readonly resources: ResourcesService,
-        private readonly mapService: MapService,
         private readonly toastService: ToastService,
         private readonly geoJsonParser: GeoJsonParser
     ) {
@@ -64,32 +64,37 @@ export class SnappingService {
         this.pointsSnappings = [];
         this.enabled = false;
         this.requestsQueue = [];
-        this.mapService.map.on("moveend", () => {
-            this.generateSnappings();
-        });
+    }
+
+    public setMap(map: Map) {
+        this.map = map;
+        this.map.on("moveend",
+            () => {
+                this.generateSnappings();
+            });
     }
 
     private generateSnappings = async () => {
-        if (this.mapService.map.getZoom() <= 13 || this.enabled === false) {
+        if (this.map.getView().getZoom() <= 13 || this.enabled === false) {
             this.highwaySnappings.splice(0);
             this.pointsSnappings.splice(0);
             return;
         }
 
-        let bounds = this.mapService.map.getBounds();
+        let bounds = SpatialService.getMapBounds(this.map);
         let boundsString = [
-                bounds.getSouthWest().lat,
-                bounds.getSouthWest().lng,
-                bounds.getNorthEast().lat,
-                bounds.getNorthEast().lng
+                bounds.southWest.lat,
+                bounds.southWest.lng,
+                bounds.northEast.lat,
+                bounds.northEast.lng
             ]
             .join(",");
         this.requestsQueue.push({
             boundsString: boundsString
         } as ISnappingRequestQueueItem);
         let params = new HttpParams()
-            .set("northEast", bounds.getNorthEast().lat + "," + bounds.getNorthEast().lng)
-            .set("southWest", bounds.getSouthWest().lat + "," + bounds.getSouthWest().lng);
+            .set("northEast", bounds.northEast.lat + "," + bounds.southWest.lng)
+            .set("southWest", bounds.northEast.lat + "," + bounds.southWest.lng);
         try {
             let features = await this.httpClient.get(Urls.osm, { params: params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>[];
             let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.boundsString === boundsString);
@@ -103,7 +108,7 @@ export class SnappingService {
                 let latlngsArrays = this.geoJsonParser.toLatLngsArray(feature);
                 for (let latlngsArray of latlngsArrays) {
                     if (latlngsArray.length > 1) {
-                        this.highwaySnappings.push(L.polyline(latlngsArray, { opacity: 0 } as L.PolylineOptions));
+                        this.highwaySnappings.push(latlngsArray);
                     } else {
                         let dataContainer = this.geoJsonParser.toDataContainer({
                                 features: [feature],
@@ -123,48 +128,34 @@ export class SnappingService {
         }
     }
 
-    public snapToRoute = (latlng: L.LatLng, options?: ISnappingRouteOptions): ISnappingRouteResponse => {
+    public snapToRoute = (latlng: LatLngAlt, options?: ISnappingRouteOptions): ISnappingRouteResponse => {
         if (!options) {
             options = {
-                polylines: this.highwaySnappings,
+                lines: this.highwaySnappings,
                 sensitivity: SnappingService.DEFAULT_SENSITIVITY
             } as ISnappingRouteOptions;
         }
         let minDistance = Infinity;
         let response = {
             latlng: latlng,
-            polyline: null
+            line: null
         } as ISnappingRouteResponse;
 
-        for (let polyline of options.polylines) {
-            let latlngs = polyline.getLatLngs() as L.LatLng[];
-            if (latlngs.length <= 1) {
+        let pointInPixels = this.map.getPixelFromCoordinate([latlng.lng, latlng.lat]);
+
+        for (let lineIndex = 0; lineIndex < options.lines.length; lineIndex++) {
+            let line = options.lines[lineIndex];
+            if (line.length <= 1) {
                 continue;
             }
+            let lineInPixels = line.map(l => this.map.getPixelFromCoordinate([l.lng, l.lat]));
+            let distance = SpatialService.getDistanceFromPointToLine(pointInPixels, lineInPixels);
 
-            let snapPoint = this.mapService.map.latLngToLayerPoint(latlng);
-            let prevPoint = this.mapService.map.latLngToLayerPoint(latlngs[0]);
-            let startDistance = snapPoint.distanceTo(prevPoint);
-
-            if (startDistance <= options.sensitivity && startDistance < minDistance) {
-                minDistance = startDistance;
-                response.latlng = latlngs[0];
-                response.polyline = polyline;
-                response.beforeIndex = 0;
-            }
-
-            for (let latlngIndex = 1; latlngIndex < latlngs.length; latlngIndex++) {
-                let currentPoint = this.mapService.map.latLngToLayerPoint(latlngs[latlngIndex]);
-
-                let currentDistance = L.LineUtil.pointToSegmentDistance(snapPoint, prevPoint, currentPoint);
-                if (currentDistance < minDistance && currentDistance <= options.sensitivity) {
-                    minDistance = currentDistance;
-                    let closestPointSegment = L.LineUtil.closestPointOnSegment(snapPoint, prevPoint, currentPoint);
-                    response.latlng = this.mapService.map.layerPointToLatLng(closestPointSegment);
-                    response.polyline = polyline;
-                    response.beforeIndex = latlngIndex - 1;
-                }
-                prevPoint = currentPoint;
+            if (distance <= options.sensitivity && distance < minDistance) {
+                minDistance = distance;
+                response.latlng = line[0];
+                response.line = line;
+                response.lineIndex = lineIndex;
             }
         }
         return response;
@@ -173,7 +164,7 @@ export class SnappingService {
     /**
      * This method will snap to the nearest point. markerData will be null in case there were no points near by.
      */
-    public snapToPoint = (latlng: L.LatLng, options?: ISnappingPointOptions): ISnappingPointResponse => {
+    public snapToPoint = (latlng: LatLngAlt, options?: ISnappingPointOptions): ISnappingPointResponse => {
         let defaultOptions = {
             points: this.pointsSnappings,
             sensitivity: 2 * SnappingService.DEFAULT_SENSITIVITY
@@ -185,14 +176,15 @@ export class SnappingService {
             markerData: null,
             id: null
         } as ISnappingPointResponse;
-        let pointOnScreen = this.mapService.map.latLngToLayerPoint(latlng);
+        let pointOnScreen = this.map.getPixelFromCoordinate([latlng.lng, latlng.lat]);
         for (let markerData of options.points) {
-            let markerPointOnScreen = this.mapService.map.latLngToLayerPoint(markerData.latlng);
-            if (markerPointOnScreen.distanceTo(pointOnScreen) < options.sensitivity && response.markerData == null) {
+            let markerPointOnScreen = this.map.getPixelFromCoordinate([markerData.latlng.lng, markerData.latlng.lat]); //this.mapService.map.latLngToLayerPoint(markerData.latlng);
+            if (SpatialService.getDistanceForCoordinates(markerPointOnScreen, pointOnScreen) < options.sensitivity && response.markerData == null) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
             } else if (response.markerData != null
-                && response.markerData.latlng.distanceTo(latlng) > markerData.latlng.distanceTo(latlng)) {
+                && SpatialService.getDistanceInMeters(response.markerData.latlng, latlng) >
+                SpatialService.getDistanceInMeters(markerData.latlng, latlng)) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
             }
@@ -211,7 +203,7 @@ export class SnappingService {
         return this.enabled;
     }
 
-    public async getClosestPoint(location: L.LatLng): Promise<Common.MarkerData> {
+    public async getClosestPoint(location: LatLngAlt): Promise<MarkerData> {
         let params = new HttpParams()
             .set("location", location.lat + "," + location.lng);
         let feature = await this.httpClient.get(Urls.osmClosest, { params: params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>;

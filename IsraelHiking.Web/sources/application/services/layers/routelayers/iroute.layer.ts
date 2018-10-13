@@ -2,28 +2,38 @@
 import { Subject } from "rxjs";
 import { MatDialog } from "@angular/material";
 
-import { RouteStateName } from "./iroute-state";
 import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { SnappingService, ISnappingRouteResponse, ISnappingPointResponse } from "../../snapping.service";
 import { GeoLocationService } from "../../geo-location.service";
 import { ElevationProvider } from "../../elevation.provider";
-import * as Common from "../../../common/IsraelHiking";
+import {
+    LatLngAlt,
+    RouteSegmentData,
+    MarkerData,
+    RoutingType,
+    ILatLngTime,
+    RouteData,
+    IMarkerWithTitle,
+    IBounds,
+    RouteStateName
+} from
+    "../../../models/models";
 
-export interface IRouteSegment extends Common.RouteSegmentData {
+export interface IRouteSegment extends RouteSegmentData {
     routePointMarker: L.Marker;
     polyline: L.Polyline;
 }
 
-export interface IMarkerWithData extends Common.MarkerData {
-    marker: Common.IMarkerWithTitle;
+export interface IMarkerWithData extends MarkerData {
+    marker: IMarkerWithTitle;
 }
 
 export interface IRouteProperties {
     name: string;
     description: string;
     pathOptions: L.PathOptions;
-    currentRoutingType: Common.RoutingType;
+    currentRoutingType: RoutingType;
     isRoutingPerPoint: boolean;
     isVisible: boolean;
     isRecording: boolean;
@@ -36,7 +46,7 @@ export interface IRoute {
 }
 
 export interface ISnappingForRouteResponse {
-    latlng: L.LatLng;
+    latlng: LatLngAlt;
     isSnapToSelfRoute: boolean;
 }
 
@@ -52,9 +62,9 @@ export interface IRouteLayer {
     geoLocationService: GeoLocationService;
 
     dataChanged: Subject<any>;
-    polylineHovered: Subject<L.LatLng>;
+    polylineHovered: Subject<LatLngAlt>;
 
-    setRoutingType(routingType: Common.RoutingType): void;
+    setRoutingType(routingType: RoutingType): void;
     setRouteProperties(properties: IRouteProperties): void;
     reverse(): void;
     undo(): void;
@@ -62,17 +72,17 @@ export interface IRouteLayer {
     clear(): void;
     getStateName(): RouteStateName;
     setState(stateName: RouteStateName): void;
-    snapToSelf(latlng: L.LatLng): ISnappingRouteResponse;
-    getSnappingForRoute(latlng: L.LatLng, isSnapToSelf?: boolean): ISnappingForRouteResponse;
-    getSnappingForPoint(latlng: L.LatLng): ISnappingPointResponse;
+    snapToSelf(latlng: LatLngAlt): ISnappingRouteResponse;
+    getSnappingForRoute(latlng: LatLngAlt, isSnapToSelf?: boolean): ISnappingForRouteResponse;
+    getSnappingForPoint(latlng: LatLngAlt): ISnappingPointResponse;
     raiseDataChanged(): void;
-    getData(): Common.RouteData;
-    setData(data: Common.RouteData): void;
-    getBounds(): L.LatLngBounds;
+    getData(): RouteData;
+    setData(data: RouteData): void;
+    getBounds(): IBounds;
     makeAllPointsEditable(): void;
 
     getLastSegment(): IRouteSegment;
-    getLastLatLng(): Common.ILatLngTime;
+    getLastLatLng(): ILatLngTime;
 
     setHiddenState(): void;
     setReadOnlyState(): void;

@@ -2,12 +2,11 @@ import { Router } from "@angular/router";
 import { TestBed, inject } from "@angular/core/testing";
 import { RouterTestingModule } from "@angular/router/testing";
 import { Subject } from "rxjs";
-import * as L from "leaflet";
 
 import { HashService, RouteStrings } from "./hash.service";
 import { MapService } from "./map.service";
 import { MapServiceMockCreator } from "./map.service.spec";
-import { Urls } from "../common/Urls";
+import { Urls } from "../urls";
 
 describe("HashService", () => {
     let hashService: HashService;
@@ -105,7 +104,7 @@ describe("HashService", () => {
                 windowMock.location.hash = "#!/10/20/30.0";
 
                 hashService = new HashService(router, windowMock, mapService);
-                mapServiceMock.mapService.map.panTo(L.latLng(1, 2));
+                mapServiceMock.mapService.map.panTo(LatLngAlt(1, 2));
 
                 expect(JSON.stringify((router.navigate as jasmine.Spy).calls.mostRecent().args))
                     .toBe(JSON.stringify([[RouteStrings.ROUTE_MAP, 13, "1.0000", "2.0000"], { replaceUrl: true }]));

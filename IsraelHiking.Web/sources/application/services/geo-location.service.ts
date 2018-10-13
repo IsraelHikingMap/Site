@@ -3,7 +3,7 @@ import * as L from "leaflet";
 
 import { environment } from "../../environments/environment";
 import { ResourcesService } from "./resources.service";
-import * as Common from "../common/IsraelHiking";
+import { ILatLngTime } from "../models/models";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 
@@ -31,7 +31,7 @@ export class GeoLocationService {
     private isBackground: boolean;
     private rejectedPosition: Position;
     public positionChanged: EventEmitter<Position>;
-    public currentLocation: Common.ILatLngTime;
+    public currentLocation: ILatLngTime;
 
     constructor(private readonly resources: ResourcesService,
         private readonly ngZone: NgZone) {
@@ -222,9 +222,12 @@ export class GeoLocationService {
     }
 
     private updatePositionAndRaiseEvent(position: Position) {
-        this.currentLocation =
-            L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude) as Common.ILatLngTime;
-        this.currentLocation.timestamp = new Date(position.timestamp);
+        this.currentLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            alt: position.coords.altitude,
+            timestamp: new Date(position.timestamp)
+        } as ILatLngTime;
 
         this.positionChanged.next(position);
     }

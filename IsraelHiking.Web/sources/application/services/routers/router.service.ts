@@ -1,14 +1,13 @@
 ﻿import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { timeout } from "rxjs/operators";
-import * as L from "leaflet";
 
 import { ResourcesService } from "../resources.service";
 import { ToastService } from "../toast.service";
 import { NoneRouter } from "./none-router";
 import { GeoJsonParser } from "../geojson.parser";
-import { Urls } from "../../common/Urls";
-import * as Common from "../../common/IsraelHiking";
+import { Urls } from "../../urls";
+import { LatLngAlt, RoutingType, RouteSegmentData }  from "../../models/models";
 
 @Injectable()
 export class RouterService {
@@ -22,7 +21,7 @@ export class RouterService {
         this.noneRouter = new NoneRouter();
     }
 
-    public async getRoute(latlngStart: L.LatLng, latlngEnd: L.LatLng, routinType: Common.RoutingType): Promise<Common.RouteSegmentData[]> {
+    public async getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt, routinType: RoutingType): Promise<RouteSegmentData[]> {
         let address = Urls.routing + "?from=" + latlngStart.lat + "," + latlngStart.lng +
             "&to=" + latlngEnd.lat + "," + latlngEnd.lng + "&type=" + routinType;
         try {

@@ -4,28 +4,26 @@ import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
 
 import { IRouteLayer, IRoute, IRouteSegment, IMarkerWithData } from "./iroute.layer";
-import { MapService } from "../../map.service";
 import { RouteLayerFactory } from "./route-layer.factory";
 import { RouteLayer } from "./route.layer";
 import { ResourcesService } from "../../resources.service";
 import { IconsService } from "../../icons.service";
 import { IRoutesService } from "./iroutes.service";
-import * as Common from "../../../common/IsraelHiking";
-
+import { SpatialService } from "../../spatial.service";
+import { RouteData, RouteSegmentData } from "../../../models/models";
 
 @Injectable()
 export class RoutesService implements IRoutesService {
     private static MERGE_THRESHOLD = 50; // meter.
 
     @LocalStorage()
-    public locallyRecordedRoutes: Common.RouteData[] = [];
+    public locallyRecordedRoutes: RouteData[] = [];
 
     public routes: IRouteLayer[];
     public routeChanged: Subject<any>;
     public selectedRoute: IRouteLayer;
 
     constructor(private readonly resourcesService: ResourcesService,
-        private readonly mapService: MapService,
         private readonly routeLayerFactory: RouteLayerFactory) {
         this.routes = [];
         this.selectedRoute = null;
@@ -35,7 +33,7 @@ export class RoutesService implements IRoutesService {
     public addRoute = (route: IRoute) => {
         let routeLayer = this.routeLayerFactory.createRouteLayer(route);
         this.routes.push(routeLayer);
-        this.mapService.map.addLayer(routeLayer);
+        routeLayer.show();
         routeLayer.setEditRouteState();
         this.selectRoute(routeLayer);
     }
@@ -48,7 +46,7 @@ export class RoutesService implements IRoutesService {
         if (this.selectedRoute === routeLayer) {
             this.selectRoute(null);
         }
-        this.mapService.map.removeLayer(routeLayer as RouteLayer);
+        (routeLayer as RouteLayer).hide();
         this.routes.splice(this.routes.indexOf(routeLayer), 1);
     }
 
@@ -60,11 +58,11 @@ export class RoutesService implements IRoutesService {
     public changeRouteState = (routeLayer: IRouteLayer) => {
         if (routeLayer === this.selectedRoute && routeLayer.route.properties.isVisible) {
             this.selectRoute(null);
-            this.mapService.map.removeLayer(routeLayer as RouteLayer);
+            (routeLayer as RouteLayer).hide();
             return;
         }
         if (routeLayer.route.properties.isVisible === false) {
-            this.mapService.map.addLayer(routeLayer as RouteLayer);
+            (routeLayer as RouteLayer).show();
         }
         this.selectRoute(routeLayer);
     }
@@ -92,7 +90,7 @@ export class RoutesService implements IRoutesService {
         return _.find(this.routes, (routeLayerToFind) => routeLayerToFind.route.properties.name === routeName);
     }
 
-    public getData = (): Common.RouteData[] => {
+    public getData = (): RouteData[] => {
         let routesData = [];
         for (let route of this.routes) {
             if (route.route.properties.isVisible) {
@@ -102,11 +100,10 @@ export class RoutesService implements IRoutesService {
         return routesData;
     }
 
-    public setData = (routes: Common.RouteData[]) => {
+    public setData = (routes: RouteData[]) => {
         if (!routes || routes.length === 0) {
             return;
         }
-        this.mapService.routesJsonToRoutesObject(routes);
         for (let route of routes) {
             for (let marker of route.markers) {
                 if (!_.find(IconsService.getAvailableIconTypes(), m => m === marker.type)) {
@@ -117,7 +114,7 @@ export class RoutesService implements IRoutesService {
         this.addLayersToMap(routes);
     }
 
-    private addLayersToMap = (routes: Common.RouteData[]) => {
+    private addLayersToMap = (routes: RouteData[]) => {
         if (routes.length === 1 && routes[0].segments.length === 0 && this.routes.length > 0) {
             // this is the case when the layer has markers only
             if (this.selectedRoute == null) {
@@ -138,7 +135,8 @@ export class RoutesService implements IRoutesService {
             }
             let routeLayer = this.routeLayerFactory.createRouteLayerFromData(routeData);
             this.routes.push(routeLayer);
-            this.mapService.map.addLayer(routeLayer as RouteLayer);
+            // HM TODO: remove cast - add hide/show to interface
+            (routeLayer as RouteLayer).show();
             this.selectRoute(routeLayer);
         }
     }
@@ -147,18 +145,18 @@ export class RoutesService implements IRoutesService {
         let segmentIndex = this.selectedRoute.route.segments.indexOf(segmenet);
         let currentRoute = this.selectedRoute.route;
         this.selectedRoute.setHiddenState();
-        let postFixSegments = currentRoute.segments.splice(segmentIndex + 1) as Common.RouteSegmentData[];
+        let postFixSegments = currentRoute.segments.splice(segmentIndex + 1) as RouteSegmentData[];
         let startPoint = this.selectedRoute.getLastLatLng();
         postFixSegments.splice(0, 0,
             {
                 latlngs: [startPoint, startPoint],
                 routePoint: startPoint,
                 routingType: postFixSegments[0].routingType
-            } as Common.RouteSegmentData);
+            } as RouteSegmentData);
         let routePostFix = {
             segments: postFixSegments,
             name: currentRoute.properties.name + this.resourcesService.split,
-        } as Common.RouteData;
+        } as RouteData;
 
         this.setData([routePostFix]);
         this.selectedRoute.setEditRouteState();
@@ -177,10 +175,10 @@ export class RoutesService implements IRoutesService {
             if (routeLayer === this.selectedRoute || routeLayer.route.segments.length <= 0) {
                 continue;
             }
-            if (routeLayer.getLastLatLng().distanceTo(latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
+            if (SpatialService.getDistance(routeLayer.getLastLatLng(),latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
                 return routeLayer;
             }
-            if (routeLayer.route.segments[0].latlngs[0].distanceTo(latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
+            if (SpatialService.getDistance(routeLayer.route.segments[0].latlngs[0], latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
                 return routeLayer;
             }
         }
@@ -197,14 +195,14 @@ export class RoutesService implements IRoutesService {
             ? this.selectedRoute.route.segments[0].latlngs[0]
             : this.selectedRoute.getLastLatLng();
         if (isFirst) {
-            if (closestRoute.route.segments[0].latlngs[0].distanceTo(latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
+            if (SpatialService.getDistanceInMeters(closestRoute.route.segments[0].latlngs[0], latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
                 closestRoute.reverse();
             }
             this.selectedRoute.route.segments.splice(0, 1);
             this.selectedRoute.route.segments[0].latlngs.splice(0, 0, closestRoute.getLastLatLng());
             this.selectedRoute.route.segments.splice(0, 0, ...closestRoute.route.segments);
         } else { // merging last point
-            if (closestRoute.getLastLatLng().distanceTo(latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
+            if (SpatialService.getDistanceInMeters(closestRoute.getLastLatLng(), latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
                 closestRoute.reverse();
             }
             // remove first segment and add last point:
@@ -228,11 +226,11 @@ export class RoutesService implements IRoutesService {
         return this.selectedRoute;
     }
 
-    public addRouteToLocalStorage(route: Common.RouteData) {
+    public addRouteToLocalStorage(route: RouteData) {
         this.locallyRecordedRoutes.push(route);
     }
 
-    public removeRouteFromLocalStorage(route: Common.RouteData) {
+    public removeRouteFromLocalStorage(route: RouteData) {
         let index = this.locallyRecordedRoutes.indexOf(route);
         this.locallyRecordedRoutes.splice(index, 1);
     }

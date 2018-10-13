@@ -3,7 +3,7 @@
 import { MapService } from "./map.service";
 import { ResourcesService } from "./resources.service";
 import { GetTextCatalogMockCreator } from "./resources.service.spec";
-import * as Common from "../common/IsraelHiking";
+import { MarkerData, IMarkerWithTitle } from "../models/models";
 
 export class MapServiceMockCreator {
     private mapDiv: HTMLElement;
@@ -56,13 +56,13 @@ describe("MapService", () => {
 
     it("should set the right direction for the title of a marker", () => {
         let service = mapMock.mapService;
-        let marker = L.marker(L.latLng(0, 0));
+        let marker = L.marker(LatLngAlt(0, 0));
 
-        service.setMarkerTitle(marker as Common.IMarkerWithTitle,
+        service.setMarkerTitle(marker as IMarkerWithTitle,
             {
                 title: "title",
                 urls: [{ mimeType: "image/png" }]
-            } as Common.MarkerData,
+            } as MarkerData,
             "#ffff00");
 
         expect(marker.getTooltip).not.toBeNull();

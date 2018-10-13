@@ -2,13 +2,12 @@
 import * as L from "leaflet";
 import * as _ from "lodash";
 
-import { MapService } from "../services/map.service";
 import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
 import { FileService } from "../services/file.service";
 import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
-import * as Common from "../common/IsraelHiking";
+import { DataContainer } from "../models/models";
 
 @Component({
     selector: "file",
@@ -20,7 +19,6 @@ export class FileComponent extends BaseMapComponent {
     public openFileElement: ElementRef;
 
     constructor(resources: ResourcesService,
-        private readonly mapService: MapService,
         private readonly dataContainerService: DataContainerService,
         private readonly fileService: FileService,
         private readonly toastService: ToastService,
@@ -57,7 +55,7 @@ export class FileComponent extends BaseMapComponent {
         }
     }
 
-    private getName(data: Common.DataContainer): string {
+    private getName(data: DataContainer): string {
         let name = "IsraelHikingMap";
         if (data.routes.length === 1 && data.routes[0].name) {
             name = data.routes[0].name;
@@ -65,7 +63,7 @@ export class FileComponent extends BaseMapComponent {
         return name;
     }
 
-    private isDataSaveable(data: Common.DataContainer): boolean {
+    private isDataSaveable(data: DataContainer): boolean {
         if (data.routes.length === 0) {
             this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
             return false;

@@ -2,7 +2,6 @@ import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
 import * as _ from "lodash";
-import * as L from "leaflet";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -22,7 +21,7 @@ import { ToastService } from "../../../services/toast.service";
 import { IMarkerWithData } from "../../../services/layers/routelayers/iroute.layer";
 import { CategoriesLayerFactory } from "../../../services/layers/categories-layers.factory";
 import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
-import * as Common from "../../../common/IsraelHiking";
+import {RouteData, LinkData, LatLngAlt }  from "../../../models/models";
 
 @Component({
     selector: "public-poi-sidebar",
@@ -35,7 +34,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public isLoading: boolean;
     public sourceImageUrls: string[];
     public rating: number;
-    public latLng: L.LatLng;
+    public latLng: LatLngAlt;
     public shareLinks: IPoiSocialLinks;
     public contribution: IContribution;
 
@@ -73,8 +72,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         try {
             let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
             this.initFromPointOfInterestExtended(poiExtended);
-            let latLng = L.latLng(poiExtended.location.lat, poiExtended.location.lng);
-            let bounds = L.latLngBounds([latLng, latLng]);
+            let latLng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng };
+            let bounds = { northEast: latLng, southWest: latLng };
             this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute).moveToSearchResults(poiExtended, bounds);
             let categoriesLayer = this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute);
             categoriesLayer.selectRoute(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
@@ -94,10 +93,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private initFromPointOfInterestExtended = (poiExtended: IPointOfInterestExtended) => {
         this.poiExtended = poiExtended;
-        this.latLng = L.latLng(poiExtended.location.lat, poiExtended.location.lng, poiExtended.location.alt);
+        this.latLng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng, alt: poiExtended.location.alt};
         this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
         this.rating = this.getRatingNumber(this.poiExtended.rating);
-        this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
         this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
         this.contribution = this.poiExtended.contribution || {} as IContribution;
         // clone:
@@ -209,8 +207,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public convertToRoute() {
-        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes))  as Common.RouteData[];
-        this.mapService.routesJsonToRoutesObject(routesCopy);
+        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes))  as RouteData[];
         routesCopy[0].description = this.info.description;
         this.routesService.setData(routesCopy);
         this.clear();
@@ -248,8 +245,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.close();
     }
 
-    private async getUrls(): Promise<Common.LinkData[]> {
-        let urls = [] as Common.LinkData[];
+    private async getUrls(): Promise<LinkData[]> {
+        let urls = [] as LinkData[];
         for (let reference of this.info.references) {
             urls.push({
                 mimeType: "text/html",

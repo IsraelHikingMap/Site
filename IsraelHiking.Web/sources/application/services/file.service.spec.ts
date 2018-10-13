@@ -5,8 +5,8 @@ import { HttpClientTestingModule, HttpTestingController } from "@angular/common/
 import { FileService, IFormatViewModel } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { ImageResizeService } from "./image-resize.service";
-import { Urls } from "../common/Urls";
-import * as Common from "../common/IsraelHiking";
+import { Urls } from "../urls";
+import { DataContainer } from "../models/models";
 
 describe("FileService", () => {
 
@@ -52,7 +52,7 @@ describe("FileService", () => {
     it("Should save to file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-        fileService.saveToFile("file.name", "format", {} as Common.DataContainer).then(() => {
+        fileService.saveToFile("file.name", "format", {} as DataContainer).then(() => {
             expect(nonAngularObjectsFactory.saveAs).toHaveBeenCalled();
             expect(nonAngularObjectsFactory.b64ToBlob).toHaveBeenCalled();
         });

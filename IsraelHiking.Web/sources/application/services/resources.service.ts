@@ -3,7 +3,7 @@ import { Direction } from "@angular/cdk/bidi";
 import { Subject } from "rxjs";
 import { LocalStorage } from "ngx-store";
 import { GetTextCatalogService } from "./gettext-catalog.service";
-import { Urls } from "../common/Urls";
+import { Urls } from "../urls";
 export type LanguageCode = "en-US" | "he";
 
 export interface ILanguage {
@@ -231,6 +231,9 @@ export class ResourcesService {
     public runningInBackground: string;
     public camera: string;
     public gallery: string;
+    public clearRoute: string;
+    public clearPois: string;
+    public clearBoth: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -698,6 +701,9 @@ export class ResourcesService {
         this.runningInBackground = this.gettextCatalog.getString("Running in the background");
         this.camera = this.gettextCatalog.getString("Camera");
         this.gallery = this.gettextCatalog.getString("Gallery");
+        this.clearRoute = this.gettextCatalog.getString("Clear route");
+        this.clearPois = this.gettextCatalog.getString("Clear points");
+        this.clearBoth = this.gettextCatalog.getString("Clear both");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

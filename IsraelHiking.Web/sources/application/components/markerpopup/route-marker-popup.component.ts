@@ -1,66 +1,67 @@
-﻿import { Component, Injector, ApplicationRef, Inject, HostListener } from "@angular/core";
+﻿import { Component, Input, HostListener, OnInit, OnChanges } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { DELETE } from "@angular/cdk/keycodes";
-import * as _ from "lodash";
 
 import { ResourcesService } from "../../services/resources.service";
-import { IRouteSegment } from "../../services/layers/routelayers/iroute.layer";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
-import { IRoutesService } from "../../services/layers/routelayers/iroutes.service";
-import * as Common from "../../common/IsraelHiking";
-
+import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 
 @Component({
     selector: "route-marker-popup",
     templateUrl: "./route-marker-popup.component.html"
 })
-export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
+export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent implements OnChanges {
     public canMerge: boolean;
     public isMiddle: boolean;
-    private routeSegment: IRouteSegment;
-    private readonly routesService: IRoutesService;
+
+    @Input()
+    private segmentIndex: number;
 
     constructor(resources: ResourcesService,
         httpClient: HttpClient,
-        applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider,
-        private readonly injector: Injector,
-        @Inject("RoutesService") routesService: IRoutesService) {
-        super(resources, httpClient, applicationRef, elevationProvider);
+        private readonly selectedRouteService: SelectedRouteService) {
+        super(resources, httpClient, elevationProvider);
         this.canMerge = false;
         this.isMiddle = false;
-        this.routesService = routesService;
     }
 
-    public setMarker(marker: Common.IMarkerWithTitle) {
-        this.setMarkerInternal(marker);
-        marker.on("popupopen", () => {
-            this.routeSegment = _.find(this.routesService.selectedRoute.route.segments,
-                segmentToFind => this.marker === segmentToFind.routePointMarker);
-            this.isMiddle = this.isFirst() === false && this.routesService.selectedRoute.getLastSegment() !== this.routeSegment;
-            if (this.isMiddle) {
-                this.canMerge = false;
-                return;
-            }
-            this.canMerge = this.routesService.getClosestRoute(this.isFirst()) != null;
-        });
+    public ngOnChanges(): void {
+        this.isMiddle = this.isFirst() === false && this.isLast() === false;
+        if (this.isMiddle) {
+            this.canMerge = false;
+            return;
+        }
+        this.canMerge = this.selectedRouteService.getClosestRoute(this.isFirst()) != null;
     }
 
     public split(): void {
-        this.routesService.splitSelectedRouteAt(this.routeSegment);
+        this.selectedRouteService.splitRoute(this.segmentIndex);
+        this.close();
     }
 
     public merge() {
-        this.routesService.mergeSelectedRouteToClosest(this.isFirst());
+        this.selectedRouteService.mergeRoutes(this.isFirst());
+        this.close();
     }
 
     public reverse() {
-        this.routesService.selectedRoute.reverse();
+        this.selectedRouteService.reverseRoute();
+        this.close();
+    }
+
+    public remove = () => {
+        this.selectedRouteService.removeSegment(this.segmentIndex);
+        this.close();
     }
 
     private isFirst(): boolean {
-        return this.routesService.selectedRoute.route.segments[0] === this.routeSegment;
+        return this.segmentIndex === 0;
+    }
+
+    private isLast(): boolean {
+        return this.selectedRouteService.getSelectedRoute().segments.length - 1 === this.segmentIndex;
     }
 
     @HostListener("window:keydown", ["$event"])
@@ -68,9 +69,7 @@ export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent {
         if ($event.keyCode !== DELETE) {
             return true;
         }
-        if (this.marker.isPopupOpen()) {
-            this.remove();
-        }
+        this.remove();
         return false;
     }
 }

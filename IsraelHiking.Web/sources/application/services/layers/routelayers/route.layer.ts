@@ -8,7 +8,7 @@ import { MapService } from "../../map.service";
 import { RouterService } from "../../routers/router.service";
 import { GeoLocationService } from "../../geo-location.service";
 import { ElevationProvider } from "../../elevation.provider";
-import { IRouteState, RouteStateName } from "./iroute-state";
+import { IRouteState } from "./iroute-state";
 import {
     IRouteLayer,
     IRoute,
@@ -23,16 +23,25 @@ import { RouteStateHidden } from "./route-state-hidden";
 import { RouteStateEditPoi } from "./route-state-edit-poi";
 import { RouteStateEditRoute } from "./route-state-edit-route";
 import { UndoHandler } from "./undo-handler";
-import * as Common from "../../../common/IsraelHiking";
+import {
+    LatLngAlt,
+    RouteData,
+    MarkerData,
+    RouteSegmentData,
+    RoutingType,
+    ILatLngTime,
+    IBounds,
+    RouteStateName
+} from "../../../models/models";
+import { SpatialService } from "../../spatial.service";
 
 export class RouteLayer extends L.Layer implements IRouteLayer {
     public route: IRoute;
     public dataChanged: Subject<any>;
-    public polylineHovered: Subject<L.LatLng>;
+    public polylineHovered: Subject<LatLngAlt>;
 
     private currentState: IRouteState;
-    private undoHandler: UndoHandler<Common.RouteData>;
-    public map: L.Map;
+    private undoHandler: UndoHandler<RouteData>;
 
     constructor(public readonly mapService: MapService,
         public readonly snappingService: SnappingService,
@@ -44,25 +53,22 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         public readonly componentFactoryResolver: ComponentFactoryResolver,
         route: IRoute) {
         super();
-        this.map = mapService.map;
         this.route = route;
-        this.undoHandler = new UndoHandler<Common.RouteData>();
+        this.undoHandler = new UndoHandler<RouteData>();
         this.undoHandler.addDataToUndoStack(this.getData());
         this.currentState = new RouteStateReadOnly(this);
         this.dataChanged = new Subject<any>();
-        this.polylineHovered = new Subject<L.LatLng>();
+        this.polylineHovered = new Subject<LatLngAlt>();
     }
 
-    public onAdd(map: L.Map): this {
+    public show() {
         this.route.properties.isVisible = true;
         this.setReadOnlyState();
-        return this;
     }
 
-    public onRemove(map: L.Map): this {
+    public hide() {
         this.setHiddenState();
         this.route.properties.isVisible = false;
-        return this;
     }
 
     public getStateName(): RouteStateName {
@@ -95,22 +101,22 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         this.raiseDataChanged();
     }
 
-    public snapToSelf(latlng: L.LatLng): ISnappingRouteResponse {
-        let polylines = [];
+    public snapToSelf(latlng: LatLngAlt): ISnappingRouteResponse {
+        let lines: LatLngAlt[][] = [];
         for (let segment of this.route.segments) {
             if (segment.polyline) {
-                polylines.push(segment.polyline);
+                lines.push(segment.latlngs);
             } else {
-                polylines.push(L.polyline(segment.latlngs));
+                lines.push(segment.latlngs);
             }
         }
         return this.snappingService.snapToRoute(latlng, {
             sensitivity: 30,
-            polylines: polylines
+            lines: lines
         } as ISnappingRouteOptions);
     }
 
-    public getSnappingForPoint(latlng: L.LatLng): ISnappingPointResponse {
+    public getSnappingForPoint(latlng: LatLngAlt): ISnappingPointResponse {
         if (this.geoLocationService.getState() === "tracking") {
             let snappingPointResponse = this.snappingService.snapToPoint(latlng,
                 {
@@ -121,7 +127,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
                             urls: [],
                             title: "",
                             description: "",
-                        } as Common.MarkerData
+                        } as MarkerData
                     ],
                     sensitivity: 30
                 });
@@ -132,9 +138,9 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         return this.snappingService.snapToPoint(latlng);
     }
 
-    public getSnappingForRoute(latlng: L.LatLng, isSnapToSelf: boolean = true): ISnappingForRouteResponse {
+    public getSnappingForRoute(latlng: LatLngAlt, isSnapToSelf: boolean = true): ISnappingForRouteResponse {
 
-        let geoLocationPoint = [] as Common.MarkerData[];
+        let geoLocationPoint = [] as MarkerData[];
         if (this.geoLocationService.getState() === "tracking") {
             geoLocationPoint.push({
                 latlng: this.geoLocationService.currentLocation,
@@ -142,7 +148,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
                 urls: [],
                 title: "",
                 description: "",
-            } as Common.MarkerData);
+            } as MarkerData);
         }
         // private POIs + Geo Location
         let snappingPointResponse = this.snappingService.snapToPoint(latlng,
@@ -167,7 +173,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         }
 
         let snappingRouteResponse = this.snapToSelf(latlng);
-        if (snappingRouteResponse.polyline != null && isSnapToSelf) {
+        if (snappingRouteResponse.line != null && isSnapToSelf) {
             return {
                 latlng: snappingRouteResponse.latlng,
                 isSnapToSelfRoute: true
@@ -175,7 +181,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         }
 
         snappingRouteResponse = this.snappingService.snapToRoute(latlng);
-        if (snappingRouteResponse.polyline != null) {
+        if (snappingRouteResponse.line != null) {
             return {
                 latlng: snappingRouteResponse.latlng,
                 isSnapToSelfRoute: false
@@ -188,16 +194,16 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         };
     }
 
-    public getData = (): Common.RouteData => {
-        let segmentsData = [] as Common.RouteSegmentData[];
+    public getData = (): RouteData => {
+        let segmentsData = [] as RouteSegmentData[];
         for (let segment of this.route.segments) {
             segmentsData.push({
                 routePoint: segment.routePoint,
                 latlngs: [...segment.latlngs],
                 routingType: segment.routingType
-            } as Common.RouteSegmentData);
+            } as RouteSegmentData);
         }
-        let markersData = [] as Common.MarkerData[];
+        let markersData = [] as MarkerData[];
         for (let marker of this.route.markers) {
             markersData.push({
                 title: marker.title,
@@ -215,10 +221,10 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
             weight: this.route.properties.pathOptions.weight,
             markers: markersData,
             segments: segmentsData
-        } as Common.RouteData;
+        } as RouteData;
     }
 
-    public setData = (data: Common.RouteData) => {
+    public setData = (data: RouteData) => {
         this.setDataInternal(data);
         this.currentState.initialize();
     }
@@ -228,7 +234,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         this.setDataInternal(data);
     }
 
-    private setDataInternal = (data: Common.RouteData) => {
+    private setDataInternal = (data: RouteData) => {
         this.currentState.clear();
         this.route.segments = [];
         this.route.markers = [];
@@ -286,7 +292,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         this.raiseDataChanged();
     }
 
-    public setRoutingType = (routingType: Common.RoutingType) => {
+    public setRoutingType = (routingType: RoutingType) => {
         this.route.properties.currentRoutingType = routingType;
         if (this.route.properties.isRoutingPerPoint) {
             return;
@@ -305,20 +311,18 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         this.currentState.reRoute();
     }
 
-    public getBounds = (): L.LatLngBounds => {
+    public getBounds = (): IBounds => {
         if (this.route.segments.length === 0 && this.route.markers.length === 0) {
             return null;
         }
-        let featureGroup = L.featureGroup([]);
+        let latlngs = [];
         for (let segment of this.route.segments) {
-            featureGroup.addLayer(L.polyline(segment.latlngs));
+            latlngs = latlngs.concat(segment.latlngs);
         }
         for (let marker of this.route.markers) {
-            featureGroup.addLayer(L.marker(marker.latlng));
+            latlngs.push(marker.latlng);
         }
-        let bounds = featureGroup.getBounds();
-        featureGroup.clearLayers();
-        return bounds;
+        return SpatialService.getBounds(latlngs);
     }
 
     public makeAllPointsEditable = () => {
@@ -334,14 +338,14 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
             }
             let previousPoint = segment.latlngs[0];
             for (let latLng of segment.latlngs) {
-                if (previousPoint.equals(latLng)) {
+                if (previousPoint.lat === latLng.lat && previousPoint.lng === latLng.lng) {
                     continue;
                 }
                 segments.push({
                     latlngs: [previousPoint, latLng],
                     routingType: segment.routingType,
                     routePoint: latLng
-                } as Common.RouteSegmentData);
+                } as RouteSegmentData);
                 previousPoint = latLng;
             }
         }
@@ -354,7 +358,7 @@ export class RouteLayer extends L.Layer implements IRouteLayer {
         return this.route.segments[this.route.segments.length - 1];
     }
 
-    getLastLatLng(): Common.ILatLngTime {
+    getLastLatLng(): ILatLngTime {
         let lastSegmentLatLngs = this.getLastSegment().latlngs;
         return lastSegmentLatLngs[lastSegmentLatLngs.length - 1];
     }

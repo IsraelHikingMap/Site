@@ -1,14 +1,16 @@
 ﻿import { Component, ViewEncapsulation } from "@angular/core";
+import { NgRedux } from "@angular-redux/store"; 
+
 import { ResourcesService } from "../../../services/resources.service";
-import { MapService } from "../../../services/map.service";
 import { FileService } from "../../../services/file.service";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
 import { ToastService } from "../../../services/toast.service";
-import { RoutesService } from "../../../services/layers/routelayers/routes.service";
-import { IRouteLayer } from "../../../services/layers/routelayers/iroute.layer";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
-import { RouteBaseDialogComponent } from "./route-base-dialog.component";
-import * as Common from "../../../common/IsraelHiking";
+import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
+import { SpatialService } from "../../../services/spatial.service";
+import { RouteBaseDialogComponent } from "./route-base-dialog.component"
+import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducres/routes.reducer";
+import { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
 
 @Component({
     selector: "route-edit-dialog",
@@ -17,50 +19,56 @@ import * as Common from "../../../common/IsraelHiking";
     encapsulation: ViewEncapsulation.None,
 })
 export class RouteEditDialogComponent extends RouteBaseDialogComponent {
-    private routeLayer: IRouteLayer;
+    private originalName: string;
 
     constructor(resources: ResourcesService,
-        mapService: MapService,
-        routesService: RoutesService,
+        selectedRouteService: SelectedRouteService,
         routeLayerFactory: RouteLayerFactory,
         toastService: ToastService,
+        ngRedux: NgRedux<ApplicationState>,
         private readonly fileService: FileService,
         private readonly fitBoundsService: FitBoundsService
     ) {
-        super(resources, mapService, routesService, routeLayerFactory, toastService);
+        super(resources, selectedRouteService, routeLayerFactory, toastService, ngRedux);
 
         this.isNew = false;
         this.title = this.resources.routeProperties;
     }
 
-    public setRouteLayer(name: string): void {
-        this.routeLayer = this.routesService.getRouteByName(name);
-        this.routeProperties = { ...this.routeLayer.route.properties };
-        this.pathOptions = { ...this.routeProperties.pathOptions };
+    protected saveImplementation() {
+        this.ngRedux.dispatch(new ChangeRoutePropertiesAction({
+            routeId: this.routeData.id,
+            routeData: this.routeData
+        }));
+    }
+
+    public setRouteData(routeData: RouteData): void {
+        this.routeData = { ...routeData };
+        this.originalName = routeData.name;
     }
 
     protected isRouteNameAlreadyInUse() {
-        return this.routeProperties.name !== this.routeLayer.route.properties.name &&
-            this.routesService.isNameAvailable(this.routeProperties.name) === false;
-    }
-
-    public saveRoute(e: Event) {
-        super.saveRoute(e);
-        this.routeLayer.setRouteProperties(this.routeProperties);
+        return this.routeData.name !== this.originalName &&
+            this.selectedRouteService.isNameAvailable(this.routeData.name) === false;
     }
 
     public deleteRoute(e: Event) {
-        this.routesService.removeRoute(this.routeLayer.route.properties.name);
-        this.suppressEvents(e);
+        this.ngRedux.dispatch(new DeleteRouteAction({
+            routeId: this.routeData.id
+        }));
     }
 
     public async saveRouteToFile(e: Event) {
-        this.suppressEvents(e);
+        let latLngs = this.getLatlngs();
+        if (latLngs.length === 0) {
+            this.toastService.error(this.resources.pleaseAddPointsToRoute);
+            return;
+        }
         let data = {
-            routes: [this.routeLayer.getData()]
-        } as Common.DataContainer;
+            routes: [this.routeData]
+        } as DataContainer;
         try {
-            let showToast = await this.fileService.saveToFile(this.routeProperties.name + ".gpx", "gpx", data);
+            let showToast = await this.fileService.saveToFile(this.routeData.name + ".gpx", "gpx", data);
             if (showToast) {
                 this.toastService.success(this.resources.fileSavedSuccessfully);
             }
@@ -70,20 +78,34 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     public moveToRoute = (e: Event) => {
-        let bounds = this.routeLayer.getBounds();
-        if (bounds == null) {
+        let latLngs = this.getLatlngs();
+        if (latLngs.length === 0) {
             this.toastService.error(this.resources.pleaseAddPointsToRoute);
             return;
         }
-        if (!this.routeProperties.isVisible) {
+        let bounds = SpatialService.getBounds(latLngs);
+        if (this.routeData.state === "Hidden") {
             this.toastService.warning(this.resources.routeIsHidden);
         }
         this.fitBoundsService.fitBounds(bounds);
-        this.suppressEvents(e);
+    }
+
+    private getLatlngs(): LatLngAlt[] {
+        let latLngs = [];
+        for (let segment of this.routeData.segments) {
+            latLngs = latLngs.concat(segment.latlngs);
+        }
+        for (let markers of this.routeData.markers) {
+            latLngs.push(markers.latlng);
+        }
+        return latLngs;
     }
 
     public makeAllPointsEditable = () => {
-        this.routeLayer.makeAllPointsEditable();
         this.toastService.info(this.resources.dataUpdatedSuccessfully);
+        // HM TODO: support this
+        throw new Error("Not implemented");
+        //this.routeLayer.makeAllPointsEditable();
+        
     }
 }

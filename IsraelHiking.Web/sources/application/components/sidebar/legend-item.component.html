@@ -1,5 +1,14 @@
 ﻿<div class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
-    <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer" #mapContainer></div>
+    <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer">
+        <aol-map [width]="'200px'" [height]="'50px'">
+            <aol-layer-tile>
+                <aol-source-xyz [url]="getUrl()"></aol-source-xyz>
+            </aol-layer-tile>
+            <aol-view [zoom]="item.zoom">
+                <aol-coordinate [x]="item.latlng.lng" [y]="item.latlng.lat" [srid]="'EPSG:4326'"></aol-coordinate>
+            </aol-view>
+        </aol-map>
+    </div>
     <div class="legend-item-text-container" matTooltip="{{item.osmTags.join(', ')}}" matTooltipPosition="{{item.type === 'Way' ? 'above' : 'right'}}">
         <a *ngIf="item.link" [href]="item.link" [target]="'_blank'" class="legend-item-text">{{item.title}}</a>
         <span *ngIf="!item.link" class="legend-item-text">{{item.title}}</span>

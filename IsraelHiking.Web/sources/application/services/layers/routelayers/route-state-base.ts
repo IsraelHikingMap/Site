@@ -1,7 +1,8 @@
 import { Subscription } from "rxjs";
 
-import { IRouteState, RouteStateName } from "./iroute-state";
+import { IRouteState } from "./iroute-state";
 import { IRouteLayer } from "./iroute.layer";
+import { RouteStateName } from "../../../models/models";
 
 export abstract class RouteStateBase implements IRouteState {
     protected context: IRouteLayer;

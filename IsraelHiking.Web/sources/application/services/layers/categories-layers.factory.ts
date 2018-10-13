@@ -25,9 +25,10 @@ export class CategoriesLayerFactory {
         private readonly hashService: HashService) {
         this.categoryLayers = new Map<CategoriesType, CategoriesLayer>();
         for (let category of this.poiService.getCategoriesTypes()) {
-            let layer = new CategoriesLayer(this.router,
-                this.mapService,
+            let layer = new CategoriesLayer(
                 this.resources,
+                this.router,
+                this.mapService,
                 this.localStorageService,
                 this.poiService,
                 this.fitBoundsService,

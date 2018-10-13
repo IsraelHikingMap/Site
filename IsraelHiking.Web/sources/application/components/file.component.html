@@ -1,8 +1,8 @@
-﻿<div class="leaflet-bar">
+﻿<div class="side-control">
     <label>
-        <a class="cursor-pointer" matTooltip="{{resources.openAFile}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Open from file"><i class="fa icon-folder-open fa-lg"></i></a>
+        <a mat-button matTooltip="{{resources.openAFile}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Open from file"><i class="fa icon-folder-open fa-lg"></i></a>
         <input type="file" name="file" id="openFile" #openFile (change)="open($event)" [style.display]="'none'" />
     </label>
-    <a class="cursor-pointer" (click)="save($event)" matTooltip="{{resources.save}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save to file"><i class="fa icon-floppy-o fa-lg"></i></a>
-    <a class="cursor-pointer" *ngIf="showPrint()" (click)="print($event)" matTooltip="{{resources.print}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Print" angularticsAction="Print map"><i class="fa icon-print fa-lg"></i></a>
+    <button mat-button (click)="save($event)" matTooltip="{{resources.save}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save to file"><i class="fa icon-floppy-o fa-lg"></i></button>
+    <button mat-button *ngIf="showPrint()" (click)="print($event)" matTooltip="{{resources.print}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Print" angularticsAction="Print map"><i class="fa icon-print fa-lg"></i></button>
 </div>

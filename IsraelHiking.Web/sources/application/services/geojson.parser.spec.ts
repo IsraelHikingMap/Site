@@ -1,7 +1,7 @@
 ﻿import * as L from "leaflet";
 
 import { GeoJsonParser } from "./geojson.parser";
-import * as Common from "../common/IsraelHiking";
+import { MarkerData, RouteSegmentData, RouteData, DataContainer } from "../models/models";
 
 describe("GeoJsonParser", () => {
 
@@ -146,18 +146,18 @@ describe("GeoJsonParser", () => {
                 {
                     name: "route",
                     markers: [
-                        { title: "marker", latlng: L.latLng(1, 1) } as Common.MarkerData
+                        { title: "marker", latlng: { lat: 1, lng: 1 } } as MarkerData
                     ],
                     segments: [
                         {
-                            latlngs: [L.latLng(1, 1)],
-                            routePoint: L.latLng(1, 1),
+                            latlngs: [{ lat: 1, lng: 1 }],
+                            routePoint: { lat: 1, lng: 1 },
                             routingType: "Hike"
-                        } as Common.RouteSegmentData
+                        } as RouteSegmentData
                     ]
-                } as Common.RouteData
+                } as RouteData
             ]
-        } as Common.DataContainer;
+        } as DataContainer;
         let geoJson = JSON.parse(geoJsonParser.toString(data)) as GeoJSON.FeatureCollection<GeoJSON.GeometryObject>;
         expect(geoJson.features.length).toBe(2);
         expect(geoJson.features[0].geometry.type).toBe("Point");

@@ -1,7 +1,11 @@
 import { Component } from "@angular/core";
+import { MapComponent } from "ngx-openlayers";
+import { NgRedux } from "@angular-redux/store";
+
 import { BaseMapComponent } from "./base-map.component";
-import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
+import { LocationActions } from "../reducres/location.reducer";
+import { ApplicationState } from "../models/models";
 
 @Component({
     selector: "zoom",
@@ -9,16 +13,14 @@ import { ResourcesService } from "../services/resources.service";
 })
 export class ZoomComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
-        private mapService: MapService) {
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
     }
-    public zoomIn(e: Event) {
-        this.mapService.map.zoomIn();
-        this.suppressEvents(e);
+    public zoomIn() {
+        this.ngRedux.dispatch(LocationActions.zoomInAction);
     }
 
-    public zoomOut(e: Event) {
-        this.mapService.map.zoomOut();
-        this.suppressEvents(e);
+    public zoomOut() {
+        this.ngRedux.dispatch(LocationActions.zoomOutAction);
     }
 }

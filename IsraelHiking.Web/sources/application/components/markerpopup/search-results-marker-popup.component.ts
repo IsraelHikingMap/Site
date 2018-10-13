@@ -1,10 +1,9 @@
-import { Component, ApplicationRef } from "@angular/core";
+import { Component, Input } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 
 import { ResourcesService } from "../../services/resources.service";
 import { ElevationProvider } from "../../services/elevation.provider";
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
-import * as Common from "../../common/IsraelHiking";
 
 
 @Component({
@@ -13,15 +12,12 @@ import * as Common from "../../common/IsraelHiking";
 })
 export class SearchResultsMarkerPopupComponent extends BaseMarkerPopupComponent {
 
+    @Input()
+    public convertToRoute: () => void;
+
     constructor(resources: ResourcesService,
         httpClient: HttpClient,
-        applicationRef: ApplicationRef,
         elevationProvider: ElevationProvider) {
-        super(resources, httpClient, applicationRef, elevationProvider);
+        super(resources, httpClient, elevationProvider);
     }
-
-    public selectRoute = (routeData: Common.RouteData): void => {
-        throw new Error(`This function must be assigned by containing layer! Route: ${routeData.name}`);
-    }
-    public convertToRoute = (): void => { throw new Error("This function must be assigned by the containing layer!"); };
 }

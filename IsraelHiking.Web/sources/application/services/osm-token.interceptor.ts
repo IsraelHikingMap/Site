@@ -3,7 +3,7 @@ import { HttpInterceptor, HttpHandler, HttpRequest, HttpEvent } from "@angular/c
 import { Observable } from "rxjs";
 
 import { AuthorizationService } from "./authorization.service";
-import { Urls } from "../common/Urls";
+import { Urls } from "../urls";
 
 @Injectable()
 export class OsmTokenInterceptor implements HttpInterceptor {

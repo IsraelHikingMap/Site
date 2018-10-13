@@ -10,7 +10,8 @@ import { ToastService } from "../../services/toast.service";
 import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
-import * as Common from "../../common/IsraelHiking";
+import { ShareUrl } from "../../models/share-url";
+import { DataContainer } from "../../models/models";
 
 export interface IIOffroadCoordinates {
     latitude: number;
@@ -53,7 +54,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     public facebookShareAddress: string;
     public nakebCreateHikeAddress: string;
     public isLoading: boolean;
-    public lastShareUrl: Common.ShareUrl;
+    public lastShareUrl: ShareUrl;
     public offroadRequest: IOffroadPostRequest;
     public showOffroadForm: boolean;
     public offroadPublicTrack: boolean;
@@ -152,7 +153,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         }
     }
 
-    private getDataFiltered(): Common.DataContainer {
+    private getDataFiltered(): DataContainer {
         let filteredData = this.dataContainerService.getData();
         for (let routeIndex = filteredData.routes.length - 1; routeIndex >= 0; routeIndex--) {
             let route = filteredData.routes[routeIndex];
@@ -163,7 +164,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         return filteredData;
     }
 
-    private createShareUrlObject = (): Common.ShareUrl => {
+    private createShareUrlObject = (): ShareUrl => {
         if (this.routesService.routes.length === 1 && !this.routesService.routes[0].route.properties.description) {
             this.routesService.routes[0].route.properties.description = this.description;
         }
@@ -175,7 +176,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             description: this.description,
             dataContainer: this.getDataFiltered(),
             osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
-        } as Common.ShareUrl;
+        } as ShareUrl;
         return shareUrl;
     }
 

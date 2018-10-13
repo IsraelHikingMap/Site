@@ -6,7 +6,7 @@ import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService, IOverlay } from "../../../services/layers/layers.service";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
-import * as Common from "../../../common/IsraelHiking";
+import { LayerData } from "../../../models/models";
 
 @Component({
     selector: "overlay-edit-dialog",
@@ -40,7 +40,7 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
         this.suppressEvents(e);
     }
 
-    protected internalSave(layerData: Common.LayerData): void {
+    protected internalSave(layerData: LayerData): void {
         this.layersService.updateOverlay(this.overlay, layerData);
     }
 }

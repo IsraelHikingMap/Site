@@ -7,11 +7,11 @@ import { DrawingPoiMarkerPopupComponent } from "../../../components/markerpopup/
 import { IRouteLayer, IMarkerWithData } from "./iroute.layer";
 import { RouteStateHelper } from "./route-state-helper";
 import { PrivatePoiEditDialogComponent } from "../../../components/dialogs/private-poi-edit-dialog.component";
-import * as Common from "../../../common/IsraelHiking";
+import { IMarkerWithTitle, MarkerData } from "../../../models/models";
 
 export class RouteStatePoiHelper {
 
-    public static createPoiMarker(markerData: Common.MarkerData, isEditable: boolean, context: IRouteLayer): Common.IMarkerWithTitle {
+    public static createPoiMarker(markerData: MarkerData, isEditable: boolean, context: IRouteLayer): IMarkerWithTitle {
         let pathOptions = context.route.properties.pathOptions;
         let color = context.route.properties.pathOptions.color;
         let marker = L.marker(markerData.latlng,
@@ -21,31 +21,22 @@ export class RouteStatePoiHelper {
                 riseOnHover: isEditable,
                 icon: IconsService.createMarkerIconWithColorAndType(color, markerData.type),
                 opacity: pathOptions.opacity
-            } as L.MarkerOptions) as Common.IMarkerWithTitle;
+            } as L.MarkerOptions) as IMarkerWithTitle;
         marker.identifier = markerData.id;
         context.mapService.setMarkerTitle(marker, markerData, color);
-        marker.addTo(context.mapService.map);
+        //marker.addTo(context.mapService.map);
         return marker;
     }
 
-    public static addReadOnlyComponentToPoiMarker(marker: Common.IMarkerWithTitle, context: IRouteLayer): DrawingPoiMarkerPopupComponent {
+    public static addReadOnlyComponentToPoiMarker(marker: IMarkerWithTitle, context: IRouteLayer): DrawingPoiMarkerPopupComponent {
         let factory = context.componentFactoryResolver.resolveComponentFactory(DrawingPoiMarkerPopupComponent);
         let containerDiv = L.DomUtil.create("div");
         let poiMarkerPopupComponentRef = factory.create(context.injector, [], containerDiv);
-        poiMarkerPopupComponentRef.instance.setMarker(marker);
+        //poiMarkerPopupComponentRef.instance.setMarker(marker);
         poiMarkerPopupComponentRef.instance.setRouteLayer(context);
-        poiMarkerPopupComponentRef.instance.angularBinding(poiMarkerPopupComponentRef.hostView);
+        //poiMarkerPopupComponentRef.instance.angularBinding(poiMarkerPopupComponentRef.hostView);
         marker.bindPopup(containerDiv);
         return poiMarkerPopupComponentRef.instance;
-    }
-
-    private static openEditMarkerDialog(marker: Common.IMarkerWithTitle, context: IRouteLayer) {
-        let dialogRef = context.matDialog.open(PrivatePoiEditDialogComponent);
-        dialogRef.componentInstance.setMarkerAndRoute(marker, context);
-        dialogRef.componentInstance.remove = () => {
-            let routeMarker = _.find(context.route.markers, markerToFind => markerToFind.marker === marker);
-            RouteStatePoiHelper.removePoi(routeMarker, context);
-        };
     }
 
     public static addPoint(e: L.LeafletMouseEvent, context: IRouteLayer): IMarkerWithData {
@@ -54,7 +45,7 @@ export class RouteStatePoiHelper {
             latlng: snappingPointResponse.latlng,
             title: "",
             type: IconsService.getAvailableIconTypes()[0]
-        } as Common.MarkerData;
+        } as MarkerData;
         if (snappingPointResponse.markerData) {
             markerData = snappingPointResponse.markerData;
         }
@@ -69,11 +60,7 @@ export class RouteStatePoiHelper {
         return markerWithData;
     }
 
-    public static setPoiMarkerEvents(marker: Common.IMarkerWithTitle, context: IRouteLayer) {
-        marker.on("click",
-            () => {
-                RouteStatePoiHelper.openEditMarkerDialog(marker, context);
-            });
+    public static setPoiMarkerEvents(marker: IMarkerWithTitle, context: IRouteLayer) {
         marker.on("drag", () => {
             let snappingResponse = context.getSnappingForPoint(marker.getLatLng());
             marker.setLatLng(snappingResponse.latlng);

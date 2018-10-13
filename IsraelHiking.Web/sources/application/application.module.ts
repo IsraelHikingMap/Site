@@ -42,6 +42,7 @@ import { NgxImageGalleryModule } from "ngx-image-gallery";
 import { D3Service } from "d3-ng2-service";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule, NgRedux } from "@angular-redux/store";
+import { AngularOpenlayersModule } from "ngx-openlayers";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -75,6 +76,12 @@ import { ImageResizeService } from "./services/image-resize.service";
 import { NonAngularObjectsFactory } from "./services/non-angular-objects.factory";
 import { DeepLinksService } from "./services/deep-links.service";
 import { PrivatePoiUploaderService } from "./services/private-poi-uploader.service";
+import { SelectedRouteService } from "./services/layers/routelayers/selected-route.service";
+import { RunningContextService } from "./services/running-context.service";
+import { TracesService } from "./services/traces.service";
+// interactions
+import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
+import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 import { ImageCaptureDirective } from "./directives/image-capture.directive";
@@ -122,10 +129,13 @@ import { PublicPointOfInterestEditComponent } from "./components/sidebar/publicp
 import { ImageScrollerComponent } from "./components/sidebar/publicpoi/image-scroller.component";
 import { ApplicationStateComponent } from "./components/application-state.component";
 import { PrivatePoiEditDialogComponent } from "./components/dialogs/private-poi-edit-dialog.component";
+import { LayersViewComponent } from "./components/layers-view.component";
+import { RoutesComponent } from "./components/routes.component";
 // variables and functions
 import { routes } from "./routes";
-import { IApplicationState, initialState } from "./state/models/application-state";
-import { rootReducer } from "./state/reducres/root.reducer";
+import { ApplicationState } from "./models/models";
+import { rootReducer } from "./reducres/root.reducer";
+import { initialState } from "./reducres/initial-state";
 
 export function getWindow() { return window; }
 export function getRoutesService(routesService: RoutesService) { return routesService; }
@@ -169,7 +179,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DndModule.forRoot(),
         NgxImageGalleryModule,
         InfiniteScrollModule,
-        NgReduxModule
+        NgReduxModule,
+        AngularOpenlayersModule
     ],
     entryComponents: [ZoomComponent,
         LocationComponent,
@@ -211,7 +222,9 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         PublicPointOfInterestEditComponent,
         ImageScrollerComponent,
         ApplicationStateComponent,
-        PrivatePoiEditDialogComponent
+        PrivatePoiEditDialogComponent,
+        LayersViewComponent,
+        RoutesComponent
     ],
     providers: [
         GestureConfig,
@@ -255,7 +268,12 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ImageResizeService,
         NonAngularObjectsFactory,
         DeepLinksService,
-        PrivatePoiUploaderService
+        PrivatePoiUploaderService,
+        SelectedRouteService,
+        RunningContextService,
+        TracesService,
+        RouteEditPoiInteraction,
+        RouteEditRouteInteraction
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
@@ -301,22 +319,25 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ImageScrollerComponent,
         ApplicationStateComponent,
         PrivatePoiEditDialogComponent,
+        LayersViewComponent,
+        RoutesComponent,
         ImageCaptureDirective
     ],
-    bootstrap: [MainMapComponent, SidebarComponent]
+    bootstrap: [MainMapComponent]
 })
 export class ApplicationModule {
     constructor(dataContainerService: DataContainerService,
         angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
         dragAndDropService: DragAndDropService,
         deepLinksService: DeepLinksService,
-        ngRedux: NgRedux<IApplicationState>,
+        ngRedux: NgRedux<ApplicationState>,
         localStorageService: LocalStorageService) {
         console.log("Starting IHM Application Initialization");
         let storedState = localStorageService.get("reduxState") || initialState;
-        ngRedux.configureStore(rootReducer, storedState);
+        ngRedux.configureStore(rootReducer, storedState, [(state) => (next) => (action) => next({...action})]);
         ngRedux.select().subscribe((state) => {
-            localStorageService.set("reduxState", state);
+            console.log(state);
+            //localStorageService.set("reduxState", state);
         });
         dataContainerService.initialize().then(() => {
             deepLinksService.initialize();

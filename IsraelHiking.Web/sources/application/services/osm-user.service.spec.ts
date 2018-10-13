@@ -3,12 +3,13 @@ import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import * as L from "leaflet";
 
-import { OsmUserService, ITrace } from "./osm-user.service";
+import { OsmUserService } from "./osm-user.service";
 import { AuthorizationService } from "./authorization.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { HashService } from "./hash.service";
-import { Urls } from "../common/Urls";
-import * as Common from "../common/IsraelHiking";
+import { Urls } from "../urls";
+import { ShareUrl, DataContainer } from "../models/models";
+import { ITrace } from "./traces.service";
 
 describe("OSM User Service", () => {
     beforeEach(() => {
@@ -72,7 +73,7 @@ describe("OSM User Service", () => {
             flushMicrotasks();
             mockBackend.expectOne(Urls.osmUser).flush({});
             flushMicrotasks();
-            mockBackend.expectOne(Urls.urls).flush([{ title: "some share" } as Common.ShareUrl]);
+            mockBackend.expectOne(Urls.urls).flush([{ title: "some share" } as ShareUrl]);
             mockBackend.expectOne(Urls.osmTrace).flush([{ id: "id", name: "name" } as ITrace]);
             flushMicrotasks();
             expect(auth.authenticate).toHaveBeenCalled();
@@ -113,7 +114,7 @@ describe("OSM User Service", () => {
     it("Should update site url", inject([OsmUserService, HttpTestingController],
         async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
 
-            let shareUrl = { id: "42" } as Common.ShareUrl;
+            let shareUrl = { id: "42" } as ShareUrl;
 
             let promise = osmUserService.updateShareUrl(shareUrl).then((res) => {
                 expect(res).not.toBeNull();
@@ -126,7 +127,7 @@ describe("OSM User Service", () => {
     it("Should delete site url", inject([OsmUserService, HttpTestingController],
         async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
 
-            let shareUrl = { id: "42" } as Common.ShareUrl;
+            let shareUrl = { id: "42" } as ShareUrl;
             osmUserService.shareUrls = [shareUrl];
 
             let promise = osmUserService.deleteShareUrl(shareUrl).then(() => {
@@ -172,7 +173,7 @@ describe("OSM User Service", () => {
 
 
     it("Should return full address of osm edit location", inject([OsmUserService], (osmUserService: OsmUserService) => {
-        let address = osmUserService.getEditOsmLocationAddress(Urls.DEFAULT_TILES_ADDRESS, 13, L.latLng(0, 0));
+        let address = osmUserService.getEditOsmLocationAddress(Urls.DEFAULT_TILES_ADDRESS, 13, LatLngAlt(0, 0));
 
         expect(address).toContain(Urls.baseTilesAddress);
         expect(address).toContain(Urls.DEFAULT_TILES_ADDRESS);
@@ -190,7 +191,7 @@ describe("OSM User Service", () => {
     }));
 
     it("Should return social links", inject([OsmUserService, HashService], (osmUserService: OsmUserService, hashService: HashService) => {
-        let shareUrl = { id: "12345" } as Common.ShareUrl;
+        let shareUrl = { id: "12345" } as ShareUrl;
 
         let links = osmUserService.getShareSocialLinks(shareUrl);
 
@@ -203,7 +204,7 @@ describe("OSM User Service", () => {
     it("Should get image preview by sending a request to server",
         inject([OsmUserService, HttpTestingController], async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
 
-            let promise = osmUserService.getImagePreview({} as Common.DataContainer).then((res) => {
+            let promise = osmUserService.getImagePreview({} as DataContainer).then((res) => {
                 expect(res).not.toBeNull();
             });
 

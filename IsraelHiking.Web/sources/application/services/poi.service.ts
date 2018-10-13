@@ -6,8 +6,8 @@ import * as _ from "lodash";
 import { ResourcesService } from "./resources.service";
 import { HashService, IPoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
-import { Urls } from "../common/Urls";
-import * as Common from "../common/IsraelHiking";
+import { Urls } from "../urls";
+import { DataContainer, MarkerData, LatLngAlt } from "../models/models";
 
 export type CategoriesType = "Points of Interest" | "Routes";
 
@@ -32,7 +32,7 @@ export interface IPointOfInterest {
     iconColor: string;
     hasExtraData: boolean;
 
-    location: L.LatLng;
+    location: LatLngAlt;
 }
 
 export interface IReference {
@@ -56,7 +56,7 @@ export interface IPointOfInterestExtended extends IPointOfInterest {
     references: IReference[];
 
     rating: IRating;
-    dataContainer: Common.DataContainer;
+    dataContainer: DataContainer;
     contribution: IContribution;
 }
 
@@ -90,7 +90,7 @@ export interface ISelectableCategory extends ICategory {
 export class PoiService {
     private categoriesMap: Map<CategoriesType, ICategory[]>;
     private poiCache: IPointOfInterestExtended[];
-    private addOrUpdateMarkerData: Common.MarkerData;
+    private addOrUpdateMarkerData: MarkerData;
 
     constructor(private readonly resources: ResourcesService,
         private readonly httpClient: HttpClient,
@@ -143,7 +143,7 @@ export class PoiService {
         return selectableCategories;
     }
 
-    public getPoints(northEast: L.LatLng, southWest: L.LatLng, categoriesTypes: string[]): Promise<IPointOfInterest[]> {
+    public getPoints(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[]): Promise<IPointOfInterest[]> {
         let params = new HttpParams()
             .set("northEast", northEast.lat + "," + northEast.lng)
             .set("southWest", southWest.lat + "," + southWest.lng)
@@ -199,7 +199,7 @@ export class PoiService {
         };
     }
 
-    public setAddOrUpdateMarkerData(data: Common.MarkerData) {
+    public setAddOrUpdateMarkerData(data: MarkerData) {
         this.addOrUpdateMarkerData = data;
     }
 

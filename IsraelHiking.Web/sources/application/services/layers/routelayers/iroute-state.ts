@@ -1,4 +1,4 @@
-﻿export type RouteStateName = "Poi" | "Route" | "ReadOnly" | "Hidden";
+﻿import { RouteStateName } from "../../../models/models";
 
 export interface IRouteState {
     reRoute: () => void;

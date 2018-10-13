@@ -1,0 +1,29 @@
+﻿@import "~scss/_variables.scss";
+
+.pane {
+    position: absolute;
+}
+
+.top-pane {
+    top: 0;
+}
+
+.left-pane {
+    left: 0;
+    z-index: $app-left-z-index !important;
+}
+
+.right-pane {
+    right: 0;
+    z-index: $app-left-z-index - 10 !important;
+}
+
+.bottom-pane {
+    bottom: 0;
+    z-index: $app-left-z-index - 20 !important;
+}
+
+.bottom-pane.left-pane {
+    z-index: $app-left-z-index - 30 !important;
+}
+

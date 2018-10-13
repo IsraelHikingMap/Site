@@ -7,7 +7,7 @@ import { SnappingService } from "./snapping.service";
 import { PoiService } from "./poi.service";
 import { ToastService } from "./toast.service";
 import { RouteStrings } from "./hash.service";
-import * as Common from "../common/IsraelHiking";
+import { LinkData, LatLngAlt, MarkerData } from "../models/models";
 
 @Injectable()
 export class PrivatePoiUploaderService {
@@ -19,13 +19,13 @@ export class PrivatePoiUploaderService {
     }
 
     public async uploadPoint(
-        marker: Common.IMarkerWithTitle,
-        imageLink: Common.LinkData,
+        latLng: LatLngAlt,
+        imageLink: LinkData,
         title: string,
         description: string,
         markerType: string
         ) {
-        let results = await this.snappingService.getClosestPoint(marker.getLatLng());
+        let results = await this.snappingService.getClosestPoint(latLng);
         let urls = [];
         if (imageLink) {
             urls = [imageLink];
@@ -33,10 +33,10 @@ export class PrivatePoiUploaderService {
         let markerData = {
             description: description,
             title: title,
-            latlng: marker.getLatLng(),
+            latlng: latLng,
             type: markerType,
             urls: urls
-        } as Common.MarkerData;
+        } as MarkerData;
 
         this.poiService.setAddOrUpdateMarkerData(markerData);
 

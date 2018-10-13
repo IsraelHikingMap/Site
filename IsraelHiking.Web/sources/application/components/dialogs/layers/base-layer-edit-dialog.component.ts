@@ -6,7 +6,7 @@ import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService, IBaseLayer } from "../../../services/layers/layers.service";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
-import * as Common from "../../../common/IsraelHiking";
+import { LayerData } from "../../../models/models";
 
 @Component({
     selector: "baselayer-edit-dialog",
@@ -39,7 +39,7 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
         this.suppressEvents(e);
     }
 
-    protected internalSave(layerData: Common.LayerData): void {
+    protected internalSave(layerData: LayerData): void {
         this.layersService.updateBaseLayer(this.baseLayer, layerData);
     }
 }

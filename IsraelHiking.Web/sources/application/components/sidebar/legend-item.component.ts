@@ -1,17 +1,15 @@
-import { Component, ViewChild, ElementRef, AfterViewInit, Input } from "@angular/core";
-import * as L from "leaflet";
+import { Component, ViewChild, ElementRef, Input } from "@angular/core";
 
 import { LayersService } from "../../services/layers/layers.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { MapService } from "../../services/map.service";
-import { MapLayersFactory } from "../../services/map-layers.factory";
-import * as Common from "../../common/IsraelHiking";
+import { LatLngAlt } from "../../models/models";
+import { FitBoundsService } from "../../services/fit-bounds.service";
 
 type LegendItemType = "POI" | "Way";
 
 export interface ILegendItem {
-    latlng: L.LatLng;
+    latlng: LatLngAlt;
     zoom: number;
     title: string;
     type: LegendItemType;
@@ -24,7 +22,7 @@ export interface ILegendItem {
     templateUrl: "./legend-item.component.html",
     styleUrls: ["./legend-item.component.css"]
 })
-export class LegendItemComponent extends BaseMapComponent implements AfterViewInit {
+export class LegendItemComponent extends BaseMapComponent {
 
     public static readonly OSM_TAG_LINK = "osm-tag-link";
     public static readonly OSM_KEY_LINK = "osm-key-link";
@@ -36,39 +34,17 @@ export class LegendItemComponent extends BaseMapComponent implements AfterViewIn
     public item: ILegendItem;
 
     constructor(resources: ResourcesService,
-        private mapService: MapService,
+        private fitBoundsService: FitBoundsService,
         private layersService: LayersService) {
         super(resources);
     }
 
-    public ngAfterViewInit(): void {
-        // set timeout in order for animation to complete
-        setTimeout(() => {
-                L.map(this.mapContainer.nativeElement,
-                    {
-                        center: this.item.latlng,
-                        zoom: this.item.zoom,
-                        zoomControl: false,
-                        attributionControl: false,
-                        dragging: false,
-                        scrollWheelZoom: false,
-                        doubleClickZoom: false,
-                        touchZoom: false,
-                        tap: false,
-                        keyboard: false,
-                        inertia: false,
-                        layers: [
-                            MapLayersFactory.createLayer(
-                                { address: this.layersService.selectedBaseLayer.address } as Common.LayerData)
-                        ]
-                    } as L.MapOptions);
-            },
-            500);
-
+    public getUrl() {
+        return this.layersService.selectedBaseLayer.address;
     }
 
     public moveToLocation(item: ILegendItem) {
-        this.mapService.map.flyTo(item.latlng, item.zoom);
+        this.fitBoundsService.flyTo(item.latlng, item.zoom);
     }
 
     public getLink(item: ILegendItem) {

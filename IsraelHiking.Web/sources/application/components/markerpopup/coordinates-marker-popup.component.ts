@@ -2,6 +2,7 @@
 import { ResourcesService } from "../../services/resources.service";
 import { INorthEast } from "./base-marker-popup.component";
 import { BaseMapComponent } from "../base-map.component";
+import { LatLngAlt } from "../../models/models";
 
 @Component({
     selector: "coordinates",
@@ -10,7 +11,7 @@ import { BaseMapComponent } from "../base-map.component";
 export class CoordinatesMarkerPopupComponent extends BaseMapComponent {
 
     @Input()
-    public latLng: L.LatLng;
+    public latLng: LatLngAlt;
     @Input()
     public itmCoordinates = null as INorthEast;
 

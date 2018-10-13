@@ -1,98 +1,75 @@
-﻿import { Component, Injector, Type, ComponentFactoryResolver, ApplicationRef, ViewChild, AfterViewInit } from "@angular/core";
+﻿import { Component, ViewChild, AfterViewInit, ViewEncapsulation } from "@angular/core";
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
-import * as L from "leaflet";
-// HM TODO: see if the following issue is fixed inside leaflet: https://github.com/Leaflet/Leaflet/issues/4968 and remove this plug-in
-import "leaflet-defaulticon-compatibility";
+import { select, NgRedux } from "@angular-redux/store";
+import { Observable } from "rxjs";
+import { proj } from "openlayers";
+import { MapComponent } from "ngx-openlayers";
 
 import { ResourcesService } from "../services/resources.service";
-import { MapService } from "../services/map.service";
-import { SidebarService } from "../services/sidebar.service";
-import { RouteStatisticsService } from "../services/route-statistics.service";
-import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
-import { ZoomComponent } from "./zoom.component";
-import { LocationComponent } from "./location.component";
-import { LayersComponent } from "./layers.component";
-import { FileComponent } from "./file.component";
-import { FileSaveAsComponent } from "./file-save-as.component";
-import { EditOSMComponent } from "./edit-osm.component";
-import { RouteStatisticsComponent } from "./route-statistics.component";
-import { OsmUserComponent } from "./osm-user.component";
-import { LanguageComponent } from "./language.component";
-import { DrawingComponent } from "./drawing.component";
-import { SearchComponent } from "./search.component";
-import { InfoComponent } from "./info.component";
-import { ShareComponent } from "./share.component";
-import { IhmLinkComponent } from "./ihm-link.component";
 import { ImageGalleryService } from "../services/image-gallery.service";
+import { ApplicationState, Location } from "../models/models";
+import { SetLocationAction } from "../reducres/location.reducer";
+import { HashService } from "../services/hash.service";
+import { MapService } from "../services/map.service";
+import { RunningContextService } from "../services/running-context.service";
 
 @Component({
     selector: "main-map",
     templateUrl: "./main-map.component.html",
+    styleUrls: ["./main-map.component.scss"],
+    encapsulation: ViewEncapsulation.None
 })
 export class MainMapComponent extends BaseMapComponent implements AfterViewInit {
 
     @ViewChild(NgxImageGalleryComponent)
     public ngxImageGallery: NgxImageGalleryComponent;
 
+    @ViewChild(MapComponent)
+    public mapComponent: MapComponent;
+
+    @select((state: ApplicationState) => state.location)
+    public location: Observable<Location>;
+
     constructor(resources: ResourcesService,
-        private readonly injector: Injector,
-        private readonly componentFactoryResolver: ComponentFactoryResolver,
+        public readonly imageGalleryService: ImageGalleryService,
         private readonly mapService: MapService,
-        private readonly sidebarService: SidebarService,
-        private readonly routeStatisticsService: RouteStatisticsService,
-        private readonly applicationRef: ApplicationRef,
-        private readonly toastService: ToastService,
-        public readonly imageGalleryService: ImageGalleryService
+        private readonly hashService: HashService,
+        private readonly runningContextService: RunningContextService,
+        private readonly ngRedux: NgRedux<ApplicationState>,
+
     ) {
         super(resources);
-        this.createControls();
+    }
+
+    public moveEnd(e: ol.MapEvent) {
+        if (!e) {
+            return;
+        }
+        console.log("moveend");
+        let centerLatLon = proj.toLonLat(e.map.getView().getCenter());
+        let action = new SetLocationAction({
+            longitude: centerLatLon[0],
+            latitude: centerLatLon[1],
+            zoom: e.map.getView().getZoom()
+        });
+        this.ngRedux.dispatch(action);
+
+        if (!this.hashService.getShareUrlId() && !this.hashService.getUrl() && !this.hashService.getPoiRouterData()) {
+            this.hashService.resetAddressbar();
+        }
     }
 
     public ngAfterViewInit(): void {
         this.imageGalleryService.setGalleryComponent(this.ngxImageGallery);
+        this.mapService.setMap(this.mapComponent.instance);
     }
 
-    private createControls() {
-        let isIFrame = window.self !== window.top;
-
-        this.createContorl("zoom-control", ZoomComponent, "topleft", L.Browser.mobile);
-        this.createContorl("location-control", LocationComponent, "topleft", !L.Browser.mobile && isIFrame);
-        this.createContorl("layer-control", LayersComponent, "topleft", false);
-        this.createContorl("file-control", FileComponent, "topleft", isIFrame);
-        this.createContorl("save-as-control", FileSaveAsComponent, "topleft", isIFrame);
-        this.createContorl("edit-osm-control", EditOSMComponent, "topleft", L.Browser.mobile || isIFrame);
-        this.createContorl("info-control", InfoComponent, "topleft", false);
-        this.createContorl("osm-user-control", OsmUserComponent, "topright", isIFrame);
-        this.createContorl("search-control", SearchComponent, "topright", isIFrame);
-        this.createContorl("drawing-control", DrawingComponent, "topright", isIFrame);
-        this.createContorl("share-control", ShareComponent, "topright", false);
-        this.createContorl("language-control", LanguageComponent, "topright", false);
-        this.createContorl("ihm-link-control", IhmLinkComponent, "bottomleft", false);
-        this.createContorl("route-statistics-control", RouteStatisticsComponent, "bottomright", false);
-
-        L.control.scale({ imperial: false, position: "bottomright" } as L.Control.ScaleOptions).addTo(this.mapService.map);
+    public isMobile() {
+        return this.runningContextService.isMobile;
     }
 
-    private createContorl<T>(directiveHtmlName: string, component: Type<T>, position: L.ControlPosition, hidden: boolean) {
-        let control = L.Control.extend({
-            options: {
-                position: position
-            } as L.ControlOptions,
-            onAdd: (): HTMLElement => {
-                let classString = directiveHtmlName + "-container";
-                if (hidden) {
-                    classString += " hidden";
-                }
-                let controlDiv = L.DomUtil.create("div", classString);
-                let componentFactory = this.componentFactoryResolver.resolveComponentFactory(component);
-                let componentRef = componentFactory.create(this.injector, [], controlDiv);
-                this.applicationRef.attachView(componentRef.hostView);
-                L.DomEvent.disableClickPropagation(controlDiv);
-                return controlDiv;
-            },
-            onRemove: () => { }
-        } as L.ControlOptions);
-        new control().addTo(this.mapService.map);
+    public isIFrame() {
+        return this.runningContextService.isIFrame;
     }
 }

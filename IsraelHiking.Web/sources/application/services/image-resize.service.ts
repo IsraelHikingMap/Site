@@ -1,8 +1,7 @@
 import { Injectable } from "@angular/core";
-import * as L from "leaflet";
 
-import * as Common from "../common/IsraelHiking";
 import { NonAngularObjectsFactory, IPiexif } from "./non-angular-objects.factory";
+import { LatLngAlt, DataContainer, RouteSegmentData, MarkerData, RouteData } from "../models/models";
 
 @Injectable()
 export class ImageResizeService {
@@ -18,12 +17,12 @@ export class ImageResizeService {
         return this.resizeImageAndConvertToAny<string>(file, data => data, false);
     }
 
-    public resizeImageAndConvert(file: File, throwIfNoLocation = true): Promise<Common.DataContainer> {
-        return this.resizeImageAndConvertToAny<Common.DataContainer>(file, this.createDataContainerFromBinaryString, throwIfNoLocation);
+    public resizeImageAndConvert(file: File, throwIfNoLocation = true): Promise<DataContainer> {
+        return this.resizeImageAndConvertToAny<DataContainer>(file, this.createDataContainerFromBinaryString, throwIfNoLocation);
     }
 
     private resizeImageAndConvertToAny<TReturn>(file: File,
-        convertMethod: (data: string, name: string, geoLocation: L.LatLng) => TReturn,
+        convertMethod: (data: string, name: string, geoLocation: LatLngAlt) => TReturn,
         throwIfNoLocation = true) {
         return new Promise<TReturn>((resolve, reject) => {
             let reader = new FileReader();
@@ -48,7 +47,7 @@ export class ImageResizeService {
         });
     }
 
-    private getGeoLocation(exifData: any) {
+    private getGeoLocation(exifData: any): LatLngAlt {
         if (exifData == null ||
             Object.keys(exifData.GPS).length === 0 ||
             !exifData.GPS.hasOwnProperty(this.piexif.GPSIFD.GPSLatitude) ||
@@ -59,7 +58,7 @@ export class ImageResizeService {
             exifData.GPS[this.piexif.GPSIFD.GPSLatitudeRef]);
         let lng = this.piexif.GPSHelper.dmsRationalToDeg(exifData.GPS[this.piexif.GPSIFD.GPSLongitude],
             exifData.GPS[this.piexif.GPSIFD.GPSLongitudeRef]);
-        return L.latLng(lat, lng);
+        return { lat: lat, lng: lng };
     }
 
     private getAndUpdateOrientation(exifData: any) {
@@ -145,13 +144,13 @@ export class ImageResizeService {
         return dataUrl;
     }
 
-    private createDataContainerFromBinaryString(binaryStringData: string, name: string, latLng: L.LatLng) {
+    private createDataContainerFromBinaryString(binaryStringData: string, name: string, latLng: LatLngAlt) {
         return {
             northEast: latLng,
             southWest: latLng,
             routes: [
                 {
-                    segments: [] as Common.RouteSegmentData[],
+                    segments: [] as RouteSegmentData[],
                     markers: [
                         {
                             title: name,
@@ -163,9 +162,9 @@ export class ImageResizeService {
                                 }
                             ]
                         }
-                    ] as Common.MarkerData[]
+                    ] as MarkerData[]
                 }
-            ] as Common.RouteData[]
-        } as Common.DataContainer;
+            ] as RouteData[]
+        } as DataContainer;
     }
 }

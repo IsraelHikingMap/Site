@@ -1,18 +1,17 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener } from "@angular/core";
-import { Router } from "@angular/router";
+import { NgRedux } from "@angular-redux/store";
 import { MatDialogRef } from "@angular/material";
 import { ENTER } from "@angular/cdk/keycodes";
 import * as _ from "lodash";
 
 import { IconsService } from "../../services/icons.service";
-import { IMarkerWithData, IRouteLayer } from "../../services/layers/routelayers/iroute.layer";
-import { MapService } from "../../services/map.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { ImageResizeService } from "../../services/image-resize.service";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
-import * as Common from "../../common/IsraelHiking";
+import { LinkData, MarkerData, ApplicationState } from "../../models/models";
+import { UpdatePrivatePoiAction, DeletePrivatePoiAction } from "../../reducres/routes.reducer";
 
 interface IIconsGroup {
     icons: string[];
@@ -25,9 +24,10 @@ interface IIconsGroup {
 export class PrivatePoiEditDialogComponent extends BaseMapComponent implements AfterViewInit {
     private static readonly NUMBER_OF_ICONS_PER_ROW = 4;
 
-    private routeLayer: IRouteLayer;
-    private marker: Common.IMarkerWithTitle;
-    public imageLink: Common.LinkData;
+    private marker: MarkerData;
+    private routeId: string;
+    private markerIndex: number;
+    public imageLink: LinkData;
 
     public showIcons: boolean;
     public title: string;
@@ -39,11 +39,11 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public titleInput: ElementRef;
 
     constructor(resources: ResourcesService,
-        private readonly mapService: MapService,
         private readonly fileService: FileService,
         private readonly imageResizeService: ImageResizeService,
         private readonly privatePoiUploaderService: PrivatePoiUploaderService,
-        private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>) {
+        private readonly dialogRef: MatDialogRef<PrivatePoiEditDialogComponent>,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.showIcons = false;
         this.iconsGroups = [];
@@ -71,14 +71,14 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         }
     }
 
-    public setMarkerAndRoute(marker: Common.IMarkerWithTitle, routeLayer: IRouteLayer) {
+    public setMarkerAndRoute(marker: MarkerData, routeId: string, index: number) {
         this.marker = marker;
-        this.routeLayer = routeLayer;
-        let routeMarker = _.find(routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker) as IMarkerWithData;
-        this.markerType = routeMarker.type;
-        this.title = routeMarker.title;
-        this.description = routeMarker.description;
-        let url = _.find(routeMarker.urls, u => u.mimeType.startsWith("image"));
+        this.routeId = routeId;
+        this.markerIndex = index;
+        this.markerType = marker.type;
+        this.title = marker.title;
+        this.description = marker.description;
+        let url = _.find(marker.urls, u => u.mimeType.startsWith("image"));
         this.imageLink = url;
     }
 
@@ -87,22 +87,19 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public save = () => {
-        let routeMarker = _.find(this.routeLayer.route.markers, markerToFind => markerToFind.marker === this.marker) as IMarkerWithData;
-        if (!routeMarker) {
-            return;
+
+        let updatedMarker = {
+            title: this.title,
+            description: this.description,
+            latlng: this.marker.latlng,
+            type: this.markerType,
+            urls: this.imageLink ? [this.imageLink] : [],
         }
-        routeMarker.title = this.title;
-        routeMarker.type = this.markerType;
-        routeMarker.description = this.description;
-        if (this.imageLink) {
-            routeMarker.urls = [this.imageLink];
-        } else {
-            routeMarker.urls = [];
-        }
-        let color = this.routeLayer.route.properties.pathOptions.color;
-        this.mapService.setMarkerTitle(this.marker, routeMarker, color);
-        this.marker.setIcon(IconsService.createMarkerIconWithColorAndType(color, routeMarker.type));
-        this.routeLayer.raiseDataChanged();
+        this.ngRedux.dispatch(new UpdatePrivatePoiAction({
+            index: this.markerIndex,
+            routeId: this.routeId,
+            markerData: updatedMarker
+        }));
     }
 
     public async addImage(e: any) {
@@ -121,7 +118,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
 
     public async uploadPoint(e: Event) {
         await this.privatePoiUploaderService.uploadPoint(
-            this.marker,
+            this.marker.latlng,
             this.imageLink,
             this.title,
             this.description,
@@ -129,7 +126,12 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         this.dialogRef.close();
     }
 
-    public remove: () => void = () => { throw new Error("Should be overridden in caller"); };
+    public remove: () => void = () => {
+        this.ngRedux.dispatch(new DeletePrivatePoiAction({
+            routeId: this.routeId,
+            index: this.markerIndex
+        }));
+    };
 
     @HostListener("window:keydown", ["$event"])
     public onEnterPress($event: KeyboardEvent) {

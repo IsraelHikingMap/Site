@@ -1,12 +1,11 @@
 import * as L from "leaflet";
 import * as _ from "lodash";
 
-import { RouteStateName } from "./iroute-state";
 import { RouteStateBase } from "./route-state-base";
 import { IRouteLayer } from "./iroute.layer";
 import { RouteStateHelper } from "./route-state-helper";
 import { RouteStatePoiHelper } from "./route-state-poi-helper";
-import * as Common from "../../../common/IsraelHiking";
+import { LatLngAlt, IMarkerWithTitle, RouteStateName } from "../../../models/models";
 
 export class RouteStateReadOnly extends RouteStateBase {
     private polylines: L.LayerGroup;
@@ -17,7 +16,7 @@ export class RouteStateReadOnly extends RouteStateBase {
         this.initialize();
     }
 
-    private addPolyline(latlngs: L.LatLng[]): void {
+    private addPolyline(latlngs: LatLngAlt[]): void {
         let routePathOptions = { ...this.context.route.properties.pathOptions } as L.PathOptions;
         routePathOptions.dashArray = "30 10";
         routePathOptions.className = "segment-readonly-indicator";
@@ -27,7 +26,7 @@ export class RouteStateReadOnly extends RouteStateBase {
 
     public initialize() {
         super.initialize();
-        this.context.mapService.map.addLayer(this.polylines);
+        //this.context.mapService.map.addLayer(this.polylines);
         this.polylines.clearLayers();
         if (this.context.route.segments.length > 0) {
             let groupedLatLngs = this.context.mapService.getGroupedLatLngForAntPath(this.context.route.segments);
@@ -46,9 +45,9 @@ export class RouteStateReadOnly extends RouteStateBase {
 
     public clear() {
         RouteStateHelper.removeLayersFromMap(this.context);
-        this.context.mapService.map.off("mousemove", this.onMouseMove);
+        //this.context.mapService.map.off("mousemove", this.onMouseMove);
         this.polylines.clearLayers();
-        this.context.mapService.map.removeLayer(this.polylines);
+        //this.context.mapService.map.removeLayer(this.polylines);
         super.clear();
     }
 
@@ -58,14 +57,14 @@ export class RouteStateReadOnly extends RouteStateBase {
 
     private onMouseMove = (e: L.LeafletMouseEvent): void => {
         let response = this.context.snapToSelf(e.latlng);
-        if (response.polyline == null) {
+        if (response.line == null) {
             this.context.polylineHovered.next(null);
         } else {
             this.context.polylineHovered.next(response.latlng);
         }
     }
 
-    private changeStateToEditPoi(markerWithTitle: Common.IMarkerWithTitle) {
+    private changeStateToEditPoi(markerWithTitle: IMarkerWithTitle) {
         let markerLatLng = markerWithTitle.getLatLng();
         this.context.setEditPoiState();
         // old markers are destroyed and new markers are created.
@@ -79,7 +78,7 @@ export class RouteStateReadOnly extends RouteStateBase {
         super.addPosition();
         let latLng = this.context.geoLocationService.currentLocation;
         let lastPolyline = this.polylines.getLayers()[this.polylines.getLayers().length - 1] as L.Polyline;
-        let latlngs = lastPolyline.getLatLngs() as L.LatLng[];
+        let latlngs = lastPolyline.getLatLngs() as LatLngAlt[];
         latlngs.push(latLng);
         lastPolyline.setLatLngs(latlngs);
         RouteStateHelper.createStartAndEndMarkers(this.context);
