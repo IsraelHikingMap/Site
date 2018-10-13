@@ -42,8 +42,8 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     }
 
     protected abstract saveImplementation();
-    public saveRouteToFile(e: Event) { }
-    public moveToRoute = (e: Event) => { };
-    public deleteRoute(e: Event) { }
+    public saveRouteToFile() { }
+    public moveToRoute = () => { };
+    public deleteRoute() { }
     public makeAllPointsEditable = () => { };
 }

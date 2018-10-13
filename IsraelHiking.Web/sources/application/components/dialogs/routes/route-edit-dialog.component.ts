@@ -52,13 +52,13 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
             this.selectedRouteService.isNameAvailable(this.routeData.name) === false;
     }
 
-    public deleteRoute(e: Event) {
+    public deleteRoute() {
         this.ngRedux.dispatch(new DeleteRouteAction({
             routeId: this.routeData.id
         }));
     }
 
-    public async saveRouteToFile(e: Event) {
+    public async saveRouteToFile() {
         let latLngs = this.getLatlngs();
         if (latLngs.length === 0) {
             this.toastService.error(this.resources.pleaseAddPointsToRoute);
@@ -77,7 +77,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         }
     }
 
-    public moveToRoute = (e: Event) => {
+    public moveToRoute = () => {
         let latLngs = this.getLatlngs();
         if (latLngs.length === 0) {
             this.toastService.error(this.resources.pleaseAddPointsToRoute);
