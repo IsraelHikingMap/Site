@@ -1,7 +1,7 @@
 ﻿<div class="side-control">
     <label>
         <a mat-button matTooltip="{{resources.openAFile}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Open from file"><i class="fa icon-folder-open fa-lg"></i></a>
-        <input type="file" name="file" id="openFile" #openFile (change)="open()" [style.display]="'none'" />
+        <input type="file" name="file" id="openFile" #openFile (change)="open($event)" [style.display]="'none'" />
     </label>
     <button mat-button (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save to file"><i class="fa icon-floppy-o fa-lg"></i></button>
     <button mat-button *ngIf="showPrint()" (click)="print()" matTooltip="{{resources.print}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Print" angularticsAction="Print map"><i class="fa icon-print fa-lg"></i></button>
