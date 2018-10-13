@@ -16,7 +16,7 @@
         <mat-expansion-panel [expanded]="getExpandState('Base Layers')" (opened)="expand('Base Layers')" (closed)="collapse('Base Layers')">
             <mat-expansion-panel-header>
                 <mat-panel-title>
-                    <button mat-button (click)="addBaseLayer(e)" matTooltip="{{resources.addBaseLayer}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add base layer"><i class="fa fa-lg icon-plus"></i></button>
+                    <button mat-button (click)="addBaseLayer()" matTooltip="{{resources.addBaseLayer}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Add base layer"><i class="fa fa-lg icon-plus"></i></button>
                     <p>{{resources.baseLayers}}</p>
                 </mat-panel-title>
             </mat-expansion-panel-header>

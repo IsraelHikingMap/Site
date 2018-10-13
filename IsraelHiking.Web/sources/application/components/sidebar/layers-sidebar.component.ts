@@ -146,7 +146,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         dialogRef.componentInstance.setOverlay(layer);
     }
 
-    public addRoute(e: Event) {
+    public addRoute() {
         this.dialog.open(RouteAddDialogComponent);
     }
 

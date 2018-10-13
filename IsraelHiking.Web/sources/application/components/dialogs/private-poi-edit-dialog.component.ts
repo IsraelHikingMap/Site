@@ -115,7 +115,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         this.imageLink = null;
     }
 
-    public async uploadPoint(e: Event) {
+    public async uploadPoint() {
         await this.privatePoiUploaderService.uploadPoint(
             this.marker.latlng,
             this.imageLink,

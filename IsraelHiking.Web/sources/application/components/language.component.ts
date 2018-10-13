@@ -14,7 +14,7 @@ export class LanguageComponent extends BaseMapComponent {
         super(resources);
     }
 
-    public openDialog(e: Event) {
+    public openDialog() {
         this.dialog.open(LanguageDialogComponent);
     }
 }
