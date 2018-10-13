@@ -1,7 +1,6 @@
 import { TestBed, inject, fakeAsync, flushMicrotasks } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
-import * as L from "leaflet";
 
 import { OsmUserService } from "./osm-user.service";
 import { AuthorizationService } from "./authorization.service";

@@ -36,15 +36,14 @@ export class FileSaveAsComponent extends BaseMapComponent {
     }
 
 
-    public toggleSaveAs(e: Event) {
+    public toggleSaveAs() {
         this.isOpen = !this.isOpen;
-        this.suppressEvents(e);
         if (this.isOpen) {
             setTimeout(() => this.dropdown.open(), 500);
         }
     }
 
-    public saveAs = async (format: IFormatViewModel, e: Event) => {
+    public saveAs = async (format: IFormatViewModel) => {
         this.selectedFormat = format;
         let outputFormat = format.outputFormat;
         let data = this.dataContainerService.getDataForFileExport();
@@ -66,7 +65,6 @@ export class FileSaveAsComponent extends BaseMapComponent {
         }
 
         this.isOpen = false;
-        this.suppressEvents(e);
     }
 
     private getName(data: DataContainer): string {

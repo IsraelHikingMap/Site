@@ -15,7 +15,6 @@ export class LayersComponent extends BaseMapComponent {
 
     public toggleShow(e: Event) {
         this.sidebarService.toggle("layers");
-        this.suppressEvents(e);
     }
 
     public isActive(): boolean {

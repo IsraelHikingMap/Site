@@ -49,7 +49,7 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
         this.opacity = opacity;
     }
 
-    public saveLayer = (e: Event) => {
+    public saveLayer = () => {
         let layerData = {
             key: this.key,
             address: this.getTilesAddress(),
@@ -59,7 +59,6 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
             opacity: this.opacity
         } as LayerData;
         this.internalSave(layerData);
-        this.suppressEvents(e);
     }
 
     protected abstract internalSave(layerData: LayerData): void;

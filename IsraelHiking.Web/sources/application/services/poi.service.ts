@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { ResourcesService } from "./resources.service";
@@ -164,7 +163,7 @@ export class PoiService {
                 dataContainer: { routes: [] }
             } as IPointOfInterestExtended);
         }
-        let itemInCache = _.find(this.poiCache, p => p.id === id && p.source === source);
+        let itemInCache = this.poiCache.find(p => p.id === id && p.source === source);
         if (itemInCache) {
             return this.mergeWithPoi(itemInCache);
         }

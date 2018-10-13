@@ -16,8 +16,7 @@ export class ShareComponent extends BaseMapComponent {
 
     }
 
-    public openShare = (e: Event) => {
+    public openShare = () => {
         this.dialog.open(ShareDialogComponent);
-        this.suppressEvents(e);
     }
 }

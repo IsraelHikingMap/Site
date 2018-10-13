@@ -74,13 +74,11 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         this.sidebarService.hide();
     }
 
-    public addBaseLayer(e: Event) {
-        this.suppressEvents(e);
+    public addBaseLayer() {
         this.dialog.open(BaseLayerAddDialogComponent);
     }
 
-    public editBaseLayer(layer: IBaseLayer, e: Event) {
-        this.suppressEvents(e);
+    public editBaseLayer(layer: IBaseLayer) {
         let dialogRef = this.dialog.open(BaseLayerEditDialogComponent);
         dialogRef.componentInstance.setBaseLayer(layer);
     }
@@ -89,8 +87,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         return this.categoriesLayerFactory.get(categoriesType).isVisible();
     }
 
-    public toggleCategoriesLayerVisibility(categoriesType: CategoriesType, e: Event) {
-        this.suppressEvents(e);
+    public toggleCategoriesLayerVisibility(categoriesType: CategoriesType) {
         let layer = this.categoriesLayerFactory.get(categoriesType);
         if (layer.isVisible()) {
             layer.hide();
@@ -128,8 +125,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         return state ? state.isExpanded : false;
     }
 
-    public toggleCategory(categoriesType: CategoriesType, category: ICategory, e: Event) {
-        this.suppressEvents(e);
+    public toggleCategory(categoriesType: CategoriesType, category: ICategory) {
         let layer = this.categoriesLayerFactory.get(categoriesType);
         layer.toggleCategory(category);
         if (layer.isVisible() && every(layer.categories, c => c.isSelected === false)) {
@@ -141,19 +137,16 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         }
     }
 
-    public addOverlay(e: Event) {
-        this.suppressEvents(e);
+    public addOverlay() {
         this.dialog.open(OverlayAddDialogComponent);
     }
 
-    public editOverlay(layer: IOverlay, e: Event) {
-        this.suppressEvents(e);
+    public editOverlay(layer: IOverlay) {
         let dialogRef = this.dialog.open(OverlayEditDialogComponent);
         dialogRef.componentInstance.setOverlay(layer);
     }
 
     public addRoute(e: Event) {
-        this.suppressEvents(e);
         this.dialog.open(RouteAddDialogComponent);
     }
 
@@ -162,14 +155,12 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         dialogRef.componentInstance.setRouteData(routeData);
     }
 
-    public selectBaseLayer(baseLayer: IBaseLayer, e: Event) {
+    public selectBaseLayer(baseLayer: IBaseLayer) {
         this.layersService.selectBaseLayer(baseLayer);
-        this.suppressEvents(e);
     }
 
-    public toggleVisibility(overlay: IOverlay, e: Event) {
+    public toggleVisibility(overlay: IOverlay) {
         this.layersService.toggleOverlay(overlay);
-        this.suppressEvents(e);
     }
 
     public toggleRoute(routeData: RouteData) {

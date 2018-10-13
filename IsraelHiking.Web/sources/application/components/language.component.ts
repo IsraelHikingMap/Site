@@ -16,6 +16,5 @@ export class LanguageComponent extends BaseMapComponent {
 
     public openDialog(e: Event) {
         this.dialog.open(LanguageDialogComponent);
-        this.suppressEvents(e);
     }
 }

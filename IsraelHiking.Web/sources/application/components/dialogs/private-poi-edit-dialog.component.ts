@@ -103,7 +103,6 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public async addImage(e: any) {
-        this.suppressEvents(e);
         let file = this.fileService.getFileFromEvent(e);
         if (!file) {
             return;

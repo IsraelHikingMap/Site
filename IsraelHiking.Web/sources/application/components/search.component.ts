@@ -13,8 +13,7 @@ import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { ENTER } from "@angular/cdk/keycodes";
-import * as L from "leaflet";
-import * as _ from "lodash";
+import { remove } from "lodash";
 import { Coordinate } from "openlayers";
 
 import { ResourcesService } from "../services/resources.service";
@@ -153,7 +152,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
     }
 
-    public toggleVisibility = (e: Event) => {
+    public toggleVisibility = () => {
         this.isVisible = !this.isVisible;
         if (this.isVisible) {
             // allow DOM make the input visible
@@ -165,12 +164,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         } else {
             this.matAutocompleteTriggers.forEach(trigger => trigger.closePanel());
         }
-        this.suppressEvents(e);
     }
 
-    public toggleDirectional = (e: Event) => {
+    public toggleDirectional = () => {
         this.directional.isOn = !this.directional.isOn;
-        this.suppressEvents(e);
     }
 
     public search = (searchContext: ISearchContext) => {
@@ -185,9 +182,9 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         return results ? results.displayName : "";
     }
 
-    public moveToResults = (searchResults: ISearchResultsPointOfInterest, e: Event) => {
+    public moveToResults = (searchResults: ISearchResultsPointOfInterest) => {
         if (this.isVisible) {
-            this.toggleVisibility(e);
+            this.toggleVisibility();
         }
         let bounds = { northEast: searchResults.southWest, southWest: searchResults.northEast };
         this.fitBoundsService.fitBounds(bounds);
@@ -198,17 +195,15 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     private selectResults = (searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) => {
         searchContext.selectedSearchResults = searchResult;
         if (!this.directional.isOn) {
-            this.moveToResults(searchResult, new Event("click"));
+            this.moveToResults(searchResult);
         }
     }
 
     public setRouting = (routingType: RoutingType, e: Event) => {
         this.routingType = routingType;
-        this.suppressEvents(e);
     }
 
-    public searchRoute = async (e: Event) => {
-        this.suppressEvents(e);
+    public searchRoute = async () => {
         if (!this.fromContext.selectedSearchResults) {
             this.toastService.warning(this.resources.pleaseSelectFrom);
             return;
@@ -264,7 +259,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
         switch (String.fromCharCode($event.which).toLowerCase()) {
             case "f":
-                this.toggleVisibility($event);
+                this.toggleVisibility();
                 break;
             default:
                 return true;
@@ -302,14 +297,14 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         } as ISearchRequestQueueItem);
         try {
             let results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasRtlCharacters(searchTerm));
-            let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
+            let queueItem = this.requestsQueue.find(itemToFind => itemToFind.searchTerm === searchTerm);
             if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                 this.requestsQueue.splice(0, this.requestsQueue.length - 1);
                 return;
             }
             if (searchContext.searchTerm !== searchTerm) {
                 // search term changed since it was requested.
-                _.remove(this.requestsQueue, queueItem);
+                remove(this.requestsQueue, queueItem);
                 return;
             }
             searchContext.searchResults = results;

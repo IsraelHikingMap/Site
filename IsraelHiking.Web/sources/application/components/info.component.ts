@@ -29,9 +29,8 @@ export class InfoComponent extends BaseMapComponent {
             });
     }
 
-    public toggleInfo = (e: Event) => {
+    public toggleInfo = () => {
         this.sidebarService.toggle("info");
-        this.suppressEvents(e);
     }
 
     public isActive = (): boolean => {

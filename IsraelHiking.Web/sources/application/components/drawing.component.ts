@@ -42,13 +42,13 @@ export class DrawingComponent extends BaseMapComponent {
             return;
         }
         if ($event.ctrlKey && String.fromCharCode($event.which).toLowerCase() === "z") {
-            this.undo($event);
+            this.undo();
         } else if ($event.keyCode === ESCAPE) {
             if (this.isPoiEditActive()) {
-                this.toggleEditPoi($event);
+                this.toggleEditPoi();
             }
             if (this.isRouteEditActive()) {
-                this.toggleEditRoute($event);
+                this.toggleEditRoute();
             }
         }
     }
@@ -88,7 +88,7 @@ export class DrawingComponent extends BaseMapComponent {
             selectedRoute.isRecording;
     }
 
-    public toggleEditRoute(e: Event) {
+    public toggleEditRoute() {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         switch (selectedRoute.state) {
             case "Route":
@@ -100,7 +100,7 @@ export class DrawingComponent extends BaseMapComponent {
         }
     }
 
-    public toggleEditPoi(e: Event) {
+    public toggleEditPoi() {
         let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         switch (selectedRoute.state) {
         case "Poi":
@@ -112,15 +112,14 @@ export class DrawingComponent extends BaseMapComponent {
         }
     }
 
-    public setRouting(routingType: RoutingType, e: Event) {
-        this.suppressEvents(e);
+    public setRouting(routingType: RoutingType) {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
         this.ngRedux.dispatch(new SetRouteEditingStateAction({ routingType: routingType }));
     }
 
-    public undo = (e: Event) => {
+    public undo = () => {
         this.ngRedux.dispatch(ActionCreators.undo());
     }
 

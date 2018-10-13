@@ -10,8 +10,8 @@ import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material";
 import { SharedStorage } from "ngx-store";
 import { Subscription } from "rxjs";
-import * as L from "leaflet";
-import * as _ from "lodash";
+//import * as _ from "lodash";
+import { orderBy, take } from "lodash";
 
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
@@ -27,6 +27,7 @@ import { BaseMapComponent } from "../base-map.component";
 import { MissingPartMarkerPopupComponent } from "../markerpopup/missing-part-marker-popup.component";
 import { ITrace, TracesService } from "../../services/traces.service";
 import { DataContainer, IMarkerWithTitle, RouteData } from "../../models/models";
+import { RunningContextService } from "../../services/running-context.service";
 
 
 @Component({
@@ -61,7 +62,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         private readonly geoJsonParser: GeoJsonParser,
         private readonly routesService: RoutesService,
         private readonly osmUserService: OsmUserService,
-        private readonly tracesService: TracesService
+        private readonly tracesService: TracesService,
+        private readonly runningContextService: RunningContextService
     ) {
         super(resources);
         this.loadingTraces = false;
@@ -185,8 +187,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             } as ITrace;
         });
         let traces = this.tracesService.traces.concat(localTraces);
-        let ordered = _.orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
-        this.filteredTraces = _.take(ordered, this.page * 10);
+        let ordered = orderBy(traces.filter((t) => this.findInTrace(t, searchTerm)), ["timeStamp"], ["desc"]);
+        this.filteredTraces = take(ordered, this.page * 10);
     }
 
     private findInTrace(trace: ITrace, searchTerm: string) {
@@ -234,7 +236,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public isMobile(): boolean {
-        return L.Browser.mobile;
+        return this.runningContextService.isMobile;
     }
 
     public canUploadToOsm(): boolean {

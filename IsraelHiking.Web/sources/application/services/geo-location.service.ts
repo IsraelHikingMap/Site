@@ -1,5 +1,4 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import * as L from "leaflet";
 
 import { environment } from "../../environments/environment";
 import { ResourcesService } from "./resources.service";

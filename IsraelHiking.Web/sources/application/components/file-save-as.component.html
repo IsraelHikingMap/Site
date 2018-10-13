@@ -1,15 +1,15 @@
 ﻿<div class="side-control" *ngIf="!isOpen" [dir]="resources.direction">
-    <button mat-button (click)="toggleSaveAs($event)" matTooltip="{{resources.saveAs}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as open"><i class="fa icon-save-as fa-lg"></i></button>
+    <button mat-button (click)="toggleSaveAs()" matTooltip="{{resources.saveAs}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as open"><i class="fa icon-save-as fa-lg"></i></button>
 </div>
 <div class="side-control" *ngIf="isOpen" [dir]="resources.direction">
     <div class="save-as-dropdown">
         <mat-form-field fxFill>
             <mat-select placeholder="{{resources.saveAs}}" fxFill #dropdown="matSelect">
-                <mat-option *ngFor="let format of formats" [value]="format" (click)="saveAs(format, $event)" [dir]="'ltr'">
+                <mat-option *ngFor="let format of formats" [value]="format" (click)="saveAs(format)" [dir]="'ltr'">
                     {{format.label}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
     </div>
-    <button mat-button class="pull-right" (click)="toggleSaveAs($event)" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as close"><i class="fa icon-save-as fa-lg"></i></button>
+    <button mat-button class="pull-right" (click)="toggleSaveAs()" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as close"><i class="fa icon-save-as fa-lg"></i></button>
 </div>

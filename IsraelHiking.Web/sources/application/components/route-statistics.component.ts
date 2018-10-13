@@ -175,8 +175,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         return Math.abs(number) > 1000 ? (number / 1000.0).toFixed(2) : number.toFixed(0);
     }
 
-    public toggle(e: Event): void {
-        this.suppressEvents(e);
+    public toggle(): void {
         this.routeStatisticsService.toggle();
         if (this.routeStatisticsService.isVisible()) {
             this.changeDetectorRef.detectChanges();
@@ -510,7 +509,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .duration(duration);
     }
 
-    public toggleKmMarker($event: Event) {
+    public toggleKmMarker() {
         this.isKmMarkersOn = !this.isKmMarkersOn;
         this.updateKmMarkers();
     }

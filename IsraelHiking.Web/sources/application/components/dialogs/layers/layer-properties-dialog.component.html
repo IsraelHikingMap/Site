@@ -48,7 +48,7 @@
         </div>
     </div>
     <div mat-dialog-actions fxLayoutAlign="end">
-        <button matDialogClose type="button" mat-button *ngIf="!isNew" (click)="removeLayer($event)" matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
-        <button matDialogClose type="button" mat-button (click)="saveLayer($event)" [disabled]="keyInput.errors" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Save layer"><i class="fa icon-check"></i></button>
+        <button matDialogClose type="button" mat-button *ngIf="!isNew" (click)="removeLayer()" matTooltip="{{resources.deleteLayer}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Delete layer"><i class="fa fa-lg icon-trash"></i></button>
+        <button matDialogClose type="button" mat-button (click)="saveLayer()" [disabled]="keyInput.errors" matTooltip="{{resources.save}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Save layer"><i class="fa icon-check"></i></button>
     </div>
 </div>

@@ -24,7 +24,7 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
         private readonly sidebarService: SidebarService,
         private readonly dataContainerService: DataContainerService,
         private readonly fitBoundsService: FitBoundsService,
-        private readonly ngRedux: NgRedux<ApplicationState) {
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         this.subscription = null;
     }
 

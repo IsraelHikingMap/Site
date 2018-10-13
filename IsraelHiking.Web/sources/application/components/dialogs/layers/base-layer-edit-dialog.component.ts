@@ -34,9 +34,8 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
         this.address = this.baseLayer.address;
     }
 
-    public removeLayer(e: Event) {
+    public removeLayer() {
         this.layersService.removeBaseLayer(this.baseLayer);
-        this.suppressEvents(e);
     }
 
     protected internalSave(layerData: LayerData): void {

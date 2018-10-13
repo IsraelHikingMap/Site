@@ -1,6 +1,5 @@
 ﻿import { Component, HostListener, ViewChild, ElementRef } from "@angular/core";
-import * as L from "leaflet";
-import * as _ from "lodash";
+import { every } from "lodash";
 
 import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
@@ -8,6 +7,7 @@ import { FileService } from "../services/file.service";
 import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
 import { DataContainer } from "../models/models";
+import { RunningContextService } from "../services/running-context.service";
 
 @Component({
     selector: "file",
@@ -22,6 +22,7 @@ export class FileComponent extends BaseMapComponent {
         private readonly dataContainerService: DataContainerService,
         private readonly fileService: FileService,
         private readonly toastService: ToastService,
+        private readonly runningContextService: RunningContextService
     ) {
         super(resources);
     }
@@ -39,12 +40,11 @@ export class FileComponent extends BaseMapComponent {
         }
     }
 
-    public async save(e: Event) {
+    public async save() {
         let data = this.dataContainerService.getDataForFileExport();
         if (!this.isDataSaveable(data)) {
             return;
         }
-        this.suppressEvents(e);
         try {
             let showToast = await this.fileService.saveToFile(this.getName(data) + ".gpx", "gpx", data);
             if (showToast) {
@@ -68,20 +68,19 @@ export class FileComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
             return false;
         }
-        if (_.every(data.routes, r => r.segments.length === 0 && r.markers.length === 0)) {
+        if (every(data.routes, r => r.segments.length === 0 && r.markers.length === 0)) {
             this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
             return false;
         }
         return true;
     }
 
-    public print(e: Event) {
+    public print() {
         window.print();
-        this.suppressEvents(e);
     }
 
     public showPrint(): boolean {
-        return !L.Browser.mobile;
+        return this.runningContextService.isMobile;
     }
 
     @HostListener("window:keydown", ["$event"])
@@ -95,10 +94,10 @@ export class FileComponent extends BaseMapComponent {
                 this.openFileElement.nativeElement.click();
                 break;
             case "s":
-                this.save($event);
+                this.save();
                 break;
             case "p":
-                this.print($event);
+                this.print();
                 break;
             default:
                 return true;

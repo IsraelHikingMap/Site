@@ -44,8 +44,7 @@ export class DrawingPoiMarkerPopupComponent extends BaseMarkerPopupComponent {
         return this.osmUserService.isLoggedIn();
     }
 
-    public async uploadPoint(e: Event) {
-        this.suppressEvents(e);
+    public async uploadPoint() {
         await await this.privatePoiUploaderService.uploadPoint(
             this.latLng,
             this.imageLink,

@@ -35,9 +35,8 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
         this.opacity = this.overlay.opacity || 1.0;
     }
 
-    public removeLayer(e: Event) {
+    public removeLayer() {
         this.layersService.removeOverlay(this.overlay);
-        this.suppressEvents(e);
     }
 
     protected internalSave(layerData: LayerData): void {

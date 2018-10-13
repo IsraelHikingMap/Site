@@ -1,9 +1,7 @@
 import { Component } from "@angular/core";
 import { Router } from "@angular/router";
-import * as L from "leaflet";
-import * as _ from "lodash";
+import { remove } from "lodash";
 
-import { MapService } from "../../services/map.service";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers/layers.service";
@@ -48,11 +46,6 @@ export class InfoSidebarComponent extends BaseMapComponent {
 
     public openDownloadDialog = () => {
         this.router.navigate([RouteStrings.DOWNLOAD]);
-    }
-
-    public toggleInfo = (e: Event) => {
-        this.sidebarService.toggle("info");
-        this.suppressEvents(e);
     }
 
     public isActive = (): boolean => {
@@ -1095,8 +1088,8 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private removeMtbUnwantedLegend() {
-        _.remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendRegionalTrails);
-        _.remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendMarkedTrails);
+        remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendRegionalTrails);
+        remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendMarkedTrails);
 
         this.removeItemInSection(this.resources.legendTrails, this.resources.legendDifficult4WD);
         this.removeItemInSection(this.resources.legendTrails, this.resources.legendSteps);
@@ -1120,8 +1113,8 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private removeIhmUnwantedLegend() {
-        _.remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendSingles);
-        _.remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendBicycleTrails);
+        remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendSingles);
+        remove(this.legendSections, sectionToRemove => sectionToRemove.title === this.resources.legendBicycleTrails);
 
         this.removeItemInSection(this.resources.legendWater, this.resources.legendRiver);
         this.removeItemInSection(this.resources.legendWater, this.resources.legendWetland);
@@ -1153,9 +1146,9 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     private removeItemInSection(sectionTitle: string, title: string) {
-        let section = _.find(this.legendSections, sectionToFind => sectionToFind.title === sectionTitle);
+        let section = this.legendSections.find(sectionToFind => sectionToFind.title === sectionTitle);
         if (section) {
-            _.remove(section.items, itemToRemove => itemToRemove.title === title);
+            remove(section.items, itemToRemove => itemToRemove.title === title);
         }
     }
 }

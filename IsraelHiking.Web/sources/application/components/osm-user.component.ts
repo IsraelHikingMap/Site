@@ -57,8 +57,7 @@ export class OsmUserComponent extends BaseMapComponent {
         ];
     }
 
-    public login(e: Event) {
-        this.suppressEvents(e);
+    public login() {
         if (!this.agreedToTheTermsOfService) {
             let component = this.dialog.open(TermsOfServiceDialogComponent);
             component.afterClosed().subscribe((results: string) => {
