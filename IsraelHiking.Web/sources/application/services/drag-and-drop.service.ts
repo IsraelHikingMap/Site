@@ -13,7 +13,7 @@ export class DragAndDropService {
         private readonly toastService: ToastService) {
 
         // HM TODO: make drag and drop work on the map
-        let dropbox = window.document;// this.mapService.map.getContainer();
+        let dropbox = window.document; // this.mapService.map.getContainer();
         dropbox.addEventListener("drop", (e: DragEvent) => {
             e.stopPropagation();
             e.preventDefault();

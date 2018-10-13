@@ -337,7 +337,7 @@ export class ApplicationModule {
         ngRedux.configureStore(rootReducer, storedState, [(state) => (next) => (action) => next({...action})]);
         ngRedux.select().subscribe((state) => {
             console.log(state);
-            //localStorageService.set("reduxState", state);
+            // localStorageService.set("reduxState", state);
         });
         dataContainerService.initialize().then(() => {
             deepLinksService.initialize();

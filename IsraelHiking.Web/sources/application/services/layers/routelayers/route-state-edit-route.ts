@@ -47,7 +47,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         this.addPointToRoute(response.latlng, this.context.route.properties.currentRoutingType).then(() => {
             this.context.raiseDataChanged();
         });
-        //this.hoverHandler.setState(HoverHandlerState.NONE);
+        // this.hoverHandler.setState(HoverHandlerState.NONE);
     }
 
     private addPointToRoute = async (latlng: LatLngAlt, routingType: string): Promise<{}> => {
@@ -77,16 +77,16 @@ export class RouteStateEditRoute extends RouteStateEditBase {
                 opacity: pathOptions.opacity
             } as L.MarkerOptions);
         this.setRouteMarkerEvents(marker);
-        //marker.addTo(this.context.mapService.map);
-        //let factory = this.context.componentFactoryResolver.resolveComponentFactory(RouteMarkerPopupComponent);
+        // marker.addTo(this.context.mapService.map);
+        // let factory = this.context.componentFactoryResolver.resolveComponentFactory(RouteMarkerPopupComponent);
         let containerDiv = L.DomUtil.create("div");
-        //let routeMarkerPopupComponentRef = factory.create(this.context.injector, [], containerDiv);
-        //routeMarkerPopupComponentRef.instance.setMarker(marker as Common.IMarkerWithTitle);
-        //routeMarkerPopupComponentRef.instance.remove = () => {
+        // let routeMarkerPopupComponentRef = factory.create(this.context.injector, [], containerDiv);
+        // routeMarkerPopupComponentRef.instance.setMarker(marker as Common.IMarkerWithTitle);
+        // routeMarkerPopupComponentRef.instance.remove = () => {
         //    let segment = _.find(this.context.route.segments, segmentToFind => marker === segmentToFind.routePointMarker);
         //    this.removeRouteSegment(segment);
-        //};
-        //routeMarkerPopupComponentRef.instance.angularBinding(routeMarkerPopupComponentRef.hostView);
+        // };
+        // routeMarkerPopupComponentRef.instance.angularBinding(routeMarkerPopupComponentRef.hostView);
         marker.bindPopup(containerDiv);
         return marker;
     }
@@ -112,7 +112,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
 
     protected createRouteSegment = (latlng: LatLngAlt, latlngs: LatLngAlt[], routingType: string): IRouteSegment => {
         let routeSegment = {
-            //routePointMarker: (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING)
+            // routePointMarker: (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING)
             //    ? this.createRouteMarker(latlng)
             //    : null,
             routePoint: latlng,
@@ -120,13 +120,13 @@ export class RouteStateEditRoute extends RouteStateEditBase {
             latlngs: latlngs,
             routingType: routingType
         } as IRouteSegment;
-        //routeSegment.polyline.addTo(this.context.mapService.map);
+        // routeSegment.polyline.addTo(this.context.mapService.map);
         return routeSegment;
     }
 
     private setRouteMarkerEvents = (marker: L.Marker) => {
         marker.on("dragstart", () => {
-            //this.hoverHandler.setState(HoverHandlerState.ON_MARKER);
+            // this.hoverHandler.setState(HoverHandlerState.ON_MARKER);
             this.dragRouteMarkerStart(marker);
         });
         marker.on("drag", () => {
@@ -134,17 +134,17 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         });
         marker.on("dragend", () => {
             this.dragRouteMarkerEnd(marker);
-            //this.hoverHandler.setState(HoverHandlerState.NONE);
+            // this.hoverHandler.setState(HoverHandlerState.NONE);
         });
         marker.on("mouseover", () => {
-            //if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
+            // if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
             //    this.hoverHandler.setState(HoverHandlerState.ON_MARKER);
-            //}
+            // }
         });
         marker.on("mouseout", () => {
-            //if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
+            // if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
             //    this.hoverHandler.setState(HoverHandlerState.NONE);
-            //}
+            // }
         });
     }
 
@@ -199,7 +199,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
     }
 
     private middleMarkerDragStart = (middleMarker: L.Marker) => {
-        //this.hoverHandler.setState(HoverHandlerState.DRAGGING);
+        // this.hoverHandler.setState(HoverHandlerState.DRAGGING);
         let snappingResponse = this.context.snapToSelf(middleMarker.getLatLng());
         this.selectedRouteSegmentIndex = snappingResponse.lineIndex;
         let latlngs = [
@@ -235,10 +235,10 @@ export class RouteStateEditRoute extends RouteStateEditBase {
             .then(() => this.runRouting(selectedRouteSegmentIndex, selectedRouteSegmentIndex + 1))
             .then(() => this.context.raiseDataChanged());
         this.selectedRouteSegmentIndex = -1;
-        //this.hoverHandler.setState(HoverHandlerState.NONE);
+        // this.hoverHandler.setState(HoverHandlerState.NONE);
     }
 
-    //private createMiddleMarker = (): L.Marker => {
+    // private createMiddleMarker = (): L.Marker => {
     //    let middleMarker = L.marker(this.context.mapService.map.getCenter(),
     //        {
     //            clickable: true,
@@ -263,7 +263,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
     //    });
     //
     //    return middleMarker;
-    //}
+    // }
 
     private middleMarkerClick = (middleMarker: L.Marker) => {
         let snappingResponse = this.context.snapToSelf(middleMarker.getLatLng());
@@ -273,16 +273,16 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         let segment = this.context.route.segments[snappingResponse.lineIndex];
         let segmentlatlngs = segment.latlngs;
         // HM TODO: allow splitting - need to find closest point.
-        //let newSegmentLatlngs = segmentlatlngs.splice(0, snappingResponse.beforeIndex + 1);
-        //let newRouteSegment = this.createRouteSegment(snappingResponse.latlng, newSegmentLatlngs,
+        // let newSegmentLatlngs = segmentlatlngs.splice(0, snappingResponse.beforeIndex + 1);
+        // let newRouteSegment = this.createRouteSegment(snappingResponse.latlng, newSegmentLatlngs,
         //    this.context.route.properties.currentRoutingType);
-        //segment.polyline.setLatLngs(segmentlatlngs);
-        //this.context.route.segments.splice(snappingResponse.lineIndex, 0, newRouteSegment);
+        // segment.polyline.setLatLngs(segmentlatlngs);
+        // this.context.route.segments.splice(snappingResponse.lineIndex, 0, newRouteSegment);
     }
 
     private removeSegmentLayers = (segment: IRouteSegment) => {
         RouteStateHelper.destroyMarker(segment.routePointMarker, this.context);
-        //this.context.mapService.map.removeLayer(segment.polyline);
+        // this.context.mapService.map.removeLayer(segment.polyline);
         this.context.route.segments.splice(this.context.route.segments.indexOf(segment), 1);
     }
 
@@ -307,11 +307,11 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         let routingType = endSegment.routingType || this.context.route.properties.currentRoutingType;
         let data = await this.context.routerService.getRoute(startLatLng, endSegment.routePoint, routingType);
 
-        //this.context.mapService.map.removeLayer(loadingPolyline);
+        // this.context.mapService.map.removeLayer(loadingPolyline);
         let latlngs = data[data.length - 1].latlngs;
         if (startSegment.routingType === "None" && (
-            startSegmentEndPoint.lat != latlngs[0].lat ||
-            startSegmentEndPoint.lng != latlngs[0].lng)) {
+            startSegmentEndPoint.lat !== latlngs[0].lat ||
+            startSegmentEndPoint.lng !== latlngs[0].lng)) {
             // need to connect the non-routed segment in case it isn't
             latlngs = [startSegmentEndPoint].concat(latlngs);
         }
@@ -326,7 +326,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         loadingSegmentPathOptions.dashArray = "10 10";
         loadingSegmentPathOptions.className = "loading-segment-indicator";
         let polyline = L.polyline(latlngs, loadingSegmentPathOptions);
-        //this.context.mapService.map.addLayer(polyline);
+        // this.context.mapService.map.addLayer(polyline);
         return polyline;
     }
 }

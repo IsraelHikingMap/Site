@@ -1,4 +1,4 @@
-﻿import { RoutingType, RouteEditingState } from "../models/models";
+import { RoutingType, RouteEditingState } from "../models/models";
 import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
 import { initialState } from "./initial-state";
 
@@ -31,7 +31,7 @@ class RouteEditingStateReducer {
         return {
             ...lastState,
             routingType: action.payload.routingType
-        }
+        };
     }
 
     @ReduxAction(SET_SELECTED_ROUTE)
@@ -39,7 +39,7 @@ class RouteEditingStateReducer {
         return {
             ...lastState,
             selectedRouteId: action.payload.routeId
-        }
+        };
     }
 }
 

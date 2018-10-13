@@ -44,7 +44,7 @@ export class DataContainerService {
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
             // HM TODO: fit bounds
-            //this.mapService.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));
+            // this.mapService.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));
         }
     }
 

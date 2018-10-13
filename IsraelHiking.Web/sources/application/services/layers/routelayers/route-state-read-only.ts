@@ -26,7 +26,7 @@ export class RouteStateReadOnly extends RouteStateBase {
 
     public initialize() {
         super.initialize();
-        //this.context.mapService.map.addLayer(this.polylines);
+        // this.context.mapService.map.addLayer(this.polylines);
         this.polylines.clearLayers();
         if (this.context.route.segments.length > 0) {
             let groupedLatLngs = this.context.mapService.getGroupedLatLngForAntPath(this.context.route.segments);
@@ -45,9 +45,9 @@ export class RouteStateReadOnly extends RouteStateBase {
 
     public clear() {
         RouteStateHelper.removeLayersFromMap(this.context);
-        //this.context.mapService.map.off("mousemove", this.onMouseMove);
+        // this.context.mapService.map.off("mousemove", this.onMouseMove);
         this.polylines.clearLayers();
-        //this.context.mapService.map.removeLayer(this.polylines);
+        // this.context.mapService.map.removeLayer(this.polylines);
         super.clear();
     }
 

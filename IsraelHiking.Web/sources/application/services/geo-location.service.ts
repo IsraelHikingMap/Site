@@ -115,7 +115,7 @@ export class GeoLocationService {
         if (environment.isCordova) {
             BackgroundGeolocation.stop();
         } else {
-            this.startNavigator();
+            this.stopNavigator();
         }
     }
 

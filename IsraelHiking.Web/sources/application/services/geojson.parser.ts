@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 
 import { LatLngAlt, DataContainer, MarkerData, RouteData, RouteSegmentData } from "../models/models";
 import { SpatialService } from "./spatial.service";
@@ -29,7 +29,7 @@ export class GeoJsonParser {
             lat: coordinates[1],
             lng: coordinates[0],
             alt: coordinates[2] || 0
-        }
+        };
     }
 
     public parse(content: string): DataContainer {
@@ -107,11 +107,18 @@ export class GeoJsonParser {
         if (markers.length > 0) {
             if (data.routes.length === 0) {
                 let name = markers.length === 1 ? markers[0].title || GeoJsonParser.MARKERS : GeoJsonParser.MARKERS;
-                data.routes.push({ id: Math.random().toString(36).substr(2, 9), name: name, description: "", state: "ReadOnly", segments: [], markers: [] });
+                data.routes.push({
+                    id: Math.random().toString(36).substr(2, 9),
+                    name: name,
+                    description: "",
+                    state: "ReadOnly",
+                    segments: [],
+                    markers: []
+                });
             }
             data.routes[0].markers = markers;
         }
-        let latLngs = []
+        let latLngs = [];
         for (let route of data.routes) {
             for (let segment of route.segments) {
                 latLngs = latLngs.concat(segment.latlngs);

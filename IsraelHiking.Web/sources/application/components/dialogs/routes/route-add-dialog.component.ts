@@ -1,5 +1,5 @@
-﻿import { Component, ViewEncapsulation } from "@angular/core";
-import { NgRedux } from "@angular-redux/store"; 
+import { Component, ViewEncapsulation } from "@angular/core";
+import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { ToastService } from "../../../services/toast.service";

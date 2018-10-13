@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { geom, Coordinate, extent, Map, Extent, proj } from "openlayers";
 
 import { LatLngAlt, IBounds } from "../models/models";
@@ -42,11 +42,11 @@ export class SpatialService {
             return {
                 northEast: latlngs[0],
                 southWest: latlngs[0]
-            }
+            };
         }
         let line = SpatialService.getLineString(latlngs);
-        let extent = line.getExtent();
-        return SpatialService.extentToBounds(extent);
+        let lineExtent = line.getExtent();
+        return SpatialService.extentToBounds(lineExtent);
     }
 
     public static getCenter(latlngs: LatLngAlt[]): LatLngAlt {
@@ -89,9 +89,9 @@ export class SpatialService {
     }
 
     public static getMapBounds(map: Map): IBounds {
-        let extent = map.getView().calculateExtent(map.getSize());
-        extent = proj.transformExtent(extent, "EPSG:3857", "EPSG:4326");
-        return SpatialService.extentToBounds(extent);
+        let viewExtent = map.getView().calculateExtent(map.getSize());
+        viewExtent = proj.transformExtent(viewExtent, "EPSG:3857", "EPSG:4326");
+        return SpatialService.extentToBounds(viewExtent);
     }
 
     public static screenToLatLng(coordinate: Coordinate): LatLngAlt {

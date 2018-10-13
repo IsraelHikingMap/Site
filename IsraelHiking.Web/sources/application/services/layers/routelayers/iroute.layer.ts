@@ -17,8 +17,7 @@ import {
     IMarkerWithTitle,
     IBounds,
     RouteStateName
-} from
-    "../../../models/models";
+} from "../../../models/models";
 
 export interface IRouteSegment extends RouteSegmentData {
     routePointMarker: L.Marker;

@@ -41,7 +41,7 @@ export class OsmUserService {
         private readonly authorizationService: AuthorizationService,
         private readonly whatsAppService: WhatsAppService,
         private readonly hashService: HashService) {
-        
+
         this.shareUrls = [];
         this.shareUrlsChanged = new Subject();
         this.loginStatusChanged = new EventEmitter();

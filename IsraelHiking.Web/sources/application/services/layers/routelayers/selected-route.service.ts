@@ -90,7 +90,8 @@ export class SelectedRouteService {
             if (SpatialService.getDistanceInMeters(this.getLastLatLng(routeData), latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
                 return routeData;
             }
-            if (SpatialService.getDistanceInMeters(routeData.segments[0].latlngs[0], latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
+            let firstLatLng = routeData.segments[0].latlngs[0];
+            if (SpatialService.getDistanceInMeters(firstLatLng, latLngToCheck) < SelectedRouteService.MERGE_THRESHOLD) {
                 return routeData;
             }
         }

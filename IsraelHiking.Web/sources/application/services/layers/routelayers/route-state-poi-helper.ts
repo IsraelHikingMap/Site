@@ -1,4 +1,4 @@
-﻿import { MatDialog } from "@angular/material";
+import { MatDialog } from "@angular/material";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
@@ -24,7 +24,7 @@ export class RouteStatePoiHelper {
             } as L.MarkerOptions) as IMarkerWithTitle;
         marker.identifier = markerData.id;
         context.mapService.setMarkerTitle(marker, markerData, color);
-        //marker.addTo(context.mapService.map);
+        // marker.addTo(context.mapService.map);
         return marker;
     }
 
@@ -32,9 +32,9 @@ export class RouteStatePoiHelper {
         let factory = context.componentFactoryResolver.resolveComponentFactory(DrawingPoiMarkerPopupComponent);
         let containerDiv = L.DomUtil.create("div");
         let poiMarkerPopupComponentRef = factory.create(context.injector, [], containerDiv);
-        //poiMarkerPopupComponentRef.instance.setMarker(marker);
+        // poiMarkerPopupComponentRef.instance.setMarker(marker);
         poiMarkerPopupComponentRef.instance.setRouteLayer(context);
-        //poiMarkerPopupComponentRef.instance.angularBinding(poiMarkerPopupComponentRef.hostView);
+        // poiMarkerPopupComponentRef.instance.angularBinding(poiMarkerPopupComponentRef.hostView);
         marker.bindPopup(containerDiv);
         return poiMarkerPopupComponentRef.instance;
     }

@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Subject } from "rxjs";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
@@ -175,7 +175,7 @@ export class RoutesService implements IRoutesService {
             if (routeLayer === this.selectedRoute || routeLayer.route.segments.length <= 0) {
                 continue;
             }
-            if (SpatialService.getDistance(routeLayer.getLastLatLng(),latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
+            if (SpatialService.getDistance(routeLayer.getLastLatLng(), latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
                 return routeLayer;
             }
             if (SpatialService.getDistance(routeLayer.route.segments[0].latlngs[0], latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
@@ -195,7 +195,8 @@ export class RoutesService implements IRoutesService {
             ? this.selectedRoute.route.segments[0].latlngs[0]
             : this.selectedRoute.getLastLatLng();
         if (isFirst) {
-            if (SpatialService.getDistanceInMeters(closestRoute.route.segments[0].latlngs[0], latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
+            let firstLatLng = closestRoute.route.segments[0].latlngs[0];
+            if (SpatialService.getDistanceInMeters(firstLatLng, latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
                 closestRoute.reverse();
             }
             this.selectedRoute.route.segments.splice(0, 1);

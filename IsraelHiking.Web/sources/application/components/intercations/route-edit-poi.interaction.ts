@@ -37,6 +37,10 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         this.dragging = false;
     }
 
+    public static createMarkerId(route: RouteData, index: number) {
+        return route.id + MARKER + index;
+    }
+
     private handleDown(event) {
         // HM TODO: snap to exiting pois
         this.dragging = false;
@@ -91,10 +95,6 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
             markerData: markerData
         }));
         return true;
-    }
-
-    public static createMarkerId(route: RouteData, index: number) {
-        return route.id + MARKER + index;
     }
 
     private openEditMarkerDialog(marker: MarkerData, routeId: string, index: number) {

@@ -1,5 +1,5 @@
-﻿import { Component, ViewEncapsulation } from "@angular/core";
-import { NgRedux } from "@angular-redux/store"; 
+import { Component, ViewEncapsulation } from "@angular/core";
+import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../../../services/resources.service";
 import { FileService } from "../../../services/file.service";
@@ -8,7 +8,7 @@ import { ToastService } from "../../../services/toast.service";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../../../services/spatial.service";
-import { RouteBaseDialogComponent } from "./route-base-dialog.component"
+import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 import { DeleteRouteAction, ChangeRoutePropertiesAction } from "../../../reducres/routes.reducer";
 import { DataContainer, RouteData, ApplicationState, LatLngAlt } from "../../../models/models";
 
@@ -105,7 +105,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         this.toastService.info(this.resources.dataUpdatedSuccessfully);
         // HM TODO: support this
         throw new Error("Not implemented");
-        //this.routeLayer.makeAllPointsEditable();
-        
+        // this.routeLayer.makeAllPointsEditable();
+
     }
 }

@@ -46,14 +46,14 @@ export class LocationComponent extends BaseMapComponent {
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly cancelableTimeoutService: CancelableTimeoutService,
         private readonly ngRedux: NgRedux<ApplicationState>,
-        host: MapComponent) {
+        private readonly host: MapComponent) {
         super(resources);
 
         this.locationCoordinate = null;
         this.routeLayer = null;
         this.isFollowing = true;
 
-        host.instance.addInteraction(new DragInteraction(() => {
+        this.host.instance.addInteraction(new DragInteraction(() => {
             if (!this.isActive()) {
                 return;
             }
@@ -99,6 +99,16 @@ export class LocationComponent extends BaseMapComponent {
                 });
             });
         }
+    }
+
+    public resetRotation() {
+        this.host.instance.getView().animate({
+            rotation: 0
+        });
+    }
+
+    public getRotationAngle() {
+        return `rotate(${this.host.instance.getView().getRotation()}rad)`;
     }
 
     public toggleTracking() {
@@ -196,6 +206,11 @@ export class LocationComponent extends BaseMapComponent {
         this.locationCoordinate.x = position.coords.longitude;
         this.locationCoordinate.y = position.coords.latitude;
         this.locationCoordinate.radius = position.coords.accuracy;
+        if (position.coords.heading != null) {
+            this.host.instance.getView().animate({
+                rotation: position.coords.heading * Math.PI / 180
+            });
+        }
         if (this.isFollowing) {
             this.setLocation();
         }

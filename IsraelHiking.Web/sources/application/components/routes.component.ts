@@ -1,4 +1,4 @@
-﻿import { Component, AfterViewInit } from "@angular/core";
+import { Component, AfterViewInit } from "@angular/core";
 import { MapComponent } from "ngx-openlayers";
 import { Coordinate } from "openlayers";
 import { select } from "@angular-redux/store";
@@ -12,8 +12,8 @@ import { RouteEditPoiInteraction } from "./intercations/route-edit-poi.interacti
 import { RouteEditRouteInteraction } from "./intercations/route-edit-route.interaction";
 
 interface RoutePointViewData {
-    latlng: LatLngAlt,
-    close: Function,
+    latlng: LatLngAlt;
+    close: Function;
     segmentIndex: number;
 }
 
@@ -46,7 +46,7 @@ export class RoutesComponent implements AfterViewInit {
                 latlng: segment.routePoint,
                 segmentIndex: pointIndex,
                 close: () => this.routePointPopupData = null
-            }
+            };
         });
 
         this.routes.subscribe(() => {

@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Subject } from "rxjs";
 import * as _ from "lodash";
@@ -32,8 +32,8 @@ export class TracesService {
 
     public traces: ITrace[];
     public tracesChanged: Subject<any>;
-    
-    constructor(private readonly httpClient: HttpClient,) {
+
+    constructor(private readonly httpClient: HttpClient, ) {
         this.traces = [];
         this.tracesChanged = new Subject();
     }

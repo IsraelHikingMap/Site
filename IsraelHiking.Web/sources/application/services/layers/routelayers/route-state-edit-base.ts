@@ -1,4 +1,4 @@
-﻿import * as L from "leaflet";
+import * as L from "leaflet";
 
 import { RouteStateBase } from "./route-state-base";
 import { IRouteLayer } from "./iroute.layer";
@@ -18,16 +18,16 @@ export abstract class RouteStateEditBase extends RouteStateBase {
             this.context.snappingService.enable(true);
         }
 
-        //for (let segment of this.context.route.segments) {
-            //segment.polyline = L.polyline(segment.latlngs, this.context.route.properties.pathOptions);
-            //this.context.mapService.map.addLayer(segment.polyline);
-        //}
+        // for (let segment of this.context.route.segments) {
+            // segment.polyline = L.polyline(segment.latlngs, this.context.route.properties.pathOptions);
+            // this.context.mapService.map.addLayer(segment.polyline);
+        // }
     }
 
     public clear() {
         RouteStateHelper.removeLayersFromMap(this.context);
         this.context.snappingService.enable(false);
-        //this.context.mapService.map.off("click", this.addPoint, this);
+        // this.context.mapService.map.off("click", this.addPoint, this);
         super.clear();
     }
 }

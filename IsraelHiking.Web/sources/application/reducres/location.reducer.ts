@@ -1,4 +1,4 @@
-﻿import { Action, AnyAction, Reducer } from "redux";
+import { Action, AnyAction, Reducer } from "redux";
 import { Location } from "../models/models";
 import { initialState } from "./initial-state";
 import { ReduxAction, BaseAction, createReducerFromClass } from "./reducer-action-decorator";
@@ -52,7 +52,7 @@ export class LocationReducer {
             zoom: action.payload.zoom || lastState.zoom,
             longitude: action.payload.longitude || lastState.longitude,
             latitude: action.payload.latitude || lastState.latitude
-        }
+        };
     }
 }
 

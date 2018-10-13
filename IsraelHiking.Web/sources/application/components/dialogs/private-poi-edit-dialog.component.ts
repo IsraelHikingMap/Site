@@ -94,7 +94,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
             latlng: this.marker.latlng,
             type: this.markerType,
             urls: this.imageLink ? [this.imageLink] : [],
-        }
+        };
         this.ngRedux.dispatch(new UpdatePrivatePoiAction({
             index: this.markerIndex,
             routeId: this.routeId,
@@ -131,7 +131,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
             routeId: this.routeId,
             index: this.markerIndex
         }));
-    };
+    }
 
     @HostListener("window:keydown", ["$event"])
     public onEnterPress($event: KeyboardEvent) {

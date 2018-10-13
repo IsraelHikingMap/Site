@@ -21,7 +21,7 @@ import { ToastService } from "../../../services/toast.service";
 import { IMarkerWithData } from "../../../services/layers/routelayers/iroute.layer";
 import { CategoriesLayerFactory } from "../../../services/layers/categories-layers.factory";
 import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
-import {RouteData, LinkData, LatLngAlt }  from "../../../models/models";
+import {RouteData, LinkData, LatLngAlt } from "../../../models/models";
 
 @Component({
     selector: "public-poi-sidebar",

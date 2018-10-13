@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { Map } from "openlayers";
 import * as _ from "lodash";
 
@@ -12,7 +12,7 @@ export class MapService {
     public map: Map;
 
     constructor(private readonly resources: ResourcesService) {
-        
+
     }
 
     public setMap(map: Map) {
@@ -20,27 +20,27 @@ export class MapService {
     }
 
     public setMarkerTitle(marker: IMarkerWithTitle, data: MarkerData, color: string = "") {
-        //HM TODO: set marker title (tooltip)
-        //marker.unbindTooltip();
-        //let title = data.title || "";
-        //marker.title = title;
-        //let hasImage = _.some(data.urls, u => u.mimeType.startsWith("image"));
-        //if (!title && !hasImage) {
+        // HM TODO: set marker title (tooltip)
+        // marker.unbindTooltip();
+        // let title = data.title || "";
+        // marker.title = title;
+        // let hasImage = _.some(data.urls, u => u.mimeType.startsWith("image"));
+        // if (!title && !hasImage) {
         //    return;
-        //}
-        //let controlDiv = L.DomUtil.create("div");
-        //let lines = title.split("\n");
-        //let displayLine = lines[0];
-        //if (lines.length > 1 || data.description) {
+        // }
+        // let controlDiv = L.DomUtil.create("div");
+        // let lines = title.split("\n");
+        // let displayLine = lines[0];
+        // if (lines.length > 1 || data.description) {
         //    displayLine += "...";
-        //}
-        //let element = hasImage
+        // }
+        // let element = hasImage
         //    ? L.DomUtil.create("i", "fa icon-camera", controlDiv) :
         //    L.DomUtil.create("div", "", controlDiv);
-        //element.style.color = color;
-        //element.dir = this.resources.getDirection(displayLine);
-        //element.innerHTML = ` ${displayLine}`;
-        //marker.bindTooltip(controlDiv, { permanent: true, direction: "bottom", interactive: true } as L.TooltipOptions);
+        // element.style.color = color;
+        // element.dir = this.resources.getDirection(displayLine);
+        // element.innerHTML = ` ${displayLine}`;
+        // marker.bindTooltip(controlDiv, { permanent: true, direction: "bottom", interactive: true } as L.TooltipOptions);
     }
 
     /**

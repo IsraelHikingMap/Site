@@ -1,4 +1,4 @@
-﻿import { Action } from "redux";
+import { Action } from "redux";
 
 export abstract class BaseAction<TPayload> implements Action {
     constructor(public type: string, public payload: TPayload) {  }
@@ -14,11 +14,11 @@ export function createReducerFromClass<State>(reducer: { new(): any }, initialSt
     const instance = Object.create(reducer.prototype);
     return (lastState: State = initialState, action: Action): State => {
         for (let fn in instance) {
-            if (typeof instance[fn] == "function" && (instance[fn] as any).type === action.type) {
+            if (typeof instance[fn] === "function" && (instance[fn] as any).type === action.type) {
                 return instance[fn].apply(instance, [lastState, action]);
             }
         }
         return lastState;
-        
+
     };
 }

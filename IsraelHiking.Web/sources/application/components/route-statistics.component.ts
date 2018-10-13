@@ -1,4 +1,4 @@
-﻿import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, AfterViewChecked } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, AfterViewChecked } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
 import { Subscription, Observable } from "rxjs";
 import { D3Service, Selection, BaseType, ScaleContinuousNumeric } from "d3-ng2-service";
@@ -194,9 +194,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.setDataToChart([]);
         this.onRouteDataChanged();
             // HM TODO: route hover event?
-            //this.routeLayerSubscriptions.push(this.routeLayer.polylineHovered.subscribe(
+            // this.routeLayerSubscriptions.push(this.routeLayer.polylineHovered.subscribe(
             //    (latlng: LatLngAlt) => this.onPolylineHover(latlng))
-            //);
+            // );
     }
 
     private onRouteDataChanged = () => {

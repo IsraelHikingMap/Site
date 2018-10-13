@@ -24,7 +24,7 @@ export abstract class BaseMarkerPopupComponent extends BaseMapComponent implemen
 
     public itmCoordinates: INorthEast;
     public hideCoordinates: boolean;
-    
+
 
     constructor(resources: ResourcesService,
         protected httpClient: HttpClient,

@@ -178,8 +178,9 @@ export class SnappingService {
         } as ISnappingPointResponse;
         let pointOnScreen = this.map.getPixelFromCoordinate([latlng.lng, latlng.lat]);
         for (let markerData of options.points) {
-            let markerPointOnScreen = this.map.getPixelFromCoordinate([markerData.latlng.lng, markerData.latlng.lat]); //this.mapService.map.latLngToLayerPoint(markerData.latlng);
-            if (SpatialService.getDistanceForCoordinates(markerPointOnScreen, pointOnScreen) < options.sensitivity && response.markerData == null) {
+            let markerPointOnScreen = this.map.getPixelFromCoordinate([markerData.latlng.lng, markerData.latlng.lat]);
+            if (SpatialService.getDistanceForCoordinates(markerPointOnScreen, pointOnScreen) < options.sensitivity &&
+                response.markerData == null) {
                 response.latlng = markerData.latlng;
                 response.markerData = markerData;
             } else if (response.markerData != null

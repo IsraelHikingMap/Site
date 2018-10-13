@@ -1,4 +1,4 @@
-﻿import undoable, { UndoableOptions, excludeAction } from "redux-undo";
+import undoable, { UndoableOptions, excludeAction } from "redux-undo";
 
 import { RouteData, MarkerData, RouteSegmentData, RouteStateName } from "../models/models";
 import { initialState } from "./initial-state";
@@ -19,10 +19,10 @@ const CHANGE_VISIBILITY = "CHANGE_VISIBILITY";
 const REVERSE_ROUTE = "REVERSE_ROUTE";
 const SPLIT_ROUTE = "SPLIT_ROUTE";
 const MERGE_ROUTES = "MERGE_ROUTES";
-//const SET_STATE = "SET_STATE";
-//const CLEAR_POI = "CLEAR_POI";
-//const CLEAR_ROUTE = "CLEAR_ROUTE";
-//const CLEAR_ALL_ROUTES = "CLEAR_ALL_ROUTES";
+// const SET_STATE = "SET_STATE";
+// const CLEAR_POI = "CLEAR_POI";
+// const CLEAR_ROUTE = "CLEAR_ROUTE";
+// const CLEAR_ALL_ROUTES = "CLEAR_ALL_ROUTES";
 
 export interface RoutePayload {
     routeId: string;
@@ -37,12 +37,12 @@ export interface ChangeRoutePropertiesActionPayload extends RoutePayload {
 }
 
 export interface AddPrivatePoiPayload extends RoutePayload {
-    markerData: MarkerData,
+    markerData: MarkerData;
 }
 
 export interface UpdatePrivatePoiPayload extends RoutePayload {
     index: number;
-    markerData: MarkerData,
+    markerData: MarkerData;
 }
 
 export interface DeletePrivatePoiPayload extends RoutePayload {
@@ -50,12 +50,12 @@ export interface DeletePrivatePoiPayload extends RoutePayload {
 }
 
 export interface AddSegmentPayload extends RoutePayload {
-    segmentData: RouteSegmentData,
+    segmentData: RouteSegmentData;
 }
 
 export interface UpdateSegmentsPayload extends RoutePayload {
     indices: number[];
-    segmentsData: RouteSegmentData[],
+    segmentsData: RouteSegmentData[];
 }
 
 export interface DeleteSegmentPayload extends RoutePayload {

@@ -34,20 +34,20 @@ export class RouteStateEditPoi extends RouteStateEditBase {
 
     private setMarkerHoverEvents(marker: IMarkerWithTitle) {
         marker.on("dragstart", () => {
-            //this.hoverHandler.setState(HoverHandlerState.DRAGGING);
+            // this.hoverHandler.setState(HoverHandlerState.DRAGGING);
         });
         marker.on("dragend", () => {
-            //this.hoverHandler.setState(HoverHandlerState.NONE);
+            // this.hoverHandler.setState(HoverHandlerState.NONE);
         });
         marker.on("mouseover", () => {
-            //if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
+            // if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
             //    this.hoverHandler.setState(HoverHandlerState.ON_MARKER);
-            //}
+            // }
         });
         marker.on("mouseout", () => {
-            //if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
+            // if (this.hoverHandler.getState() !== HoverHandlerState.DRAGGING) {
             //    this.hoverHandler.setState(HoverHandlerState.NONE);
-            //}
+            // }
         });
     }
 

@@ -60,6 +60,14 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         this.onRoutePointClick = new EventEmitter();
     }
 
+    public static createSegmentId(route: RouteData, index: number) {
+        return route.id + SEGMENT + index;
+    }
+
+    public static createSegmentPointId(route: RouteData, index: number) {
+        return route.id + SEGMENT_POINT + index;
+    }
+
     private handleDown(event: MapBrowserEvent) {
         // HM TODO: snap to public pois/private pois
         this.dragging = false;
@@ -176,14 +184,6 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         let latLngs = data[data.length - 1].latlngs;
         latLngs = await this.elevationProvider.updateHeights(latLngs) as ILatLngTime[];
         return latLngs;
-    }
-
-    public static createSegmentId(route: RouteData, index: number) {
-        return route.id + SEGMENT + index;
-    }
-
-    public static createSegmentPointId(route: RouteData, index: number) {
-        return route.id + SEGMENT_POINT + index;
     }
 
     private async updateRoutePoint(latlng: LatLngAlt) {

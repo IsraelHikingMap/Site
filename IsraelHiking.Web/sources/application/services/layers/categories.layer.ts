@@ -37,7 +37,7 @@ export class CategoriesLayer extends BaseMapComponent {
         private readonly fitBoundsService: FitBoundsService,
         private readonly sidebarService: SidebarService,
         private readonly hashService: HashService,
-        
+
         private readonly categoriesType: CategoriesType) {
         super(resources);
         this.categories = [];

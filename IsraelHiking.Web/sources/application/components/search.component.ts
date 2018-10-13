@@ -245,13 +245,13 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.directional.remove = () => {
             this.directional.routeCoordinates = [];
             this.directional.showResults = false;
-        }
+        };
         this.directional.close = () => {
             this.directional.isMarkerPopupOpen = false;
-        }
+        };
         this.directional.isMarkerPopupOpen = true;
         // HM TODO: fly to bounds, open popup
-        //this.fitBoundsService.fitBounds(this.readonlyLayer.getBounds());
+        // this.fitBoundsService.fitBounds(this.readonlyLayer.getBounds());
     }
 
     @HostListener("window:keydown", ["$event"])

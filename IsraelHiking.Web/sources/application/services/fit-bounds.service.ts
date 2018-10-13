@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 
 import { SidebarService } from "./sidebar.service";
@@ -18,11 +18,11 @@ export class FitBoundsService {
 
     public fitBounds(bounds: IBounds) {
         // HM TODO: fly to bounds correctly
-        //options.paddingTopLeft = this.sidebarService.isVisible && window.innerWidth >= 768
+        // options.paddingTopLeft = this.sidebarService.isVisible && window.innerWidth >= 768
         //    ? L.point(400, 50)
         //    : L.point(50, 50);
 
-        //options.paddingBottomRight = L.point(50, 50);
+        // options.paddingBottomRight = L.point(50, 50);
         this.isFlying = true;
         let centerLat = (bounds.northEast.lat + bounds.southWest.lat) / 2.0;
         let centerLng = (bounds.northEast.lng + bounds.southWest.lng) / 2.0;
