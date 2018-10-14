@@ -22,9 +22,6 @@ export class RouteStateEditRoute extends RouteStateEditBase {
             routeMarkerWithData.marker = RouteStatePoiHelper.createPoiMarker(routeMarkerWithData, false, this.context);
         }
         super.initialize();
-        for (let segment of this.context.route.segments) {
-            segment.routePointMarker = this.createRouteMarker(segment.routePoint);
-        }
         this.updateStartAndEndMarkersIcons();
     }
     private updateStartAndEndMarkersIcons = () => {
@@ -65,50 +62,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         return "Route";
     }
 
-    private createRouteMarker = (latlng: LatLngAlt): L.Marker => {
-        let pathOptions = this.context.route.properties.pathOptions;
-        let marker = L.marker(latlng,
-            {
-                draggable: true,
-                clickable: true,
-                riseOnHover: true,
-                zIndexOffset: 1000,
-                icon: IconsService.createRouteMarkerIcon(pathOptions.color),
-                opacity: pathOptions.opacity
-            } as L.MarkerOptions);
-        this.setRouteMarkerEvents(marker);
-        // marker.addTo(this.context.mapService.map);
-        // let factory = this.context.componentFactoryResolver.resolveComponentFactory(RouteMarkerPopupComponent);
-        let containerDiv = L.DomUtil.create("div");
-        // let routeMarkerPopupComponentRef = factory.create(this.context.injector, [], containerDiv);
-        // routeMarkerPopupComponentRef.instance.setMarker(marker as Common.IMarkerWithTitle);
-        // routeMarkerPopupComponentRef.instance.remove = () => {
-        //    let segment = _.find(this.context.route.segments, segmentToFind => marker === segmentToFind.routePointMarker);
-        //    this.removeRouteSegment(segment);
-        // };
-        // routeMarkerPopupComponentRef.instance.angularBinding(routeMarkerPopupComponentRef.hostView);
-        marker.bindPopup(containerDiv);
-        return marker;
-    }
-
-    private removeRouteSegment = (segment: IRouteSegment) => {
-        let segmentIndex = this.context.route.segments.indexOf(segment);
-        this.removeSegmentLayers(segment);
-        this.updateStartAndEndMarkersIcons();
-
-        if (this.context.route.segments.length > 0 && segmentIndex === 0) {
-            // first point is being removed
-            this.context.route.segments[0].latlngs = [_.last(this.context.route.segments[0].latlngs)];
-            let routePoint = this.context.route.segments[0].routePoint;
-            this.context.route.segments[0].polyline.setLatLngs([routePoint, routePoint]);
-            this.context.raiseDataChanged();
-        } else if (segmentIndex !== 0 && segmentIndex < this.context.route.segments.length) {
-            // middle point is being removed...
-            this.runRouting(segmentIndex - 1, segmentIndex).then(() => this.context.raiseDataChanged());
-        } else {
-            this.context.raiseDataChanged();
-        }
-    }
+    
 
     protected createRouteSegment = (latlng: LatLngAlt, latlngs: LatLngAlt[], routingType: string): IRouteSegment => {
         let routeSegment = {
@@ -198,87 +152,7 @@ export class RouteStateEditRoute extends RouteStateEditBase {
         chain.then(() => this.context.raiseDataChanged());
     }
 
-    private middleMarkerDragStart = (middleMarker: L.Marker) => {
-        // this.hoverHandler.setState(HoverHandlerState.DRAGGING);
-        let snappingResponse = this.context.snapToSelf(middleMarker.getLatLng());
-        this.selectedRouteSegmentIndex = snappingResponse.lineIndex;
-        let latlngs = [
-            this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng(),
-            snappingResponse.latlng
-        ];
-        let newSegment = this.createRouteSegment(snappingResponse.latlng, latlngs, this.context.route.properties.currentRoutingType);
-        this.context.route.segments.splice(this.selectedRouteSegmentIndex, 0, newSegment);
-    }
-
-    private middleMarkerDrag = (middleMarker: L.Marker) => {
-        if (this.selectedRouteSegmentIndex === -1) {
-            return;
-        }
-        let snappingResponse = this.context.getSnappingForRoute(middleMarker.getLatLng(), false);
-        middleMarker.setLatLng(snappingResponse.latlng);
-        this.context.route.segments[this.selectedRouteSegmentIndex + 1].polyline.setLatLngs(
-            [snappingResponse.latlng, this.context.route.segments[this.selectedRouteSegmentIndex + 1].routePointMarker.getLatLng()]
-        );
-        this.context.route.segments[this.selectedRouteSegmentIndex].polyline.setLatLngs(
-            [this.context.route.segments[this.selectedRouteSegmentIndex - 1].routePointMarker.getLatLng(), snappingResponse.latlng]
-        );
-    }
-
-    private middleMarkerDragEnd = (middleMarker: L.Marker) => {
-        let snappingResponse = this.context.getSnappingForRoute(middleMarker.getLatLng(), false);
-        this.context.route.segments[this.selectedRouteSegmentIndex].routePointMarker = this.createRouteMarker(snappingResponse.latlng);
-        this.context.route.segments[this.selectedRouteSegmentIndex].routePoint = snappingResponse.latlng;
-        let selectedSegmentLatlngs = this.context.route.segments[this.selectedRouteSegmentIndex].latlngs;
-        selectedSegmentLatlngs[selectedSegmentLatlngs.length - 1] = snappingResponse.latlng as ILatLngTime;
-        let selectedRouteSegmentIndex = this.selectedRouteSegmentIndex; // closure;
-        this.runRouting(selectedRouteSegmentIndex - 1, selectedRouteSegmentIndex)
-            .then(() => this.runRouting(selectedRouteSegmentIndex, selectedRouteSegmentIndex + 1))
-            .then(() => this.context.raiseDataChanged());
-        this.selectedRouteSegmentIndex = -1;
-        // this.hoverHandler.setState(HoverHandlerState.NONE);
-    }
-
-    // private createMiddleMarker = (): L.Marker => {
-    //    let middleMarker = L.marker(this.context.mapService.map.getCenter(),
-    //        {
-    //            clickable: true,
-    //            draggable: true,
-    //            icon: IconsService.createRoundIcon(this.context.route.properties.pathOptions.color),
-    //            opacity: 0.0
-    //        } as L.MarkerOptions);
-    //    middleMarker.on("click", () => {
-    //        this.middleMarkerClick(middleMarker);
-    //    });
-    //
-    //    middleMarker.on("dragstart", () => {
-    //        this.middleMarkerDragStart(middleMarker);
-    //    });
-    //
-    //    middleMarker.on("drag", () => {
-    //        this.middleMarkerDrag(middleMarker);
-    //    });
-    //
-    //    middleMarker.on("dragend", () => {
-    //        this.middleMarkerDragEnd(middleMarker);
-    //    });
-    //
-    //    return middleMarker;
-    // }
-
-    private middleMarkerClick = (middleMarker: L.Marker) => {
-        let snappingResponse = this.context.snapToSelf(middleMarker.getLatLng());
-        if (snappingResponse.line == null) {
-            return;
-        }
-        let segment = this.context.route.segments[snappingResponse.lineIndex];
-        let segmentlatlngs = segment.latlngs;
-        // HM TODO: allow splitting - need to find closest point.
-        // let newSegmentLatlngs = segmentlatlngs.splice(0, snappingResponse.beforeIndex + 1);
-        // let newRouteSegment = this.createRouteSegment(snappingResponse.latlng, newSegmentLatlngs,
-        //    this.context.route.properties.currentRoutingType);
-        // segment.polyline.setLatLngs(segmentlatlngs);
-        // this.context.route.segments.splice(snappingResponse.lineIndex, 0, newRouteSegment);
-    }
+    
 
     private removeSegmentLayers = (segment: IRouteSegment) => {
         RouteStateHelper.destroyMarker(segment.routePointMarker, this.context);

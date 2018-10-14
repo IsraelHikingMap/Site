@@ -73,8 +73,6 @@ export class RouteStatisticsService {
             routeStatistics.points.push(end);
             routeStatistics.length = (end.x - start.x) * 1000;
         }
-        // HM TODO: simplify like before?
-        // let simplified = L.LineUtil.simplify(routeStatistics.points, 1);
         let previousSimplifiedPoint = routeStatistics.points[0];
         for (let simplifiedPoint of routeStatistics.points) {
             routeStatistics.gain += ((simplifiedPoint.y - previousSimplifiedPoint.y) > 0 && simplifiedPoint.y !== 0

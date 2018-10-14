@@ -15,7 +15,6 @@ export class Urls {
     public static readonly openFile = Urls.apiBase + "files/open";
     public static readonly search = Urls.apiBase + "search/";
     public static readonly images = Urls.apiBase + "images/";
-    public static readonly uploadAnonymousImage = Urls.images + "anonymous/";
     public static readonly colors = Urls.images + "colors/";
     public static readonly osm = Urls.apiBase + "osm/";
     public static readonly osmConfiguration = Urls.osm + "configuration";
