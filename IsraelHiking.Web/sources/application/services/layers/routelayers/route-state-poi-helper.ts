@@ -23,8 +23,6 @@ export class RouteStatePoiHelper {
                 opacity: pathOptions.opacity
             } as L.MarkerOptions) as IMarkerWithTitle;
         marker.identifier = markerData.id;
-        context.mapService.setMarkerTitle(marker, markerData, color);
-        // marker.addTo(context.mapService.map);
         return marker;
     }
 
@@ -79,7 +77,7 @@ export class RouteStatePoiHelper {
                 marker.identifier = snappingPointResponse.markerData.id;
                 let color = context.route.properties.pathOptions.color;
                 marker.setIcon(IconsService.createMarkerIconWithColorAndType(color, snappingPointResponse.markerData.type));
-                context.mapService.setMarkerTitle(marker, snappingPointResponse.markerData, color);
+                //context.mapService.setMarkerTitle(marker, snappingPointResponse.markerData, color);
             }
             context.raiseDataChanged();
         });

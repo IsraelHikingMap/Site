@@ -24,7 +24,7 @@ import { FitBoundsService } from "../services/fit-bounds.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../services/search-results.provider";
 import { BaseMapComponent } from "./base-map.component";
-import { RoutingType, IMarkerWithTitle, DataContainer, LatLngAlt } from "../models/models";
+import { RoutingType, DataContainer } from "../models/models";
 
 
 export interface ISearchContext {
