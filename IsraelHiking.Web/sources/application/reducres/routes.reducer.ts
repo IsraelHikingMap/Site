@@ -13,6 +13,7 @@ const UPDATE_POI = "UPDATE_POI";
 const DELETE_POI = "DELETE_POI";
 const ADD_SEGMENT = "ADD_SEGMENT";
 const UPDATE_SEGMENTS = "UPDATE_SEGMENTS";
+const REPLACE_SEGMENTS = "REPLACE_SEGMENTS";
 const DELETE_SEGMENT = "DELETE_SEGMENT";
 const CHANGE_EDIT_STATE = "CHANGE_EDIT_STATE";
 const CHANGE_VISIBILITY = "CHANGE_VISIBILITY";
@@ -58,6 +59,10 @@ export interface AddSegmentPayload extends RoutePayload {
 export interface UpdateSegmentsPayload extends RoutePayload {
     indices: number[];
     segmentsData: RouteSegmentData[];
+}
+
+export interface ReplaceSegmentsPayload extends RoutePayload {
+    segmentsData: RouteSegmentData[]
 }
 
 export interface DeleteSegmentPayload extends RoutePayload {
@@ -137,6 +142,12 @@ export class AddSegmentAction extends BaseAction<AddSegmentPayload> {
 export class UpdateSegmentsAction extends BaseAction<UpdateSegmentsPayload> {
     constructor(payload: UpdateSegmentsPayload) {
         super(UPDATE_SEGMENTS, payload);
+    }
+}
+
+export class ReplaceSegmentsAction extends BaseAction<ReplaceSegmentsPayload> {
+    constructor(payload: ReplaceSegmentsPayload) {
+        super(REPLACE_SEGMENTS, payload);
     }
 }
 
@@ -294,6 +305,17 @@ class RoutesReducer {
                     segments: segments
                 } as RouteData;
             });
+    }
+
+    @ReduxAction(REPLACE_SEGMENTS)
+    public replaceSegments(lastState: RouteData[], action: ReplaceSegmentsAction): RouteData[] {
+        return this.doForRoute(lastState,
+            action.payload.routeId,
+            (route) => ({
+                    ...route,
+                    segments: action.payload.segmentsData
+                } as RouteData
+            ));
     }
 
     @ReduxAction(DELETE_SEGMENT)

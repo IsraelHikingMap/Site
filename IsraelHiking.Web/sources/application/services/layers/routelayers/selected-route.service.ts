@@ -4,8 +4,14 @@ import { Observable } from "rxjs";
 import { some } from "lodash";
 
 import { SetSelectedRouteAction } from "../../../reducres/route-editing-state.reducer";
-import { AddRouteAction, SplitRouteAction, ReverseRouteAction, MergeRoutesAction, UpdateSegmentsAction,
-    DeleteSegmentAction
+import {
+    AddRouteAction,
+    SplitRouteAction,
+    ReverseRouteAction,
+    MergeRoutesAction,
+    UpdateSegmentsAction,
+    DeleteSegmentAction,
+    ReplaceSegmentsAction
 } from "../../../reducres/routes.reducer";
 import { RouteLayerFactory } from "./route-layer.factory";
 import { ResourcesService } from "../../resources.service";
@@ -229,5 +235,34 @@ export class SelectedRouteService {
                 segmentsData: [updatedSegment]
             }));
         }
+    }
+
+    public makeAllPointsEditable = (routeId: string) => {
+        let route = this.getRouteById(routeId);
+        if (!route || route.segments.length === 0) {
+            return;
+        }
+        let segments = [];
+        for (let segment of route.segments) {
+            if (segment.latlngs.length === 0) {
+                continue;
+            }
+            let previousPoint = segment.latlngs[0];
+            for (let latLng of segment.latlngs) {
+                if (previousPoint.lat === latLng.lat && previousPoint.lng === latLng.lng) {
+                    continue;
+                }
+                segments.push({
+                    latlngs: [previousPoint, latLng],
+                    routingType: segment.routingType,
+                    routePoint: latLng
+                } as RouteSegmentData);
+                previousPoint = latLng;
+            }
+        }
+        this.ngRedux.dispatch(new ReplaceSegmentsAction({
+            routeId: routeId,
+            segmentsData: segments
+        }));
     }
 }

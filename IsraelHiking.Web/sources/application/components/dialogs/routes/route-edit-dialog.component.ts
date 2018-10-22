@@ -102,10 +102,7 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
     }
 
     public makeAllPointsEditable = () => {
+        this.selectedRouteService.makeAllPointsEditable(this.routeData.id);
         this.toastService.info(this.resources.dataUpdatedSuccessfully);
-        // HM TODO: support this
-        throw new Error("Not implemented");
-        // this.routeLayer.makeAllPointsEditable();
-
     }
 }
