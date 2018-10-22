@@ -49,6 +49,17 @@ export class SpatialService {
         return SpatialService.extentToBounds(lineExtent);
     }
 
+    public static getGeoJsonBounds(geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>): IBounds {
+        let coordinates = []
+        for (let feature of geoJson.features) {
+            for (let coordinate of feature.geometry.coordinates) {
+                coordinates.push(coordinate);
+            }
+        }
+        let line = new geom.LineString(coordinates);
+        return SpatialService.extentToBounds(line.getExtent());
+    }
+
     public static getCenter(latlngs: LatLngAlt[]): LatLngAlt {
         if (latlngs.length === 1) {
             return latlngs[0];
@@ -63,6 +74,10 @@ export class SpatialService {
         return [latlng.lng, latlng.lat];
     }
 
+    public static toViewCoordinate(latlng: LatLngAlt): Coordinate {
+        return proj.transform(SpatialService.toCoordinate(latlng), "EPSG:4326", "EPSG:3857");
+    }
+
     public static toLatLng(coordinate: Coordinate): LatLngAlt {
         return {
             lat: coordinate[1],
@@ -73,12 +88,12 @@ export class SpatialService {
     private static extentToBounds(ext: Extent): IBounds {
         return {
             northEast: {
-                lng: ext[0],
-                lat: ext[1]
-            },
-            southWest: {
                 lng: ext[2],
                 lat: ext[3]
+            },
+            southWest: {
+                lng: ext[0],
+                lat: ext[1]
             }
         };
     }

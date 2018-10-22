@@ -7,7 +7,7 @@ import { DataContainer } from "../models/models";
 import { Urls } from "../urls";
 
 
-export type Visibility = "private" | "public";
+export type Visibility = "private" | "public" | "local";
 
 export interface ITrace {
     name: string;

@@ -1,7 +1,8 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
-import * as _ from "lodash";
+import { NgRedux } from "@angular-redux/store";
+import { sum } from "lodash";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -14,14 +15,15 @@ import {
     IPoiSocialLinks,
     IContribution
 } from "../../../services/poi.service";
-import { MapService } from "../../../services/map.service";
 import { OsmUserService } from "../../../services/osm-user.service";
-import { RoutesService } from "../../../services/layers/routelayers/routes.service";
 import { ToastService } from "../../../services/toast.service";
-import { IMarkerWithData } from "../../../services/layers/routelayers/iroute.layer";
 import { CategoriesLayerFactory } from "../../../services/layers/categories-layers.factory";
 import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
-import {RouteData, LinkData, LatLngAlt } from "../../../models/models";
+import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
+import { RouteData, LinkData, LatLngAlt, ApplicationState } from "../../../models/models";
+import { AddRouteAction, AddPrivatePoiAction } from "../../../reducres/routes.reducer";
+import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
+
 
 @Component({
     selector: "public-poi-sidebar",
@@ -45,14 +47,15 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     constructor(resources: ResourcesService,
         private readonly route: ActivatedRoute,
         private readonly router: Router,
-        private readonly mapService: MapService,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
         private readonly osmUserService: OsmUserService,
-        private readonly routesService: RoutesService,
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly routeLayerFactory: RouteLayerFactory,
         private readonly toastService: ToastService,
         private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly hashService: HashService) {
+        private readonly hashService: HashService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         let poiRouterData = this.hashService.getPoiRouterData();
         this.isLoading = true;
@@ -103,7 +106,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     private getRatingNumber(rating: IRating): number {
-        return _.sum(rating.raters.map(r => r.value));
+        return sum(rating.raters.map(r => r.value));
     }
 
     public isHideEditMode(): boolean {
@@ -184,7 +187,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (this.poiExtended == null) {
             return false;
         }
-        let vote = _.find(this.poiExtended.rating.raters, r => r.id === this.osmUserService.userId);
+        let vote = this.poiExtended.rating.raters.find(r => r.id === this.osmUserService.userId);
         if (vote == null) {
             return true;
         }
@@ -207,16 +210,22 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public convertToRoute() {
-        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes))  as RouteData[];
+        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes)) as RouteData[];
         routesCopy[0].description = this.info.description;
-        this.routesService.setData(routesCopy);
+        for (let routeData of routesCopy) {
+            let name = this.selectedRouteService.createRouteName(routeData.name);
+            let newRoute = this.routeLayerFactory.createRouteData(name);
+            newRoute.segments = routeData.segments;
+            newRoute.markers = routeData.markers;
+            this.ngRedux.dispatch(new AddRouteAction({
+                routeData: newRoute
+            }));
+        }
         this.clear();
     }
 
     public async addPointToRoute() {
-        let selectedRoute = this.routesService.getOrCreateSelectedRoute();
-        let stateName = selectedRoute.getStateName();
-        this.routesService.selectedRoute.setHiddenState();
+        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         let icon = "icon-star";
         let id = "";
         if (this.poiExtended) {
@@ -224,17 +233,17 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             id = this.poiExtended.id;
         }
         let urls = await this.getUrls();
-        this.routesService.selectedRoute.route.markers.push({
-            latlng: this.latLng,
-            title: this.info.title,
-            description: this.info.description,
-            type: icon.replace("icon-", ""),
-            id: id,
-            urls: urls,
-            marker: null
-        } as IMarkerWithData);
-        selectedRoute.setState(stateName);
-        selectedRoute.raiseDataChanged();
+        this.ngRedux.dispatch(new AddPrivatePoiAction({
+            routeId: selectedRoute.id,
+            markerData: {
+                latlng: this.latLng,
+                title: this.info.title,
+                description: this.info.description,
+                type: icon.replace("icon-", ""),
+                id: id,
+                urls: urls
+            }
+        }));
         this.clear();
     }
 

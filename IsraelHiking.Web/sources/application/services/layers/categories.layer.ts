@@ -1,14 +1,11 @@
-import { Router } from "@angular/router";
 import { LocalStorageService } from "ngx-store";
+import { MapBrowserEvent } from "openlayers";
 import { Subject } from "rxjs";
-import { Map } from "openlayers";
-import * as _ from "lodash";
+import { every } from "lodash";
 
 import { ResourcesService } from "../resources.service";
 import { IPointOfInterest, PoiService, CategoriesType, ICategory } from "../poi.service";
 import { FitBoundsService } from "../fit-bounds.service";
-import { SidebarService } from "../sidebar.service";
-import { HashService, RouteStrings } from "../hash.service";
 import { IBounds, RouteData } from "../../models/models";
 import { BaseMapComponent } from "../../components/base-map.component";
 import { SpatialService } from "../spatial.service";
@@ -21,7 +18,7 @@ export class CategoriesLayer extends BaseMapComponent {
 
     private visible: boolean;
     private requestsNumber: number;
-    private markersLoaded: Subject<void>;
+    public markersLoaded: Subject<void>;
 
     public categories: ICategory[];
     public pointsOfInterest: IPointOfInterest[];
@@ -30,14 +27,10 @@ export class CategoriesLayer extends BaseMapComponent {
     public isSelectedRoutesArea: boolean;
 
     constructor(resources: ResourcesService,
-        private readonly router: Router,
         private readonly mapService: MapService,
         private readonly localStorageService: LocalStorageService,
         private readonly poiService: PoiService,
         private readonly fitBoundsService: FitBoundsService,
-        private readonly sidebarService: SidebarService,
-        private readonly hashService: HashService,
-
         private readonly categoriesType: CategoriesType) {
         super(resources);
         this.categories = [];
@@ -55,6 +48,9 @@ export class CategoriesLayer extends BaseMapComponent {
                 this.categories.push(category);
             }
             this.updateMarkers();
+            this.mapService.map.on("moveend", (event: MapBrowserEvent) => {
+                this.updateMarkers();
+            });
         });
 
         this.resources.languageChanged.subscribe(() => {
@@ -67,11 +63,11 @@ export class CategoriesLayer extends BaseMapComponent {
     }
 
     public show() {
-        if (_.every(this.categories, c => c.isSelected === false)) {
+        if (every(this.categories, c => c.isSelected === false)) {
             this.categories.forEach(c => this.changeCategorySelectedState(c, true));
         }
-        this.updateMarkers();
         this.visible = true;
+        this.updateMarkers();
         this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX, this.visible);
     }
 
@@ -79,14 +75,6 @@ export class CategoriesLayer extends BaseMapComponent {
         this.categories.forEach(c => this.changeCategorySelectedState(c, false));
         this.visible = false;
         this.localStorageService.set(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX, this.visible);
-    }
-
-    protected getIconString(): string {
-        return "fa icon-star";
-    }
-
-    protected getMinimalZoom(): number {
-        return 9;
     }
 
     public toggleCategory(category: ICategory) {
@@ -104,6 +92,12 @@ export class CategoriesLayer extends BaseMapComponent {
             // layer is not ready yet...
             return;
         }
+        if (this.mapService.map.getView().getZoom() <= 9 || !this.isVisible()) {
+            this.pointsOfInterest.splice(0);
+            this.markersLoaded.next();
+            return;
+        }
+        // HM TODO: pad bounds
         let bounds = SpatialService.getMapBounds(this.mapService.map);
         this.requestsNumber++;
         this.poiService
@@ -115,7 +109,6 @@ export class CategoriesLayer extends BaseMapComponent {
                     return;
                 }
                 this.pointsOfInterest.splice(0, this.pointsOfInterest.length, ...pointsOfInterest);
-                // raise event
                 this.markersLoaded.next();
             }, () => {
                 this.requestArrived();

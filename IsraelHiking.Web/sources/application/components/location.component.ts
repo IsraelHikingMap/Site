@@ -8,13 +8,15 @@ import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
-import { RoutesService } from "../services/layers/routelayers/routes.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SetLocationAction } from "../reducres/location.reducer";
-import { IRouteLayer, IRouteSegment } from "../services/layers/routelayers/iroute.layer";
 import { RouteData, ICoordinate, ApplicationState } from "../models/models";
 import { DragInteraction } from "./intercations/drag.interaction";
+import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { AddRouteAction, StopRecordingAction } from "../reducres/routes.reducer";
+import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
+import { AddLocallyRecordedRouteAction } from "../reducres/locally-recorded-routes.reducer";
 
 interface ILocationInfo extends ICoordinate {
     radius: number;
@@ -34,7 +36,7 @@ export class LocationComponent extends BaseMapComponent {
     @LocalStorage()
     private showBatteryConfirmation = true;
 
-    private routeLayer: IRouteLayer;
+    private recordingRouteId: string;
 
     public locationCoordinate: ILocationInfo;
     public isFollowing: boolean;
@@ -42,7 +44,7 @@ export class LocationComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
         private readonly geoLocationService: GeoLocationService,
         private readonly toastService: ToastService,
-        private readonly routesService: RoutesService,
+        private readonly selectedRouteService: SelectedRouteService,
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly cancelableTimeoutService: CancelableTimeoutService,
         private readonly ngRedux: NgRedux<ApplicationState>,
@@ -50,7 +52,7 @@ export class LocationComponent extends BaseMapComponent {
         super(resources);
 
         this.locationCoordinate = null;
-        this.routeLayer = null;
+        this.recordingRouteId = null;
         this.isFollowing = true;
 
         this.host.instance.addInteraction(new DragInteraction(() => {
@@ -73,8 +75,9 @@ export class LocationComponent extends BaseMapComponent {
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                 } else {
                     this.updateMarkerPosition(position);
-                    if (this.routeLayer != null && this.routeLayer.route.properties.isRecording) {
-                        this.lastRecordedRoute = this.routeLayer.getData();
+                    let recordingRoute = this.selectedRouteService.getRouteById(this.recordingRouteId);
+                    if (recordingRoute != null && recordingRoute.isRecording) {
+                        this.lastRecordedRoute = recordingRoute;
                     }
                 }
             });
@@ -86,14 +89,17 @@ export class LocationComponent extends BaseMapComponent {
                     type: "YesNo",
                     confirmAction: () => {
                         this.toggleTracking();
-                        this.routesService.setData([this.lastRecordedRoute]);
-                        this.routeLayer = this.routesService.selectedRoute;
-                        this.routeLayer.route.properties.isRecording = true;
-                        this.routeLayer.setReadOnlyState();
-                        this.routeLayer.raiseDataChanged();
+                        this.ngRedux.dispatch(new AddRouteAction({
+                            routeData: this.lastRecordedRoute
+                        }));
+                        this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: this.lastRecordedRoute.id }));
+                        this.recordingRouteId = this.lastRecordedRoute.id;
                     },
                     declineAction: () => {
-                        this.routesService.addRouteToLocalStorage(this.lastRecordedRoute);
+                        this.lastRecordedRoute.isRecording = false;
+                        this.ngRedux.dispatch(new AddLocallyRecordedRouteAction({
+                            routeData: this.lastRecordedRoute
+                        }));
                         this.lastRecordedRoute = null;
                     },
                 });
@@ -131,7 +137,8 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public isRecording() {
-        return this.routeLayer != null;
+        let recordingRoute = this.selectedRouteService.getRouteById(this.recordingRouteId);
+        return recordingRoute != null && recordingRoute.isRecording;
     }
 
     public toggleRecording() {
@@ -149,41 +156,45 @@ export class LocationComponent extends BaseMapComponent {
             }
             this.createRecordingRoute();
         } else {
-            this.routeLayer.route.properties.isRecording = false;
-            this.routeLayer.setReadOnlyState();
-            this.routesService.addRouteToLocalStorage(this.routeLayer.getData());
-            this.routeLayer = null;
+            this.ngRedux.dispatch(new StopRecordingAction({
+                routeId: this.recordingRouteId
+            }));
+            this.ngRedux.dispatch(new AddLocallyRecordedRouteAction({
+                routeData: this.selectedRouteService.getRouteById(this.recordingRouteId)
+            }));
             this.lastRecordedRoute = null;
+            this.recordingRouteId = null;
         }
     }
 
     private createRecordingRoute() {
         let date = new Date();
         let name = this.resources.route + " " + date.toISOString().split("T")[0];
-        if (!this.routesService.isNameAvailable(name)) {
+        if (!this.selectedRouteService.isNameAvailable(name)) {
             let dateString =
                 `${date.toISOString().split("T")[0]} ${date.getHours()}:${date.getMinutes()}:${date.getSeconds()}`;
             name = this.resources.route + " " + dateString;
         }
-        let route = this.routeLayerFactory.createRoute(name);
-        route.properties.isRecording = true;
-        let latlngs = [];
-        let routePoint = null;
+        let route = this.routeLayerFactory.createRouteData(name);
+        route.isRecording = true;
         let currentLocation = this.geoLocationService.currentLocation;
-        if (currentLocation != null) {
-            latlngs = [currentLocation];
-            routePoint = currentLocation;
-        }
         route.segments.push({
-            latlngs: latlngs,
-            routePoint: routePoint,
-            routingType: "Hike",
-            polyline: null,
-            routePointMarker: null
-        } as IRouteSegment);
-        this.routesService.addRoute(route);
-        this.routeLayer = this.routesService.selectedRoute;
-        this.routeLayer.setReadOnlyState();
+            routingType: this.routeLayerFactory.routingType,
+            latlngs: [currentLocation, currentLocation],
+            routePoint: currentLocation
+        });
+        route.segments.push({
+            routingType: this.routeLayerFactory.routingType,
+            latlngs: [currentLocation],
+            routePoint: currentLocation
+        });
+        this.ngRedux.dispatch(new AddRouteAction({
+            routeData: route
+        }));
+        this.ngRedux.dispatch(new SetSelectedRouteAction({
+            routeId: route.id
+        }));
+        this.recordingRouteId = route.id;
     }
 
     public isDisabled() {

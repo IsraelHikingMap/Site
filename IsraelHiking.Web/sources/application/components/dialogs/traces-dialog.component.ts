@@ -1,34 +1,23 @@
-import {
-    Component,
-    Injector,
-    ComponentFactoryResolver,
-    OnInit,
-    OnDestroy,
-    ViewEncapsulation,
-} from "@angular/core";
+import { Component, OnInit, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { FormControl } from "@angular/forms";
 import { MatDialogRef } from "@angular/material";
 import { SharedStorage } from "ngx-store";
 import { Subscription } from "rxjs";
-//import * as _ from "lodash";
 import { orderBy, take } from "lodash";
+import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import { ToastService } from "../../services/toast.service";
-import { IconsService } from "../../services/icons.service";
-import { DataContainerService } from "../../services/data-container.service";
 import { LayersService } from "../../services/layers/layers.service";
-import { RoutesService } from "../../services/layers/routelayers/routes.service";
-import { GeoJsonParser } from "../../services/geojson.parser";
 import { BaseMapComponent } from "../base-map.component";
-import { MissingPartMarkerPopupComponent } from "../markerpopup/missing-part-marker-popup.component";
-import { ITrace, TracesService } from "../../services/traces.service";
-import { DataContainer, IMarkerWithTitle, RouteData } from "../../models/models";
+import { ITrace, TracesService, Visibility } from "../../services/traces.service";
 import { RunningContextService } from "../../services/running-context.service";
-
+import { RemoveLocallyRecordedRouteAction } from "../../reducres/locally-recorded-routes.reducer";
+import { DataContainer, RouteData, ApplicationState } from "../../models/models";
+import { SpatialService } from "../../services/spatial.service";
 
 @Component({
     selector: "traces-dialog",
@@ -51,19 +40,15 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     private tracesChangedSubscription: Subscription;
 
     constructor(resources: ResourcesService,
-        private readonly injector: Injector,
         private readonly matDialogRef: MatDialogRef<TracesDialogComponent>,
-        private readonly componentFactoryResolver: ComponentFactoryResolver,
         private readonly fileService: FileService,
-        private readonly dataContainerService: DataContainerService,
         private readonly layersService: LayersService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly toastService: ToastService,
-        private readonly geoJsonParser: GeoJsonParser,
-        private readonly routesService: RoutesService,
         private readonly osmUserService: OsmUserService,
         private readonly tracesService: TracesService,
-        private readonly runningContextService: RunningContextService
+        private readonly runningContextService: RunningContextService,
+        private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.loadingTraces = false;
@@ -91,12 +76,13 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public showTrace = async (trace: ITrace): Promise<DataContainer> => {
-        let data = (trace.id === "")
+        let data = (trace.visibility === "local")
             ? this.getDataContainerFromRecording(trace)
             : await this.fileService.openFromUrl(trace.dataUrl);
 
+        // HM TODO: show trace should be in tracesService
         this.layersService.readOnlyDataContainer = data;
-        // HM TODO: fit bounds, set type?;
+        // HM TODO: fit bounds, set popup type?;
         return data;
     }
 
@@ -129,7 +115,9 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             type: "YesNo",
             confirmAction: () => {
                 if (this.selectedTrace.id === "") {
-                    this.routesService.removeRouteFromLocalStorage(this.getRouteFromTrace(this.selectedTrace));
+                    this.ngRedux.dispatch(new RemoveLocallyRecordedRouteAction({
+                        routeId: this.getRouteFromTrace(this.selectedTrace).id
+                    }));
                     this.updateFilteredLists(this.searchTerm.value);
                 } else {
                     this.tracesService.deleteTrace(this.selectedTrace);
@@ -152,7 +140,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
             }
             await this.showTrace(trace);
             this.tracesService.missingParts = geoJson;
-            // HM TODO: fit bounds of missing parts
+            let bounds = SpatialService.getGeoJsonBounds(geoJson);
+            this.fitBoundsService.fitBounds(bounds);
             this.matDialogRef.close();
         } catch (ex) {
             this.toastService.confirm({ message: ex.message, type: "Ok" });
@@ -177,13 +166,13 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     private updateFilteredLists(searchTerm: string) {
         searchTerm = searchTerm.trim();
         this.sessionSearchTerm = searchTerm;
-        let localTraces = this.routesService.locallyRecordedRoutes.map((r) => {
+        let localTraces = this.ngRedux.getState().locallyRecordedRoutes.map((r) => {
             return {
                 name: r.name,
                 description: r.description,
                 timeStamp: new Date(r.segments[0].latlngs[0].timestamp),
-                id: "",
-                visibility: "private"
+                id: r.id,
+                visibility: "local"
             } as ITrace;
         });
         let traces = this.tracesService.traces.concat(localTraces);
@@ -240,16 +229,18 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public canUploadToOsm(): boolean {
-        return this.selectedTrace != null && this.selectedTrace.id === "";
+        return this.selectedTrace != null && this.selectedTrace.visibility === "local";
     }
 
     public async uploadRecordingToOsm() {
         let route = this.getRouteFromTrace(this.selectedTrace);
+        this.selectedTrace = null;
         try {
             await this.fileService.uploadRouteAsTrace(route);
             await this.tracesService.getTraces();
-            this.routesService.removeRouteFromLocalStorage(route);
-            this.selectedTrace = null;
+            this.ngRedux.dispatch(new RemoveLocallyRecordedRouteAction({
+                routeId: route.id
+            }));
             this.toastService.info(this.resources.fileUploadedSuccessfullyItWillTakeTime);
         } catch (ex) {
             this.toastService.error(this.resources.unableToUploadFile);
@@ -257,7 +248,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     private getRouteFromTrace(trace: ITrace): RouteData {
-        return this.routesService.locallyRecordedRoutes.filter(r => r.name === trace.name)[0];
+        return this.ngRedux.getState().locallyRecordedRoutes.filter(r => r.id === trace.id)[0];
     }
 
     public hasNoTraces(): boolean {
@@ -265,6 +256,19 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public getTraceDisplayName(trace: ITrace) {
-        return (trace.id === "") ? trace.name : trace.description;
+        return (trace.visibility === "local") ? trace.name : trace.description;
+    }
+
+    public getVisibilityTranslation(visibility: Visibility) {
+        switch (visibility) {
+            case "private":
+                return this.resources.private;
+            case "public":
+                return this.resources.public;
+            case "local":
+                return this.resources.local;
+            default:
+                throw new Error(`invalid visibility value: ${visibility}`);
+        }
     }
 }

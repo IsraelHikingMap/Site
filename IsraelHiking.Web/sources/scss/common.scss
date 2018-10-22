@@ -245,8 +245,7 @@ ngx-image-gallery .image {
     border: 1px solid rgb(204, 204, 204);
     border-radius: 5px;
     bottom: 12px;
-    left: -100px;
-    width: 200px;
+    transform: translate(-50%);
 
     &:after, &:before {
         top: 100%;
@@ -261,15 +260,15 @@ ngx-image-gallery .image {
     &:before {
         border-top-color: #cccccc;
         border-width: 11px;
-        left: 99px;
         margin-left: -11px;
+        left: 50%
     }
 
     &:after {
         border-top-color: white;
         border-width: 10px;
-        left: 99px;
         margin-left: -10px;
+        left: 50%
     }
 
     & .close {

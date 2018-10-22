@@ -1,6 +1,6 @@
 import undoable, { UndoableOptions, excludeAction } from "redux-undo";
 
-import { RouteData, MarkerData, RouteSegmentData, RouteStateName } from "../models/models";
+import { RouteData, MarkerData, RouteSegmentData, RouteStateName, ILatLngTime } from "../models/models";
 import { initialState } from "./initial-state";
 import { ReduxAction, createReducerFromClass, BaseAction } from "./reducer-action-decorator";
 
@@ -19,6 +19,8 @@ const CHANGE_VISIBILITY = "CHANGE_VISIBILITY";
 const REVERSE_ROUTE = "REVERSE_ROUTE";
 const SPLIT_ROUTE = "SPLIT_ROUTE";
 const MERGE_ROUTES = "MERGE_ROUTES";
+const ADD_RECORDING_POINT = "ADD_RECORDING_POINT";
+const STOP_RECORDING = "STOP_RECORDING";
 // const SET_STATE = "SET_STATE";
 // const CLEAR_POI = "CLEAR_POI";
 // const CLEAR_ROUTE = "CLEAR_ROUTE";
@@ -83,6 +85,12 @@ export interface MergeRoutesPayload extends RoutePayload {
     secondaryRouteId: string;
     mergedRouteData: RouteData;
 }
+
+export interface AddRecordingPointPayload extends RoutePayload {
+   latlng: ILatLngTime;
+}
+
+export interface StopRecordingPayload extends RoutePayload { }
 
 export class AddRouteAction extends BaseAction<AddRoutePayload> {
     constructor(payload: AddRoutePayload) {
@@ -165,6 +173,18 @@ export class SplitRouteAction extends BaseAction<SplitRoutePayload> {
 export class MergeRoutesAction extends BaseAction<MergeRoutesPayload> {
     constructor(payload: MergeRoutesPayload) {
         super(MERGE_ROUTES, payload);
+    }
+}
+
+export class AddRecordingPointAction extends BaseAction<AddRecordingPointPayload> {
+    constructor(payload: AddRecordingPointPayload) {
+        super(ADD_RECORDING_POINT, payload);
+    }
+}
+
+export class StopRecordingAction extends BaseAction<StopRecordingPayload> {
+    constructor(payload: StopRecordingPayload) {
+        super(STOP_RECORDING, payload);
     }
 }
 
@@ -337,9 +357,36 @@ class RoutesReducer {
         routes.splice(routes.indexOf(secondaryRoute), 1);
         return routes;
     }
+
+    @ReduxAction(ADD_RECORDING_POINT)
+    public addRecordingPoint(lastState: RouteData[], action: AddRecordingPointAction): RouteData[] {
+        return this.doForRoute(lastState,
+            action.payload.routeId,
+            (route) => {
+                let segments = [...route.segments];
+                let lastSegment = { ...segments[segments.length - 1] };
+                lastSegment.latlngs = [...lastSegment.latlngs, action.payload.latlng];
+                lastSegment.routePoint = action.payload.latlng;
+                segments.splice(segments.length - 1, 1, lastSegment);
+                return {
+                    ...route,
+                    segments: segments
+                };
+            });
+    }
+
+    @ReduxAction(STOP_RECORDING)
+    public stopRecording(lastState: RouteData[], action: StopRecordingAction): RouteData[] {
+        return this.doForRoute(lastState,
+            action.payload.routeId,
+            (route) => ({
+                    ...route,
+                    isRecording: false
+            }));
+    }
 }
 
 export const routesReducer = undoable(createReducerFromClass(RoutesReducer, initialState.routes.present),
     {
-        filter: excludeAction([CHANGE_EDIT_STATE])
+        filter: excludeAction([CHANGE_EDIT_STATE, ADD_RECORDING_POINT, STOP_RECORDING])
     } as UndoableOptions);

@@ -1,6 +1,7 @@
 ﻿<aol-layer-tile>
     <aol-source-xyz [url]="getBaseLayer()"></aol-source-xyz>
 </aol-layer-tile>
+
 <aol-layer-tile *ngFor="let overlay of getOverlays(); let zIdx = index"
                 [zIndex]="zIdx + 10"
                 [visible]="overlay.visible"
@@ -8,49 +9,10 @@
     <aol-source-xyz [url]="overlay.address"></aol-source-xyz>
 </aol-layer-tile>
 
-<aol-layer-vector [visible]="isPoisVisible()">
-
-</aol-layer-vector>
-
-<aol-layer-vector [visible]="isPoisVisible()">
-    <aol-source-cluster [distance]="60">
-        <aol-source-vector>
-            <aol-feature *ngFor="let p of points">
-                <aol-geometry-point>
-                    <aol-coordinate [x]="p.location.lng" [y]="p.location.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-                </aol-geometry-point>
-            </aol-feature>
-        </aol-source-vector>
-
-        <aol-style>
-            <aol-style-circle [radius]="20">
-                <aol-style-stroke [color]="'#fff'"></aol-style-stroke>
-                <aol-style-fill [color]="'#3399CC'"></aol-style-fill>
-            </aol-style-circle>
-            <aol-style-text [text]="'5'">
-                <aol-style-fill [color]="'#fff'"></aol-style-fill>
-            </aol-style-text>
-        </aol-style>
-    </aol-source-cluster>
-</aol-layer-vector>
-
-<aol-layer-vector [visible]="isRoutesVisible()">
-    <aol-source-cluster [distance]="60">
-        <aol-source-vector>
-            <aol-feature *ngFor="let p of routes">
-                <aol-geometry-point>
-                    <aol-coordinate [x]="p.location.lng" [y]="p.location.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-                </aol-geometry-point>
-            </aol-feature>
-        </aol-source-vector>
-        <aol-style>
-            <aol-style-circle [radius]="15">
-                <aol-style-stroke [color]="'#fff'"></aol-style-stroke>
-                <aol-style-fill [color]="'#ff0000'"></aol-style-fill>
-            </aol-style-circle>
-            <aol-style-text [text]="'5'">
-                <aol-style-fill [color]="'#fff'"></aol-style-fill>
-            </aol-style-text>
-        </aol-style>
-    </aol-source-cluster>
-</aol-layer-vector>
+<div *ngFor="let categoriesType of categoriesTypes">
+    <aol-layer-vector [visible]="isVisible(categoriesType)">
+        <aol-source-cluster [distance]="distance">
+            <aol-source-vector></aol-source-vector>
+        </aol-source-cluster>
+    </aol-layer-vector>
+</div>

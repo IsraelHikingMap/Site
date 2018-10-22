@@ -4,14 +4,13 @@ import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
 import { LocalStorage } from "ngx-store";
 import { ResourcesService } from "../../services/resources.service";
-import { MapService } from "../../services/map.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { ToastService } from "../../services/toast.service";
-import { RoutesService } from "../../services/layers/routelayers/routes.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ShareUrl } from "../../models/share-url";
 import { DataContainer } from "../../models/models";
+import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 
 export interface IIOffroadCoordinates {
     latitude: number;
@@ -67,8 +66,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     constructor(resources: ResourcesService,
         private readonly httpClient: HttpClient,
         private readonly sanitizer: DomSanitizer,
-        private readonly mapService: MapService,
-        private readonly routesService: RoutesService,
+        private readonly selectedRouteService: SelectedRouteService,
         private readonly dataContainerService: DataContainerService,
         private readonly osmUserService: OsmUserService,
         private readonly toastService: ToastService,
@@ -100,14 +98,14 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             this.title = shareUrl.title;
             this.description = shareUrl.description;
         }
-        if (this.routesService.selectedRoute != null) {
-            let route = routesService.selectedRoute.getData();
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute != null) {
             if (shareUrl == null || (!this.title && !this.description)) {
-                this.title = route.name;
-                this.description = route.description;
+                this.title = selectedRoute.name;
+                this.description = selectedRoute.description;
             }
-            if (route.segments.length > 0) {
-                switch (route.segments[route.segments.length - 1].routingType) {
+            if (selectedRoute.segments.length > 0) {
+                switch (selectedRoute.segments[selectedRoute.segments.length - 1].routingType) {
                     case "Hike":
                         this.offroadRequest.activityType = "Walking";
                         break;
@@ -165,10 +163,6 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
     }
 
     private createShareUrlObject = (): ShareUrl => {
-        if (this.routesService.routes.length === 1 && !this.routesService.routes[0].route.properties.description) {
-            this.routesService.routes[0].route.properties.description = this.description;
-        }
-
         let id = this.dataContainerService.getShareUrl() ? this.dataContainerService.getShareUrl().id : "";
         let shareUrl = {
             id: id,
@@ -184,12 +178,12 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.offroadRequest.title = this.title;
         this.offroadRequest.description = this.description;
         this.storedUserEmail = this.offroadRequest.userMail;
-        if (this.routesService.selectedRoute == null) {
+        if (this.selectedRouteService.getSelectedRoute() == null) {
             this.toastService.warning(this.resources.pleaseSelectARoute);
             return;
         }
-        let route = this.routesService.selectedRoute.getData();
-        if (route.segments.length === 0) {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute.segments.length === 0) {
             this.toastService.warning(this.resources.pleaseAddPointsToRoute);
             return;
         }
@@ -199,13 +193,13 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.offroadRequest.externalUrl = this.shareAddress;
         this.offroadRequest.backgroundServeUrl = this.osmUserService.getImageFromShareId(this.lastShareUrl);
 
-        for (let segment of route.segments) {
+        for (let segment of selectedRoute.segments) {
             for (let latlng of segment.latlngs) {
                 this.offroadRequest.path.push({ altitude: latlng.alt, latitude: latlng.lat, longitude: latlng.lng });
             }
         }
         let index = 0;
-        for (let marker of route.markers) {
+        for (let marker of selectedRoute.markers) {
             this.offroadRequest.mapItems.push({
                 title: `Point ${index++}`,
                 mapItemType: "POI",

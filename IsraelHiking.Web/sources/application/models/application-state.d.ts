@@ -7,4 +7,5 @@ export interface ApplicationState {
     location: Location;
     routes: StateWithHistory<RouteData[]>;
     routeEditingState: RouteEditingState;
+    locallyRecordedRoutes: RouteData[];
 }

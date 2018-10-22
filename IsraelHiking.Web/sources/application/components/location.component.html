@@ -20,7 +20,7 @@
                 <aol-coordinate [x]="locationCoordinate.x" [y]="locationCoordinate.y" [srid]="'EPSG:4326'"></aol-coordinate>
             </aol-geometry-point>
             <aol-style>
-                <aol-style-text [text]="'\uf05b'" font="normal 30px IsraelHikingMap">
+                <aol-style-text [text]="resources.getCharacterForIcon('icon-crosshairs')" font="normal 30px IsraelHikingMap">
                     <aol-style-fill [color]="'blue'"></aol-style-fill>
                 </aol-style-text>
             </aol-style>

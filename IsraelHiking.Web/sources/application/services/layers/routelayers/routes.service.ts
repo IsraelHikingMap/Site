@@ -3,19 +3,15 @@ import { Subject } from "rxjs";
 import { LocalStorage } from "ngx-store";
 import * as _ from "lodash";
 
-import { IRouteLayer, IRoute, IRouteSegment, IMarkerWithData } from "./iroute.layer";
+import { IRouteLayer, IRoute, IMarkerWithData } from "./iroute.layer";
 import { RouteLayerFactory } from "./route-layer.factory";
 import { RouteLayer } from "./route.layer";
 import { ResourcesService } from "../../resources.service";
 import { IconsService } from "../../icons.service";
-import { IRoutesService } from "./iroutes.service";
-import { SpatialService } from "../../spatial.service";
-import { RouteData, RouteSegmentData } from "../../../models/models";
+import { RouteData } from "../../../models/models";
 
 @Injectable()
-export class RoutesService implements IRoutesService {
-    private static MERGE_THRESHOLD = 50; // meter.
-
+export class RoutesService {
     @LocalStorage()
     public locallyRecordedRoutes: RouteData[] = [];
 
@@ -139,100 +135,5 @@ export class RoutesService implements IRoutesService {
             (routeLayer as RouteLayer).show();
             this.selectRoute(routeLayer);
         }
-    }
-
-    public splitSelectedRouteAt(segmenet: IRouteSegment) {
-        let segmentIndex = this.selectedRoute.route.segments.indexOf(segmenet);
-        let currentRoute = this.selectedRoute.route;
-        this.selectedRoute.setHiddenState();
-        let postFixSegments = currentRoute.segments.splice(segmentIndex + 1) as RouteSegmentData[];
-        let startPoint = this.selectedRoute.getLastLatLng();
-        postFixSegments.splice(0, 0,
-            {
-                latlngs: [startPoint, startPoint],
-                routePoint: startPoint,
-                routingType: postFixSegments[0].routingType
-            } as RouteSegmentData);
-        let routePostFix = {
-            segments: postFixSegments,
-            name: currentRoute.properties.name + this.resourcesService.split,
-        } as RouteData;
-
-        this.setData([routePostFix]);
-        this.selectedRoute.setEditRouteState();
-        this.selectedRoute.raiseDataChanged();
-    }
-
-    /**
-     * This method is used to find the closest route in order to merge between routes.
-     * @param isFirst use to signal the method if to check against the beginning or the end of the selected route.
-     */
-    public getClosestRoute(isFirst: boolean) {
-        let latLngToCheck = isFirst
-            ? this.selectedRoute.route.segments[0].latlngs[0]
-            : this.selectedRoute.getLastLatLng();
-        for (let routeLayer of this.routes) {
-            if (routeLayer === this.selectedRoute || routeLayer.route.segments.length <= 0) {
-                continue;
-            }
-            if (SpatialService.getDistance(routeLayer.getLastLatLng(), latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
-                return routeLayer;
-            }
-            if (SpatialService.getDistance(routeLayer.route.segments[0].latlngs[0], latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
-                return routeLayer;
-            }
-        }
-        return null;
-    }
-
-    public mergeSelectedRouteToClosest(isFirst: boolean) {
-        let closestRoute = this.getClosestRoute(isFirst);
-        this.selectedRoute.setHiddenState();
-        this.removeRoute(closestRoute.route.properties.name);
-        let markersToAdd = closestRoute.route.markers;
-        this.selectedRoute.route.markers = this.selectedRoute.route.markers.concat(markersToAdd);
-        let latLngToCheck = isFirst
-            ? this.selectedRoute.route.segments[0].latlngs[0]
-            : this.selectedRoute.getLastLatLng();
-        if (isFirst) {
-            let firstLatLng = closestRoute.route.segments[0].latlngs[0];
-            if (SpatialService.getDistanceInMeters(firstLatLng, latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
-                closestRoute.reverse();
-            }
-            this.selectedRoute.route.segments.splice(0, 1);
-            this.selectedRoute.route.segments[0].latlngs.splice(0, 0, closestRoute.getLastLatLng());
-            this.selectedRoute.route.segments.splice(0, 0, ...closestRoute.route.segments);
-        } else { // merging last point
-            if (SpatialService.getDistanceInMeters(closestRoute.getLastLatLng(), latLngToCheck) < RoutesService.MERGE_THRESHOLD) {
-                closestRoute.reverse();
-            }
-            // remove first segment and add last point:
-            closestRoute.route.segments.splice(0, 1);
-            closestRoute.route.segments[0].latlngs.splice(0, 0, this.selectedRoute.getLastLatLng());
-            this.selectedRoute.route.segments.push(...closestRoute.route.segments);
-        }
-        this.selectedRoute.setEditRouteState();
-        this.selectedRoute.raiseDataChanged();
-    }
-
-    public getOrCreateSelectedRoute(): IRouteLayer {
-        if (this.selectedRoute == null && this.routes.length > 0) {
-            this.changeRouteState(this.routes[0]);
-        }
-        if (this.routes.length === 0) {
-            let properties = this.routeLayerFactory.createRoute(this.createRouteName()).properties;
-            this.addRoute({ properties: properties, segments: [], markers: [] });
-            this.selectedRoute.setState("ReadOnly");
-        }
-        return this.selectedRoute;
-    }
-
-    public addRouteToLocalStorage(route: RouteData) {
-        this.locallyRecordedRoutes.push(route);
-    }
-
-    public removeRouteFromLocalStorage(route: RouteData) {
-        let index = this.locallyRecordedRoutes.indexOf(route);
-        this.locallyRecordedRoutes.splice(index, 1);
     }
 }

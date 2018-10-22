@@ -40,11 +40,15 @@ export class SelectedRouteService {
     }
 
     public getSelectedRoute(): RouteData {
-        let route = this.routes.find((r) => r.id === this.selectedRouteId);
+        let route = this.getRouteById(this.selectedRouteId);
         if (route == null && this.selectedRouteId != null) {
             this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: null }));
         }
         return route;
+    }
+
+    public getRouteById(id: string): RouteData {
+        return this.routes.find((r) => r.id === id);
     }
 
     public getOrCreateSelectedRoute(): RouteData {

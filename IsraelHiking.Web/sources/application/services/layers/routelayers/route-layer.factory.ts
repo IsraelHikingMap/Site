@@ -11,7 +11,7 @@ import { ElevationProvider } from "../../elevation.provider";
 import { IRouteLayer, IRoute, IRouteProperties, IRouteSegment, IMarkerWithData } from "./iroute.layer";
 import { RouteLayer } from "./route.layer";
 import { Urls } from "../../../urls";
-import { RouteData } from "../../../models/models";
+import { RouteData, RoutingType } from "../../../models/models";
 
 
 @Injectable()
@@ -37,7 +37,7 @@ export class RouteLayerFactory {
     @LocalStorage()
     public isRoutingPerPoint = true;
     @LocalStorage()
-    public routingType = "Hike";
+    public routingType: RoutingType = "Hike";
     @LocalStorage()
     public routeOpacity = 0.5;
 

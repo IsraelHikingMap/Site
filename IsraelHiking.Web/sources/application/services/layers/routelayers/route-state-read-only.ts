@@ -24,8 +24,8 @@ export class RouteStateReadOnly extends RouteStateBase {
         super.initialize();
         for (let marker of this.context.route.markers) {
             marker.marker = RouteStatePoiHelper.createPoiMarker(marker, false, this.context);
-            let component = RouteStatePoiHelper.addReadOnlyComponentToPoiMarker(marker.marker, this.context);
-            component.changeToEditMode = () => this.changeStateToEditPoi(marker.marker);
+            RouteStatePoiHelper.addReadOnlyComponentToPoiMarker(marker.marker, this.context);
+            //component.changeToEditMode = () => this.changeStateToEditPoi(marker.marker);
         }
         this.context.mapService.map.on("mousemove", this.onMouseMove);
         RouteStateHelper.createStartAndEndMarkers(this.context);

@@ -1,37 +1,41 @@
-﻿<aol-layer-vector *ngFor="let route of (routes | async)">
-    <aol-source-vector>
-        <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegment(route, idx)">
-            <aol-geometry-linestring>
-                <aol-collection-coordinates [coordinates]="getSegmentCoordinates(segment)" [srid]="'EPSG:4326'"></aol-collection-coordinates>
-            </aol-geometry-linestring>
-            <aol-style>
-                <aol-style-stroke [color]="getColor(route)" [width]="route.weight"></aol-style-stroke>
-            </aol-style>
-        </aol-feature>
-        <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegmentPoint(route, idx)">
-            <aol-geometry-point>
-                <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-            </aol-geometry-point>
-            <aol-style>
-                <aol-style-circle [radius]="6">
-                    <aol-style-fill [color]="getColor(route)"></aol-style-fill>
-                    <aol-style-stroke [color]="getRouteMarkerColor(idx, route)" [width]="3"></aol-style-stroke>
-                </aol-style-circle>
-            </aol-style>
-        </aol-feature>
-        <aol-feature *ngFor="let marker of route.markers; let idx = index" [id]="getIdForMarker(route, idx)">
-            <aol-geometry-point>
-                <aol-coordinate [x]="marker.latlng.lng" [y]="marker.latlng.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-            </aol-geometry-point>
-            <aol-style>
-                <aol-style-circle [radius]="6">
-                    <aol-style-stroke [color]="getColor(route)"></aol-style-stroke>
-                </aol-style-circle>
-                <aol-style-text [text]="marker.title" [textAlign]="'start'" [textBaseLine]="'bottom'"></aol-style-text>
-            </aol-style>
-        </aol-feature>
-    </aol-source-vector>
-</aol-layer-vector>
+﻿<div *ngFor="let route of (routes | async)">
+    <aol-layer-vector>
+        <aol-source-vector>
+            <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegment(route, idx)">
+                <aol-geometry-linestring>
+                    <aol-collection-coordinates [coordinates]="getSegmentCoordinates(segment)" [srid]="'EPSG:4326'"></aol-collection-coordinates>
+                </aol-geometry-linestring>
+                <aol-style>
+                    <aol-style-stroke [color]="getColor(route)" [width]="route.weight"></aol-style-stroke>
+                </aol-style>
+            </aol-feature>
+            <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegmentPoint(route, idx)">
+                <aol-geometry-point>
+                    <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>
+                </aol-geometry-point>
+                <aol-style>
+                    <aol-style-circle [radius]="6">
+                        <aol-style-fill [color]="getColor(route)"></aol-style-fill>
+                        <aol-style-stroke [color]="getRouteMarkerColor(idx, route)" [width]="3"></aol-style-stroke>
+                    </aol-style-circle>
+                </aol-style>
+            </aol-feature>
+            <aol-feature *ngFor="let marker of route.markers; let idx = index" [id]="getIdForMarker(route, idx)">
+                <aol-geometry-point>
+                    <aol-coordinate [x]="marker.latlng.lng" [y]="marker.latlng.lat" [srid]="'EPSG:4326'"></aol-coordinate>
+                </aol-geometry-point>
+                <aol-style>
+                    <aol-style-circle [radius]="6">
+                        <aol-style-stroke [color]="getColor(route)" [width]="3"></aol-style-stroke>
+                    </aol-style-circle>
+                </aol-style>
+            </aol-feature>
+        </aol-source-vector>
+    </aol-layer-vector>
+    <div *ngFor="let marker of route.markers">
+        <private-poi-overlay [marker]="marker" [routeId]="route.id"></private-poi-overlay>
+    </div>
+</div>
 <aol-layer-vector *ngIf="hoverViewCoordinates">
     <aol-source-vector>
         <aol-feature [id]="'hover'">
@@ -52,10 +56,9 @@
                     [srid]="'EPSG:4326'">
     </aol-coordinate>
     <aol-content>
-        <route-marker-popup 
-            [segmentIndex]="routePointPopupData.segmentIndex"
-            [latLng]="routePointPopupData.latlng"
-            [close]="routePointPopupData.close">
+        <route-marker-popup [segmentIndex]="routePointPopupData.segmentIndex"
+                            [latLng]="routePointPopupData.latlng"
+                            [close]="routePointPopupData.close">
         </route-marker-popup>
     </aol-content>
 </aol-overlay>

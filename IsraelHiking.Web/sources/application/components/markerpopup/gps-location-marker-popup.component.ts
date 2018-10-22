@@ -1,11 +1,13 @@
 ﻿import { Component } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
+import { NgRedux } from "@angular-redux/store";
 
 import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 import { ResourcesService } from "../../services/resources.service";
 import { ElevationProvider } from "../../services/elevation.provider";
-import { RoutesService } from "../../services/layers/routelayers/routes.service";
-import { IMarkerWithData } from "../../services/layers/routelayers/iroute.layer";
+import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { ApplicationState } from "../../models/models";
+import { AddPrivatePoiAction } from "../../reducres/routes.reducer";
 
 
 @Component({
@@ -16,26 +18,23 @@ export class GpsLocationMarkerPopupComponent extends BaseMarkerPopupComponent {
     constructor(resources: ResourcesService,
         httpClient: HttpClient,
         elevationProvider: ElevationProvider,
-        private readonly routesService: RoutesService) {
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources, httpClient, elevationProvider);
     }
 
     public addPointToRoute() {
-        let selectedRoute = this.routesService.getOrCreateSelectedRoute();
-        let stateName = selectedRoute.getStateName();
-        selectedRoute.setHiddenState();
-        selectedRoute.route.markers.push({
-            latlng: this.latLng,
-            title: this.title,
-            description: "",
-            type: "star",
-            id: "",
-            urls: [],
-            marker: null
-        } as IMarkerWithData);
-        selectedRoute.setState(stateName);
-        selectedRoute.raiseDataChanged();
-
+        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        this.ngRedux.dispatch(new AddPrivatePoiAction({
+            routeId: selectedRoute.id,
+            markerData: {
+                latlng: this.latLng,
+                title: this.title,
+                description: "",
+                type: "star",
+                urls: []
+            }
+        }));
         this.close();
     }
 }

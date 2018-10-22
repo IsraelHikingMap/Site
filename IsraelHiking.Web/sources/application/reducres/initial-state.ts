@@ -19,5 +19,6 @@ export const initialState =
         routeEditingState: {
             routingType: "Hike",
             selectedRouteId: null,
-        } as RouteEditingState
+        } as RouteEditingState,
+        locallyRecordedRoutes: []
     } as ApplicationState;

@@ -230,7 +230,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         link: LegendItemComponent.OSM_KEY_LINK
                     },
                     {
-                        title: this.resources.legendChallangingWithDirection,
+                        title: this.resources.legendChallengingWithDirection,
                         latlng: { lat: 33.198423, lng: 35.5491829 },
                         zoom: 16,
                         type: "Way",
@@ -510,7 +510,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
-                        title: this.resources.legendResidental,
+                        title: this.resources.legendResidential,
                         latlng: { lat: 31.1980, lng: 34.8364 },
                         zoom: 16,
                         type: "Way",
@@ -924,7 +924,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
-                        title: this.resources.legendReastaurant,
+                        title: this.resources.legendRestaurant,
                         latlng: { lat: 31.830534, lng: 35.0722647 },
                         zoom: 16,
                         type: "POI",
@@ -994,7 +994,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                 id: "_" + id++,
                 items: [
                     {
-                        title: this.resources.legendCitySettelment,
+                        title: this.resources.legendCitySettlement,
                         latlng: { lat: 30.490800, lng: 35.1667000 },
                         zoom: 13,
                         type: "POI",
@@ -1050,7 +1050,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
                         link: LegendItemComponent.OSM_TAG_LINK
                     },
                     {
-                        title: this.resources.legendCemetary,
+                        title: this.resources.legendCemetery,
                         latlng: { lat: 32.831568, lng: 35.7989717 },
                         zoom: 16,
                         type: "POI",
@@ -1134,14 +1134,14 @@ export class InfoSidebarComponent extends BaseMapComponent {
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendBikeShop);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendFirstAid);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendCafé);
-        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendReastaurant);
+        this.removeItemInSection(this.resources.legendAmenities, this.resources.legendRestaurant);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendConvenienceStore);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendLodging);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendToilettes);
         this.removeItemInSection(this.resources.legendAmenities, this.resources.legendInformationCenter);
 
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendWetland);
-        this.removeItemInSection(this.resources.legendAreas, this.resources.legendCemetary);
+        this.removeItemInSection(this.resources.legendAreas, this.resources.legendCemetery);
         this.removeItemInSection(this.resources.legendAreas, this.resources.legendConstructionSite);
     }
 

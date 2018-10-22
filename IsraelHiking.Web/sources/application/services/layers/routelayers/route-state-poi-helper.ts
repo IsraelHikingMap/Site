@@ -1,12 +1,9 @@
-import { MatDialog } from "@angular/material";
 import * as L from "leaflet";
 import * as _ from "lodash";
 
 import { IconsService } from "../../icons.service";
-import { DrawingPoiMarkerPopupComponent } from "../../../components/markerpopup/drawing-poi-marker-popup.component";
 import { IRouteLayer, IMarkerWithData } from "./iroute.layer";
 import { RouteStateHelper } from "./route-state-helper";
-import { PrivatePoiEditDialogComponent } from "../../../components/dialogs/private-poi-edit-dialog.component";
 import { IMarkerWithTitle, MarkerData } from "../../../models/models";
 
 export class RouteStatePoiHelper {
@@ -26,15 +23,7 @@ export class RouteStatePoiHelper {
         return marker;
     }
 
-    public static addReadOnlyComponentToPoiMarker(marker: IMarkerWithTitle, context: IRouteLayer): DrawingPoiMarkerPopupComponent {
-        let factory = context.componentFactoryResolver.resolveComponentFactory(DrawingPoiMarkerPopupComponent);
-        let containerDiv = L.DomUtil.create("div");
-        let poiMarkerPopupComponentRef = factory.create(context.injector, [], containerDiv);
-        // poiMarkerPopupComponentRef.instance.setMarker(marker);
-        poiMarkerPopupComponentRef.instance.setRouteLayer(context);
-        // poiMarkerPopupComponentRef.instance.angularBinding(poiMarkerPopupComponentRef.hostView);
-        marker.bindPopup(containerDiv);
-        return poiMarkerPopupComponentRef.instance;
+    public static addReadOnlyComponentToPoiMarker(marker: IMarkerWithTitle, context: IRouteLayer) {
     }
 
     public static addPoint(e: L.LeafletMouseEvent, context: IRouteLayer): IMarkerWithData {

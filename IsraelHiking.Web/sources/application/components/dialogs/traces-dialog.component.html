@@ -29,7 +29,7 @@
                     <div *ngIf="!trace.isInEditMode">
                         {{getTraceDisplayName(trace)}}<br />
                         {{trace.timeStamp | date:'dd/MM/yyyy'}}<br />
-                        {{resources.translate(trace.visibility === 'private' ? 'Private' : 'Public')}}<br />
+                        {{getVisibilityTranslation(trace.visibility)}}<br />
                         {{trace.tagsString || resources.noTags}}
                     </div>
                     <div *ngIf="trace.isInEditMode">

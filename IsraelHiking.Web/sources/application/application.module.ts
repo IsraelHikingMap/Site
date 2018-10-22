@@ -109,7 +109,7 @@ import { LanguageComponent } from "./components/language.component";
 import { LanguageDialogComponent } from "./components/dialogs/language-dialog.component";
 import { DrawingComponent } from "./components/drawing.component";
 import { RouteMarkerPopupComponent } from "./components/markerpopup/route-marker-popup.component";
-import { DrawingPoiMarkerPopupComponent } from "./components/markerpopup/drawing-poi-marker-popup.component";
+import { PrivatePoiOverlayComponent } from "./components/overlays/private-poi-overlay.component";
 import { CoordinatesMarkerPopupComponent } from "./components/markerpopup/coordinates-marker-popup.component";
 import { SearchResultsMarkerPopupComponent } from "./components/markerpopup/search-results-marker-popup.component";
 import { MissingPartMarkerPopupComponent } from "./components/markerpopup/missing-part-marker-popup.component";
@@ -203,7 +203,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         LanguageDialogComponent,
         DrawingComponent,
         RouteMarkerPopupComponent,
-        DrawingPoiMarkerPopupComponent,
+        PrivatePoiOverlayComponent,
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,
@@ -298,7 +298,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         LanguageDialogComponent,
         DrawingComponent,
         RouteMarkerPopupComponent,
-        DrawingPoiMarkerPopupComponent,
+        PrivatePoiOverlayComponent,
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,

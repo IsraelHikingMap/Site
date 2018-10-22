@@ -80,7 +80,7 @@ export class FileComponent extends BaseMapComponent {
     }
 
     public showPrint(): boolean {
-        return this.runningContextService.isMobile;
+        return !this.runningContextService.isMobile;
     }
 
     @HostListener("window:keydown", ["$event"])

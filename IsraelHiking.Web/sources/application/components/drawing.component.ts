@@ -22,7 +22,7 @@ export class DrawingComponent extends BaseMapComponent {
     @select((state: ApplicationState) => state.routeEditingState.routingType)
     private routingType$: Observable<RoutingType>;
 
-    @select((state: ApplicationState) => state.routes.past)
+    @select((state: ApplicationState) => state.routes.past.length)
     public undoQueueLength: Observable<number>;
 
     constructor(resources: ResourcesService,
