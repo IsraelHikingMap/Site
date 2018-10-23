@@ -7,8 +7,8 @@ import { ESCAPE } from "@angular/cdk/keycodes";
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
-import { RoutingType, ApplicationState, RouteData } from "../models/models";
-import { ChangeEditStateAction } from "../reducres/routes.reducer";
+import { RoutingType, ApplicationState } from "../models/models";
+import { ChangeEditStateAction, ReplaceSegmentsAction, ClearPoisAction, ClearPoisAndRouteAction } from "../reducres/routes.reducer";
 import { SetRouteEditingStateAction } from "../reducres/route-editing-state.reducer";
 
 @Component({
@@ -54,18 +54,25 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public clearRoute() {
-        // HM TODO: clear.
-        throw new Error("Not implemented!");
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        this.ngRedux.dispatch(new ReplaceSegmentsAction({
+            routeId: selectedRoute.id,
+            segmentsData: []
+        }));
     }
 
     public clearPois() {
-        // HM TODO: clear.
-        throw new Error("Not implemented!");
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        this.ngRedux.dispatch(new ClearPoisAction({
+            routeId: selectedRoute.id
+        }));
     }
 
     public clearBoth() {
-        // HM TODO: clear.
-        throw new Error("Not implemented!");
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        this.ngRedux.dispatch(new ClearPoisAndRouteAction({
+            routeId: selectedRoute.id
+        }));
     }
 
     public isPoiEditActive() {

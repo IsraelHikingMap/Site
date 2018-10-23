@@ -22,10 +22,8 @@ const SPLIT_ROUTE = "SPLIT_ROUTE";
 const MERGE_ROUTES = "MERGE_ROUTES";
 const ADD_RECORDING_POINT = "ADD_RECORDING_POINT";
 const STOP_RECORDING = "STOP_RECORDING";
-// const SET_STATE = "SET_STATE";
-// const CLEAR_POI = "CLEAR_POI";
-// const CLEAR_ROUTE = "CLEAR_ROUTE";
-// const CLEAR_ALL_ROUTES = "CLEAR_ALL_ROUTES";
+const CLEAR_POIS = "CLEAR_POIS";
+const CLEAR_POIS_AND_ROUTE = "CLEAR_POIS_AND_ROUTE";
 
 export interface RoutePayload {
     routeId: string;
@@ -196,6 +194,18 @@ export class AddRecordingPointAction extends BaseAction<AddRecordingPointPayload
 export class StopRecordingAction extends BaseAction<StopRecordingPayload> {
     constructor(payload: StopRecordingPayload) {
         super(STOP_RECORDING, payload);
+    }
+}
+
+export class ClearPoisAction extends BaseAction<RoutePayload> {
+    constructor(payload: RoutePayload) {
+        super(CLEAR_POIS, payload);
+    }
+}
+
+export class ClearPoisAndRouteAction extends BaseAction<RoutePayload> {
+    constructor(payload: RoutePayload) {
+        super(CLEAR_POIS_AND_ROUTE, payload);
     }
 }
 
@@ -404,6 +414,27 @@ class RoutesReducer {
             (route) => ({
                     ...route,
                     isRecording: false
+            }));
+    }
+
+    @ReduxAction(CLEAR_POIS)
+    public clearPois(lastState: RouteData[], action: ClearPoisAction): RouteData[] {
+        return this.doForRoute(lastState,
+            action.payload.routeId,
+            (route) => ({
+                ...route,
+                markers: []
+            }));
+    }
+
+    @ReduxAction(CLEAR_POIS_AND_ROUTE)
+    public clearPoisAndRoute(lastState: RouteData[], action: ClearPoisAndRouteAction): RouteData[] {
+        return this.doForRoute(lastState,
+            action.payload.routeId,
+            (route) => ({
+                ...route,
+                markers: [],
+                segments: []
             }));
     }
 }
