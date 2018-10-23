@@ -31,7 +31,7 @@
                     </div>
                     <div *ngIf="(isAdvanced | async) && baseLayer.isEditable" fxFlex="10">
                         <div fxLayout="column" fxFill>
-                            <span fxFill fxLayoutAlign="end start" (click)="editBaseLayer(baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-wrench"></i></span>
+                            <span fxFill fxLayoutAlign="end start" (click)="editBaseLayer(baseLayer)" matTooltip="{{resources.baseLayerProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit base layer"><i class="fa icon-ellipsis-v"></i></span>
                         </div>
                     </div>
                 </div>
@@ -53,7 +53,7 @@
                     </div>
                     <div *ngIf="(isAdvanced | async) && overlay.isEditable" fxFlex="10">
                         <div fxLayout="column" fxFill>
-                            <span fxFill fxLayoutAlign="end start" (click)="editOverlay(overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-wrench"></i></span>
+                            <span fxFill fxLayoutAlign="end start" (click)="editOverlay(overlay)" matTooltip="{{resources.overlayProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Edit overlay"><i class="fa icon-ellipsis-v"></i></span>
                         </div>
                     </div>
                 </div>
@@ -105,7 +105,7 @@
                         </div>
                         <div fxFlex="10">
                             <div fxLayout="column" fxFill>
-                                <span fxFill fxLayoutAlign="end start" (click)="editRoute(route)" matTooltip="{{resources.routeProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Route" angularticsAction="Edit route"><i class="fa icon-wrench"></i></span>
+                                <span fxFill fxLayoutAlign="end start" (click)="editRoute(route)" matTooltip="{{resources.routeProperties}}" matTooltipPosition="before" angulartics2On="click" angularticsCategory="Route" angularticsAction="Edit route"><i class="fa icon-ellipsis-v"></i></span>
                             </div>
                         </div>
                     </div>
