@@ -3,13 +3,14 @@ import { Router } from "@angular/router";
 import { MapComponent, LayerVectorComponent } from "ngx-openlayers";
 import { style, layer, MapBrowserEvent, Feature, geom } from "openlayers";
 
-import { PoiService, CategoriesType } from "../services/poi.service";
+import { PoiService, CategoriesType, IPointOfInterest } from "../services/poi.service";
 import { LayersService } from "../services/layers/layers.service";
 import { CategoriesLayerFactory } from "../services/layers/categories-layers.factory";
 import { SpatialService } from "../services/spatial.service";
 import { RouteStrings } from "../services/hash.service";
 import { BaseMapComponent } from "./base-map.component";
 import { ResourcesService } from "../services/resources.service";
+import { LatLngAlt } from "../models/models";
 
 @Component({
     selector: "layers-view",
@@ -17,13 +18,17 @@ import { ResourcesService } from "../services/resources.service";
 })
 export class LayersViewComponent extends BaseMapComponent implements OnInit, AfterViewInit {
 
-    public distance = 60;
 
     @ViewChildren(LayerVectorComponent)
     public poiLayers: QueryList<LayerVectorComponent>;
+    public distance = 60;
+    public categoriesTypes: CategoriesType[];
+
+    public isClusterOpen: boolean;
+    public clusterLatlng: LatLngAlt;
+    public clusterPoints: IPointOfInterest[];
 
     private whiteFill: style.Fill;
-    public categoriesTypes: CategoriesType[];
 
     constructor(resources: ResourcesService,
         private readonly router: Router,
@@ -69,22 +74,52 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     public ngAfterViewInit() {
-        // HM TODO: hover and cluster click.
+        // HM TODO: hover.
         this.poiLayers.forEach(l => (l.instance as layer.Vector).setStyle((feature) => this.createClusterIcon(feature)));
-        this.host.instance.on("singleclick", (event: MapBrowserEvent) => {
-            let features = event.map.getFeaturesAtPixel(event.pixel) || [];
-            if (features.length === 0) {
-                return;
-            }
-            let size = (features[0].get("features") || []).length;
-            if (size !== 1) {
-                return;
-            }
-            let sourceAndId = features[0].get("features")[0].getId() as string;
-            let source = sourceAndId.split("__")[0];
-            let id = sourceAndId.split("__")[1];
-            this.router.navigate([RouteStrings.ROUTE_POI, source, id]);
-        });
+        this.host.instance.on("singleclick",
+            (event: MapBrowserEvent) => {
+                let featuresAtPixel = event.map.getFeaturesAtPixel(event.pixel) || [];
+                if (featuresAtPixel.length === 0) {
+                    this.isClusterOpen = false;
+                    return;
+                }
+                let features = (featuresAtPixel[0].get("features") || []);
+                if (features.length === 0) {
+                    this.isClusterOpen = false;
+                    return;
+                }
+                if (features.length === 1) {
+                    this.isClusterOpen = false;
+                    let sourceAndId = this.getSourceAndId(features[0]);
+                    this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
+                        { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+                    return;
+                }
+                let coordinates = (featuresAtPixel[0].getGeometry() as geom.Point).getCoordinates();
+                let latlng = SpatialService.screenToLatLng(coordinates);
+                if (this.isClusterOpen &&
+                    latlng.lat === this.clusterLatlng.lat &&
+                    this.clusterLatlng.lng === latlng.lng) {
+                    this.isClusterOpen = false;
+                    this.clusterLatlng = null;
+                    this.clusterPoints = [];
+                    return;
+                }
+                this.clusterLatlng = latlng;
+                this.clusterPoints = features.filter((_, index) => (index < 7))
+                    .map(f => {
+                    let properties = f.getProperties();
+                    let sourceAndId = this.getSourceAndId(f);
+                    return {
+                        icon: properties.icon,
+                        iconColor: properties.iconColor,
+                        title: properties.name,
+                        id: sourceAndId.id,
+                        source: sourceAndId.source
+                    }
+                });
+                this.isClusterOpen = true;
+            });
     }
 
     private createClusterIcon(feature): (style.Style | style.Style[]) {
@@ -165,5 +200,15 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 })
             })
         ];
+    }
+
+    private getSourceAndId(feature: Feature): { source: string, id: string } {
+        let sourceAndId = feature.getId() as string;
+        let source = sourceAndId.split("__")[0];
+        let id = sourceAndId.split("__")[1];
+        return {
+            source: source,
+            id: id
+        }
     }
 }

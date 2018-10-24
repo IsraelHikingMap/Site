@@ -16,3 +16,5 @@
         </aol-source-cluster>
     </aol-layer-vector>
 </div>
+
+<cluster-overlay [isOpen]="isClusterOpen" [latlng]="clusterLatlng" [points]="clusterPoints" (onClose)="isClusterOpen = false"></cluster-overlay>
