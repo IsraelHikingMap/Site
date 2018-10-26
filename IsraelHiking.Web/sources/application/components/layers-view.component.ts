@@ -45,7 +45,11 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     public getBaseLayer() {
-        return this.layersService.selectedBaseLayer.address;
+        let address = this.layersService.selectedBaseLayer.address;
+        if (address.toLowerCase().endsWith("/mapserver")) {
+            return `${address}/tile/{z}/{y}/{x}`;
+        }
+        return address;
     }
 
     public getOverlays() {

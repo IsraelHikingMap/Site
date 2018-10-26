@@ -69,6 +69,14 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
         return decodeURI(this.address).replace("{zoom}", "{z}").trim();
     }
 
+    public getPreviewAddress() {
+        let address = this.getTilesAddress();
+        if (address.toLowerCase().endsWith("/mapserver")) {
+            return `${address}/tile/{z}/{y}/{x}`;
+        }
+        return address;
+    }
+
     private async updateLayerKeyIfPossible() {
         if (this.key) {
             return;

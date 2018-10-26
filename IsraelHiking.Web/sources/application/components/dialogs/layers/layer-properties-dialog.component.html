@@ -39,7 +39,7 @@
         <div fxLayout="row">
             <aol-map fxfill [width]="'100%'" [height]="'100px'">
                 <aol-layer-tile [opacity]="opacity">
-                    <aol-source-xyz [url]="address"></aol-source-xyz>
+                    <aol-source-xyz [url]="getPreviewAddress()"></aol-source-xyz>
                 </aol-layer-tile>
                 <aol-view [zoom]="(minZoom + maxZoom) / 2">
                     <aol-coordinate [x]="(location | async).longitude" [y]="(location | async).latitude" [srid]="'EPSG:4326'"></aol-coordinate>
