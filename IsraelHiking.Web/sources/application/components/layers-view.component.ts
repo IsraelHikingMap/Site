@@ -100,7 +100,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                     return;
                 }
                 let coordinates = (featuresAtPixel[0].getGeometry() as geom.Point).getCoordinates();
-                let latlng = SpatialService.screenToLatLng(coordinates);
+                let latlng = SpatialService.fromViewCoordinate(coordinates);
                 if (this.isClusterOpen &&
                     latlng.lat === this.clusterLatlng.lat &&
                     this.clusterLatlng.lng === latlng.lng) {

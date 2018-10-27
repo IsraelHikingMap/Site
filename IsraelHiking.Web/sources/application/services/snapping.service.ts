@@ -1,14 +1,13 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 import { Map } from "openlayers";
-import * as _ from "lodash";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { GeoJsonParser } from "./geojson.parser";
 import { Urls } from "../urls";
-import { LatLngAlt, MarkerData } from "../models/models";
 import { SpatialService } from "./spatial.service";
+import { LatLngAlt, MarkerData } from "../models/models";
 
 
 export interface ISnappingRouteOptions {
@@ -93,11 +92,11 @@ export class SnappingService {
             boundsString: boundsString
         } as ISnappingRequestQueueItem);
         let params = new HttpParams()
-            .set("northEast", bounds.northEast.lat + "," + bounds.southWest.lng)
-            .set("southWest", bounds.northEast.lat + "," + bounds.southWest.lng);
+            .set("northEast", bounds.northEast.lat + "," + bounds.northEast.lng)
+            .set("southWest", bounds.southWest.lat + "," + bounds.southWest.lng);
         try {
             let features = await this.httpClient.get(Urls.osm, { params: params }).toPromise() as GeoJSON.Feature<GeoJSON.GeometryObject>[];
-            let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.boundsString === boundsString);
+            let queueItem = this.requestsQueue.find((itemToFind) => itemToFind.boundsString === boundsString);
             if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                 this.requestsQueue.splice(0, this.requestsQueue.length - 1);
                 return;
@@ -141,19 +140,18 @@ export class SnappingService {
             line: null
         } as ISnappingRouteResponse;
 
-        let pointInPixels = this.map.getPixelFromCoordinate([latlng.lng, latlng.lat]);
+        let pointInPixels = this.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(latlng));
 
         for (let lineIndex = 0; lineIndex < options.lines.length; lineIndex++) {
             let line = options.lines[lineIndex];
             if (line.length <= 1) {
                 continue;
             }
-            let lineInPixels = line.map(l => this.map.getPixelFromCoordinate([l.lng, l.lat]));
+            let lineInPixels = line.map(l => this.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(l)));
             let distance = SpatialService.getDistanceFromPointToLine(pointInPixels, lineInPixels);
-
             if (distance <= options.sensitivity && distance < minDistance) {
                 minDistance = distance;
-                response.latlng = line[0];
+                response.latlng = SpatialService.getClosestPoint(latlng, line);
                 response.line = line;
                 response.lineIndex = lineIndex;
             }
@@ -176,9 +174,9 @@ export class SnappingService {
             markerData: null,
             id: null
         } as ISnappingPointResponse;
-        let pointOnScreen = this.map.getPixelFromCoordinate([latlng.lng, latlng.lat]);
+        let pointOnScreen = this.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(latlng));
         for (let markerData of options.points) {
-            let markerPointOnScreen = this.map.getPixelFromCoordinate([markerData.latlng.lng, markerData.latlng.lat]);
+            let markerPointOnScreen = this.map.getPixelFromCoordinate(SpatialService.toViewCoordinate(markerData.latlng));
             if (SpatialService.getDistanceForCoordinates(markerPointOnScreen, pointOnScreen) < options.sensitivity &&
                 response.markerData == null) {
                 response.latlng = markerData.latlng;
@@ -217,7 +215,6 @@ export class SnappingService {
             },
             this.resources.getCurrentLanguageCodeSimplified());
         let markerData = dataContainer.routes[0].markers[0];
-        console.log(feature);
         return markerData;
     }
 }

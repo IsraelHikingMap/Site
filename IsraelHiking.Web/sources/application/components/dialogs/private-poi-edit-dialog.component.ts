@@ -2,9 +2,7 @@ import { Component, ViewChild, ElementRef, AfterViewInit, HostListener } from "@
 import { NgRedux } from "@angular-redux/store";
 import { MatDialogRef } from "@angular/material";
 import { ENTER } from "@angular/cdk/keycodes";
-import * as _ from "lodash";
 
-import { IconsService } from "../../services/icons.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
@@ -47,12 +45,18 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         super(resources);
         this.showIcons = false;
         this.iconsGroups = [];
-        for (let iconTypeIndex = 0; iconTypeIndex < IconsService.getAvailableIconTypes().length /
-            PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW; iconTypeIndex++) {
+        let icons = [
+            "star", "arrow-left", "arrow-right", "tint",
+            "automobile", "bike", "hike", "four-by-four",
+            "bed", "viewpoint", "fire", "flag",
+            "coffee", "cutlery", "shopping-cart", "tree"
+        ];
+        let groups = icons.length / PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW;
+        for (let iconTypeIndex = 0;
+            iconTypeIndex < groups;
+            iconTypeIndex++) {
             this.iconsGroups.push({
-                icons: IconsService.getAvailableIconTypes().splice(
-                    iconTypeIndex * PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW,
-                    PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW)
+                icons: icons.splice(0, PrivatePoiEditDialogComponent.NUMBER_OF_ICONS_PER_ROW)
             });
         }
     }
@@ -78,7 +82,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         this.markerType = marker.type;
         this.title = marker.title;
         this.description = marker.description;
-        let url = _.find(marker.urls, u => u.mimeType.startsWith("image"));
+        let url = marker.urls.find(u => u.mimeType.startsWith("image"));
         this.imageLink = url;
     }
 

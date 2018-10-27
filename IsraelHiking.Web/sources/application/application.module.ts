@@ -53,7 +53,6 @@ import { FileService } from "./services/file.service";
 import { SidebarService } from "./services/sidebar.service";
 import { HashService } from "./services/hash.service";
 import { LayersService } from "./services/layers/layers.service";
-import { RoutesService } from "./services/layers/routelayers/routes.service";
 import { DataContainerService } from "./services/data-container.service";
 import { RouteLayerFactory } from "./services/layers/routelayers/route-layer.factory";
 import { RouterService } from "./services/routers/router.service";
@@ -139,7 +138,6 @@ import { rootReducer } from "./reducres/root.reducer";
 import { initialState } from "./reducres/initial-state";
 
 export function getWindow() { return window; }
-export function getRoutesService(routesService: RoutesService) { return routesService; }
 
 @NgModule({
     imports: [
@@ -243,12 +241,6 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         FileService,
         HashService,
         LayersService,
-        RoutesService,
-        {
-            provide: "RoutesService",
-            useFactory: getRoutesService,
-            deps: [RoutesService]
-        },
         DataContainerService,
         RouteLayerFactory,
         RouterService,

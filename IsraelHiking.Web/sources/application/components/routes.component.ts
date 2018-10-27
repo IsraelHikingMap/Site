@@ -7,9 +7,10 @@ import parse from "color-parse";
 
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { SpatialService } from "../services/spatial.service";
-import { LatLngAlt, ApplicationState, RouteData, RouteSegmentData, ICoordinate } from "../models/models";
 import { RouteEditPoiInteraction } from "./intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "./intercations/route-edit-route.interaction";
+import { SnappingService } from "../services/snapping.service";
+import { LatLngAlt, ApplicationState, RouteData, RouteSegmentData, ICoordinate } from "../models/models";
 
 interface RoutePointViewData {
     latlng: LatLngAlt;
@@ -32,7 +33,8 @@ export class RoutesComponent implements AfterViewInit {
     constructor(private readonly selectedRouteService: SelectedRouteService,
         private readonly host: MapComponent,
         private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
-        private readonly routeEditRouteInteraction: RouteEditRouteInteraction, ) {
+        private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
+        private readonly snappingService: SnappingService) {
         this.hoverViewCoordinates = null;
 
         this.routeEditRouteInteraction.onRoutePointClick.subscribe((pointIndex: number) => {
@@ -49,9 +51,18 @@ export class RoutesComponent implements AfterViewInit {
             };
         });
 
+        this.routeEditRouteInteraction.onPointerMove.subscribe(latLng => {
+            this.hoverViewCoordinates = SpatialService.toViewCoordinate(latLng);
+        });
+
+        this.routeEditPoiInteraction.onPointerMove.subscribe(latLng => {
+            this.hoverViewCoordinates = SpatialService.toViewCoordinate(latLng);
+        });
+
         this.routes.subscribe(() => {
             this.routeEditPoiInteraction.setActive(false);
             this.routeEditRouteInteraction.setActive(false);
+            this.snappingService.enable(this.isEditMode());
             if (!this.isEditMode()) {
                 this.hoverViewCoordinates = null;
             }
@@ -68,21 +79,13 @@ export class RoutesComponent implements AfterViewInit {
     }
 
     public ngAfterViewInit(): void {
-        this.host.instance.on("pointermove",
-            (event: ol.MapBrowserEvent) => {
-                if (this.isEditMode()) {
-                    this.hoverViewCoordinates = event.coordinate;
-                } else {
-                    this.hoverViewCoordinates = null;
-                }
-            });
         this.routeEditPoiInteraction.setActive(false);
         this.routeEditRouteInteraction.setActive(false);
         this.host.instance.addInteraction(this.routeEditPoiInteraction);
         this.host.instance.addInteraction(this.routeEditRouteInteraction);
     }
 
-    private isEditMode() {
+    private isEditMode(): boolean {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         return selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route");
     }

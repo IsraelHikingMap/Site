@@ -1,12 +1,11 @@
 ﻿import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { LocalStorage } from "ngx-store";
-import * as _ from "lodash";
+import { remove } from "lodash";
 
 import { ResourcesService } from "../resources.service";
 import { OsmUserService } from "../osm-user.service";
 import { ToastService } from "../toast.service";
-import { MapLayersFactory } from "../map-layers.factory";
 import { Urls } from "../../urls";
 import { DataContainer, LayerData } from "../../models/models";
 
@@ -31,22 +30,24 @@ interface IUserLayer extends LayerData {
 
 @Injectable()
 export class LayersService {
-    public static ISRAEL_MTB_MAP = "Israel MTB Map";
-    public static ISRAEL_HIKING_MAP = "Israel Hiking Map";
-    public static ESRI = "ESRI";
+    public static readonly MIN_ZOOM = 7;
+    public static readonly MAX_NATIVE_ZOOM = 16;
+    public static readonly ISRAEL_MTB_MAP = "Israel MTB Map";
+    public static readonly ISRAEL_HIKING_MAP = "Israel Hiking Map";
+    public static readonly ESRI = "ESRI";
 
-    private static MIN_ESRI_ZOOM = 0;
-    private static MAX_ESRI_ZOOM = 16;
-    private static HIKING_TRAILS = "Hiking Trails";
-    private static BICYCLE_TRAILS = "Bicycle Trails";
-    private static ATTRIBUTION = "Tiles © <a href='https://IsraelHiking.osm.org.il' target='_blank'>Israel Hiking</a>, " +
+    private static readonly MIN_ESRI_ZOOM = 0;
+    private static readonly MAX_ESRI_ZOOM = 16;
+    private static readonly HIKING_TRAILS = "Hiking Trails";
+    private static readonly BICYCLE_TRAILS = "Bicycle Trails";
+    private static readonly ATTRIBUTION = "Tiles © <a href='https://IsraelHiking.osm.org.il' target='_blank'>Israel Hiking</a>, " +
         "<a href='https://creativecommons.org/licenses/by-nc-sa/3.0/' target='_blank'>CC BY-NC-SA 3.0</a>. " +
         "Data by <a href='https://openstreetmap.org' target='_blank'>OpenStreetMap</a> " +
         "under <a href='https://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
-    private static MTB_ATTRIBUTION = LayersService.ATTRIBUTION;
-    private static TRAILS_ATTRIBUTION = "Trail " + LayersService.ATTRIBUTION;
-    private static ESRI_ADDRESS = "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
-    private static ESRI_ATTRIBUTION = "DigitalGlobe, GeoEye, i-cubed, USDA, USGS, AEX, Getmapping, " +
+    private static readonly MTB_ATTRIBUTION = LayersService.ATTRIBUTION;
+    private static readonly TRAILS_ATTRIBUTION = "Trail " + LayersService.ATTRIBUTION;
+    private static readonly ESRI_ADDRESS = "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+    private static readonly ESRI_ATTRIBUTION = "DigitalGlobe, GeoEye, i-cubed, USDA, USGS, AEX, Getmapping, " +
         "Aerogrid, IGN, IGP, swisstopo, and the GIS User Community";
     private static BASE_LAYERS_KEY = "BaseLayers";
     private static OVERLAYS_KEY = "Overlays";
@@ -101,23 +102,23 @@ export class LayersService {
         let hikingTrailsOverlay = this.addOverlayFromData({
             key: LayersService.HIKING_TRAILS,
             address: Urls.baseTilesAddress + Urls.OVERLAY_TILES_ADDRESS,
-            minZoom: MapLayersFactory.MIN_ZOOM,
-            maxZoom: MapLayersFactory.MAX_NATIVE_ZOOM
+            minZoom: LayersService.MIN_ZOOM,
+            maxZoom: LayersService.MAX_NATIVE_ZOOM
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
         hikingTrailsOverlay.isEditable = false;
 
         let bicycleTrailsOverlay = this.addOverlayFromData({
             key: LayersService.BICYCLE_TRAILS,
             address: Urls.baseTilesAddress + Urls.OVERLAY_MTB_ADDRESS,
-            minZoom: MapLayersFactory.MIN_ZOOM,
-            maxZoom: MapLayersFactory.MAX_NATIVE_ZOOM
+            minZoom: LayersService.MIN_ZOOM,
+            maxZoom: LayersService.MAX_NATIVE_ZOOM
         } as ILayer, LayersService.TRAILS_ATTRIBUTION);
         bicycleTrailsOverlay.isEditable = false;
         this.selectBaseLayerAccordingToStorage(false);
     }
 
     public addBaseLayer = (layerData: LayerData, attribution?: string, position?: number): IBaseLayer => {
-        let layer = _.find(this.baseLayers, (layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
+        let layer = this.baseLayers.find((layerToFind) => this.compareKeys(layerToFind.key, layerData.key));
         if (layer != null) {
             return layer; // layer exists
         }
@@ -137,14 +138,14 @@ export class LayersService {
             }
             for (let layer of data) {
                 if (layer.isOverlay) {
-                    let existingOverlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
+                    let existingOverlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layer.key));
                     if (existingOverlay) {
                         continue;
                     }
                     let overlay = this.addOverlayFromData(layer);
                     overlay.isEditable = true;
                 } else {
-                    let existingBaselayer = _.find(this.baseLayers, (baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
+                    let existingBaselayer = this.baseLayers.find((baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
                     if (existingBaselayer) {
                         continue;
                     }
@@ -207,7 +208,7 @@ export class LayersService {
     }
 
     public addOverlay = (layerData: LayerData, attribution?: string): IOverlay => {
-        let overlay = _.find(this.overlays, (overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
+        let overlay = this.overlays.find((overlayToFind) => this.compareKeys(overlayToFind.key, layerData.key));
         if (overlay != null) {
             return overlay; // overlay exists
         }
@@ -232,11 +233,11 @@ export class LayersService {
         if (!newName) {
             return false;
         }
-        return _.find(layers, l => this.compareKeys(l.key, newName)) == null;
+        return layers.find(l => this.compareKeys(l.key, newName)) == null;
     }
 
     public updateBaseLayer = (oldLayer: IBaseLayer, newLayer: LayerData): void => {
-        let position = this.baseLayers.indexOf(_.find(this.baseLayers, bl => bl.key === oldLayer.key));
+        let position = this.baseLayers.indexOf(this.baseLayers.find(bl => bl.key === oldLayer.key));
         this.removeBaseLayerNoStore(oldLayer);
         let layer = this.addBaseLayerFromData(newLayer, null, position);
         layer.id = oldLayer.id;
@@ -259,13 +260,13 @@ export class LayersService {
 
     private removeBaseLayerNoStore = (baseLayer: IBaseLayer) => {
         if (this.selectedBaseLayer.key !== baseLayer.key) {
-            _.remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
+            remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
             return;
         }
         let index = this.baseLayers.indexOf(this.selectedBaseLayer);
         index = (index + 1) % this.baseLayers.length;
         this.selectBaseLayer(this.baseLayers[index]);
-        _.remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
+        remove(this.baseLayers, (layer) => baseLayer.key === layer.key);
         if (this.baseLayers.length === 0) {
             this.selectedBaseLayer = null;
         }
@@ -280,7 +281,7 @@ export class LayersService {
         if (overlay.visible) {
             this.toggleOverlay(overlay);
         }
-        _.remove(this.overlays, (overlayToRemove) => overlayToRemove.key === overlay.key);
+        remove(this.overlays, (overlayToRemove) => overlayToRemove.key === overlay.key);
     }
 
     public selectBaseLayer = (baseLayer: IBaseLayer) => {
@@ -288,7 +289,7 @@ export class LayersService {
             return;
         }
         let previousLayer = this.selectedBaseLayer;
-        let newSelectedLayer = _.find(this.baseLayers, (layer) => layer.key === baseLayer.key);
+        let newSelectedLayer = this.baseLayers.find((layer) => layer.key === baseLayer.key);
         newSelectedLayer.selected = true;
         this.selectedBaseLayer = newSelectedLayer;
 
@@ -299,7 +300,7 @@ export class LayersService {
     }
 
     public toggleOverlay = (overlay: IOverlay) => {
-        let overlayFromArray = _.find(this.overlays, (overlayToFind) => overlayToFind.key === overlay.key);
+        let overlayFromArray = this.overlays.find((overlayToFind) => overlayToFind.key === overlay.key);
         overlayFromArray.visible = !overlayFromArray.visible;
         if (overlayFromArray.visible) {
             if (this.activeOverlayKeys.indexOf(overlay.key) === -1) {
@@ -319,7 +320,7 @@ export class LayersService {
     }
 
     private selectBaseLayerAccordingToStorage = (updateLocalStorage: boolean) => {
-        let baseLayerToActivate = _.find(this.baseLayers, baseToFind => baseToFind.key === this.selectedBaseLayerKey);
+        let baseLayerToActivate = this.baseLayers.find(baseToFind => baseToFind.key === this.selectedBaseLayerKey);
         if (baseLayerToActivate) {
             this.selectBaseLayer(baseLayerToActivate);
         } else {
@@ -339,7 +340,7 @@ export class LayersService {
         this.selectBaseLayerAccordingToStorage(true);
 
         for (let overlayKey of this.activeOverlayKeys) {
-            let overlay = _.find(this.overlays, overlayToFind => overlayToFind.key === overlayKey);
+            let overlay = this.overlays.find(overlayToFind => overlayToFind.key === overlayKey);
             if (overlay && overlay.visible === false) {
                 this.toggleOverlay(overlay);
             }
@@ -355,7 +356,7 @@ export class LayersService {
         if (layerData == null || (layerData.address === "" && layerData.key === "")) {
             return;
         }
-        let baseLayer = _.find(this.baseLayers, (baseLayerToFind) =>
+        let baseLayer = this.baseLayers.find((baseLayerToFind) =>
             baseLayerToFind.address.toLocaleLowerCase() === layerData.address.toLocaleLowerCase() ||
             this.compareKeys(baseLayerToFind.key, layerData.key));
         if (baseLayer != null) {
@@ -371,11 +372,11 @@ export class LayersService {
             do {
                 index++;
                 customName = key + index.toString();
-                layer = _.find(this.baseLayers, (baseLayerToFind) => baseLayerToFind.key === customName);
+                layer = this.baseLayers.find((baseLayerToFind) => baseLayerToFind.key === customName);
             } while (layer != null);
             key = customName;
-            layerData.minZoom = MapLayersFactory.MIN_ZOOM;
-            layerData.maxZoom = MapLayersFactory.MAX_NATIVE_ZOOM;
+            layerData.minZoom = LayersService.MIN_ZOOM;
+            layerData.maxZoom = LayersService.MAX_NATIVE_ZOOM;
         }
 
         let newLayer = this.addBaseLayer({
@@ -436,18 +437,18 @@ export class LayersService {
     }
 
     private onLanguageChange = () => {
-        let ihmLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_HIKING_MAP);
+        let ihmLayer = this.baseLayers.find(bl => bl.key === LayersService.ISRAEL_HIKING_MAP);
         this.replaceBaseLayerAddress(ihmLayer,
             this.getTileAddressForCurrentLanguage(Urls.DEFAULT_TILES_ADDRESS),
             LayersService.ATTRIBUTION, 0);
-        let mtbLayer = _.find(this.baseLayers, bl => bl.key === LayersService.ISRAEL_MTB_MAP);
+        let mtbLayer = this.baseLayers.find(bl => bl.key === LayersService.ISRAEL_MTB_MAP);
         this.replaceBaseLayerAddress(mtbLayer,
             this.getTileAddressForCurrentLanguage(Urls.MTB_TILES_ADDRESS),
             LayersService.MTB_ATTRIBUTION, 1);
     }
 
     private replaceBaseLayerAddress = (layer: IBaseLayer, newAddress: string, attribution: string, position: number) => {
-        _.remove(this.baseLayers, (layerToRemove) => layer.key === layerToRemove.key);
+        remove(this.baseLayers, (layerToRemove) => layer.key === layerToRemove.key);
         layer.address = newAddress;
         layer.selected = false;
         let newLayer = this.addBaseLayerFromData(layer, attribution, position);

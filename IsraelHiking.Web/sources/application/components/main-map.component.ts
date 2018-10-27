@@ -13,6 +13,8 @@ import { SetLocationAction } from "../reducres/location.reducer";
 import { HashService } from "../services/hash.service";
 import { MapService } from "../services/map.service";
 import { RunningContextService } from "../services/running-context.service";
+import { DataContainerService } from "../services/data-container.service";
+import { SnappingService } from "../services/snapping.service";
 
 @Component({
     selector: "main-map",
@@ -34,6 +36,8 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     constructor(resources: ResourcesService,
         public readonly imageGalleryService: ImageGalleryService,
         private readonly mapService: MapService,
+        private readonly dataContainerService: DataContainerService,
+        private readonly snappingService: SnappingService,
         private readonly hashService: HashService,
         private readonly runningContextService: RunningContextService,
         private readonly ngRedux: NgRedux<ApplicationState>,
@@ -63,6 +67,8 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     public ngAfterViewInit(): void {
         this.imageGalleryService.setGalleryComponent(this.ngxImageGallery);
         this.mapService.setMap(this.mapComponent.instance);
+        this.snappingService.setMap(this.mapComponent.instance);
+        this.dataContainerService.setMap(this.mapComponent.instance);
     }
 
     public isMobile() {

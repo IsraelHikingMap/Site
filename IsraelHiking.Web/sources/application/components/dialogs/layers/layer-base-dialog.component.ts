@@ -6,7 +6,6 @@ import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers/layers.service";
-import { MapLayersFactory } from "../../../services/map-layers.factory";
 import { BaseMapComponent } from "../../base-map.component";
 import { LayerData, ApplicationState } from "../../../models/models";
 
@@ -33,8 +32,8 @@ export abstract class LayerBaseDialogComponent extends BaseMapComponent {
         private readonly http: HttpClient
     ) {
         super(resources);
-        this.minZoom = MapLayersFactory.MIN_ZOOM;
-        this.maxZoom = MapLayersFactory.MAX_NATIVE_ZOOM;
+        this.minZoom = LayersService.MIN_ZOOM;
+        this.maxZoom = LayersService.MAX_NATIVE_ZOOM;
         this.key = "";
         this.address = "";
         this.opacity = 1.0;

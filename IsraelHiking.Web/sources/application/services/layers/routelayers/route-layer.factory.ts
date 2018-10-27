@@ -1,15 +1,7 @@
 ﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { LocalStorage } from "ngx-store";
-import { MatDialog } from "@angular/material";
 
-import { MapService } from "../../map.service";
-import { RouterService } from "../../routers/router.service";
-import { SnappingService } from "../../snapping.service";
-import { GeoLocationService } from "../../geo-location.service";
-import { ElevationProvider } from "../../elevation.provider";
-import { IRouteLayer, IRoute, IRouteProperties, IRouteSegment, IMarkerWithData } from "./iroute.layer";
-import { RouteLayer } from "./route.layer";
 import { Urls } from "../../../urls";
 import { RouteData, RoutingType } from "../../../models/models";
 
@@ -41,61 +33,10 @@ export class RouteLayerFactory {
     @LocalStorage()
     public routeOpacity = 0.5;
 
-    constructor(private readonly httpClient: HttpClient,
-        private readonly mapService: MapService,
-        private readonly routerService: RouterService,
-        private readonly snappingService: SnappingService,
-        private readonly elevationProvider: ElevationProvider,
-        private readonly geoLocationService: GeoLocationService,
-        private readonly injector: Injector,
-        private readonly matDialog: MatDialog,
-        private readonly componentFactoryResolver: ComponentFactoryResolver) {
+    constructor(private readonly httpClient: HttpClient) {
         this.httpClient.get(Urls.colors).toPromise().then((colors: string[]) => {
             this.colors.splice(0, this.colors.length, ...colors);
         });
-    }
-
-    public createRouteLayerFromData = (routeData: RouteData): IRouteLayer => {
-        return this.createRouteLayer(this.createRouteFromData(routeData));
-    }
-
-    public createRouteLayer = (route: IRoute): RouteLayer => {
-        return new RouteLayer(this.mapService,
-            this.snappingService,
-            this.routerService,
-            this.geoLocationService,
-            this.elevationProvider,
-            this.injector,
-            this.matDialog,
-            this.componentFactoryResolver,
-            route);
-    }
-
-    private createRouteImplementation(name: string, description: string, pathOptions: L.PathOptions): IRoute {
-        let route = {
-            properties: {
-                name: name,
-                description: description,
-                currentRoutingType: this.routingType,
-                isRoutingPerPoint: this.isRoutingPerPoint,
-                isVisible: true,
-                isRecording: false,
-                pathOptions: {
-                    color: pathOptions.color || this.colors[this.nextColorIndex],
-                    className: "",
-                    opacity: pathOptions.opacity || this.routeOpacity,
-                    weight: pathOptions.weight || 4
-                } as L.PathOptions
-            } as IRouteProperties,
-            markers: [],
-            segments: []
-        } as IRoute;
-        this.nextColorIndex = (this.nextColorIndex + 1) % this.colors.length;
-        return route;
-    }
-
-    public createRoute(name: string): IRoute {
-        return this.createRouteImplementation(name, "", { color: "", opacity: null, weight: null } as L.PathOptions);
     }
 
     public createRouteData(name: string): RouteData {
@@ -112,14 +53,6 @@ export class RouteLayerFactory {
             segments: []
         };
         this.nextColorIndex = (this.nextColorIndex + 1) % this.colors.length;
-        return route;
-    }
-
-    public createRouteFromData(routeData: RouteData): IRoute {
-        let pathOptions = { color: routeData.color, opacity: routeData.opacity, weight: routeData.weight } as L.PathOptions;
-        let route = this.createRouteImplementation(routeData.name, routeData.description, pathOptions);
-        route.segments = routeData.segments as IRouteSegment[] || [];
-        route.markers = routeData.markers as IMarkerWithData[] || [];
         return route;
     }
 }

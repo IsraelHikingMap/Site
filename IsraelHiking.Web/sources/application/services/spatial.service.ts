@@ -28,6 +28,12 @@ export class SpatialService {
         return SpatialService.getDistanceForCoordinates(closestPoint, coordinate);
     }
 
+    public static getClosestPoint(latlng: LatLngAlt, line: LatLngAlt[]): LatLngAlt {
+        let lineString = new geom.LineString(line.map(l => SpatialService.toViewCoordinate(l)));
+        let closestPoint = lineString.getClosestPoint(SpatialService.toViewCoordinate(latlng));
+        return SpatialService.fromViewCoordinate(closestPoint);
+    }
+
     public static getLatlngInterpolatedValue(latlng1: LatLngAlt, latlng2: LatLngAlt, ratio: number, alt?: number): LatLngAlt {
         let returnValue = {
             lat: (latlng2.lat - latlng1.lat) * ratio + latlng1.lat,
@@ -70,15 +76,20 @@ export class SpatialService {
 
     }
 
-    public static toCoordinate(latlng: LatLngAlt): Coordinate {
-        return [latlng.lng, latlng.lat];
-    }
-
     public static toViewCoordinate(latlng: LatLngAlt): Coordinate {
         return proj.transform(SpatialService.toCoordinate(latlng), "EPSG:4326", "EPSG:3857");
     }
 
-    public static toLatLng(coordinate: Coordinate): LatLngAlt {
+    public static fromViewCoordinate(coordinate: Coordinate): LatLngAlt {
+        let coordinateLatlng = proj.toLonLat(coordinate);
+        return SpatialService.toLatLng(coordinateLatlng);
+    }
+
+    public static toCoordinate(latlng: LatLngAlt): Coordinate {
+        return [latlng.lng, latlng.lat];
+    }
+
+    private static toLatLng(coordinate: Coordinate): LatLngAlt {
         return {
             lat: coordinate[1],
             lng: coordinate[0]
@@ -107,10 +118,5 @@ export class SpatialService {
         let viewExtent = map.getView().calculateExtent(map.getSize());
         viewExtent = proj.transformExtent(viewExtent, "EPSG:3857", "EPSG:4326");
         return SpatialService.extentToBounds(viewExtent);
-    }
-
-    public static screenToLatLng(coordinate: Coordinate): LatLngAlt {
-        let coordinateLatlng = proj.toLonLat(coordinate);
-        return SpatialService.toLatLng(coordinateLatlng);
     }
 }
