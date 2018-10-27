@@ -40,7 +40,7 @@ namespace IsraelHiking.API.Tests.Executors
 
             _fetcher.Update().Wait();
 
-            _processHelper.Received(3).Start(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
+            _processHelper.Received(2).Start(Arg.Any<string>(), Arg.Any<string>(), Arg.Any<string>());
         }
 
         [TestMethod]
