@@ -5,10 +5,10 @@ import { remove } from "lodash";
 import { SidebarService } from "../../services/sidebar.service";
 import { ResourcesService } from "../../services/resources.service";
 import { LayersService } from "../../services/layers/layers.service";
+import { RunningContextService } from "../../services/running-context.service";
 import { BaseMapComponent } from "../base-map.component";
-import { ILegendItem, LegendItemComponent } from "./legend-item.component";
+import { LegendItemComponent, ILegendItem } from "./legend-item.component";
 import { RouteStrings } from "../../services/hash.service";
-import { environment } from "../../../environments/environment";
 
 export interface ILegendSection {
     items: ILegendItem[];
@@ -28,7 +28,8 @@ export class InfoSidebarComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
         private readonly router: Router,
         private readonly sidebarService: SidebarService,
-        private readonly layersService: LayersService) {
+        private readonly layersService: LayersService,
+        private readonly runningContext: RunningContextService) {
         super(resources);
 
         this.selectedTabIndex = 0;
@@ -41,7 +42,7 @@ export class InfoSidebarComponent extends BaseMapComponent {
     }
 
     public showDownloadDialog(): Boolean {
-        return !environment.isCordova;
+        return !this.runningContext.isCordova;
     }
 
     public openDownloadDialog = () => {

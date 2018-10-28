@@ -1,13 +1,16 @@
 ﻿import { Injectable } from "@angular/core";
 
+import { environment } from "../../environments/environment";
+
 @Injectable()
 export class RunningContextService {
     public readonly isMobile: boolean;
     public readonly isIFrame: boolean;
-
+    public readonly isCordova: boolean;
     constructor() {
         this.isIFrame = window.self !== window.top;
         this.isMobile = false;
+        this.isCordova = environment.isCordova;
         let agent = navigator.userAgent || navigator.vendor || (window as any).opera;
         /* tslint:disable */
         if (
