@@ -123,8 +123,6 @@ export class RouteStatisticsService {
         return (value2 - value1) * ratio + value1;
     }
 
-
-
     private isOnSegment(latlng1: LatLngAlt, latlng2: LatLngAlt, latlng: LatLngAlt): boolean {
         if (latlng2.lat > latlng1.lat) {
             if (latlng.lat < latlng1.lat) {

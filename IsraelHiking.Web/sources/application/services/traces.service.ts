@@ -1,7 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Subject } from "rxjs";
-import * as _ from "lodash";
+import { remove } from "lodash";
 
 import { DataContainer } from "../models/models";
 import { Urls } from "../urls";
@@ -33,7 +33,7 @@ export class TracesService {
     public traces: ITrace[];
     public tracesChanged: Subject<any>;
 
-    constructor(private readonly httpClient: HttpClient, ) {
+    constructor(private readonly httpClient: HttpClient) {
         this.traces = [];
         this.tracesChanged = new Subject();
     }
@@ -73,7 +73,7 @@ export class TracesService {
     public deleteTrace = (trace: ITrace): Promise<any> => {
         let promise = this.httpClient.delete(Urls.osmTrace + trace.id, { responseType: "text" }).toPromise();
         promise.then(() => {
-            _.remove(this.traces, traceToFind => traceToFind.id === trace.id);
+            remove(this.traces, traceToFind => traceToFind.id === trace.id);
             this.tracesChanged.next();
         });
         return promise;

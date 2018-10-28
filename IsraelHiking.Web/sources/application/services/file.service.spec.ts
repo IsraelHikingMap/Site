@@ -43,8 +43,6 @@ describe("FileService", () => {
         });
     });
 
-
-
     it("Should Initialize with file formats", inject([FileService], (fileService: FileService) => {
         expect(fileService.formats.length).toBe(2);
     }));
@@ -52,40 +50,41 @@ describe("FileService", () => {
     it("Should save to file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-        fileService.saveToFile("file.name", "format", {} as DataContainer).then(() => {
-            expect(nonAngularObjectsFactory.saveAs).toHaveBeenCalled();
-            expect(nonAngularObjectsFactory.b64ToBlob).toHaveBeenCalled();
-        });
+            let promise = fileService.saveToFile("file.name", "format", {} as DataContainer).then(() => {
+                expect(nonAngularObjectsFactory.saveAs).toHaveBeenCalled();
+                expect(nonAngularObjectsFactory.b64ToBlob).toHaveBeenCalled();
+            });
 
-        mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
-    }));
+            mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
+            return promise;
+        }));
 
 
     it("Should open from file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-        let promise = fileService.openFromUrl("someurl").then((res) => {
-            expect(res).not.toBeNull();
-        }, fail);
+            let promise = fileService.openFromUrl("someurl").then((res) => {
+                expect(res).not.toBeNull();
+            }, fail);
 
-        mockBackend.expectOne(Urls.files + "?url=someurl").flush(btoa("bytes"));
-        return promise;
-    }));
+            mockBackend.expectOne(Urls.files + "?url=someurl").flush(btoa("bytes"));
+            return promise;
+        }));
 
     it("Should open from url by uploading", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-        let promise = fileService.openFromFile(new Blob([""]) as File).then((res) => {
-            expect(res).not.toBeNull();
-        }, fail);
+            let promise = fileService.openFromFile(new Blob([""]) as File).then((res) => {
+                expect(res).not.toBeNull();
+            }, fail);
 
-        mockBackend.expectOne(Urls.openFile).flush({});
-        return promise;
-    }));
+            mockBackend.expectOne(Urls.openFile).flush({});
+            return promise;
+        }));
 
     it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
         async (fileService: FileService) => {
-            let file = new Blob([""], {type: "image/jpeg" }) as File;
+            let file = new Blob([""], { type: "image/jpeg" }) as File;
             let promise = fileService.openFromFile(file).then(() => {
                 expect(imageResizeService.resizeImageAndConvert).toHaveBeenCalled();
             }, fail);

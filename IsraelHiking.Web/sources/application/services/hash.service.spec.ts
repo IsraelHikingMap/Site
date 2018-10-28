@@ -5,17 +5,13 @@ import { RouterTestingModule } from "@angular/router/testing";
 import { Subject } from "rxjs";
 
 import { HashService, RouteStrings } from "./hash.service";
-import { MapService } from "./map.service";
-import { MapServiceMockCreator } from "./map.service.spec";
 import { Urls } from "../urls";
 import { ApplicationState } from "../models/models";
 
 describe("HashService", () => {
     let hashService: HashService;
-    let mapServiceMock: MapServiceMockCreator;
 
     beforeEach(() => {
-        mapServiceMock = new MapServiceMockCreator();
         let routerMock = {
             navigate: jasmine.createSpy("navigate"),
             events: new Subject<any>(),
@@ -38,12 +34,8 @@ describe("HashService", () => {
         });
     });
 
-    afterEach(() => {
-        mapServiceMock.destructor();
-    });
-
     it("Should initialize location data from hash",
-        inject([Router, Window, MapService],
+        inject([Router, Window, NgRedux],
             (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
 
                 windowMock.location.hash = "#!/1/2.2/3";
@@ -54,7 +46,7 @@ describe("HashService", () => {
             }));
 
     it("Should handle empty object in hash",
-        inject([Router, Window, MapService],
+        inject([Router, Window, NgRedux],
             (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
 
                 windowMock.location.hash = "#!/";
@@ -66,7 +58,7 @@ describe("HashService", () => {
             }));
 
     it("Should inialize share from hash",
-        inject([Router, Window, MapService],
+        inject([Router, Window, NgRedux],
             (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
 
                 windowMock.location.hash = "#!/?s=shareUrl";
@@ -77,7 +69,7 @@ describe("HashService", () => {
             }));
 
     it("Should get url for external file",
-        inject([Router, Window, MapService],
+        inject([Router, Window, NgRedux],
             (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
 
                 windowMock.location.hash = "#!/?url=external.file&baselayer=www.layer.com";
@@ -89,7 +81,7 @@ describe("HashService", () => {
             }));
 
     it("Should allow download parameter in hash",
-        inject([Router, Window, MapService],
+        inject([Router, Window, NgRedux],
             (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
 
                 windowMock.location.hash = "#!/?download";
@@ -99,22 +91,8 @@ describe("HashService", () => {
                 expect(router.navigate).toHaveBeenCalledWith([RouteStrings.ROUTE_DOWNLOAD], { replaceUrl: true });
             }));
 
-    it("Should update url with location when panning the map",
-        inject([Router, Window, MapService],
-            (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
-
-                windowMock.location.hash = "#!/10/20/30.0";
-
-                hashService = new HashService(router, windowMock, ngRedux);
-                // HM TODO: dispatch?
-                //mapServiceMock.mapService.map.panTo(LatLngAlt(1, 2));
-
-                expect(JSON.stringify((router.navigate as jasmine.Spy).calls.mostRecent().args))
-                    .toBe(JSON.stringify([[RouteStrings.ROUTE_MAP, 13, "1.0000", "2.0000"], { replaceUrl: true }]));
-            }));
-
     it("Should return base url",
-        inject([Router, Window, MapService],
+        inject([Router, Window, NgRedux],
             (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
 
                 windowMock.location.hash = "#!/";
@@ -126,7 +104,7 @@ describe("HashService", () => {
             }));
 
     it("Should return share url",
-        inject([Router, Window, MapService],
+        inject([Router, Window, NgRedux],
             (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
 
                 windowMock.location.hash = "/";
@@ -139,7 +117,7 @@ describe("HashService", () => {
             }));
 
     it("Should return external url",
-        inject([Router, Window, MapService],
+        inject([Router, Window, NgRedux],
             (router: Router, windowMock: Window, ngRedux: NgRedux<ApplicationState>) => {
 
                 windowMock.location.hash = "/";

@@ -8,7 +8,7 @@ import { WhatsAppService } from "./whatsapp.service";
 import { HashService } from "./hash.service";
 import { Urls } from "../urls";
 import { ShareUrl, DataContainer } from "../models/models";
-import { ITrace } from "./traces.service";
+import { RunningContextService } from "./running-context.service";
 
 describe("OSM User Service", () => {
     beforeEach(() => {
@@ -29,6 +29,7 @@ describe("OSM User Service", () => {
             providers: [
                 { provide: AuthorizationService, useValue: authService },
                 { provide: HashService, useValue: hashService },
+                RunningContextService,
                 WhatsAppService,
                 OsmUserService
             ]
@@ -73,11 +74,9 @@ describe("OSM User Service", () => {
             mockBackend.expectOne(Urls.osmUser).flush({});
             flushMicrotasks();
             mockBackend.expectOne(Urls.urls).flush([{ title: "some share" } as ShareUrl]);
-            mockBackend.expectOne(Urls.osmTrace).flush([{ id: "id", name: "name" } as ITrace]);
             flushMicrotasks();
             expect(auth.authenticate).toHaveBeenCalled();
             expect(osmUserService.shareUrls.length).toBe(1);
-            expect(osmUserService.traces.length).toBe(1);
         })));
 
     it("Should login even if requests for data fails",
@@ -95,7 +94,6 @@ describe("OSM User Service", () => {
                 osmUserService.login().catch(() => {
                     expect(auth.authenticate).toHaveBeenCalled();
                     expect(osmUserService.shareUrls.length).toBe(0);
-                    expect(osmUserService.traces.length).toBe(0);
                 });
                 flushMicrotasks();
                 mockBackend.expectOne(Urls.osmUser).flush(null, { status: 401, statusText: "Unauthorized" });
@@ -137,20 +135,6 @@ describe("OSM User Service", () => {
             return promise;
         }));
 
-
-    it("Should get missing parts", inject([OsmUserService, HttpTestingController],
-        async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
-
-            let trace = { dataUrl: "123" } as ITrace;
-
-            let promise = osmUserService.getMissingParts(trace).then((res) => {
-                expect(res).not.toBeNull();
-            });
-
-            mockBackend.expectOne(Urls.osm + "?url=" + trace.dataUrl).flush({});
-            return promise;
-        }));
-
     it("Should add missing parts", inject([OsmUserService, HttpTestingController],
         async (osmUserService: OsmUserService, mockBackend: HttpTestingController) => {
 
@@ -164,7 +148,7 @@ describe("OSM User Service", () => {
 
 
     it("Should get image for site url", inject([OsmUserService], (osmUserService: OsmUserService) => {
-        let shareUrl = { id: "42" } as Common.ShareUrl;
+        let shareUrl = { id: "42" } as ShareUrl;
         let imageUrl = osmUserService.getImageFromShareId(shareUrl);
 
         expect(imageUrl).toContain(shareUrl.id);
@@ -172,7 +156,7 @@ describe("OSM User Service", () => {
 
 
     it("Should return full address of osm edit location", inject([OsmUserService], (osmUserService: OsmUserService) => {
-        let address = osmUserService.getEditOsmLocationAddress(Urls.DEFAULT_TILES_ADDRESS, 13, LatLngAlt(0, 0));
+        let address = osmUserService.getEditOsmLocationAddress(Urls.DEFAULT_TILES_ADDRESS, 13, 0, 0);
 
         expect(address).toContain(Urls.baseTilesAddress);
         expect(address).toContain(Urls.DEFAULT_TILES_ADDRESS);

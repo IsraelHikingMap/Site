@@ -214,6 +214,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private onPolylineHover(latlng: LatLngAlt) {
+        // HM TODO: remove this?
         if (!this.statistics || !this.isVisible()) {
             return;
         }
