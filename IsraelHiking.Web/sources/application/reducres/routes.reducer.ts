@@ -103,7 +103,7 @@ export class AddRouteAction extends BaseAction<AddRoutePayload> {
 
 export class DeleteRouteAction extends BaseAction<RoutePayload> {
     constructor(payload: RoutePayload) {
-        super(ADD_ROUTE, payload);
+        super(DELETE_ROUTE, payload);
     }
 }
 

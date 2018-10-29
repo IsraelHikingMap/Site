@@ -1,12 +1,11 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import * as L from "leaflet";
 
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
-import { environment } from "../../environments/environment";
 import { Urls } from "../urls";
 import { DataContainer, RouteData } from "../models/models";
+import { RunningContextService } from "./running-context.service";
 
 declare var cordova: any;
 
@@ -21,6 +20,7 @@ export class FileService {
     public formats: IFormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
+        private readonly runningContextService: RunningContextService,
         private readonly imageResizeService: ImageResizeService,
         private readonly nonAngularObjectsFactory: NonAngularObjectsFactory) {
         this.formats = [];
@@ -115,14 +115,15 @@ export class FileService {
      */
     private saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            if (environment.isCordova) {
+            if (this.runningContextService.isCordova) {
                 // HM TODO: this is only for android, make it for iOS?
                 (window as any).resolveLocalFileSystemURL(cordova.file.externalRootDirectory,
                     (directoryEntry) => {
                         directoryEntry.getDirectory("IsraelHikingMap",
                             { create: true },
                             dir => {
-                                let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") +
+                                let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
+                                    .replace("Z", "_") +
                                     fileName.split(" ").join("_");
                                 dir.getFile(fullFileName,
                                     { create: true },
@@ -131,49 +132,56 @@ export class FileService {
                                             fileWriter.write(blob);
                                             resolve(true);
                                         });
-                                    }, reject);
-                            }, reject);
-                    }, reject);
-            } else if (L.Browser.mobile) {
-                let reader = new FileReader();
-                reader.onload = () => {
-                    if (L.Browser.chrome) {
-                        // If chrome android
-                        let save = document.createElement("a");
-
-                        save.href = reader.result;
-                        save.download = fileName;
-
-                        document.body.appendChild(save);
-                        save.click();
-                        document.body.removeChild(save);
-                        window.URL.revokeObjectURL(save.href);
-                        resolve(false);
-                    } else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
-                        // If iPhone etc
-                        let url = window.URL.createObjectURL(blob);
-                        window.location.href = url;
-                        resolve(false);
-                    } else {
-                        // Any other browser
-                        this.nonAngularObjectsFactory.saveAs(blob, fileName);
-                        resolve(false);
-                    }
-                };
-
-                reader.readAsDataURL(blob);
+                                    },
+                                    reject);
+                            },
+                            reject);
+                    },
+                    reject);
             } else {
-                // Desktop if safari
-                if (L.Browser.safari) {
-                    let url = window.URL.createObjectURL(blob);
-                    window.location.href = url;
-                    resolve(false);
-                } else {
-                    // If normal browser use package Filesaver.js
-                    this.nonAngularObjectsFactory.saveAs(blob, fileName);
-                    resolve(false);
-                }
+                this.nonAngularObjectsFactory.saveAs(blob, fileName);
+                resolve(false);
             }
+            //} else if (L.Browser.mobile) {
+            //    let reader = new FileReader();
+            //    reader.onload = () => {
+            //        if (L.Browser.chrome) {
+            //            // If chrome android
+            //            let save = document.createElement("a");
+            //
+            //            save.href = reader.result;
+            //            save.download = fileName;
+            //
+            //            document.body.appendChild(save);
+            //            save.click();
+            //            document.body.removeChild(save);
+            //            window.URL.revokeObjectURL(save.href);
+            //            resolve(false);
+            //        } else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
+            //            // If iPhone etc
+            //            let url = window.URL.createObjectURL(blob);
+            //            window.location.href = url;
+            //            resolve(false);
+            //        } else {
+            //            // Any other browser
+            //            this.nonAngularObjectsFactory.saveAs(blob, fileName);
+            //            resolve(false);
+            //        }
+            //    };
+            //
+            //    reader.readAsDataURL(blob);
+            //} else {
+            //    // Desktop if safari
+            //    if (L.Browser.safari) {
+            //        let url = window.URL.createObjectURL(blob);
+            //        window.location.href = url;
+            //        resolve(false);
+            //    } else {
+            //        // If normal browser use package Filesaver.js
+            //        this.nonAngularObjectsFactory.saveAs(blob, fileName);
+            //        resolve(false);
+            //    }
+            //}
         });
     }
 }

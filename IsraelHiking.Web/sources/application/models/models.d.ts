@@ -12,8 +12,3 @@ export { Location } from "./location";
 export { ApplicationState } from "./application-state";
 export { Configuration } from "./configuration";
 export { RouteEditingState } from "./route-editing-state";
-
-export interface IMarkerWithTitle extends L.Marker {
-    title: string;
-    identifier: string;
-}

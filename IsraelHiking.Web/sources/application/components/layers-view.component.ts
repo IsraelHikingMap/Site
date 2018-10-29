@@ -193,7 +193,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
             new style.Style({
                 image: new style.Circle({
                     radius: 15,
-                    fill: new ol.style.Fill({
+                    fill: new style.Fill({
                         color: color.inner
                     })
                 }),

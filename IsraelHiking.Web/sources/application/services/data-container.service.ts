@@ -51,8 +51,10 @@ export class DataContainerService {
     }
 
     public setData(dataContainer: DataContainer) {
-        // HM TODO: make sure this works...
         for (let route of dataContainer.routes) {
+            if (!route.id) {
+                route.id = Math.random().toString(36).substr(2, 9);
+            }
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: route
             }));
