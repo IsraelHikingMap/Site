@@ -5,6 +5,9 @@ if (!$env:APPVEYOR_BUILD_VERSION) {
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
 
 # Building android:
+$npmInstall = "npm install --loglevel=error"
+Write-Host $npmInstall
+Invoke-Expression $npmInstall
 
 $buildAndroidClient = "npm run build -- -c android --no-progress"
 Write-Host $buildAndroidClient
