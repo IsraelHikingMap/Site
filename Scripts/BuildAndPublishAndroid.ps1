@@ -10,6 +10,11 @@ $buildAndroidClient = "npm run build -- -c android --no-progress"
 Write-Host $buildAndroidClient
 Invoke-Expression $buildAndroidClient
 
+if ($lastexitcode)
+{
+	throw $lastexitcode
+}
+
 $AddAndroid = "npm run add-android"
 Write-Host $AddAndroid
 Invoke-Expression $AddAndroid

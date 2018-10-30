@@ -38,11 +38,16 @@ npm install --loglevel=error
 Write-Host "npm run build -- --prod --no-progress"
 npm run build -- --prod --no-progress
 
-Write-Host "npm run test -- --no-progress --code-coverage --watch=false"
-npm run test -- --no-progress --code-coverage --watch=false
+if ($lastexitcode)
+{
+	throw $lastexitcode
+}
 
 Write-Host "run lint - send warnings to appveyor"
 npm run lint | Select-String -Pattern 'ERROR:' | ForEach-Object { Add-AppveyorCompilationMessage -Message $_.line -Category Warning; }
+
+Write-Host "npm run test -- --no-progress --code-coverage --watch=false"
+npm run test -- --no-progress --code-coverage --watch=false
 
 # Locate JUnit XML results file
 
