@@ -10,8 +10,8 @@ environment:
     PASSWORD:
         secure: mqbXr4+cn3l9YNyKhOezbA==
     matrix:
-        PRODUCT: web
-        PRODUCT: android
+        - PRODUCT: web
+        - PRODUCT: android
 install:
 - ps: >-
     npm install -g npm@6.2.0 --loglevel=error
