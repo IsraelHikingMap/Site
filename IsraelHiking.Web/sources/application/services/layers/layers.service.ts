@@ -46,7 +46,8 @@ export class LayersService {
         "under <a href='https://opendatacommons.org/licenses/odbl/summary/' target='_blank'>ODbL</a>. ";
     private static readonly MTB_ATTRIBUTION = LayersService.ATTRIBUTION;
     private static readonly TRAILS_ATTRIBUTION = "Trail " + LayersService.ATTRIBUTION;
-    private static readonly ESRI_ADDRESS = "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+    private static readonly ESRI_ADDRESS =
+        "https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
     private static readonly ESRI_ATTRIBUTION = "DigitalGlobe, GeoEye, i-cubed, USDA, USGS, AEX, Getmapping, " +
         "Aerogrid, IGN, IGP, swisstopo, and the GIS User Community";
     private static BASE_LAYERS_KEY = "BaseLayers";

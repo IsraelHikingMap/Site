@@ -60,7 +60,7 @@ export interface UpdateSegmentsPayload extends RoutePayload {
 }
 
 export interface ReplaceSegmentsPayload extends RoutePayload {
-    segmentsData: RouteSegmentData[]
+    segmentsData: RouteSegmentData[];
 }
 
 export interface DeleteSegmentPayload extends RoutePayload {
@@ -92,8 +92,6 @@ export interface MergeRoutesPayload extends RoutePayload {
 export interface AddRecordingPointPayload extends RoutePayload {
    latlng: ILatLngTime;
 }
-
-export interface StopRecordingPayload extends RoutePayload { }
 
 export class AddRouteAction extends BaseAction<AddRoutePayload> {
     constructor(payload: AddRoutePayload) {
@@ -191,8 +189,8 @@ export class AddRecordingPointAction extends BaseAction<AddRecordingPointPayload
     }
 }
 
-export class StopRecordingAction extends BaseAction<StopRecordingPayload> {
-    constructor(payload: StopRecordingPayload) {
+export class StopRecordingAction extends BaseAction<RoutePayload> {
+    constructor(payload: RoutePayload) {
         super(STOP_RECORDING, payload);
     }
 }

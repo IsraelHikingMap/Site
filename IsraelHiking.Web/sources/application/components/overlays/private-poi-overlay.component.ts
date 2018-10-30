@@ -19,10 +19,10 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
 
     // HM TODO: ihm coordinates, altitude?
 
-    @Input("marker")
+    @Input()
     public marker: MarkerData;
 
-    @Input("routeId")
+    @Input()
     public routeId: string;
 
     public imageLink: LinkData;

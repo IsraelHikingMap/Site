@@ -56,7 +56,7 @@ export class SpatialService {
     }
 
     public static getGeoJsonBounds(geoJson: GeoJSON.FeatureCollection<GeoJSON.LineString>): IBounds {
-        let coordinates = []
+        let coordinates = [];
         for (let feature of geoJson.features) {
             for (let coordinate of feature.geometry.coordinates) {
                 coordinates.push(coordinate);

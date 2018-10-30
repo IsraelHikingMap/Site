@@ -20,7 +20,7 @@ export class ClusterOverlayComponent extends BaseMapComponent {
     public latlng: LatLngAlt;
 
     @Output()
-    public onClose: EventEmitter<any>;
+    public closed: EventEmitter<any>;
 
     @Input()
     public points: IPointOfInterest[];

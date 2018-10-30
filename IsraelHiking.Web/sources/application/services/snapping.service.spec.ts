@@ -1,4 +1,4 @@
-﻿import { TestBed, inject, flushMicrotasks, fakeAsync, tick } from "@angular/core/testing";
+import { TestBed, inject, flushMicrotasks, fakeAsync, tick } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
 import { View } from "openlayers";
@@ -11,9 +11,9 @@ import { GeoJsonParser } from "./geojson.parser";
 
 describe("SnappingService", () => {
 
-    var mapMock: any;
-    var moveEndAction: Function;
-    var view: View;
+    let mapMock: any;
+    let moveEndAction: Function;
+    let view: View;
 
     beforeEach(() => {
         let toastMockCreator = new ToastServiceMockCreator();

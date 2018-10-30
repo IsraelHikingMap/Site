@@ -1,4 +1,4 @@
-﻿import { Component, OnInit, AfterViewInit, ViewChildren, QueryList } from "@angular/core";
+import { Component, OnInit, AfterViewInit, ViewChildren, QueryList } from "@angular/core";
 import { Router } from "@angular/router";
 import { MapComponent, LayerVectorComponent } from "ngx-openlayers";
 import { style, layer, MapBrowserEvent, Feature, geom } from "openlayers";
@@ -120,7 +120,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                         title: properties.name,
                         id: sourceAndId.id,
                         source: sourceAndId.source
-                    }
+                    };
                 });
                 this.isClusterOpen = true;
             });
@@ -169,17 +169,17 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         let color = {
             outer: "rgba(181, 226, 140, 0.6)",
             inner: "rgba(110, 204, 57, 0.6)"
-        }
+        };
         if (size > 100) {
             color = {
                 outer: "rgba(253,156,115,.6)",
                 inner: "rgba(241,128,23,.6)"
-            }
+            };
         } else if (size > 10) {
             color = {
                 outer: "rgba(241,211,87,.6)",
                 inner: "rgba(240,194,12,.6)"
-            }
+            };
         }
         return [
             new style.Style({
@@ -198,7 +198,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                     })
                 }),
                 text: new style.Text({
-                    font: '12px "Helvetica Neue", Arial, Helvetica, sans-serif',
+                    font: "12px \"Helvetica Neue\", Arial, Helvetica, sans-serif",
                     text: `${size}`,
                     fill: this.whiteFill
                 })
@@ -213,6 +213,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         return {
             source: source,
             id: id
-        }
+        };
     }
 }

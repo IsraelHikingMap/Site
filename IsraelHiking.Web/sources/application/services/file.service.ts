@@ -142,7 +142,7 @@ export class FileService {
                 this.nonAngularObjectsFactory.saveAs(blob, fileName);
                 resolve(false);
             }
-            //} else if (L.Browser.mobile) {
+            // } else if (L.Browser.mobile) {
             //    let reader = new FileReader();
             //    reader.onload = () => {
             //        if (L.Browser.chrome) {
@@ -170,7 +170,7 @@ export class FileService {
             //    };
             //
             //    reader.readAsDataURL(blob);
-            //} else {
+            // } else {
             //    // Desktop if safari
             //    if (L.Browser.safari) {
             //        let url = window.URL.createObjectURL(blob);
@@ -181,7 +181,7 @@ export class FileService {
             //        this.nonAngularObjectsFactory.saveAs(blob, fileName);
             //        resolve(false);
             //    }
-            //}
+            // }
         });
     }
 }

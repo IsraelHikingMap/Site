@@ -16,7 +16,7 @@ export class CategoriesLayerFactory {
         private readonly resources: ResourcesService,
         private readonly localStorageService: LocalStorageService,
         private readonly poiService: PoiService,
-        private readonly fitBoundsService: FitBoundsService,) {
+        private readonly fitBoundsService: FitBoundsService) {
         this.categoryLayers = new Map<CategoriesType, CategoriesLayer>();
         for (let category of this.poiService.getCategoriesTypes()) {
             let layer = new CategoriesLayer(
