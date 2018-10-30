@@ -110,10 +110,10 @@ import { DrawingComponent } from "./components/drawing.component";
 import { RouteMarkerPopupComponent } from "./components/markerpopup/route-marker-popup.component";
 import { PrivatePoiOverlayComponent } from "./components/overlays/private-poi-overlay.component";
 import { ClusterOverlayComponent } from "./components/overlays/cluster-overlay.component";
+import { GpsLocationOverlayComponent } from "./components/overlays/gps-location-overlay.component";
 import { CoordinatesMarkerPopupComponent } from "./components/markerpopup/coordinates-marker-popup.component";
 import { SearchResultsMarkerPopupComponent } from "./components/markerpopup/search-results-marker-popup.component";
 import { MissingPartMarkerPopupComponent } from "./components/markerpopup/missing-part-marker-popup.component";
-import { GpsLocationMarkerPopupComponent } from "./components/markerpopup/gps-location-marker-popup.component";
 import { SearchComponent } from "./components/search.component";
 import { InfoComponent } from "./components/info.component";
 import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
@@ -204,10 +204,10 @@ export function getWindow() { return window; }
         RouteMarkerPopupComponent,
         PrivatePoiOverlayComponent,
         ClusterOverlayComponent,
+        GpsLocationOverlayComponent,
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,
-        GpsLocationMarkerPopupComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,
@@ -294,10 +294,10 @@ export function getWindow() { return window; }
         RouteMarkerPopupComponent,
         PrivatePoiOverlayComponent,
         ClusterOverlayComponent,
+        GpsLocationOverlayComponent,
         CoordinatesMarkerPopupComponent,
         SearchResultsMarkerPopupComponent,
         MissingPartMarkerPopupComponent,
-        GpsLocationMarkerPopupComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,

@@ -6,18 +6,18 @@
             <mat-spinner diameter="24"></mat-spinner>
         </div>
     </button>
-    <button mat-button (click)="resetRotation()" ><div [style.transform]="getRotationAngle()"><i class="icon-north"></i></div></button>
+    <button mat-button (click)="resetRotation()"><div [style.transform]="getRotationAngle()"><i class="icon-north"></i></div></button>
     <button mat-button *ngIf="canRecord()" (click)="toggleRecording()">
         <i *ngIf="!isRecording()" class="fa fa-lg icon-circle recording-button"></i>
         <i *ngIf="isRecording()" class="fa fa-lg icon-square"></i>
     </button>
 </div>
 
-<aol-layer-vector *ngIf="locationCoordinate != null" [visible]="locationCoordinate != null">
+<aol-layer-vector *ngIf="locationCoordinate" [visible]="locationCoordinate != null">
     <aol-source-vector>
-        <aol-feature>
+        <aol-feature [id]="'location'">
             <aol-geometry-point>
-                <aol-coordinate [x]="locationCoordinate.x" [y]="locationCoordinate.y" [srid]="'EPSG:4326'"></aol-coordinate>
+                <aol-coordinate [x]="locationCoordinate.lng" [y]="locationCoordinate.lat" [srid]="'EPSG:4326'"></aol-coordinate>
             </aol-geometry-point>
             <aol-style>
                 <aol-style-text [text]="resources.getCharacterForIcon('icon-crosshairs')" font="normal 30px IsraelHikingMap">
@@ -25,16 +25,12 @@
                 </aol-style-text>
             </aol-style>
         </aol-feature>
+        <aol-feature #accuracyCircle>
+            <aol-style>
+                <aol-style-fill [color]="'rgba(19, 106, 224, 0.4)'"></aol-style-fill>
+                <aol-style-stroke [color]="'#136AEC'" [width]="2"></aol-style-stroke>
+            </aol-style>
+        </aol-feature>
     </aol-source-vector>
 </aol-layer-vector>
-
-<aol-overlay *ngIf="locationCoordinate != null">
-    <!--HM TODO: facilitate close-->
-    <aol-coordinate [x]="locationCoordinate.x"
-                    [y]="locationCoordinate.y"
-                    [srid]="'EPSG:4326'">
-    </aol-coordinate>
-    <aol-content>
-        <gps-location-marker-popup></gps-location-marker-popup>
-    </aol-content>
-</aol-overlay>
+<gps-location-overlay [latlng]="locationCoordinate" [isOpen]="isLocationOverlayOpen" (closed)="isLocationOverlayOpen = false"></gps-location-overlay>

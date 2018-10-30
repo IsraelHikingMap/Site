@@ -1,8 +1,9 @@
-import { Component } from "@angular/core";
+import { Component, ViewChild } from "@angular/core";
 import { LocalStorage } from "ngx-store";
 import { first } from "rxjs/operators";
 import { NgRedux } from "@angular-redux/store";
-import { MapComponent } from "ngx-openlayers";
+import { geom, MapBrowserEvent, Feature } from "openlayers";
+import { MapComponent, FeatureComponent } from "ngx-openlayers";
 
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -11,14 +12,15 @@ import { ToastService } from "../services/toast.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SetLocationAction } from "../reducres/location.reducer";
-import { RouteData, ICoordinate, ApplicationState } from "../models/models";
+import { RouteData, ApplicationState, LatLngAlt } from "../models/models";
 import { DragInteraction } from "./intercations/drag.interaction";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { AddRouteAction, StopRecordingAction } from "../reducres/routes.reducer";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
 import { AddLocallyRecordedRouteAction } from "../reducres/locally-recorded-routes.reducer";
+import { SpatialService } from "../services/spatial.service";
 
-interface ILocationInfo extends ICoordinate {
+interface ILocationInfo extends LatLngAlt {
     radius: number;
 }
 
@@ -28,6 +30,7 @@ interface ILocationInfo extends ICoordinate {
     styleUrls: ["./location.component.scss"]
 })
 export class LocationComponent extends BaseMapComponent {
+
     private static readonly NOT_FOLLOWING_TIMEOUT = 20000;
 
     @LocalStorage()
@@ -38,8 +41,13 @@ export class LocationComponent extends BaseMapComponent {
 
     private recordingRouteId: string;
 
+    // HM TODO: implement https://github.com/quentin-ol/ngx-openlayers/issues/208
+    @ViewChild("accuracyCircle")
+    public accuracyCircle: FeatureComponent;
+
     public locationCoordinate: ILocationInfo;
     public isFollowing: boolean;
+    public isLocationOverlayOpen: boolean;
 
     constructor(resources: ResourcesService,
         private readonly geoLocationService: GeoLocationService,
@@ -54,6 +62,7 @@ export class LocationComponent extends BaseMapComponent {
         this.locationCoordinate = null;
         this.recordingRouteId = null;
         this.isFollowing = true;
+        this.isLocationOverlayOpen = false;
 
         this.host.instance.addInteraction(new DragInteraction(() => {
             if (!this.isActive()) {
@@ -68,6 +77,18 @@ export class LocationComponent extends BaseMapComponent {
                 this.isFollowing = true;
             }, LocationComponent.NOT_FOLLOWING_TIMEOUT, "following");
         }) as any);
+
+        this.host.instance.on("singleclick",
+            (event: MapBrowserEvent) => {
+                let selectedRoute = this.selectedRouteService.getSelectedRoute();
+                if (selectedRoute != null && (selectedRoute.state === "Poi" || selectedRoute.state === "Route")) {
+                    return;
+                }
+                let features = (event.map.getFeaturesAtPixel(event.pixel, { hitTolerance: 10 }) || []) as Feature[];
+                if (features.find(f => f.getId() as string === "location") != null) {
+                    this.isLocationOverlayOpen = !this.isLocationOverlayOpen;
+                }
+            });
 
         this.geoLocationService.positionChanged.subscribe(
             (position) => {
@@ -214,8 +235,8 @@ export class LocationComponent extends BaseMapComponent {
             this.locationCoordinate = {} as ILocationInfo;
             this.isFollowing = true;
         }
-        this.locationCoordinate.x = position.coords.longitude;
-        this.locationCoordinate.y = position.coords.latitude;
+        this.locationCoordinate.lng = position.coords.longitude;
+        this.locationCoordinate.lat = position.coords.latitude;
         this.locationCoordinate.radius = position.coords.accuracy;
         if (position.coords.heading != null) {
             this.host.instance.getView().animate({
@@ -225,7 +246,14 @@ export class LocationComponent extends BaseMapComponent {
         if (this.isFollowing) {
             this.setLocation();
         }
-        // HM TODO: accuracy circle? color: #136AEC, fill: #136AE
+        if (this.accuracyCircle) {
+            this.accuracyCircle.instance.setGeometry(
+                new geom.Circle(SpatialService.toViewCoordinate(this.locationCoordinate),
+                    this.locationCoordinate.radius));
+        } else {
+            console.log("detect changes?");
+        }
+
     }
 
     private disableGeoLocation() {
@@ -240,8 +268,8 @@ export class LocationComponent extends BaseMapComponent {
 
     private setLocation() {
         this.ngRedux.dispatch(new SetLocationAction({
-            longitude: this.locationCoordinate.x,
-            latitude: this.locationCoordinate.y
+            longitude: this.locationCoordinate.lng,
+            latitude: this.locationCoordinate.lat
         }));
     }
 }
