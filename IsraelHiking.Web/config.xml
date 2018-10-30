@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="il.org.osm.israelhiking" version="7.2.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="il.org.osm.israelhiking" version="8.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Israel Hiking Map</name>
     <description>An application for outdoor navigation.</description>
     <author email="IsraelHikingMap@gmail.com" href="http://israelhiking.osm.org.il">Israel Hiking Map</author>

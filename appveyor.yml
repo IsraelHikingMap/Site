@@ -1,4 +1,4 @@
-version: 7.2.{build}
+version: 8.0.{build}
 clone_depth: 1
 image: Visual Studio 2017
 configuration: Release
