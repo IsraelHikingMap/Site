@@ -7,6 +7,7 @@ import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { ImageResizeService } from "./image-resize.service";
 import { Urls } from "../urls";
 import { DataContainer } from "../models/models";
+import { RunningContextService } from "./running-context.service";
 
 describe("FileService", () => {
 
@@ -26,10 +27,11 @@ describe("FileService", () => {
                 HttpClientTestingModule
             ],
             providers: [
+                RunningContextService,
                 {
                     provide: FileService,
-                    useFactory: fakeAsync((http, mockBackend: HttpTestingController) => {
-                        let fileService = new FileService(http, imageResizeService, nonAngularObjectsFactory);
+                    useFactory: fakeAsync((http, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+                        let fileService = new FileService(http, runningContextService, imageResizeService, nonAngularObjectsFactory);
                         mockBackend.expectOne(Urls.fileFormats).flush([{
                             extension: "ex",
                             label: "label",
@@ -37,7 +39,7 @@ describe("FileService", () => {
                         } as IFormatViewModel]);
                         return fileService;
                     }),
-                    deps: [HttpClient, HttpTestingController]
+                    deps: [HttpClient, HttpTestingController, RunningContextService]
                 }
             ]
         });
