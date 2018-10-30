@@ -28,7 +28,7 @@ export class ClusterOverlayComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
         private readonly router: Router) {
         super(resources);
-        this.onClose = new EventEmitter();
+        this.closed = new EventEmitter();
     }
 
     public getRouterLinkForPoint(point: IPointOfInterest) {
@@ -38,6 +38,6 @@ export class ClusterOverlayComponent extends BaseMapComponent {
 
     public close() {
         this.isOpen = false;
-        this.onClose.emit();
+        this.closed.emit();
     }
 }
