@@ -1,7 +1,7 @@
 ﻿<div class="{{'text-' + resources.start}}">
     <p>
-        <span dir="ltr" *ngIf="latLng">{{latLng.lat | number: '1.0-6' }}°, {{latLng.lng | number:'1.0-6'}}°</span><br />
+        <span dir="ltr" *ngIf="latlng">{{latlng.lat | number: '1.0-6' }}°, {{latlng.lng | number:'1.0-6'}}°</span><br />
         <span *ngIf="itmCoordinates"><span dir="ltr">{{itmCoordinates.east}} / {{itmCoordinates.north}}</span><br /></span>
-        {{resources.elevation}}: <span dir="ltr" *ngIf="latLng">{{latLng.alt | number: '1.0-0' }}</span> {{resources.meterUnit}}
+        {{resources.elevation}}: <span dir="ltr" *ngIf="latlng">{{latlng.alt | number: '1.0-0' }}</span> {{resources.meterUnit}}
     </p>
 </div>

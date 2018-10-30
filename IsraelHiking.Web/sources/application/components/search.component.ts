@@ -226,7 +226,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.directional.routeTitle = this.fromContext.selectedSearchResults.displayName +
             " - " +
             this.toContext.selectedSearchResults.displayName;
-        
+
         this.directional.isOverlayOpen = true;
         let bounds = SpatialService.getBounds(latlngs);
         this.fitBoundsService.fitBounds(bounds);

@@ -1,4 +1,4 @@
-﻿import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
 
 import { BaseMapComponent } from "./base-map.component";
@@ -16,7 +16,6 @@ export interface INorthEast {
     templateUrl: "./coordinates.component.html"
 })
 export class CoordinatesComponent extends BaseMapComponent implements OnInit {
-    
 
     @Input()
     public latlng: LatLngAlt;

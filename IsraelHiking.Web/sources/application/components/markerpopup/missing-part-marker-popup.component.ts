@@ -13,10 +13,13 @@ import { BaseMapComponent } from "../base-map.component";
 export class MissingPartMarkerPopupComponent extends BaseMapComponent {
     private feature: GeoJSON.Feature<GeoJSON.LineString>;
 
+    public hideCoordinates: boolean;
+
     constructor(resources: ResourcesService,
         private readonly osmUserService: OsmUserService,
         private readonly toastService: ToastService) {
         super(resources);
+        this.hideCoordinates = true;
     }
 
     public setFeature(feature: GeoJSON.Feature<GeoJSON.LineString>) {
@@ -45,9 +48,13 @@ export class MissingPartMarkerPopupComponent extends BaseMapComponent {
     public addMissingPartToOsm = () => {
         this.osmUserService.addAMissingPart(this.feature).then(() => {
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);
-            //this.remove();
+            this.remove();
         }, () => {
             this.toastService.error(this.resources.unableToSendRoute);
         });
+    }
+
+    public remove() {
+        // HM TODO: should emit
     }
 }
