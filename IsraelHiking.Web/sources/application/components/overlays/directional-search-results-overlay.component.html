@@ -1,0 +1,26 @@
+﻿<aol-overlay *ngIf="isOpen">
+    <aol-coordinate [x]="latlng.lng"
+                    [y]="latlng.lat"
+                    [srid]="'EPSG:4326'">
+    </aol-coordinate>
+    <aol-content>
+        <div class="marker-popup" [dir]="resources.direction">
+            <div (click)="close()" class="close"><i class="fa icon-close"></i></div>
+            <h2 [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h2>
+            <div fxLayout="row">
+                <div fxFlex="33">
+                    <button mat-button fxFill (click)="convertToRoute.emit()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>
+                </div>
+                <div fxFlex="33">
+                    <button mat-button fxFill (click)="cleared.emit()" matTooltip="{{resources.clear}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Remove search route from map"><i class="fa icon-eye-slash"></i></button>
+                </div>
+                <div fxFlex>
+                    <button mat-button fxFill (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above"><i class="fa icon-globe"></i></button>
+                </div>
+            </div>
+            <div *ngIf="!hideCoordinates">
+                <coordinates [latlng]="latlng"></coordinates>
+            </div>
+        </div>
+    </aol-content>
+</aol-overlay>

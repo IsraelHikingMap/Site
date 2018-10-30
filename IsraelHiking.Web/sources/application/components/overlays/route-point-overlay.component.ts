@@ -1,30 +1,29 @@
-﻿import { Component, Input, HostListener, OnInit, OnChanges } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+﻿import { Component, Input, HostListener, OnChanges } from "@angular/core";
 import { DELETE } from "@angular/cdk/keycodes";
 
 import { ResourcesService } from "../../services/resources.service";
-import { ElevationProvider } from "../../services/elevation.provider";
-import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { ClosableOverlayComponent } from "./closable-overlay.component";
 
 @Component({
-    selector: "route-marker-popup",
-    templateUrl: "./route-marker-popup.component.html"
+    selector: "route-point-overlay",
+    templateUrl: "./route-point-overlay.component.html"
 })
-export class RouteMarkerPopupComponent extends BaseMarkerPopupComponent implements OnChanges {
+export class RoutePointOverlayComponent extends ClosableOverlayComponent implements OnChanges {
     public canMerge: boolean;
     public isMiddle: boolean;
 
     @Input()
     private segmentIndex: number;
 
+    public hideCoordinates: boolean;
+
     constructor(resources: ResourcesService,
-        httpClient: HttpClient,
-        elevationProvider: ElevationProvider,
         private readonly selectedRouteService: SelectedRouteService) {
-        super(resources, httpClient, elevationProvider);
+        super(resources);
         this.canMerge = false;
         this.isMiddle = false;
+        this.hideCoordinates = true;
     }
 
     public ngOnChanges(): void {

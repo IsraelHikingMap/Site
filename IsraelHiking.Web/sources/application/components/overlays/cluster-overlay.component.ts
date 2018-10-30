@@ -1,26 +1,16 @@
-﻿import { Component, Input, Output, EventEmitter } from "@angular/core";
+﻿import { Component, Input } from "@angular/core";
 import { Router } from "@angular/router";
 
-import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { RouteStrings } from "../../services/hash.service";
 import { IPointOfInterest } from "../../services/poi.service";
-import { LatLngAlt } from "../../models/models";
+import { ClosableOverlayComponent } from "./closable-overlay.component";
 
 @Component({
     selector: "cluster-overlay",
     templateUrl: "./cluster-overlay.component.html"
 })
-export class ClusterOverlayComponent extends BaseMapComponent {
-
-    @Input()
-    public isOpen: Boolean;
-
-    @Input()
-    public latlng: LatLngAlt;
-
-    @Output()
-    public closed: EventEmitter<any>;
+export class ClusterOverlayComponent extends ClosableOverlayComponent {
 
     @Input()
     public points: IPointOfInterest[];
@@ -28,16 +18,10 @@ export class ClusterOverlayComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
         private readonly router: Router) {
         super(resources);
-        this.closed = new EventEmitter();
     }
 
     public getRouterLinkForPoint(point: IPointOfInterest) {
         return this.router.createUrlTree([RouteStrings.POI, point.source, point.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } }).toString();
-    }
-
-    public close() {
-        this.isOpen = false;
-        this.closed.emit();
     }
 }

@@ -50,15 +50,4 @@
         </aol-style>
     </aol-source-vector>
 </aol-layer-vector>
-<aol-overlay *ngIf="routePointPopupData != null">
-    <aol-coordinate [x]="routePointPopupData.latlng.lng"
-                    [y]="routePointPopupData.latlng.lat"
-                    [srid]="'EPSG:4326'">
-    </aol-coordinate>
-    <aol-content>
-        <route-marker-popup [segmentIndex]="routePointPopupData.segmentIndex"
-                            [latLng]="routePointPopupData.latlng"
-                            [close]="routePointPopupData.close">
-        </route-marker-popup>
-    </aol-content>
-</aol-overlay>
+<route-point-overlay *ngIf="routePointPopupData != null" [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex" (closed)="routePointPopupData = null"></route-point-overlay>

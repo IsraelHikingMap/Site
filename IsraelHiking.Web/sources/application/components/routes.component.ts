@@ -14,7 +14,6 @@ import { LatLngAlt, ApplicationState, RouteData, RouteSegmentData, ICoordinate }
 
 interface RoutePointViewData {
     latlng: LatLngAlt;
-    close: Function;
     segmentIndex: number;
 }
 
@@ -28,7 +27,6 @@ export class RoutesComponent implements AfterViewInit {
 
     public hoverViewCoordinates: Coordinate;
     public routePointPopupData: RoutePointViewData;
-
 
     constructor(private readonly selectedRouteService: SelectedRouteService,
         private readonly host: MapComponent,
@@ -47,7 +45,6 @@ export class RoutesComponent implements AfterViewInit {
             this.routePointPopupData = {
                 latlng: segment.routePoint,
                 segmentIndex: pointIndex,
-                close: () => this.routePointPopupData = null
             };
         });
 

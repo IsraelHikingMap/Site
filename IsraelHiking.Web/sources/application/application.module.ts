@@ -107,12 +107,12 @@ import { SharesDialogComponent } from "./components/dialogs/shares-dialog.compon
 import { LanguageComponent } from "./components/language.component";
 import { LanguageDialogComponent } from "./components/dialogs/language-dialog.component";
 import { DrawingComponent } from "./components/drawing.component";
-import { RouteMarkerPopupComponent } from "./components/markerpopup/route-marker-popup.component";
+import { RoutePointOverlayComponent } from "./components/overlays/route-point-overlay.component";
 import { PrivatePoiOverlayComponent } from "./components/overlays/private-poi-overlay.component";
 import { ClusterOverlayComponent } from "./components/overlays/cluster-overlay.component";
 import { GpsLocationOverlayComponent } from "./components/overlays/gps-location-overlay.component";
-import { CoordinatesMarkerPopupComponent } from "./components/markerpopup/coordinates-marker-popup.component";
-import { SearchResultsMarkerPopupComponent } from "./components/markerpopup/search-results-marker-popup.component";
+import { CoordinatesComponent } from "./components/coordinates.component";
+import { DirectionalSearchResultsOverlayComponent } from "./components/overlays/directional-search-results-overlay.component";
 import { MissingPartMarkerPopupComponent } from "./components/markerpopup/missing-part-marker-popup.component";
 import { SearchComponent } from "./components/search.component";
 import { InfoComponent } from "./components/info.component";
@@ -201,12 +201,12 @@ export function getWindow() { return window; }
         LanguageComponent,
         LanguageDialogComponent,
         DrawingComponent,
-        RouteMarkerPopupComponent,
+        RoutePointOverlayComponent,
         PrivatePoiOverlayComponent,
         ClusterOverlayComponent,
         GpsLocationOverlayComponent,
-        CoordinatesMarkerPopupComponent,
-        SearchResultsMarkerPopupComponent,
+        CoordinatesComponent,
+        DirectionalSearchResultsOverlayComponent,
         MissingPartMarkerPopupComponent,
         SearchComponent,
         InfoComponent,
@@ -291,12 +291,12 @@ export function getWindow() { return window; }
         LanguageComponent,
         LanguageDialogComponent,
         DrawingComponent,
-        RouteMarkerPopupComponent,
+        RoutePointOverlayComponent,
         PrivatePoiOverlayComponent,
         ClusterOverlayComponent,
         GpsLocationOverlayComponent,
-        CoordinatesMarkerPopupComponent,
-        SearchResultsMarkerPopupComponent,
+        CoordinatesComponent,
+        DirectionalSearchResultsOverlayComponent,
         MissingPartMarkerPopupComponent,
         SearchComponent,
         InfoComponent,

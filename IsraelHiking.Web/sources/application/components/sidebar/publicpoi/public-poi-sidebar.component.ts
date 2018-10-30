@@ -36,7 +36,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public isLoading: boolean;
     public sourceImageUrls: string[];
     public rating: number;
-    public latLng: LatLngAlt;
+    public latlng: LatLngAlt;
     public shareLinks: IPoiSocialLinks;
     public contribution: IContribution;
 
@@ -96,7 +96,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private initFromPointOfInterestExtended = (poiExtended: IPointOfInterestExtended) => {
         this.poiExtended = poiExtended;
-        this.latLng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng, alt: poiExtended.location.alt};
+        this.latlng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng, alt: poiExtended.location.alt};
         this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
         this.rating = this.getRatingNumber(this.poiExtended.rating);
         this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
@@ -236,7 +236,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         this.ngRedux.dispatch(new AddPrivatePoiAction({
             routeId: selectedRoute.id,
             markerData: {
-                latlng: this.latLng,
+                latlng: this.latlng,
                 title: this.info.title,
                 description: this.info.description,
                 type: icon.replace("icon-", ""),

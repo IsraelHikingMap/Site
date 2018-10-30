@@ -45,9 +45,8 @@
         <aol-source-vector>
             <aol-feature>
                 <aol-geometry-linestring>
-                    <aol-collection-coordinates
-                        [coordinates]="directional.routeCoordinates"
-                        [srid]="'EPSG:4326'">
+                    <aol-collection-coordinates [coordinates]="directional.routeCoordinates"
+                                                [srid]="'EPSG:4326'">
                     </aol-collection-coordinates>
                 </aol-geometry-linestring>
             </aol-feature>
@@ -81,22 +80,13 @@
             </aol-feature>
         </aol-source-vector>
     </aol-layer-vector>
-    <aol-overlay>
-        <aol-coordinate [x]="directional.routeCoordinates[directional.routeCoordinates.length - 1][0]"
-                        [y]="directional.routeCoordinates[directional.routeCoordinates.length - 1][1]"
-                        [srid]="'EPSG:4326'">
-        </aol-coordinate>
-        <aol-content>
-            <search-results-marker-popup 
-                [title]="directional.routeTitle"
-                [latLng]="{
+    <directional-search-results-overlay [title]="directional.routeTitle"
+                                        [isOpen]="directional.isOverlayOpen"
+                                        (cleared)="directionalCleared()"
+                                        (convertToRoute)="convertToRoute()"
+                                        [latlng]="{
                              lat: directional.routeCoordinates[directional.routeCoordinates.length - 1][1],
                              lng: directional.routeCoordinates[directional.routeCoordinates.length - 1][0]
-                }"
-                [close]="directional.close"
-                [remove]="directional.remove"
-                [convertToRoute]="directional.convertToRoute">
-            </search-results-marker-popup>
-        </aol-content>
-    </aol-overlay>
+                }">
+    </directional-search-results-overlay>
 </div>

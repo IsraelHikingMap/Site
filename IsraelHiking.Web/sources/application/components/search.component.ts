@@ -15,16 +15,19 @@ import { debounceTime, filter, tap } from "rxjs/operators";
 import { ENTER } from "@angular/cdk/keycodes";
 import { remove } from "lodash";
 import { Coordinate } from "openlayers";
+import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
 import { HashService, RouteStrings, IApplicationStateChangedEventArgs } from "../services/hash.service";
-import { DataContainerService } from "../services/data-container.service";
 import { RouterService } from "../services/routers/router.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../services/search-results.provider";
 import { BaseMapComponent } from "./base-map.component";
-import { RoutingType, DataContainer } from "../models/models";
+import { RoutingType, ApplicationState, RouteSegmentData } from "../models/models";
+import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
+import { AddRouteAction } from "../reducres/routes.reducer";
+import { SpatialService } from "../services/spatial.service";
 
 
 export interface ISearchContext {
@@ -39,13 +42,11 @@ interface ISearchRequestQueueItem {
 
 interface IDirectionalContext {
     isOn: boolean;
-    isMarkerPopupOpen: boolean;
+    isOverlayOpen: boolean;
     showResults: boolean;
     routeCoordinates: Coordinate[];
     routeTitle: string;
-    convertToRoute: () => void;
-    close: () => void;
-    remove: () => void;
+    routeSegments: RouteSegmentData[];
 }
 
 @Component({
@@ -76,24 +77,23 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     constructor(resources: ResourcesService,
         private readonly hashService: HashService,
-        private readonly dataContainerService: DataContainerService,
         private readonly searchResultsProvider: SearchResultsProvider,
         private readonly routerService: RouterService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly toastService: ToastService,
-        private readonly router: Router
+        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly router: Router,
+        private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.requestsQueue = [];
         this.directional = {
             isOn: false,
-            isMarkerPopupOpen: false,
+            isOverlayOpen: false,
             routeCoordinates: [],
             routeTitle: "",
             showResults: false,
-            convertToRoute: () => {},
-            close: () => {},
-            remove: () => {}
+            routeSegments: []
         };
         this.isVisible = false;
         this.routingType = "Hike";
@@ -212,41 +212,38 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             this.toastService.warning(this.resources.pleaseSelectTo);
             return;
         }
-        let routeSegments = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
+        this.directional.routeSegments = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
             this.toContext.selectedSearchResults.location,
             this.routingType);
         this.directional.showResults = true;
-        for (let segment of routeSegments) {
+        let latlngs = [];
+        for (let segment of this.directional.routeSegments) {
             for (let latlng of segment.latlngs) {
+                latlngs.push(latlng);
                 this.directional.routeCoordinates.push([latlng.lng, latlng.lat]);
             }
         }
         this.directional.routeTitle = this.fromContext.selectedSearchResults.displayName +
             " - " +
             this.toContext.selectedSearchResults.displayName;
+        
+        this.directional.isOverlayOpen = true;
+        let bounds = SpatialService.getBounds(latlngs);
+        this.fitBoundsService.fitBounds(bounds);
+    }
 
-        this.directional.convertToRoute = () => {
-            this.dataContainerService.setData({
-                routes: [
-                    {
-                        name: this.directional.routeTitle,
-                        markers: [],
-                        segments: routeSegments
-                    }
-                ]
-            } as DataContainer);
-            this.directional.routeCoordinates = [];
-        };
-        this.directional.remove = () => {
-            this.directional.routeCoordinates = [];
-            this.directional.showResults = false;
-        };
-        this.directional.close = () => {
-            this.directional.isMarkerPopupOpen = false;
-        };
-        this.directional.isMarkerPopupOpen = true;
-        // HM TODO: fly to bounds, open popup
-        // this.fitBoundsService.fitBounds(this.readonlyLayer.getBounds());
+    public convertToRoute() {
+        let route = this.routeLayerFactory.createRouteData(this.directional.routeTitle);
+        route.segments = this.directional.routeSegments;
+        this.ngRedux.dispatch(new AddRouteAction({
+            routeData: route
+        }));
+    }
+
+    public directionalCleared() {
+        this.directional.routeCoordinates = [];
+        this.directional.showResults = false;
+        this.directional.isOverlayOpen = false;
     }
 
     @HostListener("window:keydown", ["$event"])

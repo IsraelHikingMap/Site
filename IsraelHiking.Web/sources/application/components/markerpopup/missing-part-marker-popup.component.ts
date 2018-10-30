@@ -1,25 +1,22 @@
 ﻿import { Component } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
+
 import { ResourcesService } from "../../services/resources.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { ToastService } from "../../services/toast.service";
-import { ElevationProvider } from "../../services/elevation.provider";
-import { BaseMarkerPopupComponent } from "./base-marker-popup.component";
+import { BaseMapComponent } from "../base-map.component";
 
 @Component({
     selector: "missing-part-marker-popup",
     templateUrl: "./missing-part-marker-popup.component.html",
     styleUrls: ["./missing-part-marker-popup.component.css"]
 })
-export class MissingPartMarkerPopupComponent extends BaseMarkerPopupComponent {
+export class MissingPartMarkerPopupComponent extends BaseMapComponent {
     private feature: GeoJSON.Feature<GeoJSON.LineString>;
 
     constructor(resources: ResourcesService,
-        httpClient: HttpClient,
-        elevationProvider: ElevationProvider,
-        private osmUserService: OsmUserService,
-        private toastService: ToastService) {
-        super(resources, httpClient, elevationProvider);
+        private readonly osmUserService: OsmUserService,
+        private readonly toastService: ToastService) {
+        super(resources);
     }
 
     public setFeature(feature: GeoJSON.Feature<GeoJSON.LineString>) {
@@ -48,7 +45,7 @@ export class MissingPartMarkerPopupComponent extends BaseMarkerPopupComponent {
     public addMissingPartToOsm = () => {
         this.osmUserService.addAMissingPart(this.feature).then(() => {
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);
-            this.remove();
+            //this.remove();
         }, () => {
             this.toastService.error(this.resources.unableToSendRoute);
         });
