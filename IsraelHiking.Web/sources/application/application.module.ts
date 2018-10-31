@@ -86,7 +86,7 @@ import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.
 import { ImageCaptureDirective } from "./directives/image-capture.directive";
 // components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
-import { MainMapComponent } from "./components/main-map.component";
+import { MainMapComponent } from "./components/map/main-map.component";
 import { ZoomComponent } from "./components/zoom.component";
 import { LocationComponent } from "./components/location.component";
 import { LayersComponent } from "./components/layers.component";
@@ -129,8 +129,8 @@ import { PublicPointOfInterestEditComponent } from "./components/sidebar/publicp
 import { ImageScrollerComponent } from "./components/sidebar/publicpoi/image-scroller.component";
 import { ApplicationStateComponent } from "./components/application-state.component";
 import { PrivatePoiEditDialogComponent } from "./components/dialogs/private-poi-edit-dialog.component";
-import { LayersViewComponent } from "./components/layers-view.component";
-import { RoutesComponent } from "./components/routes.component";
+import { LayersViewComponent } from "./map/components/layers-view.component";
+import { RoutesComponent } from "./map/components/routes.component";
 // variables and functions
 import { routes } from "./routes";
 import { ApplicationState } from "./models/models";

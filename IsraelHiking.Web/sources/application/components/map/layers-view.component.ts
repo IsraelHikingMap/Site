@@ -3,14 +3,14 @@ import { Router } from "@angular/router";
 import { MapComponent, LayerVectorComponent } from "ngx-openlayers";
 import { style, layer, MapBrowserEvent, Feature, geom } from "openlayers";
 
-import { PoiService, CategoriesType, IPointOfInterest } from "../services/poi.service";
-import { LayersService } from "../services/layers/layers.service";
-import { CategoriesLayerFactory } from "../services/layers/categories-layers.factory";
-import { SpatialService } from "../services/spatial.service";
-import { RouteStrings } from "../services/hash.service";
-import { BaseMapComponent } from "./base-map.component";
-import { ResourcesService } from "../services/resources.service";
-import { LatLngAlt } from "../models/models";
+import { PoiService, CategoriesType, IPointOfInterest } from "../../services/poi.service";
+import { LayersService } from "../../services/layers/layers.service";
+import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
+import { SpatialService } from "../../services/spatial.service";
+import { RouteStrings } from "../../services/hash.service";
+import { BaseMapComponent } from "../base-map.component";
+import { ResourcesService } from "../../services/resources.service";
+import { LatLngAlt } from "../../models/models";
 
 @Component({
     selector: "layers-view",
@@ -78,7 +78,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     public ngAfterViewInit() {
-        // HM TODO: hover.
+        // HM TODO: hover on cluster.
         this.poiLayers.forEach(l => (l.instance as layer.Vector).setStyle((feature) => this.createClusterIcon(feature)));
         this.host.instance.on("singleclick",
             (event: MapBrowserEvent) => {

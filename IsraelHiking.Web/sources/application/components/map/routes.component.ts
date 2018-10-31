@@ -5,12 +5,12 @@ import { select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import parse from "color-parse";
 
-import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
-import { SpatialService } from "../services/spatial.service";
-import { RouteEditPoiInteraction } from "./intercations/route-edit-poi.interaction";
-import { RouteEditRouteInteraction } from "./intercations/route-edit-route.interaction";
-import { SnappingService } from "../services/snapping.service";
-import { LatLngAlt, ApplicationState, RouteData, RouteSegmentData, ICoordinate } from "../models/models";
+import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { SpatialService } from "../../services/spatial.service";
+import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
+import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
+import { SnappingService } from "../../services/snapping.service";
+import { LatLngAlt, ApplicationState, RouteData, RouteSegmentData, ICoordinate } from "../../models/models";
 
 interface RoutePointViewData {
     latlng: LatLngAlt;

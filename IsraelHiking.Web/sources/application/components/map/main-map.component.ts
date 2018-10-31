@@ -5,16 +5,16 @@ import { Observable } from "rxjs";
 import { proj } from "openlayers";
 import { MapComponent } from "ngx-openlayers";
 
-import { ResourcesService } from "../services/resources.service";
-import { BaseMapComponent } from "./base-map.component";
-import { ImageGalleryService } from "../services/image-gallery.service";
-import { ApplicationState, Location } from "../models/models";
-import { SetLocationAction } from "../reducres/location.reducer";
-import { HashService } from "../services/hash.service";
-import { MapService } from "../services/map.service";
-import { RunningContextService } from "../services/running-context.service";
-import { DataContainerService } from "../services/data-container.service";
-import { SnappingService } from "../services/snapping.service";
+import { ResourcesService } from "../../services/resources.service";
+import { BaseMapComponent } from "../base-map.component";
+import { ImageGalleryService } from "../../services/image-gallery.service";
+import { ApplicationState, Location } from "../../models/models";
+import { SetLocationAction } from "../../reducres/location.reducer";
+import { HashService } from "../../services/hash.service";
+import { MapService } from "../../services/map.service";
+import { RunningContextService } from "../../services/running-context.service";
+import { DataContainerService } from "../../services/data-container.service";
+import { SnappingService } from "../../services/snapping.service";
 
 @Component({
     selector: "main-map",
