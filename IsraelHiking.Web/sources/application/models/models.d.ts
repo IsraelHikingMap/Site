@@ -12,3 +12,5 @@ export { Location } from "./location";
 export { ApplicationState } from "./application-state";
 export { Configuration } from "./configuration";
 export { RouteEditingState } from "./route-editing-state";
+export { Trace, TraceVisibility } from "./trace";
+export { TracesState } from "./traces-state";

@@ -1,13 +1,12 @@
 import { Injectable, EventEmitter } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
 import { Subject } from "rxjs";
-import * as _ from "lodash";
+import { remove } from "lodash";
 
 import { AuthorizationService, IAuthorizationServiceOptions } from "./authorization.service";
 import { HashService } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { Urls } from "../urls";
-import { ITrace } from "./traces.service";
 import { ShareUrl, DataContainer } from "../models/models";
 
 
@@ -154,7 +153,7 @@ export class OsmUserService {
     public deleteShareUrl = (shareUrl: ShareUrl): Promise<any> => {
         let promise = this.httpClient.delete(Urls.urls + shareUrl.id, { responseType: "text" }).toPromise() as Promise<any>;
         promise.then(() => {
-            _.remove(this.shareUrls, s => s.id === shareUrl.id);
+            remove(this.shareUrls, s => s.id === shareUrl.id);
             this.shareUrlsChanged.next();
         });
         return promise;

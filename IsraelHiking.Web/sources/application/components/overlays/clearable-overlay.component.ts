@@ -1,16 +1,13 @@
 import { Component, Input, Output, EventEmitter } from "@angular/core";
-import { HttpClient } from "@angular/common/http";
 
 import { ResourcesService } from "../../services/resources.service";
-import { ElevationProvider } from "../../services/elevation.provider";
 import { ClosableOverlayComponent } from "./closable-overlay.component";
 
-
 @Component({
-    selector: "directional-search-results-overlay",
-    templateUrl: "./directional-search-results-overlay.component.html"
+    selector: "clearable-overlay",
+    templateUrl: "./clearable-overlay.component.html"
 })
-export class DirectionalSearchResultsOverlayComponent extends ClosableOverlayComponent {
+export class ClearableOverlayComponent extends ClosableOverlayComponent {
 
     @Input()
     public title: string;
@@ -30,6 +27,4 @@ export class DirectionalSearchResultsOverlayComponent extends ClosableOverlayCom
         this.convertToRoute = new EventEmitter();
         this.cleared = new EventEmitter();
     }
-
-
 }

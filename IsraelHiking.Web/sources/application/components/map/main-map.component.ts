@@ -50,7 +50,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         if (!e) {
             return;
         }
-        console.log("moveend");
         let centerLatLon = proj.toLonLat(e.map.getView().getCenter());
         let action = new SetLocationAction({
             longitude: centerLatLon[0],

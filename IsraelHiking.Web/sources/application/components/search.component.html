@@ -49,6 +49,9 @@
                                                 [srid]="'EPSG:4326'">
                     </aol-collection-coordinates>
                 </aol-geometry-linestring>
+                <aol-style>
+                    <aol-style-stroke [width]="3" [color]="'blue'"></aol-style-stroke>
+                </aol-style>
             </aol-feature>
             <aol-feature>
                 <aol-geometry-point>
@@ -80,7 +83,7 @@
             </aol-feature>
         </aol-source-vector>
     </aol-layer-vector>
-    <directional-search-results-overlay [title]="directional.routeTitle"
+    <clearable-overlay [title]="directional.routeTitle"
                                         [isOpen]="directional.isOverlayOpen"
                                         (cleared)="directionalCleared()"
                                         (convertToRoute)="convertToRoute()"
@@ -88,5 +91,5 @@
                              lat: directional.routeCoordinates[directional.routeCoordinates.length - 1][1],
                              lng: directional.routeCoordinates[directional.routeCoordinates.length - 1][0]
                 }">
-    </directional-search-results-overlay>
+    </clearable-overlay>
 </div>

@@ -1,17 +1,21 @@
-﻿import { Component } from "@angular/core";
+﻿import { Component, Input, Output, EventEmitter } from "@angular/core";
 
 import { ResourcesService } from "../../services/resources.service";
 import { OsmUserService } from "../../services/osm-user.service";
 import { ToastService } from "../../services/toast.service";
-import { BaseMapComponent } from "../base-map.component";
+import { ClosableOverlayComponent } from "./closable-overlay.component";
 
 @Component({
-    selector: "missing-part-marker-popup",
-    templateUrl: "./missing-part-marker-popup.component.html",
-    styleUrls: ["./missing-part-marker-popup.component.css"]
+    selector: "missing-part-overlay",
+    templateUrl: "./missing-part-overlay.component.html",
+    styleUrls: ["./missing-part-overlay.component.css"]
 })
-export class MissingPartMarkerPopupComponent extends BaseMapComponent {
-    private feature: GeoJSON.Feature<GeoJSON.LineString>;
+export class MissingPartOverlayComponent extends ClosableOverlayComponent {
+    @Input()
+    public feature: GeoJSON.Feature<GeoJSON.LineString>;
+
+    @Output()
+    public removed: EventEmitter<any>;
 
     public hideCoordinates: boolean;
 
@@ -19,11 +23,8 @@ export class MissingPartMarkerPopupComponent extends BaseMapComponent {
         private readonly osmUserService: OsmUserService,
         private readonly toastService: ToastService) {
         super(resources);
+        this.removed = new EventEmitter();
         this.hideCoordinates = true;
-    }
-
-    public setFeature(feature: GeoJSON.Feature<GeoJSON.LineString>) {
-        this.feature = feature;
     }
 
     public getHighwayType = (): string => {
@@ -45,16 +46,17 @@ export class MissingPartMarkerPopupComponent extends BaseMapComponent {
         }
     }
 
-    public addMissingPartToOsm = () => {
-        this.osmUserService.addAMissingPart(this.feature).then(() => {
+    public addMissingPartToOsm = async () => {
+        try {
+            await this.osmUserService.addAMissingPart(this.feature);
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);
             this.remove();
-        }, () => {
+        } catch (ex) {
             this.toastService.error(this.resources.unableToSendRoute);
-        });
+        }
     }
 
     public remove() {
-        // HM TODO: should emit
+        this.removed.emit();
     }
 }

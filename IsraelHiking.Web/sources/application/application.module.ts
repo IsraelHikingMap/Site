@@ -107,13 +107,13 @@ import { SharesDialogComponent } from "./components/dialogs/shares-dialog.compon
 import { LanguageComponent } from "./components/language.component";
 import { LanguageDialogComponent } from "./components/dialogs/language-dialog.component";
 import { DrawingComponent } from "./components/drawing.component";
+import { CoordinatesComponent } from "./components/coordinates.component";
 import { RoutePointOverlayComponent } from "./components/overlays/route-point-overlay.component";
 import { PrivatePoiOverlayComponent } from "./components/overlays/private-poi-overlay.component";
 import { ClusterOverlayComponent } from "./components/overlays/cluster-overlay.component";
 import { GpsLocationOverlayComponent } from "./components/overlays/gps-location-overlay.component";
-import { CoordinatesComponent } from "./components/coordinates.component";
-import { DirectionalSearchResultsOverlayComponent } from "./components/overlays/directional-search-results-overlay.component";
-import { MissingPartMarkerPopupComponent } from "./components/markerpopup/missing-part-marker-popup.component";
+import { ClearableOverlayComponent } from "./components/overlays/clearable-overlay.component";
+import { MissingPartOverlayComponent } from "./components/overlays/missing-part-overlay.component";
 import { SearchComponent } from "./components/search.component";
 import { InfoComponent } from "./components/info.component";
 import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
@@ -131,6 +131,7 @@ import { ApplicationStateComponent } from "./components/application-state.compon
 import { PrivatePoiEditDialogComponent } from "./components/dialogs/private-poi-edit-dialog.component";
 import { LayersViewComponent } from "./components/map/layers-view.component";
 import { RoutesComponent } from "./components/map/routes.component";
+import { TracesComponent } from "./components/map/traces.component";
 // variables and functions
 import { routes } from "./routes";
 import { ApplicationState } from "./models/models";
@@ -201,13 +202,13 @@ export function getWindow() { return window; }
         LanguageComponent,
         LanguageDialogComponent,
         DrawingComponent,
+        CoordinatesComponent,
         RoutePointOverlayComponent,
         PrivatePoiOverlayComponent,
         ClusterOverlayComponent,
         GpsLocationOverlayComponent,
-        CoordinatesComponent,
-        DirectionalSearchResultsOverlayComponent,
-        MissingPartMarkerPopupComponent,
+        ClearableOverlayComponent,
+        MissingPartOverlayComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,
@@ -224,7 +225,8 @@ export function getWindow() { return window; }
         ApplicationStateComponent,
         PrivatePoiEditDialogComponent,
         LayersViewComponent,
-        RoutesComponent
+        RoutesComponent,
+        TracesComponent
     ],
     providers: [
         GestureConfig,
@@ -291,13 +293,13 @@ export function getWindow() { return window; }
         LanguageComponent,
         LanguageDialogComponent,
         DrawingComponent,
+        CoordinatesComponent,
         RoutePointOverlayComponent,
         PrivatePoiOverlayComponent,
         ClusterOverlayComponent,
         GpsLocationOverlayComponent,
-        CoordinatesComponent,
-        DirectionalSearchResultsOverlayComponent,
-        MissingPartMarkerPopupComponent,
+        ClearableOverlayComponent,
+        MissingPartOverlayComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,
@@ -316,6 +318,7 @@ export function getWindow() { return window; }
         PrivatePoiEditDialogComponent,
         LayersViewComponent,
         RoutesComponent,
+        TracesComponent,
         ImageCaptureDirective
     ],
     bootstrap: [MainMapComponent]

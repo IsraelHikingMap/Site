@@ -1,4 +1,4 @@
-﻿import { ApplicationState, Location, Configuration, RouteData, RouteEditingState } from "../models/models";
+﻿import { ApplicationState, Location, Configuration, RouteData, RouteEditingState, TracesState } from "../models/models";
 import { StateWithHistory } from "redux-undo";
 
 export const initialState =
@@ -20,5 +20,9 @@ export const initialState =
             routingType: "Hike",
             selectedRouteId: null,
         } as RouteEditingState,
-        locallyRecordedRoutes: []
+        traces: {
+            visibleTraceId: null,
+            traces: [],
+            missingParts: null,
+        } as TracesState
     } as ApplicationState;

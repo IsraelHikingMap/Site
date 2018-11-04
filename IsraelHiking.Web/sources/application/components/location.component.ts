@@ -12,13 +12,13 @@ import { ToastService } from "../services/toast.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SetLocationAction } from "../reducres/location.reducer";
-import { RouteData, ApplicationState, LatLngAlt } from "../models/models";
 import { DragInteraction } from "./intercations/drag.interaction";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { AddRouteAction, StopRecordingAction } from "../reducres/routes.reducer";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
-import { AddLocallyRecordedRouteAction } from "../reducres/locally-recorded-routes.reducer";
 import { SpatialService } from "../services/spatial.service";
+import { RouteData, ApplicationState, LatLngAlt, Trace, DataContainer, TraceVisibility } from "../models/models";
+import { AddTraceAction } from "../reducres/traces.reducer";
 
 interface ILocationInfo extends LatLngAlt {
     radius: number;
@@ -118,9 +118,7 @@ export class LocationComponent extends BaseMapComponent {
                     },
                     declineAction: () => {
                         this.lastRecordedRoute.isRecording = false;
-                        this.ngRedux.dispatch(new AddLocallyRecordedRouteAction({
-                            routeData: this.lastRecordedRoute
-                        }));
+                        this.addRecordingToTraces(this.lastRecordedRoute);
                         this.lastRecordedRoute = null;
                     },
                 });
@@ -180,9 +178,7 @@ export class LocationComponent extends BaseMapComponent {
             this.ngRedux.dispatch(new StopRecordingAction({
                 routeId: this.recordingRouteId
             }));
-            this.ngRedux.dispatch(new AddLocallyRecordedRouteAction({
-                routeData: this.selectedRouteService.getRouteById(this.recordingRouteId)
-            }));
+            this.addRecordingToTraces(this.selectedRouteService.getRouteById(this.recordingRouteId));
             this.lastRecordedRoute = null;
             this.recordingRouteId = null;
         }
@@ -238,9 +234,9 @@ export class LocationComponent extends BaseMapComponent {
         this.locationCoordinate.lng = position.coords.longitude;
         this.locationCoordinate.lat = position.coords.latitude;
         this.locationCoordinate.radius = position.coords.accuracy;
-        if (position.coords.heading != null) {
+        if (position.coords.heading != null && position.coords.heading !== NaN) {
             this.host.instance.getView().animate({
-                rotation: position.coords.heading * Math.PI / 180
+                rotation: - position.coords.heading * Math.PI / 180.0
             });
         }
         if (this.isFollowing) {
@@ -271,5 +267,33 @@ export class LocationComponent extends BaseMapComponent {
             longitude: this.locationCoordinate.lng,
             latitude: this.locationCoordinate.lat
         }));
+    }
+
+    private addRecordingToTraces(routeData: RouteData) {
+        let latLngs = routeData.segments[0].latlngs;
+        let northEast = { lat: Math.max(...latLngs.map(l => l.lat)), lng: Math.max(...latLngs.map(l => l.lng)) };
+        let southWest = { lat: Math.min(...latLngs.map(l => l.lat)), lng: Math.min(...latLngs.map(l => l.lng)) };
+        let container = {
+            routes: [routeData],
+            northEast: northEast,
+            southWest: southWest
+        } as DataContainer;
+
+        let trace = {
+            name: routeData.name,
+            description: routeData.description,
+            id: routeData.id,
+            timeStamp: routeData.segments[0].latlngs[0].timestamp,
+            dataContainer: container,
+            tags: [],
+            tagsString: "",
+            visibility: "local" as TraceVisibility,
+            isInEditMode: false,
+            url: "",
+            imageUrl: "",
+            dataUrl: "",
+            user: ""
+        };
+        this.ngRedux.dispatch(new AddTraceAction({ trace: trace }));
     }
 }

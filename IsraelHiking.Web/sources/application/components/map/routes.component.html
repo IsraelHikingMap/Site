@@ -50,4 +50,4 @@
         </aol-style>
     </aol-source-vector>
 </aol-layer-vector>
-<route-point-overlay *ngIf="routePointPopupData != null" [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex" (closed)="routePointPopupData = null"></route-point-overlay>
+<route-point-overlay *ngIf="routePointPopupData != null" [isOpen]="routePointPopupData != null" [latlng]="routePointPopupData.latlng" [segmentIndex]="routePointPopupData.segmentIndex" (closed)="routePointPopupData = null"></route-point-overlay>

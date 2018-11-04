@@ -65,8 +65,6 @@ export class LayersService {
     public overlays: IOverlay[];
     public selectedBaseLayer: IBaseLayer;
 
-    public readOnlyDataContainer: DataContainer;
-
     constructor(private readonly resourcesService: ResourcesService,
         private readonly osmUserService: OsmUserService,
         private readonly httpClient: HttpClient,
@@ -75,7 +73,6 @@ export class LayersService {
         this.selectedBaseLayer = null;
         this.baseLayers = [];
         this.overlays = [];
-        this.readOnlyDataContainer = null;
         this.initializeDefaultLayers();
     }
 
