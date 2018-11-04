@@ -326,7 +326,7 @@ namespace IsraelHiking.DataAccess.OpenStreetMap
                 UpdateHeaders(client, _createTraceAddress, "POST");
                 var parameters = new Dictionary<string, string>
                 {
-                    { "description", fileName },
+                    { "description", Path.GetFileNameWithoutExtension(fileName) },
                     { "visibility", "public" },
                     { "tags", "" },
                 };

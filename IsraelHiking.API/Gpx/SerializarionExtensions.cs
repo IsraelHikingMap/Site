@@ -119,7 +119,7 @@ namespace IsraelHiking.API.Gpx
                 {
                     ExtensionReader = new IsraelHikingGpxExtensionReader(),
                     DefaultCreatorIfMissing = "unknown",
-                    AllowMissingVersionAttribute = true
+                    IgnoreVersionAttribute = true
                 });
             }
         }
