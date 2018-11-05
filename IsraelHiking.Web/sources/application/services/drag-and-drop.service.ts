@@ -12,9 +12,10 @@ export class DragAndDropService {
         private readonly dataContainerService: DataContainerService,
         private readonly toastService: ToastService) {
 
-        // HM TODO: make drag and drop work on the map
-        let dropbox = window.document; // this.mapService.map.getContainer();
-        dropbox.addEventListener("drop", (e: DragEvent) => {
+        document.addEventListener("dragover", (event) => {
+            event.preventDefault();
+        });
+        document.addEventListener("drop", (e: DragEvent) => {
             e.stopPropagation();
             e.preventDefault();
             let files = Array.prototype.slice.apply(e.dataTransfer.files) as File[];
