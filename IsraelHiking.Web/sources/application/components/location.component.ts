@@ -234,13 +234,13 @@ export class LocationComponent extends BaseMapComponent {
         this.locationCoordinate.lng = position.coords.longitude;
         this.locationCoordinate.lat = position.coords.latitude;
         this.locationCoordinate.radius = position.coords.accuracy;
+        if (this.isFollowing) {
+            this.setLocation();
+        }
         if (position.coords.heading != null && position.coords.heading !== NaN) {
             this.host.instance.getView().animate({
                 rotation: - position.coords.heading * Math.PI / 180.0
             });
-        }
-        if (this.isFollowing) {
-            this.setLocation();
         }
         if (this.accuracyCircle) {
             this.accuracyCircle.instance.setGeometry(

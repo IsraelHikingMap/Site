@@ -1,10 +1,11 @@
 ﻿import { TestBed, inject } from "@angular/core/testing";
 import { HttpClientModule } from "@angular/common/http";
 import { HttpClientTestingModule, HttpTestingController } from "@angular/common/http/testing";
+import { NgRedux } from "@angular-redux/store";
 
 import { TracesService } from "./traces.service";
 import { Urls } from "../urls";
-import { ITrace } from "./traces.service";
+import { Trace } from "../models/models";
 
 describe("Traces Service", () => {
     beforeEach(() => {
@@ -14,6 +15,7 @@ describe("Traces Service", () => {
                 HttpClientTestingModule
             ],
             providers: [
+                NgRedux,
                 TracesService
             ]
         });
@@ -22,7 +24,7 @@ describe("Traces Service", () => {
     it("Should get missing parts", inject([TracesService, HttpTestingController],
         async (tracesService: TracesService, mockBackend: HttpTestingController) => {
 
-            let trace = { dataUrl: "123" } as ITrace;
+            let trace = { dataUrl: "123" } as Trace;
 
             let promise = tracesService.getMissingParts(trace).then((res) => {
                 expect(res).not.toBeNull();
