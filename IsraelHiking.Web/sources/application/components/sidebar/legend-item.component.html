@@ -1,6 +1,6 @@
 ﻿<div class="legend-item" [ngClass]="{'legend-route': item.type === 'Way', 'legend-poi' : item.type === 'POI'}">
     <div (click)="moveToLocation(item)" class="legend-item-map cursor-pointer">
-        <aol-map [width]="'200px'" [height]="'50px'">
+        <aol-map [width]="'100%'" [height]="'100%'">
             <aol-layer-tile>
                 <aol-source-xyz [url]="getUrl()"></aol-source-xyz>
             </aol-layer-tile>

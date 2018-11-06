@@ -31,13 +31,10 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
     public ngOnInit() {
         this.subscription = this.route.params.subscribe(params => {
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
-                if (!this.fitBoundsService.isFlying) {
-                    this.ngRedux.dispatch(new SetLocationAction({
-                        longitude: +params[RouteStrings.LON],
-                        latitude: +params[RouteStrings.LAT],
-                        zoom: +params[RouteStrings.ZOOM]
-                    }));
-                }
+                this.fitBoundsService.flyTo({
+                    lng: +params[RouteStrings.LON],
+                    lat: +params[RouteStrings.LAT]
+                }, +params[RouteStrings.ZOOM]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SEARCH)) {
                 this.hashService.setApplicationState("search", decodeURIComponent(params[RouteStrings.TERM]));
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {

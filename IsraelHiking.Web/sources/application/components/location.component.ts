@@ -11,7 +11,6 @@ import { GeoLocationService } from "../services/geo-location.service";
 import { ToastService } from "../services/toast.service";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
-import { SetLocationAction } from "../reducres/location.reducer";
 import { DragInteraction } from "./intercations/drag.interaction";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { AddRouteAction, StopRecordingAction } from "../reducres/routes.reducer";
@@ -19,6 +18,7 @@ import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer"
 import { SpatialService } from "../services/spatial.service";
 import { RouteData, ApplicationState, LatLngAlt, Trace, DataContainer, TraceVisibility } from "../models/models";
 import { AddTraceAction } from "../reducres/traces.reducer";
+import { FitBoundsService } from "../services/fit-bounds.service";
 
 interface ILocationInfo extends LatLngAlt {
     radius: number;
@@ -55,6 +55,7 @@ export class LocationComponent extends BaseMapComponent {
         private readonly selectedRouteService: SelectedRouteService,
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly cancelableTimeoutService: CancelableTimeoutService,
+        private readonly fitBoundsService: FitBoundsService,
         private readonly ngRedux: NgRedux<ApplicationState>,
         private readonly host: MapComponent) {
         super(resources);
@@ -263,10 +264,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     private setLocation() {
-        this.ngRedux.dispatch(new SetLocationAction({
-            longitude: this.locationCoordinate.lng,
-            latitude: this.locationCoordinate.lat
-        }));
+        this.fitBoundsService.flyTo(this.locationCoordinate);
     }
 
     private addRecordingToTraces(routeData: RouteData) {

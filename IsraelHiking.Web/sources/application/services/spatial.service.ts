@@ -109,6 +109,12 @@ export class SpatialService {
         };
     }
 
+    public static boundsToViewExtent(bounds: IBounds): Extent {
+        return [
+            ...SpatialService.toViewCoordinate(bounds.southWest), ...SpatialService.toViewCoordinate(bounds.northEast)
+        ] as Extent;
+    }
+
     private static getLineString(latlngs: LatLngAlt[]): geom.LineString {
         let olCoordinates = latlngs.map(l => SpatialService.toCoordinate(l));
         return new geom.LineString(olCoordinates);

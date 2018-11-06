@@ -1,6 +1,5 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import { Map } from "openlayers";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 
@@ -15,6 +14,7 @@ import { ShareUrl, DataContainer, ApplicationState, RouteData } from "../models/
 import { FitBoundsService } from "./fit-bounds.service";
 import { AddRouteAction } from "../reducres/routes.reducer";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { MapService } from "./map.service";
 
 
 @Injectable()
@@ -24,7 +24,6 @@ export class DataContainerService {
     private routes$: Observable<RouteData[]>;
 
     private routes: RouteData[];
-    private map: Map;
     private shareUrl: ShareUrl;
     private layersInitializationPromise: Promise<any>;
 
@@ -38,16 +37,13 @@ export class DataContainerService {
         private readonly toastService: ToastService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly selectedRouteService: SelectedRouteService,
+        private readonly mapService: MapService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.shareUrl = null;
         this.routes$.subscribe((r) => {
             this.routes = r;
         });
-    }
-
-    public setMap(map: Map) {
-        this.map = map;
     }
 
     public setData(dataContainer: DataContainer) {
@@ -70,7 +66,7 @@ export class DataContainerService {
     public getData = (): DataContainer => {
         let layersContainer = this.layersService.getData();
 
-        let bounds = SpatialService.getMapBounds(this.map);
+        let bounds = SpatialService.getMapBounds(this.mapService.map);
 
         let container = {
             routes: this.routes,

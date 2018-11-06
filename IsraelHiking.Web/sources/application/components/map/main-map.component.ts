@@ -30,8 +30,7 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
     @ViewChild(MapComponent)
     public mapComponent: MapComponent;
 
-    @select((state: ApplicationState) => state.location)
-    public location: Observable<Location>;
+    public location: Location;
 
     constructor(resources: ResourcesService,
         public readonly imageGalleryService: ImageGalleryService,
@@ -44,6 +43,7 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
 
     ) {
         super(resources);
+        this.location = this.ngRedux.getState().location;
     }
 
     public moveEnd(e: ol.MapEvent) {
@@ -67,7 +67,6 @@ export class MainMapComponent extends BaseMapComponent implements AfterViewInit 
         this.imageGalleryService.setGalleryComponent(this.ngxImageGallery);
         this.mapService.setMap(this.mapComponent.instance);
         this.snappingService.setMap(this.mapComponent.instance);
-        this.dataContainerService.setMap(this.mapComponent.instance);
     }
 
     public isMobile() {
