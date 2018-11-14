@@ -126,4 +126,12 @@ export class SharesDialogComponent extends BaseMapComponent implements OnInit, O
         this.page++;
         this.updateFilteredLists(this.searchTerm.value);
     }
+
+    public getImageFromShareId(shareUrl, width, height) {
+        return this.shareUrlsService.getImageFromShareId(shareUrl, width, height);
+    }
+
+    public getShareSocialLinks(shareUrl) {
+        return this.shareUrlsService.getShareSocialLinks(shareUrl);
+    }
 }
