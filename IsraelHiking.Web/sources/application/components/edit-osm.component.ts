@@ -4,7 +4,7 @@ import { Observable } from "rxjs";
 
 import { ResourcesService } from "../services/resources.service";
 import { LayersService } from "../services/layers/layers.service";
-import { OsmUserService } from "../services/osm-user.service";
+import { AuthorizationService } from "../services/authorization.service";
 import { BaseMapComponent } from "./base-map.component";
 import { HashService } from "../services/hash.service";
 import { ApplicationState, Location } from "../models/models";
@@ -21,7 +21,7 @@ export class EditOSMComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         private readonly layersService: LayersService,
-        private readonly osmUserService: OsmUserService,
+        private readonly authorizationService: AuthorizationService,
         private readonly hashService: HashService) {
         super(resources);
 
@@ -30,12 +30,12 @@ export class EditOSMComponent extends BaseMapComponent {
 
     public getOsmAddress() {
         let poiRouterData = this.hashService.getPoiRouterData();
-        let baseLayerAddress = this.layersService.selectedBaseLayer.address;
+        let baseLayerAddress = this.layersService.getSelectedBaseLayer().address;
         if (poiRouterData != null && poiRouterData.source.toLocaleLowerCase() === "osm") {
 
-            return this.osmUserService.getEditElementOsmAddress(baseLayerAddress, poiRouterData.id);
+            return this.authorizationService.getEditElementOsmAddress(baseLayerAddress, poiRouterData.id);
         }
-        return this.osmUserService.getEditOsmLocationAddress(baseLayerAddress,
+        return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,
             this.currentLocation.zoom,
             this.currentLocation.latitude,
             this.currentLocation.longitude);

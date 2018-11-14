@@ -22,7 +22,7 @@ export class TracesService {
         try {
             let response = await this.httpClient.get(Urls.osmTrace).toPromise() as Trace[];
             let traces = ([] as Trace[]).concat(response || []);
-            let existingTraces = this.ngRedux.getState().traces.traces;
+            let existingTraces = this.ngRedux.getState().tracesState.traces;
             for (let traceJson of traces) {
                 let url = `https://www.openstreetmap.org/user/${traceJson.user}/traces/${traceJson.id}`;
                 let dataUrl = `https://www.openstreetmap.org/api/0.6/gpx/${traceJson.id}/data`;

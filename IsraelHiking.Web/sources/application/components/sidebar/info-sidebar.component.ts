@@ -1079,11 +1079,11 @@ export class InfoSidebarComponent extends BaseMapComponent {
         ];
         // End Of Legend content definition //
 
-        if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP) {
+        if (this.layersService.getSelectedBaseLayer().key === LayersService.ISRAEL_MTB_MAP) {
             this.removeMtbUnwantedLegend();
-        } else if (this.layersService.selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP) {
+        } else if (this.layersService.getSelectedBaseLayer().key === LayersService.ISRAEL_HIKING_MAP) {
             this.removeIhmUnwantedLegend();
-        } else if (this.layersService.selectedBaseLayer.key === LayersService.ESRI) {
+        } else if (this.layersService.getSelectedBaseLayer().key === LayersService.ESRI) {
             this.legendSections = [];
         }
     }

@@ -1,16 +1,20 @@
-﻿<aol-layer-tile>
-    <aol-source-xyz [url]="getBaseLayer()"></aol-source-xyz>
+﻿<aol-layer-tile >
+    <aol-source-xyz [url]="getBaseLayerUrl()" 
+                    [minZoom]="getBaseLayerMinZoom()"
+                    [maxZoom]="getBaseLayerMaxZoom()"></aol-source-xyz>
 </aol-layer-tile>
 
-<aol-layer-tile *ngFor="let overlay of getOverlays(); let zIdx = index"
+<aol-layer-tile *ngFor="let overlay of (overlays | async); let zIdx = index"
                 [zIndex]="zIdx + 10"
                 [visible]="overlay.visible"
                 [opacity]="overlay.opacity">
-    <aol-source-xyz [url]="overlay.address"></aol-source-xyz>
+    <aol-source-xyz [url]="getFullAddress(overlay.address)"
+                    [minZoom]="overlay.minZoom"
+                    [maxZoom]="overlay.maxZoom"></aol-source-xyz>
 </aol-layer-tile>
 
 <div *ngFor="let categoriesType of categoriesTypes">
-    <aol-layer-vector [visible]="isVisible(categoriesType)">
+    <aol-layer-vector [visible]="isVisible(categoriesType)" [zIndex]="1000">
         <aol-source-cluster [distance]="distance">
             <aol-source-vector></aol-source-vector>
         </aol-source-cluster>

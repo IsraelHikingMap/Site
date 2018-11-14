@@ -2,15 +2,20 @@
 export { ICoordinate } from "./coordinate";
 export { DataContainer } from "./data-container";
 export { LatLngAlt, ILatLngTime } from "./lat-lng";
-export { LayerData } from "./layer-data";
+export { LayerData, EditableLayer, Overlay } from "./layer-data";
 export { LinkData } from "./link-data";
 export { MarkerData } from "./marker-data";
 export { RouteData, RouteStateName } from "./route-data";
 export { RouteSegmentData, RoutingType } from "./route-segment-data";
 export { ShareUrl } from "./share-url";
 export { Location } from "./location";
-export { ApplicationState } from "./application-state";
 export { Configuration } from "./configuration";
 export { RouteEditingState } from "./route-editing-state";
 export { Trace, TraceVisibility } from "./trace";
-export { TracesState } from "./traces-state";
+export { OsmUserDetails } from "./osm-user-details";
+export { UserInfo } from "./user-info";
+// states:
+export { ApplicationState } from "./state/application-state";
+export { TracesState } from "./state/traces-state";
+export { LayersState } from "./state/layers-state";
+export { UserState } from "./state/user-state";

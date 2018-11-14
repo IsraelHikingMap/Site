@@ -2,6 +2,8 @@ import { Component, OnInit, AfterViewInit, ViewChildren, QueryList } from "@angu
 import { Router } from "@angular/router";
 import { MapComponent, LayerVectorComponent } from "ngx-openlayers";
 import { style, layer, MapBrowserEvent, Feature, geom } from "openlayers";
+import { Observable } from "rxjs";
+import { select } from "@angular-redux/store";
 
 import { PoiService, CategoriesType, IPointOfInterest } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
@@ -10,7 +12,8 @@ import { SpatialService } from "../../services/spatial.service";
 import { RouteStrings } from "../../services/hash.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { LatLngAlt } from "../../models/models";
+import { Urls } from "../../urls";
+import { LatLngAlt, ApplicationState, Overlay } from "../../models/models";
 
 @Component({
     selector: "layers-view",
@@ -28,6 +31,9 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     public clusterLatlng: LatLngAlt;
     public clusterPoints: IPointOfInterest[];
 
+    @select((state: ApplicationState) => state.layersState.overlays)
+    public overlays: Observable<Overlay[]>;
+
     private whiteFill: style.Fill;
 
     constructor(resources: ResourcesService,
@@ -38,22 +44,34 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         private readonly host: MapComponent) {
         super(resources);
         this.categoriesTypes = this.poiService.getCategoriesTypes();
-
         this.whiteFill = new style.Fill({
             color: "white"
         });
     }
 
-    public getBaseLayer() {
-        let address = this.layersService.selectedBaseLayer.address;
-        if (address.toLowerCase().endsWith("/mapserver")) {
-            return `${address}/tile/{z}/{y}/{x}`;
+    public getBaseLayerUrl() {
+        let selectedBaseLayer = this.layersService.getSelectedBaseLayer();
+        let address = this.getFullAddress(selectedBaseLayer.address);
+        if (selectedBaseLayer.key === LayersService.ISRAEL_HIKING_MAP || selectedBaseLayer.key === LayersService.ISRAEL_MTB_MAP) {
+            address = this.getTileAddressForCurrentLanguage(address);
         }
         return address;
     }
 
-    public getOverlays() {
-        return this.layersService.overlays;
+    public getFullAddress(address: string) {
+        return address.toLowerCase().endsWith("/mapserver") ? `${address}/tile/{z}/{y}/{x}` : address;
+    }
+
+    public getBaseLayerMinZoom() {
+        return this.layersService.getSelectedBaseLayer().minZoom;
+    }
+
+    public getBaseLayerMaxZoom() {
+        return this.layersService.getSelectedBaseLayer().maxZoom;
+    }
+
+    private getTileAddressForCurrentLanguage(addressPostfix: string): string {
+        return Urls.baseTilesAddress + this.resources.currentLanguage.tilesFolder + addressPostfix;
     }
 
     public isVisible(categoriesType: CategoriesType) {

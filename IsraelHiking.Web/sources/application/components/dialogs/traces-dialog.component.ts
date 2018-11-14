@@ -8,7 +8,7 @@ import { NgRedux, select } from "@angular-redux/store";
 
 import { ResourcesService } from "../../services/resources.service";
 import { FileService } from "../../services/file.service";
-import { OsmUserService } from "../../services/osm-user.service";
+import { AuthorizationService } from "../../services/authorization.service";
 import { FitBoundsService } from "../../services/fit-bounds.service";
 import { ToastService } from "../../services/toast.service";
 import { LayersService } from "../../services/layers/layers.service";
@@ -33,7 +33,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     public loadingTraces: boolean;
     public searchTerm: FormControl;
 
-    @select((state: ApplicationState) => state.traces.traces)
+    @select((state: ApplicationState) => state.tracesState.traces)
     public traces$: Observable<Trace[]>;
     private traces: Trace[];
 
@@ -50,7 +50,7 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
         private readonly layersService: LayersService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly toastService: ToastService,
-        private readonly osmUserService: OsmUserService,
+        private readonly authorizationService: AuthorizationService,
         private readonly tracesService: TracesService,
         private readonly runningContextService: RunningContextService,
         private readonly ngRedux: NgRedux<ApplicationState>
@@ -125,8 +125,8 @@ export class TracesDialogComponent extends BaseMapComponent implements OnInit, O
     }
 
     public editInOsm() {
-        let baseLayerAddress = this.layersService.selectedBaseLayer.address;
-        window.open(this.osmUserService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTrace.id));
+        let baseLayerAddress = this.layersService.getSelectedBaseLayer().address;
+        window.open(this.authorizationService.getEditOsmGpxAddress(baseLayerAddress, this.selectedTrace.id));
     }
 
     public findUnmappedRoutes = async (trace: Trace): Promise<void> => {

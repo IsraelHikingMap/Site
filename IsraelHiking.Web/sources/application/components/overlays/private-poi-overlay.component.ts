@@ -2,7 +2,7 @@
 import { NgRedux } from "@angular-redux/store";
 
 import { MarkerData, LinkData, ApplicationState } from "../../models/models";
-import { OsmUserService } from "../../services/osm-user.service";
+import { AuthorizationService } from "../../services/authorization.service";
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
 import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.service";
@@ -32,7 +32,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     public hideCoordinates: boolean;
 
     constructor(resources: ResourcesService,
-        private readonly osmUserService: OsmUserService,
+        private readonly authorizationService: AuthorizationService,
         private readonly privatePoiUploaderService: PrivatePoiUploaderService,
         private readonly imageGalleryService: ImageGalleryService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -56,7 +56,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     }
 
     public showUploadPointButton(): boolean {
-        return this.osmUserService.isLoggedIn();
+        return this.authorizationService.isLoggedIn();
     }
 
     public async uploadPoint() {

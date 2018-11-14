@@ -1,4 +1,4 @@
-﻿<div class="side-control" *ngIf="!userService.isLoggedIn()" [dir]="resources.direction">
+﻿<div class="side-control" *ngIf="!isLoggedIn()" [dir]="resources.direction">
     <div class="control-container">
         <button mat-button class="pull-right" (click)="login()" matTooltip="{{resources.login}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM login - sign-in icon"><i class="fa icon-sign-in"></i></button>
         <div class="pull-right">
@@ -10,15 +10,15 @@
     </div>
 </div>
 
-<div class="side-control" *ngIf="userService.isLoggedIn()">
+<div class="side-control" *ngIf="isLoggedIn()">
     <div class="control-container">
-        <button mat-button class="pull-right" (click)="userService.logout()" matTooltip="{{resources.logout}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout"><i class="fa icon-sign-out"></i></button>
+        <button mat-button class="pull-right" (click)="logout()" matTooltip="{{resources.logout}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout"><i class="fa icon-sign-out"></i></button>
         <div class="pull-right">
             <div class="control-container-item gutters cursor-pointer" [matMenuTriggerFor]="appMenu" matTooltip="{{resources.myProfile}}">
                 <div class="table-cell button-height">
-                    <img *ngIf="userService.imageUrl" class="pull-right space-after" [src]="userService.imageUrl" alt="" width="16" height="16" />
-                    <span class="pull-right space-after" *ngIf="!userService.imageUrl"><i class="fa icon-user fa-lg"></i> </span>
-                    <span class="pull-right hidden-xs"> {{userService.displayName}}</span>
+                    <img *ngIf="(userInfo | async).imageUrl" class="pull-right space-after" [src]="(userInfo | async).imageUrl" alt="" width="16" height="16" />
+                    <span class="pull-right space-after" *ngIf="!(userInfo | async).imageUrl"><i class="fa icon-user fa-lg"></i> </span>
+                    <span class="pull-right hidden-xs"> {{(userInfo | async).displayName}}</span>
                 </div>
             </div>
         </div>
@@ -26,9 +26,9 @@
             <div [dir]="resources.direction">
                 <div fxLayout="row" class="margin-sides">
                     <div class="table">
-                        <img *ngIf="userService.imageUrl" class="pull-right space-after" [src]="userService.imageUrl" alt="" width="64" height="64" />
+                        <img *ngIf="(userInfo | async).imageUrl" class="pull-right space-after" [src]="(userInfo | async).imageUrl" alt="" width="64" height="64" />
                         <div class="table-cell">
-                            <span class="text-large">{{userService.displayName}}</span><br/>
+                            <span class="text-large">{{(userInfo | async).displayName}}</span><br/>
                             {{getRank().name}}
                         </div>
                     </div>
@@ -37,7 +37,7 @@
                     <mat-progress-bar [color]="getProgressbarType()" [mode]="'determinate'" [value]="getRankPercentage()"></mat-progress-bar>
                 </div>
                 <div fxLayout="row" class="margin-sides">
-                    <span class="text-small">{{userService.changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
+                    <span class="text-small">{{(userInfo | async).changeSets}} {{resources.changes}} ({{getRankPercentage() | number : '1.0-0'}}%)</span>
                 </div>
                 <button mat-menu-item (click)="openTraces()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user traces open">
                     <span><i class="fa fa-lg icon-recordings"></i> {{resources.myTraces}}</span>
@@ -45,7 +45,7 @@
                 <button mat-menu-item (click)="openShares()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM user shares open">
                     <span><i class="fa fa-lg icon-share-alt"></i> {{resources.myShares}}</span>
                 </button>
-                <button mat-menu-item (click)="userService.logout()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout">
+                <button mat-menu-item (click)="logout()" angulartics2On="click" angularticsCategory="OSM" angularticsAction="OSM logout">
                     <span><i class="fa fa-lg icon-sign-out"></i> {{resources.logout}}</span>
                 </button>
             </div>

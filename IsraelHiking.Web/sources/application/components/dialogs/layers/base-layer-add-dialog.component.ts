@@ -26,7 +26,6 @@ export class BaseLayerAddDialogComponent extends LayerBaseDialogComponent {
     }
 
     protected internalSave(layerData: LayerData): void {
-        let layer = this.layersService.addBaseLayer(layerData);
-        this.layersService.selectBaseLayer(layer);
+        this.layersService.addBaseLayer(layerData);
     }
 }

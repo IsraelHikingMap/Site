@@ -59,7 +59,7 @@ import { RouterService } from "./services/routers/router.service";
 import { SnappingService } from "./services/snapping.service";
 import { FitBoundsService } from "./services/fit-bounds.service";
 import { RouteStatisticsService } from "./services/route-statistics.service";
-import { OsmUserService } from "./services/osm-user.service";
+import { ShareUrlsService } from "./services/share-urls.service";
 import { ToastService } from "./services/toast.service";
 import { ElevationProvider } from "./services/elevation.provider";
 import { SearchResultsProvider } from "./services/search-results.provider";
@@ -137,6 +137,8 @@ import { routes } from "./routes";
 import { ApplicationState } from "./models/models";
 import { rootReducer } from "./reducres/root.reducer";
 import { initialState } from "./reducres/initial-state";
+
+import { debounceTime } from "rxjs/operators";
 
 export function getWindow() { return window; }
 
@@ -249,7 +251,7 @@ export function getWindow() { return window; }
         SnappingService,
         FitBoundsService,
         RouteStatisticsService,
-        OsmUserService,
+        ShareUrlsService,
         ToastService,
         ElevationProvider,
         SearchResultsProvider,
@@ -333,9 +335,9 @@ export class ApplicationModule {
         console.log("Starting IHM Application Initialization");
         let storedState = localStorageService.get("reduxState") || initialState;
         ngRedux.configureStore(rootReducer, storedState, [(state) => (next) => (action) => next({...action})]);
-        ngRedux.select().subscribe((state) => {
+        ngRedux.select().pipe(debounceTime(2000)).subscribe((state) => {
             console.log(state);
-            // localStorageService.set("reduxState", state);
+            localStorageService.set("reduxState", state);
         });
         dataContainerService.initialize().then(() => {
             deepLinksService.initialize();

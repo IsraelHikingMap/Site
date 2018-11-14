@@ -15,7 +15,7 @@ import {
     IPoiSocialLinks,
     IContribution
 } from "../../../services/poi.service";
-import { OsmUserService } from "../../../services/osm-user.service";
+import { AuthorizationService } from "../../../services/authorization.service";
 import { ToastService } from "../../../services/toast.service";
 import { CategoriesLayerFactory } from "../../../services/layers/categories-layers.factory";
 import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
@@ -49,7 +49,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         private readonly router: Router,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
-        private readonly osmUserService: OsmUserService,
+        private readonly authorizationService: AuthorizationService,
         private readonly selectedRouteService: SelectedRouteService,
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly toastService: ToastService,
@@ -110,7 +110,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public isHideEditMode(): boolean {
-        return !this.osmUserService.isLoggedIn() ||
+        return !this.authorizationService.isLoggedIn() ||
             !this.poiExtended ||
             !this.poiExtended.isEditable ||
             this.editMode;
@@ -126,7 +126,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (this.poiExtended.description) {
             return this.poiExtended.description;
         }
-        if (this.osmUserService.isLoggedIn() === false) {
+        if (this.authorizationService.isLoggedIn() === false) {
             return this.resources.noDescriptionLoginRequired;
         }
         return this.resources.emptyPoiDescription;
@@ -137,7 +137,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public setEditMode() {
-        if (this.osmUserService.isLoggedIn() === false) {
+        if (this.authorizationService.isLoggedIn() === false) {
             this.toastService.info(this.resources.loginRequired);
             return;
         }
@@ -181,13 +181,13 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public canVote(type: string): boolean {
-        if (this.osmUserService.isLoggedIn() === false) {
+        if (this.authorizationService.isLoggedIn() === false) {
             return false;
         }
         if (this.poiExtended == null) {
             return false;
         }
-        let vote = this.poiExtended.rating.raters.find(r => r.id === this.osmUserService.userId);
+        let vote = this.poiExtended.rating.raters.find(r => r.id === this.authorizationService.getUserInfo().id);
         if (vote == null) {
             return true;
         }
@@ -196,13 +196,14 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private vote(value: number) {
         if (this.canVote(value > 0 ? "up" : "down") === false) {
-            if (this.osmUserService.isLoggedIn() === false) {
+            if (this.authorizationService.isLoggedIn() === false) {
                 this.toastService.info(this.resources.loginRequired);
             }
             return;
         }
-        this.poiExtended.rating.raters = this.poiExtended.rating.raters.filter(r => r.id !== this.osmUserService.userId);
-        this.poiExtended.rating.raters.push({ id: this.osmUserService.userId, value: value } as IRater);
+        let userId = this.authorizationService.getUserInfo().id;
+        this.poiExtended.rating.raters = this.poiExtended.rating.raters.filter(r => r.id !== userId);
+        this.poiExtended.rating.raters.push({ id: userId, value: value } as IRater);
         this.poiService.uploadRating(this.poiExtended.rating).then((rating) => {
             this.poiExtended.rating = rating;
             this.rating = this.getRatingNumber(rating);
@@ -291,6 +292,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (this.poiExtended.source.toLocaleLowerCase() !== "osm") {
             return null;
         }
-        return this.osmUserService.getElementOsmAddress(this.poiExtended.id);
+        return this.authorizationService.getElementOsmAddress(this.poiExtended.id);
     }
 }

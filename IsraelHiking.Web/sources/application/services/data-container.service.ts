@@ -8,7 +8,7 @@ import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { HashService, RouteStrings } from "./hash.service";
 import { ResourcesService } from "./resources.service";
-import { OsmUserService } from "./osm-user.service";
+import { ShareUrlsService } from "./share-urls.service";
 import { SpatialService } from "./spatial.service";
 import { ShareUrl, DataContainer, ApplicationState, RouteData } from "../models/models";
 import { FitBoundsService } from "./fit-bounds.service";
@@ -25,11 +25,11 @@ export class DataContainerService {
 
     private routes: RouteData[];
     private shareUrl: ShareUrl;
-    private layersInitializationPromise: Promise<any>;
+    // private layersInitializationPromise: Promise<any>;
 
     constructor(
         private readonly router: Router,
-        private readonly osmUserService: OsmUserService,
+        private readonly shareUrlsService: ShareUrlsService,
         private readonly layersService: LayersService,
         private readonly hashService: HashService,
         private readonly fileService: FileService,
@@ -89,15 +89,16 @@ export class DataContainerService {
     }
 
     public initialize = async () => {
-        this.layersInitializationPromise = this.layersService.initialize();
-        await this.layersInitializationPromise;
+        // HM TODO: make sure this is working properly
+        // this.layersInitializationPromise = this.layersService.initialize();
+        // await this.layersInitializationPromise;
         // This assumes hashservice has already finished initialization, this assumption can cause bugs...
         // HM TODO: get base layer from store
         this.layersService.addExternalBaseLayer(this.hashService.getBaselayer());
     }
 
     public setFileUrlAfterNavigation = async (url: string, baseLayer: string) => {
-        await this.layersInitializationPromise;
+        // await this.layersInitializationPromise;
         this.hashService.setApplicationState("baseLayer", baseLayer);
         this.hashService.setApplicationState("url", url);
         let data = await this.fileService.openFromUrl(url);
@@ -109,19 +110,11 @@ export class DataContainerService {
         if (this.shareUrl && this.shareUrl.id === shareId) {
             return;
         }
-        await this.layersInitializationPromise;
+        // await this.layersInitializationPromise;
         try {
             this.hashService.setApplicationState("share", shareId);
-            let shareUrl = await this.osmUserService.getShareUrl(shareId);
+            let shareUrl = await this.shareUrlsService.getShareUrl(shareId);
             this.setData(shareUrl.dataContainer);
-            // hide overlays that are not part of the share:
-            for (let overlay of this.layersService.overlays) {
-                let overlayInShare = (shareUrl.dataContainer.overlays || []).find(
-                    o => o.key === overlay.key || o.address === overlay.address);
-                if (overlayInShare == null && overlay.visible) {
-                    this.layersService.toggleOverlay(overlay);
-                }
-            }
             this.shareUrl = shareUrl;
             if (window.self === window.top) {
                 this.toastService.info(shareUrl.description, shareUrl.title);

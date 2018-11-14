@@ -4,13 +4,13 @@ import { DomSanitizer, SafeUrl } from "@angular/platform-browser";
 
 import { LocalStorage } from "ngx-store";
 import { ResourcesService } from "../../services/resources.service";
-import { OsmUserService } from "../../services/osm-user.service";
 import { ToastService } from "../../services/toast.service";
 import { DataContainerService } from "../../services/data-container.service";
 import { BaseMapComponent } from "../base-map.component";
-import { ShareUrl } from "../../models/share-url";
-import { DataContainer } from "../../models/models";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { AuthorizationService } from "../../services/authorization.service";
+import { ShareUrlsService } from "../../services/share-urls.service";
+import { DataContainer, ShareUrl } from "../../models/models";
 
 export interface IIOffroadCoordinates {
     latitude: number;
@@ -68,12 +68,12 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         private readonly sanitizer: DomSanitizer,
         private readonly selectedRouteService: SelectedRouteService,
         private readonly dataContainerService: DataContainerService,
-        private readonly osmUserService: OsmUserService,
+        private readonly shareUrlsService: ShareUrlsService,
         private readonly toastService: ToastService,
+        private readonly authorizationService: AuthorizationService
     ) {
         super(resources);
 
-        this.osmUserService = osmUserService;
         this.title = "";
         this.description = "";
         this.imageUrl = "";
@@ -86,8 +86,8 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.lastShareUrl = null;
         let shareUrl = this.dataContainerService.getShareUrl();
         this.canUpdate = shareUrl != null &&
-            this.osmUserService.shareUrls.find(s => s.id === shareUrl.id) != null &&
-            this.osmUserService.isLoggedIn();
+            this.shareUrlsService.shareUrls.find(s => s.id === shareUrl.id) != null &&
+            this.authorizationService.isLoggedIn();
         this.updateCurrentShare = false;
         this.offroadPublicTrack = false;
         this.offroadRequest = {} as IOffroadPostRequest;
@@ -119,12 +119,12 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
 
     public async ngAfterViewInit(): Promise<any> {
         let dataToPreview = this.getDataFiltered();
-        let imageUrl = await this.osmUserService.getImagePreview(dataToPreview);
+        let imageUrl = await this.shareUrlsService.getImagePreview(dataToPreview);
         this.imageUrl = this.sanitizer.bypassSecurityTrustUrl(imageUrl) as string;
     }
 
     public getDisplayName() {
-        return this.osmUserService.getDisplayNameFromTitleAndDescription(this.title, this.description);
+        return this.shareUrlsService.getDisplayNameFromTitleAndDescription(this.title, this.description);
     }
 
     public uploadShareUrl = async () => {
@@ -133,13 +133,13 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
 
         try {
             let shareUrl = this.updateCurrentShare
-                ? await this.osmUserService.updateShareUrl(shareUrlToSend)
-                : await this.osmUserService.createShareUrl(shareUrlToSend);
+                ? await this.shareUrlsService.updateShareUrl(shareUrlToSend)
+                : await this.shareUrlsService.createShareUrl(shareUrlToSend);
 
             this.lastShareUrl = shareUrl;
             this.dataContainerService.setShareUrl(shareUrl);
-            this.imageUrl = this.osmUserService.getImageFromShareId(shareUrl);
-            let links = this.osmUserService.getShareSocialLinks(shareUrl);
+            this.imageUrl = this.shareUrlsService.getImageFromShareId(shareUrl);
+            let links = this.shareUrlsService.getShareSocialLinks(shareUrl);
             this.shareAddress = links.ihm;
             this.whatsappShareAddress = links.whatsapp;
             this.facebookShareAddress = links.facebook;
@@ -169,7 +169,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
             title: this.title,
             description: this.description,
             dataContainer: this.getDataFiltered(),
-            osmUserId: this.osmUserService.isLoggedIn() ? this.osmUserService.userId : ""
+            osmUserId: this.authorizationService.isLoggedIn() ? this.authorizationService.getUserInfo().id : ""
         } as ShareUrl;
         return shareUrl;
     }
@@ -191,7 +191,7 @@ export class ShareDialogComponent extends BaseMapComponent implements AfterViewI
         this.offroadRequest.path = [];
         this.offroadRequest.mapItems = [];
         this.offroadRequest.externalUrl = this.shareAddress;
-        this.offroadRequest.backgroundServeUrl = this.osmUserService.getImageFromShareId(this.lastShareUrl);
+        this.offroadRequest.backgroundServeUrl = this.shareUrlsService.getImageFromShareId(this.lastShareUrl);
 
         for (let segment of selectedRoute.segments) {
             for (let latlng of segment.latlngs) {

@@ -6,7 +6,7 @@ import { Observable } from "rxjs";
 import { every, some } from "lodash";
 
 import { SidebarService } from "../../services/sidebar.service";
-import { LayersService, IBaseLayer, IOverlay } from "../../services/layers/layers.service";
+import { LayersService } from "../../services/layers/layers.service";
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
@@ -20,7 +20,7 @@ import { PoiService, CategoriesType, ICategory } from "../../services/poi.servic
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
 import { ConfigurationActions } from "../../reducres/configuration.reducer";
 import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reducer";
-import { ApplicationState, RouteData } from "../../models/models";
+import { ApplicationState, RouteData, EditableLayer, Overlay } from "../../models/models";
 import { ChangeRoutePropertiesAction } from "../../reducres/routes.reducer";
 
 interface IExpandableItem {
@@ -35,12 +35,20 @@ interface IExpandableItem {
     encapsulation: ViewEncapsulation.None
 })
 export class LayersSidebarComponent extends BaseMapComponent implements OnDestroy {
-    public baseLayers: IBaseLayer[];
-    public overlays: IOverlay[];
+
     public categoriesTypes: CategoriesType[];
+
+    @select((state: ApplicationState) => state.layersState.baseLayers)
+    public baseLayers: Observable<EditableLayer[]>;
+
+    @select((state: ApplicationState) => state.layersState.overlays)
+    public overlays: Observable<Overlay[]>;
 
     @select((state: ApplicationState) => state.routes.present)
     public routes: Observable<RouteData[]>;
+
+    @select((state: ApplicationState) => state.configuration.isAdvanced)
+    public isAdvanced: Observable<boolean>;
 
     @LocalStorage()
     public layersExpandedState: WebstorableArray<IExpandableItem> = [
@@ -48,9 +56,6 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         { name: "Overlays", isExpanded: true },
         { name: "Private Routes", isExpanded: true }
     ] as any;
-
-    @select((state: ApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
 
     constructor(resources: ResourcesService,
         private readonly dialog: MatDialog,
@@ -61,8 +66,6 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         private readonly poiService: PoiService,
         private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
-        this.baseLayers = layersService.baseLayers;
-        this.overlays = layersService.overlays;
         this.categoriesTypes = this.poiService.getCategoriesTypes();
     }
 
@@ -74,11 +77,12 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         this.sidebarService.hide();
     }
 
-    public addBaseLayer() {
+    public addBaseLayer(event: Event) {
+        event.stopPropagation();
         this.dialog.open(BaseLayerAddDialogComponent);
     }
 
-    public editBaseLayer(layer: IBaseLayer) {
+    public editBaseLayer(layer: EditableLayer) {
         let dialogRef = this.dialog.open(BaseLayerEditDialogComponent);
         dialogRef.componentInstance.setBaseLayer(layer);
     }
@@ -137,16 +141,18 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         }
     }
 
-    public addOverlay() {
+    public addOverlay(event: Event) {
+        event.stopPropagation();
         this.dialog.open(OverlayAddDialogComponent);
     }
 
-    public editOverlay(layer: IOverlay) {
+    public editOverlay(layer: Overlay) {
         let dialogRef = this.dialog.open(OverlayEditDialogComponent);
         dialogRef.componentInstance.setOverlay(layer);
     }
 
-    public addRoute() {
+    public addRoute(event: Event) {
+        event.stopPropagation();
         this.dialog.open(RouteAddDialogComponent);
     }
 
@@ -155,11 +161,15 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         dialogRef.componentInstance.setRouteData(routeData);
     }
 
-    public selectBaseLayer(baseLayer: IBaseLayer) {
-        this.layersService.selectBaseLayer(baseLayer);
+    public isBaseLayerSelected(baseLayer: EditableLayer): boolean {
+        return this.layersService.isBaseLayerSelected(baseLayer);
     }
 
-    public toggleVisibility(overlay: IOverlay) {
+    public selectBaseLayer(baseLayer: EditableLayer) {
+        this.layersService.selectBaseLayer(baseLayer.key);
+    }
+
+    public toggleVisibility(overlay: Overlay) {
         this.layersService.toggleOverlay(overlay);
     }
 

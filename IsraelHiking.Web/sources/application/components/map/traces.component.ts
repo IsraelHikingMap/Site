@@ -6,7 +6,6 @@ import { Observable } from "rxjs";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { TracesService } from "../../services/traces.service";
 import { SpatialService } from "../../services/spatial.service";
 import { RemoveMissingPartAction, SetVisibleTraceAction, SetMissingPartsAction } from "../../reducres/traces.reducer";
 import { AddRouteAction } from "../../reducres/routes.reducer";
@@ -29,14 +28,13 @@ export class TracesComponent extends BaseMapComponent implements AfterViewInit {
     public missingParts: GeoJSON.FeatureCollection<GeoJSON.LineString>;
     public isConfigOpen: boolean;
 
-    @select((state: ApplicationState) => state.traces.visibleTraceId)
+    @select((state: ApplicationState) => state.tracesState.visibleTraceId)
     private visibleTraceId$: Observable<string>;
 
-    @select((state: ApplicationState) => state.traces.missingParts)
+    @select((state: ApplicationState) => state.tracesState.missingParts)
     private missingParts$: Observable<GeoJSON.FeatureCollection<GeoJSON.LineString>>;
 
     constructor(resources: ResourcesService,
-        private readonly tracesService: TracesService,
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly host: MapComponent,
         private readonly ngRedux: NgRedux<ApplicationState>) {
@@ -44,7 +42,7 @@ export class TracesComponent extends BaseMapComponent implements AfterViewInit {
         this.isConfigOpen = false;
         this.traceCoordinates = [];
         this.visibleTraceId$.subscribe((id) => {
-            this.visibleTrace = this.ngRedux.getState().traces.traces.find(t => t.id === id);
+            this.visibleTrace = this.ngRedux.getState().tracesState.traces.find(t => t.id === id);
             this.traceCoordinates = [];
             if (this.visibleTrace == null) {
                 return;

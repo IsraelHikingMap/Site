@@ -131,4 +131,4 @@ export class TracesReducer {
     }
 }
 
-export const tracesReducer = createReducerFromClass(TracesReducer, initialState.traces);
+export const tracesReducer = createReducerFromClass(TracesReducer, initialState.tracesState);

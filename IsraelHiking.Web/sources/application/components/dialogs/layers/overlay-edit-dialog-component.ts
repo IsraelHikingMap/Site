@@ -4,16 +4,16 @@ import { HttpClient } from "@angular/common/http";
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
-import { LayersService, IOverlay } from "../../../services/layers/layers.service";
+import { LayersService } from "../../../services/layers/layers.service";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
-import { LayerData } from "../../../models/models";
+import { LayerData, Overlay } from "../../../models/models";
 
 @Component({
     selector: "overlay-edit-dialog",
     templateUrl: "./layer-properties-dialog.component.html"
 })
 export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
-    private overlay: IOverlay;
+    private overlay: Overlay;
 
     constructor(resources: ResourcesService,
         mapService: MapService,
@@ -26,7 +26,7 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
         this.isOverlay = true;
     }
 
-    public setOverlay(layer: IOverlay) {
+    public setOverlay(layer: Overlay) {
         this.overlay = layer;
         this.key = this.overlay.key;
         this.maxZoom = this.overlay.maxZoom;
@@ -40,6 +40,12 @@ export class OverlayEditDialogComponent extends LayerBaseDialogComponent {
     }
 
     protected internalSave(layerData: LayerData): void {
-        this.layersService.updateOverlay(this.overlay, layerData);
+        let overlay = {
+            ...layerData,
+            id: this.overlay.id,
+            isEditable: true,
+            visible: true
+        } as Overlay;
+        this.layersService.updateOverlay(this.overlay, overlay);
     }
 }

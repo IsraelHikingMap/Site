@@ -6,11 +6,15 @@ import { locationReducer } from "./location.reducer";
 import { routesReducer } from "./routes.reducer";
 import { routeEditingReducer } from "./route-editing-state.reducer";
 import { tracesReducer } from "./traces.reducer";
+import { layersReducer } from "./layers.reducer";
+import { userReducer } from "./user.reducer";
 
 export const rootReducer = combineReducers<ApplicationState>({
     configuration: configurationReducer,
     location: locationReducer,
     routes: routesReducer,
     routeEditingState: routeEditingReducer,
-    traces: tracesReducer
+    tracesState: tracesReducer,
+    layersState: layersReducer,
+    userState: userReducer
 } as ReducersMapObject<ApplicationState>);

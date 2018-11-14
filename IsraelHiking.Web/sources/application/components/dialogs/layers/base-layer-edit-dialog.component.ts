@@ -4,16 +4,16 @@ import { HttpClient } from "@angular/common/http";
 import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
-import { LayersService, IBaseLayer } from "../../../services/layers/layers.service";
+import { LayersService } from "../../../services/layers/layers.service";
 import { LayerBaseDialogComponent } from "./layer-base-dialog.component";
-import { LayerData } from "../../../models/models";
+import { LayerData, EditableLayer } from "../../../models/models";
 
 @Component({
     selector: "baselayer-edit-dialog",
     templateUrl: "./layer-properties-dialog.component.html"
 })
 export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
-    private baseLayer: IBaseLayer;
+    private baseLayer: EditableLayer;
 
     constructor(resources: ResourcesService,
         mapService: MapService,
@@ -26,7 +26,7 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
         this.isOverlay = false;
     }
 
-    public setBaseLayer(layer: IBaseLayer) {
+    public setBaseLayer(layer: EditableLayer) {
         this.baseLayer = layer;
         this.key = this.baseLayer.key;
         this.maxZoom = this.baseLayer.maxZoom;
@@ -39,6 +39,11 @@ export class BaseLayerEditDialogComponent extends LayerBaseDialogComponent {
     }
 
     protected internalSave(layerData: LayerData): void {
-        this.layersService.updateBaseLayer(this.baseLayer, layerData);
+        let baseLayer = {
+            ...layerData,
+            id: this.baseLayer.id,
+            isEditable: true
+        } as EditableLayer;
+        this.layersService.updateBaseLayer(this.baseLayer, baseLayer);
     }
 }

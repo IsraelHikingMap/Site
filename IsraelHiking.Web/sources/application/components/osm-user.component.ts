@@ -1,14 +1,17 @@
 ﻿import { Component } from "@angular/core";
 import { MatDialog, MatDialogConfig } from "@angular/material";
+import { select } from "@angular-redux/store";
 import { LocalStorage } from "ngx-store";
+import { Observable } from "rxjs";
 
 import { ResourcesService } from "../services/resources.service";
-import { OsmUserService } from "../services/osm-user.service";
+import { AuthorizationService } from "../services/authorization.service";
 import { ToastService } from "../services/toast.service";
 import { BaseMapComponent } from "./base-map.component";
 import { TracesDialogComponent } from "./dialogs/traces-dialog.component";
 import { SharesDialogComponent } from "./dialogs/shares-dialog.component";
 import { TermsOfServiceDialogComponent } from "./dialogs/terms-of-service-dialog.component";
+import { UserInfo, ApplicationState } from "../models/models";
 
 interface IRank {
     name: string;
@@ -24,11 +27,14 @@ export class OsmUserComponent extends BaseMapComponent {
 
     private ranks: IRank[];
 
+    @select((state: ApplicationState) => state.userState.userInfo)
+    public userInfo: Observable<UserInfo>;
+
     @LocalStorage()
     public agreedToTheTermsOfService = false;
 
     constructor(resources: ResourcesService,
-        public readonly userService: OsmUserService,
+        private readonly authorizationService: AuthorizationService,
         private readonly dialog: MatDialog,
         private readonly toastService: ToastService) {
         super(resources);
@@ -57,6 +63,10 @@ export class OsmUserComponent extends BaseMapComponent {
         ];
     }
 
+    public isLoggedIn() {
+        return this.authorizationService.isLoggedIn();
+    }
+
     public login() {
         if (!this.agreedToTheTermsOfService) {
             let component = this.dialog.open(TermsOfServiceDialogComponent);
@@ -66,10 +76,14 @@ export class OsmUserComponent extends BaseMapComponent {
                 }
             });
         } else {
-            this.userService.login().then(() => { }, () => {
+            this.authorizationService.login().then(() => { }, () => {
                 this.toastService.warning(this.resources.unableToLogin);
             });
         }
+    }
+
+    public logout() {
+        this.authorizationService.logout();
     }
 
     public openTraces() {
@@ -82,7 +96,7 @@ export class OsmUserComponent extends BaseMapComponent {
 
     public getRank() {
         let rankIndex = 0;
-        while (this.userService.changeSets > this.ranks[rankIndex].points) {
+        while (this.authorizationService.getUserInfo().changeSets > this.ranks[rankIndex].points) {
             rankIndex++;
         }
         return this.ranks[rankIndex];
@@ -93,7 +107,7 @@ export class OsmUserComponent extends BaseMapComponent {
         if (rank === this.ranks[this.ranks.length - 1]) {
             return 100;
         }
-        return ((this.userService.changeSets / rank.points) * 100);
+        return ((this.authorizationService.getUserInfo().changeSets / rank.points) * 100);
     }
 
     public getProgressbarType() {

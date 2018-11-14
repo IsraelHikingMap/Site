@@ -1,9 +1,10 @@
 ﻿import { Component, Input, Output, EventEmitter } from "@angular/core";
+import { HttpClient } from "@angular/common/http";
 
 import { ResourcesService } from "../../services/resources.service";
-import { OsmUserService } from "../../services/osm-user.service";
 import { ToastService } from "../../services/toast.service";
 import { ClosableOverlayComponent } from "./closable-overlay.component";
+import { Urls } from "../../urls";
 
 @Component({
     selector: "missing-part-overlay",
@@ -20,7 +21,7 @@ export class MissingPartOverlayComponent extends ClosableOverlayComponent {
     public hideCoordinates: boolean;
 
     constructor(resources: ResourcesService,
-        private readonly osmUserService: OsmUserService,
+        private readonly httpClient: HttpClient,
         private readonly toastService: ToastService) {
         super(resources);
         this.removed = new EventEmitter();
@@ -48,7 +49,7 @@ export class MissingPartOverlayComponent extends ClosableOverlayComponent {
 
     public addMissingPartToOsm = async () => {
         try {
-            await this.osmUserService.addAMissingPart(this.feature);
+            await this.httpClient.put(Urls.osm, this.feature, { responseType: "text" }).toPromise();
             this.toastService.success(this.resources.routeAddedSuccessfullyItWillTakeTime);
             this.remove();
         } catch (ex) {

@@ -1,4 +1,4 @@
-﻿import { Trace } from "./models";
+﻿import { Trace } from "../models";
 
 export interface TracesState {
     visibleTraceId: string;
