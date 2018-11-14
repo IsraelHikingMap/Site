@@ -65,7 +65,8 @@ describe("Share Urls Service", () => {
     }));
 
     it("Should get image preview by sending a request to server",
-        inject([ShareUrlsService, HttpTestingController], async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
+        inject([ShareUrlsService, HttpTestingController],
+            async (shareUrlsService: ShareUrlsService, mockBackend: HttpTestingController) => {
 
             let promise = shareUrlsService.getImagePreview({} as DataContainer).then((res) => {
                 expect(res).not.toBeNull();
