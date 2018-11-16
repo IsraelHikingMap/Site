@@ -91,7 +91,8 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         return this.categoriesLayerFactory.get(categoriesType).isVisible();
     }
 
-    public toggleCategoriesLayerVisibility(categoriesType: CategoriesType) {
+    public toggleCategoriesLayerVisibility(categoriesType: CategoriesType, event: Event) {
+        event.stopPropagation();
         let layer = this.categoriesLayerFactory.get(categoriesType);
         if (layer.isVisible()) {
             layer.hide();

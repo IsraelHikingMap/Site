@@ -62,7 +62,7 @@
         <ng-container *ngFor="let categoriesType of categoriesTypes">
             <mat-expansion-panel [expanded]="getExpandState(categoriesType)" (opened)="expand(categoriesType)" (closed)="collapse(categoriesType)">
                 <mat-expansion-panel-header>
-                    <button mat-button (click)="toggleCategoriesLayerVisibility(categoriesType)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visiblity of category layer {{categoriesType}}">
+                    <button mat-button (click)="toggleCategoriesLayerVisibility(categoriesType, $event)" angulartics2On="click" angularticsCategory="Layers" angularticsAction="Toggle visiblity of category layer {{categoriesType}}">
                         <i class="fa fa-lg" [ngClass]="{'icon-eye': isCategoriesLayerVisible(categoriesType), 'icon-eye-slash': !isCategoriesLayerVisible(categoriesType)}"></i>
                     </button>
                     <p>{{resources.translate(categoriesType)}}</p>
