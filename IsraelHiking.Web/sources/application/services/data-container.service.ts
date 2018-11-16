@@ -15,6 +15,7 @@ import { FitBoundsService } from "./fit-bounds.service";
 import { AddRouteAction } from "../reducres/routes.reducer";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { MapService } from "./map.service";
+import { RouteLayerFactory } from "./layers/routelayers/route-layer.factory";
 
 
 @Injectable()
@@ -37,6 +38,7 @@ export class DataContainerService {
         private readonly toastService: ToastService,
         private readonly fitBoundsService: FitBoundsService,
         private readonly selectedRouteService: SelectedRouteService,
+        private readonly routeLayerFactory: RouteLayerFactory,
         private readonly mapService: MapService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
 
@@ -48,11 +50,9 @@ export class DataContainerService {
 
     public setData(dataContainer: DataContainer) {
         for (let route of dataContainer.routes) {
-            if (!route.id) {
-                route.id = Math.random().toString(36).substr(2, 9);
-            }
+            let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(route);
             this.ngRedux.dispatch(new AddRouteAction({
-                routeData: route
+                routeData: routeToAdd
             }));
         }
         this.layersService.addExternalOverlays(dataContainer.overlays);

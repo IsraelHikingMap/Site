@@ -55,4 +55,24 @@ export class RouteLayerFactory {
         this.nextColorIndex = (this.nextColorIndex + 1) % this.colors.length;
         return route;
     }
+
+    public createRouteDataAddMissingFields(routeData: RouteData): RouteData {
+        let route = { ...routeData };
+        if (!route.color) {
+            route.color = this.colors[this.nextColorIndex];
+            this.nextColorIndex = (this.nextColorIndex + 1) % this.colors.length;
+        }
+        if (!route.opacity) {
+            route.opacity = 0.5;
+        }
+        if (!route.weight) {
+            route.weight = 4;
+        }
+        if (!route.id) {
+            route.id = Math.random().toString(36).substr(2, 9);
+        }
+        route.isRecording = false;
+        route.state = "ReadOnly";
+        return route;
+    }
 }
