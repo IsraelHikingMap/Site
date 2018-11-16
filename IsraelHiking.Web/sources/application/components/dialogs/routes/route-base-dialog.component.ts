@@ -46,4 +46,5 @@ export abstract class RouteBaseDialogComponent extends BaseMapComponent {
     public moveToRoute = () => { };
     public deleteRoute() { }
     public makeAllPointsEditable = () => { };
+    public reverseRoute = () => { };
 }
