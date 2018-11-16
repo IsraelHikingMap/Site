@@ -199,8 +199,9 @@ export class SelectedRouteService {
         } as RouteData;
     }
 
-    public reverseRoute() {
-        let revered = this.reverseRouteInternal(this.getSelectedRoute());
+    public reverseRoute(routeId?: string) {
+        let route = routeId ? this.getRouteById(routeId) : this.getSelectedRoute();
+        let revered = this.reverseRouteInternal(route);
         this.ngRedux.dispatch(new ReverseRouteAction({
             routeId: revered.id,
             routeData: revered

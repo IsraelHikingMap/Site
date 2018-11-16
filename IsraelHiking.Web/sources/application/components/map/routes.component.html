@@ -1,5 +1,5 @@
 ﻿<div *ngFor="let route of (routes | async)">
-    <aol-layer-vector>
+    <aol-layer-vector *ngIf="route.state != 'Hidden'">
         <aol-source-vector>
             <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegment(route, idx)">
                 <aol-geometry-linestring>
@@ -32,8 +32,8 @@
             </aol-feature>
         </aol-source-vector>
     </aol-layer-vector>
-    <div *ngFor="let marker of route.markers">
-        <private-poi-overlay [marker]="marker" [routeId]="route.id"></private-poi-overlay>
+    <div *ngIf="route.state != 'Hidden'">
+        <private-poi-overlay *ngFor="let marker of route.markers" [marker]="marker" [routeId]="route.id"></private-poi-overlay>
     </div>
 </div>
 <aol-layer-vector *ngIf="hoverViewCoordinates">

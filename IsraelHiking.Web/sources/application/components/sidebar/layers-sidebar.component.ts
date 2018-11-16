@@ -156,7 +156,8 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         this.dialog.open(RouteAddDialogComponent);
     }
 
-    public editRoute(routeData: RouteData) {
+    public editRoute(routeData: RouteData, event: Event) {
+        event.stopPropagation();
         let dialogRef = this.dialog.open(RouteEditDialogComponent);
         dialogRef.componentInstance.setRouteData(routeData);
     }

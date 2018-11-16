@@ -105,4 +105,9 @@ export class RouteEditDialogComponent extends RouteBaseDialogComponent {
         this.selectedRouteService.makeAllPointsEditable(this.routeData.id);
         this.toastService.info(this.resources.dataUpdatedSuccessfully);
     }
+
+    public reverseRoute = () => {
+        this.selectedRouteService.reverseRoute(this.routeData.id);
+        this.toastService.info(this.resources.dataUpdatedSuccessfully);
+    }
 }
