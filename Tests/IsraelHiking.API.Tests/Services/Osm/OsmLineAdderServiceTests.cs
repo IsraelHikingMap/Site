@@ -113,6 +113,19 @@ namespace IsraelHiking.API.Tests.Services.Osm
         }
 
         [TestMethod]
+        public void AddLine_OneHighwayNearStart_ShouldModifyItOnce()
+        {
+            var osmGateway = SetupOsmGateway("42");
+            SetupHighway(42, new[] { new Coordinate(-0.1, 0), new Coordinate(1, 0) }, osmGateway);
+            osmGateway.UploadChangeset(Arg.Any<string>(), Arg.Any<OsmChange>()).Returns(new DiffResult { Results = new OsmGeoResult[0] });
+
+            _service.Add(new LineString(new[] { new Coordinate(0, 0), new Coordinate(0, 0.00000001), new Coordinate(0, 0.0000002), new Coordinate(0, 1) }), new Dictionary<string, string>(), null).Wait();
+
+            osmGateway.Received(1).UploadChangeset(Arg.Any<string>(), Arg.Is<OsmChange>(x => x.Create.OfType<Way>().First().Nodes.Length == 4 &&
+                                                                                             x.Modify.OfType<Way>().Count() == 1));
+        }
+
+        [TestMethod]
         public void AddLine_OneHighwayNearEnd_ShouldAddTheLineAndConnectIt()
         {
             var osmGateway = SetupOsmGateway("42");
