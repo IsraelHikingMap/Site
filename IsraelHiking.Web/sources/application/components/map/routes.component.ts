@@ -123,4 +123,11 @@ export class RoutesComponent implements AfterViewInit {
         }
         return routeData.color;
     }
+
+    public getSegmentRotation(segment: RouteSegmentData) {
+        let last = segment.latlngs.length - 1;
+        let dx = segment.latlngs[last].lng - segment.latlngs[last - 1].lng;
+        let dy = segment.latlngs[last].lat - segment.latlngs[last - 1].lat;
+        return -Math.atan2(dy, dx);
+    }
 }
