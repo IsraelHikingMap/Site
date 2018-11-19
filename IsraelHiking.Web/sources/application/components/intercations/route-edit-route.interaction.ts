@@ -93,14 +93,16 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
             f.getGeometry() instanceof geom.LineString);
         if (this.selectedRoutePoint == null) {
             this.onRoutePointClick.emit(null);
+        } else {
+            this.onPointerMove.emit(null);
         }
-        console.log(this.selectedRoutePoint);
         return this.selectedRoutePoint == null && this.selectedRouteSegments.length === 0;
     }
 
     private handleDrag(event) {
         this.dragging = true;
         this.onRoutePointClick.emit(null);
+        this.onPointerMove.emit(null);
         if (this.selectedRoutePoint != null) {
             return this.handleRoutePointDrag(event);
         }

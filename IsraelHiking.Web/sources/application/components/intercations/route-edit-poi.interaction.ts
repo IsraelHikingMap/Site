@@ -64,6 +64,7 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
 
     private handleDrag(event): boolean {
         this.dragging = true;
+        this.onPointerMove.emit(null);
         if (this.selectedMarker == null) {
             return true;
         }

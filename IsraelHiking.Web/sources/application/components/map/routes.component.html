@@ -9,41 +9,45 @@
                     <aol-style-stroke [color]="getColor(route)" [width]="route.weight"></aol-style-stroke>
                 </aol-style>
             </aol-feature>
-            <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegmentPoint(route, idx)">
-                <aol-geometry-point>
-                    <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-                </aol-geometry-point>
-                <aol-style>
-                    <aol-style-circle [radius]="6">
-                        <aol-style-fill [color]="getColor(route)"></aol-style-fill>
-                        <aol-style-stroke [color]="getRouteMarkerColor(idx, route)" [width]="3"></aol-style-stroke>
-                    </aol-style-circle>
-                </aol-style>
-            </aol-feature>
-            <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="'arrow-head' + idx">
-                <aol-geometry-point>
-                    <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-                </aol-geometry-point>
-                <aol-style>
-                    <aol-style-icon [anchor]="[0.75, 0.5]"
-                                    [rotateWithView]="true"
-                                    [rotation]="getSegmentRotation(segment)"
-                                    [src]="'content/arrow.png'"
-                                    [color]="route.color"
-                                    [opacity]="route.opacity">
-                    </aol-style-icon>
-                </aol-style>
-            </aol-feature>
-            <aol-feature *ngFor="let marker of route.markers; let idx = index" [id]="getIdForMarker(route, idx)">
-                <aol-geometry-point>
-                    <aol-coordinate [x]="marker.latlng.lng" [y]="marker.latlng.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-                </aol-geometry-point>
-                <aol-style>
-                    <aol-style-circle [radius]="6">
-                        <aol-style-stroke [color]="getColor(route)" [width]="3"></aol-style-stroke>
-                    </aol-style-circle>
-                </aol-style>
-            </aol-feature>
+            <div *ngIf="route.state == 'Route'">
+                <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegmentPoint(route, idx)">
+                    <aol-geometry-point>
+                        <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>
+                    </aol-geometry-point>
+                    <aol-style>
+                        <aol-style-circle [radius]="6">
+                            <aol-style-fill [color]="getColor(route)"></aol-style-fill>
+                            <aol-style-stroke [color]="getRouteMarkerColor(idx, route)" [width]="3"></aol-style-stroke>
+                        </aol-style-circle>
+                    </aol-style>
+                </aol-feature>
+            </div>
+            <div *ngIf="route.state == 'ReadOnly'">
+                <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="'arrow-head' + idx">
+                    <aol-geometry-point>
+                        <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>
+                    </aol-geometry-point>
+                    <aol-style>
+                        <aol-style-icon [anchor]="[0.75, 0.5]"
+                                        [rotateWithView]="true"
+                                        [rotation]="getSegmentRotation(segment)"
+                                        [src]="'content/arrow.png'"
+                                        [color]="route.color"
+                                        [opacity]="route.opacity">
+                        </aol-style-icon>
+                    </aol-style>
+                </aol-feature>
+            </div>
+                <aol-feature *ngFor="let marker of route.markers; let idx = index" [id]="getIdForMarker(route, idx)">
+                    <aol-geometry-point>
+                        <aol-coordinate [x]="marker.latlng.lng" [y]="marker.latlng.lat" [srid]="'EPSG:4326'"></aol-coordinate>
+                    </aol-geometry-point>
+                    <aol-style>
+                        <aol-style-circle [radius]="6">
+                            <aol-style-stroke [color]="getColor(route)" [width]="3"></aol-style-stroke>
+                        </aol-style-circle>
+                    </aol-style>
+                </aol-feature>
         </aol-source-vector>
     </aol-layer-vector>
     <div *ngIf="route.state != 'Hidden'">

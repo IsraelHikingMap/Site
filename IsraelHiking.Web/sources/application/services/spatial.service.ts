@@ -77,6 +77,9 @@ export class SpatialService {
     }
 
     public static toViewCoordinate(latlng: LatLngAlt): Coordinate {
+        if (latlng == null) {
+            return null;
+        }
         return proj.transform(SpatialService.toCoordinate(latlng), "EPSG:4326", "EPSG:3857");
     }
 
