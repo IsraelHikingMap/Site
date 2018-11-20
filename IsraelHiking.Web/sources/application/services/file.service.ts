@@ -6,6 +6,7 @@ import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { Urls } from "../urls";
 import { DataContainer, RouteData } from "../models/models";
 import { RunningContextService } from "./running-context.service";
+import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 
 declare var cordova: any;
 
@@ -22,7 +23,8 @@ export class FileService {
     constructor(private readonly httpClient: HttpClient,
         private readonly runningContextService: RunningContextService,
         private readonly imageResizeService: ImageResizeService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory) {
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+        private readonly selectedRouteService: SelectedRouteService) {
         this.formats = [];
         this.httpClient.get(Urls.fileFormats).toPromise().then((response: IFormatViewModel[]) => {
             this.formats.splice(0);
@@ -70,13 +72,16 @@ export class FileService {
         return await this.saveBytesResponseToFile(responseData, fileName);
     }
 
-    public async openFromFile(file: File): Promise<DataContainer> {
+    public async addRoutesFromFile(file: File): Promise<any> {
         if (file.type === ImageResizeService.JPEG) {
-            return await this.imageResizeService.resizeImageAndConvert(file);
+            let container = await this.imageResizeService.resizeImageAndConvert(file);
+            this.selectedRouteService.addRoutes(container.routes);
+            return;
         }
         let formData = new FormData();
         formData.append("file", file, file.name);
-        return this.httpClient.post(Urls.openFile, formData).toPromise() as Promise<DataContainer>;
+        let container = await this.httpClient.post(Urls.openFile, formData).toPromise() as DataContainer;
+        this.selectedRouteService.addRoutes(container.routes);
     }
 
     public uploadTrace(file: File): Promise<any> {
@@ -98,6 +103,11 @@ export class FileService {
 
     public openFromUrl = (url: string): Promise<DataContainer> => {
         return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<DataContainer>;
+    }
+
+    public async addRoutesFromUrl(url: string) {
+        let container = await this.openFromUrl(url);
+        this.selectedRouteService.addRoutes(container.routes);
     }
 
     private saveBytesResponseToFile = async (data: string, fileName: string): Promise<boolean> => {

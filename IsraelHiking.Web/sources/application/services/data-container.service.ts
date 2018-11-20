@@ -48,7 +48,7 @@ export class DataContainerService {
         });
     }
 
-    public setData(dataContainer: DataContainer) {
+    private setData(dataContainer: DataContainer) {
         for (let route of dataContainer.routes) {
             let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(route);
             this.ngRedux.dispatch(new AddRouteAction({

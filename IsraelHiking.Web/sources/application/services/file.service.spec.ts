@@ -8,11 +8,14 @@ import { ImageResizeService } from "./image-resize.service";
 import { Urls } from "../urls";
 import { DataContainer } from "../models/models";
 import { RunningContextService } from "./running-context.service";
+import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 
 describe("FileService", () => {
 
     let imageResizeService: ImageResizeService;
     let nonAngularObjectsFactory: NonAngularObjectsFactory;
+    let selectedRouteService: SelectedRouteService;
+
     beforeEach(() => {
         imageResizeService = {
             resizeImageAndConvert: jasmine.createSpy("resizeImageAndConvert")
@@ -21,6 +24,9 @@ describe("FileService", () => {
             saveAs: jasmine.createSpy("saveAs"),
             b64ToBlob: jasmine.createSpy("b64ToBlob"),
         } as any as NonAngularObjectsFactory;
+        selectedRouteService = {
+            addRoutes: jasmine.createSpy("addRoutes")
+        } as any as SelectedRouteService;
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -31,7 +37,7 @@ describe("FileService", () => {
                 {
                     provide: FileService,
                     useFactory: fakeAsync((http, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
-                        let fileService = new FileService(http, runningContextService, imageResizeService, nonAngularObjectsFactory);
+                        let fileService = new FileService(http, runningContextService, imageResizeService, nonAngularObjectsFactory, selectedRouteService);
                         mockBackend.expectOne(Urls.fileFormats).flush([{
                             extension: "ex",
                             label: "label",
@@ -76,8 +82,8 @@ describe("FileService", () => {
     it("Should open from url by uploading", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-            let promise = fileService.openFromFile(new Blob([""]) as File).then((res) => {
-                expect(res).not.toBeNull();
+            let promise = fileService.addRoutesFromFile(new Blob([""]) as File).then(() => {
+                expect(selectedRouteService.addRoutes).toHaveBeenCalled();
             }, fail);
 
             mockBackend.expectOne(Urls.openFile).flush({});
@@ -87,8 +93,9 @@ describe("FileService", () => {
     it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
         async (fileService: FileService) => {
             let file = new Blob([""], { type: "image/jpeg" }) as File;
-            let promise = fileService.openFromFile(file).then(() => {
-                expect(imageResizeService.resizeImageAndConvert).toHaveBeenCalled();
+            imageResizeService.resizeImageAndConvert = () => Promise.resolve({} as DataContainer);
+            let promise = fileService.addRoutesFromFile(file).then(() => {
+                expect(selectedRouteService.addRoutes).toHaveBeenCalled();
             }, fail);
 
             return promise;

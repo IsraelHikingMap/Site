@@ -1,4 +1,5 @@
 ﻿import { Component, Input, OnInit } from "@angular/core";
+import { MatDialog } from "@angular/material";
 import { NgRedux } from "@angular-redux/store";
 
 import { MarkerData, LinkData, ApplicationState } from "../../models/models";
@@ -9,6 +10,7 @@ import { PrivatePoiUploaderService } from "../../services/private-poi-uploader.s
 import { ImageGalleryService } from "../../services/image-gallery.service";
 import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reducer";
 import { ChangeEditStateAction } from "../../reducres/routes.reducer";
+import { PrivatePoiEditDialogComponent } from "../dialogs/private-poi-edit-dialog.component";
 
 @Component({
     selector: "private-poi-overlay",
@@ -25,6 +27,9 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     @Input()
     public routeId: string;
 
+    @Input()
+    public index: number;
+
     public imageLink: LinkData;
 
     public isExpanded: boolean;
@@ -32,6 +37,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     public hideCoordinates: boolean;
 
     constructor(resources: ResourcesService,
+        private readonly matDialog: MatDialog,
         private readonly authorizationService: AuthorizationService,
         private readonly privatePoiUploaderService: PrivatePoiUploaderService,
         private readonly imageGalleryService: ImageGalleryService,
@@ -77,6 +83,7 @@ export class PrivatePoiOverlayComponent extends BaseMapComponent implements OnIn
     public changeToEditMode() {
         this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: this.routeId }));
         this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: this.routeId, state: "Poi" }));
-        // HM TODO: open dialog?
+        let dialogRef = this.matDialog.open(PrivatePoiEditDialogComponent);
+        dialogRef.componentInstance.setMarkerAndRoute(this.marker, this.routeId, this.index);
     }
 }

@@ -33,8 +33,7 @@ export class FileComponent extends BaseMapComponent {
             return;
         }
         try {
-            let dataContainer = await this.fileService.openFromFile(file);
-            this.dataContainerService.setData(dataContainer);
+            await this.fileService.addRoutesFromFile(file);
         } catch (ex) {
             this.toastService.error(this.resources.unableToLoadFromFile);
         }

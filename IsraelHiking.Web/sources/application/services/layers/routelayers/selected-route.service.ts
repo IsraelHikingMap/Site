@@ -11,7 +11,8 @@ import {
     MergeRoutesAction,
     UpdateSegmentsAction,
     DeleteSegmentAction,
-    ReplaceSegmentsAction
+    ReplaceSegmentsAction,
+    AddPrivatePoiAction
 } from "../../../reducres/routes.reducer";
 import { RouteLayerFactory } from "./route-layer.factory";
 import { ResourcesService } from "../../resources.service";
@@ -265,5 +266,32 @@ export class SelectedRouteService {
             routeId: routeId,
             segmentsData: segments
         }));
+    }
+
+    public addRoutes(routes: RouteData[]) {
+        if (routes.length === 1 && routes[0].segments.length === 0 && this.routes.length > 0) {
+            // this is the case when the layer has markers only
+            for (let marker of routes[0].markers) {
+                this.ngRedux.dispatch(new AddPrivatePoiAction({
+                    routeId: this.selectedRouteId || this.routes[0].id,
+                    markerData: marker
+                }));
+            }
+            if (this.selectedRouteId == null) {
+                this.ngRedux.dispatch(new SetSelectedRouteAction({
+                    routeId: this.routes[0].id
+                }));
+            }
+            return;
+        }
+        for (let routeData of routes) {
+            if (this.isNameAvailable(routeData.name) === false) {
+                routeData.name = this.createRouteName(routeData.name);
+            }
+            let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(routeData);
+            this.ngRedux.dispatch(new AddRouteAction({
+                routeData: routeToAdd
+            }));
+        }
     }
 }

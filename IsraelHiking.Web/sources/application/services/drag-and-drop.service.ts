@@ -3,6 +3,7 @@ import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
 import { DataContainerService } from "./data-container.service";
+import { RouteData } from "../models/models";
 
 @Injectable()
 export class DragAndDropService {
@@ -23,8 +24,7 @@ export class DragAndDropService {
                 setTimeout(async () => {
                     for (let file of files) {
                         try {
-                            let dataContainer = await this.fileService.openFromFile(file);
-                            this.dataContainerService.setData(dataContainer);
+                            await this.fileService.addRoutesFromFile(file);
                         } catch (ex) {
                             this.toastService.error(this.resourcesService.unableToLoadFromFile + `: ${file.name}`);
                         }
@@ -35,9 +35,7 @@ export class DragAndDropService {
 
             let url = e.dataTransfer.getData("text");
             if (url) {
-                this.fileService.openFromUrl(url).then((dataContainer) => {
-                    this.dataContainerService.setData(dataContainer);
-                }, () => {
+                this.fileService.addRoutesFromUrl(url).then(() => {}, () => {
                     this.toastService.error(resourcesService.unableToLoadFromUrl + `: ${url}`);
                 });
             }

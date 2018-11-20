@@ -51,7 +51,7 @@
         </aol-source-vector>
     </aol-layer-vector>
     <div *ngIf="route.state != 'Hidden'">
-        <private-poi-overlay *ngFor="let marker of route.markers" [marker]="marker" [routeId]="route.id"></private-poi-overlay>
+        <private-poi-overlay *ngFor="let marker of route.markers; let idx = index" [marker]="marker" [routeId]="route.id" [index]="idx"></private-poi-overlay>
     </div>
 </div>
 <aol-layer-vector *ngIf="hoverViewCoordinates">

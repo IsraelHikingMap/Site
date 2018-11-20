@@ -74,6 +74,9 @@ export class SnappingService {
     }
 
     private generateSnappings = async () => {
+        if (!this.map) {
+            return;
+        }
         if (this.map.getView().getZoom() <= 13 || this.enabled === false) {
             this.highwaySnappings.splice(0);
             this.pointsSnappings.splice(0);
