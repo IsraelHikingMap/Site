@@ -140,6 +140,7 @@ import { ApplicationState } from "./models/models";
 import { rootReducer } from "./reducres/root.reducer";
 import { initialState } from "./reducres/initial-state";
 import { debounceTime } from "rxjs/operators";
+import { classToActionMiddleware } from "./reducres/reducer-action-decorator";
 
 function initializeApplication(injector: Injector) {
     return async () => {
@@ -157,7 +158,7 @@ function initializeApplication(injector: Injector) {
             });
         }
         let ngRedux = injector.get(NgRedux) as NgRedux<ApplicationState>;
-        ngRedux.configureStore(rootReducer, storedState, [(state) => (next) => (action) => next({ ...action })]);
+        ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
         ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state) => {
             console.log(state);
             let dbState = await database.get("state") as any;
