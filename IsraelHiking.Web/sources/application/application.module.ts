@@ -1,5 +1,5 @@
 // 3rd party
-import { NgModule } from "@angular/core";
+import { NgModule, APP_INITIALIZER, Injector } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
@@ -43,6 +43,8 @@ import { D3Service } from "d3-ng2-service";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule, NgRedux } from "@angular-redux/store";
 import { AngularOpenlayersModule } from "ngx-openlayers";
+import PouchDB from 'pouchdb';
+
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -137,8 +139,40 @@ import { routes } from "./routes";
 import { ApplicationState } from "./models/models";
 import { rootReducer } from "./reducres/root.reducer";
 import { initialState } from "./reducres/initial-state";
-
 import { debounceTime } from "rxjs/operators";
+
+function initializeApplication(injector: Injector) {
+    return async () => {
+        console.log("Starting IHM Application Initialization");
+        let database = new PouchDB("IHM");
+        let storedState = initialState;
+        try {
+            let dbState = await database.get("state") as any;
+            storedState = dbState.state;
+        } catch (ex) {
+            // not state.
+            (database as any).put({
+                _id: "state",
+                state: initialState
+            });
+        }
+        let ngRedux = injector.get(NgRedux) as NgRedux<ApplicationState>;
+        ngRedux.configureStore(rootReducer, storedState, [(state) => (next) => (action) => next({ ...action })]);
+        ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state) => {
+            console.log(state);
+            let dbState = await database.get("state") as any;
+            dbState.state = state;
+            (database as any).put(dbState);
+        });
+        try {
+            await injector.get(DataContainerService).initialize();
+            injector.get(DeepLinksService).initialize();
+            console.log("Finished IHM Application Initialization");
+        } catch (error) {
+            console.error("Failed IHM Application Initialization", error);
+        };
+    };
+}
 
 export function getWindow() { return window; }
 
@@ -237,6 +271,7 @@ export function getWindow() { return window; }
         AuthorizationService,
         { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
         { provide: "Window", useFactory: getWindow },
+        { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
         D3Service,
         GetTextCatalogService,
         MapService,
@@ -326,25 +361,7 @@ export function getWindow() { return window; }
     bootstrap: [MainMapComponent]
 })
 export class ApplicationModule {
-    constructor(dataContainerService: DataContainerService,
-        angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
-        dragAndDropService: DragAndDropService,
-        deepLinksService: DeepLinksService,
-        ngRedux: NgRedux<ApplicationState>,
-        localStorageService: LocalStorageService) {
-        console.log("Starting IHM Application Initialization");
-        let storedState = localStorageService.get("reduxState") || initialState;
-        ngRedux.configureStore(rootReducer, storedState, [(state) => (next) => (action) => next({...action})]);
-        ngRedux.select().pipe(debounceTime(2000)).subscribe((state) => {
-            console.log(state);
-            localStorageService.set("reduxState", state);
-        });
-        dataContainerService.initialize().then(() => {
-            deepLinksService.initialize();
-            console.log("Finished IHM Application Initialization");
-        }, (error) => {
-            console.error("Failed IHM Application Initialization");
-            console.error(error);
-        });
+    constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
+        dragAndDropService: DragAndDropService,) {
     }
 }
