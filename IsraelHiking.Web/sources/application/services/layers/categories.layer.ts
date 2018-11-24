@@ -5,8 +5,6 @@ import { every } from "lodash";
 
 import { ResourcesService } from "../resources.service";
 import { IPointOfInterest, PoiService, CategoriesType, ICategory } from "../poi.service";
-import { FitBoundsService } from "../fit-bounds.service";
-import { IBounds, RouteData } from "../../models/models";
 import { BaseMapComponent } from "../../components/base-map.component";
 import { SpatialService } from "../spatial.service";
 import { MapService } from "../map.service";
@@ -22,20 +20,15 @@ export class CategoriesLayer extends BaseMapComponent {
 
     public categories: ICategory[];
     public pointsOfInterest: IPointOfInterest[];
-    public searchResultsPoi: IPointOfInterest;
-    public selectedRoutes: RouteData[];
-    public isSelectedRoutesArea: boolean;
 
     constructor(resources: ResourcesService,
         private readonly mapService: MapService,
         private readonly localStorageService: LocalStorageService,
         private readonly poiService: PoiService,
-        private readonly fitBoundsService: FitBoundsService,
         private readonly categoriesType: CategoriesType) {
         super(resources);
         this.categories = [];
         this.pointsOfInterest = [];
-        this.searchResultsPoi = null;
         this.markersLoaded = new Subject<void>();
         this.requestsNumber = 0;
         this.visible = this.localStorageService.get(this.categoriesType + CategoriesLayer.VISIBILITY_POSTFIX) || false;
@@ -119,26 +112,5 @@ export class CategoriesLayer extends BaseMapComponent {
         if (this.requestsNumber > 0) {
             this.requestsNumber--;
         }
-    }
-
-    public moveToSearchResults(pointOfInterest: IPointOfInterest, bounds: IBounds) {
-        this.searchResultsPoi = pointOfInterest;
-        // triggers the subscription
-        this.fitBoundsService.fitBounds(bounds);
-        this.updateMarkers();
-    }
-
-    private clearSearchResultsMarker() {
-        this.searchResultsPoi = null;
-    }
-
-    public selectRoute(routes: RouteData[], isArea: boolean) {
-        this.selectedRoutes = routes;
-        this.isSelectedRoutesArea = isArea;
-    }
-
-    public clearSelected(id: string) {
-        this.selectedRoutes = null;
-        this.clearSearchResultsMarker();
     }
 }

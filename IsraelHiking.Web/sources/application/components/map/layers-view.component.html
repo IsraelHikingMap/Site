@@ -19,19 +19,19 @@
             <aol-source-vector></aol-source-vector>
         </aol-source-cluster>
     </aol-layer-vector>
-    <!-- HM TODO: style, dynamic geometry? -->
-    <aol-layer-vector *ngIf="getSearchResults(categoriesType) != null" [zIndex]="1001">
-        <aol-source-vector>
-            <aol-feature>
-                <aol-geometry-point>
-                    <aol-coordinate [x]="getSearchResults(categoriesType).location.lng"
-                                    [y]="getSearchResults(categoriesType).location.lat"
-                                    [srid]="'EPSG:4326'">
-                    </aol-coordinate>
-                </aol-geometry-point>
-            </aol-feature>
-        </aol-source-vector>
-    </aol-layer-vector>
 </div>
+
+<aol-layer-vector *ngIf="getSelectedPoi() != null" [zIndex]="1001">
+    <aol-source-vector>
+        <aol-feature [id]="'selected_' + getSelectedPoi().source + __ + getSelectedPoi().id">
+            <aol-geometry-point>
+                <aol-coordinate [x]="getSelectedPoi().location.lng"
+                                [y]="getSelectedPoi().location.lat"
+                                [srid]="'EPSG:4326'">
+                </aol-coordinate>
+            </aol-geometry-point>
+        </aol-feature>
+    </aol-source-vector>
+</aol-layer-vector>
 
 <cluster-overlay [isOpen]="isClusterOpen" [latlng]="clusterLatlng" [points]="clusterPoints" (closed)="isClusterOpen = false"></cluster-overlay>

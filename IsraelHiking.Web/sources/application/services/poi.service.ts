@@ -91,6 +91,8 @@ export class PoiService {
     private poiCache: IPointOfInterestExtended[];
     private addOrUpdateMarkerData: MarkerData;
 
+    public selectedPoi: IPointOfInterestExtended;
+
     constructor(private readonly resources: ResourcesService,
         private readonly httpClient: HttpClient,
         private readonly whatsappService: WhatsAppService,
@@ -98,6 +100,7 @@ export class PoiService {
 
         this.poiCache = [];
         this.addOrUpdateMarkerData = null;
+        this.selectedPoi = null;
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
         this.categoriesMap.set("Points of Interest", []);
         this.categoriesMap.set("Routes", []);
@@ -117,6 +120,11 @@ export class PoiService {
             categories.push(category);
         }
         return categories;
+    }
+
+    // HM TODO: move the following method to state?
+    public clearSelected() {
+        this.selectedPoi = null;
     }
 
     public getCategoriesTypes(): CategoriesType[] {

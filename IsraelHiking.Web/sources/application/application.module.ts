@@ -43,7 +43,7 @@ import { D3Service } from "d3-ng2-service";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule, NgRedux } from "@angular-redux/store";
 import { AngularOpenlayersModule } from "ngx-openlayers";
-import PouchDB from 'pouchdb';
+import PouchDB from "pouchdb";
 
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
@@ -157,6 +157,7 @@ export function initializeApplication(injector: Injector) {
                 state: initialState
             });
         }
+        // tslint:disable-next-line
         let ngRedux = injector.get(NgRedux) as NgRedux<ApplicationState>;
         ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
         ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state) => {
@@ -166,12 +167,12 @@ export function initializeApplication(injector: Injector) {
             (database as any).put(dbState);
         });
         try {
-            await injector.get(DataContainerService).initialize();
-            injector.get(DeepLinksService).initialize();
+            await injector.get<DataContainerService>(DataContainerService).initialize();
+            injector.get<DeepLinksService>(DeepLinksService).initialize();
             console.log("Finished IHM Application Initialization");
         } catch (error) {
             console.error("Failed IHM Application Initialization", error);
-        };
+        }
     };
 }
 
@@ -363,6 +364,6 @@ export function getWindow() { return window; }
 })
 export class ApplicationModule {
     constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
-        dragAndDropService: DragAndDropService,) {
+        dragAndDropService: DragAndDropService) {
     }
 }

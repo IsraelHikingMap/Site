@@ -80,8 +80,8 @@ export class FileService {
         }
         let formData = new FormData();
         formData.append("file", file, file.name);
-        let container = await this.httpClient.post(Urls.openFile, formData).toPromise() as DataContainer;
-        this.selectedRouteService.addRoutes(container.routes);
+        let fileContainer = await this.httpClient.post(Urls.openFile, formData).toPromise() as DataContainer;
+        this.selectedRouteService.addRoutes(fileContainer.routes);
     }
 
     public uploadTrace(file: File): Promise<any> {

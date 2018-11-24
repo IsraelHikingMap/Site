@@ -17,13 +17,12 @@ import {
 } from "../../../services/poi.service";
 import { AuthorizationService } from "../../../services/authorization.service";
 import { ToastService } from "../../../services/toast.service";
-import { CategoriesLayerFactory } from "../../../services/layers/categories-layers.factory";
 import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { RouteData, LinkData, LatLngAlt, ApplicationState } from "../../../models/models";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducres/routes.reducer";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
-
+import { FitBoundsService } from "../../../services/fit-bounds.service";
 
 @Component({
     selector: "public-poi-sidebar",
@@ -53,8 +52,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         private readonly selectedRouteService: SelectedRouteService,
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly toastService: ToastService,
-        private readonly categoriesLayerFactory: CategoriesLayerFactory,
         private readonly hashService: HashService,
+        private readonly fitBoundsService: FitBoundsService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         let poiRouterData = this.hashService.getPoiRouterData();
@@ -77,9 +76,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             this.initFromPointOfInterestExtended(poiExtended);
             let latLng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng };
             let bounds = { northEast: latLng, southWest: latLng };
-            this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute).moveToSearchResults(poiExtended, bounds);
-            let categoriesLayer = this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute);
-            categoriesLayer.selectRoute(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
+            this.fitBoundsService.fitBounds(bounds);
+            this.poiService.selectedPoi = poiExtended;
             // Change edit mode only after this.info is initialized.
             this.subscription = this.route.queryParams.subscribe(async (params) => {
                 this.editMode = params[RouteStrings.EDIT] && params[RouteStrings.EDIT] === "true";
@@ -250,7 +248,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     public clear() {
         if (this.poiExtended) {
-            this.categoriesLayerFactory.getByPoiType(this.poiExtended.isRoute).clearSelected(this.poiExtended.id);
+            this.poiService.clearSelected();
         }
         this.close();
     }

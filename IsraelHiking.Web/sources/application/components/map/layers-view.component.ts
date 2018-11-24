@@ -20,7 +20,7 @@ import { LatLngAlt, ApplicationState, Overlay } from "../../models/models";
     templateUrl: "layers-view.component.html"
 })
 export class LayersViewComponent extends BaseMapComponent implements OnInit, AfterViewInit {
-
+    private static readonly MAX_MENU_POINTS_IN_CLUSTER = 7;
 
     @ViewChildren("cluster")
     public poiLayers: QueryList<LayerVectorComponent>;
@@ -78,8 +78,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         return this.categoriesLayerFactory.get(categoriesType).isVisible();
     }
 
-    public getSearchResults(categoriesType: CategoriesType) {
-        return this.categoriesLayerFactory.get(categoriesType).searchResultsPoi;
+    public getSelectedPoi() {
+        return this.poiService.selectedPoi;
     }
 
     ngOnInit() {
@@ -134,7 +134,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                     return;
                 }
                 this.clusterLatlng = latlng;
-                this.clusterPoints = features.filter((_, index) => (index < 7))
+                this.clusterPoints = features.filter((_, index) => (index < LayersViewComponent.MAX_MENU_POINTS_IN_CLUSTER))
                     .map(f => {
                     let properties = f.getProperties();
                     let sourceAndId = this.getSourceAndId(f);

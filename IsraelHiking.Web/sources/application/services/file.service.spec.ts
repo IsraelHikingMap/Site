@@ -37,7 +37,11 @@ describe("FileService", () => {
                 {
                     provide: FileService,
                     useFactory: fakeAsync((http, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
-                        let fileService = new FileService(http, runningContextService, imageResizeService, nonAngularObjectsFactory, selectedRouteService);
+                        let fileService = new FileService(http,
+                            runningContextService,
+                            imageResizeService,
+                            nonAngularObjectsFactory,
+                            selectedRouteService);
                         mockBackend.expectOne(Urls.fileFormats).flush([{
                             extension: "ex",
                             label: "label",

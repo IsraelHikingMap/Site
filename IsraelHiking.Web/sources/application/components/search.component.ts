@@ -186,8 +186,6 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         if (this.isVisible) {
             this.toggleVisibility();
         }
-        let bounds = { northEast: searchResults.northEast, southWest: searchResults.southWest };
-        this.fitBoundsService.fitBounds(bounds);
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
