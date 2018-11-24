@@ -22,7 +22,7 @@ import { LatLngAlt, ApplicationState, Overlay } from "../../models/models";
 export class LayersViewComponent extends BaseMapComponent implements OnInit, AfterViewInit {
 
 
-    @ViewChildren(LayerVectorComponent)
+    @ViewChildren("cluster")
     public poiLayers: QueryList<LayerVectorComponent>;
     public distance = 60;
     public categoriesTypes: CategoriesType[];
@@ -78,6 +78,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         return this.categoriesLayerFactory.get(categoriesType).isVisible();
     }
 
+    public getSearchResults(categoriesType: CategoriesType) {
+        return this.categoriesLayerFactory.get(categoriesType).searchResultsPoi;
+    }
+
     ngOnInit() {
         for (let categoriesTypeIndex = 0; categoriesTypeIndex < this.categoriesTypes.length; categoriesTypeIndex++) {
             let categoriesType = this.categoriesTypes[categoriesTypeIndex];
@@ -89,8 +93,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                     feature.setProperties({ icon: p.icon, iconColor: p.iconColor, name: p.title });
                     return feature;
                 });
-                this.poiLayers.toArray()[index].instance.getSource().getSource().clear();
-                this.poiLayers.toArray()[index].instance.getSource().getSource().addFeatures(features);
+                if (index < this.poiLayers.toArray().length) {
+                    this.poiLayers.toArray()[index].instance.getSource().getSource().clear();
+                    this.poiLayers.toArray()[index].instance.getSource().getSource().addFeatures(features);
+                }
             });
         }
     }

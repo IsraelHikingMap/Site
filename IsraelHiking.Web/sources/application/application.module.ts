@@ -142,7 +142,7 @@ import { initialState } from "./reducres/initial-state";
 import { debounceTime } from "rxjs/operators";
 import { classToActionMiddleware } from "./reducres/reducer-action-decorator";
 
-function initializeApplication(injector: Injector) {
+export function initializeApplication(injector: Injector) {
     return async () => {
         console.log("Starting IHM Application Initialization");
         let database = new PouchDB("IHM");

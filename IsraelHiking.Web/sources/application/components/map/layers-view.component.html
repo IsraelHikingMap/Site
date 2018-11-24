@@ -1,5 +1,5 @@
-﻿<aol-layer-tile >
-    <aol-source-xyz [url]="getBaseLayerUrl()" 
+﻿<aol-layer-tile>
+    <aol-source-xyz [url]="getBaseLayerUrl()"
                     [minZoom]="getBaseLayerMinZoom()"
                     [maxZoom]="getBaseLayerMaxZoom()"></aol-source-xyz>
 </aol-layer-tile>
@@ -14,10 +14,23 @@
 </aol-layer-tile>
 
 <div *ngFor="let categoriesType of categoriesTypes">
-    <aol-layer-vector [visible]="isVisible(categoriesType)" [zIndex]="1000">
+    <aol-layer-vector [visible]="isVisible(categoriesType)" [zIndex]="1000" #cluster>
         <aol-source-cluster [distance]="distance">
             <aol-source-vector></aol-source-vector>
         </aol-source-cluster>
+    </aol-layer-vector>
+    <!-- HM TODO: style, dynamic geometry? -->
+    <aol-layer-vector *ngIf="getSearchResults(categoriesType) != null" [zIndex]="1001">
+        <aol-source-vector>
+            <aol-feature>
+                <aol-geometry-point>
+                    <aol-coordinate [x]="getSearchResults(categoriesType).location.lng"
+                                    [y]="getSearchResults(categoriesType).location.lat"
+                                    [srid]="'EPSG:4326'">
+                    </aol-coordinate>
+                </aol-geometry-point>
+            </aol-feature>
+        </aol-source-vector>
     </aol-layer-vector>
 </div>
 
