@@ -1,6 +1,6 @@
-import { Component, OnInit, AfterViewInit, ViewChildren, QueryList } from "@angular/core";
+import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, QueryList } from "@angular/core";
 import { Router } from "@angular/router";
-import { MapComponent, LayerVectorComponent } from "ngx-openlayers";
+import { MapComponent, LayerVectorComponent, FeatureComponent } from "ngx-openlayers";
 import { style, layer, MapBrowserEvent, Feature, geom } from "openlayers";
 import { Observable } from "rxjs";
 import { select } from "@angular-redux/store";
@@ -27,6 +27,9 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     public distance = 60;
     public categoriesTypes: CategoriesType[];
 
+    @ViewChild("selectedPoiFeature")
+    public selectedPoiFeature: FeatureComponent;
+
     public isClusterOpen: boolean;
     public clusterLatlng: LatLngAlt;
     public clusterPoints: IPointOfInterest[];
@@ -35,6 +38,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     public overlays: Observable<Overlay[]>;
 
     private whiteFill: style.Fill;
+    private blackFill: style.Fill;
 
     constructor(resources: ResourcesService,
         private readonly router: Router,
@@ -46,6 +50,9 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         this.categoriesTypes = this.poiService.getCategoriesTypes();
         this.whiteFill = new style.Fill({
             color: "white"
+        });
+        this.blackFill = new style.Fill({
+            color: "black"
         });
     }
 
@@ -79,7 +86,15 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     public getSelectedPoi() {
-        return this.poiService.selectedPoi;
+        let poi = this.poiService.selectedPoi;
+        if (poi == null) {
+            return null;
+        }
+        if (this.selectedPoiFeature != null) {
+            // HM TODO: Should be done using observation on state update?
+            this.selectedPoiFeature.instance.setStyle(this.getPoiIconStyle(poi.icon, poi.iconColor));
+        }
+        return poi;
     }
 
     ngOnInit() {
@@ -111,6 +126,15 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                     this.isClusterOpen = false;
                     return;
                 }
+                if ((featuresAtPixel[0] as Feature).getId() != null &&
+                    (featuresAtPixel[0] as Feature).getId().toString().startsWith("selected_")) {
+                    // HM TODO: toggle public poi?
+                    let sourceAndId = this.getSourceAndId((featuresAtPixel[0] as Feature).getId().toString().replace("selected_", ""));
+                    this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
+                        { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
+                    return;
+                }
+
                 let features = (featuresAtPixel[0].get("features") || []);
                 if (features.length === 0) {
                     this.isClusterOpen = false;
@@ -118,7 +142,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 }
                 if (features.length === 1) {
                     this.isClusterOpen = false;
-                    let sourceAndId = this.getSourceAndId(features[0]);
+                    let sourceAndId = this.getSourceAndId(features[0].getId().toString());
                     this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
                         { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
                     return;
@@ -136,16 +160,16 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 this.clusterLatlng = latlng;
                 this.clusterPoints = features.filter((_, index) => (index < LayersViewComponent.MAX_MENU_POINTS_IN_CLUSTER))
                     .map(f => {
-                    let properties = f.getProperties();
-                    let sourceAndId = this.getSourceAndId(f);
-                    return {
-                        icon: properties.icon,
-                        iconColor: properties.iconColor,
-                        title: properties.name,
-                        id: sourceAndId.id,
-                        source: sourceAndId.source
-                    };
-                });
+                        let properties = f.getProperties();
+                        let sourceAndId = this.getSourceAndId(f.getId().toString());
+                        return {
+                            icon: properties.icon,
+                            iconColor: properties.iconColor,
+                            title: properties.name,
+                            id: sourceAndId.id,
+                            source: sourceAndId.source
+                        };
+                    });
                 this.isClusterOpen = true;
             });
     }
@@ -157,37 +181,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         }
         if (size === 1) {
             let featureProperties = (feature.get("features")[0] as Feature).getProperties();
-            return [
-                new style.Style({
-                    text: new style.Text({
-                        font: "normal 32px IsraelHikingMap",
-                        text: this.resources.getCharacterForIcon("icon-map-marker-rect"),
-                        fill: new style.Fill({
-                            color: "rgba(0,0,0,0.5)"
-                        }),
-                        offsetY: -12,
-                        offsetX: 2
-                    }),
-                }),
-                new style.Style({
-                    text: new style.Text({
-                        font: "normal 32px IsraelHikingMap",
-                        text: this.resources.getCharacterForIcon("icon-map-marker-rect"),
-                        fill: this.whiteFill,
-                        offsetY: -14
-                    }),
-                }),
-                new style.Style({
-                    text: new style.Text({
-                        font: "normal 20px IsraelHikingMap",
-                        text: this.resources.getCharacterForIcon(featureProperties.icon),
-                        offsetY: -16,
-                        fill: new style.Fill({
-                            color: featureProperties.iconColor
-                        })
-                    }),
-                })
-            ];
+            return this.getPoiIconStyle(featureProperties.icon, featureProperties.iconColor);
         }
 
         let color = {
@@ -224,14 +218,47 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 text: new style.Text({
                     font: "12px \"Helvetica Neue\", Arial, Helvetica, sans-serif",
                     text: `${size}`,
-                    fill: this.whiteFill
+                    fill: this.blackFill
                 })
             })
         ];
     }
 
-    private getSourceAndId(feature: Feature): { source: string, id: string } {
-        let sourceAndId = feature.getId() as string;
+    private getPoiIconStyle(icon: string, iconColor: string) {
+        return [
+            new style.Style({
+                text: new style.Text({
+                    font: "normal 32px IsraelHikingMap",
+                    text: this.resources.getCharacterForIcon("icon-map-marker-rect"),
+                    fill: new style.Fill({
+                        color: "rgba(0,0,0,0.5)"
+                    }),
+                    offsetY: -12,
+                    offsetX: 2
+                }),
+            }),
+            new style.Style({
+                text: new style.Text({
+                    font: "normal 32px IsraelHikingMap",
+                    text: this.resources.getCharacterForIcon("icon-map-marker-rect"),
+                    fill: this.whiteFill,
+                    offsetY: -14
+                }),
+            }),
+            new style.Style({
+                text: new style.Text({
+                    font: "normal 20px IsraelHikingMap",
+                    text: this.resources.getCharacterForIcon(icon),
+                    offsetY: -16,
+                    fill: new style.Fill({
+                        color: iconColor
+                    })
+                }),
+            })
+        ];
+    }
+
+    private getSourceAndId(sourceAndId: string): { source: string, id: string } {
         let source = sourceAndId.split("__")[0];
         let id = sourceAndId.split("__")[1];
         return {

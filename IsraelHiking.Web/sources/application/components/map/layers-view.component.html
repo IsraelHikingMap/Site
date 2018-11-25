@@ -23,7 +23,7 @@
 
 <aol-layer-vector *ngIf="getSelectedPoi() != null" [zIndex]="1001">
     <aol-source-vector>
-        <aol-feature [id]="'selected_' + getSelectedPoi().source + __ + getSelectedPoi().id">
+        <aol-feature [id]="'selected_' + getSelectedPoi().source + '__' + getSelectedPoi().id" #selectedPoiFeature>
             <aol-geometry-point>
                 <aol-coordinate [x]="getSelectedPoi().location.lng"
                                 [y]="getSelectedPoi().location.lat"

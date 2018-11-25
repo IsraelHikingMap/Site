@@ -64,15 +64,15 @@ export class TracesComponent extends BaseMapComponent implements AfterViewInit {
             if (features.length === 0) {
                 return;
             }
-            if (features.find(f => f.getId() === this.TRACE_CONFIG) != null) {
+            if (features.find(f => f.getId() && f.getId() === this.TRACE_CONFIG) != null) {
                 this.isConfigOpen = !this.isConfigOpen;
                 return;
             }
-            let missingFeature = features.find(f => (f.getId() as string).startsWith(this.MISSING_PART));
+            let missingFeature = features.find(f => f.getId() && f.getId().toString().startsWith(this.MISSING_PART));
             if (missingFeature == null) {
                 return;
             }
-            let index = +((missingFeature.getId() as string).replace(this.MISSING_PART, ""));
+            let index = +(missingFeature.getId().toString().replace(this.MISSING_PART, ""));
             this.selectedFeature = this.missingParts.features[index];
             this.missingCoordinates = SpatialService.fromViewCoordinate((missingFeature.getGeometry() as geom.Point).getCoordinates());
         });
