@@ -1,4 +1,4 @@
-﻿<div *ngFor="let route of (routes | async)">
+﻿<div *ngFor="let route of (routes$ | async)">
     <aol-layer-vector *ngIf="route.state != 'Hidden'">
         <aol-source-vector>
             <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegment(route, idx)">
@@ -38,16 +38,11 @@
                     </aol-style>
                 </aol-feature>
             </div>
-                <aol-feature *ngFor="let marker of route.markers; let idx = index" [id]="getIdForMarker(route, idx)">
-                    <aol-geometry-point>
-                        <aol-coordinate [x]="marker.latlng.lng" [y]="marker.latlng.lat" [srid]="'EPSG:4326'"></aol-coordinate>
-                    </aol-geometry-point>
-                    <aol-style>
-                        <aol-style-circle [radius]="6">
-                            <aol-style-stroke [color]="getColor(route)" [width]="3"></aol-style-stroke>
-                        </aol-style-circle>
-                    </aol-style>
-                </aol-feature>
+            <aol-feature *ngFor="let marker of route.markers; let idx = index" [id]="getIdForMarker(route, idx)" #markers>
+                <aol-geometry-point>
+                    <aol-coordinate [x]="marker.latlng.lng" [y]="marker.latlng.lat" [srid]="'EPSG:4326'"></aol-coordinate>
+                </aol-geometry-point>
+            </aol-feature>
         </aol-source-vector>
     </aol-layer-vector>
     <div *ngIf="route.state != 'Hidden'">

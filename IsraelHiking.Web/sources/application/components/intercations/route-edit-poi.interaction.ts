@@ -50,6 +50,13 @@ export class RouteEditPoiInteraction extends interaction.Interaction {
         return route.id + MARKER + index;
     }
 
+    public static getRouteAndMarkerIndex(id: string): { routeId: string, index: number } {
+        return {
+            routeId: id.split(MARKER)[0],
+            index: +id.split(MARKER)[1]
+        };
+    }
+
     private handleDown(event): boolean {
         this.dragging = false;
         let snapping = this.getSnappingForPoint(SpatialService.fromViewCoordinate(event.coordinate));

@@ -4,41 +4,14 @@
                     [srid]="'EPSG:4326'">
     </aol-coordinate>
     <aol-content>
-        <div class="marker-popup" [dir]="resources.direction">
-            <h4 [ngClass]="resources.getTextAlignment(marker.title)" class="title-no-margin" [dir]="resources.getDirection(marker.title)">{{marker.title}}<a *ngIf="hasExtraData && !isExpanded" (click)="expand()">...</a></h4>
-            <div fxLayout="row" *ngIf="isExpanded">
-                <p fxFill [ngClass]="resources.getTextAlignment(marker.description)" [dir]="resources.getDirection(marker.description)">
-                    <img *ngIf="imageLink"
-                         [src]="resources.getResizedImageUrl(imageLink.url, 300)"
-                         class="img-placeholder cursor-zoom-in"
-                         [style.float]="resources.getImageFloat(marker.description)" 
-                         (click)="showImage()"/>
-                    <i *ngIf="!imageLink"
-                       class="fa fa-5x img-placeholder icon-camera flex-center"
-                       [style.float]="resources.getImageFloat(marker.description)">
-                    </i>
-                    <ng-container>
-                        {{marker.description}}<br />
-                    </ng-container>
-                </p>
-            </div>
-            <div fxLayout="row" *ngIf="isExpanded">
-                <div fxFlex>
-                    <button mat-button type="button" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
-                </div>
-                <div fxFlex *ngIf="showUploadPointButton()">
-                    <button mat-button type="button" (click)="uploadPoint()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
-                </div>
-                <div fxFlex>
-                    <button mat-button type="button" (click)="changeToEditMode()" matTooltip="{{resources.editPoi}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Edit POI from POI" fxFill><i class="fa icon-pencil"></i></button>
-                </div>
-                <div fxFlex>
-                    <button mat-button type="button" (click)="collapse()" matTooltip="{{resources.collapse}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Drawing" angularticsAction="Collapse" fxFill><i class="fa icon-arrow-up"></i></button>
-                </div>
-            </div>
-            <div *ngIf="!hideCoordinates">
-                <coordinates [latlng]="marker.latlng"></coordinates>
-            </div>
+        <div class="marker-popup" [dir]="resources.direction" (click)="overlayClick()">
+            <span [ngClass]="resources.getTextAlignment(marker.title)" class="title-no-margin" [dir]="resources.getDirection(marker.title)">
+                <img *ngIf="imageLink"
+                     [src]="resources.getResizedImageUrl(imageLink.url, 200)"
+                     class="img-placeholder" />
+                {{marker.title}}
+                <span *ngIf="marker.description">...</span>
+            </span>
         </div>
     </aol-content>
 </aol-overlay>

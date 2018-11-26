@@ -1,6 +1,6 @@
-import { Component, AfterViewInit } from "@angular/core";
-import { MapComponent } from "ngx-openlayers";
-import { Coordinate } from "openlayers";
+import { Component, AfterViewInit, ViewChildren, QueryList, ChangeDetectorRef, OnChanges, SimpleChanges } from "@angular/core";
+import { MapComponent, FeatureComponent } from "ngx-openlayers";
+import { Coordinate, style } from "openlayers";
 import { select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import parse from "color-parse";
@@ -10,7 +10,9 @@ import { SpatialService } from "../../services/spatial.service";
 import { RouteEditPoiInteraction } from "../intercations/route-edit-poi.interaction";
 import { RouteEditRouteInteraction } from "../intercations/route-edit-route.interaction";
 import { SnappingService } from "../../services/snapping.service";
-import { LatLngAlt, ApplicationState, RouteData, RouteSegmentData, ICoordinate } from "../../models/models";
+import { LatLngAlt, ApplicationState, RouteData, RouteSegmentData } from "../../models/models";
+import { BaseMapComponent } from "../base-map.component";
+import { ResourcesService } from "../../services/resources.service";
 
 interface RoutePointViewData {
     latlng: LatLngAlt;
@@ -21,18 +23,23 @@ interface RoutePointViewData {
     selector: "routes",
     templateUrl: "./routes.component.html"
 })
-export class RoutesComponent implements AfterViewInit {
+export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
     @select((state: ApplicationState) => state.routes.present)
-    public routes: Observable<RouteData[]>;
+    public routes$: Observable<RouteData[]>;
+
+    @ViewChildren("markers")
+    public routeMarkers: QueryList<FeatureComponent>;
 
     public hoverViewCoordinates: Coordinate;
     public routePointPopupData: RoutePointViewData;
 
-    constructor(private readonly selectedRouteService: SelectedRouteService,
+    constructor(resources: ResourcesService,
+        private readonly selectedRouteService: SelectedRouteService,
         private readonly host: MapComponent,
         private readonly routeEditPoiInteraction: RouteEditPoiInteraction,
         private readonly routeEditRouteInteraction: RouteEditRouteInteraction,
         private readonly snappingService: SnappingService) {
+        super(resources);
         this.hoverViewCoordinates = null;
 
         this.routeEditRouteInteraction.onRoutePointClick.subscribe((pointIndex: number) => {
@@ -56,23 +63,67 @@ export class RoutesComponent implements AfterViewInit {
             this.hoverViewCoordinates = SpatialService.toViewCoordinate(latLng);
         });
 
-        this.routes.subscribe(() => {
+        this.routes$.subscribe(() => {
             this.routeEditPoiInteraction.setActive(false);
             this.routeEditRouteInteraction.setActive(false);
             this.snappingService.enable(this.isEditMode());
             if (!this.isEditMode()) {
                 this.hoverViewCoordinates = null;
             }
-            let selectedRoute = this.selectedRouteService.getSelectedRoute();
-            if (selectedRoute == null) {
-                return;
-            }
-            if (selectedRoute.state === "Poi") {
-                this.routeEditPoiInteraction.setActive(true);
-            } else if (selectedRoute.state === "Route") {
-                this.routeEditRouteInteraction.setActive(true);
-            }
+            this.setInteractionAccordingToState();
         });
+    }
+
+    private setInteractionAccordingToState() {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute == null) {
+            return;
+        }
+        if (selectedRoute.state === "Poi") {
+            this.routeEditPoiInteraction.setActive(true);
+        } else if (selectedRoute.state === "Route") {
+            this.routeEditRouteInteraction.setActive(true);
+        }
+    }
+
+    private getMarkerIconStyle(feature: FeatureComponent) {
+        let routeIdAndMarkerIndex = RouteEditPoiInteraction.getRouteAndMarkerIndex(feature.instance.getId().toString());
+        let route = this.selectedRouteService.getRouteById(routeIdAndMarkerIndex.routeId);
+        let marker = route.markers[routeIdAndMarkerIndex.index];
+        let icon = "icon-" + (marker.type || "star");
+        return [
+            new style.Style({
+                text: new style.Text({
+                    font: "normal 32px IsraelHikingMap",
+                    text: this.resources.getCharacterForIcon("icon-map-marker"),
+                    fill: new style.Fill({
+                        color: "rgba(0,0,0,0.5)"
+                    }),
+                    offsetY: -12,
+                    offsetX: 2
+                }),
+            }),
+            new style.Style({
+                text: new style.Text({
+                    font: "normal 32px IsraelHikingMap",
+                    text: this.resources.getCharacterForIcon("icon-map-marker"),
+                    fill: new style.Fill({
+                        color: route.color
+                    }),
+                    offsetY: -14
+                }),
+            }),
+            new style.Style({
+                text: new style.Text({
+                    font: "normal 18px IsraelHikingMap",
+                    text: this.resources.getCharacterForIcon(icon),
+                    offsetY: -16,
+                    fill: new style.Fill({
+                        color: "white"
+                    })
+                }),
+            })
+        ];
     }
 
     public ngAfterViewInit(): void {
@@ -80,6 +131,11 @@ export class RoutesComponent implements AfterViewInit {
         this.routeEditRouteInteraction.setActive(false);
         this.host.instance.addInteraction(this.routeEditPoiInteraction);
         this.host.instance.addInteraction(this.routeEditRouteInteraction);
+        this.setInteractionAccordingToState();
+        this.routeMarkers.forEach(m => m.instance.setStyle(this.getMarkerIconStyle(m)));
+        this.routeMarkers.changes.subscribe(() => {
+            this.routeMarkers.forEach(m => m.instance.setStyle(this.getMarkerIconStyle(m)));
+        });
     }
 
     private isEditMode(): boolean {
