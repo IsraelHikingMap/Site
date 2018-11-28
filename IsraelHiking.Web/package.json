@@ -52,6 +52,7 @@
     "redux-undo": "1.0.0-beta9-9-7",
     "rxjs": "6.2.1",
     "rxjs-compat": "6.2.1",
+    "worker-pouch": "^2.1.0",
     "zone.js": "0.8.26"
   },
   "devDependencies": {

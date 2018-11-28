@@ -44,7 +44,7 @@ import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule, NgRedux } from "@angular-redux/store";
 import { AngularOpenlayersModule } from "ngx-openlayers";
 import PouchDB from "pouchdb";
-
+import WorkerPouch from "worker-pouch";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -145,7 +145,8 @@ import { classToActionMiddleware } from "./reducres/reducer-action-decorator";
 export function initializeApplication(injector: Injector) {
     return async () => {
         console.log("Starting IHM Application Initialization");
-        let database = new PouchDB("IHM");
+        (PouchDB as any).adapter("worker", WorkerPouch);
+        let database = new PouchDB("IHM", {adapter: "worker"});
         let storedState = initialState;
         try {
             let dbState = await database.get("state") as any;
