@@ -182,6 +182,9 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
 
     public getSegmentRotation(segment: RouteSegmentData) {
         let last = segment.latlngs.length - 1;
+        if (last === 0) {
+            return 0;
+        }
         let dx = segment.latlngs[last].lng - segment.latlngs[last - 1].lng;
         let dy = segment.latlngs[last].lat - segment.latlngs[last - 1].lat;
         return -Math.atan2(dy, dx);
