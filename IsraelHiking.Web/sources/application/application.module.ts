@@ -45,6 +45,7 @@ import { NgReduxModule, NgRedux } from "@angular-redux/store";
 import { AngularOpenlayersModule } from "ngx-openlayers";
 import PouchDB from "pouchdb";
 import WorkerPouch from "worker-pouch";
+import FontFaceObserver from "fontfaceobserver";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -145,6 +146,8 @@ import { classToActionMiddleware } from "./reducres/reducer-action-decorator";
 export function initializeApplication(injector: Injector) {
     return async () => {
         console.log("Starting IHM Application Initialization");
+        let font = new FontFaceObserver("IsraelHikingMap");
+        await font.load();
         (PouchDB as any).adapter("worker", WorkerPouch);
         let database = new PouchDB("IHM", {adapter: "worker"});
         let storedState = initialState;
