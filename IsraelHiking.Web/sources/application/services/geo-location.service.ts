@@ -1,8 +1,8 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
 
-import { environment } from "../../environments/environment";
 import { ResourcesService } from "./resources.service";
 import { ILatLngTime } from "../models/models";
+import { RunningContextService } from "./running-context.service";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 
@@ -33,6 +33,7 @@ export class GeoLocationService {
     public currentLocation: ILatLngTime;
 
     constructor(private readonly resources: ResourcesService,
+        private readonly runningContextService: RunningContextService,
         private readonly ngZone: NgZone) {
         this.watchNumber = -1;
         this.positionChanged = new EventEmitter<Position>();
@@ -71,12 +72,12 @@ export class GeoLocationService {
     }
 
     public canRecord(): boolean {
-        return this.state === "tracking" && this.currentLocation != null && environment.isCordova;
+        return this.state === "tracking" && this.currentLocation != null && this.runningContextService.isCordova;
     }
 
     private startWatching() {
         this.state = "searching";
-        if (environment.isCordova) {
+        if (this.runningContextService.isCordova) {
             this.configureBackgroundService();
             BackgroundGeolocation.start();
         } else {
@@ -111,7 +112,7 @@ export class GeoLocationService {
     private stopWatching() {
         this.state = "disabled";
         this.currentLocation = null;
-        if (environment.isCordova) {
+        if (this.runningContextService.isCordova) {
             BackgroundGeolocation.stop();
         } else {
             this.stopNavigator();
@@ -126,7 +127,7 @@ export class GeoLocationService {
     }
 
     private configureBackgroundService() {
-        if (!environment.isCordova) {
+        if (!this.runningContextService.isCordova) {
             return;
         }
 
