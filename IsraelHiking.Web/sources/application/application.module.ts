@@ -151,25 +151,31 @@ export function initializeApplication(injector: Injector) {
         (PouchDB as any).adapter("worker", WorkerPouch);
         let database = new PouchDB("IHM", {adapter: "worker"});
         let storedState = initialState;
-        try {
-            let dbState = await database.get("state") as any;
-            storedState = dbState.state;
-        } catch (ex) {
-            // not state.
-            (database as any).put({
-                _id: "state",
-                state: initialState
-            });
-        }
+        let runningContext = injector.get<RunningContextService>(RunningContextService);
         // tslint:disable-next-line
         let ngRedux = injector.get(NgRedux) as NgRedux<ApplicationState>;
-        ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
-        ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state) => {
-            console.log(state);
-            let dbState = await database.get("state") as any;
-            dbState.state = state;
-            (database as any).put(dbState);
-        });
+        if (runningContext.isIFrame) {
+            console.log("Running IHM inside IFrame");
+            ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
+        } else {
+            try {
+                let dbState = await database.get("state") as any;
+                storedState = dbState.state;
+            } catch (ex) {
+                // not state.
+                (database as any).put({
+                    _id: "state",
+                    state: initialState
+                });
+            }
+            ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
+            ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state) => {
+                console.log(state);
+                let dbState = await database.get("state") as any;
+                dbState.state = state;
+                (database as any).put(dbState);
+            });
+        }
         try {
             await injector.get<DataContainerService>(DataContainerService).initialize();
             injector.get<DeepLinksService>(DeepLinksService).initialize();
