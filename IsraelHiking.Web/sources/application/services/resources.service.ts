@@ -237,6 +237,7 @@ export class ResourcesService {
     public clearBoth: string;
     public collapse: string;
     public local: string;
+    public northUp: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -705,6 +706,7 @@ export class ResourcesService {
         this.clearBoth = this.gettextCatalog.getString("Clear both");
         this.collapse = this.gettextCatalog.getString("Collapse");
         this.local = this.gettextCatalog.getString("Local");
+        this.northUp = this.gettextCatalog.getString("North-Up");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");

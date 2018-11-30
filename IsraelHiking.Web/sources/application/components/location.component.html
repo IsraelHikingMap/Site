@@ -6,7 +6,7 @@
             <mat-spinner diameter="24"></mat-spinner>
         </div>
     </button>
-    <button mat-button (click)="resetRotation()"><div [style.transform]="getRotationAngle()"><i class="icon-north"></i></div></button>
+    <button mat-button (click)="resetRotation()"><div [style.transform]="getRotationAngle()" matTooltip="{{resources.northUp}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Location" angularticsAction="North Up"><i class="icon-north"></i></div></button>
     <button mat-button *ngIf="canRecord()" (click)="toggleRecording()">
         <i *ngIf="!isRecording()" class="fa fa-lg icon-circle recording-button"></i>
         <i *ngIf="isRecording()" class="fa fa-lg icon-square"></i>
