@@ -92,7 +92,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         }
         if (this.selectedPoiFeature != null) {
             // HM TODO: Should be done using observation on state update?
-            this.selectedPoiFeature.instance.setStyle(this.getPoiIconStyle(poi.icon, poi.iconColor));
+            this.selectedPoiFeature.instance.setStyle(this.getPoiIconStyle(poi.icon, poi.iconColor, poi.hasExtraData));
         }
         return poi;
     }
@@ -105,7 +105,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                 let features = this.categoriesLayerFactory.get(categoriesType).pointsOfInterest.map(p => {
                     let feature = new Feature(new geom.Point(SpatialService.toViewCoordinate(p.location)));
                     feature.setId(p.source + "__" + p.id);
-                    feature.setProperties({ icon: p.icon, iconColor: p.iconColor, name: p.title });
+                    feature.setProperties({ icon: p.icon, iconColor: p.iconColor, name: p.title, hasExtraData: p.hasExtraData });
                     return feature;
                 });
                 if (index < this.poiLayers.toArray().length) {
@@ -181,7 +181,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         }
         if (size === 1) {
             let featureProperties = (feature.get("features")[0] as Feature).getProperties();
-            return this.getPoiIconStyle(featureProperties.icon, featureProperties.iconColor);
+            return this.getPoiIconStyle(featureProperties.icon, featureProperties.iconColor, featureProperties.hasExtraData);
         }
 
         let color = {
@@ -224,8 +224,11 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         ];
     }
 
-    private getPoiIconStyle(icon: string, iconColor: string) {
-        return [
+    private getPoiIconStyle(icon: string, iconColor: string, hasExtraData: boolean) {
+        let iconFill = new style.Fill({
+            color: iconColor
+        });
+        let styleArray = [
             new style.Style({
                 text: new style.Text({
                     font: "normal 32px IsraelHikingMap",
@@ -250,12 +253,24 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                     font: "normal 20px IsraelHikingMap",
                     text: this.resources.getCharacterForIcon(icon),
                     offsetY: -16,
-                    fill: new style.Fill({
-                        color: iconColor
-                    })
+                    fill: iconFill
                 }),
             })
         ];
+        if (hasExtraData) {
+            styleArray.push(
+                new style.Style({
+                    text: new style.Text({
+                        font: "normal 6px IsraelHikingMap",
+                        text: this.resources.getCharacterForIcon("icon-circle"),
+                        offsetY: -24,
+                        offsetX: 10,
+                        fill: iconFill
+                    }),
+                })
+            );
+        }
+        return styleArray;
     }
 
     private getSourceAndId(sourceAndId: string): { source: string, id: string } {
