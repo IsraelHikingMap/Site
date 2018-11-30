@@ -28,6 +28,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     public imageLink: LinkData;
 
     public showIcons: boolean;
+    public showCoordinates: boolean;
     public title: string;
     public markerType: string;
     public description: string;
@@ -44,6 +45,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         this.showIcons = false;
+        this.showCoordinates = false;
         this.iconsGroups = [];
         let icons = [
             "star", "arrow-left", "arrow-right", "tint",
@@ -66,7 +68,10 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
             // this is to trigger changes otherwise there's an error: Expression has changed after it was checked
             this.focusTitle();
         }, 25);
+    }
 
+    public toggleCoordinates() {
+        this.showCoordinates = !this.showCoordinates;
     }
 
     private focusTitle() {
@@ -91,7 +96,6 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
     }
 
     public save = () => {
-
         let updatedMarker = {
             title: this.title,
             description: this.description,

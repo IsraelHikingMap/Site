@@ -10,8 +10,6 @@ import {
     UserState
 } from "../models";
 
-// HM TODO: add version?
-
 export interface ApplicationState {
     configuration: Configuration;
     location: Location;

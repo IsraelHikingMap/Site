@@ -152,6 +152,7 @@ export class FileService {
                 this.nonAngularObjectsFactory.saveAs(blob, fileName);
                 resolve(false);
             }
+            // HM TODO: remove this?
             // } else if (L.Browser.mobile) {
             //    let reader = new FileReader();
             //    reader.onload = () => {
