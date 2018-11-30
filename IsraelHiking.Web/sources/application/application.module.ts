@@ -219,7 +219,7 @@ export function getWindow() { return window; }
         FlexLayoutModule,
         ClipboardModule,
         RouterModule.forRoot(routes),
-        Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
+        Angulartics2Module.forRoot(),
         NgProgressModule.forRoot(),
         NgProgressHttpModule,
         NgxPaginationModule,
@@ -375,5 +375,6 @@ export function getWindow() { return window; }
 export class ApplicationModule {
     constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
         dragAndDropService: DragAndDropService) {
+        angulartics2GoogleAnalytics.startTracking();
     }
 }
