@@ -85,12 +85,20 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
         let selectedRoute = this.selectedRouteService.getSelectedRoute();
         this.selectedRoutePoint = features.find(f =>
             f.getId() &&
-            (f.getId() as string).indexOf(selectedRoute.id + SEGMENT_POINT) !== -1 &&
+            f.getId().toString().indexOf(selectedRoute.id + SEGMENT_POINT) !== -1 &&
             f.getGeometry() instanceof geom.Point);
-        this.selectedRouteSegments = features.filter(f =>
-            f.getId() &&
-            (f.getId() as string).indexOf(selectedRoute.id + SEGMENT) !== -1 &&
-            f.getGeometry() instanceof geom.LineString);
+        if (this.selectedRoutePoint != null) {
+            let pointIndex = this.getPointIndex();
+            let segments = (event.map.getFeaturesAtPixel(pixel, { hitTolerance: 100 }) || []) as Feature[];
+            this.selectedRouteSegments = segments.filter(f =>
+                f.getId() &&
+                f.getId().toString().indexOf(selectedRoute.id + SEGMENT) !== -1 &&
+                f.getGeometry() instanceof geom.LineString && 
+                (this.getSegmentIndex(f) === pointIndex || this.getSegmentIndex(f) === pointIndex + 1));
+        } else {
+            this.selectedRouteSegments = [];
+        }
+       
         if (this.selectedRoutePoint == null) {
             this.onRoutePointClick.emit(null);
         } else {
@@ -128,10 +136,10 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
                 let start = (segmentStart.getGeometry() as geom.LineString).getCoordinates()[0];
                 segmentStart.setGeometry(new geom.LineString([start, coordinate]));
             }
-        } else {
+        } else if (this.selectedRouteSegments.length === 1) {
             let segmentStart = this.selectedRouteSegments[0];
             let start = (segmentStart.getGeometry() as geom.LineString).getCoordinates()[0];
-            segmentStart.setGeometry(new geom.LineString([start, event.coordinate]));
+            segmentStart.setGeometry(new geom.LineString([start, coordinate]));
         }
         return false;
     }
@@ -271,7 +279,12 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
     }
 
     private getPointIndex() {
-        let splitStr = (this.selectedRoutePoint.getId() as string).split(SEGMENT_POINT);
+        let splitStr = this.selectedRoutePoint.getId().toString().split(SEGMENT_POINT);
+        return +splitStr[1];
+    }
+
+    private getSegmentIndex(segment: Feature) {
+        let splitStr = segment.getId().toString().split(SEGMENT);
         return +splitStr[1];
     }
 
