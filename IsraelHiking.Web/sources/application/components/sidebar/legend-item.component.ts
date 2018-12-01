@@ -20,7 +20,7 @@ export interface ILegendItem {
 @Component({
     selector: "legend-item",
     templateUrl: "./legend-item.component.html",
-    styleUrls: ["./legend-item.component.css"]
+    styleUrls: ["./legend-item.component.scss"]
 })
 export class LegendItemComponent extends BaseMapComponent {
 

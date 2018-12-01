@@ -9,7 +9,7 @@ import { Urls } from "../../urls";
 @Component({
     selector: "missing-part-overlay",
     templateUrl: "./missing-part-overlay.component.html",
-    styleUrls: ["./missing-part-overlay.component.css"]
+    styleUrls: ["./missing-part-overlay.component.scss"]
 })
 export class MissingPartOverlayComponent extends ClosableOverlayComponent {
     @Input()

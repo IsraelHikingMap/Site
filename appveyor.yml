@@ -3,6 +3,7 @@ clone_depth: 1
 image: Visual Studio 2017
 configuration: Release
 environment:
+    appveyor_build_worker_cloud: gce
     ANDROID_HOME: C:\Program Files (x86)\Android\android-sdk
     GRADLE_OPTS: "-Dorg.gradle.daemon=false"
     STORE_PASSWORD:
