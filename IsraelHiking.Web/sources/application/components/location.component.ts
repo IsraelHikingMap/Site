@@ -16,7 +16,7 @@ import { SelectedRouteService } from "../services/layers/routelayers/selected-ro
 import { AddRouteAction, StopRecordingAction } from "../reducres/routes.reducer";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
 import { SpatialService } from "../services/spatial.service";
-import { RouteData, ApplicationState, LatLngAlt, Trace, DataContainer, TraceVisibility } from "../models/models";
+import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
 import { AddTraceAction } from "../reducres/traces.reducer";
 import { FitBoundsService } from "../services/fit-bounds.service";
 
