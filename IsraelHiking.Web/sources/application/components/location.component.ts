@@ -13,7 +13,7 @@ import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.fa
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { DragInteraction } from "./intercations/drag.interaction";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
-import { AddRouteAction, StopRecordingAction } from "../reducres/routes.reducer";
+import { AddRouteAction, StopRecordingAction, AddRecordingPointAction } from "../reducres/routes.reducer";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
 import { SpatialService } from "../services/spatial.service";
 import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
@@ -92,14 +92,18 @@ export class LocationComponent extends BaseMapComponent {
             });
 
         this.geoLocationService.positionChanged.subscribe(
-            (position) => {
+            (position: Position) => {
                 if (position == null) {
                     this.toastService.warning(this.resources.unableToFindYourLocation);
                 } else {
                     this.updateMarkerPosition(position);
                     let recordingRoute = this.selectedRouteService.getRouteById(this.recordingRouteId);
                     if (recordingRoute != null && recordingRoute.isRecording) {
-                        this.lastRecordedRoute = recordingRoute;
+                        this.ngRedux.dispatch(new AddRecordingPointAction({
+                            routeId: recordingRoute.id,
+                            latlng: this.geoLocationService.currentLocation
+                        }));
+                        this.lastRecordedRoute = this.selectedRouteService.getRouteById(this.recordingRouteId);
                     }
                 }
             });
@@ -234,6 +238,7 @@ export class LocationComponent extends BaseMapComponent {
         }
         this.locationCoordinate.lng = position.coords.longitude;
         this.locationCoordinate.lat = position.coords.latitude;
+        this.locationCoordinate.alt = position.coords.altitude;
         this.locationCoordinate.radius = position.coords.accuracy;
         if (this.isFollowing) {
             this.setLocation();
