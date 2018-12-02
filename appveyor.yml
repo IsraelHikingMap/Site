@@ -16,6 +16,8 @@ environment:
 install:
 - ps: >-
     npm install -g npm@6.2.0 --loglevel=error
+
+    npm install -g increase-memory-limit
         
     node --version
 

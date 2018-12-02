@@ -165,6 +165,7 @@ namespace IsraelHiking.API.Tests.Controllers
             Assert.IsNotNull(content);
             Assert.AreEqual(10, content.Id.Length);
             task.Wait();
+            Task.Delay(100).Wait(); // just to make sure the ContinueWith finishes to run... not a great workaround...
             _repository.Received(1).Update(Arg.Is<ShareUrl>(x => x.DataContainer.Routes.First().Markers.First().Urls.First().Url == url));
         }
 
