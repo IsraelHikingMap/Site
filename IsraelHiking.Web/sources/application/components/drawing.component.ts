@@ -2,7 +2,6 @@ import { Component, HostListener } from "@angular/core";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { ActionCreators } from "redux-undo";
-import { ESCAPE } from "@angular/cdk/keycodes";
 
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -41,9 +40,9 @@ export class DrawingComponent extends BaseMapComponent {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
-        if ($event.ctrlKey && String.fromCharCode($event.which).toLowerCase() === "z") {
+        if ($event.ctrlKey && $event.key.toLowerCase() === "z") {
             this.undo();
-        } else if ($event.keyCode === ESCAPE) {
+        } else if ($event.key === "Escape") {
             if (this.isPoiEditActive()) {
                 this.toggleEditPoi();
             }

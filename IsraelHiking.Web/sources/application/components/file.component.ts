@@ -87,7 +87,7 @@ export class FileComponent extends BaseMapComponent {
         if ($event.ctrlKey === false) {
             return true;
         }
-        switch (String.fromCharCode($event.which).toLowerCase()) {
+        switch ($event.key.toLowerCase()) {
             case "o":
                 // this doesn't work on firefox due to security reasons. it does work in chrome and IE though.
                 this.openFileElement.nativeElement.click();

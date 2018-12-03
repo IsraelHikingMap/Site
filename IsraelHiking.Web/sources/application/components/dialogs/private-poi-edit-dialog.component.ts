@@ -1,7 +1,6 @@
 import { Component, ViewChild, ElementRef, AfterViewInit, HostListener } from "@angular/core";
 import { NgRedux } from "@angular-redux/store";
 import { MatDialogRef } from "@angular/material";
-import { ENTER } from "@angular/cdk/keycodes";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
@@ -145,7 +144,7 @@ export class PrivatePoiEditDialogComponent extends BaseMapComponent implements A
         if ($event.shiftKey) {
             return true;
         }
-        if ($event.keyCode !== ENTER) {
+        if ($event.key !== "Enter") {
             return true;
         }
         this.save();

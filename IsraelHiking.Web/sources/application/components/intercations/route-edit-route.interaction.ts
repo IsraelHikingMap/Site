@@ -1,4 +1,4 @@
-﻿import { Injectable, EventEmitter } from "@angular/core";
+import { Injectable, EventEmitter } from "@angular/core";
 
 import { MapBrowserEvent, interaction, Feature, geom } from "openlayers";
 import { NgRedux, select } from "@angular-redux/store";
@@ -93,12 +93,12 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
             this.selectedRouteSegments = segments.filter(f =>
                 f.getId() &&
                 f.getId().toString().indexOf(selectedRoute.id + SEGMENT) !== -1 &&
-                f.getGeometry() instanceof geom.LineString && 
+                f.getGeometry() instanceof geom.LineString &&
                 (this.getSegmentIndex(f) === pointIndex || this.getSegmentIndex(f) === pointIndex + 1));
         } else {
             this.selectedRouteSegments = [];
         }
-       
+
         if (this.selectedRoutePoint == null) {
             this.onRoutePointClick.emit(null);
         } else {

@@ -1,5 +1,4 @@
 ﻿import { Component, Input, HostListener, OnChanges } from "@angular/core";
-import { DELETE } from "@angular/cdk/keycodes";
 
 import { ResourcesService } from "../../services/resources.service";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
@@ -65,7 +64,7 @@ export class RoutePointOverlayComponent extends ClosableOverlayComponent impleme
 
     @HostListener("window:keydown", ["$event"])
     public onEnterPress($event: KeyboardEvent) {
-        if ($event.keyCode !== DELETE) {
+        if ($event.key !== "Delete") {
             return true;
         }
         this.remove();

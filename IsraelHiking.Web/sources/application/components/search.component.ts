@@ -12,7 +12,6 @@ import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
-import { ENTER } from "@angular/cdk/keycodes";
 import { remove } from "lodash";
 import { Coordinate } from "openlayers";
 import { NgRedux } from "@angular-redux/store";
@@ -246,13 +245,13 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     @HostListener("window:keydown", ["$event"])
     public onSearchShortcutKeys($event: KeyboardEvent) {
-        if ($event.keyCode === ENTER) {
+        if ($event.key === "Enter") {
             return this.handleEnterKeydown();
         }
         if ($event.ctrlKey === false) {
             return true;
         }
-        switch (String.fromCharCode($event.which).toLowerCase()) {
+        switch ($event.key.toLowerCase()) {
             case "f":
                 this.toggleVisibility();
                 break;
