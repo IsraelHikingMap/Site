@@ -35,6 +35,9 @@ Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
 Write-Host "npm install --loglevel=error"
 npm install --loglevel=error
 
+Write-Host "increase-memory-limit"
+increase-memory-limit
+
 Write-Host "npm run build -- --prod --no-progress"
 npm run build -- --prod --no-progress
 
