@@ -1,4 +1,4 @@
-import undoable, { UndoableOptions, excludeAction } from "redux-undo";
+import undoable, { UndoableOptions, includeAction } from "redux-undo";
 
 import { RouteData, MarkerData, RouteSegmentData, RouteStateName, ILatLngTime } from "../models/models";
 import { initialState } from "./initial-state";
@@ -90,7 +90,7 @@ export interface MergeRoutesPayload extends RoutePayload {
 }
 
 export interface AddRecordingPointPayload extends RoutePayload {
-   latlng: ILatLngTime;
+    latlng: ILatLngTime;
 }
 
 export class AddRouteAction extends BaseAction<AddRoutePayload> {
@@ -320,9 +320,9 @@ class RoutesReducer {
         return this.doForRoute(lastState,
             action.payload.routeId,
             (route) => ({
-                    ...route,
-                    segments: action.payload.segmentsData
-                } as RouteData
+                ...route,
+                segments: action.payload.segmentsData
+            } as RouteData
             ));
     }
 
@@ -367,7 +367,7 @@ class RoutesReducer {
     public reverseRoute(lastState: RouteData[], action: ReverseRouteAction): RouteData[] {
         return this.doForRoute(lastState,
             action.payload.routeId,
-            (route) => action.payload.routeData);
+            () => action.payload.routeData);
     }
 
     @ReduxAction(SPLIT_ROUTE)
@@ -410,8 +410,8 @@ class RoutesReducer {
         return this.doForRoute(lastState,
             action.payload.routeId,
             (route) => ({
-                    ...route,
-                    isRecording: false
+                ...route,
+                isRecording: false
             }));
     }
 
@@ -439,5 +439,22 @@ class RoutesReducer {
 
 export const routesReducer = undoable(createReducerFromClass(RoutesReducer, initialState.routes.present),
     {
-        filter: excludeAction([CHANGE_EDIT_STATE, ADD_RECORDING_POINT, STOP_RECORDING])
+        filter: includeAction([
+            ADD_ROUTE,
+            DELETE_ROUTE,
+            CHANGE_PROPERTIES,
+            ADD_POI,
+            UPDATE_POI,
+            DELETE_POI,
+            ADD_SEGMENT,
+            UPDATE_SEGMENTS,
+            REPLACE_SEGMENTS,
+            DELETE_SEGMENT,
+            CHANGE_VISIBILITY,
+            REVERSE_ROUTE,
+            SPLIT_ROUTE,
+            MERGE_ROUTES,
+            CLEAR_POIS,
+            CLEAR_POIS_AND_ROUTE
+        ])
     } as UndoableOptions);
