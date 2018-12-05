@@ -172,7 +172,7 @@ namespace IsraelHiking.API.Services.Osm
                 stream.CopyTo(memoryStream);
                 await _graphHopperGateway.Rebuild(memoryStream);
             }
-            _logger.LogInformation("Finished rebuilding POIs database.");
+            _logger.LogInformation("Finished rebuilding routing database.");
         }
 
 

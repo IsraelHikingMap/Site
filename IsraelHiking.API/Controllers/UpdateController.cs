@@ -78,11 +78,12 @@ namespace IsraelHiking.API.Controllers
                     };
                     _logger.LogInformation("No specific filters were applied, updating all databases.");
                 }
-                _logger.LogInformation("Updating site's databases according to request: " + JsonConvert.SerializeObject(request));
+                _logger.LogInformation("Starting updating site's databases according to request: " + JsonConvert.SerializeObject(request));
                 await _osmLatestFileFetcherExecutor.Update(request.OsmFile);
                 _logger.LogInformation("Update OSM file completed.");
 
                 await _elasticSearchUpdaterService.Rebuild(request);
+                _logger.LogInformation("Finished updating site's databases according to request");
                 return Ok();
             }
             finally
