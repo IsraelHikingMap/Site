@@ -1,5 +1,5 @@
 ﻿<div *ngFor="let route of (routes$ | async)">
-    <aol-layer-vector *ngIf="route.state != 'Hidden'">
+    <aol-layer-vector *ngIf="route.state != 'Hidden'"> <!-- HM TODO: add this [updateWhileAnimating]="true"-->
         <aol-source-vector>
             <aol-feature *ngFor="let segment of route.segments; let idx = index" [id]="getIdForSegment(route, idx)">
                 <aol-geometry-linestring>

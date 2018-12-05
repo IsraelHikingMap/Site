@@ -1,9 +1,9 @@
-import { Component, ViewChild } from "@angular/core";
+import { Component } from "@angular/core";
 import { LocalStorage } from "ngx-store";
 import { first } from "rxjs/operators";
 import { NgRedux } from "@angular-redux/store";
-import { geom, MapBrowserEvent, Feature } from "openlayers";
-import { MapComponent, FeatureComponent } from "ngx-openlayers";
+import { MapBrowserEvent, Feature } from "openlayers";
+import { MapComponent } from "ngx-openlayers";
 
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
@@ -15,7 +15,6 @@ import { DragInteraction } from "./intercations/drag.interaction";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { AddRouteAction, StopRecordingAction, AddRecordingPointAction } from "../reducres/routes.reducer";
 import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
-import { SpatialService } from "../services/spatial.service";
 import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
 import { AddTraceAction } from "../reducres/traces.reducer";
 import { FitBoundsService } from "../services/fit-bounds.service";
@@ -40,10 +39,6 @@ export class LocationComponent extends BaseMapComponent {
     private showBatteryConfirmation = true;
 
     private recordingRouteId: string;
-
-    // HM TODO: implement https://github.com/quentin-ol/ngx-openlayers/issues/208
-    @ViewChild("accuracyCircle")
-    public accuracyCircle: FeatureComponent;
 
     public locationCoordinate: ILocationInfo;
     public isFollowing: boolean;
@@ -248,14 +243,6 @@ export class LocationComponent extends BaseMapComponent {
                 rotation: - position.coords.heading * Math.PI / 180.0
             });
         }
-        if (this.accuracyCircle) {
-            this.accuracyCircle.instance.setGeometry(
-                new geom.Circle(SpatialService.toViewCoordinate(this.locationCoordinate),
-                    this.locationCoordinate.radius));
-        } else {
-            console.log("detect changes?");
-        }
-
     }
 
     private disableGeoLocation() {

@@ -13,7 +13,7 @@
     </button>
 </div>
 
-<aol-layer-vector *ngIf="locationCoordinate" [visible]="locationCoordinate != null">
+<aol-layer-vector *ngIf="locationCoordinate" [visible]="locationCoordinate != null"> <!--HM TODO: [updateWhileAnimating]="true"-->
     <aol-source-vector>
         <aol-feature [id]="'location'">
             <aol-geometry-point>
@@ -25,7 +25,10 @@
                 </aol-style-text>
             </aol-style>
         </aol-feature>
-        <aol-feature #accuracyCircle>
+        <aol-feature>
+            <aol-geometry-circle [radius]="locationCoordinate.radius">
+                <aol-coordinate [x]="locationCoordinate.lng" [y]="locationCoordinate.lat" [srid]="'EPSG:4326'"></aol-coordinate>
+            </aol-geometry-circle>
             <aol-style>
                 <aol-style-fill [color]="'rgba(19, 106, 224, 0.2)'"></aol-style-fill>
                 <aol-style-stroke [color]="'#136AEC'" [width]="2"></aol-style-stroke>
