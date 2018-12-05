@@ -1,9 +1,8 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
-import * as L from "leaflet";
 
-import { environment } from "../../environments/environment";
 import { ResourcesService } from "./resources.service";
-import * as Common from "../common/IsraelHiking";
+import { ILatLngTime } from "../models/models";
+import { RunningContextService } from "./running-context.service";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 
@@ -31,9 +30,10 @@ export class GeoLocationService {
     private isBackground: boolean;
     private rejectedPosition: Position;
     public positionChanged: EventEmitter<Position>;
-    public currentLocation: Common.ILatLngTime;
+    public currentLocation: ILatLngTime;
 
     constructor(private readonly resources: ResourcesService,
+        private readonly runningContextService: RunningContextService,
         private readonly ngZone: NgZone) {
         this.watchNumber = -1;
         this.positionChanged = new EventEmitter<Position>();
@@ -72,12 +72,12 @@ export class GeoLocationService {
     }
 
     public canRecord(): boolean {
-        return this.state === "tracking" && environment.isCordova;
+        return this.state === "tracking" && this.currentLocation != null && this.runningContextService.isCordova;
     }
 
     private startWatching() {
         this.state = "searching";
-        if (environment.isCordova) {
+        if (this.runningContextService.isCordova) {
             this.configureBackgroundService();
             BackgroundGeolocation.start();
         } else {
@@ -112,10 +112,10 @@ export class GeoLocationService {
     private stopWatching() {
         this.state = "disabled";
         this.currentLocation = null;
-        if (environment.isCordova) {
+        if (this.runningContextService.isCordova) {
             BackgroundGeolocation.stop();
         } else {
-            this.startNavigator();
+            this.stopNavigator();
         }
     }
 
@@ -127,7 +127,7 @@ export class GeoLocationService {
     }
 
     private configureBackgroundService() {
-        if (!environment.isCordova) {
+        if (!this.runningContextService.isCordova) {
             return;
         }
 
@@ -222,9 +222,12 @@ export class GeoLocationService {
     }
 
     private updatePositionAndRaiseEvent(position: Position) {
-        this.currentLocation =
-            L.latLng(position.coords.latitude, position.coords.longitude, position.coords.altitude) as Common.ILatLngTime;
-        this.currentLocation.timestamp = new Date(position.timestamp);
+        this.currentLocation = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            alt: position.coords.altitude,
+            timestamp: new Date(position.timestamp)
+        } as ILatLngTime;
 
         this.positionChanged.next(position);
     }

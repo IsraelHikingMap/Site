@@ -3,7 +3,7 @@ import { MatDialogRef } from "@angular/material";
 
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
-import { OsmUserService } from "../../services/osm-user.service";
+import { AuthorizationService } from "../../services/authorization.service";
 import { ToastService } from "../../services/toast.service";
 
 @Component({
@@ -17,7 +17,7 @@ export class TermsOfServiceDialogComponent extends BaseMapComponent {
 
     constructor(resources: ResourcesService,
         public dialogRef: MatDialogRef<TermsOfServiceDialogComponent>,
-        private osmUserService: OsmUserService,
+        private authorizationService: AuthorizationService,
         private toastService: ToastService) {
         super(resources);
 
@@ -28,7 +28,7 @@ export class TermsOfServiceDialogComponent extends BaseMapComponent {
     }
 
     public submit() {
-        this.osmUserService.login().then(() => { }, () => {
+        this.authorizationService.login().then(() => { }, () => {
             this.toastService.warning(this.resources.unableToLogin);
         });
     }

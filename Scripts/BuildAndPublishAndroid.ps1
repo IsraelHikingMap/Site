@@ -5,14 +5,22 @@ if (!$env:APPVEYOR_BUILD_VERSION) {
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
 
 # Building android:
+Write-Host "npm install --loglevel=error"
+npm install --loglevel=error
 
-$buildAndroidClient = "npm run build -- -c android --no-progress"
-Write-Host $buildAndroidClient
-Invoke-Expression $buildAndroidClient
+Write-Host "increase-memory-limit"
+increase-memory-limit
 
-$AddAndroid = "npm run add-android"
-Write-Host $AddAndroid
-Invoke-Expression $AddAndroid
+Write-Host "npm run build -- -c android --no-progress"
+npm run build -- -c android --no-progress
+
+if ($lastexitcode)
+{
+	throw $lastexitcode
+}
+
+Write-Host "npm run add-android"
+npm run add-android
 
 #Replace version in config.xml file
 
@@ -24,7 +32,7 @@ $xml.Save($filePath)
 
 
 Write-Host "npm run build-apk"
-Invoke-Expression "npm run build-apk"
+npm run build-apk
 
 $apkVersioned = ".\IHM_signed_$env:APPVEYOR_BUILD_VERSION.apk"
 

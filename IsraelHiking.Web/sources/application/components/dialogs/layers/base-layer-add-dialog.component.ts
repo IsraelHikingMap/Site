@@ -6,7 +6,7 @@ import { ResourcesService } from "../../../services/resources.service";
 import { MapService } from "../../../services/map.service";
 import { ToastService } from "../../../services/toast.service";
 import { LayersService } from "../../../services/layers/layers.service";
-import * as Common from "../../../common/IsraelHiking";
+import { LayerData } from "../../../models/models";
 
 @Component({
     selector: "baselayer-add-dialog",
@@ -25,8 +25,7 @@ export class BaseLayerAddDialogComponent extends LayerBaseDialogComponent {
         this.isOverlay = false;
     }
 
-    protected internalSave(layerData: Common.LayerData): void {
-        let layer = this.layersService.addBaseLayer(layerData);
-        this.layersService.selectBaseLayer(layer);
+    protected internalSave(layerData: LayerData): void {
+        this.layersService.addBaseLayer(layerData);
     }
 }

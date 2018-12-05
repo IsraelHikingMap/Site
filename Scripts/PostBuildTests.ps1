@@ -31,11 +31,26 @@ Invoke-Expression $OpenCoverCmd
 # Run tests using Karma and export results as JUnit and Lcov format
 
 Set-Location -Path "$($env:APPVEYOR_BUILD_FOLDER)\IsraelHiking.Web"
-Write-Host "npm run-script test -- --no-progress --code-coverage --watch=false"
-npm run-script test -- --no-progress --code-coverage --watch=false
 
-Write-Host "run-script lint - send warnings to appveyor"
-npm run-script lint | Select-String -Pattern 'ERROR:' | ForEach-Object { Add-AppveyorCompilationMessage -Message $_.line -Category Warning; }
+Write-Host "npm install --loglevel=error"
+npm install --loglevel=error
+
+Write-Host "increase-memory-limit"
+increase-memory-limit
+
+Write-Host "npm run build -- --prod --no-progress"
+npm run build -- --prod --no-progress
+
+if ($lastexitcode)
+{
+	throw $lastexitcode
+}
+
+Write-Host "run lint - send warnings to appveyor"
+npm run lint | Select-String -Pattern 'ERROR:' | ForEach-Object { Add-AppveyorCompilationMessage -Message $_.line -Category Warning; }
+
+Write-Host "npm run test -- --no-progress --code-coverage --watch=false"
+npm run test -- --no-progress --code-coverage --watch=false
 
 # Locate JUnit XML results file
 

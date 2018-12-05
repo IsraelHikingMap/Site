@@ -1,13 +1,14 @@
-﻿import { Component, OnInit, OnDestroy, NgZone } from "@angular/core";
+import { Component, OnInit, OnDestroy, NgZone } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
-import * as L from "leaflet";
+import { NgRedux } from "@angular-redux/store";
 
 import { HashService, RouteStrings, IPoiRouterData } from "../services/hash.service";
-import { MapService } from "../services/map.service";
 import { SidebarService } from "../services/sidebar.service";
 import { DataContainerService } from "../services/data-container.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
+import { ApplicationState } from "../models/models";
+import { SetLocationAction } from "../reducres/location.reducer";
 
 @Component({
     selector: "application-state",
@@ -20,19 +21,20 @@ export class ApplicationStateComponent implements OnInit, OnDestroy {
     constructor(private readonly router: Router,
         private readonly route: ActivatedRoute,
         private readonly hashService: HashService,
-        private readonly mapService: MapService,
         private readonly sidebarService: SidebarService,
         private readonly dataContainerService: DataContainerService,
-        private readonly fitBoundsService: FitBoundsService) {
+        private readonly fitBoundsService: FitBoundsService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         this.subscription = null;
     }
 
     public ngOnInit() {
         this.subscription = this.route.params.subscribe(params => {
             if (this.router.url.startsWith(RouteStrings.ROUTE_MAP)) {
-                if (!this.fitBoundsService.isFlying) {
-                    this.mapService.map.setView(L.latLng(+params[RouteStrings.LAT], +params[RouteStrings.LON]), +params[RouteStrings.ZOOM]);
-                }
+                this.fitBoundsService.flyTo({
+                    lng: +params[RouteStrings.LON],
+                    lat: +params[RouteStrings.LAT]
+                }, +params[RouteStrings.ZOOM]);
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SEARCH)) {
                 this.hashService.setApplicationState("search", decodeURIComponent(params[RouteStrings.TERM]));
             } else if (this.router.url.startsWith(RouteStrings.ROUTE_SHARE)) {

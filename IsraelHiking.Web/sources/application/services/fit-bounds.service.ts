@@ -1,27 +1,38 @@
-﻿import { Injectable } from "@angular/core";
-import * as L from "leaflet";
+import { Injectable } from "@angular/core";
 
-import { MapService } from "./map.service";
 import { SidebarService } from "./sidebar.service";
+import { IBounds, LatLngAlt } from "../models/models";
+import { MapService } from "./map.service";
+import { SpatialService } from "./spatial.service";
 
 @Injectable()
 export class FitBoundsService {
     public static readonly DEFAULT_MAX_ZOOM = 16;
     public isFlying: boolean;
 
-    constructor(private mapService: MapService,
-        private sidebarService: SidebarService) {
+    constructor(private readonly sidebarService: SidebarService,
+        private readonly mapService: MapService) {
         this.isFlying = false;
     }
 
-    public fitBounds(bounds: L.LatLngBounds, options: L.FitBoundsOptions = {}) {
-        options.paddingTopLeft = this.sidebarService.isVisible && this.mapService.map.getContainer().clientWidth >= 768
-            ? L.point(400, 50)
-            : L.point(50, 50);
+    public fitBounds(bounds: IBounds) {
+        let padding = [50, 50, 50, 50];
+        if (this.sidebarService.isVisible && window.innerWidth >= 768) {
+            padding = [50, -400, 50, 50];
+        }
+        this.mapService.map.getView().fit(SpatialService.boundsToViewExtent(bounds),
+            {
+                duration: 1000,
+                maxZoom: Math.max(this.mapService.map.getView().getZoom(), 16),
+                padding: padding
+            });
 
-        options.paddingBottomRight = L.point(50, 50);
-        this.isFlying = true;
-        this.mapService.map.once("moveend", () => this.isFlying = false);
-        this.mapService.map.flyToBounds(bounds, options);
+    }
+
+    public flyTo(latLng: LatLngAlt, zoom?: number) {
+        this.mapService.map.getView().animate({
+            center: SpatialService.toViewCoordinate(latLng),
+            zoom: zoom
+        });
     }
 }

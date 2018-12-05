@@ -57,7 +57,7 @@ namespace IsraelHiking.API.Services.Osm
             var createdElements = new List<OsmGeo>();
             var modifiedElement = new List<OsmGeo>();
             int generatedId = -1;
-            var nodeIds = new List<string>();
+            var newWayNodeIds = new List<string>();
             var highways = await GetHighwaysInArea(line);
             var itmHighways = highways.Select(ToItmLineString).ToList();
             var waysToUpdateIds = new List<long?>();
@@ -67,7 +67,7 @@ namespace IsraelHiking.API.Services.Osm
                 if (coordinateIndex > 0)
                 {
                     var previousCoordinate = line.Coordinates[coordinateIndex - 1];
-                    AddIntersectingNodes(previousCoordinate, coordinate, nodeIds, itmHighways, highways);
+                    AddIntersectingNodes(previousCoordinate, coordinate, newWayNodeIds, itmHighways, highways);
                 }
                 var closetHighway = GetClosetHighway(coordinate, itmHighways, highways);
                 if (closetHighway == null)
@@ -75,7 +75,7 @@ namespace IsraelHiking.API.Services.Osm
                     // no close highways, adding a new node
                     var node = new Node {Id = generatedId--, Latitude = coordinate.Y, Longitude = coordinate.X};
                     createdElements.Add(node);
-                    nodeIds.Add(node.Id.ToString());
+                    newWayNodeIds.Add(node.Id.ToString());
                     continue;
                 }
                 var itmPoint = GetItmCoordinate(coordinate);
@@ -83,25 +83,32 @@ namespace IsraelHiking.API.Services.Osm
                 var closestItmPointInWay = closestItmHighway.Coordinates.OrderBy(c => c.Distance(itmPoint.Coordinate)).First();
                 var indexOnWay = closestItmHighway.Coordinates.ToList().IndexOf(closestItmPointInWay);
                 var closestNodeId = ((List<object>)closetHighway.Attributes[FeatureAttributes.OSM_NODES])[indexOnWay].ToString();
-                if (!CanAddNewNode(nodeIds, closestNodeId))
+                if (!CanAddNewNode(newWayNodeIds, closestNodeId))
                 {
                     continue;
                 }
                 if (closestItmPointInWay.Distance(itmPoint.Coordinate) <= _options.MaxDistanceToExisitngLineForMerge)
                 {
-                    // close hihgway, adding the node id from that highway
-                    nodeIds.Add(closestNodeId);
+                    // close highway, adding the node id from that highway
+                    newWayNodeIds.Add(closestNodeId);
                     continue;
                 }
                 // need to add a new node to existing highway
                 var newNode = new Node {Id = generatedId--, Latitude = coordinate.Y, Longitude = coordinate.X};
                 createdElements.Add(newNode);
-                nodeIds.Add(newNode.Id.ToString());
-                var simpleWay = await AddNewNodeToExistingWay(newNode.Id.ToString(), closestItmHighway, indexOnWay, itmPoint);
+                newWayNodeIds.Add(newNode.Id.ToString());
+                var indexToInsert = GetIndexToInsert(indexOnWay, closestItmHighway, itmPoint);
+                if (modifiedElement.FirstOrDefault(w => w.Id.ToString() == closestItmHighway.GetOsmId()) is Way modifiedWay &&
+                    modifiedWay.Nodes[indexToInsert] < 0)
+                {
+                    // a new node was added to this highway - no reason to add a new one to the same location
+                    continue;
+                }
+                var simpleWay = await AddNewNodeToExistingWay(newNode.Id.ToString(), closestItmHighway.GetOsmId(), indexToInsert);
                 modifiedElement.Add(simpleWay);
                 waysToUpdateIds.Add(simpleWay.Id);
             }
-            var newWay = CreateWay(nodeIds, tags, generatedId--);
+            var newWay = CreateWay(newWayNodeIds, tags, generatedId--);
             createdElements.Add(newWay);
             waysToUpdateIds.Add(newWay.Id);
             
@@ -128,10 +135,17 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
+        /// <summary>
+        /// This method checks if a new node should and can be added
+        /// </summary>
+        /// <param name="nodeIds"></param>
+        /// <param name="newNodeId"></param>
+        /// <returns></returns>
         private static bool CanAddNewNode(List<string> nodeIds, string newNodeId)
         {
             if (nodeIds.Any() && nodeIds.Last() == newNodeId)
             {
+                // last node that was added had the same Id
                 return false;
             }
             if (nodeIds.Contains(newNodeId) && nodeIds.IndexOf(newNodeId) == nodeIds.Count - 2)
@@ -168,24 +182,28 @@ namespace IsraelHiking.API.Services.Osm
             }
         }
 
-        private async Task<Way> AddNewNodeToExistingWay(string nodeId, LineString closestItmHighway, int indexOnWay, Point itmPoint)
+        private async Task<Way> AddNewNodeToExistingWay(string nodeId, string wayId, int indexToInsert)
+        {
+            var simpleWay = await _osmGateway.GetWay(wayId);
+            var updatedList = simpleWay.Nodes.ToList();
+            updatedList.Insert(indexToInsert, long.Parse(nodeId));
+            simpleWay.Nodes = updatedList.ToArray();
+            return simpleWay;
+        }
+
+        private int GetIndexToInsert(int indexOnWay, LineString closestItmHighway, Point itmPoint)
         {
             var indexToInsert = indexOnWay;
             if (indexOnWay != closestItmHighway.Coordinates.Length - 1)
             {
                 // HM TODO: fix this using projection
-                var postItmLine = new LineString(new [] { closestItmHighway.Coordinates[indexOnWay], closestItmHighway.Coordinates[indexOnWay + 1] });
+                var postItmLine = new LineString(new[] { closestItmHighway.Coordinates[indexOnWay], closestItmHighway.Coordinates[indexOnWay + 1] });
                 if (postItmLine.Distance(itmPoint) <= _options.MaxDistanceToExisitngLineForMerge)
                 {
                     indexToInsert = indexOnWay + 1;
                 }
             }
-
-            var simpleWay = await _osmGateway.GetWay(closestItmHighway.GetOsmId());
-            var updatedList = simpleWay.Nodes.ToList();
-            updatedList.Insert(indexToInsert, long.Parse(nodeId));
-            simpleWay.Nodes = updatedList.ToArray();
-            return simpleWay;
+            return indexToInsert;
         }
 
         private async Task<List<Feature>> GetHighwaysInArea(LineString line)

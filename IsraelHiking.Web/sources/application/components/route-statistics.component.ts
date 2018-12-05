@@ -1,25 +1,33 @@
-﻿import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, AfterViewChecked } from "@angular/core";
+import { Component, ViewEncapsulation, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef, AfterViewChecked } from "@angular/core";
 import { trigger, style, transition, animate } from "@angular/animations";
-import { Subscription } from "rxjs";
+import { Subscription, Observable } from "rxjs";
 import { D3Service, Selection, BaseType, ScaleContinuousNumeric } from "d3-ng2-service";
-import * as L from "leaflet";
+import { select } from "@angular-redux/store";
 
-import { RoutesService } from "../services/layers/routelayers/routes.service";
+import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { ResourcesService } from "../services/resources.service";
 import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "../services/route-statistics.service";
 import { BaseMapComponent } from "./base-map.component";
-import { IRouteLayer } from "../services/layers/routelayers/iroute.layer";
-import { MapService } from "../services/map.service";
-import { IconsService } from "../services/icons.service";
 import { CancelableTimeoutService } from "../services/cancelable-timeout.service";
 import { SidebarService } from "../services/sidebar.service";
-import * as Common from "../common/IsraelHiking";
+import { SpatialService } from "../services/spatial.service";
+import { RunningContextService } from "../services/running-context.service";
+import { ICoordinate, LatLngAlt, RouteData, ApplicationState } from "../models/models";
 
 interface IMargin {
     top: number;
     bottom: number;
     left: number;
     right: number;
+}
+
+interface ICoordinateAndText extends ICoordinate {
+    text: string;
+}
+
+interface IChartHover extends ICoordinate {
+    isHovering: boolean;
+    color: string;
 }
 
 interface IChartElements {
@@ -30,7 +38,6 @@ interface IChartElements {
     dragRect: Selection<BaseType, {}, null, undefined>;
     xScale: ScaleContinuousNumeric<number, number>;
     yScale: ScaleContinuousNumeric<number, number>;
-    hoverChartMarker: L.Marker;
     margin: IMargin;
     width: number;
     height: number;
@@ -59,7 +66,6 @@ interface IChartElements {
             )]
         )
     ],
-
 })
 export class RouteStatisticsComponent extends BaseMapComponent implements OnInit, OnDestroy, AfterViewChecked {
     private static readonly HOVER_BOX_WIDTH = 140;
@@ -69,45 +75,47 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     public loss: number;
     public isKmMarkersOn: boolean;
     public isExpanded: boolean;
+    public kmMarkersCoordinates: ICoordinateAndText[];
+    public hover: IChartHover;
 
     @ViewChild("lineChartContainer")
     public lineChartContainer: ElementRef;
 
-    private routeLayer: IRouteLayer;
+    @select((state: ApplicationState) => state.routes.present)
+    private routes$: Observable<RouteData[]>;
+
     private statistics: IRouteStatistics;
     private chartElements: IChartElements;
-    private kmMarkersGroup: L.LayerGroup;
-    private routeLayerSubscriptions: Subscription[];
     private componentSubscriptions: Subscription[];
 
     constructor(resources: ResourcesService,
         private readonly changeDetectorRef: ChangeDetectorRef,
         private readonly d3Service: D3Service,
-        private readonly mapService: MapService,
-        private readonly routesService: RoutesService,
+        private readonly selectedRouteService: SelectedRouteService,
         private readonly routeStatisticsService: RouteStatisticsService,
         private readonly cancelableTimeoutService: CancelableTimeoutService,
         private readonly sidebarService: SidebarService,
+        private readonly runningContextService: RunningContextService
     ) {
         super(resources);
-
+        this.kmMarkersCoordinates = [];
         this.isKmMarkersOn = false;
         this.isExpanded = false;
-        this.routeLayer = null;
         this.statistics = null;
-        this.initalizeStatistics(null);
-        this.routeLayerSubscriptions = [];
+        this.initializeStatistics(null);
         this.componentSubscriptions = [];
-        this.kmMarkersGroup = L.layerGroup([] as L.Marker[]);
         this.chartElements = {
-            margin: { top: 20, right: L.Browser.mobile ? 10 : 50, bottom: 40, left: 70 },
-            hoverChartMarker: L.marker(mapService.map.getCenter(), { opacity: 0.0, draggable: false, clickable: false } as L.MarkerOptions)
+            margin: { top: 20, right: this.runningContextService.isMobile ? 10 : 50, bottom: 40, left: 70 },
         } as IChartElements;
-        this.mapService.map.addLayer(this.chartElements.hoverChartMarker);
-        this.mapService.map.addLayer(this.kmMarkersGroup);
+        this.hover = {
+            x: 0,
+            y: 0,
+            isHovering: false,
+            color: "black"
+        };
     }
 
-    private initalizeStatistics(statistics: IRouteStatistics): void {
+    private initializeStatistics(statistics: IRouteStatistics): void {
         if (statistics == null) {
             this.length = 0;
             this.gain = 0;
@@ -120,7 +128,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     public ngOnInit() {
-        this.componentSubscriptions.push(this.routesService.routeChanged.subscribe(() => {
+        this.componentSubscriptions.push(this.routes$.subscribe(() => {
             this.routeChanged();
         }));
         this.componentSubscriptions.push(this.resources.languageChanged.subscribe(() => {
@@ -150,9 +158,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         for (let subscription of this.componentSubscriptions) {
             subscription.unsubscribe();
         }
-        for (let subscription of this.routeLayerSubscriptions) {
-            subscription.unsubscribe();
-        }
     }
 
     public isSidebarVisible() {
@@ -170,8 +175,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         return Math.abs(number) > 1000 ? (number / 1000.0).toFixed(2) : number.toFixed(0);
     }
 
-    public toggle(e: Event): void {
-        this.suppressEvents(e);
+    public toggle(): void {
         this.routeStatisticsService.toggle();
         if (this.routeStatisticsService.isVisible()) {
             this.changeDetectorRef.detectChanges();
@@ -184,34 +188,33 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private routeChanged() {
-        for (let subscription of this.routeLayerSubscriptions) {
-            subscription.unsubscribe();
-        }
-        this.routeLayer = this.routesService.selectedRoute;
-        this.initalizeStatistics(null);
+        this.initializeStatistics(null);
         this.updateKmMarkers();
         this.setDataToChart([]);
-        if (this.routeLayer) {
-            this.onRouteDataChanged();
-            this.routeLayerSubscriptions.push(this.routeLayer.dataChanged.subscribe(this.onRouteDataChanged));
-            this.routeLayerSubscriptions.push(this.routeLayer.polylineHovered.subscribe(
-                    (latlng: L.LatLng) => this.onPolylineHover(latlng))
-            );
-        }
+        this.onRouteDataChanged();
+            // HM TODO: route hover event?
+            // this.routeLayerSubscriptions.push(this.routeLayer.polylineHovered.subscribe(
+            //    (latlng: LatLngAlt) => this.onPolylineHover(latlng))
+            // );
     }
 
     private onRouteDataChanged = () => {
-        this.statistics = this.routeStatisticsService.getStatistics(this.routesService.selectedRoute.getData());
-        this.initalizeStatistics(this.statistics);
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (!selectedRoute) {
+            return;
+        }
+        this.statistics = this.routeStatisticsService.getStatistics(selectedRoute);
+        this.initializeStatistics(this.statistics);
         if (this.isVisible()) {
             this.hideSubRouteSelection();
-            this.setRouteColorToChart(this.routeLayer.route.properties.pathOptions.color);
+            this.setRouteColorToChart(selectedRoute.color);
             this.setDataToChart(this.statistics.points.map(p => [p.x, p.y] as [number, number]));
         }
         this.updateKmMarkers();
     }
 
-    private onPolylineHover(latlng: L.LatLng) {
+    private onPolylineHover(latlng: LatLngAlt) {
+        // HM TODO: remove this?
         if (!this.statistics || !this.isVisible()) {
             return;
         }
@@ -239,7 +242,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let routeColor = "black";
         if (this.statistics != null) {
             data = this.statistics.points.map(p => [p.x, p.y]);
-            routeColor = this.routeLayer.route.properties.pathOptions.color;
+            routeColor = this.selectedRouteService.getSelectedRoute().color;
         }
 
         this.initChart();
@@ -255,7 +258,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     private hideChartHover() {
         this.chartElements.hoverGroup.style("display", "none");
-        this.chartElements.hoverChartMarker.setOpacity(0.0);
+        this.hover.isHovering = false;
     }
 
     private showChartHover(point: IRouteStatisticsPoint) {
@@ -275,8 +278,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         }
         this.chartElements.hoverGroup.select("g").attr("transform", `translate(${boxPosition}, 0)`);
         this.buildAllTextInHoverBox(point);
-        this.chartElements.hoverChartMarker.setLatLng(point.latlng);
-        this.chartElements.hoverChartMarker.setOpacity(1.0);
+        this.hover.x = point.latlng.lng;
+        this.hover.y = point.latlng.lat;
+        this.hover.isHovering = true;
     }
 
     private dragStart = () => {
@@ -478,8 +482,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     }
 
     private setRouteColorToChart(routeColor: string) {
-        let icon = IconsService.createRoundIcon(routeColor);
-        this.chartElements.hoverChartMarker.setIcon(icon);
+        this.hover.color = routeColor;
         this.chartElements.path.attr("stroke", routeColor);
         this.chartElements.hoverGroup.select(".circle-point").attr("fill", routeColor);
         this.chartElements.hoverGroup.select(".circle-point-aura").attr("stroke", routeColor);
@@ -507,31 +510,31 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             .duration(duration);
     }
 
-    public toggleKmMarker($event: Event) {
+    public toggleKmMarker() {
         this.isKmMarkersOn = !this.isKmMarkersOn;
         this.updateKmMarkers();
     }
 
     private updateKmMarkers() {
-        this.kmMarkersGroup.clearLayers();
-        if (this.routeLayer == null) {
+        this.kmMarkersCoordinates = [];
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute == null) {
             return;
         }
         if (this.isKmMarkersOn === false) {
             return;
         }
-        let routeData = this.routeLayer.getData();
-        if (routeData.segments.length <= 0) {
+        if (selectedRoute.segments.length <= 0) {
             return;
         }
 
-        let points = this.getKmPoints(routeData);
+        let points = this.getKmPoints(selectedRoute);
         for (let i = 0; i < points.length; i++) {
-            this.kmMarkersGroup.addLayer(this.createKmMarker(points[i], i));
+            this.kmMarkersCoordinates.push({ x: points[i].lng, y: points[i].lat, text: i.toString() });
         }
     }
 
-    private getKmPoints(routeData: Common.RouteData): L.LatLng[] {
+    private getKmPoints(routeData: RouteData): LatLngAlt[] {
 
         let length = 0;
         let start = routeData.segments[0].routePoint;
@@ -539,7 +542,7 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         let previousPoint = start;
         for (let segment of routeData.segments) {
             for (let latlng of segment.latlngs) {
-                let currentDistance = previousPoint.distanceTo(latlng);
+                let currentDistance = SpatialService.getDistanceInMeters(previousPoint, latlng);
                 length += currentDistance;
                 if (length < 1000) {
                     previousPoint = latlng;
@@ -551,28 +554,15 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
                     markersToAdd++;
                 }
                 let ratio = (currentDistance - length - 1000 * markersToAdd) / currentDistance;
-                results.push(this.interpolatePoint(previousPoint, latlng, ratio));
+                results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, ratio));
                 for (let i = 1; i <= markersToAdd; i++) {
                     let currentRatio = (i * 1000) / currentDistance + ratio;
-                    results.push(this.interpolatePoint(previousPoint, latlng, currentRatio));
+                    results.push(SpatialService.getLatlngInterpolatedValue(previousPoint, latlng, currentRatio));
                 }
                 previousPoint = latlng;
             }
         }
         return results;
-    }
-
-    private interpolatePoint(previousPoint: L.LatLng, currentPoint: L.LatLng, ratio: number): L.LatLng {
-        return L.latLng(previousPoint.lat + (currentPoint.lat - previousPoint.lat) * ratio,
-            previousPoint.lng + (currentPoint.lng - previousPoint.lng) * ratio);
-    }
-
-    private createKmMarker(latlng: L.LatLng, markerNumber: number): L.Marker {
-        return L.marker(latlng, {
-            clickable: false,
-            draggable: false,
-            icon: IconsService.createKmMarkerIcon(markerNumber)
-        } as L.MarkerOptions);
     }
 
     public toggleExpand() {
@@ -591,13 +581,13 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
         let start = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xStart));
         let end = this.routeStatisticsService.interpolateStatistics(this.statistics, this.chartElements.xScale.invert(xEnd));
-        let statistics = this.routeStatisticsService.getStatisticsByRange(this.routesService.selectedRoute.getData(), start, end);
-        this.initalizeStatistics(statistics);
+        let statistics = this.routeStatisticsService.getStatisticsByRange(this.selectedRouteService.getSelectedRoute(), start, end);
+        this.initializeStatistics(statistics);
     }
 
     private hideSubRouteSelection() {
         this.chartElements.dragRect.style("display", "none");
         this.chartElements.dragStartXCoordinate = null;
-        this.initalizeStatistics(this.statistics);
+        this.initializeStatistics(this.statistics);
     }
 }

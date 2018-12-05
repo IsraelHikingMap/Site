@@ -1,38 +1,32 @@
 import {
     Component,
-    Injector,
-    ComponentFactoryResolver,
     HostListener,
     ViewEncapsulation,
     AfterViewInit,
     ViewChild,
     ViewChildren,
     ElementRef,
-    ComponentFactory,
     QueryList
 } from "@angular/core";
 import { Router } from "@angular/router";
 import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
-import { ENTER } from "@angular/cdk/keycodes";
-import * as L from "leaflet";
-import * as _ from "lodash";
+import { remove } from "lodash";
+import { Coordinate } from "openlayers";
+import { NgRedux } from "@angular-redux/store";
 
-import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
 import { HashService, RouteStrings, IApplicationStateChangedEventArgs } from "../services/hash.service";
-import { DataContainerService } from "../services/data-container.service";
-import { ElevationProvider } from "../services/elevation.provider";
 import { RouterService } from "../services/routers/router.service";
 import { FitBoundsService } from "../services/fit-bounds.service";
-import { IconsService } from "../services/icons.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../services/search-results.provider";
 import { BaseMapComponent } from "./base-map.component";
-import { SearchResultsMarkerPopupComponent } from "./markerpopup/search-results-marker-popup.component";
-import { CategoriesLayerFactory } from "../services/layers/categories-layers.factory";
-import * as Common from "../common/IsraelHiking";
+import { RoutingType, ApplicationState, RouteSegmentData } from "../models/models";
+import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
+import { AddRouteAction } from "../reducres/routes.reducer";
+import { SpatialService } from "../services/spatial.service";
 
 
 export interface ISearchContext {
@@ -45,25 +39,33 @@ interface ISearchRequestQueueItem {
     searchTerm: string;
 }
 
+interface IDirectionalContext {
+    isOn: boolean;
+    isOverlayOpen: boolean;
+    showResults: boolean;
+    routeCoordinates: Coordinate[];
+    routeTitle: string;
+    routeSegments: RouteSegmentData[];
+}
+
 @Component({
     selector: "search",
     templateUrl: "./search.component.html",
-    styleUrls: ["./search.component.css"],
+    styleUrls: ["./search.component.scss"],
     encapsulation: ViewEncapsulation.None
 })
 export class SearchComponent extends BaseMapComponent implements AfterViewInit {
 
     public isVisible: boolean;
-    public isDirectional: boolean;
     public fromContext: ISearchContext;
     public toContext: ISearchContext;
-    public routingType: Common.RoutingType;
+    public routingType: RoutingType;
     public searchFrom: FormControl;
     public searchTo: FormControl;
     public hasFocus: boolean;
+    public directional: IDirectionalContext;
 
     private requestsQueue: ISearchRequestQueueItem[];
-    private readonlyLayer: L.FeatureGroup;
     private selectFirstSearchResults: boolean;
 
     @ViewChild("searchFromInput")
@@ -73,25 +75,26 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
     public matAutocompleteTriggers: QueryList<MatAutocompleteTrigger>;
 
     constructor(resources: ResourcesService,
-        private readonly mapService: MapService,
         private readonly hashService: HashService,
-        private readonly dataContainerService: DataContainerService,
-        private readonly elevationProvider: ElevationProvider,
         private readonly searchResultsProvider: SearchResultsProvider,
         private readonly routerService: RouterService,
         private readonly fitBoundsService: FitBoundsService,
-        private readonly injector: Injector,
-        private readonly componentFactoryResolver: ComponentFactoryResolver,
         private readonly toastService: ToastService,
-        private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly router: Router
+        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly router: Router,
+        private readonly ngRedux: NgRedux<ApplicationState>
     ) {
         super(resources);
         this.requestsQueue = [];
-        this.readonlyLayer = L.featureGroup();
-        this.mapService.map.addLayer(this.readonlyLayer);
+        this.directional = {
+            isOn: false,
+            isOverlayOpen: false,
+            routeCoordinates: [],
+            routeTitle: "",
+            showResults: false,
+            routeSegments: []
+        };
         this.isVisible = false;
-        this.isDirectional = false;
         this.routingType = "Hike";
         this.selectFirstSearchResults = false;
         this.fromContext = {
@@ -148,7 +151,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         }
     }
 
-    public toggleVisibility = (e: Event) => {
+    public toggleVisibility = () => {
         this.isVisible = !this.isVisible;
         if (this.isVisible) {
             // allow DOM make the input visible
@@ -160,12 +163,10 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         } else {
             this.matAutocompleteTriggers.forEach(trigger => trigger.closePanel());
         }
-        this.suppressEvents(e);
     }
 
-    public toggleDirectional = (e: Event) => {
-        this.isDirectional = !this.isDirectional;
-        this.suppressEvents(e);
+    public toggleDirectional = () => {
+        this.directional.isOn = !this.directional.isOn;
     }
 
     public search = (searchContext: ISearchContext) => {
@@ -180,30 +181,26 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         return results ? results.displayName : "";
     }
 
-    public moveToResults = (searchResults: ISearchResultsPointOfInterest, e: Event) => {
+    public moveToResults = (searchResults: ISearchResultsPointOfInterest) => {
         if (this.isVisible) {
-            this.toggleVisibility(e);
+            this.toggleVisibility();
         }
-        let bounds = L.latLngBounds(searchResults.southWest, searchResults.northEast);
-        this.fitBoundsService.fitBounds(bounds, { maxZoom: FitBoundsService.DEFAULT_MAX_ZOOM } as L.FitBoundsOptions);
         this.router.navigate([RouteStrings.ROUTE_POI, searchResults.source, searchResults.id],
             { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
     }
 
     private selectResults = (searchContext: ISearchContext, searchResult: ISearchResultsPointOfInterest) => {
         searchContext.selectedSearchResults = searchResult;
-        if (!this.isDirectional) {
-            this.moveToResults(searchResult, new Event("click"));
+        if (!this.directional.isOn) {
+            this.moveToResults(searchResult);
         }
     }
 
-    public setRouting = (routingType: Common.RoutingType, e: Event) => {
+    public setRouting = (routingType: RoutingType, e: Event) => {
         this.routingType = routingType;
-        this.suppressEvents(e);
     }
 
-    public searchRoute = async (e: Event) => {
-        this.suppressEvents(e);
+    public searchRoute = async () => {
         if (!this.fromContext.selectedSearchResults) {
             this.toastService.warning(this.resources.pleaseSelectFrom);
             return;
@@ -212,76 +209,51 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
             this.toastService.warning(this.resources.pleaseSelectTo);
             return;
         }
-        let routeSegments = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
+        this.directional.routeSegments = await this.routerService.getRoute(this.fromContext.selectedSearchResults.location,
             this.toContext.selectedSearchResults.location,
             this.routingType);
-        this.readonlyLayer.clearLayers();
-        this.mapService.updateReadOnlyLayer(this.readonlyLayer, [{ segments: routeSegments, markers: [] } as Common.RouteData]);
-        let markerFrom = L.marker(this.fromContext.selectedSearchResults.location,
-            {
-                icon: IconsService.createStartIcon(),
-                draggable: false
-            }) as Common.IMarkerWithTitle;
-        markerFrom.title = this.fromContext.selectedSearchResults.displayName;
-        let markerTo = L.marker(this.toContext.selectedSearchResults.location,
-            {
-                icon: IconsService.createEndIcon(),
-                draggable: false
-            }) as Common.IMarkerWithTitle;
-        markerTo.title = this.toContext.selectedSearchResults.displayName;
+        this.directional.showResults = true;
+        let latlngs = [];
+        for (let segment of this.directional.routeSegments) {
+            for (let latlng of segment.latlngs) {
+                latlngs.push(latlng);
+                this.directional.routeCoordinates.push([latlng.lng, latlng.lat]);
+            }
+        }
+        this.directional.routeTitle = this.fromContext.selectedSearchResults.displayName +
+            " - " +
+            this.toContext.selectedSearchResults.displayName;
 
-        let convertToRoute = () => {
-            this.dataContainerService.setData({
-                routes: [
-                    {
-                        name: markerFrom.title + "-" + markerTo.title,
-                        markers: [
-                            { latlng: markerFrom.getLatLng(), title: markerFrom.title },
-                            { latlng: markerTo.getLatLng(), title: markerTo.title }
-                        ],
-                        segments: routeSegments
-                    }
-                ]
-            } as Common.DataContainer);
-            this.readonlyLayer.clearLayers();
-        };
-
-        let componentFactory = this.componentFactoryResolver.resolveComponentFactory(SearchResultsMarkerPopupComponent);
-        this.createSearchRouteMarkerPopup(markerFrom, componentFactory, convertToRoute);
-        this.createSearchRouteMarkerPopup(markerTo, componentFactory, convertToRoute);
-
-        this.fitBoundsService.fitBounds(this.readonlyLayer.getBounds());
-
-        setTimeout(() => markerTo.openPopup(), 500);
+        this.directional.isOverlayOpen = true;
+        let bounds = SpatialService.getBounds(latlngs);
+        this.fitBoundsService.fitBounds(bounds);
     }
 
-    private createSearchRouteMarkerPopup(marker: Common.IMarkerWithTitle,
-        componentFactory: ComponentFactory<SearchResultsMarkerPopupComponent>,
-        convertToRoute: () => void) {
+    public convertToRoute() {
+        let route = this.routeLayerFactory.createRouteData(this.directional.routeTitle);
+        route.segments = this.directional.routeSegments;
+        this.ngRedux.dispatch(new AddRouteAction({
+            routeData: route
+        }));
+    }
 
-        let markerPopupDiv = L.DomUtil.create("div");
-        let componentRef = componentFactory.create(this.injector, [], markerPopupDiv);
-        componentRef.instance.setMarker(marker);
-        componentRef.instance.remove = () => {
-            this.readonlyLayer.clearLayers();
-        };
-        componentRef.instance.convertToRoute = convertToRoute;
-        componentRef.instance.angularBinding(componentRef.hostView);
-        marker.bindPopup(markerPopupDiv);
-        this.readonlyLayer.addLayer(marker);
+    public directionalCleared() {
+        this.directional.routeCoordinates = [];
+        this.directional.showResults = false;
+        this.directional.isOverlayOpen = false;
     }
 
     @HostListener("window:keydown", ["$event"])
     public onSearchShortcutKeys($event: KeyboardEvent) {
-        if ($event.keyCode === ENTER) {
+        if ($event.key === "Enter") {
             return this.handleEnterKeydown();
         }
         if ($event.ctrlKey === false) {
             return true;
         }
-        switch (String.fromCharCode($event.which).toLowerCase()) {
+        switch ($event.key.toLowerCase()) {
             case "f":
-                this.toggleVisibility($event);
+                this.toggleVisibility();
                 break;
             default:
                 return true;
@@ -319,14 +291,14 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         } as ISearchRequestQueueItem);
         try {
             let results = await this.searchResultsProvider.getResults(searchTerm, this.resources.hasRtlCharacters(searchTerm));
-            let queueItem = _.find(this.requestsQueue, (itemToFind) => itemToFind.searchTerm === searchTerm);
+            let queueItem = this.requestsQueue.find(itemToFind => itemToFind.searchTerm === searchTerm);
             if (queueItem == null || this.requestsQueue.indexOf(queueItem) !== this.requestsQueue.length - 1) {
                 this.requestsQueue.splice(0, this.requestsQueue.length - 1);
                 return;
             }
             if (searchContext.searchTerm !== searchTerm) {
                 // search term changed since it was requested.
-                _.remove(this.requestsQueue, queueItem);
+                remove(this.requestsQueue, queueItem);
                 return;
             }
             searchContext.searchResults = results;

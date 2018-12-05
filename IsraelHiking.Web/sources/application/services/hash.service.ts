@@ -2,11 +2,10 @@
 import { HttpParams } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { Subject } from "rxjs";
-import * as L from "leaflet";
+import { NgRedux } from "@angular-redux/store";
 
-import { MapService } from "./map.service";
-import { Urls } from "../common/Urls";
-import * as Common from "../common/IsraelHiking";
+import { Urls } from "../urls";
+import { LayerData, LatLngAlt, ApplicationState } from "../models/models";
 
 export type ApplicationStateType = "download" | "search" | "share" | "url" | "baseLayer" | "poi";
 
@@ -66,18 +65,12 @@ export class HashService {
 
     constructor(private readonly router: Router,
         @Inject("Window") window: any, // bug in angular aot
-        private readonly mapService: MapService) {
+        private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.window = window;
         this.applicationStateChanged = new Subject();
         this.stateMap = new Map();
         this.backwardCompatibilitySupport();
-        this.mapService.map.on("moveend", () => {
-            if (this.getShareUrlId() || this.getUrl() || this.stateMap.get("poi")) {
-                return;
-            }
-            this.resetAddressbar();
-        });
     }
 
     public resetAddressbar(): void {
@@ -95,11 +88,12 @@ export class HashService {
                 { queryParams: queryParams, replaceUrl: true });
             return;
         }
+        let location = this.ngRedux.getState().location;
         this.router.navigate([
                 RouteStrings.ROUTE_MAP,
-                this.mapService.map.getZoom(),
-                this.mapService.map.getCenter().lat.toFixed(HashService.PERSICION),
-                this.mapService.map.getCenter().lng.toFixed(HashService.PERSICION)
+                location.zoom,
+                location.latitude.toFixed(HashService.PERSICION),
+                location.longitude.toFixed(HashService.PERSICION)
             ],
             { replaceUrl: true });
     }
@@ -140,17 +134,17 @@ export class HashService {
         this.router.navigate([RouteStrings.ROUTE_ROOT], { replaceUrl: true });
     }
 
-    private parsePathToGeoLocation(): L.LatLng {
+    private parsePathToGeoLocation(): LatLngAlt {
         let path = this.window.location.hash;
         if (!HashService.LOCATION_REGEXP.test(path)) {
             return null;
         }
         let array = HashService.LOCATION_REGEXP.exec(path);
-        return L.latLng(
-            +array[2],
-            +array[3],
-            +array[1]
-        );
+        return {
+            lat: +array[2],
+            lng: +array[3],
+            alt: +array[1]
+        };
     }
 
     public getHref(): string {
@@ -172,7 +166,7 @@ export class HashService {
         return this.stateMap.get("url");
     }
 
-    public getBaselayer(): Common.LayerData {
+    public getBaselayer(): LayerData {
         return this.stateMap.get("baseLayer");
     }
 
@@ -196,7 +190,7 @@ export class HashService {
         this.applicationStateChanged.next({ type: type, value: value });
     }
 
-    public stringToBaseLayer(addressOrKey: string): Common.LayerData {
+    public stringToBaseLayer(addressOrKey: string): LayerData {
         if (!addressOrKey) {
             return null;
         }
@@ -204,15 +198,15 @@ export class HashService {
             return {
                 key: "",
                 address: addressOrKey
-            } as Common.LayerData;
+            } as LayerData;
         }
         return {
             key: addressOrKey.split("_").join(" "),
             address: ""
-        } as Common.LayerData;
+        } as LayerData;
     }
 
-    private baseLayerToString(baeLayer: Common.LayerData): string {
+    private baseLayerToString(baeLayer: LayerData): string {
         if (baeLayer == null) {
             return null;
         }

@@ -1,12 +1,14 @@
 import { Component, HostListener } from "@angular/core";
-import { ESCAPE } from "@angular/cdk/keycodes";
+import { NgRedux, select } from "@angular-redux/store";
+import { Observable } from "rxjs";
+import { ActionCreators } from "redux-undo";
 
 import { ResourcesService } from "../services/resources.service";
-import { RoutesService } from "../services/layers/routelayers/routes.service";
-import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { BaseMapComponent } from "./base-map.component";
-import * as Common from "../common/IsraelHiking";
-
+import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
+import { RoutingType, ApplicationState } from "../models/models";
+import { ChangeEditStateAction, ReplaceSegmentsAction, ClearPoisAction, ClearPoisAndRouteAction } from "../reducres/routes.reducer";
+import { SetRouteEditingStateAction } from "../reducres/route-editing-state.reducer";
 
 @Component({
     selector: "drawing",
@@ -14,43 +16,72 @@ import * as Common from "../common/IsraelHiking";
 })
 export class DrawingComponent extends BaseMapComponent {
 
+    private routingType: RoutingType;
+
+    @select((state: ApplicationState) => state.routeEditingState.routingType)
+    private routingType$: Observable<RoutingType>;
+
+    @select((state: ApplicationState) => state.routes.past.length)
+    public undoQueueLength: Observable<number>;
+
     constructor(resources: ResourcesService,
-        private readonly routesService: RoutesService,
-        private readonly routeLayerFactory: RouteLayerFactory) {
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
+
+        this.routingType = "None";
+        this.routingType$.subscribe((routingType) => {
+            this.routingType = routingType;
+        });
     }
 
     @HostListener("window:keydown", ["$event"])
     public onDrawingShortcutKeys($event: KeyboardEvent) {
-        if (this.routesService.selectedRoute == null) {
+        if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
-        if ($event.ctrlKey && String.fromCharCode($event.which).toLowerCase() === "z") {
-            this.undo($event);
-        } else if ($event.keyCode === ESCAPE) {
+        if ($event.ctrlKey && $event.key.toLowerCase() === "z") {
+            this.undo();
+        } else if ($event.key === "Escape") {
             if (this.isPoiEditActive()) {
-                this.toggleEditPoi($event);
+                this.toggleEditPoi();
             }
             if (this.isRouteEditActive()) {
-                this.toggleEditRoute($event);
+                this.toggleEditRoute();
             }
         }
     }
 
-    public clear(e: Event) {
-        this.suppressEvents(e);
-        let layer = this.routesService.selectedRoute;
-        if (layer != null) {
-            layer.clear();
-        }
+    public clearRoute() {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        this.ngRedux.dispatch(new ReplaceSegmentsAction({
+            routeId: selectedRoute.id,
+            segmentsData: []
+        }));
+    }
+
+    public clearPois() {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        this.ngRedux.dispatch(new ClearPoisAction({
+            routeId: selectedRoute.id
+        }));
+    }
+
+    public clearBoth() {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        this.ngRedux.dispatch(new ClearPoisAndRouteAction({
+            routeId: selectedRoute.id
+        }));
     }
 
     public isPoiEditActive() {
-        return this.routesService.selectedRoute != null && this.routesService.selectedRoute.getStateName() === "Poi";
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        return selectedRoute && selectedRoute.state === "Poi";
     }
 
     public isRouteEditActive() {
-        return this.routesService.selectedRoute != null && this.routesService.selectedRoute.getStateName() === "Route";
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        return selectedRoute != null && selectedRoute.state === "Route";
     }
 
     public isEditActive() {
@@ -58,70 +89,58 @@ export class DrawingComponent extends BaseMapComponent {
     }
 
     public isRouteEditDisabled() {
-        return this.routesService.selectedRoute != null && this.routesService.selectedRoute.route.properties.isRecording;
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        return selectedRoute != null &&
+            selectedRoute.isRecording;
     }
 
-    public toggleEditRoute(e: Event) {
-        this.suppressEvents(e);
-        let selectedRoute = this.routesService.getOrCreateSelectedRoute();
-        let stateName = selectedRoute.getStateName();
-        switch (stateName) {
+    public toggleEditRoute() {
+        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        switch (selectedRoute.state) {
             case "Route":
-                selectedRoute.setReadOnlyState();
+                this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "ReadOnly" }));
                 break;
             default:
-                selectedRoute.setEditRouteState();
+                this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "Route" }));
                 break;
         }
     }
 
-    public toggleEditPoi(e: Event) {
-        this.suppressEvents(e);
-        let selectedRoute = this.routesService.getOrCreateSelectedRoute();
-        let stateName = selectedRoute.getStateName();
-        switch (stateName) {
-            case "Poi":
-                selectedRoute.setReadOnlyState();
-                break;
-            default:
-                selectedRoute.setEditPoiState();
-                break;
+    public toggleEditPoi() {
+        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
+        switch (selectedRoute.state) {
+        case "Poi":
+            this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "ReadOnly" }));
+            break;
+        default:
+            this.ngRedux.dispatch(new ChangeEditStateAction({ routeId: selectedRoute.id, state: "Poi" }));
+            break;
         }
     }
 
-    public setRouting(routingType: Common.RoutingType, e: Event) {
-        this.suppressEvents(e);
-        if (this.routesService.selectedRoute == null) {
+    public setRouting(routingType: RoutingType) {
+        if (this.selectedRouteService.getSelectedRoute() == null) {
             return;
         }
-        this.routeLayerFactory.routingType = routingType;
-        this.routesService.selectedRoute.setRoutingType(routingType);
+        this.ngRedux.dispatch(new SetRouteEditingStateAction({ routingType: routingType }));
     }
 
-    public undo = (e: Event) => {
-        this.suppressEvents(e);
-        let layer = this.routesService.selectedRoute;
-        if (layer != null) {
-            layer.undo();
-        }
+    public undo = () => {
+        this.ngRedux.dispatch(ActionCreators.undo());
     }
 
-    public getRoutingType = (): Common.RoutingType => {
-        if (this.routesService.selectedRoute == null) {
+    public getRoutingType = (): RoutingType => {
+        if (this.selectedRouteService.getSelectedRoute() == null) {
             return "None";
         }
-        return this.routesService.selectedRoute.route.properties.currentRoutingType;
-    }
-
-    public isUndoDisabled = (): boolean => {
-        let layer = this.routesService.selectedRoute;
-        return layer != null ? layer.isUndoDisabled() : true;
+        return this.routingType;
     }
 
     public getRouteColor = (): string => {
-        if (this.routesService.selectedRoute == null) {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute == null) {
             return "black";
         }
-        return this.routesService.selectedRoute.route.properties.pathOptions.color;
+        return selectedRoute.color;
     }
 }

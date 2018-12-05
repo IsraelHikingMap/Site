@@ -1,5 +1,5 @@
 // 3rd party
-import { NgModule } from "@angular/core";
+import { NgModule, APP_INITIALIZER, Injector } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { BrowserModule } from "@angular/platform-browser";
 import { BrowserAnimationsModule } from "@angular/platform-browser/animations";
@@ -42,6 +42,10 @@ import { NgxImageGalleryModule } from "ngx-image-gallery";
 import { D3Service } from "d3-ng2-service";
 import { InfiniteScrollModule } from "ngx-infinite-scroll";
 import { NgReduxModule, NgRedux } from "@angular-redux/store";
+import { AngularOpenlayersModule } from "ngx-openlayers";
+import PouchDB from "pouchdb";
+import WorkerPouch from "worker-pouch";
+import FontFaceObserver from "fontfaceobserver";
 // services
 import { GetTextCatalogService } from "./services/gettext-catalog.service";
 import { AuthorizationService } from "./services/authorization.service";
@@ -52,14 +56,13 @@ import { FileService } from "./services/file.service";
 import { SidebarService } from "./services/sidebar.service";
 import { HashService } from "./services/hash.service";
 import { LayersService } from "./services/layers/layers.service";
-import { RoutesService } from "./services/layers/routelayers/routes.service";
 import { DataContainerService } from "./services/data-container.service";
 import { RouteLayerFactory } from "./services/layers/routelayers/route-layer.factory";
 import { RouterService } from "./services/routers/router.service";
 import { SnappingService } from "./services/snapping.service";
 import { FitBoundsService } from "./services/fit-bounds.service";
 import { RouteStatisticsService } from "./services/route-statistics.service";
-import { OsmUserService } from "./services/osm-user.service";
+import { ShareUrlsService } from "./services/share-urls.service";
 import { ToastService } from "./services/toast.service";
 import { ElevationProvider } from "./services/elevation.provider";
 import { SearchResultsProvider } from "./services/search-results.provider";
@@ -75,12 +78,18 @@ import { ImageResizeService } from "./services/image-resize.service";
 import { NonAngularObjectsFactory } from "./services/non-angular-objects.factory";
 import { DeepLinksService } from "./services/deep-links.service";
 import { PrivatePoiUploaderService } from "./services/private-poi-uploader.service";
+import { SelectedRouteService } from "./services/layers/routelayers/selected-route.service";
+import { RunningContextService } from "./services/running-context.service";
+import { TracesService } from "./services/traces.service";
+// interactions
+import { RouteEditPoiInteraction } from "./components/intercations/route-edit-poi.interaction";
+import { RouteEditRouteInteraction } from "./components/intercations/route-edit-route.interaction";
 // directives
 import { NameInUseValidatorDirective } from "./directives/name-in-use-validator.directive";
 import { ImageCaptureDirective } from "./directives/image-capture.directive";
 // components
 import { SidebarComponent } from "./components/sidebar/sidebar.component";
-import { MainMapComponent } from "./components/main-map.component";
+import { MainMapComponent } from "./components/map/main-map.component";
 import { ZoomComponent } from "./components/zoom.component";
 import { LocationComponent } from "./components/location.component";
 import { LayersComponent } from "./components/layers.component";
@@ -101,12 +110,13 @@ import { SharesDialogComponent } from "./components/dialogs/shares-dialog.compon
 import { LanguageComponent } from "./components/language.component";
 import { LanguageDialogComponent } from "./components/dialogs/language-dialog.component";
 import { DrawingComponent } from "./components/drawing.component";
-import { RouteMarkerPopupComponent } from "./components/markerpopup/route-marker-popup.component";
-import { DrawingPoiMarkerPopupComponent } from "./components/markerpopup/drawing-poi-marker-popup.component";
-import { CoordinatesMarkerPopupComponent } from "./components/markerpopup/coordinates-marker-popup.component";
-import { SearchResultsMarkerPopupComponent } from "./components/markerpopup/search-results-marker-popup.component";
-import { MissingPartMarkerPopupComponent } from "./components/markerpopup/missing-part-marker-popup.component";
-import { GpsLocationMarkerPopupComponent } from "./components/markerpopup/gps-location-marker-popup.component";
+import { CoordinatesComponent } from "./components/coordinates.component";
+import { RoutePointOverlayComponent } from "./components/overlays/route-point-overlay.component";
+import { PrivatePoiOverlayComponent } from "./components/overlays/private-poi-overlay.component";
+import { ClusterOverlayComponent } from "./components/overlays/cluster-overlay.component";
+import { GpsLocationOverlayComponent } from "./components/overlays/gps-location-overlay.component";
+import { ClearableOverlayComponent } from "./components/overlays/clearable-overlay.component";
+import { MissingPartOverlayComponent } from "./components/overlays/missing-part-overlay.component";
 import { SearchComponent } from "./components/search.component";
 import { InfoComponent } from "./components/info.component";
 import { InfoSidebarComponent } from "./components/sidebar/info-sidebar.component";
@@ -122,13 +132,61 @@ import { PublicPointOfInterestEditComponent } from "./components/sidebar/publicp
 import { ImageScrollerComponent } from "./components/sidebar/publicpoi/image-scroller.component";
 import { ApplicationStateComponent } from "./components/application-state.component";
 import { PrivatePoiEditDialogComponent } from "./components/dialogs/private-poi-edit-dialog.component";
+import { LayersViewComponent } from "./components/map/layers-view.component";
+import { RoutesComponent } from "./components/map/routes.component";
+import { TracesComponent } from "./components/map/traces.component";
 // variables and functions
 import { routes } from "./routes";
-import { IApplicationState, initialState } from "./state/models/application-state";
-import { rootReducer } from "./state/reducres/root.reducer";
+import { ApplicationState } from "./models/models";
+import { rootReducer } from "./reducres/root.reducer";
+import { initialState } from "./reducres/initial-state";
+import { debounceTime } from "rxjs/operators";
+import { classToActionMiddleware } from "./reducres/reducer-action-decorator";
+
+export function initializeApplication(injector: Injector) {
+    return async () => {
+        console.log("Starting IHM Application Initialization");
+        let font = new FontFaceObserver("IsraelHikingMap");
+        await font.load();
+        (PouchDB as any).adapter("worker", WorkerPouch);
+        let database = new PouchDB("IHM", {adapter: "worker"});
+        let storedState = initialState;
+        let runningContext = injector.get<RunningContextService>(RunningContextService);
+        // tslint:disable-next-line
+        let ngRedux = injector.get(NgRedux) as NgRedux<ApplicationState>;
+        if (runningContext.isIFrame) {
+            console.log("Running IHM inside IFrame");
+            ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
+        } else {
+            try {
+                let dbState = await database.get("state") as any;
+                storedState = dbState.state;
+            } catch (ex) {
+                // not state.
+                (database as any).put({
+                    _id: "state",
+                    state: initialState
+                });
+            }
+            ngRedux.configureStore(rootReducer, storedState, [classToActionMiddleware]);
+            ngRedux.select().pipe(debounceTime(2000)).subscribe(async (state) => {
+                console.log(state);
+                let dbState = await database.get("state") as any;
+                dbState.state = state;
+                (database as any).put(dbState);
+            });
+        }
+        try {
+            await injector.get<DataContainerService>(DataContainerService).initialize();
+            injector.get<DeepLinksService>(DeepLinksService).initialize();
+            console.log("Finished IHM Application Initialization");
+        } catch (error) {
+            console.error("Failed IHM Application Initialization", error);
+        }
+    };
+}
 
 export function getWindow() { return window; }
-export function getRoutesService(routesService: RoutesService) { return routesService; }
 
 @NgModule({
     imports: [
@@ -161,7 +219,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         FlexLayoutModule,
         ClipboardModule,
         RouterModule.forRoot(routes),
-        Angulartics2Module.forRoot([Angulartics2GoogleAnalytics]),
+        Angulartics2Module.forRoot(),
         NgProgressModule.forRoot(),
         NgProgressHttpModule,
         NgxPaginationModule,
@@ -169,7 +227,8 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         DndModule.forRoot(),
         NgxImageGalleryModule,
         InfiniteScrollModule,
-        NgReduxModule
+        NgReduxModule,
+        AngularOpenlayersModule
     ],
     entryComponents: [ZoomComponent,
         LocationComponent,
@@ -191,12 +250,13 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         LanguageComponent,
         LanguageDialogComponent,
         DrawingComponent,
-        RouteMarkerPopupComponent,
-        DrawingPoiMarkerPopupComponent,
-        CoordinatesMarkerPopupComponent,
-        SearchResultsMarkerPopupComponent,
-        MissingPartMarkerPopupComponent,
-        GpsLocationMarkerPopupComponent,
+        CoordinatesComponent,
+        RoutePointOverlayComponent,
+        PrivatePoiOverlayComponent,
+        ClusterOverlayComponent,
+        GpsLocationOverlayComponent,
+        ClearableOverlayComponent,
+        MissingPartOverlayComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,
@@ -211,7 +271,10 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         PublicPointOfInterestEditComponent,
         ImageScrollerComponent,
         ApplicationStateComponent,
-        PrivatePoiEditDialogComponent
+        PrivatePoiEditDialogComponent,
+        LayersViewComponent,
+        RoutesComponent,
+        TracesComponent
     ],
     providers: [
         GestureConfig,
@@ -220,6 +283,7 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         AuthorizationService,
         { provide: HTTP_INTERCEPTORS, useClass: OsmTokenInterceptor, multi: true },
         { provide: "Window", useFactory: getWindow },
+        { provide: APP_INITIALIZER, useFactory: initializeApplication, deps: [Injector], multi: true },
         D3Service,
         GetTextCatalogService,
         MapService,
@@ -228,19 +292,13 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         FileService,
         HashService,
         LayersService,
-        RoutesService,
-        {
-            provide: "RoutesService",
-            useFactory: getRoutesService,
-            deps: [RoutesService]
-        },
         DataContainerService,
         RouteLayerFactory,
         RouterService,
         SnappingService,
         FitBoundsService,
         RouteStatisticsService,
-        OsmUserService,
+        ShareUrlsService,
         ToastService,
         ElevationProvider,
         SearchResultsProvider,
@@ -255,7 +313,12 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ImageResizeService,
         NonAngularObjectsFactory,
         DeepLinksService,
-        PrivatePoiUploaderService
+        PrivatePoiUploaderService,
+        SelectedRouteService,
+        RunningContextService,
+        TracesService,
+        RouteEditPoiInteraction,
+        RouteEditRouteInteraction
     ],
     declarations: [MainMapComponent,
         SidebarComponent,
@@ -279,12 +342,13 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         LanguageComponent,
         LanguageDialogComponent,
         DrawingComponent,
-        RouteMarkerPopupComponent,
-        DrawingPoiMarkerPopupComponent,
-        CoordinatesMarkerPopupComponent,
-        SearchResultsMarkerPopupComponent,
-        MissingPartMarkerPopupComponent,
-        GpsLocationMarkerPopupComponent,
+        CoordinatesComponent,
+        RoutePointOverlayComponent,
+        PrivatePoiOverlayComponent,
+        ClusterOverlayComponent,
+        GpsLocationOverlayComponent,
+        ClearableOverlayComponent,
+        MissingPartOverlayComponent,
         SearchComponent,
         InfoComponent,
         InfoSidebarComponent,
@@ -301,29 +365,16 @@ export function getRoutesService(routesService: RoutesService) { return routesSe
         ImageScrollerComponent,
         ApplicationStateComponent,
         PrivatePoiEditDialogComponent,
+        LayersViewComponent,
+        RoutesComponent,
+        TracesComponent,
         ImageCaptureDirective
     ],
-    bootstrap: [MainMapComponent, SidebarComponent]
+    bootstrap: [MainMapComponent]
 })
 export class ApplicationModule {
-    constructor(dataContainerService: DataContainerService,
-        angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
-        dragAndDropService: DragAndDropService,
-        deepLinksService: DeepLinksService,
-        ngRedux: NgRedux<IApplicationState>,
-        localStorageService: LocalStorageService) {
-        console.log("Starting IHM Application Initialization");
-        let storedState = localStorageService.get("reduxState") || initialState;
-        ngRedux.configureStore(rootReducer, storedState);
-        ngRedux.select().subscribe((state) => {
-            localStorageService.set("reduxState", state);
-        });
-        dataContainerService.initialize().then(() => {
-            deepLinksService.initialize();
-            console.log("Finished IHM Application Initialization");
-        }, (error) => {
-            console.error("Failed IHM Application Initialization");
-            console.error(error);
-        });
+    constructor(angulartics2GoogleAnalytics: Angulartics2GoogleAnalytics,
+        dragAndDropService: DragAndDropService) {
+        angulartics2GoogleAnalytics.startTracking();
     }
 }

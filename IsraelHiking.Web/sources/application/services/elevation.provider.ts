@@ -3,7 +3,8 @@ import { HttpClient, HttpParams } from "@angular/common/http";
 
 import { ResourcesService } from "./resources.service";
 import { ToastService } from "./toast.service";
-import { Urls } from "../common/Urls";
+import { Urls } from "../urls";
+import { LatLngAlt } from "../models/models";
 
 @Injectable()
 export class ElevationProvider {
@@ -13,7 +14,7 @@ export class ElevationProvider {
         private readonly toastService: ToastService,
     ) { }
 
-    public updateHeights = async (latlngs: L.LatLng[]): Promise<L.LatLng[]> => {
+    public updateHeights = async (latlngs: LatLngAlt[]): Promise<LatLngAlt[]> => {
         let relevantIndexes = [] as number[];
         let points = [] as string[];
         for (let i = 0; i < latlngs.length; i++) {

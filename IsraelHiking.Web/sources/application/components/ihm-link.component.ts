@@ -2,13 +2,13 @@
 import { HashService } from "../services/hash.service";
 import { ResourcesService } from "../services/resources.service";
 import { BaseMapComponent } from "./base-map.component";
-import { Urls } from "../common/Urls";
+import { Urls } from "../urls";
 
 
 @Component({
     selector: "ihm-link",
     templateUrl: "./ihm-link.component.html",
-    styleUrls: ["./ihm-link.component.css"]
+    styleUrls: ["./ihm-link.component.scss"]
 })
 export class IhmLinkComponent extends BaseMapComponent {
 

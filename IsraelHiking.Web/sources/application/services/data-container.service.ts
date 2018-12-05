@@ -1,78 +1,104 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import * as L from "leaflet";
-import * as _ from "lodash";
+import { NgRedux, select } from "@angular-redux/store";
+import { Observable } from "rxjs";
 
 import { LayersService } from "./layers/layers.service";
-import { RoutesService } from "./layers/routelayers/routes.service";
-import { MapService } from "./map.service";
 import { ToastService } from "./toast.service";
 import { FileService } from "./file.service";
 import { HashService, RouteStrings } from "./hash.service";
 import { ResourcesService } from "./resources.service";
-import { OsmUserService } from "./osm-user.service";
-import * as Common from "../common/IsraelHiking";
+import { ShareUrlsService } from "./share-urls.service";
+import { SpatialService } from "./spatial.service";
+import { ShareUrl, DataContainer, ApplicationState, RouteData } from "../models/models";
+import { FitBoundsService } from "./fit-bounds.service";
+import { AddRouteAction } from "../reducres/routes.reducer";
+import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { MapService } from "./map.service";
+import { RouteLayerFactory } from "./layers/routelayers/route-layer.factory";
+
 
 @Injectable()
 export class DataContainerService {
-    private shareUrl: Common.ShareUrl;
-    private layersInitializationPromise: Promise<any>;
+
+    @select((state: ApplicationState) => state.routes.present)
+    private routes$: Observable<RouteData[]>;
+
+    private routes: RouteData[];
+    private shareUrl: ShareUrl;
+    // private layersInitializationPromise: Promise<any>;
 
     constructor(
         private readonly router: Router,
-        private readonly osmUserService: OsmUserService,
+        private readonly shareUrlsService: ShareUrlsService,
         private readonly layersService: LayersService,
-        private readonly routesService: RoutesService,
-        private readonly mapService: MapService,
         private readonly hashService: HashService,
         private readonly fileService: FileService,
         private readonly resourcesService: ResourcesService,
-        private readonly toastService: ToastService) {
+        private readonly toastService: ToastService,
+        private readonly fitBoundsService: FitBoundsService,
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly routeLayerFactory: RouteLayerFactory,
+        private readonly mapService: MapService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.shareUrl = null;
+        this.routes$.subscribe((r) => {
+            this.routes = r;
+        });
     }
 
-    public setData(dataContainer: Common.DataContainer) {
-        this.routesService.setData(dataContainer.routes);
+    private setData(dataContainer: DataContainer) {
+        for (let route of dataContainer.routes) {
+            let routeToAdd = this.routeLayerFactory.createRouteDataAddMissingFields(route);
+            this.ngRedux.dispatch(new AddRouteAction({
+                routeData: routeToAdd
+            }));
+        }
         this.layersService.addExternalOverlays(dataContainer.overlays);
         this.layersService.addExternalBaseLayer(dataContainer.baseLayer);
 
         if (dataContainer.northEast != null && dataContainer.southWest != null) {
-            this.mapService.map.fitBounds(L.latLngBounds(dataContainer.southWest, dataContainer.northEast));
+            this.fitBoundsService.fitBounds({northEast: dataContainer.northEast, southWest: dataContainer.southWest});
         }
     }
 
-    public getData = (): Common.DataContainer => {
+    public getData = (): DataContainer => {
         let layersContainer = this.layersService.getData();
 
+        let bounds = SpatialService.getMapBounds(this.mapService.map);
+
         let container = {
-            routes: this.routesService.getData(),
+            routes: this.routes,
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,
-            northEast: this.mapService.map.getBounds().getNorthEast(),
-            southWest: this.mapService.map.getBounds().getSouthWest()
-        } as Common.DataContainer;
+            northEast: bounds.northEast,
+            southWest: bounds.southWest
+        } as DataContainer;
         return container;
     }
 
-    public getDataForFileExport(): Common.DataContainer {
-        if (this.routesService.selectedRoute == null) {
+    public getDataForFileExport(): DataContainer {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute == null) {
             return this.getData();
         }
         return {
-            routes: [this.routesService.selectedRoute.getData()]
-        } as Common.DataContainer;
+            routes: [selectedRoute]
+        } as DataContainer;
     }
 
     public initialize = async () => {
-        this.layersInitializationPromise = this.layersService.initialize();
-        await this.layersInitializationPromise;
+        // HM TODO: make sure this is working properly
+        // this.layersInitializationPromise = this.layersService.initialize();
+        // await this.layersInitializationPromise;
         // This assumes hashservice has already finished initialization, this assumption can cause bugs...
+        // HM TODO: get base layer from store
         this.layersService.addExternalBaseLayer(this.hashService.getBaselayer());
     }
 
     public setFileUrlAfterNavigation = async (url: string, baseLayer: string) => {
-        await this.layersInitializationPromise;
+        // await this.layersInitializationPromise;
         this.hashService.setApplicationState("baseLayer", baseLayer);
         this.hashService.setApplicationState("url", url);
         let data = await this.fileService.openFromUrl(url);
@@ -84,19 +110,11 @@ export class DataContainerService {
         if (this.shareUrl && this.shareUrl.id === shareId) {
             return;
         }
-        await this.layersInitializationPromise;
+        // await this.layersInitializationPromise;
         try {
             this.hashService.setApplicationState("share", shareId);
-            let shareUrl = await this.osmUserService.getShareUrl(shareId);
+            let shareUrl = await this.shareUrlsService.getShareUrl(shareId);
             this.setData(shareUrl.dataContainer);
-            // hide overlays that are not part of the share:
-            for (let overlay of this.layersService.overlays) {
-                let overlayInShare = _.find(shareUrl.dataContainer.overlays || [],
-                    o => o.key === overlay.key || o.address === overlay.address);
-                if (overlayInShare == null && overlay.visible) {
-                    this.layersService.toggleOverlay(overlay);
-                }
-            }
             this.shareUrl = shareUrl;
             if (window.self === window.top) {
                 this.toastService.info(shareUrl.description, shareUrl.title);
@@ -107,11 +125,11 @@ export class DataContainerService {
         }
     }
 
-    public getShareUrl(): Common.ShareUrl {
+    public getShareUrl(): ShareUrl {
         return this.shareUrl;
     }
 
-    public setShareUrl(shareUrl: Common.ShareUrl) {
+    public setShareUrl(shareUrl: ShareUrl) {
         this.shareUrl = shareUrl;
         this.router.navigate([RouteStrings.ROUTE_SHARE, this.shareUrl.id]);
     }

@@ -18,7 +18,7 @@ The technology stack of this site is base on the following frameworks:
 * [Typescript](http://www.typescriptlang.org/)
 * [Angular](https://angular.io/)
 * [Angular-Material](https://material.angular.io/)
-* [Leaflet](http://leafletjs.com/)
+* [OpenLayers](https://openlayers.org/)
 * [Jasmine](http://jasmine.github.io/) + [Karma](https://karma-runner.github.io/) - for unit testing.
 * [Asp.Net core](https://docs.microsoft.com/en-us/aspnet/core/)
 * [NSubstitute](http://nsubstitute.github.io/)
@@ -26,9 +26,11 @@ The technology stack of this site is base on the following frameworks:
 * [Elastic Search and NEST](https://www.elastic.co/)
 * [Net Topology Suite](https://github.com/NetTopologySuite/NetTopologySuite)
 * [OsmSharp](http://www.osmsharp.com/)
-* [Wiki client library](https://github.com/CXuesong/WikiClientLibrary) Wikipedia and upload images to Wikimedia common
+* [Wikipedia using Wiki client library](https://github.com/CXuesong/WikiClientLibrary) Wikipedia and upload images to Wikimedia common
 * [Imgur](https://imgur.com/) - Used for uploadling anonymous images
 * [Cordova](https://cordova.apache.org/) - Used to wrap the site as a mobile application and add some native capabilities
+* [Redux using angular-redux](https://github.com/angular-redux/platform)
+* [PouchDB](https://pouchdb.com/)
 
 # Architecture and folder stucture of UI
 The architecture is based heavily on Angular:

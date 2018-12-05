@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { NgxImageGalleryComponent, GALLERY_IMAGE, GALLERY_CONF } from "ngx-image-gallery";
 
 import { MapService } from "./map.service";
@@ -11,7 +11,7 @@ export class ImageGalleryService {
 
     private galleryComponent: NgxImageGalleryComponent;
 
-    constructor(private readonly mapService: MapService) {
+    constructor() {
         this.config = {
             imageOffset: "0px",
             showDeleteControl: false,
@@ -22,18 +22,6 @@ export class ImageGalleryService {
 
     public setGalleryComponent(galleryComponent: NgxImageGalleryComponent) {
         this.galleryComponent = galleryComponent;
-        galleryComponent.onOpen.subscribe(() => {
-            this.mapService.map.dragging.disable();
-            this.mapService.map.scrollWheelZoom.disable();
-            this.mapService.map.touchZoom.disable();
-            this.mapService.map.boxZoom.disable();
-        });
-        galleryComponent.onClose.subscribe(() => {
-            this.mapService.map.dragging.enable();
-            this.mapService.map.scrollWheelZoom.enable();
-            this.mapService.map.touchZoom.enable();
-            this.mapService.map.boxZoom.enable();
-        });
     }
 
     public setImages(urls: string[]) {

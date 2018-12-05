@@ -1,19 +1,27 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { HttpInterceptor, HttpHandler, HttpRequest, HttpEvent } from "@angular/common/http";
 import { Observable } from "rxjs";
+import { NgRedux } from "@angular-redux/store";
 
-import { AuthorizationService } from "./authorization.service";
-import { Urls } from "../common/Urls";
+import { Urls } from "../urls";
+import { ApplicationState } from "../models/models";
 
 @Injectable()
 export class OsmTokenInterceptor implements HttpInterceptor {
-    constructor(public authorizationService: AuthorizationService) { }
+    constructor(private readonly ngRedux: NgRedux<ApplicationState>) { }
 
-    public intercept(request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
-        if (this.authorizationService.osmToken && request.url.indexOf(Urls.apiBase) !== -1) {
+    public intercept = (request: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> => {
+        let token = "";
+        try {
+            token = this.ngRedux.getState().userState.token;
+        } catch (ex) {
+            // store is not ready yet
+        }
+
+        if (token && request.url.indexOf(Urls.apiBase) !== -1) {
             request = request.clone({
                 setHeaders: {
-                    Authorization: `Bearer ${this.authorizationService.osmToken}`
+                    Authorization: `Bearer ${token}`
                 }
             });
         }

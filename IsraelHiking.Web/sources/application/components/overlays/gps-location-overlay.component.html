@@ -1,0 +1,24 @@
+﻿<aol-overlay *ngIf="isOpen">
+    <aol-coordinate [x]="latlng.lng"
+                    [y]="latlng.lat"
+                    [srid]="'EPSG:4326'">
+    </aol-coordinate>
+    <aol-content>
+        <div class="marker-popup" [dir]="resources.direction">
+            <div (click)="close()" class="close"><i class="fa icon-close"></i></div>
+            <div fxLayout="row">
+                <div fxFlex>
+                    <button mat-button fxFill (click)="addPointToRoute()" matTooltip="{{resources.addPointToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Location" angularticsAction="Convert location to point"><i class="fa icon-plus"></i></button>
+                </div>
+                <div fxFlex>
+                    <button mat-button type="button" (click)="hideCoordinates = !hideCoordinates" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
+                </div>
+            </div>
+            <div *ngIf="!hideCoordinates">
+                <coordinates [latlng]="latlng"></coordinates>
+            </div>
+        </div>
+    </aol-content>
+</aol-overlay>
+
+

@@ -1,17 +1,17 @@
-﻿import * as Common from "../../common/IsraelHiking";
+﻿import { LatLngAlt, RouteSegmentData } from "../../models/models";
 
 export class NoneRouter {
 
-    public getRoute(latlngStart: L.LatLng, latlngEnd: L.LatLng): Promise<Common.RouteSegmentData[]> {
-        return new Promise<Common.RouteSegmentData[]>((resolve) => {
-            let emptyReturn = [] as Common.RouteSegmentData[];
+    public getRoute(latlngStart: LatLngAlt, latlngEnd: LatLngAlt): Promise<RouteSegmentData[]> {
+        return new Promise<RouteSegmentData[]>((resolve) => {
+            let emptyReturn = [] as RouteSegmentData[];
             latlngStart.alt = 0;
             latlngEnd.alt = 0;
             emptyReturn.push({
                 routePoint: latlngEnd,
                 latlngs: [latlngStart, latlngEnd],
                 routingType: "None"
-            } as Common.RouteSegmentData);
+            } as RouteSegmentData);
             resolve(emptyReturn);
         });
     }

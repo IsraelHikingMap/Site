@@ -8,10 +8,11 @@
         </div>
     </div>
     <div mat-dialog-content>
+        <div flexLayout="row">
         <div fxFlex="60" class="margin-10-reverse">
             <div fxLayout="row">
                 <mat-form-field fxFill>
-                    <input matInput #titleInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.title}}" fxFill />
+                    <input matInput #titleInput type="text" [dir]="resources.getDirection(title)" [(ngModel)]="title" placeholder="{{resources.title}}" fxFill/>
                 </mat-form-field>
             </div>
             <div fxLayout="row">
@@ -20,43 +21,50 @@
                 </mat-form-field>
             </div>
         </div>
-        <div fxFlex>
-            <div fxLayout="row">
-                <label *ngIf="!imageLink">
-                    <a mat-button class="flex-center" [style.color]="'black'" imageCapture (change)="addImage($event)" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
-                    <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera" />
-                </label>
-                <img fxFill *ngIf="imageLink"
-                     [src]="resources.getResizedImageUrl(imageLink.url, 300)"
-                     class="img-responsive" />
-            </div>
-            <div fxLayout="row" *ngIf="imageLink">
-                <button mat-button fxFill (click)="clearImage()" matTooltip="{{resources.clear}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
-            </div>
-            <div *ngIf="showIcons">
-                <br/>
-                <div *ngFor="let group of iconsGroups">
-                    <div fxLayout="row" fxFill>
-                        <div *ngFor="let icon of group.icons" (click)="setMarkerType(icon)" class="cursor-pointer text-center" fxFlex="{{100/iconsGroups.length}}" angulartics2On="click" angularticsCategory="Icons" angularticsAction="Select {{icon}}">
-                            <i class="fa icon-{{icon}} fa-lg"></i>
+            <div fxFlex>
+                <div fxLayout="row">
+                    <label *ngIf="!imageLink">
+                        <a mat-button class="flex-center" [style.color]="'black'" imageCapture (change)="addImage($event)" fxFill angulartics2On="click" angularticsCategory="POI" angularticsAction="Upload image"><i class="fa icon-camera fa-4x"></i> <i class="fa icon-plus fa-2x"></i></a>
+                        <input type="file" (change)="addImage($event)" [style.display]="'none'" accept="image/*;capture=camera"/>
+                    </label>
+                    <img fxFill *ngIf="imageLink"
+                         [src]="resources.getResizedImageUrl(imageLink.url, 300)"
+                         class="img-responsive"/>
+                </div>
+                <div fxLayout="row" *ngIf="imageLink">
+                    <button mat-button fxFill (click)="clearImage()" matTooltip="{{resources.clear}}" matTooltipPosition="above"><i class="fa icon-trash"></i></button>
+                </div>
+                <div *ngIf="showIcons">
+                    <br/>
+                    <div *ngFor="let group of iconsGroups">
+                        <div fxLayout="row" fxFill>
+                            <div *ngFor="let icon of group.icons" (click)="setMarkerType(icon)" class="cursor-pointer text-center" fxFlex="{{100/iconsGroups.length}}" angulartics2On="click" angularticsCategory="Icons" angularticsAction="Select {{icon}}">
+                                <i class="fa icon-{{icon}} fa-lg"></i>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <div mat-dialog-actions>
-        <div fxFlex>
-            <button mat-button type="button" matDialogClose (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>
-        </div>
-        <div fxFlex>
-            <button mat-button type="button" (click)="showIcons = !showIcons" matTooltip="{{resources.selectIcon}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsAction="Toggle select icon" fxFill><i class="fa icon-{{markerType}}"></i></button>
-        </div>
-        <div fxFlex>
-            <button mat-button type="button" matDialogClose (click)="uploadPoint($event)" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
-        </div>
-        <div fxFlex>
-            <button mat-button type="button" matDialogClose (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
+        <div flexLayout="row" *ngIf="showCoordinates">
+            <coordinates [latlng]="marker.latlng"></coordinates>
         </div>
     </div>
-</div>
+        <div mat-dialog-actions>
+            <div fxFlex>
+                <button mat-button type="button" matDialogClose (click)="remove()" matTooltip="{{resources.deletePoi}}" matTooltipPosition="above" fxFill><i class="fa icon-trash"></i></button>
+            </div>
+            <div fxFlex>
+                <button mat-button type="button" (click)="showIcons = !showIcons" matTooltip="{{resources.selectIcon}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Icons" angularticsAction="Toggle select icon" fxFill><i class="fa icon-{{markerType}}"></i></button>
+            </div>
+            <div fxFlex>
+                <button mat-button type="button" matDialogClose (click)="uploadPoint()" matTooltip="{{resources.uploadPoint}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="OSM" angularticsAction="Open upload point dialog" fxFill><i class="fa icon-cloud-upload"></i></button>
+            </div>
+            <div fxFlex>
+                <button mat-button type="button" (click)="toggleCoordinates()" matTooltip="{{resources.showCoordinates}}" matTooltipPosition="above" fxFill><i class="fa icon-globe"></i></button>
+            </div>
+            <div fxFlex>
+                <button mat-button type="button" matDialogClose (click)="save()" matTooltip="{{resources.save}}" matTooltipPosition="above" fxFill><i class="fa icon-check"></i></button>
+            </div>
+        </div>
+    </div>

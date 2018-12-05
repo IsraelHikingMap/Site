@@ -1,12 +1,12 @@
 import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import * as L from "leaflet";
 
 import { ImageResizeService } from "./image-resize.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
-import { Urls } from "../common/Urls";
-import { environment } from "../../environments/environment";
-import * as Common from "../common/IsraelHiking";
+import { Urls } from "../urls";
+import { DataContainer, RouteData } from "../models/models";
+import { RunningContextService } from "./running-context.service";
+import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 
 declare var cordova: any;
 
@@ -21,8 +21,10 @@ export class FileService {
     public formats: IFormatViewModel[];
 
     constructor(private readonly httpClient: HttpClient,
+        private readonly runningContextService: RunningContextService,
         private readonly imageResizeService: ImageResizeService,
-        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory) {
+        private readonly nonAngularObjectsFactory: NonAngularObjectsFactory,
+        private readonly selectedRouteService: SelectedRouteService) {
         this.formats = [];
         this.httpClient.get(Urls.fileFormats).toPromise().then((response: IFormatViewModel[]) => {
             this.formats.splice(0);
@@ -65,18 +67,21 @@ export class FileService {
         return filesToReturn;
     }
 
-    public saveToFile = async (fileName: string, format: string, dataContainer: Common.DataContainer): Promise<boolean> => {
+    public saveToFile = async (fileName: string, format: string, dataContainer: DataContainer): Promise<boolean> => {
         let responseData = await this.httpClient.post(Urls.files + "?format=" + format, dataContainer).toPromise() as string;
         return await this.saveBytesResponseToFile(responseData, fileName);
     }
 
-    public async openFromFile(file: File): Promise<Common.DataContainer> {
+    public async addRoutesFromFile(file: File): Promise<any> {
         if (file.type === ImageResizeService.JPEG) {
-            return await this.imageResizeService.resizeImageAndConvert(file);
+            let container = await this.imageResizeService.resizeImageAndConvert(file);
+            this.selectedRouteService.addRoutes(container.routes);
+            return;
         }
         let formData = new FormData();
         formData.append("file", file, file.name);
-        return this.httpClient.post(Urls.openFile, formData).toPromise() as Promise<Common.DataContainer>;
+        let fileContainer = await this.httpClient.post(Urls.openFile, formData).toPromise() as DataContainer;
+        this.selectedRouteService.addRoutes(fileContainer.routes);
     }
 
     public uploadTrace(file: File): Promise<any> {
@@ -85,10 +90,10 @@ export class FileService {
         return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
     }
 
-    public async uploadRouteAsTrace(route: Common.RouteData): Promise<any> {
+    public async uploadRouteAsTrace(route: RouteData): Promise<any> {
         let data = {
             routes: [route]
-        } as Common.DataContainer;
+        } as DataContainer;
         let responseData = await this.httpClient.post(Urls.files + "?format=gpx", data).toPromise() as string;
         let blobToSave = this.nonAngularObjectsFactory.b64ToBlob(responseData, "application/octet-stream");
         let formData = new FormData();
@@ -96,15 +101,13 @@ export class FileService {
         return this.httpClient.post(Urls.osmTrace, formData, { responseType: "text" }).toPromise();
     }
 
-    // HM TODO: remove this?
-    public uploadAnonymousImage(file: File): Promise<string> {
-        let formData = new FormData();
-        formData.append("file", file, file.name);
-        return this.httpClient.post(Urls.uploadAnonymousImage, formData, { responseType: "text" }).toPromise();
+    public openFromUrl = (url: string): Promise<DataContainer> => {
+        return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<DataContainer>;
     }
 
-    public openFromUrl = (url: string): Promise<Common.DataContainer> => {
-        return this.httpClient.get(Urls.files + "?url=" + url).toPromise() as Promise<Common.DataContainer>;
+    public async addRoutesFromUrl(url: string) {
+        let container = await this.openFromUrl(url);
+        this.selectedRouteService.addRoutes(container.routes);
     }
 
     private saveBytesResponseToFile = async (data: string, fileName: string): Promise<boolean> => {
@@ -122,14 +125,15 @@ export class FileService {
      */
     private saveAsWorkAround(blob: Blob, fileName: string): Promise<boolean> {
         return new Promise((resolve, reject) => {
-            if (environment.isCordova) {
+            if (this.runningContextService.isCordova) {
                 // HM TODO: this is only for android, make it for iOS?
                 (window as any).resolveLocalFileSystemURL(cordova.file.externalRootDirectory,
                     (directoryEntry) => {
                         directoryEntry.getDirectory("IsraelHikingMap",
                             { create: true },
                             dir => {
-                                let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_").replace("Z", "_") +
+                                let fullFileName = new Date().toISOString().split(":").join("-").replace("T", "_")
+                                    .replace("Z", "_") +
                                     fileName.split(" ").join("_");
                                 dir.getFile(fullFileName,
                                     { create: true },
@@ -138,49 +142,57 @@ export class FileService {
                                             fileWriter.write(blob);
                                             resolve(true);
                                         });
-                                    }, reject);
-                            }, reject);
-                    }, reject);
-            } else if (L.Browser.mobile) {
-                let reader = new FileReader();
-                reader.onload = () => {
-                    if (L.Browser.chrome) {
-                        // If chrome android
-                        let save = document.createElement("a");
-
-                        save.href = reader.result;
-                        save.download = fileName;
-
-                        document.body.appendChild(save);
-                        save.click();
-                        document.body.removeChild(save);
-                        window.URL.revokeObjectURL(save.href);
-                        resolve(false);
-                    } else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
-                        // If iPhone etc
-                        let url = window.URL.createObjectURL(blob);
-                        window.location.href = url;
-                        resolve(false);
-                    } else {
-                        // Any other browser
-                        this.nonAngularObjectsFactory.saveAs(blob, fileName);
-                        resolve(false);
-                    }
-                };
-
-                reader.readAsDataURL(blob);
+                                    },
+                                    reject);
+                            },
+                            reject);
+                    },
+                    reject);
             } else {
-                // Desktop if safari
-                if (L.Browser.safari) {
-                    let url = window.URL.createObjectURL(blob);
-                    window.location.href = url;
-                    resolve(false);
-                } else {
-                    // If normal browser use package Filesaver.js
-                    this.nonAngularObjectsFactory.saveAs(blob, fileName);
-                    resolve(false);
-                }
+                this.nonAngularObjectsFactory.saveAs(blob, fileName);
+                resolve(false);
             }
+            // HM TODO: remove this?
+            // } else if (L.Browser.mobile) {
+            //    let reader = new FileReader();
+            //    reader.onload = () => {
+            //        if (L.Browser.chrome) {
+            //            // If chrome android
+            //            let save = document.createElement("a");
+            //
+            //            save.href = reader.result;
+            //            save.download = fileName;
+            //
+            //            document.body.appendChild(save);
+            //            save.click();
+            //            document.body.removeChild(save);
+            //            window.URL.revokeObjectURL(save.href);
+            //            resolve(false);
+            //        } else if (navigator.platform && navigator.platform.match(/iPhone|iPod|iPad/)) {
+            //            // If iPhone etc
+            //            let url = window.URL.createObjectURL(blob);
+            //            window.location.href = url;
+            //            resolve(false);
+            //        } else {
+            //            // Any other browser
+            //            this.nonAngularObjectsFactory.saveAs(blob, fileName);
+            //            resolve(false);
+            //        }
+            //    };
+            //
+            //    reader.readAsDataURL(blob);
+            // } else {
+            //    // Desktop if safari
+            //    if (L.Browser.safari) {
+            //        let url = window.URL.createObjectURL(blob);
+            //        window.location.href = url;
+            //        resolve(false);
+            //    } else {
+            //        // If normal browser use package Filesaver.js
+            //        this.nonAngularObjectsFactory.saveAs(blob, fileName);
+            //        resolve(false);
+            //    }
+            // }
         });
     }
 }

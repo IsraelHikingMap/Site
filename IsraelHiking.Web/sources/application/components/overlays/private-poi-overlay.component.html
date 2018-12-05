@@ -1,0 +1,17 @@
+﻿<aol-overlay *ngIf="marker.title">
+    <aol-coordinate [x]="marker.latlng.lng"
+                    [y]="marker.latlng.lat"
+                    [srid]="'EPSG:4326'">
+    </aol-coordinate>
+    <aol-content>
+        <div class="marker-popup" [dir]="resources.direction" (click)="overlayClick()">
+            <span [ngClass]="resources.getTextAlignment(marker.title)" class="title-no-margin" [dir]="resources.getDirection(marker.title)">
+                <img *ngIf="imageLink"
+                     [src]="resources.getResizedImageUrl(imageLink.url, 200)"
+                     class="img-placeholder" />
+                {{marker.title}}
+                <span *ngIf="marker.description">...</span>
+            </span>
+        </div>
+    </aol-content>
+</aol-overlay>

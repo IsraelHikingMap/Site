@@ -1,7 +1,8 @@
 import { Component } from "@angular/core";
+
 import { BaseMapComponent } from "./base-map.component";
-import { MapService } from "../services/map.service";
 import { ResourcesService } from "../services/resources.service";
+import { MapService } from "../services/map.service";
 
 @Component({
     selector: "zoom",
@@ -9,16 +10,20 @@ import { ResourcesService } from "../services/resources.service";
 })
 export class ZoomComponent extends BaseMapComponent {
     constructor(resources: ResourcesService,
-        private mapService: MapService) {
+        private readonly mapService: MapService) {
         super(resources);
     }
-    public zoomIn(e: Event) {
-        this.mapService.map.zoomIn();
-        this.suppressEvents(e);
+    public zoomIn() {
+        this.mapService.map.getView().animate({
+            zoom: Math.round(this.mapService.map.getView().getZoom()) + 1,
+            duration: 250
+        });
     }
 
-    public zoomOut(e: Event) {
-        this.mapService.map.zoomOut();
-        this.suppressEvents(e);
+    public zoomOut() {
+        this.mapService.map.getView().animate({
+            zoom: Math.round(this.mapService.map.getView().getZoom()) - 1,
+            duration: 250
+        });
     }
 }

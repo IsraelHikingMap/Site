@@ -97,9 +97,6 @@
             "scripts": [
               "sources/google-analytics.js"
             ],
-            "styles": [
-              "sources/common.scss"
-            ],
             "assets": [
               "sources/content",
               "sources/translations",

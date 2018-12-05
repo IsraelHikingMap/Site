@@ -1,15 +1,15 @@
-﻿<div class="leaflet-bar" *ngIf="!isOpen" [dir]="resources.direction">
-    <a class="cursor-pointer" (click)="toggleSaveAs($event)" matTooltip="{{resources.saveAs}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as open"><i class="fa icon-save-as fa-lg"></i></a>
+﻿<div class="side-control" *ngIf="!isOpen" [dir]="resources.direction">
+    <button mat-button (click)="toggleSaveAs()" matTooltip="{{resources.saveAs}}" matTooltipPosition="right" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as open"><i class="fa icon-save-as fa-lg"></i></button>
 </div>
-<div class="leaflet-bar" *ngIf="isOpen" [dir]="resources.direction">
+<div class="side-control" *ngIf="isOpen" [dir]="resources.direction">
     <div class="save-as-dropdown">
         <mat-form-field fxFill>
             <mat-select placeholder="{{resources.saveAs}}" fxFill #dropdown="matSelect">
-                <mat-option *ngFor="let format of formats" [value]="format" (click)="saveAs(format, $event)" [dir]="'ltr'">
+                <mat-option *ngFor="let format of formats" [value]="format" (click)="saveAs(format)" [dir]="'ltr'">
                     {{format.label}}
                 </mat-option>
             </mat-select>
         </mat-form-field>
     </div>
-    <a class="cursor-pointer save-as-button" (click)="toggleSaveAs($event)" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as close"><i class="fa icon-save-as fa-lg"></i></a>
+    <button mat-button class="pull-right" (click)="toggleSaveAs()" angulartics2On="click" angularticsCategory="Files" angularticsAction="Save as close"><i class="fa icon-save-as fa-lg"></i></button>
 </div>

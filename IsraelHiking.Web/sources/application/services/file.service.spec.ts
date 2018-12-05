@@ -5,13 +5,17 @@ import { HttpClientTestingModule, HttpTestingController } from "@angular/common/
 import { FileService, IFormatViewModel } from "./file.service";
 import { NonAngularObjectsFactory } from "./non-angular-objects.factory";
 import { ImageResizeService } from "./image-resize.service";
-import { Urls } from "../common/Urls";
-import * as Common from "../common/IsraelHiking";
+import { Urls } from "../urls";
+import { DataContainer } from "../models/models";
+import { RunningContextService } from "./running-context.service";
+import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 
 describe("FileService", () => {
 
     let imageResizeService: ImageResizeService;
     let nonAngularObjectsFactory: NonAngularObjectsFactory;
+    let selectedRouteService: SelectedRouteService;
+
     beforeEach(() => {
         imageResizeService = {
             resizeImageAndConvert: jasmine.createSpy("resizeImageAndConvert")
@@ -20,16 +24,24 @@ describe("FileService", () => {
             saveAs: jasmine.createSpy("saveAs"),
             b64ToBlob: jasmine.createSpy("b64ToBlob"),
         } as any as NonAngularObjectsFactory;
+        selectedRouteService = {
+            addRoutes: jasmine.createSpy("addRoutes")
+        } as any as SelectedRouteService;
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
                 HttpClientTestingModule
             ],
             providers: [
+                RunningContextService,
                 {
                     provide: FileService,
-                    useFactory: fakeAsync((http, mockBackend: HttpTestingController) => {
-                        let fileService = new FileService(http, imageResizeService, nonAngularObjectsFactory);
+                    useFactory: fakeAsync((http, mockBackend: HttpTestingController, runningContextService: RunningContextService) => {
+                        let fileService = new FileService(http,
+                            runningContextService,
+                            imageResizeService,
+                            nonAngularObjectsFactory,
+                            selectedRouteService);
                         mockBackend.expectOne(Urls.fileFormats).flush([{
                             extension: "ex",
                             label: "label",
@@ -37,13 +49,11 @@ describe("FileService", () => {
                         } as IFormatViewModel]);
                         return fileService;
                     }),
-                    deps: [HttpClient, HttpTestingController]
+                    deps: [HttpClient, HttpTestingController, RunningContextService]
                 }
             ]
         });
     });
-
-
 
     it("Should Initialize with file formats", inject([FileService], (fileService: FileService) => {
         expect(fileService.formats.length).toBe(2);
@@ -52,42 +62,44 @@ describe("FileService", () => {
     it("Should save to file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-        fileService.saveToFile("file.name", "format", {} as Common.DataContainer).then(() => {
-            expect(nonAngularObjectsFactory.saveAs).toHaveBeenCalled();
-            expect(nonAngularObjectsFactory.b64ToBlob).toHaveBeenCalled();
-        });
+            let promise = fileService.saveToFile("file.name", "format", {} as DataContainer).then(() => {
+                expect(nonAngularObjectsFactory.saveAs).toHaveBeenCalled();
+                expect(nonAngularObjectsFactory.b64ToBlob).toHaveBeenCalled();
+            });
 
-        mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
-    }));
+            mockBackend.expectOne(Urls.files + "?format=format").flush(btoa("bytes"));
+            return promise;
+        }));
 
 
     it("Should open from file", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-        let promise = fileService.openFromUrl("someurl").then((res) => {
-            expect(res).not.toBeNull();
-        }, fail);
+            let promise = fileService.openFromUrl("someurl").then((res) => {
+                expect(res).not.toBeNull();
+            }, fail);
 
-        mockBackend.expectOne(Urls.files + "?url=someurl").flush(btoa("bytes"));
-        return promise;
-    }));
+            mockBackend.expectOne(Urls.files + "?url=someurl").flush(btoa("bytes"));
+            return promise;
+        }));
 
     it("Should open from url by uploading", inject([FileService, HttpTestingController],
         async (fileService: FileService, mockBackend: HttpTestingController) => {
 
-        let promise = fileService.openFromFile(new Blob([""]) as File).then((res) => {
-            expect(res).not.toBeNull();
-        }, fail);
+            let promise = fileService.addRoutesFromFile(new Blob([""]) as File).then(() => {
+                expect(selectedRouteService.addRoutes).toHaveBeenCalled();
+            }, fail);
 
-        mockBackend.expectOne(Urls.openFile).flush({});
-        return promise;
-    }));
+            mockBackend.expectOne(Urls.openFile).flush({});
+            return promise;
+        }));
 
     it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
         async (fileService: FileService) => {
-            let file = new Blob([""], {type: "image/jpeg" }) as File;
-            let promise = fileService.openFromFile(file).then(() => {
-                expect(imageResizeService.resizeImageAndConvert).toHaveBeenCalled();
+            let file = new Blob([""], { type: "image/jpeg" }) as File;
+            imageResizeService.resizeImageAndConvert = () => Promise.resolve({} as DataContainer);
+            let promise = fileService.addRoutesFromFile(file).then(() => {
+                expect(selectedRouteService.addRoutes).toHaveBeenCalled();
             }, fail);
 
             return promise;

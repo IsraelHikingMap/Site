@@ -1,7 +1,5 @@
-﻿import * as L from "leaflet";
-
-import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "./route-statistics.service";
-import * as Common from "../common/IsraelHiking";
+﻿import { RouteStatisticsService, IRouteStatistics, IRouteStatisticsPoint } from "./route-statistics.service";
+import { RouteData } from "../models/models";
 
 describe("RouteStatisticsService", () => {
     let service: RouteStatisticsService;
@@ -23,7 +21,7 @@ describe("RouteStatisticsService", () => {
     it("Should get empty statistics on empty route", () => {
         let routeData = {
             segments: []
-        } as Common.RouteData;
+        } as RouteData;
 
         let statistics = service.getStatistics(routeData);
 
@@ -37,16 +35,16 @@ describe("RouteStatisticsService", () => {
         let routeData = {
             segments: [
                 {
-                    latlngs: [L.latLng(1, 1, 1), L.latLng(2, 2, 2)]
+                    latlngs: [{ lat: 1, lng: 1, alt: 1 }, { lat: 2, lng: 2, alt: 2 }]
                 },
                 {
-                    latlngs: [L.latLng(2, 2, 2), L.latLng(3, 3, 3)]
+                    latlngs: [{ lat: 2, lng: 2, alt: 2 }, { lat: 3, lng: 3, alt: 3 }]
                 },
                 {
-                    latlngs: [L.latLng(2, 2, 2), L.latLng(1, 1, 1)]
+                    latlngs: [{ lat: 2, lng: 2, alt: 2 }, { lat: 1, lng: 1, alt: 1 }]
                 }
             ]
-        } as Common.RouteData;
+        } as RouteData;
 
         let statistics = service.getStatistics(routeData);
 
@@ -60,10 +58,10 @@ describe("RouteStatisticsService", () => {
         let routeData = {
             segments: [
                 {
-                    latlngs: [L.latLng(0, 0, 0), L.latLng(0, 0.01, 2), L.latLng(0, 0.02, 1)]
+                    latlngs: [{ lat: 0, lng: 0, alt: 0 }, { lat: 0, lng: 0.01, alt: 2 }, { lat: 0, lng: 0.02, alt: 1 }]
                 }
             ]
-        } as Common.RouteData;
+        } as RouteData;
         let statistics = service.getStatistics(routeData);
         let start = service.interpolateStatistics(statistics, 0.5);
         let end = service.interpolateStatistics(statistics, 1);
@@ -87,22 +85,22 @@ describe("RouteStatisticsService", () => {
                 {
                     x: 0,
                     y: 0,
-                    latlng: L.latLng(0, 0)
+                    latlng: { lat: 0, lng: 0 }
                 } as IRouteStatisticsPoint,
                 {
                     x: 1,
                     y: 1,
-                    latlng: L.latLng(1, 1)
+                    latlng: { lat: 1, lng: 1 }
                 } as IRouteStatisticsPoint,
                 {
                     x: 2,
                     y: 2,
-                    latlng: L.latLng(2, 2)
+                    latlng: { lat: 2, lng: 2 }
                 } as IRouteStatisticsPoint,
                 {
                     x: 3,
                     y: 3,
-                    latlng: L.latLng(3, 3)
+                    latlng: { lat: 3, lng: 3 }
                 } as IRouteStatisticsPoint
             ]
         } as IRouteStatistics, 2.5);
@@ -118,29 +116,29 @@ describe("RouteStatisticsService", () => {
         expect(distance).toBe(0);
     });
 
-    it("Should return 0 distance for statistics not on route", () => {
+    it("Should not return 0 distance for statistics on route", () => {
         let distance = service.findDistanceForLatLng({
             points: [
                 {
                     x: 0,
-                    latlng: L.latLng(0, 0)
+                    latlng: { lat: 0, lng: 0 }
                 },
                 {
                     x: 1,
-                    latlng: L.latLng(1, 1)
+                    latlng: { lat: 1, lng: 1 }
                 },
                 {
                     x: 2,
-                    latlng: L.latLng(2, 2)
+                    latlng: { lat: 2, lng: 2 }
                 },
                 {
                     x: 3,
-                    latlng: L.latLng(3, 3)
+                    latlng: { lat: 3, lng: 3 }
                 }
             ]
-        } as IRouteStatistics, L.latLng(0.5, 0.6));
+        } as IRouteStatistics, {lat: 0.6, lng: 0.6 });
 
-        expect(distance).toBe(0);
+        expect(distance).not.toBe(0);
     });
 
     it("Should return 0 distance for statistics not on route", () => {
@@ -148,23 +146,23 @@ describe("RouteStatisticsService", () => {
             points: [
                 {
                     x: 0,
-                    latlng: L.latLng(0, 0)
+                    latlng: { lat: 0, lng: 0 }
                 },
                 {
                     x: 1,
-                    latlng: L.latLng(0.0001, 0.0001)
+                    latlng: { lat: 0.0001, lng: 0.0001 }
                 },
                 {
                     x: 2,
-                    latlng: L.latLng(0.0002, 0.0002)
+                    latlng: { lat: 0.0002, lng: 0.0002 }
                 },
                 {
                     x: 3,
-                    latlng: L.latLng(0.0003, 0.0003)
+                    latlng: { lat: 0.0003, lng: 0.0003 }
                 }
             ]
-        } as IRouteStatistics, L.latLng(0.00005, 0.00005));
+        } as IRouteStatistics, {lat: 0.005, lng: 0.005 });
 
-        expect(distance).not.toBe(0);
+        expect(distance).toBe(0);
     });
 });

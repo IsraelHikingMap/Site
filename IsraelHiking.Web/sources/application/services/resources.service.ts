@@ -3,7 +3,7 @@ import { Direction } from "@angular/cdk/bidi";
 import { Subject } from "rxjs";
 import { LocalStorage } from "ngx-store";
 import { GetTextCatalogService } from "./gettext-catalog.service";
-import { Urls } from "../common/Urls";
+import { Urls } from "../urls";
 export type LanguageCode = "en-US" | "he";
 
 export interface ILanguage {
@@ -23,6 +23,8 @@ export class ResourcesService {
     public direction: Direction;
     public start: string;
     public end: string;
+    private iconsCache: Map<string, string> = new Map();
+
     // All the text in the app //
     /////////////////////////////
     public about: string;
@@ -91,7 +93,6 @@ export class ResourcesService {
     public medium: string;
     public large: string;
     public custom: string;
-    public copyPasteEmbdExplenation: string;
     public html: string;
     public close: string;
     public northAbbreviation: string;
@@ -126,7 +127,7 @@ export class ResourcesService {
     public titlePlaceHolder: string;
     public description: string;
     public descriptionPlaceHolder: string;
-    public osmLoginExplenation: string;
+    public osmLoginExplanation: string;
     public application: string;
     public map: string;
     public startDownload: string;
@@ -135,7 +136,7 @@ export class ResourcesService {
     public detailsLevel: string;
     public upToZoom: string;
     public installationInstructions: string;
-    public offlineMapBenifits: string;
+    public offlineMapBenefits: string;
     public installationInstructionsMobileOruxMaps: string;
     public installationInstructionsMobileLocus: string;
     public installationInstructionsMobileOffroad: string;
@@ -231,6 +232,12 @@ export class ResourcesService {
     public runningInBackground: string;
     public camera: string;
     public gallery: string;
+    public clearRoute: string;
+    public clearPois: string;
+    public clearBoth: string;
+    public collapse: string;
+    public local: string;
+    public northUp: string;
     // Toasts: Errors/Warnings/Success
     public unableToGetSearchResults: string;
     public pleaseSelectFrom: string;
@@ -273,7 +280,6 @@ export class ResourcesService {
     public continueRecording: string;
     public makeSureBatteryOptimizationIsOff: string;
     public dontShowThisMessageAgain: string;
-
     // Help
     public helpSubheader: string;
     public helpInfo: string;
@@ -295,7 +301,6 @@ export class ResourcesService {
     public helpTrash: string;
     public helpReverse: string;
     public helpCheck: string;
-    public helpLinksExplenation: string;
     public helpLanguage: string;
     public helpDragDrop: string;
     public helpYoutubeLink: string;
@@ -346,7 +351,7 @@ export class ResourcesService {
     public legendTertiary: string;
     public legendUnclassified: string;
     public legendLowSpeedStreet: string;
-    public legendResidental: string;
+    public legendResidential: string;
     public legendBridge: string;
     public legendTunnel: string;
     public legendTransportation: string;
@@ -360,7 +365,7 @@ export class ResourcesService {
     public legendCampsite: string;
     public legendDrinkingWater: string;
     public legendCafé: string;
-    public legendReastaurant: string;
+    public legendRestaurant: string;
     public legendParking: string;
     public legendFuelStation: string;
     public legendConvenienceStore: string;
@@ -422,12 +427,12 @@ export class ResourcesService {
     public legendEasyWithDirection: string;
     public legendModerate: string;
     public legendAdvanced: string;
-    public legendChallangingWithDirection: string;
+    public legendChallengingWithDirection: string;
     public legendBicycleTrails: string;
     public legendLocalTrail: string;
     public legendNationalTrail: string;
     public legendAreas: string;
-    public legendCitySettelment: string;
+    public legendCitySettlement: string;
     public legendOrchard: string;
     public legendCrop: string;
     public legendWoods: string;
@@ -436,7 +441,7 @@ export class ResourcesService {
     public legendSand: string;
     public legendWetland: string;
     public legendDryRiverbed: string;
-    public legendCemetary: string;
+    public legendCemetery: string;
     public legendQuarry: string;
     public legendEmpty: string;
 
@@ -548,8 +553,6 @@ export class ResourcesService {
         this.medium = this.gettextCatalog.getString("Medium");
         this.large = this.gettextCatalog.getString("Large");
         this.custom = this.gettextCatalog.getString("Custom");
-        this.copyPasteEmbdExplenation = this.gettextCatalog
-            .getString("Copy and paste the code below in order to show this map on your webpage.");
         this.html = this.gettextCatalog.getString("HTML");
         this.close = this.gettextCatalog.getString("Close");
         this.northAbbreviation = this.gettextCatalog.getString("N");
@@ -583,7 +586,7 @@ export class ResourcesService {
         this.titlePlaceHolder = this.gettextCatalog.getString("The title for your share.");
         this.description = this.gettextCatalog.getString("Description");
         this.descriptionPlaceHolder = this.gettextCatalog.getString("A few words about what you are sharing.");
-        this.osmLoginExplenation = this.gettextCatalog
+        this.osmLoginExplanation = this.gettextCatalog
             .getString("Click on the frowny-face to login to OSM. We'll make it worth your while!");
         this.application = this.gettextCatalog.getString("Application");
         this.map = this.gettextCatalog.getString("Map");
@@ -593,7 +596,7 @@ export class ResourcesService {
         this.detailsLevel = this.gettextCatalog.getString("Details Level");
         this.upToZoom = this.gettextCatalog.getString("Up to zoom");
         this.installationInstructions = this.gettextCatalog.getString("Installation Instructions");
-        this.offlineMapBenifits = this.gettextCatalog
+        this.offlineMapBenefits = this.gettextCatalog
             .getString("The download may take several minutes, " +
                 "and afterwards you can enjoy the map with no need for a network connection.");
         this.installationInstructionsMobileOruxMaps = this.gettextCatalog
@@ -698,6 +701,12 @@ export class ResourcesService {
         this.runningInBackground = this.gettextCatalog.getString("Running in the background");
         this.camera = this.gettextCatalog.getString("Camera");
         this.gallery = this.gettextCatalog.getString("Gallery");
+        this.clearRoute = this.gettextCatalog.getString("Clear route");
+        this.clearPois = this.gettextCatalog.getString("Clear points");
+        this.clearBoth = this.gettextCatalog.getString("Clear both");
+        this.collapse = this.gettextCatalog.getString("Collapse");
+        this.local = this.gettextCatalog.getString("Local");
+        this.northUp = this.gettextCatalog.getString("North-Up");
         // Toasts: Errors/Warnings/Success
         this.unableToGetSearchResults = this.gettextCatalog.getString("Unable to get search results...");
         this.pleaseSelectFrom = this.gettextCatalog.getString("Please select from...");
@@ -771,7 +780,6 @@ export class ResourcesService {
         this.helpTrash = this.gettextCatalog.getString("Delete a layer");
         this.helpReverse = this.gettextCatalog.getString("Reverse route's direction");
         this.helpCheck = this.gettextCatalog.getString("Save layer properties");
-        this.helpLinksExplenation = this.gettextCatalog.getString("You can use the following links");
         this.helpLanguage = this.gettextCatalog.getString("Change language");
         this.helpDragDrop = this.gettextCatalog.getString("You can drag-and-drop files or URLs onto the map to load them.");
         this.helpYoutubeLink = this.gettextCatalog
@@ -838,7 +846,7 @@ export class ResourcesService {
         this.legendTertiary = this.gettextCatalog.getString("Tertiary");
         this.legendUnclassified = this.gettextCatalog.getString("Unclassified");
         this.legendLowSpeedStreet = this.gettextCatalog.getString("Low-Speed Street");
-        this.legendResidental = this.gettextCatalog.getString("Residental");
+        this.legendResidential = this.gettextCatalog.getString("Residential");
         this.legendBridge = this.gettextCatalog.getString("Bridge");
         this.legendTunnel = this.gettextCatalog.getString("Tunnel");
         this.legendTransportation = this.gettextCatalog.getString("Transportation");
@@ -852,7 +860,7 @@ export class ResourcesService {
         this.legendCampsite = this.gettextCatalog.getString("Campsite");
         this.legendDrinkingWater = this.gettextCatalog.getString("Drinking Water");
         this.legendCafé = this.gettextCatalog.getString("Café");
-        this.legendReastaurant = this.gettextCatalog.getString("Reastaurant");
+        this.legendRestaurant = this.gettextCatalog.getString("Restaurant");
         this.legendParking = this.gettextCatalog.getString("Parking");
         this.legendFuelStation = this.gettextCatalog.getString("Fuel Station");
         this.legendConvenienceStore = this.gettextCatalog.getString("Convenience Store");
@@ -913,12 +921,12 @@ export class ResourcesService {
         this.legendEasyWithDirection = this.gettextCatalog.getString("Easy with Direction");
         this.legendModerate = this.gettextCatalog.getString("Moderate");
         this.legendAdvanced = this.gettextCatalog.getString("Advanced");
-        this.legendChallangingWithDirection = this.gettextCatalog.getString("Challanging with Direction");
+        this.legendChallengingWithDirection = this.gettextCatalog.getString("Challenging with Direction");
         this.legendBicycleTrails = this.gettextCatalog.getString("Bicycle Trails");
         this.legendLocalTrail = this.gettextCatalog.getString("Local Trail");
         this.legendNationalTrail = this.gettextCatalog.getString("National Trail");
         this.legendAreas = this.gettextCatalog.getString("Areas");
-        this.legendCitySettelment = this.gettextCatalog.getString("City, Settelment");
+        this.legendCitySettlement = this.gettextCatalog.getString("City, Settlement");
         this.legendOrchard = this.gettextCatalog.getString("Orchard");
         this.legendCrop = this.gettextCatalog.getString("Crop");
         this.legendWoods = this.gettextCatalog.getString("Woods");
@@ -927,7 +935,7 @@ export class ResourcesService {
         this.legendSand = this.gettextCatalog.getString("Sand");
         this.legendWetland = this.gettextCatalog.getString("Wetland");
         this.legendDryRiverbed = this.gettextCatalog.getString("Dry Riverbed");
-        this.legendCemetary = this.gettextCatalog.getString("Cemetary");
+        this.legendCemetery = this.gettextCatalog.getString("Cemetery");
         this.legendQuarry = this.gettextCatalog.getString("Quarry");
         this.legendConstructionSite = this.gettextCatalog.getString("Construction Site");
         this.legendEmpty = this.gettextCatalog.getString("No legend for this map...");
@@ -991,5 +999,20 @@ export class ResourcesService {
             return "l";
         }
         return "";
+    }
+
+    public getCharacterForIcon(icon: string) {
+        let character = this.iconsCache.get(icon);
+        if (character) {
+            return character;
+        }
+        let i = document.createElement("i");
+        i.classList.add(`${icon}`);
+        document.body.appendChild(i);
+        let style = getComputedStyle(i, ":before");
+        character = String.fromCharCode(style.content.toString().charCodeAt(1));
+        document.body.removeChild(i);
+        this.iconsCache.set(icon, character);
+        return character;
     }
 }

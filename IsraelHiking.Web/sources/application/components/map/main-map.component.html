@@ -1,0 +1,39 @@
+﻿<sidebar></sidebar>
+<ngx-image-gallery [images]="imageGalleryService.images"
+                   [conf]="imageGalleryService.config">
+</ngx-image-gallery>
+<router-outlet></router-outlet>
+<aol-map [width]="'100%'" [height]="'100%'" (onMoveEnd)="moveEnd($event)">
+    <aol-interaction-default></aol-interaction-default>
+    <aol-interaction-dragrotateandzoom></aol-interaction-dragrotateandzoom>
+    <aol-view [zoom]="location.zoom">
+        <aol-coordinate [x]="location.longitude" [y]="location.latitude" [srid]="'EPSG:4326'"></aol-coordinate>
+    </aol-view>
+    <layers-view></layers-view>
+    <routes></routes>
+    <traces></traces>
+    <div class="pane top-pane left-pane">
+        <zoom></zoom>
+        <location *ngIf="isMobile() || !isIFrame()"></location>
+        <layers></layers>
+        <file></file>
+        <file-save-as *ngIf="!isIFrame()"></file-save-as>
+        <edit-osm *ngIf="!isMobile() && !isIFrame()"></edit-osm>
+        <info></info>
+    </div>
+    <div class="pane top-pane right-pane">
+        <osm-user *ngIf="!isIFrame()"></osm-user>
+        <search *ngIf="!isIFrame()"></search>
+        <drawing *ngIf="!isIFrame()"></drawing>
+        <share></share>
+        <language></language>
+    </div>
+    <div class="pane bottom-pane right-pane">
+        <route-statistics></route-statistics>
+    </div>
+    <div class="pane bottom-pane left-pane">
+        <ihm-link></ihm-link>
+    </div>
+    <aol-control-scaleline [units]="'metric'"></aol-control-scaleline>
+</aol-map>
+<ng-progress [ngStyle]="{'z-index':1500}"></ng-progress>

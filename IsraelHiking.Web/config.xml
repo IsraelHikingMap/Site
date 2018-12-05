@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='utf-8'?>
-<widget id="il.org.osm.israelhiking" version="7.2.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
+<widget id="il.org.osm.israelhiking" version="8.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
     <name>Israel Hiking Map</name>
     <description>An application for outdoor navigation.</description>
     <author email="IsraelHikingMap@gmail.com" href="http://israelhiking.osm.org.il">Israel Hiking Map</author>
@@ -36,7 +36,7 @@
         <icon height="180" src="www/content/favicons/apple-touch-icon-180x180.png" width="180" />
     </platform>
     <plugin name="cordova-plugin-inappbrowser" spec="^3.0.0" />
-    <plugin name="cordova-plugin-mauron85-background-geolocation" spec="^3.0.0-alpha.40">
+    <plugin name="cordova-plugin-mauron85-background-geolocation" spec="^3.0.0-alpha.47">
         <variable name="GOOGLE_PLAY_SERVICES_VERSION" value="11+" />
         <variable name="ANDROID_SUPPORT_LIBRARY_VERSION" value="26+" />
         <variable name="ALWAYS_USAGE_DESCRIPTION" value="App requires background tracking enabled" />
@@ -54,6 +54,8 @@
     </universal-links>
     <plugin name="cordova-plugin-deeplinks" spec="^1.1.0" />
     <plugin name="cordova-plugin-insomnia" spec="^4.3.0" />
+    <plugin name="cordova-android-play-services-gradle-release" spec="^1.4.4">
+        <variable name="PLAY_SERVICES_VERSION" value="11.6.2" />
+    </plugin>
     <engine name="android" spec="^7.0.0" />
-    <engine name="browser" spec="^5.0.4" />
 </widget>

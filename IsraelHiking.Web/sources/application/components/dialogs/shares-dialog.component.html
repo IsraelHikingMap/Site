@@ -17,7 +17,7 @@
         <div *ngFor="let shareUrl of filteredShareUrls" class="item">
             <div fxLayout="row" [ngClass]="{'active': selectedShareUrl === shareUrl}" (click)="toggleSelectedShareUrl(shareUrl)">
                 <div class="item-image">
-                    <img [src]="userService.getImageFromShareId(shareUrl, 128, 128)" fxFill />
+                    <img [src]="getImageFromShareId(shareUrl, 128, 128)" fxFill />
                 </div>
                 <div class="margin-10">
                     <div class="item-content">
@@ -40,7 +40,7 @@
             </div>
         </div>
         <mat-spinner *ngIf="loadingShareUrls"></mat-spinner>
-        <p *ngIf="userService.shareUrls.length === 0 && !loadingShareUrls">{{resources.noShares}}</p>
+        <p *ngIf="filteredShareUrls.length === 0 && !loadingShareUrls">{{resources.noShares}}</p>
     </div>
     <div mat-dialog-actions>
         <div fxLayout="row" fxFlex>
@@ -54,9 +54,9 @@
                 <mat-menu #appMenu="matMenu" [dir]="resources.direction" yPosition="above" overlapTrigger="false">
                     <div mat-menu-item disableRipple="true">
                         <div fxLayout="row">
-                            <div fxFlex><a [href]="userService.getShareSocialLinks(selectedShareUrl).facebook" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook share"><i class="fa icon-facebook"></i></a></div>
-                            <div fxFlex><a [href]="userService.getShareSocialLinks(selectedShareUrl).whatsapp" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp share"><i class="fa icon-whatsapp"></i></a></div>
-                            <div fxFlex><button fxFill mat-button ngxClipboard [cbContent]="userService.getShareSocialLinks(selectedShareUrl).ihm" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard share"><i class="fa icon-clipboard"></i></button></div>
+                            <div fxFlex><a [href]="getShareSocialLinks(selectedShareUrl).facebook" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithFacebook}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share facebook share"><i class="fa icon-facebook"></i></a></div>
+                            <div fxFlex><a [href]="getShareSocialLinks(selectedShareUrl).whatsapp" [target]="'_blank'" fxFill mat-button matTooltip="{{resources.shareWithWhatsapp}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share whatsapp share"><i class="fa icon-whatsapp"></i></a></div>
+                            <div fxFlex><button fxFill mat-button ngxClipboard [cbContent]="getShareSocialLinks(selectedShareUrl).ihm" matTooltip="{{resources.copyUrl}}" matTooltipPosition="below" angulartics2On="click" angularticsCategory="Share" angularticsAction="Share copy to clipboard share"><i class="fa icon-clipboard"></i></button></div>
                         </div>
                     </div>
                 </mat-menu>

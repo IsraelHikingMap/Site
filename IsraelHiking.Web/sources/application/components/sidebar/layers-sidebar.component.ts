@@ -3,13 +3,10 @@ import { MatDialog } from "@angular/material";
 import { LocalStorage, WebstorableArray } from "ngx-store";
 import { select, NgRedux } from "@angular-redux/store";
 import { Observable } from "rxjs";
-import * as _ from "lodash";
+import { every, some } from "lodash";
 
-import { MapService } from "../../services/map.service";
 import { SidebarService } from "../../services/sidebar.service";
-import { LayersService, IBaseLayer, IOverlay } from "../../services/layers/layers.service";
-import { RoutesService } from "../../services/layers/routelayers/routes.service";
-import { IRouteLayer } from "../../services/layers/routelayers/iroute.layer";
+import { LayersService } from "../../services/layers/layers.service";
 import { ResourcesService } from "../../services/resources.service";
 import { BaseMapComponent } from "../base-map.component";
 import { BaseLayerAddDialogComponent } from "../dialogs/layers/base-layer-add-dialog.component";
@@ -20,8 +17,11 @@ import { RouteAddDialogComponent } from "../dialogs/routes/route-add-dialog.comp
 import { RouteEditDialogComponent } from "../dialogs/routes/route-edit-dialog.component";
 import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
 import { PoiService, CategoriesType, ICategory } from "../../services/poi.service";
-import { IApplicationState } from "../../state/models/application-state";
-import { ConfigurationActions } from "../../state/reducres/configuration.reducer";
+import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
+import { ConfigurationActions } from "../../reducres/configuration.reducer";
+import { SetSelectedRouteAction } from "../../reducres/route-editing-state.reducer";
+import { ApplicationState, RouteData, EditableLayer, Overlay } from "../../models/models";
+import { ChangeRoutePropertiesAction } from "../../reducres/routes.reducer";
 
 interface IExpandableItem {
     name: string;
@@ -35,10 +35,20 @@ interface IExpandableItem {
     encapsulation: ViewEncapsulation.None
 })
 export class LayersSidebarComponent extends BaseMapComponent implements OnDestroy {
-    public baseLayers: IBaseLayer[];
-    public overlays: IOverlay[];
-    public routes: IRouteLayer[];
+
     public categoriesTypes: CategoriesType[];
+
+    @select((state: ApplicationState) => state.layersState.baseLayers)
+    public baseLayers: Observable<EditableLayer[]>;
+
+    @select((state: ApplicationState) => state.layersState.overlays)
+    public overlays: Observable<Overlay[]>;
+
+    @select((state: ApplicationState) => state.routes.present)
+    public routes: Observable<RouteData[]>;
+
+    @select((state: ApplicationState) => state.configuration.isAdvanced)
+    public isAdvanced: Observable<boolean>;
 
     @LocalStorage()
     public layersExpandedState: WebstorableArray<IExpandableItem> = [
@@ -47,22 +57,15 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         { name: "Private Routes", isExpanded: true }
     ] as any;
 
-    @select((state: IApplicationState) => state.configuration.isAdvanced)
-    public isAdvanced: Observable<boolean>;
-
     constructor(resources: ResourcesService,
         private readonly dialog: MatDialog,
-        private readonly mapService: MapService,
         private readonly layersService: LayersService,
-        private readonly routesService: RoutesService,
+        private readonly selectedRouteService: SelectedRouteService,
         private readonly categoriesLayerFactory: CategoriesLayerFactory,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
-        private ngRedux: NgRedux<IApplicationState>) {
+        private ngRedux: NgRedux<ApplicationState>) {
         super(resources);
-        this.baseLayers = layersService.baseLayers;
-        this.overlays = layersService.overlays;
-        this.routes = routesService.routes;
         this.categoriesTypes = this.poiService.getCategoriesTypes();
     }
 
@@ -74,13 +77,12 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         this.sidebarService.hide();
     }
 
-    public addBaseLayer(e: Event) {
-        this.suppressEvents(e);
+    public addBaseLayer(event: Event) {
+        event.stopPropagation();
         this.dialog.open(BaseLayerAddDialogComponent);
     }
 
-    public editBaseLayer(layer: IBaseLayer, e: Event) {
-        this.suppressEvents(e);
+    public editBaseLayer(layer: EditableLayer) {
         let dialogRef = this.dialog.open(BaseLayerEditDialogComponent);
         dialogRef.componentInstance.setBaseLayer(layer);
     }
@@ -89,13 +91,13 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
         return this.categoriesLayerFactory.get(categoriesType).isVisible();
     }
 
-    public toggleCategoriesLayerVisibility(categoriesType: CategoriesType, e: Event) {
-        this.suppressEvents(e);
+    public toggleCategoriesLayerVisibility(categoriesType: CategoriesType, event: Event) {
+        event.stopPropagation();
         let layer = this.categoriesLayerFactory.get(categoriesType);
         if (layer.isVisible()) {
-            this.mapService.map.removeLayer(layer);
+            layer.hide();
         } else {
-            this.mapService.map.addLayer(layer);
+            layer.show();
         }
     }
 
@@ -104,7 +106,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     }
 
     public expand(group: string) {
-        let state = _.find(this.layersExpandedState, l => l.name === group);
+        let state = this.layersExpandedState.find(l => l.name === group);
         if (state) {
             state.isExpanded = true;
         } else {
@@ -114,7 +116,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     }
 
     public collapse(group: string) {
-        let state = _.find(this.layersExpandedState, l => l.name === group);
+        let state = this.layersExpandedState.find(l => l.name === group);
         if (state) {
             state.isExpanded = false;
         } else {
@@ -124,78 +126,85 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
     }
 
     public getExpandState(group: string): boolean {
-        let state = _.find(this.layersExpandedState, l => l.name === group);
+        let state = this.layersExpandedState.find(l => l.name === group);
         return state ? state.isExpanded : false;
     }
 
-    public toggleCategory(categoriesType: CategoriesType, category: ICategory, e: Event) {
-        this.suppressEvents(e);
+    public toggleCategory(categoriesType: CategoriesType, category: ICategory) {
         let layer = this.categoriesLayerFactory.get(categoriesType);
         layer.toggleCategory(category);
-        if (layer.isVisible() && _.every(layer.categories, c => c.isSelected === false)) {
-            this.mapService.map.removeLayer(layer);
+        if (layer.isVisible() && every(layer.categories, c => c.isSelected === false)) {
+            layer.hide();
             return;
         }
-        if (layer.isVisible() === false && _.some(layer.categories, c => c.isSelected)) {
-            this.mapService.map.addLayer(layer);
+        if (layer.isVisible() === false && some(layer.categories, c => c.isSelected)) {
+            layer.show();
         }
     }
 
-    public addOverlay(e: Event) {
-        this.suppressEvents(e);
+    public addOverlay(event: Event) {
+        event.stopPropagation();
         this.dialog.open(OverlayAddDialogComponent);
     }
 
-    public editOverlay(layer: IOverlay, e: Event) {
-        this.suppressEvents(e);
+    public editOverlay(layer: Overlay) {
         let dialogRef = this.dialog.open(OverlayEditDialogComponent);
         dialogRef.componentInstance.setOverlay(layer);
     }
 
-    public addRoute(e: Event) {
-        this.suppressEvents(e);
+    public addRoute(event: Event) {
+        event.stopPropagation();
         this.dialog.open(RouteAddDialogComponent);
     }
 
-    public editRoute(routeName: string, e: Event) {
-        this.suppressEvents(e);
+    public editRoute(routeData: RouteData, event: Event) {
+        event.stopPropagation();
         let dialogRef = this.dialog.open(RouteEditDialogComponent);
-        dialogRef.componentInstance.setRouteLayer(routeName);
+        dialogRef.componentInstance.setRouteData(routeData);
     }
 
-    public selectBaseLayer(baseLayer: IBaseLayer, e: Event) {
-        this.layersService.selectBaseLayer(baseLayer);
-        this.suppressEvents(e);
+    public isBaseLayerSelected(baseLayer: EditableLayer): boolean {
+        return this.layersService.isBaseLayerSelected(baseLayer);
     }
 
-    public toggleVisibility(overlay: IOverlay, e: Event) {
+    public selectBaseLayer(baseLayer: EditableLayer) {
+        this.layersService.selectBaseLayer(baseLayer.key);
+    }
+
+    public toggleVisibility(overlay: Overlay) {
         this.layersService.toggleOverlay(overlay);
-        this.suppressEvents(e);
     }
 
-    public selectRoute(routeLayer: IRouteLayer, e: Event) {
-        this.routesService.changeRouteState(routeLayer);
-        this.suppressEvents(e);
+    public toggleRoute(routeData: RouteData) {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        if (selectedRoute != null && routeData.id === selectedRoute.id && routeData.state !== "Hidden") {
+            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: null }));
+            routeData.state = "Hidden";
+            this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
+                {
+                    routeId: routeData.id,
+                    routeData: routeData
+                }));
+            return;
+        }
+        if (routeData.state === "Hidden") {
+            routeData.state = "ReadOnly";
+            this.ngRedux.dispatch(new ChangeRoutePropertiesAction(
+                {
+                    routeId: routeData.id,
+                    routeData: routeData
+                }));
+        }
+        this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: routeData.id }));
     }
 
-    public getRouteColor(routeLayer: IRouteLayer) {
-        return routeLayer.route.properties.pathOptions.color;
+    public isRouteVisible(routeData: RouteData) {
+        return routeData.state !== "Hidden";
     }
 
-    public getRouteName = (routeLayer: IRouteLayer) => {
-        return routeLayer.route.properties.name;
-    }
-
-    public getRouteDescription = (routeLayer: IRouteLayer) => {
-        return routeLayer.route.properties.description;
-    }
-
-    public isRouteVisible(routeLayer: IRouteLayer) {
-        return routeLayer.route.properties.isVisible;
-    }
-
-    public isRouteSelected(routeLayer: IRouteLayer) {
-        return this.routesService.selectedRoute === routeLayer;
+    public isRouteSelected(routeData: RouteData) {
+        let selectedRoute = this.selectedRouteService.getSelectedRoute();
+        return selectedRoute != null && selectedRoute.id === routeData.id;
     }
 
     public toggleIsAdvanced() {

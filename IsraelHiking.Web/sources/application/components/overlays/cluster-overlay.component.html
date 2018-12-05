@@ -1,0 +1,16 @@
+﻿<aol-overlay *ngIf="isOpen">
+    <aol-coordinate [x]="latlng.lng"
+                    [y]="latlng.lat"
+                    [srid]="'EPSG:4326'">
+    </aol-coordinate>
+    <aol-content>
+        <div class="marker-popup" [dir]="resources.direction">
+            <div (click)="close()" class="close"><i class="fa icon-close"></i></div>
+            <div *ngFor="let point of points" fxLayout="row" [dir]="resources.getDirection(point.title)">
+                <a fxFill mat-button [routerLink]="getRouterLinkForPoint(point)" (click)="close()" [ngClass]="resources.getTextAlignment(point.title)">
+                    <i class="fa {{point.icon}}" [style.color]="point.iconColor"></i> {{point.title}}
+                </a><br/>
+            </div>
+        </div>
+    </aol-content>
+</aol-overlay>

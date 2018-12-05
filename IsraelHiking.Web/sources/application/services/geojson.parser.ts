@@ -1,7 +1,7 @@
-﻿import { Injectable } from "@angular/core";
-import * as L from "leaflet";
+import { Injectable } from "@angular/core";
 
-import * as Common from "../common/IsraelHiking";
+import { LatLngAlt, DataContainer, MarkerData, RouteData, RouteSegmentData } from "../models/models";
+import { SpatialService } from "./spatial.service";
 
 namespace GeoJson {
     export const lineString = "LineString";
@@ -24,97 +24,116 @@ export class GeoJsonParser {
         return value || properties[key];
     }
 
-    public static createLatlng(coordinates: GeoJSON.Position): L.LatLng {
-        return L.latLng(coordinates[1], coordinates[0], coordinates[2] || 0);
+    public static createLatlng(coordinates: GeoJSON.Position): LatLngAlt {
+        return {
+            lat: coordinates[1],
+            lng: coordinates[0],
+            alt: coordinates[2] || 0
+        };
     }
 
-    public parse(content: string): Common.DataContainer {
+    public parse(content: string): DataContainer {
         let geojson = JSON.parse(content);
         return this.toDataContainer(geojson);
     }
 
-    public toString(data: Common.DataContainer): string {
+    public toString(data: DataContainer): string {
         let geoJson = this.toGeoJson(data);
         return JSON.stringify(geoJson);
     }
 
-    public toDataContainer(geoJson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>, language?: string): Common.DataContainer {
-        let markers = [] as Common.MarkerData[];
+    public toDataContainer(geoJson: GeoJSON.FeatureCollection<GeoJSON.GeometryObject>, language?: string): DataContainer {
+        let markers = [] as MarkerData[];
         let data = {
-            routes: [] as Common.RouteData[]
-        } as Common.DataContainer;
-        let leaftletGeoJson = L.geoJSON(geoJson, {
-            onEachFeature: (feature: GeoJSON.Feature<GeoJSON.GeometryObject>) => {
-                let routeData = null;
-                let name = GeoJsonParser.getPropertyValue(feature.properties, "name", language);
-                let description = GeoJsonParser.getPropertyValue(feature.properties, "description", language);
-                let icon = feature.properties["icon"];
-                let id = feature.properties["identifier"];
-                let website = feature.properties["website"];
-                let image = feature.properties["image"];
-                switch (feature.geometry.type) {
-                    case GeoJson.point:
-                        let point = feature.geometry as GeoJSON.Point;
-                        let marker = this.createMarker(point.coordinates, id, name, icon, description);
-                        if (website) {
-                            marker.urls.push({ mimeType: "text/html", text: marker.title, url: website });
-                        }
-                        if (image) {
-                            marker.urls.push({
-                                mimeType: `image/${image.split(".").pop()}`,
-                                text: "",
-                                url: image
-                            });
-                        }
-                        markers.push(marker);
-                        break;
-                    case GeoJson.multiPoint:
-                        let points = feature.geometry as GeoJSON.MultiPoint;
-                        for (let pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
-                            let multiMarker = this.createMarker(points.coordinates[pointIndex], id, name, null, description);
-                            markers.push(multiMarker);
-                        }
-                        break;
-                    case GeoJson.lineString:
-                        let lineString = feature.geometry as GeoJSON.LineString;
-                        routeData = this.positionsToData(lineString.coordinates, name, description);
-                        break;
-                    case GeoJson.multiLineString:
-                        let multiLineString = feature.geometry as GeoJSON.MultiLineString;
-                        routeData = this.coordinatesArrayToData(multiLineString.coordinates, name, description);
-                        break;
-                    case GeoJson.polygon:
-                        let polygone = feature.geometry as GeoJSON.Polygon;
-                        routeData = this.coordinatesArrayToData(polygone.coordinates, name, description);
-                        break;
-                    case GeoJson.multiPolygon:
-                        let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
-                        routeData = ({ name: name || "", description: description || "", segments: [] } as Common.RouteData);
-                        for (let polygoneCoordinates of multiPolygone.coordinates) {
-                            let route = this.coordinatesArrayToData(polygoneCoordinates, name, description);
-                            routeData.segments = routeData.segments.concat(route.segments);
-                        }
-                        break;
+            routes: [] as RouteData[]
+        } as DataContainer;
+        for (let feature of geoJson.features) {
+            let routeData = null;
+            let name = GeoJsonParser.getPropertyValue(feature.properties, "name", language);
+            let description = GeoJsonParser.getPropertyValue(feature.properties, "description", language);
+            let icon = feature.properties["icon"];
+            let id = feature.properties["identifier"];
+            let website = feature.properties["website"];
+            let image = feature.properties["image"];
+            switch (feature.geometry.type) {
+            case GeoJson.point:
+                let point = feature.geometry as GeoJSON.Point;
+                let marker = this.createMarker(point.coordinates, id, name, icon, description);
+                if (website) {
+                    marker.urls.push({ mimeType: "text/html", text: marker.title, url: website });
                 }
-                if (routeData && routeData.segments.length > 0) {
-                    routeData.markers = routeData.markers || [];
-                    data.routes.push(routeData);
+                if (image) {
+                    marker.urls.push({
+                        mimeType: `image/${image.split(".").pop()}`,
+                        text: "",
+                        url: image
+                    });
                 }
+                markers.push(marker);
+                break;
+            case GeoJson.multiPoint:
+                let points = feature.geometry as GeoJSON.MultiPoint;
+                for (let pointIndex = 0; pointIndex < points.coordinates.length; pointIndex++) {
+                    let multiMarker = this.createMarker(points.coordinates[pointIndex], id, name, null, description);
+                    markers.push(multiMarker);
+                }
+                break;
+            case GeoJson.lineString:
+                let lineString = feature.geometry as GeoJSON.LineString;
+                routeData = this.positionsToData(lineString.coordinates, name, description);
+                break;
+            case GeoJson.multiLineString:
+                let multiLineString = feature.geometry as GeoJSON.MultiLineString;
+                routeData = this.coordinatesArrayToData(multiLineString.coordinates, name, description);
+                break;
+            case GeoJson.polygon:
+                let polygone = feature.geometry as GeoJSON.Polygon;
+                routeData = this.coordinatesArrayToData(polygone.coordinates, name, description);
+                break;
+            case GeoJson.multiPolygon:
+                let multiPolygone = feature.geometry as GeoJSON.MultiPolygon;
+                routeData = ({ name: name || "", description: description || "", segments: [] } as RouteData);
+                for (let polygoneCoordinates of multiPolygone.coordinates) {
+                    let route = this.coordinatesArrayToData(polygoneCoordinates, name, description);
+                    routeData.segments = routeData.segments.concat(route.segments);
+                }
+                break;
             }
-        } as L.GeoJSONOptions);
+            if (routeData && routeData.segments.length > 0) {
+                routeData.markers = routeData.markers || [];
+                data.routes.push(routeData);
+            }
+        }
         if (markers.length > 0) {
             if (data.routes.length === 0) {
                 let name = markers.length === 1 ? markers[0].title || GeoJsonParser.MARKERS : GeoJsonParser.MARKERS;
-                data.routes.push({ name: name, description: "", segments: [], markers: [] });
+                data.routes.push({
+                    id: Math.random().toString(36).substr(2, 9),
+                    name: name,
+                    description: "",
+                    state: "ReadOnly",
+                    segments: [],
+                    markers: []
+                });
             }
             data.routes[0].markers = markers;
         }
-        data.northEast = leaftletGeoJson.getBounds().getNorthEast();
-        data.southWest = leaftletGeoJson.getBounds().getSouthWest();
+        let latLngs = [];
+        for (let route of data.routes) {
+            for (let segment of route.segments) {
+                latLngs = latLngs.concat(segment.latlngs);
+            }
+            for (let marker of route.markers) {
+                latLngs.push(marker.latlng);
+            }
+        }
+        let bounds = SpatialService.getBounds(latLngs);
+        data.northEast = bounds.northEast;
+        data.southWest = bounds.southWest;
         return data;
     }
 
-    private createMarker(coordinates: GeoJSON.Position, id: string, message: string, icon: string, description: string): Common.MarkerData {
+    private createMarker(coordinates: GeoJSON.Position, id: string, message: string, icon: string, description: string): MarkerData {
         return {
             id: id,
             latlng: GeoJsonParser.createLatlng(coordinates),
@@ -125,17 +144,17 @@ export class GeoJsonParser {
         };
     }
 
-    private createLatlngArray(coordinates: GeoJSON.Position[]): L.LatLng[] {
-        let latlngs = [] as L.LatLng[];
+    private createLatlngArray(coordinates: GeoJSON.Position[]): LatLngAlt[] {
+        let latlngs = [] as LatLngAlt[];
         for (let pointCoordinates of coordinates) {
             latlngs.push(GeoJsonParser.createLatlng(pointCoordinates));
         }
         return latlngs;
     }
 
-    private positionsToData(positions: GeoJSON.Position[], name: string, description: string): Common.RouteData {
+    private positionsToData(positions: GeoJSON.Position[], name: string, description: string): RouteData {
 
-        let routeData = { name: name || "", description: description || "", segments: [], markers: [] } as Common.RouteData;
+        let routeData = { name: name || "", description: description || "", segments: [], markers: [] } as RouteData;
         let latlngs = this.createLatlngArray(positions);
         if (latlngs.length < 2) {
             return routeData;
@@ -144,17 +163,17 @@ export class GeoJsonParser {
             routePoint: latlngs[0],
             latlngs: [latlngs[0], latlngs[0]],
             routingType: "Hike"
-        } as Common.RouteSegmentData);
+        } as RouteSegmentData);
         routeData.segments.push({
             routePoint: latlngs[latlngs.length - 1],
             latlngs: latlngs,
             routingType: "Hike"
-        } as Common.RouteSegmentData);
+        } as RouteSegmentData);
         return routeData;
     }
 
-    private coordinatesArrayToData(coordinates: GeoJSON.Position[][], name: string, description: string): Common.RouteData {
-        let routeData = { name: name || "", description: description || "", segments: [], markers: [] } as Common.RouteData;
+    private coordinatesArrayToData(coordinates: GeoJSON.Position[][], name: string, description: string): RouteData {
+        let routeData = { name: name || "", description: description || "", segments: [], markers: [] } as RouteData;
         for (let lineCoordinates of coordinates) {
             if (lineCoordinates.length <= 0) {
                 continue;
@@ -165,7 +184,7 @@ export class GeoJsonParser {
                     latlngs: [latLng, latLng],
                     routePoint: latLng,
                     routingType: "Hike"
-                } as Common.RouteSegmentData);
+                } as RouteSegmentData);
             }
             let latlngs = this.createLatlngArray(lineCoordinates);
             if (latlngs.length >= 2) {
@@ -173,13 +192,13 @@ export class GeoJsonParser {
                     latlngs: latlngs,
                     routePoint: latlngs[0],
                     routingType: "Hike"
-                } as Common.RouteSegmentData);
+                } as RouteSegmentData);
             }
         }
         return routeData;
     }
 
-    public toGeoJson(data: Common.DataContainer): GeoJSON.FeatureCollection<GeoJSON.GeometryObject> {
+    public toGeoJson(data: DataContainer): GeoJSON.FeatureCollection<GeoJSON.GeometryObject> {
         let geoJson = {
             type: "FeatureCollection",
             features: [] as GeoJSON.Feature<GeoJSON.GeometryObject>[]
@@ -227,8 +246,8 @@ export class GeoJsonParser {
         return geoJson;
     }
 
-    public toLatLngsArray(feature: GeoJSON.Feature<GeoJSON.GeometryObject>): L.LatLng[][] {
-        let latlngsArray = [] as L.LatLng[][];
+    public toLatLngsArray(feature: GeoJSON.Feature<GeoJSON.GeometryObject>): LatLngAlt[][] {
+        let latlngsArray = [] as LatLngAlt[][];
         switch (feature.geometry.type) {
             case GeoJson.point:
                 let point = feature.geometry as GeoJSON.Point;

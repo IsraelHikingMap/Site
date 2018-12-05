@@ -1,40 +1,32 @@
 import { Injectable } from "@angular/core";
 import { FileService } from "./file.service";
 import { ResourcesService } from "./resources.service";
-import { MapService } from "./map.service";
 import { ToastService } from "./toast.service";
 import { DataContainerService } from "./data-container.service";
+import { RouteData } from "../models/models";
 
 @Injectable()
 export class DragAndDropService {
 
-    constructor(private resourcesService: ResourcesService,
-        private mapService: MapService,
-        private fileService: FileService,
-        private dataContainerService: DataContainerService,
-        private toastService: ToastService) {
+    constructor(private readonly resourcesService: ResourcesService,
+        private readonly fileService: FileService,
+        private readonly dataContainerService: DataContainerService,
+        private readonly toastService: ToastService) {
 
-        let dropbox = this.mapService.map.getContainer();
-
-        dropbox.addEventListener("dragenter", () => { this.mapService.map.scrollWheelZoom.disable(); });
-        dropbox.addEventListener("dragleave", () => { this.mapService.map.scrollWheelZoom.enable(); });
-        dropbox.addEventListener("dragover", (e: DragEvent) => {
-            e.stopPropagation();
-            e.preventDefault();
+        document.addEventListener("dragover", (event) => {
+            event.preventDefault();
         });
-        dropbox.addEventListener("drop", (e: DragEvent) => {
+        document.addEventListener("drop", (e: DragEvent) => {
             e.stopPropagation();
             e.preventDefault();
-            this.mapService.map.scrollWheelZoom.enable();
             let files = Array.prototype.slice.apply(e.dataTransfer.files) as File[];
             if (files && files.length > 0) {
                 setTimeout(async () => {
                     for (let file of files) {
                         try {
-                            let dataContainer = await fileService.openFromFile(file);
-                            dataContainerService.setData(dataContainer);
+                            await this.fileService.addRoutesFromFile(file);
                         } catch (ex) {
-                            toastService.error(resourcesService.unableToLoadFromFile + `: ${file.name}`);
+                            this.toastService.error(this.resourcesService.unableToLoadFromFile + `: ${file.name}`);
                         }
                     }
                 }, 25);
@@ -43,10 +35,8 @@ export class DragAndDropService {
 
             let url = e.dataTransfer.getData("text");
             if (url) {
-                fileService.openFromUrl(url).then((dataContainer) => {
-                    dataContainerService.setData(dataContainer);
-                }, () => {
-                    toastService.error(resourcesService.unableToLoadFromUrl + `: ${url}`);
+                this.fileService.addRoutesFromUrl(url).then(() => {}, () => {
+                    this.toastService.error(resourcesService.unableToLoadFromUrl + `: ${url}`);
                 });
             }
         });

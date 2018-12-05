@@ -1,8 +1,8 @@
 import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
-import * as _ from "lodash";
-import * as L from "leaflet";
+import { NgRedux } from "@angular-redux/store";
+import { sum } from "lodash";
 
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
@@ -15,14 +15,14 @@ import {
     IPoiSocialLinks,
     IContribution
 } from "../../../services/poi.service";
-import { MapService } from "../../../services/map.service";
-import { OsmUserService } from "../../../services/osm-user.service";
-import { RoutesService } from "../../../services/layers/routelayers/routes.service";
+import { AuthorizationService } from "../../../services/authorization.service";
 import { ToastService } from "../../../services/toast.service";
-import { IMarkerWithData } from "../../../services/layers/routelayers/iroute.layer";
-import { CategoriesLayerFactory } from "../../../services/layers/categories-layers.factory";
 import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
-import * as Common from "../../../common/IsraelHiking";
+import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
+import { RouteData, LinkData, LatLngAlt, ApplicationState } from "../../../models/models";
+import { AddRouteAction, AddPrivatePoiAction } from "../../../reducres/routes.reducer";
+import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
+import { FitBoundsService } from "../../../services/fit-bounds.service";
 
 @Component({
     selector: "public-poi-sidebar",
@@ -35,7 +35,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public isLoading: boolean;
     public sourceImageUrls: string[];
     public rating: number;
-    public latLng: L.LatLng;
+    public latlng: LatLngAlt;
     public shareLinks: IPoiSocialLinks;
     public contribution: IContribution;
 
@@ -46,14 +46,15 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     constructor(resources: ResourcesService,
         private readonly route: ActivatedRoute,
         private readonly router: Router,
-        private readonly mapService: MapService,
         private readonly sidebarService: SidebarService,
         private readonly poiService: PoiService,
-        private readonly osmUserService: OsmUserService,
-        private readonly routesService: RoutesService,
+        private readonly authorizationService: AuthorizationService,
+        private readonly selectedRouteService: SelectedRouteService,
+        private readonly routeLayerFactory: RouteLayerFactory,
         private readonly toastService: ToastService,
-        private readonly categoriesLayerFactory: CategoriesLayerFactory,
-        private readonly hashService: HashService) {
+        private readonly hashService: HashService,
+        private readonly fitBoundsService: FitBoundsService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
         let poiRouterData = this.hashService.getPoiRouterData();
         this.isLoading = true;
@@ -73,11 +74,10 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         try {
             let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
             this.initFromPointOfInterestExtended(poiExtended);
-            let latLng = L.latLng(poiExtended.location.lat, poiExtended.location.lng);
-            let bounds = L.latLngBounds([latLng, latLng]);
-            this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute).moveToSearchResults(poiExtended, bounds);
-            let categoriesLayer = this.categoriesLayerFactory.getByPoiType(poiExtended.isRoute);
-            categoriesLayer.selectRoute(this.poiExtended.dataContainer.routes, this.poiExtended.isArea);
+            let latLng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng };
+            let bounds = { northEast: latLng, southWest: latLng };
+            this.fitBoundsService.fitBounds(bounds);
+            this.poiService.selectedPoi = poiExtended;
             // Change edit mode only after this.info is initialized.
             this.subscription = this.route.queryParams.subscribe(async (params) => {
                 this.editMode = params[RouteStrings.EDIT] && params[RouteStrings.EDIT] === "true";
@@ -94,10 +94,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private initFromPointOfInterestExtended = (poiExtended: IPointOfInterestExtended) => {
         this.poiExtended = poiExtended;
-        this.latLng = L.latLng(poiExtended.location.lat, poiExtended.location.lng, poiExtended.location.alt);
+        this.latlng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng, alt: poiExtended.location.alt};
         this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
         this.rating = this.getRatingNumber(this.poiExtended.rating);
-        this.mapService.routesJsonToRoutesObject(this.poiExtended.dataContainer.routes);
         this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
         this.contribution = this.poiExtended.contribution || {} as IContribution;
         // clone:
@@ -105,11 +104,11 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     private getRatingNumber(rating: IRating): number {
-        return _.sum(rating.raters.map(r => r.value));
+        return sum(rating.raters.map(r => r.value));
     }
 
     public isHideEditMode(): boolean {
-        return !this.osmUserService.isLoggedIn() ||
+        return !this.authorizationService.isLoggedIn() ||
             !this.poiExtended ||
             !this.poiExtended.isEditable ||
             this.editMode;
@@ -125,7 +124,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (this.poiExtended.description) {
             return this.poiExtended.description;
         }
-        if (this.osmUserService.isLoggedIn() === false) {
+        if (this.authorizationService.isLoggedIn() === false) {
             return this.resources.noDescriptionLoginRequired;
         }
         return this.resources.emptyPoiDescription;
@@ -136,7 +135,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public setEditMode() {
-        if (this.osmUserService.isLoggedIn() === false) {
+        if (this.authorizationService.isLoggedIn() === false) {
             this.toastService.info(this.resources.loginRequired);
             return;
         }
@@ -180,13 +179,13 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public canVote(type: string): boolean {
-        if (this.osmUserService.isLoggedIn() === false) {
+        if (this.authorizationService.isLoggedIn() === false) {
             return false;
         }
         if (this.poiExtended == null) {
             return false;
         }
-        let vote = _.find(this.poiExtended.rating.raters, r => r.id === this.osmUserService.userId);
+        let vote = this.poiExtended.rating.raters.find(r => r.id === this.authorizationService.getUserInfo().id);
         if (vote == null) {
             return true;
         }
@@ -195,13 +194,14 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private vote(value: number) {
         if (this.canVote(value > 0 ? "up" : "down") === false) {
-            if (this.osmUserService.isLoggedIn() === false) {
+            if (this.authorizationService.isLoggedIn() === false) {
                 this.toastService.info(this.resources.loginRequired);
             }
             return;
         }
-        this.poiExtended.rating.raters = this.poiExtended.rating.raters.filter(r => r.id !== this.osmUserService.userId);
-        this.poiExtended.rating.raters.push({ id: this.osmUserService.userId, value: value } as IRater);
+        let userId = this.authorizationService.getUserInfo().id;
+        this.poiExtended.rating.raters = this.poiExtended.rating.raters.filter(r => r.id !== userId);
+        this.poiExtended.rating.raters.push({ id: userId, value: value } as IRater);
         this.poiService.uploadRating(this.poiExtended.rating).then((rating) => {
             this.poiExtended.rating = rating;
             this.rating = this.getRatingNumber(rating);
@@ -209,17 +209,22 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public convertToRoute() {
-        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes))  as Common.RouteData[];
-        this.mapService.routesJsonToRoutesObject(routesCopy);
+        let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes)) as RouteData[];
         routesCopy[0].description = this.info.description;
-        this.routesService.setData(routesCopy);
+        for (let routeData of routesCopy) {
+            let name = this.selectedRouteService.createRouteName(routeData.name);
+            let newRoute = this.routeLayerFactory.createRouteData(name);
+            newRoute.segments = routeData.segments;
+            newRoute.markers = routeData.markers;
+            this.ngRedux.dispatch(new AddRouteAction({
+                routeData: newRoute
+            }));
+        }
         this.clear();
     }
 
     public async addPointToRoute() {
-        let selectedRoute = this.routesService.getOrCreateSelectedRoute();
-        let stateName = selectedRoute.getStateName();
-        this.routesService.selectedRoute.setHiddenState();
+        let selectedRoute = this.selectedRouteService.getOrCreateSelectedRoute();
         let icon = "icon-star";
         let id = "";
         if (this.poiExtended) {
@@ -227,29 +232,29 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             id = this.poiExtended.id;
         }
         let urls = await this.getUrls();
-        this.routesService.selectedRoute.route.markers.push({
-            latlng: this.latLng,
-            title: this.info.title,
-            description: this.info.description,
-            type: icon.replace("icon-", ""),
-            id: id,
-            urls: urls,
-            marker: null
-        } as IMarkerWithData);
-        selectedRoute.setState(stateName);
-        selectedRoute.raiseDataChanged();
+        this.ngRedux.dispatch(new AddPrivatePoiAction({
+            routeId: selectedRoute.id,
+            markerData: {
+                latlng: this.latlng,
+                title: this.info.title,
+                description: this.info.description,
+                type: icon.replace("icon-", ""),
+                id: id,
+                urls: urls
+            }
+        }));
         this.clear();
     }
 
     public clear() {
         if (this.poiExtended) {
-            this.categoriesLayerFactory.getByPoiType(this.poiExtended.isRoute).clearSelected(this.poiExtended.id);
+            this.poiService.clearSelected();
         }
         this.close();
     }
 
-    private async getUrls(): Promise<Common.LinkData[]> {
-        let urls = [] as Common.LinkData[];
+    private async getUrls(): Promise<LinkData[]> {
+        let urls = [] as LinkData[];
         for (let reference of this.info.references) {
             urls.push({
                 mimeType: "text/html",
@@ -285,6 +290,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         if (this.poiExtended.source.toLocaleLowerCase() !== "osm") {
             return null;
         }
-        return this.osmUserService.getElementOsmAddress(this.poiExtended.id);
+        return this.authorizationService.getElementOsmAddress(this.poiExtended.id);
     }
 }

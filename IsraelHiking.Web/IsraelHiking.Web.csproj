@@ -111,20 +111,4 @@
     <ProjectReference Include="..\IsraelHiking.DataAccessInterfaces\IsraelHiking.DataAccessInterfaces.csproj" />
     <ProjectReference Include="..\IsraelHiking.DataAccess\IsraelHiking.DataAccess.csproj" />
   </ItemGroup>
-  <Target Name="NodeInitialize">
-    <!-- Ensure Node.js is installed -->
-    <Exec Command="node --version" ContinueOnError="true">
-      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
-    </Exec>
-    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
-
-    <Message Importance="high" Text="Installing all npm packages" />
-    <Exec Command="npm install --loglevel=error" />
-  </Target>
-
-  <Target Name="ReleaseRunNgBuild" BeforeTargets="Build" DependsOnTargets="NodeInitialize" Condition=" '$(Configuration)' == 'Release' and '$(DeployOnBuild)' != 'true'">
-    <Message Importance="high" Text="Starting Ng Build for production" />
-    <Exec Command="npm run-script build -- --prod --no-progress" />
-    <Message Importance="high" Text="Ng Build for production ended" />
-  </Target>
 </Project>

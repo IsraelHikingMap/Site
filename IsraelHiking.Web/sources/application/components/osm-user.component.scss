@@ -1,4 +1,6 @@
-﻿.table {
+﻿@import "~scss/_variables.scss";
+
+.table {
     display: table
 }
 
@@ -12,11 +14,7 @@
 }
 
 .button-height {
-    height: 26px;
-}
-
-.leaflet-touch .button-height {
-    height: 30px;
+    height: $app-button-size;
 }
 
 .margin-top {

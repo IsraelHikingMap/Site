@@ -1,8 +1,6 @@
-﻿@import "fonts/icons.css";
+﻿@import "../fonts/icons.css";
 @import "font-awesome/css/font-awesome.css";
-@import "leaflet/dist/leaflet.css";
-@import "leaflet.markercluster/dist/MarkerCluster.css";
-@import "leaflet.markercluster/dist/MarkerCluster.Default.css";
+@import "openlayers/dist/ol.css";
 @import "~@beyerleinf/ngx-dnd/styles.css";
 @import "./dialogs.scss";
 @import "./_variables.scss";
@@ -24,34 +22,46 @@ body {
     font-family: Roboto, sans-serif;
 }
 
-#map {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    left: 0;
-    overflow: hidden;
+.side-control {
+    position: relative;
+    padding: 2px;
+    clear: both;
+    background-color: $app-button-background;
+    margin-bottom: 5px;
+}
+
+.right-pane {
+    pointer-events: none;
+}
+
+.right-pane * {
+    pointer-events: auto;
+}
+
+.left-pane .side-control {
+    float: left;
+}
+
+.right-pane .side-control {
+    float: right;
+}
+
+.bottom-pane .side-control {
+    margin-bottom: unset;
+}
+
+
+.side-control button, .side-control a {
+    min-width: unset !important;
+    padding: 0 !important;
+    display: block;
+    width: $app-button-size;
+    height: $app-button-size;
 }
 
 .input-wrapper-spacer {
     height: 0;
     margin-bottom: 1rem;
-}
-
-.leaflet-left {
-    z-index: $app-left-z-index !important;
-}
-
-.leaflet-right {
-    z-index: $app-left-z-index - 10 !important;
-}
-
-.leaflet-bottom.leaflet-right {
-    z-index: $app-left-z-index - 20 !important;
-}
-
-.leaflet-bottom.leaflet-left {
-    z-index: $app-left-z-index - 30 !important;
 }
 
 @media (max-width: 550px) {
@@ -61,7 +71,6 @@ body {
     }
 }
 
-.leaflet-container a.leaflet-active,
 .active {
     outline: 2px solid mat-color($app-primary) !important;
 }
@@ -129,41 +138,16 @@ ngx-image-gallery .image {
     display: table;
 }
 
-.leaflet-touch .control-container-item {
-    height: 30px;
-}
-
 .control-container-item {
     display: table-cell;
     vertical-align: middle;
-    height: 26px;
-    background: white !important;
-    border-right: 1px solid #ccc !important;
-    border-left: 1px solid #ccc !important;
+    height: $app-button-size;
 }
 
 .control-container-item.gutters {
     padding-left: 12px;
     padding-right: 12px;
     white-space: nowrap
-}
-
-.control-icon-first {
-    float: right;
-    border-top-left-radius: 0 !important;
-    border-top-right-radius: 4px !important;
-    border-bottom-right-radius: 4px !important;
-    border-bottom-left-radius: 0 !important;
-    border-bottom: 0 !important;
-}
-
-.control-icon-last {
-    float: right;
-    border-top-left-radius: 4px !important;
-    border-top-right-radius: 0 !important;
-    border-bottom-right-radius: 0 !important;
-    border-bottom-left-radius: 4px !important;
-    border-bottom: 0 !important;
 }
 
 .chrome-wordwrap-fix {
@@ -249,17 +233,49 @@ ngx-image-gallery .image {
 
 @media print {
     .mat-tooltip,
-    .leaflet-bar {
+    .side-control {
         display: none !important;
-    }
-
-    .route-statistics-control-container .leaflet-bar {
-        display: unset !important;
     }
 }
 
 .marker-popup {
-    width: 300px;
+    position: absolute;
+    background-color: white;
+    padding: 15px 5px 5px 5px;
+    border: 1px solid rgb(204, 204, 204);
+    border-radius: 5px;
+    bottom: 12px;
+    transform: translate(-50%);
+
+    &:after, &:before {
+        top: 100%;
+        border: solid transparent;
+        content: " ";
+        height: 0;
+        width: 0;
+        position: absolute;
+        pointer-events: none;
+    }
+
+    &:before {
+        border-top-color: #cccccc;
+        border-width: 11px;
+        margin-left: -11px;
+        left: 50%
+    }
+
+    &:after {
+        border-top-color: white;
+        border-width: 10px;
+        margin-left: -10px;
+        left: 50%
+    }
+
+    & .close {
+        position: absolute;
+        top: 5px;
+        right: 5px
+    }
 }
 
 .hidden {
