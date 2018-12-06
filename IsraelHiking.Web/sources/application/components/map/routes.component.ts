@@ -170,14 +170,21 @@ export class RoutesComponent extends BaseMapComponent implements AfterViewInit {
         return this.getColor(selectedRoute);
     }
 
-    public getRouteMarkerColor(segmentIndex: number, routeData: RouteData) {
+    public getRouteMarkerColor(segmentIndex: number, routeData: RouteData, stroke: boolean) {
         if (segmentIndex === 0) {
-            return "green";
+            return "#43a047";
         }
-        if (segmentIndex === routeData.segments.length - 1) {
+        if (this.isLast(segmentIndex, routeData)) {
             return "red";
         }
-        return routeData.color;
+        if (stroke) {
+            return "white";
+        }
+        return this.getColor(routeData);
+    }
+
+    public isLast(segmentIndex: number, routeData: RouteData) {
+        return segmentIndex === routeData.segments.length - 1;
     }
 
     public getSegmentRotation(segment: RouteSegmentData) {

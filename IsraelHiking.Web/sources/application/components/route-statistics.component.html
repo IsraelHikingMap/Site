@@ -34,7 +34,7 @@
     </div>
 </div>
 
-<aol-layer-vector>
+<aol-layer-vector [zIndex]="10">
     <aol-source-vector>
         <aol-feature *ngFor="let marker of kmMarkersCoordinates">
             <aol-geometry-point>
@@ -61,7 +61,7 @@
             </aol-geometry-point>
             <aol-style>
                 <aol-style-circle [radius]="5">
-                    <aol-style-stroke [color]="'white'" [width]="1"></aol-style-stroke>
+                    <aol-style-stroke [color]="'white'" [width]="5"></aol-style-stroke>
                     <aol-style-fill [color]="hover.color"></aol-style-fill>
                 </aol-style-circle>
             </aol-style>

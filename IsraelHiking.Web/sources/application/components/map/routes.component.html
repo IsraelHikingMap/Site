@@ -15,10 +15,16 @@
                         <aol-coordinate [x]="segment.routePoint.lng" [y]="segment.routePoint.lat" [srid]="'EPSG:4326'"></aol-coordinate>
                     </aol-geometry-point>
                     <aol-style>
-                        <aol-style-circle [radius]="6">
-                            <aol-style-fill [color]="getColor(route)"></aol-style-fill>
-                            <aol-style-stroke [color]="getRouteMarkerColor(idx, route)" [width]="3"></aol-style-stroke>
+                        <aol-style-circle [radius]="7">
+                            <aol-style-fill [color]="getRouteMarkerColor(idx, route, false)"></aol-style-fill>
+                            <aol-style-stroke [color]="getRouteMarkerColor(idx, route, true)" [width]="3"></aol-style-stroke>
                         </aol-style-circle>
+                        <aol-style-text *ngIf="idx === 0" [text]="resources.getCharacterForIcon('icon-play')" font="normal 8px IsraelHikingMap">
+                            <aol-style-fill [color]="'white'"></aol-style-fill>
+                        </aol-style-text>
+                        <aol-style-text *ngIf="idx !== 0 && isLast(idx, route)" [text]="resources.getCharacterForIcon('icon-stop')" font="normal 8px IsraelHikingMap">
+                            <aol-style-fill [color]="'white'"></aol-style-fill>
+                        </aol-style-text>
                     </aol-style>
                 </aol-feature>
             </div>
