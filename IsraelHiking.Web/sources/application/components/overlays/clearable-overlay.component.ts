@@ -5,7 +5,8 @@ import { ClosableOverlayComponent } from "./closable-overlay.component";
 
 @Component({
     selector: "clearable-overlay",
-    templateUrl: "./clearable-overlay.component.html"
+    templateUrl: "./clearable-overlay.component.html",
+    styleUrls: ["./clearable-overlay.component.scss"]
 })
 export class ClearableOverlayComponent extends ClosableOverlayComponent {
 

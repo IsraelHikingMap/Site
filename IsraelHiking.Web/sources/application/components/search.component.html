@@ -84,12 +84,13 @@
         </aol-source-vector>
     </aol-layer-vector>
     <clearable-overlay [title]="directional.routeTitle"
-                                        [isOpen]="directional.isOverlayOpen"
-                                        (cleared)="directionalCleared()"
-                                        (convertToRoute)="convertToRoute()"
-                                        [latlng]="{
-                             lat: directional.routeCoordinates[directional.routeCoordinates.length - 1][1],
-                             lng: directional.routeCoordinates[directional.routeCoordinates.length - 1][0]
+                       [isOpen]="directional.isOverlayOpen"
+                       (closed)="directional.isOverlayOpen = false"
+                       (cleared)="directionalCleared()"
+                       (convertToRoute)="convertToRoute()"
+                       [latlng]="{
+                             lat: directional.routeCoordinates[0][1],
+                             lng: directional.routeCoordinates[0][0]
                 }">
     </clearable-overlay>
 </div>

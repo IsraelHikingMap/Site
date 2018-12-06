@@ -4,9 +4,9 @@
                     [srid]="'EPSG:4326'">
     </aol-coordinate>
     <aol-content>
-        <div class="marker-popup" [dir]="resources.direction">
+        <div class="marker-popup wide" [dir]="resources.direction">
             <div (click)="close()" class="close"><i class="fa icon-close"></i></div>
-            <h2 *ngIf="title" [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h2>
+            <h3 *ngIf="title" [ngClass]="resources.getTextAlignment(title)" [dir]="resources.getDirection(title)" class="chrome-wordwrap-fix">{{title}}</h3>
             <div fxLayout="row">
                 <div fxFlex="33">
                     <button mat-button fxFill (click)="convertToRoute.emit()" matTooltip="{{resources.convertToRoute}}" matTooltipPosition="above" angulartics2On="click" angularticsCategory="Search" angularticsAction="Convert search to route"><i class="fa icon-plus"></i></button>
