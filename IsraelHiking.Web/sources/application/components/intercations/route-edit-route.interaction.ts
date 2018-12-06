@@ -96,7 +96,10 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
                 f.getGeometry() instanceof geom.LineString &&
                 (this.getSegmentIndex(f) === pointIndex || this.getSegmentIndex(f) === pointIndex + 1));
         } else {
-            this.selectedRouteSegments = [];
+            this.selectedRouteSegments = features.filter(f =>
+                f.getId() &&
+                f.getId().toString().indexOf(selectedRoute.id + SEGMENT) !== -1 &&
+                f.getGeometry() instanceof geom.LineString);
         }
 
         if (this.selectedRoutePoint == null) {
@@ -167,7 +170,13 @@ export class RouteEditRouteInteraction extends interaction.Interaction {
             return true;
         }
         if (!this.dragging) {
-            this.onRoutePointClick.emit(this.getPointIndex());
+            if (this.selectedRoutePoint != null) {
+                // click on exiting point
+                this.onRoutePointClick.emit(this.getPointIndex());
+            } else {
+                // click on the middle of a segment
+                this.updateRouteSegment(latlng);
+            }
             return true;
         }
         // drag exiting route point
