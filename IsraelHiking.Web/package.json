@@ -47,7 +47,7 @@
     "ngx-store": "2.1.0",
     "ngx-window-token": "1.0.2",
     "ohauth": "1.0.0",
-    "piexifjs": "2.0.0-beta.2",
+    "piexifjs": "2.0.0-beta.7",
     "pouchdb": "7.0.0",
     "redux": "4.0.1",
     "redux-undo": "1.0.0-beta9-9-7",
