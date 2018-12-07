@@ -84,6 +84,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
     @select((state: ApplicationState) => state.routes.present)
     private routes$: Observable<RouteData[]>;
 
+    @select((state: ApplicationState) => state.routeEditingState.selectedRouteId)
+    private selectedRouteId$: Observable<string>;
+
     private statistics: IRouteStatistics;
     private chartElements: IChartElements;
     private componentSubscriptions: Subscription[];
@@ -129,6 +132,9 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
 
     public ngOnInit() {
         this.componentSubscriptions.push(this.routes$.subscribe(() => {
+            this.routeChanged();
+        }));
+        this.componentSubscriptions.push(this.selectedRouteId$.subscribe(() => {
             this.routeChanged();
         }));
         this.componentSubscriptions.push(this.resources.languageChanged.subscribe(() => {
@@ -192,10 +198,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
         this.updateKmMarkers();
         this.setDataToChart([]);
         this.onRouteDataChanged();
-            // HM TODO: route hover event?
-            // this.routeLayerSubscriptions.push(this.routeLayer.polylineHovered.subscribe(
-            //    (latlng: LatLngAlt) => this.onPolylineHover(latlng))
-            // );
     }
 
     private onRouteDataChanged = () => {
@@ -211,24 +213,6 @@ export class RouteStatisticsComponent extends BaseMapComponent implements OnInit
             this.setDataToChart(this.statistics.points.map(p => [p.x, p.y] as [number, number]));
         }
         this.updateKmMarkers();
-    }
-
-    private onPolylineHover(latlng: LatLngAlt) {
-        // HM TODO: remove this?
-        if (!this.statistics || !this.isVisible()) {
-            return;
-        }
-        if (latlng == null) {
-            this.hideChartHover();
-            return;
-        }
-        let x = this.routeStatisticsService.findDistanceForLatLng(this.statistics, latlng);
-        if (x <= 0) {
-            this.hideChartHover();
-            return;
-        }
-        let point = this.routeStatisticsService.interpolateStatistics(this.statistics, x);
-        this.showChartHover(point);
     }
 
     public redrawChart = () => {
