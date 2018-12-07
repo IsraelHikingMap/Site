@@ -9,12 +9,14 @@ import { Urls } from "../urls";
 import { DataContainer } from "../models/models";
 import { RunningContextService } from "./running-context.service";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
+import { FitBoundsService } from "./fit-bounds.service";
 
 describe("FileService", () => {
 
     let imageResizeService: ImageResizeService;
     let nonAngularObjectsFactory: NonAngularObjectsFactory;
     let selectedRouteService: SelectedRouteService;
+    let fitBoundsService: FitBoundsService;
 
     beforeEach(() => {
         imageResizeService = {
@@ -27,6 +29,9 @@ describe("FileService", () => {
         selectedRouteService = {
             addRoutes: jasmine.createSpy("addRoutes")
         } as any as SelectedRouteService;
+        fitBoundsService = {
+            fitBounds: jasmine.createSpy("fitBounds")
+        } as any as FitBoundsService;
         TestBed.configureTestingModule({
             imports: [
                 HttpClientModule,
@@ -41,7 +46,8 @@ describe("FileService", () => {
                             runningContextService,
                             imageResizeService,
                             nonAngularObjectsFactory,
-                            selectedRouteService);
+                            selectedRouteService,
+                            fitBoundsService);
                         mockBackend.expectOne(Urls.fileFormats).flush([{
                             extension: "ex",
                             label: "label",
@@ -90,14 +96,17 @@ describe("FileService", () => {
                 expect(selectedRouteService.addRoutes).toHaveBeenCalled();
             }, fail);
 
-            mockBackend.expectOne(Urls.openFile).flush({});
+            mockBackend.expectOne(Urls.openFile).flush({
+                northEast: { lat: 0, lng: 0 },
+                southWest: { lat: 1, lng: 1 }
+            } as DataContainer);
             return promise;
         }));
 
     it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
         async (fileService: FileService) => {
             let file = new Blob([""], { type: "image/jpeg" }) as File;
-            imageResizeService.resizeImageAndConvert = () => Promise.resolve({} as DataContainer);
+            imageResizeService.resizeImageAndConvert = () => Promise.resolve({ northEast: { lat: 0, lng: 0 }, southWest: { lat: 1, lng: 1}} as DataContainer);
             let promise = fileService.addRoutesFromFile(file).then(() => {
                 expect(selectedRouteService.addRoutes).toHaveBeenCalled();
             }, fail);

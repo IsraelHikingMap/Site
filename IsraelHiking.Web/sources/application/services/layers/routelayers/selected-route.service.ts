@@ -1,4 +1,4 @@
-﻿import { Injectable } from "@angular/core";
+import { Injectable } from "@angular/core";
 import { NgRedux, select } from "@angular-redux/store";
 import { Observable } from "rxjs";
 import { some } from "lodash";
@@ -269,6 +269,9 @@ export class SelectedRouteService {
     }
 
     public addRoutes(routes: RouteData[]) {
+        if (routes.length === 0) {
+            return;
+        }
         if (routes.length === 1 && routes[0].segments.length === 0 && this.routes.length > 0) {
             // this is the case when the layer has markers only
             for (let marker of routes[0].markers) {
@@ -292,6 +295,12 @@ export class SelectedRouteService {
             this.ngRedux.dispatch(new AddRouteAction({
                 routeData: routeToAdd
             }));
+            if (routes.indexOf(routeData) === 0) {
+                this.ngRedux.dispatch(new SetSelectedRouteAction({
+                    routeId: routeToAdd.id
+                }));
+            }
         }
+
     }
 }
