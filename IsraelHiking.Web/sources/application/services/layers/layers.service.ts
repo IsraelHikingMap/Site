@@ -87,7 +87,6 @@ export class LayersService {
         if (!this.authorizationService.isLoggedIn()) {
             return;
         }
-        // HM TODO: sync not just add - remove layers that are not in the server
         try {
             let data = await this.httpClient.get(Urls.userLayers).toPromise() as IUserLayer[];
             if (data == null) {
@@ -99,7 +98,7 @@ export class LayersService {
                     if (existingOverlay) {
                         continue;
                     }
-                    this.addOverlayFromData(layer);
+                    this.addOverlayFromData(layer, false);
                 } else {
                     let existingBaselayer = this.baseLayers.find((baseLayerToFind) => this.compareKeys(baseLayerToFind.key, layer.key));
                     if (existingBaselayer) {
@@ -107,6 +106,28 @@ export class LayersService {
                     }
                     this.addBaseLayerFromData(layer);
                 }
+            }
+            let overlaysToRemove = [];
+            for (let overlay of this.overlays) {
+                if (data.find(l => l.key === overlay.key) == null) {
+                    overlaysToRemove.push(overlay);
+                }
+            }
+            for (let toRemove of overlaysToRemove) {
+                this.ngRedux.dispatch(new RemoveOverlayAction({
+                    key: toRemove.key
+                }));
+            }
+            let baselayerToRemove = [];
+            for (let baselayer of this.baseLayers) {
+                if (data.find(l => l.key === baselayer.key) == null) {
+                    baselayerToRemove.push(baselayer);
+                }
+            }
+            for (let toRemove of baselayerToRemove) {
+                this.ngRedux.dispatch(new RemoveBaseLayerAction({
+                    key: toRemove.key
+                }));
             }
         } catch (error) {
             console.error(error);
@@ -166,7 +187,7 @@ export class LayersService {
         }
     }
 
-    private async deleteUserLayerInStorage(id: string) {
+    private async deleteUserLayerFromDatabase(id: string) {
         if (this.authorizationService.isLoggedIn()) {
             await this.httpClient.delete(Urls.userLayers + id).toPromise();
         }
@@ -177,14 +198,14 @@ export class LayersService {
         if (overlay != null) {
             return overlay; // overlay exists
         }
-        overlay = this.addOverlayFromData(layerData);
+        overlay = this.addOverlayFromData(layerData, true);
         this.addOverlayToDatabase(overlay);
     }
 
-    private addOverlayFromData = (layerData: LayerData): Overlay => {
+    private addOverlayFromData = (layerData: LayerData, visible: boolean): Overlay => {
         let overlay = {
             ...layerData,
-            visible: true,
+            visible: visible,
             isEditable: true
         } as Overlay;
         this.ngRedux.dispatch(new AddOverlayAction({
@@ -252,14 +273,14 @@ export class LayersService {
         this.ngRedux.dispatch(new RemoveBaseLayerAction({
             key: baseLayer.key
         }));
-        this.deleteUserLayerInStorage(baseLayer.id);
+        this.deleteUserLayerFromDatabase(baseLayer.id);
     }
 
     public removeOverlay = (overlay: Overlay) => {
         this.ngRedux.dispatch(new RemoveOverlayAction({
             key: overlay.key
         }));
-        this.deleteUserLayerInStorage(overlay.id);
+        this.deleteUserLayerFromDatabase(overlay.id);
     }
 
     public selectBaseLayer = (key: string) => {
