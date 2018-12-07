@@ -53,7 +53,7 @@
                     <aol-style-stroke [width]="3" [color]="'blue'"></aol-style-stroke>
                 </aol-style>
             </aol-feature>
-            <aol-feature>
+            <aol-feature [id]="'directionalStart'">
                 <aol-geometry-point>
                     <aol-coordinate [x]="directional.routeCoordinates[0][0]"
                                     [y]="directional.routeCoordinates[0][1]"
@@ -61,13 +61,15 @@
                     </aol-coordinate>
                 </aol-geometry-point>
                 <aol-style>
-                    <aol-style-circle [radius]="5">
-                        <aol-style-stroke [color]="'black'" [width]="1"></aol-style-stroke>
-                        <aol-style-fill [color]="'green'"></aol-style-fill>
+                    <aol-style-circle [radius]="7">
+                        <aol-style-fill [color]="'#43a047'"></aol-style-fill>
                     </aol-style-circle>
+                    <aol-style-text [text]="resources.getCharacterForIcon('icon-play')" font="normal 8px IsraelHikingMap">
+                        <aol-style-fill [color]="'white'"></aol-style-fill>
+                    </aol-style-text>
                 </aol-style>
             </aol-feature>
-            <aol-feature>
+            <aol-feature [id]="'directionalEnd'">
                 <aol-geometry-point>
                     <aol-coordinate [x]="directional.routeCoordinates[directional.routeCoordinates.length - 1][0]"
                                     [y]="directional.routeCoordinates[directional.routeCoordinates.length - 1][1]"
@@ -75,10 +77,12 @@
                     </aol-coordinate>
                 </aol-geometry-point>
                 <aol-style>
-                    <aol-style-circle [radius]="5">
-                        <aol-style-stroke [color]="'black'" [width]="1"></aol-style-stroke>
+                    <aol-style-circle [radius]="7">
                         <aol-style-fill [color]="'red'"></aol-style-fill>
                     </aol-style-circle>
+                    <aol-style-text [text]="resources.getCharacterForIcon('icon-stop')" font="normal 8px IsraelHikingMap">
+                        <aol-style-fill [color]="'white'"></aol-style-fill>
+                    </aol-style-text>
                 </aol-style>
             </aol-feature>
         </aol-source-vector>
@@ -88,9 +92,6 @@
                        (closed)="directional.isOverlayOpen = false"
                        (cleared)="directionalCleared()"
                        (convertToRoute)="convertToRoute()"
-                       [latlng]="{
-                             lat: directional.routeCoordinates[0][1],
-                             lng: directional.routeCoordinates[0][0]
-                }">
+                       [latlng]="directional.overlayLocation">
     </clearable-overlay>
 </div>

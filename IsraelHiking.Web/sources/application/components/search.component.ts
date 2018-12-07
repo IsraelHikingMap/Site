@@ -13,7 +13,8 @@ import { MatAutocompleteTrigger } from "@angular/material";
 import { FormControl } from "@angular/forms";
 import { debounceTime, filter, tap } from "rxjs/operators";
 import { remove } from "lodash";
-import { Coordinate } from "openlayers";
+import { Coordinate, MapBrowserEvent, Feature, geom } from "openlayers";
+import { MapComponent } from "ngx-openlayers";
 import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
@@ -23,7 +24,7 @@ import { FitBoundsService } from "../services/fit-bounds.service";
 import { ToastService } from "../services/toast.service";
 import { SearchResultsProvider, ISearchResultsPointOfInterest } from "../services/search-results.provider";
 import { BaseMapComponent } from "./base-map.component";
-import { RoutingType, ApplicationState, RouteSegmentData } from "../models/models";
+import { RoutingType, ApplicationState, RouteSegmentData, LatLngAlt } from "../models/models";
 import { RouteLayerFactory } from "../services/layers/routelayers/route-layer.factory";
 import { AddRouteAction } from "../reducres/routes.reducer";
 import { SpatialService } from "../services/spatial.service";
@@ -42,6 +43,7 @@ interface ISearchRequestQueueItem {
 interface IDirectionalContext {
     isOn: boolean;
     isOverlayOpen: boolean;
+    overlayLocation: LatLngAlt;
     showResults: boolean;
     routeCoordinates: Coordinate[];
     routeTitle: string;
@@ -82,13 +84,15 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         private readonly toastService: ToastService,
         private readonly routeLayerFactory: RouteLayerFactory,
         private readonly router: Router,
-        private readonly ngRedux: NgRedux<ApplicationState>
+        private readonly ngRedux: NgRedux<ApplicationState>,
+        private readonly host: MapComponent
     ) {
         super(resources);
         this.requestsQueue = [];
         this.directional = {
             isOn: false,
             isOverlayOpen: false,
+            overlayLocation: null,
             routeCoordinates: [],
             routeTitle: "",
             showResults: false,
@@ -149,6 +153,20 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
                 this.search(this.fromContext);
             }, 100);
         }
+        this.host.instance.on("singleclick",
+            (event: MapBrowserEvent) => {
+                let features = (this.host.instance.getFeaturesAtPixel(event.pixel) || []) as Feature[];
+                let startOrEnd = features.find(f => f.getId() && f.getId().toString().indexOf("directional") !== -1);
+                if (startOrEnd != null) {
+                    let location = SpatialService.fromViewCoordinate((startOrEnd.getGeometry() as geom.Point).getCoordinates());
+                    if (SpatialService.getDistanceInMeters(location, this.directional.overlayLocation) < 10) {
+                        this.directional.isOverlayOpen = !this.directional.isOverlayOpen;
+                    } else {
+                        this.directional.overlayLocation = location;
+                        this.directional.isOverlayOpen = true;
+                    }
+                }
+            });
     }
 
     public toggleVisibility = () => {
@@ -223,7 +241,7 @@ export class SearchComponent extends BaseMapComponent implements AfterViewInit {
         this.directional.routeTitle = this.fromContext.selectedSearchResults.displayName +
             " - " +
             this.toContext.selectedSearchResults.displayName;
-
+        this.directional.overlayLocation = latlngs[0];
         this.directional.isOverlayOpen = true;
         let bounds = SpatialService.getBounds(latlngs);
         this.fitBoundsService.fitBounds(bounds);
