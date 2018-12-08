@@ -1,6 +1,6 @@
 ﻿import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import * as _ from "lodash";
+import { chain, flatten, map } from "lodash";
 
 import { ResourcesService } from "./resources.service";
 import { SnappingService } from "./snapping.service";
@@ -44,7 +44,7 @@ export class PrivatePoiUploaderService {
             let message = `${this.resources.wouldYouLikeToUpdate} ${results.title}?`;
             if (!results.title) {
                 let categories = await this.poiService.getSelectableCategories();
-                let iconWithLabel = _.chain(categories)
+                let iconWithLabel = chain(categories)
                     .map(c => c.icons)
                     .flatten()
                     .find(i => i.icon === `icon-${results.type}`)

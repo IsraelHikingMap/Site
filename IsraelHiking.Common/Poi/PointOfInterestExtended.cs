@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using NetTopologySuite.Features;
 
 namespace IsraelHiking.Common.Poi
 {
@@ -13,6 +14,7 @@ namespace IsraelHiking.Common.Poi
 
         public Reference[] References { get; set; }
         public Rating Rating { get; set; }
+        public FeatureCollection FeatureCollection { get; set; }
         public DataContainer DataContainer { get; set; }
         public Dictionary<string, List<string>> CombinedIds { get; set; }
         public Contribution Contribution { get; set; }

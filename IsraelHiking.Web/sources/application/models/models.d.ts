@@ -14,8 +14,10 @@ export { RouteEditingState } from "./route-editing-state";
 export { Trace, TraceVisibility } from "./trace";
 export { OsmUserDetails } from "./osm-user-details";
 export { UserInfo } from "./user-info";
+export { PointOfInterestExtended, PointOfInterest, Rating, Contribution, Rater } from "./point-of-interest";
 // states:
 export { ApplicationState } from "./state/application-state";
 export { TracesState } from "./state/traces-state";
 export { LayersState } from "./state/layers-state";
 export { UserState } from "./state/user-state";
+export { PointsOfInterestState } from "./state/poi-state";

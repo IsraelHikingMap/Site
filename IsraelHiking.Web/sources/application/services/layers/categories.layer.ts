@@ -4,10 +4,11 @@ import { Subject } from "rxjs";
 import { every } from "lodash";
 
 import { ResourcesService } from "../resources.service";
-import { IPointOfInterest, PoiService, CategoriesType, ICategory } from "../poi.service";
+import { PoiService, CategoriesType, ICategory } from "../poi.service";
 import { BaseMapComponent } from "../../components/base-map.component";
 import { SpatialService } from "../spatial.service";
 import { MapService } from "../map.service";
+import { PointOfInterest } from "../../models/models";
 
 export class CategoriesLayer extends BaseMapComponent {
 
@@ -19,7 +20,7 @@ export class CategoriesLayer extends BaseMapComponent {
     public markersLoaded: Subject<void>;
 
     public categories: ICategory[];
-    public pointsOfInterest: IPointOfInterest[];
+    public pointsOfInterest: PointOfInterest[];
 
     constructor(resources: ResourcesService,
         private readonly mapService: MapService,

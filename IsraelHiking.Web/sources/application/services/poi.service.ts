@@ -1,63 +1,13 @@
 import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import * as _ from "lodash";
 
 import { ResourcesService } from "./resources.service";
 import { HashService, IPoiRouterData } from "./hash.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { Urls } from "../urls";
-import { DataContainer, MarkerData, LatLngAlt } from "../models/models";
+import { MarkerData, LatLngAlt, PointOfInterestExtended, PointOfInterest, Rating } from "../models/models";
 
 export type CategoriesType = "Points of Interest" | "Routes";
-
-export interface IRater {
-    id: string;
-    value: number;
-}
-
-export interface IRating {
-    id: string;
-    source: string;
-    raters: IRater[];
-    total: number;
-}
-
-export interface IPointOfInterest {
-    id: string;
-    category: string;
-    title: string;
-    source: string;
-    icon: string;
-    iconColor: string;
-    hasExtraData: boolean;
-
-    location: LatLngAlt;
-}
-
-export interface IReference {
-    url: string;
-    sourceImageUrl: string;
-}
-
-export interface IContribution {
-    userName: string;
-    userAddress: string;
-    lastModifiedDate: Date;
-}
-
-export interface IPointOfInterestExtended extends IPointOfInterest {
-    isEditable: boolean;
-    isRoute: boolean;
-    isArea: boolean;
-    lengthInKm: number;
-    imagesUrls: string[];
-    description: string;
-    references: IReference[];
-
-    rating: IRating;
-    dataContainer: DataContainer;
-    contribution: IContribution;
-}
 
 export interface IIconColorLabel {
     icon: string;
@@ -88,10 +38,8 @@ export interface ISelectableCategory extends ICategory {
 @Injectable()
 export class PoiService {
     private categoriesMap: Map<CategoriesType, ICategory[]>;
-    private poiCache: IPointOfInterestExtended[];
+    private poiCache: PointOfInterestExtended[];
     private addOrUpdateMarkerData: MarkerData;
-
-    public selectedPoi: IPointOfInterestExtended;
 
     constructor(private readonly resources: ResourcesService,
         private readonly httpClient: HttpClient,
@@ -100,7 +48,6 @@ export class PoiService {
 
         this.poiCache = [];
         this.addOrUpdateMarkerData = null;
-        this.selectedPoi = null;
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
         this.categoriesMap.set("Points of Interest", []);
         this.categoriesMap.set("Routes", []);
@@ -120,11 +67,6 @@ export class PoiService {
             categories.push(category);
         }
         return categories;
-    }
-
-    // HM TODO: move the following method to state?
-    public clearSelected() {
-        this.selectedPoi = null;
     }
 
     public getCategoriesTypes(): CategoriesType[] {
@@ -150,16 +92,16 @@ export class PoiService {
         return selectableCategories;
     }
 
-    public getPoints(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[]): Promise<IPointOfInterest[]> {
+    public getPoints(northEast: LatLngAlt, southWest: LatLngAlt, categoriesTypes: string[]): Promise<PointOfInterest[]> {
         let params = new HttpParams()
             .set("northEast", northEast.lat + "," + northEast.lng)
             .set("southWest", southWest.lat + "," + southWest.lng)
             .set("categories", categoriesTypes.join(","))
             .set("language", this.resources.getCurrentLanguageCodeSimplified());
-        return this.httpClient.get(Urls.poi, { params: params }).toPromise() as Promise<IPointOfInterest[]>;
+        return this.httpClient.get(Urls.poi, { params: params }).toPromise() as Promise<PointOfInterest[]>;
     }
 
-    public async getPoint(id: string, source: string, language?: string): Promise<IPointOfInterestExtended> {
+    public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {
         if (source === "new") {
             return this.mergeWithPoi({
                 imagesUrls: [],
@@ -169,7 +111,7 @@ export class PoiService {
                 references: [],
                 isEditable: true,
                 dataContainer: { routes: [] }
-            } as IPointOfInterestExtended);
+            } as PointOfInterestExtended);
         }
         let itemInCache = this.poiCache.find(p => p.id === id && p.source === source);
         if (itemInCache) {
@@ -177,22 +119,22 @@ export class PoiService {
         }
         let params = new HttpParams()
             .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
-        let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as IPointOfInterestExtended;
+        let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as PointOfInterestExtended;
         this.poiCache.splice(0, 0, poi);
         return this.mergeWithPoi(poi);
     }
 
-    public async uploadPoint(poiExtended: IPointOfInterestExtended): Promise<IPointOfInterestExtended> {
+    public async uploadPoint(poiExtended: PointOfInterestExtended): Promise<PointOfInterestExtended> {
         let uploadAddress = Urls.poi + "?language=" + this.resources.getCurrentLanguageCodeSimplified();
         this.poiCache = [];
-        return this.httpClient.post(uploadAddress, poiExtended).toPromise() as Promise<IPointOfInterestExtended>;
+        return this.httpClient.post(uploadAddress, poiExtended).toPromise() as Promise<PointOfInterestExtended>;
     }
 
-    public uploadRating(rating: IRating): Promise<IRating> {
-        return this.httpClient.post(Urls.rating, rating).toPromise() as Promise<IRating>;
+    public uploadRating(rating: Rating): Promise<Rating> {
+        return this.httpClient.post(Urls.rating, rating).toPromise() as Promise<Rating>;
     }
 
-    public getPoiSocialLinks(poiExtended: IPointOfInterestExtended): IPoiSocialLinks {
+    public getPoiSocialLinks(poiExtended: PointOfInterestExtended): IPoiSocialLinks {
         let poiLink = this.hashService.getFullUrlFromPoiId({
             source: poiExtended.source,
             id: poiExtended.id,
@@ -210,7 +152,7 @@ export class PoiService {
         this.addOrUpdateMarkerData = data;
     }
 
-    private mergeWithPoi(poiExtended: IPointOfInterestExtended) {
+    private mergeWithPoi(poiExtended: PointOfInterestExtended) {
         if (this.addOrUpdateMarkerData == null) {
             return poiExtended;
         }

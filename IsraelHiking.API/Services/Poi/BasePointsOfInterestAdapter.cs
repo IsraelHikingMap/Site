@@ -156,6 +156,7 @@ namespace IsraelHiking.API.Services.Poi
             {
                 coordinate.Z = await _elevationDataStorage.GetElevation(coordinate);
             }
+            poiItem.FeatureCollection = featureCollection;
             poiItem.DataContainer = await _dataContainerConverterService.ToDataContainer(
                 featureCollection.ToBytes(), poiItem.Title + ".geojson");
             foreach (var coordinate in poiItem.DataContainer.Routes

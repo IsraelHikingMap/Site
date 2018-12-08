@@ -7,22 +7,25 @@ import { sum } from "lodash";
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
 import { SidebarService } from "../../../services/sidebar.service";
-import {
-    PoiService,
-    IPointOfInterestExtended,
-    IRater,
-    IRating,
-    IPoiSocialLinks,
-    IContribution
-} from "../../../services/poi.service";
+import { PoiService, IPoiSocialLinks } from "../../../services/poi.service";
 import { AuthorizationService } from "../../../services/authorization.service";
 import { ToastService } from "../../../services/toast.service";
 import { HashService, IPoiRouterData, RouteStrings } from "../../../services/hash.service";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
-import { RouteData, LinkData, LatLngAlt, ApplicationState } from "../../../models/models";
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducres/routes.reducer";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
+import { SetSelectedPoiAction } from "../../../reducres/poi.reducer";
+import {
+    RouteData,
+    LinkData,
+    LatLngAlt,
+    ApplicationState,
+    PointOfInterestExtended,
+    Contribution,
+    Rating,
+    Rater
+} from "../../../models/models";
 
 @Component({
     selector: "public-poi-sidebar",
@@ -31,16 +34,16 @@ import { FitBoundsService } from "../../../services/fit-bounds.service";
     encapsulation: ViewEncapsulation.None
 })
 export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDestroy {
-    public info: IPointOfInterestExtended;
+    public info: PointOfInterestExtended;
     public isLoading: boolean;
     public sourceImageUrls: string[];
     public rating: number;
     public latlng: LatLngAlt;
     public shareLinks: IPoiSocialLinks;
-    public contribution: IContribution;
+    public contribution: Contribution;
 
     private editMode: boolean;
-    private poiExtended: IPointOfInterestExtended;
+    private poiExtended: PointOfInterestExtended;
     private subscription: Subscription;
 
     constructor(resources: ResourcesService,
@@ -59,8 +62,8 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         let poiRouterData = this.hashService.getPoiRouterData();
         this.isLoading = true;
         this.shareLinks = {} as IPoiSocialLinks;
-        this.contribution = {} as IContribution;
-        this.info = { imagesUrls: [], references: [] } as IPointOfInterestExtended;
+        this.contribution = {} as Contribution;
+        this.info = { imagesUrls: [], references: [] } as PointOfInterestExtended;
         this.getExtendedData(poiRouterData);
     }
 
@@ -77,7 +80,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let latLng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng };
             let bounds = { northEast: latLng, southWest: latLng };
             this.fitBoundsService.fitBounds(bounds);
-            this.poiService.selectedPoi = poiExtended;
+            this.ngRedux.dispatch(new SetSelectedPoiAction({
+                poi: poiExtended
+            }));
             // Change edit mode only after this.info is initialized.
             this.subscription = this.route.queryParams.subscribe(async (params) => {
                 this.editMode = params[RouteStrings.EDIT] && params[RouteStrings.EDIT] === "true";
@@ -92,18 +97,18 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }
     }
 
-    private initFromPointOfInterestExtended = (poiExtended: IPointOfInterestExtended) => {
+    private initFromPointOfInterestExtended = (poiExtended: PointOfInterestExtended) => {
         this.poiExtended = poiExtended;
         this.latlng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng, alt: poiExtended.location.alt};
         this.sourceImageUrls = poiExtended.references.map(r => r.sourceImageUrl);
         this.rating = this.getRatingNumber(this.poiExtended.rating);
         this.shareLinks = this.poiService.getPoiSocialLinks(poiExtended);
-        this.contribution = this.poiExtended.contribution || {} as IContribution;
+        this.contribution = this.poiExtended.contribution || {} as Contribution;
         // clone:
         this.info = JSON.parse(JSON.stringify(this.poiExtended));
     }
 
-    private getRatingNumber(rating: IRating): number {
+    private getRatingNumber(rating: Rating): number {
         return sum(rating.raters.map(r => r.value));
     }
 
@@ -201,7 +206,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
         }
         let userId = this.authorizationService.getUserInfo().id;
         this.poiExtended.rating.raters = this.poiExtended.rating.raters.filter(r => r.id !== userId);
-        this.poiExtended.rating.raters.push({ id: userId, value: value } as IRater);
+        this.poiExtended.rating.raters.push({ id: userId, value: value } as Rater);
         this.poiService.uploadRating(this.poiExtended.rating).then((rating) => {
             this.poiExtended.rating = rating;
             this.rating = this.getRatingNumber(rating);
@@ -209,6 +214,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     }
 
     public convertToRoute() {
+        // HM TODO: add can convert and allow conversion of routes only... remove isArea?
         let routesCopy = JSON.parse(JSON.stringify(this.poiExtended.dataContainer.routes)) as RouteData[];
         routesCopy[0].description = this.info.description;
         for (let routeData of routesCopy) {
@@ -248,7 +254,9 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     public clear() {
         if (this.poiExtended) {
-            this.poiService.clearSelected();
+            this.ngRedux.dispatch(new SetSelectedPoiAction({
+                poi: null
+            }));
         }
         this.close();
     }

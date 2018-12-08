@@ -21,17 +21,23 @@
     </aol-layer-vector>
 </div>
 
-<aol-layer-vector *ngIf="getSelectedPoi() != null" [zIndex]="1001">
+<aol-layer-vector [zIndex]="1001" #selectedPoiGeoJsonLayer>
+    <aol-source-vector></aol-source-vector>
+    <aol-style>
+        <aol-style-stroke [width]="2" [color]="'blue'"></aol-style-stroke>
+        <aol-style-fill [color]="'rgba(19, 106, 224, 0.2)'"></aol-style-fill>
+    </aol-style>
+</aol-layer-vector>
+<aol-layer-vector [visible]="(selectedPoi$ | async) != null" [zIndex]="1001">
     <aol-source-vector>
-        <aol-feature [id]="'selected_' + getSelectedPoi().source + '__' + getSelectedPoi().id" #selectedPoiFeature>
+        <aol-feature [id]="getSelectedPoiId(selectedPoi$ | async)" #selectedPoiFeature>
             <aol-geometry-point>
-                <aol-coordinate [x]="getSelectedPoi().location.lng"
-                                [y]="getSelectedPoi().location.lat"
+                <aol-coordinate [x]="getSelectedPoiX(selectedPoi$ | async)"
+                                [y]="getSelectedPoiY(selectedPoi$ | async)"
                                 [srid]="'EPSG:4326'">
                 </aol-coordinate>
             </aol-geometry-point>
         </aol-feature>
     </aol-source-vector>
 </aol-layer-vector>
-
 <cluster-overlay [isOpen]="isClusterOpen" [latlng]="clusterLatlng" [points]="clusterPoints" (closed)="isClusterOpen = false"></cluster-overlay>

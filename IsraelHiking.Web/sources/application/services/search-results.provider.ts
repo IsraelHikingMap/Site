@@ -1,12 +1,10 @@
 ﻿import { Injectable } from "@angular/core";
 import { HttpClient, HttpParams } from "@angular/common/http";
-import * as _ from "lodash";
 
-import { IPointOfInterestExtended } from "./poi.service";
 import { Urls } from "../urls";
-import { LatLngAlt } from "../models/models";
+import { LatLngAlt, PointOfInterestExtended } from "../models/models";
 
-export interface ISearchResultsPointOfInterest extends IPointOfInterestExtended {
+export interface ISearchResultsPointOfInterest extends PointOfInterestExtended {
     displayName: string;
     northEast: LatLngAlt;
     southWest: LatLngAlt;

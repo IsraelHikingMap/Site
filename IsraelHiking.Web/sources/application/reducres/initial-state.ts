@@ -88,5 +88,8 @@ export const initialState =
         userState: {
             userInfo: null,
             token: null
+        },
+        poiState: {
+            selectedPointOfInterest: null
         }
     } as ApplicationState;

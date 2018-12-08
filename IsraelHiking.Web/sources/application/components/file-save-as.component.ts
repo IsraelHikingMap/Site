@@ -1,6 +1,6 @@
 import { Component, ViewEncapsulation, ViewChild } from "@angular/core";
 import { MatSelect } from "@angular/material";
-import * as _ from "lodash";
+import { every } from "lodash";
 
 import { DataContainerService } from "../services/data-container.service";
 import { ResourcesService } from "../services/resources.service";
@@ -80,7 +80,7 @@ export class FileSaveAsComponent extends BaseMapComponent {
             this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
             return false;
         }
-        if (_.every(data.routes, r => r.segments.length === 0 && r.markers.length === 0)) {
+        if (every(data.routes, r => r.segments.length === 0 && r.markers.length === 0)) {
             this.toastService.warning(this.resources.unableToSaveAnEmptyRoute);
             return false;
         }

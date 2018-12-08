@@ -106,7 +106,10 @@ describe("FileService", () => {
     it("Should open jpeg file and resize it", inject([FileService, HttpTestingController],
         async (fileService: FileService) => {
             let file = new Blob([""], { type: "image/jpeg" }) as File;
-            imageResizeService.resizeImageAndConvert = () => Promise.resolve({ northEast: { lat: 0, lng: 0 }, southWest: { lat: 1, lng: 1}} as DataContainer);
+            imageResizeService.resizeImageAndConvert = () => Promise.resolve({
+                northEast: { lat: 0, lng: 0 },
+                southWest: { lat: 1, lng: 1 }
+            } as DataContainer);
             let promise = fileService.addRoutesFromFile(file).then(() => {
                 expect(selectedRouteService.addRoutes).toHaveBeenCalled();
             }, fail);

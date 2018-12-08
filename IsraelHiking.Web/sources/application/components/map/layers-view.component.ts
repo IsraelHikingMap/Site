@@ -1,11 +1,11 @@
 import { Component, OnInit, AfterViewInit, ViewChild, ViewChildren, QueryList } from "@angular/core";
 import { Router } from "@angular/router";
 import { MapComponent, LayerVectorComponent, FeatureComponent } from "ngx-openlayers";
-import { style, layer, MapBrowserEvent, Feature, geom } from "openlayers";
+import { style, layer, MapBrowserEvent, Feature, geom, format, source } from "openlayers";
 import { Observable } from "rxjs";
 import { select } from "@angular-redux/store";
 
-import { PoiService, CategoriesType, IPointOfInterest } from "../../services/poi.service";
+import { PoiService, CategoriesType } from "../../services/poi.service";
 import { LayersService } from "../../services/layers/layers.service";
 import { CategoriesLayerFactory } from "../../services/layers/categories-layers.factory";
 import { SpatialService } from "../../services/spatial.service";
@@ -13,7 +13,7 @@ import { RouteStrings } from "../../services/hash.service";
 import { BaseMapComponent } from "../base-map.component";
 import { ResourcesService } from "../../services/resources.service";
 import { Urls } from "../../urls";
-import { LatLngAlt, ApplicationState, Overlay } from "../../models/models";
+import { LatLngAlt, ApplicationState, Overlay, PointOfInterest, PointOfInterestExtended } from "../../models/models";
 
 @Component({
     selector: "layers-view",
@@ -30,12 +30,18 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     @ViewChild("selectedPoiFeature")
     public selectedPoiFeature: FeatureComponent;
 
+    @ViewChild("selectedPoiGeoJsonLayer")
+    public selectedPoiGeoJsonLayer: LayerVectorComponent;
+
     public isClusterOpen: boolean;
     public clusterLatlng: LatLngAlt;
-    public clusterPoints: IPointOfInterest[];
+    public clusterPoints: PointOfInterest[];
 
     @select((state: ApplicationState) => state.layersState.overlays)
     public overlays: Observable<Overlay[]>;
+
+    @select((state: ApplicationState) => state.poiState.selectedPointOfInterest)
+    public selectedPoi$: Observable<PointOfInterestExtended>;
 
     private whiteFill: style.Fill;
     private blackFill: style.Fill;
@@ -85,18 +91,6 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         return this.categoriesLayerFactory.get(categoriesType).isVisible();
     }
 
-    public getSelectedPoi() {
-        let poi = this.poiService.selectedPoi;
-        if (poi == null) {
-            return null;
-        }
-        if (this.selectedPoiFeature != null) {
-            // HM TODO: Should be done using observation on state update?
-            this.selectedPoiFeature.instance.setStyle(this.getPoiIconStyle(poi.icon, poi.iconColor, poi.hasExtraData));
-        }
-        return poi;
-    }
-
     ngOnInit() {
         for (let categoriesTypeIndex = 0; categoriesTypeIndex < this.categoriesTypes.length; categoriesTypeIndex++) {
             let categoriesType = this.categoriesTypes[categoriesTypeIndex];
@@ -117,8 +111,37 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     public ngAfterViewInit() {
-        // HM TODO: hover on cluster.
         this.poiLayers.forEach(l => (l.instance as layer.Vector).setStyle((feature) => this.createClusterIcon(feature)));
+        this.selectedPoi$.subscribe((poi) => {
+            if (this.selectedPoiGeoJsonLayer == null) {
+                return;
+            }
+            let vectorSource = new source.Vector({
+                features: []
+            });
+            if (poi == null) {
+                this.selectedPoiGeoJsonLayer.instance.setSource(vectorSource);
+                return;
+            }
+            if (this.selectedPoiFeature != null) {
+                this.selectedPoiFeature.instance.setStyle(this.getPoiIconStyle(poi.icon, poi.iconColor, poi.hasExtraData));
+            }
+            vectorSource = new source.Vector({
+                features: new format.GeoJSON().readFeatures(poi.featureCollection,
+                    { dataProjection: "EPSG:4326", featureProjection: "EPSG:3857" })
+            });
+            this.selectedPoiGeoJsonLayer.instance.setSource(vectorSource);
+        });
+        this.host.instance.on("pointermove",
+            (event: MapBrowserEvent) => {
+                let featuresAtPixel = (this.host.instance.getFeaturesAtPixel(event.pixel) || []) as Feature[];
+                if (featuresAtPixel.length === 0) {
+                    return;
+                }
+                if (featuresAtPixel[0].get("features") && featuresAtPixel[0].get("features").length === 1) {
+                    // HM TODO: hover on single feature - show title
+                }
+            });
         this.host.instance.on("singleclick",
             (event: MapBrowserEvent) => {
                 let featuresAtPixel = event.map.getFeaturesAtPixel(event.pixel) || [];
@@ -172,6 +195,27 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
                     });
                 this.isClusterOpen = true;
             });
+    }
+
+    public getSelectedPoiId(poi: PointOfInterest) {
+        if (poi == null) {
+            return "invalid";
+        }
+        return `selected_${poi.source}__${poi.id}`;
+    }
+
+    public getSelectedPoiX(poi: PointOfInterest) {
+        if (poi == null) {
+            return 0;
+        }
+        return poi.location.lng;
+    }
+
+    public getSelectedPoiY(poi: PointOfInterest) {
+        if (poi == null) {
+            return 0;
+        }
+        return poi.location.lat;
     }
 
     private createClusterIcon(feature): (style.Style | style.Style[]) {
@@ -274,10 +318,10 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
     }
 
     private getSourceAndId(sourceAndId: string): { source: string, id: string } {
-        let source = sourceAndId.split("__")[0];
+        let poiSource = sourceAndId.split("__")[0];
         let id = sourceAndId.split("__")[1];
         return {
-            source: source,
+            source: poiSource,
             id: id
         };
     }

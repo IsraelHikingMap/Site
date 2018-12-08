@@ -8,6 +8,7 @@ import { routeEditingReducer } from "./route-editing-state.reducer";
 import { tracesReducer } from "./traces.reducer";
 import { layersReducer } from "./layers.reducer";
 import { userReducer } from "./user.reducer";
+import { pointsOfInterestReducer } from "./poi.reducer";
 
 export const rootReducer = combineReducers<ApplicationState>({
     configuration: configurationReducer,
@@ -16,5 +17,6 @@ export const rootReducer = combineReducers<ApplicationState>({
     routeEditingState: routeEditingReducer,
     tracesState: tracesReducer,
     layersState: layersReducer,
-    userState: userReducer
+    userState: userReducer,
+    poiState: pointsOfInterestReducer
 } as ReducersMapObject<ApplicationState>);

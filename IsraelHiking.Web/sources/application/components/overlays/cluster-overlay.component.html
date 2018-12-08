@@ -7,7 +7,7 @@
         <div class="marker-popup" [dir]="resources.direction">
             <div (click)="close()" class="close"><i class="fa icon-close"></i></div>
             <div *ngFor="let point of points" fxLayout="row" [dir]="resources.getDirection(point.title)">
-                <a fxFill mat-button [routerLink]="getRouterLinkForPoint(point)" (click)="close()" [ngClass]="resources.getTextAlignment(point.title)">
+                <a fxFill mat-button [routerLink]="getRouterLinkForPoint(point)" [queryParams]="{ language: resources.getCurrentLanguageCodeSimplified() }" (click)="close()" [ngClass]="resources.getTextAlignment(point.title)">
                     <i class="fa {{point.icon}}" [style.color]="point.iconColor"></i> {{point.title}}
                 </a><br/>
             </div>

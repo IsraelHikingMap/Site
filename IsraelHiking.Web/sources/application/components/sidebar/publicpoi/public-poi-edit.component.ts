@@ -1,12 +1,10 @@
 import { Component, Input, OnInit } from "@angular/core";
 import { MatSelectChange } from "@angular/material";
-import * as _ from "lodash";
 
 import { PoiService, ISelectableCategory, IIconColorLabel } from "../../../services/poi.service";
 import { BaseMapComponent } from "../../base-map.component";
 import { ResourcesService } from "../../../services/resources.service";
-import { FileService } from "../../../services/file.service";
-import { IPointOfInterestExtended } from "../../../services/poi.service";
+import { PointOfInterestExtended } from "../../../models/models";
 
 
 @Component({
@@ -16,13 +14,12 @@ import { IPointOfInterestExtended } from "../../../services/poi.service";
 })
 export class PublicPointOfInterestEditComponent extends BaseMapComponent implements OnInit {
     @Input()
-    public info: IPointOfInterestExtended;
+    public info: PointOfInterestExtended;
 
     public categories: ISelectableCategory[];
     public selectedCategory: ISelectableCategory;
 
     constructor(resources: ResourcesService,
-        private readonly fileService: FileService,
         private readonly poiService: PoiService) {
         super(resources);
         this.selectedCategory = null;
@@ -39,7 +36,7 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
     public async ngOnInit(): Promise<void> {
         await this.initializeCategories();
         for (let category of this.categories) {
-            let icon = _.find(category.icons, iconToFind => iconToFind.icon === this.info.icon);
+            let icon = category.icons.find(iconToFind => iconToFind.icon === this.info.icon);
             if (icon) {
                 this.selectCategory({ value: category } as MatSelectChange);
                 this.selectIcon(icon);
@@ -47,7 +44,7 @@ export class PublicPointOfInterestEditComponent extends BaseMapComponent impleme
         }
 
         if (this.selectedCategory == null) {
-            let category = _.find(this.categories, categoryToFind => categoryToFind.name === "Other");
+            let category = this.categories.find(categoryToFind => categoryToFind.name === "Other");
             let icon = { icon: this.info.icon, color: "black", label: this.resources.other } as IIconColorLabel;
             category.icons.push(icon);
             this.selectCategory({ value: category } as MatSelectChange);
