@@ -263,6 +263,35 @@ namespace IsraelHiking.API.Tests.Services.Poi
         }
 
         [TestMethod]
+        public void UpdatePointWithTwoIcon_ShouldUpdate()
+        {
+            var gateway = SetupHttpFactory();
+            var pointOfInterest = new PointOfInterestExtended
+            {
+                ImagesUrls = new string[0],
+                Id = "Node_1",
+                Icon = "icon-cave",
+                Description = "new description",
+                References = new Reference[0]
+            };
+            _dataContainerConverterService.ToDataContainer(Arg.Any<byte[]>(), Arg.Any<string>()).Returns(new DataContainer { Routes = new List<RouteData>() });
+            gateway.GetElement("1", OsmGeoType.Node.ToString()).Returns(new Node
+            {
+                Id = 1,
+                Tags = new TagsCollection
+                {
+                    new Tag("historic", "archaeological_site"),
+                    new Tag("natural", "cave_entrance"),
+                }
+            });
+            _elasticSearchGateway.GetContainers(Arg.Any<Coordinate>()).Returns(new List<Feature>());
+
+            var results = _adapter.UpdatePointOfInterest(pointOfInterest, null, "en").Result;
+
+            CollectionAssert.AreEqual(pointOfInterest.ImagesUrls.OrderBy(i => i).ToArray(), results.ImagesUrls.OrderBy(i => i).ToArray());
+        }
+
+        [TestMethod]
         public void UpdatePoint_SyncImages()
         {
             var gateway = SetupHttpFactory();

@@ -303,7 +303,7 @@ namespace IsraelHiking.API.Services.Poi
             var tagsList = _tagsHelper.FindTagsForIcon(icon);
             if (tagsList.Any())
             {
-                tags.Add(tagsList.First().Key, tagsList.First().Value);
+                tags.AddOrReplace(tagsList.First().Key, tagsList.First().Value);
             }
         }
 
