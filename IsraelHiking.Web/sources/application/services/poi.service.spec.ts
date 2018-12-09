@@ -6,9 +6,10 @@ import { ToastServiceMockCreator } from "./toast.service.spec";
 import { ResourcesService } from "./resources.service";
 import { WhatsAppService } from "./whatsapp.service";
 import { RunningContextService } from "./running-context.service";
-import { PoiService, IPointOfInterestExtended, IRating } from "./poi.service";
+import { PoiService } from "./poi.service";
 import { HashService } from "./hash.service";
 import { Urls } from "../urls";
+import { PointOfInterestExtended, Rating } from "../models/models";
 
 describe("Poi Service", () => {
 
@@ -85,7 +86,7 @@ describe("Poi Service", () => {
         inject([PoiService, HttpTestingController],
             async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-                let poiExtended = { imagesUrls: ["http://link.com"] } as IPointOfInterestExtended;
+                let poiExtended = { imagesUrls: ["http://link.com"] } as PointOfInterestExtended;
                 let promise = poiService.uploadPoint(poiExtended).then((res) => {
                     expect(res).not.toBeNull();
                 });
@@ -97,7 +98,7 @@ describe("Poi Service", () => {
     it("Should update rating using the server", inject([PoiService, HttpTestingController],
         async (poiService: PoiService, mockBackend: HttpTestingController) => {
 
-            let promise = poiService.uploadRating({} as IRating).then((res) => {
+            let promise = poiService.uploadRating({} as Rating).then((res) => {
                 expect(res).not.toBeNull();
             });
 
