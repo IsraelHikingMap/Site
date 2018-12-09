@@ -12,7 +12,8 @@ import {
     UpdateSegmentsAction,
     DeleteSegmentAction,
     ReplaceSegmentsAction,
-    AddPrivatePoiAction
+    AddPrivatePoiAction,
+    ChangeEditStateAction
 } from "../../../reducres/routes.reducer";
 import { RouteLayerFactory } from "./route-layer.factory";
 import { ResourcesService } from "../../resources.service";
@@ -65,9 +66,21 @@ export class SelectedRouteService {
         if (this.routes.length === 0) {
             let data = this.routeLayerFactory.createRouteData(this.createRouteName());
             this.ngRedux.dispatch(new AddRouteAction({ routeData: data }));
-            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: data.id }));
+            this.setSelectedRoute(data.id);
         }
         return this.getSelectedRoute();
+    }
+
+    public setSelectedRoute(routeId: string) {
+        if (this.selectedRouteId == null) {
+            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: routeId }));
+        } else {
+            this.ngRedux.dispatch(new ChangeEditStateAction({
+                routeId: this.selectedRouteId,
+                state: "ReadOnly"
+            }));
+            this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: routeId }));
+        }
     }
 
     public createRouteName = (routeName: string = this.resourcesService.route) => {
@@ -296,9 +309,7 @@ export class SelectedRouteService {
                 routeData: routeToAdd
             }));
             if (routes.indexOf(routeData) === 0) {
-                this.ngRedux.dispatch(new SetSelectedRouteAction({
-                    routeId: routeToAdd.id
-                }));
+                this.setSelectedRoute(routeToAdd.id);
             }
         }
 

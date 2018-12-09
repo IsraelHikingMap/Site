@@ -14,7 +14,6 @@ import { CancelableTimeoutService } from "../services/cancelable-timeout.service
 import { DragInteraction } from "./intercations/drag.interaction";
 import { SelectedRouteService } from "../services/layers/routelayers/selected-route.service";
 import { AddRouteAction, StopRecordingAction, AddRecordingPointAction } from "../reducres/routes.reducer";
-import { SetSelectedRouteAction } from "../reducres/route-editing-state.reducer";
 import { RouteData, ApplicationState, LatLngAlt, DataContainer, TraceVisibility } from "../models/models";
 import { AddTraceAction } from "../reducres/traces.reducer";
 import { FitBoundsService } from "../services/fit-bounds.service";
@@ -113,7 +112,7 @@ export class LocationComponent extends BaseMapComponent {
                         this.ngRedux.dispatch(new AddRouteAction({
                             routeData: this.lastRecordedRoute
                         }));
-                        this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: this.lastRecordedRoute.id }));
+                        this.selectedRouteService.setSelectedRoute(this.lastRecordedRoute.id);
                         this.recordingRouteId = this.lastRecordedRoute.id;
                     },
                     declineAction: () => {
@@ -208,9 +207,7 @@ export class LocationComponent extends BaseMapComponent {
         this.ngRedux.dispatch(new AddRouteAction({
             routeData: route
         }));
-        this.ngRedux.dispatch(new SetSelectedRouteAction({
-            routeId: route.id
-        }));
+        this.selectedRouteService.setSelectedRoute(route.id);
         this.recordingRouteId = route.id;
     }
 

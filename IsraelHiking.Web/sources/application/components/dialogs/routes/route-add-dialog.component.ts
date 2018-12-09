@@ -8,7 +8,6 @@ import { RouteBaseDialogComponent } from "./route-base-dialog.component";
 import { SelectedRouteService } from "../../../services/layers/routelayers/selected-route.service";
 import { ApplicationState } from "../../../models/models";
 import { AddRouteAction } from "../../../reducres/routes.reducer";
-import { SetSelectedRouteAction } from "../../../reducres/route-editing-state.reducer";
 
 @Component({
     selector: "route-add-dialog",
@@ -33,8 +32,6 @@ export class RouteAddDialogComponent extends RouteBaseDialogComponent {
         this.ngRedux.dispatch(new AddRouteAction({
             routeData: this.routeData
         }));
-        this.ngRedux.dispatch(new SetSelectedRouteAction({
-            routeId: this.routeData.id
-        }));
+        this.selectedRouteService.setSelectedRoute(this.routeData.id);
     }
 }

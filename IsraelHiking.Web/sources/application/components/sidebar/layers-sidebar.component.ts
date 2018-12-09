@@ -195,7 +195,7 @@ export class LayersSidebarComponent extends BaseMapComponent implements OnDestro
                     routeData: routeData
                 }));
         }
-        this.ngRedux.dispatch(new SetSelectedRouteAction({ routeId: routeData.id }));
+        this.selectedRouteService.setSelectedRoute(routeData.id);
     }
 
     public isRouteVisible(routeData: RouteData) {
