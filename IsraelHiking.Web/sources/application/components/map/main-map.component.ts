@@ -1,7 +1,6 @@
 ﻿import { Component, ViewChild, AfterViewInit, ViewEncapsulation } from "@angular/core";
 import { NgxImageGalleryComponent } from "ngx-image-gallery";
-import { select, NgRedux } from "@angular-redux/store";
-import { Observable } from "rxjs";
+import { NgRedux } from "@angular-redux/store";
 import { proj } from "openlayers";
 import { MapComponent } from "ngx-openlayers";
 
