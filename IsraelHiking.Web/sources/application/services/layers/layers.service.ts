@@ -108,7 +108,7 @@ export class LayersService {
                 }
             }
             let overlaysToRemove = [];
-            for (let overlay of this.overlays) {
+            for (let overlay of this.overlays.filter(o => o.isEditable)) {
                 if (data.find(l => l.key === overlay.key) == null) {
                     overlaysToRemove.push(overlay);
                 }
@@ -119,7 +119,7 @@ export class LayersService {
                 }));
             }
             let baselayerToRemove = [];
-            for (let baselayer of this.baseLayers) {
+            for (let baselayer of this.baseLayers.filter(o => o.isEditable)) {
                 if (data.find(l => l.key === baselayer.key) == null) {
                     baselayerToRemove.push(baselayer);
                 }
