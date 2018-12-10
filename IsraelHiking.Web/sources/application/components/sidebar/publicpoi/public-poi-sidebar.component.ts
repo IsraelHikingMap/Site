@@ -78,6 +78,7 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
             this.initFromPointOfInterestExtended(poiExtended);
             let latLng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng };
+            // HM TODO: fit to feature collection bounds
             let bounds = { northEast: latLng, southWest: latLng };
             this.fitBoundsService.fitBounds(bounds);
             this.ngRedux.dispatch(new SetSelectedPoiAction({

@@ -9,6 +9,7 @@ namespace IsraelHiking.DataAccess.Tests
     public class RemoteFileFetcherGatewayTests
     {
         [TestMethod]
+        [Ignore]
         public void TestGateway_JeepologAttachmentGpx()
         {
             RemoteFileFetcherGateway gateway = new RemoteFileFetcherGateway(Substitute.For<ILogger>());
@@ -18,6 +19,7 @@ namespace IsraelHiking.DataAccess.Tests
         }
 
         [TestMethod]
+        [Ignore]
         public void TestGateway_JeeptripTwl()
         {
             RemoteFileFetcherGateway gateway = new RemoteFileFetcherGateway(Substitute.For<ILogger>());
