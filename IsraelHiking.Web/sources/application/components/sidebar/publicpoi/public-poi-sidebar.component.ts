@@ -2,6 +2,7 @@ import { Component, OnDestroy, ViewEncapsulation } from "@angular/core";
 import { Router, ActivatedRoute } from "@angular/router";
 import { Subscription } from "rxjs";
 import { NgRedux } from "@angular-redux/store";
+import { format } from "openlayers";
 import { sum } from "lodash";
 
 import { BaseMapComponent } from "../../base-map.component";
@@ -15,7 +16,7 @@ import { SelectedRouteService } from "../../../services/layers/routelayers/selec
 import { AddRouteAction, AddPrivatePoiAction } from "../../../reducres/routes.reducer";
 import { RouteLayerFactory } from "../../../services/layers/routelayers/route-layer.factory";
 import { FitBoundsService } from "../../../services/fit-bounds.service";
-import { SetSelectedPoiAction } from "../../../reducres/poi.reducer";
+import { SetSelectedPoiAction, SetUploadMarkerDataAction } from "../../../reducres/poi.reducer";
 import {
     RouteData,
     LinkData,
@@ -26,6 +27,7 @@ import {
     Rating,
     Rater
 } from "../../../models/models";
+import { SpatialService } from "../../../services/spatial.service";
 
 @Component({
     selector: "public-poi-sidebar",
@@ -75,27 +77,54 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
 
     private async getExtendedData(data: IPoiRouterData) {
         try {
-            let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
-            this.initFromPointOfInterestExtended(poiExtended);
-            let latLng = { lat: poiExtended.location.lat, lng: poiExtended.location.lng };
-            // HM TODO: fit to feature collection bounds
-            let bounds = { northEast: latLng, southWest: latLng };
-            this.fitBoundsService.fitBounds(bounds);
-            this.ngRedux.dispatch(new SetSelectedPoiAction({
-                poi: poiExtended
-            }));
+            if (data.source === "new") {
+                let newPoi = {
+                    imagesUrls: [],
+                    source: "OSM",
+                    id: "",
+                    rating: { raters: [] },
+                    references: [],
+                    isEditable: true,
+                    dataContainer: { routes: [] },
+                } as PointOfInterestExtended;
+                this.mergeDataIfNeededData(newPoi);
+            } else {
+                let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
+                this.mergeDataIfNeededData(poiExtended);
+                let features = new format.GeoJSON().readFeatures(this.poiExtended.featureCollection,
+                    { dataProjection: "EPSG:4326", featureProjection: "EPSG:4326" });
+                if (features.length > 0) {
+                    let geometry = features.map(f => f.getGeometry()).find(g => g.getType() !== "Point") || features[0].getGeometry();
+                    let bounds = SpatialService.extentToBounds(geometry.getExtent());
+                    this.fitBoundsService.fitBounds(bounds);
+                }
+                this.ngRedux.dispatch(new SetSelectedPoiAction({
+                    poi: this.poiExtended
+                }));
+            }
             // Change edit mode only after this.info is initialized.
             this.subscription = this.route.queryParams.subscribe(async (params) => {
                 this.editMode = params[RouteStrings.EDIT] && params[RouteStrings.EDIT] === "true";
-                if (this.editMode) {
-                    // HM TODO: need to think of a better way to refresh data.
-                    poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
-                    this.initFromPointOfInterestExtended(poiExtended);
+                if (this.editMode && data.source !== "new") {
+                    let poiExtended = await this.poiService.getPoint(data.id, data.source, data.language);
+                    this.mergeDataIfNeededData(poiExtended);
                 }
             });
+
         } finally {
             this.isLoading = false;
         }
+    }
+
+    private async mergeDataIfNeededData(poiExtended: PointOfInterestExtended) {
+        let uploadMarkerData = this.ngRedux.getState().poiState.uploadMarkerData;
+        if (uploadMarkerData != null) {
+            this.poiService.mergeWithPoi(poiExtended, uploadMarkerData);
+            this.ngRedux.dispatch(new SetUploadMarkerDataAction({
+                markerData: null
+            }));
+        }
+        this.initFromPointOfInterestExtended(poiExtended);
     }
 
     private initFromPointOfInterestExtended = (poiExtended: PointOfInterestExtended) => {
@@ -166,7 +195,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
             let poiExtended = await this.poiService.uploadPoint(this.info);
             this.initFromPointOfInterestExtended(poiExtended);
             this.toastService.info(this.resources.dataUpdatedSuccessfully);
-            this.poiService.setAddOrUpdateMarkerData(null);
             this.router.navigate([RouteStrings.ROUTE_POI, this.poiExtended.source, this.poiExtended.id],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
         } catch (ex) {
@@ -288,7 +316,6 @@ export class PublicPoiSidebarComponent extends BaseMapComponent implements OnDes
     public close() {
         this.sidebarService.hide();
         this.hashService.setApplicationState("poi", null);
-        this.poiService.setAddOrUpdateMarkerData(null);
         this.hashService.resetAddressbar();
     }
 

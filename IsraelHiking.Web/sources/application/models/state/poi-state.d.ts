@@ -1,5 +1,6 @@
-﻿import { PointOfInterestExtended } from "../models";
+﻿import { PointOfInterestExtended, MarkerData } from "../models";
 
 export interface PointsOfInterestState {
     selectedPointOfInterest: PointOfInterestExtended;
+    uploadMarkerData: MarkerData;
 }

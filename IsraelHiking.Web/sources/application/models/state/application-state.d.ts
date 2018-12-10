@@ -8,7 +8,7 @@ import {
     TracesState,
     LayersState,
     UserState,
-    PointOfInterestState
+    PointsOfInterestState
 } from "../models";
 
 export interface ApplicationState {
@@ -19,5 +19,5 @@ export interface ApplicationState {
     tracesState: TracesState;
     layersState: LayersState;
     userState: UserState;
-    poiState: PointOfInterestState;
+    poiState: PointsOfInterestState;
 }

@@ -39,7 +39,6 @@ export interface ISelectableCategory extends ICategory {
 export class PoiService {
     private categoriesMap: Map<CategoriesType, ICategory[]>;
     private poiCache: PointOfInterestExtended[];
-    private addOrUpdateMarkerData: MarkerData;
 
     constructor(private readonly resources: ResourcesService,
         private readonly httpClient: HttpClient,
@@ -47,7 +46,6 @@ export class PoiService {
         private readonly hashService: HashService) {
 
         this.poiCache = [];
-        this.addOrUpdateMarkerData = null;
         this.categoriesMap = new Map<CategoriesType, ICategory[]>();
         this.categoriesMap.set("Points of Interest", []);
         this.categoriesMap.set("Routes", []);
@@ -102,26 +100,15 @@ export class PoiService {
     }
 
     public async getPoint(id: string, source: string, language?: string): Promise<PointOfInterestExtended> {
-        if (source === "new") {
-            return this.mergeWithPoi({
-                imagesUrls: [],
-                source: "OSM",
-                id: "",
-                rating: { raters: [] },
-                references: [],
-                isEditable: true,
-                dataContainer: { routes: [] }
-            } as PointOfInterestExtended);
-        }
         let itemInCache = this.poiCache.find(p => p.id === id && p.source === source);
         if (itemInCache) {
-            return this.mergeWithPoi(itemInCache);
+            return itemInCache;
         }
         let params = new HttpParams()
             .set("language", language || this.resources.getCurrentLanguageCodeSimplified());
         let poi = await this.httpClient.get(Urls.poi + source + "/" + id, { params: params }).toPromise() as PointOfInterestExtended;
         this.poiCache.splice(0, 0, poi);
-        return this.mergeWithPoi(poi);
+        return poi;
     }
 
     public async uploadPoint(poiExtended: PointOfInterestExtended): Promise<PointOfInterestExtended> {
@@ -148,23 +135,15 @@ export class PoiService {
         };
     }
 
-    public setAddOrUpdateMarkerData(data: MarkerData) {
-        this.addOrUpdateMarkerData = data;
-    }
+    public mergeWithPoi(poiExtended: PointOfInterestExtended, markerData: MarkerData) {
+        poiExtended.title = poiExtended.title || markerData.title;
+        poiExtended.description = poiExtended.description || markerData.description;
+        poiExtended.location = poiExtended.location || markerData.latlng;
+        poiExtended.icon = poiExtended.icon || `icon-${markerData.type}`;
 
-    private mergeWithPoi(poiExtended: PointOfInterestExtended) {
-        if (this.addOrUpdateMarkerData == null) {
-            return poiExtended;
-        }
-        poiExtended.title = poiExtended.title || this.addOrUpdateMarkerData.title;
-        poiExtended.description = poiExtended.description || this.addOrUpdateMarkerData.description;
-        poiExtended.location = poiExtended.location || this.addOrUpdateMarkerData.latlng;
-        poiExtended.icon = poiExtended.icon || `icon-${this.addOrUpdateMarkerData.type}`;
-
-        this.addOrUpdateMarkerData.urls.filter(u => u.mimeType.startsWith("image")).map(u => u.url).forEach(url => {
+        markerData.urls.filter(u => u.mimeType.startsWith("image")).map(u => u.url).forEach(url => {
             poiExtended.imagesUrls.push(url);
         });
-        this.addOrUpdateMarkerData = null;
         return poiExtended;
     }
 }

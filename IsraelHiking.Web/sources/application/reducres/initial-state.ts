@@ -90,6 +90,7 @@ export const initialState =
             token: null
         },
         poiState: {
-            selectedPointOfInterest: null
+            selectedPointOfInterest: null,
+            uploadMarkerData: null
         }
     } as ApplicationState;

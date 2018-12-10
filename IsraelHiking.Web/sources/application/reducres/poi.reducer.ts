@@ -1,11 +1,16 @@
 import { createReducerFromClass, ReduxAction, BaseAction } from "./reducer-action-decorator";
 import { initialState } from "./initial-state";
-import { PointsOfInterestState, PointOfInterestExtended } from "../models/models";
+import { PointsOfInterestState, PointOfInterestExtended, MarkerData } from "../models/models";
 
 const SET_SELECTED_POI = "SET_SELECTED_POI";
+const SET_UPLOAD_MARKER_DATA = "SET_UPLOAD_MARKER_DATA";
 
 export interface SetSelectedPoiPayload {
     poi: PointOfInterestExtended;
+}
+
+export interface SetUploadMarkerDataPayload {
+    markerData: MarkerData;
 }
 
 export class SetSelectedPoiAction extends BaseAction<SetSelectedPoiPayload> {
@@ -14,6 +19,11 @@ export class SetSelectedPoiAction extends BaseAction<SetSelectedPoiPayload> {
     }
 }
 
+export class SetUploadMarkerDataAction extends BaseAction<SetUploadMarkerDataPayload> {
+    constructor(payload: SetUploadMarkerDataPayload) {
+        super(SET_UPLOAD_MARKER_DATA, payload);
+    }
+}
 
 export class PointsOfInterestReducer {
     @ReduxAction(SET_SELECTED_POI)
@@ -21,6 +31,14 @@ export class PointsOfInterestReducer {
         return {
             ...lastState,
             selectedPointOfInterest: action.payload.poi
+        };
+    }
+
+    @ReduxAction(SET_UPLOAD_MARKER_DATA)
+    public setUploadMarkerData(lastState: PointsOfInterestState, action: SetUploadMarkerDataAction) {
+        return {
+            ...lastState,
+            uploadMarkerData: action.payload.markerData
         };
     }
 }

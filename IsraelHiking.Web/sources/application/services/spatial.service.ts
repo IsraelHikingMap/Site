@@ -99,7 +99,7 @@ export class SpatialService {
         };
     }
 
-    private static extentToBounds(ext: Extent): IBounds {
+    public static extentToBounds(ext: Extent): IBounds {
         return {
             northEast: {
                 lng: ext[2],
