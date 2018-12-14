@@ -1,4 +1,5 @@
 import { Injectable, EventEmitter, NgZone } from "@angular/core";
+import { BackgroundGeolocationPlugin } from "cordova-plugin-mauron85-background-geolocation";
 
 import { ResourcesService } from "./resources.service";
 import { ILatLngTime } from "../models/models";
@@ -6,7 +7,7 @@ import { RunningContextService } from "./running-context.service";
 
 declare type GeoLocationServiceState = "disabled" | "searching" | "tracking";
 
-declare var BackgroundGeolocation: any;
+declare var BackgroundGeolocation: BackgroundGeolocationPlugin;
 
 interface IBackgroundLocation {
     accuracy: number;
