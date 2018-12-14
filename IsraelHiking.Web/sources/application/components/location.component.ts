@@ -194,13 +194,14 @@ export class LocationComponent extends BaseMapComponent {
         let route = this.routeLayerFactory.createRouteData(name);
         route.isRecording = true;
         let currentLocation = this.geoLocationService.currentLocation;
+        let routingType = this.ngRedux.getState().routeEditingState.routingType;
         route.segments.push({
-            routingType: this.routeLayerFactory.routingType,
+            routingType: routingType,
             latlngs: [currentLocation, currentLocation],
             routePoint: currentLocation
         });
         route.segments.push({
-            routingType: this.routeLayerFactory.routingType,
+            routingType: routingType,
             latlngs: [currentLocation],
             routePoint: currentLocation
         });

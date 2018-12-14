@@ -1,6 +1,5 @@
-﻿import { Injectable, Injector, ComponentFactoryResolver } from "@angular/core";
+﻿import { Injectable } from "@angular/core";
 import { HttpClient } from "@angular/common/http";
-import { LocalStorage } from "ngx-store";
 
 import { Urls } from "../../../urls";
 import { RouteData, RoutingType } from "../../../models/models";
@@ -25,13 +24,6 @@ export class RouteLayerFactory {
     ];
 
     private nextColorIndex = 0;
-
-    @LocalStorage()
-    public isRoutingPerPoint = true;
-    @LocalStorage()
-    public routingType: RoutingType = "Hike";
-    @LocalStorage()
-    public routeOpacity = 0.5;
 
     constructor(private readonly httpClient: HttpClient) {
         this.httpClient.get(Urls.colors).toPromise().then((colors: string[]) => {
