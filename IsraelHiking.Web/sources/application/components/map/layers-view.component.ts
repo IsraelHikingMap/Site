@@ -135,7 +135,9 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         this.host.instance.on("pointermove",
             (event: MapBrowserEvent) => {
                 let featuresAtPixel = (this.host.instance.getFeaturesAtPixel(event.pixel) || []) as Feature[];
-                if (featuresAtPixel.length === 0) {
+                let hit = featuresAtPixel.length !== 0;
+                (event.map.getViewport() as HTMLElement).style.cursor = hit ? "pointer" : "";
+                if (!hit) {
                     return;
                 }
                 if (featuresAtPixel[0].get("features") && featuresAtPixel[0].get("features").length === 1) {
