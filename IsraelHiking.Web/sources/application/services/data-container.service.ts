@@ -1,7 +1,6 @@
 import { Injectable } from "@angular/core";
 import { Router } from "@angular/router";
-import { NgRedux, select } from "@angular-redux/store";
-import { Observable } from "rxjs";
+import { NgRedux } from "@angular-redux/store";
 
 import { LayersService } from "./layers/layers.service";
 import { ToastService } from "./toast.service";
@@ -10,13 +9,12 @@ import { HashService, RouteStrings } from "./hash.service";
 import { ResourcesService } from "./resources.service";
 import { ShareUrlsService } from "./share-urls.service";
 import { SpatialService } from "./spatial.service";
-import { ShareUrl, DataContainer, ApplicationState, RouteData } from "../models/models";
 import { FitBoundsService } from "./fit-bounds.service";
 import { AddRouteAction } from "../reducres/routes.reducer";
 import { SelectedRouteService } from "./layers/routelayers/selected-route.service";
 import { MapService } from "./map.service";
 import { RouteLayerFactory } from "./layers/routelayers/route-layer.factory";
-
+import { ShareUrl, DataContainer, ApplicationState } from "../models/models";
 
 @Injectable()
 export class DataContainerService {

@@ -2,7 +2,7 @@
 import { HttpClient } from "@angular/common/http";
 
 import { Urls } from "../../../urls";
-import { RouteData, RoutingType } from "../../../models/models";
+import { RouteData } from "../../../models/models";
 
 
 @Injectable()

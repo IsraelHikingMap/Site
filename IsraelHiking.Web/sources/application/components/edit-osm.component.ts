@@ -6,7 +6,7 @@ import { LayersService } from "../services/layers/layers.service";
 import { AuthorizationService } from "../services/authorization.service";
 import { BaseMapComponent } from "./base-map.component";
 import { HashService } from "../services/hash.service";
-import { ApplicationState, Location } from "../models/models";
+import { ApplicationState } from "../models/models";
 
 @Component({
     selector: "edit-osm",

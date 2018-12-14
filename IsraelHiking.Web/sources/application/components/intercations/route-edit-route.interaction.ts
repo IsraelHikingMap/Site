@@ -1,8 +1,7 @@
 import { Injectable, EventEmitter } from "@angular/core";
 
 import { MapBrowserEvent, interaction, Feature, geom } from "openlayers";
-import { NgRedux, select } from "@angular-redux/store";
-import { Observable } from "rxjs";
+import { NgRedux } from "@angular-redux/store";
 
 import { AddSegmentAction, UpdateSegmentsAction } from "../../reducres/routes.reducer";
 import { SelectedRouteService } from "../../services/layers/routelayers/selected-route.service";
@@ -15,7 +14,6 @@ import {
     ApplicationState,
     RouteData,
     LatLngAlt,
-    RoutingType,
     RouteSegmentData,
     ILatLngTime,
     MarkerData
