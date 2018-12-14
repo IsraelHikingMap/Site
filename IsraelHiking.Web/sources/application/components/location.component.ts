@@ -41,6 +41,7 @@ export class LocationComponent extends BaseMapComponent {
 
     public locationCoordinate: ILocationInfo;
     public isFollowing: boolean;
+    public isKeepNorthUp: boolean;
     public isLocationOverlayOpen: boolean;
 
     constructor(resources: ResourcesService,
@@ -57,6 +58,7 @@ export class LocationComponent extends BaseMapComponent {
         this.locationCoordinate = null;
         this.recordingRouteId = null;
         this.isFollowing = true;
+        this.isKeepNorthUp = false;
         this.isLocationOverlayOpen = false;
 
         this.host.instance.addInteraction(new DragInteraction(() => {
@@ -83,6 +85,11 @@ export class LocationComponent extends BaseMapComponent {
                 if (features.find(f => f.getId() as string === "location") != null) {
                     this.isLocationOverlayOpen = !this.isLocationOverlayOpen;
                 }
+            });
+
+        this.host.instance.getView().on("change:rotation",
+            (event) => {
+                this.isKeepNorthUp = false;
             });
 
         this.geoLocationService.positionChanged.subscribe(
@@ -125,10 +132,13 @@ export class LocationComponent extends BaseMapComponent {
         }
     }
 
-    public resetRotation() {
+    public toggleKeepNorthUp() {
+        
         this.host.instance.getView().animate({
             rotation: 0
         });
+        // wait for rotation to finish
+        setTimeout(() => this.isKeepNorthUp = !this.isKeepNorthUp, 1000);
     }
 
     public getRotationAngle() {
@@ -236,7 +246,7 @@ export class LocationComponent extends BaseMapComponent {
         if (this.isFollowing) {
             this.setLocation();
         }
-        if (position.coords.heading != null && position.coords.heading !== NaN) {
+        if (position.coords.heading != null && position.coords.heading !== NaN && this.isKeepNorthUp === false) {
             this.host.instance.getView().animate({
                 rotation: - position.coords.heading * Math.PI / 180.0
             });
