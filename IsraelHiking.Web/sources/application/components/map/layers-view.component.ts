@@ -163,7 +163,7 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
             this.hoverTitle = feature.getProperties().title;
             return;
         }
-        
+
         if (feature.getId() && feature.getId().toString().startsWith(LayersViewComponent.SELECTED)) {
             this.hoverLatlng = SpatialService.fromViewCoordinate((feature.getGeometry() as geom.Point).getCoordinates());
             this.isHoverOpen = true;
@@ -182,7 +182,8 @@ export class LayersViewComponent extends BaseMapComponent implements OnInit, Aft
         if ((featuresAtPixel[0] as Feature).getId() != null &&
             (featuresAtPixel[0] as Feature).getId().toString().startsWith(LayersViewComponent.SELECTED)) {
             // HM TODO: toggle public poi?
-            let sourceAndId = this.getSourceAndId((featuresAtPixel[0] as Feature).getId().toString().replace(LayersViewComponent.SELECTED, ""));
+            let sourceAndId = this.getSourceAndId((featuresAtPixel[0] as Feature)
+                .getId().toString().replace(LayersViewComponent.SELECTED, ""));
             this.router.navigate([RouteStrings.ROUTE_POI, sourceAndId.source, sourceAndId.id],
                 { queryParams: { language: this.resources.getCurrentLanguageCodeSimplified() } });
             return;
