@@ -149,7 +149,6 @@ namespace IsraelHiking.Web
             var configurationData = app.ApplicationServices.GetRequiredService<IOptions<ConfigurationData>>().Value;
             var fileExtensionContentTypeProvider = new FileExtensionContentTypeProvider();
             fileExtensionContentTypeProvider.Mappings.Add(".db", "application/octet-stream");
-            fileExtensionContentTypeProvider.Mappings.Add(".pbf", "application/octet-stream");
             foreach (var directory in configurationData.ListingDictionary)
             {
                 var fileServerOptions = new FileServerOptions
