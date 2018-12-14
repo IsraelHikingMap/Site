@@ -21,10 +21,6 @@ import { RouteLayerFactory } from "./layers/routelayers/route-layer.factory";
 @Injectable()
 export class DataContainerService {
 
-    @select((state: ApplicationState) => state.routes.present)
-    private routes$: Observable<RouteData[]>;
-
-    private routes: RouteData[];
     private shareUrl: ShareUrl;
     // private layersInitializationPromise: Promise<any>;
 
@@ -43,9 +39,6 @@ export class DataContainerService {
         private readonly ngRedux: NgRedux<ApplicationState>) {
 
         this.shareUrl = null;
-        this.routes$.subscribe((r) => {
-            this.routes = r;
-        });
     }
 
     private setData(dataContainer: DataContainer) {
@@ -69,7 +62,7 @@ export class DataContainerService {
         let bounds = SpatialService.getMapBounds(this.mapService.map);
 
         let container = {
-            routes: this.routes,
+            routes: this.ngRedux.getState().routes.present,
             baseLayer: layersContainer.baseLayer,
             overlays: layersContainer.overlays,
             northEast: bounds.northEast,

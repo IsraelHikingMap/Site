@@ -1,6 +1,5 @@
 import { Component } from "@angular/core";
-import { select } from "@angular-redux/store";
-import { Observable } from "rxjs";
+import { NgRedux } from "@angular-redux/store";
 
 import { ResourcesService } from "../services/resources.service";
 import { LayersService } from "../services/layers/layers.service";
@@ -15,17 +14,12 @@ import { ApplicationState, Location } from "../models/models";
 })
 export class EditOSMComponent extends BaseMapComponent {
 
-    @select((state: ApplicationState) => state.location)
-    private location: Observable<Location>;
-    private currentLocation: Location;
-
     constructor(resources: ResourcesService,
         private readonly layersService: LayersService,
         private readonly authorizationService: AuthorizationService,
-        private readonly hashService: HashService) {
+        private readonly hashService: HashService,
+        private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
-
-        this.location.subscribe(s => this.currentLocation = s);
     }
 
     public getOsmAddress() {
@@ -35,9 +29,10 @@ export class EditOSMComponent extends BaseMapComponent {
 
             return this.authorizationService.getEditElementOsmAddress(baseLayerAddress, poiRouterData.id);
         }
+        let currentLocation = this.ngRedux.getState().location;
         return this.authorizationService.getEditOsmLocationAddress(baseLayerAddress,
-            this.currentLocation.zoom,
-            this.currentLocation.latitude,
-            this.currentLocation.longitude);
+            currentLocation.zoom,
+            currentLocation.latitude,
+            currentLocation.longitude);
     }
 }

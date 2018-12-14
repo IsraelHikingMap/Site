@@ -16,11 +16,6 @@ import { SetRouteEditingStateAction } from "../reducres/route-editing-state.redu
 })
 export class DrawingComponent extends BaseMapComponent {
 
-    private routingType: RoutingType;
-
-    @select((state: ApplicationState) => state.routeEditingState.routingType)
-    private routingType$: Observable<RoutingType>;
-
     @select((state: ApplicationState) => state.routes.past.length)
     public undoQueueLength: Observable<number>;
 
@@ -28,11 +23,6 @@ export class DrawingComponent extends BaseMapComponent {
         private readonly selectedRouteService: SelectedRouteService,
         private readonly ngRedux: NgRedux<ApplicationState>) {
         super(resources);
-
-        this.routingType = "None";
-        this.routingType$.subscribe((routingType) => {
-            this.routingType = routingType;
-        });
     }
 
     @HostListener("window:keydown", ["$event"])
@@ -133,7 +123,7 @@ export class DrawingComponent extends BaseMapComponent {
         if (this.selectedRouteService.getSelectedRoute() == null) {
             return "None";
         }
-        return this.routingType;
+        return this.ngRedux.getState().routeEditingState.routingType;
     }
 
     public getRouteColor = (): string => {
