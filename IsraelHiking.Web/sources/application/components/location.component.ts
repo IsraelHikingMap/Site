@@ -133,7 +133,7 @@ export class LocationComponent extends BaseMapComponent {
     }
 
     public toggleKeepNorthUp() {
-        
+
         this.host.instance.getView().animate({
             rotation: 0
         });
